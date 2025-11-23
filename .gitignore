@@ -1,0 +1,22 @@
+# General
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+android/local.properties
+
+# Firebase
+.firebase/
+firebase-debug.log
