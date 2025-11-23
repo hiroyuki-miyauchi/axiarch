@@ -17,7 +17,10 @@
 *   **[20. Design & UX](./rules/ja/20_design_ux.md)**
 *   **[30. Engineering (General)](./rules/ja/30_engineering_general.md)**
 *   **[31. Mobile (Flutter)](./rules/ja/31_engineering_mobile_flutter.md)**
+*   **[31. Mobile (Flutter)](./rules/ja/31_engineering_mobile_flutter.md)**
 *   **[32. Backend (Firebase/GCP)](./rules/ja/32_engineering_backend_firebase_gcp.md)**
+*   **[33. Web Frontend (Next.js)](./rules/ja/33_engineering_web_frontend.md)**
+*   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/ja/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
@@ -34,7 +37,10 @@
 *   **[20. Design & UX](./rules/en/20_design_ux.md)**
 *   **[30. Engineering (General)](./rules/en/30_engineering_general.md)**
 *   **[31. Mobile (Flutter)](./rules/en/31_engineering_mobile_flutter.md)**
+*   **[31. Mobile (Flutter)](./rules/en/31_engineering_mobile_flutter.md)**
 *   **[32. Backend (Firebase/GCP)](./rules/en/32_engineering_backend_firebase_gcp.md)**
+*   **[33. Web Frontend (Next.js)](./rules/en/33_engineering_web_frontend.md)**
+*   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/en/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
