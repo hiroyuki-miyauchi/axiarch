@@ -16,6 +16,12 @@
     *   使用するライブラリは信頼性を確認し、定期的に `npm audit` 等で脆弱性をスキャンする。
     *   不審なパッケージやメンテナンスされていないライブラリは使用しない。
 
+## 3. Infrastructure Security (Defense in Depth)
+*   **Network Security**:
+    *   **VPC**: バックエンドサービスはプライベートVPC内に隔離する。データベースをインターネットに直接公開しない。
+    *   **Cloud Armor**: DDoSや一般的なWeb攻撃から保護するためにWAFを使用する。
+*   **App Check**: リクエストが真正なアプリから来ていることを保証するために、Firebase App Checkを強制する。
+
 ## 3. Offensive Security (Red Team Mindset)
 *   **Self-Penetration Testing**:
     *   開発者は「攻撃者」の視点を持ち、自分のコードに対してSQLインジェクションやXSS（クロスサイトスクリプティング）を試みる思考実験を行う。

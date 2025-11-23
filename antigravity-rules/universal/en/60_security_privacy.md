@@ -16,6 +16,12 @@
     *   Verify the reliability of libraries used and regularly scan for vulnerabilities with `npm audit`, etc.
     *   Do not use suspicious packages or unmaintained libraries.
 
+## 3. Infrastructure Security (Defense in Depth)
+*   **Network Security**:
+    *   **VPC**: Isolate backend services in a private VPC. Do not expose databases directly to the internet.
+    *   **Cloud Armor**: Use WAF to protect against DDoS and common web attacks.
+*   **App Check**: Enforce Firebase App Check to ensure requests come from your genuine app.
+
 ## 3. Offensive Security (Red Team Mindset)
 *   **Self-Penetration Testing**:
     *   Developers must adopt an "Attacker's" perspective and perform thought experiments trying SQL Injection or XSS (Cross-Site Scripting) on their own code.

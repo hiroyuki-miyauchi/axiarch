@@ -4,7 +4,25 @@
 > **Absolute Foundation**
 > This "Core Philosophy" is the bedrock of all Google Antigravity activities and allows for no exceptions.
 
-## 1. The Antigravity Mindset (2025 Ver.)
+## 4. Governance Protocol (The "Immutable Constitution")
+> **CRITICAL RULE**: The `antigravity-rules/universal/` directory is **READ-ONLY** for specific project development.
+
+*   **Directory Structure**:
+    *   `antigravity-rules/universal/`: **Global Standards** (Immutable). Defines "How Google Antigravity Works".
+    *   `antigravity-rules/blueprint/`: **Project Specifics** (Mutable). Defines "What this project is".
+*   **Universal Rules (Immutable)**:
+    *   **Strict Prohibition**: You must **NEVER** edit `antigravity-rules/universal/` to accommodate a specific project's needs.
+    *   **Update Policy (Double Confirmation)**:
+        *   If you must update Universal Rules (e.g., global security standard evolution), you must **confirm with the user TWICE**.
+        *   Step 1: "Are you sure you want to update the Global Standard? This affects ALL projects."
+        *   Step 2: "Please confirm again. Is this a permanent change to the Constitution?"
+*   **Specific Rules (Mutable)**:
+    *   The `antigravity-rules/blueprint/` directory is the **ONLY** place for project-specific contexts, overrides, and configurations.
+    *   **AI Instruction**:
+        1.  Read all files in `antigravity-rules/blueprint/` to understand the "Mission" and "Constraints".
+        2.  Apply `antigravity-rules/universal/` as the "Methodology" to achieve that mission.
+
+## 5. The "Antigravity" Team Structure (AI-Native)r.)
 **"Defy Gravity (Convention, Constraints, Inertia) and Create Overwhelming Value with AI-Native Speed and Quality."**
 
 1.  **High Agency & Extreme Ownership**:

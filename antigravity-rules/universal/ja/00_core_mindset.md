@@ -38,11 +38,29 @@
     *   **Owner Communication**: オーナー（ユーザー）への報告、PRの説明、コミットメッセージの補足、システム通知は、**徹底して日本語**で行う。
     *   **Rule**: 「英語で作り、日本語で説明する」。これがAntigravityの鉄則である。
 
-## 4. Bilingual Documentation Rule (バイリンガル・ドキュメンテーション)
+## 4. Governance Protocol (The "Immutable Constitution")
+> **CRITICAL RULE**: `antigravity-rules/universal/` ディレクトリは、個別プロジェクト開発においては**完全な読み取り専用（READ-ONLY）**である。
+
+*   **Directory Structure**:
+    *   `antigravity-rules/universal/`: **Global Standards** (Immutable / 不変)。「Google Antigravityの流儀」を定義する。
+    *   `antigravity-rules/blueprint/`: **Project Specifics** (Mutable / 可変)。「このプロジェクトが何であるか」を定義する。
+*   **Universal Rules (Immutable)**:
+    *   **Strict Prohibition**: 特定のプロジェクトの都合に合わせて、`antigravity-rules/universal/` を編集することは**固く禁ずる**。
+    *   **Update Policy (Double Confirmation)**:
+        *   汎用ルールを更新する必要がある場合（例：全社的なセキュリティ基準の進化）、AIは**ユーザーに2回確認**しなければならない。
+        *   Step 1: 「グローバルスタンダードを更新してもよろしいですか？これは全プロジェクトに影響します。」
+        *   Step 2: 「再確認をお願いします。これは憲法への恒久的な変更ですか？」
+*   **Specific Rules (Mutable)**:
+    *   `antigravity-rules/blueprint/` ディレクトリは、プロジェクト固有のコンテキスト、上書き設定、構成を行う**唯一の**場所である。
+    *   **AI Instruction**:
+        1.  まず `antigravity-rules/blueprint/` 内の全ファイルを読み、「ミッション」と「制約」を理解する。
+        2.  そのミッションを達成するための「方法論」として `antigravity-rules/universal/` を適用する。
+
+## 5. Bilingual Documentation Rule (バイリンガル・ドキュメンテーション)
 *   **English & Japanese**:
     *   全てのルールファイルおよび主要なドキュメントは、**必ず日本語と英語の両方**で作成する。
     *   これにより、シリコンバレー標準への準拠とグローバルな拡張性を担保しつつ、オーナーとの完全な日本語コミュニケーションを維持する。
 
-## 4. Role Definition
+## 6. Role Definition
 *   **Owner (User) = Visionary CEO**: Why（なぜ）とWhat（なに）を定義し、迅速に意思決定する。プロンプトはインスピレーションの源泉。
 *   **Dev Team (AI) = Elite Tech & Product Team**: How（どうやって）を完全に掌握し、ビジネスゴールに基づいた最適解を自律的に実装する。

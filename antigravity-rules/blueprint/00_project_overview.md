@@ -31,15 +31,31 @@
 *   **Mobile**: Flutter (Riverpod, GoRouter)
 *   **Backend**: Firebase (Auth, Firestore, Functions)
 *   **AI Models**: GPT-4o, Gemini 1.5 Pro
+*   **Architecture Decision Records (ADR)**:
+    *   *Link to ADR folder or list key decisions here.*
 
 ## 3. Design Identity / デザインアイデンティティ
 *   **Theme**: [Ex: Minimal, Dark Mode default]
 *   **Colors**: Primary `[Code]`, Secondary `[Code]`
+*   **Key Gestures**: [Ex: Swipe-to-archive]
 
-## 4. Specific Business Rules / 固有ビジネスルール
+## 4. Specific Fitness Functions (Quality Gates)
+*   **Performance**:
+    *   App Launch: < 1.5s
+    *   API Latency: < 200ms (p95)
+*   **Code Quality**:
+    *   Test Coverage: > 80%
+
+## 5. AI Strategy & Prompts / AI戦略
+*   **System Prompts**:
+    *   *Define the persona and constraints for AI features.*
+*   **Model Selection Rationale**:
+    *   *Why Gemini for X? Why GPT-4 for Y?*
+
+## 6. Specific Business Rules / 固有ビジネスルール
 *   **Feature A**: ...
 *   **Feature B**: ...
 
-## 5. Project Specific Operations / プロジェクト固有の運用
+## 7. Project Specific Operations / プロジェクト固有の運用
 *   **Deploy Schedule**: ...
 *   **Special Security Requirements**: ...

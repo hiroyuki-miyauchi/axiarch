@@ -20,7 +20,18 @@
     *   Respect the "feel" of both iOS and Android while unifying the brand world view.
     *   Appropriately use Material 3 and Cupertino widgets, or build highly customized common components.
 
-## 4. Robust Connectivity
+## 4. Code Size & Obfuscation
+*   **Release Build**: Always build with `--release`.
+*   **Obfuscation**: Use `--obfuscate --split-debug-info=/<path>` to reduce size and secure code.
+    *   *Why*: Shrinks symbol names and removes debug metadata.
+*   **Tree Shaking**: Use `const` constructors everywhere possible to help the compiler eliminate dead code.
+
+## 5. Testing & CI/CD
+*   **Widget Tests**: Test UI components in isolation.
+*   **Integration Tests**: Test critical flows (Login, Payment) on real devices/emulators.
+*   **Golden Tests**: Use Golden Tests to prevent UI regressions (pixel-perfect check).
+
+## 6. Robust Connectivity
 *   **Offline-First**:
     *   The app must not crash when the network is disconnected; display viewable data.
     *   Use the Repository Pattern to appropriately manage synchronization between local cache and remote data.

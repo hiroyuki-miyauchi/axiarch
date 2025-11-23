@@ -1,29 +1,23 @@
-# Google Antigravity Development Rules (Creating-strict-rules)
+# Google Antigravity Development Rules
 
-This repository manages and stores the **Absolute Development Rules (Constitution)** for the Google Antigravity project.
-このリポジトリは、Google Antigravityプロジェクトにおける**絶対的な開発ルール（憲法）**を管理・保存するためのものです。
+> **The Absolute Constitution for AI-Native Development**
+> シリコンバレーのトップティア基準を網羅した、Google Antigravityプロジェクトの絶対的な開発ルールセット。
 
-## 📂 Structure / 構成
+## 📂 Repository Structure
 
-*   **[ANTIGRAVITY_RULES.md](./ANTIGRAVITY_RULES.md)**: Master Index of all rules. (全ルールのマスターインデックス)
-*   **[rules/](./rules/)**: Detailed rules modularized by category. (カテゴリ別にモジュール化された詳細ルール群)
-    *   **ja/**: Japanese Rules (日本語版)
-    *   **en/**: English Rules (英語版)
-*   **[project_specific_rules.md](./project_specific_rules.md)**: Template for new projects. (新規プロジェクト用の固有ルールテンプレート)
+*   **[antigravity-rules/](./antigravity-rules/)**: **The Core Ruleset**.
+    *   **[README.md (Master Index)](./antigravity-rules/README.md)**: 👈 **Start Here / まずはこちら**
+    *   **universal/**: Immutable Global Standards (不変の汎用ルール)
+    *   **blueprint/**: Mutable Project Specifics (プロジェクト固有の設計図)
 
 ## 🚀 How to Use / 使い方
 
-When starting a new project, copy the `rules/` folder and `ANTIGRAVITY_RULES.md` from this repository to the project root (or add as a submodule), and define specific rules using `project_specific_rules.md` as a template.
-新規プロジェクトを開始する際は、本リポジトリの `rules/` フォルダと `ANTIGRAVITY_RULES.md` をプロジェクトのルートにコピー（またはサブモジュールとして追加）し、`project_specific_rules.md` をテンプレートとして固有ルールを定義してください。
+1.  **Copy**: Copy the `antigravity-rules/` folder to your project root.
+    *   `cp -r antigravity-rules /path/to/your/project/`
+2.  **Configure**: Edit `antigravity-rules/blueprint/00_overview.md` to define your project's specific mission and constraints.
+3.  **Develop**: The AI Development Team will strictly adhere to these rules to deliver Silicon Valley quality code.
 
-## ⚠️ Operational Rules / 運用ルール
+## ⚠️ Governance
 
-1.  **Absolute Compliance / 絶対遵守**:
-    *   The rules listed here are a contract between the Owner (User) and the Dev Team (AI) and have absolute validity.
-    *   ここに記載されたルールは、オーナー（ユーザー）と開発チーム（AI）の間の契約であり、絶対的な効力を持つ。
-2.  **Bilingual / バイリンガル**:
-    *   All documents and rules must be maintained in both English and Japanese.
-    *   全てのドキュメントとルールは、英語と日本語の両方で維持管理する。
-3.  **Silicon Valley Standard**:
-    *   Always update to the top-tier Silicon Valley standards.
-    *   常にシリコンバレーのトップティア基準で更新し続けること。
+*   **Universal Rules (`universal/`)**: **READ-ONLY**. Do not edit unless the global standard itself changes (requires Double Confirmation).
+*   **Specific Rules (`blueprint/`)**: **Mutable**. Customize freely for your project.
