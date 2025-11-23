@@ -21,7 +21,10 @@
 *   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/ja/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
+*   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
 *   **[70. Growth & Marketing](./rules/ja/70_growth_marketing.md)**
+*   **[80. QA & Testing Strategy](./rules/ja/80_qa_testing.md)**
+*   **[90. Advanced Operations (Legal/FinOps)](./rules/ja/90_advanced_ops_legal.md)**
 
 ### 🇺🇸 English Rules (English)
 *   **[00. Core Philosophy & Mindset](./rules/en/00_core_mindset.md)**
@@ -33,7 +36,10 @@
 *   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/en/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
+*   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
 *   **[70. Growth & Marketing](./rules/en/70_growth_marketing.md)**
+*   **[80. QA & Testing Strategy](./rules/en/80_qa_testing.md)**
+*   **[90. Advanced Operations (Legal/FinOps)](./rules/en/90_advanced_ops_legal.md)**
 
 ---
 
