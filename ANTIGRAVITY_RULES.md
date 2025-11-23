@@ -20,12 +20,17 @@
 *   **[31. Mobile (Flutter)](./rules/ja/31_engineering_mobile_flutter.md)**
 *   **[32. Backend (Firebase/GCP)](./rules/ja/32_engineering_backend_firebase_gcp.md)**
 *   **[33. Web Frontend (Next.js)](./rules/ja/33_engineering_web_frontend.md)**
+*   **[34. CMS Strategy (WordPress)](./rules/ja/34_engineering_cms_wordpress.md)**
+*   **[35. API Integration Strategy](./rules/ja/35_engineering_api_integration.md)**
+*   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/ja/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
 *   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
 *   **[70. Growth & Marketing](./rules/ja/70_growth_marketing.md)**
+*   **[71. GEO Strategy (AI Search)](./rules/ja/71_growth_geo_strategy.md)**
+*   **[80. QA & Testing Strategy](./rules/ja/80_qa_testing.md)**
 *   **[80. QA & Testing Strategy](./rules/ja/80_qa_testing.md)**
 *   **[90. Advanced Operations (Legal/FinOps)](./rules/ja/90_advanced_ops_legal.md)**
 *   **[100. Crisis Management & SRE](./rules/ja/100_crisis_sre.md)**
@@ -40,12 +45,17 @@
 *   **[31. Mobile (Flutter)](./rules/en/31_engineering_mobile_flutter.md)**
 *   **[32. Backend (Firebase/GCP)](./rules/en/32_engineering_backend_firebase_gcp.md)**
 *   **[33. Web Frontend (Next.js)](./rules/en/33_engineering_web_frontend.md)**
+*   **[34. CMS Strategy (WordPress)](./rules/en/34_engineering_cms_wordpress.md)**
+*   **[35. API Integration Strategy](./rules/en/35_engineering_api_integration.md)**
+*   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
 *   **[50. Git & Version Control](./rules/en/50_git_version_control.md)**
 *   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
 *   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
 *   **[70. Growth & Marketing](./rules/en/70_growth_marketing.md)**
+*   **[71. GEO Strategy (AI Search)](./rules/en/71_growth_geo_strategy.md)**
+*   **[80. QA & Testing Strategy](./rules/en/80_qa_testing.md)**
 *   **[80. QA & Testing Strategy](./rules/en/80_qa_testing.md)**
 *   **[90. Advanced Operations (Legal/FinOps)](./rules/en/90_advanced_ops_legal.md)**
 *   **[100. Crisis Management & SRE](./rules/en/100_crisis_sre.md)**
