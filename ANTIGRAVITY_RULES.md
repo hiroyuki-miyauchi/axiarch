@@ -12,6 +12,8 @@
     *   Antigravityマインドセット、役割定義、完全日本語化ルール。
 *   **[10. Product & Business Strategy](./rules/10_product_business.md)**
     *   CEO/COO/CMO/CPO視点、KPI、Unit Economics。
+*   **[70. Growth & Marketing](./rules/70_growth_marketing.md)**
+    *   SEO/ASO、分析戦略、PLG（Product-Led Growth）。
 
 ### 🎨 Design & Experience
 *   **[20. Design & UX](./rules/20_design_ux.md)**
