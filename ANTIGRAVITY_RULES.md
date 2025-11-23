@@ -25,6 +25,8 @@
 *   **[70. Growth & Marketing](./rules/ja/70_growth_marketing.md)**
 *   **[80. QA & Testing Strategy](./rules/ja/80_qa_testing.md)**
 *   **[90. Advanced Operations (Legal/FinOps)](./rules/ja/90_advanced_ops_legal.md)**
+*   **[100. Crisis Management & SRE](./rules/ja/100_crisis_sre.md)**
+*   **[110. Data & DocOps Strategy](./rules/ja/110_data_docops.md)**
 
 ### 🇺🇸 English Rules (English)
 *   **[00. Core Philosophy & Mindset](./rules/en/00_core_mindset.md)**
@@ -40,6 +42,8 @@
 *   **[70. Growth & Marketing](./rules/en/70_growth_marketing.md)**
 *   **[80. QA & Testing Strategy](./rules/en/80_qa_testing.md)**
 *   **[90. Advanced Operations (Legal/FinOps)](./rules/en/90_advanced_ops_legal.md)**
+*   **[100. Crisis Management & SRE](./rules/en/100_crisis_sre.md)**
+*   **[110. Data & DocOps Strategy](./rules/en/110_data_docops.md)**
 
 ---
 
