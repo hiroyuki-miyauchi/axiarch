@@ -3,35 +3,37 @@
 > [!IMPORTANT]
 > **Constitution of Antigravity**
 > 本フォルダ（`rules/`）に含まれる全てのルールは、Google Antigravityプロジェクトにおける絶対的な憲法である。
-> 新規プロジェクトを開始する際は、必ずこのフォルダごとコピーし、プロジェクトのルートに配置すること。
+> All rules contained in this folder (`rules/`) are the absolute constitution of the Google Antigravity project.
+>
+> **Bilingual Requirement / バイリンガル要件**:
+> 全てのルールは日本語と英語の両方で提供される。
+> All rules are provided in both Japanese and English.
 
 ## 📂 Rule Modules
 
-### 🧠 Core & Strategy
-*   **[00. Core Philosophy & Mindset](./rules/00_core_mindset.md)**
-    *   Antigravityマインドセット、役割定義、完全日本語化ルール。
-*   **[10. Product & Business Strategy](./rules/10_product_business.md)**
-    *   CEO/COO/CMO/CPO視点、KPI、Unit Economics。
-*   **[70. Growth & Marketing](./rules/70_growth_marketing.md)**
-    *   SEO/ASO、分析戦略、PLG（Product-Led Growth）。
+### 🇯🇵 Japanese Rules (日本語)
+*   **[00. Core Philosophy & Mindset](./rules/ja/00_core_mindset.md)**
+*   **[10. Product & Business Strategy](./rules/ja/10_product_business.md)**
+*   **[20. Design & UX](./rules/ja/20_design_ux.md)**
+*   **[30. Engineering (General)](./rules/ja/30_engineering_general.md)**
+*   **[31. Mobile (Flutter)](./rules/ja/31_engineering_mobile_flutter.md)**
+*   **[32. Backend (Firebase/GCP)](./rules/ja/32_engineering_backend_firebase_gcp.md)**
+*   **[40. Operational Workflow](./rules/ja/40_operations_workflow.md)**
+*   **[50. Git & Version Control](./rules/ja/50_git_version_control.md)**
+*   **[60. Security & Privacy](./rules/ja/60_security_privacy.md)**
+*   **[70. Growth & Marketing](./rules/ja/70_growth_marketing.md)**
 
-### 🎨 Design & Experience
-*   **[20. Design & UX](./rules/20_design_ux.md)**
-    *   デザイン哲学、デザイン思考プロセス、AIパーソナライゼーション。
-
-### 💻 Engineering Excellence
-*   **[30. Engineering (General)](./rules/30_engineering_general.md)**
-    *   クリーンコード、セキュリティ、可観測性。
-*   **[31. Mobile (Flutter)](./rules/31_engineering_mobile_flutter.md)**
-    *   Flutterアーキテクチャ、パフォーマンス(60fps)、オフライン対応。
-*   **[32. Backend (Firebase/GCP)](./rules/32_engineering_backend_firebase_gcp.md)**
-    *   Googleエコシステム完全理解、セキュリティルール、IaC。
-
-### ⚙️ Operations
-*   **[40. Operational Workflow](./rules/40_operations_workflow.md)**
-    *   計画 -> 実装 -> 検証 -> クリーンアップの開発サイクル。
-
-
+### 🇺🇸 English Rules (English)
+*   **[00. Core Philosophy & Mindset](./rules/en/00_core_mindset.md)**
+*   **[10. Product & Business Strategy](./rules/en/10_product_business.md)**
+*   **[20. Design & UX](./rules/en/20_design_ux.md)**
+*   **[30. Engineering (General)](./rules/en/30_engineering_general.md)**
+*   **[31. Mobile (Flutter)](./rules/en/31_engineering_mobile_flutter.md)**
+*   **[32. Backend (Firebase/GCP)](./rules/en/32_engineering_backend_firebase_gcp.md)**
+*   **[40. Operational Workflow](./rules/en/40_operations_workflow.md)**
+*   **[50. Git & Version Control](./rules/en/50_git_version_control.md)**
+*   **[60. Security & Privacy](./rules/en/60_security_privacy.md)**
+*   **[70. Growth & Marketing](./rules/en/70_growth_marketing.md)**
 
 ---
 
