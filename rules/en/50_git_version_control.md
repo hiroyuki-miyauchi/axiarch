@@ -4,10 +4,11 @@
 *   **Main Branch is Holy**: The `main` branch must always be in a Deployable state.
 *   **Short-Lived Feature Branches**: Feature development is done in short-lived branches like `feat/user-login` and merged into `main` within a few days. Long-lived branches are the source of merge hell and are prohibited.
 
-## 2. Commit Convention (Conventional Commits in Japanese)
-Commit messages must be written in "Japanese" so the content is instantly understandable. Apply Silicon Valley standard "Conventional Commits" localized to Japanese.
+## 2. Commit Convention (Bilingual Commits)
+Commit messages must use a **Bilingual Format** that satisfies both "Global Standard (English)" and "User Explanation (Japanese)."
 
-*   **Format**: `type(scope): subject`
+*   **Format**: `type(scope): English Subject / 日本語の説明`
+    *   Alternatively, use English only for the Subject, and provide a detailed Japanese explanation in the Body (starting from the 3rd line).
 *   **Types**:
     *   `feat: ...`: New Feature
     *   `fix: ...`: Bug Fix
@@ -19,10 +20,10 @@ Commit messages must be written in "Japanese" so the content is instantly unders
     *   `chore: ...`: Updating build tasks, package manager configs, etc; no production code change
 
 *   **Example**:
-    *   ⭕️ `feat(auth): ログイン画面のUI実装` (Impl login UI)
-    *   ⭕️ `fix(api): タイムアウト処理のバグを修正` (Fix timeout bug)
+    *   ⭕️ `feat(auth): Add login UI / ログイン画面のUI実装`
+    *   ⭕️ `fix(api): Fix timeout bug / タイムアウト処理のバグを修正`
     *   ❌ `update code` (No specificity)
-    *   ❌ `fix bug` (English prohibited in subject)
+    *   ❌ `fix bug` (No Japanese explanation)
 
 ## 3. Pull Requests (PR) & Code Review
 *   **The "100 Lines" Rule**: Keep PRs small. Fewer lines mean higher bug detection rates and faster reviews.

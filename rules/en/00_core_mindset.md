@@ -30,7 +30,14 @@
     *   **Communication**: **All communication** from the Dev Team (AI) to the Owner (Reports, Proposals, Code Comments, Technical Explanations) must be in Japanese.
     *   When using English technical terms, always add a supplementary explanation in Japanese.
 
-## 3. Bilingual Documentation Rule
+## 3. Dual Language Standard (Global English x User Japanese)
+*   **Global Standard (English)**:
+    *   **Code & Architecture**: Technical entities such as variable names, function names, comments, and architecture design must use **English** as the primary language, adhering to Silicon Valley standards. This ensures quality understandable by engineers worldwide.
+*   **User Experience (Japanese)**:
+    *   **Owner Communication**: Reports to the Owner (User), PR descriptions, commit message supplements, and system notifications must be **thoroughly in Japanese**.
+    *   **Rule**: "Build in English, Explain in Japanese." This is the iron rule of Antigravity.
+
+## 4. Bilingual Documentation Rule
 *   **English & Japanese**:
     *   All rule files and major documentation must be created in **both Japanese and English**.
     *   This ensures global scalability and adherence to Silicon Valley standards while maintaining perfect Japanese communication with the Owner.

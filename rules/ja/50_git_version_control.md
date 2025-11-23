@@ -4,27 +4,26 @@
 *   **Main Branch is Holy**: `main` ブランチは常にデプロイ可能な状態（Deployable）でなければならない。
 *   **Short-Lived Feature Branches**: 機能開発は `feat/user-login` のような短命なブランチで行い、数日以内に `main` にマージする。巨大なブランチ（Long-lived branches）はマージ地獄の元であり、禁止する。
 
-## 2. Commit Convention (Conventional Commits in Japanese)
-コミットメッセージは、変更内容が一目でわかるように「日本語」で記述する。シリコンバレー標準の "Conventional Commits" を日本語化して適用する。
+## 2. Commit Convention (Bilingual Commits)
+コミットメッセージは「グローバル標準（英語）」と「ユーザー説明（日本語）」を両立させる**バイリンガル形式**を必須とする。
 
-*   **Format**: `type(scope): subject`
+*   **Format**: `type(scope): English Subject / 日本語の説明`
+    *   または、Subjectは英語のみとし、Body（3行目以降）に詳細な日本語説明を記述する。
 *   **Types**:
-    *   `feat: ...`: 新機能の追加 (Feature)
-    *   `fix: ...`: バグ修正 (Bug fix)
-    *   `docs: ...`: ドキュメントのみの変更 (Documentation)
-    *   `style: ...`: コードの意味に影響しない変更（空白、フォーマット等）
-    *   `refactor: ...`: バグ修正も機能追加も行わないコード変更 (Refactoring)
-    *   `perf: ...`: パフォーマンスを向上させる変更 (Performance)
-    *   `test: ...`: テストの追加・修正 (Tests)
-    *   `chore: ...`: ビルドプロセスやドキュメント生成などの雑用 (Chores)
+    *   `feat: ...`: New Feature
+    *   `fix: ...`: Bug Fix
+    *   `docs: ...`: Documentation only
+    *   `style: ...`: Formatting, missing semi colons, etc; no code change
+    *   `refactor: ...`: Refactoring production code
+    *   `perf: ...`: Performance improvement
+    *   `test: ...`: Adding tests, refactoring test; no production code change
+    *   `chore: ...`: Updating build tasks, package manager configs, etc; no production code change
 
 *   **Example**:
-    *   ⭕️ `feat(auth): ログイン画面のUI実装`
-    *   ⭕️ `fix(api): タイムアウト処理のバグを修正`
-    *   ❌ `update code` (具体性がない)
-    *   ❌ `fix bug` (英語禁止)
-
-## 3. Pull Requests (PR) & Code Review
+    *   ⭕️ `feat(auth): Add login UI / ログイン画面のUI実装`
+    *   ⭕️ `fix(api): Fix timeout bug / タイムアウト処理のバグを修正`
+    *   ❌ `update code` (No specificity)
+    *   ❌ `fix bug` (No Japanese explanation)s (PR) & Code Review
 *   **The "100 Lines" Rule**: PRは小さく保つ。変更行数が少ないほど、バグ発見率は上がり、レビュー速度も上がる。
 *   **Description is Mandatory**: PRの説明欄には、「何をしたか（What）」「なぜしたか（Why）」「どう確認するか（How）」を必ず日本語で記述する。
 *   **Review Standard**:
