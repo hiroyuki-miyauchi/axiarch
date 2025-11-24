@@ -12,9 +12,10 @@
     *   Show detailed statuses like `Thinking...`, `Searching...`, `Generating...` to remove user anxiety.
 
 ## 2. AI Ethics & Safety
-*   **Safety Settings**:
-    *   **Filtering**: Set safety settings (Harassment, Hate speech, Sexually explicit) of Gemini/OpenAI to "High" by default.
-    *   **Jailbreak Protection**: Strictly separate user input in system prompts to prevent Prompt Injection attacks.
+*   **Safety & Ethics**:
+    *   **Human in the Loop**: In high-risk areas like healthcare, finance, and law, a process for human verification of AI output is mandatory.
+    *   **Reporting**: For Generative AI apps (GenAI), you MUST implement a feature for users to report and block inappropriate content (Google Play 2025 Requirement).
+    *   **Hallucination Mitigation**: To reduce the risk of factually incorrect answers (hallucinations), implement RAG (Retrieval-Augmented Generation) and cite sources.
 *   **Hallucination Mitigation**:
     *   **Disclaimer**: Always display a disclaimer that "AI may generate inaccurate information".
     *   **Citations**: If possible, provide source citations for the answer (in case of RAG).
