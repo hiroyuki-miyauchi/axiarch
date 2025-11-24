@@ -20,6 +20,9 @@
     *   **Containment**: 複雑なウィジェットには `contain: content` を使用し、ブラウザの再計算範囲を隔離します。
     *   **Will-Change**: アニメーション要素には `will-change` を使用しますが、メモリ消費を防ぐため、必要なタイミングのみ適用します。
     *   **GPUアクセラレーション**: アニメーションには `transform` と `opacity` のみを使用し、`top`, `left`, `width` などのレイアウト変更（Reflow）を伴うプロパティのアニメーションは禁止します。
+    *   **CSS Variables (Custom Properties)**: テーマ化やランタイムのパフォーマンス向上のため、SASS変数よりもCSS変数を優先します。
+    *   **Content Visibility**: 長大なリスト（無限スクロール等）には `content-visibility: auto` を使用し、画面外のレンダリングコストを削減します。
+    *   **Touch Action**: モバイルでのスクロールパフォーマンスを向上させるため、インタラクティブ要素には `touch-action: manipulation` を明示します。
 *   **レスポンシブ (Responsive)**:
     *   **モバイルファースト**: CSSは常にモバイル向けのスタイルをデフォルトとし、`min-width` メディアクエリでデスクトップ向けに拡張します。
 

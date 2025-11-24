@@ -5,7 +5,8 @@
 ### 1.1. The "Wow" Factor (Delight)
 *   **Mandate**: Every interaction must feel "Alive". Build **Dynamic Experiences**, not static screens.
 *   **Google Standard**: Adopt **Material Design 3 (Material You)** and its evolution **"Expressive"** (2025+) as the baseline.
-*   **Differentiation**: While using Google's system, differentiate through **High-Fidelity Motion**, **Custom Shaders**, and **Bold Typography** to create a "Silicon Valley Premium" feel.
+*   **Apple Standard**: For iOS, respect the **Human Interface Guidelines (HIG)**. Do not force Material Design; maintain **Platform Fidelity** (e.g., Switches, Pickers).
+*   **Differentiation**: While using Google's system, differentiate with **high-precision motion**, **custom shaders**, and **bold typography** to create a "Silicon Valley Premium" feel.
 *   **Tools**: Refer to `21_design_ops_tools.md` for specific operational rules regarding Figma, Adobe, and Canva.
 
 ### 1.2. Trend Scouting Protocol

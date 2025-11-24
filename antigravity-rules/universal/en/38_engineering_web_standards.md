@@ -19,9 +19,12 @@
 *   **Rendering Optimization**:
     *   **Containment**: Use `contain: content` for complex widgets to isolate browser layout recalculations.
     *   **Will-Change**: Use `will-change` for animation elements, but apply it sparingly to prevent memory leaks.
-    *   **GPU Acceleration**: Use only `transform` and `opacity` for animations. Prohibit animating properties that trigger Reflow (e.g., `top`, `left`, `width`).
+    *   **GPU Acceleration**: Use only `transform` and `opacity` for animations. Animating properties that trigger layout changes (Reflow) like `top`, `left`, `width` is prohibited.
+    *   **CSS Variables (Custom Properties)**: Prioritize CSS variables over SASS variables for theming and runtime performance.
+    *   **Content Visibility**: Use `content-visibility: auto` for long lists (e.g., infinite scroll) to reduce off-screen rendering costs.
+    *   **Touch Action**: Explicitly set `touch-action: manipulation` on interactive elements to improve scroll performance on mobile.
 *   **Responsive**:
-    *   **Mobile First**: Always write CSS for mobile first as the default, and expand for desktop using `min-width` media queries.
+    *   **Mobile First**: CSS must always default to mobile styles and expand to desktop using `min-width` media queries.
 
 ## 2. JavaScript (Vanilla & ES6+)
 *   **Modern Standards**:
