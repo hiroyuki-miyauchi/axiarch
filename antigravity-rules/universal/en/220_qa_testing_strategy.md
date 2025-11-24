@@ -29,3 +29,13 @@
 *   **Zero Bug Policy**:
     *   Manage discovered bugs with priority (P0: Immediate fix to P3: Next release), and prohibit releases with P0/P1 bugs.
     *   **Reproduction Steps**: Bug reports must always include "Reproduction Steps," "Expected Result," and "Actual Result."
+
+## 5. Compatibility & Real Device Testing
+*   **Browser & OS Support**:
+    *   **Web**: Latest 2 versions of Chrome, Safari (iOS/Mac), Firefox, Edge.
+    *   **Mobile**: Latest 2 major versions of iOS and Android (e.g., iOS 17/18, Android 14/15).
+*   **Mandatory Real Device Testing**:
+    *   **TestFlight / Internal App Sharing**: Do not rely solely on simulators. Always distribute via TestFlight or Google Play Internal App Sharing and verify operation on real devices.
+    *   **Cloud Testing**: Use BrowserStack or AWS Device Farm to test fragmentation on devices not on hand or older Android devices.
+*   **Edge Cases**:
+    *   **Network**: Verify behavior and error handling under Offline and 3G (slow network) conditions.

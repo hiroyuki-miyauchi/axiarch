@@ -53,10 +53,17 @@
 *   **The 24-Hour Rule (Critical Issues)**:
     *   **Severity 1 (Critical)**: Critical issues like data loss, security breaches, or core feature outages must be resolved (or mitigated) within **24 hours** of discovery. This is the Silicon Valley standard.
 
-## 8. Observability
+## 8. Continuous Learning & Verification
+*   **Latest Info Protocol**:
+    *   **Before Coding**: Before writing code, you MUST check the official documentation and latest release notes (e.g., "Next.js 15 breaking changes", "Swift 6 concurrency"). Implementing based on outdated information causes rework.
+    *   **Deprecation Check**: Verify that the APIs you intend to use are not Deprecated.
+*   **Stay Updated**:
+    *   Constantly catch up with the latest Silicon Valley trends (AI Agents, Privacy Manifests, etc.) and continue to evolve the rules themselves. This is the Silicon Valley standard.
+
+## 9. Observability
 *   **Monitor Everything**:
     *   Visualize not just "that it works" but "how it works" (logs, metrics, error tracking).
-## 9. Admin Ops & Internal Tools (Retool First)
+## 10. Admin Ops & Internal Tools (Retool First)
 *   **Build vs Buy**:
     *   **Rule**: Admin panels and internal tools do not generate revenue. Therefore, scratch development (React/Flutter) is prohibited in principle.
     *   **Retool First**: Build admin panels using low-code tools like **Retool** in 1/10th of the time.
