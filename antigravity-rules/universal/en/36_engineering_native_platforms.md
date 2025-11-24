@@ -30,7 +30,15 @@ Even in a Flutter-first environment, deep understanding of native platforms is r
 *   **Haptics**:
     *   **Feedback**: Use platform-standard haptic feedback (`UIImpactFeedbackGenerator`, etc.) for success, failure, and warning actions.
 
-## 5. Common Platform Requirements
+## 5. Offline First & Data Efficiency
+*   **Offline First**:
+    *   **Local DB**: Design the app to work without a network connection by using Room (Android) / Realm / SwiftData (iOS) as the "Single Source of Truth".
+    *   **Background Sync**: Use WorkManager (Android) / BackgroundTasks (iOS) to automatically sync data when the network returns.
+*   **Data Efficiency**:
+    *   **Caching**: Aggressively cache images and API responses to reduce unnecessary data usage.
+    *   **Wi-Fi Only**: Restrict large downloads (high-res assets, updates) to Wi-Fi only by default. This is strict user-first design.
+
+## 6. Common Platform Requirements
 *   **Permissions**:
     *   **Just-in-Time**: Request permissions (Camera, Location) only when absolutely needed.
     *   **Explanation**: Always show a pre-dialog explaining "Why" before the system dialog.
