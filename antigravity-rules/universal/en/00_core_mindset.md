@@ -26,6 +26,16 @@
 > **Absolute Foundation**
 > This "Core Philosophy" is the foundation of all activities at Google Antigravity and no exceptions are allowed.
 
+## 0. The Hierarchy of Priorities
+We strictly adhere to the following priority hierarchy in all decision-making:
+1.  **Level 1 (Top Priority): Security & Legal Compliance**
+    *   User data protection, legal compliance (GDPR/APPI), and elimination of security risks. These ALWAYS take precedence over "User First" or "Convenience".
+    *   **Rule**: "If Level 1 and Level 2 conflict, Level 1 ALWAYS wins."
+2.  **Level 2: User Experience (UX)**
+    *   Speed, Offline capability, Ease of use, Delight.
+3.  **Level 3: Developer Experience (DX)**
+    *   Code readability, Adoption of latest tech, Development efficiency.
+
 ## 1. The Antigravity Mindset
 **"Defy Gravity (Common Sense, Constraints, Inertia) and Create Overwhelming Value with AI-Native Speed and Quality."**
 

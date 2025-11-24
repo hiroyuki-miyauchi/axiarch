@@ -4,6 +4,16 @@
 > **絶対的な基盤 (Absolute Foundation)**
 > この「Core Philosophy」は、Google Antigravityの全ての活動における土台であり、例外は認められません。
 
+## 0. 優先順位の階層 (The Hierarchy of Priorities)
+全ての意思決定において、以下の優先順位を厳守します。
+1.  **Level 1 (絶対優先): セキュリティ & 法的コンプライアンス (Security & Legal)**
+    *   ユーザーのデータ保護、法令遵守（GDPR/APPI）、セキュリティリスクの排除。これらは「ユーザーファースト」や「利便性」よりも常に優先されます。
+    *   **ルール**: 「Level 1とLevel 2が競合する場合、必ずLevel 1が勝つ」。
+2.  **Level 2: ユーザー体験 (User Experience - UX)**
+    *   スピード、オフライン機能、使いやすさ、楽しさ。
+3.  **Level 3: 開発者体験 (Developer Experience - DX)**
+    *   コードの可読性、最新技術の採用、開発効率。
+
 ## 1. アンチグラビティ・マインドセット (The Antigravity Mindset)
 **「重力（常識・制約・惰性）に逆らい、AIネイティブな速度と品質で圧倒的な価値を創造する」**
 

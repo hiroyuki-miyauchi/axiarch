@@ -34,6 +34,9 @@ Even in a Flutter-first environment, deep understanding of native platforms is r
 *   **Offline First**:
     *   **Local DB**: Design the app to work without a network connection by using Room (Android) / Realm / SwiftData (iOS) as the "Single Source of Truth".
     *   **Background Sync**: Use WorkManager (Android) / BackgroundTasks (iOS) to automatically sync data when the network returns.
+    *   **Security Exception**:
+        *   **Priority**: "Security > Offline Convenience".
+        *   **Sensitive Data**: Storing PII or payment info locally without encryption (Android Keystore / iOS Keychain) is prohibited. If there is a risk of data leakage, offline capability for that feature must be disabled.
 *   **Data Efficiency**:
     *   **Caching**: Aggressively cache images and API responses to reduce unnecessary data usage.
     *   **Wi-Fi Only**: Restrict large downloads (high-res assets, updates) to Wi-Fi only by default. This is strict user-first design.
