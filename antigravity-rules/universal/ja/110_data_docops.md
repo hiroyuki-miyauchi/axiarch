@@ -1,14 +1,21 @@
-# 110. Data & DocOps Strategy
+# 110. データ基盤とドキュメント運用 (Data Ops & Doc Ops)
 
-## 1. Modern Data Stack (BI Strategy)
-*   **Architecture**:
-    *   **Ingest**: Firebase/GCPの生データをBigQueryに集約する。
-    *   **Transform**: 生データを分析用テーブル（Mart）に加工する。
-    *   **Visualize**: Looker Studioを使用し、経営判断に必要なKPI（LTV, CAC, Retention）をリアルタイムで可視化する。
-*   **Single Source of Truth**:
-    *   「スプレッドシートでの手動集計」を禁止する。全ての数字はBigQueryから自動生成されるダッシュボードを正とする。
+## 1. データ基盤 (Data Infrastructure - "Data Mesh")
+*   **信頼できる唯一の情報源 (Single Source of Truth)**:
+    *   **BigQuery**: 全ての分析データはBigQueryに集約します。スプレッドシートやローカルファイルでの管理は禁止です。
+    *   **ELT**: データは加工せずにまずロード（Load）し、BigQuery内で変換（Transform）するELTパイプラインを採用します。
+*   **データ品質 (Data Quality)**:
+    *   **dbt**: データ変換には **dbt (data build tool)** を使用し、SQLをバージョン管理・テストします。
+    *   **テスト**: データの欠損、重複、異常値を自動検知するテストをパイプラインに組み込みます。
 
-## 2. DocOps (Documentation Operations)
+## 2. ドキュメント運用 (Documentation Ops)
+*   **Notion / GitHub Wiki**:
+    *   **フロー情報**: 日々の議事録やアイデアはNotionで管理します。
+    *   **ストック情報**: 仕様書、設計図、手順書はGitHub（Markdown）で管理し、コードと同期させます。
+*   **検索性 (Searchability)**:
+    *   ドキュメントは「書くこと」よりも「見つけられること」が重要です。適切なタグ付けと階層構造を維持します。
+*   **更新責任 (Ownership)**:
+    *   全てのドキュメントには「最終更新日」と「責任者（Owner）」を明記します。半年以上更新されていないドキュメントは、更新するかアーカイブ（削除）します。
 *   **Docs as Code**:
     *   ドキュメントはコードと等価である。Gitで管理し、PRレビューの対象とする。
     *   コードの変更とドキュメントの更新は「アトミック（不可分）」である。ドキュメント更新なきコード変更はマージしてはならない。

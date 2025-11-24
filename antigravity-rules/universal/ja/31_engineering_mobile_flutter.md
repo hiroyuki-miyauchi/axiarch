@@ -1,29 +1,43 @@
-# 31. Mobile & Native App Standards (Flutter Edition)
+# 31. モバイルエンジニアリング (Mobile Engineering - Flutter)
 
-## 1. Architecture & State Management
-*   **Clean Architecture**:
-    *   UI (Presentation), Logic (Domain), Data (Infrastructure) を明確に分離する。
-    *   "Feature-First" なディレクトリ構成を採用し、機能ごとの独立性を高める。
-*   **State Management**:
-    *   予測可能で不変（Immutable）な状態管理を行う。
-    *   **Recommended**: Riverpod (with code generation) または BLoC。
-    *   `setState` の乱用を避け、リビルド範囲を最小化する。
+## 1. アーキテクチャと状態管理 (Architecture & State Management)
+*   **Riverpod & Hooks**:
+    *   **標準化**: 状態管理には **Riverpod (Code Generation)** を、UIロジックには **Flutter Hooks** を標準として採用します。
+    *   **不変性 (Immutability)**: 状態（State）は全て `Freezed` を使用して不変（Immutable）にし、予期せぬ副作用を防ぎます。
+*   **レイヤー構造 (Layered Architecture)**:
+    *   **Presentation**: UIとViewModel（Notifier）。ロジックを持たせず、描画に徹します。
+    *   **Domain**: ビジネスロジックとエンティティ。Flutterへの依存を排除します。
+    *   **Data**: API通信、DB操作、DTO。Repositoryパターンで抽象化します。
 
-## 2. Performance Obsession
-*   **60fps / 120fps**:
-    *   Jank（カクつき）はバグと同義である。常に滑らかな描画を維持する。
-    *   `const` コンストラクタを徹底的に使用する。
-    *   重い処理（JSONパース、画像加工等）はメインスレッドで行わず、Isolate（別スレッド）に逃がす。
+## 2. パフォーマンス最適化 (Performance Optimization - "60fps or Die")
+*   **レンダリング (Rendering)**:
+    *   **再描画の抑制**: `Consumer` や `select` を適切に使用し、必要な部分だけを再描画（Rebuild）させます。
+    *   **定数化**: `const` コンストラクタを徹底的に使用し、ウィジェットの再生成を防ぎます。
+*   **起動速度 (Startup Time)**:
+    *   アプリの起動時間は **2秒以内** を目指します。初期化処理は非同期で並列実行し、スプラッシュ画面で待機させません。
+*   **画像処理 (Image Handling)**:
+    *   `cached_network_image` を使用して画像をキャッシュし、通信量を削減します。
+    *   巨大な画像はサーバー側でリサイズしてから取得します。
 
-## 4.3. Code Size & Obfuscation
-*   **Release Build**: 必ず `--release` でビルドする。
-*   **Obfuscation**: サイズ削減とコード保護のために `--obfuscate --split-debug-info=/<path>` を使用する。
+## 3. プラットフォームへの忠実度 (Platform Fidelity)
+*   **ネイティブの感触 (Native Feel)**:
+    *   iOSでは「スワイプバック」、Androidでは「戻るボタン」の挙動を完全にサポートします。
+    *   スクロールの物理挙動（Bouncing vs Clamping）は、各OSの標準に従います。
+*   **アダプティブUI (Adaptive UI)**:
+    *   OSごとに異なるダイアログ、ボトムシート、スイッチ等のUIコンポーネントを使い分け、違和感を排除します。
+
+## 4. 品質保証 (Quality Assurance)
+*   **Golden Tests**:
+    *   UIの回帰テストとして、**Golden Toolkit** を使用したスナップショットテストを必須とします。
+    *   異なるデバイスサイズ（iPhone SE, Pro Max, Pixel）での表示崩れを自動検知します。
+*   **Maestro**:
+    *   E2Eテストには **Maestro** を使用し、ユーザーの実際の操作フローを自動化します。
+
+## 5. デプロイと配信 (Deployment & Distribution)
+*   **CI/CD**:
+    *   GitHub ActionsとCodemagic/Bitriseを連携させ、mainブランチへのマージをトリガーに、TestFlight/Google Play Internal Testingへ自動配信します。
+    *   リリースビルドは、難読化（Obfuscation）と最適化（Tree Shaking）を必ず有効にします。bfuscate --split-debug-info=/<path>` を使用する。
     *   *Why*: シンボル名を短縮し、デバッグメタデータを削除するため。
-*   **Tree Shaking**: コンパイラがデッドコードを削除しやすくするために、可能な限り `const` コンストラクタを使用する。
-
-## 5. Testing & CI/CD
-*   **Widget Tests**: UIコンポーネントを単体でテストする。
-*   **Integration Tests**: 重要なフロー（ログイン、決済）を実機/エミュレータでテストする。
 *   **Golden Tests**: UIの退行（リグレッション）を防ぐためにゴールデンテスト（ピクセルパーフェクトチェック）を使用する。
 
 ## 3. Platform Fidelity & UI

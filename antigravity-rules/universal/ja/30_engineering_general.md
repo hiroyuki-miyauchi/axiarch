@@ -1,80 +1,41 @@
-# 30. Engineering Excellence (General)
+# 30. エンジニアリングの卓越性 (Engineering Excellence - General)
 
-## 1. Code Quality
-*   **Clean Code**:
-    *   コードは「資産」である。可読性、単一責任原則（SRP）、DRY原則を徹底する。
-    *   変数名や関数名は、コメントなしでも意図が伝わるように命名する（Self-documenting code）。
-*   **Refactoring (Boy Scout Rule)**:
-    *   触ったファイルは、必ず触る前より綺麗にしてコミットする。技術的負債を溜めない。
-    *   「後で直す」は決してやってこない。今直す。
+## 1. コード品質とクリーンコード (Code Quality & Clean Code)
+*   **クリーンコード基準 (Clean Code Standards)**:
+    *   **自己文書化 (Self-Documenting)**: コメントは「Why（なぜ）」を語るために使い、「What（何をしているか）」はコード自身に語らせます。
+    *   **関数サイズ (Function Size)**: 関数は「1つのこと」だけを行います。理想的には **20行以内** に収めます。
+    *   **命名規則 (Naming)**: 変数名は具体的かつ明確にします。`data`, `temp`, `item` などの曖昧な名前は禁止です（例: `userData` -> `authenticatedUserProfile`）。
+*   **リファクタリング (Refactoring - The Boy Scout Rule)**:
+    *   **義務 (Mandate)**: 「来た時よりも美しくして立ち去る（ボーイスカウトの精神）」。ファイルを触る際は、必ず小さな改善（命名変更、関数抽出）を行います。
+    *   **「後で」はない (No "Later")**: 「後でリファクタリングする」は嘘です。今やるか、永遠にやらないかです。
 
-## 2. Security by Design (DevSecOps)
-*   **Security First**:
-    *   セキュリティは後付け機能ではない。設計段階から組み込む。
-    *   **Zero Trust**: 入力値は全て疑う（バリデーション必須）。認証・認可は厳格に。
-    *   機密情報（API Key等）は決してコードにハードコードしない。
+## 2. パフォーマンスと最適化 (Performance & Optimization - The "Speed")
+*   **パフォーマンス予算 (Performance Budgets)**:
+    *   **Lighthouseスコア**: Performance, Accessibility, Best Practices, SEO の全てで **90点以上** を維持します（緑色）。
+    *   **Core Web Vitals**: LCP (2.5s以内), FID (100ms以内), CLS (0.1以内) を厳守します。
+*   **アセット最適化 (Asset Optimization)**:
+    *   **画像 (Images)**: 次世代フォーマット（AVIF/WebP）を強制します。`next/image` 等の最適化コンポーネントを使用します。
+    *   **遅延読み込み (Lazy Loading)**: ファーストビュー（Above the fold）以外の全てのアセットは遅延読み込みします。
 
-## 3. Performance & Optimization (The "Speed")
+## 3. 設計によるセキュリティ (Security by Design - DevSecOps)
+*   **ゼロトラスト (Zero Trust)**:
+    *   全ての入力（ユーザー入力、APIレスポンス）を疑います。バリデーションはクライアントとサーバーの両方で行います。
+*   **機密情報管理 (Secrets Management)**:
+    *   APIキーや秘密鍵はコードにコミットしません。`.env` ファイルとシークレットマネージャーを使用します。
 
-### 3.1. Asset Optimization
-*   **Next-Gen Formats**:
-    *   **Web**: **AVIF**をデフォルトとし（`next/image`経由）、WebPにフォールバックする。
-    *   **Mobile (Flutter)**: バンドルアセットには**WebP**を使用する。AVIFはサイズが重要な高精細静止画にのみ使用する（プラグインが必要なため）。
-    *   **Vectors**: アイコンや単純なイラストには**SVG**を使用する。
-*   **Lazy Loading**:
-    *   ファーストビュー（Above the fold）以下の画像は必ずLazy Loadする。
-    *   体感速度向上のため、"Blur-up"プレースホルダー（`blurDataURL`）を使用する。
+## 4. 技術的負債とクリーンアップ (Technical Debt & Cleanup)
+*   **負債の返済 (Debt Paydown)**:
+    *   スプリントの **20%** は技術的負債の返済（リファクタリング、ライブラリ更新）に充てます。
+*   **デジタル5S (Digital 5S)**:
+    *   **整理 (Seiri)**: 未使用のコード（Dead Code）、画像、ファイルは即座に削除します。コメントアウトされたコードを残しません。
 
-### 3.2. Code Hygiene (Lightweighting)
-*   **Tree Shaking**:
-    *   **Imports**: Tree Shakingを阻害する「バレルファイル（index.ts）」を避ける。特定のモジュールをインポートする（例：`import { map } from 'lodash/map'`）。
-    *   **Dead Code**: `dart analyze`や`eslint-plugin-unused-imports`を使用して、未使用コードを自動的に検出し削除する。
-*   **Dependency Diet**:
-    *   **Audit**: 新しいパッケージを追加する前に、必ずバンドルサイズへの影響を確認する（Bundlephobiaを使用）。
-    *   **Pruning**: 未使用の依存関係は即座に削除する。
+## 5. AIネイティブ・アーキテクチャ (AI-Native Architecture)
+*   **RAG最適化 (RAG Optimization)**:
+    *   コードはAIが理解しやすいように、小さなモジュール（Atomic）に分割します。
+    *   ファイル名とディレクトリ構造は「意味論的（Semantic）」に命名し、AIの検索精度を高めます。
 
-### 3.3. Full-Stack Performance Strategy
-*   **CDN & Edge Caching**:
-    *   **Static Assets**: 静的アセットは必ずCDN（Firebase Hosting/Cloud CDN）経由で配信し、積極的なキャッシュポリシー（`Cache-Control: public, max-age=31536000, immutable`）を適用する。
-    *   **Edge Logic**: ロジックをユーザーに近づける。地域固有の処理には **Cloud Functions (2nd Gen)** または **Edge Middleware** (Next.js) を使用する。
-*   **Latency & UX Impact**:
-    *   **Rule**: 「速度は機能である」。100msの遅延は収益を1%低下させる。
-    *   **Optimistic UI**: ユーザー操作に対して*即座に*UIを更新し、その後サーバーと同期する。同期に失敗した場合は優雅にエラー処理（ロールバック）を行う。
-    *   **Skeleton Screens**: 待機時間の体感を短くするため、スピナーではなくスケルトンスクリーンを使用する。
-
-### 3.4. Evolutionary Architecture (Future-Proofing)
-*   **Fitness Functions**:
-    *   **Automated Guardrails**: アーキテクチャ特性を保護するための「フィットネス関数」を定義する（例：「起動時間は2秒未満」「循環参照禁止」）。
-    *   **CI Enforcement**: これらのメトリクスが悪化した場合、ビルドを失敗させる。
-*   **YAGNI (You Ain't Gonna Need It)**:
-    *   **Strict Prohibition**: 「念のため」の機能実装は厳禁。現在の要件に必要なもの**だけ**を実装する。
-    *   **KISS**: 複雑なコードよりもシンプルなコードの方が、将来の変更に強い。
-
-## 4. Technical Debt & Cleanup (The "Boy Scout")
-
-### 4.1. The "Boy Scout Rule"
-*   **Mandate**: 「来た時よりも美しくして立ち去る。」
-*   **Action**: ファイルを触る際は、そのファイル内の少なくとも1つの小さな問題（フォーマット、命名、未使用インポート）を修正する。
-
-### 4.2. Automated Cleanup
-*   **Tools**:
-    *   **Flutter**: `dart analyze` と `dart fix --apply` を定期的に実行する。
-    *   **Next.js**: **Knip** を使用して未使用のファイルやエクスポートを検出する。
-    *   **General**: **SonarQube** 等を統合し、コード品質を継続的に監視する。
-
-### 4.3. Debt Paydown Protocol
-*   **Definition**: 「技術的負債」は比喩ではなく、金融負債である。利子（複雑性）が蓄積する。
-*   **Routine**: **スプリントの20%**（または2週間に1日）を、リファクタリングとクリーンアップに充てる。この時間は新機能開発を禁止する。
-
-## 5. Digital 5S (Cleanup & Optimization)
-*   **Seiri (整理) & Seiton (整頓)**:
-    *   未使用のファイル、画像、関数、コメントアウトされたコードは「ゴミ」である。発見次第即座に削除する。
-    *   ディレクトリ構造は常に論理的で予測可能な状態に保つ。
-*   **Seiso (清掃) - Refactoring**:
-    *   **Continuous Refactoring**: 機能追加のたびに、既存コードを少しだけ綺麗にする（Boy Scout Rule）。大規模なリファクタリング期間を設けるのではなく、日常的に行う。
-    *   **Performance Tuning**: 定期的にプロファイリングを行い、ボトルネックを解消する。推測で最適化しない（Premature Optimization is the root of all evil）。
-
-## 6. Observability
-*   **Monitor Everything**:
-    *   「動いている」だけでなく「どう動いているか」を可視化する（ログ、メトリクス、エラートラッキング）。
-    *   エラーはユーザーより先に検知する。
+## 6. ゼロバグ・ポリシー (The "Zero Bug Policy")
+*   **修正優先 (Fix First)**:
+    *   既知のバグがある状態で新機能を開発しません。バグ修正は最優先事項です。
+*   **24時間ルール (24-Hour Rule)**:
+    *   クリティカルなバグ（データ損失、セキュリティ、主要機能停止）は、発見から **24時間以内** に修正します。

@@ -1,19 +1,18 @@
-# 110. Data & DocOps Strategy
+# 110. Data Ops & Doc Ops
 
-## 1. Modern Data Stack (BI Strategy)
-*   **Architecture**:
-    *   **Ingest**: Aggregate raw data from Firebase/GCP into BigQuery.
-    *   **Transform**: Process raw data into analytical tables (Marts).
-    *   **Visualize**: Use Looker Studio to visualize KPIs (LTV, CAC, Retention) required for management decisions in real-time.
+## 1. Data Infrastructure (Data Mesh)
 *   **Single Source of Truth**:
-    *   "Manual aggregation in spreadsheets" is prohibited. All numbers must be sourced from dashboards automatically generated from BigQuery.
+    *   **BigQuery**: Aggregate all analytical data in BigQuery. Managing data in spreadsheets or local files is prohibited.
+    *   **ELT**: Adopt an ELT pipeline where data is loaded first (Load) and then transformed within BigQuery (Transform).
+*   **Data Quality**:
+    *   **dbt**: Use **dbt (data build tool)** for data transformation to version control and test SQL.
+    *   **Testing**: Incorporate automated tests to detect missing data, duplicates, and outliers in the pipeline.
 
-## 2. DocOps (Documentation Operations)
-*   **Docs as Code**:
-    *   Documentation is equivalent to code. Manage it with Git and subject it to PR reviews.
-    *   Code changes and documentation updates are "Atomic." Do not merge code changes without documentation updates.
-*   **Freshness & Maintenance**:
-    *   **Dead Link Check**: Introduce mechanisms to automatically detect broken links.
-    *   **Review Cycle**: Review major rule files quarterly to prevent obsolescence.
-*   **AI Generation**:
-    *   Leverage AI to automatically generate API specifications and boilerplate documentation, allowing humans to focus on describing "Why."
+## 2. Documentation Ops
+*   **Notion / GitHub Wiki**:
+    *   **Flow Info**: Manage daily minutes and ideas in Notion.
+    *   **Stock Info**: Manage specifications, design docs, and procedures in GitHub (Markdown) and sync with code.
+*   **Searchability**:
+    *   "Findability" is more important than "Writing". Maintain proper tagging and hierarchy.
+*   **Ownership**:
+    *   Specify "Last Updated Date" and "Owner" for all documents. Archive (delete) or update documents not updated for over 6 months.

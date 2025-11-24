@@ -1,29 +1,30 @@
-# 33. Engineering: Web Frontend (Next.js/React)
+# 33. Web Frontend Engineering (Next.js)
 
-## 1. Core Stack (Silicon Valley Standard)
-*   **Framework**: **Next.js (App Router)** is the sole choice.
-    *   **React Server Components (RSC)**: Use Server Components by default to minimize client-side JavaScript.
-    *   **Server Actions**: Perform data mutations via Server Actions instead of creating separate API routes.
-*   **Language**: **TypeScript** (Strict Mode) is mandatory.
-*   **Styling**: **Tailwind CSS**.
-    *   CSS-in-JS (Styled Components, etc.) is prohibited due to runtime overhead.
-    *   **Shadcn UI**: Adopt as the component library, customizing via copy-and-paste base.
+## 1. Modern Web Architecture
+*   **Next.js & React Server Components (RSC)**:
+    *   **Default**: Use **App Router** as a rule and render with Server Components (RSC) whenever possible. This drastically reduces the JavaScript sent to the client.
+    *   **Data Fetching**: Fetch data on the server side to avoid waterfall issues.
+*   **Edge Computing**:
+    *   **Middleware**: Execute auth checks and geolocation redirects in **Edge Middleware** to minimize latency.
 
-## 2. AI Integration (AI-Native Web)
-*   **Vercel AI SDK**:
-    *   Must use **Vercel AI SDK** for implementing AI features (Chat, Streaming Generation).
-    *   **Streaming UI**: Display UI in real-time token-by-token without making the user wait for full AI response (`useChat`, `useCompletion`).
-    *   **Generative UI**: Dynamically generate and render React components as AI output, not just text.
+## 2. Performance & SEO ("Core Web Vitals")
+*   **Image Optimization**:
+    *   Always use `next/image` to automatically serve optimal size and format (AVIF/WebP) for the device.
+    *   **CLS**: Always specify `width` and `height` (or `fill`) to prevent layout shifts.
+*   **Font Optimization**:
+    *   Use `next/font` to self-host Google Fonts and eliminate layout shifts (CLS) and external requests.
+*   **Metadata Management**:
+    *   Dynamically generate and fully optimize `title`, `description`, and `og:image` for each page for SEO.
 
-## 3. Performance & SEO (Web Vitals)
-*   **Core Web Vitals**:
-    *   Strictly adhere to **LCP (within 2.5s)**, **INP (within 200ms)**, and **CLS (within 0.1)**.
-    *   Use `next/image` to automate image optimization and Lazy Loading.
-*   **SEO**:
-    *   Use Next.js `Metadata` API. Leverage `next/og` (ImageResponse) for dynamic OGP image generation.
+## 3. Component Design
+*   **Atomic Design**:
+    *   Design components for reusability but avoid over-abstraction. Prioritize "Colocation" (ease of change) over "Premature Optimization".
+*   **Accessibility (A11y)**:
+    *   **Radix UI / Headless UI**: For complex interactive components (Dialogs, Dropdowns), use accessible headless UI libraries and apply styles with Tailwind CSS.
 
 ## 4. Deployment & Infrastructure
-*   **Platform**: **Vercel**.
-    *   Utilize automatic deployments via GitHub integration (Preview Deployments).
-*   **Edge Functions**:
-    *   Execute latency-sensitive processes (AI streaming, Auth Middleware) on the Edge Runtime.
+*   **Vercel**:
+    *   **Vercel** is the first choice for deployment.
+    *   **Preview**: Automatically generate preview environments for every PR to facilitate design reviews and testing.
+*   **ISR (Incremental Static Regeneration)**:
+    *   Use ISR for static content (Blogs, Help Pages) to achieve both fast build times and fresh content.

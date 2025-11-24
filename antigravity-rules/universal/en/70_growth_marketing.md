@@ -1,21 +1,22 @@
-# 70. Growth & Marketing Strategy (CMO View)
+# 70. Growth & Marketing Strategy
 
-## 1. SEO & ASO (Search Engine & App Store Optimization)
-*   **Day 1 Implementation**:
-    *   SEO/ASO is not a post-release measure. Incorporate keyword strategy, metadata structure, and OGP settings from the design phase.
-    *   For Web Apps, maintain a Lighthouse score (Performance, Accessibility, Best Practices, SEO) of 90+ for everything.
-*   **Semantic HTML**:
-    *   Use semantic tags like `article`, `section`, `nav` instead of `div` to correctly convey structure to search engines.
+## 1. Product-Led Growth (PLG)
+*   **Viral Loops**:
+    *   **Invite Mechanism**: Design incentives for users to invite friends and make the flow frictionless.
+    *   **Network Effects**: Build mechanisms where the product value increases as more users join (Data sharing, Community).
+*   **Onboarding**:
+    *   **Aha! Moment**: Minimize the time from signup to the "First Success". Don't make them read manuals; let them experience it.
 
-## 2. Analytics & Data Strategy
+## 2. SEO & Content Strategy
+*   **Technical SEO**:
+    *   **Core Web Vitals**: Optimize page load speed and stability to boost search rankings.
+    *   **Structured Data**: Use JSON-LD to correctly convey content meaning (FAQ, Product Info) to search engines.
+*   **Content Marketing**:
+    *   **Problem Solving**: Provide useful content (Blogs, Guides) that solves user problems, rather than just "Selling".
+
+## 3. Analytics & Measurement
 *   **Event Tracking**:
-    *   Do not just "install Google Analytics somehow." Define and implement "Key Events" directly linked to KPIs (North Star Metric).
-    *   Visualize behavior flows within the scope of not infringing on user privacy.
-*   **Feedback Loops**:
-    *   Build a pipeline (e.g., Slack integration) to feed user voices (NPS, reviews, inquiries) back to the development team in real-time.
-
-## 3. Viral Mechanics (Product-Led Growth)
-*   **In-App Virality**:
-    *   Implement mechanisms where the use of the product itself becomes marketing, such as invite features, share features, and watermarks.
-*   **Onboarding Optimization**:
-    *   Minimize the time to "Aha! Moment" (the moment value is felt) to the extreme. Minimize tutorials and let users learn through experience.
+    *   Track all key user actions (Signup, Purchase, Feature usage) as events.
+    *   **Tools**: Use GA4 or Mixpanel for funnel analysis.
+*   **A/B Testing**:
+    *   Decide based on data, not intuition. Validate key changes (LP copy, Button colors) with A/B tests.

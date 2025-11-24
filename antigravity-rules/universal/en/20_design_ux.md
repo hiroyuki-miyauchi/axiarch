@@ -1,27 +1,48 @@
 # 20. Design & UX Strategy
 
-## 1. Philosophy: "Silicon Valley Excellence & Google First"
+## 1. Design Philosophy ("Silicon Valley Excellence & Google First")
 
 ### 1.1. The "Wow" Factor (Delight)
-*   **Mandate**: Every interaction must feel "alive". We do not build static screens; we build **dynamic experiences**.
-*   **Google Standard**: Adopt **Material Design 3 (Material You)** and its **"Expressive"** evolution (2025+) as the baseline.
-*   **Differentiation**: While using Google's system, we differentiate through **high-fidelity motion**, **custom shaders**, and **bold typography** to achieve a "Premium Silicon Valley" feel.
+*   **Mandate**: Every interaction must feel "Alive". Build **Dynamic Experiences**, not static screens.
+*   **Google Standard**: Adopt **Material Design 3 (Material You)** and its evolution **"Expressive"** (2025+) as the baseline.
+*   **Differentiation**: While using Google's system, differentiate with **High-Fidelity Motion**, **Custom Shaders**, and **Bold Typography** to create a "Silicon Valley Premium" feel.
 
-### 1.2. Trend Scouting Protocol (Mandatory)
-Before *any* design task (even a single component), the following "Scouting Loop" is mandatory:
-1.  **Analyze Leaders**: Check **Mobbin** (iOS/Android flows), **Awwwards** (Web trends), and **Google Design** (latest specs).
-2.  **Deconstruct**: Identify *why* a top-tier app feels good (e.g., "The bounce on this modal makes it feel playful").
-3.  **Apply**: Adapt that specific "feel" to our context. **Never copy blindly; steal the "soul" of the interaction.**
-4.  **AI Leverage**: Use Generative AI to brainstorm "futuristic" variants of standard UI components.
+### 1.2. Trend Scouting Protocol
+Before *every* design task (even a single component), the following "Scouting Loop" is mandatory:
+1.  **Analyze Leaders**: Check **Mobbin** (iOS/Android flows), **Awwwards** (Web trends), and **Google Design** (Latest specs).
+2.  **Deconstruct**: Dissect why top-tier apps feel "good" (e.g., "This modal bounce adds playfulness").
+3.  **Apply**: Adapt that "Soul" to our context. **Steal the soul of the interaction, don't blindly copy.**
+4.  **AI Leverage**: Use Generative AI to brainstorm "Futuristic" variations of standard UI components.
 
-## 2. Visual Language & System
+## 2. User Sovereignty & Trust
+*   **Data Ownership**:
+    *   Users own their data. Provide easy "Export" and "Delete" options.
+*   **No Dark Patterns**:
+    *   Never use deceptive UI patterns to trick users into subscribing or preventing cancellation. Transparency builds long-term trust (LTV).
 
-### 2.1. Material 3 Expressive
+## 3. Mobile First & Any-Screen
+*   **Touch Targets**:
+    *   Minimum touch target size is **44x44pt** (iOS) / **48x48dp** (Android). No exceptions.
+*   **Thumb Zone**:
+    *   Place primary actions (FAB, Navigation) within the "Thumb Zone" for easy one-handed operation.
+*   **Responsive**:
+    *   Design for mobile first, but ensure it scales beautifully to Tablets and Desktops (Adaptive Layouts).
+
+## 4. Accessibility (A11y)
+*   **WCAG 2.1 AA**:
+    *   All text must meet contrast ratios (4.5:1 for normal text).
+    *   Do not rely on color alone to convey meaning (use icons/text labels).
+*   **Semantics**: All custom components must have proper semantic labels for screen readers (TalkBack/VoiceOver).
+*   **Touch Targets**: Minimum 48x48dp for all interactive elements.
+
+## 5. Visual Language & System
+
+### 5.1. Material 3 Expressive
 *   **Dynamic Color**: Utilize the `dynamic_color` engine to harmonize with the user's wallpaper/OS, but enforce high-contrast overrides for critical actions.
 *   **Shapes**: Use **Expressive Shapes** (asymmetric corners, morphing containers) to break the "boxy" grid.
 *   **Typography**: Use variable fonts (e.g., Roboto Flex, Inter) to animate weight/width during interactions.
 
-### 2.2. Motion & Gestures (The "Soul")
+### 5.2. Motion & Gestures (The "Soul")
 *   **Physics-Based**: All animations must use **spring physics** (stiffness/damping). Things should bounce, stretch, and squash slightly.
 *   **Gestures (Swipe First)**:
     *   **Navigation**: Support "Swipe Back" universally.
@@ -39,9 +60,18 @@ Before *any* design task (even a single component), the following "Scouting Loop
 *   **Tokenization**: All colors, spacing, and type MUST be tokens. **Hardcoded values are banned.**
 *   **Component Governance**: Before creating a new component, check if an existing one can be extended. Avoid "Component Bloat".
 
-### 3.2. Performance & Cost Awareness
-*   **Render Cost**: Heavy effects (Blur, Shadows) must be used sparingly. Test on low-end devices.
-    *   *Rule*: If a blur causes frame drops, replace with a semi-transparent scrim.
+### 6. Emotional Design & "Micro-Delights"
+*   **The "Aha!" Moment**:
+    *   Provide not just functional satisfaction, but "emotional satisfaction".
+    *   **Micro-Delights**: Provide at least one "Micro-Delight" per session (a clever animation, human-like copy, unexpected convenience) that makes the user go "Wow".
+*   **Dogfooding (Extreme User Empathy)**:
+    *   The Dev Team (AI) must be the "First and Toughest Heavy User" of the product they build.
+    *   Never ship something you don't love using yourself.
+
+## 7. Performance as Design
+*   **Speed is a Feature**:
+    *   A 100ms delay costs 1% of user trust. Design includes not just "looks" but "response speed".
+    *   **Skeleton Screens**: Use skeleton screens instead of spinners during loading to reduce perceived wait time.
 *   **Asset Optimization**: Use **Vector (SVG/Lottie/Rive)** over Raster. If Raster is needed, use **WebP** and lazy load.
 *   **Battery Impact**: Avoid infinite looping animations unless user-initiated.
 
@@ -64,6 +94,15 @@ Before *any* design task (even a single component), the following "Scouting Loop
 *   **Rive / Lottie**: Use **Rive** for interactive vector animations (state machines) where code-based animation is too complex.
 *   **Inclusive Copywriting**:
     *   Use Inclusive Language that excludes no one regardless of gender, race, age, or ability.
+
+## 8. AI UX Strategy (Latency Management)
+*   **Streaming First**:
+    *   AI generation wait time must be "perceived as zero".
+    *   **Streaming Responses**: Do not wait for the full answer; display it token by token in real-time (typing animation).
+*   **Optimistic Updates**:
+    *   React immediately to user actions (e.g., pressing send) without waiting for AI processing (e.g., show chat bubble instantly).
+*   **Transparency**:
+    *   Visually distinguish between "Thinking..." and "Generating..." states to reassure the user.
 
 ## 4. AI & Personalization
 *   **Hyper-Personalization**:

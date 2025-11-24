@@ -2,25 +2,32 @@
 
 ## 1. The Testing Pyramid (Silicon Valley Standard)
 Testing is about "Balance," not just "Quantity." Maintain the following pyramid structure.
+# 80. QA & Testing Strategy
 
+## 1. Testing Pyramid
 *   **Unit Tests (70%)**:
-    *   Target logic, utilities, and Firestore Security Rules.
-    *   Fast execution serves as the foundation for the development feedback loop.
-*   **Widget/Component Tests (20%)**:
-    *   UI tests for individual Flutter Widgets or screens.
-    *   **Golden Tests (Visual Regression)**: Introduce pixel-perfect snapshot testing (Golden File Testing) to prevent design regressions.
-*   **Integration/E2E Tests (10%)**:
-    *   Simulate key user flows (Login -> Payment -> Completion).
-    *   Use Firebase Test Lab to guarantee operation on real devices. Focus only on critical paths as they are fragile and costly to maintain.
+    *   Test individual functions and classes. Aim for high coverage of business logic.
+*   **Integration Tests (20%)**:
+    *   Test interactions between modules (API + DB, Widget + Provider).
+*   **E2E Tests (10%)**:
+    *   Test critical user flows (Login -> Purchase) on real devices/emulators. Use Maestro.
 
-## 2. CI/CD Pipeline (GitHub Actions)
+## 2. CI/CD Pipeline
 *   **Automated Checks**:
-    *   Lint, Unit Test, and Build must run automatically upon PR creation. Merging is prohibited unless checks pass (Branch Protection).
-*   **Continuous Delivery**:
-    *   Merging into the `main` branch triggers immediate deployment to the Staging environment (Firebase App Distribution).
+    *   Run Lint, Unit Tests, and Build on every Pull Request.
+    *   **Rule**: PRs cannot be merged if any check fails.
 
-## 3. Manual Testing Strategy
-*   **Exploratory Testing**:
-    *   Allocate time for humans (Owner or AI) to explore the app to discover "oddities" or "usability issues" that automated tests cannot catch.
+## 3. Self-Check List (Before Review)
+*   **Mandatory**:
+    *   [ ] Does it work on iOS and Android?
+    *   [ ] Are there any console errors?
+    *   [ ] Is the design pixel-perfect?
+    *   [ ] Are edge cases (empty state, error state) handled?
+
+## 4. Test Perspectives
+*   **Monkey Testing**:
+    *   Randomly tap buttons to find crashes.
+*   **Network Conditions**:
+    *   Test behavior under offline or slow network conditions.
 *   **Dogfooding**:
     *   Developers must use the app daily and become the first users.

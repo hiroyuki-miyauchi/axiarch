@@ -2,25 +2,27 @@
 
 ## 1. Privacy by Design (GDPR/CCPA Standard)
 *   **Data Minimization**:
-    *   "Collecting just in case" is prohibited. Collect only data truly necessary for the business.
-    *   Anonymize or pseudonymize PII (Personally Identifiable Information) as much as possible.
-*   **User Sovereignty**:
-    *   Implement features for users to "View," "Export," and "Completely Delete" their data from the MVP stage.
-    *   "Unsubscribing" must be as easy as "Subscribing" (Prohibition of Dark Patterns).
+    *   Collect only the data you absolutely need. Do not collect "just in case".
+*   **Consent**:
+    *   Obtain explicit consent for tracking and cookies (GDPR/CCPA/APPI).
 
-## 2. Security Architecture (Zero Trust)
-*   **Authentication & Authorization**:
-    *   Do not build your own auth infrastructure. Use verified solutions like Firebase Auth or Auth0.
-    *   Enforce MFA (Multi-Factor Authentication) for accounts with administrative privileges.
-*   **Supply Chain Security**:
-    *   Verify the reliability of libraries used and regularly scan for vulnerabilities with `npm audit`, etc.
-    *   Do not use suspicious packages or unmaintained libraries.
+## 2. Application Security (OWASP Top 10)
+*   **Injection**:
+    *   Use ORM/Prepared Statements to prevent SQL/NoSQL Injection.
+*   **Authentication**:
+    *   Enforce **MFA (Multi-Factor Authentication)** for all admin accounts.
+    *   Use established IDaaS (Firebase Auth/Auth0) instead of building auth from scratch.
 
-## 3. Infrastructure Security (Defense in Depth)
-*   **Network Security**:
-    *   **VPC**: Isolate backend services in a private VPC. Do not expose databases directly to the internet.
-    *   **Cloud Armor**: Use WAF to protect against DDoS and common web attacks.
-*   **App Check**: Enforce Firebase App Check to ensure requests come from your genuine app.
+## 3. Infrastructure Security
+*   **Least Privilege**:
+    *   Grant only minimum necessary permissions to IAM roles and Service Accounts.
+*   **WAF/DDoS**:
+    *   Use Cloud Armor or Cloudflare to protect against attacks.
+
+## 4. Incident Response
+*   **Playbook**:
+    *   Prepare a response manual for data breaches.
+    *   **Drills**: Conduct security drills regularly.
 
 ## 3. Offensive Security (Red Team Mindset)
 *   **Self-Penetration Testing**:

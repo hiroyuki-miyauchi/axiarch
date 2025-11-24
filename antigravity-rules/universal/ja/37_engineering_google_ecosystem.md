@@ -6,27 +6,35 @@
 *   **Default Choice**: 技術選定においては、**Googleエコシステム**（Firebase, GCP, Android, Flutter, Maps, AI）を最優先する。
     *   **Why**: シームレスな統合、世界クラスのスケーラビリティ、統一された請求/管理を実現するため。
     *   **Exception Policy**: サードパーティ製ツール（RevenueCat, Auth0など）は、Google純正品と比較して**圧倒的な**利点（クロスプラットフォームUX、安定性、開発者体験）がある場合にのみ採用する。
+# 37. エンジニアリング: Googleエコシステムと重要フロー (Engineering: Google Ecosystem & Critical Flows)
 
-### 1.2. Continuous Trend Analysis
-*   **Mandate**: エンジニアは常に最新のトレンド（Firebase IAP拡張機能、新しいGCP AIモデルなど）を監視し続ける義務がある。
-*   **Pruning**: Google純正ソリューションが進化し、サードパーティ製ツールの品質に追いついた場合は、**Google純正へ回帰（マイグレーション）**する。
-*   **Priority**: **Security > Performance > UX > Cost > Trend**。セキュリティやユーザー体験を犠牲にしてまでトレンドを採用してはならない。
+## 1. 哲学: "Google First" と継続的進化 (Philosophy: "Google First" & Continuous Evolution)
 
-## 2. Google Ecosystem Strategy
+### 1.1. Google First 戦略 (Google First Strategy)
+*   **デフォルトの選択**: 技術選定においては、**Googleエコシステム**（Firebase, GCP, Android, Flutter, Maps, AI）を最優先する。
+    *   **理由**: シームレスな統合、世界クラスのスケーラビリティ、統一された請求/管理を実現するため。
+    *   **例外ポリシー**: サードパーティ製ツール（RevenueCat, Auth0など）は、Google純正品と比較して**圧倒的な**利点（クロスプラットフォームUX、安定性、開発者体験）がある場合にのみ採用する。
 
-### 2.1. Google Maps Platform
-*   **Cost Optimization**:
-    *   **Static Maps First**: 非対話型のビュー（レシート詳細、リストのサムネイルなど）には**Maps Static API**を使用し、コストを大幅に削減する。
-    *   **Lazy Loading**: マップコンポーネントは、ビューポートに入ったときにのみロードする。
-    *   **Session Billing**: **Places Autocomplete**には必ずセッショントークンを使用し、クエリを単一の課金対象セッションにまとめる。
-*   **Performance**:
-    *   **Vector Maps**: よりスムーズなレンダリングとデータ使用量削減のために、Vector Maps (Android/iOS SDK v18+) を使用する。
-    *   **Lightweight Markers**: マーカーにはシンプルなPNGまたは最適化されたベクタードローアブルを使用する。複雑なSVGの動的レンダリングは避ける。
+### 1.2. 継続的なトレンド分析 (Continuous Trend Analysis)
+*   **義務**: エンジニアは常に最新のトレンド（Firebase IAP拡張機能、新しいGCP AIモデルなど）を監視し続ける義務がある。
+*   **見直し**: Google純正ソリューションが進化し、サードパーティ製ツールの品質に追いついた場合は、**Google純正へ回帰（マイグレーション）**する。
+*   **優先順位**: **セキュリティ > パフォーマンス > UX > コスト > トレンド**。セキュリティやユーザー体験を犠牲にしてまでトレンドを採用してはならない。
 
-### 2.2. Firebase & GCP
-*   **Firestore Strategy (NoSQL Optimization)**:
-    *   **Flat Data Structure**: 深いネストを避ける。スケーラビリティのために**ルートレベルコレクション**（例：`users/{uid}/posts` ではなく `posts/{postId}`）を使用する。
-    *   **Denormalization**: Read回数を最小化するためにデータを重複（非正規化）させる（例：`posts` 内に `authorName` を持たせる）。**書き込みストレージではなく、読み取りパフォーマンスを最適化する。**
+## 2. Googleエコシステム戦略 (Google Ecosystem Strategy)
+
+### 2.1. Google Maps Platform (Google Maps Platform)
+*   **コスト最適化**:
+    *   **Static Maps を優先**: 非対話型のビュー（レシート詳細、リストのサムネイルなど）には**Maps Static API**を使用し、コストを大幅に削減する。
+    *   **遅延ロード**: マップコンポーネントは、ビューポートに入ったときにのみロードする。
+    *   **セッション課金**: **Places Autocomplete**には必ずセッショントークンを使用し、クエリを単一の課金対象セッションにまとめる。
+*   **パフォーマンス**:
+    *   **ベクターマップ**: よりスムーズなレンダリングとデータ使用量削減のために、Vector Maps (Android/iOS SDK v18+) を使用する。
+    *   **軽量マーカー**: マーカーにはシンプルなPNGまたは最適化されたベクタードローアブルを使用する。複雑なSVGの動的レンダリングは避ける。
+
+### 2.2. Firebase & GCP (Firebase & GCP)
+*   **Firestore 戦略 (NoSQL 最適化)**:
+    *   **フラットなデータ構造**: 深いネストを避ける。スケーラビリティのために**ルートレベルコレクション**（例：`users/{uid}/posts` ではなく `posts/{postId}`）を使用する。
+    *   **非正規化**: Read回数を最小化するためにデータを重複（非正規化）させる（例：`posts` 内に `authorName` を持たせる）。**書き込みストレージではなく、読み取りパフォーマンスを最適化する。**
     *   **App Check**: 不正なトラフィック（ボット）をブロックするため、本番アプリでは必須とする。
 *   **Security & Networking**:
     *   **VPC Service Controls**: エンタープライズグレードの保護のために、VPC Service Controlsを使用して機密リソース（Cloud Functions, Firestore）の周囲にセキュリティ境界を定義する。

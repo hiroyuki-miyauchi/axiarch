@@ -1,20 +1,20 @@
-# 71. Growth: GEO (Generative Engine Optimization)
+# 71. Geo Strategy & Localization
 
-## 1. Beyond SEO: Optimizing for AI
-*   **Concept**:
-    *   Prioritize **GEO (Generative Engine Optimization)** in addition to traditional SEO.
-    *   Create content that AI search engines (ChatGPT, Gemini, Perplexity) want to cite as "Answers."
+## 1. Internationalization (i18n)
+*   **Day 1 Support**:
+    *   **No Hardcoding**: Strictly prohibit hardcoding text in UI code. Always separate into resource files (ARB/JSON).
+    *   **LTR/RTL**: Design layouts to support Right-to-Left (RTL) languages like Arabic.
+*   **Cultural Sensitivity**:
+    *   Colors, icons, and gestures have different meanings in different cultures. Adopt designs that are culturally neutral or appropriate for each region.
 
-## 2. GEO Strategies
-*   **E-E-A-T & Authority**:
-    *   AI prioritizes citing "trusted sources." Explicitly include primary information, expert insights, and concrete data.
-*   **Structured Content**:
-    *   Logically structure articles (H1-H3, bullet points, conclusion first) for easy AI comprehension.
-    *   Thoroughly utilize Schema.org (JSON-LD) to make content machine-readable.
-*   **Direct Answers**:
-    *   Include a "Direct Answer" section that answers user questions straight away without rambling introductions. This is highly likely to be adopted in AI "Summaries."
+## 2. Geo Expansion Strategy
+*   **Tier Strategy**:
+    *   **Tier 1 (Priority)**: Japan, USA. Focus resources here until PMF is achieved.
+    *   **Tier 2 (Expansion)**: English-speaking world, Europe. Expand the successful model from Tier 1.
+*   **Local Payments**:
+    *   Support major local payment methods (PayPay, Venmo, WeChat Pay, etc.) to prevent CVR drop-off.
 
-## 3. AIO (Artificial Intelligence Optimization)
-*   **Brand Presence in AI**:
-    *   Regularly verify if the brand and products are correctly recognized within LLM training data (Brand Monitoring in AI).
-    *   If AI outputs incorrect information (Hallucination), encourage correction of training data by continuously publishing accurate information.
+## 3. Timezones & Dates
+*   **UTC Standard**:
+    *   **Storage**: Store and process all times in **UTC** in the database and backend.
+    *   **Display**: Convert to the user's local timezone (JST, etc.) only at the moment of display.

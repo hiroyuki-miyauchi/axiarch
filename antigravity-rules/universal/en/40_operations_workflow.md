@@ -18,19 +18,27 @@
     3.  **Refactoring**: Address any "quick hacks" introduced during the Execution phase.
     4.  **Documentation**: Update `README.md` and API docs to reflect changes.
 
-### 1.5. Phase 5: Sunset & Deprecation (The "End")
-*   **Goal**: Remove dead weight to keep the codebase agile.
-*   **Protocol**:
-    1.  **Identify**: Use analytics to find features with < 1% usage.
-    2.  **Deprecate**: Mark code as `@deprecated` and add "Sunset Headers" to APIs.
-    3.  **Announce**: Notify users (if user-facing) or developers (if internal) with a clear timeline.
-    4.  **Delete**: Remove the code entirely after the grace period. **Do not comment it out.** Git history is your backup.
+# 40. Operations & Workflow
 
-## 2. Phase 2: Execution (The Build)
-*   **Test-Driven & Atomic**:
-    *   Write testable code and make changes in logical units (Atomic Commits).
-*   **AI-Assisted Coding**:
-    *   Maximize the use of AI tools to automate boilerplate writing and focus on essential logic.
+## 1. Agile & Scrum
+*   **Sprint Cycle**:
+    *   **1 Week Sprint**: Adopt a 1-week sprint to iterate at high speed.
+    *   **Review**: Hold a "Demo Day" every Friday to show working software.
+*   **Ticket Management**:
+    *   **No Ticket, No Work**: Every task must have a ticket (GitHub Issues/Linear).
+    *   **Definition of Done (DoD)**: Clear criteria for completion (Code reviewed, Tested, Deployed).
+
+## 2. Docs as Code
+*   **Markdown**:
+    *   Manage all documentation in Markdown within the Git repository.
+    *   **Review**: Documentation updates must be reviewed in PRs just like code.
+*   **Mermaid**:
+    *   Use Mermaid.js for diagrams (Flowcharts, Sequence diagrams) to keep them version-controllable.
+
+## 3. Communication
+*   **Async First**:
+    *   Prioritize asynchronous communication (Slack/GitHub) over synchronous meetings.
+    *   **Meeting Rules**: No meeting without an agenda. If the goal is achieved, end the meeting early. logic.
 
 ## 3. Phase 3: Verification & Cleanup
 *   **User Perspective Testing**:

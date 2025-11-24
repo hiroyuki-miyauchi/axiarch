@@ -23,7 +23,7 @@
     *   **Vector Maps**: Use Vector Maps (Android/iOS SDK v18+) for smoother rendering and lower data usage.
     *   **Lightweight Markers**: Use simple PNGs or optimized vector drawables for markers. Avoid complex SVG rendering on the fly.
 
-### 2.2. Firebase & GCP
+## 2.2. Firebase & GCP
 *   **Firestore Strategy (NoSQL Optimization)**:
     *   **Flat Data Structure**: Avoid deep nesting. Use **Root-Level Collections** (e.g., `users/{uid}/posts` -> `posts/{postId}`) for scalability.
     *   **Denormalization**: Duplicate data (e.g., `authorName` in `posts`) to minimize Reads. **Optimize for Read Performance**, not Write Storage.

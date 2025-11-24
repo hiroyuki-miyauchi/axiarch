@@ -21,19 +21,12 @@ Even in a Flutter-first environment, deep understanding of native platforms is r
 *   **Memory Leaks**: Use **LeakCanary** in debug builds to detect memory leaks, especially with Context handling.
 
 ## 3. iOS (Swift) Standards
-
-### 3.1. Modern Architecture
-*   **SwiftUI & UIKit**: While Flutter handles UI, if native UI is needed (e.g., Widgets), use **SwiftUI** where possible.
-*   **Concurrency**: Use **Swift Concurrency (async/await)** for asynchronous tasks. Avoid "Callback Hell".
-*   **ARC Management**: Be vigilant about Retain Cycles. Use `[weak self]` or `[unowned self]` in closures appropriately.
-
-### 3.2. Code Style & Quality
-*   **SwiftLint**: Mandatory use of **SwiftLint** to enforce community standards.
-*   **Protocol Oriented Programming**: Prefer protocols and value types (Structs) over class inheritance.
-
-### 3.3. Performance
-*   **Instruments**: Use Xcode Instruments (Time Profiler, Allocations) to profile native code performance.
-*   **Background Tasks**: Use `BGTaskScheduler` for modern background execution management.
+## 3. Common Platform Requirements
+*   **Permissions**:
+    *   **Just-in-Time**: Request permissions (Camera, Location) only when absolutely needed.
+    *   **Explanation**: Always show a pre-dialog explaining "Why" before the system dialog.
+*   **Accessibility**:
+    *   **VoiceOver / TalkBack**: Ensure all UI elements have proper labels (Content Description) for screen readers.
 
 ## 4. Flutter Integration (Platform Channels)
 

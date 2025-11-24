@@ -1,25 +1,3 @@
-# 50. Git & Version Control Standards (Silicon Valley Style)
-
-## 1. Branching Strategy (Trunk Based Development)
-*   **Main Branch is Holy**: The `main` branch must always be in a Deployable state.
-*   **Short-Lived Feature Branches**: Feature development is done in short-lived branches like `feat/user-login` and merged into `main` within a few days. Long-lived branches are the source of merge hell and are prohibited.
-
-## 2. Commit Convention (Bilingual Commits)
-Commit messages must use a **Bilingual Format** that satisfies both "Global Standard (English)" and "User Explanation (Japanese)."
-
-*   **Format**: `type(scope): English Subject / 日本語の説明`
-    *   Alternatively, use English only for the Subject, and provide a detailed Japanese explanation in the Body (starting from the 3rd line).
-*   **Types**:
-    *   `feat: ...`: New Feature
-    *   `fix: ...`: Bug Fix
-    *   `docs: ...`: Documentation only
-    *   `style: ...`: Formatting, missing semi colons, etc; no code change
-    *   `refactor: ...`: Refactoring production code
-    *   `perf: ...`: Performance improvement
-    *   `test: ...`: Adding tests, refactoring test; no production code change
-    *   `chore: ...`: Updating build tasks, package manager configs, etc; no production code change
-
-*   **Example**:
     *   ⭕️ `feat(auth): Add login UI / ログイン画面のUI実装`
     *   ⭕️ `fix(api): Fix timeout bug / タイムアウト処理のバグを修正`
     *   ❌ `update code` (No specificity)

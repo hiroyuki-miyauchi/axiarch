@@ -1,26 +1,26 @@
-# 100. Crisis Management & SRE (Site Reliability Engineering)
+# 100. Crisis Management & SRE
 
-## 1. Incident Response Protocol (War Room)
-*   **Severity Levels (SEV)**:
-    *   **SEV-0 (Critical)**: All users affected, data loss. Immediate response (24/365).
-    *   **SEV-1 (Major)**: Major features (Payment, Login) unavailable. Call out even outside business hours.
-    *   **SEV-2 (Minor)**: Partial malfunction. Handle next business day.
-*   **War Room**:
-    *   If SEV-1 or higher occurs, immediately establish a "War Room" (dedicated chat/call) and do not disband until resolved.
-    *   **Roles**:
-        *   **Commander**: Overall command, decision making (Owner or AI).
-        *   **Ops**: Actual fix implementation (AI).
-        *   **Comms**: Status reporting to users (AI).
+## 1. Incident Response Protocol
+*   **Roles**:
+    *   **Commander**: Takes command and makes decisions. Does not touch code.
+    *   **Communicator**: Handles external communication (Status Page, SNS).
+    *   **Resolver**: Investigates and fixes the technical issue.
+*   **First Response**:
+    *   **Stop the Bleeding**: Prioritize stopping the damage (disable feature, rollback) over finding the root cause.
+    *   **Transparency**: Inform users immediately that "We are investigating". Silence breeds distrust.
 
-## 2. Blameless Post-Mortem
-*   **Philosophy**:
-    *   Ask "Why did the system allow the error?" not "Who made the mistake?"
-    *   Create a detailed Post-Mortem report within 24 hours after incident resolution.
-*   **Action Items**:
-    *   Must implement preventive measures and add them to the task list.
+## 2. SRE (Site Reliability Engineering)
+*   **SLO/SLI**:
+    *   **SLI (Service Level Indicator)**: Metric to measure health (e.g., Error Rate, Latency).
+    *   **SLO (Service Level Objective)**: Target level (e.g., 99.9% Availability).
+    *   **Error Budget**: If SLO is breached, freeze new feature development and focus on reliability.
+*   **Post-Mortem**:
+    *   **Blameless**: Focus on "What happened" and "Why it happened", not "Who did it".
+    *   **Documentation**: Create an incident report and share it.
 
-## 3. Disaster Recovery (DR)
-*   **Backup Strategy**:
-    *   Enable automatic backups for Firestore/Cloud SQL and conduct regular restore drills.
-*   **Playbooks**:
-    *   Prepare specific response procedures (Playbooks) in advance for scenarios like "DB wipeout" or "API down."
+## 3. Backup & Recovery
+*   **RPO/RTO**:
+    *   **RPO (Recovery Point Objective)**: How much data loss is acceptable (e.g., 1 hour).
+    *   **RTO (Recovery Time Objective)**: How long to recover (e.g., 4 hours).
+*   **Drills**:
+    *   Conduct regular Disaster Recovery Drills to ensure backups actually work.
