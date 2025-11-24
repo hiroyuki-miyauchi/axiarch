@@ -13,6 +13,7 @@
     *   **OpenTelemetry**: フロントエンドからバックエンド、データベースに至るまでのリクエストを一気通貫で追跡（Trace）できるようにします。「どこで遅くなったか」を即座に特定します。
 *   **パフォーマンス監視 (Performance Monitoring)**:
     *   **リアルタイム監視**: TTI (Time to Interactive) や APIレイテンシをリアルタイムで監視し、閾値を超えた場合はSlack等にアラートを通知します。
+    *   **Core Web Vitals**: LCP, FID, CLSのスコアを継続的に計測し、SEOやUXへの悪影響を未然に防ぎます。
 
 ## 3. プライバシーファースト分析 (Privacy-First Analytics)
 *   **PIIの送信禁止 (No PII)**:
@@ -20,3 +21,9 @@
     *   **ハッシュ化**: ユーザーを識別する必要がある場合は、ソルト付きハッシュIDを使用します。
 *   **同意管理 (Consent Management)**:
     *   **GDPR / APPI**: ユーザーのCookie同意ステータス（Do Not Track）を厳格に尊重します。同意がない場合、分析スクリプト自体をロードしません。
+
+## 4. ビジネスインテリジェンス (Business Intelligence)
+*   **North Star Metricの追跡**:
+    *   単なるPVやダウンロード数ではなく、事業の最重要指標（North Star Metric）に直結するユーザー行動（例：有料機能の利用回数、コンテンツ作成数）を計測します。
+*   **ファネル分析 (Funnel Analysis)**:
+    *   サインアップから課金、主要機能の利用までの離脱ポイントを可視化し、ボトルネックを特定します。

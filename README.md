@@ -2,6 +2,7 @@
 
 > **The Absolute Constitution for AI-Native Development**
 > シリコンバレーのトップティア基準を網羅した、Google Antigravityプロジェクトの絶対的な開発ルールセット。
+> **Now Fully Bilingual (Japanese & English) / 日英完全対応**
 
 ## 📂 Repository Structure
 

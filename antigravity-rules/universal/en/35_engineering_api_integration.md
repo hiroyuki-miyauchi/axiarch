@@ -2,30 +2,32 @@
 
 ## 1. API Design Principles
 *   **API-First Design**:
-    *   **Design Before Code**: Define API specifications before implementation.
-    *   **OpenAPI (Swagger)**: For REST APIs, write OpenAPI 3.x specs first and auto-generate code (types, clients) to ensure consistency.
-    *   **Schema-Driven**: For GraphQL, treat the Schema definition as the source of truth.
+    *   **Design First**: Define API specifications before starting implementation.
+    *   **OpenAPI (Swagger)**: For REST APIs, write the OpenAPI 3.x spec first, then auto-generate code (type definitions, clients). This ensures efficiency and consistency.
+    *   **Schema-Driven**: For GraphQL, treat the Schema definition as the source of truth to ensure type safety for both frontend and backend.
 *   **RESTful & GraphQL**:
-    *   **REST**: Adhere to resource-oriented URL design (e.g., `GET /users/{id}/orders`) and proper HTTP methods. Statelessness is mandatory.
-    *   **GraphQL**: Adopt GraphQL for complex data fetching to prevent over-fetching.
+    *   **REST**: Adhere to resource-oriented URL design (e.g., `GET /users/{id}/orders`) and use appropriate HTTP methods (GET, POST, PUT, DELETE). Strictly observe statelessness.
+    *   **GraphQL**: Adopt GraphQL for complex data fetching or when clients need to specify exact data requirements, preventing over-fetching.
 *   **Versioning**:
-    *   Manage versions via URL (`/v1/`) or Header to avoid Breaking Changes.
+    *   Manage versions via URL or Header (e.g., `/v1/users`) to avoid Breaking Changes and minimize impact on existing clients.
 
 ## 2. Error Handling
 *   **Unified Format**:
-    *   Always return error responses in a unified JSON format (e.g., `{ "code": "INVALID_INPUT", "message": "..." }`).
-    *   Use HTTP status codes correctly (200, 400, 401, 403, 404, 500). Do NOT return 200 for everything.
+    *   Always return error responses in a unified JSON format (e.g., `{ "code": "INVALID_INPUT", "message": "Input is invalid." }`). This simplifies client-side error handling.
+    *   Correctly use HTTP status codes (200 OK, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error). Do not return everything as 200 OK.
 *   **Retry Strategy**:
-    *   Implement **Exponential Backoff** on the client side to automatically retry transient network errors (503, Timeout).
+    *   Implement logic on the client side to automatically retry with **Exponential Backoff** for temporary network errors (503 Service Unavailable, Timeout).
 
 ## 3. Security & Authentication
 *   **Authorization Header**:
-    *   Always send API tokens via `Authorization: Bearer <token>` header, never in URL parameters.
+    *   Always send API tokens in the `Authorization: Bearer <token>` header, not as URL parameters.
 *   **Rate Limiting**:
-    *   Implement Rate Limiting (Throttling) by IP or User to prevent DDoS and scraping.
+    *   Implement rate limiting (Throttling) by IP address or user to prevent DDoS attacks and scraping.
 
 ## 4. Best Practices
 *   **Idempotency**:
-    *   Implement `Idempotency-Key` header for payments and critical updates to prevent double execution on network errors.
+    *   Always implement the `Idempotency-Key` header for payments and critical updates to prevent double execution due to network errors.
+
+## 5. Documentation
 *   **Live Documentation**:
-    *   API docs must be auto-generated from code and always "Live" (Swagger UI). Manual docs are prohibited. Manually updated documentation is prohibited.
+    *   API documentation must be auto-generated from code and always kept up-to-date (Live) (Swagger UI, GraphiQL). Manual documentation is prohibited.

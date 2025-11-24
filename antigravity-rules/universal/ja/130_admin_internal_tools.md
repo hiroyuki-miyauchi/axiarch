@@ -23,3 +23,15 @@
 *   **アラート連携 (Alerting Integration)**:
     *   システムエラー（5xxエラーの急増）や異常なKPI変動（解約の急増）が発生した場合、SlackやEmailに即座に通知する連携を構築します。
     *   管理画面を見に行かなくても、異常に気付ける仕組みを作ります。
+
+## 4. サポートとFAQ (Support & FAQ)
+*   **FAQ管理 (FAQ Management)**:
+    *   ユーザーからの問い合わせが多い項目は、即座にFAQ（ヘルプセンター）に追加し、自己解決率を高めます。FAQはCMS（NotionやZendesk Guide）で管理し、エンジニア以外でも更新可能にします。
+*   **チャットサポート (Chat Support)**:
+    *   **Intercom / Zendesk**: アプリ内チャットサポートを導入し、ユーザーの課題をリアルタイムで解決します。AIボット（Finなど）を活用し、一次対応を自動化します。
+
+## 5. セキュリティと権限 (Security & Access Control)
+*   **RBAC (Role-Based Access Control)**:
+    *   管理者にも権限レベル（Super Admin, Support, Analyst）を設け、必要な情報のみにアクセスできるようにします（最小権限の原則）。
+*   **IP制限 (IP Restriction)**:
+    *   管理画面へのアクセスは、VPN経由または特定のIPアドレスからのみ許可し、外部からの攻撃を防ぎます。

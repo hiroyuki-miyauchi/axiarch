@@ -1,114 +1,101 @@
 # 20. Design & UX Strategy
 
-## 1. Design Philosophy ("Silicon Valley Excellence & Google First")
+## 1. Design Philosophy (Silicon Valley Excellence & Google First)
 
 ### 1.1. The "Wow" Factor (Delight)
-*   **Mandate**: Every interaction must feel "Alive". Build **Dynamic Experiences**, not static screens.
+*   **Mandate**: Every interaction must feel "alive". Build **dynamic experiences**, not static screens.
 *   **Google Standard**: Adopt **Material Design 3 (Material You)** and its evolution **"Expressive"** (2025+) as the baseline.
-*   **Apple Standard**: For iOS, respect the **Human Interface Guidelines (HIG)**. Do not force Material Design; maintain **Platform Fidelity** (e.g., Switches, Pickers).
-*   **Differentiation**: While using Google's system, differentiate with **high-precision motion**, **custom shaders**, and **bold typography** to create a "Silicon Valley Premium" feel.
-*   **Tools**: Refer to `21_design_ops_tools.md` for specific operational rules regarding Figma, Adobe, and Canva.
+*   **Apple Standard**: On iOS, respect the **Human Interface Guidelines (HIG)**. Do not force Material Design; maintain Platform Fidelity (e.g., switches, pickers).
+*   **Differentiation**: While using Google's system, differentiate with **high-fidelity motion**, **custom shaders**, and **bold typography** to create a "Silicon Valley Premium" feel.
+*   **Tools**: Refer to `21_design_ops_tools.md` for specific rules on Figma, Adobe, and Canva.
 
 ### 1.2. Trend Scouting Protocol
 Before *every* design task (even a single component), the following "Scouting Loop" is mandatory:
-1.  **Analyze Leaders**: Check **Mobbin** (iOS/Android flows), **Awwwards** (Web trends), and **Google Design** (Latest specs).
-2.  **Deconstruct**: Dissect why top-tier apps feel "good" (e.g., "This modal bounce adds playfulness").
-3.  **Apply**: Adapt that "Soul" to our context. **Steal the soul of the interaction, don't blindly copy.**
-4.  **AI Leverage**: Use Generative AI to brainstorm "Futuristic" variations of standard UI components.
+1.  **Analyze Leaders**: Check **Mobbin** (iOS/Android flows), **Awwwards** (Web trends), and **Google Design** (latest specs).
+2.  **Deconstruct**: Dissect why top-tier apps feel "pleasant" (e.g., "This modal's bounce creates playfulness").
+3.  **Apply**: Adapt that "Soul" to our context. **Do not blindly copy; steal the "Soul" of the interaction.**
+4.  **AI Leverage**: Use Generative AI to brainstorm "futuristic" variations of standard UI components.
 
-## 2. User Sovereignty & Trust
-*   **Data Ownership**:
-    *   Users own their data. Provide easy "Export" and "Delete" options.
-*   **No Dark Patterns**:
-    *   Never use deceptive UI patterns to trick users into subscribing or preventing cancellation. Transparency builds long-term trust (LTV).
+## 2. Visual Language & System
 
-## 3. Mobile First & Any-Screen
-*   **Touch Targets**:
-    *   Minimum touch target size is **44x44pt** (iOS) / **48x48dp** (Android). No exceptions.
-*   **Thumb Zone**:
-    *   Place primary actions (FAB, Navigation) within the "Thumb Zone" for easy one-handed operation.
-*   **Responsive**:
-    *   Design for mobile first, but ensure it scales beautifully to Tablets and Desktops (Adaptive Layouts).
+### 2.1. Material 3 Expressive
+*   **Dynamic Color**: Leverage the `dynamic_color` engine to harmonize with the user's wallpaper/OS, but force high-contrast overrides for critical actions.
+*   **Shapes**: Use **Expressive Shapes** (asymmetrical corners, morphing containers) to break the "boxy" grid.
+*   **Typography**: Use variable fonts (Roboto Flex, Inter, etc.) and animate weight/width during interactions.
 
-## 4. Accessibility (A11y)
-*   **WCAG 2.1 AA**:
-    *   All text must meet contrast ratios (4.5:1 for normal text).
-    *   Do not rely on color alone to convey meaning (use icons/text labels).
-*   **Semantics**: All custom components must have proper semantic labels for screen readers (TalkBack/VoiceOver).
-*   **Touch Targets**: Minimum 48x48dp for all interactive elements.
-
-## 5. Visual Language & System
-
-### 5.1. Material 3 Expressive
-*   **Dynamic Color**: Utilize the `dynamic_color` engine to harmonize with the user's wallpaper/OS, but enforce high-contrast overrides for critical actions.
-*   **Shapes**: Use **Expressive Shapes** (asymmetric corners, morphing containers) to break the "boxy" grid.
-*   **Typography**: Use variable fonts (e.g., Roboto Flex, Inter) to animate weight/width during interactions.
-
-### 5.2. Motion & Gestures (The "Soul")
-*   **Physics-Based**: All animations must use **spring physics** (stiffness/damping). Things should bounce, stretch, and squash slightly.
-*   **Gestures (Swipe First)**:
-    *   **Navigation**: Support "Swipe Back" universally.
+### 2.2. Motion & Gestures (The "Soul")
+*   **Physics-Based**: All animations use **Spring Physics** (stiffness/damping). Elements should bounce, stretch, and slightly squash.
+*   **Swipe First**:
+    *   **Navigation**: Universally support "Swipe Back".
     *   **Actions**: Use **Swipe-to-Action** (Archive, Delete) for list items.
-    *   **Feel**: Gestures must track 1:1 with the finger. No lag. Use **Haptics** (Light Impact) to confirm threshold crossing.
+    *   **Feel**: Gestures must track finger movement 1:1. Lag is strictly prohibited. Use **Haptics** (light vibration) for confirmation when thresholds are crossed.
 *   **Micro-interactions**:
-    *   **Buttons**: Scale down on press (`0.95x`), bounce up on release.
-    *   **Lists**: Staggered entrance animations (Waterfall effect).
-    *   **Transitions**: Use **Container Transforms** (card expands to page).
+    *   **Buttons**: Scale down (`0.95x`) on press, bounce back on release.
+    *   **Lists**: Adopt staggered entrance animations.
+    *   **Transitions**: Use **Container Transforms** (card expands into page) instead of simple push transitions.
 *   **Sliders & Carousels**:
-    *   **Snap Physics**: Scroll must always snap to snap points. Prevent stopping in awkward middle positions.
-    *   **Parallax**: Use parallax effects on backgrounds/elements during swipe to create depth.
+    *   **Snap Physics**: Scrolling must always snap to snap points. Prevent stopping in halfway positions.
+    *   **Parallax**: Use parallax effects on backgrounds or elements during swipes to create depth.
 
-## 3. Design System Ops (Scalability & Performance)
+### 2.3. Performance Animation
+*   **60fps (120fps) Target**:
+    *   Animations must always maintain 60fps (120fps if possible).
+    *   **GPU Optimization**: Animate only `transform` and `opacity` properties. Animating `width`, `height`, `top`, `left` causes layout recalculation (Reflow) and is prohibited.
+    *   **Will-Change**: Use the `will-change` property only when necessary to give hints to the browser, but avoid overuse (to prevent memory bloat).
+
+## 3. Design System Ops
 
 ### 3.1. Scalability & Maintenance
-*   **Atomic Design**: Strictly follow Atomic Design (Atoms -> Molecules -> Organisms).
-*   **Tokenization**: All colors, spacing, and type MUST be tokens. **Hardcoded values are banned.**
+*   **Atomic Design**: Strictly adhere to Atomic Design (Atoms -> Molecules -> Organisms).
+*   **Tokenization**: All colors, spacing, and typography must be tokenized. **Hardcoded values are prohibited.**
 *   **Component Governance**: Before creating a new component, check if an existing one can be extended. Avoid "Component Bloat".
 
-### 6. Emotional Design & "Micro-Delights"
-*   **The "Aha!" Moment**:
-    *   Provide not just functional satisfaction, but "emotional satisfaction".
-    *   **Micro-Delights**: Provide at least one "Micro-Delight" per session (a clever animation, human-like copy, unexpected convenience) that makes the user go "Wow".
-*   **Dogfooding (Extreme User Empathy)**:
-    *   The Dev Team (AI) must be the "First and Toughest Heavy User" of the product they build.
-    *   Never ship something you don't love using yourself.
-
-## 7. Performance as Design
-*   **Speed is a Feature**:
-    *   A 100ms delay costs 1% of user trust. Design includes not just "looks" but "response speed".
-    *   **Skeleton Screens**: Use skeleton screens instead of spinners during loading to reduce perceived wait time.
-*   **Asset Optimization**: Use **Vector (SVG/Lottie/Rive)** over Raster. If Raster is needed, use **WebP** and lazy load.
-*   **Battery Impact**: Avoid infinite looping animations unless user-initiated.
+### 3.2. Performance & Cost Awareness
+*   **Render Cost**: Use heavy effects (Blur, Shadows) carefully. Testing on low-end devices is mandatory.
+    *   *Rule*: If blur causes frame drops, replace it with a translucent Scrim.
+*   **Asset Optimization**: Prioritize **Vectors (SVG/Lottie/Rive)** over raster images. If raster is needed, use **WebP** and Lazy Load.
+*   **Battery Impact**: Avoid infinite loop animations when the user is not interacting (to suppress battery consumption).
 
 ## 4. Adaptability & Foldables
 
 ### 4.1. Universal Responsiveness
-*   **Rule**: "Mobile-First" is dead. We design for **"Any-Screen"**.
+*   **Rule**: "Mobile First" is dead. We design for **"Any-Screen"**.
 *   **Foldables**:
-    *   **Hinge Awareness**: UI must split intelligently around the hinge (Tabletop mode).
-    *   **Continuity**: State must be preserved perfectly when folding/unfolding.
-*   **Large Screens**: Use **Canonical Layouts** (List-Detail, Supporting Pane, Feed) to utilize extra space. Never just "stretch" the mobile UI.
+    *   **Hinge Awareness**: UI must recognize the hinge and split intelligently (Tabletop Mode).
+    *   **Continuity**: State must be fully preserved during fold/unfold.
+*   **Large Screens**: Use **Canonical Layouts** (List-Detail, Supporting Pane, Feed) to utilize whitespace effectively. Simply "stretching" mobile UI is prohibited.
 
-## 5. Accessibility (A11y)
-*   **Non-Negotiable**: A11y is not a "nice to have"; it is a launch blocker.
-*   **Touch Targets**: Minimum 48x48dp for all interactive elements.
-*   **Semantics**: All custom components must have proper semantic labels for screen readers (TalkBack/VoiceOver).
+## 5. Accessibility & Inclusivity
+*   **WCAG 2.1 AA Standard**:
+    *   **Contrast**: Ensure a minimum contrast ratio of **4.5:1** for text and background.
+    *   **Scaling**: Font size must follow user settings (Dynamic Type / Text Scaling).
+*   **Touch Targets (Mobile First)**:
+    *   **Rule**: Ensure a minimum touch target of **44x44dp (iOS) / 48x48dp (Android)** for all interactive elements.
+    *   **Reachability**: Place frequently used actions at the bottom of the screen (within thumb reach).
+*   **Semantics**:
+    *   Assign appropriate semantic labels for screen readers (TalkBack/VoiceOver) to all custom components. Always set `alt` text for images.
+    *   **ARIA**: Use WAI-ARIA attributes only when native HTML elements cannot express the semantics.
 
-## 6. Tools & Workflow
-*   **Figma**: The source of truth. Dev Mode must be used for exact token handoff.
-*   **Rive / Lottie**: Use **Rive** for interactive vector animations (state machines) where code-based animation is too complex.
+## 6. User Sovereignty (User First)
+*   **Data Ownership**:
+    *   Users have the right to fully control their data. Place "Export" and "Delete Account" in accessible locations.
+*   **No Dark Patterns**:
+    *   Deceptive designs (hiding cancellation, auto-adding to cart) are strictly prohibited.
+    *   **Delight Metric**: Intentionally design moments where users feel "fun to use" (Micro-delights).
+*   **Transparency**:
+    *   Make AI decision logic and reasons for content display understandable to users (Explainable AI).
+
+## 7. Tools & Workflow
+*   **Figma**: The Single Source of Truth. Use Dev Mode for accurate token hand-off.
+*   **Rive / Lottie**: Use **Rive** (vector animation with state machines) if code-based animation is too complex.
 *   **Inclusive Copywriting**:
-    *   Use Inclusive Language that excludes no one regardless of gender, race, age, or ability.
+    *   Choose words that do not exclude anyone based on gender, race, age, or ability (Inclusive Language).
 
 ## 8. AI UX Strategy (Latency Management)
 *   **Streaming First**:
-    *   AI generation wait time must be "perceived as zero".
-    *   **Streaming Responses**: Do not wait for the full answer; display it token by token in real-time (typing animation).
+    *   AI generation wait time must be "perceived zero".
+    *   **Streaming Responses**: Display in real-time, one token at a time, without waiting for completion (Typing Animation).
 *   **Optimistic Updates**:
-    *   React immediately to user actions (e.g., pressing send) without waiting for AI processing (e.g., show chat bubble instantly).
+    *   React the UI immediately to user actions (e.g., send button press) without waiting for AI processing (e.g., instant chat bubble).
 *   **Transparency**:
-    *   Visually distinguish between "Thinking..." and "Generating..." states to reassure the user.
-
-## 4. AI & Personalization
-*   **Hyper-Personalization**:
-    *   Leverage AI to dynamically optimize displayed content and suggestions based on each user's context.
+    *   Visually distinguish between AI "Thinking..." and "Generating..." states to reassure the user.

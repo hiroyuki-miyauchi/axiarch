@@ -2,77 +2,60 @@
 
 ## 1. Code Quality & Clean Code
 *   **Clean Code Standards**:
-    *   **Self-Documenting**: Comments should explain "Why", not "What". Let the code speak for itself.
-    *   **Function Size**: Functions should do "one thing". Ideally keep them under **20 lines**.
+    *   **Self-Documenting**: Use comments to explain "Why", and let the code itself explain "What".
+    *   **Function Size**: A function should do "one thing". Ideally, keep it within **20 lines**.
     *   **Naming**: Variable names must be specific and clear. Vague names like `data`, `temp`, `item` are prohibited (e.g., `userData` -> `authenticatedUserProfile`).
 *   **Zero Warnings**:
-    *   **Rule**: Treat warnings as errors. CI must fail on a single warning. Prevent the "Broken Windows Theory".
-    *   **Strict Error Handling**: Empty `catch` blocks are prohibited. All errors must be logged and handled.
+    *   **Rule**: Treat Warnings as Errors. CI must fail if there is even one warning. Prevent the "Broken Windows Theory".
+    *   **Strict Error Handling**: Empty `catch` blocks are prohibited. All errors must be logged and handled appropriately.
 *   **Refactoring (The Boy Scout Rule)**:
     *   **Mandate**: "Leave the campground cleaner than you found it." Always make small improvements (renaming, function extraction) when touching a file.
-    *   **No "Later"**: "I'll refactor later" is a lie. Do it now or never.
+    *   **No "Later"**: "I'll refactor later" is a lie. Do it now, or never.
 
-## 2. Performance Obsession
-*   **Speed is a Feature**:
-    *   **Latency**: Any interaction taking over **100ms** is "slow".
-    *   **N+1 Problem**: Strictly prohibit N+1 queries in database access. Always use eager loading or batch fetching.
-*   **Performance Budget**:
-    *   Set strict budgets for bundle size (e.g., < 100KB initial load) and enforce them in CI.
+## 2. Performance & Optimization (The "Speed")
+*   **Performance Budgets**:
+    *   **Lighthouse Score**: Maintain **90+** (Green) in all categories: Performance, Accessibility, Best Practices, SEO.
+    *   **Core Web Vitals**: Strictly adhere to LCP (< 2.5s), FID (< 100ms), CLS (< 0.1).
+*   **Asset Optimization**:
+    *   **Images**: Enforce next-gen formats (AVIF/WebP). Use optimization components like `next/image`.
+    *   **Lazy Loading**: Lazy load all assets except those above the fold.
 
-## 3. Security by Design
+## 3. Security by Design (DevSecOps)
 *   **Zero Trust**:
-    *   Never trust input from the client. Validate everything on the server side.
+    *   Doubt all inputs (user input, API responses). Validate on both client and server.
 *   **Secrets Management**:
-    *   Never commit API keys or secrets to Git. Use environment variables (`.env`) and secret managers.
+    *   Do not commit API keys or private keys to code. Use `.env` files and secret managers.
 
-## 4. Technical Debt Management
-*   **Definition**: Technical debt is not "bad code", it is a "loan" taken for speed. It must be repaid with interest.
-*   **Repayment Plan**: Allocate **20%** of every sprint to debt repayment (refactoring, library updates).
+## 4. Technical Debt & Cleanup
+*   **Debt Paydown**:
+    *   Allocate **20%** of the sprint to paying down technical debt (refactoring, library updates).
 *   **Tech Radar**:
-    *   **Regular Updates**: Mandate quarterly dependency updates to stay on the "Bleeding Edge" (safely).
+    *   **Regular Updates**: Update dependencies quarterly to always maintain a "Safe Bleeding Edge".
+*   **Digital 5S**:
+    *   **Seiri (Sort)**: Immediately delete unused code (Dead Code), images, and files. Do not leave commented-out code.
 
 ## 5. AI-Native Architecture
-*   **AI First**:
-    *   When building a feature, first ask "Can AI solve this?".
-    *   Design data structures to be "AI-readable" (e.g., meaningful field names, structured logs).
-*   **Seiso (Shine) - Refactoring**:
-    *   **Continuous Refactoring**: Clean existing code slightly with every feature addition (Boy Scout Rule). Do not set aside large refactoring periods; do it daily.
-    *   **Performance Tuning**: Regularly profile and eliminate bottlenecks. Do not optimize by guessing (Premature Optimization is the root of all evil).
+*   **RAG Optimization**:
+    *   Split code into small modules (Atomic) so AI can easily understand it.
+    *   Name files and directories "Semantically" to improve AI search accuracy.
 
-## 6. AI-Native Architecture (RAG Optimization)
-*   **Context-Aware Coding**:
-    *   **Small & Atomic**: Keep functions and classes atomic. To optimize for LLM context windows and RAG accuracy, one file/function must handle only a "single concept".
-    *   **Semantic Naming**: Use "Semantic" naming for files and functions to facilitate AI retrieval (e.g., `auth_utils.ts` ❌ -> `user_authentication_flow.ts` ⭕️).
-*   **Self-Documenting for AI**:
-    *   For complex logic, write comments specifically for "AI" (intent, constraints, dependencies), not just humans. This enables future AI agents to autonomously refactor code.
+## 6. Zero Bug Policy
+*   **Fix First**:
+    *   Do not develop new features while there are known bugs. Bug fixing is the top priority.
+*   **24-Hour Rule**:
+    *   Critical bugs (data loss, security, major feature outage) must be fixed within **24 hours** of discovery.
 
-## 7. The "Zero Bug Policy" & 24-Hour Rule
-*   **Zero Bug Policy**:
-    *   Never build new features on top of known bugs. "Bug Fixing" always takes priority over "New Features".
-    *   When a bug is found, either **Fix Now** or **Close as Won't Fix**. There is no "Fix Later".
-*   **The 24-Hour Rule (Critical Issues)**:
-    *   **Severity 1 (Critical)**: Critical issues like data loss, security breaches, or core feature outages must be resolved (or mitigated) within **24 hours** of discovery. This is the Silicon Valley standard.
-
-## 8. Continuous Learning & Verification
+## 7. Continuous Learning & Verification
 *   **Latest Info Protocol**:
-    *   **Before Coding**: Before writing code, you MUST check the official documentation and latest release notes (e.g., "Next.js 15 breaking changes", "Swift 6 concurrency"). Implementing based on outdated information causes rework.
-    *   **Deprecation Check**: Verify that the APIs you intend to use are not Deprecated.
-*   **Stay Updated**:
-    *   Constantly catch up with the latest Silicon Valley trends (AI Agents, Privacy Manifests, etc.) and continue to evolve the rules themselves. This is the Silicon Valley standard.
+    *   **Before Coding**: Always check the official documentation and latest release notes (e.g., "Next.js 15 breaking changes", "Swift 6 concurrency") before writing code. Implementation based on outdated information causes rework.
+    *   **Deprecation Check**: Check if the API you are about to use is Deprecated.
+*   **Trend Awareness**:
+    *   Constantly catch up with the latest Silicon Valley trends (AI Agents, Privacy Manifests, etc.) and evolve the rules themselves.
 
-## 9. Observability
-*   **Monitor Everything**:
-    *   Visualize not just "that it works" but "how it works" (logs, metrics, error tracking).
-## 10. Admin Ops & Internal Tools (Retool First)
-*   **Build vs Buy**:
-    *   **Rule**: Admin panels and internal tools do not generate revenue. Therefore, scratch development (React/Flutter) is prohibited in principle.
-    *   **Retool First**: Build admin panels using low-code tools like **Retool** in 1/10th of the time.
-    *   **Exception**: Scratch development is allowed only if it is a customer-facing dashboard that serves as a differentiator.
-
-## 10. Mobile-First & Offline Strategy
-*   **Offline First**:
-    *   Apps must work even in "places with no signal".
-    *   **Optimistic UI**: Update the screen without waiting for server communication and sync in the background.
-    *   **Caching**: Cache necessary data locally (SQLite/Isar/Hive) to enable offline viewing.
-*   **Thumb Zone Architecture**:
-    *   Place important action buttons (FAB, navigation) within the "Thumb Zone" for one-handed operation. Avoid placing them at the top of the screen.
+## 8. Compatibility & Testing
+*   **Real Device Testing**:
+    *   Test on real devices (iOS, Android), not just simulators. Hardware features like camera, GPS, and biometrics require real devices.
+*   **Browser Compatibility**:
+    *   Support the latest 2 versions of Chrome, Safari (iOS/macOS), Firefox, and Edge. Pay special attention to Safari (iOS) specific bugs (e.g., 100vh issue).
+*   **Self-Check List**:
+    *   Before submitting a PR, developers must review their own code and confirm "Zero Warnings", "No Console Errors", and "No Unnecessary Logs".

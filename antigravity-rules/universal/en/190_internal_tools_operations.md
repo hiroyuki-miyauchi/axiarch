@@ -1,20 +1,20 @@
 # 190. Internal Tools & Operations
 
 ## 1. Retool First Strategy
-*   **Principle**: To focus engineering resources on customer-facing products, internal Admin Panels and tools should generally be built using low-code tools like **Retool**.
-*   **Exception**: Only consider scratch development (e.g., Next.js) if complex custom logic is required or performance is critical. Even then, use UI libraries (MUI, Ant Design) to minimize design costs.
+*   **Principle**: In principle, build Admin Panels and internal tools using low-code tools like **Retool** to focus engineer resources on customer-facing products.
+*   **Exception**: Consider scratch development with Next.js etc. only when complex unique logic is required or performance is extremely critical, but even then, utilize UI libraries (MUI, Ant Design) to avoid spending design costs.
 
-## 2. Role-Based Access Control (RBAC)
-*   **Strict Separation**:
-    *   **Super Admin**: Full access. Restricted to the CTO and designated responsible persons only.
-    *   **Support**: Read-only access to user information. No edit/delete permissions.
+## 2. RBAC (Role-Based Access Control)
+*   **Strict Privilege Separation**:
+    *   **Super Admin**: Has full authority. Only CTO and designated responsible persons.
+    *   **Support**: Can only view user information. Cannot edit or delete.
     *   **Content Manager**: Can only input and edit content.
-*   **Principle of Least Privilege**: Grant only the minimum permissions necessary for the job.
+*   **Principle of Least Privilege**: Grant only the minimum privileges necessary for the task.
 
 ## 3. Audit Logs
-*   **Full Traceability**: Record all actions in the Admin Panel (Who, When, What, Before/After) as logs. This is mandatory for fraud prevention and troubleshooting.
-*   **Immutability**: Store audit logs in a tamper-proof state (e.g., Firestore write-only collections, Cloud Logging).
+*   **Complete Tracking**: Record all operations on the admin screen (Who, When, What, Before/After) as logs. This is mandatory for fraud prevention and troubleshooting.
+*   **Immutability**: Store audit logs in a tamper-proof state (e.g., Firestore write-only collection, Cloud Logging).
 
 ## 4. Operational Workflow
-*   **CS Support**: Design the Admin Panel to facilitate smooth customer support (e.g., User ID search, status check, password reset email trigger).
-*   **Documentation**: Document operational procedures in Notion to prevent knowledge silos. Use AI (Chatbots) to make manual searching efficient.
+*   **CS Response**: Design so that inquiries from users can be handled smoothly from the admin screen (e.g., User ID search, Status check, Password reset email transmission).
+*   **Manualization**: Document operation procedures in Notion etc. to prevent personalization. Utilize AI (chatbots) to streamline manual searches.

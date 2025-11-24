@@ -1,8 +1,3 @@
-# 35. Engineering: API Integration Strategy
-
-## 1. API-First Design
-*   **Design Before Code**:
-    *   実装を始める前に、必ずAPI仕様を定義する。
 # 35. API統合と設計 (API Integration & Design)
 
 ## 1. API設計原則 (API Design Principles)
@@ -10,13 +5,9 @@
     *   **設計先行**: 実装を始める前に、必ずAPI仕様を定義します。
     *   **OpenAPI (Swagger)**: REST APIの場合はOpenAPI 3.x仕様書を先に記述し、そこからコード（型定義、クライアント）を自動生成します。これにより、開発の効率化と一貫性を保ちます。
     *   **Schema-Driven**: GraphQLの場合はSchema定義を正とし、フロントエンドとバックエンドの型安全性を担保します。
-
 *   **RESTful & GraphQL**:
     *   **REST**: リソース指向のURL設計（例: `GET /users/{id}/orders`）を遵守し、適切なHTTPメソッド（GET, POST, PUT, DELETE）を使用します。ステートレス性を厳守し、各リクエストが独立して処理されるようにします。
     *   **GraphQL**: 複雑なデータ取得や、クライアントが必要なデータを細かく指定したい場合はGraphQLを採用し、オーバーフェッチ（無駄なデータ取得）を防ぎます。
-
-*   **gRPC**: マイクロサービス間通信や、低遅延が求められるリアルタイム通信にはgRPCを採用します（Protocol Buffers）。
-
 *   **バージョニング (Versioning)**:
     *   破壊的変更（Breaking Changes）を避けるため、URLまたはヘッダーでバージョン管理を行います（例: `/v1/users`）。これにより、既存のクライアントへの影響を最小限に抑えます。
 

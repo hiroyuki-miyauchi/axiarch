@@ -15,16 +15,24 @@
     *   **テスト駆動**: Firestore Security Rulesは必ずユニットテストを書き、意図しないアクセス権限の漏洩を防ぎます。
     *   **最小権限**: デフォルトは `allow read, write: if false;` とし、必要なパスのみを明示的に許可します。
 
-## 3. 拡張性と信頼性 (Scalability & Reliability)
+## 3. データ分析とエクスポート (Analytics & Export)
+*   **BigQuery連携 (BigQuery Integration)**:
+    *   **生データ (Raw Data)**: Firestoreのデータは **BigQuery Extension** を使用してリアルタイムに同期し、複雑な分析はBigQuery側で行います。アプリ側で集計クエリを走らせることは禁止です（コストとパフォーマンスのため）。
+*   **エクスポート処理 (Export Processing)**:
+    *   **バッチ処理**: CSVやPDFのエクスポートは、Cloud Functionsのメモリ制限を考慮し、**Stream処理** または **Cloud Run Jobs** で実行します。
+    *   **署名付きURL**: 生成されたファイルは直接ダウンロードさせるのではなく、有効期限付きの **Signed URL** を発行して提供します。
+
+## 4. 拡張性と信頼性 (Scalability & Reliability)
 *   **冪等性 (Idempotency)**:
     *   **ルール**: 全てのバックグラウンド処理は、何度実行されても結果が変わらない「冪等（Idempotent）」な設計にします。
     *   **実装**: 処理済みIDを記録し、重複実行を防ぎます。
 *   **デッドレターキュー (Dead Letter Queue)**:
     *   処理に失敗したメッセージは破棄せず、デッドレターキュー（DLQ）に送り、後で調査・再処理できるようにします。
 
-## 4. 監視とログ (Monitoring & Logging)
+## 5. 監視とログ (Monitoring & Logging)
 *   **構造化ログ (Structured Logging)**:
     *   ログは単なるテキストではなく、JSON形式で出力し、Cloud Loggingでクエリ可能にします（例: `jsonPayload.userId` で検索可能にする）。
 *   **アラート (Alerting)**:
-    *   エラー率が **1%** を超えた場合、または関数の実行時間が閾値を超えた場合に、即座にSlackへ通知します。Firebaseの設定やGCPのリソースは、TerraformやFirebase CLIを用いてコード管理する。
-    *   手動操作（ClickOps）によるオペレーションミスを排除する。
+    *   エラー率が **1%** を超えた場合、または関数の実行時間が閾値を超えた場合に、即座にSlackへ通知します。
+*   **IaC (Infrastructure as Code)**:
+    *   Firebaseの設定やGCPのリソースは、TerraformやFirebase CLIを用いてコード管理します。手動操作（ClickOps）によるオペレーションミスを排除します。

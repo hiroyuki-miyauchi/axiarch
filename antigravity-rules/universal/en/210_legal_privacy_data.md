@@ -1,20 +1,26 @@
-# 210. Legal, Privacy & Data
+# 210. Legal, Privacy & Data Governance
 
-## 1. Global Compliance
-*   **GDPR (EU) / CCPA (California) / APPI (Japan)**:
-    *   **Consent Management**: Implement Cookie banners and App Tracking Transparency (ATT) in accordance with local laws.
-    *   **Data Subject Rights**: Prepare a mechanism (Admin Panel feature) to respond automatically or semi-automatically to user requests for "Data Deletion" and "Data Disclosure".
-*   **Terms & Privacy Policy**:
-    *   **Mandatory Clauses**: Clearly state Limitation of Liability, Governing Law, and Purpose of Data Usage.
-    *   **Update Notification**: Notify users via email or in-app notification when terms change, and require re-consent for significant changes.
+## 1. Global Data Privacy
+*   **GDPR (EU) / CCPA (US) / APPI (Japan)**:
+    *   **Strict Compliance**: Apply the strictest standard (currently GDPR) as the baseline regardless of the user's country of residence.
+    *   **Consent Management Platform (CMP)**: Manage Cookie and tracking consent using a trusted CMP (like OneTrust) instead of custom implementation, to automatically follow legal changes.
+*   **Data Sovereignty**:
+    *   Store user data in the region of the user's residence as much as possible (e.g., EU users in EU region).
 
-## 2. Data Minimization
-*   **Principle**: Collect only data that is "essential for function," not data that is "nice to have."
-*   **Retention Period**: Define retention periods for logs and user data (e.g., logs for 1 year, deleted user data fully removed after 30 days) and implement automatic deletion batches.
+## 2. Terms of Service & Privacy Policy (ToS)
+*   **Dynamic Consent**:
+    *   When terms are revised, force display of a "Consent Screen" at the next login and implement a mechanism to block service use unless consented.
+    *   **Version Control**: Record "when and which version of terms the user consented to" in the database and keep it as legal evidence.
+*   **Plain Language**:
+    *   Adopt a "Layered Notice" that presents a summary in plain language understandable to users before showing detailed clauses, rather than just listing legal jargon.
 
-## 3. Specified Commercial Transactions Act
-*   **Japan**: If selling paid goods/services, you are obligated to display the "Notation based on the Specified Commercial Transactions Act" (Business Name, Address, Contact, Return Policy, etc.) in an accessible location within the app or website.
+## 3. Intellectual Property & Licenses (IP)
+*   **Prevention of License Contamination**:
+    *   **No GPL/AGPL**: Mixing code with copyleft licenses (GPL, etc.) creates a risk of obligation to publish your own product's source code. **Strictly prohibit** these and automatically scan (FOSSA, etc.) and block them in CI.
+    *   **Commercial Use**: Confirm that all assets used (images, fonts, icons) allow commercial use and record license evidence.
 
-## 4. Intellectual Property
-*   **Infringement Prevention**: Thoroughly verify rights for images, fonts, and libraries used to ensure no infringement of third-party copyright or trademarks (see Rule 180).
-*   **Own Rights**: Appropriately protect your own logos, brand names, and unique algorithms (consider trademark registration and patent application).
+## 4. Specified Commercial Transactions Act & Payment Services Act (Japan Specific)
+*   **Specified Commercial Transactions Act**:
+    *   When conducting paid billing, always place the notation based on the Specified Commercial Transactions Act (Operator, Contact, Return Policy, etc.) in an easily accessible location within the app.
+*   **Payment Services Act**:
+    *   When issuing prepaid payment instruments (points, coins), there is a possibility of deposit obligations, so always implement after legal confirmation. In principle, use Apple/Google IAP systems and avoid issuing own points.

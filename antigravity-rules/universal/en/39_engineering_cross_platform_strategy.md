@@ -2,23 +2,23 @@
 
 ## 1. Tech Selection Criteria
 *   **Web (Next.js)**:
-    *   **Use Case**: When SEO is critical, or for instant access without installation (LP, Media, SaaS Dashboard).
-    *   **Rule**: Web is the default choice for content consumption or desktop-heavy workflows.
+    *   **Application**: When SEO is mandatory, or immediate use without installation is desired (LP, Media, SaaS Dashboard).
+    *   **Principle**: Web is the first choice if content viewing or PC work is the main focus.
 *   **Flutter**:
-    *   **Use Case**: For mobile apps requiring high-fidelity UI, offline capability, and push notifications.
-    *   **Rule**: The standard technology for new apps requiring both iOS and Android support.
+    *   **Application**: Mobile apps requiring advanced UI/UX, offline capabilities, and push notifications.
+    *   **Principle**: The standard technology for new app development requiring both iOS/Android support.
 *   **Native (Swift/Kotlin)**:
-    *   **Use Case**: When deep integration with latest OS features (ARKit, HealthKit, Home Screen Widgets) is essential.
-    *   **Rule**: Use Native only for features impossible in Flutter (e.g., Widgets), bridging via Method Channels.
+    *   **Application**: When deep integration with latest OS features (ARKit, HealthKit, Home Screen Widgets) is essential.
+    *   **Principle**: Implement only features impossible with Flutter (Widgets, etc.) in Native and link via Method Channel.
 
 ## 2. Integration
 *   **Deep Linking**:
-    *   **Mandatory**: Must implement **Universal Links (iOS)** and **App Links (Android)** to seamlessly bridge Web and App.
-    *   **Experience**: Tapping a web URL should instantly open the specific page in the app if installed.
+    *   **Mandatory**: Mandate implementation of **Universal Links (iOS)** and **App Links (Android)** to seamlessly connect Web and App.
+    *   **Experience**: When a user taps a Web URL, if the app is installed, it immediately opens the corresponding page within the app.
 *   **WebView Bridge**:
-    *   **Security**: When displaying web content in-app, establish a secure communication protocol (JavaScript Bridge) to prevent unauthorized script execution.
+    *   **Security**: When displaying Web content within the app, establish a secure communication protocol (JavaScript Bridge) and prevent malicious script execution.
 
 ## 3. PWA (Progressive Web App)
 *   **Installable Web**:
-    *   Consider PWA as a lightweight alternative to Native Apps for "Installable" experiences without development overhead.
-    *   **Offline**: Design for offline capability using Service Workers.
+    *   Consider PWA as a lightweight alternative to realize "Add to Home Screen" and Push Notifications (Web Push) without incurring native app development costs.
+    *   **Offline Support**: Design main features to work offline using Service Workers.

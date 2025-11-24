@@ -18,6 +18,8 @@
 *   **ハルシネーション対策 (Hallucination Mitigation)**:
     *   **免責事項 (Disclaimer)**: AIが生成する情報には必ず「AIは不正確な情報を生成する可能性があります」という免責を表示します。
     *   **根拠の提示 (Citations)**: 可能であれば、回答の根拠となるソース（引用元）を提示します（RAGの場合）。
+*   **通報機能 (Reporting)**:
+    *   生成AIアプリ（GenAI）には、不適切なコンテンツをユーザーが通報・ブロックできる機能を必ず実装します（Google Play 2025要件）。
 
 ## 3. 技術アーキテクチャ (Technical Architecture)
 *   **コンテキスト管理 (Context Window Management)**:
@@ -29,13 +31,7 @@
 *   **キャッシング (Caching)**:
     *   同じ入力に対するAIの回答はキャッシュし、APIコストとレイテンシを削減します（Semantic Caching）。
 
-## 4. 評価と改善 (Evaluation & Improvement)
-*   **自動評価 (Automated Evaluation)**:
-    *   「回答の質」を定量的に評価する仕組み（LLM-as-a-Judge）を導入します。
-*   **ユーザーフィードバック (User Feedback)**:
-    *   各回答に対して「Good/Bad」ボタンを設置し、ユーザーからのフィードバックを収集します。これを次回のファインチューニングやプロンプト改善に活用します。RLHF（Reinforcement Learning from Human Feedback）のためのデータを収集する。
-
-## 5. マルチモーダルAIとエッジAI (Multimodal & Edge AI)
+## 4. マルチモーダルAIとエッジAI (Multimodal & Edge AI)
 *   **技術スタック (Tech Stack)**:
     *   **Web**: **TensorFlow.js** または **ONNX Runtime Web** を使用し、ブラウザ内で推論を完結させます。
     *   **Mobile**: **CoreML** (iOS) および **TensorFlow Lite** (Android) を使用し、ネイティブパフォーマンスとプライバシーを確保します。
@@ -45,7 +41,9 @@
 *   **音声認識 (Voice)**:
     *   **レイテンシ**: 音声入力のフィードバック（波形アニメーション等）は即座に行い、録音されていることを視覚的に伝えます。
     *   **誤認識対策**: 重要なアクション（送金、削除）は音声のみで完結させず、必ず画面上での確認ステップを挟みます。
-*   **安全性と倫理 (Safety & Ethics)**:
-    *   **Human in the Loop**: 医療、金融、法律などの高リスク領域では、AIの出力結果を人間が確認するプロセスを必須とします。
-    *   **通報機能 (Reporting)**: 生成AIアプリ（GenAI）には、不適切なコンテンツをユーザーが通報・ブロックできる機能を必ず実装します（Google Play 2025要件）。
-    *   **ハルシネーション対策**: 事実に基づかない回答（幻覚）のリスクを低減するため、RAG（検索拡張生成）や出典の明記を行います。
+
+## 5. 評価と改善 (Evaluation & Improvement)
+*   **自動評価 (Automated Evaluation)**:
+    *   「回答の質」を定量的に評価する仕組み（LLM-as-a-Judge）を導入します。
+*   **ユーザーフィードバック (User Feedback)**:
+    *   各回答に対して「Good/Bad」ボタンを設置し、ユーザーからのフィードバックを収集します。これを次回のファインチューニングやプロンプト改善に活用します。RLHF（Reinforcement Learning from Human Feedback）のためのデータを収集する。

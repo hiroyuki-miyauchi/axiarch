@@ -1,41 +1,29 @@
 # 220. 品質保証とテスト戦略 (QA & Testing Strategy)
 
-## 1. テストピラミッド (Testing Pyramid)
-*   **Unit Tests (70%)**:
-    *   **対象**: ユーティリティ関数、ドメインロジック、個々のコンポーネント。
-    *   **ツール**: Jest, Vitest, JUnit, XCTest。
-    *   **基準**: カバレッジ（C0/C1）を指標としつつ、重要なロジックの網羅を優先します。
-*   **Integration Tests (20%)**:
-    *   **対象**: APIとDBの連携、コンポーネント間の連携。
-    *   **ツール**: Supertest, React Testing Library。
-*   **E2E Tests (10%)**:
-    *   **対象**: ユーザーの主要な操作フロー（サインアップ、決済、コア機能）。
-    *   **ツール**: Playwright, Cypress, Maestro (Mobile)。
-    *   **運用**: 壊れやすいため、クリティカルパスに絞って実装します。
+## 1. シフトレフト・テスティング (Shift Left Testing)
+*   **早期発見 (Early Detection)**:
+    *   QAプロセスを開発の最終工程ではなく、要件定義や設計段階から開始します。
+    *   **静的解析**: ESLint, SwiftLint, Detektなどの静的解析ツールをCIに組み込み、コードレビュー前に自動的に問題を検出します。
+*   **テストピラミッド (Testing Pyramid)**:
+    *   **Unit Tests (70%)**: 実行速度が速く、安定しているユニットテストを基盤とします。カバレッジ目標は80%以上としますが、数値よりも「重要なロジックの網羅」を重視します。
+    *   **Integration Tests (20%)**: APIとDB、コンポーネント間の連携を確認します。
+    *   **E2E Tests (10%)**: ユーザーのクリティカルパス（登録、決済、主要機能）のみを対象とし、メンテナンスコストを抑えます。
 
-## 2. CI/CD ゲート (CI/CD Gates)
-*   **自動ブロック**:
-    *   Lintエラー、型エラー、テスト失敗があるPRはマージできないようにGitHub Actions等でブロックします。
-*   **プレビュー環境**:
-    *   PRごとにプレビュー環境（Vercel Preview, Firebase Hosting Preview）を自動デプロイし、動作確認を容易にします。
+## 2. 不安定なテストの排除 (Flaky Test Management)
+*   **即時対応 (Immediate Action)**:
+    *   結果が不安定なテスト（Flaky Test）は、開発者の信頼を損なう最大の敵です。発見次第、即座に修正するか、修正されるまで無効化（Skip）します。
+    *   **リトライ禁止**: テストの失敗を隠蔽する「自動リトライ」は原則禁止し、根本原因を解決します。
 
-## 3. マニュアルQA (Manual QA)
-*   **Dogfooding**:
-    *   開発チーム自身が日常的にアプリを使用（ドッグフーディング）し、UXの違和感やバグを早期発見します。
-*   **リリースクリテリア**:
-    *   リリース前には「リリースチェックリスト」（主要機能の動作、課金テスト、ログ出力確認）を全項目パスすることを義務付けます。
+## 3. 実機テストと互換性 (Real Device & Compatibility)
+*   **実機義務化 (Mandatory Real Device Testing)**:
+    *   シミュレーターは完璧ではありません。リリース前には必ず物理デバイス（iOS/Android）で動作確認を行います。
+    *   **TestFlight / Internal App Sharing**: 開発チーム全員が実機でドッグフーディングを行い、UXの違和感を検出します。
+*   **フラグメンテーション対策**:
+    *   **Android**: 主要メーカー（Samsung, Pixel, Xiaomi）や異なるOSバージョンでの動作を、BrowserStackやAWS Device Farmを用いて確認します。
+    *   **ネットワーク**: オフライン、3G（低速）、機内モードからの復帰など、不安定なネットワーク環境での挙動をテストします。
 
-## 4. バグ管理 (Bug Management)
-*   **Zero Bug Policy**:
-    *   発見されたバグは、優先度（P0: 即時修正 〜 P3: 次回以降）を付けて管理し、P0/P1バグがある状態でのリリースは禁止します。
-    *   **再現手順**: バグレポートには必ず「再現手順」「期待値」「実際の結果」を含めます。
-
-## 5. 互換性と実機テスト (Compatibility & Real Device Testing)
-*   **ブラウザ・OSサポート**:
-    *   **Web**: Chrome, Safari (iOS/Mac), Firefox, Edge の最新2バージョン。
-    *   **Mobile**: iOSとAndroidの最新メジャー2バージョン（例: iOS 17/18, Android 14/15）。
-*   **実機テスト義務 (Mandatory Real Device Testing)**:
-    *   **TestFlight / Internal App Sharing**: シミュレーターだけでなく、必ず実機（TestFlight, Google Play Internal App Sharing）で配布し、インストールから動作確認を行います。
-    *   **クラウドテスト**: BrowserStackやAWS Device Farmを活用し、手元にないデバイスや古いAndroid端末でのフラグメンテーションテストを実施します。
-*   **エッジケース (Edge Cases)**:
-    *   **ネットワーク**: オフライン状態、3G（低速回線）状態での動作とエラーハンドリングを確認します。
+## 4. リリース判定 (Release Criteria)
+*   **ブロッカー (Blockers)**:
+    *   P0（クリティカル）およびP1（メジャー）のバグが残っている状態でのリリースは**絶対禁止**です。
+*   **段階的ロールアウト (Phased Rollout)**:
+    *   全ユーザーに一度に公開せず、1% → 5% → 20% → 100% と段階的に公開範囲を広げ、予期せぬ不具合の影響を最小限に抑えます。

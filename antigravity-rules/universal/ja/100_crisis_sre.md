@@ -1,5 +1,3 @@
-# 100. Crisis Management & SRE (Site Reliability Engineering)
-
 # 100. クライシスマネジメントとSRE (Crisis Management & SRE)
 
 ## 1. インシデント対応プロトコル (Incident Response Protocol)
@@ -27,4 +25,4 @@
 *   **訓練 (Drills)**:
     *   定期的に避難訓練（Disaster Recovery Drill）を行い、バックアップから実際に復旧できるか確認します。
 *   **Playbooks**:
-    *   「DBが消えた時」「APIがダウンした時」などの具体的な対応手順書（Playbook）を事前に用意する。
+    *   「DBが消えた時」「APIがダウンした時」などの具体的な対応手順書（Playbook）を事前に用意します。

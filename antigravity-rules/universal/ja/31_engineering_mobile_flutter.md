@@ -36,16 +36,4 @@
 ## 5. デプロイと配信 (Deployment & Distribution)
 *   **CI/CD**:
     *   GitHub ActionsとCodemagic/Bitriseを連携させ、mainブランチへのマージをトリガーに、TestFlight/Google Play Internal Testingへ自動配信します。
-    *   リリースビルドは、難読化（Obfuscation）と最適化（Tree Shaking）を必ず有効にします。bfuscate --split-debug-info=/<path>` を使用する。
-    *   *Why*: シンボル名を短縮し、デバッグメタデータを削除するため。
-*   **Golden Tests**: UIの退行（リグレッション）を防ぐためにゴールデンテスト（ピクセルパーフェクトチェック）を使用する。
-
-## 3. Platform Fidelity & UI
-*   **Native Feel**:
-    *   iOSとAndroidそれぞれの「らしさ」を尊重しつつ、ブランドの世界観を統一する。
-    *   Material 3 と Cupertino ウィジェットを適切に使い分けるか、高度にカスタマイズされた共通コンポーネントを構築する。
-
-## 4. Robust Connectivity
-*   **Offline-First**:
-    *   ネットワーク切断時でもアプリがクラッシュせず、閲覧可能なデータは表示する。
-    *   Repository Patternを用いて、ローカルキャッシュとリモートデータの同期を適切に管理する。
+    *   リリースビルドは、難読化（Obfuscation）と最適化（Tree Shaking）を必ず有効にします。`flutter build ipa --obfuscate --split-debug-info=/<path>` を使用します。

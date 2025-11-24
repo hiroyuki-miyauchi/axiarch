@@ -51,3 +51,11 @@
     *   **非推奨チェック**: 使用しようとしているAPIが Deprecated（非推奨）になっていないか確認します。
 *   **トレンドの把握**:
     *   シリコンバレーの最新トレンド（AIエージェント、Privacy Manifests等）を常にキャッチアップし、ルール自体も進化させ続けます。
+
+## 8. 互換性とテスト (Compatibility & Testing)
+*   **実機テスト (Real Device Testing)**:
+    *   シミュレーターだけでなく、必ず実機（iOS, Android）でテストを行います。特にカメラ、GPS、生体認証などのハードウェア機能は実機必須です。
+*   **ブラウザ互換性 (Browser Compatibility)**:
+    *   Chrome, Safari (iOS/macOS), Firefox, Edge の最新2バージョンをサポートします。特にSafari（iOS）特有のバグ（100vh問題など）に注意します。
+*   **セルフチェックリスト (Self-Check List)**:
+    *   PRを出す前に、開発者は自身のコードをレビューし、「警告ゼロ」「コンソールエラーなし」「不要なログ削除」を確認します。

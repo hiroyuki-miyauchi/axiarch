@@ -2,8 +2,8 @@
 
 > [!NOTE]
 > **Inheritance / 継承**:
-> This document inherits all rules from `ANTIGRAVITY_RULES.md` and the `rules/` directory.
-> このドキュメントは `ANTIGRAVITY_RULES.md` および `rules/` 以下の全ルールを継承する。
+> This document inherits all rules from `README.md` and the `universal/` directory.
+> このドキュメントは `README.md` および `universal/` 以下の全ルールを継承する。
 >
 > **Priority / 優先順位**:
 > Specific rules here may override general rules, but the **Core Philosophy** is absolute.

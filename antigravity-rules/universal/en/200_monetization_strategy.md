@@ -2,25 +2,25 @@
 
 ## 1. Unit Economics
 *   **LTV > CAC**:
-    *   **Principle**: Always monitor that Lifetime Value (LTV) exceeds Customer Acquisition Cost (CAC). Ideally, aim for LTV / CAC > 3.
-    *   **Measurement**: Ensure CAC and ROI are measurable for every marketing channel.
+    *   **Principle**: Constantly monitor that Customer Lifetime Value (LTV) exceeds Customer Acquisition Cost (CAC). Ideally aim for LTV / CAC > 3.
+    *   **Measurement**: Make CAC and ROI measurable for each channel in all marketing initiatives.
 *   **Break-even Point**:
-    *   Understand fixed costs (servers, tools) and variable costs (API usage) and always be aware of how many paid users are needed to become profitable.
+    *   Understand fixed costs (server fees, tool fees) and variable costs (API usage fees), and always be conscious of how many paid users are needed to become profitable.
 
-## 2. In-App Purchases (IAP) & Subscriptions
+## 2. In-App Purchases & Subscriptions (IAP)
 *   **SKU Design**:
-    *   **Simplicity**: Limit plans to about three (e.g., Free, Pro, Business) to avoid confusing users.
-    *   **Duration**: Offer Monthly and Yearly plans, and provide a clear discount for Yearly plans (e.g., 2 months free) to encourage upsells.
+    *   **Simplicity**: Narrow down plans to about 3 (e.g., Free, Pro, Business) so users don't get lost.
+    *   **Duration**: Prepare Monthly and Yearly plans, and offer a clear discount for the Yearly plan (e.g., 2 months free) to aim for upsells.
 *   **Offer Strategy**:
-    *   **Introductory Offer**: Always set a free trial (e.g., 1 week, 2 weeks) for first-time subscriptions to increase conversion rates.
-    *   **Win-back**: Prepare a mechanism for comeback campaigns (discount offers) for churned users.
+    *   **Introductory Offer**: Always set a free trial (e.g., 1 week, 2 weeks) at initial registration to increase conversion rates.
+    *   **Win-back**: Prepare a comeback campaign (discount offer) mechanism for cancelled users.
 
 ## 3. Freemium Model
-*   **Defining the Boundary**:
-    *   **Free**: Allow users to experience the "Aha! Moment" (realizing value) for free. However, create paywalls for continuous use or advanced features (e.g., unlimited storage, advanced AI features).
-    *   **Paywall**: The paywall screen should visually appeal to the benefits and remove anxiety about cancellation (state "Cancel Anytime" clearly).
+*   **Defining Boundaries**:
+    *   **Free**: Let users experience for free until the "Aha! Moment" (the moment they realize value). However, create charging points for continuous use or advanced features (e.g., unlimited saves, advanced AI features).
+    *   **Paywall**: Design the Paywall to visually appeal to benefits and remove anxiety about cancellation (state "Cancel Anytime").
 
 ## 4. Finance & Expenses
 *   **Cost Optimization**:
-    *   **Prevent Cloud Bankruptcy**: Always set Budget Alerts for AWS/GCP/Firebase.
-    *   **API Costs**: For pay-as-you-go APIs like OpenAI, implement caching strategies and rate limits to prevent cost explosions.
+    *   **Cloud Bankruptcy Prevention**: Always set Budget Alerts for AWS/GCP/Firebase.
+    *   **API Costs**: Set caching strategies and rate limits for pay-as-you-go APIs like OpenAI to prevent cost explosions.

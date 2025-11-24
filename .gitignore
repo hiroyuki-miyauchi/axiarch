@@ -3,11 +3,16 @@
 .idea/
 .vscode/
 *.log
+.env
+.env.*
+!.env.example
 
 # Node
 node_modules/
 npm-debug.log
 yarn-error.log
+dist/
+tmp/
 
 # Flutter/Dart
 .dart_tool/
@@ -20,3 +25,8 @@ android/local.properties
 # Firebase
 .firebase/
 firebase-debug.log
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini

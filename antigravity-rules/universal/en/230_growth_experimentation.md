@@ -1,21 +1,21 @@
 # 230. Growth & Experimentation
 
 ## 1. A/B Testing Infrastructure
-*   **Feature Flags**:
-    *   **Decouple Deploy from Release**: Always wrap new features in Feature Flags (LaunchDarkly, Firebase Remote Config) to separate code deployment from user release.
-    *   **Server-Side Control**: Control flags server-side to enable/disable features without waiting for app store review.
+*   **Feature Flag**:
+    *   **Decouple Deploy & Release**: Always wrap new features with Feature Flags (LaunchDarkly, Firebase Remote Config) to separate code deployment from user release.
+    *   **Server-Side Control**: In principle, control flags on the server side to enable on/off of features without waiting for app review.
 *   **Culture of Experimentation**:
-    *   **Hypothesis-Driven**: Define a "Hypothesis" and "Success Metric" for every new feature before development. Building "just because" is prohibited.
+    *   **Hypothesis Driven**: Develop all new features after defining a "Hypothesis" and "Success Metric". "Building just because" is prohibited.
 
 ## 2. Analytics Architecture
 *   **Event Dictionary**:
-    *   **Single Source of Truth**: Create a document (Event Dictionary) managing all event definitions (names, properties, triggers) and agree on it with PMs/Engineers before implementation.
-    *   **Naming Convention**: Strictly adhere to the `Object + Action` format (e.g., `Button_Clicked`, `Screen_Viewed`) to prevent inconsistency.
-*   **Idempotency**:
-    *   Implement client-side debouncing and ID management to prevent duplicate event transmission.
+    *   **Single Source of Truth**: Create a document (Event Dictionary) managing all event definitions (event names, properties, trigger conditions) and agree on it between PM and engineers before implementation.
+    *   **Naming Convention**: Strictly adhere to the `Object + Action` format (e.g., `Button_Clicked`, `Screen_Viewed`) to prevent notation inconsistencies.
+*   **Double Sending Prevention**:
+    *   Thoroughly implement debounce processing and ID management on the client side to prevent duplicate transmission of the same event.
 
 ## 3. Onboarding Optimization
 *   **Magic Number**:
-    *   Identify the number of actions required for user retention (e.g., "Add 3 friends within 7 days") and design the UI to encourage this behavior.
-*   **Remove Friction**:
-    *   Minimize input fields in the signup flow. Consider "Lazy Registration" (delaying email verification, etc.).
+    *   Find the number of actions required for user retention (e.g., "Add 3 friends within 7 days") and design the UI to encourage those actions.
+*   **Friction Elimination**:
+    *   Minimize input fields in the signup flow. Consider deferring email verification etc. (Lazy Registration).
