@@ -3,9 +3,23 @@
 ## 1. HTML & CSS (The Foundation)
 *   **Semantic HTML**:
     *   Prohibit "div soup". Use `header`, `main`, `footer`, `article`, `section` appropriately to maximize SEO and Accessibility.
-*   **CSS Architecture**:
-    *   **BEM (Block Element Modifier)**: For non-Tailwind projects (e.g., WordPress themes), strictly adhere to **BEM** naming conventions to avoid style conflicts and specificity hell.
-    *   **SASS/SCSS**: Use nesting, variables, and Mixins for maintainable stylesheets.
+
+### 1.1. Advanced CSS Architecture
+*   **Strict BEM (Block Element Modifier)**:
+    *   **Naming**: Strictly adhere to `Block__Element--Modifier` syntax.
+    *   **No Grandchildren**: `Block__Element__Grandchild` is prohibited. If the structure gets deep, break it out into a new Block (Maintain flat structure).
+    *   **State Management**: Use state classes like `is-active`, `has-error` combined with BEM (e.g., `Button--primary.is-active`).
+*   **SASS/SCSS Optimization**:
+    *   **Nesting Limit**: Limit nesting to **Max 3 levels**. Deep nesting causes specificity wars and degrades maintainability.
+    *   **Avoid Ampersand Abuse**: Avoid concatenating class names with `&` (e.g., `&__element`) as it hinders searchability. Prefer writing full class names.
+*   **Modern Layout**:
+    *   **Container Queries**: Prioritize Container Queries (`@container`) over Media Queries (`@media`) to enhance component reusability.
+
+### 1.2. CSS Performance (Rendering)
+*   **Rendering Optimization**:
+    *   **Containment**: Use `contain: content` for complex widgets to isolate browser layout recalculations.
+    *   **Will-Change**: Use `will-change` for animation elements, but apply it sparingly to prevent memory leaks.
+    *   **GPU Acceleration**: Use only `transform` and `opacity` for animations. Prohibit animating properties that trigger Reflow (e.g., `top`, `left`, `width`).
 *   **Responsive**:
     *   **Mobile First**: Always write CSS for mobile first as the default, and expand for desktop using `min-width` media queries.
 

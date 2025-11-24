@@ -21,7 +21,16 @@ Even in a Flutter-first environment, deep understanding of native platforms is r
 *   **Memory Leaks**: Use **LeakCanary** in debug builds to detect memory leaks, especially with Context handling.
 
 ## 3. iOS (Swift) Standards
-## 3. Common Platform Requirements
+*   **SwiftUI & UIKit**: Use SwiftUI where possible for native widgets.
+*   **Concurrency**: Use **Swift Concurrency (async/await)**. Avoid callback hell.
+
+## 4. Advanced Native Features
+*   **Biometrics**:
+    *   **Mandatory**: Must implement **FaceID / TouchID** (iOS) and **BiometricPrompt** (Android) for payments and sensitive data access.
+*   **Haptics**:
+    *   **Feedback**: Use platform-standard haptic feedback (`UIImpactFeedbackGenerator`, etc.) for success, failure, and warning actions.
+
+## 5. Common Platform Requirements
 *   **Permissions**:
     *   **Just-in-Time**: Request permissions (Camera, Location) only when absolutely needed.
     *   **Explanation**: Always show a pre-dialog explaining "Why" before the system dialog.

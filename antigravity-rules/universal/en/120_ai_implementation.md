@@ -34,3 +34,11 @@
     *   Implement a mechanism to quantitatively evaluate "Answer Quality" (LLM-as-a-Judge).
 *   **User Feedback**:
     *   Place "Good/Bad" buttons for each answer to collect user feedback. Use this for future fine-tuning and prompt improvement.
+
+## 5. Multimodal AI
+*   **Vision (Image Analysis)**:
+    *   **Privacy**: Perform image analysis on the client-side (On-Device AI) whenever possible to minimize server transmission.
+    *   **Accessibility**: Always convert analysis results into `alt` text or voice output.
+*   **Voice Recognition**:
+    *   **Latency**: Provide immediate visual feedback (waveform animation) to confirm recording status.
+    *   **Error Prevention**: Never finalize critical actions (transfer, delete) via voice alone. Always require an on-screen confirmation step.

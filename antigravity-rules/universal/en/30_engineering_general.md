@@ -5,6 +5,9 @@
     *   **Self-Documenting**: Comments should explain "Why", not "What". Let the code speak for itself.
     *   **Function Size**: Functions should do "one thing". Ideally keep them under **20 lines**.
     *   **Naming**: Variable names must be specific and clear. Vague names like `data`, `temp`, `item` are prohibited (e.g., `userData` -> `authenticatedUserProfile`).
+*   **Zero Warnings**:
+    *   **Rule**: Treat warnings as errors. CI must fail on a single warning. Prevent the "Broken Windows Theory".
+    *   **Strict Error Handling**: Empty `catch` blocks are prohibited. All errors must be logged and handled.
 *   **Refactoring (The Boy Scout Rule)**:
     *   **Mandate**: "Leave the campground cleaner than you found it." Always make small improvements (renaming, function extraction) when touching a file.
     *   **No "Later"**: "I'll refactor later" is a lie. Do it now or never.
@@ -25,6 +28,8 @@
 ## 4. Technical Debt Management
 *   **Definition**: Technical debt is not "bad code", it is a "loan" taken for speed. It must be repaid with interest.
 *   **Repayment Plan**: Allocate **20%** of every sprint to debt repayment (refactoring, library updates).
+*   **Tech Radar**:
+    *   **Regular Updates**: Mandate quarterly dependency updates to stay on the "Bleeding Edge" (safely).
 
 ## 5. AI-Native Architecture
 *   **AI First**:

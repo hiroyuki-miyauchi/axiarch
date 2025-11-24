@@ -53,6 +53,9 @@ Before *every* design task (even a single component), the following "Scouting Lo
     *   **Buttons**: Scale down on press (`0.95x`), bounce up on release.
     *   **Lists**: Staggered entrance animations (Waterfall effect).
     *   **Transitions**: Use **Container Transforms** (card expands to page).
+*   **Sliders & Carousels**:
+    *   **Snap Physics**: Scroll must always snap to snap points. Prevent stopping in awkward middle positions.
+    *   **Parallax**: Use parallax effects on backgrounds/elements during swipe to create depth.
 
 ## 3. Design System Ops (Scalability & Performance)
 
