@@ -61,3 +61,9 @@
     *   **Virality (Growth)**: Viral Coefficient (K-factor), Number of referrals.
     *   **Revenue (Scale)**: MRR, ARPU, CAC, LTV.
     *   **Scale (Mature)**: Operational cost reduction rate, Profit margin.
+
+## 7. Organizational DNA Frameworks
+*   **The Keeper Test (Netflix)**:
+    *   **Talent Density**: Ask yourself, "If a team member said they were leaving for another company, would I fight hard to keep them?" If the answer is No, you should give them a severance package and look for a star player. Compromised hiring kills organizations.
+*   **Working Backwards (Amazon)**:
+    *   **Press Release Driven Development**: Before writing code, write the "Press Release" and "FAQ" for the finished product. Completely define what delights the customer and what questions they will have, then develop backwards from there.
