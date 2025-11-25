@@ -11,6 +11,14 @@
 *   **Blameless Post-mortem**:
     *   **Purpose**: Pursue "Why the system failed" instead of "Who was at fault".
     *   **Documentation**: After a major incident (SEV-1/SEV-2), always create a Post-Mortem (incident report) and agree on Action Items to prevent recurrence.
+    *   Prepare specific Playbooks in advance, such as "When DB is gone" or "When API is down".
+
+## 4. Chaos Engineering (Anti-Fragility)
+*   **Premise**:
+    *   Stand on the premise that "Systems will inevitably fail". Do not pray for them not to break; design them to be safe even if they break.
+*   **Intentional Fault Injection**:
+    *   **Game Days**: Periodically intentionally crash servers or delay latency in the production environment (or equivalent) to test system resilience.
+    *   **Anti-Fragile**: Evolve the system to be more robust by applying stress (failure).
 *   **On-Call**:
     *   **Rotation**: Rotate on-call duties using PagerDuty etc. so that the burden does not concentrate on specific individuals.
     *   **Escalation**: Set automatic escalation rules for when the primary responder does not react.
