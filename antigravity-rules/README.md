@@ -16,48 +16,47 @@
 ## 📂 Rule Modules
 
 ### 📚 Universal Rules (Bilingual)
+
+#### 00-09: Core & Mindset
 *   **00. Core Philosophy & Mindset** ([🇯🇵](./universal/ja/00_core_mindset.md) / [🇺🇸](./universal/en/00_core_mindset.md))
+
+#### 10-19: Business & Growth
 *   **10. Product & Business Strategy** ([🇯🇵](./universal/ja/10_product_business.md) / [🇺🇸](./universal/en/10_product_business.md))
-*   **20. Design & UX** ([🇯🇵](./universal/ja/20_design_ux.md) / [🇺🇸](./universal/en/20_design_ux.md))
-*   **21. Design Ops & Tools** ([🇯🇵](./universal/ja/21_design_ops_tools.md) / [🇺🇸](./universal/en/21_design_ops_tools.md))
-*   **30. Engineering (General)** ([🇯🇵](./universal/ja/30_engineering_general.md) / [🇺🇸](./universal/en/30_engineering_general.md))
-*   **31. Mobile (Flutter)** ([🇯🇵](./universal/ja/31_engineering_mobile_flutter.md) / [🇺🇸](./universal/en/31_engineering_mobile_flutter.md))
-*   **32. Backend (Firebase/GCP)** ([🇯🇵](./universal/ja/32_engineering_backend_firebase_gcp.md) / [🇺🇸](./universal/en/32_engineering_backend_firebase_gcp.md))
-*   **33. Web Frontend (Next.js)** ([🇯🇵](./universal/ja/33_engineering_web_frontend.md) / [🇺🇸](./universal/en/33_engineering_web_frontend.md))
-*   **34. CMS Strategy (WordPress)** ([🇯🇵](./universal/ja/34_engineering_cms_wordpress.md) / [🇺🇸](./universal/en/34_engineering_cms_wordpress.md))
-*   **35. API Integration Strategy** ([🇯🇵](./universal/ja/35_engineering_api_integration.md) / [🇺🇸](./universal/en/35_engineering_api_integration.md))
-*   **36. Native Platforms (Kotlin/Swift)** ([🇯🇵](./universal/ja/36_engineering_native_platforms.md) / [🇺🇸](./universal/en/36_engineering_native_platforms.md))
-*   **37. Google Ecosystem & Critical Flows** ([🇯🇵](./universal/ja/37_engineering_google_ecosystem.md) / [🇺🇸](./universal/en/37_engineering_google_ecosystem.md))
-*   **38. Web Standards (HTML/CSS)** ([🇯🇵](./universal/ja/38_engineering_web_standards.md) / [🇺🇸](./universal/en/38_engineering_web_standards.md))
-*   **39. Cross-Platform Strategy** ([🇯🇵](./universal/ja/39_engineering_cross_platform_strategy.md) / [🇺🇸](./universal/en/39_engineering_cross_platform_strategy.md))
-*   **40. Operations Workflow** ([🇯🇵](./universal/ja/40_operations_workflow.md) / [🇺🇸](./universal/en/40_operations_workflow.md))
-*   **50. Git & Version Control** ([🇯🇵](./universal/ja/50_git_version_control.md) / [🇺🇸](./universal/en/50_git_version_control.md))
+*   **11. Business & Finance** ([🇯🇵](./universal/ja/11_business_finance.md) / [🇺🇸](./universal/en/11_business_finance.md))
+*   **12. Growth & Marketing** ([🇯🇵](./universal/ja/12_growth_marketing.md) / [🇺🇸](./universal/en/12_growth_marketing.md))
+*   **13. Store Compliance & ASO** ([🇯🇵](./universal/ja/13_store_compliance.md) / [🇺🇸](./universal/en/13_store_compliance.md))
+
+#### 20-29: Design & UX
+*   **20. Design & UX Strategy** ([🇯🇵](./universal/ja/20_design_ux.md) / [🇺🇸](./universal/en/20_design_ux.md))
+
+#### 30-39: Engineering Core
+*   **30. Engineering General** ([🇯🇵](./universal/ja/30_engineering_general.md) / [🇺🇸](./universal/en/30_engineering_general.md))
+*   **31. Mobile (Flutter)** ([🇯🇵](./universal/ja/31_mobile_flutter.md) / [🇺🇸](./universal/en/31_mobile_flutter.md))
+*   **32. Backend (Firebase)** ([🇯🇵](./universal/ja/32_backend_firebase.md) / [🇺🇸](./universal/en/32_backend_firebase.md))
+*   **33. Web Frontend (Next.js)** ([🇯🇵](./universal/ja/33_web_frontend.md) / [🇺🇸](./universal/en/33_web_frontend.md))
+*   **34. CMS Strategy (Headless)** ([🇯🇵](./universal/ja/34_cms_headless.md) / [🇺🇸](./universal/en/34_cms_headless.md))
+*   **35. API Integration** ([🇯🇵](./universal/ja/35_api_integration.md) / [🇺🇸](./universal/en/35_api_integration.md))
+*   **36. Native Platforms** ([🇯🇵](./universal/ja/36_native_platforms.md) / [🇺🇸](./universal/en/36_native_platforms.md))
+
+#### 40-49: AI & Data
+*   **40. AI Implementation** ([🇯🇵](./universal/ja/40_ai_implementation.md) / [🇺🇸](./universal/en/40_ai_implementation.md))
+*   **41. Analytics & Intelligence** ([🇯🇵](./universal/ja/41_analytics_intelligence.md) / [🇺🇸](./universal/en/41_analytics_intelligence.md))
+
+#### 50-59: Operations & Reliability
+*   **50. Admin & Internal Tools** ([🇯🇵](./universal/ja/50_admin_tools.md) / [🇺🇸](./universal/en/50_admin_tools.md))
+*   **51. User Support & Success** ([🇯🇵](./universal/ja/51_user_support.md) / [🇺🇸](./universal/en/51_user_support.md))
+*   **52. SRE & Reliability** ([🇯🇵](./universal/ja/52_sre_reliability.md) / [🇺🇸](./universal/en/52_sre_reliability.md))
+*   **53. Crisis Management** ([🇯🇵](./universal/ja/53_crisis_management.md) / [🇺🇸](./universal/en/53_crisis_management.md))
+
+#### 60-69: Security & Legal
 *   **60. Security & Privacy** ([🇯🇵](./universal/ja/60_security_privacy.md) / [🇺🇸](./universal/en/60_security_privacy.md))
-*   **70. Growth & Marketing** ([🇯🇵](./universal/ja/70_growth_marketing.md) / [🇺🇸](./universal/en/70_growth_marketing.md))
-*   **71. GEO Strategy (AI Search)** ([🇯🇵](./universal/ja/71_growth_geo_strategy.md) / [🇺🇸](./universal/en/71_growth_geo_strategy.md))
-*   **100. Crisis Management & SRE** ([🇯🇵](./universal/ja/100_crisis_sre.md) / [🇺🇸](./universal/en/100_crisis_sre.md))
-*   **110. Data & DocOps Strategy** ([🇯🇵](./universal/ja/110_data_docops.md) / [🇺🇸](./universal/en/110_data_docops.md))
-*   **120. AI Implementation & UX** ([🇯🇵](./universal/ja/120_ai_implementation.md) / [🇺🇸](./universal/en/120_ai_implementation.md))
-*   **130. Admin & Internal Tools** ([🇯🇵](./universal/ja/130_admin_internal_tools.md) / [🇺🇸](./universal/en/130_admin_internal_tools.md))
-*   **140. User Support & Success** ([🇯🇵](./universal/ja/140_user_support_success.md) / [🇺🇸](./universal/en/140_user_support_success.md))
-*   **150. E-Commerce & Finance** ([🇯🇵](./universal/ja/150_business_ecommerce_finance.md) / [🇺🇸](./universal/en/150_business_ecommerce_finance.md))
-*   **160. Store Guidelines Compliance** ([🇯🇵](./universal/ja/160_store_guidelines_compliance.md) / [🇺🇸](./universal/en/160_store_guidelines_compliance.md))
-*   **170. Platform API Terms** ([🇯🇵](./universal/ja/170_platform_api_terms.md) / [🇺🇸](./universal/en/170_platform_api_terms.md))
-*   **180. License & Dependency Mgmt** ([🇯🇵](./universal/ja/180_license_dependency_management.md) / [🇺🇸](./universal/en/180_license_dependency_management.md))
-*   **190. Internal Tools & Ops** ([🇯🇵](./universal/ja/190_internal_tools_operations.md) / [🇺🇸](./universal/en/190_internal_tools_operations.md))
-*   **200. Monetization Strategy** ([🇯🇵](./universal/ja/200_monetization_strategy.md) / [🇺🇸](./universal/en/200_monetization_strategy.md))
-*   **210. Legal, Privacy & Data** ([🇯🇵](./universal/ja/210_legal_privacy_data.md) / [🇺🇸](./universal/en/210_legal_privacy_data.md))
-*   **220. QA & Testing Strategy** ([🇯🇵](./universal/ja/220_qa_testing_strategy.md) / [🇺🇸](./universal/en/220_qa_testing_strategy.md))
-*   **230. Growth & Experimentation** ([🇯🇵](./universal/ja/230_growth_experimentation.md) / [🇺🇸](./universal/en/230_growth_experimentation.md))
-*   **240. SRE & Reliability** ([🇯🇵](./universal/ja/240_sre_reliability.md) / [🇺🇸](./universal/en/240_sre_reliability.md))
-*   **250. Accessibility & Inclusion** ([🇯🇵](./universal/ja/250_accessibility_inclusion.md) / [🇺🇸](./universal/en/250_accessibility_inclusion.md))
-*   **260. Data Visualization & Export** ([🇯🇵](./universal/ja/260_data_visualization_export.md) / [🇺🇸](./universal/en/260_data_visualization_export.md))
-*   **270. Global Expansion & i18n** ([🇯🇵](./universal/ja/270_global_expansion_i18n.md) / [🇺🇸](./universal/en/270_global_expansion_i18n.md))
-*   **280. Crisis Management & BCP** ([🇯🇵](./universal/ja/280_crisis_management_bcp.md) / [🇺🇸](./universal/en/280_crisis_management_bcp.md))
-*   **290. IP Strategy & Due Diligence** ([🇯🇵](./universal/ja/290_due_diligence_ip.md) / [🇺🇸](./universal/en/290_due_diligence_ip.md))
-*   **300. Analytics Intelligence** ([🇯🇵](./universal/ja/300_analytics_intelligence.md) / [🇺🇸](./universal/en/300_analytics_intelligence.md))
+*   **61. Legal & Data Governance** ([🇯🇵](./universal/ja/61_legal_data_privacy.md) / [🇺🇸](./universal/en/61_legal_data_privacy.md))
+*   **62. License & Dependency** ([🇯🇵](./universal/ja/62_license_dependency.md) / [🇺🇸](./universal/en/62_license_dependency.md))
+*   **63. IP Strategy & Due Diligence** ([🇯🇵](./universal/ja/63_ip_due_diligence.md) / [🇺🇸](./universal/en/63_ip_due_diligence.md))
 
-
+#### 70-79: QA & Global
+*   **70. QA & Testing** ([🇯🇵](./universal/ja/70_qa_testing.md) / [🇺🇸](./universal/en/70_qa_testing.md))
+*   **71. Global Expansion** ([🇯🇵](./universal/ja/71_global_expansion.md) / [🇺🇸](./universal/en/71_global_expansion.md))
 
 ---
 

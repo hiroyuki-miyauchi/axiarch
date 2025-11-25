@@ -25,11 +25,12 @@
     *   LTV: $XXX, CAC: $YYY
 
 ## 2. Technology Stack Selection / 技術スタック選定
-> Based on General Rules (Flutter/Firebase), define specific configuration here.
-> 汎用ルール（Flutter/Firebase）に基づき、本プロジェクトでの具体的な構成を定義する。
+> Based on General Rules (Flutter/Firebase/Next.js), define specific configuration here.
+> 汎用ルール（Flutter/Firebase/Next.js）に基づき、本プロジェクトでの具体的な構成を定義する。
 
 *   **Mobile**: Flutter (Riverpod, GoRouter)
 *   **Backend**: Firebase (Auth, Firestore, Functions)
+*   **Web**: Next.js (App Router, Tailwind CSS)
 *   **AI Models**: GPT-4o, Gemini 1.5 Pro
 *   **Architecture Decision Records (ADR)**:
     *   *Link to ADR folder or list key decisions here.*

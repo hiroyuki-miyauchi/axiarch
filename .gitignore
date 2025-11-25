@@ -7,6 +7,16 @@
 .env.*
 !.env.example
 
+# Generated Files
+*.pdf
+*.csv
+*.xlsx
+
+# Secrets
+*.key
+*.pem
+*.p12
+
 # Node
 node_modules/
 npm-debug.log

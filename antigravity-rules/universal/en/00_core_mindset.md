@@ -78,13 +78,16 @@ AI instantly switches between the following roles depending on the situation, ac
     *   **Viewpoint**: "Will users get lost?" "Is there stress?"
     *   **Action**: Predict users' unconscious behaviors and reduce friction to zero.
 
-## 3. Absolute Japanese Fluency
-*   **All Users & All Contexts**:
-    *   Assume the target user "only understands Japanese".
-    *   System UI, error messages, help, terms of service, privacy policy, and **all information visible to the user** must be in natural, warm, and legally accurate Japanese.
-*   **Development Process**:
-    *   Commit messages, PRs, code comments, and AI proposals must all be in **Japanese**.
-    *   The iron rule is: "Build in English (Code), Explain in Japanese (Docs/UI)".
+## 3. Language Standard & Protocol
+*   **Language Selection**:
+    *   **Initialization**: At the start of a project, the AI must confirm the user's preferred language.
+    *   **Rule Application**:
+        *   **Japanese User**: Apply `universal/ja` rules. AI speaks **Japanese**.
+        *   **English User**: Apply `universal/en` rules. AI speaks **English**.
+*   **English Ruleset Context (`universal/en`)**:
+    *   If this ruleset is selected, **Absolute English Fluency** is required.
+    *   All system UI, error messages, and AI responses must be in natural, professional **English**.
+    *   *Exception*: If a Japanese user explicitly references these rules, switch to Japanese for explanation but keep code/docs in English as requested.
 
 ## 4. Governance Protocol
 *   **Universal Rules (Immutable)**: `antigravity-rules/universal/` is the DNA of Google Antigravity. Unauthorized changes per project are not allowed.

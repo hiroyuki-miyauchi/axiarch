@@ -26,6 +26,11 @@
     *   Build integration to instantly notify Slack or Email when system errors (surge in 5xx) or abnormal KPI fluctuations (surge in churn) occur.
     *   Create a mechanism to notice abnormalities without checking the admin screen.
 
+## 4. Data Import & Export
+*   **Bulk Operations**:
+    *   **Async Processing**: Execute CSV exports or bulk updates exceeding thousands of records as **background jobs** (Cloud Tasks, etc.) to prevent timeouts. Notify via email or notification upon completion.
+    *   **Validation**: For import features, always implement a "Preview Screen" to display error rows (type mismatch, missing required fields) and allow correction before execution. Writing directly to DB without review is prohibited.
+
 ## 4. Support & FAQ
 *   **SLA (Service Level Agreement)**:
     *   **First Response**: React **instantly** (including auto-response) to user inquiries, and aim for first response within **24 hours** even for human support.

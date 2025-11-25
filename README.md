@@ -15,7 +15,7 @@
 
 1.  **Copy**: Copy the `antigravity-rules/` folder to your project root.
     *   `cp -r antigravity-rules /path/to/your/project/`
-2.  **Configure**: Edit `antigravity-rules/blueprint/00_overview.md` to define your project's specific mission and constraints.
+2.  **Configure**: Edit `antigravity-rules/blueprint/00_project_overview.md` to define your project's specific mission and constraints.
 3.  **Develop**: The AI Development Team will strictly adhere to these rules to deliver Silicon Valley quality code.
 
 ## ⚠️ Governance

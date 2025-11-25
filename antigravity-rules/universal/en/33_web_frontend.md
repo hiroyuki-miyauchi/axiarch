@@ -64,7 +64,10 @@
     *   **UX**: Implement interactive graphs supporting tooltips on hover, zoom, and pan, not static images.
 *   **Export**:
     *   **Web Workers**: Execute PDF/CSV generation within Web Workers so as not to block the main thread.
-    *   **Compatibility**: Output CSV with **BOM-prefixed UTF-8** to prevent garbled text in Excel. Embed Japanese fonts in PDF.
+    *   **Library Selection**:
+        *   **PDF**: Recommend `@react-pdf/renderer` for client-side generation. For complex reports, generate on the server-side (Puppeteer/Playwright).
+        *   **CSV**: Use `papaparse` or similar to guarantee RFC 4180 compliant format.
+    *   **Compatibility**: Output CSV with **BOM-prefixed UTF-8** to prevent garbled text in Excel. Always embed Japanese fonts (e.g., Noto Sans JP) in PDFs.
 
 ## 6. User Guidance Implementation
 *   **Onboarding Tours**:

@@ -64,7 +64,10 @@
     *   **UX**: 静止画ではなく、ホバー時のツールチップ、ズーム、パンに対応したインタラクティブなグラフを実装します。
 *   **エクスポート (Export)**:
     *   **Web Workers**: PDF/CSV生成はメインスレッドをブロックしないよう、Web Worker内で実行します。
-    *   **互換性**: CSVは **BOM付きUTF-8** で出力し、Excelでの文字化けを防ぎます。PDFには日本語フォントを埋め込みます。
+    *   **ライブラリ選定**:
+        *   **PDF**: クライアントサイド生成には `@react-pdf/renderer` を推奨します。複雑な帳票はサーバーサイド（Puppeteer/Playwright）で生成します。
+        *   **CSV**: `papaparse` 等を使用し、RFC 4180準拠のフォーマットを保証します。
+    *   **互換性**: CSVは **BOM付きUTF-8** で出力し、Excelでの文字化けを防ぎます。PDFには日本語フォント（Noto Sans JP等）を必ず埋め込みます。
 
 ## 6. ユーザーガイド実装 (User Guidance Implementation)
 *   **オンボーディングツアー (Onboarding Tours)**:
