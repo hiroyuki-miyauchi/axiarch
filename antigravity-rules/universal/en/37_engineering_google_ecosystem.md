@@ -28,6 +28,11 @@
     *   **VPC Service Controls**: Define security perimeters around sensitive resources (Cloud Functions, Firestore) using VPC Service Controls for enterprise-grade protection.
     *   **WAF**: Use Google Cloud Armor when exposing custom endpoints.
 
+## 3. Growth Ecosystem
+*   **Remote Config**:
+    *   **Onboarding A/B Testing**: Do not hardcode onboarding step counts or text; manage them with **Firebase Remote Config**. This enables flow optimization (A/B testing) without app updates.
+    *   **Feature Flags**: Roll out new features using Remote Config to allow immediate disabling (Kill Switch) if issues occur.
+
 ## 3. Critical Flows
 ### 3.1. In-App Purchases
 *   **Current Standard: RevenueCat**:

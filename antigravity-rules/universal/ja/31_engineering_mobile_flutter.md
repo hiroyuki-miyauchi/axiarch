@@ -26,6 +26,12 @@
 *   **アダプティブUI (Adaptive UI)**:
     *   OSごとに異なるダイアログ、ボトムシート、スイッチ等のUIコンポーネントを使い分け、違和感を排除します。
 
+## 4. ユーザーガイドとオンボーディング (User Guidance & Onboarding)
+*   **コーチマーク実装 (Coach Marks Implementation)**:
+    *   **ライブラリ**: `tutorial_coach_mark` パッケージ（または同等の高品質ライブラリ）を使用し、実装工数を最小化します。自前での複雑なオーバーレイ実装は避けます。
+    *   **OverlayPortal**: カスタムオーバーレイが必要な場合は、Flutter 3.10+の `OverlayPortal` を使用し、パフォーマンスを維持しつつウィジェットツリーの制約を回避します。
+    *   **状態管理**: 「一度だけ表示する」状態は、必ずローカルストレージ（SharedPreferences/Isar）とリモートDBの両方で管理し、再インストール時にもユーザーを煩わせないようにします。
+
 ## 4. 品質保証 (Quality Assurance)
 *   **Golden Tests**:
     *   UIの回帰テストとして、**Golden Toolkit** を使用したスナップショットテストを必須とします。

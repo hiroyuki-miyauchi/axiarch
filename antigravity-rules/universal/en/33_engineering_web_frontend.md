@@ -33,6 +33,11 @@
 *   **Accessibility (A11y)**:
     *   **Radix UI / Headless UI**: For complex interactive components (Dialogs, Dropdowns), use accessible headless UI libraries and apply styles only with Tailwind CSS.
 
+## 5. User Guidance Implementation
+*   **Onboarding Tours**:
+    *   **Library**: Use a lightweight and accessible library like `driver.js` to guarantee Focus Trap and keyboard navigation.
+    *   **React Portals**: Render guide elements using `createPortal` at the top level of the DOM tree to avoid `z-index` wars (Stacking Context issues).
+
 ## 5. Deployment & Infrastructure
 *   **Vercel**:
     *   **Vercel** is the first choice for deployment.

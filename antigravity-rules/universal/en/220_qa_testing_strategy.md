@@ -27,3 +27,10 @@
     *   Releasing with P0 (Critical) and P1 (Major) bugs remaining is **strictly prohibited**.
 *   **Phased Rollout**:
     *   Do not release to all users at once; expand the release scope in stages (1% -> 5% -> 20% -> 100%) to minimize the impact of unexpected defects.
+
+## 5. Ultimate User Perspective
+*   **The Grandmother Test**:
+    *   **Standard**: Always ask yourself, "Can my grandmother, who is not tech-savvy, use this without explanation?"
+    *   **Intuitiveness**: UI that requires a manual is considered a "Bug".
+*   **Bug Bash**:
+    *   Before a major release, organize a "Bug Bash" with everyone, including designers and PMs, not just engineers, to identify edge cases from diverse perspectives.

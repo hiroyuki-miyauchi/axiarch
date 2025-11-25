@@ -99,3 +99,23 @@ Before *every* design task (even a single component), the following "Scouting Lo
     *   React the UI immediately to user actions (e.g., send button press) without waiting for AI processing (e.g., instant chat bubble).
 *   **Transparency**:
     *   Visually distinguish between AI "Thinking..." and "Generating..." states to reassure the user.
+## 9. User Onboarding & Guidance
+*   **Coach Marks**:
+    *   **Context-Aware**: Display only when the user visits the screen for the first time or when a new feature is added.
+    *   **UI Pattern**: As shown in the attached image, highlight the target element (e.g., button) and present a concise explanation and action (e.g., "Record") in a tooltip.
+    *   **Skippable**: Always provide a means to "Skip" or "Close" to avoid the stress of forced tutorials.
+*   **Feature Discovery**:
+    *   **Progressive Disclosure**: Do not explain all features at once; reveal advanced features gradually according to the user's proficiency.
+    *   **Empty States**: Treat the "Zero Data" state not as an "Error" but as an "Onboarding Opportunity". Instead of just "No records", place a clear Call to Action (CTA) like "Add your first record".
+*   **General Consumer Perspective**:
+    *   **No Jargon**: Do not use technical terms like "Database", "Sync", or "API" in UI text. Choose words anyone can understand, like "Save", "Update", or "Connect".
+    *   **Intuitiveness**: The goal is "Usable without reading a manual". Always add labels to icons to eliminate ambiguity.
+
+## 10. Omotenashi UX (Japanese Hospitality)
+*   **Kigakiku (Anticipatory Design)**:
+    *   **Anticipation**: Anticipate needs and present solutions before the user gets stuck.
+    *   **Example**: The moment an error occurs in a form input, instead of just turning it red, offer a correction button like "It's full-width. Shall we fix it to half-width?".
+*   **Ma (Negative Space)**:
+    *   **Aesthetics of Emptiness**: Fuse Silicon Valley's "Information Density" with Japan's "Ma (Space)". White space is not just empty space, but a function to give the user "Time to Think".
+*   **Aizuchi (Reassuring Feedback)**:
+    *   **Reaction**: Return visual or haptic "Aizuchi (Nods)" for every user action (tap, scroll, input). Constantly provide reassurance that "Your operation is being correctly received".

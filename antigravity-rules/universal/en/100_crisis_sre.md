@@ -13,7 +13,11 @@
 *   **SLO/SLI**:
     *   **SLI (Service Level Indicator)**: An indicator to measure service health (e.g., error rate, latency).
     *   **SLO (Service Level Objective)**: The target level (e.g., 99.9% availability).
-    *   **Error Budget**: If the SLO is exceeded, stop developing new features and concentrate resources on improving reliability.
+    *   **SLO (Service Level Objective)**: The target level (e.g., 99.9% availability).
+    *   **Error Budget**: If the SLO is exceeded, **forcibly stop** developing new features and concentrate resources 100% on improving reliability (paying off technical debt). This is non-negotiable.
+*   **War Room Protocol**:
+    *   **Declaration**: When a critical incident (P0) occurs, immediately open a "War Room (dedicated call channel)" and have everyone stay there until resolved.
+    *   **Recording**: Record all conversations and decisions as a timeline for use in the post-mortem.
 *   **Post-Mortem**:
     *   **Blameless**: Discuss "What happened", "Why it happened", and "How to prevent recurrence" instead of "Who was at fault".
     *   **Documentation**: Create an incident report and share it company-wide.

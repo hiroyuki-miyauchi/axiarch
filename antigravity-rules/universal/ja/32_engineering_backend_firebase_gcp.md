@@ -14,6 +14,9 @@
 *   **セキュリティルール (Security Rules)**:
     *   **テスト駆動**: Firestore Security Rulesは必ずユニットテストを書き、意図しないアクセス権限の漏洩を防ぎます。
     *   **最小権限**: デフォルトは `allow read, write: if false;` とし、必要なパスのみを明示的に許可します。
+*   **データライフサイクル (Data Lifecycle)**:
+    *   **TTL (Time-to-Live)**: 通知履歴、一時的なログ、監査ログなど、永続保存が不要なデータには必ず **Firestore TTLポリシー** を設定し、自動削除させます。Cloud Functionsでの定期削除バッチは（コスト高のため）禁止します。
+    *   **Cloud Storage Lifecycle**: 古いバックアップや一時ファイルは、GCPのライフサイクル管理機能を使用して、一定期間後に自動的に削除またはColdline/Archiveクラスへ移動させます。
 
 ## 3. データ分析とエクスポート (Analytics & Export)
 *   **BigQuery連携 (BigQuery Integration)**:

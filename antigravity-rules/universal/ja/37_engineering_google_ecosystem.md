@@ -28,6 +28,11 @@
     *   **VPC Service Controls**: エンタープライズグレードの保護のために、VPC Service Controlsを使用して機密リソース（Cloud Functions, Firestore）の周囲にセキュリティ境界を定義します。
     *   **WAF**: カスタムエンドポイントを公開する場合は、Google Cloud Armorを使用します。
 
+## 3. グロース・エコシステム (Growth Ecosystem)
+*   **Remote Config**:
+    *   **オンボーディングA/Bテスト**: オンボーディングのステップ数や文言はハードコードせず、**Firebase Remote Config** で管理します。これにより、アプリのアップデートなしでフローを最適化（A/Bテスト）可能にします。
+    *   **機能フラグ (Feature Flags)**: 新機能のロールアウトはRemote Configで行い、問題が発生した際に即座に無効化（キルスイッチ）できるようにします。
+
 ## 3. 重要フロー (Critical Flows)
 ### 3.1. 課金 (In-App Purchases)
 *   **現在の標準: RevenueCat**:

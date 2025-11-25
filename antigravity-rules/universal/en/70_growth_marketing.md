@@ -13,6 +13,9 @@
     *   **Lazy Registration**: Request account registration or detailed settings only "after" the user has felt value.
 *   **Friction Elimination**:
     *   **SSO (Single Sign-On)**: Mandate Google/Apple login to eliminate the hassle of password entry.
+*   **Guidance Strategy**:
+    *   **Contextual Coaching**: Display appropriate hints (Coach Marks) only when the user is lost (e.g., long dwell time, invalid clicks).
+    *   **Staging Success**: Display confetti or praise messages the moment the first action (e.g., first record) is completed to stimulate dopamine.
 
 ## 3. Retention Strategy
 *   **Habit Formation**:

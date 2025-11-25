@@ -33,6 +33,11 @@
 *   **アクセシビリティ (Accessibility - A11y)**:
     *   **Radix UI / Headless UI**: 複雑なインタラクティブコンポーネント（ダイアログ、ドロップダウン）は、アクセシビリティが担保されたヘッドレスUIライブラリを使用し、スタイルのみをTailwind CSSで適用します。
 
+## 5. ユーザーガイド実装 (User Guidance Implementation)
+*   **オンボーディングツアー (Onboarding Tours)**:
+    *   **ライブラリ**: `driver.js` などの軽量かつアクセシブルなライブラリを使用し、フォーカストラップ（Focus Trap）とキーボード操作を保証します。
+    *   **React Portals**: ガイド要素は `createPortal` を使用してDOMツリーの最上位にレンダリングし、`z-index` 戦争（スタッキングコンテキストの問題）を回避します。
+
 ## 5. デプロイとインフラ (Deployment & Infrastructure)
 *   **Vercel**:
     *   デプロイ先は **Vercel** を第一選択肢とします。

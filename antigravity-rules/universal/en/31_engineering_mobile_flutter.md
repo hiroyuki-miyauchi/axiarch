@@ -26,6 +26,12 @@
 *   **Adaptive UI**:
     *   Use different UI components for Dialogs, Bottom Sheets, Switches, etc., for each OS to eliminate awkwardness.
 
+## 4. User Guidance & Onboarding
+*   **Coach Marks Implementation**:
+    *   **Library**: Use the `tutorial_coach_mark` package (or an equivalent high-quality library) to minimize implementation effort. Avoid complex custom overlay implementations.
+    *   **OverlayPortal**: If a custom overlay is needed, use `OverlayPortal` (Flutter 3.10+) to maintain performance while bypassing widget tree constraints.
+    *   **State Management**: Manage the "Show only once" state in BOTH local storage (SharedPreferences/Isar) and the remote DB to avoid annoying users upon re-installation.
+
 ## 4. Quality Assurance
 *   **Golden Tests**:
     *   Mandate snapshot tests using **Golden Toolkit** as UI regression tests.

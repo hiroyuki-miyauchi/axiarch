@@ -9,6 +9,9 @@
     *   **Testing**: Incorporate tests into the pipeline to automatically detect missing data, duplicates, and outliers.
 
 ## 2. Documentation Ops
+*   **Living Documentation**:
+    *   **Mermaid.js**: Architecture diagrams and flowcharts must be written in code bases like **Mermaid.js**, not images (png/jpg). This allows version control and editing, preventing obsolescence.
+    *   **ADR (Architecture Decision Records)**: Record important decisions like "Why we chose this technology" or "Why we designed it this way" in Markdown format in the `docs/adr` directory to preserve historical context.
 *   **Notion / GitHub Wiki**:
     *   **Flow Info**: Manage daily minutes and ideas in Notion.
     *   **Stock Info**: Manage specifications, design documents, and procedures in GitHub (Markdown) and synchronize them with the code.

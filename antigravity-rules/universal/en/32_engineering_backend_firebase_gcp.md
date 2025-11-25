@@ -14,6 +14,9 @@
 *   **Security Rules**:
     *   **Test-Driven**: Always write unit tests for Firestore Security Rules to prevent unintended access privilege leaks.
     *   **Least Privilege**: Default to `allow read, write: if false;` and explicitly allow only necessary paths.
+*   **Data Lifecycle**:
+    *   **TTL (Time-to-Live)**: Mandatory **Firestore TTL Policies** must be set for non-permanent data such as notification history, temporary logs, and audit logs to ensure automatic deletion. Periodic deletion batches via Cloud Functions are prohibited (due to high cost).
+    *   **Cloud Storage Lifecycle**: Use GCP's Lifecycle Management features to automatically delete or move old backups and temporary files to Coldline/Archive classes after a certain period.
 
 ## 3. Analytics & Export
 *   **BigQuery Integration**:

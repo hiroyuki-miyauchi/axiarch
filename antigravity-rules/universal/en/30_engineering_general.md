@@ -11,6 +11,10 @@
 *   **Refactoring (The Boy Scout Rule)**:
     *   **Mandate**: "Leave the campground cleaner than you found it." Always make small improvements (renaming, function extraction) when touching a file.
     *   **No "Later"**: "I'll refactor later" is a lie. Do it now, or never.
+    *   **Cyclomatic Complexity**: High complexity (deep nesting) is a breeding ground for bugs. Use Early Return to keep nesting shallow.
+*   **Cleanup**:
+    *   **Immediate Deletion of Dead Code**: Completely delete commented-out code, unused imports, and debug `console.log` before committing.
+    *   **TODO Comment Management**: If leaving `// TODO:`, always include a ticket number or deadline. Abandoned TODOs are technical debt.
 
 ## 2. Performance & Optimization (The "Speed")
 *   **Performance Budgets**:
@@ -33,6 +37,14 @@
     *   **Regular Updates**: Update dependencies quarterly to always maintain a "Safe Bleeding Edge".
 *   **Digital 5S**:
     *   **Seiri (Sort)**: Immediately delete unused code (Dead Code), images, and files. Do not leave commented-out code.
+
+## 5. FinOps & Green Coding
+*   **FinOps (Cost Awareness)**:
+    *   **Cost of Code**: Always be conscious of "How much does this one line of code cost?". Infinite loops and inefficient queries are acts of burning company funds.
+    *   **Cloud Bankruptcy Prevention**: Always set "Budget Alerts" and "Auto-Stop Limits" for serverless functions and databases.
+*   **Green Coding (Sustainability)**:
+    *   **CO2 Reduction**: Reducing data transfer and computational load leads not only to cost reduction but also to CO2 emission reduction (Environmental Protection).
+    *   **Dark Mode**: Recommend True Black (#000000) Dark Mode to reduce power consumption on OLED devices.
 
 ## 5. AI-Native Architecture
 *   **RAG Optimization**:
