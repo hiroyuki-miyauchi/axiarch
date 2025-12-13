@@ -57,6 +57,8 @@
 #### 70-79: QA & Global
 *   **70. QA & Testing** ([🇯🇵](./universal/ja/70_qa_testing.md) / [🇺🇸](./universal/en/70_qa_testing.md))
 *   **71. Global Expansion** ([🇯🇵](./universal/ja/71_global_expansion.md) / [🇺🇸](./universal/en/71_global_expansion.md))
+*   **72. Constitution Authority** ([🇯🇵](./universal/ja/72_constitution_authority.md) / [🇺🇸](./universal/en/72_constitution_authority.md))
+*   **74. Language Protocol** ([🇯🇵](./universal/ja/74_language_protocol.md) / [🇺🇸](./universal/en/74_language_protocol.md))
 
 ---
 

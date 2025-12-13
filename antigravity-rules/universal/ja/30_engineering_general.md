@@ -17,6 +17,9 @@
     *   **TODOコメントの管理**: `// TODO:` を残す場合は、必ずチケット番号または期限を併記します。放置されたTODOは技術的負債です。
 
 ## 2. パフォーマンスと最適化 (Performance & Optimization - The "Speed")
+*   **読み取り最適化 (Read-Optimized Architecture)**:
+    *   **事前計算 (Pre-calculation)**: ランキング、集計、複雑なフィルタリング結果は、リクエストごと（On-the-fly）に計算せず、データ更新時または定期バッチで事前計算し、DBのカラム（例: `ranking_score`, `total_sales`）に保存します。
+    *   **CQRS**: 参照系と更新系のモデルを分離し、参照系には非正規化（Denormalization）された読み取り専用テーブルやマテリアライズドビューの使用を推奨します。
 *   **パフォーマンス予算 (Performance Budgets)**:
     *   **Lighthouseスコア**: Performance, Accessibility, Best Practices, SEO の全てで **90点以上** を維持します（緑色）。
     *   **Core Web Vitals**: LCP (2.5s以内), FID (100ms以内), CLS (0.1以内) を厳守します。

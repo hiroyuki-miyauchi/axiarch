@@ -1,4 +1,4 @@
-# 12. グロースとマーケティング (Growth & Marketing) Strategy - CMO View)
+# 12. グロースとマーケティング (Growth & Marketing) Strategy - CMO View
 
 ## 1. プロダクト主導型成長 (Product-Led Growth - PLG)
 *   **バイラル係数 (Viral K-factor)**:
@@ -11,9 +11,12 @@
 ## 2. テクニカルSEO (Technical SEO)
 *   **構造化データ (Structured Data)**:
     *   **JSON-LD**: 全てのパブリックページに `Schema.org`（JSON-LD）を実装し、Google検索結果でのリッチスニペット表示（レビュー、価格、FAQ）を狙います。
-*   **インデックス制御**:
-    *   **Sitemap.xml**: 動的に生成されるコンテンツ（ユーザープロフィール、記事）は、即座にサイトマップに反映させ、Google Search Console APIを使用してインデックス登録をリクエストします。
-    *   **Core Web Vitals**: SEO順位に直結するため、LCP, FID, CLSのスコアを常に緑色（Good）に保ちます。
+*   **インデックス制御 (Indexing Control)**:
+    *   **Sitemap自動化**: `next-sitemap` 等を使用し、ビルド時または定期的（ISR）にXMLサイトマップを自動生成します。手動更新は禁止です。
+    *   **Search Console API**: 記事公開や更新時に、Google Search Console APIを叩いてインデックス登録を即時リクエストする仕組みを整えます。
+    *   **URLの永続性 (URL Persistence)**: リニューアル時、旧URL（例: WordPressの `/archives/123`）からの301リダイレクトを必ず設定し、SEO評価（Link Juice）を継承します。
+*   **Core Web Vitals**:
+    *   SEO順位に直結するため、LCP, FID, CLSのスコアを常に緑色（Good）に保ちます。
 
 ## 3. オンボーディング最適化 (Onboarding Optimization)
 *   **Aha! Momentへの短縮**:

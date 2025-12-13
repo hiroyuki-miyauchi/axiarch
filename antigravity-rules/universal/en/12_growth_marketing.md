@@ -12,8 +12,11 @@
 *   **Structured Data**:
     *   **JSON-LD**: Implement `Schema.org` (JSON-LD) on all public pages to aim for Rich Snippet display (reviews, prices, FAQ) in Google search results.
 *   **Index Control**:
-    *   **Sitemap.xml**: Immediately reflect dynamically generated content (user profiles, articles) in the sitemap and request indexing using the Google Search Console API.
-    *   **Core Web Vitals**: Since it directly affects SEO ranking, always keep LCP, FID, and CLS scores green (Good).
+    *   **Automated Sitemap**: Use `next-sitemap` etc. to strictly generate XML sitemaps automatically at build time or periodically (ISR). Manual updates are prohibited.
+    *   **Search Console API**: Establish a mechanism to instantly request indexing via Google Search Console API upon article publication or update.
+    *   **URL Persistence**: When renewing, strictly set 301 redirects from old URLs (e.g., WordPress `/archives/123`) to inherit SEO value (Link Juice).
+*   **Core Web Vitals**:
+    *   Since it directly affects SEO ranking, always keep LCP, FID, and CLS scores green (Good).
 
 ## 3. Onboarding Optimization
 *   **Shortening to Aha! Moment**:

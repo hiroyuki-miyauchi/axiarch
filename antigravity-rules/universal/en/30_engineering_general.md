@@ -17,6 +17,9 @@
     *   **TODO Management**: If leaving `// TODO:`, always include a ticket number or deadline. Abandoned TODOs are technical debt.
 
 ## 2. Performance & Optimization - The "Speed"
+*   **Read-Optimized Architecture**:
+    *   **Pre-calculation**: Do not calculate ranking, aggregation, or complex filtering results per request (On-the-fly). Calculate them beforehand (at update or periodic batch) and save to DB columns (e.g., `ranking_score`, `total_sales`).
+    *   **CQRS**: Separate Read and Write models. Recommend using Denormalized read-only tables or Materialized Views for the Read side.
 *   **Performance Budgets**:
     *   **Lighthouse Score**: Maintain **90+** in all categories: Performance, Accessibility, Best Practices, SEO (Green).
     *   **Core Web Vitals**: Strictly adhere to LCP (<2.5s), FID (<100ms), CLS (<0.1).

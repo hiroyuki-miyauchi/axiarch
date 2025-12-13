@@ -19,19 +19,28 @@
     *   Implement a feature (Impersonation) for admins to login as a specific user and check the same screen for CS support.
     *   **Security**: Restrict this feature to Super Admins only and always log usage.
 
-## 3. Operational Workflow
+
+## 3. Content Management Strategy
+*   **No Raw HTML**:
+    *   **Principle**: It is **strictly prohibited** for admins to directly write or edit HTML tags in the admin panel. This causes XSS vulnerabilities and destroys design consistency.
+    *   **Block Editor**: If article creation features are needed, introduce a Block-based Editor like **Tiptap** or a Headless CMS.
+    *   **Structured Data**: Save content as JSON structure, not HTML strings, separating the presentation layer from data.
+*   **Custom Fields UI**:
+    *   For map or video embedding, do not paste iframe codes. Provide dedicated fields (Address input, YouTube ID input) and safely generate tags on the frontend side.
+
+## 4. Operational Workflow
 *   **Approval Flows**:
     *   Always incorporate "Approval Flows (Double Check)" for irreversible or high-risk operations like refund, physical data deletion, notification to all users. Utilize Retool's approval workflows.
 *   **Alerting Integration**:
     *   Build integration to instantly notify Slack or Email when system errors (surge in 5xx) or abnormal KPI fluctuations (surge in churn) occur.
     *   Create a mechanism to notice abnormalities without checking the admin screen.
 
-## 4. Data Import & Export
+## 5. Data Import & Export
 *   **Bulk Operations**:
     *   **Async Processing**: Execute CSV exports or bulk updates exceeding thousands of records as **background jobs** (Cloud Tasks, etc.) to prevent timeouts. Notify via email or notification upon completion.
     *   **Validation**: For import features, always implement a "Preview Screen" to display error rows (type mismatch, missing required fields) and allow correction before execution. Writing directly to DB without review is prohibited.
 
-## 4. Support & FAQ
+## 6. Support & FAQ
 *   **SLA (Service Level Agreement)**:
     *   **First Response**: React **instantly** (including auto-response) to user inquiries, and aim for first response within **24 hours** even for human support.
 *   **FAQ Management**:
@@ -39,7 +48,7 @@
 *   **Chat Support**:
     *   **Intercom / Zendesk**: Introduce in-app chat support to solve user issues in real-time. Utilize AI bots (Fin etc.) to automate first response.
 
-## 5. Security & Access Control
+## 7. Security & Access Control
 *   **RBAC (Role-Based Access Control)**:
     *   Set permission levels (Super Admin, Support, Analyst) for admins and allow access only to necessary information (Least Privilege).
 *   **IP Restriction**:
