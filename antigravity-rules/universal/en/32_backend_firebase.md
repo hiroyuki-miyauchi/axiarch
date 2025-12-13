@@ -8,12 +8,18 @@
 *   **Event-Driven**:
     *   **Async Processing**: Use **Cloud Pub/Sub** or **Eventarc** to execute heavy processing (email sending, image processing, aggregation) asynchronously to minimize user wait time.
 
-## 2. Database Design - Firestore
+## 2. Database Design (Firestore)
+*   **Data Integrity & Ownership**:
+    *   **Strict RLS**: Row Level Security (RLS) is absolute. All records must have an owner (`user_id`) or admin flag and be strictly controlled via Firestore Security Rules. "Publicly readable" data, other than Master Data, is prohibited.
+    *   **Explicit Ownership**: In create operations, mandatory validation must match the authenticated User ID (`request.auth.uid`) with the data's `user_id` field.
+*   **Infinite Scalability**:
+    *   **No Select All**: Executing unlimited queries (e.g., `collection('posts').get()`) on the client side is **strictly prohibited**. Pagination or Cursor-based Infinite Scroll must be implemented for data potentially exceeding 1000 rows.
+    *   **Lazy Loading**: Fetch only necessary data on-demand.
 *   **NoSQL Modeling**:
-    *   **Read Optimization**: Design prioritizing Read performance over Write. Denormalize necessary data beforehand.
-    *   **Subcollections**: Place user-specific data (order history, etc.) as subcollections, not at the top level, to facilitate query efficiency and security management.
+    *   **Read-Optimized**: Design prioritizing Read performance over Write. Denormalize necessary data beforehand.
+    *   **Subcollections**: Place user-related data (e.g., order history) as subcollections, not top-level, to facilitate efficient querying and security management.
 *   **Security Rules**:
-    *   **Test Driven**: Always write unit tests for Firestore Security Rules to prevent unintended access permission leaks.
+    *   **Test Driven**: Always write Unit Tests for Firestore Security Rules to prevent unintended permission leaks.
     *   **Least Privilege**: Default to `allow read, write: if false;` and explicitly allow only necessary paths.
 
 ## 3. FinOps & Cost Management
