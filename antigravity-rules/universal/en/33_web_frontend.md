@@ -52,13 +52,15 @@
 *   **Font Optimization**:
     *   Self-host Google Fonts using `next/font` to eliminate layout shift (CLS) and external requests.
 *   **Metadata Management**:
-    *   Dynamically generate and fully optimize `title`, `description`, `og:image` for SEO on each page.
+    *   **Dynamic Metadata**: Page titles must follow `[Page Name] | [Site Name]` format and fetch values dynamically from Site Settings (DB). Hardcoding is prohibited.
+    *   **Image Fallback**: Implement logic to use default images in `public/assets` as fallback when OGP or content images do not exist in DB, preventing image breakage (404).
 
 ## 7. Component Design & A11y
 *   **Accessibility - "Shift Left"**:
     *   **Automated Testing**: Run `axe-core` in CI to automatically detect and block low contrast or missing labels.
-    *   **Screen Reader**: Mandate real device testing with Screen Readers (VoiceOver/TalkBack) for main flows.
-    *   **WAI-ARIA**: "No ARIA is better than Bad ARIA". Use native HTML elements as much as possible and apply ARIA attributes only when necessary.
+    *   **Screen Reader**: Validating main flows with screen readers (VoiceOver/TalkBack) on actual devices is mandatory.
+    *   **Icon Labels**: Icon-only buttons containing no text must have an `aria-label` attribute to explicitly state their function.
+    *   **WAI-ARIA**: "No ARIA is better than Bad ARIA". Use native HTML elements as much as possible and keep ARIA attributes to a minimum.
     *   **Radix UI / Headless UI**: Use accessible headless UI libraries for complex components.
 *   **Atomic Design**:
     *   Design components considering reusability, but avoid excessive abstraction.

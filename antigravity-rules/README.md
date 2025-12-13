@@ -37,6 +37,7 @@
 *   **34. CMS Strategy (Headless)** ([🇯🇵](./universal/ja/34_cms_headless.md) / [🇺🇸](./universal/en/34_cms_headless.md))
 *   **35. API Integration** ([🇯🇵](./universal/ja/35_api_integration.md) / [🇺🇸](./universal/en/35_api_integration.md))
 *   **36. Native Platforms** ([🇯🇵](./universal/ja/36_native_platforms.md) / [🇺🇸](./universal/en/36_native_platforms.md))
+*   **37. Backend - Supabase & PostgreSQL** ([🇯🇵](./universal/ja/37_backend_supabase.md) / [🇺🇸](./universal/en/37_backend_supabase.md))
 
 #### 40-49: AI & Data
 *   **40. AI Implementation** ([🇯🇵](./universal/ja/40_ai_implementation.md) / [🇺🇸](./universal/en/40_ai_implementation.md))

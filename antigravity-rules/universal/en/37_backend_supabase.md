@@ -18,4 +18,11 @@
 *   **Supabase Auth**:
     *   Delegate the authentication flow entirely to Supabase Auth (Gotrue). Self-implemented password hashing or session management is prohibited.
 *   **Automation via Triggers**:
-    *   Operations like copying to `public.users` table upon user creation must be executed atomically at the DB layer using PostgreSQL Triggers, not on the application side, to prevent data inconsistency.
+
+## 4. Operations & Migration
+*   **Migration Protocol**:
+    *   **Remote Execution**: For schema changes to remote databases (Prod/Staging), executing SQL via **Supabase SQL Editor** is recommended to avoid instability of CLI (`db push`).
+    *   **Version Control**: Executed SQL must be saved as a file in `supabase/migrations/` and managed by Git. Ensure traceability of "who executed what and when".
+*   **Type Safety Protocol**:
+    *   **Internal Casting**: Only when Supabase client type inference fails (e.g., becomes `never`) for complex JOINs or Views, `as any` casting at the query builder call site and immediate casting to an "Explicit Type Definition" are permitted (Internal Casting Pattern).
+    *   **Restriction**: Use of `any` outside of this exception remains strictly prohibited.

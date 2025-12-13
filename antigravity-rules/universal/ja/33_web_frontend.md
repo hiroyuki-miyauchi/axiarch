@@ -51,15 +51,17 @@
     *   **CLS対策**: 画像には必ず `width` と `height` を指定（または `fill`）し、レイアウトシフトを防ぎます。
 *   **フォント最適化 (Font Optimization)**:
     *   `next/font` を使用してGoogle Fontsをセルフホストし、レイアウトシフト（CLS）と外部リクエストを排除します。
-*   **メタデータ管理 (Metadata Management)**:
-    *   SEOのための `title`, `description`, `og:image` は、各ページで動的に生成し、完全に最適化します。
+*   **メタデータ管理**:
+    *   **Dynamic Metadata**: ページタイトルは `[ページ名] | [サイト名]` の形式で統一し、サイト設定（DB）から動的に値を取得します。ハードコーディングは禁止です。
+    *   **Image Fallback**: OGPやコンテンツ画像がDBに存在しない場合、`public/assets` 内のデフォルト画像をフォールバックとして使用するロジックを実装し、画像欠損（404）を防ぎます。
 
 ## 7. コンポーネント設計とアクセシビリティ (Component Design & A11y)
 *   **アクセシビリティ (Accessibility - "Shift Left")**:
     *   **自動テスト**: CIで `axe-core` を実行し、コントラスト不足やラベル欠損を自動検知してブロックします。
-    *   **スクリーンリーダー**: 主要フローは必ずスクリーンリーダー（VoiceOver/TalkBack）で実機テストを行います。
-    *   **WAI-ARIA**: 「No ARIA is better than Bad ARIA」。可能な限りネイティブHTML要素を使用し、必要な場合のみARIA属性を付与します。
-    *   **Radix UI / Headless UI**: 複雑なコンポーネントは、アクセシビリティ対応済みのヘッドレスUIライブラリを使用します。
+    *   **Screen Reader**: 主要フローにおいて、スクリーンリーダー（VoiceOver/TalkBack）での実機テストを義務付けます。
+    *   **Icon Labels**: テキストを含まないアイコンのみのボタンには、必ず `aria-label` 属性を付与し、機能を明示します。
+    *   **WAI-ARIA**: "No ARIA is better than Bad ARIA". 可能な限りネイティブHTML要素を使用し、ARIA属性は必要最小限に留めます。
+    *   **Radix UI / Headless UI**: 複雑なコンポーネントには、アクセシビリティ対応済みのヘッドレスUIライブラリを使用します。
 *   **アトミックデザイン**:
     *   コンポーネントは再利用性を考慮して設計しますが、過度な抽象化は避けます。
 

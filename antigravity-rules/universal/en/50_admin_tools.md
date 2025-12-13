@@ -12,6 +12,10 @@
 *   **KPI Monitoring**:
     *   Always place widgets displaying key KPIs (MRR, DAU, Churn Rate, New Signups) in real-time.
     *   Maintain a state where "How the business is doing now" is visible at a glance.
+*   **UI/UX Standards**:
+    *   **Modal Visibility**: Key operational modals like media pickers must use **80% (80vw)** or more of screen width to ensure visibility. Narrow modals reduce work efficiency.
+    *   **Action Feedback**: Implement clear feedback for save/update actions using "Toast Notification" plus "Button Greenify + Text Change (Saved!)". Zero the time users wonder "Was it saved?".
+    *   **Copyright Automation**: Implement footer copyright year to update automatically in `[Start Year]–[Current Year]` format. Manual updates are abolished.
 *   **User Management**:
     *   **Search & Filter**: Implement features to instantly search/filter users by ID, email, status, billing plan.
     *   **Audit Trail**: Record all operations performed by admins (user deletion, refund, status change) as logs to track who did what when.

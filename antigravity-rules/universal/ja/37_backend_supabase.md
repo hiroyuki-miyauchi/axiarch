@@ -18,4 +18,11 @@
 *   **Gotrue**:
     *   認証フローはSupabase Auth (Gotrue) に完全に委任します。自前でのパスワードハッシュ化やセッション管理は禁止です。
 *   **Triggerによる自動化**:
-    *   ユーザー作成時の `public.users` テーブルへのコピーなどは、アプリケーション側ではなく、PostgreSQLのTrigger機能を使用してDB層でアトミックに実行します。データ不整合を防ぐためです。
+
+## 4. 運用とマイグレーション (Operations & Migration)
+*   **マイグレーション運用規定 (Migration Protocol)**:
+    *   **Remote Execution**: リモートデータベース（本番/Staging）へのスキーマ変更は、CLI (`db push`) の不安定さを回避するため、原則として **Supabase管理画面のSQLエディタ** でSQLを実行することを推奨します。
+    *   **Version Control**: 実行したSQLは必ず `supabase/migrations/` にファイルとして保存し、Git管理します。「誰がいつ何を実行したか」を追跡可能にします。
+*   **型安全性プロトコル (Type Safety Protocol)**:
+    *   **Internal Casting**: 複雑なJOINやViewに対してSupabaseクライアントの型推論が効かない（`never`等になる）場合に限り、クエリビルダ呼び出し箇所での `as any` キャストと、その直後の「明示的な型定義へのキャスト」を許可します（Internal Casting Pattern）。
+    *   **Restriction**: この例外処理以外での `any` の使用は引き続き厳禁です。
