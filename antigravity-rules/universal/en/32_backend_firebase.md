@@ -9,11 +9,11 @@
     *   **Async Processing**: Use **Cloud Pub/Sub** or **Eventarc** to execute heavy processing (email sending, image processing, aggregation) asynchronously to minimize user wait time.
 
 ## 2. Database Design (Firestore)
-*   **Data Integrity & Ownership**:
-    *   **Strict RLS**: Row Level Security (RLS) is absolute. All records must have an owner (`user_id`) or admin flag and be strictly controlled via Firestore Security Rules. "Publicly readable" data, other than Master Data, is prohibited.
-    *   **Explicit Ownership**: In create operations, mandatory validation must match the authenticated User ID (`request.auth.uid`) with the data's `user_id` field.
+*   **Integrity & Security**:
+    *   **Strict Security Rules**: Firestore Security Rules are absolute. Access control must be properly configured for all documents.
+    *   **Strict Validation**: Use `request.auth.uid` to restrict users to accessing only their own data.
 *   **Infinite Scalability**:
-    *   **No Select All**: Executing unlimited queries (e.g., `collection('posts').get()`) on the client side is **strictly prohibited**. Pagination or Cursor-based Infinite Scroll must be implemented for data potentially exceeding 1000 rows.
+    *   **No Unbounded Queries**: Executing unlimited queries (e.g., `collection('posts').get()`) on the client side is **strictly prohibited**. Implement pagination to control Firestore read costs and maintain performance.
     *   **Lazy Loading**: Fetch only necessary data on-demand.
 *   **NoSQL Modeling**:
     *   **Read-Optimized**: Design prioritizing Read performance over Write. Denormalize necessary data beforehand.

@@ -9,11 +9,11 @@
     *   **非同期処理**: ユーザーの待機時間を最小化するため、重い処理（メール送信、画像加工、集計）は **Cloud Pub/Sub** や **Eventarc** を使用して非同期に実行します。
 
 ## 2. データベース設計 (Database Design - Firestore)
-*   **整合性と所有権 (Data Integrity & Ownership)**:
-    *   **RLSの絶対遵守**: 行レベルセキュリティ（RLS）は絶対です。全てのレコードには所有者（`user_id`）または管理者フラグを持たせ、Firestore Security Rulesで厳密にアクセス制御します。「誰でも読める」データは、マスターデータ以外作りません。
-    *   **明示的な所有権**: 作成操作（create）において、認証済みユーザーID (`request.auth.uid`) を必ず検証し、データの `user_id` フィールドと一致させることを強制します。
+*   **整合性とセキュリティ (Integrity & Security)**:
+    *   **Security Rulesの絶対遵守**: Firestore Security Rulesは絶対です。全てのドキュメントには適切なアクセス制御を設定します。
+    *   **厳格な検証**: `request.auth.uid` を使用して、ユーザーが自分自身のデータにのみアクセスできるように制限します。
 *   **無限のスケーラビリティ (Infinite Scalability)**:
-    *   **Select All 禁止**: クライアントサイドで上限（Limit）のないクエリ（例: `collection('posts').get()`）を実行することは**厳禁**です。1000行を超える可能性のあるデータは、必ずページネーションまたは無限スクロール（カーソルベース）を実装します。
+    *   **Unbounded Queries 禁止**: クライアントサイドで上限（Limit）のないクエリ（例: `collection('posts').get()`）を実行することは**厳禁**です。Firestoreの読み取りコストを抑制し、パフォーマンスを維持するため、必ずページネーションを実装します。
     *   **遅延読み込み**: 必要なデータのみをオンデマンドで取得します。
 *   **NoSQLモデリング (NoSQL Modeling)**:
     *   **Read最適化**: 書き込み（Write）よりも読み取り（Read）のパフォーマンスを優先して設計します。必要なデータは事前に非正規化（Denormalization）して保存します。
