@@ -21,12 +21,16 @@
     * `antigravity-rules/blueprint/*.md` （現在の仕様）を確認する。
     * ユーザーの指示がこれらと矛盾しないか検証する。
 
-2.  **Blueprint First:**
-    * コードを書く前に、必ず `antigravity-rules/blueprint/` 内の仕様書を更新・定義する。
-    * **「コードがいきなり書かれること」を禁止します。**
+2.  **Blueprint First (Strategic Documentation):**
+    * **Major Changes (機能追加・DB変更・ロジック変更):**
+        * コードを書く前に、必ず `antigravity-rules/blueprint/` 内の仕様書を更新・定義する。
+        * 設計の整合性を保つため、ここをスキップすることは禁止です。
+    * **Minor Fixes (バグ修正・UI微調整・リファクタリング):**
+        * Blueprintの更新は不要です。即座にコード修正（Implementation）を行ってください。
 
 3.  **Full-Content Output:**
     * ファイルを作成・修正する際は、省略せずに**ファイル内容の全文**をコードブロックで出力する。
+    * `// ... rest of code` のような省略は禁止です。
 
 ## 3. Continuous Improvement (Rule Crystallization)
 **各タスクまたは作業セッションの最後に、以下の振り返りを必ず実施してください。**
@@ -34,11 +38,11 @@
 * **Trigger:** 作業の完了時、または重要な決定をした時。
 * **Action:**
     * 今回の作業で得られた「重要な気づき」「今後徹底すべきルール」「アンチパターン」がないかスキャンする。
-* **Output:**
-    * もし重要な知見があれば、`antigravity-rules/blueprint/` に新しいルールファイルとして追加、または既存ファイルに追記する。
-* **Naming Convention:**
-    * 新規作成時は、既存の番号に続く連番を付与する。
-    * 例: `03_naming_convention.md`, `04_supabase_policy.md` ...
+* **Output & Organization:**
+    * **Grouping:** 機能追加の際は、むやみに新規ファイルを作成せず、関連する既存のBlueprint（例: `02_auth.md`, `03_ui_components.md`）への追記を優先する。
+    * **New Feature:** 全く新しい概念の機能（例: 決済機能の初導入など）の場合のみ、新規ファイルを作成する。
+        * **重要:** 新規作成時は、必ず既存の `99_project_specific_template.md` の構成（見出し・項目）に準拠して作成すること。
+    * **Lessons:** プロジェクトを通じた教訓や運用ルールは `98_project_lessons.md` に集約して追記する。
 
 ---
 これより下の指示は、すべて上記ルールが適用された状態で処理されます。
