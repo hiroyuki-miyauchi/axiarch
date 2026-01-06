@@ -5,9 +5,12 @@
     *   QAプロセスを開発の最終工程ではなく、要件定義や設計段階から開始します。
     *   **静的解析**: ESLint, SwiftLint, Detektなどの静的解析ツールをCIに組み込み、コードレビュー前に自動的に問題を検出します。
 *   **テストピラミッド (Testing Pyramid)**:
-    *   **Unit Tests (70%)**: 実行速度が速く、安定しているユニットテストを基盤とします。カバレッジ目標は80%以上としますが、数値よりも「重要なロジックの網羅」を重視します。
+    *   **Unit Tests (70%)**: 実行速度が速く、安定しているユニットテストを基盤とします。カバレッジ目標は80%以上としますが、数値よりも「重要なロジックの網羅」を重視します。UIコンポーネントの単体テストはコスト対効果が低いため推奨しません。
     *   **Integration Tests (20%)**: APIとDB、コンポーネント間の連携を確認します。
-    *   **E2E Tests (10%)**: ユーザーのクリティカルパス（登録、決済、主要機能）のみを対象とし、メンテナンスコストを抑えます。
+    *   **E2E Tests (10%)**: ユーザーのクリティカルパス（登録、決済、主要機能）のみを対象とし、メンテナンスコストを抑えます。決済・ログイン等の重要フローのみ自動化します。
+    *   **Priority**: 1. Type Check(tsc) > 2. Lint > 3. Manual > 4. E2E > 5. Unit. 静的解析（tsc）こそが最強のテストです。
+*   **モック戦略 (Mock First Strategy)**:
+    *   **Offline Dev**: 外部API（Stripe, SendGrid）がない状態でも開発できるよう、`MOCK_MODE` を実装します。APIキーがない場合は自動的にモックが応答し、開発を止めません。
 
 ## 2. 不安定なテストの排除 (Flaky Test Management)
 *   **即時対応 (Immediate Action)**:
@@ -21,8 +24,15 @@
 *   **フラグメンテーション対策**:
     *   **Android**: 主要メーカー（Samsung, Pixel, Xiaomi）や異なるOSバージョンでの動作を、BrowserStackやAWS Device Farmを用いて確認します。
     *   **ネットワーク**: オフライン、3G（低速）、機内モードからの復帰など、不安定なネットワーク環境での挙動をテストします。
+*   **手動検証プロトコル (Manual Verification Protocol)**:
+    *   機能実装完了時には、以下の観点で検証を行う義務があります。
+    *   **Checklist**: Happy Path, Edge Cases (0件/最大値), Cross-Device, Role Access, API Security (Bypass確認), Layout Stability (二重スクロールなし)。
 
-## 4. リリース判定 (Release Criteria)
+## 4. 再発防止 (Fix Twice Principle)
+*   **Double Fix**:
+    *   バグを修正する際は、「そのバグを直す (Fix Once)」だけでなく、「二度と同じバグが起きない仕組み（Lint追加、型厳格化、テスト追加）を作る (Fix Twice)」までをワンセットとします。
+
+## 5. リリース判定 (Release Criteria)
 *   **ブロッカー (Blockers)**:
     *   P0（クリティカル）およびP1（メジャー）のバグが残っている状態でのリリースは**絶対禁止**です。
     *   **0 Warnings**: コンソールやビルドログにWarningが残っている状態でのリリースも禁止します。

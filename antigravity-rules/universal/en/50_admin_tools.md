@@ -1,59 +1,72 @@
 # 50. Admin Operations & Internal Tools
 
-## 1. Build vs Buy Strategy - "Retool First"
+## 1. Build vs Buy Strategy ("Retool First")
 *   **Retool First Policy**:
-    *   **Rule**: **Scratch development (React/Flutter) is prohibited in principle** for Admin Panels, CS tools, and Operation Dashboards.
-    *   **Solution**: Make **Retool** the first choice, reducing build time from "weeks" to "hours". Focus engineer resources on Core Product for users.
-    *   **Exception**: Scratch development is allowed only for dashboards directly used by customers (end users) or when advanced UI/UX impossible with Retool is required.
+    *   **Rule**: Building Admin Panels and CS Dashboards from scratch (React/Flutter) is **generally prohibited**.
+    *   **Solution**: Use **Retool** as the first choice to cut dev time from weeks to hours. Focus engineering resources on Core Products.
+    *   **Exception**: Scratch development is allowed only for client-facing dashboards or complex UI/UX not possible in Retool.
 
 ## 2. Admin Dashboard Requirements
 *   **Mobile First Admin**:
-    *   **Emergency Response**: Admins may perform emergency responses (User BAN, Refund Approval) while out or moving. Guarantee **mobile operability** even for admin screens.
+    *   **Emergency**: Admins may handle bans or refunds on the go. Admin panels must be mobile-friendly.
 *   **KPI Monitoring**:
-    *   Always place widgets displaying key KPIs (MRR, DAU, Churn Rate, New Signups) in real-time.
-    *   Maintain a state where "How the business is doing now" is visible at a glance.
+    *   Always display real-time widgets for KPI (MRR, DAU, Churn).
 *   **UI/UX Standards**:
-    *   **Modal Visibility**: Key operational modals like media pickers must use **80% (80vw)** or more of screen width to ensure visibility. Narrow modals reduce work efficiency.
-    *   **Action Feedback**: Implement clear feedback for save/update actions using "Toast Notification" plus "Button Greenify + Text Change (Saved!)". Zero the time users wonder "Was it saved?".
-    *   **Copyright Automation**: Implement footer copyright year to update automatically in `[Start Year]–[Current Year]` format. Manual updates are abolished.
+    *   **Modal Visibility**: Use **80vw+** for main task modals (e.g., Media Picker). Small modals kill productivity.
+    *   **Action Feedback**: Use "Toast" + "Button Green/Text Change" for clear feedback. Zero ambiguity.
+    *   **Copyright Automation**: Auto-update copyright year `[Start]–[Current]`. No Manual updates.
+*   **Information Density Strategy**:
+    *   **Card Strategy**: Use white cards (`bg-white shadow-sm`) for content areas, separated from background (`bg-muted/40`).
+    *   **Action Placement**: Place primary actions like "Save" at the top right of the header.
+    *   **Layman Accessibility**: Avoid technical jargon like "Slug", "UUID". Use plain words like "URL Identifier". Tooltips are mandatory for all inputs.
+    *   **Visual Theme Editor**: Implement a Theme Editor in "Site Settings" to allow intuitive design changes with real-time preview.
 *   **User Management**:
-    *   **Search & Filter**: Implement features to instantly search/filter users by ID, email, status, billing plan.
-    *   **Audit Trail**: Record all operations performed by admins (user deletion, refund, status change) as logs to track who did what when.
-*   **Impersonation / Masquerade**:
-    *   Implement a feature (Impersonation) for admins to login as a specific user and check the same screen for CS support.
-    *   **Security**: Restrict this feature to Super Admins only and always log usage.
-
+    *   **Search & Filter**: Instant filtering by ID, Email, Status, Plan.
+    *   **Audit Trail**: Log all admin actions (Delete, Refund, Status Change).
+*   **Impersonation**:
+    *   Allow Admins to log in as users for support. Strict permissions and logging required.
 
 ## 3. Content Management Strategy
 *   **No Raw HTML**:
-    *   **Principle**: It is **strictly prohibited** for admins to directly write or edit HTML tags in the admin panel. This causes XSS vulnerabilities and destroys design consistency.
-    *   **Block Editor**: If article creation features are needed, introduce a Block-based Editor like **Tiptap** or a Headless CMS.
-    *   **Structured Data**: Save content as JSON structure, not HTML strings, separating the presentation layer from data.
-*   **Custom Fields UI**:
-    *   For map or video embedding, do not paste iframe codes. Provide dedicated fields (Address input, YouTube ID input) and safely generate tags on the frontend side.
+    *   **Principle**: Admins strictly prohibited from editing Raw HTML. Prevents XSS and design breakage.
+    *   **Block Editor**: Use **Tiptap** or Headless CMS.
+    *   **Structured Data**: Store content as JSON, not HTML strings.
+*   **Custom Fields**:
+    *   Use dedicated fields for Video IDs or Maps instead of iframe pasting.
 
 ## 4. Operational Workflow
 *   **Approval Flows**:
-    *   Always incorporate "Approval Flows (Double Check)" for irreversible or high-risk operations like refund, physical data deletion, notification to all users. Utilize Retool's approval workflows.
+    *   Require double-check/approval for high-risk actions (Refunds, Physical Delete).
 *   **Alerting Integration**:
-    *   Build integration to instantly notify Slack or Email when system errors (surge in 5xx) or abnormal KPI fluctuations (surge in churn) occur.
-    *   Create a mechanism to notice abnormalities without checking the admin screen.
+    *   Notify Slack/Email immediately on System Errors (5xx spike) or Biz Anomalies (Churn spike).
 
 ## 5. Data Import & Export
 *   **Bulk Operations**:
-    *   **Async Processing**: Execute CSV exports or bulk updates exceeding thousands of records as **background jobs** (Cloud Tasks, etc.) to prevent timeouts. Notify via email or notification upon completion.
-    *   **Validation**: For import features, always implement a "Preview Screen" to display error rows (type mismatch, missing required fields) and allow correction before execution. Writing directly to DB without review is prohibited.
+    *   **Async**: CSV exports/updates >1000 rows must be background jobs.
+    *   **Validation**: Always show a "Preview" with error validation before committing to DB.
 
 ## 6. Support & FAQ
-*   **SLA (Service Level Agreement)**:
-    *   **First Response**: React **instantly** (including auto-response) to user inquiries, and aim for first response within **24 hours** even for human support.
+*   **SLA**:
+    *   **Response**: Instant auto-reply, 24h human response target.
 *   **FAQ Management**:
-    *   Immediately add frequently asked items to FAQ (Help Center) to increase self-resolution rate. Manage FAQ with CMS (Notion or Zendesk Guide) so non-engineers can update.
+    *   Move frequent queries to FAQ immediately. Managed by CS (Notion/Zendesk), not engineers.
 *   **Chat Support**:
-    *   **Intercom / Zendesk**: Introduce in-app chat support to solve user issues in real-time. Utilize AI bots (Fin etc.) to automate first response.
+    *   Use Intercom/Zendesk with AI bots for first response.
 
 ## 7. Security & Access Control
-*   **RBAC (Role-Based Access Control)**:
-    *   Set permission levels (Super Admin, Support, Analyst) for admins and allow access only to necessary information (Least Privilege).
+*   **RBAC**:
+    *   Role-Based access (Super Admin, Support, Analyst). Least privilege.
 *   **IP Restriction**:
-    *   Allow access to admin screens only via VPN or specific IP addresses to prevent external attacks.
+    *   Restrict Admin access to VPN or specific IPs.
+
+## 8. Admin Operations Protocols
+
+### 8.1. The Admin Hygiene Protocol (Native Language UI)
+*   **Law**: "It's just an admin panel" is an excuse that lowers the productivity of non-engineer operators.
+*   **Action**:
+    *   **Full Localization**: Every text on the screen (Labels, Errors, Log Actions) must be in the **Project Native Language** defined in `GEMINI.md`.
+    *   **Mapping**: Always use mapping constants to display Enum values or System Identifiers.
+
+### 8.2. The System Transparency Protocol (Tech Stack Sync)
+*   **Context**: Ops/Execs lose trust if the tech stack is a black box.
+*   **Law**: When the tech stack changes (New DB, New AI Model), update the "Tech Stack Card" on the dashboard immediately to reflect reality.

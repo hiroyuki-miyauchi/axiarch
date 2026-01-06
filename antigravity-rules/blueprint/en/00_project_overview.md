@@ -1,32 +1,26 @@
-# [Project Name] Specific Rules / 固有開発ルール
+# [Project Name] Specific Rules
 
 > [!NOTE]
-> **Inheritance / 継承**:
+> **Inheritance**:
 > This document inherits all rules from `README.md` and the `universal/` directory.
-> このドキュメントは `README.md` および `universal/` 以下の全ルールを継承する。
 >
-> **Priority / 優先順位**:
+> **Priority**:
 > Specific rules here may override general rules, but the **Core Philosophy** is absolute.
-> 汎用ルールと矛盾する場合は、より具体的な本ルールが優先される場合があるが、基本哲学（Core Philosophy）は絶対である。
 
 ---
 
-## 1. Project Vision & Strategy / プロジェクトビジョンと戦略
+## 1. Project Vision & Strategy
 *   **Mission (What & Why)**:
     *   *Ex: The world's most beautiful AI-driven ToDo app. To eliminate existing cognitive load.*
-    *   *例: 世界で最も美しい、AI駆動のToDoアプリ。既存の認知負荷を解消するため。*
 *   **Target Audience**:
     *   *Ex: Engineers in Silicon Valley, 30s.*
-    *   *例: 30代、シリコンバレーのエンジニア。*
 *   **North Star Metric**:
     *   *Ex: User free time created per day.*
-    *   *例: ユーザーの1日あたりの自由時間創出量。*
 *   **Unit Economics Goals**:
     *   LTV: $XXX, CAC: $YYY
 
-## 2. Technology Stack Selection / 技術スタック選定
+## 2. Technology Stack Selection
 > Based on General Rules (Flutter/Firebase/Next.js), define specific configuration here.
-> 汎用ルール（Flutter/Firebase/Next.js）に基づき、本プロジェクトでの具体的な構成を定義する。
 
 *   **Mobile**: Flutter (Riverpod, GoRouter)
 *   **Backend**: Firebase (Auth, Firestore, Functions)
@@ -35,7 +29,7 @@
 *   **Architecture Decision Records (ADR)**:
     *   *Link to ADR folder or list key decisions here.*
 
-## 3. Design Identity / デザインアイデンティティ
+## 3. Design Identity
 *   **Theme**: [Ex: Minimal, Dark Mode default]
 *   **Colors**: Primary `[Code]`, Secondary `[Code]`
 *   **Key Gestures**: [Ex: Swipe-to-archive]
@@ -47,16 +41,16 @@
 *   **Code Quality**:
     *   Test Coverage: > 80%
 
-## 5. AI Strategy & Prompts / AI戦略
+## 5. AI Strategy & Prompts
 *   **System Prompts**:
     *   *Define the persona and constraints for AI features.*
 *   **Model Selection Rationale**:
     *   *Why Gemini for X? Why GPT-4 for Y?*
 
-## 6. Specific Business Rules / 固有ビジネスルール
+## 6. Specific Business Rules
 *   **Feature A**: ...
 *   **Feature B**: ...
 
-## 7. Project Specific Operations / プロジェクト固有の運用
+## 7. Project Specific Operations
 *   **Deploy Schedule**: ...
 *   **Special Security Requirements**: ...

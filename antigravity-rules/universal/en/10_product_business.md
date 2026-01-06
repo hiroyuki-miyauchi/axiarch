@@ -70,10 +70,10 @@
 ## 6. Legal & Compliance Perspective
 *   **Terms of Service & Privacy Policy**:
     *   Must be established before service launch, and user consent flow (checkboxes, etc.) must be embedded in the UI. Avoid "deemed consent" and obtain explicit consent.
-*   **Act on Specified Commercial Transactions**:
-    *   If selling for a fee, strictly implement the notation based on the Act on Specified Commercial Transactions.
-*   **Payment Services Act**:
-    *   When issuing prepaid payment instruments (points, coins), always be aware of the line where the deposit obligation arises (10 million yen) and report to the Finance Bureau if necessary.
+*   **Local Commercial Laws**:
+    *   If selling for a fee, strictly implement the notation based on **local laws** (e.g., Tokusho-ho).
+*   **Prepaid Instrument Regulations**:
+    *   When issuing prepaid payment instruments (points, coins), always be aware of the line where the deposit obligation arises (e.g., threshold amount in local currency) and report to relevant authorities if necessary.
 
 ## 7. Organizational DNA Frameworks
 *   **Working Backwards (Amazon)**:

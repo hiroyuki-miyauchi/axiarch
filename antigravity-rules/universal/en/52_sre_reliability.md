@@ -28,6 +28,7 @@
 *   **Definitions**:
     *   **SLI (Indicator)**: Metrics to measure (e.g., HTTP success rate, latency).
     *   **SLO (Objective)**: Target level (e.g., 99.9% availability).
+    *   **The 99.9% Promise**: Target 99.9% monthly uptime. Planned maintenance requires 72-hour advance notice.
 *   **Error Budget**:
     *   **Policy**: If Error Budget is depleted, **freeze new feature releases**. Dedicate 100% of engineering resources to reliability improvement. This is an agreement with management.
 
@@ -36,6 +37,7 @@
     *   **Purpose**: Pursue "Why the system failed", not "Who was wrong".
     *   **Documentation**: After major incidents (SEV-1/SEV-2), always create a Post-mortem report and agree on Action Items to prevent recurrence.
     *   Prepare Playbooks for specific scenarios ("When DB vanishes", "When API is down") in advance.
+    *   **The 15-Minute Rule**: Start initial response within 15 mins for critical incidents. Target 4-hour recovery.
 *   **On-Call**:
     *   **Rotation**: Rotate on-call duty using PagerDuty etc. to avoid concentrating burden on specific individuals.
     *   **Escalation**: Set auto-escalation rules if the primary responder does not react.
@@ -46,3 +48,8 @@
     *   **Logs**: Detailed event records. Used for debugging.
     *   **Traces**: Request path tracking. Used for bottleneck identification.
     *   Introduce tools (Datadog, Cloud Monitoring) that can monitor these integrally.
+
+## 7. Data Durability
+*   **RPO / RTO**:
+    *   **RPO (Recovery Point)**: **24 hours**. Backup daily.
+    *   **RTO (Recovery Time)**: **2 hours**. Maintain procedures to restart within 2 hours.

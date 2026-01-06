@@ -1,24 +1,27 @@
-# Google Antigravity Development Rules
+# Creating Strict Rules (Project Antigravity)
 
-> **The Absolute Constitution for AI-Native Development**
-> シリコンバレーのトップティア基準を網羅した、Google Antigravityプロジェクトの絶対的な開発ルールセット。
-> **Now Fully Bilingual (Japanese & English) / 日英完全対応**
+> **Google Antigravity Rule Generator / Master Repository**
 
-## 📂 Repository Structure
+### 🇯🇵 日本語 (Primary)
 
-*   **[antigravity-rules/](./antigravity-rules/)**: **The Core Ruleset**.
-    *   **[README.md (Master Index)](./antigravity-rules/README.md)**: 👈 **Start Here / まずはこちら**
-    *   **universal/**: Immutable Global Standards (不変の汎用ルール)
-    *   **blueprint/**: Mutable Project Specifics (プロジェクト固有の設計図)
+このリポジトリは、AIネイティブ開発のための厳格な憲法「Creating Strict Rules (Antigravity)」の**マスターソース（原本）**です。
+ここで定義されているルールセットをあなたのプロジェクトにコピーすることで、AIエージェントに対する強力なガバナンスと、シリコンバレー水準の品質管理を即座に導入できます。
 
-## 🚀 How to Use / 使い方
+#### 📚 利用ガイド (Usage)
 
-1.  **Copy**: Copy the `antigravity-rules/` folder to your project root.
-    *   `cp -r antigravity-rules /path/to/your/project/`
-2.  **Configure**: Edit `antigravity-rules/blueprint/00_project_overview.md` to define your project's specific mission and constraints.
-3.  **Develop**: The AI Development Team will strictly adhere to these rules to deliver Silicon Valley quality code.
+ルールの導入方法、初期化手順、各ルールの詳細は、以下のドキュメントをご覧ください。
 
-## ⚠️ Governance
+*   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **詳しい導入マニュアルはこちら**
 
-*   **Universal Rules (`universal/`)**: **READ-ONLY**. Do not edit unless the global standard itself changes (requires Double Confirmation).
-*   **Specific Rules (`blueprint/`)**: **Mutable**. Customize freely for your project.
+---
+
+### 🇺🇸 English (Secondary)
+
+This repository is the **Master Source** of the "Creating Strict Rules (Antigravity)" framework, strictly designed for AI-Native development.
+By copying the ruleset defined here into your project, you can instantly enforce strict governance and Silicon Valley-tier quality standards for your AI Agents.
+
+#### 📚 Usage Guide
+
+For installation instructions, initialization steps, and detailed rule explanations, please refer to:
+
+*   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **See Installation Manual Here**

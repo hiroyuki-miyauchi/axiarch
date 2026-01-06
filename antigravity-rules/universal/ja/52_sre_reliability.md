@@ -14,7 +14,7 @@
 *   **ロールバック**:
     *   デプロイ失敗時、ボタン1つで即座に前のバージョンに戻せる（Rollback）状態を常に維持します。
 
-## 2. 互換性マトリクス (Compatibility Matrix - "Zero Tolerance")
+## 3. 互換性マトリクス (Compatibility Matrix - "Zero Tolerance")
 *   **ブラウザ (Browsers)**:
     *   **Tier 1 (完全サポート)**: Chrome (Latest 2), Safari (Latest 2), Edge (Latest 2), Firefox (Latest 2)。これらでのレイアウト崩れや機能不全は**リリースブロッカー**です。
     *   **Tier 2 (動作保証)**: iOS Safari (Latest 2), Android Chrome (Latest 2)。
@@ -24,25 +24,41 @@
 *   **実機テスト**:
     *   シミュレーターだけでなく、BrowserStack等を使用して、実際のデバイス（特に低スペックなAndroid端末）での動作を確認します。
 
-## 3. SLI / SLO (Service Level Objectives)
+## 4. SLI / SLO (Service Level Objectives)
 *   **定義**:
     *   **SLI (Indicator)**: 計測すべき指標（例: HTTPリクエストの成功率、レイテンシ）。
     *   **SLO (Objective)**: 目標とする水準（例: 99.9%の可用性）。
+    *   **The 99.9% Promise**: 月間稼働率 99.9% (停止約43分以内) を目標とし、計画メンテは72時間前通知を義務付けます。
 *   **エラーバジェット (Error Budget)**:
     *   **ポリシー**: エラーバジェットが枯渇した場合、**新機能のリリースを凍結（Feature Freeze）**します。エンジニアリングリソースの100%を信頼性向上に充てます。これは経営陣との合意事項です。
 
-## 4. インシデント管理 (Incident Management)
+## 5. インシデント管理 (Incident Management)
 *   **Blameless Post-mortem (非難なき振り返り)**:
     *   **目的**: 「誰が悪かったか」ではなく「なぜシステムが失敗したか」を追求します。
     *   **ドキュメント**: 重大なインシデント（SEV-1/SEV-2）発生後は、必ずポストモーテム（事後検証レポート）を作成し、再発防止策（Action Items）を合意します。
     *   「DBが消えた時」「APIがダウンした時」などの具体的な対応手順書（Playbook）を事前に用意します。
+    *   **The 15-Minute Rule**: 重大障害時は検知から15分以内に一次対応を開始し、4時間以内の復旧を目指します。
 *   **オンコール (On-Call)**:
     *   **ローテーション**: 特定の個人に負担が集中しないよう、PagerDuty等を用いてオンコール担当をローテーションします。
     *   **エスカレーション**: 一次対応者が反応しない場合の自動エスカレーションルールを設定します。
 
-## 5. 可観測性 (Observability)
+## 6. 可観測性 (Observability)
 *   **3本の柱**:
     *   **Metrics**: 数値データ（CPU使用率、RPS）。傾向把握に使用。
     *   **Logs**: イベントの詳細記録。デバッグに使用。
     *   **Traces**: リクエストの経路追跡。ボトルネック特定に使用。
     *   これらを統合的に監視できるツール（Datadog, Cloud Monitoring）を導入します。
+
+## 7. データ耐久性 (Data Durability)
+*   **RPO / RTO**:
+    *   **RPO (Recovery Point)**: **24時間**。毎日バックアップを取得し、最悪でも前日の状態に復元可能にします。
+    *   **RTO (Recovery Time)**: **2時間**。バックアップからのリストア手順を確立し、2時間以内にサービス再開できる体制を維持します。
+
+## 8. 保守とレジリエンス (Maintenance & Resilience)
+*   **メンテナンスモード (Maintenance Mode)**:
+    *   **Switch**: メンテナンス状態はDB設定（`site_settings`）で管理し、MiddlewareとServer Actionsの両方でチェックします。裏口からの書き込みを物理的にブロックします。
+*   **Circuit Breaker**:
+    *   外部API呼び出しにはタイムアウトを設定し、障害時はデフォルト値を返します（Fail Safe）。
+*   **Job Queue**:
+    *   メール送信や画像解析などの重い処理は、APIレスポンスサイクルから切り離し、**Supabase Edge Functions + pgmq** で非同期実行します。
+

@@ -63,7 +63,31 @@
 
 ---
 
-## 🚀 How to Use
-1.  **Project Setup**: プロジェクト開始時に `antigravity-rules/` フォルダをルートに配置。
-2.  **Specific Rules**: `blueprint/` フォルダを作成し、その中に `00_overview.md` 等を作成して固有ルールを記述する。
-3.  **Enforcement**: 開発チーム（AI）は、常にこれらのファイルを参照し、ルールに準拠しているか自己監査を行う。
+## 🚀 Antigravity Setup & Initialization (導入と初期化)
+
+### 🇯🇵 日本語ガイド (Usage in Japanese)
+
+1.  **コピー (Copy)**: `antigravity-rules/` フォルダと `GEMINI.md` (Cursor派は `.cursorrules` も) をプロジェクトのルートにコピーします。
+    *   `cp -r antigravity-rules GEMINI.md .cursorrules /path/to/your/project/`
+
+2.  **初期化 (Initialize)**:
+    *   **`GEMINI.md` の編集**: `Project Native Language` を `Japanese` に設定します。
+    *   **クリーンアップ (Cleanup)**: 使用しない英語のルールのディレクトリを削除します。
+        *   `rm -rf antigravity-rules/universal/en antigravity-rules/blueprint/en`
+3.  **設定 (Configure)**: `antigravity-rules/blueprint/ja/01_project_lessons_log.md`（およびその他の青写真）を編集し、プロジェクト固有の要件を定義します。
+
+4.  **開発開始 (Start)**: AI開発チームは、これらのルールを厳格に遵守して開発を行います。
+
+### 🇺🇸 English Guide (Usage in English)
+
+1.  **Copy**: Copy the `antigravity-rules/` folder and `GEMINI.md` (and `.cursorrules` for Cursor users) to your project root.
+    *   `cp -r antigravity-rules GEMINI.md .cursorrules /path/to/your/project/`
+
+2.  **Initialize**:
+    *   **Edit `GEMINI.md`**: Set `Project Native Language` to `English`.
+    *   **Cleanup**: Delete the unused Japanese language directory.
+        *   `rm -rf antigravity-rules/universal/ja antigravity-rules/blueprint/ja`
+3.  **Configure**: Edit `antigravity-rules/blueprint/en/01_project_lessons_log.md` (and other blueprints) to define your project's specifics.
+
+4.  **Develop**: The AI Development Team will strictly adhere to these rules.
+

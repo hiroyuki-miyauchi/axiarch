@@ -1,99 +1,118 @@
-# 30. Engineering Excellence - General
+# 30. Engineering Excellence (General)
 
 ## 1. Code Quality & Clean Code
 *   **Clean Code Standards**:
-    *   **Self-Documenting**: Use comments to explain "Why", let the code explain "What".
-    *   **Function Size**: Functions do "one thing". Ideally keep within **20 lines**.
-    *   **Naming**: Variable names must be specific and clear. Vague names like `data`, `temp`, `item` are prohibited (e.g., `userData` -> `authenticatedUserProfile`).
+    *   **Self-Documenting**: Comments explain "Why", Code explains "What".
+    *   **Function Size**: One function, one job. Ideally **under 20 lines**.
+    *   **Naming**: Clear and descriptive names. No `data`, `temp` (e.g., `userData` -> `authenticatedUserProfile`).
+*   **Blueprint Compliance**:
+    *   **Entry Point**: All development work starts by checking `000_blueprint_index.md` (or corresponding rule files).
+    *   **Update First**: If design changes are needed during implementation, **update the Blueprint before (or while) coding**. Discrepancy between docs and code is the biggest technical debt.
 *   **Zero Warnings**:
-    *   **Rule**: Treat Warnings as Errors. CI fails if there is even one warning. Prevent "Broken Windows Theory".
-    *   **Strict Error Handling**: Empty `catch` blocks are prohibited. All errors must be logged and handled appropriately.
+    *   **Rule**: Warnings are Errors. CI fails on a single warning.
+    *   **Strict Error Handling**: No empty `catch` blocks.
 *   **Refactoring (The Boy Scout Rule)**:
-    *   **Mandate**: "Leave the campground cleaner than you found it." Always make small improvements (renaming, function extraction) when touching a file.
-    *   **No "Later"**: "I'll refactor later" is a lie. Do it now, or never.
-    *   **Cyclomatic Complexity**: Code with high complexity (deep nesting) is a breeding ground for bugs. Use Early Return to keep nesting shallow.
+    *   **Mandate**: Leave the code cleaner than you found it.
+    *   **No "Later"**: Refactor now or never.
+    *   **Cyclomatic Complexity**: Keep nesting shallow. Use Early Returns.
 *   **Cleanup**:
-    *   **Immediate Dead Code Deletion**: Commented-out code, unused imports, and debug `console.log` must be completely deleted before commit.
-    *   **TODO Management**: If leaving `// TODO:`, always include a ticket number or deadline. Abandoned TODOs are technical debt.
+    *   **Dead Code**: Delete immediately. No commented out code, no unused imports, no console.logs.
 
-## 2. Performance & Optimization - The "Speed"
+## 2. Infrastructure & Performance
+*   **Infrastructure Standard (The Golden Quad)**:
+    *   **Managed Hosting**: Use managed hosting (e.g., Vercel Pro) with DDoS protection and scalability.
+    *   **BaaS**: Use BaaS (e.g., Supabase) with integrated DB and backups as the "Single Source of Truth".
+    *   **Edge Shield**: Deploy Edge WAF/CDN (e.g., Cloudflare) to absorb attacks and load at the edge.
+    *   **Email Deliverability**: Adopt email infrastructure (e.g., Resend) with excellent DX and deliverability.
 *   **Read-Optimized Architecture**:
-    *   **Pre-calculation**: Do not calculate ranking, aggregation, or complex filtering results per request (On-the-fly). Calculate them beforehand (at update or periodic batch) and save to DB columns (e.g., `ranking_score`, `total_sales`).
-    *   **CQRS**: Separate Read and Write models. Recommend using Denormalized read-only tables or Materialized Views for the Read side.
+    *   **Pre-calculation**: Store calculated values (ranking, total sales) in DB columns. No on-the-fly calculation.
+    *   **CQRS**: Separate read and write models. Use materialized views.
 *   **Performance Budgets**:
-    *   **Lighthouse Score**: Maintain **90+** in all categories: Performance, Accessibility, Best Practices, SEO (Green).
-    *   **Core Web Vitals**: Strictly adhere to LCP (<2.5s), FID (<100ms), CLS (<0.1).
+    *   **Lighthouse**: Maintain **90+** on all metrics.
+    *   **Core Web Vitals**: Strict adherence to LCP, FID, CLS limits.
 *   **Asset Optimization**:
-    *   **Images**: Enforce next-gen formats (AVIF/WebP). Use optimization components like `next/image`.
-    *   **Lazy Loading**: Lazy load all assets except those in the First View (Above the fold).
+    *   **Images**: Force AVIF/WebP. Use optimization components.
+    *   **Lazy Loading**: Lazy load everything below the fold.
 
-## 3. Security by Design - DevSecOps
+## 3. Security by Design (DevSecOps)
 *   **Zero Trust**:
-    *   Suspect all inputs (user input, API responses). Validation is performed on both client and server.
+    *   Trust no input. Validate on both client and server.
 *   **Secrets Management**:
-    *   Do not commit API keys or secret keys to code. Use `.env` files and Secret Managers.
+    *   Never commit secrets. Use `.env` and secret managers.
 
 ## 4. Technical Debt & Cleanup
 *   **Debt Paydown**:
-    *   **20%** of the sprint is dedicated to paying down technical debt (refactoring, library updates).
+    *   Allocate **20%** of sprint to debt repayment.
 *   **Tech Radar**:
-    *   **Regular Updates**: Update dependencies quarterly and always maintain "Safe Bleeding Edge".
+    *   Update dependencies quarterly. Stay "Bleeding Edge" but safe.
 *   **Digital 5S**:
-    *   **Seiri (Sort)**: Immediately delete unused code (Dead Code), images, and files. Do not leave commented-out code.
+    *   **Seiri**: Delete unused code and files immediately.
 
 ## 5. AI-First Engineering
 *   **Prompt Driven Development (PDD)**:
-    *   **Principle**: Code is not written by humans, but by AI. The "Prompt" is the true source code.
-    *   **AI Friendly**: Variable and function names should be extremely Descriptive so AI can easily understand the context (e.g., `daysSinceLastLogin` instead of `x`).
+    *   **Principle**: The prompt is the source code.
+    *   **AI Friendly**: Use descriptive naming (e.g., `daysSinceLastLogin`) for AI context.
 *   **RAG Optimization**:
-    *   **Modularization**: Keep file sizes small (Atomic) to avoid overwhelming the AI's context window.
-    *   **Semantic Structure**: Organize directory structure by Feature to make it easier for AI to find related files.
+    *   **Modular**: Keep files small (Atomic).
+    *   **Semantic Structure**: Organize by feature for retrieval.
 
 ## 6. Green Coding & Sustainability
 *   **Energy Efficiency**:
-    *   **Algorithms**: Be conscious of computational complexity (Big O) and write code that does not waste CPU cycles. This protects both battery life and the global environment.
-    *   **Dark Mode**: Recommend True Black (#000000) Dark Mode to reduce power consumption on OLED devices.
+    *   **Algorithm**: Optimize O-notation to save battery and planet.
+    *   **Dark Mode**: Recommend True Black (#000000) for OLED power saving.
 *   **Data Transfer**:
-    *   **Compression**: Always optimize images and videos (AVIF/H.265) to prevent waste of network bandwidth.
+    *   **Compression**: Optimize images and video (AVIF/H.265).
+    *   **Cache Maximization**: Aim for **80%+** CDN cache hit ratio to minimize origin load for static assets.
+    *   **Centralized Storage Shield**: Centralize image origins in BaaS Storage and route delivery via CDN Optimization features to balance cost and performance.
 
-## 7. The "Zero Bug Policy"
-*   **Fix First**:
-    *   Do not develop new features while known bugs exist. Bug fixing is the top priority.
-*   **24-Hour Rule**:
-    *   Critical bugs (data loss, security, major feature outage) must be fixed within **24 hours** of discovery.
+## 7. Zero Bug Policy
+*   **Fix First**: No new features with known bugs. Fixing is top priority.
+*   **24-Hour Rule**: Critical bugs must be fixed within **24 hours**.
 
-## 7. Continuous Learning & Verification
+## 8. Continuous Learning & Verification
 *   **Latest Info Protocol**:
-    *   **Before Dev**: Before writing code, always check the official documentation and latest release notes of the target technology (e.g., "Next.js 15 breaking changes", "Swift 6 concurrency"). Implementation based on old information is a source of rework.
-    *   **Deprecation Check**: Check if the API you are about to use is Deprecated.
-*   **Trend Awareness**:
-    *   Constantly catch up with the latest Silicon Valley trends (AI Agents, Privacy Manifests, etc.) and keep evolving the rules themselves.
+    *   **Before Coding**: Check official docs and release notes. Old info triggers rework.
+*   **Trend Awareness**: Catch up with Silicon Valley trends (Agents, Privacy Manifests).
 
-## 8. Compatibility & Testing
-*   **Real Device Testing**:
-    *   Test not only on simulators but always on real devices (iOS, Android). Hardware features like Camera, GPS, Biometrics require real devices.
-*   **Browser Compatibility**:
-    *   Support the latest 2 versions of Chrome, Safari (iOS/macOS), Firefox, Edge. Pay special attention to Safari (iOS) specific bugs (100vh issue, etc.).
-*   **Self-Check List**:
-    *   Before submitting a PR, developers review their own code and confirm "Zero Warnings", "No Console Errors", "No Unnecessary Logs".
+## 9. Compatibility & Testing
+*   **Real Device Testing**: Test on physical iOS/Android devices.
+*   **Browser Compatibility**: Support last 2 versions of major browsers. Watch out for Safari bugs.
+*   **Self-Check**: Zero warnings, no clean logs before PR.
 
-## 9. Git & Version Control
-*   **Trunk Based Development**:
-    *   **Principle**: Abolish long-lived branches and merge short-lived branches into `main` frequently (daily).
-    *   **Stacked Diffs**: Recommend stacking small dependent PRs instead of giant PRs.
-*   **Commit Messages (Conventional Commits)**:
-    *   Strictly adhere to `type(scope): subject` format (e.g., `feat(auth): add google login`). Describe details in Japanese in the body.
-*   **Pull Requests**:
-    *   **100 Lines Rule**: Keep PRs small.
-    *   **Protection**: Direct push to `main` is prohibited; CI pass and review approval are mandatory.
-*   **Security**:
-    *   Never commit secrets like API keys; use `.env`. Mandate secret scanning (TruffleHog) in CI.
+## 10. Git & Version Control
+*   **Trunk Based Development**: Short-lived branches, daily merges.
+*   **Conventional Commits**: Strict `type(scope): subject` format.
+    *   **Atomic Commits**: Include only "one logical change" per commit. Maintain granularity that allows reverting "only that commit" to fix a bug.
+*   **Pull Requests**: Keep it small (100 lines). Require CI (Build, Test, Lint) pass and review.
+    *   **Omnichannel Check**: Reviewers must check "Is this change available for non-Web (iOS/Android)?". "Web Only" logic must be Rejected immediately.
+*   **Deployment Safety Protocol**:
+    *   **No Unauthorized Push**: The AI Agent MUST NOT execute `git push` without user's explicit permission.
+    *   **Pre-Check**: Always pass `tsc --noEmit` (Type Check) and `npm run build` (Build Check) locally before pushing.
+*   **Security**: No secrets in repo. TruffleHog scan required.
 
 ## 10. Documentation Ops
 *   **Living Documentation**:
-    *   **Mermaid.js**: Manage architecture diagrams with code (Mermaid) instead of images to prevent obsolescence.
-    *   **ADR**: Record technical decisions in Markdown in `docs/adr`.
+    *   **Mermaid.js**: Architecture diagrams must be code (Mermaid), not images, to prevent obsolescence.
+    *   **ADR**: Technical decisions are recorded in Markdown at `docs/adr`.
 *   **Docs as Code**:
-    *   Documentation is equivalent to code; manage it in Git and subject it to PR review. Code changes without doc updates are forbidden from merging.
+    *   Documentation is equal to code; managed in Git and subject to PR review. No code merge without doc updates.
 *   **Freshness**:
-    *   Automate broken link checks and review major rules quarterly.
+    *   Automate link rot checks. Review key rules quarterly.
+
+## 12. Engineering Quality Protocols
+
+### 11.1. The Zero-Warning Lint Protocol
+*   **Law**: "It works with warnings" is a compromise that leads to quality decay. CI All Green means Zero Warnings.
+*   **Action**: `npm run lint` must return **Zero Warnings**. Delete unused variables immediately.
+
+### 11.2. The Clean Import Protocol
+*   **Law**: `import` statements must be at the **Top-Level** of the file.
+*   **Action**: Imports inside functions or control flows are strictly prohibited. Move them to the top immediately.
+
+### 11.3. The Explicit Explanation Protocol (Zero Jargon)
+*   **Law**: Developer "common sense" is user "jargon".
+*   **Action**: Always attach a `Tooltip` to technical terms and metrics on the admin panel, explaining "what it is and how it affects business" in layperson terms.
+
+### 11.4. Localization First Protocol
+*   **Law**: English error messages cause user churn.
+*   **Action**: Localize all error messages and validation messages (including Zod custom errors) into the **Project Native Language** defined in `GEMINI.md`.

@@ -1,57 +1,88 @@
-# 60. Security & Privacy - CISO & Legal View
+# 60. Security & Privacy (CISO & Legal View)
 
 > [!IMPORTANT]
 > **Level 1 Priority: Absolute Compliance**
-> Security and Legal Compliance are the **highest priorities** at Google Antigravity.
-> They take precedence over user convenience, development speed, and profitability. There is no room for debate.
+> Security and Legal Compliance are the **Highest Priority** at Google Antigravity.
+> They override UX, Speed, and Profitability without exception.
+
+> [!CRITICAL]
+> **Supreme Directive**
+> Protection of personal information and security ALWAYS takes precedence over functional requirements, deadlines, and costs.
+> Code that violates this document MUST NOT be deployed to the production environment for any reason.
 
 ## 1. The Golden Rule
 *   **Legal & Security > User Experience**:
-    *   **Iron Rule**: "If it's legally risky, do not offer it, even if the user wants it."
-    *   **Example**: Reject "View history without login" if there is privacy risk. Reject "Offline payment" if there is security risk.
+    *   **Rule**: "If it's legally risky, do not provide it, even if users want it."
+    *   **Example**: Reject "Login-free history view" if it carries privacy risks. Reject "Offline payment" if it carries security risks.
 *   **Zero Trust Architecture**:
-    *   Discard the premise that "Internal network is safe". Verify all accesses and all requests.
+    *   Abandon the assumption that "Internal networks are safe". Verify every access and request.
+    *   **Rule 10.1.1: The Untrusted Default**: Start by **"Distrusting" all access entities**, including internal IPs, admin accounts, and AI agents. Enforce **Authentication**, **Authorization**, and **Encryption** for ALL requests.
 
 ## 2. Legal Compliance
 *   **Global Regulations**:
-    *   **GDPR (EU) / CCPA (California) / APPI (Japan)**: Adhere to these privacy regulations as the "Minimum Line".
-    *   **Data Sovereignty**: User data belongs to the user. Guarantee rights to delete and export (Data Portability) at the system level.
-*   **Japan Specifics**:
-    *   **Payment Services Act**: When issuing prepaid payment instruments (points/coins), constantly monitor the deposit obligation threshold (10 million yen) and control not to exceed it or report to the Finance Bureau.
-    *   **Specified Commercial Transactions**: When selling for a fee, clearly state all legally required information.
+    *   **GDPR / CCPA / APPI**: Observe these privacy regulations as the minimum baseline.
+    *   **Data Sovereignty**: Data belongs to users. Systematically guarantee Export/Delete rights.
+*   **Local Regulations**:
+    *   **Funds Settlement Laws**: Monitor deposit obligations for points/coins constantly (e.g., Japan's PSA).
+    *   **Specified Commercial Transactions**: Clearly state all required legal info for paid services (e.g., Japan's Tokusho-ho).
 
 ## 3. Privacy by Design
 *   **Data Minimization**:
-    *   **Principle**: Collecting data "just in case" is prohibited. Collect only data essential for business.
-    *   **Retention**: Define Data Retention Policy and automatically delete or anonymize data past its expiration.
+    *   **Principle**: Collecting data "just in case" is prohibited. Collect only essential data.
+    *   **Retention**: Define retention policies. Delete or anonymize expired data automatically.
 *   **Consent Management**:
-    *   **Opt-in**: Marketing emails and tracking cookies must be OFF (Opt-in) by default. Dark Patterns deceiving users (hiding Opt-out) are **strictly prohibited**.
+    *   **Opt-in**: Marketing and tracking must be Opt-in by default. Dark patterns are **strictly prohibited**.
+*   **The "Right to be Forgotten"**:
+    *   **Physical Deletion**: User account deletion MUST basically involve **Physical Deletion (DELETE)** of related records containing PII. Logical deletion is allowed only for transaction data (purchase history, etc.).
+*   **The API Output Hygiene**:
+    *   **Law**: Public API responses MUST physically remove (DTO processing) PII (Email, detailed address), Internal Params (IDs, notes), and Security Fields (Hash, Salt).
 
 ## 4. Security Architecture
 *   **Authentication & Authorization**:
-    *   **MFA**: **Force MFA** for accounts with admin privileges. No exceptions.
-    *   **IDaaS**: Do not build auth infrastructure yourself. Use verified solutions like Firebase Auth, Auth0, Cognito.
+    *   **MFA**: **Mandatory MFA** for all admin accounts. No exceptions.
+    *   **IDaaS**: Use verified solutions (Firebase Auth, Auth0, Cognito).
+    *   **Omnichannel Auth**: The system must fully support **Bearer Token (JWT)** access from native apps, not just Web cookies. Skipping verification in Server Actions because "web session exists" is prohibited.
+*   **API Key Security**:
+    *   **Hashing**: API Keys (`sk_live_...`) MUST **NEVER be stored in plain text**. Always hash them before storage and hash input values for verification.
 *   **OWASP Top 10**:
-    *   **Injection**: Use ORMs or parameterized queries only to prevent SQL/NoSQL injection.
-    *   **Access Control**: Strictly check if the requester has permission to access the resource at all API endpoints (Firestore Security Rules / RLS).
+    *   **Injection**: Use ORMs or parameterized queries to prevent SQL/NoSQL injection.
+    *   **Access Control**: Strictly check RLS/Security Rules for every endpoint.
 
 ## 5. License & ToS Compliance
 *   **License Contamination Prevention**:
-    *   **No GPL**: Libraries with Copyleft licenses (GPL, AGPL) are **prohibited** as they risk obligating source code disclosure of the entire product.
-    *   **Permissive Only**: Use only permissive licenses like MIT, Apache 2.0, BSD, ISC.
-    *   **CI Check**: Auto-run license scan in CI pipeline to block violation libraries.
+    *   **No GPL**: Copyleft licenses (GPL, AGPL) are **banned**.
+    *   **Permissive Only**: Use MIT, Apache 2.0, BSD, ISC.
+    *   **CI Check**: Automate license scanning in CI/CD.
 *   **Platform ToS**:
-    *   **Google/Apple**: Acts violating Platform ToS (scraping, private API use, review manipulation) are **never done** even if technically possible. Account BAN means death of the business.
+    *   **Google/Apple**: Never violate platform ToS (Scraping, Review manipulation). Account bans mean business death.
 
 ## 6. Infrastructure Security
 *   **Network Isolation**:
-    *   Place databases and internal APIs in a Private Network (VPC) not directly accessible from the internet.
-*   **DDoS Protection**:
-    *   Use Cloud Armor or AWS WAF to protect apps from DDoS and Bot attacks.
-*   **App Check**:
-    *   Introduce Firebase App Check etc. to block API access from non-legitimate apps.
+    *   Place DBs and internal APIs in private VPCs.
+*   **Multi-Layered Defense**:
+    *   **Edge (WAF)**: Use Cloud Armor/AWS WAF for GeoIP blocking and Bot detection to protect against DDoS and EDoS (resource exhaustion) attacks.
+    *   **App Check**: Block unauthorized API access using Firebase App Check.
 
 ## 7. Offensive Security
 *   **Self-Penetration Test**:
-    *   Developers must have an "Attacker" perspective and perform thought experiments trying SQL injection or XSS on their own code.
-    *   Start Firestore Security Rules from "No one can do anything" and grant only necessary permissions (Allowlist), not "Anyone can read/write".
+    *   Think like an attacker. Try XSS/SQLi on your own code.
+    *   Start Security Rules from "Deny All".
+
+## 8. Advanced Security Operations
+
+### 8.1. The Double Security Protocol (Turnstile + OTP)
+*   **Law**: All critical security operations (Login, Register, PW Change, Delete Account, etc.) MUST implement Double Defense: "Managed Turnstile" + "OTP".
+*   **Action**:
+    1.  **Layer 1 (Pre-Auth)**: Physically block bots with Turnstile (`appearance: 'always'`). The submit button must be **physically disabled** until verification (`onSuccess`) is complete.
+    2.  **Layer 2 (Auth)**: Do NOT allow data mutation (UPDATE/DELETE) until identity verification via OTP is complete.
+    3.  **Fail-Safe**: Build a flow that immediately disables the button and resets the state upon error.
+
+### 8.2. The Audit Log Obligation (No Invisible Hands)
+*   **Law**: DB writes bypassing audit logs are a security Blind Spot.
+*   **Action**:
+    *   **Prohibition**: Direct DB mutation from Client Side is strictly prohibited.
+    *   **Mandate**: Must go through `Server Actions` that call `recordAuditLog` internaly.
+
+### 8.3. The PII Logging Defense (Masking Protocol)
+*   **Law**: Leaking PII (Email, Token, Password) to logs is a fatal security risk.
+*   **Action**: Implement auto-masking logic in the Logger class to replace sensitive fields (password, token) with `***MASKED***`.

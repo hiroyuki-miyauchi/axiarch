@@ -2,6 +2,8 @@
 
 ## 1. API Design Principles
 *   **API-First Design**:
+    *   **Omnichannel First**: Do not treat the Web Frontend as a "privileged client". Treat it equally with iOS/Android apps. All web operations must be available via API.
+    *   **Tiered Gateway**: Implement "Tier 1 (Public/Read-Only)" and "Tier 2 (Enterprise/Auth/Paid)" separately from the start to prepare for future API monetization (Stripe Metering).
     *   **Design First**: Define API specifications before starting implementation.
     *   **OpenAPI (Swagger)**: For REST API, write OpenAPI 3.x specs first, then auto-generate code (type definitions, clients) from there.
     *   **Schema-Driven**: For GraphQL, the Schema definition is truth, ensuring type safety for frontend and backend.
@@ -12,6 +14,9 @@
     *   **gRPC**: Use fast and type-safe **gRPC (Protobuf)** for internal communication between microservices. Eliminate JSON overhead.
 *   **Versioning**:
     *   Manage versions via URL or Header (e.g., `/v1/users`) to avoid Breaking Changes.
+*   **Data Transport Standard**:
+    *   **DTO Obligation**: Returning database Row Objects (Raw Row) directly is a "Felony". Always use `UserDTO` etc. to output only intentionally mapped fields.
+    *   **PII Masking**: Structurally prevent leakage of password hashes and internal flags (`is_admin`).
 
 ## 2. Reliability & Resilience
 *   **Idempotency**:
@@ -33,9 +38,19 @@
 ## 4. Security & Authentication
 *   **Authorization Header**:
     *   Send API tokens always in `Authorization: Bearer <token>` header, not URL parameters.
+    *   **Native Session Bypass**: For First Party Apps, do not embed API Keys; verify User Session (Cookie/Bearer) to automatically grant privileges (Tier 2).
 *   **Least Privilege**:
     *   Grant only minimum necessary scopes (permissions) to API keys and tokens.
 
 ## 5. Documentation
 *   **Live Documentation**:
     *   API documentation must be auto-generated from code and always be up-to-date (Live) (Swagger UI, GraphiQL). Manual documentation updates are prohibited.
+## 6. API Economy & Monetization
+*   **Commercialization Protocol**:
+    *   **Internal as Public**: Assume all APIs will eventually be "products sold to other companies". "Building a paid version later" is not allowed; consider Public and Enterprise versions from the start.
+    *   **Usage Metering**: Maintain an architecture capable of measuring traffic and call counts at the API Gateway layer to prepare for Stripe Metered Billing.
+    *   **Tiered Access**: Control via DTOs to enable code-level branching between "Free Plans (Restricted)" and "Paid Plans (Unrestricted)".
+    *   **Native App Exemption**: Treat access from our own Native App as "Tier 2 (Enterprise) equivalent" and exclude it from billing (Bundled).
+*   **Data Monetization Privacy**:
+    *   **Anonymization Interface**: APIs provided to external partners must return only statistical data processed via **k-anonymity** or **Differential Privacy**. Selling raw data is permanently prohibited.
+    *   **Opt-Out**: Provide an ON/OFF switch for "Data Utilization Cooperation" in user settings and exclude OFF users from aggregation.

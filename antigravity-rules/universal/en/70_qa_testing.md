@@ -5,9 +5,12 @@
     *   Start QA process from requirement definition and design stages, not the final stage of development.
     *   **Static Analysis**: Integrate ESLint, SwiftLint, Detekt etc. into CI to automatically detect issues before code review.
 *   **Testing Pyramid**:
-    *   **Unit Tests (70%)**: Base on fast and stable unit tests. Coverage goal is 80%+, but value "coverage of critical logic" over numbers.
+    *   **Unit Tests (70%)**: Base on fast and stable unit tests. Coverage goal is 80%+, but value "coverage of critical logic" over numbers. Unit tests for UI components are not recommended due to low ROI.
     *   **Integration Tests (20%)**: Verify coordination between API, DB, and components.
-    *   **E2E Tests (10%)**: Target only user critical paths (registration, payment, key features) to suppress maintenance costs.
+    *   **E2E Tests (10%)**: Target only user critical paths (registration, payment, key features) to suppress maintenance costs. Automate only critical flows.
+    *   **Priority**: 1. Type Check(tsc) > 2. Lint > 3. Manual > 4. E2E > 5. Unit. Static Analysis (tsc) is the strongest test.
+*   **Mock First Strategy**:
+    *   **Offline Dev**: Implement `MOCK_MODE` to allow development without external APIs (Stripe, SendGrid). If no API key, mocks respond automatically to keep dev moving.
 
 ## 2. Flaky Test Management
 *   **Immediate Action**:
@@ -21,8 +24,15 @@
 *   **Fragmentation**:
     *   **Android**: Verify operation on major manufacturers (Samsung, Pixel, Xiaomi) and different OS versions using BrowserStack or AWS Device Farm.
     *   **Network**: Test behavior in unstable network environments like Offline, 3G (Slow), Recovery from Airplane Mode.
+*   **Manual Verification Protocol**:
+    *   Upon feature completion, verification from following perspectives is mandatory.
+    *   **Checklist**: Happy Path, Edge Cases (0 items/Max val), Cross-Device, Role Access, API Security (Confirm Bypass), Layout Stability (No double scroll).
 
-## 4. Release Criteria
+## 4. Fix Twice Principle
+*   **Double Fix**:
+    *   When fixing a bug, do not just "Fix Once". Make it a set to "Fix Twice" by creating a mechanism (Add Lint, Strict Type, Add Test) to prevent the same bug from happening again.
+
+## 5. Release Criteria
 *   **Blockers**:
     *   Release with P0 (Critical) and P1 (Major) bugs remaining is **strictly prohibited**.
     *   **0 Warnings**: Release with Warnings remaining in console or build logs is also prohibited.

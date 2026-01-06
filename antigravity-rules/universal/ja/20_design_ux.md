@@ -20,6 +20,27 @@
 ### 2.1. デザイン・トークン (Design Tokens)
 *   **Single Source of Truth**: 色、スペーシング、タイポグラフィ、シャドウ、角丸などの全てのデザイン値は、FigmaのVariablesで定義し、コード（Tailwind Config / CSS Variables）と100%同期させます。
 *   **ハードコード禁止**: `px` や `#hex` を直接コードに書くことは**厳禁**です。必ずトークン（例: `color-primary-500`, `spacing-4`）を使用します。
+*   **Dynamic Theme**: テーマ設定 (`site_settings`) は、Runtime (`RootLayout`) でDBから取得し、CSS変数として注入します。
+
+## 2. コンポーネント実装ガイド (Component Guidelines)
+### 2.1. Implementation Patterns
+*   **Skeleton Loader**:
+    *   データ読み込み中（Suspense）は、スピナーではなく **Skeleton Screen** (`<Skeleton />`) を使用し、レイアウトシフト（CLS）を防ぎます。
+*   **Feedback Hierarchy**:
+    *   **Toast**: 成功・通知（非同期）。
+    *   **Inline Alert**: 文脈依存のエラー。
+    *   **Modal Dialog**: 重要な警告。`z-[9999]` で最前面に表示。
+*   **Optimistic UI (楽観的更新)**:
+    *   いいね等の軽量アクションは、サーバー応答を待たずに即座に表示更新し、ネイティブアプリ並みの応答速度を実現します。
+
+### 2.2. Layout Architecture
+*   **The Natural Scrolling Protocol**:
+    *   `h-screen` + `overflow-scroll` による独自スクロールコンテナを禁止し、`min-h-screen` によるブラウザネイティブスクロールを採用します。
+*   **The Single Container Protocol**:
+    *   Layoutがコンテナ (`container`) を提供する場合、Page側での再定義（二重パディング）を厳禁とします。
+*   **Navigation Standards**:
+    *   **Breadcrumb Priority**: パンくずリストは「命綱」であり、モバイル・PC問わず**必ずページ最上部**に配置します。モバイルではアクションボタンと縦積み（Stack）にします。
+    *   **Extension Defense**: グローバルナビゲーション（Link）には `suppressHydrationWarning` を付与し、ブラウザ拡張機能によるDOM改変から保護します。
 
 ### 2.2. モーションとジェスチャー (Motion & Gestures - The "Soul")
 *   **物理ベース (Physics-Based)**: すべてのアニメーションは**スプリング物理**（剛性/減衰）を使用します。要素は弾み、伸び、わずかに潰れるべきです。
@@ -96,6 +117,16 @@
 *   **一般消費者視点 (General Consumer Perspective)**:
     *   **専門用語禁止**: UI上のテキストには「データベース」「同期」「API」などの技術用語を一切使用しません。「保存」「更新」「連携」など、誰でもわかる言葉を選びます。
     *   **直感性**: 「説明書を読まなくても使える」をゴールとします。アイコンには必ずラベルを併記し、意味の曖昧さを排除します。
+    *   **Micro-Interaction Standards**:
+        *   **Cursor Affordance**: クリック可能な要素（カード、独自入力欄含む）は、ホバー時に必ず `cursor-pointer` を適用し、アフォーダンスを明確にします。
+
+## 10. 安全なUIプロトコル (Safety UI Protocols)
+*   **No Native Popups**:
+    *   `window.alert`, `confirm`, `prompt` の使用を禁止します。スレッドをブロックしUXを損なうため、必ず `Dialog` コンポーネントを使用します。
+*   **Destructive Actions**:
+    *   **Magic Word**: データの完全削除など、取り返しのつかない操作には、「OK」ボタンではなく、「delete」等の**マジックワード入力**を求める確認ダイアログを実装します。
+*   **Dirty Check**:
+    *   未保存の変更がある状態での離脱に対し、「変更が失われます」という警告を表示します。
 
 ## 10. おもてなしUX (Omotenashi UX - Japanese Hospitality)
 *   **気が利く (Kigakiku - Anticipatory Design)**:
@@ -115,3 +146,42 @@
 *   **ハンドオフ (Hand-off)**:
     *   **ステータス管理**: Figma上の各フレームには「Draft」「Ready for Dev」「Shipped」のステータスを明記します。
     *   **エクスポート**: 画像は原則として **WebP** または **SVG** でエクスポートします。PNG/JPGは特別な理由がない限り使用しません。
+
+## 12. ユニバーサル・ビューティー・プロトコル (Universal Beauty Protocol)
+
+### 12.1. The Responsive Mandate
+*   **Law**: 全ての機能追加・UI実装において、以下の3環境での「美しさ（Beauty）」と「機能性（Functionality）」を確認・保証することを**最重要義務**とします。
+    1.  **SP (Mobile)**: 縦持ち (Width < 640px)
+    2.  **Tablet**: 縦持ち・横持ち (Width 768px ~ 1280px) ※特にiPad縦での崩れに注意。
+    3.  **PC (Desktop)**: フルサイズ (Width > 1280px)
+*   **Action**: "PCで動くからOK" は厳禁です。レスポンシブデザインの不備は「未完成（Incomplete）」とみなします。
+
+### 12.2. The Fragmented UI Lesson (統一性の欠如)
+*   **Law**: 「似ているが違う」は最悪です。UIコンポーネント（パンくず、見出し、ボタン等すべて）は、その配置コンテキスト（Wrapper/Layout）まで含めて標準化しなければなりません。
+*   **Action**: ページごとのアドホックなCSS調整を禁止します。サイト全体で一つの「正解（Gold Standard）」に従ってください。
+
+### 12.3. The Mobile First Typography (文字サイズの適正化)
+*   **Law**: PC基準の巨大なフォントサイズ（いきなり `text-3xl` 等）はモバイル画面を破壊します。
+*   **Action**: 文字サイズは必ずモバイル基準（`text-xl`）から書き始め、`sm:` や `lg:` などのブレークポイントで拡大していく「モバイルファースト」な記述を徹底します。
+
+## 13. インタラクション安全プロトコル (Interaction Safety Protocols)
+
+### 13.1. The Responsive Safety Protocol (No-Trap Mandate)
+*   **Law**: PCとSPではインタラクションの物理法則が異なります。
+*   **Action**:
+    1.  **SP (Drawer Safety)**: Drawer内のスクロール領域には `data-vaul-no-drag` を付与し、誤閉鎖を防ぎます。
+    2.  **PC (Viewport Safety)**: Popover等の浮動要素には必ず `max-height` を設定し、画面外へのはみ出しを防ぎます。
+    3.  **Responsive Split**: モバイルでは `Drawer`、PCでは `Popover` を使い分ける実装を標準とします。
+
+### 13.2. The Mobile Click/Tap Fix
+*   **Law**: モバイル上のPopover等は、フォーカス制御の競合によりタップイベントを拾えない場合があります。
+*   **Action**: インタラクティブ要素（リスト項目等）には `pointer-events-auto` を強制し、`onClick` / `onMouseDown` / `onPointerUp` などの多重バインディングでイベント発火を保証します。
+
+### 13.3. The Z-Index Stratification Protocol
+*   **Law**: Z-Indexの戦いに終止符を打ちます。
+    *   **Level 4 (Max)**: `z-[10000]` - Overlay Components (Select, Popover, Tooltip, Calendar) ※Modalより上
+    *   **Level 3**: `z-[9999]` - Dialog / Modal
+    *   **Level 2**: `z-[1000]` - Full Screen UI (Mobile Menu, Drawer)
+    *   **Level 1**: `z-50` - Fixed Header, Floating Buttons
+    *   **Level 0**: `z-0` ~ `z-40` - Page Content
+*   **Action**: 恣意的な `z-100` などのマジックナンバーを禁止します。この階層構造を厳守してください。

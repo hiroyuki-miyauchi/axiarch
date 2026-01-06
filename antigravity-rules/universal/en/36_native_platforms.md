@@ -85,3 +85,11 @@ Even in a Flutter-first environment, deep understanding of native platforms is e
 *   **Inclusive Design**:
     *   **Dynamic Type**: Font size follows user settings (max 200%) without breaking layout.
     *   **Touch Targets**: All interactive elements ensure minimum **44x44dp (iOS) / 48x48dp (Android)**.
+
+## 9. Web-Native Integration (Bridge & PWA)
+*   **Mobile Bridge Protocol**:
+    *   **JS Interface**: Standardize `window.AppBridge` to invoke native features (Haptics, Push Token) from WebView.
+    *   **User Agent**: Identify app access via UA (`NativeApp/1.0`) and hide web headers/footers (Prevent double navigation).
+*   **App Links & PWA**:
+    *   **Deep Links**: Configure `/.well-known/apple-app-site-association` for direct app opening.
+    *   **PWA**: Provide `manifest.json` to ensure standalone experience for mobile web users.

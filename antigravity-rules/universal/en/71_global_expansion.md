@@ -26,7 +26,7 @@
 
 ## 4. Timezone Management
 *   **UTC Storage**:
-    *   Time storage in DB and backend is done in **UTC (Coordinated Universal Time)** without exception. Storage in JST (Japan Time) is prohibited.
+    *   Time storage in DB and backend is done in **UTC (Coordinated Universal Time)** without exception. Storage in specific timezones (e.g., JST, PST) is prohibited.
 *   **Local Conversion**:
     *   Convert to user's timezone only at the UI layer just before display to user.
 

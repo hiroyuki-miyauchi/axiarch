@@ -5,6 +5,9 @@
     *   **自己文書化 (Self-Documenting)**: コメントは「Why（なぜ）」を語るために使い、「What（何をしているか）」はコード自身に語らせます。
     *   **関数サイズ (Function Size)**: 関数は「1つのこと」だけを行います。理想的には **20行以内** に収めます。
     *   **命名規則 (Naming)**: 変数名は具体的かつ明確にします。`data`, `temp`, `item` などの曖昧な名前は禁止です（例: `userData` -> `authenticatedUserProfile`）。
+*   **Blueprint Compliance (憲法遵守)**:
+    *   **Entry Point**: すべての開発作業は、まず `000_blueprint_index.md`（または対応するルールファイル）を確認することから始めます。
+    *   **Update First**: 実装中に設計変更が必要になった場合、**コードを書く前に（または同時に）Blueprintを更新**します。ドキュメントとコードの乖離は最大の技術的負債です。
 *   **警告ゼロ (Zero Warnings)**:
     *   **ルール**: 警告（Warning）はエラー（Error）として扱います。CIは警告が1つでもあれば失敗させます。「壊れた窓割れ理論」を防ぎます。
     *   **厳格なエラーハンドリング**: 空の `catch` ブロックは禁止です。全てのエラーはログに記録され、適切に処理されなければなりません。
@@ -16,7 +19,12 @@
     *   **デッドコードの即時削除**: コメントアウトされたコード、使われていないインポート、デバッグ用の `console.log` は、コミット前に完全に削除します。
     *   **TODOコメントの管理**: `// TODO:` を残す場合は、必ずチケット番号または期限を併記します。放置されたTODOは技術的負債です。
 
-## 2. パフォーマンスと最適化 (Performance & Optimization - The "Speed")
+## 2. インフラとパフォーマンス (Infrastructure & Performance)
+*   **インフラストラクチャ基準 (The Golden Quad)**:
+    *   **Managed Hosting**: Vercel Pro等、DDoS保護とスケーラビリティを備えたマネージドホスティングを利用します。
+    *   **BaaS**: Supabase等、DBとバックアップ機能が統合されたBaaSを「唯一の正解」として利用します。
+    *   **Edge Shield**: Cloudflare等のエッジWAF/CDNを配置し、攻撃と負荷をエッジで吸収します。
+    *   **Email Deliverability**: Resend等、開発者体験と到達率に優れたメールインフラを採用します。
 *   **読み取り最適化 (Read-Optimized Architecture)**:
     *   **事前計算 (Pre-calculation)**: ランキング、集計、複雑なフィルタリング結果は、リクエストごと（On-the-fly）に計算せず、データ更新時または定期バッチで事前計算し、DBのカラム（例: `ranking_score`, `total_sales`）に保存します。
     *   **CQRS**: 参照系と更新系のモデルを分離し、参照系には非正規化（Denormalization）された読み取り専用テーブルやマテリアライズドビューの使用を推奨します。
@@ -55,6 +63,8 @@
     *   **ダークモード**: 有機EL（OLED）デバイスでの消費電力を抑えるため、真の黒（#000000）を使用したダークモードを推奨します。
 *   **データ転送量**:
     *   **圧縮**: 画像や動画は必ず最適化（AVIF/H.265）し、ネットワーク帯域の浪費を防ぎます。
+    *   **Cache Maximization**: CDNキャッシュヒット率 **80%以上** を目標とし、静的アセットのオリジン負荷を最小化します。
+    *   **Centralized Storage Shield**: 画像実体はBaaSストレージ（Origin）に集約し、配信はCDNのOptimization機能を経由させることで、コストとパフォーマンスを両立します。
 
 ## 7. ゼロバグ・ポリシー (The "Zero Bug Policy")
 *   **修正優先 (Fix First)**:
@@ -62,33 +72,38 @@
 *   **24時間ルール (24-Hour Rule)**:
     *   クリティカルなバグ（データ損失、セキュリティ、主要機能停止）は、発見から **24時間以内** に修正します。
 
-## 7. 継続的学習と検証 (Continuous Learning & Verification)
+## 8. 継続的学習と検証 (Continuous Learning & Verification)
 *   **最新情報の確認義務 (Latest Info Protocol)**:
     *   **開発着手前**: コードを書く前に、必ず対象技術の公式ドキュメントや最新のリリースノート（例: "Next.js 15 breaking changes", "Swift 6 concurrency"）を確認します。古い情報に基づいた実装は手戻りの元です。
     *   **非推奨チェック**: 使用しようとしているAPIが Deprecated（非推奨）になっていないか確認します。
 *   **トレンドの把握**:
     *   シリコンバレーの最新トレンド（AIエージェント、Privacy Manifests等）を常にキャッチアップし、ルール自体も進化させ続けます。
 
-## 8. 互換性とテスト (Compatibility & Testing)
+## 9. 互換性とテスト (Compatibility & Testing)
 *   **実機テスト (Real Device Testing)**:
     *   シミュレーターだけでなく、必ず実機（iOS, Android）でテストを行います。特にカメラ、GPS、生体認証などのハードウェア機能は実機必須です。
 *   **ブラウザ互換性 (Browser Compatibility)**:
     *   Chrome, Safari (iOS/macOS), Firefox, Edge の最新2バージョンをサポートします。特にSafari（iOS）特有のバグ（100vh問題など）に注意します。
 *   **セルフチェックリスト (Self-Check List)**:
     *   PRを出す前に、開発者は自身のコードをレビューし、「警告ゼロ」「コンソールエラーなし」「不要なログ削除」を確認します。
-## 9. Gitとバージョン管理 (Git & Version Control)
+## 10. Gitとバージョン管理 (Git & Version Control)
 *   **開発フロー (Trunk Based Development)**:
     *   **原則**: 長寿命のブランチは廃止し、短命のブランチから `main` へ頻繁に（毎日）マージします。
     *   **Stacked Diffs**: 巨大なPRを避け、依存関係のある小さなPRを積み重ねる手法を推奨します。
 *   **コミットメッセージ (Conventional Commits)**:
     *   `type(scope): subject` 形式を厳守します（例: `feat(auth): add google login`）。本文には日本語で詳細を記述します。
+    *   **Atomic Commits**: 1つのコミットには「1つの論理的変更」のみを含め、バグ発生時に「そのコミットだけ」をRevertすれば直る粒度を保ちます。
 *   **プルリクエスト (Pull Requests)**:
     *   **100行ルール**: PRは小さく保ちます。
-    *   **保護設定**: `main` への直接プッシュは禁止し、CI通過とレビュー承認を必須とします。
+    *   **保護設定**: `main` への直接プッシュは禁止し、CI（Build, Test, Lint）通過とレビュー承認を必須とします。
+    *   **Omnichannel Check**: レビュー時は「Web以外（iOS/Androidアプリ）でも利用可能か？」を最優先で確認します。"Web Only" のロジックは即座にRejectします。
+*   **デプロイメント安全プロトコル (Deployment Safety Protocol)**:
+    *   **No Unauthorized Push**: AIエージェントは、ユーザーの明示的な許可なしに `git push` を実行してはなりません。
+    *   **Pre-Check**: Push前には必ず `tsc --noEmit` (Type Check) と `npm run build` (Build Check) をローカルで通過させます。
 *   **セキュリティ**:
     *   APIキー等の機密情報は絶対にコミットせず、`.env` を使用します。CIでシークレットスキャン（TruffleHog）を義務付けます。
 
-## 10. ドキュメント運用 (Documentation Ops)
+## 11. ドキュメント運用 (Documentation Ops)
 *   **Living Documentation**:
     *   **Mermaid.js**: アーキテクチャ図は画像ではなくコード（Mermaid）で管理し、陳腐化を防ぎます。
     *   **ADR**: 技術的な意思決定は `docs/adr` にMarkdownで記録します。
@@ -96,3 +111,21 @@
     *   ドキュメントはコードと等価であり、Gitで管理し、PRレビューの対象とします。ドキュメント更新なきコード変更はマージ禁止です。
 *   **鮮度維持**:
     *   リンク切れチェックを自動化し、主要ルールは四半期ごとに見直します。
+
+## 12. エンジニアリング品質プロトコル (Engineering Quality Protocols)
+
+### 11.1. The Zero-Warning Lint Protocol
+*   **Law**: 「Warningなら無視しても動く」という甘えは品質低下の元です。CI全通過の真の意味は、警告数0です。
+*   **Action**: `npm run lint` の結果は、必ず警告数0（Zero Warnings）でなければなりません。未使用変数は即座に削除してください。
+
+### 11.2. The Clean Import Protocol
+*   **Law**: `import` ステートメントは必ずファイルの最上部（Top-Level）に記述してください。
+*   **Action**: 関数や制御フロー内でのインポートは厳禁です。どんなに急いでいても、インポートはファイルの先頭に移動させてください。
+
+### 11.3. The Explicit Explanation Protocol (Zero Jargon)
+*   **Law**: 開発者にとっての「常識」はユーザーにとっての「謎の記号」です。
+*   **Action**: 管理画面上の専門用語・指標には、必ず `Tooltip` を付与し、「それが何であり、ビジネスにどう影響するか」を素人でも分かる言葉で解説してください。
+
+### 11.4. Localization First Protocol
+*   **Law**: 英語のエラーメッセージはユーザーの離脱を招きます。
+*   **Action**: エラーメッセージやバリデーションメッセージは、全て（Zodカスタムエラー等も含め）日本語化してください。

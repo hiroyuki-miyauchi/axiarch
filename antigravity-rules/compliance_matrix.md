@@ -2,7 +2,7 @@
 
 ユーザーの網羅的な要望（プロンプト）が、どのルールファイルでカバーされているかを証明する対照表です。
 
-| ユーザー要望 (User Request) | 対応ファイル (Covered In) | 具体的なルール (Specific Rule) |
+| ユーザー要望 (User Request) | 対応ファイル(JA/EN共通) (Covered In) | 具体的なルール (Specific Rule) |
 | :--- | :--- | :--- |
 | **全ての言語や説明は日本語** | `00_core_mindset.md` | "Absolute Japanese Fluency", "Dual Language Standard" |
 | **セルフチェック** | `30_engineering_general.md` | "Self-Check List", "Zero Warnings" |
