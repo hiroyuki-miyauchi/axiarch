@@ -61,6 +61,12 @@
 *   **72. Constitution Authority** ([🇯🇵](./universal/ja/72_constitution_authority.md) / [🇺🇸](./universal/en/72_constitution_authority.md))
 *   **74. Language Protocol** ([🇯🇵](./universal/ja/74_language_protocol.md) / [🇺🇸](./universal/en/74_language_protocol.md))
 
+
+### 📐 Blueprint Rules (Project Specific)
+*   **00. Project Overview & Architecture** ([🇯🇵](./blueprint/ja/00_project_overview.md) / [🇺🇸](./blueprint/en/00_project_overview.md))
+*   **01. Project Lessons Log** ([🇯🇵](./blueprint/ja/01_project_lessons_log.md) / [🇺🇸](./blueprint/en/01_project_lessons_log.md))
+*   **99. Project Specific Template** ([🇯🇵](./blueprint/ja/99_project_specific_template.md) / [🇺🇸](./blueprint/en/99_project_specific_template.md))
+
 ---
 
 ## 🚀 Antigravity Setup & Initialization (導入と初期化)
