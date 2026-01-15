@@ -1,6 +1,13 @@
 # 30. Engineering Excellence (General)
 
 ## 1. Code Quality & Clean Code
+
+### 1.0. The Supreme Directive
+- **UI/Logic Consistency**:
+  - **Principle**: "Similar but different" shows a lack of professionalism and is a bug. UI and logic must be unified across all features (Delete, Edit, List).
+  - **Tiered Security**: Security is tiered according to risk.
+    - **Tier 1**: General single operations require "Confirmation only".
+    - **Tier 2**: Bulk operations and **Critical Single Operations (e.g., User Deletion)** require "High-Assurance Verification (OTP, Passkey, 2FA, etc.)". Deviating from this based on personal judgment is not permitted.
 *   **Clean Code Standards**:
     *   **Self-Documenting**: Comments explain "Why", Code explains "What".
     *   **Function Size**: One function, one job. Ideally **under 20 lines**.

@@ -1,5 +1,13 @@
 # 20. Design & UX Strategy
 
+> [!CRITICAL]
+> **Rule 20.0: The Consistency Mandate (Professionalism Protocol)**
+>
+> - **Law**: Inconsistency in UI/UX is a "Lack of Professionalism".
+> - **Action**: Do not tolerate minor deviations such as "The button is on the left only on this screen" or "The delete flow is different only here". Elements that disrupt the overall Harmony are bugs, even if they function.
+> - **Target**: Maintain "Iron Consistency" especially in critical flows like "Delete", "Save", and "Authentication" to protect the user's mental model.
+
+
 ## 1. Design Philosophy ("Silicon Valley Excellence & Google First")
 
 ### 1.1. The "Wow" Factor (Delight)
