@@ -184,6 +184,9 @@
 ### 13.2. The Mobile Click/Tap Fix
 *   **Law**: モバイル上のPopover等は、フォーカス制御の競合によりタップイベントを拾えない場合があります。
 *   **Action**: インタラクティブ要素（リスト項目等）には `pointer-events-auto` を強制し、`onClick` / `onMouseDown` / `onPointerUp` などの多重バインディングでイベント発火を保証します。
+*   **Combobox Interaction Protocol**:
+    *   **Stable IDs**: 仮想リスト（CMDK等）の `value` 属性には、必ず一意かつ不変な **ASCII文字列**（ID等）を使用してください。日本語を使用すると選択ロジック（フィルタリング）が誤動作します。
+    *   **Searchability**: 日本語での検索が必要な場合は、`keywords` プロパティ（配列）を明示的に指定して検索性を担保します。
 
 ### 13.3. The Z-Index Stratification Protocol
 *   **Law**: Z-Indexの戦いに終止符を打ちます。

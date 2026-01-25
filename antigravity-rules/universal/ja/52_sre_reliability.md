@@ -7,6 +7,9 @@
     *   **本番環境**: 成熟度が上がった段階で、本番環境でのGame Day（避難訓練）を実施します。
 
 ## 2. デプロイメント戦略 (Deployment Strategy)
+*   **Supreme Directive: The Automated Deployment Mandate (CD First Protocol)**:
+    *   **Law**: 本番環境（Production）へのデータベース変更およびアプリケーションデプロイは、**いかなる場合も開発者の手動コマンド（ローカル端末からの `supabase db push` 等）で行ってはなりません。**
+    *   **Action**: デプロイは必ず **「検証されたコード（Pull Request）」** が **「信頼されたパイプライン（GitHub Actions）」** を通過した結果として、自動的に実行されなければなりません。「Human Touch（人の手による本番操作）」は不整合とオペミスの最大要因であり、排除されなければなりません。
 *   **ブルー/グリーンデプロイメント**:
     *   新旧の環境を並行稼働させ、トラフィックを瞬時に切り替えることで、ダウンタイムゼロのリリースを実現します。
 *   **カナリアリリース**:
@@ -62,3 +65,16 @@
 *   **Job Queue**:
     *   メール送信や画像解析などの重い処理は、APIレスポンスサイクルから切り離し、**Supabase Edge Functions + pgmq** で非同期実行します。
 
+### 8.x. The IPv6 Deployment Protocol (Connection Hygiene)
+*   **Context**: GitHub Actions 等のCI環境とSupabase間の接続において、IPv6名前解決の問題による接続エラーを防ぐための適切な構成を義務付けます。
+*   **Action**:
+    *   **Official Link**: `supabase link` を使用し、Connection Pooler等の適切な経路を確立してください。`gai.conf` によるOSハックは脆弱性です。
+    *   **Auth Token**: CI環境での認証には、プロジェクトAPIキーではなく、必ず **Personal Access Token (PAT)** を使用してください（`SUPABASE_ACCESS_TOKEN`）。トークン名は `GitHub Actions CI` とし、漏洩時の影響範囲を限定してください。
+
+### 8.y. The Lockfile Integrity Protocol (CI Consistency)
+*   **Law**: ローカルの `npm install` は曖昧さを許容しますが、CIの `npm ci` は厳密です。CIのみ落ちる場合、原因の9割は `package-lock.json` の不整合です。
+*   **Action**: CIエラー（特に "Context Deadline Exceeded" や "Missing from lock file"）に遭遇したら、調査に時間を使う前にまず `rm -rf package-lock.json node_modules && npm install` を実行し、Lockfileを再生成してPushしてください。これが最短の解決策です。
+
+### 8.z. The Environment Verification Protocol (Connection Check)
+*   **Law**: データベース接続エラー発生時は、解決策を提示する前に必ず `.env.local` の `NEXT_PUBLIC_SUPABASE_URL` を確認し、**「現在どこに繋ごうとしているか（Target）」** を特定することを義務付けます。
+*   **Anti-Pattern**: エラーメッセージ（症状）だけで判断し、「Dockerが落ちている」と推測でユーザーに指示することは禁止です。実際はリモートに繋ごうとしている（`.env.local`が残っている）ケースが大半です。
