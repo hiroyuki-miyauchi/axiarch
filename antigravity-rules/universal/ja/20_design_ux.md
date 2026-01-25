@@ -1,5 +1,13 @@
 # 20. デザインとUX戦略 (Design & UX Strategy)
 
+> [!CRITICAL]
+> **Rule 20.0: The Consistency Mandate (Professionalism Protocol)**
+>
+> - **Law**: UI/UXの不統一は「プロ意識の欠如」である。
+> - **Action**: 「この画面だけボタンが左にある」「ここだけ削除フローが違う」といった些細なズレを許容してはならない。全体の調和（Harmony）を乱す要素は、機能していようとバグである。
+> - **Target**: 特に「削除」「保存」「認証」などのクリティカルなフローにおいては、ユーザーのメンタルモデルを守るため、鉄の統一（Iron Consistency）を維持せよ。
+
+
 ## 1. デザイン哲学 (Philosophy: "Silicon Valley Excellence & Google First")
 
 ### 1.1. 圧倒的な「Wow」体験 (The "Wow" Factor - Delight)

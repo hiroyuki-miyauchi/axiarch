@@ -86,3 +86,15 @@
 ### 8.3. The PII Logging Defense (Masking Protocol)
 *   **Law**: ログへの個人情報（Email, Token, Password）流出は、システム最大のセキュリティリスクの一つです。
 *   **Action**: Loggerクラス内部で、`password`や`token`等のキーワードを含むフィールドを自動的に `***MASKED***` に置換するロジックを実装し、開発者のミスによる流出を防いでください。
+
+### 8.4. The User Experience Preservation Protocol (UX保護プロトコル)
+
+> [!CRITICAL]
+> **Supreme UX Directive (UX至上命令)**
+>
+> - **Principle**: 「セキュリティ」を言い訳にしてユーザー体験（UX）を損なうことは、システム設計上の**完全な敗北**であり、Google Antigravityとして断じて許容しません。過剰な認証はユーザーの離脱を招き、結果としてサービスの価値を毀損します。
+> - **Law**: Turnstile (Cloudflare) や OTP (ワンタイムパスワード) などの強力な認証は、**「重大なリスクを伴う操作」** にのみ適用を許可し、それ以外での使用を**厳禁**とします。
+> - **Classification**:
+>   - **Critical (Authentication Required)**: ログイン、決済、出金、アカウント削除、コンテンツの「公開(Publish)」、重要設定の変更。
+>   - **Non-Critical (Authentication Forbidden)**: 下書き保存(Draft Save)、AI生成(Gen-AI)、コンテンツの閲覧(Read)、コンテンツの「下書き更新」。
+> - **Mandate**: `StoreForm` 等の編集画面において、下書き保存やAI機能利用時にモーダル認証を要求することは**憲法違反**です。これらはストレスフリーで実行されなければなりません。

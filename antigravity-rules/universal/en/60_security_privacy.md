@@ -86,3 +86,15 @@
 ### 8.3. The PII Logging Defense (Masking Protocol)
 *   **Law**: Leaking PII (Email, Token, Password) to logs is a fatal security risk.
 *   **Action**: Implement auto-masking logic in the Logger class to replace sensitive fields (password, token) with `***MASKED***`.
+
+### 8.4. The User Experience Preservation Protocol
+
+> [!CRITICAL]
+> **Supreme UX Directive**
+>
+> - **Principle**: Sacrificing User Experience (UX) with "Security" as an excuse is a **complete defeat** in system design and is absolutely unacceptable as Google Antigravity. Excessive authentication leads to user churn and consequently damages the service value.
+> - **Law**: Strong authentication such as Turnstile (Cloudflare) or OTP (One-Time Password) is **strictly limited** to **"operations involving significant risk"** and is **strictly prohibited** for any other use.
+> - **Classification**:
+>   - **Critical (Authentication Required)**: Login, Payments, Withdrawals, Account Deletion, Content "Publishing", Changing Critical Settings.
+>   - **Non-Critical (Authentication Forbidden)**: Draft Save, AI Generation (Gen-AI), Content Viewing (Read), Content "Draft Updates".
+> - **Mandate**: Demanding modal authentication for draft saving or using AI features in edit screens like `StoreForm` is a **constitutional violation**. These must be executed stress-free.
