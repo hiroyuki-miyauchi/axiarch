@@ -57,7 +57,10 @@
         *   ※以下の数値は標準的なSaaSモデルの参考例です。プロジェクトの採算性に応じて調整してください。
         *   **Free**: Chat 5回/日, Vision 0回.
         *   **Standard**: Chat 30回/日, Thinking 3回. (ROI重視)
+        *   **Standard**: Chat 30回/日, Thinking 3回. (ROI重視)
         *   **Premium**: Chat 100回/日, Thinking 10回. (満足度重視)
+    *   **Vision AI Standards (Thinking Ban)**:
+        *   **Law**: "Thinking Mode"はOCRのような即時認識タスクには遅すぎて不適切です。ユーザーの期待値ギャップ（Expectation Gap）を防ぐため、画像認識には `gemini-2.0-flash` を使用し、Thinkingモデルの使用を禁止します。
     *   **Over-Limit**: 上限到達時は、ポイント課金 (Pay-as-you-go) などで柔軟に対応します。
 
 ## 5. マルチモーダルAIとエッジAI (Multimodal & Edge AI)

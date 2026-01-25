@@ -26,6 +26,12 @@
     *   **前払い式支払手段**: ポイントやコインを発行する場合、資金決済法に基づく供託義務（1000万円基準）を常に監視し、財務局への届出が必要なラインを超えないよう制御、または届出を行います。
     *   **特商法表記**: 有料販売を行う場合、法的に求められる全ての情報を明記します。
 
+### 2.x. The Legal Text DB Strategy (No Hardcoding)
+*   **Law**: 利用規約、プライバシーポリシー、特商法などの法的文書をソースコード内にハードコード（`const TERMS = ...`）することは、緊急時の修正を困難にするため禁止します。
+*   **Action**:
+    *   **DB Management**: 全ての法的テキストは `site_settings` または専用テーブルの `TEXT` カラムとして管理し、管理画面から即座に更新可能にしてください。
+    *   **Versioning**: 改定履歴を残すため、`valid_from` 等のカラムを用いてバージョン管理を行うことが望ましいです。
+
 ## 3. プライバシー・バイ・デザイン (Privacy by Design)
 *   **データ最小化 (Data Minimization)**:
     *   **原則**: 「いつか使うかも」でデータを取得することは禁止です。ビジネスに不可欠なデータのみを収集します。
@@ -62,6 +68,10 @@
 *   **多層防御 (Multi-Layered Defense)**:
     *   **Edge (WAF)**: Cloud ArmorやAWS WAFを使用し、GeoIPブロックやBot検知を行い、DDoS攻撃やEDoS攻撃（リソース枯渇）から保護します。
     *   **App Check**: Firebase App Check等を導入し、正規のアプリ以外からのAPIアクセスを遮断します。
+    *   **Rate Limiting**:
+        *   **Law**: 公開系（Public）のアクション（Inquiry, Auth）には、必ず `checkRateLimit` によるレートリミット（例: 5回/時）を実装し、多層防御（Defense in Depth）を構築します。
+        *   **Fail Fast**: レートリミット超過時は、DB接続や重い処理を行う前に即座にエラーを返し、リソースを保護します。
+        *   **Implementation**: Vercel KV や Upstash Redis を使用し、エッジでの高速なブロックを実現してください。DB負荷をかけないことが重要です。
 
 ## 7. 攻撃的セキュリティ (Offensive Security)
 *   **セルフ・ペネトレーションテスト**:
@@ -73,7 +83,7 @@
 ### 8.1. The Double Security Protocol (Turnstile + OTP)
 *   **Law**: すべての重要セキュリティ操作（ログイン、登録、PW変更、退会等）は、「Managed Turnstile」と「OTP (One-Time Password)」による2重防御を実装しなければなりません。
 *   **Action**:
-    1.  **Layer 1 (Pre-Auth)**: Turnstile (`appearance: 'always'`) でボットを物理的にブロックします。認証完了（`onSuccess`）まで送信ボタンを**物理的に無効化（disabled）**してください。
+    1.  **Layer 1 (Pre-Auth)**: Turnstile (`appearance: 'always'`) でボットを物理的にブロックします。認証完了（`onSuccess`）まで送信ボタンを**物理的に無効化（disabled）**してください。「見えない処理」でユーザーを待たせることはUXの欠陥です。
     2.  **Layer 2 (Auth)**: OTPによる本人確認完了まで、データの変更（UPDATE/DELETE）を許可してはなりません。
     3.  **Fail-Safe**: エラー時は即座にボタンを無効化し、状態をリセットする再試行フローを構築します。
 
@@ -87,8 +97,7 @@
 *   **Law**: ログへの個人情報（Email, Token, Password）流出は、システム最大のセキュリティリスクの一つです。
 *   **Action**: Loggerクラス内部で、`password`や`token`等のキーワードを含むフィールドを自動的に `***MASKED***` に置換するロジックを実装し、開発者のミスによる流出を防いでください。
 
-### 8.4. The User Experience Preservation Protocol (UX保護プロトコル)
-
+### 8.4. The User Experience Preservation Protocol (No Friction Mandate)
 > [!CRITICAL]
 > **Supreme UX Directive (UX至上命令)**
 >
@@ -97,4 +106,17 @@
 > - **Classification**:
 >   - **Critical (Authentication Required)**: ログイン、決済、出金、アカウント削除、コンテンツの「公開(Publish)」、重要設定の変更。
 >   - **Non-Critical (Authentication Forbidden)**: 下書き保存(Draft Save)、AI生成(Gen-AI)、コンテンツの閲覧(Read)、コンテンツの「下書き更新」。
-> - **Mandate**: `StoreForm` 等の編集画面において、下書き保存やAI機能利用時にモーダル認証を要求することは**憲法違反**です。これらはストレスフリーで実行されなければなりません。
+> - **No UI Friction**: モーダルを開く、タブを切り替える、ファイルをアップロードするといった「探索・中間操作」において認証を挟むことを**厳禁**とします。ユーザーが既に認証済み（ログイン済み）セッション内で行う軽微な操作に対し、再認証を強いることは「信頼の欠如」とみなされます。
+
+### 8.5. The Strict Nonce Protocol (Highest Security Mandate)
+*   **Law**: 外部スクリプト（Turnstile, GTM等）のブロックに対し、安易に `'unsafe-inline'` を追加する行為は「防御の放棄」であり、開発者としての敗北です。
+*   **Action**:
+    1.  **Nonce Propagation**: 全てのインラインスクリプトおよび外部ウィジェットには、必ず Middleware から生成された Nonce を伝播させ、正当性を証明してください。
+    2.  **Strict CSP**: `Content-Security-Policy` ヘッダーにおいて、常に最高強度の設定（Strict）を死守し、攻撃者が介入する隙（XSS等）を物理的に排除してください。
+
+### 8.6. The IPv6 Deployment Protocol (Connection Hygiene)
+*   **Law**: GitHub Actions 等のCI環境とSupabase間の接続において、IPv6名前解決の問題による接続エラーを防ぐための適切な構成を義務付けます。
+*   **Action**:
+    *   **Official Link**: `supabase link` を使用し、Connection Pooler等の適切な経路を確立してください。
+    *   **Auth Token**: CI環境での認証には、プロジェクトAPIキーではなく、必ず **Personal Access Token (PAT)** を使用してください（`SUPABASE_ACCESS_TOKEN`）。
+
