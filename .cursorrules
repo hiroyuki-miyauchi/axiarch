@@ -33,7 +33,10 @@
 ### 2. JAPANESE LANGUAGE FIRST PROTOCOL (日本語厳守プロトコル)
 
 1. **Thinking & Explanation**: 思考プロセス、ユーザーへの解説、バグ分析は**全て日本語**で行うこと。
-2. **Plan & Tasks**: 実装計画書 (Blueprint)、タスクリスト、TODOコメントは**全て日本語**で記述すること。
+2. **Plan & Tasks**: 以下のドキュメントおよびTODOコメントは**全て日本語**で記述すること。
+   - `implementation_plan.md` (実装計画書)
+   - `walkthrough.md` (修正内容の確認)
+   - `task.md` (タスクリスト)
 3. **Documents**: 憲法ファイル、仕様書、コミットメッセージの要約は、ニュアンスの齟齬を防ぐため**全て日本語**とする。
 4. **English**: コード内の変数名、関数名、JSDoc（型定義の一部）のみ英語の使用を許可する。
 
@@ -72,7 +75,6 @@
     - **思考・解説:** ユーザーへの回答、思考プロセス。
     - **Plan & Task:** 実装計画（Implementation Plan）、タスクリスト、TODO管理。
     - **Documents:** 仕様書（Blueprint）、ドキュメント、コミットメッセージの要約。
-    - **Document:** 仕様書（Blueprint）、ドキュメント、コミットメッセージの要約。
     - ※ ニュアンスのズレを防ぐため、これらは**必ず日本語**で記述すること。
   - **English (英語):**
     - **Code:** ソースコード、変数名、関数名。
@@ -98,6 +100,13 @@
 3.  **Full-Content Output (完全な出力):**
     - ファイルを作成・修正する際は、省略せずに**ファイル内容の全文**をコードブロックで出力する。
     - `// ... rest of code` のような省略は禁止です。
+
+4.  **Documentation Requirements (ドキュメント生成要件):**
+    - **Always Create:** タスクの大小や複雑さに関わらず、確認と記録のために以下の3ファイルを原則としてチャット内で生成・保存する。
+      - `task.md` (タスクリスト)
+      - `implementation_plan.md` (実装計画書)
+      - `walkthrough.md` (修正内容の確認)
+    - **Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経るフローを推奨する。
 
 ### 7. Continuous Improvement (ルールの結晶化)
 
