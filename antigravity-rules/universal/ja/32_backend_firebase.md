@@ -1,5 +1,11 @@
 # 32. バックエンドエンジニアリング (Backend Engineering - Firebase & GCP)
 
+> [!WARNING]
+> **Deprecated / Auxiliary Mode Only**
+> 本プロジェクトの **Single Source of Truth (SSOT)** は **Supabase (PostgreSQL)** です。
+> Firestoreをユーザーデータやドメインデータの保存に使用することは原則禁止です。
+> Firebaseの利用は、**FCM (Push Notification)**, **Google Analytics**, **Crashlytics** などの「周辺機能」に限定してください。
+
 ## 1. サーバーレス・アーキテクチャ (Serverless Architecture)
 *   **Cloud Functions (第2世代)**:
     *   **標準化**: 原則として **Cloud Functions (2nd Gen)** を使用し、並列処理（Concurrency）とコールドスタート対策を強化します。
@@ -8,9 +14,10 @@
 *   **イベント駆動 (Event-Driven)**:
     *   **非同期処理**: ユーザーの待機時間を最小化するため、重い処理（メール送信、画像加工、集計）は **Cloud Pub/Sub** や **Eventarc** を使用して非同期に実行します。
 
-## 2. データベース設計 (Database Design - Firestore)
+## 2. データベース設計 (Database Design - Firestore / DEPRECATED)
+*   **原則禁止**: 新規開発においてFirestoreを使用しないでください。データはSupabaseへ保存してください。
 *   **整合性とセキュリティ (Integrity & Security)**:
-    *   **Security Rulesの絶対遵守**: Firestore Security Rulesは絶対です。全てのドキュメントには適切なアクセス制御を設定します。
+    *   **Legacy Maintenance**: 既存機能の保守のためにFirestoreを使用する場合でも、Security Rulesは絶対です。全てのドキュメントには適切なアクセス制御を設定します。
     *   **厳格な検証**: `request.auth.uid` を使用して、ユーザーが自分自身のデータにのみアクセスできるように制限します。
 *   **無限のスケーラビリティ (Infinite Scalability)**:
     *   **Unbounded Queries 禁止**: クライアントサイドで上限（Limit）のないクエリ（例: `collection('posts').get()`）を実行することは**厳禁**です。Firestoreの読み取りコストを抑制し、パフォーマンスを維持するため、必ずページネーションを実装します。

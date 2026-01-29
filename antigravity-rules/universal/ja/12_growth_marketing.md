@@ -8,15 +8,46 @@
 *   **透かしとブランディング (Watermarks & Branding)**:
     *   **UGC (User Generated Content)**: ユーザーが生成したコンテンツ（画像、動画、共有リンク）には、必ずプロダクトのロゴや「Powered by...」を含め、外部への露出を最大化します。
 
-## 2. テクニカルSEO (Technical SEO)
+## 2. Technical SEO & GEO (Generative Engine Optimization)
+*   **The GEO Mandate**:
+    *   **Context**: 従来のSEO（対Google）に加え、PerplexityやSearchGPTなどの「AI検索エンジン」への最適化（GEO）を義務付けます。
+    *   **Definition**: GEOとは、AIが学習・引用しやすい形式で情報を提供し、回答生成時の「信頼できる引用元（Primary Source）」として選ばれるための戦略です。
 *   **構造化データ (Structured Data)**:
     *   **JSON-LD**: 全てのパブリックページに `Schema.org`（JSON-LD）を実装し、Google検索結果でのリッチスニペット表示（レビュー、価格、FAQ）を狙います。
+    *   **The Direct Answer Protocol (アンサーファースト)**:
+        *   **Context**: AI検索エンジン（SGE, Perplexity）は、ユーザーの質問に対する「直接的な回答」を抜粋します。
+        *   **Action**: コンテンツは「結論を最初に（アンサーファースト）」「手順は番号付きリストで」「比較はテーブルで」記述することを強制します。「〜とは、〜のことである」という定義構文も有効です。
+    *   **The Primary Source Citation (一次情報引用)**:
+        *   **Law**: 事実（統計、法律、医学データ）を述べる際は、可能な限り信頼できる一次情報（公的機関、論文、公式サイト）への発リンクを行います。
+        *   **Effect**: これは「情報の裏付け」があることを検索エンジン及びAIに示し、信頼度スコア（Trustworthiness）を向上させます。
+    *   **The Reviewer Visibility Protocol (監修者明示)**:
+        *   **Context**: YMYL (Your Money Your Life) 領域では、誰が書いたか以上に「誰が認めたか」が重要です。
+        *   **Action**: 専門家（医師、弁護士等）が監修した記事には、必ず `reviewer` プロパティを使用して監修者情報を構造化データに含めてください。
+*   **The URL as State Protocol (状態のURL表現)**:
+    *   **Law**: フィルタ、ソート、ページネーション等のUI状態は、クエリパラメータ（例: `?area=tokyo&sort=rating`）で再現可能にします。
+    *   **Action**:
+        1.  **Shareable URLs**: ユーザーが状態を共有・ブックマークできるようにします。
+        2.  **Canonical Normalization**: 同一コンテンツへの複数URL（パラメータ順序違い等）は `canonical` タグで正規化し、SEO評価の分散を防ぎます。
 *   **インデックス制御 (Indexing Control)**:
     *   **Sitemap自動化**: `next-sitemap` 等を使用し、ビルド時または定期的（ISR）にXMLサイトマップを自動生成します。手動更新は禁止です。
     *   **Search Console API**: 記事公開や更新時に、Google Search Console APIを叩いてインデックス登録を即時リクエストする仕組みを整えます。
     *   **URLの永続性 (URL Persistence)**: リニューアル時、旧URL（例: WordPressの `/archives/123`）からの301リダイレクトを必ず設定し、SEO評価（Link Juice）を継承します。
+    *   **The Pre-Launch Indexing Protocol (Sealed SEO)**:
+        *   **Law**: 正式ドメインへの移行およびステークホルダーからの明示的な「Launch承認」があるまで、`robots: noindex` 設定を**絶対に解除してはなりません**。
+        *   **Risk**: 未完成の状態でのインデックス登録は、ドメイン評価の毀損、重複コンテンツ、ブランドイメージの低下を招きます。
+        *   **Action**: 開発・ステージング環境では、`next.config.js` や `middleware` でnoindex を強制し、本番かつ明示的承認後のみ解除するフローを構築してください。
 *   **Core Web Vitals**:
-    *   SEO順位に直結するため、LCP, FID, CLSのスコアを常に緑色（Good）に保ちます。
+    *   SEO順位に直結するため、**LCP, INP, CLS** のスコアを常に緑色（Good）に保ちます。
+*   **The SEO Integrity Protocol (Canonical & Internal Link)**:
+    *   **Law**: 全ての公開ページにおいて、`generateMetadata` を用いた `canonical` URLのリターンを義務付けます。
+    *   **Action**: ページ遷移時にパンくずリスト（Breadcrumbs）の階層構造をJSON-LDとして動的に生成し、クローラにサイト構造を正確に伝えてください。
+*   **The Consent Mode v2 Protocol (Compliance Tracking)**:
+    *   **Context**: 欧州経済領域 (EEA) や日本国内の法規制（改正電気通信事業法等）への対応。
+    *   **Law**: Google Consent Mode v2 を実装し、ユーザーの同意状態 (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`) に応じてタグの発火を動的に制御してください。
+    *   **Action**: 同意管理プラットフォーム (CMP) を導入するか、自社で同意取得 UI を構築し、`gtag('consent', 'default'|'update', ...)` を正確に叩くフローを標準化します。
+*   **The Data Layer Standard (Standardized Observation)**:
+    *   **Law**: コンバージョンやユーザー行動の計測において、DOMスクレイピング（「ボタンのテキストが〜なら」といった判定）を禁止します。
+    *   **Action**: 必ず `window.dataLayer.push({ event: 'event_name', ... })` という構造化されたデータレイヤーを介して GTM (Google Tag Manager) 等へ情報を渡してください。
 
 ## 3. オンボーディング最適化 (Onboarding Optimization)
 *   **Aha! Momentへの短縮**:
@@ -36,3 +67,34 @@
     *   **AppsFlyer / Adjust**: モバイルアプリのインストール経路を正確に計測し、どの広告チャネルがLTVの高いユーザーを連れてきているかを特定します。
 *   **ディープリンク (Deep Linking)**:
     *   **Universal Links / App Links**: Webやメールからアプリ内の特定の画面に直接遷移できるディープリンクを完備します。インストールされていない場合はストアへ誘導します（Deferred Deep Linking）。
+
+## 6. Marketing Feeds & Integrations (広告フィード連携)
+*   **The Marketing Feed Protocol (自動同期)**:
+    *   **Law**: 商品やサービスを広告プラットフォーム（Google Shopping, Meta Dynamic Ads等）で展開する場合、手動更新に依存せず、常に最新のデータを自動同期するフィードを整備します。
+    *   **Action**:
+        1.  **Feed Endpoint**: 商品データフィード (XML/TSV/JSON) を出力するAPIエンドポイント（例: `/api/feeds/ads`）を実装します。
+        2.  **Realtime Sync**: 在庫、価格、ステータスの変更は、フィード経由で広告媒体に即時反映されるようにします。
+        3.  **Schema Compliance**: Google Merchant Center等のスキーマ要件を厳守し、審査エラーを未然に防ぎます。
+
+## 7. Traffic Risk Diversification (トラフィック・リスク分散)
+*   **The Owned Audience Mandate (脱プラットフォーム依存)**:
+    *   **Risk**: 外部プラットフォーム（Google検索アルゴリズム変更、SNSポリシー変更）によるトラフィックの突然の蒸発。
+    *   **Law**: 外部プラットフォームに依存しない「自社保有の顧客リスト（Owned Audience）」を構築することを義務付けます。
+    *   **Action**:
+        1.  **Newsletter/LINE**: ユーザー登録時にメルマガまたはチャットプラットフォーム（LINE等）への登録を促し（Opt-in）、検索を経由せず直接リーチできる手段を確保します。
+        2.  **Web Push**: PWAのWeb Push通知を実装し、リテンション（再訪）をコントロール可能にします。
+        3.  **Community Building**: 自社フォーラムやDiscord等のコミュニティを構築し、プラットフォームに依存しないユーザー基盤を形成します。
+*   **The CAPI Direct Connection Protocol (First-Party Sovereignty)**:
+    *   **Context**: ブラウザのCookie制限や広告ブロックによる欠損対策。
+    *   **Law**: Meta CAPI や Google Ads Enhanced Conversions を、Pixel（フロントエンド）経由だけでなく、**サーバーサイド (Next.js Server Actions) から直接** 送信する「二重送信プロトコル」を標準とします。
+    *   **Action**: 
+        1. **Deduplication**: PixelとCAPIで同一の `event_id` (UUID) を使用し、媒体側での重複排除を保証してください。
+        2. **PII Normalization**: サーバーから送信する個人情報（メールアドレス、電話番号等）は、必ずクライアントサイドではなくサーバーサイドで **SHA-256 ハッシュ化** してから送信することを厳守してください。
+*   **The Data-Driven Marketing Protocol (Plan Abstraction)**:
+    *   **Law**: コード内で特定のプラン ID を直接判定することを禁止します。
+    *   **Mandate**: プランの性質（Enterprise かどうか、特定機能の開放等）は、必ず決済プラットフォーム（Stripe 等）の **Metadata** に持たせ、コードはそれを動的に参照してください。
+    *   **Goal**: 開発チームを介さずに、ビジネス側でプランごとの権限や機能を即座に変更できる「経営の機動力」を最大化します。
+### 7.1. The Metadata Segregation Protocol (Marketing Content Hygiene)
+*   **Law**: コンテンツの「本来の属性（名前、価格、説明）」と、マーケティング用の「メタ情報（SEO用タイトル、広告用キャッチコピー）」を物理的に分離して管理してください。
+*   **Action**: `items` テーブル等の主データと、`marketing_metadata` (jsonb または専用テーブル) を分離し、UI においてマーケターが後者を編集しても、システムの基盤ロジック（注文処理、通知等）が壊れない依存関係を構築してください。
+*   **Rationale**: 広告表現の最適化（ABテスト）のために商品名を変えた結果、発送伝票の名前まで変わってしまう「密結合の悲劇」を物理的に回避します。

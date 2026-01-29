@@ -1,8 +1,10 @@
-# 300. 分析インテリジェンスとオブザーバビリティ (Analytics Intelligence & Observability)
+# 41. 分析インテリジェンスとオブザーバビリティ (Analytics Intelligence & Observability)
 
 ## 1. 行動分析 (Behavioral Analytics - "Amplitude First")
 *   **イベント設計 (Event Taxonomy)**:
     *   **アクションベース**: 「ページを見た (Page Viewed)」ではなく「購入ボタンを押した (Clicked Purchase)」「チュートリアルを完了した (Completed Tutorial)」という**ユーザーの意図**を記録します。
+    *   **Naming Convention (Snake Case)**:
+        *   **Law**: イベント名は全て **スネークケース** (`action_completed`) で統一します。スペースやキャメルケースは禁止です。これはDBカラム名との整合性を保つためです。
     *   **プロパティ**: イベントには必ずコンテキスト（例: `source: "banner_A"`, `item_count: 3`）を付与し、分析の解像度を高めます。
 *   **コホート分析 (Cohort Analysis)**:
     *   **リテンション**: 「機能Aを使ったユーザー」と「使わなかったユーザー」の翌週継続率（Retention Rate）を比較し、プロダクトの**マジックナンバー**（例: 「7人フォローすると定着する」）を特定します。
@@ -14,7 +16,7 @@
 *   **統計的有意差 (Statistical Significance)**:
     *   結果の判定には、95%以上の信頼区間（Confidence Interval）を使用し、偶然のブレを排除します。
 
-## 41. アナリティクスとインテリジェンス (Analytics & Intelligence)
+## 3. アナリティクスとインテリジェンス (Analytics & Intelligence)
 *   **North Star Metric (NSM)**:
     *   **定義**: プロダクトの長期的価値を最も的確に表す「たった一つの指標」を定義します（例: Spotifyなら「総再生時間」、Airbnbなら「予約泊数」）。
     *   **全社共有**: エンジニアからCSまで、全員がこのNSMを向上させるために動きます。
@@ -34,7 +36,7 @@
     *   **OpenTelemetry**: フロントエンドからバックエンド、データベースに至るまでのリクエストを一気通貫で追跡（Trace）できるようにします。「どこで遅くなったか」を即座に特定します。
 *   **パフォーマンス監視 (Performance Monitoring)**:
     *   **リアルタイム監視**: TTI (Time to Interactive) や APIレイテンシをリアルタイムで監視し、閾値を超えた場合はSlack等にアラートを通知します。
-    *   **Core Web Vitals**: LCP, FID, CLSのスコアを継続的に計測し、SEOやUXへの悪影響を未然に防ぎます。
+    *   **Core Web Vitals**: **LCP, INP, CLS** のスコアを継続的に計測し、SEOやUXへの悪影響を未然に防ぎます。
 
 ## 6. プライバシーファースト分析 (Privacy-First Analytics)
 *   **PIIの送信禁止 (No PII)**:

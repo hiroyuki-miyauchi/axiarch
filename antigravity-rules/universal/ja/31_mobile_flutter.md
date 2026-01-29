@@ -35,14 +35,19 @@
     *   **OverlayPortal**: カスタムオーバーレイが必要な場合は、Flutter 3.10+の `OverlayPortal` を使用し、パフォーマンスを維持しつつウィジェットツリーの制約を回避します。
     *   **状態管理**: 「一度だけ表示する」状態は、必ずローカルストレージ（SharedPreferences/Isar）とリモートDBの両方で管理し、再インストール時にもユーザーを煩わせないようにします。
 
-## 4. 品質保証 (Quality Assurance)
+## 5. 品質保証 (Quality Assurance)
 *   **Golden Tests**:
     *   UIの回帰テストとして、**Golden Toolkit** を使用したスナップショットテストを必須とします。
     *   異なるデバイスサイズ（iPhone SE, Pro Max, Pixel）での表示崩れを自動検知します。
 *   **Maestro**:
     *   E2Eテストには **Maestro** を使用し、ユーザーの実際の操作フローを自動化します。
 
-## 5. デプロイと配信 (Deployment & Distribution)
+## 6. デプロイと配信 (Deployment & Distribution)
 *   **CI/CD**:
     *   GitHub ActionsとCodemagic/Bitriseを連携させ、mainブランチへのマージをトリガーに、TestFlight/Google Play Internal Testingへ自動配信します。
     *   リリースビルドは、難読化（Obfuscation）と最適化（Tree Shaking）を必ず有効にします。`flutter build ipa --obfuscate --split-debug-info=/<path>` を使用します。
+
+## 7. Security & API Integration
+*   **The Native Bypass Protocol (VIP Lane Strategy)**:
+    *   **Law**: バックエンドのTier 2 (VIP Lane) 戦略に対応するため、ログインユーザーのリクエストにおいては、**API Key (`x-api-key`) を送信せず、必ず `Authorization: Bearer <token>` のみを送信**することを義務付けます。
+    *   **Reason**: アプリバイナリ内へのAPI Key（秘密鍵）埋め込みリスクを物理的にゼロにするためです。アプリ内にはPublic Keyすら持たせないのが理想です。

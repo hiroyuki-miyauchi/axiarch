@@ -16,6 +16,12 @@
     *   **Modal Visibility**: メディアピッカー等の主要な作業用モーダルは、一覧性を確保するため画面幅の **80% (80vw)** 以上を使用します。狭いモーダルは作業効率を下げます。
     *   **Action Feedback**: 保存・更新アクションに対し、「Toast通知」に加え、「ボタンの緑色化 + テキスト変更（保存しました！）」による明確なフィードバックを実装します。ユーザーに「保存された？」と迷わせる時間をゼロにします。
     *   **Copyright Automation**: フッターのコピーライト年号は、`[開始年]–[現在年]` の形式でシステムが自動更新するように実装します。手動更新は廃止します。
+    *   **The Code Input Standard (Mandatory Code Editor)**:
+        *   **Law**: 生の `textarea` でのコード編集（HTML/CSS/JS/Config）は、シンタックスハイライトがなく、入力ミスを誘発し、サイトの品質を著しく損なうため厳禁です。
+        *   **Action**: コード入力欄（HTML/CSS/Config等）には、必ず `react-simple-code-editor` (+ `prismjs`) などのエディタコンポーネントを使用してください。
+    *   **The CSS Containment Protocol (Admin Layout Protection)**:
+        *   **Law**: 管理画面のアコーディオン展開等によって、親コンテナのスクロール計算が狂い、膨大な余白が発生する「Whitespace Glitch」を防ぐ必要があります。
+        *   **Action**: `overflow-y-auto` を持つ管理画面のメインコンテナには、原則として `style={{ contain: 'layout' }}` を付与し、子要素のレイアウト変動を隔離してください。
 *   **Information Density Strategy**:
     *   **Card Strategy**: コンテンツエリアは白背景のカード (`bg-white shadow-sm`) とし、背景（`bg-muted/40`）から分離します。
     *   **Action Placement**: 「保存」等の主要アクションは、常にヘッダー右上に配置します。
@@ -70,7 +76,10 @@
 *   **Action**:
     *   **Full Localization**: ボタンラベル、エラーメッセージ、ログのアクション名に至るまで、画面上に表示される全てのテキストは日本語でなければなりません。
     *   **Mapping**: Enum型やシステム識別子は、必ず表示用の定数マップ（例: `AUDIT_ACTION_LABEL`）を通して表示してください。生の値（`create_post`）を表示することは禁止です。
-    *   **Tech Stack Sync**: 技術スタックに変更があった場合（DB変更、新AIモデル導入等）は、必ずダッシュボード上の `src/components/admin/dashboard/tech-stack-card.tsx` を即座に更新し、実態と同期させてください。技術構成がブラックボックス化することは許されません。
+
+### 8.2. The System Transparency Protocol (Tech Stack Sync)
+*   **Context**: 技術構成がブラックボックス化すると、非エンジニア（経営陣・運用者）との共通認識がズレ、誤った意思決定を招きます。
+*   **Law**: 技術スタックに変更があった場合（DB変更、新AIモデル導入等）は、必ずダッシュボード上の `src/components/admin/dashboard/tech-stack-card.tsx` を即座に更新し、実態と同期させてください。技術構成がブラックボックス化することは許されません。
 
 
 

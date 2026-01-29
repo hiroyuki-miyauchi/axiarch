@@ -93,3 +93,8 @@ Even in a Flutter-first environment, deep understanding of native platforms is e
 *   **App Links & PWA**:
     *   **Deep Links**: Configure `/.well-known/apple-app-site-association` for direct app opening.
     *   **PWA**: Provide `manifest.json` to ensure standalone experience for mobile web users.
+
+## 10. Security & API Protocols
+*   **The Native Bypass Protocol (No Secrets in Binary)**:
+    *   **Law**: Native apps (IPA/APK) can be decompiled. Bundling API Keys (`x-api-key`) is a security risk.
+    *   **Action**: For authenticated requests, attach ONLY `Authorization: Bearer <token>` and do NOT use API Keys. The backend provides VIP Lane (Tier 2 Access) via this token.

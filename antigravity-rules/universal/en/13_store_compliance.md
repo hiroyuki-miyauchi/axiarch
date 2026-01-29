@@ -11,6 +11,9 @@
         *   Must include `PrivacyInfo.xcprivacy` file and accurately describe data types collected by the app and third-party SDKs and their usage purposes.
         *   **Reason for API Use**: When using APIs such as disk capacity or boot time, the legitimate reason (Required Reason API) must be declared.
     *   **Data Minimization**: Do not collect data not necessary for features.
+    *   **The Account Deletion Mandate (Apple 5.1.1(v))**:
+        *   **Law**: Apps with account creation MUST implement a feature to **fully delete** the account directly from within the app. "Contact Support" is not acceptable.
+        *   **Action**: Place an "Delete Account" button in a clear location in Settings, and implement a confirmation flow. Apply Backend Constitution (`37`) "Right to be Forgotten" exception and physically delete PII.
 
 ## 2. Google Play Store (Android)
 *   **Target API Level**:

@@ -16,6 +16,9 @@
 *   **Immediate Action**:
     *   Unstable tests (Flaky Tests) are the biggest enemy of developer trust. Fix immediately upon discovery, or Disable (Skip) until fixed.
     *   **No Retry**: "Auto-retry" that hides test failures is prohibited in principle; solve the root cause.
+*   **Seed Data Determinism (Fixed Seed)**:
+    *   **Law**: To build reproducible test environments, mandate use of **Fixed IDs/Values** for test data (Seed), never random numbers. "Tests that change results every time" are not tests.
+    *   **Snapshot**: Tests dependent on timestamps must also fix time using `FakeTimer` etc.
 
 ## 3. Real Device & Compatibility
 *   **Mandatory Real Device Testing**:
@@ -26,11 +29,22 @@
     *   **Network**: Test behavior in unstable network environments like Offline, 3G (Slow), Recovery from Airplane Mode.
 *   **Manual Verification Protocol**:
     *   Upon feature completion, verification from following perspectives is mandatory.
-    *   **Checklist**: Happy Path, Edge Cases (0 items/Max val), Cross-Device, Role Access, API Security (Confirm Bypass), Layout Stability (No double scroll).
+    *   **Verification Checklist (Mandatory)**:
+        *   **Happy Path**: Does the normal flow work?
+        *   **Edge Cases**: Zero data, max characters, network error behavior.
+        *   **Cross-Device**: Verify display breakage on PC (Chrome) vs Mobile (iOS Safari Real Device). Watch out for iOS `100vh` issues and Safe Area.
+        *   **Role Access**: Is permission separation correctly functioning for Guest, General User, and Admin?
+        *   **API Security**: Confirm that requests without `x-api-key` are rejected (Public), and requests with `Authorization: Bearer` (User) are allowed (Native Bypass).
+        *   **Natural Scrolling**: No unintended "mystery whitespace" at screen bottom? No double scrollbars?
 
 ## 4. Fix Twice Principle
 *   **Double Fix**:
     *   When fixing a bug, do not just "Fix Once". Make it a set to "Fix Twice" by creating a mechanism (Add Lint, Strict Type, Add Test) to prevent the same bug from happening again.
+*   **The Regression Ban Protocol (Zero Recurrence Mandate)**:
+    *   **Law**: Defining "Recurrence of a once-fixed bug" (Regression) as the **"Greatest Failure"** in engineering.
+    *   **Action**: 
+        1. **Visibility**: When fixing a recurring bug, MUST explicity write "Fact of Recurrence" and "WHY previous mechanism failed" in `task.md` or `walkthrough.md`.
+        2. **Hardening**: Mandatory condition for task completion is not just code fix, but adding **Automated Test (Regression Test)** that physically catches that bug.
 
 ## 5. Release Criteria
 *   **Blockers**:
@@ -39,7 +53,7 @@
 *   **Phased Rollout**:
     *   Do not release to all users at once; expand range gradually 1% -> 5% -> 20% -> 100% to minimize impact of unexpected defects.
 
-## 5. Ultimate User Perspective
+## 6. Ultimate User Perspective
 *   **The Grandmother Test**:
     *   **Standard**: Always ask yourself "Can my grandmother who is not tech-savvy use this without explanation?".
     *   **Intuitiveness**: UI requiring a manual is considered a "Bug".

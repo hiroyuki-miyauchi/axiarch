@@ -7,12 +7,25 @@
     *   **Production**: Once maturity increases, conduct Game Days (Evacuation Drills) in production.
 
 ## 2. Deployment Strategy
+*   **Supreme Directive: The Automated Deployment Mandate (CD First Protocol)**:
+    *   **Law**: Database changes and application deployments to production MUST **NEVER be done via developer's manual commands (e.g., `supabase db push` from local terminal)**.
+    *   **Prohibition**: "Manual Deploy" is "engineering suicide" that invites operation mistakes and causes history inconsistencies.
+    *   **Action**: Deployments MUST be automatically executed as a result of **"Verified Code (Pull Request)"** passing through **"Trusted Pipeline (GitHub Actions)"**.
 *   **Blue/Green Deployment**:
     *   Run new and old environments in parallel and switch traffic instantly to achieve Zero Downtime Release.
 *   **Canary Release**:
     *   Release new features only to a subset of users (e.g., employees only, 1%) and expand to all users after confirming no issues.
 *   **Rollback**:
     *   Maintain a state where you can immediately revert to the previous version (Rollback) with one button upon deployment failure.
+*   **The Gatekeeper Protocols (Zero Tolerance Mandate)**:
+    *   **Linter Zero Tolerance**: CI does not tolerate `Warning`. Mandate `eslint --max-warnings=0`.
+    *   **Husky Guard (Universal Defense)**: Regardless of server-side protection, mandate defense via `husky` `pre-push` hook across all repositories. Make "accidentally pushed" physically impossible.
+*   **The Husky Guard (Universal Defense Mandate)**:
+    *   **Law**: All projects MUST install **Husky** and configure `pre-push` hook to prohibit direct push to `main` (and `master`) branches as **Universal Mandate**. "Being careful" is meaningless psychological operation; only physical defense lines in code are trusted.
+    *   **Action**: Set up guardrails at project initialization. Double defense lines are the supreme duty, not relying on server-side protection (Branch Protection) alone.
+*   **The Branch Hygiene Mandate (Clean Up After Yourself)**:
+    *   **Law**: Leaving working branches invites accidents from environment differences. "Delete after merge" is engineer's breathing.
+    *   **Action**: Before Final Notify, always check `git branch --merged` and automatically delete merged local working branches.
 
 ## 3. Compatibility Matrix - "Zero Tolerance"
 *   **Browsers**:
@@ -48,8 +61,51 @@
     *   **Logs**: Detailed event records. Used for debugging.
     *   **Traces**: Request path tracking. Used for bottleneck identification.
     *   Introduce tools (Datadog, Cloud Monitoring) that can monitor these integrally.
+*   **The Request ID Protocol (Zero Search Time)**:
+    *   **Law**: API responses and error responses MUST always include tracking `requestId` (`x-request-id`).
+    *   **Source**: Adopt reliable ID such as `x-nonce` header generated in middleware or UUID.
+    *   **Usage**: On error, user or AI agent presents this ID so developers can immediately identify cause from logs (Zero Search Time).
+    *   **Mandate**: Recommend including this ID in both response header and error JSON body.
+*   **The Client Observability Mandate (Frontend Monitoring)**:
+    *   **Law**: Mandate introduction of **Sentry** or equivalent monitoring tool to observe script errors (Uncaught Exception) and hydration errors on frontend (Browser).
+    *   **Scope**: Enable only in production (`NODE_ENV=production`) and don't pollute dev environment console.
+    *   **Outcome**: Visualize silent errors occurring without user reports and connect to quality improvement.
+*   **The Health Check Protocol (Liveness Probe)**:
+    *   **Law**: All applications MUST maintain `/api/health` or `/healthz` endpoint and accept liveness monitoring from load balancers and monitoring tools.
+    *   **Response**: Recommend returning status code `200 OK` with basic health info like DB connection state, cache connection state.
+*   **The Correlation ID Tracing Protocol (Distributed Tracing)**:
+    *   **Law**: Attach correlation ID (`correlation_id`) to complex distributed transactions (payment, AI generation, multi-step processes like email sending) to enable end-to-end log tracing (OpenTelemetry philosophy).
+    *   **Scope**: Propagate ID generated at request origin to all related service calls (Edge Function, external API).
+    *   **Outcome**: Maintain state to immediately identify "which request, at which service, at which step failed" on incident.
 
 ## 7. Data Durability
 *   **RPO / RTO**:
-    *   **RPO (Recovery Point)**: **24 hours**. Backup daily.
-    *   **RTO (Recovery Time)**: **2 hours**. Maintain procedures to restart within 2 hours.
+    *   **RPO (Recovery Point)**: **24 hours**. Backup daily making worst case restoring to previous day possible.
+    *   **RTO (Recovery Time)**: **2 hours**. Establish restore procedures from backup targeting service restart within 2 hours.
+*   **The Fire Drill Protocol (Recovery Drill Obligation)**:
+    *   **Mandate**: Mandate quarterly "recovery drill" that actually restores from backup and confirms normal operation. Untested backup is considered "non-existent".
+*   **The Off-Site Backup Mandate**:
+    *   **Risk**: Total data loss from cloud provider failure itself or account freeze.
+    *   **Mandate**: In addition to main DB auto-backup, mandate periodic logical backup transfer to external storage (S3/R2 etc.) operating as "Noah's Ark".
+
+## 8. Maintenance & Resilience
+*   **Maintenance Mode**:
+    *   **Switch**: Manage maintenance state via DB settings (`site_settings`) and check in both Middleware and Server Actions. Physically block writes from backdoors.
+*   **Circuit Breaker**:
+    *   Set timeouts on external API calls and return default values on failure (Fail Safe).
+*   **Job Queue**:
+    *   Decouple heavy processing like email sending and image analysis from API response cycle, and execute asynchronously with **Supabase Edge Functions + pgmq**.
+
+### 8.1. The IPv6 Deployment Protocol (Connection Hygiene)
+*   **Context**: Mandate appropriate configuration to prevent connection errors from IPv6 name resolution issues between CI environments like GitHub Actions and Supabase.
+*   **Action**:
+    *   **Official Link**: Use `supabase link` to establish proper routes like Connection Pooler. OS hacks via `gai.conf` are vulnerabilities.
+    *   **Auth Token**: For CI environment auth, MUST use **Personal Access Token (PAT)** instead of project API key (`SUPABASE_ACCESS_TOKEN`). Name token `GitHub Actions CI` to limit leak impact scope.
+
+### 8.2. The Lockfile Integrity Protocol (Lockfile Sanctuary)
+*   **Law**: `package-lock.json` (or `pnpm-lock.yaml`, `yarn.lock`) is the "sanctuary" guaranteeing dependency integrity. "Context Deadline Exceeded" or "Missing from lock file" errors in CI are 90% caused by lockfile inconsistency.
+*   **Action**: When encountering dependency errors in CI, don't waste time investigating—immediately **delete lockfile and `node_modules`, rerun `npm install` to regenerate lockfile and push**. This is the shortest and only correct answer.
+
+### 8.3. The Environment Verification Protocol (Connection Check)
+*   **Law**: When database connection error occurs, MUST check `.env.local`'s `NEXT_PUBLIC_SUPABASE_URL` before proposing solutions to identify **"where it's trying to connect (Target)"**.
+*   **Anti-Pattern**: Prohibit judging only by error message (symptom) and instructing user with "Docker is down" speculation. Actually trying to connect to remote is the majority case.

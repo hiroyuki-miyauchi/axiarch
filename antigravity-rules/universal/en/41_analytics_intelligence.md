@@ -3,6 +3,8 @@
 ## 1. Behavioral Analytics - "Amplitude First"
 *   **Event Taxonomy**:
     *   **Action-Based**: Record **User Intent** like "Clicked Purchase" or "Completed Tutorial", not just "Page Viewed".
+    *   **Naming Convention (Snake Case)**:
+        *   **Law**: Unify all event names in **Snake Case** (`action_completed`). Spaces or Camel Case are prohibited. This is to maintain consistency with DB column names.
     *   **Properties**: Always attach context (e.g., `source: "banner_A"`, `item_count: 3`) to events to increase analysis resolution.
 *   **Cohort Analysis**:
     *   **Retention**: Compare next-week Retention Rate between "Users who used Feature A" and "Users who didn't" to identify the product's **Magic Number** (e.g., "Retain if they follow 7 people").

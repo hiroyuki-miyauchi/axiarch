@@ -53,6 +53,18 @@
 *   **Subscription Economics**:
     *   **Recurring Revenue**: Prioritize recurring revenue (MRR/ARR) over one-time sales.
     *   **Tiered Pricing**: Create a structure where users can upgrade (Upsell) as they grow (e.g., Basic, Pro, Enterprise).
+    *   **Metadata Segregation Protocol (Data Driven Strategy)**:
+        *   **Law**: Writing conditional branches in code like "if plan ID is this, then Enterprise plan" (Hardcoding) is a serious design mistake that damages business flexibility.
+        *   **Action**: Plan properties (BtoB/BtoC, API permission availability) should be in metadata (e.g., `is_enterprise: true`) in Stripe etc., and application should dynamically reference these to determine behavior—enforce **"Data Driven Strategy"**. This enables immediate response to business plan changes without deployment.
+    *   **The API Economy Alignment (Commercialization First)**:
+        *   **Law**: Even internal APIs should be designed assuming future external sales (Monetization). Build in concepts of "Tier 1 (Public)" and "Tier 2 (Enterprise)" as business requirements from the start.
+        *   **Reason**: "Selling APIs later" pivot costs more than building from scratch.
+    *   **The Usage Limit UX & Enforcement Protocol (Tier-based Limit Implementation)**:
+        *   **Law**: Feature limits per subscription tier (Free/Standard/Premium, etc.) such as registration counts or API calls MUST be enforced on **both UI and backend**.
+        *   **Action**:
+            1.  **Server-Side Enforcement (SSOT)**: Limit validation MUST be done on **Server Actions / RPC / DB Trigger** side. Client-side-only limits risk being bypassed.
+            2.  **Clear Error Messaging**: On limit exceeded, display **specific and positive messages** to prompt upsell like "Free plan is limited to 1 item. Upgrade to Pro plan for unlimited."
+            3.  **Guard Centralization**: Limit check logic MUST be centralized in `src/lib/guards/subscription-guard.ts` etc. Scattering across individual features is prohibited (DRY violation prevention).
 *   **Ad-based Model (If applicable)**:
     *   **User Experience First**: Integrate ads naturally as part of the content and ensure they do not hinder UX (Native Ads).
     *   **Viewability**: Value only the ads that users actually see.
@@ -74,6 +86,13 @@
     *   If selling for a fee, strictly implement the notation based on **local laws** (e.g., Tokusho-ho).
 *   **Prepaid Instrument Regulations**:
     *   When issuing prepaid payment instruments (points, coins), always be aware of the line where the deposit obligation arises (e.g., threshold amount in local currency) and report to relevant authorities if necessary.
+
+### 6.1. The Legal Hardcoding Ban (DB SSOT Mandate)
+*   **Law**: Hardcoding (directly writing) "legally binding text" such as Terms of Service, Privacy Policy, or commercial law-required disclosures in source code is **permanently banned (Universal Ban)** as it risks delayed corrections during legal changes.
+*   **Action**:
+    *   **DB First**: All legal documents MUST be saved in `site_settings` table or dedicated `fixed_pages` table.
+    *   **Admin UI**: Standard implementation of a mechanism allowing non-engineers to immediately edit and publish via admin panel without developer involvement.
+    *   **Risk Management**: A state where deployment wait occurs on the day of legal changes is declared "defeat" in corporate compliance management.
 
 ## 7. Organizational DNA Frameworks
 *   **Working Backwards (Amazon)**:

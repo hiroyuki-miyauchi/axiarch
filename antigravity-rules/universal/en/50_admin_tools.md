@@ -15,6 +15,12 @@
     *   **Modal Visibility**: Use **80vw+** for main task modals (e.g., Media Picker). Small modals kill productivity.
     *   **Action Feedback**: Use "Toast" + "Button Green/Text Change" for clear feedback. Zero ambiguity.
     *   **Copyright Automation**: Auto-update copyright year `[Start]–[Current]`. No Manual updates.
+    *   **The Code Input Standard (Mandatory Code Editor)**:
+        *   **Law**: Editing code (HTML/CSS/JS/Config) in raw `textarea` lacks syntax highlighting, invites input errors, and severely degrades site quality—strictly prohibited.
+        *   **Action**: MUST use editor components like `react-simple-code-editor` (+ `prismjs`) for code input fields (HTML/CSS/Config etc.).
+    *   **The CSS Containment Protocol (Admin Layout Protection)**:
+        *   **Law**: Prevent "Whitespace Glitch" where accordion expansion etc. in admin screens disrupts parent container scroll calculation causing huge whitespace.
+        *   **Action**: Main containers in admin screens with `overflow-y-auto` should generally have `style={{ contain: 'layout' }}` to isolate child element layout changes.
 *   **Information Density Strategy**:
     *   **Card Strategy**: Use white cards (`bg-white shadow-sm`) for content areas, separated from background (`bg-muted/40`).
     *   **Action Placement**: Place primary actions like "Save" at the top right of the header.
@@ -70,3 +76,15 @@
 ### 8.2. The System Transparency Protocol (Tech Stack Sync)
 *   **Context**: Ops/Execs lose trust if the tech stack is a black box.
 *   **Law**: When the tech stack changes (New DB, New AI Model), update the "Tech Stack Card" on the dashboard immediately to reflect reality.
+
+### 8.3. The Explicit Explanation Protocol (Zero Jargon)
+*   **Law**: "Common sense for developers (UUID, CPM, MRR)" is "mysterious symbols" for operators. Lack of explanation is tool failure.
+*   **Action**:
+    *   **Zero Jargon**: MUST attach `Info` icon and `Tooltip` to all technical terms, metrics, and calculated values on admin screens, explaining in layperson terms "what it is, how it's calculated, and how it affects business".
+    *   **No Assumptions**: Prohibit "obvious from looking" assumptions. All numbers require definitions. New dashboards/metrics are considered "complete" only when Tooltip implementation is done.
+
+### 8.4. The Data Seeding & Caching Protocol
+*   **Law**: Cache key staleness or overconfidence in CLI results ("Up to date") causes data inconsistency in production (master data loss, etc.).
+*   **Action**:
+    *   **Versioning**: Attach version suffix (`_v2` etc.) to master data cache keys when data quantity or quality changes, physically invalidating cache.
+    *   **Verification**: After production sync, MUST verify data count matches expectations via application—make this step mandatory.

@@ -3,6 +3,8 @@
 ## 1. Global Strategy & Tiers
 *   **Tier Strategy**:
     *   **Tier 1 (High Priority)**: North America, Japan, Western Europe, Australia. Concentrate marketing budget and culturalization (cultural adaptation) as high ARPU is expected.
+    *   **Dynamic Pricing Metadata**:
+        *   **Law**: Control country-specific pricing and feature restrictions NOT via code variations, but via **Stripe Metadata** (e.g., `allowed_regions: ['JP', 'US']`) as defined in Product Constitution (`10`).
     *   **Tier 2 (Growth)**: Southeast Asia, South America, India. Aim for viral growth and lighten app size to support low-spec devices.
 *   **Data Sovereignty**:
     *   **GDPR (EU)**: Store user data in EU servers as much as possible.
@@ -29,6 +31,10 @@
     *   Time storage in DB and backend is done in **UTC (Coordinated Universal Time)** without exception. Storage in specific timezones (e.g., JST, PST) is prohibited.
 *   **Local Conversion**:
     *   Convert to user's timezone only at the UI layer just before display to user.
+*   **The Physical Location Timezone Override (Physical Store Exception)**:
+    *   **Context**: "Universal Time (UTC)" principle is valid for digital services, but **Business Hours of Physical Stores** (Restaurants, Hospitals, etc.) must be judged by the store's location, not the user's location.
+    *   **Law**: Display/Search of data tied to physical locations (opening hours, reservation slots) must NOT depend on user's browser locale but force **Timezone of that location (e.g., Asia/Tokyo)**.
+    *   **Action**: For queries involving physical stores like "Open Now", enforce judgment using the store's timezone on the server side.
 
 ## 5. Cultural Sensitivity
 *   **Layout**:
