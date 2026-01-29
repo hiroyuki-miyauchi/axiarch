@@ -1,5 +1,11 @@
 # 32. Backend Engineering - Firebase & GCP
 
+> [!WARNING]
+> **Deprecated / Auxiliary Mode Only**
+> The **Single Source of Truth (SSOT)** for this project is **Supabase (PostgreSQL)**.
+> Using Firestore for storing user data or domain data is generally prohibited.
+> Limit usage of Firebase to "peripheral features" such as **FCM (Push Notification)**, **Google Analytics**, and **Crashlytics**.
+
 ## 1. Serverless Architecture
 *   **Cloud Functions (2nd Gen)**:
     *   **Standardization**: Use **Cloud Functions (2nd Gen)** in principle to enhance Concurrency and Cold Start mitigation.
@@ -8,7 +14,8 @@
 *   **Event-Driven**:
     *   **Async Processing**: Use **Cloud Pub/Sub** or **Eventarc** to execute heavy processing (email sending, image processing, aggregation) asynchronously to minimize user wait time.
 
-## 2. Database Design (Firestore)
+## 2. Database Design (Firestore / DEPRECATED)
+*   **Principally Prohibited**: Do not use Firestore for new development. Store data in **Supabase**.
 *   **Integrity & Security**:
     *   **Strict Security Rules**: Firestore Security Rules are absolute. Access control must be properly configured for all documents.
     *   **Strict Validation**: Use `request.auth.uid` to restrict users to accessing only their own data.

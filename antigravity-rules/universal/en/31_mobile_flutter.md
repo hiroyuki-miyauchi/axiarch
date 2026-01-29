@@ -35,14 +35,21 @@
     *   **OverlayPortal**: If custom overlays are needed, use Flutter 3.10+ `OverlayPortal` to maintain performance and avoid widget tree constraints.
     *   **State Management**: Manage "Show only once" state in both local storage (SharedPreferences/Isar) and remote DB so users are not bothered even after re-installation.
 
-## 4. Quality Assurance
+## 5. Quality Assurance
 *   **Golden Tests**:
     *   Mandate snapshot testing using **Golden Toolkit** as UI regression testing.
     *   Automatically detect layout breakage on different device sizes (iPhone SE, Pro Max, Pixel).
 *   **Maestro**:
     *   Use **Maestro** for E2E testing to automate actual user operation flows.
 
-## 5. Deployment & Distribution
+## 6. Deployment & Distribution
 *   **CI/CD**:
     *   Link GitHub Actions with Codemagic/Bitrise to automatically distribute to TestFlight/Google Play Internal Testing triggered by merge to main branch.
     *   For release builds, always enable Obfuscation and Optimization (Tree Shaking). Use `flutter build ipa --obfuscate --split-debug-info=/<path>`.
+
+## 7. Security & API Integration
+*   **The Native Bypass Protocol (VIP Lane Strategy)**:
+    *   **Law**: To support Backend Tier 2 (VIP Lane) strategy, mandate that logged-in user requests **MUST NOT send API Keys (`x-api-key`) but ONLY `Authorization: Bearer <token>`**.
+    *   **Reason**: To physically eliminate the risk of embedding API Keys (Secrets) within the app binary. Ideally, refrain from holding even Public Keys inside the app.
+
+

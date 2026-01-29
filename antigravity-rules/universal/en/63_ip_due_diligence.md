@@ -10,7 +10,9 @@
 
 ## 2. Due Diligence & IP Strategy
 *   **Data Room**:
-    *   Maintain a folder (Data Room) keeping the following documents up-to-date to instantly respond to audits (Due Diligence) during M&A or fundraising.
+    *   **Automated Data Room Mandate**:
+        *   **Law**: To guarantee document "freshness", mandate **automatic generation** of architecture diagrams and SBOMs via CI pipeline (e.g., ER diagram generation with `tbls`), rather than manual updates. "Outdated documents" are a risk in due diligence.
+    *   **Content**: Maintain a folder (Data Room) keeping the following documents up-to-date to instantly respond to audits (Due Diligence) during M&A or fundraising.
         *   System Architecture Diagram
         *   List of OSS libraries used and licenses (SBOM)
         *   List of external service (SaaS) contracts and costs

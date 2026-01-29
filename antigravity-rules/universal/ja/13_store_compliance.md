@@ -11,6 +11,9 @@
         *   `PrivacyInfo.xcprivacy` ファイルを必ず含め、アプリおよびサードパーティSDKが収集するデータタイプと使用目的を正確に記述します。
         *   **API使用理由**: ディスク容量や起動時間などのAPIを使用する場合、その正当な理由（Required Reason API）を宣言する必要があります。
     *   **データ最小化**: 機能に必要のないデータは収集しません。
+    *   **The Account Deletion Mandate (Apple 5.1.1(v))**:
+        *   **Law**: アカウント作成機能があるアプリは、アプリ内から直接アカウントを**完全に削除**する機能を実装しなければなりません。「サポートへ連絡」は不可です。
+        *   **Action**: 設定画面のわかりやすい場所に「アカウント削除」ボタンを配置し、タップ後の確認フローを実装してください。Backend憲法(`37`)の「忘れられる権利」例外を適用し、PIIを物理削除します。
 
 ## 2. Google Play Store (Android)
 *   **ターゲットAPIレベル**:
@@ -37,7 +40,7 @@
     *   **A/Bテスト**: スクリーンショット、アプリアイコン、プレビュー動画は、**Product Page Optimization (iOS)** および **Store Listing Experiments (Android)** を使用して常にA/Bテストを行い、コンバージョン率（CVR）を最大化します。
     *   **動画**: 最初の3秒でアプリの価値が伝わるプレビュー動画を必ず用意します。
 
-## 4. 共通の禁止事項とチェックリスト (Common Rejections & Checklist)
+## 5. 共通の禁止事項とチェックリスト (Common Rejections & Checklist)
 *   **申請前チェックリスト (Pre-Submission Checklist)**:
     *   [ ] **未完成機能**: 「Coming Soon」やベータ版の表記、ダミーテキスト（Lorem Ipsum）は全て削除したか？
     *   [ ] **クラッシュ**: TestFlight/内部テストでクラッシュ率が0%であることを確認したか？

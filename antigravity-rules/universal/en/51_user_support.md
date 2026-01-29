@@ -6,6 +6,8 @@
     *   **WOW Experience**: Recommend providing "WOW" experiences exceeding user expectations (e.g., handwritten messages, anniversary surprises) rather than manual responses.
 *   **AI Triage**:
     *   **Auto-Classification**: Use LLM to instantly classify all inquiries (Technical, Billing, Feature Request) and judge Severity.
+    *   **The AI Triage PII Protocol**:
+        *   **Law**: When using AI (LLM) for auto-classification or draft generation, strictly observe "PII Scrubbing" in AI Constitution (`40`). Mask Personal Information (Name, Phone phone) via Regex before sending to AI.
     *   **Draft Generation**: AI generates draft answers from past knowledge base, but **humans must review** and add warmth before sending. Cold AI-only responses are prohibited.
 
 ## 2. Proactive Success

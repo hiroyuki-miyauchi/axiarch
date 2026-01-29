@@ -24,6 +24,8 @@
 
 ## 4. バージョン管理 (Version Management)
 *   **ロックファイル (Lock Files)**:
+    *   **The CI Lockfile Protocol**:
+        *   **Law**: `package-lock.json` の管理基準はSRE憲法 (`52`) の "Lockfile Integrity Protocol" に準拠します。CI環境では必ず `npm ci` を使用し、曖昧さを排除してください。
     *   `package-lock.json`, `yarn.lock`, `Podfile.lock`, `pubspec.lock` 等は**必ずコミット**し、チーム全員とCI環境で同一のバージョンがインストールされることを保証します。
 *   **アップデート戦略 (Update Strategy)**:
     *   **定期更新**: 月に1回など、定期的に依存関係を更新する日（Dependency Day）を設けます。

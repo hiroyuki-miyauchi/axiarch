@@ -24,6 +24,8 @@
 
 ## 4. Version Management
 *   **Lock Files**:
+    *   **The CI Lockfile Protocol**:
+        *   **Law**: Management standards for `package-lock.json` comply with SRE Constitution (`52`) "Lockfile Integrity Protocol". In CI environments, MUST use `npm ci` to eliminate ambiguity.
     *   **Always Commit** `package-lock.json`, `yarn.lock`, `Podfile.lock`, `pubspec.lock` to guarantee the same version is installed for all team members and CI environment.
 *   **Update Strategy**:
     *   **Regular Updates**: Set a "Dependency Day" (e.g., once a month) to regularly update dependencies.

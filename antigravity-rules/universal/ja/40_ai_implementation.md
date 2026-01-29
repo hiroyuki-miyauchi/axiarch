@@ -14,7 +14,7 @@
     *   **Thinking Visualization**: 長考する場合は単なるスピナーではなく、「思考プロセス」を可視化するアニメーションを表示し、待ち時間を「期待感」に変えます。
     *   **The High Cost Metaphor**: 回数制限を表示する際は、「ケチな制限」ではなく「高度なエネルギーを使い切った（Daily Energy Limit）」等、機能の価値を高めるメタファーを使用します。
 
-## 2. AI倫理と安全性 (AI Ethics & Safety)
+## 2. AI Governance, Ethics & Safety (AI統治と倫理・安全性)
 *   **安全設定 (Safety Settings)**:
     *   **フィルタリング**: Gemini/OpenAIの安全設定（ハラスメント、ヘイトスピーチ、性的なコンテンツ等）は、原則として「最高レベル」に設定します。
     *   **脱獄対策 (Jailbreak Policy)**: プロンプトインジェクション攻撃を防ぐため、システムプロンプト内でユーザー入力を厳格に区別する方針を徹底します。(実装はSec.3参照)
@@ -23,9 +23,15 @@
     *   **Emergency Response**: 危険キーワード（`血`, `痙攣`, `意識がない` 等）を検知した場合、生成を中止し、直ちに「緊急事態の可能性があります。病院へ連絡してください」というルールベースのアラートを表示します。
 *   **Hallucination Mitigation (ハルシネーション対策)**:
     *   **Mandatory Disclaimer**: AI回答には「※AI情報は不正確な可能性があります。正確な判断は専門機関へ」等の免責を常時表示します。
+    *   **The Triple Write RAG Protocol (Clean Data Source)**:
+        *   **Law**: RAG（検索拡張生成）の参照ソースには、CMS憲法 (`34`) で義務付けられた **「Triple Write されたプレーンテキスト同期データ」** を必ず使用してください。
+        *   **Reason**: HTMLタグを含むノイズだらけのデータをAIに読ませることは、トークンの無駄遣いであり、回答精度の低下を招きます。
     *   **Grounding & Citations**: 可能であれば、回答の根拠となるソース（引用元/DB情報）を提示します（RAGの場合）。
 *   **Privacy & Bias**:
     *   **PII Scrubbing**: 外部LLMへ送信するプロンプトには、個人情報（電話番号、氏名）を含めてはなりません。正規表現等で送信前にマスク処理 (`[連絡先削除]`) を行います。
+    *   **The Fairness Protocol (Bias Mitigation)**:
+        *   **Law**: 特定の属性（人種、性別、または犬種等の特定カテゴリ）に対する、統計的根拠のない偏見や差別的な回答を生成しないよう、システムプロンプトで明示的に制御します。
+        *   **Action**: 「危険である」「劣っている」といったバイアスを含む形容詞の使用を監視し、中立的な表現を強制します。
 *   **Reporting**:
     *   生成AIアプリには、不適切なコンテンツをユーザーが通報・ブロックできる機能を必ず実装します（Google Play 2025要件）。
 
@@ -44,11 +50,23 @@
     *   **Grounding & Citations**: 店舗情報や価格などの事実は必ずDBの確定情報と照合（Grounding）し、可能であれば引用元（Source）を提示します。
 *   **Caching**:
     *   同じ入力に対する回答はキャッシュし、コストとレイテンシを削減します（Semantic Caching）。
+    *   **The Semantic Caching Protocol (pgvector戦略)**:
+        *   **Requirement**: `pgvector` を用いた「類似度検索キャッシュ」の実装を推奨します。閾値は **0.95以上** とし、完全一致に近い問答のみをキャッシュ返却します。
+        *   **Benefit**: これにより、コスト削減だけでなく、レスポンスタイムを大幅に短縮し、UXを改善します。
 
-## 4. AI FinOps (財務戦略とリソース管理)
+
+## 4. 危機管理 (Crisis Management)
+*   **The Red Button Protocol (AI Kill Switch)**:
+    *   **Risk**: プロンプトインジェクションによる「ヘイトスピーチ大量生成」や、APIループによる「クラウド破産」の発生。
+    *   **Solution**: コードの再デプロイを待たずに、一瞬でAI機能を全停止できる「緊急停止スイッチ (Global Kill Switch)」を実装してください。Edge ConfigやDBフラグ (`ai_enabled: false`) で制御します。
+
+## 5. AI FinOps (財務戦略とリソース管理)
 *   **The 30% Profitability Rule**:
     *   AI機能の原価（トークン代）は、いかなる場合もプラン収益の **30%** を超えてはなりません。
 *   **Model Selection Protocol (Cost/Performance)**:
+    *   **The Model Router Protocol (Tiered Architecture)**:
+        *   **Law**: コード内で特定のモデルID（例: `"gemini-1.5-flash"`）をハードコーディングすることを禁止します。
+        *   **Action**: 必ず `Tier`（例: `Tier.FAST`, `Tier.SMART`, `Tier.VISION`）という抽象化レイヤーを介してモデルを呼び出す「ルーター機能」を実装し、将来のモデル変更や価格改定時に一箇所で対応できるようにしてください。
     *   **Principle**: 常に「コスト」「速度」「精度」のバランスが最適化された最新モデルを選定します。
     *   **Current Standard**: 現時点では **Gemini 2.0 Flash** を「圧倒的なコストパフォーマンス」の観点から標準採用します。Thinkingが必要な場合のみ上位モデル (`Gemini 2.0 Flash Thinking` 等) を検討します。
     *   **Quota & Tiering Standards (Tier別制限基準)**:
@@ -57,13 +75,18 @@
         *   ※以下の数値は標準的なSaaSモデルの参考例です。プロジェクトの採算性に応じて調整してください。
         *   **Free**: Chat 5回/日, Vision 0回.
         *   **Standard**: Chat 30回/日, Thinking 3回. (ROI重視)
-        *   **Standard**: Chat 30回/日, Thinking 3回. (ROI重視)
         *   **Premium**: Chat 100回/日, Thinking 10回. (満足度重視)
     *   **Vision AI Standards (Thinking Ban)**:
         *   **Law**: "Thinking Mode"はOCRのような即時認識タスクには遅すぎて不適切です。ユーザーの期待値ギャップ（Expectation Gap）を防ぐため、画像認識には `gemini-2.0-flash` を使用し、Thinkingモデルの使用を禁止します。
     *   **Over-Limit**: 上限到達時は、ポイント課金 (Pay-as-you-go) などで柔軟に対応します。
+    *   **The AI Tier Metering Protocol (利用量計測と課金連携)**:
+        *   **Law**: 有料プランでAI機能に利用制限を設ける場合、利用回数は**サーバーサイドで厳格に計測・記録**し、課金システムと連携させます。
+        *   **Action**:
+            1.  **Atomic Counting**: AI API呼び出し成功時、トランザクション内で `usage_counts` テーブル等にカウントを記録します。レスポンス受信前にカウントを進めることで、エラー時の不公平を回避します。
+            2.  **Graceful Denial**: 上限到達時は、APIエラーではなく、「本日の利用回数に達しました。明日リセットされます」等のユーザーフレンドリーなUIで通知します。
+            3.  **No Bypass**: クライアントからの直接API呼び出しを許可せず、全てサーバー経由とすることで、計測バイパスを物理的に阻止します。
 
-## 5. マルチモーダルAIとエッジAI (Multimodal & Edge AI)
+## 6. マルチモーダルAIとエッジAI (Multimodal & Edge AI)
 *   **技術スタック (Tech Stack)**:
     *   **Web**: **TensorFlow.js** または **ONNX Runtime Web** を使用し、ブラウザ内で推論を完結させます。
     *   **Mobile**: **CoreML** (iOS) および **TensorFlow Lite** (Android) を使用し、ネイティブパフォーマンスとプライバシーを確保します。
@@ -76,7 +99,7 @@
 *   **Optical Data Entry Strategy (OCR/Vision)**:
     *   **Optical Archive**: **請求書や公的証明書**などの物理ドキュメントは、Vision AI (GPT-4o/Gemini) を通じて構造化データ（日付、品目、金額）に自動変換します。ユーザーには「入力フォーム」ではなく「カメラ」を提供するUXを目指します。
 
-## 6. 評価と改善 (Evaluation & Improvement)
+## 7. 評価と改善 (Evaluation & Improvement)
 *   **PromptOps Workflow**:
     *   **Git-Based Versioning**: プロンプト変更はPRベースで行います。「誰が、いつ、なぜ変えたか」を追跡可能にします。
     *   **Regression Testing**: 変更時は「正解データセット (Golden Dataset)」を用いた回帰テストを行い、品質劣化を防ぎます。

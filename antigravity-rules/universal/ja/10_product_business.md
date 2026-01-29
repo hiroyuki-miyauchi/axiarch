@@ -53,6 +53,18 @@
 *   **サブスクリプション経済 (Subscription Economics)**:
     *   **継続収益 (Recurring Revenue)**: 一時的な売上よりも、継続的な収益（MRR/ARR）を重視します。
     *   **段階的価格設定 (Tiered Pricing)**: ユーザーの成長に合わせてプランをアップグレードできる（Upsell）構造を作ります（例：Basic, Pro, Enterprise）。
+    *   **Metadata Segregation Protocol (Data Driven Strategy)**:
+        *   **Law**: コード内で「プランIDがこれなら Enterprise プラン」という条件分岐（Hardcoding）を記述することは、ビジネスの柔軟性を損なう重大な設計ミスです。
+        *   **Action**: プランの性質（BtoB/BtoC, API権限の有無）は、Stripe 等のメタデータ（例: `is_enterprise: true`）に持たせ、アプリケーションはそれを動的に参照して振る舞いを決定する **「データ駆動 (Data Driven Strategy)」** を徹底してください。これにより、ビジネス側のプラン変更にデプロイなしで即応可能にします。
+    *   **The API Economy Alignment (Commercialization First)**:
+        *   **Law**: 社内用APIであっても、将来的な外販（Monetization）を前提に設計します。「Tier 1 (Public)」と「Tier 2 (Enterprise)」の概念をビジネス要件として初期から組み込んでください。
+        *   **Reason**: 「後でAPIを売る」というピボットは、ゼロから作るよりコストがかかるためです。
+    *   **The Usage Limit UX & Enforcement Protocol (Tier別制限の実装)**:
+        *   **Law**: サブスクリプションティア（Free/Standard/Premium等）ごとの機能制限（登録数、API回数等）は、**UIとバックエンド両方**で必ず強制します。
+        *   **Action**:
+            1.  **Server-Side Enforcement (SSOT)**: 制限のバリデーションは、必ず **Server Actions / RPC / DB Trigger** 側で行います。クライアントサイドのみの制限は回避されるリスクがあります。
+            2.  **Clear Error Messaging**: 制限超過時は、曖昧なエラーではなく、「Free プランでは1件までです。Pro プランにアップグレードすると無制限になります」のような**具体的かつポジティブなメッセージ**でアップセルを促します。
+            3.  **Guard Centralization**: 制限チェックロジックは `src/lib/guards/subscription-guard.ts` 等に集約し、個々の機能に散在させることを禁止します（DRY違反防止）。
 *   **広告モデル (Ad-based Model - 該当する場合)**:
     *   **ユーザー体験第一 (User Experience First)**: 広告はコンテンツの一部として自然に統合し、UXを阻害しない形（ネイティブ広告）にします。
     *   **視認性 (Viewability)**: 実際にユーザーが見た広告のみを価値とします。
@@ -74,6 +86,13 @@
     *   有料販売を行う場合は、特定商取引法に基づく表記を必ず実装します。
 *   **資金決済法**:
     *   前払い式支払手段（ポイント、コイン）を発行する場合は、供託金の義務が発生するライン（1000万円）を常に意識し、必要に応じて財務局への届出を行います。
+
+### 6.1. The Legal Hardcoding Ban (DB SSOT Mandate)
+*   **Law**: 利用規約、プライバシーポリシー、特定商取引法に基づく表記等の「法的効力を持つテキスト」をソースコードにハードコード（直接記述）することは、法改正時の修正遅延を招くリスクがあるため**永久禁止（Universal Ban）**とします。
+*   **Action**:
+    *   **DB First**: 全ての法的文書は必ず `site_settings` テーブル、または専用の `fixed_pages` テーブルに保存してください。
+    *   **Admin UI**: 開発者を介さず、管理画面から非エンジニアが即座に修正・公開できる仕組みを標準実装してください。
+    *   **Risk Management**: 法改正当日にデプロイ待ちが発生する状態は、企業のコンプライアンス管理における「敗北」であることを命じます。
 
 ## 7. 組織DNAフレームワーク (Organizational DNA Frameworks)
 *   **Working Backwards (Amazon)**:
