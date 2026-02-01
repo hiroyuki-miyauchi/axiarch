@@ -1,7 +1,21 @@
-# 要件対照表 (Compliance Matrix)
+# Compliance Matrix / 要件対照表
 
-ユーザーの網羅的な要望（プロンプト）が、どのルールファイルでカバーされているかを証明する対照表です。
+> [!CRITICAL]
+> **AI Agent Controls / AIへの重要指示**
+>
+> ### 🇯🇵 日本語指示 (Japanese Instructions)
+> *   **Universal Constitution (普遍憲法)**: `1. アンティグラビティ普遍憲法` セクションに記載されているファイル（`universal/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。
+> *   **Blueprint (固有ルール)**: `2. プロジェクト固有ルール` セクションに記載されているファイル（`blueprint/` 配下）は、プロジェクトごとにカスタマイズされるべき領域です。AIは要件に応じてこれらを積極的に提案・更新してください。
+>
+> ### 🇺🇸 English Instructions
+> *   **Universal Constitution**: The files listed in the `1. Antigravity Universal Constitution` section (under `universal/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution").
+> *   **Blueprint Rules**: The files listed in the `2. Project-Specific Blueprint Rules` section (under `blueprint/`) are the area to be customized for each project. AI SHOULD proactively propose and update these files according to requirements.
+
 This matrix proves which rule files cover the user's comprehensive requests (prompts).
+ユーザーの網羅的な要望（プロンプト）が、どのルールファイルでカバーされているかを証明する対照表です。
+
+## 1. Antigravity Universal Constitution (アンティグラビティ普遍憲法)
+**Immutable / 編集禁止**
 
 | ユーザー要望 (User Request) <br> [JP / EN] | 対応ファイル(JA/EN共通) <br> (Covered In) | 具体的なルール (Specific Rule) <br> [EN / JP] |
 | :--- | :--- | :--- |
@@ -34,6 +48,18 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **ライセンス・プラグイン規約** <br> License/Plugin Rules | `62_license_dependency.md` | "License Whitelist" <br> "ライセンスホワイトリスト" |
 | **テスト観点** <br> Testing Perspective | `70_qa_testing.md` | "Shift Left Testing", "Flaky Tests" <br> "シフトレフトテスト", "Flakyテスト" |
 
-**証明完了 (Proof Complete)**: 
-ユーザーの全ての要望は、上記のルールファイル群によって完全に網羅されています。
+## 2. Project-Specific Blueprint Rules (プロジェクト固有ルール)
+**Mutable / 積極提案・更新推奨**
+
+This section defines the "Blueprint" area for project-specific requirements. AI SHOULD proactively reference, propose, and update this section.
+このセクションは、プロジェクト固有の要件を定義する「Blueprint」領域です。AIはここを積極的に参照し、提案・更新を行ってください。
+
+| ユーザー要望 (User Request) <br> [JP / EN] | 対応ファイル(JA/EN共通) <br> (Covered In) | 具体的なルール (Specific Rule) <br> [EN / JP] |
+| :--- | :--- | :--- |
+| **プロジェクト概要・基本アーキテクチャ** <br> Project Overview & Architecture | `00_project_overview.md` | "Tech Stack", "Directory Structure" <br> "技術スタック", "ディレクトリ構造" |
+| **プロジェクト固有の教訓・ログ** <br> Project Lessons Log | `01_project_lessons_log.md` | "Context Log", "Specific Constraints" <br> "コンテキストログ", "固有の制約" |
+| **その他プロジェクト固有の要件** <br> Other Specific Requirements | `99_project_specific_template.md` | (As needed) |
+
+**Proof Complete / 証明完了**:
 All user requests are completely covered by the rule files above.
+ユーザーの全ての要望は、上記のルールファイル群によって完全に網羅されています。

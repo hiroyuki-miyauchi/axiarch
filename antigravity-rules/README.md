@@ -5,9 +5,23 @@
 > 本フォルダ（`antigravity-rules/`）に含まれる全てのルールは、Google Antigravityプロジェクトにおける絶対的な憲法であり、**個別プロジェクト開発時に編集してはならない**。
 > All rules contained in this folder (`antigravity-rules/`) are the absolute constitution of the Google Antigravity project and **MUST NOT be edited during specific project development**.
 >
-> **Separation of Concerns**:
-> *   **Universal**: `universal/` (Immutable / 不変 - Requires Double Confirmation to update)
-> *   **Specific**: `blueprint/` (Mutable / 可変 - Create files here for each project)
+> **Separation of Concerns (AI Agent Instructions)**:
+>
+> ### 🇯🇵 日本語指示 (Japanese Instructions)
+> *   **Universal Rules (`universal/`)**:
+>     *   **Status**: **Immutable (不変)** / プロジェクト作業では読み取り専用。
+>     *   **Action**: 明示的に「憲法改正」を指示されない限り、AIはこれらのファイルを編集してはならない。
+> *   **Blueprint Rules (`blueprint/`)**:
+>     *   **Status**: **Mutable (可変)** / プロジェクト固有。
+>     *   **Action**: AIはプロジェクトのコンテキストを定義するために、これらのファイルを作成・編集すべきである。
+>
+> ### 🇺🇸 English Instructions
+> *   **Universal Rules (`universal/`)**:
+>     *   **Status**: **Immutable (不変)** / Read-Only for Project Tasks.
+>     *   **Action**: AI MUST NOT edit these files unless explicitly instructed to "Amend Constitution".
+> *   **Blueprint Rules (`blueprint/`)**:
+>     *   **Status**: **Mutable (可変)** / Project Specific.
+>     *   **Action**: AI SHOULD create and edit these files to define project context.
 
 > **Language Standard / 言語基準**:
 > 全てのルールは**日本語と英語**で提供される（Bilingual Documentation）。
