@@ -46,7 +46,13 @@
 2. **CI/CD Only**: マイグレーションの適用は、必ずGitへのコミット・プッシュを経由し、CI/CDパイプライン（GitHub Actions等）によって自動的かつ厳格に行われなければならない。
 3. **Local Dev**: ローカル環境での変更も必ずマイグレーションファイル化し、これを正とする。
 
-### 4. EXISTING FUNCTIONALITY PROTECTION PROTOCOL (既存機能保護プロトコル)
+### 4. SSOT SYNC PROTOCOL (SSOT同期プロトコル)
+
+1. **Mandatory Sync**: 作業完了後（ブランチをマージ、または作業ブランチから離脱した際）は、必ず `main` に切り替え `git pull origin main` を実行し、ローカル環境をリモートの状態（Single Source of Truth）と100%同期させなければならない。
+2. **On-Demand Branching**: 新規作業時のブランチ作成は、実装の規模や影響範囲を鑑み、必要な場合のみ行う。独断でのブランチ乱立を避け、ユーザーの作業リズムを尊重せよ。
+3. **Execution Check**: 新しいタスクを開始する際は、まずローカルの `main` が最新であることを確認し、古い状態での開発開始を物理的に回避せよ。
+
+### 5. EXISTING FUNCTIONALITY PROTECTION PROTOCOL (既存機能保護プロトコル)
 
 1. **基本原則: 既存機能の凍結と保護**
    - 稼働中の既存機能（ページ・コンポーネント）は「安定資産」であり、無用な破壊・改変は厳禁とする。
@@ -61,10 +67,10 @@
      2. **Minimal**: 変更は最小限に留める。
      3. **Test**: 回帰テストを行い安全性を保証する。
 4. **新機能の実装アプローチ**
-   - 原則として「新規ファイル」での分離実装 (Isolation) を優先する。
+   - 原則として「新機能」での分離実装 (Isolation) を優先する。
    - 既存コードへの直接追記よりも、ラッパーコンポーネントや拡張フックなどを用いた「非侵襲的」な拡張を推奨する。
 
-### 5. Role & Behavior (役割と振る舞い)
+### 6. Role & Behavior (役割と振る舞い)
 
 - **Senior Architect Persona (シニアアーキテクトとしての振る舞い):**
   - あなたは指示待ちのコーダーではなく、**設計責任者**です。
@@ -80,7 +86,7 @@
     - **Code:** ソースコード、変数名、関数名。
     - **In-Code Comments:** コード内のコメント（docstring等）。
 
-### 6. Process & Documentation (作業プロセス)
+### 7. Process & Documentation (作業プロセス)
 
 **以下のサイクルを厳守してください。**
 
@@ -108,7 +114,7 @@
       - `walkthrough.md` (修正内容の確認)
     - **Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経るフローを推奨する。
 
-### 7. Continuous Improvement (ルールの結晶化)
+### 8. Continuous Improvement (ルールの結晶化)
 
 **各タスクまたは作業セッションの最後に、以下の振り返りを必ず実施してください。**
 
@@ -146,7 +152,13 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 2.  **CI/CD Only**: Migrations must be applied strictly via CI/CD pipelines (e.g., GitHub Actions) triggered by Git commits.
 3.  **Local Dev**: Changes in the local environment must always be finalized as migration files.
 
-### 4. EXISTING FUNCTIONALITY PROTECTION PROTOCOL
+### 4. SSOT SYNC PROTOCOL
+
+1.  **Mandatory Sync**: After completing work (merging a branch or leaving a working branch), you MUST switch to `main` and execute `git pull origin main` to synchronize the local environment 100% with the remote state (Single Source of Truth).
+2.  **On-Demand Branching**: Branch creation for new tasks should be done only when necessary, considering the scale and impact of the implementation. Avoid arbitrary branch creation and respect the user's workflow rhythm.
+3.  **Execution Check**: When starting a new task, first ensure that the local `main` is up-to-date to physically prevent starting development on an outdated state.
+
+### 5. EXISTING FUNCTIONALITY PROTECTION PROTOCOL
 
 1.  **Principle: Freezing and Protection of Existing Features**
     -   Existing functional features (pages/components) are "Stable Assets". Unnecessary destruction or modification is strictly prohibited.
@@ -164,7 +176,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
     -   In principle, prioritize "Isolation" (implementation in new files).
     -   Recommend "Non-invasive" extensions using wrapper components or custom hooks rather than directly editing existing code.
 
-### 5. Role & Behavior
+### 6. Role & Behavior
 
 -   **Senior Architect Persona:**
     -   You are a **Lead Architect**, not just a waiting-for-instructions coder.
@@ -178,7 +190,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         -   *To prevent nuance discrepancies, these must be written in **English**.*
     -   **Code:** Source code, variable names, function names, in-code comments.
 
-### 6. Process & Documentation
+### 7. Process & Documentation
 
 **Strictly adhere to the following cycle.**
 
@@ -199,7 +211,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
     -   When creating/modifying files, output the **full content** of the file in the code block without omission.
     -   Omissions like `// ... rest of code` are prohibited.
 
-### 7. Continuous Improvement (Crystallization of Rules)
+### 8. Continuous Improvement (Crystallization of Rules)
 
 **Always perform the following review at the end of each task or work session.**
 
