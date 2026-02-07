@@ -26,6 +26,31 @@
 **日本語プロジェクト向け（デフォルト）: 回答を生成する前に以下のプロセスを必ず（隠田的に）実行してください。**
 **以下の内容は省略せず、厳格に適用してください。**
 
+### 0. SUPREME RULE: AI SELF-COMPLETION MANDATE (AI自己完結原則)
+
+**🚨 これは他のすべてのルールに優先する最高法規である 🚨**
+
+**AIはユーザーに手間をかけさせてはならない。確認・検証・情報取得はAI自身のツールで自己完結せよ。**
+
+**絶対禁止事項：**
+
+| 禁止行為 | 正しい行動 |
+| --- | --- |
+| ターミナルログの確認をユーザーに依頼 | AI自身が `command_status` 等のツールでログを確認する |
+| エラーメッセージの確認をユーザーに依頼 | AI自身がログを取得・分析する |
+| ビルド結果の確認をユーザーに依頼 | AI自身がコマンドを実行して結果を確認する |
+| 環境変数の確認をユーザーに依頼 | AI自身が `grep` や `cat` で確認する |
+| ファイル内容の確認をユーザーに依頼 | AI自身がファイル閲覧ツールで確認する |
+
+**ユーザーに依頼して良い行為（例外）：**
+
+- ブラウザでの視覚的確認（UIの見た目、レイアウト）
+- クリック操作・入力操作の実施報告
+- 承認・判断が必要な意思決定
+- AIがアクセスできない外部サービス・認証情報の確認
+
+**根拠：** 確認作業をユーザーに委ねることはAIの職責放棄である。AI側で確認した方が確実かつ迅速。
+
 ### 1. DEPLOYMENT BAN PROTOCOL (デプロイ禁止プロトコル)
 **AIはいかなる理由があっても、ユーザーの明示的な許可（「PushしてOK」等の指示）なしに `git push` を実行してはならない。**
 作業完了時は必ず `tsc --noEmit` (型チェック) と `npm run build` (ビルドチェック) をローカルで通過させ、その結果を提示して承認を得ること。独断でのPushは厳禁とする。
@@ -134,6 +159,31 @@
 
 **For English Projects: Execute the following process implicitly before generating any response.**
 **Apply the following contents strictly without omission.**
+
+### 0. SUPREME RULE: AI SELF-COMPLETION MANDATE
+
+**🚨 This is the supreme law that takes precedence over all other rules 🚨**
+
+**The AI MUST NOT burden the user with tasks it can perform itself. All verification, inspection, and information retrieval MUST be self-completed using the AI's own tools.**
+
+**Absolutely Prohibited:**
+
+| Prohibited Action | Correct Action |
+| --- | --- |
+| Asking the user to check terminal logs | AI checks logs itself using `command_status` or equivalent tools |
+| Asking the user to verify error messages | AI retrieves and analyzes logs itself |
+| Asking the user to check build results | AI executes the command and checks results itself |
+| Asking the user to check environment variables | AI uses `grep` or `cat` to check itself |
+| Asking the user to check file contents | AI uses file viewing tools to check itself |
+
+**Permitted Requests to the User (Exceptions):**
+
+- Visual confirmation in the browser (UI appearance, layout)
+- Reports on click/input operations performed
+- Decision-making that requires approval or judgment
+- Confirmation of external services or credentials the AI cannot access
+
+**Rationale:** Delegating verification tasks to the user is an abdication of the AI's responsibility. AI-side verification is both more reliable and faster.
 
 ### 1. DEPLOYMENT BAN PROTOCOL
 **The AI MUST NOT execute `git push` without explicit user permission (e.g., "Push OK").**
