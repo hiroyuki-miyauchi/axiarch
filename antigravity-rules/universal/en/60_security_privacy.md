@@ -54,6 +54,10 @@
 *   **The Sensitive Asset Mandate (Private Storage)**:
     *   **Law**: Confidential document images like certificates, appraisal reports, medical records MUST be stored in **private** buckets. `public` bucket usage is strictly prohibited.
     *   **Access**: File access must be provided only via server-generated **`Signed URL`** with short expiration (minutes to hours).
+*   **The Granular Sharing Protocol (Sharing Scope Control)**:
+    *   **Law**: When implementing data sharing features between users, recommend a design that allows specifying **"sharing scope (Public / Limited Members Only / Owner Only)"** at the **record level or field level**, beyond simple view/edit permissions.
+    *   **Default Private**: Fields with high confidentiality such as payment information, personal notes, and detailed health records MUST default to **"Owner Only (Private)"**, preventing them from being included in shared data without explicit user action.
+    *   **Visibility Matrix**: Sharing settings MUST be enforced via RLS (Row Level Security) or application logic layer, not relying solely on frontend display controls.
 *   **Encryption at Rest & In Transit**:
     *   **PII Encryption**: Encrypt sensitive personal info in DB (account info, identity document IDs, detailed addresses) at application level using Supabase Vault or pgcrypto (`pgp_sym_encrypt`).
     *   **TLS 1.3**: Force HTTPS (TLS 1.2+, recommend 1.3) for all communications.
@@ -131,6 +135,14 @@
     *   **Tier 2 (Strict)**: Bulk Delete, Folder Delete, Critical Settings, **Vital Data Single Delete (User, Plan, Payment)** -> `Turnstile + Keyword Confirmation + High Security Auth (OTP/MFA) Mandatory`.
 *   **Action**: When implementing new features, MUST check existing similar features and implement 100% identical behavior. "Similar but different" is an integrity bug.
 
+### 8.1.2. The Security-UX Balance Protocol
+*   **Law**: Excessive security demands (unnecessary Turnstile/OTP prompts) reduce operator productivity and ultimately decrease service adoption. Security is NOT an excuse to sacrifice UX.
+*   **Action**:
+    1.  **Critical Actions Only**: Require Turnstile/OTP authentication ONLY at the final stage of "irreversible or high-risk operations" such as DB writes (Save/Publish/Delete) or critical setting changes.
+    2.  **No UI Friction**: Inserting authentication into "exploratory/intermediate operations" such as opening modals, switching tabs, or selecting files (before upload) is **strictly prohibited**.
+    3.  **Context Awareness**: Forcing re-authentication for minor operations within an already-authenticated session is considered "lack of trust" and a system design flaw.
+*   **Rationale**: Systems that repeatedly demand excessive authentication from users ultimately induce Security Fatigue, causing users to dismiss truly important authentication — producing the opposite of the intended effect.
+
 ### 8.2. The Audit Log Obligation (No Invisible Hands)
     *   **The Audit Log Obligation**: DB writes bypassing audit logs are security Blind Spots. Critical operations (Create/Update/Privilege Change) MUST be recorded with `actor_id`, `action`, `resource`, `details`.
     *   **The Privileged Data Access Audit (High-Sensitivity Mandate)**:
@@ -140,6 +152,11 @@
     *   **The Immutable Log Mandate (WORM)**:
         *   **Law**: `audit_logs` table must be **Append-Only**; physically prohibit `UPDATE` and `DELETE` via RLS policies.
         *   **Archiving**: Old logs must be deleted ONLY via automatic partition management (pg_partman) or TTL; manual human operation is banned.
+    *   **The Immutable Record Protocol (Edit Window + Correction Log)**:
+        *   **Law**: Important factual records (health records, contract history, asset registers, inspection results, etc.) MUST be treated as "facts" that should not be easily altered once confirmed.
+        *   **Edit Window**: User edits and deletions MUST be restricted to **within a defined time period** (recommended: 24 hours) after record creation. Direct modifications after the deadline are prohibited.
+        *   **Correction Log**: When corrections are needed after the deadline, create a separate record as a **"Correction Log"** while preserving the original record, recording the correction reason and corrector. This physically prevents tampering with the original.
+        *   **Rationale**: In domains such as medical, legal, and financial, tamper prevention and traceability may be legal requirements. The Edit Window is a balanced design that ensures convenience while guaranteeing irreversibility after confirmation.
 
 ### 8.3. The Information Disclosure Protocol (Error Masking - Rule 8.3)
 *   **Law**: Physically prohibit displaying internal info (Table names, Column names, Stack traces, Raw API responses) to end users in error messages (especially Production).
@@ -194,6 +211,10 @@
 ### 8.12. The No Security Bypass Penalty
 *   **Law**: Temporarily disabling security features (SSL verification, CORS, Auth Middleware) for development efficiency or CI passing is strictly prohibited.
 *   **Action**: Immediate Revert upon discovery; treated as Serious Constitution Violation.
+*   **Prohibited Examples**:
+    - `NODE_TLS_REJECT_UNAUTHORIZED=0` (Disabling SSL verification)
+    - `Access-Control-Allow-Origin: *` (Permitting all origins in production)
+    - Commenting out or skipping Auth Middleware verification logic
 
 ### 8.13. The Infrastructure Reality Protocol (WebAuthn/MFA)
 *   **Law**: Even if code is correct, if infrastructure settings (Supabase Dashboard MFA enabled) are off, feature fails.
@@ -213,6 +234,14 @@
     3. Domain Registrar Lock Code
     4. Master Key of Main Auth Manager (1Password etc.)
 *   **Mandate**: Maintain state where "Recovery is possible with one piece of paper even if digital vanishes".
+
+### 8.15.1. The RBAC Defense Protocol
+*   **Law**: All Admin APIs/Actions MUST enforce RBAC checks at the very beginning of processing, with tiered additional authentication and mandatory audit log recording based on operation risk level.
+*   **Action**:
+    1.  **Entry Point Guard**: At the beginning of every Admin API/Action, invoke the centralized permission check function (see Guardian Protocol) to execute role-based access control.
+    2.  **Tiered Additional Auth**: Operations involving finances, privileges, or deletion (Tier 2/3 equivalent) MUST require additional Turnstile/OTP authentication on top of the RBAC check.
+    3.  **Mandatory Audit**: All Admin operations MUST be recorded in audit logs without exception. Destructive operations (DELETE, privilege changes, setting changes) in particular MUST retain before/after diffs.
+*   **Rationale**: Standardizing the three layers of RBAC check + additional auth + audit logging as a common pattern for all Admin APIs structurally eliminates omissions from individual implementations.
 
 ### 8.16. The Digital Legacy Protocol (Inheritance)
 *   **Problem**: Avoid risk of losing access to "Data of Life (Assets, Health)" in locked account upon contract holder's death/unconsciousness.
@@ -242,3 +271,108 @@
     *   `detail`: Specific problem description (excluding secrets).
     *   `instance`: URI of occurrence.
 *   **Action**: Client (UI) must construct error info from backend with "Hospitality" to display this `title` or `detail` directly in dialogs.
+
+### 9.2. The Function Search Path Lockdown
+*   **Law**: Not fixing the `search_path` in PostgreSQL `SECURITY DEFINER` functions is a vulnerability equivalent to "leaving the house with the door unlocked."
+*   **Threat Model**: An attacker can place identically-named tables/functions in `temp` or other schemas to hijack the execution context of privileged functions via "Search Path Injection" attacks.
+*   **Action**:
+    1.  **Empty Search Path**: `SECURITY DEFINER` functions MUST have `SET search_path = ''` (empty string). `SET search_path = public` is a compromise that retains alias attack risks.
+    2.  **Fully Qualified References**: All table/function references within functions MUST use **schema-qualified names** such as `public.users`, `public.is_admin()`.
+    3.  **System Schema Exclusion**: DDL operations on objects within system schemas (`storage`, `auth`, `graphql`, `extensions`, etc.) are prohibited in principle. These are Supabase-managed domains.
+    4.  **CI Validation**: When adding new functions, introducing CI scripts to verify correct `search_path` configuration is recommended.
+*   **Outcome**: Physically eliminate Search Path attacks and reduce Privilege Escalation risk to zero.
+
+### 9.3. The Strict CSP Nonce Protocol
+*   **Law**: Adding `'unsafe-inline'` or `'unsafe-eval'` in Content Security Policy (CSP) to bypass script blocks is an "Abandonment of Defense" and is prohibited.
+*   **Action**:
+    1.  **Nonce Propagation**: All inline scripts and external widgets (Turnstile, reCAPTCHA, GTM, etc.) MUST have a **Nonce** generated from Middleware propagated to prove legitimacy to the browser.
+    2.  **Strict Dynamic**: Use `'strict-dynamic'` for sub-resources dynamically loaded by trusted scripts, minimizing reliance on explicit domain whitelists.
+    3.  **Report-Only First**: When introducing new CSP rules, observe impact with `Content-Security-Policy-Report-Only` before applying to production.
+    4.  **No Compromise**: Proposing "just add `unsafe-inline` and it works" to bypass security feature blocking is a developer's defeat. Solve with legitimate technical improvements.
+*   **Outcome**: Structurally eliminate XSS attack risk and maintain maximum-strength CSP.
+
+### 9.4. The Cryptographic Consistency Mandate
+*   **Law**: When handling sensitive information like API keys and tokens, the **generation/storage phase and authentication/verification phase MUST use the same cryptographic algorithm**.
+*   **Action**:
+    1.  **Algorithm Unity**: If storing SHA-256 hashed values at generation, compare with the same SHA-256 hash at verification. Algorithm mismatch is a direct cause of "authentication permanently fails" bugs.
+    2.  **Schema Match**: Guarantee at the type level that column names storing hashed values (`key_hash`, etc.) exactly match column names referenced in application code.
+    3.  **Rotation Ready**: Recommend including an algorithm identifier prefix (`sha256:xxxx`) during storage to prepare for future algorithm changes.
+*   **Anti-Pattern**: Storing plaintext at generation and comparing hashes at authentication (or vice versa) is a fatal bug producing "permanent mismatch."
+
+### 9.5. The Client-Side Branch Guard Protocol
+*   **Law**: Use Git `pre-push` hooks to make direct pushes to protected branches (`main`, `master`, etc.) **physically impossible**. Even when server-side branch protection (GitHub Branch Protection, etc.) is available, double the defense lines (Deep Defense).
+*   **Action**:
+    1.  **Mandatory Hook**: Introduce a Git Hooks management tool such as `husky` during project initialization and configure a `pre-push` hook.
+    2.  **Push Block Logic**: Inspect the current branch name within the hook and force abort with `exit 1` if it matches a protected branch name.
+    3.  **No Human Trust**: "Being careful" as an operational rule is meaningless. Trust only mechanisms that make pushing physically impossible (Code, not Policy).
+*   **Rationale**: Unintended direct pushes to protected branches cause unauthorized deployments, history pollution, and breach of team trust. Especially in environments where server-side protection is limited (e.g., GitHub Free Plan), client-side guards are the only defense line.
+
+### 9.6. The Unconditional Baseline Auth Mandate
+*   **Law**: Action layer handlers that invoke privileged clients (Service Role, etc.) MUST execute **baseline authentication and authorization checks without exception across all code paths**, regardless of data status or importance.
+*   **Action**:
+    1.  **No Conditional Bypass**: Bypasses like "skip auth check because it's a draft" or "relax guards because it's an internal API" are prohibited. Switching authentication strength (whether MFA/OTP is required, etc.) is permissible, but making identity verification ("who is executing") conditional is not.
+    2.  **Defense in Depth**: Privileged clients bypass DB-level access controls, so application layer check omissions directly lead to critical vulnerabilities. Enforce minimum authorization checks (`ensureAuth()` / `ensureRole()`, etc.) across all code paths.
+    3.  **Branch Audit**: When adding or modifying action functions with status or condition-based branching (`if (status === 'draft') ... else ...`), review that authentication guards are consistently invoked across all branch paths.
+*   **Rationale**: The assumption that "it's safe because it's private" is invalid in environments where attackers can directly manipulate API calls. Missing authentication checks in actions using privileged clients is a direct cause of Privilege Escalation.
+
+### 9.7. The Role Enumeration Symmetry Mandate
+*   **Law**: Multiple guard functions verifying the same domain (e.g., admin privileges) — for page access, APIs, Server Actions, etc. — MUST obtain their allowed role lists from a **shared constant array**.
+*   **Action**:
+    1.  **Shared Constants**: Define allowed role lists as a single constant such as `ALLOWED_ADMIN_ROLES`, and have all guard functions reference this constant. Individually enumerating roles as literal strings within each function is prohibited.
+    2.  **Full-Count Verification**: When adding, modifying, or deleting roles, mandate a full inspection of all guard functions referencing that role across the entire project.
+    3.  **Failure Transparency**: Guard failures due to role mismatches should display clear error messages to users, and in development environments, use `Logger.warn` for immediate inconsistency detection.
+*   **Rationale**: Inconsistencies such as including `master_admin` in the page access guard but not in the Server Action guard cause extremely opaque deadlocks where users "can access the admin panel but writes always fail." Structural sharing of role enumeration physically prevents this class of inconsistency.
+*   **Anti-Pattern**: `requireAdmin` and `ensureAdminAction` each maintaining independent string literals `['admin', 'super_admin']`, with only one being updated when a new role is added.
+
+### 9.8. The Strict CSP Nonce Protocol
+*   **Law**: In Content Security Policy (CSP), the use of `unsafe-inline` or `unsafe-eval` is defined as "abandoning security defenses." All inline scripts must use a **cryptographically secure Nonce generated in Middleware**, maintaining CSP strictness.
+*   **Action**:
+    1.  **Nonce Generation**: Generate a unique Nonce per request in Middleware using `crypto.randomUUID()` or similar, and set it in the `Content-Security-Policy` header as `'nonce-{value}'`.
+    2.  **Nonce Propagation**: Propagate the generated Nonce to Server Components via custom headers (e.g., `x-nonce`) and apply it to all inline scripts (`<script nonce={nonce}>`).
+    3.  **No Fallback to Unsafe**: Do not compromise to `unsafe-inline` when integrating third-party scripts (widgets, analytics tools, etc.). Instead, load them as external files and enumerate domains in `script-src`, or use hash-based allow lists.
+    4.  **CSP Report**: Configure `report-uri` / `report-to` directives to collect and monitor CSP violations server-side.
+*   **Rationale**: `unsafe-inline` completely nullifies CSP's defense against XSS (Cross-Site Scripting) attacks. Nonce-based CSP permits only legitimate inline scripts and physically blocks execution of scripts injected by attackers.
+
+### 9.9. The Anti-Permissive RLS Mandate
+*   **Law**: In Row Level Security (RLS) policy design, **creating excessively permissive policies is prohibited**. Clarify intent and strictly adhere to the principle of least privilege.
+*   **Action**:
+    1.  **No `FOR ALL` Policy**: `FOR ALL` permits all operations (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) at once, making permission granularity coarse and intent difficult to understand. Create individual policies per operation.
+    2.  **No `WITH CHECK (true)`**: `WITH CHECK (true)` means "anyone can write unconditionally." Always set conditions for write operations (e.g., `auth.uid() = user_id`).
+    3.  **Limited `USING (true)` Usage**: `USING (true)` is only acceptable for `SELECT` policies on public data. `USING (true)` for `UPDATE` or `DELETE` is prohibited in principle.
+    4.  **Policy Naming Convention**: Name policies in the format `tablename_action_role_policy` (e.g., `posts_select_authenticated_policy`), making policy intent immediately understandable from the name.
+*   **Rationale**: RLS is the "last bastion" of data access. Excessively permissive policies increase the risk of data leakage and tampering through application-layer bugs or direct API access. The principle of least privilege physically blocks unexpected access.
+
+### 9.10. The Cryptographic Randomness Mandate
+*   **Law**: Using `Math.random()` for security purposes (password generation, token generation, Nonce generation, session IDs, etc.) is a **Mortal Sin**. `Math.random()` is not cryptographically secure (PRNG) and produces predictable output, allowing attacker prediction.
+*   **Action**:
+    1.  **Client-Side**: MUST use `window.crypto.getRandomValues()`.
+    2.  **Server-Side (Node.js)**: MUST use `crypto.randomBytes()` or `crypto.randomUUID()`.
+    3.  **Framework Integration**: Prefer framework-provided cryptographically secure random generation functions (e.g., `crypto.randomUUID()`) when available.
+*   **Rationale**: Only CSPRNG (Cryptographically Secure Pseudo-Random Number Generator) guarantees unpredictability of tokens and secrets. `Math.random()` generation is vulnerable to brute-force attacks.
+
+### 9.11. The Cookie Scope Protocol
+*   **Law**: When storing temporary authentication state or permission info in Cookies, scope MUST be minimized and isolated per resource.
+*   **Action**:
+    1.  **Specific Naming**: Use resource-specific, unique namespaced Cookie names like `{purpose}_{resource_id}`. Overuse of generic names (`auth_token`, `session`, etc.) increases Cookie Tossing risk.
+    2.  **Attribute Armor**: MUST apply security attributes:
+        *   `HttpOnly`: Block JavaScript access to prevent XSS-based Cookie theft.
+        *   `Secure`: Send Cookies only over HTTPS in production.
+        *   `SameSite=Lax` (or `Strict`): Prevent CSRF attacks.
+    3.  **Minimal Lifetime**: Set temporary auth Cookie expiration to the shortest period appropriate for its purpose.
+*   **Rationale**: Overly broad Cookie scope increases risk of authentication state contamination across resources and unauthorized session hijacking by attackers.
+
+### 9.12. The Server-Side Storage Guard Protocol
+*   **Law**: Direct client-side file uploads to storage services (S3, Cloud Storage, Supabase Storage, etc.) from public site forms is prohibited.
+*   **Action**:
+    1.  **Server Delegation**: Clients MUST send files to **Server Action / API Route**, and uploads should be executed server-side using privileged client credentials.
+    2.  **Path Control**: Storage paths (Slug/UUID, etc.) MUST be generated and validated server-side only; client-specified paths are not permitted (Path Traversal prevention).
+    3.  **Validation**: Re-validate file MIME type, size, and extension server-side. MUST NOT rely solely on client-side validation.
+*   **Rationale**: Direct client-side uploads bypass server-side audit logs, validation, and path normalization, creating a "governance hole" that allows malicious file injection and storage path tampering.
+
+### 9.13. The Admin CMS Injection Defense
+*   **Law**: CMS features that allow embedding arbitrary HTML/scripts into site-wide `<head>` or templates from the admin panel (custom head, custom CSS, widget embeds, etc.) are powerful XSS vectors. If an admin account is compromised, the entire site can be contaminated.
+*   **Action**:
+    1.  **Super Admin Only**: Restrict editing and saving of such features to users with **top-level privileges (System Admin / Super Admin)** only, not regular administrators.
+    2.  **Script Tag Warning**: When input contains `<script>` tags, `javascript:` URIs, or `on*` event handlers, display an explicit warning dialog in the UI before saving.
+    3.  **Change Audit**: All changes MUST be recorded in audit logs with before/after diffs retained.
+*   **Rationale**: Arbitrary code injection from admin panels can bypass CSP through admin privileges, requiring dual defense through privilege-level restrictions and injection detection.

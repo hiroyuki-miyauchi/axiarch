@@ -58,6 +58,10 @@
 *   **The Sensitive Asset Mandate (Private Storage)**:
     *   **Law**: 証明書、鑑定書、医療記録等の機密文書画像は、必ず **非公開 (private)** バケットに保存してください。公開 (`public`) バケットの使用は厳禁です。
     *   **Access**: これらのファイルへのアクセスは、サーバー側で生成した **`Signed URL` (署名付きURL)** を通じてのみ、数分〜数時間程度の短い有効期限付きで提供してください。
+*   **The Granular Sharing Protocol (共有範囲制御)**:
+    *   **Law**: ユーザー間でデータを共有する機能において、単なる閲覧・編集権限だけでなく、**レコード単位またはフィールド単位**で「共有範囲（全員公開 / 限定メンバーのみ / 本人のみ）」を指定できる設計を推奨します。
+    *   **Default Private**: 決済情報、個人的メモ、健康記録詳細など秘匿性の高いフィールドは、デフォルトで **「本人のみ（Private）」** に設定し、ユーザーの明示的な操作なしに共有対象に含まれることを防いでください。
+    *   **Visibility Matrix**: 共有設定は、RLS（Row Level Security）またはアプリケーションロジック層で強制し、フロントエンドの表示制御のみに依存しないでください。
 *   **Encryption at Rest & In Transit**:
     *   **PII Encryption**: DB内のセンシティブな個人情報（口座情報、本人確認書類ID、住所詳細等）は、Supabase Vault や pgcrypto (`pgp_sym_encrypt`) を用いてアプリケーションレベルで暗号化して保存します。
     *   **TLS 1.3**: すべての通信はHTTPS (TLS 1.2以上、推奨1.3) を強制します。
@@ -135,6 +139,14 @@
     *   **Tier 2 (Strict)**: 一括削除、フォルダ削除、重要設定変更、**最重要データの単体削除（ユーザー、プラン、決済関連等）** → `Turnstile + Keyword Confirmation + 高セキュリティ認証 (OTP/MFA) 必須`。
 *   **Action**: 新機能実装時は、必ず既存類似機能のUI/ロジックを確認し、100%同一の振る舞いを実装してください。「似ているが違う」は整合性を欠くバグです。
 
+### 8.1.2. The Security-UX Balance Protocol（セキュリティ-UXバランス原則）
+*   **Law**: 過剰なセキュリティ要求（不要な場面での Turnstile/OTP 要求）は、運用者の生産性を低下させ、最終的にサービス利用率の低下を招きます。セキュリティはUXを犠牲にする免罪符ではありません。
+*   **Action**:
+    1.  **Critical Actions Only**: Turnstile/OTP 認証は、DB書き込み（Save/Publish/Delete）や重要設定の変更など、「不可逆またはリスクの高い操作」の最終段階でのみ要求してください。
+    2.  **No UI Friction**: モーダルを開く、タブを切り替える、ファイルを選択する（アップロード前）といった「探索・中間操作」において認証を挟むことを**厳禁**とします。
+    3.  **Context Awareness**: すでに認証済みのセッション内で行う軽微な操作に対し、再認証を強いることは「信頼の欠如」であり、システム設計の欠陥とみなします。
+*   **Rationale**: ユーザーに過剰な認証を繰り返し要求するシステムは、結果として認証疲れ（Security Fatigue）を誘発し、ユーザーが本当に重要な認証を軽視する逆効果を生みます。
+
 ### 8.2. The Audit Log Obligation (No Invisible Hands)
     *   **The Audit Log Obligation**: 監査ログを経由しないDB書き込みはセキュリティ上の死角です。重要な操作（作成・更新・権限変更）は、`actor_id`, `action`, `resource`, `details` を含む所定のスキーマで記録してください。
     *   **The Privileged Data Access Audit (High-Sensitivity Mandate)**:
@@ -144,6 +156,11 @@
     *   **The Immutable Log Mandate (WORM)**:
         *   **Law**: `audit_logs` テーブルは **Append-Only (追記のみ)** とし、RLSポリシーにて `UPDATE` および `DELETE` を物理的に禁止してください。
         *   **Archiving**: 古いログの削除は、自動パーティション管理（pg_partman）またはTTL機能によってのみ行い、人間の手動操作を禁じます。
+    *   **The Immutable Record Protocol (Edit Window + Correction Log)**:
+        *   **Law**: 重要な事実記録（健康記録、契約履歴、資産台帳、検査結果等）は、一度確定したら安易に変更されるべきではない「事実」として扱ってください。
+        *   **Edit Window**: ユーザーによる編集・削除は、レコード作成から **一定時間以内**（推奨: 24時間）に制限してください。期限超過後の直接変更は禁止します。
+        *   **Correction Log**: 期限後に修正が必要な場合は、元のレコードを保持したまま **「訂正記録（Correction Log）」** として別レコードを作成し、修正理由と修正者を記録する設計としてください。原本の改竄を物理的に防止します。
+        *   **Rationale**: 医療・法務・財務等の領域では、記録の改竄防止と追跡可能性（Traceability）が法的要件となる場合があります。Edit Window は利便性を確保しつつ、確定後の不可逆性を保証するバランス設計です。
 
 ### 8.3. The Information Disclosure Protocol (Error Masking - Rule 8.3)
 *   **Law**: エラーメッセージ（特に本番環境）において、DBのテーブル名、カラム名、スタックトレース、外部APIの生レスポンスなどの内部情報（Detailed Information）をエンドユーザーに表示することを物理的に禁止します。
@@ -198,6 +215,10 @@
 ### 8.12. The No Security Bypass Penalty
 *   **Law**: 開発効率やCI通過を優先して、セキュリティ機能（SSL検証、CORS制限、Auth Middleware等）を一時的にでも無効化することを厳禁とします。
 *   **Action**: これを発見した場合は即座に Revert し、重大な憲法違反として扱います。
+*   **Prohibited Examples**:
+    - `NODE_TLS_REJECT_UNAUTHORIZED=0`（SSL検証の無効化）
+    - `Access-Control-Allow-Origin: *`（本番環境でのCORS全許可）
+    - 認証Middlewareの検証ロジックをコメントアウトまたはスキップ
 
 ### 8.13. The Infrastructure Reality Protocol (WebAuthn/MFA)
 *   **Law**: コードが正しくても、インフラ側の設定（Supabase ダッシュボードの MFA 有効化等）が無効であれば、機能は不全に陥ります。
@@ -217,6 +238,14 @@
     3. ドメイン・レジストラ・ロックコード
     4. 主要認証マネージャー (1Password等) のマスターキー
 *   **Mandate**: 「デジタルが消滅しても、紙一枚あれば復旧できる」状態を維持してください。
+
+### 8.15.1. The RBAC Defense Protocol（RBAC防御プロトコル）
+*   **Law**: 全てのAdmin API/Actionは、処理の冒頭でRBACチェックを強制し、操作のリスクレベルに応じた追加認証と監査ログの記録を義務付けます。
+*   **Action**:
+    1.  **Entry Point Guard**: 全てのAdmin API/Actionの冒頭で、集約された権限チェック関数（Guardian Protocol参照）を呼び出し、ロールベースのアクセス制御を実行してください。
+    2.  **Tiered Additional Auth**: 金銭・権限・削除に関わる操作（Tier 2/3相当）は、RBACチェックに加えて Turnstile/OTP による追加認証を必須としてください。
+    3.  **Mandatory Audit**: 全てのAdmin操作は例外なく監査ログに記録してください。特に破壊的操作（DELETE、権限変更、設定変更）は変更前後の差分を含めて保持してください。
+*   **Rationale**: RBACチェック・追加認証・監査ログの3層を全Admin APIの共通パターンとして標準化することで、個別実装による抜け漏れを構造的に排除します。
 
 ### 8.16. The Digital Legacy Protocol (Inheritance)
 *   **Problem**: 契約者の死亡や意識不明時、ロックされたアカウント内の「命のデータ（資産、健康記録）」にアクセスできなくなるリスクを回避してください。
@@ -248,3 +277,108 @@
     *   `detail`: 発生した具体的な問題の説明（機密情報を除く）。
     *   `instance`: 発生個所の URI。
 *   **Action**: クライアント側（UI）は、この `title` または `detail` をそのままダイアログ等に表示できる「おもてなしの心」を持って、バックエンドからエラー情報を構築してください。
+
+### 9.2. The Function Search Path Lockdown (関数セキュリティ強化)
+*   **Law**: PostgreSQLの `SECURITY DEFINER` 関数において、`search_path` を固定しないことは「家の鍵を開けたまま外出する」に等しい脆弱性です。
+*   **Threat Model**: 攻撃者が `temp` スキーマや他スキーマに同名のテーブル/関数を配置し、特権関数の実行コンテキストを乗っ取る「Search Path Injection」攻撃が可能になります。
+*   **Action**:
+    1.  **Empty Search Path**: `SECURITY DEFINER` 関数には必ず `SET search_path = ''`（空文字列）を設定してください。`SET search_path = public` は妥協であり、エイリアス攻撃のリスクを残します。
+    2.  **Fully Qualified References**: 関数内の全てのテーブル・関数参照を `public.users`、`public.is_admin()` のように**スキーマ完全修飾**で記述することを義務付けます。
+    3.  **System Schema Exclusion**: `storage`, `auth`, `graphql`, `extensions` 等のシステムスキーマ内のオブジェクトへのDDL操作は原則禁止です。これらはSupabaseが管理する領域です。
+    4.  **CI Validation**: 新規関数追加時は、CIで `search_path` が正しく設定されていることを検証するスクリプトの導入を推奨します。
+*   **Outcome**: Search Path攻撃を物理的に不可能にし、特権エスカレーション（Privilege Escalation）のリスクをゼロにします。
+
+### 9.3. The Strict CSP Nonce Protocol (CSP最高強度義務)
+*   **Law**: Content Security Policy（CSP）において、`'unsafe-inline'` や `'unsafe-eval'` を追加してスクリプトブロックを回避することは「防御の放棄」であり禁止します。
+*   **Action**:
+    1.  **Nonce Propagation**: 全てのインラインスクリプトおよび外部ウィジェット（Turnstile, reCAPTCHA, GTM等）には、Middleware から生成された **Nonce** を伝播させ、ブラウザに正当性を証明してください。
+    2.  **Strict Dynamic**: 信頼済みスクリプトが動的に読み込むサブリソースには `'strict-dynamic'` を使用し、明示的なドメインホワイトリストへの依存を最小化してください。
+    3.  **Report-Only First**: 新規CSPルール導入時は `Content-Security-Policy-Report-Only` で影響を観測してから本番適用してください。
+    4.  **No Compromise**: セキュリティ機能のブロックに対して「`unsafe-inline` を追加すれば動く」という提案は、開発者としての敗北です。正攻法の技術改善で解決してください。
+*   **Outcome**: XSS攻撃のリスクを構造的に排除し、最高強度のCSPを維持します。
+
+### 9.4. The Cryptographic Consistency Mandate (暗号化整合性義務)
+*   **Law**: APIキーやトークンなどの機密情報を扱う際、**生成・保存フェーズと認証・検証フェーズが同一の暗号化アルゴリズムを使用**しなければなりません。
+*   **Action**:
+    1.  **Algorithm Unity**: 生成時に SHA-256 でハッシュ化した値を保存するなら、検証時も同じ SHA-256 でハッシュ化して比較してください。アルゴリズムの不一致は「永久に認証が通らない」バグの直接原因です。
+    2.  **Schema Match**: ハッシュ化した値を保存するカラム名（`key_hash` 等）と、アプリケーションコードで参照するカラム名が完全一致することを型レベルで保証してください。
+    3.  **Rotation Ready**: 将来のアルゴリズム変更に備え、保存時にアルゴリズム識別子（`sha256:xxxx`）をプレフィックスとして含める設計を推奨します。
+*   **Anti-Pattern**: 生成時に平文保存し、認証時にハッシュ比較を行う（またはその逆）は「永久に不一致」を生む致命的バグです。
+
+### 9.5. The Client-Side Branch Guard Protocol（クライアント側ブランチ保護）
+*   **Law**: Git の `pre-push` フックにより、保護ブランチ（`main`, `master` 等）への直接Push を **物理的に不可能** にしてください。サーバーサイドのブランチ保護（GitHub Branch Protection等）が利用可能な場合でも、防衛線を二重化（Deep Defense）してください。
+*   **Action**:
+    1.  **Mandatory Hook**: プロジェクト初期化時に `husky` 等のGit Hooks管理ツールを導入し、`pre-push` フックを設定してください。
+    2.  **Push Block Logic**: フック内で現在のブランチ名を検査し、保護ブランチ名に一致する場合は `exit 1` で強制中断してください。
+    3.  **No Human Trust**: 「気をつける」という運用ルールは無意味です。物理的にPushできない仕組み（Code, not Policy）のみを信頼してください。
+*   **Rationale**: 保護ブランチへの意図しない直接Pushは、未承認デプロイ、履歴の汚染、およびチームの信頼への背信を招きます。特にGitHub Free Plan等でサーバーサイド保護が制限される環境では、クライアント側ガードが唯一の防衛線です。
+
+### 9.6. The Unconditional Baseline Auth Mandate（無条件ベースライン認証義務）
+*   **Law**: 特権クライアント（Service Role等）を呼び出すアクション層のハンドラは、データのステータスや重要度に関わらず、**ベースラインとなる認証・認可チェックを例外なく全コードパスで実行**しなければなりません。
+*   **Action**:
+    1.  **No Conditional Bypass**: 「下書きだから認証チェックを省略」「内部APIだからガードを緩和」という条件付きバイパスは禁止です。認証強度の切り替え（MFA/OTPの要否等）は許容しますが、「誰が実行しているか」のアイデンティティ検証を条件付きにしてはなりません。
+    2.  **Defense in Depth**: 特権クライアントはDBレベルのアクセス制御をバイパスするため、アプリケーション層のチェック漏れが致命的な脆弱性に直結します。全コードパスで最低限の認可チェック（`ensureAuth()` / `ensureRole()` 等）を強制してください。
+    3.  **Branch Audit**: ステータスや条件による分岐（`if (status === 'draft') ... else ...`）を持つアクション関数を追加・変更した際は、全分岐パスで認証ガードが一貫して呼び出されているかレビューしてください。
+*   **Rationale**: 「非公開だから安全」という仮定は、攻撃者がAPI呼び出しを直接操作できる環境では無効です。特権クライアントを使用するアクションにおける認証チェックの漏れは、権限昇格（Privilege Escalation）の直接的な原因となります。
+
+### 9.7. The Role Enumeration Symmetry Mandate（ロール列挙対称性義務）
+*   **Law**: 同一ドメイン（例: 管理者権限）を検証する複数のガード関数（ページアクセス用、API用、Server Action用等）は、許可するロールの一覧を **共通の定数配列** から取得しなければなりません。
+*   **Action**:
+    1.  **Shared Constants**: 許可ロール一覧は `ALLOWED_ADMIN_ROLES` 等の単一の定数として定義し、全てのガード関数がこの定数を参照してください。各関数内で個別にロールをリテラル文字列で列挙することは禁止です。
+    2.  **Full-Count Verification**: ロールの追加・変更・削除を行った際は、プロジェクト全体で当該ロールを参照している全ガード関数の全数検査を義務付けます。
+    3.  **Failure Transparency**: ロール不一致によるガード失敗は、ユーザーに対して明確なエラーメッセージを表示し、開発環境では `Logger.warn` で不整合を即座に検知できるようにしてください。
+*   **Rationale**: ページアクセスガードには `master_admin` を含むが、Server Actionガードには含まない、といった不一致は、「管理画面には入れるが書き込みだけが失敗する」という極めて不透明なデッドロックを引き起こします。ロール列挙の構造的な共有は、この種の不整合を物理的に防止します。
+*   **Anti-Pattern**: `requireAdmin` と `ensureAdminAction` でそれぞれ独立した文字列リテラル `['admin', 'super_admin']` を保持し、新ロール追加時に片方だけ更新漏れが発生するケース。
+
+### 9.8. The Strict CSP Nonce Protocol（CSP Nonce厳格化プロトコル）
+*   **Law**: Content Security Policy（CSP）において、`unsafe-inline` や `unsafe-eval` の使用は「セキュリティ防御の放棄」と定義します。全てのインラインスクリプトには**Middleware で生成された暗号的に安全な Nonce** を使用し、CSP の厳格性を維持しなければなりません。
+*   **Action**:
+    1.  **Nonce Generation**: Middleware で `crypto.randomUUID()` 等を使用してリクエストごとに一意の Nonce を生成し、`Content-Security-Policy` ヘッダーに `'nonce-{value}'` として設定してください。
+    2.  **Nonce Propagation**: 生成された Nonce は、カスタムヘッダー（例: `x-nonce`）を通じてサーバーコンポーネントに伝播し、全てのインラインスクリプト（`<script nonce={nonce}>`）に適用してください。
+    3.  **No Fallback to Unsafe**: サードパーティスクリプト（ウィジェット、分析ツール等）の統合時に `unsafe-inline` への妥協を許さないでください。代わりに、外部ファイルとして読み込み `script-src` にドメインを列挙するか、ハッシュベースの許可リストを使用してください。
+    4.  **CSP Report**: `report-uri` / `report-to` ディレクティブを設定し、CSP違反をサーバーサイドで収集・監視してください。
+*   **Rationale**: `unsafe-inline` はXSS（クロスサイトスクリプティング）攻撃に対するCSPの防御を完全に無効化します。Nonce ベースのCSPは、正当なインラインスクリプトのみを許可し、攻撃者が注入したスクリプトの実行を物理的にブロックします。
+
+### 9.9. The Anti-Permissive RLS Mandate（RLSポリシー衛生義務）
+*   **Law**: Row Level Security（RLS）のポリシー設計において、**過度に許容的なポリシーの作成を禁止**します。意図を明確にし、最小権限の原則を厳守してください。
+*   **Action**:
+    1.  **No `FOR ALL` Policy**: `FOR ALL` は `SELECT`, `INSERT`, `UPDATE`, `DELETE` の全操作を一括で許可するため、権限の粒度が粗くなり意図の把握が困難です。操作ごとに個別のポリシーを作成してください。
+    2.  **No `WITH CHECK (true)`**: `WITH CHECK (true)` は「誰でも無条件に書き込み可能」を意味します。書き込み操作には必ず条件（例: `auth.uid() = user_id`）を設定してください。
+    3.  **USING (true) の限定使用**: `USING (true)` は公開データの `SELECT` ポリシーで**のみ**許容します。`UPDATE` や `DELETE` の `USING (true)` は原則禁止です。
+    4.  **Policy Naming Convention**: ポリシー名は `tablename_action_role_policy`（例: `posts_select_authenticated_policy`）の形式で命名し、ポリシーの意図を名前から即座に把握可能にしてください。
+*   **Rationale**: RLSはデータアクセスの「最後の砦」です。過度に許容的なポリシーは、アプリケーション層のバグやAPI直接アクセスによるデータ漏洩・改竄のリスクを増大させます。最小権限の原則により、想定外のアクセスを物理的に遮断します。
+
+### 9.10. The Cryptographic Randomness Mandate（暗号学的乱数義務）
+*   **Law**: セキュリティ目的（パスワード生成、トークン生成、Nonce生成、セッションID等）において、`Math.random()` の使用は**大罪（Mortal Sin）**です。`Math.random()` は暗号学的に安全ではなく（PRNG）、予測可能な出力を生成するため、攻撃者による推測を許します。
+*   **Action**:
+    1.  **Client-Side**: 必ず `window.crypto.getRandomValues()` を使用してください。
+    2.  **Server-Side (Node.js)**: 必ず `crypto.randomBytes()` または `crypto.randomUUID()` を使用してください。
+    3.  **Framework Integration**: フレームワークが提供する暗号学的に安全なランダム生成関数（例: `crypto.randomUUID()`）が利用可能な場合は、それを優先使用してください。
+*   **Rationale**: CSPRNG（暗号論的擬似乱数生成器）のみが、トークンやシークレットの推測不能性を保証します。`Math.random()` による生成は、ブルートフォース攻撃の対象となります。
+
+### 9.11. The Cookie Scope Protocol（Cookie スコープ分離義務）
+*   **Law**: 一時的な認証状態や権限情報を Cookie に保存する際、スコープの広さは最小限に抑え、リソース単位で分離しなければなりません。
+*   **Action**:
+    1.  **Specific Naming**: Cookie 名は `{purpose}_{resource_id}` のように、リソース単位で一意かつ推測困難な名前空間を使用してください。汎用的な名前（`auth_token`, `session` 等）の乱用は、Cookie 汚染（Cookie Tossing）のリスクを高めます。
+    2.  **Attribute Armor**: セキュリティ属性を必ず付与してください:
+        *   `HttpOnly`: JavaScript からの Cookie アクセスを遮断し、XSS 攻撃による Cookie 窃取を防止します。
+        *   `Secure`: 本番環境では HTTPS 通信時のみ Cookie を送信します。
+        *   `SameSite=Lax` (または `Strict`): CSRF攻撃を防止します。
+    3.  **Minimal Lifetime**: 一時的な認証 Cookie の有効期限は、用途に応じた最短期間に設定してください。
+*   **Rationale**: Cookie のスコープが広すぎると、異なるリソース間での認証状態の汚染や、攻撃者による不正なセッション乗っ取りのリスクが増大します。
+
+### 9.12. The Server-Side Storage Guard Protocol（サーバーサイドStorage委任義務）
+*   **Law**: 公開サイトのフォーム等において、クライアントサイドからストレージサービス（S3、Cloud Storage、Supabase Storage等）へファイルを直接アップロードすることを禁止します。
+*   **Action**:
+    1.  **Server Delegation**: クライアントはファイルを **Server Action / API Route** へ送信し、サーバーサイドで管理者権限クライアントを用いてアップロードを実行してください。
+    2.  **Path Control**: 保存パス（Slug/UUID等）はサーバー側でのみ生成・検証し、クライアントからのパス指定を許可しないでください（Path Traversal 防止）。
+    3.  **Validation**: サーバーサイドでファイルの MIME タイプ、サイズ、拡張子を再検証してください。クライアントサイドのバリデーションのみに依存してはなりません。
+*   **Rationale**: クライアントサイドからの直接アップロードは、サーバーサイドの監査ログ、バリデーション、パスの正規化をバイパスし、不正ファイルの混入やストレージパスの改竄を許す「ガバナンスの穴」となります。
+
+### 9.13. The Admin CMS Injection Defense（管理画面CMS注入防御）
+*   **Law**: 管理画面からサイト全体の `<head>` やテンプレートに任意のHTML/スクリプトを埋め込める機能（カスタムヘッド、カスタムCSS、ウィジェット埋め込み等）は、強力なXSSベクタとなります。管理者アカウントが侵害された場合、サイト全体が汚染されるリスクがあります。
+*   **Action**:
+    1.  **Super Admin Only**: このような機能の編集・保存は、通常の管理者ではなく**最上位権限（System Admin / Super Admin）**を持つユーザーにのみ制限してください。
+    2.  **Script Tag Warning**: 入力値に `<script>` タグや `javascript:` URI、`on*` イベントハンドラが含まれる場合、保存前にUI上で明示的な警告ダイアログを表示してください。
+    3.  **Change Audit**: これらの変更は必ず監査ログに記録し、変更前後の差分を保持してください。
+*   **Rationale**: 管理画面からの任意コード注入は、CSPを正しく設定していても管理者権限経由でバイパスされる可能性があるため、権限レベルでの防御と注入検知の二重防衛が必要です。

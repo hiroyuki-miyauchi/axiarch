@@ -17,6 +17,12 @@
         *   **Cache Invalidation Storm**: キャッシュ無効化（Revalidation）をループ内で連打する実装は、APIコールの爆発的増加を招くため禁止します。
     *   **ゾンビリソース排除**: 未使用の開発環境や古いバックアップは定期的に削除スクリプトで一掃します。
     *   **Preview Cleanup Protocol**: PRマージ後、CI/CDでPreview環境（ブランチDB等）を自動削除し、「マイグレーションの亡霊」を防ぎます。
+    *   **Storage Tiering Protocol**: アクセス頻度の低いログやアーカイブデータは、Hot Storage（高価）から Cold Storage（S3 Glacier / R2 等の低価格帯）へ移動するライフサイクルポリシーを設定し、ストレージコストを最適化します。
+    *   **Cache Hierarchy Standard (Cache-First FinOps)**: DB負荷とコストを最小化するため、全てのクエリに以下のキャッシュ階層を適用します。
+        *   **STATIC (86400s)**: マスタデータ（カテゴリ、設定値）— DB負荷ゼロ。
+        *   **WARM (300s)**: 検索結果、一覧リスト。
+        *   **HOT (60s)**: 詳細ページ、レビュー。
+        *   **REALTIME (0s)**: 決済、認証 — キャッシュ禁止。
 *   **Vendor Lock Avoidance (Exit Strategy)**:
     *   **Portable Schema**: DBスキーマ、RLSポリシー、Triggerは標準SQL (`.sql`) で記述し、特定ベンダー固有機能への依存を最小化します。
     *   **No Proprietary Lock-in**: ベンダー独自のストレージ/KV機能を避け、S3/Redis互換インターフェースを使用します。
@@ -54,6 +60,12 @@
         1.  **Dunning Emails**: 決済失敗時は、1日後、3日後、5日後に「カード情報を更新してください」という督促メールを自動送信します。
         2.  **Service Continuity**: Grace Period中はサービスを継続利用可能にし、意図しない解約（Involuntary Churn）を最小化します。
         3.  **Stripe Smart Retries**: Stripe Billingの自動リトライ機能を有効化し、回収率を最大化します。
+*   **The Smart Retention Protocol (自主解約時引き留めフロー)**:
+    *   **Context**: ユーザーが自ら解約を選択した場合でも、適切なフローを通じてチャーン（離脱）を低減できます。
+    *   **Action**:
+        1.  **Cancel Reason Survey**: 解約ボタン押下後、解約理由を選択式で聴取します（改善のためのデータ収集）。
+        2.  **Retention Offer**: 理由に応じたリテンションオファー（翌月無料クーポン、機能改善予定の通知等）を提示します。
+    *   **Guardrail**: 解約導線を意図的に複雑にする **Dark Pattern は厳禁** です。オファーを辞退した場合は即座に解約を完了してください。
 *   **Hybrid Architecture Strategy**:
     *   **Dual API Integration**: サブスクリプションは `Stripe Billing`、単発決済は `Stripe Checkout` を使い分けます。
     *   **Metadata-Driven Tiering (Rule 26.2)**: 
@@ -116,3 +128,24 @@
     *   **The 30% Rule**: AI機能の原価（トークンコスト）は、サブスクリプション月額の **30%以下** に抑えます。超過時はハードリミットを適用します。
     *   **モデル使い分け**: 全てに最高性能モデル（GPT-4等）を使わず、タスクの複雑度に応じて軽量モデル（Flash/Mini）と使い分けます。
     *   **サーキットブレーカー**: コスト急騰時（例: 1時間で予算超過）にAI機能を自動停止する安全装置を実装します。
+
+## 7. プロモーション・価格戦略 (Promotion & Pricing Strategy)
+
+### 7.1. The Coupon Integrity Protocol (クーポン整合性)
+*   **Law**: クーポン・割引の適用ロジックは、**サーバーサイドで厳格に検証** してください。フロントエンドのみでの割引適用は、改ざんリスクがあるため禁止します。
+*   **Action**:
+    1.  **Server-Side Validation**: クーポンコードの有効性（期限、使用回数、対象条件）は必ずサーバーサイドで検証します。
+    2.  **Idempotency**: 同一クーポンの二重適用を防ぐため、使用履歴をDB で管理し、一意制約（Unique Constraint）を設定します。
+    3.  **Audit Trail**: クーポン使用履歴を監査ログに記録し、不正使用の追跡を可能にします。
+    4.  **Budget Guard**: クーポンの総予算（利用上限回数、総割引額上限）をDB で管理し、予算超過時は自動的に無効化します。
+    5.  **Per-User Limit**: ユーザーごとの使用回数上限（`max_uses_per_user`）を設定し、複数回の不正利用を防止してください。複数アカウント対策には、SMS認証やデバイスフィンガープリント等を組み合わせることを推奨します。
+    6.  **Immutable Redemption History**: クーポン使用履歴（`coupon_redemptions`）は、決済確定後（Webhook受信後等）に記録し、**一切の変更・削除を禁止**してください。監査証跡として永久に保持します。
+
+### 7.2. The Dynamic Pricing Protocol (動的価格設計)
+*   **Law**: 価格やサブスクリプションプランの変更は、**コードデプロイなしに管理画面から即座に反映** できる設計を標準とします。
+*   **Action**:
+    1.  **Price as Data**: 価格情報はDBのテーブル（例: `plans`, `prices`）で管理し、コード内のハードコードを禁止します。
+    2.  **Version Control**: 価格変更時は新しいレコードを作成し、`valid_from` / `valid_until` で有効期間を管理します。既存ユーザーの契約は変更の影響を受けないグランドファザリング設計を考慮してください。
+    3.  **Display Sync**: 価格変更がフロントエンド（LP、料金ページ等）に即座に反映されるようキャッシュ無効化戦略を設計してください。
+    4.  **Server-Side Recalculation**: 価格・割引の最終計算は必ず**サーバーサイド**で再実行してください。フロントエンドでの表示価格はあくまで「参考価格」であり、決済処理時にサーバーサイドで再計算することで、フロントエンドの改ざんリスクを排除します。
+

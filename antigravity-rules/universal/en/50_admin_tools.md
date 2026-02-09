@@ -88,3 +88,11 @@
 *   **Action**:
     *   **Versioning**: Attach version suffix (`_v2` etc.) to master data cache keys when data quantity or quality changes, physically invalidating cache.
     *   **Verification**: After production sync, MUST verify data count matches expectations via application—make this step mandatory.
+
+### 8.5. The Label Mapping Protocol
+*   **Law**: Displaying system internal keys (Enum values, status codes, action names, etc.) directly in the UI is "cryptography" for non-engineer operators and a failure as a tool.
+*   **Action**:
+    1.  **Display Map**: Define display constant maps for all Enum values and system identifiers (e.g., `STATUS_LABEL_MAP: Record<Status, string>`), and retrieve labels via this map from the UI.
+    2.  **Fallback**: When a value not present in the map is passed (future extensions, etc.), display the raw key as a fallback while outputting a warning to the Logger. This enables immediate detection of "untranslated" states.
+    3.  **Localization Ready**: Write label maps in the project's configured language and design them for easy replacement with i18n keys when future multi-language support is needed.
+*   **Scope**: Applies to all button labels, table column headers, audit log action names, and notification messages.

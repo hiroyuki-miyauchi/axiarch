@@ -52,6 +52,9 @@
 *   **Feedback Hierarchy**:
     *   **Toast**: 成功・通知（非同期）。
     *   **Inline Alert**: 文脈依存のエラー。
+*   **Toast Promise Standard (Async Feedback Lifecycle)**:
+    *   **Law**: 非同期処理（保存・削除・送信等）において、Loading→Success→Errorのフィードバックサイクルを手動で管理することはバグの温床です。
+    *   **Action**: Toastライブラリの `promise` 機能（例: `sonner.promise()`）を使用し、処理中・成功・失敗の3状態を自動的に表示してください。ユーザーは「処理中」であることを視覚的に認識し、完了または失敗の結果を確実に受け取れなければなりません。
 *   **Z-Index Stratification (The Layering Law)**:
     *   **Overlay (10000)**: Select, Popover, Tooltip, Calendar 等。常に最前面。
     *   **Modal (9999)**: Dialog, Sheet 等。
@@ -163,6 +166,42 @@
         *   **Action**: 必ず `<label>` タグ（または `shadcn/ui` の `Label` コンポーネント）でテキストごとラップし、タッチ有効領域を最大化してください。「文字を押しても反応しない」はバグです。
 *   **セマンティクス (Semantics)**:
     *   すべてのカスタムコンポーネントには、スクリーンリーダー（TalkBack/VoiceOver）用の適切なセマンティックラベルを付与します。画像には必ず `alt` テキストを設定します。
+*   **A11y Legal Defense (ADA/EAA Compliance)**:
+    *   **Risk**: アクセシビリティ対応不足は、米国障害者法 (ADA Title III) や欧州アクセシビリティ法 (EAA) に基づく訴訟リスクを生じます。
+    *   **Mandate**: `aria-label` の欠如、コントラスト比不足は「バグ」ではなく「法的瑕疵」として扱います。CIでの自動チェックに加え、四半期に一度のスクリーンリーダー（VoiceOver/NVDA等）による実機検証を義務付けます。
+*   **A11y Zero Tolerance CI (Build Gate)**:
+    *   **Mandate**: `axe-core` または `pa11y-ci` をCIパイプラインに組み込み、レベル `critical` および `serious` の違反が1つでも検出された場合、**ビルドを強制失敗**させます。
+    *   **Exemption**: UIライブラリ内部の修正不可能な外部要因に限り、理由を文書化した上で例外リスト（Ignore Config）への追加を許可します。
+*   **Non-Color Indication Protocol (色に依存しない情報伝達)**:
+    *   **Law**: エラー表示や重要情報は、**色だけ**に依存してはなりません。色覚多様性を持つユーザーが情報を見落とします。
+    *   **Action**: 必ずアイコン（⚠️、✅、❌）やテキスト（「必須」「エラー」「成功」）を**併用**し、色＋アイコン＋テキストの**三重伝達**を標準としてください。
+*   **Font Size & Zoom Protocol (フォントサイズとズーム)**:
+    *   **rem Mandate**: `font-size` は `rem` 単位で指定し、ユーザーのブラウザ設定を尊重します。`px` 固定は `:root` レベルのみ許可します。
+    *   **Zoom Resilience**: ブラウザのズーム機能（**200%**）でレイアウトが崩れないように設計してください。コンテンツの切れや重なりはバグとして扱います。
+*   **Tab Order Protocol (キーボードナビゲーション順序)**:
+    *   **Law**: DOM順序とタブ順序を一致させます。`tabindex` の正値（例: `tabindex="5"`）は**禁止**です。
+    *   **Allowed**: `tabindex="0"`（自然なタブ順に追加）と `tabindex="-1"`（プログラムからのフォーカスのみ）のみ許可します。
+    *   **Escape Key**: モーダルやドロップダウンは `Escape` キーで閉じられなければなりません。
+*   **Skip Link Protocol (スキップナビゲーション)**:
+    *   **Mandate**: ページの冒頭に **「メインコンテンツへスキップ」** リンクを実装してください。
+    *   **Implementation**: 通常は非表示、フォーカス時のみ可視化する `sr-only` + `:focus` パターンを使用します。
+*   **ARIA Attributes Standard (ARIA属性基準)**:
+    *   **aria-live**: 動的に変化するコンテンツ（トースト通知、カウントダウン等）には `aria-live="polite"` を設定し、スクリーンリーダーに変更を通知します。
+    *   **aria-expanded / aria-controls**: アコーディオンやドロップダウンには、開閉状態を示す `aria-expanded` と制御対象を示す `aria-controls` を設定します。
+    *   **First Rule of ARIA**: セマンティックHTMLで十分な場合はARIAを使わないでください。過剰なARIAはかえって混乱を招きます。
+*   **Label Association Protocol (ラベル関連付け)**:
+    *   **Mandate**: すべての入力フィールドに `<label>` を `htmlFor` 属性で関連付けてください。
+    *   **Placeholder-Only Prohibition**: `placeholder` をラベルの代替にすることは厳禁です。プレースホルダーはフォーカス時に消えるため、ユーザーが入力の目的を見失います。
+*   **Error Notification Protocol (フォームエラー通知)**:
+    *   **Mandate**: フォームエラーは `aria-live="assertive"` で即座にスクリーンリーダーに通知します。
+    *   **Association**: エラーメッセージはフィールドの直下に配置し、`aria-describedby` でフィールドと関連付けてください。
+    *   **Clarity**: エラーメッセージは「どのフィールド」に不備があるかを**明確に**示さなければなりません。
+*   **Required Fields Protocol (必須フィールド明示)**:
+    *   **ARIA**: 必須フィールドには `aria-required="true"` を設定します。
+    *   **Visual**: 視覚的にも「必須」ラベルまたは `*` マーク + テキストで明示してください（色だけに依存しない: Non-Color Indication Protocol準拠）。
+*   **Lighthouse Score Gate (品質ゲート)**:
+    *   **Mandate**: Lighthouse Accessibility Score **90点以上** を**デプロイ要件**とします。90点未満のページはバグとして扱います。
+    *   **Manual Testing**: 定期的にキーボードのみでのサイト操作テスト、スクリーンリーダー（VoiceOver / NVDA）での読み上げ確認、および200%ズームテストを実施してください。
 
 ## 7. ユーザー主権 (User Sovereignty - User First)
 *   **データ所有権 (Data Ownership)**:
@@ -205,6 +244,8 @@
     *   **Micro-Interaction Standards**:
         *   **Cursor Affordance Mandate**: クリックでアクションが発生する全ての要素（カード、デイトピッカー、カスタム入力欄等）には、ホバー時に必ず **`cursor-pointer`** を適用し、アフォーダンスを明確にしてください。
         *   **Hover State Fidelity**: インタラクティブなカードには、ホバー時に背景色の微変やわずかな浮浮（`shadow-md`）を付与し、その要素が「反応する」ことをユーザーの潜在意識に伝えなさい。
+        *   **Clipboard Interaction Protocol (Copy Feedback)**: URLやコードの「コピー」アクション成功時は、必ず **トースト通知** または **アイコン変化（チェックマーク等）** を即座に表示し、ユーザーに成功を明示してください。`navigator.clipboard` が失敗する環境（非HTTPS等）では、テキスト選択状態にして手動コピーを促すフォールバックを実装します。
+        *   **Input Reflection Protocol (Real-time Label Sync)**: アコーディオン等の開閉UIにおいて、内部の入力フィールド（`name`, `title`等）の変更は、親コンポーネント（リストビューやアコーディオンヘッダー）に**リアルタイムで反映**させなければなりません。「保存するまでタイトルが変わらない」挙動は、管理画面においてはUXの遅延（ラグ）として認知されます。
     *   **Code Input Standard (Rule 14.12)**:
         *   **Law**: HTML/CSS/JSON等のコード編集が必要な箇所で、生の `textarea` を使用することは、シンタックスハイライトがなくミスを誘発し、品質を著しく損なうため厳禁です。
         *   **Action**: 必ず `react-simple-code-editor` (+ `prismjs`) などのエディタコンポーネントを使用し、プロフェッショナルな品質を提供してください。生の `Textarea` の使用は未完成とみなします。
@@ -227,6 +268,13 @@
     *   **Magic Word**: データの完全削除など、取り返しのつかない操作には、「OK」ボタンではなく、「delete」等の**マジックワード入力**を求める確認ダイアログを実装します。
 *   **Dirty Check**:
     *   未保存の変更がある状態での離脱に対し、「変更が失われます」という警告を表示します。
+*   **Loading Lock Protocol (Double-Submit Prevention)**:
+    *   **Law**: フォーム送信中や非同期処理中にボタンが押せる状態を放置することは、データの二重登録やRace Conditionの原因となり厳禁です。
+    *   **Action**: 処理中 (`isLoading`) はボタンを `disabled` 属性で無効化し、視覚的にもグレーアウトまたはスピナーを表示してください。重大な副作用を伴うアクションでは `pointer-events-none` を併用し、物理的なクリックを遮断します。
+*   **Responsive Action Button Protocol**:
+    *   **Mobile**: 重要なアクションボタン（登録、保存、購入等）は `w-full`（画面幅いっぱい）で押しやすくします。
+    *   **Desktop**: `w-auto` かつ十分な最小幅を確保し、**中央配置** とします。PCで `w-full` にして間延びさせることは禁止です。
+    *   **Affordance**: 影 (`shadow-md`) やホバーエフェクトを付与し、「押せる感」を演出します。
 
 ## 12. おもてなしUX (Omotenashi UX - Japanese Hospitality)
 *   **気が利く (Kigakiku - Anticipatory Design)**:
@@ -236,6 +284,9 @@
     *   **余白の美学**: シリコンバレーの「情報の密度」と、日本の「間（余白）」を融合させます。余白は単なるスペースではなく、ユーザーに「思考の時間」を与えるための機能です。
 *   **相槌 (Aizuchi - Reassuring Feedback)**:
     *   **反応**: ユーザーのあらゆるアクション（タップ、スクロール、入力）に対して、視覚的または触覚的（Haptics）な「相槌」を返します。「あなたの操作は正しく伝わっていますよ」という安心感を常に与え続けます。
+*   **The Graceful Error Recovery Protocol (謝罪と導線の義務)**:
+    *   **Law**: 予期せぬエラー発生時には、事実を伝えるだけでなく、ユーザーへの共感を表現し、**次にユーザーが取るべきアクション**（再読込、ホームに戻る、問い合わせる等）の導線ボタンを必ず添えてください。
+    *   **Action**: エラーページやエラーモーダルには、原因の簡潔な説明と共に、最低1つの回復アクションボタンを配置してください。「行き止まり（Dead End）」のエラー画面は、ユーザーの離脱を加速させるUXの敗北です。
 
 ## 13. デザインOpsとツール連携 (Design Ops & Tools)
 *   **デザインシステム (Design System)**:

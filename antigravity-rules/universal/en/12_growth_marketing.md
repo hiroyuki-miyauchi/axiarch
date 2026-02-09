@@ -17,9 +17,18 @@
     *   **The Direct Answer Protocol (Answer First)**:
         *   **Context**: AI search engines (SGE, Perplexity) extract "direct answers" to user questions.
         *   **Action**: Force content to be written as "conclusion first (answer first)", "procedures in numbered lists", "comparisons in tables". Definition syntax like "X is Y" is also effective.
+    *   **The Q&A Anchor Protocol (Question-Format Headings)**:
+        *   **Context**: AI (RAG) is looking for "question" and "answer" pairs.
+        *   **Action**: Recommend structuring article headings (H2/H3) as **questions** such as "What is X?" or "What are the benefits of X?" and stating the **conclusion** in the immediately following paragraph. This makes it easier for AI search engines to extract as an "answer".
+    *   **The Data Tokenization Protocol (Data Density Optimization)**:
+        *   **Law**: AI prefers **concrete numbers and data** (specs, prices, dates, regulatory numbers, etc.) over vague adjective-based descriptions.
+        *   **Action**: Information organized in tables (`<table>`) and lists (`<ul>`/`<ol>`) has lower parsing cost for AI and is more likely to be cited. Adopt this format whenever possible.
     *   **The Primary Source Citation (Authoritative Linking)**:
         *   **Law**: When stating facts (statistics, laws, medical data), link to trusted primary sources (government agencies, papers, official sites) whenever possible.
         *   **Effect**: This shows search engines and AI that "information is substantiated", improving trustworthiness score.
+    *   **The Author Visibility Protocol (Author Profile Mandate)**:
+        *   **Law**: AI weighs "who is saying it" heavily. Articles and content MUST always include **author profiles (name, title, photo, social media links)**.
+        *   **Action**: Use Schema.org's `author` property to include author information in structured data. Linking to author pages is also recommended.
     *   **The Reviewer Visibility Protocol (Expert Endorsement)**:
         *   **Context**: In YMYL (Your Money Your Life) domains, "who approved" matters more than "who wrote".
         *   **Action**: For articles supervised by experts (doctors, lawyers), MUST include supervisor info in structured data using `reviewer` property.
@@ -36,6 +45,10 @@
         *   **Law**: `robots: noindex` setting MUST **NEVER be removed** until migration to official domain and explicit "Launch approval" from stakeholders.
         *   **Risk**: Indexing in incomplete state damages domain reputation, causes duplicate content, degrades brand image.
         *   **Action**: In dev/staging environments, force noindex via `next.config.js` or `middleware`, and build flow to only remove after production AND explicit approval.
+    *   **The Hreflang Protocol (Internationalized URL Strategy)**:
+        *   **Context**: Prepare SEO-safe URL design for future multi-language expansion.
+        *   **Law**: Adopt a **subdirectory strategy** with unique URLs per language (e.g., `/en/products/tokyo`). Language switching via query parameters (`?lang=en`) or cookies is prohibited for SEO reasons.
+        *   **Action**: When implementing multi-language support, implement `hreflang` tags to accurately communicate the correspondence between language versions to search engines.
 *   **Core Web Vitals**:
     *   Since it directly affects SEO ranking, always keep **LCP, INP, CLS** scores green (Good).
 *   **The SEO Integrity Protocol (Canonical & Internal Link)**:
@@ -99,3 +112,40 @@
 *   **Law**: Physically separate and manage content's "inherent attributes (name, price, description)" from marketing "meta info (SEO title, ad catch copy)".
 *   **Action**: Separate `items` table main data from `marketing_metadata` (jsonb or dedicated table), building dependency where marketers editing the latter doesn't break base system logic (order processing, notifications).
 *   **Rationale**: Physically avoid "tight coupling tragedy" where changing product name for ad optimization (AB test) also changes shipping label name.
+
+## 8. Growth Performance Architecture
+*   **The Growth-Critical Performance Mandate**:
+    *   **Law**: Pages directly linked to user Acquisition and Retention (LPs, feeds, search results, etc.) MUST prioritize performance, making cache strategy mandatory.
+    *   **Targets**:
+        1.  **First Paint < 1 second**: Instantly serve initial data from cache to prevent new user drop-off.
+        2.  **Engagement API < 100ms**: Interactions like likes and bookmarks must be reflected instantly using Optimistic UI.
+        3.  **Feed/Search < 200ms**: Personalized content recommendations and search results must leverage caching for fast delivery.
+    *   **Retention Strategy**:
+        *   **Push Data Prefetch**: When users return via notifications, instantly display target content from cache.
+        *   **Offline-First**: Cache already-read content locally to enable viewing even offline.
+    *   **Mandate**: Pages directly linked to growth KPIs (DAU/MAU, session duration) MUST apply Cache Hierarchy (refer to `11_business_finance.md` §1 Cache Hierarchy Standard).
+
+## 9. Dynamic OGP & Social Sharing
+*   **The Dynamic OGP Protocol**:
+    *   **Law**: For pages with high social sharing potential (detail pages, articles, etc.), generate **dynamic OGP images** on-demand by compositing title, ratings, and images to maximize CTR (Click-Through Rate) on SNS sharing.
+    *   **Action**:
+        1.  **Server-Side Generation**: Use Edge Functions or server-side OGP image generation libraries to dynamically generate OGP images at request time.
+        2.  **CDN Cache**: Apply CDN caching (e.g., `s-maxage=86400`) to prevent regeneration on repeated requests to the same page, reducing generation costs.
+        3.  **Fallback**: If dynamic generation fails, fall back to a site-wide default OGP image to avoid empty OGP.
+
+## 10. First-Party Data & Attribution
+*   **The First-Party Data Strategy**:
+    *   **Context**: Third-party cookie deprecation and browser privacy enhancements are reducing tracking accuracy via ad platforms.
+    *   **Law**: Save `utm_source`, `utm_medium`, `utm_campaign` and other parameters from first visit to Cookie or Session, and record them as referrer metadata in the user record upon registration.
+    *   **Attribution Model**: Evaluate **First Touch** (initial contact) rather than Last Click (last touchpoint) to accurately identify the channel most contributing to new user acquisition.
+    *   **Data Ownership**: Accumulate attribution data in your own database rather than relying on ad platform-provided data, building an analytics foundation unaffected by platform changes or policy shifts.
+
+## 11. Product Feedback & Continuous Improvement
+*   **The Feedback Loop Protocol (NPS/CSAT)**:
+    *   **Context**: Quantitative data alone (GA4, etc.) cannot reveal qualitative reasons like "why users churned" or "why they are dissatisfied".
+    *   **Micro-Survey**:
+        *   **Relevance**: Place "Was this information helpful? (Yes/No)" at the end of content (articles, search results, recommendations) to collect content quality signals.
+        *   **NPS (Net Promoter Score)**: Display a modal asking "Would you recommend this service to a friend? (0-10)" to active users after a set period (e.g., 30 days) from service start.
+    *   **Action**: For low-scoring (Detractor: 0-6) users, prompt free-text follow-up asking "What aspects were unsatisfactory?" to obtain product improvement insights (Product-Led Growth).
+    *   **Frequency Control**: Survey display to the same user must be spaced at least **90 days apart** to prevent Survey Fatigue.
+

@@ -43,6 +43,24 @@
     *   **AI Context Meta**: Recommend including `meta` field in all success responses.
     *   **Details**: Include info like `tier` (public, enterprise), `usage` (metered, unlimited), `revalidation` (ttl) to support AI agent inference accuracy improvement and FinOps optimization.
 
+### 3.2. The Transparent Gateway Instrumentation Protocol
+*   **Law**: In Gateway / Service layer `catch` blocks, **directly embedding error objects in string templates for logging** is prohibited. Error `code`, `message`, `details` must be explicitly deconstructed and recorded.
+*   **Action**:
+    1.  **No Generic Messages**: `` `Gateway error: ${error}` `` outputs `[object Object]`, completely obscuring root causes such as RLS violations, insufficient permissions, and type mismatches.
+    2.  **Property Deconstruction**: In `catch` blocks, output structured logs in the format `Logger.error('Gateway operation failed', { message: error?.message, code: error?.code, details: error?.details, hint: error?.hint })`.
+    3.  **HTTP Status Mapping**: Appropriately map database error codes (e.g., `23505` = unique violation, `42501` = insufficient privileges) to HTTP status codes and return semantic error information to clients.
+    4.  **Sensitive Data Guard**: When including request payloads in error logs, PII (personally identifiable information) and credentials must always be masked.
+*   **Rationale**: The gateway layer is the "first line of defense" in application error diagnosis. When `[object Object]` is recorded here, it becomes impossible to isolate whether the cause is database, RLS, or authentication, exponentially increasing debugging time.
+
+### 3.3. The Server Action Graceful Return Protocol
+*   **Law**: When a Server Action (or server-side function called from the client) detects a business error, it must return a **common response type** (e.g., `{ success: false, error: '...', code: '...' }`) instead of `throw new Error()`.
+*   **Action**:
+    1.  **No Raw Throw**: `throw` in Server Actions causes client-side hooks (`useActionState` / `useTransition`, etc.) to process the error as an "unexpected exception," causing component cleanup or retry logic to run amok.
+    2.  **Typed Response Contract**: Unify all Server Action return values with a common type like `ActionResponse<T> = { success: true, data: T } | { success: false, error: string, code?: string }`.
+    3.  **Client Graceful Handling**: On the client side, branch with `if (!result.success)` and provide appropriate UI feedback such as toast notifications or form error displays. Error handling that relies on unhandled `throw` is prohibited.
+    4.  **Observability**: In Server Action `catch` blocks, log the error, then convert it to a user-friendly message and include it in the response. Returning raw technical error messages to the client is prohibited.
+*   **Rationale**: Error propagation via `throw` causes serialization issues and conflicts with React's lifecycle when crossing the client-server boundary (Next.js Server Actions, etc.). A common response type structurally avoids these problems and enables predictable error handling.
+
 ## 4. Performance & Scalability
 *   **Rate Limiting**:
     *   **Distributed Rate Limiting**: Implement accurate rate limiting (e.g., 100 req/min) even in distributed environments using **Token Bucket** algorithm with Redis.
@@ -95,3 +113,22 @@
     *   **Law**: Hardcoding specific Plan IDs in code is prohibited.
     *   **Action**: Manage plan attributes (Enterprise, feature flags) in **Metadata** of payment platforms (Stripe) or DB plan definition tables.
     *   **Success**: This secures flexibility for marketers/executives to change sales strategies immediately without engineering help (no deployment).
+
+### 6.2. The Strict Action Return Type Protocol
+*   **Law**: Server Actions (or server-side functions) must have **strict type definitions** for all return values. Using `as any` casting on the UI side to convert return value types is permanently prohibited.
+*   **Action**:
+    1.  **Typed Response Contract**: All Server Actions must use a common return type (e.g., `ActionResponse<T> = { success: true, data: T } | { success: false, error: string, code?: string }`). Using `void` or `any` as return types is prohibited.
+    2.  **No Client-Side Cast**: Using `result as any` or `result as MyType` on the UI (calling side) to force-fit return value types is prohibited. If types don't match, fix the Server Action's type definitions.
+    3.  **Error Typing**: Express error cases through types. Rather than returning `unknown` from `catch` blocks, enumerate all expected error patterns as Union types.
+    4.  **Serialization Boundary**: Server Action return values pass through React's serialization boundary. Do not include non-serializable values such as `Date`, `Map`, `Set`, or class instances.
+*   **Rationale**: Concealing type mismatches on the UI side with `as any` causes UIsilently breaking with unexpected data when Server Action specs change. Strictly maintaining the type contract between Server Actions and UI is the cornerstone of full-stack type safety.
+
+### 6.3. The Graceful Failure Contract
+*   **Law**: Propagating errors from Server Actions (`'use server'` functions) to the client via `throw` is **prohibited in principle**. All errors must be returned as structured responses in the format `{ success: false, error: string, code?: string }`.
+*   **Action**:
+    1.  **No Throw Propagation**: When a Server Action `throw`s an error, React's Error Boundary fires, potentially destroying the entire page or a large UI segment. Express all business logic errors (validation failures, permission denials, data inconsistencies, etc.) through return values.
+    2.  **Try-Catch Envelope**: The root function of every Server Action must wrap its entire body in `try-catch`, converting internal exceptions to `{ success: false, error: e.message }`. Ensure that even unexpected exceptions return appropriate user feedback.
+    3.  **Typed Error Codes**: Include machine-readable `code` values in error responses (e.g., `VALIDATION_ERROR`, `PERMISSION_DENIED`, `NOT_FOUND`) to enable UI-side branching logic (toast display, redirect, retry, etc.) based on error type.
+    4.  **Logging Before Return**: Always output server-side logs (`Logger.error`) before returning errors as return values. Error handling via return values risks losing observability if logging is neglected.
+*   **Rationale**: `throw` in Server Actions interacts complexly with React's streaming rendering, causing unpredictable side effects such as unintended Error Boundary firing, form state resets, and re-rendering cascades. Structured return value error handling guarantees both UI stability and debugging ease.
+

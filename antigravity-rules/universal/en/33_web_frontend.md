@@ -90,6 +90,14 @@
     *   **Law**: Do not place heavy imports, external module function executions, or DOM side effects (useEffect, etc.) "after" conditional branches or early returns.
     *   **Action**: Logic completely unnecessary depending on conditions should be separated by Next.js `dynamic()` or `Suspense` boundaries, or definitions placed outside (Top-Level) so they are "physically" not executed in the codebase.
 
+*   **The Semicolon Guard (ASI Safety)**:
+    *   **Law**: When the next line starts with a parenthesis (`(` or `[`) after a side-effect execution line, you MUST explicitly add a semicolon `;`. Physically prevent "stealth bugs" caused by ASI (Automatic Semicolon Insertion) failure.
+    *   **Action**: Enable ESLint's `no-unexpected-multiline` rule and auto-detect in CI.
+
+*   **The Component Colocation Protocol (Maintaining Proper Granularity)**:
+    *   **Law**: "Sub-components," "type definitions," and "constants" used only by a specific component should be written in the **same file (Co-location)** as a principle. Excessive file splitting increases cognitive load.
+    *   **Split Threshold**: Splitting sub-components into separate files is permitted only when the file exceeds **300 lines**. When splitting, create a directory and group related files together.
+
 ### 2.3. Headless UI Architecture (Web Only Prohibition)
 *   **Rule**: UI components must focus only on "Displaying Data" and "Firing Events". Business logic is prohibited (Dumb UI).
 *   **Prohibition**: Fetching within components or state management dependent on specific page DOM structure (Web Only Design) is strictly prohibited as it hinders future Native porting.
@@ -140,6 +148,15 @@
         2.  **DERIVED STATE**: Place variable calculations and state judgments after Hooks.
         3.  **CONDITIONAL RETURNS**: Place Early Returns (error handling, loading) AFTER derived state.
 
+### 2.7.1. The Static Component Persistence Protocol (Module Scope Mandate)
+*   **Law**: Defining components inside another component's render function is prohibited. Each re-render creates a new component type, causing React to discard the DOM tree — resulting in **input focus loss**, **state resets**, and catastrophic performance degradation.
+*   **Action**: Sub-components and wrapper components MUST be defined at **Module Scope (file top-level)**. When values need to be passed, use explicit Props.
+*   **Anti-Pattern**: `const MyComponent = () => { const SubComponent = () => <div />; return <SubComponent />; }` — This is a **Technical Felony**.
+
+### 2.7.2. The Route Conflict Ban (Zero Duplicate Route)
+*   **Law**: When refactoring pages (directory moves), the **source directory MUST be physically deleted**. Stale `page.tsx` files cause the framework (Next.js, etc.) to detect route conflicts, resulting in **build errors**.
+*   **Action**: After file moves, verify no stale files remain using `find` or `git status`.
+
 ### 2.8. The Hydration Stability Protocol (Zero Mismatch)
 *   **Law 1 (Dynamic Content)**: Directly embedding dynamic values like `new Date()` or `Math.random()` in JSX is prohibited. These cause SSR/CSR value mismatch, triggering Hydration Errors.
 *   **Law 2 (Identifier Match)**: `id` and `htmlFor` MUST have unique and immutable values, or use React's `useId` to physically guarantee matching.
@@ -150,6 +167,9 @@
 *   **Library Selection**:
     *   **React Hook Form**: Base on uncontrolled components to minimize re-renders.
     *   **Zod**: Practice Schema-Driven Development. Separate validation logic from UI and define it as Zod schemas.
+*   **The Atomic Tabbed Form Protocol (God Component Resolution)**:
+    *   **Law**: Forms with **5 or more** related items, or files exceeding **500 lines**, MUST apply **Tabbed Architecture** and be split into child components. A single giant form component (God Component) destroys maintainability, testability, and performance.
+    *   **Action**: Split child components should use `useFormContext` to access root form state. Initialization responsibility (`defaultValues`) remains with the root component.
 *   **Validation**:
     *   **The External Link Protocol (Context Aware)**:
         *   **Law**: **Recommend** `target="_blank"` for external links to avoid interrupting user workflow.
@@ -170,8 +190,11 @@
         *   **Law**: MUST set `inputMode` (`numeric`, `tel`, `email`) for numeric fields (Phone, Zip, Credit Card) to auto-display optimal keyboard on mobile.
         *   **Outcome**: Remove burden of manual keyboard switching.
     *   **The Input Normalization Protocol (NFKC)**:
-        *   **Law**: When user inputs full-width numbers (１２３) or full-width spaces, do NOT reject with validation error, but **auto-convert to half-width (Normalize) on `onChange` or `onBlur`** and accept it.
+        *   **Law**: When users enter full-width numbers (１２３) or full-width spaces, accept them by **auto-converting to half-width via `onChange` or `onBlur` (Normalize)** instead of rejecting with validation errors.
         *   **Implementation**: Use `String.normalize('NFKC')` to adopt "Omotenashi" design that doesn't stress users.
+    *   **The IME Composition Guard (CJK Input Safety)**:
+        *   **Law**: IME input for CJK languages (Japanese, Chinese, Korean) may fire `onChange` events before composition is finalized, causing search request storms or input value corruption.
+        *   **Action**: For real-time search, autocomplete, and other immediate-response inputs, monitor `compositionstart` / `compositionend` events and suppress action firing during composition.
 
 ### 3.3. Auto-Save & Data Persistence Protocol
 *   **Mandatory Scope**: **Auto-Save** functionality is mandatory for articles, settings, and long-text forms in the Admin Panel (Data Loss Zero Tolerance).
@@ -200,6 +223,9 @@
 *   **Server Actions Protocol**:
     *   **The 'use server' Mandate**:
         *   **Law**: Files defining Server Actions MUST describe `'use server'` at the very first line of the file. Declare basically per file units, not per function, to prevent Server/Client boundary leaks.
+*   **Hard Session Refresh Protocol (Cookie Sync)**:
+    *   **Context**: Even after updating session Cookies via Server Actions, SPA transitions alone may not immediately reflect changes in Middleware or Server Components.
+    *   **Mandate**: On authentication state or critical permission changes (Login/Logout, etc.), use `window.location.reload()` for a hard refresh to ensure the server receives the latest Cookie state. A momentary white screen is acceptable since permission mismatch errors cause worse UX damage.
 
 ## 5. Compatibility & Error Handling
 *   **Browser Compatibility**:
@@ -208,6 +234,9 @@
 *   **Error Handling**:
     *   **Error Boundaries**: Use React's `ErrorBoundary` to prevent component-level crashes from taking down the entire app.
     *   **Graceful Degradation**: Design so minimal content is displayed even if JavaScript is disabled or errors occur.
+    *   **Offline Defense Protocol (Network Resilience)**:
+        *   **Component-Level Recovery**: Before the global Error Boundary fires, display a skeleton or error message with a "Reload" button at the component level where data fetching failed.
+        *   **Offline Guard**: Monitor `navigator.onLine` and disable form submission buttons during offline state to prevent data loss.
     *   **0 Warnings**: Console Warnings are a sign of technical debt. Resolve all during development; release is not allowed unless **Warning count is 0**.
 
 ## 6. Performance & SEO - "Core Web Vitals"
@@ -244,7 +273,14 @@
     *   **Technical SEO**:
         *   **SSR**: `<h1>`, metadata, and main content must be Server-Side Rendered.
         *   **Single H1**: One `<h1>` per page. H1 represents the "Subject" of the page, not the logo.
+        *   **The Semantic HTML Landmark Protocol**:
+            *   **Law**: AI crawlers parse HTML structure. Use landmark elements such as `<article>`, `<section>`, `<header>`, `<nav>`, `<aside>` appropriately — not just `<div>` — to clarify semantic boundaries of content.
+            *   **Action**: Strictly maintain heading tag (`<h1>`–`<h6>`) hierarchy. Placing `<h2>` after `<h3>` for design reasons — **hierarchy violations are prohibited**.
         *   **IndexNow**: Notify search engines immediately via **IndexNow API** upon content updates.
+    *   **Ghost Content Protocol (Time-Gated SEO)**:
+        *   **Law**: Scheduled content (`published_at > NOW()`) MUST behave as "non-existent" to search engines.
+        *   **404 Mock**: Return the same UI and status code as a normal 404 for general user access, preventing existence inference.
+        *   **NoIndex**: Force-inject `<meta name="robots" content="noindex, nofollow" />` on unpublished pages.
 *   **Marketing Engineering**:
     *   **Dynamic Assets**: Use `@vercel/og` to generate OGP images on demand and cache via Cloudflare CDN (`s-maxage=86400`).
     *   **Tracking Infrastructure**:
@@ -290,6 +326,12 @@
     *   **Ad Labeling**: Automatically append "PR" or "Sponsored" labels to ad slots and sponsored content in a recognizable position. Stealth marketing without labels is blocked at the system level.
 *   **Performance (Core Web Vitals)**:
     *   **Zero CLS (Layout Shift Guard)**: Reduce Layout Shift caused by ad banners to **0**. Always reserve display area using `min-height` or `aspect-ratio` in CSS (Ban on Late Loading Push).
+*   **The Ad Category Exclusion Protocol (Prohibited Ad Categories)**:
+    *   **Context**: Ads inappropriate for the service's brand image damage LTV and erode user trust.
+    *   **Law**: **Prohibit at the system level** ad categories inappropriate for the service's brand, such as gambling, adult content, violence, and political advertising.
+    *   **Action**:
+        1.  **External Ads (Google AdSense, etc.)**: Apply category block settings in the ad platform's management console and periodically audit the configuration.
+        2.  **Self-Served Ads**: Mandate category classification during ad submission and reject ads matching prohibited categories via validation.
 
 ## 12. Prohibited Anti-Patterns
 
@@ -337,3 +379,271 @@
 *   **CSP Worker Integrity (blob: permission)**:
     *   **Context**: `heic2any` or high-performance image compression libraries generate internal `Web Worker` and use `blob:` URL. This will hang if blocked.
     *   **Action**: MUST explicitly include `worker-src 'self' blob:;` in Middleware CSP settings to guarantee availability of image processing processes.
+
+### 14.1. The Form DefaultValues Completeness Mandate
+*   **Law**: When using `useForm` with React Hook Form (or similar form libraries), `defaultValues` MUST **explicitly set all fields** used in the form.
+*   **Reason**: If a field specified by `name` in `Controller` or `useController` does not exist in `defaultValues`, the UI renders empty even when DB data is returned correctly ("DB Success but UI Empty" problem).
+*   **Action**:
+    1.  **Exhaustive Default**: List all form fields in `defaultValues`. When adding new fields, **always add them to `defaultValues`** as well.
+    2.  **Checklist**: When adding fields, verify all of: Schema definition + `defaultValues` + Controller/register + `setValue` call sites + `useFieldArray` usage.
+    3.  **Zod Sync**: Systematically compare and verify that all fields defined in the Zod Schema are also included in `defaultValues`.
+*   **Diagnostic**: "DB write success + DB read success" but UI is empty → **Suspect `defaultValues` omission**.
+
+### 14.2. The Production Build Verification Protocol
+*   **Law**: The development server (`npm run dev`) working does NOT mean the code is correct. **Until `npm run build` passes with Exit 0, that code "does not exist."**
+*   **Action**:
+    1.  **Local Build**: Always run `npm run build` locally before committing and confirm success.
+    2.  **SSG Awareness**: Importing dynamic APIs like `cookies()` in Static Site Generation (SSG) pages works in development but causes "Dynamic server usage" errors in production builds. Isolate dynamic dependencies.
+    3.  **Phantom File**: If build errors indicate "non-existent files," use `grep` to locate actual files hidden by re-exports or dynamic imports.
+*   **Rationale**: Development servers conceal type errors and import errors through Hot Module Replacement. Only the build reveals the truth.
+
+### 14.3. The Non-Blocking Edge Processing Protocol
+*   **Law**: In Edge Middleware and API Routes, blocking DB writes unrelated to the main response (analytics logs, usage metering) with `await` causes response delays for users and is prohibited.
+*   **Action**:
+    1.  **waitUntil**: Side effects (logging, metering, notifications) MUST be backgrounded using `event.waitUntil()` or equivalent mechanisms.
+    2.  **Fire-and-Forget**: Unless there is a justified reason, fire non-response-affecting operations asynchronously without `await`.
+    3.  **Error Isolation**: Isolate background processing errors with try-catch to prevent them from affecting the main response.
+*   **Outcome**: Minimize user-perceived response time (TTFB) while completing ancillary processing in the background.
+
+### 14.4. The LCP & Lazy Loading Performance Protocol
+*   **Law**: Apply first-view (Above the Fold) priority rendering for critical elements and lazy loading for everything else across all pages.
+*   **Action**:
+    1.  **LCP Priority**: Assign `priority` attribute and `fetchPriority="high"` to the most critical elements within the viewport (hero images, main thumbnails, etc.).
+    2.  **CLS Prevention**: Mandate fixed `aspect-ratio` or skeleton placeholders for images and videos, targeting zero Cumulative Layout Shift (CLS).
+    3.  **Lazy Everything Else**: All images, videos, and heavy components (maps, social embeds, etc.) outside the first view MUST use `loading="lazy"` or `next/dynamic` for deferred loading.
+    4.  **Heavy Library Decoupling**: Libraries exceeding 50KB (rich editors, sliders, etc.) MUST be loaded via `dynamic import` to minimize initial bundle size.
+    5.  **Incremental Loading**: Limit initial list loading to 10-12 items, with "Load More" or incremental scroll for additional retrieval.
+
+### 14.5. The Strict Action Return Type Mandate
+*   **Law**: All Server Actions (or API call functions) MUST define strict return types (`ActionResult` format, etc.). `Promise<any>` or untyped return values are prohibited.
+*   **Action**:
+    1.  **Unified Return Shape**: Unify return values into a consistent structure such as `{ success: boolean; data?: T; error?: string; errorDetails?: Record<string, string> }`.
+    2.  **All Paths Covered**: Guarantee that all return paths within an Action return the same type structure. Inconsistencies such as missing the `success` property in some paths are a direct cause of `undefined` reference errors on the UI side.
+    3.  **No UI-Side Casting**: Casting like `(result as any).error` on the UI side is prohibited. If types don't match, fix the Action's return type.
+*   **Rationale**: Type mismatches between Server Actions and UI fundamentally destroy TypeScript's type safety. Strict return types are a "contract by type" between Backend and Frontend.
+
+### 14.6. The Reactive Subscription Safety Protocol
+*   **Law**: Directly including return values of reactive observers (`watch()`, `subscribe()`, `onSnapshot()`, etc.) in `useEffect` dependency arrays is prohibited. These APIs generate new object references on every call, causing infinite re-render loops when included in dependency arrays.
+*   **Action**:
+    1.  **Callback Subscription Pattern**: Instead of tracking observation results in `useEffect` dependency arrays, use **callback-based subscriptions**. Start subscriptions inside `useEffect` and call `unsubscribe()` in the cleanup function.
+    2.  **Stable Dependencies Only**: Include only stable references (the form object itself, primitive values, etc.) in `useEffect` dependency arrays.
+    3.  **Timer Sanitization (useRef Pattern)**: When using timers (`setTimeout` / `setInterval`) within subscription callbacks, always manage timer IDs with `useRef` and call `clearTimeout` at the beginning of the callback to achieve genuine debouncing. Uncleaned timers are a direct cause of massive async process stacking and memory leaks.
+*   **Rationale**: Many reactive libraries internally generate new objects to notify value changes. Connecting these "unstable references" to React's dependency tracking mechanism structurally completes an infinite loop: "same value but different reference" → "re-execution" → "state update" → "re-render" → "new reference."
+*   **Anti-Pattern**: `const values = form.watch(); useEffect(() => { save(values); }, [values])` — This generates a new reference on every render and causes an infinite loop.
+
+### 14.7. The One-Shot Initialization Guard Protocol
+*   **Law**: Correction and reordering logic for initial values of dynamic arrays (`useFieldArray`, dynamic lists, etc.) MUST be guaranteed to execute only once using a **`useRef`-based flag**. Code that modifies a reactive array while including that array in `useEffect`'s dependency array generates infinite loops.
+*   **Action**:
+    1.  **Ref-Based Init Flag**: Use `const isInitialized = useRef(false)` to track whether initialization is complete. Execute correction logic only when `isInitialized.current` is `false`, then set it to `true` upon completion.
+    2.  **Empty Dependency Array**: The `useEffect` for array correction should have an empty dependency array `[]` or include only values that do not physically change (IDs, etc.). Including the `fields` array itself in dependencies is strictly prohibited.
+    3.  **DTO-Form Completeness**: When forms are split across tabs or sub-components, guarantee that all field names used in child components exist in the root's `defaultValues`. Fields not present in `defaultValues` are initialized as `undefined`, causing data loss on save.
+*   **Rationale**: Array operations like `prepend` / `move` / `append` update the array's reference, which triggers `useEffect` re-execution. When the re-executed `useEffect` performs further array operations, a `Maximum update depth exceeded` error crashes the browser.
+*   **Anti-Pattern**: `useEffect(() => { if (fields[0]?.type !== 'header') prepend(headerItem); }, [fields])` — Watching `fields` while calling `prepend` guarantees an infinite loop.
+
+### 14.8. The Validation Error Transparency Mandate
+*   **Law**: Form submit handlers (`handleSubmit`, etc.) MUST include **not only success callbacks, but also validation failure callbacks (`onInvalid`)**. The majority of "button does nothing when pressed" cases are caused by silent validation failures.
+*   **Action**:
+    1.  **Always Provide onInvalid**: Log error contents (`console.error` / `Logger.warn`) on validation failure, and display toast notifications to the user when possible.
+    2.  **Flexible JSONB Schemas**: Validation schemas for dynamically extended JSONB fields (`features`, `settings`, etc.) should not be overly strict and must stay in sync with the actual UI structure at all times.
+    3.  **Debug Visibility**: In development environments, inline display of validation error details (field names, error messages) on screen is recommended.
+*   **Rationale**: Form library `handleSubmit` silently skips the `onSubmit` handler when validation errors exist. Without `onInvalid` configured, error details are not communicated to either developers or users, leading to the misconception that "the button is broken."
+*   **Anti-Pattern**: `form.handleSubmit(onSubmit)` — Since `onInvalid` is omitted, validation failures are silently ignored.
+
+### 14.9. The SSR Stream Resilience Protocol
+*   **Law**: When data fetching fails during Server-Side Rendering (SSR/RSC) streaming, the browser displays generic network errors (404, connection reset, etc.), completely concealing the root cause. Always provide defensive guards for data access within streaming components.
+*   **Action**:
+    1.  **Strict Null Guards**: After data fetching, always place guards like `if (!data) return notFound()` before accessing properties. Property access on `null` crashes the entire RSC stream.
+    2.  **Server Terminal as Primary Source**: When debugging SSR streaming errors, use **server terminal output as the primary diagnostic source** instead of the browser console. Browser-side errors are intentionally sanitized and lack specificity.
+    3.  **Gateway Instrumentation**: In data access layer (Gateway) `catch` blocks, explicitly extract and log `code` and `message` from error objects. Outputting `[object Object]` as-is is prohibited.
+*   **Rationale**: SSR streaming crashes during HTML generation on the server, so unlike traditional SSR, only a generic "stream was interrupted" error reaches the browser. This makes identifying root causes (missing data, insufficient permissions, schema mismatches, etc.) extremely difficult.
+
+### 14.10. The Non-Blocking Edge Middleware Protocol
+*   **Law**: In Edge Middleware (or request pre-processing layers), **non-critical DB writes** such as analytics logging, usage metering, and access statistics updates MUST be made asynchronous using `event.waitUntil()`. Blocking with `await` causes response delay for all requests.
+*   **Action**:
+    1.  **Classification**: Classify DB operations within Middleware into "Critical (auth checks, etc.)" and "Non-Critical (log recording, etc.)."
+    2.  **waitUntil for Non-Critical**: Execute Non-Critical operations in the background via `event.waitUntil(promise)` and return the response immediately.
+    3.  **Error Isolation**: Provide independent error handling with `try-catch` within `waitUntil` to ensure failures don't affect the main response.
+*   **Rationale**: Edge Middleware sits on the hot path of all requests, so delays here directly impact overall application performance. Asynchronization prevents log recording failures from blocking user page rendering.
+
+### 14.11. The DnD Overlay Input Isolation Protocol
+*   **Law**: Form input elements such as `<input>`, `<select>`, and `<textarea>` MUST NOT be rendered as-is within DragOverlay (the ghost element displayed during drag) of Drag & Drop (DnD) libraries.
+*   **Action**:
+    1.  **Render-Only Overlay**: Components within DragOverlay MUST be limited to **display-only** views (text display, icons, etc.).
+    2.  **Name Collision Prevention**: When form input elements are cloned into the Overlay, `<input>` elements with identical `name` attributes become duplicated in the DOM, destroying form library data integrity.
+    3.  **Conditional Rendering**: In the DragOverlay rendering path, use flags (`isOverlay` props, etc.) to suppress form element rendering.
+*   **Rationale**: DnD DragOverlay adds a "visual copy" of the dragged item to the DOM. When this copy contains form elements, form libraries (React Hook Form, etc.) encounter two input fields with the same name in the DOM, causing duplicate value registration and validation malfunctions.
+
+### 14.12. The Form DefaultValues Completeness Mandate
+*   **Law**: When using form libraries such as React Hook Form, `defaultValues` must explicitly set **all fields** the form uses. When adding or modifying fields, **simultaneous three-point updates of Schema (validation definition) + defaultValues (initial values) + Controller/Input (UI rendering)** are mandatory.
+*   **Action**:
+    1.  **Exhaustive DefaultValues**: Enumerate all field initial values in `useForm({ defaultValues: { ... } })`. Omitted fields become `undefined`, causing unexpected behavior in Controlled Components.
+    2.  **Three-Point Sync**: When adding a field, update the following three locations simultaneously:
+        *   **Schema**: Zod / Yup validation schema
+        *   **DefaultValues**: The `defaultValues` object of `useForm`
+        *   **UI**: Form input components via `Controller` / `register`
+    3.  **Type-Safe DefaultValues**: The type of `defaultValues` must match the type auto-inferred from the Schema (e.g., `z.infer<typeof schema>`). Defining types manually to create divergence is prohibited.
+*   **Rationale**: Incomplete `defaultValues` is the leading cause of silent bugs where "the form looks normal when opened, but specific fields don't save." Enforcing three-point synchronization structurally prevents this class of bugs.
+
+### 14.13. The Deep Type Recursion Break Protocol
+*   **Law**: For type recursion errors caused by excessively deep TypeScript type generics (`Type instantiation is excessively deep`), escaping to `any` type is prohibited. Use techniques that limit recursion depth while maintaining type safety.
+*   **Action**:
+    1.  **Bounded Generic**: For overly deep generics, use "loose but safe types" such as `Record<string, unknown>` as intermediate boundaries, and perform type guards or explicit casts within the boundary.
+    2.  **No `any` Escape**: Type bypass to `any` is a complete abandonment of type safety. Use `unknown` instead and safely narrow types through Type Guard functions.
+    3.  **Library Type Wrapper**: When third-party library type definitions are too deep, define wrapper types to limit generic depth.
+    4.  **Diagnostic**: When errors occur, use the TypeScript Compiler's `--generateTrace` option to identify which type definition is causing the recursion.
+*   **Rationale**: Escaping to `any` only "silences the compiler" and completely destroys runtime type safety. The `unknown` + type guard pattern ensures safety at both compile time and runtime.
+
+### 14.14. The Strict DTO Boundary Protocol
+*   **Law**: When converting "loosely typed" data from external data sources (databases, external APIs, file systems, etc.) to "strictly typed" application-internal types, **the input boundary must pass through the `unknown` type** and be safely converted through type guards or validation functions.
+*   **Action**:
+    1.  **Unknown First**: JSON data retrieved from external sources should first be received as `unknown` type and converted to application types through validation (Zod `parse`, etc.).
+    2.  **No Direct Cast**: Direct casting with `as TargetType` is prohibited. This assigns types without verifying that the data structure matches expectations, and is a direct cause of runtime errors.
+    3.  **Mapper Function**: DB record → DTO conversion must be performed through dedicated mapper functions (e.g., `toStoreDto(row: DatabaseRow): StoreDto`), consolidating conversion logic in a single location.
+    4.  **Nullable Safety**: Properly handle `null | undefined` from external data, and in application types either provide default values or explicitly define as optional (`?`).
+*   **Rationale**: JSON columns in databases and external API responses always have the potential for divergence between type definitions and actual data structures. Passing through `unknown` achieves defensive code that does not rely on the assumption "the type should be correct."
+
+### 14.15. The Watch Subscription Safety Protocol
+*   **Law**: Including the return value of React Hook Form's `form.watch()` or the `form` object itself in `useEffect` dependency arrays is **prohibited**. These produce new references on every render, directly causing infinite loops.
+*   **Action**:
+    1.  **No Watch in Deps**: The pattern `const values = form.watch(); useEffect(() => { ... }, [values])` is prohibited. The `watch()` return value creates a new object reference on every render, triggering `useEffect` each time.
+    2.  **Subscription Pattern**: To monitor form value changes, use the callback form within `useEffect`: `form.watch((value, { name }) => { ... })`, and call the returned unsubscribe function in the cleanup.
+    3.  **Targeted Watch**: When monitoring specific fields only, use `form.watch('fieldName')` and include only individual primitive values in the dependency array.
+    4.  **Form Object Stability**: Do not include the `form` object itself in `useEffect` dependency arrays either. If the instance is regenerated due to `useForm` option changes, the same infinite loop will occur.
+*   **Rationale**: Including object references in `useEffect` dependency arrays causes React's shallow comparison (`Object.is`) to determine "changed" on every render, executing the Effect infinitely. This is an anti-pattern common to all "hooks that return objects," not limited to React Hook Form.
+
+### 14.16. The handleSubmit Validation Visibility Mandate
+*   **Law**: When using `form.handleSubmit(onSuccess)`, **the second argument `onInvalid` handler must always be specified** to make validation failure error details visible to developers and users.
+*   **Action**:
+    1.  **Mandatory onInvalid**: Always implement the validation error handler in the form `form.handleSubmit(onSuccess, onInvalid)`. When `onInvalid` is unspecified, validation errors result in a silent bug where "nothing happens."
+    2.  **Error Logging**: Output `console.error('Validation Errors:', errors)` within the `onInvalid` handler to immediately identify which fields failed validation.
+    3.  **User Feedback**: For large-scale forms like admin panels, display a toast notification saying "Validation errors exist" and implement scrolling to or highlighting the fields with errors.
+    4.  **Schema Sync**: When `handleSubmit` "silently" doesn't work, suspect a structural mismatch between the Zod schema and form data, particularly checking schema definitions for JSONB fields or dynamically added fields.
+*   **Rationale**: In large forms (multiple tabs, dozens of fields), validation errors from invisible or recently added fields frequently cause "button doesn't work" bugs. Not specifying `onInvalid` abandons the most fundamental debugging clue.
+
+### 14.17. The useFieldArray Initialization Guard
+*   **Law**: Including `useFieldArray`'s `fields` in `useEffect` dependency arrays and performing field operations (`append`, `prepend`, `move`, `remove`, etc.) within that `useEffect` is **prohibited**.
+*   **Action**:
+    1.  **No Fields in Deps**: The pattern `useEffect(() => { prepend(defaultItem) }, [fields])` is prohibited. Field operations update the `fields` array, which re-triggers the `useEffect`, causing a `Maximum update depth exceeded` infinite loop.
+    2.  **Ref-Based Guard**: Control field initialization (adding default items, correcting order, etc.) with a one-time flag using `useRef`. Execute operations only when `isInitialized.current` is `false`, and set it to `true` upon completion.
+    3.  **Mount-Only Effect**: Use an empty dependency array `[]` for the initialization logic's `useEffect` so it executes only once on mount.
+    4.  **Cascading Awareness**: Be aware that this infinite loop monopolizes the browser's main thread, completely blocking save buttons and other asynchronous processes (authentication flows, etc.).
+*   **Rationale**: `useFieldArray` is a powerful hook for managing array data in forms, but interfering with its lifecycle via `useEffect` collides with React's rendering cycle. Particularly, "structure correction" (inserting required items at the beginning, etc.) must guarantee one-time execution during initialization.
+
+### 14.18. The Stacking Context Sovereignty
+*   **Law**: **Structurally prevent conflicts** between `z-index` of sticky headers, modals, overlays, and `z-index` within normal page content. As a rule, do not assign explicit `z-index` to normal content.
+*   **Action**:
+    1.  **Layer Hierarchy**: Define a project-wide `z-index` hierarchy (e.g., content = auto/0, sticky header = 10, dropdown = 20, modal = 30, toast = 40).
+    2.  **No Casual Z-Index**: Prohibit in principle setting `z-index` on elements within normal content (cards, icons, badges, etc.). `z-index` combined with `position: relative` can inadvertently create stacking contexts, causing elements to "punch through" sticky headers.
+    3.  **Context Isolation**: When a stacking context is needed within the content area, set `isolation: isolate` on the parent element to prevent child `z-index` from polluting the global hierarchy.
+    4.  **Scroll Awareness**: When elements with `position: absolute` and `z-index` exist within scrollable content, test that they do not display above the sticky header when scrolling.
+*   **Rationale**: `z-index` conflicts cause visually prominent bugs where "certain elements punch through the header when scrolling," but identifying the root cause is difficult. Especially in component-based development, each component independently setting `z-index` easily destroys the global hierarchy.
+
+### 14.19. The Subscription Timer Sanitization Protocol
+*   **Law**: When using `setTimeout` / `setInterval` **inside external event listeners** such as `form.watch()` subscription callbacks or `WebSocket` message handlers, timer IDs must be managed via `useRef`, and the previous timer must always be cleared at the beginning of the callback.
+*   **Action**:
+    1.  **Ref-Based Timer Management**: Hold the timer ID with `const timerRef = useRef<NodeJS.Timeout | null>(null)` and execute `if (timerRef.current) clearTimeout(timerRef.current)` within the callback before setting a new timer.
+    2.  **No Closure Timer**: Managing timers with local variables (`let timer`) is prohibited. Subscription callbacks are invoked multiple times across closures, so local variables lose the reference to the previous timer, making cleanup impossible.
+    3.  **Cleanup on Unmount**: Execute `clearTimeout(timerRef.current)` simultaneously with subscription unsubscription in the `useEffect` cleanup function to ensure timers are reliably destroyed on component unmount.
+    4.  **Debounce Awareness**: For debounce processing like auto-save, this pattern is the only safe implementation. The `useCallback` + `setTimeout` combination causes timer leaks when the dependency array changes.
+*   **Rationale**: Timers within subscriptions (`form.watch(callback)`, etc.) are outside React's normal lifecycle management, so `useEffect` cleanup alone cannot prevent leaks. Explicit timer management via `useRef` is the only pattern that structurally avoids both race conditions and memory leaks.
+
+### 14.20. The Resilient RSC Data Access Protocol
+*   **Law**: In React Server Components (RSC) or streaming SSR, when data fetch results may be `null` / `undefined`, **null guards must be implemented before property access**. Unguarded null access crashes the RSC stream.
+*   **Action**:
+    1.  **Early Return Guard**: Perform data fetching at the beginning of Server Components, and if the result is `null`, immediately return `notFound()` or an appropriate fallback UI. Passing `null` as props to child components is prohibited.
+    2.  **Non-Null Assertion Ban**: Using `data!.property` (Non-null Assertion) on data fetch results is prohibited. While it appears safe at the type system level, runtime null penetrates the type system and crashes the stream.
+    3.  **Error Boundary Integration**: RSC errors may not be caught by regular React Error Boundaries. Properly place `error.tsx` / `not-found.tsx` to guarantee user experience during streaming errors.
+    4.  **Opaque Error Awareness**: RSC stream crashes appear in the browser console not as `TypeError` but as opaque network errors (`Failed to fetch`, etc.), making root cause identification difficult. Use server logs as the primary information source.
+*   **Rationale**: In traditional client-side rendering, `null` access crashes only the affected component, but in RSC, the entire stream is interrupted, resulting in a white screen or network error for the entire page. Understanding this difference in blast radius and practicing defensive coding is essential.
+
+### 14.21. The Dynamic Library Decoupling Protocol
+*   **Law**: Heavy libraries exceeding 50KB (rich text editors, chart libraries, map SDKs, syntax highlighters, etc.) are prohibited from being included in the initial bundle. They must always be lazy-loaded via **dynamic imports** (`next/dynamic`, `React.lazy`, `import()`, etc.).
+*   **Action**:
+    1.  **Bundle Analysis**: Regularly monitor each chunk's size using `next build` output or tools like `@next/bundle-analyzer`. Client-side chunks exceeding 50KB are optimization candidates.
+    2.  **Dynamic Import with SSR Control**: For client-only libraries that don't need SSR, use `dynamic(() => import('...'), { ssr: false })` to avoid server-side bundling and evaluation.
+    3.  **Loading Skeleton**: Dynamic import fallbacks should display **Skeleton UI** that mimics the content shape, not full-size spinners, to minimize perceived wait time.
+    4.  **Preload Hint**: For libraries that will definitely be needed upon user interaction, use `prefetch` / `preload` hints to begin background loading before the user acts.
+*   **Rationale**: Initial bundle size bloat directly degrades TTI (Time to Interactive) and lowers Core Web Vitals scores. Lazy loading of heavy libraries is an essential design pattern that protects both initial display performance and user experience.
+
+### 14.22. The Form DefaultValues Completeness Mandate
+*   **Law**: All fields used within a form MUST be **explicitly set in `useForm`'s `defaultValues`**. When managing form state with individual `useState` hooks, all properties of the corresponding DTO must be guaranteed to exist in all three locations: "State initialization," "UI input," and "Submit payload."
+*   **Action**:
+    1.  **Exhaustive DefaultValues**: Ensure every field specified via `Controller` or `register` `name` exists in `defaultValues`. Fields not included in `defaultValues` will have `undefined` as their initial value, causing the UI to render as blank even when data is returned from the DB (Ghost Mapping).
+    2.  **Tab/Sub-Component Synchronization**: When forms are split into tabs or sub-components, scan all `name` specifications within child components and synchronize them with the root `defaultValues`. While `useFormContext` delegates data read/write, initialization responsibility remains with the root component.
+    3.  **DTO-Form Naming Alignment**: DTO property names, Zod validation schema key names, and form `name` attributes must be **100% identical**. Renaming across layers (e.g., `dog_description` → `description_dog`) causes data mapping inconsistencies and is prohibited.
+    4.  **Schema Addition Protocol**: When adding fields to DTOs or Zod schemas, always simultaneously add them to `defaultValues`. This synchronization gap is the most difficult-to-discover bug causing "saved but not reflected" issues.
+    5.  **Vertical Synchronization Audit**: When suspecting field omissions, vertically verify across **DB Schema → DTO → Gateway → Validation → Form** layers. If a "Phantom Field" exists only in UI but not in the DB, remove it from the UI.
+*   **Rationale**: Missing `defaultValues` causes two directions of critical bugs: "data is correctly saved in DB but not displayed in UI" and "existing data overwritten with empty values on save (Ghost Write)." In large multi-tab forms especially, field synchronization gaps when adding tabs are frequent, making a structural checking process indispensable.
+
+### 14.23. The Conditional Security Bypass Ban
+*   **Law**: In action layers that invoke privileged clients (Service Role, etc.), **baseline authentication and authorization checks must never be omitted** regardless of data status (draft/published, etc.) or importance. While varying authentication intensity by status (presence/absence of OTP, etc.) is acceptable, identity verification of "who is executing" must be unified and enforced across all code paths.
+*   **Action**:
+    1.  **Unconditional Base Guard**: In all code paths performing privileged operations within Server Actions, execute baseline authentication checks such as `ensureAdminAction()` **outside of conditional branches** (as the first line). Patterns like `if (status === 'public') { ensureAuth() }` that conditionally apply guards are prohibited.
+    2.  **Defense in Depth**: Additional verification based on status (OTP, Turnstile, etc.) must be implemented as **layers on top of** the baseline check. Additional verification must never substitute for the baseline.
+    3.  **Branch Audit**: Regularly audit all branches of Server Actions with conditional logic (`if/else`, `switch`) to ensure authentication checks are not missing from any branch.
+    4.  **Error Symmetry**: When authentication guards throw exceptions, **simultaneously establish** a mechanism on the client side to properly catch and display these errors in the UI. Hardening only the server side while leaving client-side error handling unprepared can cause infinite loops or freezes from authentication errors.
+*   **Rationale**: Privileged clients (`service_role`) bypass RLS, making application-layer authentication checks the last line of defense for data protection. Omitting authentication for specific statuses creates a "privilege escalation vulnerability" where authenticated users can execute privileged operations without admin rights through that code path.
+
+### 14.24. The Validation Visibility Mandate
+*   **Law**: Form submission functions (`handleSubmit`, etc.) must have not only a handler for validation success but also **a handler for validation failure (`onInvalid`) that must always be set**, making error content visible through logs or UI.
+*   **Action**:
+    1.  **Always Set onInvalid**: Do not omit the second argument of `form.handleSubmit(onValid, onInvalid)`. When omitted, validation errors result in users perceiving only "nothing happens when I click the button," making root cause identification extremely difficult.
+    2.  **Error Logging**: Within the `onInvalid` handler, output error objects to the console or structured logs so that which field's validation rule failed can be immediately identified in development environments.
+    3.  **User Notification**: In production, inform users via toast notifications that "there are issues with input content," and provide UX such as scrolling to the field with errors.
+    4.  **Schema-Form Sync Audit**: When validation errors occur frequently, check for inconsistencies between Zod schema constraints and the form's data structure (especially JSONB fields and nested objects). Overly strict schemas (e.g., `z.record(z.string(), z.boolean())`) frequently fail to match the actual form data structure.
+*   **Rationale**: In large admin panel forms, "button not working" bugs caused by validation errors in invisible fields or recently added fields are frequent. Missing `onInvalid` handlers transform what should be a seconds-long validation error resolution into hours of debugging.
+
+### 14.25. The Recursive Field Initialization Guard
+*   **Law**: Including the `fields` object from `useFieldArray` in a `useEffect` dependency array and calling field manipulation methods (`prepend`, `append`, `move`, `remove`, etc.) within it is **prohibited**. Structural corrections to field arrays (e.g., prepending standard items) must be executed exactly once using a `useRef`-based one-time initialization guard.
+*   **Action**:
+    1.  **Fields Dependency Ban**: Do not include `fields` (the return value of `useFieldArray`) in `useEffect` dependency arrays. Since `fields` returns a new reference with every field operation, it triggers an infinite loop of operation → reference update → re-execution → operation (`Maximum update depth exceeded`).
+    2.  **Ref-Based One-Time Guard**: When validation and correction of the field array's initial state is needed, create an initialization flag with `useRef(false)` and use the pattern `useEffect(() => { if (!isInitialized.current) { /* correction logic */ isInitialized.current = true; } }, [])` to execute exactly once.
+    3.  **Empty Dependency Array**: Initialization `useEffect` should use an empty dependency array `[]` as a rule. If dynamic processing in response to `fields` changes is needed, use the `form.watch` subscription pattern instead of `useEffect`.
+    4.  **Cascading Failure Awareness**: This infinite loop monopolizes the browser's main thread and completely blocks other async operations such as save buttons and authentication flows. Recognize that the blast radius is not limited to the component.
+*   **Rationale**: `useFieldArray`'s `fields` generates a new array reference with every operation. Including it in a `useEffect` dependency array causes infinite recursion: field operation → re-render → `useEffect` re-execution → field operation. This is a known design characteristic of React Hook Form, and direct use of `fields` in dependency arrays is not recommended in official documentation.
+
+### 14.26. The Stacking Context Safety Protocol
+*   **Law**: Applying explicit `z-index` to elements within normal content that should be layered below **fixed-position UI elements** (sticky headers, modals, drawers, etc.) is **prohibited in principle**. Structurally prevent "punch-through" layout breakage caused by z-index conflicts.
+*   **Action**:
+    1.  **Default Layer Maintenance**: Elements within normal content areas (cards, badges, check icons, etc.) should remain with unspecified z-index (default: auto/0 equivalent). Applying `z-10` or higher within content areas causes conflicts with sticky headers (also `z-10`, etc.) at the same layer, causing "punch-through" during scrolling.
+    2.  **Layering Hierarchy Definition**: Establish a z-index hierarchy definition within the project (e.g., content layer = 0-9, sticky headers = 10-19, drawers = 20-29, modals = 30-39, toasts = 40-49). All components must set z-index according to this hierarchy.
+    3.  **Periodic Audit**: Periodically scan the codebase for elements with `z-index` applied within scrollable content areas. `z-index` combined with `position: absolute` or `position: relative` is the most common cause of "punch-through."
+    4.  **Isolation Strategy**: When controlling element stacking order within content, apply `isolation: isolate` to the parent element, creating a new stacking context that limits the z-index blast radius to within that parent element.
+*   **Rationale**: z-index is evaluated relatively within the same stacking context. Carelessly setting high values on content elements causes conflicts with UI elements like sticky headers and modals at the same layer. The resulting display order becomes unpredictable based on DOM tree position, especially causing layout breakage during scrolling such as "check icons overlapping the header."
+
+### 14.27. The CSS Class Merge Utility Protocol
+*   **Law**: When conditionally applying classes in utility-first CSS frameworks (Tailwind CSS, etc.), **manual concatenation via template literals or string concatenation is prohibited**. The use of dedicated merge utilities such as `cn()` / `clsx` + `tailwind-merge` is mandatory.
+*   **Action**:
+    1.  **Utility Function Mandate**: Define a `cn()` function (combination of `clsx` + `tailwind-merge`) as a shared project utility and use it across all components. Template literals like `className={`px-4 ${isActive ? 'bg-blue-500' : ''}`}` cannot detect class conflicts.
+    2.  **Conflict Resolution**: `tailwind-merge` automatically resolves multiple utility classes targeting the same CSS property (e.g., `px-4` and `px-8`) using last-wins rules. Manual concatenation lacks this resolution, applying unpredictable styles.
+    3.  **Empty String Prevention**: Use `cn()` or `clsx` to automatically filter out empty strings `''` and `undefined` that would otherwise contaminate the class list when conditions are `false`.
+    4.  **Component Props Pattern**: When components accept `className` from external sources, merge internal and external classes using the `cn(baseClasses, className)` pattern.
+*   **Rationale**: Manual concatenation of CSS utility classes cannot detect class duplication or conflicts, making style priority unpredictable. In Tailwind CSS specifically, when multiple utilities target the same CSS property, the result depends on stylesheet appearance order rather than CSS specificity, causing silent bugs where visually correct code applies different styles in production.
+
+### 14.28. The Explicit Initial State Typing Mandate
+*   **Law**: When passing empty arrays `[]`, `null`, or values where inference is difficult as initial values to React's `useState`, **generic type parameters must be explicitly specified**. Implicit initialization relying on type inference is prohibited.
+*   **Action**:
+    1.  **Empty Array Typing**: `useState([])` is prohibited. Use `useState<Item[]>([])` to explicitly specify the element type. When the type parameter is omitted, TypeScript infers `never[]`, causing type errors on subsequent `setState(items)` calls.
+    2.  **Nullable State Typing**: `useState(null)` is prohibited. Use `useState<User | null>(null)` to explicitly specify the non-null type. When omitted, the `null` literal type is inferred, making non-null value assignments type errors.
+    3.  **Complex Object Typing**: When using object initial values (`useState({})`), specify concrete types like `useState<FormState>({})`. Inference from empty objects does not include necessary properties in the type.
+    4.  **Primitive Exception**: Primitive values like `useState(0)`, `useState('')`, `useState(false)` have accurate inference, so explicit type parameters are optional.
+*   **Rationale**: TypeScript's type inference derives types from initial values, but `[]` infers as `never[]` and `null` as the `null` literal type. This causes type mismatches to surface when data is actually assigned, pushing developers into a vicious cycle of escape-casting with `as` or ignoring type errors. Explicit typing at initialization fundamentally prevents this problem.
+
+### 14.29. The Compiler Readiness Protocol
+*   **Law**: In preparation for future migration to next-generation compiler optimization tools such as React Compiler, **excessive manual use of `useMemo` / `useCallback` should be avoided**, and compiler-compatible coding patterns are recommended.
+*   **Action**:
+    1.  **Avoid Premature Memoization**: Avoid preemptively applying `useMemo` / `useCallback` before performance issues are confirmed through measurement. Compilers have the ability to perform these optimizations automatically, and manual memoization may interfere with compiler optimizations.
+    2.  **Pure Function Preference**: Implement components as **pure functions** whenever possible. Consolidate side effects into `useEffect` and keep rendering logic side-effect-free so that compiler static analysis functions accurately.
+    3.  **Stable Reference Pattern**: Instead of regenerating objects and arrays during rendering, define them as module-scope constants or maintain stable references with `useRef`.
+    4.  **Migration Path**: Existing `useMemo` / `useCallback` need not be immediately removed. In new code, avoid excessive manual memoization and apply only where necessity is confirmed through performance profiling.
+*   **Rationale**: React Compiler achieves automatic memoization of function components, but in code with manually applied `useMemo` / `useCallback`, compiler optimizations and manual optimizations may be double-applied, potentially degrading performance instead. Adopting compiler-compatible coding styles now minimizes future migration costs.
+
+### 14.30. The Server Cookie Write Authority Protocol
+*   **Law**: Cookie and response header writes (Set/Delete) are limited to **Server Actions** or **Route Handlers (API Routes)**. Writing cookies during Server Component (`page.tsx`, `layout.tsx`) rendering is **prohibited**.
+*   **Action**:
+    1.  **Read Only in RSC**: Server Components should in principle only perform Cookie **reads (`cookies().get()`)**. Cookie writes during rendering are unstable per framework specifications and cause unpredictable side effects in streaming SSR environments.
+    2.  **Write Authority**: Cookie writes (Set/Delete) must be performed within Server Actions (`'use server'`) or Route Handlers (`route.ts`). These have clear request-response cycles where cookie operations execute safely.
+    3.  **Session Management**: Authentication session updates (token refresh, etc.) should be handled in Middleware or Server Actions, separated from the rendering pipeline.
+    4.  **Testing**: Server Actions involving cookie operations should verify expected behavior after cookie state changes (redirects, session state reflection, etc.) through automated tests.
+*   **Rationale**: Server Component (RSC) rendering may occur in a streaming fashion, and attempting to set cookies after response headers have already been sent results in them being ignored or causing errors. Explicitly limiting write authority to Server Actions / Route Handlers structurally eliminates this unstable behavior.
+

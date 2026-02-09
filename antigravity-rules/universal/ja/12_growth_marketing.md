@@ -17,9 +17,18 @@
     *   **The Direct Answer Protocol (アンサーファースト)**:
         *   **Context**: AI検索エンジン（SGE, Perplexity）は、ユーザーの質問に対する「直接的な回答」を抜粋します。
         *   **Action**: コンテンツは「結論を最初に（アンサーファースト）」「手順は番号付きリストで」「比較はテーブルで」記述することを強制します。「〜とは、〜のことである」という定義構文も有効です。
+    *   **The Q&A Anchor Protocol (質問形式見出し)**:
+        *   **Context**: AI（RAG）は「質問」と「回答」のペアを探しています。
+        *   **Action**: 記事の見出し（H2/H3）を「〜とは？」や「〜のメリットは？」等の**質問形式**にし、直後のパラグラフで**結論**を述べる構造を推奨します。これにより、AI検索エンジンが「回答」として抜粋しやすくなります。
+    *   **The Data Tokenization Protocol (データ密度向上)**:
+        *   **Law**: AIは曖昧な形容詞による表現より、**具体的な数値・データ**（スペック、価格、日付、法規制番号等）を好みます。
+        *   **Action**: テーブル（`<table>`）やリスト（`<ul>`/`<ol>`）で整理された情報はAIにとって解析コストが低く引用されやすいため、可能な限りこの形式を採用してください。
     *   **The Primary Source Citation (一次情報引用)**:
         *   **Law**: 事実（統計、法律、医学データ）を述べる際は、可能な限り信頼できる一次情報（公的機関、論文、公式サイト）への発リンクを行います。
         *   **Effect**: これは「情報の裏付け」があることを検索エンジン及びAIに示し、信頼度スコア（Trustworthiness）を向上させます。
+    *   **The Author Visibility Protocol (著者情報の明示)**:
+        *   **Law**: AIは「誰が言っているか」を重視します。記事やコンテンツには必ず**著者プロフィール（名前、肩書き、顔写真、SNSリンク）**を明記してください。
+        *   **Action**: Schema.orgの `author` プロパティを使用し、著者情報を構造化データに含めます。著者ページへのリンクも推奨します。
     *   **The Reviewer Visibility Protocol (監修者明示)**:
         *   **Context**: YMYL (Your Money Your Life) 領域では、誰が書いたか以上に「誰が認めたか」が重要です。
         *   **Action**: 専門家（医師、弁護士等）が監修した記事には、必ず `reviewer` プロパティを使用して監修者情報を構造化データに含めてください。
@@ -36,6 +45,10 @@
         *   **Law**: 正式ドメインへの移行およびステークホルダーからの明示的な「Launch承認」があるまで、`robots: noindex` 設定を**絶対に解除してはなりません**。
         *   **Risk**: 未完成の状態でのインデックス登録は、ドメイン評価の毀損、重複コンテンツ、ブランドイメージの低下を招きます。
         *   **Action**: 開発・ステージング環境では、`next.config.js` や `middleware` でnoindex を強制し、本番かつ明示的承認後のみ解除するフローを構築してください。
+    *   **The Hreflang Protocol (国際化URL戦略)**:
+        *   **Context**: 将来の多言語展開に備え、SEOを損なわないURL設計を予約します。
+        *   **Law**: 言語ごとにユニークなURL（例: `/en/products/tokyo`）を持つ**サブディレクトリ戦略**を採用してください。クエリパラメータ（`?lang=en`）やCookieによる言語切り替えはSEO上禁止です。
+        *   **Action**: 多言語対応時は `hreflang` タグを実装し、各言語版ページの対応関係を検索エンジンに正確に伝えてください。
 *   **Core Web Vitals**:
     *   SEO順位に直結するため、**LCP, INP, CLS** のスコアを常に緑色（Good）に保ちます。
 *   **The SEO Integrity Protocol (Canonical & Internal Link)**:
@@ -98,3 +111,39 @@
 *   **Law**: コンテンツの「本来の属性（名前、価格、説明）」と、マーケティング用の「メタ情報（SEO用タイトル、広告用キャッチコピー）」を物理的に分離して管理してください。
 *   **Action**: `items` テーブル等の主データと、`marketing_metadata` (jsonb または専用テーブル) を分離し、UI においてマーケターが後者を編集しても、システムの基盤ロジック（注文処理、通知等）が壊れない依存関係を構築してください。
 *   **Rationale**: 広告表現の最適化（ABテスト）のために商品名を変えた結果、発送伝票の名前まで変わってしまう「密結合の悲劇」を物理的に回避します。
+
+## 8. Growth Performance Architecture (成長パフォーマンス基盤)
+*   **The Growth-Critical Performance Mandate (成長KPI直結ページのパフォーマンス義務)**:
+    *   **Law**: ユーザー獲得（Acquisition）と定着（Retention）に直結するページ（LP、フィード、検索結果等）は、パフォーマンスを最優先し、キャッシュ戦略の適用を必須とします。
+    *   **Targets**:
+        1.  **First Paint < 1秒**: 新規ユーザーの離脱防止のため、初期データはキャッシュから即時配信します。
+        2.  **Engagement API < 100ms**: いいね・ブックマーク等のインタラクションは Optimistic UI で即座に反映します。
+        3.  **Feed/Search < 200ms**: パーソナライズされたコンテンツ推薦や検索結果はキャッシュを活用して高速配信します。
+    *   **Retention Strategy**:
+        *   **Push Data Prefetch**: 通知経由での復帰時、対象コンテンツをキャッシュで即時表示します。
+        *   **Offline-First**: 既読コンテンツをローカルキャッシュし、オフライン時でも閲覧可能にします。
+    *   **Mandate**: 成長KPI（DAU/MAU、セッション時間）に直結するページは、必ずキャッシュ階層（`11_business_finance.md` §1 Cache Hierarchy Standard 参照）を適用してください。
+
+## 9. Dynamic OGP & Social Sharing (動的OGPとソーシャル共有)
+*   **The Dynamic OGP Protocol (動的OGP画像生成)**:
+    *   **Law**: 詳細ページや記事ページなど、ソーシャル共有される可能性が高いページでは、タイトル、評価、画像を合成した**動的OGP画像**をオンデマンド生成し、SNS共有時のCTR（クリック率）を最大化します。
+    *   **Action**:
+        1.  **Server-Side Generation**: Edge Function やサーバーサイドのOGP画像生成ライブラリを使用し、リクエスト時に動的にOGP画像を生成します。
+        2.  **CDN Cache**: 生成コスト削減のため、CDNキャッシュ（例: `s-maxage=86400`）を適用し、同一ページへの繰り返しリクエストでは再生成を防ぎます。
+        3.  **Fallback**: 動的生成に失敗した場合、サイト共通のデフォルトOGP画像にフォールバックし、空のOGPを避けます。
+
+## 10. First-Party Data & Attribution (ファーストパーティデータと帰属分析)
+*   **The First-Party Data Strategy (ファーストパーティデータ戦略)**:
+    *   **Context**: サードパーティCookieの廃止やブラウザのプライバシー強化により、広告媒体経由のトラッキング精度が低下しています。
+    *   **Law**: 初回流入時の `utm_source`、`utm_medium`、`utm_campaign` 等のパラメータをCookieまたはSessionに保存し、ユーザー登録時にユーザーレコードの参照元メタデータとして記録します。
+    *   **Attribution Model**: Last Click（最後のタッチポイント）ではなく、**First Touch（最初の接触）**を評価することで、新規ユーザー獲得に最も貢献したチャネルを正確に特定します。
+    *   **Data Ownership**: 広告プラットフォームが提供するデータに依存せず、自社データベースに帰属情報を蓄積することで、プラットフォーム変更やポリシー変更に左右されない分析基盤を構築します。
+
+## 11. Product Feedback & Continuous Improvement (プロダクトフィードバック)
+*   **The Feedback Loop Protocol (NPS/CSAT)**:
+    *   **Context**: GA4等の定量データだけでは「なぜ離脱したか」「なぜ不満か」の定性的な理由は分かりません。
+    *   **Micro-Survey**:
+        *   **Relevance**: コンテンツ（記事、検索結果、推薦等）の末尾に「この情報は役に立ちましたか？ (Yes/No)」を配置し、コンテンツ品質のシグナルを収集します。
+        *   **NPS (Net Promoter Score)**: サービス利用開始から一定期間（例: 30日）後のアクティブユーザーに、「このサービスを友人に勧めたいですか？ (0-10)」を問うモーダルを表示します。
+    *   **Action**: 低評価（Detractor: 0-6）ユーザーには「どのような点が不満でしたか？」と深堀りの自由記述を促し、プロダクト改善のヒントを取得します（Product-Led Growth）。
+    *   **Frequency Control**: 同一ユーザーへのサーベイ表示は、最低でも**90日間隔**を空け、サーベイ疲れ（Survey Fatigue）を防ぎます。

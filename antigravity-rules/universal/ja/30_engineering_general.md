@@ -28,6 +28,8 @@
     *   **Autonomous Structure Strategy (Edge AI)**: 
         *   **Law**: ユーザーに入力（Typing）という苦役を強いることは可能な限り避け、紙の証明書、領収書、書類等の「非構造化物理アセット」は、OCR/Vision AI を活用して即座に「高精度な構造化データ」へ自動変換するフローを標準実装として検討してください。
         *   **Standard**: 「写真を撮るだけで、重要な全項目が DB に入る」UX を、データ品質維持とユーザー継続率向上のための至上命題とします。
+        *   **Human-in-the-Loop Mandate**: AI（OCR/Vision等）によるデータ抽出・変換結果は、常に **「下書き（Draft）」** として扱い、**ユーザーが目視で確認・修正した上で「保存」ボタンを押す**フローを強制してください。AIによるDBへの直接書き込み（Auto-Save）は、誤データの混入リスクがあるため禁止します。
+        *   **PII Scrubbing**: AI処理対象の文書や画像に個人情報（氏名、住所、電話番号等）が含まれる場合、OCR/AI結果としてそのまま保存せず、自動的に破棄またはマスキング（`***`等で置換）してください。特に第三者の個人情報は、本人の同意なく構造化データとして保持してはなりません。
 *   **Blueprint Compliance (憲法遵守)**:
     *   **Entry Point**: すべての開発作業は、まず対応するルールファイルを確認することから始めます。
     *   **Update First**: 実装中に設計変更が必要になった場合、**コードを書く前に（または同時に）Blueprintを更新**します。ドキュメントとコードの乖離は最大の技術的負債です。
@@ -146,6 +148,9 @@
     *   **モジュール化**: ファイルサイズは小さく保ち（Atomic）、AIのコンテキストウィンドウを圧迫しないようにします。
     *   **Explicit Imports**: `import` ステートメントは必ずファイルの最上部（Top-Level）に記述してください。関数内や条件分岐内でのインポートは、静的解析を妨げ、AIの理解を困難にします。
     *   **セマンティック構造**: ディレクトリ構造は機能単位（Feature-based）で整理し、AIが関連ファイルを見つけやすくします。
+*   **Schema Trust Protocol (No Ghost Columns)**:
+    *   **Law**: 設計書（Blueprint）に予定されているが、DBマイグレーションがまだ適用されていないカラム名をクエリ（SELECT/INSERT/UPDATE）で使用することを禁止します。存在しない列へのアクセスはページ全体をクラッシュさせます。
+    *   **Action**: クエリで使用するカラムは「現在、確実に存在する」ものに限定し、未実装機能のデータはアプリケーション層の定数（Default Config）で補完してください。
 
 ## 6. グリーンコーディング (Green Coding & Sustainability)
 *   **エネルギー効率 (Energy Efficiency)**:
@@ -173,6 +178,9 @@
     *   **非推奨チェック**: 使用しようとしているAPIが Deprecated（非推奨）になっていないか確認します。
 *   **トレンドの把握**:
     *   シリコンバレーの最新トレンド（AIエージェント、Privacy Manifests等）を常にキャッチアップし、ルール自体も進化させ続けます。
+*   **The Crystallization Protocol (Knowledge Extraction)**:
+    *   **Law**: 機能実装完了後、その過程で得られた「暗黙知」「新しいパターン」「ハマったポイント」は、設計書（Blueprint）やルールファイルに文書として還元する義務を負います。
+    *   **Rationale**: 知識がコードにのみ存在する状態は「経験の揮発」です。次の開発者（人間・AI問わず）が同じ轍を踏むことを防ぐため、得られた学びを即座にドキュメント化する習慣がチームの生産性を指数関数的に向上させます。
 
 ## 9. 互換性とテスト (Compatibility & Testing)
 *   **実機テスト (Real Device Testing)**:
@@ -410,3 +418,407 @@
     *   **No Mercy**: 新機能への移行が完了した、または不要と判断されたコードは、即座に**物理削除**してください。
     *   **Git Trust**: Gitの履歴がある限り、必要な時に復元可能です。コードベースに「墓標」を残してはいけません。
     *   **Ghost Feature Elimination**: ユーザー導線（UI）やAPIエンドポイントが存在しない未使用の機能コードは、発見次第削除し、Implementation Planとの同期を徹底してください。
+
+### 13.15. The Select Specification Pattern (データ取得の明示化)
+*   **Law**: ORM、Query Builder、またはDB直接呼び出しにおいて、`SELECT *` や `.select('*')` のような「全カラム取得」を禁止します。
+*   **Reason**:
+    1.  **Security**: 将来追加される機密カラム（`internal_memo`, `password_hash` 等）が意図せずクライアントに漏洩するリスク。
+    2.  **Performance**: 不要なカラムの転送はネットワーク帯域とメモリを浪費する。
+    3.  **AI Economy**: AIエージェントに不要なデータを読ませるとトークンを浪費し、推論精度が低下する。
+*   **Action**:
+    *   **Explicit Select**: 必要なカラムのみを明示的に列挙してください（例: `.select('id, name, status, created_at')`）。
+    *   **Purpose-Driven Spec**: 用途別（一覧表示用、詳細表示用、管理者用）にSelect仕様を定義し、過不足なくデータを取得してください。
+    *   **Registry**: プロジェクト規模に応じて、Select仕様を定数として一元管理（Select Spec Registry）し、散在・重複を防ぐことを推奨します。
+
+### 13.16. The Type Lying Prohibition Protocol (型詐称の禁止)
+*   **Law**: 型システムを欺く行為は、コンパイラとレビュワーの信頼を裏切る最大の犯罪です。以下の行為を禁止します。
+    *   `as any` / `as never`: 型エラーの握りつぶし。
+    *   `@ts-ignore` / `@ts-expect-error`（理由なし）: 型チェックの無効化。
+    *   `eslint-disable`（理由なし）: Lintルールの恣意的な無効化。
+*   **Exception**: やむを得ず使用する場合は、必ず以下を満たすこと。
+    1.  **Reason**: なぜ型が合わないかの根本原因を1行コメントで記述。
+    2.  **Ticket**: 対応するIssue番号を併記（例: `// TODO(#456): Fix after library update`）。
+    3.  **Scope**: 影響範囲を最小限に限定（ファイル全体ではなく行単位）。
+*   **Outcome**: 「ビルドが通る」と「型が安全」は別物です。前者のみで安心することは自殺行為です。
+
+### 13.17. The No Future-Use Code Protocol (YAGNI 厳格化)
+*   **Law**: 「将来使うかもしれない」コード、変数、インポート、関数は、現時点で使用されていない限り「ノイズ」であり、即時削除の対象です。
+*   **Action**:
+    *   **Unused Imports**: 未使用のインポートは1行たりとも残しません。Linter（`no-unused-vars`）を `error` レベルで強制してください。
+    *   **Unused Variables**: `_` プレフィックスは「意図的に未使用である」ことを示す場合にのみ許可します（例: `const [_, setCount] = useState(0)`）。それ以外の未使用変数は物理削除してください。
+    *   **Speculative Code**: 現在のユーザーストーリーに含まれない「先回り実装」は技術的負債です。必要になった時に書いてください。
+
+### 13.18. The Service Layer Extraction Mandate (サービス層分離義務)
+*   **Law**: Route Handler、Server Action、Controller 等のエントリーポイントは「薄いインターフェース」に徹しなければなりません。ビジネスロジック（バリデーション、DB操作、外部API呼び出し、計算）をエントリーポイントに直書きすることを禁止します。
+*   **Action**:
+    1.  **Service Layer**: ビジネスロジックは `lib/services/` または `lib/api/` に抽出し、テスト可能かつ再利用可能な状態にしてください。
+    2.  **DTO Boundary**: Service 層の入出力は DTO（Data Transfer Object）で型安全に定義し、DB型やフレームワーク固有の型をUIに漏洩させないでください。
+    3.  **Single Responsibility**: 1つの Service 関数は1つの責務のみを持ちます。「取得して加工して保存して通知する」関数は分割してください。
+*   **Reason**: エントリーポイントにロジックが密結合すると、テスト不能、再利用不能、Omnichannel対応不能の三重苦を招きます。
+
+### 13.19. The Clean Workspace Mandate (作業場清掃義務)
+*   **Law**: タスク完了時、検証のために作成した一時ファイル（`test-*.ts`, `*.log`, `debug-*.ts`）やビルドキャッシュ（`*.tsbuildinfo`）は、**「使用後即廃棄」** を義務とします。
+*   **Action**:
+    *   **Scorched Earth**: 空ディレクトリ（`snapshots/`, `snippets/`）、残存する古いバックアップファイル、開発中にのみ使用した JSON ダンプは「過去の遺物」であり、リポジトリに残置したままコミットすることは禁止です。
+    *   **Build Artifact**: `.tsbuildinfo`、`.next/cache` 等のビルドキャッシュは `.gitignore` で管理し、リポジトリに含めてはなりません。
+    *   **Verification**: コミット前に `git status` で意図しないファイルが含まれていないことを確認してください。
+*   **Rationale**: 不要なファイルの残置はコードベースのS/N比（Signal to Noise ratio）を低下させ、後続の開発者やAIエージェントの判断を誤らせます。
+
+### 13.20. The CQRS Pattern (コマンドクエリ責務分離)
+*   **Law**: Read操作とWrite操作が同一のService/Repositoryに混在することは、将来のスケーリング（Read Replica、キャッシュ最適化）の障壁となります。
+*   **Action**:
+    1.  **Read Layer (Query)**: データ取得専用の層を設け、Select Spec（明示的カラム指定）とキャッシュ戦略を必須引数とします。フィルタリング・ソート・ページネーションはこの層で提供してください。
+    2.  **Write Layer (Command)**: データ変更専用の層を設け、全操作に監査ログの統合を推奨します。論理削除（Soft Delete）のサポートをオプションで設計してください。
+    3.  **Cache Invalidation**: Write操作完了時に、関連するReadキャッシュを自動的に無効化する仕組み（タグベース等）を導入してください。
+*   **Benefit**: Read/Writeの責務分離により、個別の最適化・スケーリング・テストが可能になります。
+
+### 13.21. The DTO Synchronicity Protocol (DTO同期義務)
+*   **Law**: Backend（Server Action/API）の戻り値をDTO化した場合、それを受け取るFrontend（UI Component/Form）のProps型も**必ず同一のDTOに同期**しなければなりません。
+*   **Action**:
+    1.  **Single Source**: DTO定義は `lib/dto/` 等に一元管理し、Backend・Frontendの両方からインポートしてください。
+    2.  **No Drift**: BackendのDTO変更時は、それを参照する全てのFrontendコンポーネントのProps型も同時に更新してください。片方だけの更新は `undefined` 参照によるランタイムエラーの直接原因です。
+    3.  **Type Guard**: DTO境界では必ず型ガード（`in` 演算子、`typeof`チェック）を行い、外部データの安全性を保証してください。
+*   **Anti-Pattern**: BackendがDTO を返しているのにFrontendで `as any` にキャストして受け取ることは、DTOの意味を完全に無効化する「型の背信行為」です。
+
+### 13.22. The Omnichannel Delivery Mandate（オムニチャネル提供義務）
+*   **Law**: UIコンポーネント（`page.tsx`, `layout.tsx` 等）にビジネスロジックやデータアクセスを直接記述することを禁止します。全てのデータ取得・更新・集約ロジックは **Service層またはGateway層** に抽出し、型安全なインターフェースとして提供してください。
+*   **Rationale**: Web UIに密結合したロジックは、モバイルアプリ、AIエージェント、外部APIからの再利用が不可能な「Web専用レガシーコード」となります。ロジックをService/Gateway層に集約することで、全チャネルから一貫した振る舞いを保証できます。
+*   **Action**:
+    1.  **UI = Thin Controller**: UIコンポーネントはService/Actionの呼び出しとプレゼンテーションのみに専念してください。DBクライアントの直接参照は禁止です。
+    2.  **Service Aggregation**: 複数のGateway/Actionを統合して1画面分のデータを生成する「集約ロジック」は、必ずService層に `get...Data()` 形式で抽出してください。
+    3.  **DTO Response Only**: Service/Actionの戻り値は必ずDTOに変換し、生のDBレコードをUI層に返却しないでください。
+*   **Anti-Pattern**: `page.tsx` 内で `supabase.from('table').select()` を直接呼び出す行為は、アーキテクチャの根幹への違反です。
+
+### 13.23. The Zero Defect Sovereignty（ゼロ欠陥主権）
+*   **Law**: 型チェック（`tsc --noEmit` 等）およびLinter（`eslint`, `biome` 等）が **警告ゼロ（Exit 0）** で通過しないコードのコミットを禁止します。
+*   **Action**:
+    1.  **Local First**: コミット前にローカルで型チェックとLintを実行し、ゼロ警告を確認してください。CIでの検出に頼る運用は遅延の原因です。
+    2.  **No Escape Hatches**: `as any`、`@ts-ignore`、`@ts-nocheck` は「警告の抑制」ではなく「バグの埋め込み」です。使用を原則禁止とし、使う場合は根拠をコメントで明記してください。
+    3.  **Zero Tolerance**: 「今は無視して後で直す」は許容しません。警告が出たらその場で解決してください。
+*   **Rationale**: 型エラーやLint警告を放置すると、スキーマ変更時に「ビルドは通るが実行時にクラッシュする」時限爆弾が埋め込まれます。ゼロ欠陥は品質の最低基準であり、目標ではありません。
+
+### 13.24. The Linter Suppression Prohibition（Linter抑制コメント禁止）
+*   **Law**: `eslint-disable` / `eslint-disable-next-line` / `@ts-ignore` / `biome-ignore` 等のLinter抑制コメントの使用を原則禁止とします。
+*   **Exception**: 外部ライブラリとの互換性問題など、根本解決が不可能な場合のみ許可します。その場合も：
+    1.  抑制の理由を具体的にコメントで明記してください。
+    2.  対応する Issue を作成し、将来の根本解決を追跡してください。
+*   **Rationale**: 抑制コメントは問題を「見えなくする」だけであり、根本原因を次の開発者に押し付ける行為です。警告が出たら、抑制ではなく根本原因を解決してください。
+*   **Anti-Pattern**: 「将来使うかもしれない」変数を `eslint-disable` で黙らせて残すのは、不要コードの温存であり禁止です。使う時に書いてください。
+
+### 13.25. The Structured Error Return Protocol（構造化エラー返却）
+*   **Law**: バックエンドAPIやサーバーアクションは、原則として例外（`throw`）を投げるのではなく、**`{ success: boolean; data?: T; error?: string }` 形式の構造化されたレスポンス**を返さなければなりません。
+*   **Action**:
+    1.  **No Raw Throw**: バリデーションエラーや権限不足などの「予期されるエラー」に対して `throw new Error()` を使用しないでください。`throw` はフロントエンドの状態管理フック（`useActionState` 等）を「予期せぬ例外」として処理させ、コンポーネントのクリーンアップや再試行ロジックの暴走を招きます。
+    2.  **Graceful Failure Contract**: エラー発生時は `{ success: false, error: 'human-readable message' }` を返し、フロントエンド側でトーストやインラインメッセージとして表示してください。
+    3.  **Server-Client Symmetry**: サーバーサイドのガード強化（認証チェック追加等）を行う際は、必ずフロントエンド側の「エラー受け取り口」を同時に整備してください。片側だけの強化は、システム全体のクラッシュに昇格するリスクがあります。
+*   **Rationale**: 「予期されるエラー」を `throw` で返すと、フロントエンドフレームワークの例外処理機構が介入し、無限再レンダリングループやページ全体のクラッシュを引き起こします。構造化されたレスポンスは、エラーハンドリングの制御権をフロントエンド開発者に委ね、システムの安定性を保証します。
+
+### 13.26. The Cache Invalidation Ceremony Protocol（キャッシュ無効化儀式）
+*   **Law**: コアクエリロジック（フィルタ条件、プロジェクション仕様、可視性ガード等）を変更した場合は、**ビルドキャッシュの物理削除と開発サーバーの完全再起動**を義務付けます。
+*   **Action**:
+    1.  **Full Environment Reset**: クエリロジック変更後は、ビルドキャッシュディレクトリ（`.next/`, `dist/`, `.cache/` 等）を物理削除し、開発サーバーを再起動してください。
+    2.  **Kill Process**: プロセスの graceful shutdown では不十分な場合があります。`kill -9` 等で強制終了し、クリーンな状態から再起動してください。
+    3.  **Pre-Verification**: キャッシュクリア後にのみ、変更の効果を検証してください。キャッシュの残留は「コード変更が反映されていない」という誤った結論を導きます。
+*   **Rationale**: 多層キャッシュ戦略（メモリキャッシュ、ファイルキャッシュ、CDNキャッシュ等）を採用しているアプリケーションでは、コード変更後もキャッシュが古いデータを提供し続ける可能性があります。これにより「コードは正しいのに動作しない」という誤診が発生し、不要なデバッグに膨大な時間を浪費します。
+
+### 13.27. The Projection-Schema Parity Mandate（射影スキーマ同期義務）
+*   **Law**: データ取得時の射影仕様（Select Specification、GraphQLフラグメント等）は、物理的なDBスキーマと **100%一致** しなければなりません。UIやDTOに定義されているがDBに存在しない「幽霊フィールド（Phantom Fields）」は、実行時のサイレントクラッシュの直接原因です。
+*   **Action**:
+    1.  **Vertical Synchronization Audit**: 新しいフィールドを追加する際は、**DB Schema → DTO → Gateway → UI Interface** の全レイヤーを垂直に検証してください。一つのレイヤーにのみフィールドが存在する状態は許容しません。
+    2.  **Ghost Hunt Protocol**: 射影仕様に含まれるフィールドが「column does not exist」エラーを引き起こした場合、そのフィールドだけでなく、仕様全体を物理スキーマと照合する「再帰的ゴースト監査」を実施してください。1つの不一致は、システム的なドリフトのシグナルです。
+    3.  **No Speculative Fields**: DBに未実装のフィールドを「将来的に必要だろう」という予測でDTOやUIに定義しておくことは禁止です。使用時に実装してください。
+*   **Rationale**: 射影仕様パターン（Select Specification等）はPII漏洩防止やAPI課金制御に強力ですが、スキーマとの「結合リスク」を内在します。DBから返されないフィールドへのアクセスは、フロントエンド全体をクラッシュさせる不可視のバグとなります。
+
+### 13.28. The Mutation Integrity Verification Protocol（ミューテーション整合性検証）
+*   **Law**: データ書き込み操作（Create/Update/Delete）において、**`error: null` は成功を意味しません**。影響行数（`count` / `affectedRows`）を常に検証し、0行の場合は明示的にエラーを投げてください。
+*   **Action**:
+    1.  **Count Validation**: ID指定の単一レコード操作（`WHERE id = ?`）では、影響行数が `1`（または期待値）であることを必ず検証してください。`0` の場合は「権限不足」または「レコード不在」のシグナルとして明示的エラーをスローしてください。
+    2.  **Sub-Step Integrity**: 一つのトランザクション的な処理内で複数の書き込み操作（メインテーブル更新 → リレーション更新 → タグ更新等）を行う場合、各ステップのエラーオブジェクトを個別に検証してください。途中のステップが失敗しても最終結果が「成功」を返す「Partial Phantom Success」を防いでください。
+    3.  **Post-Mutation Verification Fetch**: 特に重要度の高い更新（画像の並び替え、ステータス変更等）では、更新直後に同じIDで再取得（`SELECT`）を行い、現在値をログ出力またはアサーションしてください。これにより「DB書き込み失敗」と「UI表示失敗（キャッシュ）」を100%切り分けられます。
+*   **Rationale**: 多くのDBクライアント/ORM（特にRLS対応のもの）は、権限不足によりアクセスを拒否された場合でも、エラーを投げずに「0行に影響した成功レスポンス」を返す仕様があります。この「サイレント拒否」は、UIに偽の成功メッセージを表示させ、データの不整合を検知不能にします。
+
+### 13.29. The Service Aggregation Protocol（サービス集約プロトコル）
+*   **Law**: 複数のGateway/Repository/Actionを呼び出して1画面（1ページ）分のデータを組み立てる「集約ロジック」は、**Service層に抽出**しなければなりません。UI層（ページコンポーネント、コントローラー）は、Serviceを呼び出すだけの薄いエントリーポイントに徹してください。
+*   **Action**:
+    1.  **Single Responsibility**: 1つのページに5つ以上のデータソースからフェッチしている場合、それは「ページがService層の仕事をしている」シグナルです。`XxxService.getPageData()` に集約してください。
+    2.  **Testability**: Service層はPure Functionまたは注入可能な依存関係のみで構成し、UI/フレームワーク依存を持たないでください。これにより単体テストが可能になります。
+    3.  **Reusability**: 同一データセットを複数のUI（管理画面、公開ページ、API）から利用する場合、Serviceを共有することで「同じデータの別解釈」を防止してください。
+*   **Rationale**: UI層にデータ集約ロジックが散在すると、同一データへのアクセスパスが複数生まれ、キャッシュ戦略やエラーハンドリングの統一が不可能になります。Service層は「ビジネスロジックの正門」として機能します。
+
+### 13.30. The Production Build Verification Protocol（本番ビルド検証義務）
+*   **Law**: 開発サーバー（`dev` モード）が動作していることは、コードの正しさの証明には**なりません**。型チェック（`tsc --noEmit`）および本番ビルド（`npm run build` 等）が通過するまで、そのコードは「存在しない」ものとして扱ってください。
+*   **Action**:
+    1.  **Mandatory Triple Crown**: タスク完了前に以下の3つのチェックを必ず通過させてください。
+        *   ① 型チェック（`tsc --noEmit`）: 型エラーゼロ
+        *   ② リンター（`eslint --max-warnings=0`）: 警告ゼロ
+        *   ③ 本番ビルド（`npm run build`）: ビルド成功
+    2.  **PR Rejection**: 上記3点の通過結果が提示されていないPRは即時却下してください。
+    3.  **Dev Mode Trap**: `dev` モードではHot Module Replacement（HMR）やランタイムエラーの遅延評価により、本番では発生するエラーが隠蔽されます。`import` の解決、Tree Shaking、SSRパスの実行は `build` でのみ完全に検証されます。
+*   **Rationale**: 開発サーバーは「寛容すぎる」環境です。本番ビルドは、デッドインポートの検出、SSRパスのクラッシュ、動的ルートの型不整合など、開発モードでは沈黙するエラーを顕在化させる唯一の手段です。
+
+### 13.31. The CI/CD Environment Gap Protocol（CI/CD環境乖離プロトコル）
+*   **Law**: CI環境は「空のデータベース（Clean Room）」でテストを実行するため、**既存データとの衝突**（ユニーク制約違反、外部キー不整合、NOT NULL制約のデフォルト値不足等）を検知できません。データ操作を含む変更は、本番データとの衝突を前提とした防衛的コードで記述してください。
+*   **Action**:
+    1.  **Defensive DML**: `INSERT` 文には `ON CONFLICT ... DO UPDATE` または `DO NOTHING` を使用し、冪等性を確保してください。
+    2.  **Pre-Check**: `ALTER TABLE` で `NOT NULL` 制約を追加する場合、既存の `NULL` 値を事前に `UPDATE` でデフォルト値に埋めてください。
+    3.  **Staging Verification**: 可能な限り、本番に近いデータを持つステージング環境でデータ変更を事前検証してください。
+*   **Rationale**: CIの「全グリーン」は「無菌室での成功」に過ぎません。本番環境の複雑さ（既存データ、並行アクセス、歴史的メンテナンス負債）を忘れた時、デプロイ障害は確実に訪れます。
+
+### 13.32. The Clean Workspace Mandate（クリーンワークスペース義務）
+*   **Law**: タスク完了時、作業中に生成された一時ファイル、ビルドキャッシュ、空ディレクトリ、デバッグ用の `console.log` は**全て除去**してからコミットしてください。リポジトリは「使用後即廃棄（Scorched Earth）」の原則で常にクリーンな状態を維持します。
+*   **Action**:
+    1.  **Checklist**: コミット前に以下を確認してください。
+        *   一時ファイル（`.tmp`, `.bak`, `*.log` 等）が残っていないか
+        *   空ディレクトリ（ファイルが0個のフォルダ）が残っていないか
+        *   `console.log` / `console.debug` がコードに残っていないか
+        *   ビルドキャッシュ（`.next/cache` 等）がGit追跡対象に含まれていないか
+    2.  **Gitignore Hygiene**: `.gitignore` にビルド出力、環境ファイル、IDE設定が網羅されていることを初期化時に確認してください。
+    3.  **Branch Hygiene**: マージ済みブランチは速やかに削除してください。放置ブランチは「環境差異による事故」の温床です。
+*   **Rationale**: 残置された一時ファイルやデバッグコードは、次の開発者（未来の自分を含む）に「これは意図的に残されたコードなのか？」という不要な認知負荷を与えます。クリーンなリポジトリはチーム全体の生産性に直結します。
+
+### 13.33. The Dead Code Prohibition Protocol（デッドコード禁止プロトコル）
+*   **Law**: 「将来使うかもしれない」という理由でコードを残すことは、技術的負債の最大の温床です。**現在使用されていないコード（未使用の変数、インポート、関数、型定義）は即時削除**を義務付けます。
+*   **Action**:
+    1.  **No Future-Use Code**: 現在の機能で使用されていないコードは、コメントアウトも含めて一切残しません。必要になった時に Git 履歴から復元してください。
+    2.  **Strict Variable Hygiene**: 宣言されたが一度も参照されない変数・定数・インポートは、ビルド前に全て除去してください。`_` プレフィックスは、destructuring での明示的な値の廃棄（例: `const [_, setValue] = useState()`）にのみ許可します。
+    3.  **Lint Enforcement**: ESLint の `no-unused-vars` / `@typescript-eslint/no-unused-vars` を `error` に設定し、CIで物理的にブロックしてください。
+*   **Rationale**: 未使用コードは「壊れた窓」です。1つ放置すれば、チーム全体が「少しくらいなら大丈夫」と判断し、コードベース全体の品質が低下します。
+
+### 13.34. The Warning Suppression Prohibition Protocol（警告抑制禁止プロトコル）
+*   **Law**: Linter や型チェッカーの警告を**抑制・無視するディレクティブ**を安易に使用することを原則禁止します。警告は「修正すべきコードの臭い」であり、消すのではなく根本原因を修正してください。
+*   **Action**:
+    1.  **ESLint**: `eslint-disable`, `eslint-disable-next-line` の使用は原則禁止です。やむを得ず使用する場合は、**理由を明記したコメント**を必ず併記してください（例: `// eslint-disable-next-line -- ライブラリの型定義が不正確なため`）。
+    2.  **TypeScript**: `@ts-ignore`, `@ts-nocheck`, `@ts-expect-error` の使用を原則禁止します。型エラーは型定義の修正で解消してください。
+    3.  **Other Tools**: Stylelint、Prettier 等のツールについても同様に、抑制ディレクティブの使用は根本解決の後の最終手段としてのみ許容します。
+    4.  **CI Enforcement**: 抑制ディレクティブの新規追加を検出する Lint ルール（例: `eslint-comments/no-unlimited-disable`）の導入を推奨します。
+*   **Rationale**: 警告抑制は「問題を見えなくする」だけで解決しません。抑制コメントが増殖するとコードベースの信頼性が損なわれ、真に重要な警告が埋もれます。
+
+### 13.35. The Type Integrity Mandate（型誠実性義務）
+*   **Law**: TypeScript の型システムをバイパスする行為は「バグの埋め込み」と定義します。**`as any` による型キャストを原則禁止**し、型の正確性を最優先事項とします。
+*   **Action**:
+    1.  **No `as any`**: `as any` は型チェッカーを完全に無効化するため、使用を禁止します。外部ライブラリの型が不正確な場合は、`declare module` で正確な型定義を提供してください。
+    2.  **Strict Action Return Types**: Server Actions、API ハンドラ、Service 関数の戻り値には、必ず明示的な型定義を付与してください。`any` や `unknown` を戻り値型として使用することは禁止です。
+    3.  **No Type Assertion Chains**: `(value as unknown as TargetType)` のような多段キャストは、型安全性の破壊を示すアンチパターンです。データ変換関数を作成し、ランタイムでの検証を伴う型変換を行ってください。
+    4.  **Lint Enforcement**: `@typescript-eslint/no-explicit-any` を `error` に設定してください。
+*   **Rationale**: `as any` は「型チェッカーへの嘘」です。コンパイル時には問題が見えなくなりますが、ランタイムでは予期しない型のデータが流通し、デバッグ困難なバグを引き起こします。
+
+### 13.36. The UI-Layer Data Access Prohibition（UI層直接データアクセス禁止）
+*   **Law**: UIコンポーネント（ページコンポーネント、レイアウトコンポーネント、クライアントコンポーネント）から、データベースや外部APIに**直接アクセスすることを禁止**します。全てのデータアクセスは、Service層またはGateway層を経由しなければなりません。
+*   **Action**:
+    1.  **Service Layer Mandate**: データの取得・変更は、必ず専用の Service / Gateway / Action 関数を経由してください。UI層はこれらの関数の戻り値（DTO）のみを扱います。
+    2.  **No DB Client in UI**: UIファイル内で DB クライアント（ORM、SDK等）を直接インポート・使用することを禁止します。
+    3.  **DTO Boundary**: Service層は、DBのレコード構造をそのまま返すのではなく、UIが必要とするデータのみを含む**DTO（Data Transfer Object）**に変換して返してください。
+    4.  **Omnichannel Readiness**: この分離により、同一の Service 層をWeb、ネイティブアプリ、外部API など複数のクライアントから再利用可能にします。
+*   **Rationale**: UI層とデータ層の直接結合は、テスト容易性を破壊し、オムニチャネル展開を不可能にします。Service層を挟むことで、ビジネスロジックの集約、テストの容易化、クライアント非依存のアーキテクチャを実現します。
+
+### 13.37. The Graceful Failure Contract（優雅な失敗の契約）
+*   **Law**: サーバーサイドの処理（Server Actions、APIハンドラ等）は、業務ロジック上の失敗に対して `throw new Error()` を使用することを**原則禁止**します。代わりに、**構造化されたエラーレスポンス**（`{ success: false, error: '...' }`）を返し、クライアントサイドで適切に処理させなければなりません。
+*   **Action**:
+    1.  **No Raw Throw**: Server Actions が `throw` を行うと、クライアントサイドのUIフレームワーク（React の `useActionState` 等）がエラーを「予期せぬ例外」として処理し、コンポーネントのクリーンアップや再試行ロジックが暴走して無限ループを引き起こす場合があります。業務エラー（権限不足、バリデーション失敗等）は必ず構造化レスポンスとして返してください。
+    2.  **Common Response Type**: 全てのサーバーアクションに共通のレスポンス型（例: `ActionResult<T> = { success: true, data: T } | { success: false, error: string }`）を定義し、クライアントが統一的にエラーを処理できるようにしてください。
+    3.  **Client-Side Feedback**: クライアントサイドでは、`success: false` の場合にトースト通知やインラインエラーメッセージとして表示し、ユーザーに適切なフィードバックを提供してください。
+    4.  **Exception**: `throw` の使用が許容されるのは、プログラムの継続が不可能な致命的エラー（DB接続断絶、環境設定の欠落等）のみです。
+*   **Rationale**: サーバーサイドのセキュリティ強化（ガード追加等）とクライアントサイドのエラーハンドリングは「対」で整備する必要があります。サーバーだけを強化してクライアントの「エラー受け取り口」を整備しないと、正常な「権限不足エラー」がシステム全体の「無限ループクラッシュ」へと昇格するリスクがあります。
+
+### 13.38. The Mutation Count Validation（ミューテーション影響行数検証義務）
+*   **Law**: データベースへの書き込み操作（UPDATE / DELETE）の後、**影響を受けた行数（`count`）を必ず検証**しなければなりません。`error: null`（エラーなし）であっても `count: 0` は「サイレント拒否」を意味する可能性があります。
+*   **Action**:
+    1.  **Count Check**: ID等を指定した単一レコードの更新・削除操作において、レスポンスから `count` を必ず取得し、期待される行数（通常は `1`）であることを検証してください。
+    2.  **Explicit Failure**: `count` が `0` または `null` の場合は、明示的なエラー（例: `throw new Error('Update failed: No rows affected.')`）をスローし、UIが虚偽の成功状態を表示することを防いでください。
+    3.  **Instrumentation**: デバッグ時には、ミューテーション結果の `count` をログに出力し、書き込みの実効性を可視化してください。
+    4.  **RLS Awareness**: Row Level Security（RLS）を使用するデータベースでは、権限不足はエラーではなく「0行に影響」として返されることを常に念頭に置いてください。
+*   **Rationale**: 多くのデータベースAPI（特にPostgREST等のHTTPラッパー）は、権限不足による書き込み失敗をエラーとして報告しません。`error: null` のみを検証する実装は、「成功したように見えるがデータが永続化されていない」という最も診断困難な「Phantom Success」を引き起こします。
+
+### 13.39. The Post-Mutation Verification Fetch（ミューテーション後即時検証フェッチ）
+*   **Law**: 特に重要度の高いミューテーション（画像の並び替え、ステータス変更、権限変更等）において、書き込み操作の直後に**同一レコードを再取得（SELECT）**し、意図した値がデータベースに永続化されたことをログまたはアサーションで確認することを推奨します。
+*   **Action**:
+    1.  **Verification Fetch**: `update()` の直後に同じIDで `select()` を実行し、現在値をログ出力してください。これにより、問題が「DBへの書き込み失敗」なのか「アプリでの読み込み・キャッシュ問題」なのかを100%確実に切り分けることができます。
+    2.  **Diagnostic Isolation**: リロード後にデータが元に戻る現象が報告された場合、まずこのパターンでサーバーサイドの物理的な値を確認し、問題の層（DB / Cache / UI）を特定してください。
+    3.  **Production Guard**: 本番環境では、パフォーマンスへの影響を考慮し、この検証をフラグ（`DEBUG_MUTATIONS=true`）で有効化するか、ログレベルで制御してください。
+*   **Rationale**: キャッシュの不整合（フレームワークのData Cache / Router Cache等）やトリガーによる値の上書き等、書き込み操作そのものは成功してもデータが反映されないケースは多々あります。即時検証フェッチは、サイレントな永続化失敗を迅速に特定するための最も確実なデバッグ手法です。
+
+### 13.40. The Read-Write Privilege Symmetry（読み書き権限の対称性義務）
+*   **Law**: データの書き込み（Mutation）に特権クライアント（管理者権限等）を使用している場合、**「編集のための読み込み」にも同等の可視性を保証**しなければなりません。書き込み権限と読み込み権限の不一致は「片肺状態」を引き起こします。
+*   **Action**:
+    1.  **Read-Write Parity**: 管理画面等において、書き込みが特権クライアント（RLSバイパス等）で行われている場合、編集フォームへのデータ取得も同等の権限レベルで行ってください。権限不一致は、「保存は成功するがリロードすると元に戻る」という極めて不透明なバグを引き起こします。
+    2.  **Spec Synchronization**: データ取得に使用するプロジェクション（Select Spec / カラム指定）が、書き込み対象の全カラムを包含しているか検証してください。取得Specにカラムが不足していると、保存はされるが表示されない項目が生じます。
+    3.  **Gateway Awareness**: 管理目的のデータ取得関数は、その用途を関数名で明示的に示し（例: `getAdminItemById`）、適切な権限レベルのクライアントを使用してください。
+*   **Rationale**: 書き込みと読み込みで異なる権限レベルを使用することは、セキュリティの「穴」ではなくても、データの「不可視化」を引き起こします。特にRLSを使用する環境では、SELECTポリシーが不完全な場合、DBに存在するデータが取得時にフィルタリングされ、UIには表示されないという診断困難なバグが発生します。
+
+### 13.41. The Sub-Step Mutation Integrity Protocol（マルチステップ書き込み整合性）
+*   **Law**: 単一のサービスメソッドまたはトランザクション内で**複数の非同期書き込み操作**（複数テーブルへの INSERT/UPDATE、外部APIへの連続呼び出し等）を行う場合、**各ステップの結果を個別に検証**しなければなりません。
+*   **Action**:
+    1.  **Per-Step Error Check**: 各書き込み操作の直後に `error` / `count` / `status` を検証してください。最初のステップが成功したことを前提に後続ステップを実行し、途中のエラーを握りつぶすことは「Partial Phantom Success（部分的幽霊成功）」の直接的な原因です。
+    2.  **Fail-Fast Cascade**: いずれかのステップでエラーが検出された場合、後続のステップを実行せず即座にエラーを返却してください。部分的に更新された状態を放置することは、データ不整合の温床です。
+    3.  **Composite Error Reporting**: 複数ステップの結果を集約し、どのステップで失敗したかを呼び出し元に明確に伝達するエラーレスポンスを構築してください（例: `{ step: 'update_metadata', error: '...' }`）。
+    4.  **Diagnostic Logging**: 各ステップの実行結果（成功行数、影響カラム等）をログに出力し、障害発生時の原因特定を迅速化してください。
+*   **Rationale**: マルチステップの書き込み処理において、中間ステップのエラーを無視すると「メインデータは更新されたが関連データは古いまま」という不整合が発生します。この種の部分的成功は、ユーザーには「保存成功」と表示されるため発見が極めて困難です。
+
+### 13.42. The Structured Error Logging Mandate（構造化エラーログ義務）
+*   **Law**: エラーオブジェクトをログに出力する際、**文字列テンプレートへの直接埋め込み**（例: `` `Error: ${error}` ``）を禁止します。エラーオブジェクトは必ず**構造化された形式**でログに記録しなければなりません。
+*   **Action**:
+    1.  **No Template Embedding**: `` `Error occurred: ${error}` `` のパターンは `[object Object]` を出力し、根本原因の情報を完全に喪失させます。
+    2.  **Destructured Logging**: エラーオブジェクトの `message`, `code`, `details`, `hint` 等のプロパティを明示的に分解してログに出力してください（例: `Logger.error('Operation failed', { message: error.message, code: error.code, details: error.details })`）。
+    3.  **JSON Serialization**: 構造化ログシステムを使用する場合は、`JSON.stringify(error, null, 2)` 等でエラーオブジェクト全体をシリアライズし、全プロパティを保存してください。
+    4.  **Stack Trace Preservation**: `Error` インスタンスの `stack` プロパティは、テンプレートリテラルに含めると消失します。常に第2引数またはメタデータオブジェクトとして渡してください。
+*   **Rationale**: `[object Object]` としてログに記録されたエラーは、根本原因の特定を事実上不可能にします。特にRLS違反、認証エラー、型不一致等の微妙なエラーは `code` や `details` に重要な診断情報を含んでおり、テンプレート埋め込みはこれらを全て喪失させます。
+
+### 13.43. The Type Integrity Prohibition Protocol（型詐称の禁止）
+*   **Law**: `as any` や `as never` を用いて型エラーを黙殺する行為は「バグの埋め込み」と定義します。型を正しく合致させることが**唯一の正当な解決策**であり、キャストによる回避は全面禁止です。
+*   **Action**:
+    1.  **Zero `as any` Policy**: コードベース全体で `as any` の使用を原則禁止します。ESLint ルール `@typescript-eslint/no-explicit-any` を `error` に設定し、CIで物理的にブロックしてください。
+    2.  **Root Cause Resolution**: 型エラーが発生した場合は、キャストではなく「型定義の修正」「DTOの再設計」「ジェネリクスの適用」のいずれかで**根本原因**を解消してください。
+    3.  **Exceptional Cast Documentation**: やむを得ず型アサーションが必要な場合（外部ライブラリの型定義不備等）は、`// SAFETY: <理由>` コメントを必ず付記し、コードレビューで承認を得てください。
+    4.  **Lint Suppression Audit**: `// eslint-disable` や `// @ts-ignore` の使用は「技術的負債の宣言」です。使用時は必ず対応するIssue番号を併記し、四半期ごとに棚卸しを義務付けます。
+*   **Rationale**: `as any` は型安全性を完全に無効化し、本来コンパイル時に検出されるべきバグを実行時に先送りします。特にDTO変換やAPI境界での使用は、データ不整合を隠蔽し、障害発生時の原因特定を著しく困難にします。
+
+### 13.44. The Thin Controller Mandate（薄いコントローラー原則）
+*   **Law**: API Route / Controller / Route Handler は、リクエストのパース・バリデーションと権限チェックのみを担当する「薄い層」として設計しなければなりません。ビジネスロジックはService層に委譲し、Controllerに直接記述することを禁止します。
+*   **Action**:
+    1.  **Controller Responsibilities**: Controller内のコードは以下に限定します: (a) リクエストボディ/パラメータのパースとバリデーション、(b) 認証/認可チェック、(c) Service層の呼び出し、(d) レスポンスの構築と返却。
+    2.  **No DB Access in Controllers**: Controller / Route Handler 内での直接的なDB呼び出し（ORMクエリ、SQL実行等）を禁止します。全てのデータアクセスはService/Gateway層を経由してください。
+    3.  **Testability**: Service層はControllerから独立してユニットテスト可能でなければなりません。Controllerに密結合したロジックはテスタビリティを破壊します。
+    4.  **Error Translation**: Service層から発生した例外は、Controller層でHTTPステータスコードとエラーレスポンス形式に変換してください。Service層がHTTPステータスコードを知っていてはなりません。
+*   **Rationale**: 肥大化したControllerはテスト困難、再利用不能、変更影響の把握不能という三重苦を生みます。薄いController + 厚いServiceの分離は、保守性とスケーラビリティの基盤です。
+
+### 13.45. The DTO Boundary Casting Protocol（DTO境界キャスト規約）
+*   **Law**: データベースやORMからの戻り値（緩い型）を厳格なDTO型に変換する際、`as any` によるキャストを禁止します。安全な型変換戦略を義務付けます。
+*   **Action**:
+    1.  **No `as any` Bridge**: `dbResult as any as MyDTO` のようなダブルキャストは、型安全性の完全な放棄です。禁止します。
+    2.  **Explicit Mapping**: DB結果からDTOへの変換は、明示的なマッピング関数（`toDTO(dbResult): MyDTO`）を作成し、各フィールドを個別にマップしてください。
+    3.  **Validated Cast**: やむを得ず型アサーションが必要な場合は、`as unknown as TargetType` による意図的な二段階変換を使用し、変換意図を明示してください。ただし、Zodなどのランタイムバリデーションとの併用を強く推奨します。
+    4.  **Generated Types**: DB型定義は自動生成（Prisma, Drizzle, Supabase CLI等）を使用し、手書きの型定義との乖離を物理的に防止してください。
+*   **Rationale**: DB層とアプリケーション層の型境界は、最もデータ不整合が発生しやすい箇所です。`as any` によるキャストは、カラム追加・名変更時のサイレントなデータ消失を引き起こし、ビルドは通るがデータが壊れる最悪のバグを生み出します。
+
+### 13.46. The CQRS Separation Mandate（コマンドクエリ責務分離義務）
+*   **Law**: Read操作（参照）とWrite操作（更新）のロジックを同一の関数・クラスに混在させることを禁止します。Query（Read専用）とCommand（Write専用）を明確に分離してください。
+*   **Action**:
+    1.  **Query/Command Split**: データアクセス層は、読み取り専用の `QueryGateway`（または `ReadService`）と、書き込み専用の `CommandGateway`（または `WriteService`）に分離してください。
+    2.  **No Side Effects in Queries**: Query系のメソッドは、データの読み取りと変換のみを行い、DBへの書き込みや外部APIの呼び出し等の副作用を一切持ってはなりません。
+    3.  **Independent Scaling**: Read/Writeの分離により、読み取り負荷が高い場合はRead Replicaの追加、書き込みが集中する場合はWrite最適化と、独立したスケーリング判断が可能になります。
+    4.  **Naming Convention**: メソッド名でRead/Writeの意図を明示してください（例: `getUser` / `findUsers` は Read、`createUser` / `updateUser` は Write）。
+*   **Rationale**: Read/Writeの混在は、キャッシュ戦略の適用を困難にし、パフォーマンスボトルネックの特定を遅延させます。CQRS分離は、コードの可読性向上、テスタビリティの改善、そして将来のイベントソーシングやマイクロサービス化への移行パスを確保します。
+
+### 13.47. The Cache Strategy Layer Protocol（階層化キャッシュ戦略義務）
+*   **Law**: データ特性を無視した一律のキャッシュ戦略（全件TTL固定 / キャッシュ完全無効化）を禁止します。データの変更頻度と鮮度要件に基づいた**階層化キャッシュ戦略**を定義してください。
+*   **Action**:
+    1.  **Data Classification**: アプリケーションで扱うデータを以下のティアに分類してください:
+        - **STATIC** (変更なし): 法的文書、利用規約等。CDN/ISR（リビルドトリガー式）。
+        - **WARM** (日次〜週次変更): マスターデータ、カテゴリ等。TTL 5分〜1時間 + SWR (Stale-While-Revalidate)。
+        - **HOT** (分単位変更): ユーザー投稿コンテンツ、商品在庫等。短TTL (30秒〜5分) + オンデマンドリバリデーション。
+        - **REALTIME** (即時反映): チャット、通知、決済ステータス等。キャッシュ無効 + WebSocket/SSE。
+    2.  **No Blind Cache**: `cache: 'force-cache'` や `revalidate: 0` を「とりあえず」で設定することを禁止します。各データソースに対してティア分類に基づいた明示的なキャッシュ戦略を文書化してください。
+    3.  **Cache Invalidation Strategy**: 書き込み時のキャッシュ無効化戦略（`revalidateTag` / `revalidatePath` / Purge API等）を、データ更新フローと一体で設計してください。
+    4.  **Monitoring**: キャッシュヒット率を計測し、90%未満のエンドポイントは最適化対象としてください。
+*   **Rationale**: 一律のキャッシュ戦略は、静的データに不要なリクエストを送り（コスト増加）、リアルタイムデータに古い情報を返す（UX劣化）という両面で損害を与えます。データ特性に基づく階層化は、コスト効率とユーザー体験の両立を実現する唯一の設計パターンです。
+
+### 13.48. The Explicit Mapping Mandate（ミューテーション明示マッピング義務）
+*   **Law**: Service層やServer Action内でデータベースへの書き込みペイロードを構築する際、スプレッド構文（`...input`）による一括展開を**禁止**します。全てのフィールドを明示的にマッピングしてください。
+*   **Action**:
+    1.  **No Spread Payload**: `supabase.from('table').update({ ...formData })` のようなスプレッド展開によるペイロード構築を禁止します。入力オブジェクトに含まれる予期しないフィールド（UIが追加した状態管理用フィールド等）がDBに送信され、エラーまたはデータ汚染を引き起こします。
+    2.  **Field-by-Field Construction**: ペイロードは `{ name: input.name, email: input.email, status: input.status }` のように、各フィールドを個別に指定してください。これにより、送信されるデータの範囲が明確になり、レビューが容易になります。
+    3.  **JSONB Structural Mapping**: ネストされたJSON/JSONB構造を持つフィールドも、トップレベルのスプレッドに頼らず、内部構造を明示的に構築してください。特に配列データ（画像リスト等）は、元データの順序と内容を正確に維持するマッピングが必要です。
+    4.  **DTO-Payload Alignment Check**: DTOにフィールドが追加された際は、Service層のマッピングにも同時に追加してください。マッピングの欠落は「保存しても反映されない」サイレントバグの最も一般的な原因です。
+*   **Rationale**: スプレッド構文は簡潔ですが、「何が送信されるか」の制御を放棄する行為です。特に管理画面のような大規模フォームでは、UIの状態管理用フィールド、計算フィールド、未定義フィールドが混入するリスクが高く、明示的なマッピングだけがデータの整合性を保証します。
+
+### 13.49. The Mutation Count Verification Protocol（ミューテーション影響行数検証義務）
+*   **Law**: データベースへの書き込み操作（INSERT/UPDATE/DELETE）の結果を検証する際、`error` の有無だけでなく、**影響を受けた行数（`count`）**を必ず確認しなければなりません。`error: null` かつ `count: 0` の組み合わせは「Phantom Success（偽の成功）」であり、実質的な失敗として扱ってください。
+*   **Action**:
+    1.  **Count Validation**: ID指定の単一レコード操作（`.eq('id', id)`）では、`count` が `1`（または期待される数）であることを検証してください。`count` が `0` または `null` の場合は、権限不足（RLS拒否）またはレコード不在として例外をスローしてください。
+    2.  **Bulk Operation Awareness**: 一括更新・削除操作では、`count` が入力データの件数と一致することを検証してください。部分的な成功（10件中7件のみ更新）はデータの不整合を意味します。
+    3.  **Sub-Step Integrity**: 単一のService関数内で複数のテーブルを連続して更新する場合、全てのサブステップで `error` と `count` の両方を検証してください。途中のステップの失敗をスキップすると、一部だけが更新された「Partial Phantom Success」となります。
+    4.  **Diagnostic Logging**: ミューテーション結果のログには `count` を必ず含めてください（例: `Logger.info('Update result:', { count })`）。事後の障害分析において、影響行数は最も重要な手がかりです。
+*   **Rationale**: Row Level Security（RLS）を使用するデータベースでは、権限不足のクエリが「エラーなし・0行影響」という形でサイレントに拒否されることがあります。`error` のみをチェックする従来のパターンでは、この「成功のように見える失敗」を検知できず、ユーザーには「保存したのに反映されない」という最も不透明なバグとして現れます。
+
+### 13.50. The Authentication Guard Enumeration Consistency（認証ガード列挙整合性義務）
+*   **Law**: ロールベースアクセス制御（RBAC）において、許可ロールのリストを複数のガード関数で個別管理することを**禁止**します。全てのガード関数は、共通の定数配列（例: `ALLOWED_ADMIN_ROLES`）を参照し、ロール定義の単一真実源（SSOT）を確立しなければなりません。
+*   **Action**:
+    1.  **Shared Role Constants**: 許可ロール（`admin`, `super_admin`, `master_admin` 等）は、単一の定数配列として定義し、全てのガード関数（ページアクセス制御、Server Action認可、RLSポリシー等）がこの定数を参照してください。
+    2.  **Simultaneous Update Mandate**: 新しいロールを追加する際は、全てのガード関数が自動的に更新される構造にしてください。定数配列を共有していれば、更新箇所は1箇所で済みます。
+    3.  **Dead Zone Detection**: 「画面には入れるが、操作（保存等）だけが失敗する」という不透明なデッドロックを防ぐため、ページレベルのガードとアクションレベルのガードが同一のロール集合を参照していることを定期的に監査してください。
+    4.  **Failure Transparency**: ガード関数が認可エラーを返す際は、フロントエンドでエラーをキャッチし、開発環境では `Logger.warn` でロール不整合を即座に検知できるようにしてください。
+*   **Rationale**: ロールの種類が増えた際に、全てのガード関数を同時に更新し忘れると、「管理画面にはログインできるが、特定の操作だけがサイレントに拒否される」という極めて不透明なデッドロックが発生します。この種のバグはエラーメッセージも表示されないため、原因特定に膨大な時間を浪費します。
+
+### 13.51. The Sub-Step Mutation Integrity Protocol（サブステップ・ミューテーション整合性義務）
+*   **Law**: 単一のサービスメソッド内で複数の非同期書き込み操作（INSERT/UPDATE/DELETE）を連続して実行する場合、**全てのサブステップで `error` オブジェクトを検証**し、エラーが発生した場合は即座にプロセスを停止して例外をスローしなければなりません。
+*   **Action**:
+    1.  **No Silent Continue**: `await supabase.from('table').delete()` のように戻り値の `error` をチェックせず後続処理に進むことを禁止します。全ての書き込み操作で `const { error } = await ...` として結果を受け取り、エラーチェックを行ってください。
+    2.  **Step-by-Step Logging**: 各サブステップの開始時と完了時にログを出力し（例: `Logger.info('[Step 2/5] Updating tags...')`）、障害発生時にどのステップで失敗したかを即座に特定できるようにしてください。
+    3.  **Aggregate Error Reporting**: 中間ステップの失敗が最終結果（`return { success: true }`）を汚染しないよう、サービスメソッド全体を `try-catch` で囲み、いずれかのステップで例外が発生した場合は明示的な失敗レスポンスを返してください。
+    4.  **Transaction Awareness**: 外部APIのシンプルな呼び出し（PostgREST等）はデフォルトでアトミックなトランザクションとして扱われないことを認識し、途中失敗時の補償処理（ロールバック相当）や冪等性の確保を設計に組み込んでください。
+*   **Rationale**: マルチテーブル更新において途中のステップの失敗を無視すると、メインテーブルは更新されたが関連テーブルは古いままという「Partial Phantom Success（部分的偽成功）」が発生します。ユーザーには「保存成功」と表示されるにもかかわらず、一部のデータだけが反映されないため、問題の発見が大幅に遅れます。
+
+### 13.52. The Error Object Transparency Mandate（エラーオブジェクト透過性義務）
+*   **Law**: エラーハンドリングにおいて、エラーオブジェクトをそのまま文字列として連結・出力すること（結果として `[object Object]` が出力される）を**禁止**します。エラーの `message`, `code`, `details` 等のプロパティを**明示的に分解**してログに記録しなければなりません。
+*   **Action**:
+    1.  **Structured Error Logging**: `Logger.error('Operation failed', { error: err.message, code: err.code, details: err.details })` のように、エラーオブジェクトのプロパティを個別のフィールドとして出力してください。`Logger.error('Failed: ' + error)` は `[object Object]` となり、原因特定が不可能です。
+    2.  **Catch Block Standard**: 全ての `catch` ブロックにおいて、捕捉したエラーが `Error` インスタンスか `PostgrestError` か等を判定し、それぞれのプロパティを適切に抽出してください。
+    3.  **Error Serialization**: クライアントへ返すエラーレスポンスにおいても、内部エラーの構造を適切に変換し、`{ success: false, error: 'Human-readable message', code: 'ERROR_CODE' }` 形式で返却してください。
+    4.  **Development vs. Production**: 開発環境ではエラーの全プロパティをログに含め、本番環境では機密情報（スタックトレース、内部パス等）をマスクした上で、運用に必要な情報（`code`, `message`）のみを出力してください。
+*   **Rationale**: `[object Object]` は、障害対応における最も無価値な情報です。特にデータベースエラー（Supabase `PostgrestError` 等）は `message`, `code`, `details`, `hint` といった豊富な診断情報を持っていますが、オブジェクトの直接連結によりこれらが全て失われ、障害の根本原因分析が事実上不可能になります。
+
+### 13.53. The Post-Mutation Verification Fetch Protocol（ミューテーション後検証フェッチ義務）
+*   **Law**: 重要度の高い書き込み操作（画像の並び替え、ステータス変更、権限変更等）の直後に、**同一IDで即時 `select`（再取得）を実行**し、データが実際にデータベースへ永続化されたことをログで検証しなければなりません。
+*   **Action**:
+    1.  **Verification Fetch Pattern**: ミューテーション（`update`, `insert`, `delete`）の直後に、同一レコードを `select` で取得し、更新後の値をログに出力してください（例: `Logger.info('[Verify] Post-update:', { id, updatedAt: result?.updated_at })`）。これにより、問題が「DB書き込みの失敗（RLS/Trigger）」なのか「アプリケーション側の読み込み/表示の失敗（Cache/UI）」なのかを100%確実に切り分けることができます。
+    2.  **Diagnostic Isolation**: 検証フェッチの結果が更新後の値を返すにもかかわらずUIに反映されない場合、問題はキャッシュ（Data Cache / Router Cache）またはフォームの再初期化にあると確定できます。逆にフェッチ結果が古い値を返す場合、問題はDB層（RLS拒否、トリガーによる上書き等）にあると確定できます。
+    3.  **Conditional Application**: 全てのミューテーションに適用する必要はありません。以下のケースで重点的に使用してください: (a) RLSが関与する特権操作、(b) 複数テーブルの連続更新、(c) ユーザーから「保存しても反映されない」と報告された箇所、(d) JSONB型の複雑なデータ構造の更新。
+    4.  **Production Consideration**: 本番環境では検証フェッチのログレベルを `debug` に下げるか、フィーチャーフラグで無効化できるようにしてください。ただし、デバッグ時に即座に有効化できる仕組みは維持してください。
+*   **Rationale**: 「保存したのに反映されない」はWebアプリケーションにおいて最も診断困難なバグの一つです。原因がDB書き込みの失敗（RLS、トリガー、権限不足）なのか、キャッシュの不整合なのか、フォーム再初期化の問題なのかを区別するには、ミューテーション直後のDB内の物理的な値を確認するしかありません。検証フェッチはこの切り分けを即座に行える唯一の確実な手段です。
+
+### 13.54. The Static Master Protocol（定数ファイル一元管理義務）
+*   **Law**: アプリケーション全体で使用される定数値（メニュー項目、カテゴリ定義、ステータスラベル、選択肢リスト等）は、必ず**専用の定数ファイル（例: `constants/`, `config/`）に一元定義**し、コンポーネントやページファイル内でのハードコードを禁止します。
+*   **Action**:
+    1.  **Single Source of Truth**: 各ドメインの定数は `constants/<domain>.ts` 等の専用ファイルにまとめ、`as const` でイミュータブルに定義してください。コンポーネント内でリテラル配列やオブジェクトを直接定義することを禁止します。
+    2.  **Type Derivation**: 定数定義から `typeof` + インデックスアクセス型で型を自動導出してください（例: `type Status = typeof STATUSES[number]`）。定数と型を別々に管理すると同期漏れの原因になります。
+    3.  **Change Impact Control**: 定数の変更が影響する全箇所を即座に把握できるよう、定数はエクスポートして参照で使用してください。マジックストリングの散在は、変更漏れによるサイレントバグの最大原因です。
+    4.  **i18n Readiness**: 表示ラベルを定数として定義する場合は、i18nキーとの対応関係を明確にし、将来の多言語対応時に定数ファイルの変更だけで済む構造にしてください。
+*   **Rationale**: 定数がコンポーネント間に散在すると、ビジネスルールの変更時に全ファイルを検索・修正する必要が生じ、変更漏れによるUI不整合やロジックバグが頻発します。一元管理はSSOT原則の基本であり、リファクタリングコストを劇的に削減します。
+
+### 13.55. The Generic Type Inference Safety Protocol（ジェネリック型推論安全性）
+*   **Law**: 汎用コンポーネント、ユーティリティ関数、共有型定義において、`Record<string, any>` や `{ [key: string]: any }` 等の**anyインデックスシグネチャ**を「便利な型」として使用することを**禁止**します。具体的な型パラメータ、`unknown`、または制約付きジェネリクスを義務付けます。
+*   **Action**:
+    1.  **No Any Index**: `Record<string, any>` の代わりに `Record<string, unknown>` を使用し、アクセス時に型ガードで絞り込んでください。`any` は型チェックを完全に無効化し、プロパティ名のタイポすら検出不可能にします。
+    2.  **Constrained Generics**: 汎用関数には `<T extends BaseType>` のように制約付きジェネリクスを使用し、呼び出し元に型安全性を保証してください。`<T>` だけでは `T` が `any` に推論されるリスクがあります。
+    3.  **Mapped Type Preference**: 動的なキーが必要な場合は、`Record` よりも `Pick<FullType, K>` や `Partial<FullType>` 等のMapped Typeを優先してください。これにより、許可されたキーの範囲がコンパイル時に検証されます。
+    4.  **Inference Verification**: ジェネリック関数の呼び出し箇所で、TypeScriptのホバー表示により推論結果が期待通りか確認してください。`any` に推論されている場合は、型パラメータの制約を見直してください。
+*   **Rationale**: `any` インデックスシグネチャは型安全性を根底から破壊し、存在しないプロパティへのアクセス、誤った型の代入、構造不整合のすべてをコンパイル時に検出不可能にします。これは「型のある `any`」であり、TypeScriptを使用する意義そのものを無効化する最も危険なアンチパターンの一つです。
+
+### 13.56. The Multi-Axis Deployment Audit Protocol（多軸デプロイ監査義務）
+*   **Law**: 機能追加・変更時、「動く」だけではデプロイ基準を満たしません。以下の**4軸すべてでグリーン**であることを自律的に検証してからデプロイ可能とします。
+*   **Action**:
+    1.  **Security (監査ログ)**: 破壊的アクション（作成・更新・削除）に監査ログ（`recordAuditLog` 等）が計装されているかを確認してください。証跡のない操作はガバナンス不能であり、セキュリティ事故発生時の追跡を不可能にします。
+    2.  **Structured Data (構造化データ)**: 公開ページの変更時、構造化データ（JSON-LD, OpenGraph等）が最新の状態に更新されているかを確認してください。SEOとAIエージェントの正確な情報取得に直結します。
+    3.  **UX (ユーザー体験)**: エラーメッセージ、ツールチップ、確認ダイアログがユーザーの言語で適切に提供されているかを確認してください。技術メッセージの露出はプロダクション品質を毀損します。
+    4.  **Type Safety (型安全性)**: `any`、不透明なキャスト（`as unknown as`）、anyインデックスシグネチャが新たに導入されていないかを確認してください。
+*   **Rationale**: 「動いたら完了」という意識は、セキュリティ、SEO、UX、保守性のいずれかに盲点を残します。多軸の品質基準を構造的に要求することで、デプロイ後の手戻りとインシデントを予防します。
+
+### 13.57. The DTO Segregation Protocol（型定義ファイル分割義務）
+*   **Law**: 肥大化した単一の型定義ファイル（例: `types/index.ts`）にプロジェクト全体のDTO・インターフェースを集約することを**禁止**します。機能ドメイン単位でファイルを分割してください。
+*   **Action**:
+    1.  **Domain-Based Splitting**: DTO定義は機能ドメインごとに分割してください（例: `types/store.ts`, `types/user.ts`, `types/article.ts`）。1ファイルに10を超えるDTO定義が含まれる場合は、分割の検討を義務付けます。
+    2.  **No Circular References**: 型定義ファイル間の循環参照（`A → B → A`）を防止してください。共通の基底型は `types/common.ts` 等の共有ファイルに配置し、依存の方向を一方向に保ちます。
+    3.  **AI Context Efficiency**: AIエージェントが関連する型のみをピンポイントで読み取れる構造を維持してください。巨大な型ファイルはAIのコンテキストウィンドウを浪費し、精度を低下させます。
+    4.  **Index Re-export**: 利便性のため `types/index.ts` からの再エクスポート（`export { StoreDTO } from './store'`）は許可しますが、そのファイル内で型定義を直接行うことは禁止します。
+*   **Rationale**: 巨大な型定義ファイルは、開発者の認知負荷を増大させ、AIエージェントのコンテキスト効率を劣化させ、Git上でのマージコンフリクトを頻発させます。ドメイン単位の分割により、関心の分離と並行開発の効率化を実現します。
+
+### 13.58. The Mapper Input Robustness Protocol（マッパー入力堅牢性）
+*   **Law**: DTOマッパー関数（データベース行→DTO変換関数）の設計において、**Postelの法則**「出力は厳格に、入力は寛容に（Be conservative in what you send, be liberal in what you accept）」を適用します。
+*   **Action**:
+    1.  **Liberal Input**: マッパー関数の入力型は、ORM/DBクライアントの推論結果が不完全（Partial、null混在、結合結果の不定形等）であることを前提とし、過度に厳密な型を強制しないでください。`Record<string, unknown>` やロスのない中間型の使用を許容します。
+    2.  **Conservative Output**: マッパー関数の戻り値は、必ず明示的に定義されたDTO型（`StoreDTO`, `UserDTO` 等）であり、型チェッカーが全フィールドの存在と型を保証する状態にしてください。
+    3.  **Internal Validation**: 入力の型を緩める代わりに、マッパー関数内部での値検証・Fallback処理（`input.name ?? ''`, `Number(input.price) || 0` 等）を徹底してください。これにより、不正な入力が安全なデフォルト値に変換されます。
+    4.  **No Partial Cascade**: マッパー関数の入力型にPartialを使用したことにより、出力DTOのフィールドまでoptionalになる「Partial伝播」を防止してください。出力型は常に完全型（Required）です。
+*   **Rationale**: ORM/DBクライアントの型推論は、テーブル結合やRPC呼び出し時に不完全な型を返すことが頻繁にあります。入力に厳密な型を強制すると、Partial不整合や`never`型エラーが頻発し、開発者は`as any`キャストに逃げる悪循環に陥ります。入力を寛容に、出力を厳格にすることで、実用性と型安全性を両立します。
+
+### 13.59. The Migration Static Analysis Guard Protocol（マイグレーション静的解析防衛）
+*   **Law**: データベースマイグレーションファイルのPush/Merge時に、CIパイプラインおよびPre-pushフック（Git Hook）で**静的解析**を実行し、危険なSQLパターンを物理的に拒否する仕組みを義務付けます。人間の注意に依存する「運用ルール」は必ず破られます。システム自らが拒否する自動ガードのみが本番環境を守ります。
+*   **Action**:
+    1.  **Forbidden Pattern Detection**: 以下のパターンをマイグレーションファイルから検出した場合、Push/Mergeを拒否してください。
+        -   **`UPDATE` without `DO` block**: WHERE句なし、または競合ハンドリングなしの無防備な更新。データ不整合（Constraint Violation）を招きます。
+        -   **`INSERT` without `ON CONFLICT`**: 一意制約違反を招く無防備な追加。
+        -   **`UNIQUE` constraint without Cleanup**: 既存の重複データを掃除せずに一意制約を追加すると、マイグレーション適用時にエラーで停止します。
+    2.  **Pre-push Hook**: ローカル環境でのPush前にスクリプト（例: `scripts/migration-guard.ts`）を実行し、危険なSQLを即座にフィードバックしてください。`--no-verify` でのフック回避は、プロジェクトの信頼性を破壊する行為として禁止します。
+    3.  **CI Pipeline**: GitHub Actions等のCIにおいて `migration:check` ジョブを常時稼働させ、ヒューマンエラーの最終防衛線としてください。このCIジョブの削除・無効化は禁止します。
+    4.  **Custom Rules**: プロジェクト固有の危険パターン（例: `DROP TABLE` without `IF EXISTS`、`ALTER TABLE DROP COLUMN` without backup）もルールセットに追加可能な拡張設計としてください。
+*   **Rationale**: マイグレーションの事故は「本番データの不可逆的破壊」に直結します。コードレビューのみに依存した防衛は、レビュアーの見落としや緊急デプロイ時のスキップにより容易に突破されます。機械的な静的解析ガードは、24時間365日、一切の例外なく本番環境を守り続けます。

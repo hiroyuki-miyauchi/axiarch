@@ -53,6 +53,9 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **Feedback Hierarchy**:
     *   **Toast**: Success/Notification (Async).
     *   **Inline Alert**: Context-dependent errors.
+*   **Toast Promise Standard (Async Feedback Lifecycle)**:
+    *   **Law**: Manually managing Loading→Success→Error feedback cycles for async operations (save, delete, submit, etc.) is a breeding ground for bugs.
+    *   **Action**: Use the Toast library's `promise` feature (e.g., `sonner.promise()`) to automatically display processing, success, and failure states. Users must visually perceive "processing" status and reliably receive completion or failure results.
     *   **Z-Index Stratification (The Layering Law)**:
         *   **Overlay (10000)**: Select, Popover, Tooltip, Calendar. Topmost.
         *   **Modal (9999)**: Dialog, Sheet.
@@ -146,6 +149,42 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **Focus Ring Protocol (Accessibility Sight)**:
     *   **Law**: UI where focus state (Tab key navigation, etc.) is not visually recognizable is a "maze in the dark" for keyboard users—accessibility failure.
     *   **Action**: When removing browser default focus ring (`outline-none`), MUST redefine **high-contrast focus ring** (e.g., `ring-2 ring-primary ring-offset-2`). "Invisible Focus" is treated as a bug.
+*   **A11y Legal Defense (ADA/EAA Compliance)**:
+    *   **Risk**: Insufficient accessibility creates litigation risk under the Americans with Disabilities Act (ADA Title III) and European Accessibility Act (EAA).
+    *   **Mandate**: Missing `aria-label` and insufficient contrast ratios are not "bugs" but "legal deficiencies." In addition to automated CI checks, mandate quarterly manual verification with screen readers (VoiceOver/NVDA, etc.).
+*   **A11y Zero Tolerance CI (Build Gate)**:
+    *   **Mandate**: Integrate `axe-core` or `pa11y-ci` into the CI pipeline. If even one `critical` or `serious` violation is detected, **force the build to fail**.
+    *   **Exemption**: Only for unfixable external factors within UI library internals—addition to the exception list (Ignore Config) is permitted after documenting the reason.
+*   **Non-Color Indication Protocol**:
+    *   **Law**: Error displays and critical information MUST NOT rely on **color alone**. Users with color vision diversity will miss the information.
+    *   **Action**: Always **combine** icons (⚠️, ✅, ❌) and text ("Required", "Error", "Success") with color to achieve a **triple-channel communication** standard.
+*   **Font Size & Zoom Protocol**:
+    *   **rem Mandate**: Specify `font-size` in `rem` units to respect user browser settings. `px` fixed values are only permitted at the `:root` level.
+    *   **Zoom Resilience**: Design layouts to remain intact at browser zoom (**200%**). Content clipping or overlap at 200% zoom is treated as a bug.
+*   **Tab Order Protocol (Keyboard Navigation Order)**:
+    *   **Law**: DOM order and tab order must match. Positive `tabindex` values (e.g., `tabindex="5"`) are **prohibited**.
+    *   **Allowed**: Only `tabindex="0"` (add to natural tab order) and `tabindex="-1"` (programmatic focus only) are permitted.
+    *   **Escape Key**: Modals and dropdowns must be closable with the `Escape` key.
+*   **Skip Link Protocol**:
+    *   **Mandate**: Implement a **"Skip to main content"** link at the beginning of every page.
+    *   **Implementation**: Use the `sr-only` + `:focus` pattern—hidden by default, visible only on focus.
+*   **ARIA Attributes Standard**:
+    *   **aria-live**: Set `aria-live="polite"` on dynamically changing content (toast notifications, countdowns, etc.) to notify screen readers of changes.
+    *   **aria-expanded / aria-controls**: Set `aria-expanded` for open/close state and `aria-controls` for target elements on accordions and dropdowns.
+    *   **First Rule of ARIA**: Do NOT use ARIA when semantic HTML is sufficient. Excessive ARIA causes more confusion than it solves.
+*   **Label Association Protocol**:
+    *   **Mandate**: Associate all input fields with `<label>` using the `htmlFor` attribute.
+    *   **Placeholder-Only Prohibition**: Using `placeholder` as a substitute for labels is strictly prohibited. Placeholders disappear on focus, causing users to lose track of input purpose.
+*   **Error Notification Protocol (Form Error Notification)**:
+    *   **Mandate**: Notify screen readers of form errors immediately using `aria-live="assertive"`.
+    *   **Association**: Place error messages directly below the field and associate them using `aria-describedby`.
+    *   **Clarity**: Error messages MUST **clearly indicate** which field has the issue.
+*   **Required Fields Protocol**:
+    *   **ARIA**: Set `aria-required="true"` on required fields.
+    *   **Visual**: Visually indicate with a "Required" label or `*` mark + text (do not rely on color alone: Non-Color Indication Protocol compliant).
+*   **Lighthouse Score Gate**:
+    *   **Mandate**: Lighthouse Accessibility Score of **90 or above** is a **deployment requirement**. Pages scoring below 90 are treated as bugs.
+    *   **Manual Testing**: Periodically conduct keyboard-only site operation tests, screen reader (VoiceOver / NVDA) read-aloud verification, and 200% zoom testing.
 
 ## 7. User Sovereignty (User First)
 *   **Data Ownership**: Users control their data (Easy Export/Delete).
@@ -169,6 +208,8 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **Micro-Interaction Standards**:
     *   **Cursor Affordance**: Clickable elements (including Cards and custom inputs) must apply `cursor-pointer` on hover to clarify affordance.
     *   **Hover State Fidelity**: Interactive cards must apply subtle background color change or elevation (`shadow-md`) on hover to signal reactivity to user's subconscious.
+        *   **Clipboard Interaction Protocol (Copy Feedback)**: On successful "copy" actions for URLs or codes, always display an immediate **toast notification** or **icon change (checkmark, etc.)** to clearly indicate success. In environments where `navigator.clipboard` fails (non-HTTPS, etc.), implement a fallback that selects the text for manual copying.
+        *   **Input Reflection Protocol (Real-time Label Sync)**: In collapsible UIs such as accordions, changes to internal input fields (`name`, `title`, etc.) MUST be reflected **in real-time** in parent components (list views, accordion headers). Behavior where "the title doesn't update until saved" is perceived as UX lag in admin interfaces.
 *   **The Microcopy Quality Protocol (Kindness First)**:
     *   **Law (No Blame)**: Error messages must "help" users, not "blame" them.
         *   **NG**: "Invalid Input"
@@ -190,11 +231,21 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     *   **Magic Word**: For irreversible actions like permanent deletion, verify with **Magic Word Input** (e.g., type "delete") instead of a simple "OK" button.
 *   **Dirty Check**:
     *   Warn users ("Changes will be lost") when attempting to leave with unsaved changes.
+*   **Loading Lock Protocol (Double-Submit Prevention)**:
+    *   **Law**: Leaving buttons clickable during form submission or async processing causes double-registration and Race Conditions, and is strictly prohibited.
+    *   **Action**: During processing (`isLoading`), disable buttons with the `disabled` attribute and visually indicate with greyout or spinner. For actions with significant side effects, additionally use `pointer-events-none` to physically block clicks.
+*   **Responsive Action Button Protocol**:
+    *   **Mobile**: Important action buttons (register, save, purchase, etc.) should be `w-full` (full screen width) for easy tapping.
+    *   **Desktop**: Use `w-auto` with sufficient minimum width and **center alignment**. Making buttons `w-full` on PC causing visual stretching is prohibited.
+    *   **Affordance**: Apply shadows (`shadow-md`) and hover effects to convey "clickability".
 
 ## 12. Hospitality UX (Omotenashi - Japanese Hospitality)
 *   **Kigakiku (Anticipatory)**: Anticipate needs before users struggle. (e.g., Offer "Convert to Half-width?" button on Full-width error).
 *   **Ma (Negative Space)**: White space is for "Thinking Time", not just empty space. Merge Silicon Valley density with Japanese Ma.
 *   **Aizuchi (Reassuring Feedback)**: Give reassuring feedback (Visual/Haptic) to every action. "Your operation is conveyed."
+*   **The Graceful Error Recovery Protocol**:
+    *   **Law**: When unexpected errors occur, do not merely state the facts—express empathy to the user, and **always provide action buttons for the user's next step** (reload, return home, contact support, etc.).
+    *   **Action**: Error pages and error modals MUST include a concise explanation of the cause along with at least one recovery action button. A "Dead End" error screen that offers no escape accelerates user churn and constitutes a UX failure.
 
 ## 13. Design Ops & Tools
 *   **Design System**: Figma is truth. Code follows Figma.

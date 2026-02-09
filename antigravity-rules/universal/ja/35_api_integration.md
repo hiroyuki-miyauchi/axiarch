@@ -43,6 +43,24 @@
     *   **AI Context Meta**: 全ての成功レスポンスには、`meta` フィールドを含めることを推奨します。
     *   **Details**: `tier` (public, enterprise), `usage` (metered, unlimited), `revalidation` (ttl) 等の情報を含め、AIエージェントによる推論精度向上と FinOps 最適化を支援してください。
 
+### 3.2. The Transparent Gateway Instrumentation Protocol（ゲートウェイ透過的計装）
+*   **Law**: Gateway / Service層の `catch` ブロックにおいて、エラーオブジェクトを**文字列テンプレートに直接埋め込んでログ出力**することを禁止します。エラーの `code`, `message`, `details` を明示的に分解して記録しなければなりません。
+*   **Action**:
+    1.  **No Generic Messages**: `` `Gateway error: ${error}` `` は `[object Object]` を出力し、RLS違反・権限不足・型不一致等の根本原因を完全に不可視化します。
+    2.  **Property Deconstruction**: `catch` ブロックでは `Logger.error('Gateway operation failed', { message: error?.message, code: error?.code, details: error?.details, hint: error?.hint })` の形式で構造化ログを出力してください。
+    3.  **HTTP Status Mapping**: データベースエラーコード（例: `23505` = unique violation, `42501` = insufficient privileges）をHTTPステータスコードに適切にマッピングし、クライアントにセマンティックなエラー情報を返却してください。
+    4.  **Sensitive Data Guard**: エラーログにリクエストペイロードを含める場合は、PII（個人情報）やクレデンシャルを必ずマスキングしてください。
+*   **Rationale**: ゲートウェイ層はアプリケーションのエラー診断における「最初の防衛線」です。ここで `[object Object]` が記録されると、データベース・RLS・認証のいずれが原因かの切り分けが不可能となり、デバッグ時間が指数関数的に増大します。
+
+### 3.3. The Server Action Graceful Return Protocol（Server Action優雅な返却）
+*   **Law**: Server Action（またはクライアントから呼び出されるサーバーサイド関数）が業務エラーを検出した場合、`throw new Error()` ではなく**共通レスポンス型**（例: `{ success: false, error: '...', code: '...' }`）で返却しなければなりません。
+*   **Action**:
+    1.  **No Raw Throw**: Server Actionでの `throw` は、クライアントの `useActionState` / `useTransition` 等のフックが「予期せぬ例外」として処理し、コンポーネントのクリーンアップや再試行ロジックが暴走する原因となります。
+    2.  **Typed Response Contract**: 全Server Actionの戻り値を `ActionResponse<T> = { success: true, data: T } | { success: false, error: string, code?: string }` のような共通型で統一してください。
+    3.  **Client Graceful Handling**: クライアント側では `if (!result.success)` で分岐し、トースト通知やフォームエラー表示等の適切なUIフィードバックを提供してください。未処理の `throw` に依存するエラーハンドリングは禁止です。
+    4.  **Observability**: Server Action内の `catch` ブロックでは、エラーをログに記録した上で、ユーザーフレンドリーなメッセージに変換してレスポンスに含めてください。生の技術的エラーメッセージをクライアントに返却してはなりません。
+*   **Rationale**: `throw` によるエラー伝播は、クライアント-サーバー境界（Next.js Server Actions等）を跨ぐ場合、シリアライゼーションの問題やReactのライフサイクルとの競合を引き起こします。共通レスポンス型はこれらの問題を構造的に回避し、予測可能なエラーハンドリングを実現します。
+
 ## 4. パフォーマンスとスケーラビリティ (Performance & Scalability)
 *   **レート制限 (Rate Limiting)**:
     *   **分散レート制限**: Redisを使用した **Token Bucket** アルゴリズムにより、分散環境下でも正確なレート制限（例: 100 req/min）を実施します。
@@ -94,3 +112,22 @@
     *   **Law**: コード内に特定のプラン ID をハードコードすることを禁止します。
     *   **Action**: プランの属性（Enterprise か、特定機能が有効か等）は、必ず Stripe 等の決済プラットフォーム側の **Metadata** または DB のプラン定義テーブルで管理してください。
     *   **Success**: これにより、エンジニアの手を借りず（デプロイなし）に、マーケターや経営陣が販売戦略を即座に変更できる柔軟性を確保します。
+
+### 6.2. The Strict Action Return Type Protocol（Server Action戻り値厳格化）
+*   **Law**: Server Action（またはサーバーサイド関数）は、全ての戻り値に対して**厳格な型定義**を持たなければなりません。UI側での `as any` キャストによる戻り値の型変換を永久に禁止します。
+*   **Action**:
+    1.  **Typed Response Contract**: 全てのServer Actionは、共通の戻り値型（例: `ActionResponse<T> = { success: true, data: T } | { success: false, error: string, code?: string }`）を使用してください。`void` や `any` を戻り値型にすることを禁止します。
+    2.  **No Client-Side Cast**: UI（呼び出し側）で `result as any` や `result as MyType` を使用して戻り値の型を無理やり合わせる行為を禁止します。型が合わない場合はServer Action側の型定義を修正してください。
+    3.  **Error Typing**: エラーケースも型で表現してください。`catch` ブロックで `unknown` を返すのではなく、想定されるエラーパターンを全てUnion型で列挙することを推奨します。
+    4.  **Serialization Boundary**: Server Actionの戻り値はReactのシリアライゼーション境界を通過します。`Date`, `Map`, `Set`, クラスインスタンス等の非シリアライズ可能な値を含めないでください。
+*   **Rationale**: 型の不整合をUI側で `as any` により隠蔽すると、Server Action の仕様変更時にUIが想定外のデータでサイレントに破壊されます。Server ActionとUIの型契約を厳密に維持することが、フルスタック型安全性の要です。
+
+### 6.3. The Graceful Failure Contract（Server Action安全失敗契約）
+*   **Law**: Server Action（`'use server'` 関数）内で発生したエラーを `throw` によりクライアントに伝播させることを**原則禁止**します。全てのエラーを `{ success: false, error: string, code?: string }` 形式の構造化レスポンスとして返却しなければなりません。
+*   **Action**:
+    1.  **No Throw Propagation**: Server Action がエラーを `throw` すると、Reactのエラーバウンダリが発火し、ページ全体または大きなUIセグメントが破壊される可能性があります。ビジネスロジックのエラー（バリデーション失敗、権限不足、データ不整合等）は全て戻り値で表現してください。
+    2.  **Try-Catch Envelope**: Server Action のルート関数は必ず `try-catch` で全体を包み、内部で発生した例外を `{ success: false, error: e.message }` に変換してください。予期しない例外もユーザーに適切なフィードバックを返せるようにしてください。
+    3.  **Typed Error Codes**: エラーレスポンスには機械可読な `code`（例: `VALIDATION_ERROR`, `PERMISSION_DENIED`, `NOT_FOUND`）を含め、UI側でエラーの種類に応じた分岐処理（トースト表示、リダイレクト、リトライ等）を可能にしてください。
+    4.  **Logging Before Return**: エラーを戻り値として返す前に、必ずサーバーサイドでログ（`Logger.error`）を出力してください。戻り値によるエラーハンドリングは、ログ出力を怠ると観測性を失う危険があります。
+*   **Rationale**: Server Action の `throw` はReactのストリーミングレンダリングと複雑に相互作用し、エラーバウンダリの意図しない発火、フォーム状態のリセット、再レンダリングの連鎖など、予測困難な副作用を引き起こします。構造化された戻り値によるエラーハンドリングは、UIの安定性とデバッグの容易さの両方を保証します。
+

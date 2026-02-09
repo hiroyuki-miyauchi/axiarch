@@ -203,6 +203,17 @@
     - [ ] `DROP POLICY` の名称は推測ではなく、DB上の実名と完全一致しているか？
     - [ ] **The Copy-Paste Mandate**: ポリシー名を手入力（タイピング）したか？ → YESならReject。必ずDashboard/SQLからコピペせよ。一字一句の不一致も許されない（Exact Policy Name Match Protocol）。
     - [ ] デプロイ後に Security Advisor 警告数を確認したか？
+*   **Strictification Drop Mandate（厳格化時のDROP義務）**:
+    *   **Warning**: RLSポリシーは**加算（OR）方式**で評価されます。既存のPermissiveポリシー（例: `USING (true)` の「誰でもOK」ルール）が残ったまま厳格なポリシーを追加しても、既存の緩いポリシーが優先され**新しいポリシーは実質無効化**されます。
+    *   **Action**: セキュリティ強化マイグレーションでは、新しい厳格ポリシーを作成する**前に**、必ず `DROP POLICY IF EXISTS "旧ポリシー名" ON ...;` を実行し、既存の穴を物理的に塞いでください。
+    *   **Template**:
+        ```sql
+        -- Step 1: 既存の緩いポリシーをDROP（必須）
+        DROP POLICY IF EXISTS "legacy_permissive_policy" ON public.target_table;
+        -- Step 2: 新しい厳格ポリシーを作成
+        CREATE POLICY "target_table_select_policy" ON public.target_table
+        FOR SELECT USING (strict_condition);
+        ```
 
 ### Rule 3.5: Public Read Protocol (Anti-Vault Paradox)
 *   **Principle**: 「セキュリティ」とは機能不全にすることではない。
@@ -382,3 +393,222 @@
 *   **Action**: 
     1. **Surgical Write**: 原則として書き込みは **Server Actions** に集約し、その内部で `recordAuditLog` を呼び出すことを義務付けます。
     2. **Exception Recognition**: 現実的な制約でクライアントから INSERT する場合は、DBトリガー (`AFTER INSERT`) に `recordAuditLog` 相当のロジックを実装し、物理的にバイパスを不可能にしてください。
+
+### Rule 11.3: The RLS Best Practices Protocol (ポリシー衛生)
+*   **Law 1: No Redundant Admin Policy**: `service_role` キーはRLSを完全にバイパスします。したがって、`TO service_role` のポリシーは**意味がなく冗長**です。管理者アクセスはアプリケーション層（`is_admin()` ヘルパー）で制御してください。
+*   **Law 2: One Policy Per Action**: 同一テーブル、同一アクション（例: `SELECT`）に対して複数の `PERMISSIVE` ポリシーが存在する場合、PostgreSQLはそれらを `OR` で結合します。これは意図しないアクセス許可を生みます。**1テーブル、1アクションにつき、原則1ポリシー**を徹底してください。
+*   **Law 3: No WITH CHECK (true)**: `WITH CHECK (true)` は「誰でも書き込み可能」を意味します。本番テーブルへの適用は厳禁です。必ず `auth.uid()` 等による所有権チェックか、管理者ロールチェックを含めてください。
+
+### Rule 11.4: The Poison Row Prevention Protocol (型崩壊防止)
+*   **Context**: 自動生成型 (`database.types.ts`) を拡張する際に、交差型 (`&`) で `Insert` / `Update` を `never` に設定すると、型推論が壊れ（Type Collapse）、正当なINSERT/UPDATE操作が型エラーで拒否されるようになります。
+*   **Law**: 拡張型定義において、自動生成型の `Insert` / `Update` サブタイプを `never` で上書きすることを禁止します。
+*   **Action**:
+    1.  **Type Alias**: 拡張型は `interface` ではなく **`type` エイリアス** を使用してください（Mapped Typeとの互換性）。
+    2.  **Intersection Safety**: 交差型で拡張する場合は、`Row` のみを対象にし、`Insert` / `Update` は元の型をそのまま継承させてください。
+    3.  **Validation**: 拡張型を定義した後、必ず `supabase.from('table').insert({...})` がコンパイルを通ることを確認してください。
+
+### Rule 11.5: The Idempotent Migration Protocol (冪等マイグレーション)
+*   **Context**: マイグレーションは「クリーンルーム」（CIの新規DB）と「ダーティルーム」（既にデータが存在する本番DB）の両方で実行されます。両環境で成功することを保証する設計が必要です。
+*   **Law**: マイグレーションファイルは、何度実行しても同じ結果になる**冪等性（Idempotency）**を持たなければなりません。
+*   **Action**:
+    *   **Functions**: `CREATE FUNCTION` ではなく `CREATE OR REPLACE FUNCTION` を使用してください。
+    *   **Policies**: `CREATE POLICY` の前に `DROP POLICY IF EXISTS` を記述してください。
+    *   **DML**: `INSERT` には `ON CONFLICT ... DO NOTHING` または `DO UPDATE` を付与し、既存データとの衝突を防いでください。
+    *   **Tables/Indexes**: `IF NOT EXISTS` を必ず付与してください。
+*   **Rationale**: CI/CDパイプラインでの再実行やロールバック後の再適用に対応するため。冪等でないマイグレーションは「爆弾」です。
+
+### Rule 11.6: The Admin/System Write Service Role Mandate (管理者書き込みのService Role義務)
+*   **Law**: 管理者（Admin）の書き込み操作（Create/Update/Delete）は、`anon` キー + Cookie セッション（`createClient()`）ではなく、**`serviceRoleKey`（`createAdminClient()`）を使用**しなければなりません。
+*   **Reason**:
+    1.  Server Action経由でSupabaseを呼び出す際、セッション情報が正しく渡されない場合がある。
+    2.  RLSが `UPDATE` を拒否しても**エラーを返さず0行更新（サイレント失敗）**になる。
+    3.  管理者操作は業務都合上RLSの制約を超える必要があるケースが多い。
+*   **Action**:
+    1.  **Admin Write**: 管理画面からの全書き込み操作は `createAdminClient()` を使用してください。
+    2.  **System Job**: Cron、Webhook等のバックグラウンドジョブも同様に `createAdminClient()` を使用してください（ユーザーセッションが存在しないため）。
+    3.  **Read is OK**: 管理者の読み取り操作は `createClient()` でも問題ありませんが、一貫性のため `createAdminClient()` の使用を推奨します。
+
+### Rule 11.7: The Silent RLS Failure Detection Protocol (RLSサイレント失敗検知)
+*   **Law**: SupabaseのRLSポリシーにより操作が拒否された場合、PostgRESTは**エラーを返さずに「0行影響（affected rows = 0）」を返す**仕様です。これは「サイレント失敗」であり、最も検知困難なバグの原因です。
+*   **Action**:
+    1.  **Count Check**: UPDATE/DELETE操作後は、戻り値の `count` が `null` または `0` でないことを検証してください。`hasError: false` かつ `count: null` はRLS違反のシグナルです。
+    2.  **Explicit Error**: `count === 0` の場合は、明示的なエラーを返すラッパー関数を実装してください（例: `throw new Error('RLS policy may have blocked this operation')`）。
+    3.  **Logging**: サイレント失敗が疑われるケースではログに `{ operation, table, userId, affectedRows }` を記録し、後日の原因調査を可能にしてください。
+*   **Diagnostic**: 「保存成功なのにリロードすると元に戻る」→ **RLSサイレント失敗を疑え**。
+
+### Rule 11.8: The RPC Scope Limitation Protocol（RPCスコープ制限）
+*   **Law**: DB側のRPC（PL/pgSQL関数）に複雑なビジネスロジック（条件分岐の連鎖、外部API呼び出しの模倣、複数エンティティにまたがるワークフロー）を押し込むことを**禁止**します。
+*   **Action**:
+    1.  **Atomic Operations Only**: RPCの用途は「アトミックなデータ操作」に限定してください。許可される用途: バルク更新（`UPDATE ... WHERE id = ANY(...)`）、システム権限チェック、集計クエリ、トランザクション内の複数テーブル同時操作。
+    2.  **Application Layer Logic**: 条件分岐、ワークフロー制御、外部サービス連携、通知送信等のビジネスロジックは、アプリケーション層（Server Actions / TypeScript等）で記述してください。
+    3.  **Debuggability**: PL/pgSQLは型安全性が低く、デバッグツールも限定的です。ロジックをアプリケーション層に保つことで、ブレークポイント設定・ログ出力・テスト記述が容易になります。
+    4.  **DB Load Offloading**: 重い計算処理をDB側に押し込むと、DB接続プールを圧迫し、他のクエリの遅延を招きます。計算はアプリケーション層にオフロードしてください。
+*   **Rationale**: RPCへのビジネスロジック集中は、デバッグ困難性・型安全性の欠如・DB負荷増大という三重のリスクを生みます。RPCは「DBが最も効率的に処理できる操作」に限定し、アプリケーション層との適切な責務分離を維持してください。
+
+### Rule 11.9: The Ghost Migration Ban（ゴーストマイグレーション禁止）
+*   **Law**: マイグレーションファイル化されていないDB操作（手動でのカラム追加・変更・削除、Dashboard上でのスキーマ変更等）を**「ゴーストマイグレーション」と定義し、厳禁**とします。
+*   **Action**:
+    1.  **Migration File Mandate**: すべてのスキーマ変更は、必ずマイグレーションツール（`supabase migration new` 等）を経由し、マイグレーションファイルとしてGitに保存されなければなりません。
+    2.  **No Dashboard Edits**: DB管理画面（Supabase Dashboard、pgAdmin等）での直接的なスキーマ変更は、履歴追跡が不可能となるため禁止します。緊急対応であっても、事後に必ずマイグレーションファイルを作成してGitに反映してください。
+    3.  **Schema Consistency Protocol**: ローカル環境のスキーマがマイグレーションファイルと乖離（汚染）した場合は、DB再構築（`supabase db reset` 等）を躊躇してはなりません。常にマイグレーションファイルをSource of Truth（正）として扱い、ローカルDBを従とします。
+    4.  **Verification**: マイグレーション適用後は、ローカルスキーマとリモートスキーマの差分がゼロであることを確認してください。差分がある場合はゴーストマイグレーションの存在を疑います。
+*   **Rationale**: マイグレーションファイルに記録されない変更は、チーム間での再現不能、CI/CD障害、本番環境との不整合を引き起こします。「全ての変更は記録される」という原則こそが、スキーマの信頼性を担保する唯一の方法です。
+
+## 12. マイグレーションと特権操作 (Migrations & Privileged Operations)
+
+### Rule 12.1: The Admin Write Service Role Protocol（管理者書き込みのService Role使用義務）
+*   **Law**: 管理画面やバックグラウンドジョブからのDB書き込み操作は、ユーザー認証セッションに依存しない**特権クライアント（Service Role Key）**を使用しなければなりません。通常クライアント（ユーザーセッション経由）での管理者書き込みは、RLSポリシーによりサイレントに拒否される危険があります。
+*   **Action**:
+    1.  **Admin Write**: 管理画面からの全書き込み操作（INSERT/UPDATE/DELETE）は、RLSをバイパス可能な特権クライアントを使用してください。
+    2.  **System Job**: Cron、Webhook、バッチ処理等のバックグラウンドジョブも同様に特権クライアントを使用してください（ユーザーセッションが存在しないため）。
+    3.  **Principle of Least Privilege**: 特権クライアントの使用はサーバーサイドに限定し、クライアントサイドコードでService Role Keyを使用することは**厳禁**です。
+    4.  **Audit Trail**: 特権クライアント経由の操作は、RLSをバイパスしているため、アプリケーション層で明示的に監査ログを記録してください。
+*   **Rationale**: Server Action等のサーバー実行コードでも、フレームワークのセッション管理の仕組みによっては認証情報が正しく渡らず、RLSが意図せず操作を拒否するケースがあります。管理者操作が「エラーなし・影響0行」で終了する「サイレント失敗」は、最も発見困難なバグです。
+
+### Rule 12.2: The Idempotent Migration Protocol（冪等マイグレーション義務）
+*   **Law**: データベースマイグレーションファイルは、**何度実行しても同じ結果になる（冪等性）**ことを保証しなければなりません。CI環境、プレビュー環境、本番環境でマイグレーションが部分実行される可能性を常に想定してください。
+*   **Action**:
+    1.  **CREATE OR REPLACE**: 関数（Function）やビュー（View）の作成・更新には `CREATE OR REPLACE` を使用し、`ALTER` ではなく宣言的な定義を推奨してください。
+    2.  **IF NOT EXISTS**: テーブルやインデックスの作成には `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS` を使用してください。
+    3.  **DROP IF EXISTS + CREATE**: ポリシーやトリガーなど `CREATE OR REPLACE` が使用できないオブジェクトは、`DROP ... IF EXISTS` → `CREATE` のパターンを使用してください。
+    4.  **Defensive DML**: シードデータの挿入には `INSERT ... ON CONFLICT DO NOTHING`（または `DO UPDATE`）を使用し、重複挿入エラーを防いでください。
+*   **Rationale**: CI環境は空のDBでマイグレーションを適用するため常に冪等ですが、プレビュー環境や手動復旧時には過去のマイグレーションが部分的に適用されている場合があります。冪等でないマイグレーションはこれらの環境でデプロイ障害を引き起こします。
+
+### Rule 12.3: The Anti-Permissive Policy Duplication Mandate（冗長ポリシー禁止義務）
+*   **Law**: RLS（Row Level Security）のポリシー設計において、同一ロール・同一アクションに対する**冗長なPermissiveポリシーの作成を禁止**します。特に `service_role` はRLSをバイパスするため、管理者用の別途ポリシーは不要です。
+*   **Action**:
+    1.  **One Policy Per Role-Action**: 同一テーブルに対し、同一ロール（`authenticated`, `anon` 等）の同一アクション（`SELECT`, `INSERT` 等）で複数の Permissive ポリシーを作成しないでください。複数条件がある場合は `OR` で1つのポリシーにまとめます。
+    2.  **No service_role Policy**: `service_role` はRLSを完全にバイパスするため、`service_role` 用のRLSポリシーを作成することは冗長であり禁止します。
+    3.  **Policy Audit**: 既存ポリシーの追加・変更時は、同一テーブルの全ポリシーを一覧し、論理的な重複がないか確認してください。
+*   **Rationale**: PostgreSQL の Permissive ポリシーは `OR` で結合されるため、意図せず広い範囲を許可してしまうリスクがあります。1ロール1アクション1ポリシーの原則により、権限の意図を明確にし、セキュリティホールを防ぎます。
+
+### Rule 12.3.1: The RLS Auth Function InitPlan Optimization（RLS認証関数InitPlan最適化）
+*   **Law**: RLSポリシー内で `auth.uid()`, `auth.role()`, `current_setting()` 等の認証関数を使用する際、必ず **`(select ...)`でラップ** し、各行での再評価を防がなければなりません。
+*   **Action**:
+    1.  **Subquery Wrap**: `USING (user_id = auth.uid())` ではなく `USING (user_id = (select auth.uid()))` と記述してください。
+    2.  **All Auth Functions**: `auth.uid()`, `auth.role()`, `auth.jwt()`, `current_setting()` 等、セッション情報を返す全ての関数に適用してください。
+    3.  **EXISTS内も同様**: `EXISTS (SELECT 1 FROM ... WHERE ... = auth.uid())` も、内部の `auth.uid()` を `(select auth.uid())` にラップしてください。
+*   **Rationale**: ラップなしの場合、PostgreSQLは各行のスキャンごとにこれらの関数を再評価します（Volatile扱い）。`(select ...)`でラップすることで、PostgreSQLのオプティマイザは結果を**InitPlan（事前計算）**として1回だけ評価し、大規模テーブルでの劇的なパフォーマンス改善を実現します。
+*   **Anti-Pattern**:
+    ```sql
+    -- ❌ 禁止: 各行で auth.uid() が再評価される
+    USING (user_id = auth.uid())
+    ```
+*   **Correct Pattern**:
+    ```sql
+    -- ✅ 正解: InitPlanにより1回だけ評価
+    USING (user_id = (select auth.uid()))
+    ```
+
+### Rule 12.4: The Type Extension Safety Protocol（型拡張安全プロトコル）
+*   **Law**: データベースSDKやORM等が自動生成する型定義を、アプリケーション固有の型で拡張する際には、型の安全性を損なわない手法を用いなければなりません。
+*   **Action**:
+    1.  **No `never` in Type Extensions**: 自動生成型のプロパティを `never` で上書きする型拡張を禁止します。`never` は「到達不能」を意味するため、実行時にはプロパティが存在するにも関わらず型レベルではアクセス不能となる「Poison Row」を引き起こします。
+    2.  **Type Alias over Interface**: 自動生成型の拡張には `interface extends` よりも `type` エイリアスと交差型（`&`）を優先してください。Interface の `extends` は宣言マージ（Declaration Merging）による意図しない汚染のリスクがあります。
+    3.  **Simple Intersection over Omit**: `Omit<GeneratedType, 'key1' | 'key2' | ...>` の多用は型の可読性を著しく低下させます。可能な限り単純な交差型で拡張し、`Omit` はプロパティの型を変更する場合にのみ使用してください。
+    4.  **Generated Type Sovereignty**: 自動生成型のファイル自体を手動で編集することは厳に禁止します。拡張は常に別ファイルで行ってください。
+*   **Rationale**: 自動生成型は「DBスキーマの真実」を反映する重要な資産です。不適切な拡張はこの真実を歪め、型定義と実データの乖離を引き起こします。
+
+### Rule 12.5: The Migration System Schema Exclusion Protocol（マイグレーション・システムスキーマ除外プロトコル）
+*   **Law**: データベースマイグレーションにおいて、関数のセキュリティ設定（`search_path`、`SECURITY DEFINER/INVOKER`等）を一括変更するスクリプトを作成する際、**マネージドサービスが管理するシステムスキーマの関数は除外リストに含める**ことを義務付けます。
+*   **Action**:
+    1.  **Exclusion List**: `auth`, `storage`, `realtime`, `supabase_functions`, `graphql`, `graphql_public`, `pgsodium`, `vault`, `extensions` などのシステムスキーマの関数は、一括変更の対象から明示的に除外してください。
+    2.  **Schema Filter**: マイグレーションスクリプトの `WHERE` 句で `n.nspname NOT IN ('auth', 'storage', ...)` を使用し、システムスキーマの関数への干渉を物理的に防止してください。
+    3.  **Dry Run**: 一括変更マイグレーションを適用する前に、対象となる関数の一覧をプレビュー（`SELECT` のみ実行）し、システム関数が含まれていないことを確認してください。
+*   **Rationale**: マネージドサービスのシステム関数（認証、ストレージ管理等）の `search_path` やセキュリティ設定を変更すると、サービスの基盤機能が破壊される可能性があります。これは即座にサービス全停止につながる致命的な障害です。
+
+### Rule 12.6: The RLS InitPlan Optimization Protocol（RLS InitPlan最適化義務）
+*   **Law**: RLS（Row Level Security）ポリシー内での `auth.uid()`、`auth.role()` 等のセッション関数呼び出しは、**`(SELECT auth.uid())` のようにサブクエリ（Sub-Select）として記述**しなければなりません。
+*   **Action**:
+    1.  **Sub-Select Wrapping**: RLSポリシーの `USING` 句や `WITH CHECK` 句で `auth.uid()` を使用する場合、必ず `(SELECT auth.uid())` の形式にしてください。これにより、PostgreSQLのクエリプランナが関数を一度だけ評価してその結果をInitPlanとしてキャッシュし、行ごとの再評価を防止します。
+    2.  **All Auth Functions**: `auth.uid()` だけでなく、`auth.role()`、`auth.jwt()` 等の全てのセッション関数に同じパターンを適用してください。
+    3.  **Linter Integration**: Supabaseのセキュリティリンター等が `auth_rls_initplan` 警告を出す場合は、即座に修正してください。
+    4.  **Performance Impact**: 大規模テーブル（数万行以上）では、このパターンの適用で数十倍のパフォーマンス差が生じる場合があります。
+*   **Rationale**: RLSポリシー内の関数が行ごとに再評価されると、テーブルスキャンのたびにO(N)回の関数呼び出しが発生します。サブクエリ化によりO(1)に削減され、大規模テーブルでのクエリパフォーマンスが劇的に向上します。
+
+### Rule 12.7: The Client Identity Audit Protocol（クライアントIDコンテキスト監査義務）
+*   **Law**: RLSポリシーの最適化（統合・削除）を行う前に、対象データにアクセスする**全ての経路**（Server Action、API Route、SSR、管理画面等）が**どのIDENTITY**（`service_role` / User JWT / Anonymous）を使用しているかを**網羅的に監査**しなければなりません。
+*   **Action**:
+    1.  **Access Path Inventory**: 対象テーブルにアクセスする全てのコードパス（Service層、Gateway層、Server Action等）をリストアップし、それぞれが使用するクライアント初期化関数（`createClient`, `createAdminClient` 等）を特定してください。
+    2.  **No Blind Optimization**: 「`service_role` で十分だから」という理由でユーザーJWT向けのポリシーを削除しないでください。Server Action等がユーザーJWTを使用している場合、そのポリシーの削除は正規アクセスのサイレントな遮断を引き起こします。
+    3.  **Identity Matrix**: 複雑なテーブルに対しては、「テーブル × 操作 × 使用IDENTITY」のマトリクスを作成し、全てのアクセスパターンが少なくとも1つのRLSポリシーでカバーされていることを確認してください。
+    4.  **Post-Change Verification**: ポリシーを変更・削除した後は、影響を受ける全てのUIフロー（管理画面の編集・保存、ユーザー向けの閲覧等）を実際に操作して動作を確認してください。
+*   **Rationale**: RLSポリシーの「最適化」による不用意な削除は、セキュリティホールではなく「正規アクセスの不可視化」を招きます。特に管理画面がServer Action（ユーザーJWTコンテキスト）を使用している場合、service_roleで十分だと思ってJWT向けポリシーを削除すると、管理者のCRUD操作がサイレントに拒否されます。
+
+### Rule 2.8: The Idempotent Migration Protocol（冪等マイグレーション義務）
+*   **Law**: マイグレーションファイルは、何度実行しても同じ結果を生む**冪等な構造**で記述しなければなりません。DML（データ操作）を含む場合は、本番データとの衝突を想定した防衛的コードで記述してください。
+*   **Action**:
+    1.  **DDL Idempotency**: `CREATE TABLE` は `IF NOT EXISTS`、`DROP TABLE` は `IF EXISTS`、`ALTER TABLE ADD COLUMN` は `IF NOT EXISTS`（PostgreSQL 9.6+）を必ず付与してください。
+    2.  **DML Idempotency**: `INSERT` は `ON CONFLICT DO NOTHING` または `ON CONFLICT DO UPDATE` を使用し、既存データとの重複時にエラーにならないようにしてください。
+    3.  **Function/Trigger Idempotency**: `CREATE OR REPLACE FUNCTION` を使用し、関数の再作成が安全に行えるようにしてください。トリガーは `DROP TRIGGER IF EXISTS ... ; CREATE TRIGGER ...` のパターンで記述してください。
+    4.  **RLS Policy Idempotency**: ポリシーの作成前に `DROP POLICY IF EXISTS "policy_name" ON table_name;` を実行し、既存ポリシーとの衝突を防止してください。
+*   **Rationale**: マイグレーションの非冪等性は、ステージング環境と本番環境の差異、マイグレーションの再実行、ブランチ間の競合時に「一度通ったはずのマイグレーションが壊れる」致命的な障害を引き起こします。冪等性は、安全なデプロイと環境再現性の基盤です。
+
+### Rule 2.9: The Read-Write Privilege Symmetry（読み書き権限の対称性）
+*   **Law**: 管理画面等において、書き込み（Mutation）が特権クライアント（`service_role` 等）で実行される場合、**読み込み（Query for Edit Form）も同等の可視性を保証**しなければなりません。書き込みと読み込みで異なる権限レベルのクライアントを使用すると、「保存は成功するがリロードすると元に戻る」という不透明なバグが発生します。
+*   **Action**:
+    1.  **Privilege Parity Check**: 書き込みに `createAdminClient()`（RLSバイパス）を使用している場合、対応する「編集のための取得」も同等の権限で実行されるか確認してください。読み込みが `anon` や制限された `authenticated` 権限で行われると、RLSにより一部のデータがフィルタされ、フォームに古いデータや空データが流し込まれます。
+    2.  **Select Spec Synchronization**: DTOで使用する Select Specification が、保存対象の全カラムを包含しているか確認してください。片方にだけカラムを追加すると、「保存はされるが編集画面に表示されない」片肺状態になります。
+    3.  **Admin Gateway Awareness**: 管理目的が明示的な関数（例: `getAdminStoreById`）では、必要に応じて特権クライアントを使用するか、RLSポリシーを管理ロールに対して完全に開放してください。
+    4.  **Post-Update Verification**: 重要度の高いミューテーション（画像の並び替え、ステータス変更等）では、更新直後に同じIDで `select` を実行し、現在値をログで確認する「Verification Fetch」パターンの適用を検討してください。
+*   **Rationale**: 特権クライアントによる書き込みは RLS をバイパスしてデータを正しく保存しますが、編集画面の再読み込み時に非特権クライアントが使用されると、RLS の `SELECT` ポリシーにより一部のカラムやレコードが除外されます。結果として、ユーザーは「保存したのに反映されない」と感じ、同じ操作を繰り返すことでデータの不整合がさらに拡大する悪循環に陥ります。
+
+### Rule 2.10: The RLS Policy Consolidation Mandate（RLSポリシー統合義務）
+*   **Law**: 同一テーブル・同一操作（SELECT, INSERT, UPDATE, DELETE）に対して、複数の `PERMISSIVE` ポリシーが定義されている場合、評価オーバーヘッドを削減するため、可能な限り**単一のポリシーにOR条件で統合**しなければなりません。
+*   **Action**:
+    1.  **Consolidation by Operation**: `anon` 向けと `authenticated` 向けに別々の `SELECT` ポリシーを定義するのではなく、`USING (true)` や `USING (auth.role() IN ('anon', 'authenticated'))` のように単一ポリシーに統合してください。PostgreSQLは全ての `PERMISSIVE` ポリシーをOR結合で評価するため、個別ポリシーの分割は評価回数を不必要に増加させます。
+    2.  **Service Role Redundancy Elimination**: `service_role` はRLSを完全にバイパスするため、`service_role` 向けの明示的なポリシーは冗長です。`service_role` のみを対象としたポリシーが存在する場合は削除してください。
+    3.  **RESTRICTIVE Policy Awareness**: `RESTRICTIVE` ポリシーは全ての `PERMISSIVE` ポリシーの**AND条件**として評価されるため、統合対象は `PERMISSIVE` ポリシーのみです。`RESTRICTIVE` ポリシーの統合は副作用を引き起こす可能性があります。
+    4.  **New Table Checklist**: 新規テーブル作成時のRLSポリシー設計では、「操作ごとに最小数のポリシー」を設計原則としてください。同一操作に2つ以上のポリシーを作成する場合は、統合不可能な理由を明示的にコメントしてください。
+*   **Rationale**: PostgreSQLは同一操作に対する全ての `PERMISSIVE` ポリシーをOR結合で評価するため、機能的に同等の条件を複数のポリシーに分割しても結果は変わりませんが、評価のオーバーヘッドが増加します。特に大量のレコードを持つテーブルでは、不要なポリシーの分割がクエリパフォーマンスに直接影響します。
+
+### Rule 2.11: The Orphan File Defense Protocol（孤立ファイル防衛）
+*   **Law**: データベースレコードの削除時に、関連するストレージ上のファイルを放置する（Orphan Files）ことを禁止します。孤立ファイルはストレージコストを継続的に増大させ、意図しない情報残存のリスクを生みます。
+*   **Action**:
+    1.  **Cascade Deletion**: `DELETE` トリガー、またはアプリケーションのミューテーションロジック内で、DBレコード削除時に関連するストレージファイルも**非同期で削除**する処理を組み込んでください。同期的な削除はレスポンスタイムに影響するため、非同期ジョブ（Queue/Worker）を推奨します。
+    2.  **Batch Cleanup**: 定期的（例: 週次）にバッチジョブを実行し、DBに参照が存在しないストレージファイル（孤立ファイル）を検出・削除するスイーパーを設置してください。
+    3.  **Soft Delete Awareness**: 論理削除（`deleted_at`）を採用している場合、ファイル削除はレコードの物理削除時（またはアーカイブ移行時）まで遅延させてください。論理削除時点でファイルを消すと、復元時にファイルが失われます。
+*   **Rationale**: レコードのみ削除してファイルを放置する運用は、ストレージコストの「サイレントリーク」を引き起こします。特にUGC（ユーザー生成コンテンツ）が多いサービスでは、月単位で数十GBの孤立ファイルが蓄積し、FinOps上の重大な損失となります。
+
+### Rule 2.12: The Safety Valve Protocol（安全弁カラム義務）
+*   **Law**: 主要なエンティティテーブル（ユーザー、コンテンツ、商品、店舗等）には、スキーマ変更を必要とせずにイレギュラー情報を記録できる**自由記述カラム**（`notes`, `remarks`, `internal_memo` 等）を必ず1つ以上設置しなければなりません。
+*   **Action**:
+    1.  **Escape Hatch**: 現実の運用では、厳格なスキーマだけでは表現しきれない例外（「冬季閉鎖」「要電話確認」「特別対応あり」等）が頻繁に発生します。自由記述カラムは、スキーマ変更を待たずにこれらの情報を記録する「安全弁（Escape Hatch）」として機能します。
+    2.  **Type**: `TEXT` 型（またはMarkdown対応が必要な場合は `TEXT`）を推奨します。`VARCHAR(n)` の文字数制限は運用時の障害要因となるため、特段の理由がない限り避けてください。
+    3.  **Nullable**: 自由記述カラムは `NULL` を許容してください。全レコードに記述が必要な性質のものではありません。
+    4.  **No Business Logic**: 自由記述カラムの値にビジネスロジック（条件分岐、フィルタリング）を依存させることを禁止します。ロジックに必要な情報は正規化カラムとして昇格させてください。
+*   **Rationale**: スキーマ変更にはマイグレーション・デプロイ・テストのサイクルが必要であり、即座に対応できません。安全弁カラムの設置により、「今すぐ記録する必要がある」情報をロスなく保存でき、運用の柔軟性と開発速度の両立を実現します。
+
+### Rule 2.13: The Time-Series Partitioning & Retention Protocol（時系列パーティション＆保持期間戦略）
+*   **Law**: ログデータ（`audit_logs`, `access_logs`）やトランザクション履歴（`point_transactions` 等）など、時系列で肥大化するテーブルには、`created_at` をキーとした**Range Partitioning**を設計しなければなりません。
+*   **Action**:
+    1.  **Range Partitioning**: 時系列テーブルは `pg_partman` 等を使用し、月次または四半期でパーティションを自動作成してください。単一テーブルのレコード数が1,000万件（10M）を超える予測で導入を検討します。
+    2.  **Retention Policy**: 古いパーティション（例: 2年以上前）は自動的に**Detached Partition**とし、アクティブなクエリ対象から除外してください。Detach後はCold Storageへの移動またはObject Storageへのエクスポートを計画します。
+    3.  **No Premature Partitioning**: データが少ない開発フェーズでのパーティション導入は過剰設計です。閾値（10M件）に達する前に設計を完了し、達した時点で適用する「Ready-to-Fire」戦略を採用してください。
+*   **Rationale**: パーティションなしで肥大化したテーブルは、インデックスサイズの増大、バキューム時間の延長、バックアップ時間の増加を引き起こします。時系列パーティションにより、古いデータの運用負荷をゼロに近づけつつ、法的保管義務への対応も可能になります。
+
+### Rule 2.14: The Cold Data Offloading Protocol（アーカイブ戦略）
+*   **Law**: 「1年以上アクセスがない」「法的保管義務があるが参照頻度が低い」データは、アクティブなDBから切り離し、**Archived Tables**またはObject Storage（CSV/Parquet）へ退避させなければなりません。
+*   **Action**:
+    1.  **Archived Tables**: アーカイブ用スキーマ（例: `archives`）を用意し、古いデータを移動してください（例: `archives.old_audit_logs`）。アプリケーションの通常クエリはこのスキーマを参照しません。
+    2.  **Object Storage Export**: 大量の古いデータは、CSVまたはParquet形式でObject Storage（S3/R2/GCS等）にエクスポートしてください。分析が必要な場合はData Warehouse（BigQuery等）から参照します。
+    3.  **Transparent Migration**: データの退避は、アプリケーションの動作に一切影響を与えない形で実行してください。アーカイブ対象のレコードがAPI応答に含まれないことを確認します。
+    4.  **Compliance**: 法的保管義務（税法：7年、労働法：3年等）のあるデータは、保管期間が経過するまで物理削除してはなりません。アーカイブ先で保管期間を管理してください。
+*   **Rationale**: アクティブDBに古いデータを残し続けると、インデックスサイズの膨張、クエリパフォーマンスの低下、バックアップ時間の増加を招きます。データの「温度」で保管先を分けることにより、アクティブデータのパフォーマンスとコスト効率を最大化します。
+
+### Rule 2.15: The RLS Inheritance Protocol（権限継承・Chain of Trust）
+*   **Law**: 子テーブル・孫テーブル（例: 医療記録、コメント、添付ファイル等）のアクセス権限は、**単独で定義せず**、必ず親テーブル（例: ペット、投稿、プロジェクト等）の所有権や参加状況を `EXISTS` サブクエリで参照して決定しなければなりません。
+*   **Action**:
+    1.  **Parent Ownership Check**: 子テーブルのRLSポリシーでは、直接 `auth.uid() = user_id` で認証するのではなく、親テーブルの所有権を `EXISTS (SELECT 1 FROM parent_table WHERE id = child_table.parent_id AND user_id = (select auth.uid()))` で検証してください。
+    2.  **Chain of Trust**: テーブル階層が3段階以上（祖父→親→子）になる場合も、常に最上位の所有権まで遡って検証してください。中間テーブルだけの検証はセキュリティホールを生みます。
+    3.  **SECURITY DEFINER for Cross-Table**: 権限チェックで他テーブル（`profiles` 等）を参照する必要がある場合は、`SECURITY DEFINER` 関数内でラップし、`search_path` を固定（`SET search_path = public, pg_temp`）してください。
+    4.  **No Redundant Columns**: 子テーブルに `user_id` を重複して持たせることで権限チェックを「簡略化」するアプローチは、データ不整合の温床となるため非推奨です。権限は常に関係（Relation）で導出してください。
+*   **Rationale**: 子テーブルごとに独立した権限ロジックを定義すると、親テーブルの権限変更時に子テーブルの更新漏れが発生し、セキュリティホールの原因となります。親テーブルの所有権を信頼の連鎖（Chain of Trust）として継承することで、権限ロジックの一元化と不整合の排除を実現します。
+
+### Rule 2.16: The Brittle Table Reference Prohibition（動的テーブル参照禁止）
+*   **Law**: SQL関数（`CREATE FUNCTION`）やRPC内で、テーブル名を動的な文字列として結合（`EXECUTE 'SELECT * FROM ' || table_name`）することを**禁止**します。
+*   **Action**:
+    1.  **Static References Only**: すべてのSQL関数内のテーブル参照は、静的なSQL文として記述してください。コンパイル時（またはマイグレーション適用時）に依存関係が解決されなければなりません。
+    2.  **No Dynamic EXECUTE**: `EXECUTE format('SELECT * FROM %I', variable)` のようなパターンは、テーブル名のタイポや存在しないテーブルへの参照をランタイムまで検出できないため禁止します。
+    3.  **Schema Change Safety**: 静的なテーブル参照により、テーブルのリネームや削除時に依存関数がマイグレーション時点でエラーとなり、問題を早期検出できます。
+*   **Rationale**: 動的テーブル参照はSQLインジェクションの温床となり、スキーマ変更時の影響範囲追跡も不可能にします。静的参照を義務付けることで、コンパイル時安全性と保守性を確保します。

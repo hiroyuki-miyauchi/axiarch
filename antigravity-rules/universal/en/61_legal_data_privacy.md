@@ -2,7 +2,7 @@
 
 ## 1. Data Sovereignty
 *   **Residency**: Store user data in the region where the user resides (e.g., EU users in EU region) and comply with cross-border transfer regulations (GDPR etc.).
-    *   **Portability Protocol**: Users have the right to bulk download all their data (posts, images, logs) in machine-readable format (JSON/CSV). Implementation must be via async jobs.
+    *   **Portability Protocol**: Users have the right to bulk download all their data (posts, images, logs) in machine-readable format (JSON/CSV). Maintain capability to fulfill data access requests within **72 hours**. Implementation must be via async jobs.
     *   **Right to Erasure**: Account deletion must involve **Hard Delete** of relevant PII, making it unrecoverable. Only data with legal retention obligations shall be isolated in Cold Storage.
 *   **Consent Management**:
     *   **CMP**: Manage Cookie and tracking consent using trusted CMPs (Consent Management Platform) like OneTrust instead of custom implementation, to auto-follow legal changes in each country.
@@ -31,11 +31,20 @@
     *   **Final Confirm Screen**: Explicitly display contract period and cancellation conditions before payment. Eliminate dark patterns.
 *   **Payment Services Laws**:
     *   **Deposit Avoidance**: Be cautious with issuing prepaid payment instruments (points, coins) as deposit obligations may arise (e.g., Japan's PSA). In principle, use Apple/Google IAP systems and avoid self-issued points.
+*   **Minor Safety Protocol**:
+    *   **Age Gate**: For services with payment features, implement age verification (date of birth input) at registration or before first payment.
+    *   **Parental Consent**: When users under the legal age make a purchase, display a mandatory "I have obtained parental consent" checkbox and record the consent log (timestamp, IP). Unauthorized contracts by minors are subject to cancellation rights.
+*   **Stealth Marketing Regulation (Ad Disclosure Obligation)**:
+    *   **Law**: Content involving monetary compensation from advertisers MUST display legally required ad labels ("PR", "Ad", "Sponsored", etc.). Omission of labeling constitutes a legal violation.
+    *   **System Guard**: Implement a system-level Guardrail that automatically appends ad labeling to posts with the `is_sponsored` flag.
 
 ## 4. IP & Licenses
 *   **License Contamination Prevention**:
     *   **No GPL**: Mixing Copyleft license (GPL/AGPL) code is strictly prohibited due to risk of source code disclosure obligation.
     *   **Rights Clearance**: Confirm commercial use allows for all assets (images, fonts) used and centrally manage license trails.
+    *   **UGC License Grant**:
+        *   **Law**: Include a clause in Terms of Service granting the operator a "free, non-exclusive right to use (reproduce, publicly transmit, etc.) user-generated content (reviews, images, etc.) for promotional purposes".
+        *   **Safeguard**: Include a clause for non-assertion of moral rights, while ensuring user rights are not unfairly infringed.
     *   **The Work-for-Hire Protocol (Contractor IP Rights)**:
         *   **Risk**: Risk that copyright of outsourced deliverables remains with contractor.
         *   **Mandate**: In contractor agreements, MUST require that deliverable copyright (including derivative rights) transfers to client upon acceptance, and include clause for non-assertion of moral rights.

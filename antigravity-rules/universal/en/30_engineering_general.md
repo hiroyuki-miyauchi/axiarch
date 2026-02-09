@@ -28,6 +28,8 @@
     *   **Autonomous Structure Strategy (Edge AI)**:
         *   **Law**: Avoid forcing users to type whenever possible. Non-structured physical assets (paper certificates, receipts, documents) should have standard implementation flows that use OCR/Vision AI to auto-convert to "high-precision structured data" instantly.
         *   **Standard**: "Just take a photo and all important items go into DB" UX is the supreme mandate for data quality maintenance and user retention improvement.
+        *   **Human-in-the-Loop Mandate**: Data extraction/conversion results by AI (OCR/Vision, etc.) MUST always be treated as **"Draft"**, forcing a flow where **users visually verify and correct the results before pressing "Save"**. Direct DB writes by AI (Auto-Save) are prohibited due to the risk of erroneous data contamination.
+        *   **PII Scrubbing**: When documents or images processed by AI contain personal information (names, addresses, phone numbers, etc.), do not store them as-is in OCR/AI results — automatically discard or mask them (replace with `***`, etc.). In particular, third-party personal information MUST NOT be retained as structured data without the individual's consent.
 *   **Clean Code Standards**:
     *   **Self-Documenting**: Comments explain "Why", Code explains "What".
     *   **Function Size**: One function, one job. Ideally **under 20 lines**.
@@ -169,6 +171,9 @@
     *   **Modular**: Keep file sizes small (Atomic) and don't overwhelm AI context windows.
     *   **Explicit Imports**: `import` statements MUST be at file **Top-Level**. Imports inside functions or control flows inhibit static analysis and make AI understanding difficult.
     *   **Semantic Structure**: Organize directory structure by feature to make it easy for AI to find related files.
+*   **Schema Trust Protocol (No Ghost Columns)**:
+    *   **Law**: Using column names in queries (SELECT/INSERT/UPDATE) that are planned in the Blueprint but whose DB migration has not yet been applied is prohibited. Accessing non-existent columns crashes the entire page.
+    *   **Action**: Limit query columns to those that "currently, definitely exist." Supplement data for unimplemented features with application-layer constants (Default Config).
 
 ## 6. Green Coding & Sustainability
 *   **Energy Efficiency**:
@@ -193,6 +198,9 @@
     *   **Before Coding**: Check official docs and latest release notes (e.g., "Next.js 15 breaking changes", "Swift 6 concurrency") BEFORE coding. Implementations based on old info cause rework.
     *   **Deprecation Check**: Verify APIs you're about to use are not Deprecated.
 *   **Trend Awareness**: Continuously catch up with Silicon Valley trends (AI Agents, Privacy Manifests, etc.) and keep evolving the rules themselves.
+*   **The Crystallization Protocol (Knowledge Extraction)**:
+    *   **Law**: After completing a feature implementation, you are obligated to document "tacit knowledge," "new patterns," and "pain points" encountered during the process back into design documents (Blueprints) or rule files.
+    *   **Rationale**: Knowledge existing only in code is "volatile experience." To prevent the next developer (human or AI) from repeating the same mistakes, the habit of immediately documenting learnings exponentially improves team productivity.
 
 ## 9. Compatibility & Testing
 *   **Real Device Testing**: Test on real devices (iOS, Android), not just simulators. Hardware features (camera, GPS, biometrics) require real devices.
@@ -383,3 +391,407 @@
 ### 13.14. The Dead Code Elimination Protocol
 *   **Law**: "Just in case" code is Garbage.
 *   **Action**: **Physical Deletion** of unused code, dead branches, and ghost features. Trust Git history.
+
+### 13.15. The Select Specification Pattern (Explicit Data Retrieval)
+*   **Law**: `SELECT *` or `.select('*')` (i.e., "fetch all columns") is prohibited in ORMs, Query Builders, and direct DB calls.
+*   **Reason**:
+    1.  **Security**: Risk of unintentionally exposing sensitive columns added in the future (`internal_memo`, `password_hash`, etc.) to the client.
+    2.  **Performance**: Transferring unnecessary columns wastes network bandwidth and memory.
+    3.  **AI Economy**: Feeding unnecessary data to AI agents wastes tokens and degrades inference accuracy.
+*   **Action**:
+    *   **Explicit Select**: Enumerate only necessary columns explicitly (e.g., `.select('id, name, status, created_at')`).
+    *   **Purpose-Driven Spec**: Define Select specs per use case (list view, detail view, admin view) to retrieve data without excess or deficiency.
+    *   **Registry**: For larger projects, centrally manage Select specs as constants (Select Spec Registry) to prevent scattering and duplication.
+
+### 13.16. The Type Lying Prohibition Protocol
+*   **Law**: Deceiving the type system is the gravest crime that betrays compiler and reviewer trust. The following are prohibited:
+    *   `as any` / `as never`: Suppressing type errors.
+    *   `@ts-ignore` / `@ts-expect-error` (without reason): Disabling type checking.
+    *   `eslint-disable` (without reason): Arbitrarily disabling lint rules.
+*   **Exception**: When unavoidable, ALL of the following must be met:
+    1.  **Reason**: A one-line comment explaining the root cause of the type mismatch.
+    2.  **Ticket**: An associated Issue number (e.g., `// TODO(#456): Fix after library update`).
+    3.  **Scope**: Minimize the scope of impact (line-level, not file-level).
+*   **Outcome**: "Build passes" and "type-safe" are different things. Feeling secure with only the former is self-destructive.
+
+### 13.17. The No Future-Use Code Protocol (YAGNI Strict)
+*   **Law**: "Might use in the future" code, variables, imports, and functions are "noise" if not currently in use and are subject to immediate deletion.
+*   **Action**:
+    *   **Unused Imports**: Not a single unused import shall remain. Enforce Linter (`no-unused-vars`) at `error` level.
+    *   **Unused Variables**: `_` prefix is permitted ONLY to indicate "intentionally unused" (e.g., `const [_, setCount] = useState(0)`). All other unused variables must be physically deleted.
+    *   **Speculative Code**: Pre-emptive implementation not included in the current user story is technical debt. Write it when you need it.
+
+### 13.18. The Service Layer Extraction Mandate
+*   **Law**: Entry points such as Route Handlers, Server Actions, and Controllers MUST remain "thin interfaces." Writing business logic (validation, DB operations, external API calls, calculations) directly in entry points is prohibited.
+*   **Action**:
+    1.  **Service Layer**: Extract business logic to `lib/services/` or `lib/api/` to make it testable and reusable.
+    2.  **DTO Boundary**: Define Service layer input/output with DTOs (Data Transfer Objects) for type safety. Do not leak DB types or framework-specific types to the UI.
+    3.  **Single Responsibility**: One Service function has one responsibility. Functions that "fetch, transform, save, and notify" must be split.
+*   **Reason**: Tight coupling of logic to entry points leads to a triple affliction: untestable, unreusable, and Omnichannel-incompatible.
+
+### 13.19. The Clean Workspace Mandate
+*   **Law**: Upon task completion, temporary files created for verification (`test-*.ts`, `*.log`, `debug-*.ts`) and build caches (`*.tsbuildinfo`) MUST be **immediately discarded** ("Use and Dispose").
+*   **Action**:
+    *   **Scorched Earth**: Empty directories (`snapshots/`, `snippets/`), leftover backup files, and JSON dumps used only during development are "relics of the past" — committing them to the repository is prohibited.
+    *   **Build Artifact**: Build caches like `.tsbuildinfo`, `.next/cache` MUST be managed in `.gitignore` and never included in the repository.
+    *   **Verification**: Before committing, verify with `git status` that no unintended files are included.
+*   **Rationale**: Leaving unnecessary files degrades the codebase's S/N ratio (Signal to Noise ratio), misleading subsequent developers and AI agents.
+
+### 13.20. The CQRS Pattern (Command Query Responsibility Segregation)
+*   **Law**: Mixing Read and Write operations in the same Service/Repository becomes a barrier to future scaling (Read Replicas, Cache Optimization).
+*   **Action**:
+    1.  **Read Layer (Query)**: Establish a dedicated data retrieval layer requiring Select Spec (explicit column specification) and cache strategy as mandatory parameters. Provide filtering, sorting, and pagination in this layer.
+    2.  **Write Layer (Command)**: Establish a dedicated data mutation layer, recommending audit log integration for all operations. Design Soft Delete support as an option.
+    3.  **Cache Invalidation**: Introduce a mechanism (tag-based, etc.) to automatically invalidate related Read caches upon Write operation completion.
+*   **Benefit**: Separating Read/Write responsibilities enables independent optimization, scaling, and testing.
+
+### 13.21. The DTO Synchronicity Protocol
+*   **Law**: When Backend (Server Action/API) return values are DTO-ized, the Frontend (UI Component/Form) Props types receiving them MUST **always be synchronized to the same DTO**.
+*   **Action**:
+    1.  **Single Source**: Centralize DTO definitions in `lib/dto/` or equivalent, and import from both Backend and Frontend.
+    2.  **No Drift**: When Backend DTOs change, all Frontend component Props types referencing them MUST be updated simultaneously. One-sided updates are a direct cause of `undefined` reference runtime errors.
+    3.  **Type Guard**: At DTO boundaries, always perform type guards (`in` operator, `typeof` checks) to guarantee external data safety.
+*   **Anti-Pattern**: Receiving a DTO from Backend but casting it with `as any` on the Frontend completely nullifies the DTO's purpose — a "Type Betrayal."
+
+### 13.22. The Omnichannel Delivery Mandate
+*   **Law**: Writing business logic or data access directly in UI components (`page.tsx`, `layout.tsx`, etc.) is prohibited. All data retrieval, update, and aggregation logic MUST be extracted to a **Service or Gateway layer** and provided as type-safe interfaces.
+*   **Rationale**: Logic tightly coupled to Web UI becomes "Web-only legacy code" that cannot be reused from mobile apps, AI agents, or external APIs. Centralizing logic in Service/Gateway layers guarantees consistent behavior across all channels.
+*   **Action**:
+    1.  **UI = Thin Controller**: UI components should focus solely on calling Services/Actions and presentation. Direct DB client references are prohibited.
+    2.  **Service Aggregation**: "Aggregation logic" that integrates multiple Gateways/Actions to produce data for a single screen MUST be extracted to the Service layer as `get...Data()` methods.
+    3.  **DTO Response Only**: Service/Action return values MUST be converted to DTOs. Never return raw DB records to the UI layer.
+*   **Anti-Pattern**: Calling `supabase.from('table').select()` directly inside `page.tsx` is a fundamental architectural violation.
+
+### 13.23. The Zero Defect Sovereignty
+*   **Law**: Committing code that does not pass type checking (`tsc --noEmit`, etc.) and Linting (`eslint`, `biome`, etc.) with **zero warnings (Exit 0)** is prohibited.
+*   **Action**:
+    1.  **Local First**: Run type checks and linting locally before committing and confirm zero warnings. Relying on CI for detection causes delays.
+    2.  **No Escape Hatches**: `as any`, `@ts-ignore`, `@ts-nocheck` are not "warning suppression" — they are "bug implantation." Their use is prohibited in principle; if used, the rationale MUST be documented in a comment.
+    3.  **Zero Tolerance**: "Ignore for now, fix later" is not acceptable. Resolve warnings on the spot.
+*   **Rationale**: Leaving type errors and lint warnings unresolved plants time bombs that "build successfully but crash at runtime" when schemas change. Zero defects is the minimum quality bar, not a goal.
+
+### 13.24. The Linter Suppression Prohibition
+*   **Law**: Use of linter suppression comments such as `eslint-disable` / `eslint-disable-next-line` / `@ts-ignore` / `biome-ignore` is prohibited in principle.
+*   **Exception**: Permitted only for compatibility issues with external libraries where root cause resolution is impossible. Even then:
+    1.  Document the specific reason for suppression in a comment.
+    2.  Create a corresponding Issue to track future root cause resolution.
+*   **Rationale**: Suppression comments merely make problems "invisible" — they push root causes onto the next developer. When warnings appear, resolve the root cause instead of suppressing.
+*   **Anti-Pattern**: Silencing "might use in the future" variables with `eslint-disable` is preservation of unnecessary code and is prohibited. Write it when you need it.
+
+### 13.25. The Structured Error Return Protocol
+*   **Law**: Backend APIs and server actions MUST return **structured responses in `{ success: boolean; data?: T; error?: string }` format** rather than throwing exceptions (`throw`) as a general principle.
+*   **Action**:
+    1.  **No Raw Throw**: Do not use `throw new Error()` for "expected errors" such as validation failures or insufficient permissions. `throw` causes frontend state management hooks (`useActionState`, etc.) to process them as "unexpected exceptions," leading to runaway component cleanup or retry logic.
+    2.  **Graceful Failure Contract**: On error, return `{ success: false, error: 'human-readable message' }` and display it as a toast or inline message on the frontend.
+    3.  **Server-Client Symmetry**: When strengthening server-side guards (adding auth checks, etc.), always simultaneously prepare the frontend's "error reception point." One-sided strengthening risks escalating into system-wide crashes.
+*   **Rationale**: Returning "expected errors" via `throw` triggers the frontend framework's exception handling mechanism, causing infinite re-render loops or full page crashes. Structured responses delegate error handling control to frontend developers and guarantee system stability.
+
+### 13.26. The Cache Invalidation Ceremony Protocol
+*   **Law**: When modifying core query logic (filter conditions, projection specifications, visibility guards, etc.), **physical deletion of build caches and full restart of the development server** is mandatory.
+*   **Action**:
+    1.  **Full Environment Reset**: After query logic changes, physically delete build cache directories (`.next/`, `dist/`, `.cache/`, etc.) and restart the development server.
+    2.  **Kill Process**: Graceful shutdown may be insufficient. Force terminate with `kill -9` etc. and restart from a clean state.
+    3.  **Pre-Verification**: Verify the effect of changes only after cache clearing. Cache residue leads to the false conclusion that "code changes are not being reflected."
+*   **Rationale**: In applications employing multi-layer caching strategies (memory cache, file cache, CDN cache, etc.), caches may continue serving stale data after code changes. This causes misdiagnosis of "code is correct but doesn't work," wasting enormous time on unnecessary debugging.
+
+### 13.27. The Projection-Schema Parity Mandate
+*   **Law**: Projection specifications (Select Specifications, GraphQL fragments, etc.) for data retrieval MUST **match the physical DB schema 100%**. "Phantom Fields" defined in UI or DTOs but not present in the DB are a direct cause of silent runtime crashes.
+*   **Action**:
+    1.  **Vertical Synchronization Audit**: When adding new fields, verify **DB Schema → DTO → Gateway → UI Interface** across all layers vertically. A state where a field exists in only one layer is not acceptable.
+    2.  **Ghost Hunt Protocol**: When a field included in the projection specification triggers a "column does not exist" error, conduct a "recursive ghost audit" comparing not just that field but the entire specification against the physical schema. One mismatch is a signal of systemic drift.
+    3.  **No Speculative Fields**: Defining fields in DTOs or UI based on the speculation that they "will probably be needed in the future" while they are unimplemented in the DB is prohibited. Implement when needed.
+*   **Rationale**: Projection specification patterns (Select Specifications, etc.) are powerful for PII leak prevention and API billing control, but inherently carry "coupling risk" with the schema. Accessing fields not returned from the DB becomes an invisible bug that crashes the entire frontend.
+
+### 13.28. The Mutation Integrity Verification Protocol
+*   **Law**: In data write operations (Create/Update/Delete), **`error: null` does NOT mean success**. Always verify affected row count (`count` / `affectedRows`), and explicitly throw an error when the count is 0.
+*   **Action**:
+    1.  **Count Validation**: For single-record operations with ID specification (`WHERE id = ?`), always verify that the affected row count is `1` (or the expected value). If `0`, throw an explicit error as a signal of "insufficient permissions" or "record not found."
+    2.  **Sub-Step Integrity**: When performing multiple write operations within a single transactional process (main table update → relation update → tag update, etc.), verify each step's error object individually. Prevent "Partial Phantom Success" where intermediate steps fail but the final result returns "success."
+    3.  **Post-Mutation Verification Fetch**: For particularly critical updates (image reordering, status changes, etc.), perform an immediate re-fetch (`SELECT`) with the same ID after updating, and log or assert the current value. This enables 100% differentiation between "DB write failure" and "UI display failure (cache)."
+*   **Rationale**: Many DB clients/ORMs (especially RLS-enabled ones) return a "successful response affecting 0 rows" without throwing errors when access is denied due to insufficient permissions. This "silent rejection" displays false success messages in the UI and makes data inconsistencies undetectable.
+
+### 13.29. The Service Aggregation Protocol
+*   **Law**: "Aggregation logic" that calls multiple Gateways/Repositories/Actions to assemble data for a single screen (page) MUST be **extracted into a Service layer**. The UI layer (page components, controllers) MUST remain a thin entry point that only calls the Service.
+*   **Action**:
+    1.  **Single Responsibility**: If a single page fetches from 5 or more data sources, that is a signal that "the page is doing Service layer work." Aggregate into `XxxService.getPageData()`.
+    2.  **Testability**: Compose the Service layer with Pure Functions or injectable dependencies only, without UI/framework dependencies. This enables unit testing.
+    3.  **Reusability**: When the same dataset is used from multiple UIs (admin panel, public page, API), share the Service to prevent "different interpretations of the same data."
+*   **Rationale**: When data aggregation logic is scattered across the UI layer, multiple access paths to the same data emerge, making unified caching strategies and error handling impossible. The Service layer functions as the "front gate for business logic."
+
+### 13.30. The Production Build Verification Protocol
+*   **Law**: A running development server (`dev` mode) is **NOT proof** of code correctness. Until type checking (`tsc --noEmit`) and production build (`npm run build`, etc.) pass, treat the code as "non-existent."
+*   **Action**:
+    1.  **Mandatory Triple Crown**: Before completing a task, the following 3 checks MUST pass:
+        *   ① Type check (`tsc --noEmit`): Zero type errors
+        *   ② Linter (`eslint --max-warnings=0`): Zero warnings
+        *   ③ Production build (`npm run build`): Build success
+    2.  **PR Rejection**: PRs without evidence of passing all 3 checks above MUST be immediately rejected.
+    3.  **Dev Mode Trap**: In `dev` mode, Hot Module Replacement (HMR) and lazy runtime error evaluation conceal errors that would surface in production. `import` resolution, Tree Shaking, and SSR path execution are fully verified only in `build`.
+*   **Rationale**: The development server is a "too-forgiving" environment. Production build is the only mechanism that surfaces errors silent in dev mode, such as dead import detection, SSR path crashes, and dynamic route type mismatches.
+
+### 13.31. The CI/CD Environment Gap Protocol
+*   **Law**: CI environments run tests against an "empty database (Clean Room)" and therefore **cannot detect collisions with existing data** (unique constraint violations, foreign key inconsistencies, missing NOT NULL defaults, etc.). Changes involving data manipulation MUST be written with defensive code that anticipates collisions with production data.
+*   **Action**:
+    1.  **Defensive DML**: Use `ON CONFLICT ... DO UPDATE` or `DO NOTHING` in `INSERT` statements to ensure idempotency.
+    2.  **Pre-Check**: When adding `NOT NULL` constraints via `ALTER TABLE`, pre-fill existing `NULL` values with `UPDATE` to set defaults.
+    3.  **Staging Verification**: Whenever possible, pre-verify data changes on a staging environment with production-like data.
+*   **Rationale**: CI's "all green" is merely "success in a sterile room." When you forget the complexity of production (existing data, concurrent access, historical maintenance debt), deployment incidents will inevitably occur.
+
+### 13.32. The Clean Workspace Mandate
+*   **Law**: Upon task completion, all temporary files, build caches, empty directories, and debug `console.log` statements generated during work MUST be **removed** before committing. Repositories maintain a clean state following the "Scorched Earth" principle.
+*   **Action**:
+    1.  **Checklist**: Verify the following before committing:
+        *   No temporary files (`.tmp`, `.bak`, `*.log`, etc.) remain
+        *   No empty directories (folders with 0 files) remain
+        *   No `console.log` / `console.debug` remains in code
+        *   Build caches (`.next/cache`, etc.) are not included in Git tracking
+    2.  **Gitignore Hygiene**: Verify that `.gitignore` comprehensively covers build outputs, environment files, and IDE settings at initialization.
+    3.  **Branch Hygiene**: Promptly delete merged branches. Abandoned branches are breeding grounds for "incidents caused by environment differences."
+*   **Rationale**: Leftover temporary files and debug code impose unnecessary cognitive load on the next developer (including your future self) — "Was this code intentionally left?" A clean repository directly impacts the entire team's productivity.
+
+### 13.33. The Dead Code Prohibition Protocol
+*   **Law**: Keeping code "just in case it's needed later" is the biggest source of technical debt. **Immediate deletion of all currently unused code (unused variables, imports, functions, type definitions) is mandatory.**
+*   **Action**:
+    1.  **No Future-Use Code**: Code not used by current features must not be kept, including commented-out code. Restore from Git history when needed.
+    2.  **Strict Variable Hygiene**: Variables, constants, and imports that are declared but never referenced must be removed before building. The `_` prefix is only permitted for explicit value discarding in destructuring (e.g., `const [_, setValue] = useState()`).
+    3.  **Lint Enforcement**: Set ESLint's `no-unused-vars` / `@typescript-eslint/no-unused-vars` to `error` and physically block in CI.
+*   **Rationale**: Unused code is a "broken window." If one is tolerated, the entire team judges "a little is fine," and the overall codebase quality deteriorates.
+
+### 13.34. The Warning Suppression Prohibition Protocol
+*   **Law**: The casual use of directives that **suppress or ignore linter and type checker warnings** is prohibited in principle. Warnings are "code smells that need fixing" — fix the root cause instead of silencing them.
+*   **Action**:
+    1.  **ESLint**: `eslint-disable` and `eslint-disable-next-line` usage is prohibited in principle. When unavoidable, a **comment explaining the reason** must be added (e.g., `// eslint-disable-next-line -- library type definition is inaccurate`).
+    2.  **TypeScript**: `@ts-ignore`, `@ts-nocheck`, and `@ts-expect-error` usage is prohibited in principle. Resolve type errors by fixing type definitions.
+    3.  **Other Tools**: For Stylelint, Prettier, and similar tools, suppression directives are only acceptable as a last resort after root cause resolution.
+    4.  **CI Enforcement**: Introducing lint rules that detect new suppression directive additions (e.g., `eslint-comments/no-unlimited-disable`) is recommended.
+*   **Rationale**: Warning suppression only "makes problems invisible" without solving them. As suppression comments proliferate, codebase reliability degrades, and truly important warnings get buried.
+
+### 13.35. The Type Integrity Mandate
+*   **Law**: Bypassing TypeScript's type system is defined as "embedding bugs." **`as any` type casts are prohibited in principle**, and type accuracy is the highest priority.
+*   **Action**:
+    1.  **No `as any`**: `as any` completely disables the type checker and is prohibited. When external library types are inaccurate, provide accurate type definitions via `declare module`.
+    2.  **Strict Action Return Types**: Server Actions, API handlers, and Service functions must always have explicit return type definitions. Using `any` or `unknown` as return types is prohibited.
+    3.  **No Type Assertion Chains**: Multi-step casts like `(value as unknown as TargetType)` are an anti-pattern indicating type safety destruction. Create data transformation functions and perform type conversions with runtime validation.
+    4.  **Lint Enforcement**: Set `@typescript-eslint/no-explicit-any` to `error`.
+*   **Rationale**: `as any` is a "lie to the type checker." While problems become invisible at compile time, unexpected types circulate at runtime, causing bugs that are extremely difficult to debug.
+
+### 13.36. The UI-Layer Data Access Prohibition
+*   **Law**: **Direct access to databases or external APIs from UI components** (page components, layout components, client components) is prohibited. All data access must go through the Service or Gateway layer.
+*   **Action**:
+    1.  **Service Layer Mandate**: Data retrieval and modification must always go through dedicated Service / Gateway / Action functions. The UI layer handles only the return values (DTOs) of these functions.
+    2.  **No DB Client in UI**: Directly importing and using DB clients (ORM, SDK, etc.) in UI files is prohibited.
+    3.  **DTO Boundary**: The Service layer must not return DB record structures as-is, but transform them into **DTOs (Data Transfer Objects)** containing only the data the UI requires.
+    4.  **Omnichannel Readiness**: This separation enables reuse of the same Service layer across multiple clients — Web, native apps, external APIs, etc.
+*   **Rationale**: Direct coupling between UI and data layers destroys testability and makes omnichannel deployment impossible. Inserting a Service layer achieves business logic aggregation, ease of testing, and client-agnostic architecture.
+
+### 13.37. The Graceful Failure Contract
+*   **Law**: Server-side processes (Server Actions, API handlers, etc.) are **prohibited in principle from using `throw new Error()`** for business logic failures. Instead, they must return **structured error responses** (e.g., `{ success: false, error: '...' }`) to be properly handled by the client side.
+*   **Action**:
+    1.  **No Raw Throw**: When Server Actions `throw`, client-side UI frameworks (React's `useActionState`, etc.) may process the error as an "unexpected exception," causing component cleanup or retry logic to run amok, potentially triggering infinite loops. Business errors (insufficient permissions, validation failures, etc.) must always be returned as structured responses.
+    2.  **Common Response Type**: Define a common response type for all server actions (e.g., `ActionResult<T> = { success: true, data: T } | { success: false, error: string }`) so that clients can handle errors uniformly.
+    3.  **Client-Side Feedback**: On the client side, display `success: false` cases as toast notifications or inline error messages to provide appropriate feedback to the user.
+    4.  **Exception**: The use of `throw` is permitted only for fatal errors where program continuation is impossible (DB connection loss, missing environment configuration, etc.).
+*   **Rationale**: Server-side security hardening (adding guards, etc.) and client-side error handling must be developed as a "pair." Hardening only the server without preparing the client's "error reception point" risks escalating a normal "insufficient permissions error" into a system-wide "infinite loop crash."
+
+### 13.38. The Mutation Count Validation
+*   **Law**: After database write operations (UPDATE / DELETE), **the number of affected rows (`count`) must always be verified**. Even when `error: null` (no error), `count: 0` may indicate a "silent rejection."
+*   **Action**:
+    1.  **Count Check**: For single-record update/delete operations specifying an ID, always retrieve `count` from the response and verify it equals the expected number of rows (typically `1`).
+    2.  **Explicit Failure**: If `count` is `0` or `null`, throw an explicit error (e.g., `throw new Error('Update failed: No rows affected.')`) to prevent the UI from displaying a false success state.
+    3.  **Instrumentation**: During debugging, log the mutation result's `count` to visualize write effectiveness.
+    4.  **RLS Awareness**: In databases using Row Level Security (RLS), always keep in mind that insufficient permissions are returned as "0 rows affected" rather than as an error.
+*   **Rationale**: Many database APIs (especially HTTP wrappers like PostgREST) do not report write failures due to insufficient permissions as errors. Implementations that only verify `error: null` cause the most difficult-to-diagnose "Phantom Success" — appearing to succeed while data is not actually persisted.
+
+### 13.39. The Post-Mutation Verification Fetch
+*   **Law**: For particularly critical mutations (image reordering, status changes, permission changes, etc.), it is recommended to **re-fetch the same record (SELECT)** immediately after the write operation and confirm via logs or assertions that the intended values have been persisted in the database.
+*   **Action**:
+    1.  **Verification Fetch**: Execute a `select()` with the same ID immediately after `update()` and log the current values. This enables 100% reliable isolation of whether the problem is "a write failure to the DB" or "a read/cache issue in the application."
+    2.  **Diagnostic Isolation**: When data reverting after reload is reported, first use this pattern to verify the physical server-side values and identify the problem layer (DB / Cache / UI).
+    3.  **Production Guard**: In production environments, consider the performance impact and enable this verification via a flag (`DEBUG_MUTATIONS=true`) or control it through log levels.
+*   **Rationale**: There are many cases where data is not reflected even though the write operation itself succeeded — cache inconsistencies (framework Data Cache / Router Cache, etc.), value overwrites by triggers, etc. The immediate verification fetch is the most reliable debugging technique for swiftly identifying silent persistence failures.
+
+### 13.40. The Read-Write Privilege Symmetry
+*   **Law**: When a privileged client (admin permissions, etc.) is used for data writes (Mutations), **the "read for editing" must also guarantee equivalent visibility**. Mismatch between write and read permissions causes a "single-lung state."
+*   **Action**:
+    1.  **Read-Write Parity**: In admin panels and similar contexts, if writes are performed with a privileged client (RLS bypass, etc.), data retrieval for edit forms must also be performed at an equivalent permission level. Permission mismatch causes an extremely opaque bug where "saving succeeds but data reverts after reload."
+    2.  **Spec Synchronization**: Verify that the projection used for data retrieval (Select Spec / column specification) encompasses all columns that are write targets. If the retrieval spec is missing columns, items will be saved but not displayed.
+    3.  **Gateway Awareness**: Data retrieval functions for administrative purposes should explicitly indicate their purpose in the function name (e.g., `getAdminItemById`) and use an appropriately privileged client.
+*   **Rationale**: Using different permission levels for writes and reads may not be a security "hole," but it causes data "invisibility." Especially in environments using RLS, if SELECT policies are incomplete, data existing in the DB is filtered out during retrieval and not displayed in the UI — creating a diagnostically challenging bug.
+
+### 13.41. The Sub-Step Mutation Integrity Protocol
+*   **Law**: When performing **multiple asynchronous write operations** within a single service method or transaction (INSERT/UPDATE to multiple tables, sequential calls to external APIs, etc.), **each step's result must be individually verified**.
+*   **Action**:
+    1.  **Per-Step Error Check**: Verify `error` / `count` / `status` immediately after each write operation. Executing subsequent steps assuming the first step succeeded while swallowing intermediate errors is the direct cause of "Partial Phantom Success."
+    2.  **Fail-Fast Cascade**: If an error is detected at any step, return the error immediately without executing subsequent steps. Leaving partially updated state is a breeding ground for data inconsistency.
+    3.  **Composite Error Reporting**: Aggregate results from multiple steps and construct an error response that clearly communicates to the caller which step failed (e.g., `{ step: 'update_metadata', error: '...' }`).
+    4.  **Diagnostic Logging**: Log the execution result of each step (number of affected rows, impacted columns, etc.) to accelerate root cause identification during incidents.
+*   **Rationale**: In multi-step write processes, ignoring errors at intermediate steps causes inconsistencies such as "main data was updated but related data remains stale." This type of partial success is extremely difficult to discover because the user sees "save successful."
+
+### 13.42. The Structured Error Logging Mandate
+*   **Law**: When logging error objects, **direct embedding in string templates** (e.g., `` `Error: ${error}` ``) is prohibited. Error objects must be logged in a **structured format**.
+*   **Action**:
+    1.  **No Template Embedding**: The pattern `` `Error occurred: ${error}` `` outputs `[object Object]`, completely losing root cause information.
+    2.  **Destructured Logging**: Explicitly deconstruct error object properties (`message`, `code`, `details`, `hint`, etc.) for logging (e.g., `Logger.error('Operation failed', { message: error.message, code: error.code, details: error.details })`).
+    3.  **JSON Serialization**: When using structured logging systems, serialize the entire error object with `JSON.stringify(error, null, 2)` to preserve all properties.
+    4.  **Stack Trace Preservation**: The `stack` property of `Error` instances is lost when included in template literals. Always pass it as a second argument or metadata object.
+*   **Rationale**: Errors logged as `[object Object]` make root cause identification virtually impossible. RLS violations, authentication errors, type mismatches, and similar subtle errors contain critical diagnostic information in `code` and `details` — template embedding loses all of this.
+
+### 13.43. The Type Integrity Prohibition Protocol
+*   **Law**: Using `as any` or `as never` to silence type errors is defined as "embedding bugs." Making types correctly align is the **only legitimate solution** — circumvention via casting is completely prohibited.
+*   **Action**:
+    1.  **Zero `as any` Policy**: Prohibit `as any` usage across the entire codebase. Set ESLint rule `@typescript-eslint/no-explicit-any` to `error` and physically block it in CI.
+    2.  **Root Cause Resolution**: When type errors occur, resolve the **root cause** through "fixing type definitions," "redesigning DTOs," or "applying generics" — not through casting.
+    3.  **Exceptional Cast Documentation**: When type assertions are unavoidable (e.g., external library type definition deficiencies), always add a `// SAFETY: <reason>` comment and require code review approval.
+    4.  **Lint Suppression Audit**: Using `// eslint-disable` or `// @ts-ignore` is a "declaration of technical debt." Always note the corresponding Issue number when used, and mandate quarterly inventory reviews.
+*   **Rationale**: `as any` completely disables type safety, deferring bugs that should be caught at compile time to runtime. Especially at DTO conversions and API boundaries, its use conceals data inconsistencies and makes root cause identification during incidents extremely difficult.
+
+### 13.44. The Thin Controller Mandate
+*   **Law**: API Routes / Controllers / Route Handlers must be designed as a "thin layer" responsible only for request parsing/validation and authorization checks. Business logic must be delegated to the Service layer — direct implementation in Controllers is prohibited.
+*   **Action**:
+    1.  **Controller Responsibilities**: Code within Controllers is limited to: (a) parsing and validating request body/parameters, (b) authentication/authorization checks, (c) calling Service layer, (d) constructing and returning responses.
+    2.  **No DB Access in Controllers**: Direct DB calls (ORM queries, SQL execution, etc.) within Controllers / Route Handlers are prohibited. All data access must go through the Service/Gateway layer.
+    3.  **Testability**: The Service layer must be independently unit-testable from Controllers. Logic tightly coupled to Controllers destroys testability.
+    4.  **Error Translation**: Exceptions from the Service layer must be translated to HTTP status codes and error response formats at the Controller layer. The Service layer must not know about HTTP status codes.
+*   **Rationale**: Bloated Controllers create a triple burden: untestable, non-reusable, and impossible to assess change impact. The separation of thin Controllers + thick Services is the foundation of maintainability and scalability.
+
+### 13.45. The DTO Boundary Casting Protocol
+*   **Law**: When converting database or ORM return values (loose types) to strict DTO types, casting via `as any` is prohibited. A safe type conversion strategy is mandated.
+*   **Action**:
+    1.  **No `as any` Bridge**: Double casting like `dbResult as any as MyDTO` is a complete abandonment of type safety. It is prohibited.
+    2.  **Explicit Mapping**: Conversion from DB results to DTOs must use explicit mapping functions (`toDTO(dbResult): MyDTO`) that individually map each field.
+    3.  **Validated Cast**: When type assertions are unavoidable, use intentional two-stage conversion via `as unknown as TargetType` to make the conversion intent explicit. However, combining with runtime validation (Zod, etc.) is strongly recommended.
+    4.  **Generated Types**: DB type definitions must use auto-generation (Prisma, Drizzle, Supabase CLI, etc.) to physically prevent divergence from hand-written type definitions.
+*   **Rationale**: The type boundary between DB and application layers is where data inconsistencies most frequently occur. Casting via `as any` causes silent data loss during column additions/renames, producing the worst kind of bugs — where builds pass but data is corrupted.
+
+### 13.46. The CQRS Separation Mandate
+*   **Law**: Mixing Read operations (queries) and Write operations (mutations) in the same function or class is prohibited. Query (Read-only) and Command (Write-only) must be clearly separated.
+*   **Action**:
+    1.  **Query/Command Split**: The data access layer must be separated into read-only `QueryGateway` (or `ReadService`) and write-only `CommandGateway` (or `WriteService`).
+    2.  **No Side Effects in Queries**: Query methods must only perform data reading and transformation — they must have zero side effects such as DB writes or external API calls.
+    3.  **Independent Scaling**: Read/Write separation enables independent scaling decisions: adding Read Replicas for high read load, or Write optimization for write-heavy scenarios.
+    4.  **Naming Convention**: Method names must explicitly indicate Read/Write intent (e.g., `getUser` / `findUsers` for Read, `createUser` / `updateUser` for Write).
+*   **Rationale**: Mixing Read/Write makes cache strategy application difficult and delays performance bottleneck identification. CQRS separation improves code readability, testability, and secures migration paths to future event sourcing or microservice architectures.
+
+### 13.47. The Cache Strategy Layer Protocol
+*   **Law**: Uniform cache strategies that ignore data characteristics (fixed TTL for everything / completely disabling cache) are prohibited. Define a **layered cache strategy** based on data change frequency and freshness requirements.
+*   **Action**:
+    1.  **Data Classification**: Classify application data into the following tiers:
+        - **STATIC** (No changes): Legal documents, terms of service, etc. CDN/ISR (rebuild-triggered).
+        - **WARM** (Daily to weekly changes): Master data, categories, etc. TTL 5min–1hr + SWR (Stale-While-Revalidate).
+        - **HOT** (Minute-level changes): User-generated content, inventory, etc. Short TTL (30s–5min) + on-demand revalidation.
+        - **REALTIME** (Immediate reflection): Chat, notifications, payment status, etc. No cache + WebSocket/SSE.
+    2.  **No Blind Cache**: Setting `cache: 'force-cache'` or `revalidate: 0` "just because" is prohibited. Document an explicit cache strategy based on tier classification for each data source.
+    3.  **Cache Invalidation Strategy**: Design cache invalidation strategies (`revalidateTag` / `revalidatePath` / Purge API, etc.) as an integral part of data update flows.
+    4.  **Monitoring**: Measure cache hit rates and flag endpoints below 90% as optimization targets.
+*   **Rationale**: Uniform cache strategies cause damage on both fronts: sending unnecessary requests for static data (increased cost) and returning stale information for real-time data (degraded UX). Layering based on data characteristics is the only design pattern that achieves both cost efficiency and user experience.
+
+### 13.48. The Explicit Mapping Mandate
+*   **Law**: When constructing write payloads for database operations in Service layers or Server Actions, using spread syntax (`...input`) for bulk expansion is **prohibited**. All fields must be explicitly mapped.
+*   **Action**:
+    1.  **No Spread Payload**: Spread-based payload construction like `supabase.from('table').update({ ...formData })` is prohibited. Unexpected fields in the input object (UI state management fields, etc.) will be sent to the DB, causing errors or data contamination.
+    2.  **Field-by-Field Construction**: Construct payloads by specifying each field individually, e.g., `{ name: input.name, email: input.email, status: input.status }`. This makes the scope of transmitted data explicit and review easier.
+    3.  **JSONB Structural Mapping**: Nested JSON/JSONB structure fields must also be explicitly constructed rather than relying on top-level spread. Array data (image lists, etc.) in particular requires mapping that accurately maintains the original data's order and content.
+    4.  **DTO-Payload Alignment Check**: When fields are added to DTOs, simultaneously add them to the Service layer mapping. Missing mappings are the most common cause of "saved but not reflected" silent bugs.
+*   **Rationale**: While spread syntax is concise, it abandons control over "what gets sent." In large admin forms especially, the risk of UI state management fields, computed fields, and undefined fields contaminating the payload is high. Only explicit mapping guarantees data integrity.
+
+### 13.49. The Mutation Count Verification Protocol
+*   **Law**: When verifying the results of database write operations (INSERT/UPDATE/DELETE), you must check not only the presence of `error` but also the **number of affected rows (`count`)**. The combination of `error: null` and `count: 0` is a "Phantom Success" and must be treated as an effective failure.
+*   **Action**:
+    1.  **Count Validation**: For single-record operations with ID specification (`.eq('id', id)`), verify that `count` is `1` (or the expected number). If `count` is `0` or `null`, throw an exception indicating permission denial (RLS rejection) or record absence.
+    2.  **Bulk Operation Awareness**: For bulk update/delete operations, verify that `count` matches the number of input data items. Partial success (only 7 out of 10 updated) indicates data inconsistency.
+    3.  **Sub-Step Integrity**: When updating multiple tables sequentially within a single Service function, verify both `error` and `count` at every sub-step. Skipping a failed intermediate step results in a "Partial Phantom Success" where only some data is updated.
+    4.  **Diagnostic Logging**: Always include `count` in mutation result logs (e.g., `Logger.info('Update result:', { count })`). In post-incident analysis, affected row count is the most critical clue.
+*   **Rationale**: In databases using Row Level Security (RLS), queries with insufficient permissions may be silently rejected as "no error, 0 rows affected." The traditional pattern of checking only `error` cannot detect this "failure that looks like success," manifesting to users as the most opaque bug: "saved but not reflected."
+
+### 13.50. The Authentication Guard Enumeration Consistency
+*   **Law**: In Role-Based Access Control (RBAC), maintaining separate lists of allowed roles across multiple guard functions is **prohibited**. All guard functions must reference a shared constant array (e.g., `ALLOWED_ADMIN_ROLES`) to establish a Single Source of Truth (SSOT) for role definitions.
+*   **Action**:
+    1.  **Shared Role Constants**: Define allowed roles (`admin`, `super_admin`, `master_admin`, etc.) as a single constant array, and have all guard functions (page access control, Server Action authorization, RLS policies, etc.) reference this constant.
+    2.  **Simultaneous Update Mandate**: When adding new roles, structure the system so all guard functions are automatically updated. Sharing a constant array means only one update location is needed.
+    3.  **Dead Zone Detection**: To prevent opaque deadlocks where "you can access the screen but operations (save, etc.) fail silently," periodically audit that page-level guards and action-level guards reference the same role set.
+    4.  **Failure Transparency**: When guard functions return authorization errors, catch them on the frontend and detect role inconsistencies immediately via `Logger.warn` in development environments.
+*   **Rationale**: When the number of roles increases and not all guard functions are simultaneously updated, an extremely opaque deadlock occurs: "can log into the admin panel, but specific operations are silently rejected." These bugs produce no error messages, wasting enormous time on root cause identification.
+
+### 13.51. The Sub-Step Mutation Integrity Protocol
+*   **Law**: When executing multiple asynchronous write operations (INSERT/UPDATE/DELETE) sequentially within a single service method, **the `error` object must be verified at every sub-step**, and if an error occurs, the process must be immediately stopped with an exception thrown.
+*   **Action**:
+    1.  **No Silent Continue**: Proceeding to subsequent processing without checking the `error` return value, as in `await supabase.from('table').delete()`, is prohibited. Receive results as `const { error } = await ...` for every write operation and perform error checking.
+    2.  **Step-by-Step Logging**: Output logs at the start and completion of each sub-step (e.g., `Logger.info('[Step 2/5] Updating tags...')`), enabling immediate identification of which step failed during incidents.
+    3.  **Aggregate Error Reporting**: Wrap the entire service method in `try-catch` to prevent intermediate step failures from contaminating the final result (`return { success: true }`), returning an explicit failure response if any step throws an exception.
+    4.  **Transaction Awareness**: Recognize that simple external API calls (PostgREST, etc.) are not treated as atomic transactions by default, and incorporate compensating transactions (rollback equivalents) and idempotency guarantees into the design for mid-process failures.
+*   **Rationale**: Ignoring intermediate step failures in multi-table updates causes "Partial Phantom Success" where the main table is updated but related tables remain stale. Despite showing "save successful" to users, only some data is reflected, significantly delaying problem discovery.
+
+### 13.52. The Error Object Transparency Mandate
+*   **Law**: In error handling, directly concatenating error objects as strings (resulting in `[object Object]` output) is **prohibited**. Error properties such as `message`, `code`, and `details` must be **explicitly destructured** and recorded in logs.
+*   **Action**:
+    1.  **Structured Error Logging**: Output error object properties as individual fields, e.g., `Logger.error('Operation failed', { error: err.message, code: err.code, details: err.details })`. `Logger.error('Failed: ' + error)` produces `[object Object]`, making root cause identification impossible.
+    2.  **Catch Block Standard**: In all `catch` blocks, determine whether the caught error is an `Error` instance, `PostgrestError`, etc., and extract properties appropriately for each type.
+    3.  **Error Serialization**: In error responses returned to clients, appropriately transform the internal error structure and return in `{ success: false, error: 'Human-readable message', code: 'ERROR_CODE' }` format.
+    4.  **Development vs. Production**: In development environments, include all error properties in logs. In production, mask sensitive information (stack traces, internal paths, etc.) and output only operationally necessary information (`code`, `message`).
+*   **Rationale**: `[object Object]` is the most worthless piece of information in incident response. Database errors (Supabase `PostgrestError`, etc.) in particular carry rich diagnostic information such as `message`, `code`, `details`, and `hint`, but direct object concatenation loses all of these, making root cause analysis effectively impossible.
+
+### 13.53. The Post-Mutation Verification Fetch Protocol
+*   **Law**: Immediately after high-importance write operations (image reordering, status changes, permission changes, etc.), **execute an immediate `select` (re-fetch) with the same ID** and verify via logs that data has actually been persisted to the database.
+*   **Action**:
+    1.  **Verification Fetch Pattern**: Immediately after a mutation (`update`, `insert`, `delete`), retrieve the same record via `select` and output the post-update values to logs (e.g., `Logger.info('[Verify] Post-update:', { id, updatedAt: result?.updated_at })`). This enables 100% reliable differentiation between whether the problem is "DB write failure (RLS/Trigger)" or "application-side read/display failure (Cache/UI)."
+    2.  **Diagnostic Isolation**: If the verification fetch returns updated values but the UI doesn't reflect them, the problem is definitively in the cache (Data Cache / Router Cache) or form re-initialization. Conversely, if the fetch returns old values, the problem is definitively in the DB layer (RLS rejection, trigger overwrite, etc.).
+    3.  **Conditional Application**: Not every mutation needs this. Apply intensively in: (a) privileged operations involving RLS, (b) sequential multi-table updates, (c) areas where users report "saved but not reflected," (d) updates to complex JSONB data structures.
+    4.  **Production Consideration**: In production environments, lower the verification fetch log level to `debug` or make it disableable via feature flags. However, maintain the ability to immediately enable it during debugging.
+*   **Rationale**: "Saved but not reflected" is one of the most diagnostically difficult bugs in web applications. The only way to distinguish whether the cause is DB write failure (RLS, triggers, insufficient permissions), cache inconsistency, or form re-initialization issues is to verify the physical value in the DB immediately after the mutation. The verification fetch is the only reliable method for this immediate differentiation.
+
+### 13.54. The Static Master Protocol (Centralized Constants Mandate)
+*   **Law**: Constant values used across the application (menu items, category definitions, status labels, option lists, etc.) MUST be **centrally defined in dedicated constant files (e.g., `constants/`, `config/`)**. Hardcoding constants within component or page files is prohibited.
+*   **Action**:
+    1.  **Single Source of Truth**: Consolidate each domain's constants in dedicated files such as `constants/<domain>.ts`, defined immutably with `as const`. Defining literal arrays or objects directly within components is prohibited.
+    2.  **Type Derivation**: Automatically derive types from constant definitions using `typeof` + index access types (e.g., `type Status = typeof STATUSES[number]`). Managing constants and types separately causes synchronization failures.
+    3.  **Change Impact Control**: Export constants and use them by reference so that all affected locations can be immediately identified when changes occur. Scattered magic strings are the primary cause of silent bugs from missed updates.
+    4.  **i18n Readiness**: When defining display labels as constants, clarify the mapping relationship with i18n keys, structuring so that future multilingual support requires only constant file changes.
+*   **Rationale**: When constants are scattered across components, every business rule change requires searching and modifying all files, causing frequent UI inconsistencies and logic bugs from missed updates. Centralized management is fundamental to the SSOT principle and dramatically reduces refactoring costs.
+
+### 13.55. The Generic Type Inference Safety Protocol
+*   **Law**: Using **any-indexed signatures** such as `Record<string, any>` or `{ [key: string]: any }` as "convenient types" in generic components, utility functions, and shared type definitions is **prohibited**. Concrete type parameters, `unknown`, or constrained generics are mandatory.
+*   **Action**:
+    1.  **No Any Index**: Use `Record<string, unknown>` instead of `Record<string, any>`, and narrow with type guards at access points. `any` completely disables type checking, making even property name typos undetectable.
+    2.  **Constrained Generics**: Use constrained generics like `<T extends BaseType>` for generic functions to guarantee type safety at call sites. `<T>` alone risks `T` being inferred as `any`.
+    3.  **Mapped Type Preference**: When dynamic keys are needed, prefer Mapped Types such as `Pick<FullType, K>` or `Partial<FullType>` over `Record`. This ensures the range of permitted keys is verified at compile time.
+    4.  **Inference Verification**: At generic function call sites, verify via TypeScript hover display that inference results match expectations. If inferred as `any`, review the type parameter constraints.
+*   **Rationale**: `any` index signatures fundamentally destroy type safety, making access to nonexistent properties, incorrect type assignments, and structural mismatches all undetectable at compile time. This is "typed `any`" — one of the most dangerous anti-patterns that nullifies the very purpose of using TypeScript.
+
+### 13.56. The Multi-Axis Deployment Audit Protocol
+*   **Law**: When adding or modifying features, "it works" alone does not meet deployment criteria. All **4 axes must be green** before deployment is permitted, verified autonomously.
+*   **Action**:
+    1.  **Security (Audit Log)**: Verify that destructive actions (create, update, delete) have audit logging (`recordAuditLog`, etc.) instrumented. Operations without audit trails are ungovernable and make incident investigation impossible.
+    2.  **Structured Data**: When modifying public pages, verify that structured data (JSON-LD, OpenGraph, etc.) is updated to the latest state. This directly impacts SEO and accurate information retrieval by AI agents.
+    3.  **UX (User Experience)**: Verify that error messages, tooltips, and confirmation dialogs are appropriately provided in the user's language. Exposing technical messages degrades production quality.
+    4.  **Type Safety**: Verify that no new `any`, opaque casts (`as unknown as`), or any-indexed signatures have been introduced.
+*   **Rationale**: The mindset of "it works, so it's done" leaves blind spots in security, SEO, UX, or maintainability. Structurally requiring multi-axis quality criteria prevents post-deployment rework and incidents.
+
+### 13.57. The DTO Segregation Protocol
+*   **Law**: Aggregating all project DTOs and interfaces into a single bloated type definition file (e.g., `types/index.ts`) is **prohibited**. Split files by functional domain.
+*   **Action**:
+    1.  **Domain-Based Splitting**: Split DTO definitions by functional domain (e.g., `types/store.ts`, `types/user.ts`, `types/article.ts`). When a single file contains more than 10 DTO definitions, splitting review is mandatory.
+    2.  **No Circular References**: Prevent circular references between type definition files (`A → B → A`). Place common base types in shared files like `types/common.ts` and keep dependency direction unidirectional.
+    3.  **AI Context Efficiency**: Maintain a structure that allows AI agents to pinpoint-read only relevant types. Bloated type files waste AI context windows and degrade accuracy.
+    4.  **Index Re-export**: Re-exports from `types/index.ts` (`export { StoreDTO } from './store'`) are permitted for convenience, but defining types directly in that file is prohibited.
+*   **Rationale**: Bloated type definition files increase developer cognitive load, degrade AI agent context efficiency, and cause frequent merge conflicts on Git. Domain-based splitting achieves separation of concerns and parallel development efficiency.
+
+### 13.58. The Mapper Input Robustness Protocol
+*   **Law**: In DTO mapper function design (database row → DTO conversion functions), apply **Postel's Law**: "Be conservative in what you send, be liberal in what you accept."
+*   **Action**:
+    1.  **Liberal Input**: Mapper function input types should assume that ORM/DB client inference results are incomplete (Partial, null-mixed, amorphous join results, etc.) and must not enforce overly strict types. Use of `Record<string, unknown>` or lossless intermediate types is permitted.
+    2.  **Conservative Output**: Mapper function return values must always be explicitly defined DTO types (`StoreDTO`, `UserDTO`, etc.) where the type checker guarantees the existence and type of all fields.
+    3.  **Internal Validation**: In exchange for relaxed input types, mandate thorough value validation/fallback processing within mapper functions (`input.name ?? ''`, `Number(input.price) || 0`, etc.). This converts invalid inputs to safe default values.
+    4.  **No Partial Cascade**: Prevent "Partial propagation" where using Partial in mapper input types causes output DTO fields to also become optional. Output types must always be complete types (Required).
+*   **Rationale**: ORM/DB client type inference frequently returns incomplete types for table joins and RPC calls. Enforcing strict input types causes frequent Partial mismatches and `never` type errors, pushing developers into a vicious cycle of `as any` escape casts. Being liberal with input and conservative with output achieves both practicality and type safety.
+
+### 13.59. The Migration Static Analysis Guard Protocol
+*   **Law**: Mandate execution of **static analysis** via CI pipelines and Pre-push hooks (Git Hooks) when pushing/merging database migration files, physically rejecting dangerous SQL patterns. "Operational rules" that depend on human attention will inevitably be broken. Only automated guards that reject at the system level protect the production environment.
+*   **Action**:
+    1.  **Forbidden Pattern Detection**: Reject Push/Merge when the following patterns are detected in migration files:
+        -   **`UPDATE` without `DO` block**: Unprotected updates without WHERE clause or conflict handling. Leads to data inconsistency (Constraint Violation).
+        -   **`INSERT` without `ON CONFLICT`**: Unprotected insertions that invite unique constraint violations.
+        -   **`UNIQUE` constraint without Cleanup**: Adding unique constraints without cleaning up existing duplicate data causes migration to fail with errors.
+    2.  **Pre-push Hook**: Execute a script (e.g., `scripts/migration-guard.ts`) before local pushes to provide immediate feedback on dangerous SQL. Bypassing the hook with `--no-verify` is prohibited as an act that destroys project reliability.
+    3.  **CI Pipeline**: Keep a `migration:check` job constantly running in CI (GitHub Actions, etc.) as the final defense line against human error. Deletion or disabling of this CI job is prohibited.
+    4.  **Custom Rules**: Design the rule set to be extensible so project-specific dangerous patterns (e.g., `DROP TABLE` without `IF EXISTS`, `ALTER TABLE DROP COLUMN` without backup) can be added.
+*   **Rationale**: Migration accidents directly lead to "irreversible destruction of production data". Defense relying solely on code review is easily breached through reviewer oversights or skipping during emergency deployments. Mechanical static analysis guards protect the production environment 24/7, without any exceptions.

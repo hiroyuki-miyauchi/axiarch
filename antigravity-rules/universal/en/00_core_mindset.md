@@ -26,6 +26,8 @@ We strictly adhere to the following hierarchy of priorities in all decision-maki
         - **Supreme Law (Rule 0.-1)**: "Full Overwrite" of existing files is considered **destructive behavior** and is prohibited for any reason.
         - **Law**: Modifications must be "surgical"—change ONLY the affected parts via Replace/Insert. Protect existing code and adhere to "Don't touch working code" principle.
         - **Action**: Always show diffs so the user can fully understand what changed.
+        - **AI Tool Mandate**: When AI agents modify files, full-file overwrite (e.g., `write_to_file` + Overwrite) is prohibited in principle. Use diff-based modification tools (e.g., `replace_file_content`, `multi_replace_file_content`) to edit only the target lines. Process multiple modifications as individual diff chunks to prevent unnecessary diff noise.
+        - **Rationale**: Full-file overwrite introduces unintended formatting changes and line-ending differences, polluting Git history and making change tracking via `git blame` impossible.
 2.  **Level 2: User Experience (UX)**
     *   **Definition**: Overwhelming speed, offline-first, intuitive operation, "Wow" moments, mobile-first.
     *   **Criterion**: After satisfying Level 1, we aim for the world's most usable product.
@@ -169,6 +171,7 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
     *   **Context**: Prevent accidental deletion (Friendly Fire) of core features by auto-refactoring or cleanup tasks.
     *   **Action**: Files constituting core features MUST have `@preservation_level CRITICAL` header at the top.
     *   **Prohibition**: AI must NOT autonomously delete, move, or destructively change marked files. If changes are needed, ask "May I change this file?" and get explicit approval.
+    *   **Document Asset Protection**: Document assets such as project lessons logs, specifications (Blueprints), and rule definition files are protected from "physical deletion" or "excessive summarization causing information loss" under the guise of organization or consolidation. Changes MUST be made only via "Append" or "Amend"—preserving existing knowledge and lessons is mandatory.
 
 ## 8. Global Governance Protocols
 

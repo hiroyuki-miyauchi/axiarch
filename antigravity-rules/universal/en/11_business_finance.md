@@ -17,6 +17,12 @@
         *   **Cache Invalidation Storm**: Prohibit implementations that spam cache invalidation (Revalidation) in loops due to explosive API call increase.
     *   **Zombie Resource Elimination**: Regularly run scripts to delete unused dev environments and old backups.
     *   **Preview Cleanup Protocol**: Auto-delete Preview environments (branch DBs etc.) via CI/CD after PR merge to prevent "migration ghosts".
+    *   **Storage Tiering Protocol**: Configure lifecycle policies to move infrequently accessed logs and archive data from Hot Storage (expensive) to Cold Storage (S3 Glacier / R2 etc.) to optimize storage costs.
+    *   **Cache Hierarchy Standard (Cache-First FinOps)**: Apply the following cache hierarchy to all queries to minimize DB load and cost.
+        *   **STATIC (86400s)**: Master data (categories, configurations) — zero DB load.
+        *   **WARM (300s)**: Search results, list views.
+        *   **HOT (60s)**: Detail pages, reviews.
+        *   **REALTIME (0s)**: Payments, authentication — no cache.
 *   **Vendor Lock Avoidance (Exit Strategy)**:
     *   **Portable Schema**: Write DB schema, RLS policies, Triggers in standard SQL (`.sql`), minimizing vendor-specific feature dependency.
     *   **No Proprietary Lock-in**: Avoid vendor-proprietary storage/KV features; use S3/Redis compatible interfaces.
@@ -54,6 +60,12 @@
         1.  **Dunning Emails**: Auto-send "please update card info" reminder emails 1, 3, 5 days after payment failure.
         2.  **Service Continuity**: Allow continued service during Grace Period to minimize involuntary churn.
         3.  **Stripe Smart Retries**: Enable Stripe Billing auto-retry to maximize collection rate.
+*   **The Smart Retention Protocol (Voluntary Churn Mitigation)**:
+    *   **Context**: Even when users choose to cancel, appropriate flows can reduce churn (attrition).
+    *   **Action**:
+        1.  **Cancel Reason Survey**: After the cancel button is pressed, collect cancellation reasons via multiple-choice survey (data collection for improvement).
+        2.  **Retention Offer**: Present retention offers based on the reason (free month coupon, upcoming feature improvement notifications, etc.).
+    *   **Guardrail**: Intentionally complicating the cancellation flow — **Dark Patterns are strictly prohibited**. If the user declines the offer, complete the cancellation immediately.
 *   **Hybrid Architecture Strategy**:
     *   **Dual API Integration**: Use `Stripe Billing` for subscriptions and `Stripe Checkout` for one-time payments.
     *   **Metadata-Driven Tiering (Rule 26.2)**:
@@ -116,3 +128,24 @@
     *   **The 30% Rule**: Keep AI token costs under **30%** of subscription revenue. Apply hard limits if exceeded.
     *   **Model Tiering**: Do not use highest-spec models (e.g., GPT-4) for everything. Switch to lightweight models (Flash/Mini) based on task complexity.
     *   **Circuit Breaker**: Implement a safety mechanism to auto-stop AI features upon sudden cost spikes (e.g., exceeding budget in 1 hour).
+
+## 7. Promotion & Pricing Strategy
+
+### 7.1. The Coupon Integrity Protocol
+*   **Law**: Coupon and discount application logic MUST be **strictly validated on the server side**. Applying discounts on the frontend only is prohibited due to tampering risks.
+*   **Action**:
+    1.  **Server-Side Validation**: Validate coupon code validity (expiration, usage count, eligibility conditions) on the server side.
+    2.  **Idempotency**: Manage usage history in the DB with Unique Constraints to prevent duplicate application of the same coupon.
+    3.  **Audit Trail**: Record coupon usage history in audit logs to enable fraud tracking.
+    4.  **Budget Guard**: Manage total coupon budgets (usage limits, total discount caps) in the DB and automatically deactivate upon budget exhaustion.
+    5.  **Per-User Limit**: Set per-user usage limits (`max_uses_per_user`) to prevent multiple fraudulent redemptions. For multi-account prevention, combine with SMS verification, device fingerprinting, etc.
+    6.  **Immutable Redemption History**: Coupon redemption history (`coupon_redemptions`) MUST be recorded after payment confirmation (e.g., after Webhook receipt), and **any modification or deletion is strictly prohibited**. Retain permanently as an audit trail.
+
+### 7.2. The Dynamic Pricing Protocol
+*   **Law**: Price and subscription plan changes MUST be designed to be **immediately reflected from the admin panel without code deployment** as the standard.
+*   **Action**:
+    1.  **Price as Data**: Manage pricing information in DB tables (e.g., `plans`, `prices`); hardcoding in source code is prohibited.
+    2.  **Version Control**: Create new records for price changes, managing validity periods with `valid_from` / `valid_until`. Consider grandfathering design so existing user contracts are not affected by changes.
+    3.  **Display Sync**: Design cache invalidation strategies to ensure price changes are immediately reflected on the frontend (LPs, pricing pages, etc.).
+    4.  **Server-Side Recalculation**: Final price and discount calculations MUST be **re-executed on the server side**. Frontend display prices are merely "reference prices"; recalculating on the server side during payment processing eliminates frontend tampering risks.
+

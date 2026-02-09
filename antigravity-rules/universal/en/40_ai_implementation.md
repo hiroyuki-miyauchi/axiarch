@@ -27,6 +27,15 @@
         *   **Law**: RAG (Retrieval Augmented Generation) reference sources MUST use **"Triple Write synchronized plain text data"** mandated by CMS Constitution (`34`).
         *   **Reason**: Feeding noise-filled data containing HTML tags to AI wastes tokens and degrades response accuracy.
     *   **Grounding & Citations**: If possible, present sources (citations/DB info) that ground the answer (in case of RAG).
+*   **The Hallucination Tiered Disclaimer Protocol**:
+    *   **Law**: Hallucination risk (generating information that differs from facts) varies by context type. Instead of uniform disclaimers, mandate tiered disclaimer responses according to risk level.
+    *   **Mandate**:
+        | Risk Level | Context Example | Disclaimer Response |
+        |:---|:---|:---|
+        | **Critical** | Medical, legal, financial professional information | **Must** display disclaimer. Auto-append "Please consult a professional" |
+        | **High** | Business hours, prices, inventory facts | Mandate Grounding against DB data. Display "Unverified" if unable to confirm |
+        | **Medium** | General advice, recommendations | Display "Reference information" label |
+        | **Low** | Casual chat, entertainment | No label required (but harmful content checks still apply) |
 *   **Privacy & Bias**:
     *   **PII Scrubbing**: Prompts sent to external LLMs must NOT contain PII (Phone, Name). Use regex masking (`[Contact Removed]`) before sending.
     *   **The Fairness Protocol (Bias Mitigation)**:
@@ -34,6 +43,12 @@
         *   **Action**: Monitor use of bias-containing adjectives like "dangerous" or "inferior" and enforce neutral expressions.
 *   **Reporting**:
     *   Always implement a feature for users to report/block inappropriate content in GenAI apps (Google Play 2025 Requirement).
+*   **The AI Generated Content Labeling Protocol**:
+    *   **Law**: Content generated or assisted by AI (text, image analysis results, recommendations, etc.) MUST always display labels indicating its origin. Hiding, concealing, or minimizing labels is prohibited. Comply with the principles of the EU AI Act and relevant national AI regulation guidelines.
+    *   **Action**:
+        1.  **Chat Label**: Always display labels such as `🤖 Answered by AI` on AI chat responses.
+        2.  **Analysis Label**: Display "Content read by AI. Please verify accuracy" on AI image analysis (OCR, etc.) results.
+        3.  **DB Flag**: When saving AI-generated content, use an `is_ai_generated: boolean` column (default: `false`) to enable origin tracking at the data level.
 
 ## 3. Technical Architecture
 *   **Private Relay & Execution Pattern**:
@@ -53,6 +68,17 @@
     *   **The Semantic Caching Protocol (pgvector Strategy)**:
         *   **Requirement**: Recommend implementing "similarity search cache" using `pgvector`. Set threshold at **0.95 or higher** and return cache only for Q&A close to exact match.
         *   **Benefit**: This improves UX by significantly reducing response time, not just cost savings.
+
+### 3.1. The AI Destructive Command Ban
+*   **Law**: AI agents MUST NOT autonomously generate or execute **destructive commands** such as `rm`, `git rm`, `git restore` (without specific recovery intent), regardless of the reason, without explicit user permission.
+*   **Action**:
+    1.  **Text Asset Immunity**: Deletion of document assets (specifications, rule definitions, code) in particular risks "project memory loss" and must be self-censored as a "prohibited operation" even if technically possible.
+    2.  **Exception**: Obvious cleanup tasks like deleting `.DS_Store` or `node_modules` are exempt, but this does not apply to text assets (code, documents).
+*   **Rationale**: AI agents tend to interpret "file organization" as "deletion" and execute accordingly, risking unintended asset loss.
+
+### 3.2. The Human-in-the-Loop Protocol (AI Supervision Mandate)
+*   **Law**: AI agents respond based on past context (chat history) and may persist with outdated information or incorrect assumptions. Users (humans) are obligated to promptly point out "That's wrong" or "The premise has changed" and **correct the context** when they feel the AI is heading in the wrong direction.
+*   **Rationale**: Leaving AI runaway unchecked is negligence by the supervisor (human). AI is a "tool," and steering responsibility always lies with humans. Not stopping an AI heading in the wrong direction is equivalent to approving the wrong outcome.
 
 ## 4. Crisis Management
 *   **The Red Button Protocol (AI Kill Switch)**:
@@ -104,3 +130,10 @@
     *   **Regression Testing**: Perform regression testing using "Golden Dataset" upon changes to prevent quality degradation.
 *   **Automated Evaluation (LLM-as-a-Judge)**:
     *   Introduce automated evaluation using superior models as "Judges" to assess answer quality, and use it as deployment criteria.
+*   **The Model Switch Protocol**:
+    *   **Law**: AI model generation changes occur frequently, with risk of quality degradation during transitions. Model changes MUST go through the following 4-step process.
+    *   **Step 1 (Staging Test)**: Enable the new model only in the staging environment and verify accuracy with Golden Dataset.
+    *   **Step 2 (Shadow Mode)**: Run old and new models simultaneously (Shadow Traffic) in production and record response differences. Recommended comparison period is at least **48 hours**.
+    *   **Step 3 (Canary Release)**: Deploy the new model to a subset of users (e.g., 10%) and monitor error rates and satisfaction.
+    *   **Step 4 (Full Rollout)**: If no issues, roll out to all users.
+    *   **Rollback**: Maintain the ability to immediately rollback (switch to old model) at each step. Control via environment variable (e.g., `AI_MODEL_VERSION`) is recommended.
