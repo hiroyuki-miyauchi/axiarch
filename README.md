@@ -1,17 +1,16 @@
 # Creating Strict Rules (Project Antigravity)
 
-> **Google Antigravity Rule Generator / Master Repository**
+> **AI-Native Development Rule Framework / AI開発のための厳格なルールフレームワーク**
 
 ### 🇯🇵 日本語 (Primary)
 
 このリポジトリは、AIネイティブ開発のための厳格な憲法「Creating Strict Rules (Antigravity)」の**マスターソース（原本）**です。
 ここで定義されているルールセットをあなたのプロジェクトにコピーすることで、AIエージェントに対する強力なガバナンスと、シリコンバレー水準の品質管理を即座に導入できます。
 
-#### 📚 利用ガイド (Usage)
+#### 📚 利用ガイド
 
-ルールの導入方法、初期化手順、各ルールの詳細は、以下のドキュメントをご覧ください。
-
-*   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **詳しい導入マニュアルはこちら**
+*   **[.agent/rules/README.md](./.agent/rules/README.md)**: 👈 **詳しい導入マニュアルはこちら**
+*   **[.agent/rules/INDEX.md](./.agent/rules/INDEX.md)**: ルール目次・カテゴリ一覧
 
 ---
 
@@ -22,6 +21,5 @@ By copying the ruleset defined here into your project, you can instantly enforce
 
 #### 📚 Usage Guide
 
-For installation instructions, initialization steps, and detailed rule explanations, please refer to:
-
-*   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **See Installation Manual Here**
+*   **[.agent/rules/README.md](./.agent/rules/README.md)**: 👈 **See Installation Manual Here**
+*   **[.agent/rules/INDEX.md](./.agent/rules/INDEX.md)**: Rule directory index & category map

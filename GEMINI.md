@@ -15,9 +15,9 @@
 -   **Project Native Language**: `[Japanese | English]` (Default: `Japanese`)
   - **Japanese**: AIは日本語で対話します。下部の **[🇯🇵 日本語プロトコル]** セクションを参照し、遵守してください。
   - **English**: AI communicates in English. Refer to the **[🇺🇸 English Protocol]** section below.
-  - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`antigravity-rules/universal/` および `antigravity-rules/blueprint/` 内の **使用しない方の言語フォルダを必ず削除** してください。
+  - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`.agent/rules/universal/` および `.agent/rules/blueprint/` 内の **使用しない方の言語フォルダを必ず削除** してください。
 
-  - *(Action for English)*: Set this value upon initialization and **delete the unused folders** in `antigravity-rules/universal/` and `antigravity-rules/blueprint/`.
+  - *(Action for English)*: Set this value upon initialization and **delete the unused folders** in `.agent/rules/universal/` and `.agent/rules/blueprint/`.
 
 ---
 
@@ -116,14 +116,14 @@
 **以下のサイクルを厳守してください。**
 
 1.  **Load Constitution (ルールの読み込み):**
-    - **Standard Rules**: プロジェクトルートの `antigravity-rules/universal/*.md` （不変のルール）をコンテキストに読み込む。
-    - **Blueprint**: `antigravity-rules/blueprint/ja/*.md` （現在の仕様）を確認する。特に **`01_project_lessons_log.md`** （最新の教訓）を最優先で適用する。
+    - **Standard Rules**: プロジェクトルートの `.agent/rules/universal/*.md` （不変のルール）をコンテキストに読み込む。
+    - **Blueprint**: `.agent/rules/blueprint/*.md` （プロジェクト固有ルール）を確認する。特に **`001_project_lessons_log.md`** （最新の教訓）を最優先で適用する。
 
     - ユーザーの指示がこれらと矛盾しないか検証する。
 
 2.  **Blueprint First (設計書ファースト):**
     - **Major Changes (機能追加・DB変更・ロジック変更):**
-      - コードを書く前に、必ず `antigravity-rules/blueprint/` 内の仕様書を更新・定義する。
+      - コードを書く前に、必ず `.agent/rules/blueprint/` 内のプロジェクト固有ルールを更新・定義する。
       - 設計の整合性を保つため、ここをスキップすることは禁止です。
     - **Minor Fixes (バグ修正・UI微調整・リファクタリング):**
       - Blueprintの更新は不要です。即座にコード修正（Implementation）を行ってください。
@@ -149,7 +149,7 @@
 - **Output & Organization:**
   - **Grouping:** 機能追加の際は、むやみに新規ファイルを作成せず、関連する既存のBlueprint（システムアーキテクチャ図やデザインシステム定義書など）への追記を優先する。
   - **New Feature:** 全く新しい概念の機能の場合のみ、ルールディレクトリ内のテンプレート構成（もし存在すれば）に準拠して新規ファイルを作成する。
-  - **Lessons:** プロジェクトを通じた教訓や運用ルールは、**特定した教訓ファイル（Lessons Log）** に集約して追記する。
+  - **Lessons (該当箇所修正ファースト):** 教訓や運用ルールを得た場合は、**まず該当する全ルールファイル（blueprint/）を洗い出し、関連箇所を直接修正・追記**すること。Lessons Logへの記録は一時的な備忘として併用するが、最終的な反映先は常に各ルールファイル本体とする。※ `universal/` は不変（Immutable）のため修正禁止。
 
 
 
@@ -245,14 +245,14 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 **Strictly adhere to the following cycle.**
 
 1.  **Load Constitution:**
-    -   **Standard Rules**: Load project root `antigravity-rules/universal/*.md` (immutable rules) into context.
-    -   **Blueprint**: Check `antigravity-rules/blueprint/en/*.md` (current specs). Prioritize applying **`01_project_lessons_log.md`** (latest lessons).
+    -   **Standard Rules**: Load project root `.agent/rules/universal/*.md` (immutable rules) into context.
+    -   **Blueprint**: Check `.agent/rules/blueprint/*.md` (project-specific rules). Prioritize applying **`001_project_lessons_log.md`** (latest lessons).
 
     -   Verify that user instructions do not contradict these.
 
 2.  **Blueprint First:**
     -   **Major Changes (Feature add/DB change/Logic change):**
-        -   Before coding, you MUST update/define specifications in `antigravity-rules/blueprint/`.
+        -   Before coding, you MUST update/define project-specific rules in `.agent/rules/blueprint/`.
         -   Skipping this is prohibited to maintain design integrity.
     -   **Minor Fixes (Bug fix/UI tweak/Refactor):**
         -   Blueprint update is unnecessary. Proceed immediately to Implementation.
@@ -271,7 +271,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 -   **Output & Organization:**
     -   **Grouping:** For feature additions, prioritize adding to existing Blueprints (System Architecture, Design System definitions, etc.) rather than creating new files indiscriminately.
     -   **New Feature:** Create a new file adhering to the template configuration in the rule directory (if it exists) only for completely new conceptual features.
-    -   **Lessons:** Summarize and append lessons or operational rules to the **specified Lesson Log file (Lessons Log)**.
+    -   **Lessons (Fix-in-Place First):** When lessons or operational rules are identified, **first locate ALL relevant rule files in blueprint/ and directly update/append the related sections**. The Lessons Log may be used as a temporary memo, but the final destination must always be the rule files themselves. Note: `universal/` is Immutable and MUST NOT be modified.
 
 ---
 
