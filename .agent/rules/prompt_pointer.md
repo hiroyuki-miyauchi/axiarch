@@ -18,31 +18,46 @@
 
 **すべてのタスクを開始する前に、以下の順序でファイルを読み込み、内容を遵守せよ。**
 
-#### Step 1: 最上位憲法
+#### Step 1: 最上位憲法 & 全体地図の把握（必ず最初に読む）
 - **`GEMINI.md`**（プロジェクトルート）
   - Antigravity System Protocol の最高法規。全ルールに優先する。
+- **`antigravity-rules/INDEX.md`** — 全ルールの詳細索引
+  - 全ルールファイルの概要を把握し、以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
 
-#### Step 2: Universal Rules（不変ルール）
-- **`antigravity-rules/universal/`** 配下の全ファイル
+#### Step 2: 必須ルール（どんなタスクでも毎回必ず読む）
+
+> [!IMPORTANT]
+> 以下のファイルはタスクの種類に関わらず**毎回必ず読み込むこと。**
+> これらは全タスクに横断的に適用される最重要ルールである。
+
+- **`antigravity-rules/universal/{lang}/00_core_mindset.md`** — 全ルールの基盤・最上位行動原則
+- **`antigravity-rules/universal/{lang}/60_security_privacy.md`** — セキュリティ・プライバシー（横断的関心事）
+- **`antigravity-rules/blueprint/{lang}/01_project_lessons_log.md`** — プロジェクト教訓ログ（最優先適用）
+
+> ※ `{lang}` は `GEMINI.md` の `Project Native Language` に従い `ja/` または `en/` に置換する。
+
+#### Step 3: タスク関連ルールの選択的読み込み
+
+> [!IMPORTANT]
+> **全ファイルを無差別に読み込む必要はない。**
+> Step 1 で把握した `INDEX.md` の情報に基づき、**「現在のタスクに関連するファイルのみ」**をツールを使って読み込むこと。
+
+- **Universal Rules**（`antigravity-rules/universal/{lang}/`）
   - **不変** — 明示的に「憲法改正」を指示されない限り編集禁止。
-  - `GEMINI.md` の `Project Native Language` に従い、該当する言語フォルダ（`ja/` or `en/`）を参照する。
-
-#### Step 3: Blueprint Rules（プロジェクト固有仕様）
-- **`antigravity-rules/blueprint/`** 配下のファイル
+  - Step 2 で読んだファイルを除き、タスクに関連するファイルをINDEXから選択して読む。
+- **Blueprint Rules**（`antigravity-rules/blueprint/{lang}/`）
   - **可変** — プロジェクトのコンテキストに応じて作成・編集可能。
-  - 特に **`01_project_lessons_log.md`**（教訓ログ）を最優先で適用する。
+  - Step 2 で読んだファイルを除き、タスクに関連するファイルをINDEXから選択して読む。
 
-#### Step 4〜6: ルートレベルの参照ファイル
+> [!TIP]
+> **クロスリファレンスに従うこと。** 読み込んだファイル内に「関連ルール」「参照」等のリンクがあれば、そのリンク先も追加で読み込むこと。これにより、見落としを防ぐ。
 
-> 以下3ファイルは `antigravity-rules/` **直下**に配置されている（`universal/` や `blueprint/` の中ではない）。
+#### Step 4: ルートレベルの参照ファイル（必要時のみ）
 
-- **`antigravity-rules/README.md`** — マスター目次
-  - 全ルールモジュールへのリンク集。ルール間のナビゲーションに使用する。
-- **`antigravity-rules/compliance_matrix.md`** — 要件対照表
-  - ユーザーの要望がどのルールファイルでカバーされているかを証明する対照表。
-  - Universal（不変）と Blueprint（可変）の責務分離を明確にする。
-- **`antigravity-rules/INDEX.md`** — 詳細索引
-  - 全ルールファイルの概要説明を記載した詳細索引。各ファイルが何を規定しているかを把握する際に参照する。
+> 以下のファイルは `antigravity-rules/` **直下**に配置されている。必要に応じて参照する。
+
+- **`antigravity-rules/README.md`** — マスター目次（ナビゲーション用）
+- **`antigravity-rules/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
 
 ### 🚫 禁止事項
 
@@ -58,31 +73,46 @@
 
 **Before starting any task, load the following files in order and comply with their contents.**
 
-#### Step 1: Supreme Constitution
+#### Step 1: Supreme Constitution & Master Map (Always Read First)
 - **`GEMINI.md`** (project root)
   - The supreme law of the Antigravity System Protocol. Takes precedence over all other rules.
+- **`antigravity-rules/INDEX.md`** — Detailed index of all rules
+  - Understand the overview of all rule files and use this as a **map to decide which files to read** in the following steps.
 
-#### Step 2: Universal Rules (Immutable)
-- **`antigravity-rules/universal/`** — all files under this directory
+#### Step 2: Mandatory Rules (Always Read Regardless of Task)
+
+> [!IMPORTANT]
+> The following files MUST be read **every time, regardless of task type.**
+> These are the most critical rules that apply across all tasks.
+
+- **`antigravity-rules/universal/{lang}/00_core_mindset.md`** — Foundation of all rules, supreme behavioral principles
+- **`antigravity-rules/universal/{lang}/60_security_privacy.md`** — Security & Privacy (cross-cutting concern)
+- **`antigravity-rules/blueprint/{lang}/01_project_lessons_log.md`** — Project lessons log (highest priority)
+
+> Note: Replace `{lang}` with `ja/` or `en/` based on the `Project Native Language` setting in `GEMINI.md`.
+
+#### Step 3: Selective Loading of Task-Relevant Rules
+
+> [!IMPORTANT]
+> **DO NOT indiscriminately read all files.**
+> Based on the `INDEX.md` reviewed in Step 1, **read only the files relevant to the current task** using your tools.
+
+- **Universal Rules** (`antigravity-rules/universal/{lang}/`)
   - **Immutable** — DO NOT edit unless explicitly instructed to "Amend Constitution".
-  - Refer to the language folder (`ja/` or `en/`) matching the `Project Native Language` setting in `GEMINI.md`.
-
-#### Step 3: Blueprint Rules (Project-Specific)
-- **`antigravity-rules/blueprint/`** — files under this directory
+  - Excluding files already read in Step 2, select and read task-relevant files from the INDEX.
+- **Blueprint Rules** (`antigravity-rules/blueprint/{lang}/`)
   - **Mutable** — Create and edit to define project-specific context.
-  - Prioritize **`01_project_lessons_log.md`** (Lessons Log) above all other blueprints.
+  - Excluding files already read in Step 2, select and read task-relevant files from the INDEX.
 
-#### Steps 4–6: Root-Level Reference Files
+> [!TIP]
+> **Follow cross-references.** If a loaded file contains links labeled "Related Rules", "See Also", etc., load those linked files as well. This prevents oversight.
 
-> The following 3 files are located **directly under** `antigravity-rules/` (NOT inside `universal/` or `blueprint/`).
+#### Step 4: Root-Level Reference Files (As Needed)
 
-- **`antigravity-rules/README.md`** — Master Index
-  - Link collection to all rule modules. Use for navigation.
-- **`antigravity-rules/compliance_matrix.md`** — Compliance Matrix
-  - Proves which rule files cover each user requirement.
-  - Clarifies the separation of responsibilities between Universal (immutable) and Blueprint (mutable).
-- **`antigravity-rules/INDEX.md`** — Detailed Index
-  - Detailed index with summaries for every rule file. Use to understand what each file governs.
+> The following files are located **directly under** `antigravity-rules/`. Refer to them as needed.
+
+- **`antigravity-rules/README.md`** — Master index (for navigation)
+- **`antigravity-rules/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)
 
 ### 🚫 Prohibited Actions
 

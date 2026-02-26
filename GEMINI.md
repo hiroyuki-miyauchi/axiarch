@@ -116,9 +116,15 @@
 **以下のサイクルを厳守してください。**
 
 1.  **Load Constitution (ルールの読み込み):**
-    - **Standard Rules**: プロジェクトルートの `antigravity-rules/universal/ja/*.md` （不変のルール）をコンテキストに読み込む。
-    - **Blueprint**: `antigravity-rules/blueprint/ja/*.md` （現在の仕様）を確認する。特に **`01_project_lessons_log.md`** （最新の教訓）を最優先で適用する。
-
+    - **INDEX First**: まず `antigravity-rules/INDEX.md` を読み、全ルールファイルの概要を把握する。
+    - **必須ルール（毎回必ず読む）:**
+      - `antigravity-rules/universal/{lang}/00_core_mindset.md` — 全ルールの基盤
+      - `antigravity-rules/universal/{lang}/60_security_privacy.md` — セキュリティ（横断的関心事）
+      - `antigravity-rules/blueprint/{lang}/01_project_lessons_log.md` — 教訓ログ（最優先適用）
+    - **選択ルール（タスクに応じて INDEX から選択）:**
+      - Universal / Blueprint の残りのファイルは、INDEXの概要に基づき**現在のタスクに関連するもののみ**読み込む。
+      - 全ファイルを無差別に読み込む必要はない。
+    - **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあれば、そのリンク先も追加で読むこと。
     - ユーザーの指示がこれらと矛盾しないか検証する。
 
 2.  **Blueprint First (設計書ファースト):**
@@ -245,9 +251,15 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 **Strictly adhere to the following cycle.**
 
 1.  **Load Constitution:**
-    -   **Standard Rules**: Load project root `antigravity-rules/universal/en/*.md` (immutable rules) into context.
-    -   **Blueprint**: Check `antigravity-rules/blueprint/en/*.md` (current specs). Prioritize applying **`01_project_lessons_log.md`** (latest lessons).
-
+    -   **INDEX First**: Read `antigravity-rules/INDEX.md` first to understand the overview of all rule files.
+    -   **Mandatory Rules (always read):**
+        - `antigravity-rules/universal/{lang}/00_core_mindset.md` — Foundation of all rules
+        - `antigravity-rules/universal/{lang}/60_security_privacy.md` — Security (cross-cutting concern)
+        - `antigravity-rules/blueprint/{lang}/01_project_lessons_log.md` — Lessons log (highest priority)
+    -   **Selective Rules (read based on task relevance):**
+        - For remaining Universal / Blueprint files, read **only those relevant to the current task** based on the INDEX overview.
+        - DO NOT indiscriminately read all files.
+    -   **Cross-references**: If a loaded file contains links to related rules, load those linked files as well.
     -   Verify that user instructions do not contradict these.
 
 2.  **Blueprint First:**
