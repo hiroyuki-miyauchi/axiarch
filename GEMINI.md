@@ -117,13 +117,21 @@
 
 1.  **Load Constitution (ルールの読み込み):**
     - **INDEX First**: まず `antigravity-rules/INDEX.md` を読み、全ルールファイルの概要を把握する。
-    - **必須ルール（毎回必ず読む）:**
+    - **必須ルール（毎回必ず読む — 9ファイル）:**
       - `antigravity-rules/universal/{lang}/00_core_mindset.md` — 全ルールの基盤
+      - `antigravity-rules/universal/{lang}/10_product_business.md` — ビジネスコンテキスト・収益化判断基盤
+      - `antigravity-rules/universal/{lang}/12_growth_marketing.md` — SEO/GEO/OGP（構造化データ＋メタタグの一体システム）
+      - `antigravity-rules/universal/{lang}/20_design_ux.md` — モバイルファースト・アクセシビリティ・UX横断基準
+      - `antigravity-rules/universal/{lang}/30_engineering_general.md` — コーディング規約・品質基準・CI/CD
+      - `antigravity-rules/universal/{lang}/35_api_integration.md` — API設計（フロントエンド設計と不可分）・エラーハンドリング
       - `antigravity-rules/universal/{lang}/60_security_privacy.md` — セキュリティ（横断的関心事）
+      - `antigravity-rules/universal/{lang}/61_legal_data_privacy.md` — 個人情報保護・GDPR/APPI（セキュリティと対の横断的義務）
+      - `antigravity-rules/universal/{lang}/70_qa_testing.md` — テスト戦略・回帰防止方針
       - `antigravity-rules/blueprint/{lang}/01_project_lessons_log.md` — 教訓ログ（最優先適用）
-    - **選択ルール（タスクに応じて INDEX から選択）:**
-      - Universal / Blueprint の残りのファイルは、INDEXの概要に基づき**現在のタスクに関連するもののみ**読み込む。
-      - 全ファイルを無差別に読み込む必要はない。
+    - **自律的ロード（AIが自律判断で追加読み込み）:**
+      - **技術スタック把握**: Blueprint `00_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`33`, Supabase→`37`）。Blueprint側もタスクに関連するファイルを自律選択。
+      - **タスク分類**: 現在のタスク内容に基づき、残りのUniversal/Blueprintから関連ファイルを自律的に選択して読み込む。
+      - **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
     - **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあれば、そのリンク先も追加で読むこと。
     - ユーザーの指示がこれらと矛盾しないか検証する。
 
@@ -252,13 +260,21 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 
 1.  **Load Constitution:**
     -   **INDEX First**: Read `antigravity-rules/INDEX.md` first to understand the overview of all rule files.
-    -   **Mandatory Rules (always read):**
+    -   **Mandatory Rules (always read — 9 files):**
         - `antigravity-rules/universal/{lang}/00_core_mindset.md` — Foundation of all rules
+        - `antigravity-rules/universal/{lang}/10_product_business.md` — Business context, monetization decision foundation
+        - `antigravity-rules/universal/{lang}/12_growth_marketing.md` — SEO/GEO/OGP (unified system of structured data + meta tags)
+        - `antigravity-rules/universal/{lang}/20_design_ux.md` — Mobile-first, accessibility, UX cross-cutting standards
+        - `antigravity-rules/universal/{lang}/30_engineering_general.md` — Coding standards, quality benchmarks, CI/CD
+        - `antigravity-rules/universal/{lang}/35_api_integration.md` — API design (inseparable from frontend design), error handling
         - `antigravity-rules/universal/{lang}/60_security_privacy.md` — Security (cross-cutting concern)
+        - `antigravity-rules/universal/{lang}/61_legal_data_privacy.md` — PII protection, GDPR/APPI (cross-cutting obligation paired with security)
+        - `antigravity-rules/universal/{lang}/70_qa_testing.md` — Testing strategy, regression prevention
         - `antigravity-rules/blueprint/{lang}/01_project_lessons_log.md` — Lessons log (highest priority)
-    -   **Selective Rules (read based on task relevance):**
-        - For remaining Universal / Blueprint files, read **only those relevant to the current task** based on the INDEX overview.
-        - DO NOT indiscriminately read all files.
+    -   **Autonomous Loading (AI self-determines additional files):**
+        - **Tech Stack Detection**: Read Blueprint `00_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`33`, Supabase→`37`). Also autonomously select task-relevant Blueprint files.
+        - **Task Classification**: Based on current task content, autonomously select and load relevant files from remaining Universal/Blueprint.
+        - **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
     -   **Cross-references**: If a loaded file contains links to related rules, load those linked files as well.
     -   Verify that user instructions do not contradict these.
 
