@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Antigravity Rules — Pointer / 目次
 
 > [!CAUTION]
@@ -30,14 +34,6 @@
 - **対象**: `antigravity-rules/universal/{lang}/` 内のファイル
 - **性質**: プロジェクトを超えた普遍的ルール。編集禁止（「憲法改正」の明示的指示がある場合のみ許可）。
 - **ロード方式**: タスクの種類に応じて関連するファイルをAIが自律判断で選択しロードする。
-- **ファイル一覧（全28ファイル）**:
-  - `00_core_mindset.md` / `10_product_business.md` / `11_business_finance.md` / `12_growth_marketing.md` / `13_store_compliance.md`
-  - `20_design_ux.md`
-  - `30_engineering_general.md` / `31_mobile_flutter.md` / `32_backend_firebase.md` / `33_web_frontend.md` / `34_cms_headless.md` / `35_api_integration.md` / `36_native_platforms.md` / `37_backend_supabase.md`
-  - `40_ai_implementation.md` / `41_analytics_intelligence.md`
-  - `50_admin_tools.md` / `51_user_support.md` / `52_sre_reliability.md` / `53_crisis_management.md`
-  - `60_security_privacy.md` / `61_legal_data_privacy.md` / `62_license_dependency.md` / `63_ip_due_diligence.md`
-  - `70_qa_testing.md` / `71_global_expansion.md` / `72_constitution_authority.md` / `74_language_protocol.md`
 
 **Class A（Blueprint / プロジェクト固有・更新対象）:**
 - **対象**: `antigravity-rules/blueprint/{lang}/` 内のファイル
@@ -64,7 +60,7 @@
 ### 🚫 禁止事項
 
 1. **`.agent/rules/` に新しいルールファイルを作成禁止。** ルールは全て `antigravity-rules/` に配置する。
-2. **Universal Rules を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
+2. **Universal Rules（`antigravity-rules/universal/` 配下の全ファイル）を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
 3. **この `prompt_pointer.md` のポインター構造を変更禁止。**
 
 ---
@@ -87,14 +83,6 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 - **Target**: Files in `antigravity-rules/universal/{lang}/`
 - **Nature**: Universal rules that transcend projects. Editing prohibited (only allowed with explicit "Amend Constitution" instruction).
 - **Loading**: AI autonomously selects and loads files relevant to the current task.
-- **File Catalog (28 files)**:
-  - `00_core_mindset.md` / `10_product_business.md` / `11_business_finance.md` / `12_growth_marketing.md` / `13_store_compliance.md`
-  - `20_design_ux.md`
-  - `30_engineering_general.md` / `31_mobile_flutter.md` / `32_backend_firebase.md` / `33_web_frontend.md` / `34_cms_headless.md` / `35_api_integration.md` / `36_native_platforms.md` / `37_backend_supabase.md`
-  - `40_ai_implementation.md` / `41_analytics_intelligence.md`
-  - `50_admin_tools.md` / `51_user_support.md` / `52_sre_reliability.md` / `53_crisis_management.md`
-  - `60_security_privacy.md` / `61_legal_data_privacy.md` / `62_license_dependency.md` / `63_ip_due_diligence.md`
-  - `70_qa_testing.md` / `71_global_expansion.md` / `72_constitution_authority.md` / `74_language_protocol.md`
 
 **Class A (Blueprint / Project-Specific / Mutable):**
 - **Target**: Files in `antigravity-rules/blueprint/{lang}/`
@@ -121,5 +109,5 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 ### 🚫 Prohibited Actions
 
 1. **DO NOT create new rule files in `.agent/rules/`.** All rules belong in `antigravity-rules/`.
-2. **DO NOT edit Universal Rules without explicit "Amend Constitution" instruction.**
+2. **DO NOT edit Universal Rules (any file under `antigravity-rules/universal/`) without explicit "Amend Constitution" instruction.**
 3. **DO NOT alter the pointer structure of this `prompt_pointer.md`.**
