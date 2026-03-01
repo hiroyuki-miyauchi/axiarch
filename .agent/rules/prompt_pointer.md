@@ -30,6 +30,14 @@
 - **対象**: `antigravity-rules/universal/{lang}/` 内のファイル
 - **性質**: プロジェクトを超えた普遍的ルール。編集禁止（「憲法改正」の明示的指示がある場合のみ許可）。
 - **ロード方式**: タスクの種類に応じて関連するファイルをAIが自律判断で選択しロードする。
+- **ファイル一覧（全28ファイル）**:
+  - `00_core_mindset.md` / `10_product_business.md` / `11_business_finance.md` / `12_growth_marketing.md` / `13_store_compliance.md`
+  - `20_design_ux.md`
+  - `30_engineering_general.md` / `31_mobile_flutter.md` / `32_backend_firebase.md` / `33_web_frontend.md` / `34_cms_headless.md` / `35_api_integration.md` / `36_native_platforms.md` / `37_backend_supabase.md`
+  - `40_ai_implementation.md` / `41_analytics_intelligence.md`
+  - `50_admin_tools.md` / `51_user_support.md` / `52_sre_reliability.md` / `53_crisis_management.md`
+  - `60_security_privacy.md` / `61_legal_data_privacy.md` / `62_license_dependency.md` / `63_ip_due_diligence.md`
+  - `70_qa_testing.md` / `71_global_expansion.md` / `72_constitution_authority.md` / `74_language_protocol.md`
 
 **Class A（Blueprint / プロジェクト固有・更新対象）:**
 - **対象**: `antigravity-rules/blueprint/{lang}/` 内のファイル
@@ -79,6 +87,14 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 - **Target**: Files in `antigravity-rules/universal/{lang}/`
 - **Nature**: Universal rules that transcend projects. Editing prohibited (only allowed with explicit "Amend Constitution" instruction).
 - **Loading**: AI autonomously selects and loads files relevant to the current task.
+- **File Catalog (28 files)**:
+  - `00_core_mindset.md` / `10_product_business.md` / `11_business_finance.md` / `12_growth_marketing.md` / `13_store_compliance.md`
+  - `20_design_ux.md`
+  - `30_engineering_general.md` / `31_mobile_flutter.md` / `32_backend_firebase.md` / `33_web_frontend.md` / `34_cms_headless.md` / `35_api_integration.md` / `36_native_platforms.md` / `37_backend_supabase.md`
+  - `40_ai_implementation.md` / `41_analytics_intelligence.md`
+  - `50_admin_tools.md` / `51_user_support.md` / `52_sre_reliability.md` / `53_crisis_management.md`
+  - `60_security_privacy.md` / `61_legal_data_privacy.md` / `62_license_dependency.md` / `63_ip_due_diligence.md`
+  - `70_qa_testing.md` / `71_global_expansion.md` / `72_constitution_authority.md` / `74_language_protocol.md`
 
 **Class A (Blueprint / Project-Specific / Mutable):**
 - **Target**: Files in `antigravity-rules/blueprint/{lang}/`
