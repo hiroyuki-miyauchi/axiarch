@@ -127,6 +127,7 @@
       - UI/デザインタスク → `20_design_ux`
       - API設計タスク → `35_api_integration`, `30_engineering_general`
     - **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあり、現在のタスクに関連する場合は、そのリンク先も追加で読むこと。
+    - **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
     - ユーザーの指示がこれらと矛盾しないか検証する。
 
 2.  **Blueprint First (設計書ファースト):**
@@ -264,6 +265,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         - UI/Design tasks → `20_design_ux`
         - API design tasks → `35_api_integration`, `30_engineering_general`
     -   **Cross-references**: If a loaded file references related rules and they are relevant to the current task, load those as well.
+    -   **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
     -   Verify that user instructions do not contradict these.
 
 2.  **Blueprint First:**

@@ -51,6 +51,7 @@ trigger: always_on
 - API設計タスク → `35_api_integration`, `30_engineering_general`
 
 **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあり、現在のタスクに関連する場合は、そのリンク先も追加で読むこと。
+**記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
 ユーザーの指示がこれらと矛盾しないか検証する。
 
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
@@ -103,6 +104,7 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 - API design tasks → `35_api_integration`, `30_engineering_general`
 
 **Cross-references**: If a loaded file references related rules and they are relevant to the current task, load those as well.
+**Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
 Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
