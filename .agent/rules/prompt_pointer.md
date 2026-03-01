@@ -45,12 +45,12 @@ trigger: always_on
 **原則**: 全ファイルを毎回読む必要はない。INDEXとディレクトリ構造から、現在のタスクに必要なルールだけを自律判断で選択すること。
 
 **選択の指針（例）:**
-- 技術スタック把握: Blueprint `00_project_overview.md` を読み、プロジェクトの技術スタックに対応するUniversalファイルを選択（例：Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`）
+- 技術スタック把握: Blueprint `00_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`）。Blueprint側もタスクに関連するファイルを自律選択。
 - セキュリティ関連タスク → `60_security_privacy`, `61_legal_data_privacy`
 - UI/デザインタスク → `20_design_ux`
 - API設計タスク → `35_api_integration`, `30_engineering_general`
 
-**クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあれば、そのリンク先も追加で読むこと。
+**クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあり、現在のタスクに関連する場合は、そのリンク先も追加で読むこと。
 ユーザーの指示がこれらと矛盾しないか検証する。
 
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
@@ -97,12 +97,12 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 **Principle**: Do NOT load all files every time. Based on INDEX and directory structure, autonomously select only the rules needed for the current task.
 
 **Selection Guide (examples):**
-- Tech stack: Read Blueprint `00_project_overview.md`, then select matching Universal files (e.g., Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`)
+- Tech stack: Read Blueprint `00_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`). Also autonomously select task-relevant Blueprint files.
 - Security tasks → `60_security_privacy`, `61_legal_data_privacy`
 - UI/Design tasks → `20_design_ux`
 - API design tasks → `35_api_integration`, `30_engineering_general`
 
-**Cross-references**: If a loaded file contains links to related rules, load those linked files as well.
+**Cross-references**: If a loaded file references related rules and they are relevant to the current task, load those as well.
 Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
