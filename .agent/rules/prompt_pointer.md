@@ -50,6 +50,9 @@ trigger: always_on
 - UI/デザインタスク → `20_design_ux`
 - API設計タスク → `35_api_integration`, `30_engineering_general`
 
+**クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあれば、そのリンク先も追加で読むこと。
+ユーザーの指示がこれらと矛盾しないか検証する。
+
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
 
 > 以下のファイルは `antigravity-rules/` **直下**に配置されている。必要に応じて参照する。
@@ -98,6 +101,9 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 - Security tasks → `60_security_privacy`, `61_legal_data_privacy`
 - UI/Design tasks → `20_design_ux`
 - API design tasks → `35_api_integration`, `30_engineering_general`
+
+**Cross-references**: If a loaded file contains links to related rules, load those linked files as well.
+Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
 

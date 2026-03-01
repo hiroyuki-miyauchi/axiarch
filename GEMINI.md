@@ -126,6 +126,8 @@
       - セキュリティ関連タスク → `60_security_privacy`, `61_legal_data_privacy`
       - UI/デザインタスク → `20_design_ux`
       - API設計タスク → `35_api_integration`, `30_engineering_general`
+    - **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあれば、そのリンク先も追加で読むこと。
+    - ユーザーの指示がこれらと矛盾しないか検証する。
 
 2.  **Blueprint First (設計書ファースト):**
     - **Major Changes (機能追加・DB変更・ロジック変更):**
@@ -261,6 +263,8 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         - Security tasks → `60_security_privacy`, `61_legal_data_privacy`
         - UI/Design tasks → `20_design_ux`
         - API design tasks → `35_api_integration`, `30_engineering_general`
+    -   **Cross-references**: If a loaded file contains links to related rules, load those linked files as well.
+    -   Verify that user instructions do not contradict these.
 
 2.  **Blueprint First:**
     -   **Major Changes (Feature add/DB change/Logic change):**
