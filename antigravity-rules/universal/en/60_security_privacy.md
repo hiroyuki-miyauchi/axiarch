@@ -43,6 +43,15 @@
 *   **Consent Management**:
     *   **Opt-in**: Marketing and tracking must be Opt-in by default. Dark patterns are **strictly prohibited**.
     *   **Anonymized Usage Consent**: Mandate explicit consent during registration that "anonymized statistical data may be used for service improvement, research, or public interest".
+*   **Privacy Impact Assessment (PIA)**:
+    *   **Law**: Before implementing features that handle PII, you MUST create a Privacy Impact Assessment document specifying data types, storage locations, access permissions, and retention periods, and pass review.
+    *   **Action**:
+        1.  **PIA Document**: When adding features that collect/process new PII, document the data types, storage locations, access permissions, and retention periods.
+        2.  **Purpose Limitation**: Explicitly state collection purposes in Terms of Service and prohibit secondary use both technically and operationally. Obtain re-consent when purposes change.
+        3.  **Transparency**: Provide a UI that explains to users in plain language "what data, why, for how long" it is retained.
+        4.  **Data Flow Mapping**: Diagram PII flows within the system (input → storage → reference → external integration → deletion) and document protection measures at each point.
+        5.  **PR Review Gate**: Include "PIA Completed" as a review checklist item for PRs introducing new features.
+    *   **Rationale**: Privacy protection must be "built in by design" not "addressed after the fact" — this is the international standard (ISO 31700, GDPR Art.25).
 *   **The Professional Advice Disclaimer**:
     *   **Law**: For services potentially containing professional advice (health, medical, legal, financial), physically display a disclaimer that "This service does not replace direct diagnosis or advice from professionals (veterinarians, doctors, lawyers, etc.)" in footers, critical operation screens, and Terms of Service.
 *   **The "Right to be Forgotten"**:
@@ -65,6 +74,17 @@
 ## 4. Security Architecture
 *   **Supply Chain Security**:
     *   **Dependency Watch**: Regularly run `npm audit` and apply patches within 24 hours for High/Critical vulnerabilities or implement workarounds. Periodically remove unused dependencies to minimize Attack Surface.
+    *   **The Dependency Vulnerability Patrol Protocol**:
+        *   **CI Integration**: Automatically run `npm audit --audit-level=high` in CI on PR creation against the `main` branch.
+        *   **Merge Block**: **Block PR merge** when `high` or above vulnerabilities are detected.
+        *   **Response SLA**:
+            | Vulnerability Level | Response Deadline | Action |
+            |:-------------------|:-----------------|:--------|
+            | **Critical / High** | **Within 72 hours** | Apply immediate patch or implement impact mitigation |
+            | **Medium** | **Within 2 weeks** | Address in next sprint |
+            | **Low** | **Next major release** | Address in batch update |
+        *   **Auto-Update**: Introduce Renovate or Dependabot to auto-generate dependency update PRs.
+        *   **Prohibitions**: Wildcard (`*`) version specifications in `package.json` and production deployments with High+ vulnerabilities outstanding are prohibited.
 *   **Authentication & Authorization**:
     *   **Credential Hygiene**: Physically prohibit writing API Keys, secrets, DB connection strings in source code (No Hardcoding). Always use `process.env`, share secrets via encrypted channels like 1Password (Slack paste forbidden).
     *   **MFA**: **Mandatory MFA** for all admin accounts. No exceptions.
@@ -108,11 +128,74 @@
         *   **Fail Fast**: Return error immediately upon limit exceeded before DB connection or heavy processing to protect resources.
         *   **Implementation**: Use Vercel KV or Upstash Redis for high-speed edge blocking. Not burdening the DB is critical.
     *   **Middleware Matcher Safety**: Prohibit complex Regex in `middleware.ts` `config.matcher`. Opaque Regex breeds ReDoS and bypass risks. use readable Array format.
+*   **Email Domain Authentication Protocol**:
+    *   **Mandate**: To guarantee email deliverability and prevent spoofing, all 3 of the following DNS authentications **must** be configured.
+
+        | Authentication | Target | Purpose |
+        |:--------------|:-------|:--------|
+        | **SPF** | TXT Record | Sender server legitimacy verification |
+        | **DKIM** | TXT Record | Email content tampering detection |
+        | **DMARC** | TXT Record | Policy definition for SPF/DKIM failures |
+
+    *   **DMARC Policy**: Recommended staged strengthening: `p=none` (monitor) → `p=quarantine` (quarantine) → `p=reject` (reject).
+    *   **Monitoring**: Periodically review DMARC Aggregate Reports to detect spoofing attempts.
+    *   **Prohibition**: Sending system emails from free email addresses (`@gmail.com`, etc.) is prohibited.
+*   **Email Domain Separation Protocol**:
+    *   **Law**: Transactional emails (password reset, payment confirmation, etc.) and marketing emails (newsletters, etc.) **must use different sender addresses**.
+    *   **Rationale**: This is a mandatory measure to prevent marketing email unsubscribes or spam classification from affecting transactional email deliverability.
+    *   **Reply-To**: Even when sending from `noreply@`, set a support address in the `Reply-To` header so that user replies reach the support team.
+*   **Webhook Security Protocol**:
+    *   **Context**: Webhooks from external services are susceptible to forgery and replay attacks. Verification is mandatory for all receiving endpoints.
+    *   **Mandate**:
+        *   **Signature Verification (Mandatory)**:
+            *   Verify the `signature` header of all Webhook requests using **HMAC-SHA256** or equivalent.
+            *   Immediately return `401 Unauthorized` for requests with mismatched signatures and record in alert logs.
+            *   Manage signature secrets via environment variables (see Credential Hygiene).
+        *   **Replay Attack Prevention**:
+            *   Validate the `timestamp` in the Webhook payload and **reject requests older than 5 minutes**.
+            *   Cache processed event IDs for a defined period to prevent duplicate execution.
+        *   **Idempotency Guarantee**:
+            *   Even if the same `event_id` Webhook arrives multiple times, side effects MUST occur only once.
+            *   Use the Webhook-unique ID as an idempotency key and perform duplicate checks in DB before processing.
+        *   **Error Handling**:
+            *   Return `500` on processing failure and rely on the sender's retry mechanism.
+            *   Build a mechanism to trigger alert notifications on consecutive failures (e.g., 3 or more).
+    *   **Cross-Reference**: §4 (Credential Hygiene), §8.2 (Audit Log Obligation)
 
 ## 7. Offensive Security
 *   **Self-Penetration Test**:
     *   Think like an attacker. Try XSS/SQLi on your own code.
     *   Start Security Rules from "Deny All".
+*   **Penetration Test Schedule**:
+
+    | Type | Frequency | Scope |
+    |:-----|:----------|:------|
+    | **Automated Vulnerability Scan** | Monthly | All public endpoints |
+    | **Manual Penetration Test** | Annually | Auth, Payments, Admin panel |
+    | **Ad-hoc Test** | As needed | After major feature changes |
+
+*   **OWASP Top 10 Check Mandate**:
+    *   Cover all Top 10 items including Injection (SQL/NoSQL), Broken Authentication, XSS, CSRF, SSRF, etc.
+    *   Record pass/fail per item and commence remediation for failures within **48 hours**.
+    *   Scope: All public API endpoints, admin panel (auth bypass, privilege escalation), RLS policies, file upload functions.
+    *   Classify results as Critical/High/Medium/Low and record in the lessons log.
+*   **The Security Training Protocol**:
+    *   **Law**: Technical measures alone cannot guarantee security. Continuous improvement of developer knowledge and security awareness is essential.
+    *   **Training Program**:
+        | Type | Frequency | Target | Content |
+        |:-----|:----------|:-------|:--------|
+        | **Onboarding Training** | On hire | All developers | OWASP Top 10, Access Control basics, PII handling |
+        | **Regular Training** | Annually | All developers | Latest threat trends, Incident case reviews |
+        | **Incident Response Drill** | Semi-annually | Lead+ | Simulated drill based on Incident Response Plan |
+    *   **Required Knowledge Checklist**:
+        *   SQL Injection prevention (Parameter binding, Access control)
+        *   XSS prevention (Template engine auto-escaping + CSP)
+        *   CSRF prevention (SameSite Cookie + Origin verification)
+        *   Authentication vs Authorization separation (Zero Trust principle)
+        *   PII handling rules (Log masking, Encryption)
+        *   Environment variable management (Secret handling)
+    *   **Record Obligation**: Maintain training attendance records and suspend code review approval privileges for non-attendees.
+
 
 ## 8. Advanced Security Operations
 
@@ -157,6 +240,10 @@
         *   **Edit Window**: User edits and deletions MUST be restricted to **within a defined time period** (recommended: 24 hours) after record creation. Direct modifications after the deadline are prohibited.
         *   **Correction Log**: When corrections are needed after the deadline, create a separate record as a **"Correction Log"** while preserving the original record, recording the correction reason and corrector. This physically prevents tampering with the original.
         *   **Rationale**: In domains such as medical, legal, and financial, tamper prevention and traceability may be legal requirements. The Edit Window is a balanced design that ensures convenience while guaranteeing irreversibility after confirmation.
+    *   **The Action Instrumentation Mandate**:
+        *   **Law**: ALL Server Actions / API handlers that mutate database state (`create`, `update`, `delete`, etc.) MUST have audit log recording instrumented **near the top of the function**, without exception.
+        *   **Zero Blind Spots**: Operations without an audit trail are considered "non-existent". Implementations that cannot respond to legal requests or incident investigations are deemed unacceptable.
+        *   **Cross-Reference**: `61_legal_data_privacy.md` §2 (Legal Snapshot Protocol)
 
 ### 8.3. The Information Disclosure Protocol (Error Masking - Rule 8.3)
 *   **Law**: Physically prohibit displaying internal info (Table names, Column names, Stack traces, Raw API responses) to end users in error messages (especially Production).
@@ -185,8 +272,33 @@
 *   **Law**: Being in Admin Panel (`/admin`) does not justify sending all DB columns directly to frontend. This invites leakage of future confidential columns (Cost, Supplier Contacts, Internal Notes).
 *   **Action**: Even in Admin APIs (`getAdminUsers`), MUST define dedicated **DTO (`AdminUserDTO`)** and explicitly select only needed fields. `SELECT *` is strictly prohibited.
 
+### 8.7.1. The Select Specification Mandate
+*   **Law**: Using `SELECT *` or ORM's `.select('*')` for database data retrieval is **universally prohibited**. All queries MUST explicitly select only the columns required for their specific purpose.
+*   **Action**:
+    1.  **Purpose-Specific Select**: Define required column sets per use case (public, admin, internal processing, etc.) and ensure queries explicitly select columns according to these definitions.
+    2.  **DTO Alignment**: Selected columns MUST align with the corresponding DTO (Data Transfer Object) fields. Do not include "fetched but unused columns" in responses.
+    3.  **Future-Proofing**: Using `SELECT *` risks unintentionally including sensitive columns (cost, internal notes, PII, etc.) added to tables in the future. Explicit selection structurally prevents this "unknown column leakage."
+*   **Rationale**: Explicit column selection delivers triple benefits: ① Structural prevention of PII leakage, ② Performance improvement by reducing unnecessary data transfer and parsing overhead, ③ Improved code readability and intent clarity.
+
 ### 8.8. The PII Logging Defense (Masking Protocol)
 *   **Action**: Implement logic in Logger class to automatically replace fields containing keywords like `password`, `token` with `***MASKED***` to prevent leaks from developer error.
+
+### 8.8.1. The PII Sensitivity Classification Standard
+*   **Law**: Fields containing PII MUST be classified by sensitivity level, and masking levels for log output, external integrations, and analytical use MUST be standardized. Protection without classification breeds "gaps."
+*   **Classification Template**:
+    *   Apply the following 3-tier classification as a baseline to project-specific data.
+
+        | Classification | Definition | Masking Level | Examples |
+        |:--------------|:-----------|:-------------|:---------|
+        | **Sensitive PII** | Information whose leakage could cause serious human rights violations, discrimination, or financial harm | `[REDACTED]` (fully concealed) | Diagnosis, Medication details, Bank account info, National ID numbers, Criminal records |
+        | **Personal Info** | Information that can directly identify an individual | Partial masking (e.g., `Smi***`, `090-****-1234`) | Name, Phone number, Email address, Physical address |
+        | **Quasi-Personal Info** | Information that cannot identify an individual alone but can when combined with other data | No masking required (but access logs must be recorded) | Organization name, Facility name, City/district-level region |
+
+*   **Action**:
+    1.  **PIA Integration**: When adding new tables or columns, assign each field to one of the above 3 classifications during the PIA (§3 Privacy Impact Assessment).
+    2.  **Logger Integration**: Design the masking logic of the PII Logging Defense (§8.8) to automatically determine masking levels based on this classification table.
+    3.  **Documentation**: Create and maintain a domain-specific PII classification table in each project's Blueprint (design document).
+*   **Rationale**: Uniformly applying `[REDACTED]` to all PII makes operational debugging and support response difficult. Tiered masking based on sensitivity achieves a balance between privacy protection and operational efficiency.
 
 ### 8.9. The Security-UX Balance Protocol (No Friction Mandate)
 *   **Law**: Sacrificing UX with "Security" as excuse is **Complete Defeat** in system design. Excessive auth is proof of **"Incompetent System"**, causing user churn and damaging service value.
@@ -253,6 +365,23 @@
 *   **Action**:
     1.  **Semi-Annual Drills**: Conduct **Response Drills** assuming pseudo-incidents (Leak, Attack) every 6 months to verify contact network and Kill Switch procedures.
     2.  **Post-Mortem Obligation**: After incident, mandatorily verbalize "Why it happened" and "How to prevent recurrence", updating the Blueprint.
+*   **Incident Response 5-Step Protocol (Initial Response Timeline)**:
+    *   **Context**: Data protection regulations (GDPR 72 hours, Japan APPI preliminary report within 3-5 days + final report within 30 days, etc.) mandate rapid initial response. Use the following timeline as the standard flow.
+
+    | Step | Timeframe | Action | Responsible |
+    |:-----|:----------|:-------|:------------|
+    | **1. Detection & Isolation** | 0-1 hour | Identify impact scope, block access paths (revoke API keys, block IPs), preserve logs | Technical Lead |
+    | **2. Impact Assessment** | 1-6 hours | Identify types and volume of leaked data, assess secondary damage risk | Technical Lead |
+    | **3. Preliminary Report** | Within 3-5 days | Submit preliminary report to supervisory authority, send initial notification to affected users | Business Lead |
+    | **4. Root Cause Analysis** | Up to 14 days | Conduct RCA (Root Cause Analysis), apply remediation patches | Technical Lead |
+    | **5. Final Report & Prevention** | Up to 30 days | Submit final report to supervisory authority, append lessons to design docs, implement preventive measures | Business Lead |
+
+    *   **Escalation Criteria**:
+        *   PII (name, email, address, etc.) leaks externally, even **a single record**
+        *   Authentication/authorization bypass is confirmed
+        *   Unauthorized database access traces are detected
+    *   **Communication Ban**: During an active incident, disclosure on social media or public channels is **prohibited** until the root cause is confirmed. Official announcements MUST be unified after legal review.
+
 
 ## 9. The Victory Protocol (Standard of Excellence)
 *   **The Iron Fortress Mandate**: We maintain a "Fortress", not just an app.
@@ -290,6 +419,14 @@
     3.  **Report-Only First**: When introducing new CSP rules, observe impact with `Content-Security-Policy-Report-Only` before applying to production.
     4.  **No Compromise**: Proposing "just add `unsafe-inline` and it works" to bypass security feature blocking is a developer's defeat. Solve with legitimate technical improvements.
 *   **Outcome**: Structurally eliminate XSS attack risk and maintain maximum-strength CSP.
+*   **CSP Directive Change Governance**:
+    1.  **Centralized Management**: CSP directives MUST be **centrally managed** in the `headers()` function of `next.config.ts` (or Middleware). Scattering across multiple files breeds configuration omissions and contradictions.
+    2.  **PR Justification**: Changes to CSP directives (adding domains, relaxing directives, etc.) MUST **explicitly state the reason from a security perspective** in the PR and pass security review.
+    3.  **Report-Only Staging**: New CSP directives and changes to existing directives MUST be **pre-validated** using `Content-Security-Policy-Report-Only` before production application. Promote to the production header only after confirming normal operation.
+*   **CSP Worker Protocol (Web Worker Permission)**:
+    *   **Law**: Image processing libraries (HEIC conversion, Canvas compression, etc.) and WebAssembly modules may internally create `Web Workers` using `blob:` URLs. Under strict CSP settings, these are blocked, causing processing to **silently hang** (errors may not even occur).
+    *   **Action**: When introducing libraries that may use Web Workers, explicitly add `worker-src 'self' blob:;` to the CSP configuration.
+    *   **Rationale**: If the `worker-src` directive is not set, the `script-src` fallback applies, but if `blob:` is not permitted, Worker creation silently fails, resulting in bugs that are extremely difficult to diagnose.
 
 ### 9.4. The Cryptographic Consistency Mandate
 *   **Law**: When handling sensitive information like API keys and tokens, the **generation/storage phase and authentication/verification phase MUST use the same cryptographic algorithm**.
@@ -333,6 +470,17 @@
     4.  **CSP Report**: Configure `report-uri` / `report-to` directives to collect and monitor CSP violations server-side.
 *   **Rationale**: `unsafe-inline` completely nullifies CSP's defense against XSS (Cross-Site Scripting) attacks. Nonce-based CSP permits only legitimate inline scripts and physically blocks execution of scripts injected by attackers.
 
+### 9.8.1. The Permissions-Policy Header Mandate (Browser API Restriction)
+*   **Law**: The `Permissions-Policy` (formerly `Feature-Policy`) header MUST be configured to **explicitly disable** browser APIs not used by the application (camera, microphone, geolocation, payment, etc.).
+*   **Action**:
+    1.  **Deny by Default**: Browser APIs not used by the project MUST be explicitly disabled with `()` (empty list = deny all). Example: `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()`.
+    2.  **Self Only**: APIs used by the project MUST be restricted to `(self)` to prevent unauthorized use from third-party iframes or scripts.
+    3.  **Middleware Integration**: Add as response headers via Next.js `middleware.ts` or `next.config.ts` `headers` configuration.
+    4.  **Audit**: When adding new third-party scripts (analytics tools, widgets, etc.), verify which browser APIs the script requests and allow only the minimum necessary.
+    5.  **DevTools Verification**: When using new browser APIs, **physically verify** in the DevTools Console that no `Permissions policy violation` error occurs. Silent blocking by policy is extremely difficult to debug.
+    6.  **PR Justification**: Changes to the `Permissions-Policy` header (adding/modifying API permissions) MUST **state the reason for change** in the PR and pass review.
+*   **Rationale**: Without `Permissions-Policy`, third-party scripts or iframes embedded in the page become attack vectors that can access the user's camera or microphone without consent. Combined with CSP, this achieves multi-layered defense.
+
 ### 9.9. The Anti-Permissive RLS Mandate
 *   **Law**: In Row Level Security (RLS) policy design, **creating excessively permissive policies is prohibited**. Clarify intent and strictly adhere to the principle of least privilege.
 *   **Action**:
@@ -341,6 +489,12 @@
     3.  **Limited `USING (true)` Usage**: `USING (true)` is only acceptable for `SELECT` policies on public data. `USING (true)` for `UPDATE` or `DELETE` is prohibited in principle.
     4.  **Policy Naming Convention**: Name policies in the format `tablename_action_role_policy` (e.g., `posts_select_authenticated_policy`), making policy intent immediately understandable from the name.
 *   **Rationale**: RLS is the "last bastion" of data access. Excessively permissive policies increase the risk of data leakage and tampering through application-layer bugs or direct API access. The principle of least privilege physically blocks unexpected access.
+*   **RLS Best Practices**:
+    *   **Service Role Bypass Principle**: The `service_role` key **completely bypasses RLS**. Therefore, "admin policies" (`FOR ALL USING (auth.role() = 'service_role')`) are redundant and **their creation is prohibited**. Redundant policies cause "Multiple Permissive Policies" warnings and degrade performance as each policy is evaluated on every query.
+    *   **Auth Function InitPlan Optimization**: When using `auth.uid()`, `auth.role()`, `current_setting()` within RLS policies, MUST **wrap with `(select ...)`** to prevent per-row re-evaluation. Without wrapping, functions are re-evaluated on each row scan of large tables, causing severe performance degradation.
+        *   ❌ `USING (user_id = auth.uid())`
+        *   ✅ `USING (user_id = (select auth.uid()))`
+    *   **Single Purpose Policy Principle**: **Creating multiple PERMISSIVE policies for the same table, same role, and same action (SELECT/INSERT/UPDATE/DELETE) is prohibited**. Multiple policies are evaluated with OR conditions, and all policies are executed on every query, degrading performance. When multiple conditions exist, combine them using the `OR` operator within a single policy.
 
 ### 9.10. The Cryptographic Randomness Mandate
 *   **Law**: Using `Math.random()` for security purposes (password generation, token generation, Nonce generation, session IDs, etc.) is a **Mortal Sin**. `Math.random()` is not cryptographically secure (PRNG) and produces predictable output, allowing attacker prediction.
@@ -376,3 +530,75 @@
     2.  **Script Tag Warning**: When input contains `<script>` tags, `javascript:` URIs, or `on*` event handlers, display an explicit warning dialog in the UI before saving.
     3.  **Change Audit**: All changes MUST be recorded in audit logs with before/after diffs retained.
 *   **Rationale**: Arbitrary code injection from admin panels can bypass CSP through admin privileges, requiring dual defense through privilege-level restrictions and injection detection.
+
+### 9.14. The Social Login Security Protocol
+*   **Law**: When implementing Social Login (OAuth 2.0 / OpenID Connect), authentication flow deficiencies become a breeding ground for account takeover attacks. The following design standards MUST be strictly observed.
+*   **Action**:
+    1.  **Authorization Code Flow + PKCE Mandatory**: **Authorization Code Flow with PKCE** is the only permitted flow. Use of Implicit Flow (where tokens are exposed in URL fragments) is prohibited.
+    2.  **CSRF Prevention**: OAuth authorization requests MUST include a `state` parameter and verify it upon callback to prevent CSRF attacks.
+    3.  **Server-Side Token Exchange**: Communication with the token endpoint (containing `client_secret`) MUST be executed **server-side only**. Exposure of `client_secret` on the client side is strictly prohibited.
+    4.  **Scope Minimization**: Requested scopes MUST be limited to the minimum required for service delivery, such as `openid`, `email`, `profile`. Additional scope requests require prior review and approval.
+    5.  **Explicit Account Link**: When an account with the same email address already exists, do NOT auto-link. Display an **explicit confirmation UI** to verify user intent before linking accounts. Automatic merging introduces account takeover risks.
+    6.  **Session Verification**: When verifying tokens obtained from the ID Provider, validate not only the signature but also the `iss` (issuer), `aud` (audience), and `exp` (expiration) fields without exception.
+*   **Rationale**: OAuth misconfiguration (Implicit Flow, lack of CSRF protection, excessive scope requests, etc.) becomes a vulnerability in the authentication infrastructure itself, endangering all user accounts.
+
+### 9.15. The Concurrent Session Control Mandate
+*   **Law**: Inadequate session management is a direct cause of account takeover and information leakage. Session lifecycle design MUST be based on the following principles.
+*   **Action**:
+    1.  **Token Expiration Design**: Design appropriate expiration periods for access tokens and refresh tokens. Access tokens should be short-lived (recommended: within 1 hour), refresh tokens medium-lived (recommended: 7–30 days), and high-privilege sessions (e.g., admin panels) should have shorter expiration periods.
+    2.  **Step-Up Authentication**: For high-risk operations such as password changes, email changes, viewing/modifying payment information, and admin privilege operations, require **re-authentication (Step-Up Auth)** even when the current session is valid.
+    3.  **Concurrent Session Policy**: Set an upper limit on the number of simultaneously logged-in devices per account. When exceeded, either invalidate the oldest session or implement a flow allowing the user to choose. Apply stricter limits to administrator accounts.
+    4.  **Suspicious Session Detection**: Design a mechanism to detect simultaneous access from different IP addresses or geographically distant regions to the same account, and notify the user. Providing a "Log out from all devices" feature is recommended.
+    5.  **Server-Side Invalidation**: On logout, invalidate the session server-side immediately. Client-side token deletion alone is insufficient — the server must guarantee session validity. On account suspension or deletion, invalidate all sessions immediately.
+*   **Rationale**: Lax session management is equivalent to "leaving the key in the door." Properly designing token lifetime management, re-authentication triggers, and concurrent session controls minimizes the blast radius when a compromise occurs.
+
+### 9.16. The Subresource Integrity Mandate (SRI)
+*   **Law**: External scripts and stylesheets loaded from CDNs or third parties MUST have **Subresource Integrity (SRI)** `integrity` attributes applied wherever possible to detect tampering.
+*   **Action**:
+    1.  **Integrity Attribute**: Add `integrity="sha384-..."` and `crossorigin="anonymous"` attributes to `<script>` and `<link>` tags loading external libraries from CDNs to detect file tampering along the delivery path.
+    2.  **Third-Party Script Inventory**: Maintain an inventory of all external scripts loaded on the site (Analytics, CAPTCHA, ad tags, payment SDKs, etc.), and document each script's **purpose, risk, and CSP configuration**. Adding unapproved scripts is prohibited.
+    3.  **Review Obligation**: When adding new third-party scripts, conduct a security review to confirm the browser APIs and network access the script requires before granting approval.
+*   **Rationale**: If external scripts are tampered with through CDN compromise or supply chain attacks, without SRI the tampered code executes directly in all users' browsers. SRI functions as the "last checkpoint," physically detecting and blocking tampering.
+
+## 10. The Vendor Security Management Protocol
+
+### 10.1. Vendor Security Assessment Standards
+*   **Law**: When selecting and contracting external vendors (SaaS, IaaS, outsourcing partners, etc.), their compliance with your organization's security standards MUST be evaluated in advance.
+*   **Mandate**:
+    *   **Pre-Selection Checklist**: Evaluate the following items before contracting with new vendors.
+
+        | Assessment Category | Check Item | Minimum Requirement |
+        |:---------|:--------|:--------|
+        | **Certifications** | ISO 27001 / SOC 2 Type II acquisition status | At least one |
+        | **Data Encryption** | Encryption methods at rest and in transit | AES-256 + TLS 1.2 or higher |
+        | **Access Control** | RBAC, MFA implementation status | MFA mandatory for admin accounts |
+        | **Incident Response** | Incident response plan availability and notification timeline | Initial notification within 24 hours |
+        | **Data Storage Location** | Data center locations | Same region as service user base |
+        | **Backup & DR** | Backup frequency and recovery framework | Daily backup + RTO within 24 hours |
+
+    *   **Risk Classification**: Classify vendors into the following risk tiers based on the sensitivity of data they handle, and apply management intensity accordingly.
+        *   **High**: Vendors handling PII, payment data, authentication credentials → Annual audit + SLA mandatory
+        *   **Medium**: Vendors handling business data, analytics data → Annual self-assessment + SLA recommended
+        *   **Low**: Vendors handling only public information → Initial assessment only
+
+### 10.2. Vendor SLA Template
+*   **Law**: SLAs (Service Level Agreements) including the following items MUST be established with vendors involved in security-sensitive operations.
+*   **Mandatory SLA Items**:
+
+    | SLA Item | Recommended Standard | Response on Violation |
+    |:--------|:--------|:-----------|
+    | **Availability** | 99.9% or higher (monthly) | Credit refund or penalty clause |
+    | **Incident Notification** | Initial report within 24 hours of discovery | Record as contract violation |
+    | **Data Recovery** | RPO within 24 hours / RTO within 4 hours | Escalation + alternative solution review |
+    | **Security Patch Application** | Critical: within 72 hours / High: within 2 weeks | Demand improvement plan submission |
+    | **Audit Cooperation** | Obligation to accept audit once per year | Contract review if refused |
+
+### 10.3. Sub-Processor Management
+*   **Law**: When vendors further delegate data processing to third parties (sub-processors), prior notification to and approval from the data controller is required.
+*   **Mandate**:
+    *   **Prior Notification Obligation**: Vendors must notify the data controller at least **30 days before** commencing use of a new sub-processor.
+    *   **Equivalent Conditions Requirement**: Sub-processors must be contractually bound to security and privacy conditions equivalent to the primary vendor.
+    *   **Chain Restriction**: Further delegation from sub-processors (sub-sub-processing) is **prohibited in principle**. Individual approval is required when unavoidable.
+    *   **List Management**: Include in the contract the obligation for vendors to maintain, update, and disclose to the data controller a complete list of all sub-processors (company name, location, processing scope).
+*   **Rationale**: GDPR Art.28(2) requires prior approval for sub-processors, and APPI amendments have strengthened supervisory obligations over sub-contractors. Data protection cannot be achieved without visibility and management of the vendor chain.
+

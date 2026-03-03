@@ -14,6 +14,23 @@
     *   **gRPC**: マイクロサービス間の内部通信には、高速で型安全な **gRPC (Protobuf)** を使用します。JSONのオーバーヘッドを排除します。
 *   **バージョニング (Versioning)**:
     *   破壊的変更（Breaking Changes）を避けるため、URLまたはヘッダーでバージョン管理を行います（例: `/v1/users`）。
+    *   **URL-Based Versioning (推奨)**: `/api/v{major}/` 形式（例: `/api/v1/stores`）を標準とします。Header-basedやQuery-basedより発見性（Discoverability）が高く、ドキュメント化とテストが容易です。
+    *   **Breaking Change Definition (破壊的変更の定義)**:
+
+        | 変更種別 | Breaking | 例 |
+        |:--------|:---------|:---|
+        | レスポンスフィールドの**削除** | ✅ Yes | `address` フィールドの除去 |
+        | レスポンスフィールドの**型変更** | ✅ Yes | `price: string` → `price: number` |
+        | 必須パラメータの**追加** | ✅ Yes | 新パラメータ `region` を必須化 |
+        | レスポンスフィールドの**追加** | ❌ No | 新フィールド `rating_count` の追加 |
+        | オプショナルパラメータの**追加** | ❌ No | `?sort=newest` の追加 |
+        | エンドポイントの**追加** | ❌ No | `/api/v1/reviews` の新設 |
+
+    *   **Deprecation Protocol (非推奨化手順)**:
+        1.  **並行稼働**: 旧バージョンのAPIは、新バージョンリリースから**最低6ヶ月間**並行稼働してください。
+        2.  **Sunset Header**: 非推奨APIのレスポンスに `Sunset: <date>` ヘッダーを付与してください（RFC 8594準拠）。
+        3.  **通知義務**: APIキー保持者へ3ヶ月前、1ヶ月前、1週間前にメール通知を行ってください。
+        4.  **ドキュメント**: API仕様書に非推奨の旨と移行ガイドを掲載してください。
 *   **データ転送基準 (Data Transport Standard)**:
     *   **DTO Obligation**: データベースの行オブジェクト（Raw Row）をそのまま返すことを「重罪」とします。必ず `UserDTO` などを経由し、意図的にマッピングされたフィールドのみを出力します。
     *   **Admin Data Leak Defense**: 管理者画面用の API においても、`SELECT *` を禁止し、必ず専用の **`AdminDTO`** を定義してください。将来的な `internal_memo` や原価情報等の機密カラム追加時の自動漏洩を物理的に防ぎます。
@@ -80,6 +97,9 @@
 *   **The Webhook Security Mandate (Signature Verification)**:
     *   **Law**: 外部サービス（Stripe, Meta, GitHub等）からの Webhook 受信時、署名検証（`X-Hub-Signature` 等の検証）を行わずに処理を開始することを禁止します。
     *   **Action**: 必ずプラットフォームから提供される `Signing Secret` を用いてリクエストの真正性を検証し、なりすましによる不正なデータ更新（例：未払いなのに支払い済みへの変更）を物理的に阻止してください。
+    *   **Replay Attack Prevention (リプレイアタック防止)**: Webhookペイロード内の `timestamp` を検証し、**5分以上前のリクエストは拒否**してください。処理済みイベントIDを一定期間キャッシュし、重複実行を防止します。
+    *   **Idempotency（冪等性保証）**: 同一 `event_id` の Webhook が複数回到達しても、副作用が1回のみ発生するよう設計してください。冪等性キーとしてWebhook固有IDを使用し、処理前にDB上で重複チェックを実施します。
+    *   **Error Handling**: 処理失敗時は `5xx` を返し、送信元のリトライ機構に委ねてください。`2xx` を返すと「成功した」とみなされリトライが発生しないため、処理が未完了のまま消失します。署名が一致しないリクエストは即座に `401 Unauthorized` を返し、アラートログに記録してください。
 *   **The Stateless Gateway Protocol (Scale First)**:
     *   **Law**: API Gateway および Middleware 層において、スティッキーセッションやサーバー内メモリに依存した状態保持を禁止します。
     *   **Action**: 全ての認証・認可は Bearer Token (JWT) または API Key に集約し、水平スケーリングがいつでも可能な状態を維持してください。
@@ -96,6 +116,16 @@
 ## 7. ドキュメンテーション (Documentation)
 *   **ライブドキュメント (Live Documentation)**:
     *   APIドキュメントはコードから自動生成され、常に最新の状態（Live）でなければなりません（Swagger UI, GraphiQL）。手動更新のドキュメントは禁止します。
+
+### 7.1. The API Documentation Standard（API公開ドキュメント基準）
+*   **Law**: 外部に公開するAPIは、開発者が契約前に動作検証可能な**Sandbox環境**と、主要言語でのリクエスト例を提供しなければなりません。
+*   **Action**:
+    1.  **OpenAPI 3.x**: 全APIエンドポイントをOpenAPI仕様で定義し、自動生成ドキュメントを公開してください。
+    2.  **Sandbox Environment**: テスト用APIキーとサンドボックス環境を提供し、契約前に動作検証を可能にしてください。本番データへの影響がない隔離環境を用意します。
+    3.  **Code Examples**: 最低3言語（JavaScript、Python、cURL）でのリクエスト例をドキュメントに含めてください。コピーペーストで動作するコード例を標準とします。
+    4.  **Bilingual Documentation**: グローバル展開を前提とするAPIは、プロジェクト設定言語と英語の**バイリンガル**でドキュメントを提供することを推奨します。
+*   **Rationale**: 「APIが存在するが試す方法がない」状態は、潜在顧客の離脱を招きます。Sandbox環境とコード例により、開発者のオンボーディング時間を最小化し、API採用率を最大化します。
+
 ## 8. APIエコノミーと収益化 (API Economy & Monetization)
 ### 8.1. The API Product Mindset (Highest Engineering Standard)
 *   **Law**: 全ての API 出力を「販売可能な商品（Asset）」と捉え、Tiering と DTO による保護を徹底してください。内部用の手抜きは、将来の負債として指数関数的に増大します。
@@ -112,6 +142,14 @@
     *   **Law**: コード内に特定のプラン ID をハードコードすることを禁止します。
     *   **Action**: プランの属性（Enterprise か、特定機能が有効か等）は、必ず Stripe 等の決済プラットフォーム側の **Metadata** または DB のプラン定義テーブルで管理してください。
     *   **Success**: これにより、エンジニアの手を借りず（デプロイなし）に、マーケターや経営陣が販売戦略を即座に変更できる柔軟性を確保します。
+
+### 8.2. The API Gateway Metering Mandate (ゲートウェイ使用量計測義務)
+*   **Law**: 将来的な従量課金（Metered Billing）に備え、API Gateway / Middleware 層には**使用量計測（Metering Log）**を実装しなければなりません。計測はレスポンス遅延を発生させずに非同期で行うことを標準とします。
+*   **Action**:
+    1.  **Gateway-Level Metering**: API Gateway層で、リクエストごとにエンドポイント、呼び出し元（Tier/API Key）、レスポンスステータスを記録してください。ビジネスロジック層の `recordUsage` とは独立した、インフラ層での計測です。
+    2.  **Async Logging**: ログ記録は `event.waitUntil()` パターン（または同等の非同期メカニズム）を使用し、メインレスポンスをブロックせずにバックグラウンドで行ってください。
+    3.  **Aggregation Ready**: 計測データは「日次/月次の集計」「Tier別のトラフィック分析」「コスト配分」に利用可能な粒度で記録してください。
+*   **Rationale**: ビジネスロジック層の `recordUsage` は「課金対象のアクション」を記録しますが、Gateway層の計測は「全トラフィックの可視化」を目的とします。この二層計測により、従量課金の正確性とインフラのキャパシティプランニングの両方を支えます。
 
 ### 6.2. The Strict Action Return Type Protocol（Server Action戻り値厳格化）
 *   **Law**: Server Action（またはサーバーサイド関数）は、全ての戻り値に対して**厳格な型定義**を持たなければなりません。UI側での `as any` キャストによる戻り値の型変換を永久に禁止します。
@@ -131,3 +169,19 @@
     4.  **Logging Before Return**: エラーを戻り値として返す前に、必ずサーバーサイドでログ（`Logger.error`）を出力してください。戻り値によるエラーハンドリングは、ログ出力を怠ると観測性を失う危険があります。
 *   **Rationale**: Server Action の `throw` はReactのストリーミングレンダリングと複雑に相互作用し、エラーバウンダリの意図しない発火、フォーム状態のリセット、再レンダリングの連鎖など、予測困難な副作用を引き起こします。構造化された戻り値によるエラーハンドリングは、UIの安定性とデバッグの容易さの両方を保証します。
 
+## 9. CORS ガバナンス
+
+### 9.1. The CORS Governance Protocol（CORSガバナンス基準）
+*   **Context**: API外販やサードパーティ統合を前提とし、CORSポリシーの明確な管理基準が必要です。
+*   **Default Policy**: 明示的に許可されていないオリジンからのリクエストは**全てブロック**してください。
+*   **Environment Matrix**:
+    | 環境 | 許可オリジン | 設定方法 |
+    |:-----|:-----------|:--------|
+    | **Production** | 自社ドメインのみ | フレームワーク設定ファイル |
+    | **Preview/Staging** | Preview用ドメインパターン | 環境変数で動的設定 |
+    | **Development** | `http://localhost:*` | `.env.local` |
+    | **API外販（将来）** | 契約者ドメインのホワイトリスト | DB管理 + APIキーに紐付け |
+*   **Credentials Rule**: `Access-Control-Allow-Credentials: true` は認証が必要なエンドポイントのみに限定し、`Allow-Origin: *` との組み合わせを**厳禁**としてください。
+*   **Preflight Cache**: `Access-Control-Max-Age: 86400`（24時間）を設定し、不要なOPTIONSリクエストを削減してください。
+*   **Prohibition**: 本番環境での `Access-Control-Allow-Origin: *` の使用は厳禁です（`60_security_privacy.md` 参照）。
+*   **Rationale**: CORSの設定ミスは、XSSやCSRFの攻撃面を広げるセキュリティリスクであると同時に、意図しないオリジンからのAPIアクセスを許可することで認証バイパスやデータ流出のリスクを生みます。環境別に厳格なポリシーを適用することで、開発の利便性とセキュリティを両立します。

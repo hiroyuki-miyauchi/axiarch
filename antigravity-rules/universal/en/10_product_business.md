@@ -21,6 +21,30 @@
     *   **Principle**: Prioritize speed except for "Security and Legal". A fast product with bugs that reaches the market wins over a slow bug-free product (however, Level 1 Security is absolute).
     *   **Pivot**: If data denies the hypothesis, have the courage to ignore sunk costs and change direction immediately.
 
+### 1.2. The User Persona Definition Protocol
+*   **Law**: Target user personas MUST be **explicitly documented** as the decision criteria for all feature development, UI design, and microcopy. Development without personas is a state of "not knowing who you're building for" and is the primary cause of specification drift and rework.
+*   **Mandate**:
+    *   **Primary Persona**: Define the main target (primary user of the service). Include age range, region, device ratio, key challenges, and goals.
+    *   **Secondary Persona**: Define secondary targets (administrators, business operators, etc.).
+    *   **Use Case Priority**: List the persona's key use cases with priority ranking and use them as input for determining the order of feature development.
+*   **Location**: Persona definitions should be managed in the project-specific Blueprint and reviewed quarterly. This protocol provides the "template."
+
+### 1.3. The Technology Roadmap Protocol
+*   **Law**: Ad-hoc feature additions are the primary cause of technical debt and cost inflation. A mid-to-long-term technology roadmap MUST be explicitly documented to grow the product strategically.
+*   **Mandate**:
+    *   **3-Phase Structure**:
+        | Timeframe | Content | Update Frequency |
+        |:----------|:--------|:----------------|
+        | **Now (This Quarter)** | Features in progress or next to start | Every sprint |
+        | **Next (Next Quarter)** | Confirmed but not yet started features | Monthly |
+        | **Later (6 months–1 year)** | Conceptual features and tech investments | Quarterly |
+    *   **Quarterly Review Obligation**: Review the roadmap at the end of each quarter and evaluate the following:
+        1.  KPI achievement status of completed features
+        2.  Technical debt inventory (classification and prioritization of accumulated TODO/FIXME items)
+        3.  Cost budget vs. actual variance
+    *   **Prioritization Framework**: Quantitatively evaluate features using ICE (Impact × Confidence × Ease) scores to eliminate subjective judgment.
+*   **Location**: Specific roadmaps should be managed in the project-specific Blueprint. This protocol provides the "template" for the management process.
+
 ## 2. Finance & Cost Management - CFO View
 *   **ROI-Driven Development**:
     *   Be conscious of ROI (Return on Investment) in all feature development and technology selection. Adopt not because "it's technically interesting" but because "it has business value".
@@ -126,6 +150,23 @@
 *   **Action**: Design appropriate search index update triggers (Webhooks, Realtime Subscriptions, scheduled batches) to build an architecture that meets the SLA.
 *   **Cache Purge Sync**: Even if immediate search index reflection is achieved, stale data may be displayed due to missed CDN or application cache purges. Execute cache tag purges (e.g., `revalidateTag`) synchronously upon data updates.
 
+### 8.4. The Multi-Factor Ranking Protocol
+*   **Law**: Search result ordering MUST be determined by **multi-factor scoring** aimed at maximizing value for users, not simply by registration date.
+*   **Scoring Factors**: Combine the following factors to compose the ranking score. Weighting should be defined in the project-specific Blueprint.
+
+    | Factor | Description |
+    |:-------|:-----------|
+    | **Review Score** (Bayesian Average) | Bayesian Average from §9.1 |
+    | **Completeness** | Image count, description richness, attribute fill rate |
+    | **Freshness** | Recency of last update |
+    | **Engagement** | Favorites count, view count, inquiry count |
+    | **Proximity** | Distance from user's current location (when location permission granted) |
+    | **Sponsored Boost** | Score addition via paid advertising |
+
+*   **Sponsored Transparency**: When rank elevation includes an advertising boost, search results MUST display labels such as "PR" or "Sponsored," complying with advertising disclosure regulations of each country.
+*   **Pre-calculation**: Scores should NOT be calculated in real-time. Pre-calculate via daily batch or event-driven processes and store in an entity table column (e.g., `search_score`).
+*   **User-Controlled Sorting**: Provide user-selectable sort options (Recommended / Rating / Newest / Distance, etc.) with the default being composite score descending.
+
 ## 9. Review & Trust System
 
 ### 9.1. The Bayesian Average Protocol
@@ -148,6 +189,50 @@
 *   **Reason**: To maintain integrity of aggregate scores (Bayesian Average) and to enable auditing of irregular operations (deletion of unfavorable reviews).
 *   **Action**: Set a deletion flag (`deleted_at`) to exclude from public queries while retaining the record in the database.
 *   **Destructive Action Confirmation**: Since soft deletion of reviews has irreversible impacts (e.g., aggregate score recalculation), require **confirmation word input** (e.g., typing "delete") in the admin panel for deletion operations to prevent accidental actions.
+
+### 9.4. The Automated Spam Filter Protocol
+*   **Law**: Apply the following automated filters upon UGC (reviews, etc.) submission and hold content suspected of spam in a `flagged` status.
+*   **Detection Rules**:
+    *   **Burst Posting**: Same user submitting more than a defined number (e.g., 3+) within a short period (e.g., 10 minutes)
+    *   **Template Detection**: High content similarity (e.g., 80%+) across posts targeting different entities
+    *   **URL/Contact Info Injection**: Content containing phone numbers, URLs, or other external redirection
+    *   **Prohibited Word Dictionary**: Keywords matching discriminatory expressions, violent content, or competitor defamation
+*   **AI Augmentation**: Use LLM (lightweight model recommended) for semantic-level spam detection to reduce false positive rates. Log detection results and use them for filter accuracy improvement.
+
+### 9.5. The Progressive Trust Level Protocol
+*   **Law**: Assign progressive trust levels to UGC contributors and relax moderation requirements based on trust level.
+*   **Trust Level Design**:
+
+    | Level | Conditions | Privileges |
+    |:------|:-----------|:-----------|
+    | **Lv.0 (New)** | New user | All posts require approval |
+    | **Lv.1 (Verified)** | Identity verified + N+ approved posts | Text posts published immediately |
+    | **Lv.2 (Trusted)** | Lv.1 conditions + MFA enabled + M+ posts + no report history | Posts with images published immediately |
+
+*   **Demotion**: If reports accumulate to a threshold (e.g., 3+), demote to Lv.0 and subject all posts to re-review.
+*   **Mandate**: Define specific thresholds (N, M) for each level in the project-specific Blueprint. This protocol provides the level structure "template."
+
+### 9.6. The User Report Protocol
+*   **Law**: Provide a mechanism for users to report inappropriate UGC and define response SLAs.
+*   **Report Categories**: Inaccurate information / Inappropriate content / Spam / Personal information exposure / Other
+*   **Response SLA**: Complete initial judgment (maintain display or temporarily hide) within **24 hours** of report.
+*   **Due Process**: When deleting UGC, notify the poster of the reason and provide an opportunity for appeal (e.g., within 14 days).
+
+### 9.7. The UGC Submission Rate Limit Protocol
+*   **Context**: Define frequency limits to structurally prevent spam, self-promotion, and mass bot submissions while ensuring UGC quality.
+*   **Mandate**:
+
+    | Limit Type | Threshold Example | Violation Response |
+    |:-----------|:-----------------|:-------------------|
+    | **Same entity submission** | 1 per 365 days | Allow updates only |
+    | **Overall posting frequency** | 5 per 24 hours | Queue excess submissions |
+    | **New account restriction** | 2 posts within 72 hours of registration | Linked with Progressive Trust (§9.5) |
+    | **Bot detection** | CAPTCHA/challenge authentication required | Block submission on verification failure |
+
+*   **Implementation**:
+    *   Manage Rate Limit counters at the DB level using composite keys of `user_id + entity_id`.
+    *   Implement a cooldown period (e.g., 30 seconds) on the submission button in the frontend to physically prevent rapid-fire submissions.
+*   **Mandate**: Define specific threshold values for each limit in the project-specific Blueprint. This protocol provides the limit structure "template."
 
 ## 10. Interactive Engine
 

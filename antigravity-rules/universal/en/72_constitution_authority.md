@@ -27,3 +27,18 @@
 ## 3. The Conflict Resolution Protocol
 *   **Law**: When contradictions arise between constitution files (e.g., Firebase Constitution vs Supabase Constitution), the **more "Strict" and "Core" rule** takes precedence.
 *   **Hierarchy**: In this project, regarding data management, **Backend Constitution (`37`)** is positioned above all other documents (`32`, `unknown`, etc.) and has absolute decision authority.
+
+## 4. The Sparse Numbering Protocol
+*   **Law**: File numbers for rule files and Blueprint specifications MUST be assigned with **gaps of approximately 5–10** to allow for future expansion.
+*   **Anti-Pattern**: Sequential numbering (1, 2, 3...) eliminates room for inserting new rules and is prohibited.
+*   **Example**: Use numbering like `00, 10, 20, 30...` or `00, 05, 10, 15...` to ensure sufficient gaps between categories.
+
+## 5. The Unique Numbering Protocol
+*   **Law**: File prefix numbers for rule files and Blueprint specifications (e.g., `10_`, `30_`) MUST be **completely unique (Unique) across the entire project**.
+*   **Prohibition**: Having multiple files with the same number (e.g., `50_business.md` and `50_strategy.md`) causes reference ambiguity and is **strictly prohibited**.
+*   **Action**: When creating a new rule file, always check the existing file list and guarantee that numbers do not conflict. If a conflict exists, either merge with the older file or assign a new number.
+
+## 6. The Additive Evolution Protocol
+*   **Law**: Changes to rule files and Blueprint specifications MUST be made only through **"Append" or "Amend"**. Deleting past knowledge and lessons is "Regression."
+*   **Red Button Protocol**: If deletion of a rule or Blueprint section is truly necessary (e.g., complete deprecation), a **"Red Button" level warning** MUST be issued to the user and explicit approval obtained. The reason "for tidying up" is not accepted.
+*   **Rationale**: Documentation assets are the project's "Memory." Erasing memory structurally increases the risk of repeating the same mistakes.

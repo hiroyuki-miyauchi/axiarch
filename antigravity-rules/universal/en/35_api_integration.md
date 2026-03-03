@@ -14,6 +14,23 @@
     *   **gRPC**: Use fast and type-safe **gRPC (Protobuf)** for internal communication between microservices. Eliminate JSON overhead.
 *   **Versioning**:
     *   Manage versions via URL or Header (e.g., `/v1/users`) to avoid Breaking Changes.
+    *   **URL-Based Versioning (Recommended)**: Use `/api/v{major}/` format (e.g., `/api/v1/stores`) as standard. Higher discoverability than Header-based or Query-based, and easier documentation and testing.
+    *   **Breaking Change Definition**:
+
+        | Change Type | Breaking | Example |
+        |:-----------|:---------|:--------|
+        | **Removing** a response field | ✅ Yes | Removing the `address` field |
+        | **Changing type** of a response field | ✅ Yes | `price: string` → `price: number` |
+        | **Adding** a required parameter | ✅ Yes | Making new parameter `region` mandatory |
+        | **Adding** a response field | ❌ No | Adding new field `rating_count` |
+        | **Adding** an optional parameter | ❌ No | Adding `?sort=newest` |
+        | **Adding** an endpoint | ❌ No | New endpoint `/api/v1/reviews` |
+
+    *   **Deprecation Protocol**:
+        1.  **Parallel Operation**: Deprecated API versions must remain operational for **a minimum of 6 months** after the new version release.
+        2.  **Sunset Header**: Attach `Sunset: <date>` header to deprecated API responses (RFC 8594 compliant).
+        3.  **Notification Obligation**: Send email notifications to API key holders at 3 months, 1 month, and 1 week before deprecation.
+        4.  **Documentation**: Publish deprecation notice and migration guide in API specification documents.
 *   **Data Transport Standard**:
     *   **DTO Obligation**: Returning database Row Objects (Raw Row) directly is a "Felony". Always use `UserDTO` etc. to output only intentionally mapped fields.
     *   **Admin Data Leak Defense**: Even for admin screen APIs, prohibit `SELECT *` and always define dedicated **`AdminDTO`**. Physically prevent automatic leakage when confidential columns like `internal_memo` or cost info are added in future.
@@ -80,6 +97,9 @@
 *   **The Webhook Security Mandate (Signature Verification)**:
     *   **Law**: Prohibit starting processing without signature verification (`X-Hub-Signature` verification, etc.) when receiving Webhooks from external services (Stripe, Meta, GitHub, etc.).
     *   **Action**: MUST verify request authenticity using `Signing Secret` provided by platform to physically prevent unauthorized data updates via impersonation (e.g., changing to paid status when actually unpaid).
+    *   **Replay Attack Prevention**: Verify the `timestamp` in the Webhook payload and **reject requests older than 5 minutes**. Cache processed event IDs for a period to prevent duplicate execution.
+    *   **Idempotency**: Design so that even if the same `event_id` arrives multiple times, side effects occur only once. Use the Webhook's unique ID as an idempotency key and perform a duplicate check on DB before processing.
+    *   **Error Handling**: On processing failure, return `5xx` and rely on the sender's retry mechanism. Returning `2xx` signals success to the sender, causing no retry and silently losing unprocessed events. Requests that fail signature verification MUST immediately return `401 Unauthorized` and be recorded in alert logs.
 *   **The Stateless Gateway Protocol (Scale First)**:
     *   **Law**: Prohibit state retention dependent on sticky sessions or in-server memory at API Gateway and Middleware layers.
     *   **Action**: Consolidate all authentication/authorization to Bearer Token (JWT) or API Key, maintaining state ready for horizontal scaling at any time.
@@ -97,6 +117,15 @@
 *   **Live Documentation**:
     *   API documentation must be auto-generated from code and always be up-to-date (Live) (Swagger UI, GraphiQL). Manual documentation updates are prohibited.
 
+### 7.1. The API Documentation Standard
+*   **Law**: Externally published APIs MUST provide a **Sandbox environment** where developers can verify functionality before contracting, along with request examples in major languages.
+*   **Action**:
+    1.  **OpenAPI 3.x**: Define all API endpoints in OpenAPI specification and publish auto-generated documentation.
+    2.  **Sandbox Environment**: Provide test API keys and a sandbox environment to enable pre-contract verification. Prepare an isolated environment with no impact on production data.
+    3.  **Code Examples**: Include request examples in at least 3 languages (JavaScript, Python, cURL) in the documentation. Copy-paste-ready code examples are the standard.
+    4.  **Bilingual Documentation**: APIs intended for global deployment are recommended to provide documentation in both the **Project Native Language and English** (bilingual).
+*   **Rationale**: An \"API exists but there's no way to try it\" state drives away potential customers. Sandbox environments and code examples minimize developer onboarding time and maximize API adoption rates.
+
 ## 8. API Economy & Monetization
 ### 8.1. The API Product Mindset (Highest Engineering Standard)
 *   **Law**: Treat all API outputs as "Salable Assets" and enforce protection via Tiering and DTOs. Internal shortcuts will exponentially increase as future debt.
@@ -113,6 +142,14 @@
     *   **Law**: Hardcoding specific Plan IDs in code is prohibited.
     *   **Action**: Manage plan attributes (Enterprise, feature flags) in **Metadata** of payment platforms (Stripe) or DB plan definition tables.
     *   **Success**: This secures flexibility for marketers/executives to change sales strategies immediately without engineering help (no deployment).
+
+### 8.2. The API Gateway Metering Mandate
+*   **Law**: To prepare for future usage-based billing (Metered Billing), API Gateway / Middleware layers MUST implement **usage metering (Metering Log)**. Metering MUST be performed asynchronously without introducing response latency.
+*   **Action**:
+    1.  **Gateway-Level Metering**: At the API Gateway layer, record the endpoint, caller identity (Tier/API Key), and response status for each request. This is an infrastructure-layer measurement independent of the business logic layer's `recordUsage`.
+    2.  **Async Logging**: Logging MUST use the `event.waitUntil()` pattern (or equivalent async mechanism) to run in the background without blocking the main response.
+    3.  **Aggregation Ready**: Record metering data at a granularity that enables "daily/monthly aggregation", "per-Tier traffic analysis", and "cost allocation".
+*   **Rationale**: The business logic layer's `recordUsage` records "billable actions", while Gateway-layer metering aims to "visualize all traffic". This two-layer metering approach supports both billing accuracy and infrastructure capacity planning.
 
 ### 6.2. The Strict Action Return Type Protocol
 *   **Law**: Server Actions (or server-side functions) must have **strict type definitions** for all return values. Using `as any` casting on the UI side to convert return value types is permanently prohibited.
@@ -132,3 +169,19 @@
     4.  **Logging Before Return**: Always output server-side logs (`Logger.error`) before returning errors as return values. Error handling via return values risks losing observability if logging is neglected.
 *   **Rationale**: `throw` in Server Actions interacts complexly with React's streaming rendering, causing unpredictable side effects such as unintended Error Boundary firing, form state resets, and re-rendering cascades. Structured return value error handling guarantees both UI stability and debugging ease.
 
+## 9. CORS Governance
+
+### 9.1. The CORS Governance Protocol
+*   **Context**: Clear CORS policy management standards are required for API monetization and third-party integration.
+*   **Default Policy**: Requests from origins not explicitly allowed MUST be **blocked entirely**.
+*   **Environment Matrix**:
+    | Environment | Allowed Origins | Configuration Method |
+    |:-----------|:---------------|:--------------------|
+    | **Production** | Own domains only | Framework configuration file |
+    | **Preview/Staging** | Preview domain patterns | Dynamic configuration via environment variables |
+    | **Development** | `http://localhost:*` | `.env.local` |
+    | **API Monetization (Future)** | Contracted domain whitelist | DB management + linked to API key |
+*   **Credentials Rule**: `Access-Control-Allow-Credentials: true` MUST be limited to authentication-required endpoints only, and its combination with `Allow-Origin: *` is **strictly prohibited**.
+*   **Preflight Cache**: Set `Access-Control-Max-Age: 86400` (24 hours) to reduce unnecessary OPTIONS requests.
+*   **Prohibition**: Use of `Access-Control-Allow-Origin: *` in production environments is strictly prohibited (see `60_security_privacy.md`).
+*   **Rationale**: CORS misconfiguration is a security risk that expands the attack surface for XSS and CSRF, while also risking authentication bypass and data leakage by allowing API access from unintended origins. Applying strict policies per environment balances development convenience with security.

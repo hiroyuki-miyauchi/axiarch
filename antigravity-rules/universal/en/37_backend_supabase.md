@@ -21,6 +21,14 @@
     *   **Universal Types**: Do NOT store data types dependent on specific UI frameworks (React Node, etc.) in DB.
     *   **Neutral JSON**: Manage JSON data as "pure data" without display logic.
 
+### Supreme Directive 0.4: The Client DTO Barrier
+*   **Law**: Passing database row data (Raw Entity) directly as Props to client-side components (`use client`, etc.) is **prohibited**.
+*   **Mandate**:
+    *   **Server-Side Transformation**: Always transform data into purpose-specific lightweight DTOs on the server side, sending only the minimum required fields to the client.
+    *   **PII Exclusion**: Physically prevent PII such as `admin_notes`, `phone_number`, `email` and internal management fields (`deleted_at`, `internal_memo`) from reaching the browser.
+    *   **Payload Minimization**: Sending unnecessary fields causes the dual problem of wasted network bandwidth and increased future data leakage risk.
+*   **Rationale**: As the concrete boundary for the DTO obligation defined by SD 0.2 (Trinity DTO Mandate), this establishes data handoff to client components as a physical interception point. Direct transmission of Raw Entities is the greatest risk source for unintended PII leakage.
+
 ### Core Laws
 *   **SSOT (Single Source of Truth)**: Settings, user data, and content all have **PostgreSQL (`public` schema)** as the Single Source of Truth. "Dual management" in JSON files or external CMS is strictly prohibited.
     *   **Prohibition**: "Holding temporarily in JSON" is data rebellion.
@@ -51,6 +59,10 @@
     2. **Type Safety**: TypeScript/zod type inference becomes accurate, preventing "undefined key" errors.
     3. **Integrity**: Foreign key constraints and CHECK constraints become applicable.
 *   **Migration**: DB migration is mandatory when adding new settings items.
+*   **Exception (Dynamic Label Isolation Protocol)**: JSONB columns are exceptionally permitted ONLY for the following cases. The responsibility of each JSONB column must be strictly limited, and mixing in data that should be normalized is prohibited.
+    1.  **Dynamic Labels/Translations**: UI display labels for multi-language support, custom evaluation criteria names, etc.—dynamic text whose item count is indeterminate at schema design time.
+    2.  **Non-Searchable Variable-Length Arrays**: Lists where only display order matters and that are never targets of SQL WHERE clauses or JOINs.
+    3.  **Prohibition**: Properties used for calculations, searches, or conditional logic (e.g., `max_count`, `threshold`) MUST NOT be included in JSONB. These must always be promoted to normalized columns.
 
 ### Rule 2.1: Integrity & Ownership
 *   **RLS Absolute**: Row Level Security (RLS) is absolute. `service_role` key usage is prohibited in principle; all queries must pass through RLS.
@@ -84,6 +96,44 @@
     - [ ] **Index**: Added index to foreign keys (`*_id`)?
     - [ ] **Type**: Regenerated `database.types.ts` and updated type definitions?
     - [ ] **Audit**: Set trigger to `audit_logs`? (For important tables)
+
+### Rule 2.17: The Schema-Reality Reconciliation Checklist
+*   **Law**: When creating or modifying data access code (Query/Mutation/DTO), all referenced columns MUST be verified to exist in the actual DB schema with matching types and constraints before implementation.
+*   **Action**:
+    1.  **Column Existence**: Before writing `.select('column_name')` or `.not('column', 'is', null)`, verify **column existence** in the `Row` type of the auto-generated type definition file (`database.types.ts`, etc.). "Probably exists" is prohibited.
+    2.  **FK Name Verification**: Foreign key names (`user_id`, `owner_id`, etc.) differ per table. Do not assume default names; verify the actual FK name for each table in the type definitions.
+    3.  **RPC vs Column Distinction**: RPC functions (e.g., `get_point_balance`) are NOT columns. They cannot be retrieved directly via `.select()`. Implement them correctly as aggregations from source tables or RPC calls.
+    4.  **Array Empty Check**: "Existence checks" on array-type columns (`text[]`, `jsonb[]`, etc.) are insufficient with `.not('column', 'is', null)` alone. Add `.neq('column', '{}')` to also exclude empty arrays `{}`.
+    5.  **Nullable Parity**: DB `nullable` columns MUST be defined as `optional (?)` or `| null` in TypeScript type definitions. Divergence from auto-generated types is the gateway to "future runtime errors."
+*   **Checklist (New Backend Implementation)**:
+    | Check Item | Verification Method |
+    |---|---|
+    | All referenced columns exist in type definition file | Visual check of Row type |
+    | RPC functions not treated as columns | Cross-reference with Functions section |
+    | FK names match actual table definitions | Check Relationships section |
+    | Array column empty checks are correct | Addition of `.neq('column', '{}')` |
+    | nullable/optional matches DB definition | Cross-reference with auto-generated types |
+*   **Rationale**: Schema-Reality Gaps are the primary cause of "silent bugs" that only manifest in production. By treating the type definition file as the "absolute truth" and eliminating guesswork-based implementation, these bugs are reduced to zero.
+
+### Rule 2.18: The Automated Data Retention Protocol
+*   **Law**: Data that accumulates over time MUST have **category-based retention periods** defined, with mechanisms (Cron Job / Scheduled Task) to **automatically purge or anonymize** data after expiration.
+*   **Action**:
+    1.  **Retention Category Definition**: Classify all data tables into the following categories and explicitly define retention periods.
+        | Category | Example | Recommended Retention |
+        |---|---|---|
+        | Active Data | Users, Content | Indefinite (until account deletion) |
+        | Transaction Logs | Payment records | Legal retention period (e.g., 7 years) |
+        | Access Logs | Request logs, Traces | 90 days |
+        | Session Data | Sessions, Tokens | 30 days |
+        | Temporary Data | OTP codes, Upload temp files | 24 hours |
+        | Analytics Data | Analytics events | 2 years (aggregate to summary after) |
+    2.  **Automated Purge**: Implement batch jobs using `pg_cron` or cloud schedulers to automatically delete/archive data that exceeds retention periods.
+    3.  **Account Deletion Lifecycle**: Implement staged data processing for user account deletion:
+        *   Immediate: De-publicize profile information
+        *   After 30 days: Logical deletion (`deleted_at` set)
+        *   After legal retention period: Physical deletion or complete PII anonymization
+    4.  **Purge Logging**: Record purge execution details (target tables, deletion count, execution timestamp) in audit logs.
+*   **Rationale**: Retaining data indefinitely leads to increased storage costs, expanded privacy risks, and violations of data minimization principles under GDPR/APPI. Automated retention management achieves a triple win of cost, compliance, and performance.
 
 ## 3. Integrity & Logic Strategy
 
@@ -217,9 +267,25 @@
 
 ### Rule 4.3: Scalability Strategy
 *   **Infinite Scalability**: `select('*')` and unlimited queries banned. Pagination mandatory.
+*   **Post-Query Filter Prohibition**: Filtering paginated query results on the application side (JavaScript/TypeScript) is prohibited. All filter conditions MUST be included in SQL WHERE clauses. Applying JS-side filters causes inconsistent items-per-page counts and inaccurate total counts/page numbers in pagination.
 *   **Partitioning**: Introduce `pg_partman` when table records exceed **10 Million (10M)**.
 *   **Read Replica**: Offload analysis queries to Replica.
 *   **Archival**: Evacuate cold data to Object Storage.
+*   **Connection Pooling**:
+    *   **Law**: Database connection count is constrained by PostgreSQL's maximum connections limit. Connection pooling tools (PgBouncer, etc.) MUST be utilized to optimize DB connection count.
+    *   **Action**:
+        1.  **Pooler Mandatory**: DB connections from serverless environments (Edge Functions, Vercel Serverless, etc.) MUST go through a connection pooler. Creating new connections on every function cold start causes connection count to explode.
+        2.  **Transaction Mode**: Use `Transaction Mode` (release connection per request) for short-lived request processing. Limit `Session Mode` to cases where Prepared Statements are required.
+        3.  **Max Connections Guard**: Application-side connection pool size MUST be set to **70% or less** of the DB's `max_connections` to ensure connection headroom for management tools and background jobs.
+    *   **Rationale**: In serverless architectures, concurrent connection count spikes dramatically. Without a connection pooler, DB connection count reaches its limit, risking total service outage due to connection errors.
+
+### Rule 4.4: The Optimistic Mutation Protocol
+*   **Law**: For high-frequency actions (likes, status changes, reordering, etc.) where network latency causes 0.5+ seconds of lag between action and response, **Optimistic UI** MUST be implemented to update the UI immediately without waiting for server response.
+*   **Action**:
+    1.  **Instant Feedback**: Use local State or optimistic update hooks (e.g., React's `useOptimistic`) to update the UI immediately after user action. Waiting for server response before updating the UI gives users the impression that the app is "broken."
+    2.  **Rollback on Error**: On server error, immediately rollback to the original state and notify the user via toast or snackbar.
+    3.  **Scope**: Not all operations require this. Limit application to "repetitive and high-frequency operations" and do NOT use for irreversible operations such as payments or deletions.
+*   **Rationale**: UI freezes exceeding 0.5 seconds give users the impression of a "broken" app and increase churn rates. Optimistic updates dramatically improve perceived speed and enhance overall app quality.
 
 ---
 
@@ -261,6 +327,7 @@
 *   **Ghost Table Defense**:
     *   **Law**: `ALTER` or `CREATE POLICY` on non-existent tables causes errors.
     *   **Action (Table Existence Verification)**: Use `DO $$ ... IF EXISTS ...` block when referencing external/uncertain schemas. No assumptions.
+    *   **Column-Level Verification (Schema-Reality Reconciliation)**: Before creating migrations and designing DTOs, verify not just table existence but also **column existence, types, and constraints via `information_schema.columns`**. Implementing based on assumed column names (e.g., defining `dog_description_json` in DTO when it doesn't exist in DB) is the primary cause of Schema-Reality drift and is prohibited.
 *   **Remote Schema Warning**: Always check current DB state (Dashboard/`pg_tables`) before writing SQL.
 
 ### Rule 7.2: IPv6 & CI/CD Protocol
@@ -286,6 +353,37 @@
 *   **Action**:
     1.  Create local migration `supabase migration new fix`, deploy via Git.
     2.  Restrict SQL Editor to Read-only usage (Query Debugging).
+
+### Rule 7.7: The Expand-Contract Migration Protocol (Zero Downtime Schema Changes)
+*   **Law**: When performing destructive schema changes (column rename/type change/deletion, table reconstruction, etc.) on tables running in production, the **Expand-Contract pattern** MUST be used to execute changes in stages with zero downtime.
+*   **Action**:
+    1.  **Phase 1 — Expand**: Create new columns or tables as **additions only**. At this stage, existing columns/tables MUST NOT be modified or deleted; the application continues operating on the old structure.
+    2.  **Phase 2 — Migrate**: Backfill (copy/transform) old data into new columns/tables. Perform bulk updates via batch processing and avoid single-transaction full-table `UPDATE`s. The application should implement "Dual Write" supporting both old and new structures to guarantee data consistency during the transition period.
+    3.  **Phase 3 — Contract**: After confirming that all applications reference only the new structure, delete old columns/tables only after **a minimum of one week of stable operation**.
+*   **Prohibition**:
+    *   Executing `DROP COLUMN` or `ALTER COLUMN ... TYPE` during the Expand phase is prohibited.
+    *   Before executing the Contract phase, physically verify via `grep` that no references to the old structure exist anywhere in the codebase.
+*   **Rationale**: Even seemingly simple operations like `ALTER TABLE ... RENAME COLUMN` can cause failures when old code accesses the new schema due to deployment timing differences. The Expand-Contract pattern temporally separates schema and application changes, achieving safe zero-downtime migrations.
+
+### Rule 7.8: The Data-Aware Defense Protocol
+*   **Law**: Production DBs contain "dirty data" (duplicate records, type mismatches, incomplete data) that does not exist in development environments. Since CI environments (clean DBs) cannot detect this contamination, all DML (data manipulation) MUST be written defensively with the **assumption that "data already exists."**
+*   **Action**:
+    1.  **Assumed Conflict**: All `UPDATE` / `INSERT` statements must be written on the assumption that "target data already exists" and "duplicates are present." SQL written assuming a "clean DB" will explode in production.
+    2.  **Defensive Logic**: Instead of simple SQL, use `DO $$ ... END $$` blocks or `ON CONFLICT` clauses to avoid exceptions at the code level.
+    3.  **Cleanup Before Constraint**: Migrations that add unique constraints (`UNIQUE`) MUST include cleanup logic to delete or merge duplicate data **within the same migration file**. Adding only the constraint causes the migration to fail against production's duplicate data.
+*   **Rationale**: Migrations that "succeed" in development and CI environments frequently fail against dirty production data. Defensive DML writing guarantees safe migrations across all environments.
+
+### Rule 7.9: The Migration Static Analysis Guard
+*   **Law**: A static analysis mechanism (Pre-push Hook + CI Check) MUST be implemented to **automatically detect dangerous SQL patterns in migration files and reject them before merge**. Operational rules that rely on "human attention" will inevitably be broken during emergencies or by new team members.
+*   **Action**:
+    1.  **Pre-push Hook (Local Iron Dome)**: Use Git pre-push hooks to statically analyze new/modified files in `supabase/migrations/` and physically reject pushes containing dangerous patterns.
+    2.  **CI Check (Remote Concrete Wall)**: Run equivalent checks in CI pipelines (GitHub Actions, etc.) as a final defense line that blocks merges even when local hooks are bypassed.
+    3.  **Detection Patterns (The Forbidden Patterns)**:
+        *   `UPDATE` without `DO` block or `WHERE` with subquery → Reject as undefended update
+        *   `INSERT` without `ON CONFLICT` → Reject as unique constraint violation risk
+        *   `ADD CONSTRAINT ... UNIQUE` without prior cleanup → Reject as existing data inconsistency risk
+    4.  **No Bypass**: Using hook bypass options (`--no-verify`, etc.) is prohibited as an act that destroys the project's schema reliability.
+*   **Rationale**: Depending on human attention for migration safety is merely a question of "when" an incident will occur, not "if." By establishing physical defense walls through static analysis, dangerous SQL is structurally prevented from reaching production.
 
 ---
 
@@ -332,6 +430,39 @@
 *   **Business Hours**: Structured JSONB, prioritizing `holidays` logic.
 *   **Reputation System**: **Bayesian Average** for reliable scoring.
 *   **Geo-Centric**: Physical locations MUST have `latitude`/`longitude` and support location-based search.
+
+### Rule 9.5: The Geolocation Data Strategy
+*   **Law**: When assigning coordinate information to entities with physical locations, dependency on external Geocoding APIs (pay-per-use) MUST be minimized, and **API-free methods MUST be prioritized**.
+*   **Action**:
+    1.  **API-Free First (Recommended Priority Order)**:
+        *   **Pattern 1 (URL Parse)**: Extract coordinates embedded in map service URLs (e.g., Google Maps URL) using regular expressions. No API call required — completely free.
+        *   **Pattern 2 (Manual Input)**: Copy coordinates from the map service and enter them directly in the admin panel.
+        *   **Pattern 3 (Geocoding API / Fallback)**: Only when the above methods cannot obtain coordinates, use address-to-coordinate conversion APIs with caching. **Results MUST be saved to DB** to prevent re-conversion of the same address (one-time API call only).
+    2.  **Distance Calculation**: Use the **Haversine formula** (accounting for Earth's curvature) for calculating distances between two points.
+    3.  **Distance Display Format**:
+
+        | Distance | Display Format | Example |
+        |:---------|:---------------|:--------|
+        | < 1km | Meters (100m increments) | `300m` |
+        | 1-50km | Kilometers (0.1km increments) | `1.2km` |
+        | > 50km | Kilometers (integer) | `52km` |
+
+    4.  **Spatial Index**: In anticipation of distance-based search ("within N km from current location"), adoption of **GIN indexes** or **PostGIS extensions** for `latitude` / `longitude` is recommended.
+*   **Rationale**: Geocoding APIs incur pay-per-use charges of several dollars per 1,000 calls. By designing with an "API-Free First" approach rather than API-First, operational costs are dramatically reduced while also minimizing the impact of external service outages.
+
+### Rule 9.4: The Time-Gated Content Schema Standard
+*   **Law**: Content tables with scheduled publishing capabilities MUST implement a **time-gated schema** using the combination of `published_at` and `status`.
+*   **Action**:
+    1.  **Schema Standard**: Define the following columns:
+        *   `status` (text): Publication state such as `'public'`, `'private'`, `'draft'`, `'archived'`.
+        *   `published_at` (timestamptz, nullable): Scheduled publication datetime. `NULL` means "publish immediately."
+    2.  **Query Condition (AND Conjunction)**: Public content retrieval queries MUST **AND-conjoin** the following 2 conditions. Using only one causes either leakage of unpublished content or invalidation of scheduled publishing.
+        ```sql
+        WHERE status = 'public'
+          AND (published_at IS NULL OR published_at <= NOW())
+        ```
+    3.  **Indexing**: `published_at` is frequently used in range queries; index creation is recommended.
+*   **Rationale**: Filtering by `status = 'public'` alone leaks content before its scheduled publication date. Filtering by `published_at` alone publishes draft content. Only the AND conjunction of both achieves accurate publication control.
 
 ---
 
@@ -570,3 +701,23 @@
     2.  **No Dynamic EXECUTE**: Patterns like `EXECUTE format('SELECT * FROM %I', variable)` are prohibited because they cannot detect typos or references to non-existent tables until runtime.
     3.  **Schema Change Safety**: Static table references ensure that dependent functions error at migration time when tables are renamed or deleted, enabling early problem detection.
 *   **Rationale**: Dynamic table references are a breeding ground for SQL injection and make it impossible to trace impact scope during schema changes. Mandating static references ensures compile-time safety and maintainability.
+
+### Rule 2.17.1: The Data Quality Management Framework
+*   **Law**: Accumulated data must be designed and managed not as a \"byproduct\" but as an independent **revenue asset**. There is an obligation to systematically measure and manage data quality across the following 6 dimensions and detect quality degradation early.
+*   **DQ Framework**:
+
+    | Quality Dimension | Definition | Measurement Method | Target |
+    |:------------------|:-----------|:-------------------|:-------|
+    | **Accuracy** | Does the data correctly reflect reality? | Sampling verification | ≥ 95% |
+    | **Completeness** | Are required fields populated? | NULL rate measurement | ≥ 90% |
+    | **Consistency** | Is data for the same entity free of contradictions? | Cross-table verification | ≥ 99% |
+    | **Freshness** | Is the data up-to-date? | `updated_at` elapsed days | ≤ 30 days |
+    | **Uniqueness** | Are there no duplicate data entries? | Duplicate detection query | Duplicate rate ≤ 1% |
+    | **Conformity** | Do data types and formats comply with specifications? | Schema Validation | 100% |
+
+*   **Action**:
+    1.  **Automated DQ Checks**: Automatically measure the above 6 metrics via monthly batch jobs (`pg_cron` or cloud scheduler) and display them on the admin dashboard.
+    2.  **Asset Registry**: Catalog major data assets, explicitly documenting each asset's \"owner,\" \"quality owner,\" and \"monetization potential.\"
+    3.  **Cleansing Mandate**: Data must always be maintained in a cleansed state. Leaving dirty data (unvalidated inputs, duplicate records, type violations) is prohibited.
+    4.  **Alert Threshold**: When any quality dimension falls below its target value, trigger an alert and complete corrective measures within 30 days.
+*   **Rationale**: Without quantitative data quality management, data that \"looks clean but is actually full of inconsistencies\" accumulates, negatively impacting API sales, AI training, and analytics. The 6-dimension framework structurally prevents quality degradation.

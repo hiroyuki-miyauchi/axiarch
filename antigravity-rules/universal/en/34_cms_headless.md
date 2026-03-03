@@ -26,6 +26,13 @@
         *   **Law**: Admin-uploaded images are "Master Data". NEVER compress or destructively convert on the server-side.
         *   **Action**: Optimization (WebP, Resize) must happen at Delivery (CDN Edge). Keep the original pristine.
     *   **User Assets**: Isolate UGC (Profiles, Posts) in `users/{uid}/` and allow direct upload from User Settings.
+    *   **The UGC Capacity Optimization Protocol**:
+        *   **Law**: Mandate **client-side pre-processing before upload** for user-uploaded images to optimize server storage and CDN bandwidth costs.
+        *   **Action**:
+            1.  **Resize Mandate**: Resize images to **1920px or less on the longest edge** on the client-side before upload. Uploading original-size images is prohibited as a waste of storage costs.
+            2.  **EXIF Strip**: **Strip EXIF data containing location information (GPS) before upload** for privacy protection. Physically eliminate the risk of users inadvertently exposing their home or workplace location.
+            3.  **Format Guidance**: Explicitly specify uploadable formats (JPEG, PNG, WebP, etc.) and maximum file size limits, and enforce via validation.
+        *   **Rationale**: Server-side resizing consumes bandwidth and CPU costs. Client-side pre-processing is the optimal solution for simultaneously reducing server load and protecting privacy.
     *   **The Video Ban Protocol (Cost & Risk Control)**:
         *   **Law**: Direct video upload to server is prohibited due to bandwidth costs and content monitoring risks.
         *   **Action**: Mandate uploading videos to external platforms (YouTube/Vimeo) and store only "Embed Code (iframe/ID)".
@@ -38,10 +45,27 @@
     *   Generate content as static HTML at build time (SSG) or request time (ISR) and deliver via CDN. Minimize direct access to CMS servers for lightning-fast speed.
 *   **Image Optimization**:
     *   Optimize and cache images delivered from CMS using `next/image` on the frontend. Avoid using CMS image URLs directly in `img` tags.
+*   **The CDN Delivery Gateway Mandate**:
+    *   **Law**: Directly specifying **origin URLs** (raw storage service URLs) in the `src` attribute of `<img>` tags is prohibited.
+    *   **Action**: Image delivery MUST be routed through a **CDN (Content Delivery Network) or reverse proxy**, applying edge caching, automatic format conversion (WebP/AVIF), and responsive resizing.
+    *   **Rationale**: Direct origin URL references cause CDN cache bypass (performance degradation), excessive requests to origin servers (cost increase), and require full codebase modification during future storage provider migration (technical debt). CDN gateway centralization achieves the trinity of performance, cost efficiency, and flexibility.
 *   **The Storage URL Hardcoding Ban**:
     *   **Law**: Hardcoding image or file URLs as `https://...` directly in code is prohibited.
     *   **Action**: Always resolve domains and paths via utility functions such as `getStorageUrl(path)`. This ensures flexibility for future bucket name changes or CDN provider migrations.
     *   **Rationale**: Hardcoded URLs create technical debt requiring codebase-wide grep and modification during infrastructure changes.
+
+### 3.1. The Content Cache Tiering Protocol
+*   **Law**: Tier cache TTL (Time To Live) based on content update frequency to optimize the balance between performance and freshness. Applying uniform cache settings to all content is prohibited.
+*   **Action**:
+    1.  **Tier Classification**: Classify content into the following 3 tiers based on update frequency and apply appropriate caching strategies to each.
+        | Tier | Example | Cache Strategy |
+        |:-----|:--------|:--------------|
+        | **Hot (High-frequency updates)** | Rankings, inventory, pricing | ISR `revalidate: 60`–300 or SSR |
+        | **Warm (Medium-frequency updates)** | Article lists, featured pages | ISR `revalidate: 3600` |
+        | **Cold (Low-frequency updates)** | Terms of service, company info | SSG + On-demand Revalidation |
+    2.  **Cache Invalidation**: Trigger on-demand revalidation for corresponding pages upon content updates to prevent stale cache persistence.
+    3.  **Cache Key Design**: Include role information in cache keys to prevent cache mixing between user roles (admin preview vs public access).
+*   **Rationale**: Uniform cache settings cause "updated but not reflected" issues and unnecessary server load. Tiering based on content nature is the key to achieving both performance and UX.
 
 ## 4. Operations & Security
 *   **Preview Mode**:
@@ -64,6 +88,14 @@
     *   **Law**: Physically define a **`ComponentRegistry`** connecting CMS Types to Frontend Components 1:1. Eliminate hardcoded `switch` branches.
     *   **Action**: Maintain a "Plugin Architecture" where `Object.entries()` or dynamic imports automatically render the corresponding UI the moment CMS response arrives.
 
+### 5.1. The Schema Permission Lock Protocol
+*   **Law**: When adopting JSON-based layout definitions or content structures in CMS, **explicitly separate at the schema level** the "structure defined and locked by operations (System Schema)" from the "areas editable by users or editors (User Data)."
+*   **Action**:
+    1.  **Lock/Unlock Separation**: Apply `editable: true/false` or equivalent metadata to each field in the JSON schema, and physically control editability on the UI side.
+    2.  **Admin Override Only**: Restrict modifications to locked fields to admin-level permissions (Admin or above), displaying them as read-only to general editors.
+    3.  **Validation Gate**: If changes to locked fields are detected at save time, reject them on the backend. Relying solely on frontend control is prohibited.
+*   **Rationale**: When layout structure and content data coexist in the same JSON without permission differentiation, there is a risk of site-wide layout collapse due to editor mistakes. Schema-level permission separation is the only means to achieve both "content freedom" and "structural stability."
+
 ## 6. Content Operations Protocol
 *   **Publishing Workflow**:
     *   **Status Transition**: Strictly adhere to status transitions: `draft` -> `pending` (Review) -> `published` -> `archived` (Soft Delete).
@@ -84,6 +116,19 @@
 *   **Automated SEO**:
     *   **Meta Automation**: Automatically complete missing Titles/OGP using AI summarization or default images to prevent publishing incomplete content.
     *   **Internal Linking**: Automatically recommend related content (matching tags/categories) to reinforce internal link structure.
+*   **The SEO Preview Mandate**:
+    *   **Context**: Without meta information preview (title/description/OGP image) during CMS content entry, SEO quality degradation and inappropriate social share previews occur after publication.
+    *   **Law**: Install a permanent **SEO Preview Panel** on the content editing screen and mandate pre-publication quality checks.
+        *   **Search Result Preview**: Display title + description in a search-result-style UI
+        *   **Social Share Preview**: Display OGP image + title + description in a social card-style UI
+    *   **Validation Rules**:
+        | Item | Criteria | On Violation |
+        |:-----|:---------|:-------------|
+        | **meta title** | 15-60 characters (adjust per language) | Yellow warning display |
+        | **meta description** | 50-160 characters (adjust per language) | Yellow warning display |
+        | **OGP image** | 1200×630px recommended, file size ≦ 300KB | Resize suggestion |
+        | **H1 heading** | One per page, consistency with meta title recommended | Red warning display |
+    *   **Auto-Suggestion**: When title/description is empty, automatically generate and suggest candidates from the body text.
 
 ## 7. Editor Governance (Rich Text Policy)
 *   **Tiptap Governance**:
@@ -104,6 +149,47 @@
     *   **Context**: Small-scale text fields like "supplementary notes" or "access information remarks" that need line breaks and links but are not rich enough to warrant a full article editor.
     *   **Law**: Using rich text editors (Tiptap, etc.) for such fields is prohibited. It causes data structure bloat (`string` vs `JSON`) and performance degradation.
     *   **Action**: Adopt a standard `Textarea` + `Markdown` parser (`react-markdown`, etc.) configuration to keep data structures simple.
+*   **The Content Moderation Protocol**:
+    *   **Context**: UGC (reviews, comments, etc.) is fundamental to trust, but leaving inappropriate content unaddressed leads to brand damage and legal risks.
+    *   **Law**: For services accepting UGC, establish the following prohibited content classifications and multi-layered moderation framework.
+    *   **Prohibited Content Categories**:
+        | Category | Examples | Response |
+        |:---------|:---------|:---------|
+        | **Defamation** | Personal attacks, libel, discriminatory expressions | Immediate unpublish + author warning |
+        | **Misinformation** | Factually incorrect reviews (including astroturfing) | Unpublish + investigation |
+        | **Personal Information** | Exposure of phone numbers, addresses, email addresses | Automatic masking |
+        | **Harmful Content** | Violence, obscenity, drug-related content | Immediate deletion |
+        | **Spam** | Promotional posts, link spam | Auto-filter to hidden |
+        | **Copyright Infringement** | Unauthorized image reproduction, plagiarized text | Process via legal response flow |
+    *   **Moderation Layers**:
+        1.  **Automatic Filter (Layer 1)**: Immediate judgment via prohibited word dictionary + regex patterns
+        2.  **AI Judgment (Layer 2)**: Flag as "requires review" via sentiment analysis and toxicity detection
+        3.  **Human Review (Layer 3)**: Administrators review flagged content within 24 hours
+    *   **Transparency**: Notify authors of the reason for content removal and provide an opportunity for appeal.
+*   **The Content Auto-Save Protocol**:
+    *   **Context**: Extended editing sessions in rich text editors carry significant data loss risks from browser crashes, network disconnections, and accidental tab closures.
+    *   **Law**: Implement multi-layered auto-saving for editor content to bring data loss risk as close to zero as possible.
+    *   **Action**:
+        1.  **Local Auto-Save**: Auto-save editor content to `localStorage` at **30-second intervals** (guideline) to provide recovery points in case of browser crashes.
+        2.  **Server Draft Sync**: Auto-sync draft content to the server at **60-second intervals** (guideline) to prevent data loss in case of device failure.
+        3.  **Conflict Detection**: Detect simultaneous editing of the same content in multiple tabs and notify users with messages such as "New changes were saved in another tab." Silent overwrites without notification are prohibited.
+    *   **Rationale**: "Forgot to save and lost everything" is the biggest trust-destroying event in editor UX. Multi-layered auto-save is the most cost-effective investment in protecting user work.
+*   **The NodeView Portal Prohibition**:
+    *   **Context**: When implementing custom NodeViews (image galleries, embedded widgets, etc.) in ProseMirror-based rich text editors (Tiptap, etc.), there is a temptation to use React Portal (`createPortal`) from within the NodeView to render external UI (dropdowns, modals, etc.).
+    *   **Law**: Using React Portal from within a NodeView to render UI outside the editor's DOM management (`document.body`, etc.) is **prohibited**.
+    *   **Action**:
+        1.  **Inline Rendering**: UI elements such as dropdowns and toolbars MUST be rendered **inline** within the NodeView's `contentDOM` or as adjacent DOM elements.
+        2.  **Editor Command Pattern**: When external UI needs to be launched from a NodeView, delegate control to the editor itself through the editor's command system or plugin metadata, and render the UI at the editor level.
+        3.  **Z-Index Isolation**: Set appropriate `z-index` for overlay UI within NodeViews within the editor's stacking context to control overlap with other NodeViews.
+    *   **Rationale**: ProseMirror's NodeView strictly manages the editor's `contentDOM`, and external DOM operations via React Portal conflict with this management. Specifically: (1) Focus management disruption (Portal click → focus loss from editor → selection collapse), (2) Event propagation disruption (keyboard events within Portal do not reach the editor), (3) Node synchronization collapse (UI operations within Portal occur outside ProseMirror's transaction, causing state inconsistencies).
+*   **The stopEvent Configuration Mandate**:
+    *   **Context**: When placing interactive elements (`<input>`, `<select>`, `<button>`, sliders, etc.) inside custom NodeViews of ProseMirror-based rich text editors (Tiptap, etc.), by default, click, key input, drag, and other events on these elements are propagated to and consumed by the editor, rendering UI operations non-functional.
+    *   **Law**: When placing interactive elements inside custom NodeViews, the `stopEvent` function in the NodeView definition MUST be configured to explicitly control event propagation to the editor.
+    *   **Action**:
+        1.  **Explicit stopEvent**: Implement the `stopEvent` function in the NodeView definition (`addNodeView`, etc.) to prevent events (`mousedown`, `keydown`, `input`, `dragstart`, etc.) from interactive elements within the NodeView from propagating to the editor.
+        2.  **Selective Blocking**: Rather than indiscriminately blocking all events, selectively block only events originating from interactive elements within the NodeView. Events related to text editing (cursor movement, etc.) must still propagate to the editor.
+        3.  **Testing**: Individually test each interactive element within the NodeView to confirm that "clicks respond," "text input works," and "drag operations function."
+    *   **Rationale**: ProseMirror, by default, attempts to handle all events within the editor itself. In NodeViews without `stopEvent` configured, button clicks are interpreted as editor selection operations, and input field keystrokes are consumed as editor shortcuts. This is the most frequently occurring bug during NodeView implementation, and proper `stopEvent` configuration is the "minimum operational guarantee for custom NodeViews."
 
 ## 8. Audit & Revision History
 *   **Historian Protocol**:

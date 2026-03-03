@@ -44,6 +44,11 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         1. **Date Library**: When using `date-fns` or `Intl.DateTimeFormat`, always explicitly specify target locale.
         2. **Currency**: Display currency symbols and digit separators using `Intl.NumberFormat` in correct format for locale.
         3. **Consistency**: Maintain unified locale settings across the application and prevent mixing.
+        4. **Form Field Order Locale Compliance**: Form fields for personal information (name, address, etc.) MUST follow locale-specific ordering conventions. Name ordering (e.g., "Last → First" in Japan vs "First → Last" in Western countries) and address ordering (e.g., "Prefecture → Street" in Japan vs "Street → State" in Western countries) differ by locale. Forcing an order contrary to the locale is prohibited.
+*   **Dark Mode Readiness**:
+    *   **CSS Variable Separation**: Define all UI colors as CSS variables (`hsl(var(--...))` tokens) and maintain a design where light/dark mode switching is completed solely by overriding CSS variables.
+    *   **Semantic Token Mandate**: Prohibit usage of hardcoded color values (`#ffffff`, `bg-white`, etc.) and use semantic tokens (`bg-background`, `text-foreground`) instead.
+    *   **Loading State Unification**: Unify loading displays during data fetching as follows: Page level uses `loading.tsx` with Suspense Boundary + Skeleton, Component level uses `<Skeleton />` component, Action level uses button `disabled` + spinner icon. A blank white screen without any loading indicator is treated as a critical UX deficiency.
 
 ## 3. Component Implementation Guidelines
 
@@ -66,6 +71,27 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **The Sortable Table Standard**:
     *   **Law**: "Cannot sort" in admin tables (Users, Logs) makes it an Incomplete business tool.
     *   **Action**: MUST implement server-side sort (`sortBy`, `sortOrder`) via `SortableTableHead`.
+*   **The Carousel Standardization Protocol**:
+    *   **Law**: Self-implementing carousels (sliders) tends to introduce bugs in touch interactions and accessibility (A11y). Usage of a validated library is mandatory.
+    *   **Synced Sliders**: When implementing thumbnail-synced sliders (Main + Thumbs), use the library's native synchronization feature instead of custom State synchronization.
+    *   **A11y**: Always enable `navigation` (arrows) and `pagination` (dots) and ensure keyboard accessibility.
+*   **The Native Input Prohibition**:
+    *   **Law**: Usage of browser-native input forms (`<input type="date">`, `<input type="time">`, `<input type="color">`, etc.) in designed UIs is prohibited. Their appearance and behavior differ across browsers, destroying design consistency.
+    *   **Action**: Use `Popover + Calendar` components for date selection, custom `Select` for time selection, and custom color pickers for color selection.
+    *   **Modal Scale**: Ensure sufficient width for modals handling complex settings (e.g., `max-w-4xl` or above, or `80vw`) to eliminate cramped layouts.
+*   **The Editor Preview Protocol**:
+    *   **Law**: In rich content editors (block editors, etc.), displaying only URL text or icons for embedded media (videos, maps, etc.) is prohibited.
+    *   **Action**: Use editor extension features (NodeView, etc.) to display actual previews (iframes, etc.) within the editor. Achieve "True WYSIWYG" where the published layout can be accurately understood during editing.
+*   **The Headless UI Architecture (UI-Logic Separation Mandate)**:
+    *   **Law**: UI components MUST focus exclusively on "data display" and "event emission", and MUST NOT contain business logic (data fetching, state computation, validation, etc.) internally.
+    *   **Anti-Pattern**: Directly performing `fetch` inside components or managing state dependent on specific page DOM structures is a design violation that destroys reusability and portability.
+    *   **Goal**: UI components must maintain a state where, when porting to another platform (React Native, etc.) in the future, only the "display layer" needs to be swapped without modifying logic.
+*   **The Modal Standard Architecture (Portal & Close UX)**:
+    *   **Law**: All modals MUST be rendered at the DOM root using the `Portal` pattern. This prevents clipping caused by parent element's `overflow: hidden` or `z-index` constraints.
+    *   **Close Button**: Modal close buttons MUST be placed in the top-right corner with a unified visual design (e.g., circular background) consistent across the entire project. A modal with an unclear close mechanism is a UX deficiency.
+*   **The Mobile Media Upload Protocol**:
+    *   **Law**: Standard capture formats of mobile devices (e.g., iOS HEIC/HEIF) often cannot be directly displayed in browsers. Components with file upload functionality should account for these formats.
+    *   **Action**: To reduce server load, client-side automatic conversion to universal formats (JPEG/PNG/WebP) before upload is recommended. Requiring users to manually convert is a mobile UX failure.
 
 ### 3.2. The React/Hydration Hardening Protocol (Lesson 42.18)
 *   **The Hooks Order Guarantee**:
@@ -98,6 +124,19 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **The Fragmented UI Protocol**:
     *   **Law**: "Similar but different" is worst. Standardize components including their layout context.
     *   **Action**: Prohibit ad-hoc CSS. Follow single "Gold Standard".
+
+    *   **The Action Placement Standard**:
+        *   **Law**: Inconsistent placement of primary action buttons ("Add", "Save", etc.) across pages increases user eye movement cost.
+        *   **Action**: Primary actions for a section (e.g., "Add", "Save") MUST be placed at the **right end of the section header** (`flex justify-between items-center`). They must never be buried in the middle of content or at the very bottom.
+
+    *   **The Breadcrumb Priority Protocol**:
+        *   **Law**: Breadcrumbs are the "lifeline for knowing current location" and MUST be placed at the **very top of the page** without exception.
+        *   **Mobile**: On mobile screens, breadcrumbs and action buttons MUST be separated into a **vertical stack**, with breadcrumbs on top. Placing them side-by-side where breadcrumbs are hidden or forced to horizontal scroll is prohibited.
+        *   **Visibility**: Handle breadcrumb text overflow with `overflow-x-auto` while ensuring visibility within the first view as much as possible.
+
+    *   **The Sub-Page Header Consistency**:
+        *   **Law**: List pages and create/detail pages MUST share the same header structure (icon + title + description) to maintain visual consistency.
+        *   **Action**: Even for new registration or edit pages, place the same branding header and navigation as the parent page. A bare-bones form-only page gives users the impression of "arriving at a different site".
 
 ### 3.4. Motion & Gestures (The "Soul")
 *   **Physics-Based**: All animation uses spring physics. Elements should bounce, stretch, and squash.
@@ -140,12 +179,18 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         *   Both touch (Touch) and mouse (Hover) interactions comfortable?
 
 ## 6. Accessibility & Inclusivity
-*   **WCAG 2.1 AA**: Contrast ratio 4.5:1+, supports dynamic type scaling.
+*   **WCAG 2.1 AA**: Contrast ratio 4.5:1+ (WCAG 1.4.3), supports dynamic type scaling.
+    *   **Large Text**: Text at 18px or above (or bold at 14px or above) may use a contrast ratio of **3:1 or above**.
+    *   **UI Components**: Borders and icons of interactive elements such as buttons must also maintain a contrast ratio of **3:1 or above** against the background (WCAG 1.4.11).
 *   **Touch Targets**: Minimum 44x44dp (iOS) / 48x48dp (Android). Important actions at the bottom.
 *   **The Fat Finger Protocol (Label Wrapping)**:
     *   **Law**: Prohibit placing checkboxes/radio buttons standalone.
     *   **Action**: Always wrap with `<label>` tag (or `shadcn/ui` `Label` component) including text to maximize touch target area. "Tapping text doesn't respond" is a bug.
 *   **Semantics**: Proper labels for screen readers.
+*   **Image Alt Text Protocol**:
+    *   **Content Images**: Provide an `alt` attribute that accurately conveys the image content (e.g., `alt="Product exterior photo"`).
+    *   **Decorative Images**: Set `alt=""` for purely decorative images so screen readers ignore them.
+    *   **Omission Prohibited**: Omitting the `alt` attribute (which results in `undefined`) is strictly prohibited. Always specify either an empty string (`""`) or descriptive text.
 *   **Focus Ring Protocol (Accessibility Sight)**:
     *   **Law**: UI where focus state (Tab key navigation, etc.) is not visually recognizable is a "maze in the dark" for keyboard users—accessibility failure.
     *   **Action**: When removing browser default focus ring (`outline-none`), MUST redefine **high-contrast focus ring** (e.g., `ring-2 ring-primary ring-offset-2`). "Invisible Focus" is treated as a bug.
@@ -159,6 +204,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     *   **Law**: Error displays and critical information MUST NOT rely on **color alone**. Users with color vision diversity will miss the information.
     *   **Action**: Always **combine** icons (⚠️, ✅, ❌) and text ("Required", "Error", "Success") with color to achieve a **triple-channel communication** standard.
 *   **Font Size & Zoom Protocol**:
+    *   **Minimum Body Text Size**: The minimum font size for body text is **16px**. Smaller font sizes impair readability and should be limited to supplementary text, captions, etc.
     *   **rem Mandate**: Specify `font-size` in `rem` units to respect user browser settings. `px` fixed values are only permitted at the `:root` level.
     *   **Zoom Resilience**: Design layouts to remain intact at browser zoom (**200%**). Content clipping or overlap at 200% zoom is treated as a bug.
 *   **Tab Order Protocol (Keyboard Navigation Order)**:
@@ -185,6 +231,29 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **Lighthouse Score Gate**:
     *   **Mandate**: Lighthouse Accessibility Score of **90 or above** is a **deployment requirement**. Pages scoring below 90 are treated as bugs.
     *   **Manual Testing**: Periodically conduct keyboard-only site operation tests, screen reader (VoiceOver / NVDA) read-aloud verification, and 200% zoom testing.
+*   **Color Vision Simulation Test**:
+    *   **Mandate**: When creating or modifying UI components that use color for information conveyance (status badges, charts, error displays, etc.), verification under the following color vision simulations is mandatory.
+        *   Protanopia (Type 1): Difficulty perceiving red
+        *   Deuteranopia (Type 2): Difficulty perceiving green
+        *   Tritanopia (Type 3): Difficulty perceiving blue
+    *   **Tools**: During development, use Chrome DevTools "Rendering > Emulate vision deficiencies". During design, use Figma's `Able` or `Stark` plugin.
+    *   **PR Review Gate**: For PRs containing UI components that convey information through color, reviewers are recommended to document confirmation results using the above tools in PR comments.
+*   **Media Accessibility Protocol**:
+    *   **Subtitles**: Subtitles in the target locale's language are mandatory for video content.
+    *   **Transcript**: Provide text transcripts for audio-only content.
+    *   **Auto-Play Ban**: Auto-play of media with audio is prohibited. Playback must only begin with explicit user action (click/tap) (WCAG 1.4.2 compliant).
+*   **Semantic HTML Standard**:
+    *   **Law**: Avoid "div hell" — excessive use of `div` / `span`. Use appropriate HTML elements.
+    *   **Elements**:
+        *   `<button>`: Clickable actions (`<div onClick>` is prohibited)
+        *   `<a>`: Navigation (page transitions, external links)
+        *   `<nav>`, `<main>`, `<header>`, `<footer>`, `<aside>`: Page structure landmarks
+        *   `<article>`, `<section>`: Semantic content divisions
+    *   **Landmark Completeness**: Place exactly one `<main>` per page, and `<nav>` must always contain navigation menus.
+*   **Locale-Aware Screen Reader Testing**:
+    *   **Context**: Screen reader pronunciation behavior differs by locale (e.g., locale-specific pronunciation quirks, currency symbol reading, address format ordering, etc.).
+    *   **Mandate**: Before releasing new pages or major UI components, conduct read-aloud testing with VoiceOver (iOS/macOS) or NVDA (Windows) configured in the target locale's language settings.
+    *   **Checklist**: Verify button announcements (operations communicated in target language), form labels (input purpose read in target language), error messages (immediate notification via `aria-live`), and numeric/currency values (natural pronunciation).
 
 ## 7. User Sovereignty (User First)
 *   **Data Ownership**: Users control their data (Easy Export/Delete).
@@ -200,9 +269,18 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 *   **Streaming First**: Zero perceived latency. Stream responses immediately.
 *   **Optimistic Updates**: React UI immediately to user actions before AI finishes.
 *   **Transparency**: Visually distinguish "Thinking" vs "Generating".
+*   **The Quota Framing Protocol**:
+    *   **Law**: When displaying usage limits (Quota) for AI generation, API calls, etc., wording that makes users feel "stingy restrictions" is prohibited.
+    *   **NG**: "You have reached your limit" / "Usage limit exceeded"
+    *   **OK**: "You've used all your AI generation power this month. Upgrade your plan to unlock more?"
+    *   **Effect**: Justify the existence of limits as "this feature is so special and powerful that limits exist", simultaneously increasing user acceptance and premium perception.
 
 ## 10. User Onboarding & Guidance
 *   **Coach Marks**: Context-aware tooltips. Always skippable.
+*   **The Feature Tab Protocol**:
+    *   **Law**: For pages composing related feature groups (e.g., profile management, settings screens, etc.), place shared tab navigation so users can navigate between features without confusion.
+    *   **Disabled State**: When prerequisites are not met (e.g., initial registration incomplete), related tabs should NOT be hidden but instead displayed as **disabled (Disabled / reduced Opacity)**, maintaining awareness of the feature's existence (ensuring discoverability).
+    *   **Active State**: Highlight the tab corresponding to the current context. When on a sub-resource (new creation screen, etc.) with no directly corresponding tab, either maintain the parent category tab or leave all tabs unselected.
 *   **Feature Discovery**: Progressive disclosure. Zero Data is an onboarding opportunity.
 *   **General Consumer Perspective**: No technical jargon ("Database", "API"). Use intuitive words ("Save", "Connect").
 *   **Micro-Interaction Standards**:
@@ -215,6 +293,10 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         *   **NG**: "Invalid Input"
         *   **OK**: "Please enter in email format" / "Only alphanumeric characters allowed"
     *   **Law (Safety Warning)**: For dangerous operations like delete confirmation, add **words emphasizing irreversibility** ("This action cannot be undone") with red UI.
+        *   **Law (Error 2-Sentence Rule)**: Error messages MUST follow a **2-sentence structure**: "**What happened**" + "**What to do next**". An error message that only reports the cause without suggesting a solution is incomplete.
+        *   **Law (Positive Framing)**: Prefer **affirmative framing** over negation. Tell users "how to achieve" instead of "cannot do".
+        *   **Law (Action-Oriented Button Labels)**: Button labels should prefer **verb forms** that clearly state the intended action (e.g., "Save Changes", "Submit Form", "Confirm Details") over bare nouns (e.g., "Save", "Submit"). This encourages user action and contributes to higher conversion rates.
+        *   **Law (Debug Artifact Display Ban)**: Runtime debug values (`null`, `undefined`, `NaN`), stack traces, and raw database error messages being displayed in the UI is **strictly prohibited**. These give users the impression that the system is "broken" and constitute a critical UX deficiency. Always catch them with Error Boundaries or fallback UI and display user-comprehensible messages instead.
 *   **The Explicit Explanation Protocol (Zero Jargon / Tooltip Mandate)**:
     *   **Law**: What's "common knowledge" to developers (API, Webhook, MRR) is "mystery symbols" to users. Lack of explanation means failure as a tool.
     *   **Action**: 
@@ -238,14 +320,33 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     *   **Mobile**: Important action buttons (register, save, purchase, etc.) should be `w-full` (full screen width) for easy tapping.
     *   **Desktop**: Use `w-auto` with sufficient minimum width and **center alignment**. Making buttons `w-full` on PC causing visual stretching is prohibited.
     *   **Affordance**: Apply shadows (`shadow-md`) and hover effects to convey "clickability".
+*   **Rich Selection Protocol**:
+    *   **Law**: Standalone use of small radio buttons or checkboxes is prohibited for important selection UIs, as their hit area is insufficient for touch devices and the selected state has poor visibility.
+    *   **Standard**: Use **Selectable Card Grid** as the standard—featuring large hit areas, clear borders, color changes on selection (background/border color changes), and icon-based visual aids.
+    *   **Implementation**: Hide native radio/checkbox elements with `sr-only` for screen readers, and style adjacent label elements using `peer-data-[state=checked]:` or equivalent techniques.
 
 ## 12. Hospitality UX (Omotenashi - Japanese Hospitality)
 *   **Kigakiku (Anticipatory)**: Anticipate needs before users struggle. (e.g., Offer "Convert to Half-width?" button on Full-width error).
+    *   **Input Normalization (Tolerant Input Principle)**: When users enter data in an imprecise format (full-width numbers, full-width spaces, etc.), do NOT reject with validation errors. Instead, **silently auto-convert (Normalize)** on `onChange` or `onBlur`. Use `String.normalize('NFKC')` etc. to minimize user input burden.
+    *   **Locale-Specific Input Assistance**: For locale-specific data entry (address, name, etc.), implement **locale-tailored input assistance features** (e.g., postal code to address auto-complete, phonetic reading auto-generation, phone number formatting, etc.) to reduce user input burden. Always allow manual correction after auto-completion to preserve user control.
 *   **Ma (Negative Space)**: White space is for "Thinking Time", not just empty space. Merge Silicon Valley density with Japanese Ma.
 *   **Aizuchi (Reassuring Feedback)**: Give reassuring feedback (Visual/Haptic) to every action. "Your operation is conveyed."
 *   **The Graceful Error Recovery Protocol**:
     *   **Law**: When unexpected errors occur, do not merely state the facts—express empathy to the user, and **always provide action buttons for the user's next step** (reload, return home, contact support, etc.).
     *   **Action**: Error pages and error modals MUST include a concise explanation of the cause along with at least one recovery action button. A "Dead End" error screen that offers no escape accelerates user churn and constitutes a UX failure.
+*   **Error Page Design Protocol**:
+    *   **Law**: Error pages are the moment users feel the most anxious. The following design standards are established to prevent churn and maintain trust.
+    *   **Design Principles**:
+        1.  Maintain brand logo and color scheme (blank white pages are prohibited)
+        2.  Visually convey the situation using illustrations or icons
+        3.  Present next actions clearly, limited to 3 or fewer (e.g., "Return to Top", "Search", "Contact Us")
+    *   **HTTP Status Compliance**: Error pages MUST return the correct HTTP status code. Returning 200 is prohibited. 404 pages MUST include `<meta name="robots" content="noindex">`.
+    *   **Prohibited**: Displaying stack traces or debug information, and wording that blames the user (e.g., "There is a problem with your operation") are strictly prohibited.
+*   **The Ghost Content Protocol (Time-Gated SEO / Scheduled Content Isolation)**:
+    *   **Context**: Scheduled content (published_at > NOW()) exists on the server but must behave as if it "does not exist" for general users and search engines.
+    *   **Action**:
+        1.  **404 Mock**: For access from general users, return the same UI and status code as a regular 404 error, preventing them from guessing the content's existence.
+        2.  **NoIndex Guard**: As a safeguard against URL leakage, force-inject `<meta name="robots" content="noindex, nofollow" />` on all unpublished pages.
 
 ## 13. Design Ops & Tools
 *   **Design System**: Figma is truth. Code follows Figma.
@@ -265,6 +366,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     1.  **SP (Drawer Safety)**: Add `data-vaul-no-drag` to scrollable areas in Drawers to prevent accidental close.
     2.  **PC (Viewport Safety)**: Set `max-height` for floating elements like Popovers to prevent overflow outside screen.
     3.  **Responsive Split**: Use `Drawer` for Mobile, `Popover` for PC standard.
+    4.  **iOS Input Zoom Defense**: On iOS Safari, when input field `font-size` is **below 16px**, the browser auto-zooms on focus, damaging UX. The `font-size` of `input`, `textarea`, `select` in mobile views MUST be enforced at **16px (`text-base`)** or above.
 
 ### 14.2. The Mobile Click/Tap Fix
 *   **Law**: Mobile Popovers may fail to capture tap events due to focus conflicts.
@@ -281,3 +383,94 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     *   **Level 1**: `z-50` - Fixed Header, Floating Buttons
     *   **Level 0**: `z-0` ~ `z-40` - Page Content
 *   **Action**: No magic numbers like `z-100`. Strictly adhere to this hierarchy.
+
+### 14.4. The Drag & Drop Safety Protocol
+*   **Portal Rendering (Clipping Defense)**: `DragOverlay` MUST be rendered directly under `document.body` using `createPortal` to prevent clipping caused by parent element's `overflow: hidden`.
+*   **Context Isolation**: When multiple DnD areas exist on a single page, isolate `DndContext` or assign unique IDs to prevent interference between areas.
+*   **DragOverlay Input Ban**: Rendering form input elements (`input`, `textarea`) directly inside `DragOverlay` is prohibited. Form libraries (React Hook Form, etc.) will misidentify two input fields with the same `name`, causing validation bugs. Implement an `isOverlay` property branch that returns Read-Only JSX during overlay rendering.
+*   **Accordion Handling**: When dragging elements containing Accordions, force all-closed state (`defaultValue={[]}`) inside the Overlay to prevent oversized elements from dominating the screen.
+
+### 14.5. The Auto-Save Protocol
+*   **Scope**: For admin screens and forms involving long-text input (articles, settings, content editing, etc.), implementing auto-save functionality is recommended.
+*   **Hook Strategy**: Use a standardized `useAutoSave` hook to implement draft saving with debounce (2 seconds or more).
+*   **Passive Restoration**: When a draft exists at page load, do NOT auto-apply it. Display a "Draft found" notification and give the user the choice to restore.
+*   **Hygiene**: On successful form submission, call `clearDraft()` to clean up local storage.
+*   **Roadmap**: Transitioning to server-side draft saving in the future is recommended to enable cross-device continuity (resume in progress).
+*   **The Public Form Persistence Protocol**:
+    *   **Context**: When end-user facing forms (contact, registration, etc.) lose all input due to browser closure during entry, it constitutes a UX loss.
+    *   **Action**: Even for public-facing forms, using `localStorage` or `sessionStorage` for temporary input data persistence is recommended. Propose restoration on next visit to reduce user re-entry burden.
+
+### 14.6. The Hard Session Refresh Protocol (Auth State Hard Reload)
+*   **Context**: Even when session cookies (login, permission changes, etc.) are updated via Server Actions or APIs, SPA transitions (client-side routing) alone may not immediately reflect changes in Middleware or Server Components.
+*   **Action**: When authentication state or critical permissions change (Login / Logout / privilege escalation, etc.), use `window.location.reload()` or `window.location.href` for a **hard refresh** to ensure the server is accessed with the latest cookie state.
+*   **Rationale**: Soft navigation via client-side routing does not reflect Cookie/Session changes to Middleware, causing permission mismatch errors or security holes. The momentary white screen from a reload is a far more minor UX cost than permission inconsistencies.
+
+### 14.7. The Offline Resilience Protocol (Network Instability Defense)
+*   **Context**: When the app stops with a "white screen" in environments with unstable network (mobile connections, commuting, etc.), it constitutes a critical user experience deficiency.
+*   **Action**:
+    1.  **Component-Level Recovery**: Handle `onError` in data fetching libraries (SWR, React Query, etc.) and display skeleton or error messages with a "Reload" button at the component level before global Error Boundaries fire.
+    2.  **Online Status Watch**: Monitor `navigator.onLine` and disable form submission buttons when offline is detected to prevent data loss. Displaying a banner notifying "You are currently offline" is recommended.
+
+## 15. Localization & Internationalization
+
+### 15.1. The Localization Completeness Protocol
+*   **Law**: UI strings that remain untranslated in the target locale's language (button labels, placeholders, toast notifications, validation messages, empty state text, tooltips, etc.) are treated as **"bugs"**.
+*   **Scope**: The following areas are priority scan targets:
+    1.  **Static UI**: Button labels, headings, menu items
+    2.  **Placeholders**: Input examples must be concrete and locale-appropriate
+    3.  **Toasts & Alerts**: Success/error notification text
+    4.  **Validation Messages**: Framework/library default messages (override with Zod `message` parameter, etc.)
+    5.  **Date & Currency**: Locale-compliant formatting (see §2.1 Locale Format Mandate)
+    6.  **Admin Panel**: Administrators are also speakers of the target locale's language. Untranslated labels in admin panels are bugs without exception
+    7.  **Automated Emails & Notifications**: From subject line to signature, all text must be natural in the target language
+*   **Exception**: Proper nouns (Google, LINE, Instagram, etc.) and technical terms where translation would be unnatural (URL, ID, API, etc.) are permitted.
+*   **Internal Value Display Guard**: Directly displaying DB values, internal constants, or enum string values in the UI is prohibited. Always convert to the target language via mapping dictionaries or label properties.
+*   **Scan Protocol**: Include verification that string literals in UI files (`.tsx`, etc.) are localized as a PR review checklist item. When possible, build CI script-based automated detection.
+
+### 15.2. The Error Message UX Standard
+*   **Law**: Error messages MUST meet the following quality standards.
+*   **2-Sentence Rule**: Error messages MUST follow a **2-sentence structure**: "**What happened**" + "**What to do next**". A message that only reports the cause without suggesting a solution is incomplete.
+*   **No Tech-Speak**: Displaying technical terms and debug information such as `null`, `undefined`, `NaN`, `UUID`, stack traces, and DB-specific error messages in the UI is physically prohibited. Always catch them with Error Boundaries or fallback UI and convert to user-comprehensible messages.
+*   **Empathy First**: Error messages should "help" users, not "blame" them. Prefer affirmative framing over negation.
+*   **Positive Framing**: Instead of "Cannot do X", say "Please do Y and try again" to show how to achieve the goal.
+*   **Graceful Recovery**: Error screens and error modals MUST include a concise explanation of the cause plus **at least one recovery action button** (reload, return home, contact support, etc.). A dead-end error screen is a critical UX deficiency.
+
+### 15.3. The IME/Input Method Handling Protocol
+*   **Context**: In CJK language regions (Japanese, Chinese, Korean, etc.), input via IME (Input Method Editor) is standard, and `onChange` event firing timing differs from direct input.
+*   **Composition Event Handling**:
+    *   For search bars and instant-filtering UIs, properly handle `compositionstart` / `compositionend` events to prevent requests from firing before IME conversion is confirmed.
+    *   When implementing or modifying input forms, testing with the following 3 patterns is recommended:
+        1.  **IME ON (with conversion)**: The full sequence of candidate selection → confirmation
+        2.  **IME OFF (direct input)**: Direct alphanumeric or URL input
+        3.  **Mixed input**: Cases mixing target language and alphanumeric characters
+*   **Input Normalization**: When users enter full-width numbers, full-width spaces, etc., do NOT reject with validation errors. Instead, silently auto-convert to half-width using **`String.normalize('NFKC')`** on `onChange` or `onBlur`. The principle is "tolerant input" that minimizes user input burden.
+
+### 15.4. The i18n Readiness Protocol
+*   **Context**: Even for single-language projects, maintaining a translation-ready architecture for future multilingual expansion is important.
+*   **Design Principles**:
+    1.  **String Resource Consolidation**: Consolidate UI text into constant files or dictionary objects as much as possible, minimizing hardcoding within components.
+    2.  **Intl API Usage**: Use `Intl.DateTimeFormat` and `Intl.NumberFormat` for date, currency, and number formatting to maintain locale-switchable state.
+    3.  **Translation Key Design**: In preparation for future i18n adoption, design translation keys with namespace separation per feature/page (e.g., `common.save`, `auth.login`, `error.network`), with a maximum depth of 3 levels.
+    4.  **No Premature Investment**: Premature adoption of i18n libraries or creation of translated UIs before demand is confirmed is prohibited.
+*   **Trigger Conditions**: Formally start a multilingual project when any of the following are met:
+    *   International traffic exceeds **10%** of total
+    *   Partnership offer from an international partner
+    *   Business strategy decision for international expansion
+
+### 15.5. The Error Message Catalog Protocol
+*   **Law**: Writing error messages ad-hoc within individual components or actions is prohibited.
+*   **SSOT**: Error messages MUST be centrally managed (Single Source of Truth) in a constants file (e.g., `error-messages.ts`) with a nested structure organized by category.
+*   **Quality Standard**:
+    | Element | Criteria |
+    |:--------|:---------|
+    | **Tone** | Unified in the standard polite expression of the target locale |
+    | **Technical Terms** | Never expose (`UUID`, `500`, `null`, etc. are prohibited) |
+    | **Untranslated Strings** | Not permitted (see §15.1 Localization Completeness) |
+    | **Next Action** | Suggest solutions whenever possible |
+*   **Fallback**: When no matching error exists in the catalog, display a generic fallback message.
+
+### 15.6. The Accessible Native Language Label Protocol
+*   **Law**: `aria-label` is text read aloud by screen readers—it is **information that reaches the user's ears**. It is not a developer-facing attribute.
+*   **Mandate**: `aria-label` for user-facing UI elements MUST be written in the **target locale's language** as a rule.
+*   **Exception**: Brand names and technical terms where transliteration is natural (e.g., PDF) may be mixed.
+*   **Cross-Reference**: §6 (Accessibility & Inclusivity) aria-label related rules

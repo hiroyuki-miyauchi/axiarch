@@ -26,6 +26,9 @@
     *   **Action Placement**: Place primary actions like "Save" at the top right of the header.
     *   **Layman Accessibility**: Avoid technical jargon like "Slug", "UUID". Use plain words like "URL Identifier". Tooltips are mandatory for all inputs.
     *   **Visual Theme Editor**: Implement a Theme Editor in "Site Settings" to allow intuitive design changes with real-time preview.
+    *   **The Audit Visibility Protocol (Freshness Indicator)**:
+        *   **Law**: Admin list views and detail headers MUST display both the publication date (`published_at`) and the last updated date (`updated_at`) side by side.
+        *   **Visual Cue**: When `updated_at` exceeds a defined period (e.g., 3 months), display it in a warning color (orange, etc.) to visually communicate content staleness.
 *   **User Management**:
     *   **Search & Filter**: Instant filtering by ID, Email, Status, Plan.
     *   **Audit Trail**: Log all admin actions (Delete, Refund, Status Change).
@@ -50,6 +53,16 @@
 *   **Bulk Operations**:
     *   **Async**: CSV exports/updates >1000 rows must be background jobs.
     *   **Validation**: Always show a "Preview" with error validation before committing to DB.
+
+### 5.1. The Data Import Validation Standard
+*   **Law**: In bulk import functionality, the following validations MUST **all pass** before writing data to the DB. Bulk insertion without validation is "database contamination" and is strictly prohibited.
+*   **Action**:
+    1.  **Type Check**: Verify that each field conforms to the expected data type (numeric, date, URL, etc.). Rows with type mismatches must be excluded from the import.
+    2.  **Duplicate Detection**: Detect duplicates within the import data and against existing DB data for unique constraint columns (email addresses, identifiers, etc.).
+    3.  **Character Encoding Normalization**: Automatically detect the character encoding of input data (UTF-8, Shift_JIS, EUC-JP, etc.) and normalize to UTF-8 before import. Full-width/half-width inconsistencies are also normalization targets.
+    4.  **Error Report**: For failed import rows, provide a report with **line numbers** and **specific error messages** (in the Project Native Language). Vague reports like "3 items failed" are prohibited.
+    5.  **Preview Mandatory**: Present validation results (success count, failure count, error details) for user review and obtain explicit approval before executing DB writes.
+*   **Rationale**: Bulk imports without validation cause triple contamination of type-invalid data, duplicate records, and character encoding corruption, with repair costs increasing exponentially. Strict validation at the entry point structurally guarantees data quality.
 
 ## 6. Support & FAQ
 *   **SLA**:
@@ -96,3 +109,23 @@
     2.  **Fallback**: When a value not present in the map is passed (future extensions, etc.), display the raw key as a fallback while outputting a warning to the Logger. This enables immediate detection of "untranslated" states.
     3.  **Localization Ready**: Write label maps in the project's configured language and design them for easy replacement with i18n keys when future multi-language support is needed.
 *   **Scope**: Applies to all button labels, table column headers, audit log action names, and notification messages.
+    *   **Operator-Native Language**: Admin UI MUST be displayed in the Operator's Native Language (Project Native Language). The excuse "it's just an admin panel, so system internal keys are fine" increases cognitive load for non-engineer operators and becomes a breeding ground for operational errors.
+    *   **Abbreviation Convention**: Choose notation for abbreviations and technical terms (IP, URL, API, etc.) that fits naturally within the context of the Project Native Language. Avoid inconsistencies in character width and maintain a consistent style throughout.
+
+## 9. Admin Escalation Protocol
+
+### 9.1. The Automated Escalation Standard
+*   **Law**: Clearly define automated processing when user reports exceed thresholds, and the administrator response process.
+*   **Escalation Threshold**:
+
+    | Report Count | Automated Action |
+    |:------------|:----------------|
+    | **3 reports / same target** | **Auto-hide** target content and send review-required notification to administrators |
+    | **5 reports / same poster** | Move **all posts by the user to review queue** |
+    | **10 reports / within 24 hours** | **Suspend account** and require manual administrator review |
+
+*   **Admin Action Audit**: All sanction operations executed by administrators (deletion, hiding, account suspension, etc.) MUST be recorded in the audit log including **operator ID, target, reason, and timestamp**.
+*   **Due Process**: Provide an **opportunity for appeal** (e.g., within 14 days) for all sanction measures.
+*   **Notification Template**: Sanction notification text must be written naturally in the target locale's language, and include reason disclosure, inquiry navigation, and appeal deadline.
+*   **Mandate**: Define specific escalation threshold values in the project-specific Blueprint. This protocol provides the escalation structure "template."
+

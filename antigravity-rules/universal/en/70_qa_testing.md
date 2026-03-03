@@ -11,6 +11,19 @@
     *   **Priority**: 1. Type Check(tsc) > 2. Lint > 3. Manual > 4. E2E > 5. Unit. Static Analysis (tsc) is the strongest test.
 *   **Mock First Strategy**:
     *   **Offline Dev**: Implement `MOCK_MODE` to allow development without external APIs (Stripe, SendGrid). If no API key, mocks respond automatically to keep dev moving.
+*   **The Mandatory Test Coverage Protocol**:
+    *   **Law**: Focus testing not on "all code" but on "areas with the greatest failure impact."
+    *   **Required Test Areas**:
+        | Area | Reason | Test Type |
+        |:----|:-------|:----------|
+        | **Payment Logic** | Risk of financial loss | Unit + Integration |
+        | **Authentication & Authorization** | Security risk | Integration |
+        | **Access Control (RLS etc.)** | Data leak risk | Integration |
+        | **DTO Conversion & Data Mapping** | Data inconsistency risk | Unit |
+        | **Input Validation** | Injection risk | Unit |
+        | **Points/Coupon Calculations** | Abuse risk | Unit |
+    *   **Areas NOT Requiring Tests**: Pure UI (design changes, layout adjustments) does not require tests in principle. Overuse of snapshot tests is prohibited.
+    *   **Rationale**: To maximize ROI with limited resources, concentrated investment in "areas where failure stops the business" is the optimal solution.
 
 ## 2. Flaky Test Management
 *   **Immediate Action**:
@@ -36,6 +49,13 @@
         *   **Role Access**: Is permission separation correctly functioning for Guest, General User, and Admin?
         *   **API Security**: Confirm that requests without `x-api-key` are rejected (Public), and requests with `Authorization: Bearer` (User) are allowed (Native Bypass).
         *   **Natural Scrolling**: No unintended "mystery whitespace" at screen bottom? No double scrollbars?
+*   **The Verified Persistence Protocol**:
+    *   **Law**: Implementations where "it appears saved on screen but reverts on reload" (facade implementations) are strictly prohibited.
+    *   **Action**:
+        1.  When implementing forms or settings screens, MUST perform **"Input → Save → Browser Reload"** and confirm that values have not reverted to defaults.
+        2.  Verify not only through browser dev tools, but **physically confirm via DB management tools or `psql`** that values exist in the columns.
+        3.  E2E tests MUST include post-reload persistence verification.
+    *   **Rationale**: Creating PRs where "the save button exists but nothing is saved" is an affront to reviewers and subject to immediate rejection.
 
 ## 4. Fix Twice Principle
 *   **Double Fix**:
@@ -45,6 +65,19 @@
     *   **Action**: 
         1. **Visibility**: When fixing a recurring bug, MUST explicity write "Fact of Recurrence" and "WHY previous mechanism failed" in `task.md` or `walkthrough.md`.
         2. **Hardening**: Mandatory condition for task completion is not just code fix, but adding **Automated Test (Regression Test)** that physically catches that bug.
+*   **The Large-Scale Change Verification Protocol**:
+    *   **Law**: Large-scale refactoring or audit branches changing 100+ files require more than standard CI checks. The following 5-step verification is mandatory.
+    *   **Verification Steps**:
+        | Step | Content | Pass Criteria |
+        |:-----|:--------|:-------------|
+        | **1. Static Verification** | `tsc --noEmit` + `npm run build` | Zero errors |
+        | **2. Diff Analysis** | Change category classification + High-risk change identification | All changes have explainable rationale |
+        | **3. Public Page Verification** | Visual inspection of key pages in browser | Data display normal |
+        | **4. Admin Panel Verification** | Verify key features (forms, settings, CRUD) | All operations normal |
+        | **5. API Verification** | Verify public API responses | Normal responses |
+    *   **High-Risk Changes**: Type definition changes, function deletions, data access layer column changes, and DB connection code changes require special attention.
+    *   **Evidence**: Save screenshots or recordings and document in walkthrough.
+    *   **Rationale**: Mass file changes can cause runtime regressions undetectable by CI type checks and builds alone. Multi-stage visual verification is the only defense.
 
 ## 5. Release Criteria
 *   **Blockers**:
@@ -52,6 +85,18 @@
     *   **0 Warnings**: Release with Warnings remaining in console or build logs is also prohibited.
 *   **Phased Rollout**:
     *   Do not release to all users at once; expand range gradually 1% -> 5% -> 20% -> 100% to minimize impact of unexpected defects.
+
+### 5.1. The Canary Deployment Protocol
+*   **Law**: During phased rollouts to production, **monitoring of error rates and key metrics** is mandatory at each stage. Define immediate rollback criteria in advance.
+*   **Action**:
+    1.  **Stage Gates**: At each stage of the phased release (e.g., 1%→5%→20%→100%), observe for a minimum of **15 minutes** and verify metrics before advancing to the next stage.
+    2.  **Rollback Criteria**: Execute an immediate rollback upon detecting any of the following:
+        *   Error rate increases to **2x or more** above baseline
+        *   Latency (P95) degrades to **1.5x or more** above baseline
+        *   **3 or more** user-reported incidents occur
+    3.  **Automation**: Automate rollback decisions wherever possible (Feature Flag tools, CD platform health checks, etc.) to prevent damage escalation from human judgment delays.
+    4.  **Post-Deployment Verification**: After reaching the final stage (100%), maintain the ability to **rollback for at least 24 hours**.
+*   **Rationale**: The concept of phased releases alone leaves the judgment criteria for "when to advance to the next stage" and "when to stop" dependent on individual discretion. Clear thresholds and automation eliminate subjectivity from deployment decisions and minimize the blast radius of incidents.
 
 ## 6. Ultimate User Perspective
 *   **The Grandmother Test**:
@@ -123,3 +168,15 @@
     4.  **Build Time Budget**: Start performance investigation when build time exceeds 5 minutes, and treat speed improvement as highest priority when it exceeds 10 minutes.
 *   **Rationale**: "It was working in the dev environment" is the most frequent and least valuable report during production incidents. The behavioral differences between development servers and production builds are structural — a workflow that skips build verification is synonymous with "scheduling an outage."
 
+### 8.6. The Timezone Boundary Testing Mandate
+*   **Law**: Features dependent on date/time (scheduled publishing, reservations, campaign period specification, etc.) MUST include **timezone boundary value and DST (Daylight Saving Time) transition testing**. "It worked in local time" is not a free pass.
+*   **Action**:
+    1.  **UTC-Based Testing**: Run test environments with `TZ=UTC` to eliminate incidental success dependent on local timezones.
+    2.  **Boundary Value Testing**: The following timezone boundary cases MUST be tested.
+        | Case | Test Content |
+        |:-----|:------------|
+        | **Date Line Crossing** | Publish/unpublish transition at UTC 23:59 → 00:00 |
+        | **DST Transition** | Behavior during 1-hour gap at DST start/end |
+        | **Multi-Region** | Whether same content publishes at correct time in US/EU/Asia |
+    3.  **FakeTimer Usage**: Use `jest.useFakeTimers()` or equivalent to fix and manipulate time within tests. Tests dependent on `new Date()` are a cause of flaky tests.
+*   **Rationale**: Timezone-related bugs are the worst bug category — they "occur only at specific times and are difficult to reproduce." They can only be defended against through proactive test case design.

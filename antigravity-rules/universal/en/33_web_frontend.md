@@ -68,6 +68,12 @@
 *   **The Canonical Identity Protocol (SEO Duplicate Protection)**:
     *   **Context**: For pages exposed to search engines (Public Pages).
     *   **Law**: MUST define `alternates: { canonical: url }` in Next.js `generateMetadata` to prevent rating dispersion from parameter differences. Not needed for authenticated admin pages.
+*   **The TrailingSlash URL Integrity Protocol (URL Normalization Mandate)**:
+    *   **Law**: TrailingSlash (trailing slash) settings across the framework (Next.js `trailingSlash` config, etc.), reverse proxy (Nginx/Cloudflare), and CDN MUST be **unified** project-wide. Coexistence of `/about` and `/about/` causes SEO rating dispersion, redirect loops, and cache duplication.
+    *   **Action**:
+        1.  **Config Alignment**: Apply the same policy in framework settings (e.g., `next.config.ts` `trailingSlash: true | false`) and infrastructure settings (reverse proxy, CDN).
+        2.  **Canonical Consistency**: The `canonical` URL in `generateMetadata` MUST also match the chosen TrailingSlash policy. Mismatch causes SEO rating dispersion.
+        3.  **Redirect Enforcement**: Access to non-canonical URLs MUST be unified to canonical URLs via **301 redirect** to prevent search engine index duplication.
 *   **The Performance First Protocol (LCP & Lazy Loading Mandate)**:
     *   **Law 1 (First View Optimization)**: Critical elements in viewport (hero images, etc.) MUST have `priority` (Next.js) and `fetchPriority="high"`.
     *   **Law 2 (Lazy Load Everything Else)**: ALL images, videos, heavy components outside first view MUST use `loading="lazy"` or `next/dynamic` lazy loading without exception to save initial resources.
@@ -231,6 +237,17 @@
 *   **Browser Compatibility**:
     *   **Target**: Support latest 2 versions of Chrome, Safari, Firefox, Edge, and latest 2 versions of iOS Safari, Android Chrome.
     *   **Polyfill**: Use `core-js` etc. to polyfill only necessary features.
+    *   **Tier Classification**:
+        | Tier | Target | Testing Obligation |
+        |:-----|:-------|:-------------------|
+        | **Tier 1 (Required)** | Chrome / Safari (latest 2 versions) | Full feature testing |
+        | **Tier 1 (Required)** | Major In-App browsers (LINE, etc., depending on market) | Full feature testing |
+        | **Tier 2 (Recommended)** | Firefox / Edge (latest 2 versions) | Major feature testing |
+        | **Tier 3 (Best Effort)** | Other In-App browsers | Visual verification only |
+        | **Not Supported** | IE11 | No support required |
+    *   **In-App Browser Considerations**: In-App browsers (LINE browser, etc.) may have constraints on OAuth authentication flow redirects. Always verify functionality when implementing social login.
+    *   **Private Browsing Defense**: Private browsing mode restricts `localStorage`. Consider fallback implementations for features that depend on `localStorage` (draft saving, theme settings, etc.).
+    *   **Polyfill Policy**: Apply automatic polyfills based on `browserslist`. Manual polyfills are prohibited.
 *   **Error Handling**:
     *   **Error Boundaries**: Use React's `ErrorBoundary` to prevent component-level crashes from taking down the entire app.
     *   **Graceful Degradation**: Design so minimal content is displayed even if JavaScript is disabled or errors occur.
@@ -291,6 +308,23 @@
 ## 7. Component Design & A11y
 *   **Accessibility - "Shift Left"**:
     *   **Automated Testing**: Run `axe-core` in CI to automatically detect and block low contrast or missing labels.
+    *   **The Alt Text Mandate (Invisible UX)**:
+        *   **Law**: All images (`<Image>`) MUST have an `alt` attribute (`eslint-plugin-jsx-a11y` error).
+        *   **Detail**: Set `alt=""` (empty) for decorative images, and for meaningful images set text that conveys the content to those who cannot see the image. Including words like "image" or "photo" is prohibited (as screen readers already announce it, causing redundancy).
+    *   **The Alt Text Quality Standard (Image Alt Quality Criteria)**:
+        *   **Context**: The `alt` attribute serves 3 roles: (1) screen reader readout, (2) fallback text on image load failure, (3) image comprehension by search engines/AI crawlers. Alt text quality impacts SEO, A11y, and GEO.
+        *   **Law**: Content images MUST have specific alt text in the operator's native language. Decorative images use `alt=""`, and omitting the `alt` attribute entirely is **permanently prohibited**.
+        *   **Quality Matrix**:
+            | Image Type | Criteria | Bad Example ❌ | Good Example ✅ |
+            |:-----------|:---------|:--------------|:---------------|
+            | **Store/Facility Photo** | Include name + features | `alt="photo1"` | `alt="Interior of Café XYZ in Shibuya"` |
+            | **Product Image** | Product name + features | `alt="image"` | `alt="Organic Product Name 100g"` |
+            | **Map** | Area + purpose | `alt="map"` | `alt="Map of pet-friendly cafés near Shibuya, Tokyo"` |
+            | **Icon** | Icon meaning | `alt="icon"` | `alt="Rating: 4 stars"` |
+            | **Banner** | Campaign content | `alt="banner"` | `alt="Spring Campaign March 2026"` |
+            | **Logo** | Service name | `alt="logo"` | `alt="Service Name"` |
+            | **Decoration** | Empty string | `alt="decoration"` | `alt=""` |
+        *   **CI Detection (Recommended)**: During PR review, verify `alt` attribute presence on `<img` tags, and recommend CI auto-detection to warn against generic or non-descriptive values (e.g., `alt="[A-Za-z ]+"` pattern).
     *   **Screen Reader**: Validating main flows with screen readers (VoiceOver/TalkBack) on actual devices is mandatory.
     *   **Icon Labels**: Icon-only buttons containing no text must have an `aria-label` attribute to explicitly state their function.
     *   **WAI-ARIA**: "No ARIA is better than Bad ARIA". Use native HTML elements as much as possible and keep ARIA attributes to a minimum.
@@ -367,7 +401,7 @@
 *   **Law**: Page title becoming "undefined" or site name only is a quality defect damaging user trust.
 *   **Action**: In all `page.tsx`, MUST define `export const metadata: Metadata`. Include visual check of browser tab title in pre-build self-check.
 
-## 13.0. The Security & Performance Boundary
+### 13.0. The Security & Performance Boundary
 *   **The Next.js 15 Async API Protocol**:
     *   **Law**: From Next.js 15, `params`, `searchParams`, `headers`, `cookies`, `draftMode` are Awaitable (Promise).
     *   **Action**: When referencing these, MUST `await` or use React's `use()` hook. Neglecting async processing causes "Value Missing" or "Infinite Rendering" only in production.
@@ -394,7 +428,8 @@
 *   **Action**:
     1.  **Local Build**: Always run `npm run build` locally before committing and confirm success.
     2.  **SSG Awareness**: Importing dynamic APIs like `cookies()` in Static Site Generation (SSG) pages works in development but causes "Dynamic server usage" errors in production builds. Isolate dynamic dependencies.
-    3.  **Phantom File**: If build errors indicate "non-existent files," use `grep` to locate actual files hidden by re-exports or dynamic imports.
+    3.  **Tiered Database Client Protocol**: DB clients for SSG/ISR compatibility MUST be **physically separated into different files**—one depending on dynamic APIs (`cookies()`, `headers()`) and one that does not. Exporting from the same file may prevent Tree Shaking from eliminating unused dynamic dependencies.
+    4.  **Phantom File**: If build errors indicate "non-existent files," use `grep` to locate actual files hidden by re-exports or dynamic imports.
 *   **Rationale**: Development servers conceal type errors and import errors through Hot Module Replacement. Only the build reveals the truth.
 
 ### 14.3. The Non-Blocking Edge Processing Protocol
@@ -647,3 +682,104 @@
     4.  **Testing**: Server Actions involving cookie operations should verify expected behavior after cookie state changes (redirects, session state reflection, etc.) through automated tests.
 *   **Rationale**: Server Component (RSC) rendering may occur in a streaming fashion, and attempting to set cookies after response headers have already been sent results in them being ignored or causing errors. Explicitly limiting write authority to Server Actions / Route Handlers structurally eliminates this unstable behavior.
 
+### 14.31. The Component Config Re-mount Protocol
+*   **Law**: In React components that wrap external libraries with imperative initialization (sliders, map SDKs, chart libraries, etc.), when configuration Props (slide count, options, data sources, etc.) change dynamically, the standard strategy MUST be **forced re-mounting via `key` prop changes** rather than relying on React's reactive updates.
+*   **Action**:
+    1.  **Key-Based Re-mount**: When a component needs to be re-initialized upon configuration Props changes, pass `key={configHash}` or `key={configVersion}` from the parent component to force React to perform a complete re-mount. Manual `destroy()` → `init()` patterns within `useEffect` are prohibited as they cause race conditions due to React's effect execution order (child effects execute before parent effects).
+    2.  **Config Hashing**: When generating a `key` from multiple configuration values, use `JSON.stringify(config)` or concatenated configuration value strings — values that are guaranteed to differ when the configuration changes.
+    3.  **Cleanup Guarantee**: The wrapped library's `destroy()` method MUST be **reliably** called during React's unmount phase (within `useEffect`'s cleanup function) to prevent memory leaks and DOM remnants.
+    4.  **No Manual Re-init in Effects**: The pattern `useEffect(() => { instance.destroy(); instance = new Library(options); }, [options])` is prohibited. Due to React's effect execution order (child component `useEffect` executes before parent), internal state conflicts and DOM inconsistencies occur.
+*   **Rationale**: Imperative libraries (Swiper, Chart.js, Google Maps, etc.) directly manipulate the DOM during initialization and maintain internal state. React's Props changes do not automatically update these libraries' internal state, so stale instances continue operating in an inconsistent state with new Props. Re-mounting via `key` prop is the only official mechanism React provides to "reset a component's identity," and is the safest and most predictable strategy for integration with imperative libraries.
+
+## 15. Performance Budget & Optimization
+
+### 15.1. CWV Deployment Gate
+*   **Law**: The following Core Web Vitals metrics are not merely "targets" but **"Deployment Gates"**. PRs that exceed these thresholds are blocked from merging.
+
+    | Metric | Threshold | Measurement | Block Condition |
+    |:-------|:----------|:------------|:---------------|
+    | **LCP** (Largest Contentful Paint) | **≤ 2.5s** | Lighthouse CI / CrUX | P75 exceeded → Merge blocked |
+    | **INP** (Interaction to Next Paint) | **≤ 200ms** | Lighthouse CI / CrUX | P75 exceeded → Merge blocked |
+    | **CLS** (Cumulative Layout Shift) | **≤ 0.1** | Lighthouse CI / CrUX | P75 exceeded → Merge blocked |
+    | **FCP** (First Contentful Paint) | **≤ 1.8s** | Lighthouse CI | Target value (Warning only) |
+    | **TTFB** (Time to First Byte) | **≤ 800ms** | Lighthouse CI | Target value (Warning only) |
+
+*   **Edge Target**: Page response on cache hit should target **≤ 200ms**.
+*   **Mobile-First Measurement**: Lighthouse CI measurements MUST default to **Mobile Simulation (Slow 4G + CPU Throttling 4x)**. Passing based on desktop scores alone is prohibited. Mobile score **≥ 90** is required.
+*   **Touch Target**: Tappable elements (buttons, links, etc.) MUST have a minimum **44×44px** touch target.
+*   **Cross-Reference**: §2 Performance Budget (SLA), `52_sre_reliability.md` §10.2 (Performance Benchmark)
+
+### 15.2. Bundle Size Budget
+*   **Law**: When the following size limits are exceeded, a build warning or PR comment notification is triggered.
+
+    | Target | Limit | Measurement Tool (Example) | Notes |
+    |:-------|:------|:--------------------------|:------|
+    | **Initial JS** (First Load JS) | **≤ 150KB** (gzip) | `next build` output | Root page initial load |
+    | **Route Chunk** (Per Page) | **≤ 80KB** (gzip) | `next build` output | Per-page specific JS |
+    | **Third-party JS** (External Scripts) | **≤ 50KB** (gzip) | Bundle Analyzer | Analytics, etc. total |
+    | **Total CSS** | **≤ 50KB** (gzip) | Build output | Including UI framework output |
+
+*   **Diff Alert**: Run Bundle Analyzer in CI. If the diff from the previous build exceeds **+10KB**, automatically post a warning comment on the PR.
+*   **Tree Shaking**: To prevent unused module inclusion, named imports are mandatory (`import { format } from 'date-fns'` ✅ / `import * as dateFns` ❌).
+*   **Unused CSS**: Unused CSS classes MUST NOT exceed **20%** of the total. Use CSS framework `content` configuration or PurgeCSS to remove unnecessary classes.
+*   **Cross-Reference**: §2 Bundle Size (150KB SLA), §14.21 Dynamic Library Decoupling
+
+### 15.3. Image Size Budget
+*   **Law**: Constrain maximum image sizes and formats by use case.
+
+    | Use Case | Format | Max Size | Notes |
+    |:---------|:-------|:---------|:------|
+    | **Hero Image** | WebP / AVIF | ≤ 200KB | `priority` required if LCP element |
+    | **Thumbnail** | WebP | ≤ 30KB | Optimal delivery via `sizes` prop |
+    | **Icon/Logo** | SVG / WebP | ≤ 10KB | Prefer vector |
+    | **OGP Image** | JPEG / PNG | ≤ 100KB | Fixed 1200×630px |
+    | **User Upload** | WebP (converted) | ≤ 500KB | Via Image Resizing |
+
+*   **Lazy Loading Strategy**:
+    *   **Above-the-Fold**: First-view images use `loading="eager"` + `priority={true}` for immediate loading.
+    *   **Below-the-Fold**: Images below the scroll use `loading="lazy"` for Native Lazy Loading.
+*   **Cross-Reference**: §6 Image Optimization, §14.4 LCP & Lazy Loading
+
+### 15.4. Data Loading Waterfall Prevention
+*   **Law**: Serial chaining (Waterfall) of data fetches is prohibited. Independent data fetches MUST be executed in parallel.
+*   **Action**:
+    1.  **Parallel Fetch**: Execute independent data fetches with `Promise.all()` / `Promise.allSettled()` in parallel.
+    2.  **Streaming SSR**: Leverage `React.Suspense` + `loading.tsx` to defer heavy data fetches while accelerating initial UI rendering.
+    3.  **Prefetch**: Prefetch next-page data before navigation (leverage framework's `prefetch` feature).
+    4.  **DB Query Target**: Target **≤ 50ms** for single query execution time. Queries exceeding 50ms should be analyzed with `EXPLAIN ANALYZE` and optimized with indexes or query restructuring.
+*   **Cross-Reference**: §1 Data Fetching (RSC), §14.9 SSR Stream Resilience
+
+### 15.5. Font Loading Strategy
+*   **Law**: Apply the following strategies to prevent web font loading from degrading CWV (especially CLS and LCP).
+*   **Action**:
+    1.  **`font-display: swap`**: Display system fonts during web font loading to prevent FOIT (Flash of Invisible Text).
+    2.  **Preload**: Preload only font weights used in first view (Regular, Bold) via `<link rel="preload">`. Preloading unnecessary weights wastes bandwidth.
+    3.  **Subsetting**: Subset CJK fonts (Noto Sans JP, etc.) to reduce font file size. If the framework's standard font feature (`next/font/google`, etc.) handles this automatically, use that.
+    4.  **Variable Font**: Adopt Variable Fonts when possible to consolidate multiple weight HTTP requests into one.
+*   **Cross-Reference**: §6 Font Optimization
+
+### 15.6. Lighthouse CI Auto Gate Protocol
+*   **Law**: Run Lighthouse CI on every PR and apply the following auto gate thresholds.
+*   **Auto Gate Thresholds**:
+    | Category | Minimum Score | Block Condition |
+    |:---------|:-------------|:---------------|
+    | **Performance** | **≧ 90** | < 80 → PR merge auto-blocked |
+    | **Accessibility** | **≧ 90** | Target value (Warning only) |
+    | **SEO** | **≧ 90** | Target value (Warning only) |
+    | **Best Practices** | **≧ 90** | Target value (Warning only) |
+*   **Score Degradation Alert**: If a score drops **-5pt** or more compared to the previous PR, automatically post an alert comment on the PR.
+*   **RUM (Real User Monitoring)**: Display Web Vitals data on a daily dashboard to immediately detect field data degradation.
+*   **CrUX Monthly Review**: Review Google Search Console CrUX reports monthly to identify and address pages where field data exceeds the budget.
+*   **Cross-Reference**: §15.1 CWV Deployment Gate, `52_sre_reliability.md` §10.2 (Performance Benchmark)
+
+### 15.7. Performance Regression Response
+*   **Law**: When performance degradation is detected, respond according to the following severity classification.
+
+    | Severity | Condition | Response Deadline | Action |
+    |:---------|:----------|:-----------------|:-------|
+    | **P0 (Critical)** | LCP > 4s or CLS > 0.25 | **Immediately** | Consider rollback, emergency hotfix |
+    | **P1 (Major)** | LCP 2.5–4s or INP 200–500ms | **Within 24 hours** | Identify root cause, create fix PR |
+    | **P2 (Minor)** | Lighthouse score 80–90 | **Within 1 sprint** | File in backlog |
+
+*   **Escalation**: P0 triggers immediate notification to on-call personnel. P1 is reported in daily standups.
+*   **Cross-Reference**: §15.1 CWV Deployment Gate, §15.6 Lighthouse CI Auto Gate, `52_sre_reliability.md` §10.2

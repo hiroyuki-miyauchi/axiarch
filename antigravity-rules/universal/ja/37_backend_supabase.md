@@ -21,6 +21,14 @@
     *   **Universal Types**: 特定のUIフレームワークに依存したデータ型（React Nodeなど）をDBに保存してはなりません。
     *   **Neutral JSON**: JSONデータは、表示ロジックを含まない「純粋なデータ」として管理してください。
 
+### Supreme Directive 0.4: The Client DTO Barrier（クライアントDTO障壁）
+*   **Law**: データベースの行データ（Raw Entity）を、クライアントサイドコンポーネント（`use client` 等）のPropsとして**直接渡すことを禁止**します。
+*   **Mandate**:
+    *   **Server-Side Transformation**: 必ずサーバー側で目的に応じた軽量なDTOへ変換し、必要最小限のフィールドのみをクライアントへ送信してください。
+    *   **PII Exclusion**: `admin_notes`, `phone_number`, `email` 等のPIIや内部管理フィールド（`deleted_at`, `internal_memo`）がブラウザへ到達することを物理的に防いでください。
+    *   **Payload Minimization**: 不要なフィールドの送信は、ネットワーク帯域の浪費と、将来のデータ漏洩リスクの二重の問題を引き起こします。
+*   **Rationale**: SD 0.2（Trinity DTO Mandate）が定義するDTO化義務の具体的な境界線として、クライアントコンポーネントへのデータ受け渡しを物理的な遮断点として確立します。Raw Entityの直接送信は、意図しないPII漏洩の最大のリスク源です。
+
 ### Core Laws
 *   **SSOT (Single Source of Truth)**: 設定値、ユーザーデータ、コンテンツはすべて **PostgreSQL (`public` schema)** を唯一の正 (Source of Truth) とします。JSONファイルや外部CMSへの「二重管理」は厳禁です。
     *   **Prohibition**: 「とりあえずJSONで持つ」はデータの反逆です。
@@ -53,6 +61,10 @@
     2. **Type Safety**: TypeScript/zodでの型推論が正確になり、「未定義キー」エラーを防ぎます。
     3. **Integrity**: 外部キー制約やCHECK制約の適用が可能になります。
 *   **Migration**: 新しい設定項目追加時は、必ずDBマイグレーションを行ってください。
+*   **Exception (Dynamic Label Isolation Protocol)**: 以下のケースに限り、JSONBカラムの使用を例外的に許可します。ただし、そのJSONBカラムの責務を厳密に限定し、正規化すべきデータの混入を禁止します。
+    1.  **動的ラベル・翻訳**: 多言語対応のUI表示ラベル、カスタム評価項目名等、スキーマ設計時に項目数が確定しない動的テキスト。
+    2.  **検索不要な可変長配列**: 表示順序のみが重要で、SQLのWHERE句やJOINでの検索対象にならないリスト。
+    3.  **禁止**: `max_count`, `threshold` 等の計算・検索・条件分岐に使用されるプロパティをJSONBに含めることは禁止です。これらは必ず正規化カラムに昇格させてください。
 
 ### Rule 2.1: Integrity & Ownership
 *   **RLS Absolute**: 行レベルセキュリティ (RLS) は絶対です。`service_role` キーの使用は原則禁止とし、全てのクエリはRLSを経由させます。
@@ -86,6 +98,44 @@
     - [ ] **Index**: 外部キー (`*_id`) にインデックスを貼ったか？
     - [ ] **Type**: `database.types.ts` を再生成し、型定義を更新したか？
     - [ ] **Audit**: `audit_logs` へのトリガーを設定したか？（重要テーブルの場合）
+
+### Rule 2.17: The Schema-Reality Reconciliation Checklist（スキーマ現実突合チェックリスト）
+*   **Law**: データアクセスコード（Query/Mutation/DTO）を新規作成・変更する際は、参照する全カラムが実際のDBスキーマに存在し、型・制約が一致することを事前に検証しなければなりません。
+*   **Action**:
+    1.  **Column Existence**: `.select('column_name')` や `.not('column', 'is', null)` を書く前に、自動生成型定義ファイル（`database.types.ts` 等）の `Row` 型で**カラムの実在を確認**してください。「たぶん存在する」は禁止です。
+    2.  **FK Name Verification**: 外部キー名（`user_id`, `owner_id` 等）はテーブルごとに異なります。デフォルト名を仮定せず、各テーブルの実際のFK名を型定義で確認してください。
+    3.  **RPC vs Column Distinction**: RPC関数（例: `get_point_balance`）はカラムではありません。`.select()` で直接取得できないため、元テーブルからの集計やRPC呼び出しとして正しく実装してください。
+    4.  **Array Empty Check**: 配列型カラム（`text[]`, `jsonb[]` 等）の「存在チェック」は `.not('column', 'is', null)` だけでは不十分です。空配列 `{}` も除外するために `.neq('column', '{}')` を追加してください。
+    5.  **Nullable Parity**: DBで `nullable` なカラムは、TypeScriptの型定義でも `optional (?)` または `| null` で定義してください。自動生成型との乖離は「将来のランタイムエラー」の入り口です。
+*   **Checklist（新規バックエンド実装時）**:
+    | チェック項目 | 確認方法 |
+    |---|---|
+    | 全参照カラムが型定義ファイルに存在する | Row型の目視確認 |
+    | RPC関数をカラムとして扱っていない | Functions セクションとの突合 |
+    | FK名が実テーブル定義と一致する | Relationships セクションの確認 |
+    | 配列型カラムの空チェックが正しい | `.neq('column', '{}')` の追加 |
+    | nullable/optional が DB定義と一致する | 自動生成型との突合 |
+*   **Rationale**: スキーマと実装の乖離（Schema-Reality Gap）は、本番環境でのみ顕在化する「サイレントバグ」の主因です。型定義ファイルを「絶対的な真実」として扱い、推測による実装を排除することで、この種のバグをゼロにします。
+
+### Rule 2.18: The Automated Data Retention Protocol（自動データ保持期間プロトコル）
+*   **Law**: 時間経過とともに蓄積されるデータには、**カテゴリ別の保持期間**を定義し、期限到達後に**自動的にパージまたは匿名化**する仕組み（Cron Job / Scheduled Task）を実装しなければなりません。
+*   **Action**:
+    1.  **Retention Category Definition**: 全データテーブルを以下のカテゴリに分類し、保持期間を明示的に定義してください。
+        | カテゴリ | 例 | 推奨保持期間 |
+        |---|---|---|
+        | アクティブデータ | ユーザー、コンテンツ | 無期限（退会まで） |
+        | トランザクションログ | 決済記録 | 法定保持期間（例: 7年） |
+        | アクセスログ | リクエストログ、トレース | 90日 |
+        | セッションデータ | セッション、トークン | 30日 |
+        | 一時データ | OTPコード、アップロード一時ファイル | 24時間 |
+        | 分析データ | アナリティクスイベント | 2年（集約後サマリーへ） |
+    2.  **Automated Purge**: `pg_cron` やクラウドスケジューラ等を使用し、保持期限を超過したデータを自動的に削除・アーカイブするバッチジョブを実装してください。
+    3.  **Account Deletion Lifecycle**: ユーザー退会時は、段階的なデータ処理を実装してください：
+        *   即時: プロフィール情報の非公開化
+        *   30日後: 論理削除（`deleted_at` 設定）
+        *   法定保持期間後: 物理削除またはPII完全匿名化
+    4.  **Purge Logging**: パージ実行の記録（対象テーブル、削除件数、実行日時）を監査ログに残してください。
+*   **Rationale**: データを無期限に保持することは、ストレージコストの増大、プライバシーリスクの拡大、そしてGDPR/APPI等のデータ最小化原則への違反を招きます。保持期間の自動管理により、コスト・コンプライアンス・パフォーマンスの三方良しを実現します。
 
 ---
 
@@ -238,9 +288,25 @@
 
 ### Rule 4.3: Scalability Strategy
 *   **Infinite Scalability**: `select('*')` および上限なしクエリは禁止。必ずページネーションを実装。
+*   **Post-Query Filter Prohibition**: ページネーション付きクエリの結果に対して、アプリケーション側（JavaScript/TypeScript）でフィルタリングを行うことを禁止します。フィルタ条件は必ずSQLのWHERE句に含めてください。JS側フィルターを適用すると、1ページあたりの表示件数が不定になり、ページネーションの総件数・総ページ数も不正確になります。
 *   **Partitioning**: テーブルレコード数が **1,000万件 (10M)** を超える予測で `pg_partman` を導入。
 *   **Read Replica**: 分析クエリはReplicaへオフロード。
 *   **Archival**: コールドデータはオブジェクトストレージへ退避。
+*   **Connection Pooling（接続プール最適化）**:
+    *   **Law**: データベース接続数はPostgreSQLの最大接続数に制約されるため、コネクションプーリングツール（PgBouncer等）を活用してDB接続数を最適化しなければなりません。
+    *   **Action**:
+        1.  **Pooler Mandatory**: サーバーレス環境（Edge Functions, Vercel Serverless等）からのDB接続は、必ずコネクションプーラー経由としてください。関数のコールドスタートごとに新規接続を作成すると、接続数が爆発的に増加します。
+        2.  **Transaction Mode**: 短寿命のリクエスト処理には `Transaction Mode`（リクエスト単位で接続を解放）を使用してください。`Session Mode` はPrepared Statementsが必要な場合に限定します。
+        3.  **Max Connections Guard**: アプリケーション側の接続プールサイズは、DBの `max_connections` の**70%以下**に設定し、管理ツールやバックグラウンドジョブへの接続余裕を確保してください。
+    *   **Rationale**: サーバーレスアーキテクチャでは同時接続数がスパイク的に増加します。コネクションプーラーなしではDB接続数が上限に達し、全サービスが接続エラーで停止するリスクがあります。
+
+### Rule 4.4: The Optimistic Mutation Protocol（楽観的更新プロトコル）
+*   **Law**: ネットワーク遅延により操作から反応までに0.5秒以上のラグが生じる高頻度アクション（いいね、ステータス変更、並び替え等）には、サーバー応答を待たずにUIを即時更新する**楽観的UI（Optimistic UI）**を実装しなければなりません。
+*   **Action**:
+    1.  **Instant Feedback**: ユーザーの操作直後にローカルStateまたは楽観的更新フック（例: React の `useOptimistic`）を使用してUIを即時更新してください。サーバーレスポンスを待ってからUIを更新するパターンは、ユーザーに「壊れている」という印象を与えます。
+    2.  **Rollback on Error**: サーバーエラー発生時は、即座に元の状態にロールバックし、トーストまたはスナックバーでエラーを通知してください。
+    3.  **Scope**: 全ての操作に適用する必要はありません。適用対象は「反復的かつ高頻度な操作」に限定し、決済や削除など不可逆な操作には使用しないでください。
+*   **Rationale**: 0.5秒以上のUIフリーズはユーザーに「壊れている」という印象を与え、離脱率の増加を招きます。楽観的更新により体感速度を劇的に改善し、アプリの品質感を向上させます。
 
 ---
 
@@ -283,6 +349,7 @@
 *   **Ghost Table Defense**: 
     *   **Law**: 存在しないテーブルへの `ALTER` や `CREATE POLICY` はマイグレーションエラー (`42P01`) を引き起こします。
     *   **Action (Table Existence Verification Protocol)**: 外部依存や古いスキーマダンプを参考にする際は、必ず `DO $$` ブロックを用いた条件付き実行（`IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '...')`）を徹底してください。記憶や「あるはず」という思い込みでの実装を禁止します。
+    *   **Column-Level Verification (Schema-Reality突合義務)**: マイグレーション作成前およびDTO設計時は、テーブルの存在だけでなく**カラムの存在・型・制約も`information_schema.columns`で確認**してください。カラム名の推測による実装（例：`dog_description_json`が存在しないのにDTOに定義）はSchema-Reality乖離の主因であり禁止です。
 *   **Remote Schema Warning**: `remote_schema.sql` や生成ファイルは過去のスナップショットに過ぎません。SQL作成前は必ず現在のDB状態（Dashboard または `pg_tables` クエリ）を正として確認してください。
 
 ### Rule 7.2: IPv6 & CI/CD Protocol
@@ -313,6 +380,37 @@
 *   **Action**: 
     1. 修正や操作が必要な場合は、必ずローカルで `supabase migration new your_fix` を作成し、Git 経由でデプロイしてください。
     2. SQL Editor は、「現在値の確認」や「クエリのデバッグ」という参照専用（Read-only）として利用を制限してください。
+
+### Rule 7.7: The Expand-Contract Migration Protocol（ゼロダウンタイム・スキーマ変更）
+*   **Law**: 本番環境で稼働中のテーブルに対して破壊的なスキーマ変更（カラムのリネーム・型変更・削除、テーブルの再構築等）を行う場合、**Expand-Contract パターン**を用いてゼロダウンタイムで段階的に実施しなければなりません。
+*   **Action**:
+    1.  **Phase 1 — Expand（拡張）**: 新しいカラムまたはテーブルを**追加のみ**で作成してください。この段階では既存のカラム・テーブルを一切変更・削除してはならず、アプリケーションは旧構造のまま稼働し続けます。
+    2.  **Phase 2 — Migrate（移行）**: 旧データを新カラム/テーブルへバックフィル（コピー・変換）してください。大量データの更新はバッチ処理で行い、単一トランザクションでの全件 `UPDATE` を避けてください。アプリケーションは新旧両方の構造をサポートする「デュアルライト（Dual Write）」を実装し、移行期間中のデータ整合性を保証してください。
+    3.  **Phase 3 — Contract（縮退）**: 全アプリケーションが新構造のみを参照していることを確認した後、**最低1週間の安定稼働期間**を経てから旧カラム/テーブルを削除してください。
+*   **Prohibition**:
+    *   Expandフェーズで `DROP COLUMN` や `ALTER COLUMN ... TYPE` を実行することは禁止です。
+    *   Contractフェーズの実行前に、旧構造への参照がコードベース全体に存在しないことを `grep` で物理的に確認してください。
+*   **Rationale**: 「ALTER TABLE ... RENAME COLUMN」のような一見単純な操作でも、デプロイのタイミング差で旧コードが新スキーマにアクセスし、障害を引き起こします。Expand-Contractパターンにより、スキーマとアプリケーションの変更を時間的に分離し、安全なゼロダウンタイムマイグレーションを実現します。
+
+### Rule 7.8: The Data-Aware Defense Protocol（データ依存防衛プロトコル）
+*   **Law**: 本番DBには開発環境にない「汚れたデータ」（重複レコード、型不整合、不完全なデータ）が存在します。CI環境（クリーンなDB）はこの汚れを検知できないため、全てのDML（データ操作）は**「既にデータが存在する」前提**で防衛的に記述しなければなりません。
+*   **Action**:
+    1.  **Assumed Conflict**: 全ての `UPDATE` / `INSERT` は、「対象データが既に存在する」「重複している」前提で書いてください。楽観的な「きれいなDB」を前提にしたSQLは本番で爆発します。
+    2.  **Defensive Logic**: 単純なSQLではなく、`DO $$ ... END $$` ブロックや `ON CONFLICT` 句を用い、例外発生をコードレベルで回避してください。
+    3.  **Cleanup Before Constraint**: 一意制約（`UNIQUE`）を追加するマイグレーションでは、事前に重複データを削除・統合するクリーンアップロジックを**同一マイグレーションファイル内に**必ず含めてください。制約追加だけでは、本番の重複データがマイグレーションを失敗させます。
+*   **Rationale**: 開発環境とCIでは「成功したマイグレーション」が、本番環境の汚れたデータで失敗するケースは非常に多いです。防衛的なDML記述により、全環境での安全なマイグレーションを保証します。
+
+### Rule 7.9: The Migration Static Analysis Guard（マイグレーション静的解析ガード）
+*   **Law**: マイグレーションファイルに含まれる危険なSQLパターンを**自動検出し、マージ前に拒否**する静的解析の仕組み（Pre-push Hook + CI Check）を導入しなければなりません。「人間の注意力」に依存する運用ルールは、緊急時や新任者によって必ず破られます。
+*   **Action**:
+    1.  **Pre-push Hook (Local Iron Dome)**: Git の pre-push hook で、`supabase/migrations/` 内の新規・変更ファイルを静的解析し、危険パターンが含まれている場合は Push を物理的に拒否してください。
+    2.  **CI Check (Remote Concrete Wall)**: GitHub Actions 等のCIパイプラインで同等のチェックを実行し、ローカルフックをバイパスした場合でもマージを阻止する最終防衛線としてください。
+    3.  **Detection Patterns (The Forbidden Patterns)**:
+        *   `UPDATE` without `DO` block or `WHERE` with subquery → 防衛なき更新として拒否
+        *   `INSERT` without `ON CONFLICT` → 一意制約違反リスクとして拒否
+        *   `ADD CONSTRAINT ... UNIQUE` without prior cleanup → 既存データ不整合リスクとして拒否
+    4.  **No Bypass**: `--no-verify` 等のフック回避オプションの使用は、プロジェクトのスキーマ信頼性を破壊する行為として禁止します。
+*   **Rationale**: マイグレーションの安全性を人間の注意力に依存させることは、インシデントの「いつ起こるか」の問題に過ぎません。静的解析による物理的な防御壁を設けることで、危険なSQLが本番環境に到達することを構造的に不可能にします。
 
 ---
 
@@ -374,6 +472,39 @@
 *   **Business Hours**: 営業時間は構造化データ(JSONB)とし、祝日設定を優先するロジックを標準化。
 *   **Reputation System**: 評価スコアには単純平均ではなく **ベイジアン平均** を採用し、信頼性を担保。
 *   **Geo-Centric**: 物理拠点には `latitude`/`longitude` を付与し、位置情報検索に対応。
+
+### Rule 9.5: The Geolocation Data Strategy（位置情報データ戦略）
+*   **Law**: 物理拠点を持つエンティティに座標情報を付与する際は、外部Geocoding API（従量課金）への依存を最小化し、**API不要の手段を優先**しなければなりません。
+*   **Action**:
+    1.  **API-Free First（推奨優先順位）**:
+        *   **Pattern 1 (URL Parse)**: 地図サービスのURL（例: Google Maps URL）に埋め込まれた座標を正規表現で抽出する。API呼び出し不要・完全無料。
+        *   **Pattern 2 (Manual Input)**: 地図サービス上で座標をコピーし、管理画面で直接入力する。
+        *   **Pattern 3 (Geocoding API / Fallback)**: 上記で取得できない場合のみ、住所→座標変換APIをキャッシュ付きで使用する。**取得結果は必ずDBに保存**し、同一住所の再変換を防止すること（1回限りのAPI呼び出し）。
+    2.  **Distance Calculation（距離計算基準）**: 2地点間の距離計算には**Haversine公式**（地球の曲率を考慮）を使用してください。
+    3.  **Distance Display Format（距離表示形式）**:
+
+        | 距離 | 表示形式 | 例 |
+        |:-----|:---------|:---|
+        | < 1km | メートル（100m単位） | `300m` |
+        | 1-50km | キロメートル（0.1km単位） | `1.2km` |
+        | > 50km | キロメートル（整数） | `52km` |
+
+    4.  **Spatial Index**: 距離ベースの検索（「現在地からN km以内」）の実装を見越し、`latitude` / `longitude` への**GINインデックス**または**PostGIS拡張**の導入を推奨します。
+*   **Rationale**: Geocoding APIは1,000回あたり数ドルの従量課金が発生します。API-Firstではなく「API-Free First」の姿勢で設計することにより、運用コストを劇的に削減しつつ、外部サービス障害の影響も最小化できます。
+
+### Rule 9.4: The Time-Gated Content Schema Standard（時限公開コンテンツスキーマ標準）
+*   **Law**: 公開予約機能を持つコンテンツテーブルには、`published_at` と `status` の組み合わせによる**時限公開スキーマ**を標準実装しなければなりません。
+*   **Action**:
+    1.  **Schema Standard**: 以下のカラムを定義してください：
+        *   `status` (text): `'public'`, `'private'`, `'draft'`, `'archived'` 等の公開状態。
+        *   `published_at` (timestamptz, nullable): 公開予定日時。`NULL` は「即時公開」を意味します。
+    2.  **Query Condition (AND Conjunction)**: 公開コンテンツ取得クエリでは、以下の2条件を必ず**AND結合**してください。どちらか一方だけでは、非公開コンテンツの漏洩や公開予約の無効化を招きます。
+        ```sql
+        WHERE status = 'public'
+          AND (published_at IS NULL OR published_at <= NOW())
+        ```
+    3.  **Indexing**: `published_at` は範囲検索で頻繁に使用されるため、インデックスの作成を推奨します。
+*   **Rationale**: `status = 'public'` のみでのフィルタリングは、公開予約日前のコンテンツを漏洩させます。`published_at` のみでのフィルタリングは、下書き状態のコンテンツを公開します。両方のAND結合によってのみ、正確な公開制御が実現します。
 
 ---
 
@@ -612,3 +743,23 @@
     2.  **No Dynamic EXECUTE**: `EXECUTE format('SELECT * FROM %I', variable)` のようなパターンは、テーブル名のタイポや存在しないテーブルへの参照をランタイムまで検出できないため禁止します。
     3.  **Schema Change Safety**: 静的なテーブル参照により、テーブルのリネームや削除時に依存関数がマイグレーション時点でエラーとなり、問題を早期検出できます。
 *   **Rationale**: 動的テーブル参照はSQLインジェクションの温床となり、スキーマ変更時の影響範囲追跡も不可能にします。静的参照を義務付けることで、コンパイル時安全性と保守性を確保します。
+
+### Rule 2.17.1: The Data Quality Management Framework（データ品質管理フレームワーク）
+*   **Law**: 蓄積されるデータは「副産物」ではなく、独立した**収益資産**として設計・管理しなければなりません。データ品質を以下の6次元で体系的に計測・管理し、品質劣化を早期に検知する義務があります。
+*   **DQ Framework**:
+
+    | 品質次元 | 定義 | 計測方法 | 目標 |
+    |:---------|:-----|:---------|:-----|
+    | **正確性 (Accuracy)** | データが現実を正しく反映しているか | サンプリング検証 | ≥ 95% |
+    | **完全性 (Completeness)** | 必須フィールドが埋まっているか | NULL率計測 | ≥ 90% |
+    | **一貫性 (Consistency)** | 同一エンティティのデータが矛盾していないか | Cross-table検証 | ≥ 99% |
+    | **鮮度 (Freshness)** | データが最新であるか | `updated_at` 経過日数 | ≤ 30日 |
+    | **一意性 (Uniqueness)** | 重複データが存在しないか | 重複検出クエリ | 重複率 ≤ 1% |
+    | **適合性 (Conformity)** | データ型・フォーマットが規定に準拠しているか | Schema Validation | 100% |
+
+*   **Action**:
+    1.  **Automated DQ Checks**: 月次のバッチジョブ（`pg_cron` またはクラウドスケジューラ）で上記6指標を自動計測し、管理ダッシュボードに表示してください。
+    2.  **Asset Registry**: 主要データ資産を台帳化し、各資産の「所有者」「品質責任者」「収益可能性」を明記してください。
+    3.  **Cleansing Mandate**: データはクレンジング済みの状態が常に維持されること。ゴミデータ（未検証の入力、重複レコード、型不正）の放置を禁止します。
+    4.  **Alert Threshold**: いずれかの品質次元が目標値を下回った場合、アラートを発報し、30日以内に是正措置を完了してください。
+*   **Rationale**: データ品質を定量的に管理しないと、「クリーンに見えるが実は矛盾だらけ」のデータが蓄積し、API外販・AI学習・分析の全てに悪影響を及ぼします。6次元フレームワークにより、品質劣化を構造的に防止します。

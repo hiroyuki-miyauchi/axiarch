@@ -68,6 +68,12 @@
     *   **The Canonical Identity Protocol (SEO Duplicate Protection)**:
         *   **Context**: 検索エンジンに公開するページ（Public Pages）において。
         *   **Law**: Next.js の `generateMetadata` で必ず `alternates: { canonical: url }` を定義し、パラメータ違いによる評価分散を防いでください。認証後の管理画面ページでは不要です。
+    *   **The TrailingSlash URL Integrity Protocol (URL正規化義務)**:
+        *   **Law**: フレームワーク（Next.js `trailingSlash` 設定等）、リバースプロキシ（Nginx/Cloudflare）、CDN のTrailingSlash（末尾スラッシュ）設定は、プロジェクト全体で**統一**しなければなりません。`/about` と `/about/` が共存する状態は、SEO評価の分散・リダイレクトループ・キャッシュの二重化を招きます。
+        *   **Action**:
+            1.  **Config Alignment**: フレームワーク設定（例: `next.config.ts` の `trailingSlash: true | false`）とインフラ設定（リバースプロキシ、CDN）で同一ポリシーを適用してください。
+            2.  **Canonical Consistency**: `generateMetadata` の `canonical` URL も、選択したTrailingSlashポリシーと一致させてください。不一致はSEO評価の分散を招きます。
+            3.  **Redirect Enforcement**: 非正規URLへのアクセスは、**301リダイレクト**で正規URLへ統一し、検索エンジンのインデックス重複を防いでください。
     *   **The Performance First Protocol (LCP & Lazy Loading Mandate)**:
         *   **Law 1 (First View Optimization)**: ビューポート内（ファーストビュー）の最重要要素（ヒーロー画像等）には、必ず `priority` (Next.js) および `fetchPriority="high"` を付与してください。
         *   **Law 2 (Lazy Load Everything Else)**: ファーストビュー以外の全ての画像、動画、高負荷コンポーネントは、例外なく `loading="lazy"` または `next/dynamic` による遅延読み込みを徹底し、初期リソースを節約してください。
@@ -244,6 +250,17 @@
 *   **ブラウザ互換性 (Browser Compatibility)**:
     *   **ターゲット**: Chrome, Safari, Firefox, Edgeの最新2バージョン、およびiOS Safari, Android Chromeの最新2バージョンをサポートします。
     *   **Polyfill**: `core-js` 等を使用し、必要な機能のみをPolyfillします。
+    *   **Tier Classification (サポート階層)**:
+        | Tier | 対象 | テスト義務 |
+        |:-----|:-----|:---------|
+        | **Tier 1（必須）** | Chrome / Safari（最新2バージョン）| 全機能テスト |
+        | **Tier 1（必須）** | 主要In-Appブラウザ（LINE等、市場に応じて）| 全機能テスト |
+        | **Tier 2（推奨）** | Firefox / Edge（最新2バージョン）| 主要機能テスト |
+        | **Tier 3（ベストエフォート）** | その他In-Appブラウザ | 表示確認のみ |
+        | **非サポート** | IE11 | 対応不要 |
+    *   **In-App Browser Considerations**: In-Appブラウザ（LINE内ブラウザ等）はOAuth認証フローのリダイレクトに制約がある場合があります。ソーシャルログイン実装時は必ず動作確認してください。
+    *   **Private Browsing Defense**: プライベートブラウジングモードでは `localStorage` が制限される問題があります。`localStorage` に依存する機能（下書き保存、テーマ設定等）にはフォールバック実装を検討してください。
+    *   **Polyfill Policy**: `browserslist` に基づき自動ポリフィルを適用してください。手動ポリフィルは禁止します。
     *   **Hydration Warning Control**:
         *   **Extension Defense**: ブラウザ拡張機能による属性注入（Hydration Error）を防ぐため、`<html>`, `<body>`, およびヘッダー/フッター内の主な `Link` には `suppressHydrationWarning` を付与することを推奨します。
         *   **Link Extension Guard**: ヘッダーやフッターなど、全ページ共通のナビゲーションリンクは、ブラウザ拡張機能（例: McAfee WebAdvisor, Video Downloader, Grammarly等）による `vcdaldp-fin` や `data-nodal` 等の属性注入の標的になりやすいため、予防的に `<Link suppressHydrationWarning>` を付与してください。
@@ -315,6 +332,20 @@
     *   **The Alt Text Mandate (Invisible UX)**:
         *   **Law**: 全ての画像 (`<Image>`) に `alt` 属性を義務付けます (`eslint-plugin-jsx-a11y` error)。
         *   **Detail**: 装飾目的の画像には `alt=""` (空) を設定し、意味のある画像には「画像が見えない人にも内容が伝わるテキスト」を設定してください。「image」や「photo」という単語を含めることは禁止です（スクリーンリーダーが読み上げるため重複する）。
+    *   **The Alt Text Quality Standard (画像alt品質基準)**:
+        *   **Context**: `alt` 属性は (1) スクリーンリーダーによる読み上げ、(2) 画像読み込み失敗時の代替テキスト、(3) 検索エンジン/AIクローラーの画像理解の3つの役割を持ちます。alt テキストの品質はSEO・A11y・GEOの全てに影響します。
+        *   **Law**: コンテンツ画像には運用者の母国語で具体的な alt を**必須**とし、装飾画像は `alt=""` で除外、`alt` 属性自体の省略は**永久に禁止**します。
+        *   **Quality Matrix**:
+            | 画像種別 | 基準 | 悪い例 ❌ | 良い例 ✅ |
+            |:---------|:-----|:---------|:---------|
+            | **店舗・施設写真** | 名称+特徴を含む | `alt="photo1"` | `alt="渋谷のカフェ○○の店内写真"` |
+            | **商品画像** | 商品名+特徴 | `alt="image"` | `alt="オーガニック商品名 100g"` |
+            | **地図** | 地域+目的 | `alt="map"` | `alt="東京都渋谷区周辺の施設マップ"` |
+            | **アイコン** | アイコンの意味 | `alt="icon"` | `alt="評価: 星4つ"` |
+            | **バナー** | キャンペーン内容 | `alt="banner"` | `alt="春のキャンペーン 2026年3月開催"` |
+            | **ロゴ** | サービス名 | `alt="logo"` | `alt="サービス名"` |
+            | **装飾** | 空文字 | `alt="decoration"` | `alt=""` |
+        *   **CI Detection (推奨)**: PRレビュー時に `<img` タグの `alt` 属性を確認し、英語のみの値（例: `alt="[A-Za-z ]+"` パターン）を検出して警告するCI自動検出を推奨します。
     *   **Screen Reader**: 主要フローにおいて、スクリーンリーダー（VoiceOver/TalkBack）での実機テストを義務付けます。
     *   **Icon Labels**: テキストを含まないアイコンのみのボタンには、必ず `aria-label` 属性を付与し、機能を明示します。
     *   **WAI-ARIA**: "No ARIA is better than Bad ARIA". 可能な限りネイティブHTML要素を使用し、ARIA属性は必要最小限に留めます。
@@ -423,7 +454,8 @@
 *   **Action**:
     1.  **Local Build**: コミット前に必ずローカルで `npm run build` を実行し、成功を確認してください。
     2.  **SSG Awareness**: 静的生成（SSG）ページで `cookies()` 等の動的APIをインポートすると、開発時は動作するが本番ビルドで "Dynamic server usage" エラーになります。動的依存を分離してください。
-    3.  **Phantom File**: ビルドエラーが「存在しないファイル」を示す場合、re-export や動的インポートで隠蔽された実体ファイルを `grep` で特定してください。
+    3.  **Tiered Database Client Protocol**: SSG/ISR互換のDBクライアントは、動的APIに依存するクライアント（`cookies()`, `headers()` 使用）と依存しないクライアントを**別ファイルに物理分離**してください。同一ファイルからのexportでは、Tree Shakingが効かず未使用の動的依存まで引きずる場合があります。
+    4.  **Phantom File**: ビルドエラーが「存在しないファイル」を示す場合、re-export や動的インポートで隠蔽された実体ファイルを `grep` で特定してください。
 *   **Rationale**: 開発サーバーはHot Module Replacementにより型エラーやインポートエラーを隠蔽します。ビルドのみが真実です。
 
 ### 14.3. The Non-Blocking Edge Processing Protocol (Edge非同期処理義務)
@@ -676,3 +708,104 @@
     4.  **Testing**: Cookie操作を含むServer Actionは、Cookie状態の変更後に期待される挙動（リダイレクト、セッション状態の反映等）を自動テストで検証してください。
 *   **Rationale**: Server Component（RSC）のレンダリングはストリーミング的に行われる場合があり、レスポンスヘッダーがすでに送信された後にCookieを設定しようとすると、無視されるかエラーになります。書き込み権限をServer Action / Route Handlerに明確に限定することで、この不安定な挙動を構造的に排除します。
 
+### 14.31. The Component Config Re-mount Protocol（コンポーネント設定変更時の再マウント義務）
+*   **Law**: 命令型初期化を行う外部ライブラリ（スライダー、マップSDK、チャートライブラリ等）をラップするReactコンポーネントにおいて、設定Props（スライド数、オプション、データソース等）が動的に変更される場合、Reactのリアクティブ更新に依存せず、**`key` propの変更による強制再マウント**を標準戦略として採用しなければなりません。
+*   **Action**:
+    1.  **Key-Based Re-mount**: 設定Propsが変更された際にコンポーネントを再初期化する必要がある場合、親コンポーネントから `key={configHash}` や `key={configVersion}` を渡し、Reactに完全な再マウントを強制してください。`useEffect` 内での手動の`destroy()` → `init()` パターンは、Reactのeffect実行順序（子→親の順で実行される）により競合状態を引き起こすため禁止します。
+    2.  **Config Hashing**: 複数の設定値から `key` を生成する場合は、`JSON.stringify(config)` や設定値の連結文字列など、設定が変わった時に確実に異なる値になるキーを使用してください。
+    3.  **Cleanup Guarantee**: ラップされたライブラリの`destroy()`メソッドは、Reactのアンマウント時（`useEffect`のクリーンアップ関数内）で**確実に**呼び出し、メモリリークとDOMの残骸を防いでください。
+    4.  **No Manual Re-init in Effects**: `useEffect(() => { instance.destroy(); instance = new Library(options); }, [options])` のようなパターンを禁止します。Reactのeffect実行順序（子コンポーネントの`useEffect`が親より先に実行される）により、内部状態の競合やDOMの不整合が発生します。
+*   **Rationale**: 命令型ライブラリ（Swiper, Chart.js, Google Maps等）は、初期化時にDOMを直接操作し、内部状態を保持します。ReactのProps変更はこれらのライブラリの内部状態を自動的に更新しないため、古いインスタンスが新しいPropsと不整合な状態で動作し続けます。`key` propによる再マウントは、Reactが提供する「コンポーネントのアイデンティティをリセットする」唯一の公式メカニズムであり、命令型ライブラリとの統合において最も安全で予測可能な戦略です。
+
+## 15. パフォーマンス予算と最適化 (Performance Budget & Optimization)
+
+### 15.1. CWVデプロイメントゲート (CWV Deployment Gate)
+*   **Law**: Core Web Vitalsの以下の数値は「目標」ではなく**「デプロイ要件（Deployment Gate）」**とする。超過したPRはマージを禁止する。
+
+    | 指標 | 閾値 | 測定条件 | ブロック条件 |
+    |:-----|:-----|:---------|:-----------|
+    | **LCP** (Largest Contentful Paint) | **≤ 2.5秒** | Lighthouse CI / CrUX | P75 超過 → マージブロック |
+    | **INP** (Interaction to Next Paint) | **≤ 200ms** | Lighthouse CI / CrUX | P75 超過 → マージブロック |
+    | **CLS** (Cumulative Layout Shift) | **≤ 0.1** | Lighthouse CI / CrUX | P75 超過 → マージブロック |
+    | **FCP** (First Contentful Paint) | **≤ 1.8秒** | Lighthouse CI | 目標値（警告のみ） |
+    | **TTFB** (Time to First Byte) | **≤ 800ms** | Lighthouse CI | 目標値（警告のみ） |
+
+*   **Edge Target**: キャッシュヒット時のページ応答は **≤ 200ms** を目標とする。
+*   **Mobile-First Measurement**: Lighthouse CIの測定は **モバイルシミュレーション（Slow 4G + CPU Throttling 4x）** をデフォルトとする。デスクトップスコアのみでの合格判定を禁止する。モバイルスコアが **≥ 90** であることを要件とする。
+*   **Touch Target**: タップ可能な要素（ボタン、リンク等）は最低 **44×44px** のタッチターゲットを確保すること。
+*   **Cross-Reference**: §2 Performance Budget (SLA), `52_sre_reliability.md` §10.2 (Performance Benchmark)
+
+### 15.2. バンドルサイズ予算 (Bundle Size Budget)
+*   **Law**: 以下のサイズ上限を超過した場合、ビルド警告またはPRコメントで通知する。
+
+    | 対象 | 上限 | 測定ツール（例） | 備考 |
+    |:-----|:-----|:---------------|:-----|
+    | **Initial JS** (First Load JS) | **≤ 150KB** (gzip) | `next build` 出力 | ルートページ初期ロード |
+    | **Route Chunk** (ページ単位) | **≤ 80KB** (gzip) | `next build` 出力 | 各ページの固有JS |
+    | **Third-party JS** (外部スクリプト) | **≤ 50KB** (gzip) | Bundle Analyzer | Analytics等の総量 |
+    | **Total CSS** | **≤ 50KB** (gzip) | ビルド出力 | UI Framework出力含む |
+
+*   **Diff Alert**: Bundle AnalyzerをCI上で実行し、前回ビルドとの差分が **+10KB** を超えた場合はPRに警告コメントを自動付与する。
+*   **Tree Shaking**: 未使用モジュール混入防止のため、`import` は名前付きインポートを必須とする（`import { format } from 'date-fns'` ✅ / `import * as dateFns` ❌）。
+*   **Unused CSS**: 未使用CSSクラスが全体の **20%** を超えないこと。CSSフレームワークの `content` 設定やPurgeCSSで不要クラスを除去する。
+*   **Cross-Reference**: §2 Bundle Size (150KB SLA), §14.21 Dynamic Library Decoupling
+
+### 15.3. 画像サイズ予算 (Image Size Budget)
+*   **Law**: 用途ごとに画像の最大サイズとフォーマットを制約する。
+
+    | 用途 | フォーマット | 最大サイズ | 備考 |
+    |:-----|:-----------|:---------|:-----|
+    | **ヒーロー画像** | WebP / AVIF | ≤ 200KB | LCP要素の場合は `priority` 必須 |
+    | **サムネイル** | WebP | ≤ 30KB | `sizes` prop による最適配信 |
+    | **アイコン/ロゴ** | SVG / WebP | ≤ 10KB | ベクター優先 |
+    | **OGP画像** | JPEG / PNG | ≤ 100KB | 1200×630px固定 |
+    | **ユーザーアップロード** | WebP (変換後) | ≤ 500KB | Image Resizing経由 |
+
+*   **Lazy Loading Strategy**:
+    *   **Above-the-Fold**: ファーストビューの画像は `loading="eager"` + `priority={true}` で即時読み込み。
+    *   **Below-the-Fold**: スクロール下の画像は `loading="lazy"` でNative Lazy Loading。
+*   **Cross-Reference**: §6 Image Optimization, §14.4 LCP & Lazy Loading
+
+### 15.4. データ取得ウォーターフォール防止 (Data Loading Waterfall Prevention)
+*   **Law**: データ取得の「直列連鎖（Waterfall）」を禁止する。独立したデータ取得は並列で実行しなければならない。
+*   **Action**:
+    1.  **Parallel Fetch**: 独立したデータ取得は `Promise.all()` / `Promise.allSettled()` で並列実行する。
+    2.  **Streaming SSR**: `React.Suspense` + `loading.tsx` を活用し、重いデータ取得を遅延させつつUIの初期描画を高速化する。
+    3.  **Prefetch**: ナビゲーション前に次ページのデータをプリフェッチする（フレームワークの `prefetch` 機能活用）。
+    4.  **DB Query Target**: 単一クエリの実行時間は **≤ 50ms** を目標とする。50ms超のクエリは `EXPLAIN ANALYZE` で分析し、インデックスまたはクエリ最適化を施す。
+*   **Cross-Reference**: §1 Data Fetching (RSC), §14.9 SSR Stream Resilience
+
+### 15.5. フォント読み込み戦略 (Font Loading Strategy)
+*   **Law**: Webフォントの読み込みがCWV（特にCLS・LCP）を劣化させないよう、以下の戦略を適用する。
+*   **Action**:
+    1.  **`font-display: swap`**: Webフォント読み込み中はシステムフォントを表示し、FOIT（Flash of Invisible Text）を防ぐ。
+    2.  **Preload**: ファーストビューで使用するフォントウェイト（Regular, Bold）のみを `<link rel="preload">` で事前読み込みする。不要なウェイトのPreloadは帯域浪費。
+    3.  **Subset化**: CJKフォント（Noto Sans JP等）はサブセット化し、フォントファイルサイズを削減する。フレームワーク標準のフォント機能（`next/font/google` 等）が自動的にこれを行う場合はそちらを利用する。
+    4.  **Variable Font**: 可能であればVariable Fontを採用し、複数ウェイトのHTTPリクエストを1つに集約する。
+*   **Cross-Reference**: §6 Font Optimization
+
+### 15.6. Lighthouse CI 自動ゲートプロトコル (Lighthouse CI Auto Gate Protocol)
+*   **Law**: PR毎にLighthouse CIを実行し、以下の自動ゲート閾値を適用する。
+*   **Auto Gate Thresholds**:
+    | カテゴリ | 最低スコア | ブロック条件 |
+    |:--------|:----------|:-----------|
+    | **Performance** | **≧ 90** | < 80 → PRマージ自動ブロック |
+    | **Accessibility** | **≧ 90** | 目標値（警告のみ） |
+    | **SEO** | **≧ 90** | 目標値（警告のみ） |
+    | **Best Practices** | **≧ 90** | 目標値（警告のみ） |
+*   **Score Degradation Alert**: 前回PRとの比較でスコアが **-5pt** 以上低下した場合、PRに自動アラートコメントを付与する。
+*   **RUM (Real User Monitoring)**: Web Vitalsデータを日次でダッシュボードに表示し、フィールドデータのデグレーションを即座に検知する仕組みを構築する。
+*   **CrUX Monthly Review**: Google Search Console の CrUX レポートを月次で確認し、フィールドデータが予算を超過したページを特定・対処する。
+*   **Cross-Reference**: §15.1 CWV Deployment Gate, `52_sre_reliability.md` §10.2 (Performance Benchmark)
+
+### 15.7. パフォーマンスデグレーション対応 (Performance Regression Response)
+*   **Law**: パフォーマンスの劣化を検知した場合、以下の重大度分類に基づき対応する。
+
+    | 重大度 | 条件 | 対応期限 | アクション |
+    |:------|:-----|:--------|:---------|
+    | **P0 (Critical)** | LCP > 4秒 または CLS > 0.25 | **即時** | ロールバック検討、緊急hotfix |
+    | **P1 (Major)** | LCP 2.5〜4秒 または INP 200〜500ms | **24時間以内** | 原因特定・修正PR作成 |
+    | **P2 (Minor)** | Lighthouseスコア 80〜90 | **1スプリント以内** | バックログに起票 |
+
+*   **Escalation**: P0 は発生即座にオンコール担当へ通知する。P1 は日次スタンドアップで報告する。
+*   **Cross-Reference**: §15.1 CWV Deployment Gate, §15.6 Lighthouse CI Auto Gate, `52_sre_reliability.md` §10.2

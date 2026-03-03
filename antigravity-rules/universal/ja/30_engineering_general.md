@@ -56,6 +56,37 @@
 *   **クリーンアップ (Cleanup)**:
     *   **デッドコードの即時削除**: コメントアウトされたコード、使われていないインポート、デバッグ用の `console.log` は、コミット前に完全に削除します。
     *   **TODOコメントの管理**: `// TODO:` を残す場合は、必ずチケット番号または期限を併記します。放置されたTODOは技術的負債です。
+*   **根本原因優先 (The Root Cause First Protocol)**:
+    *   **Prohibition**: エラー発生時、原因を特定せずに「とりあえず動く修正（Band-Aid Fix）」を適用することを禁止します。
+    *   **Process**:
+        1.  **Reproduce（再現）**: エラーをローカルで確実に再現させてください。
+        2.  **Diagnose（診断）**: ログ、スタックトレース、依存関係ツリー等を分析し、「なぜ起きたか」を言語化してください。
+        3.  **Fix Root（根本修正）**: その場しのぎの緩和策（SSL検証無効化、型キャスト、`--legacy-peer-deps`）ではなく、根本原因（証明書更新、型定義修正、`overrides` 設定）を解決してください。
+    *   **Rationale**: バンドエイド修正は「時限爆弾」です。短期的には動作しますが、環境変更やライブラリ更新時に予測不能な障害を引き起こします。
+*   **設定変更影響分析 (The Config Change Impact Analysis Protocol)**:
+    *   **Context**: ビルド設定（`next.config.ts`等）、コンパイラ設定（`tsconfig.json`等）、スタイル設定（`tailwind.config.ts`等）のプロジェクト全体設定ファイルの変更は、コードベース全体に予期しない影響を波及させます。
+    *   **Mandate**:
+        1.  **Impact Scan**: 設定変更前に、影響を受ける可能性のある全ファイルを `grep` で特定してください。
+        2.  **Approval Gate**: 影響ファイル数が10を超える場合、変更適用前にレビュワーまたは責任者の承認を得てください。
+        3.  **Atomic Fix**: 影響のある全ファイルを同一コミット（またはPR）で修正し、半端な状態を防止してください。
+    *   **Scan Examples**:
+        *   `trailingSlash` 変更 → 全 `router.push` / `redirect` / `Link href` をスキャン
+        *   `paths` エイリアス変更 → 全 `import` 文をスキャン
+        *   `images.remotePatterns` 変更 → 全 `<Image>` コンポーネントをスキャン
+*   **The Silent Async Bug Pattern（await欠落バグパターン）**:
+    *   **Law**: データベース書き込み操作（`.insert()` / `.update()` / `.delete()` / `.upsert()`）や外部API呼び出しなどのPromiseを返す非同期関数には、**必ず `await` を付与してください**。`await` の欠落は、書き込みが「サイレントに失敗」し、エラーも発生せずデータが消失する最も診断困難なバグの原因です。
+    *   **Action**:
+        1.  `async` 関数内のPromiseを返す操作に `await` がない場合は即座に修正してください。
+        2.  ESLint `@typescript-eslint/no-floating-promises` ルールの有効化を推奨します。
+        3.  監査時は、DB操作の `await` 欠落を `grep` で検出してください。
+    *   **Anti-Pattern**: `supabase.from('messages').insert({ content: text })` （❌ awaitなし — Promiseが浮遊しサイレント失敗）
+*   **The Codebase-as-Truth Protocol（コードベースを正とする原則）**:
+    *   **Law**: フレームワークやライブラリのAPIを使用する際、「公式ドキュメント」よりも「既存コードベースの実装パターン」を正としてください。ドキュメントは古い場合がありますが、動いているコードは常に最新です。
+    *   **Action**:
+        1.  APIや関数を使用する前に、必ず `grep` で既存の使用例を検索し、プロジェクト内で確立されたパターンに従ってください。
+        2.  公式ドキュメントと既存コードの実装が矛盾する場合、既存コードの実装を優先してください。
+        3.  新しいパターンを導入する場合は、既存のコードベースとの一貫性を確認し、不整合があれば先に既存コードを統一してください。
+    *   **Rationale**: 公式ドキュメントはバージョンアップや廃止の反映が遅れることがあります。「ドキュメント通りに書いたのに動かない」という時間浪費を防ぎます。
 
 ### 1.1. Supreme Directive: Omnichannel & Headless First Protocol
 *   **Web is just ONE Client**:
@@ -99,6 +130,14 @@
     *   **The Fixed Page Protocol (Dynamic Static Pages / SEO & Legal)**:
         *   **Law**: 利用規約、プライバシーポリシー、特定商取引法等の「静的だが更新可能なページ」を、物理的な `page.tsx` として個別に作成することを厳禁とします。
         *   **Action**: `src/app/(public)/[slug]/page.tsx` 等の動的ルートを使用し、DBの `fixed_pages` テーブル（または `site_settings`）からコンテンツを取得するアーキテクチャを採用してください。これにより、法改正時のコード変更・再デプロイのタイムラグをゼロにし、コンプライアンスを物理的に保証します。
+*   **API-Free First Protocol (無料代替優先原則)**:
+    *   **Law**: 有料の外部API（Geocoding、住所補完、画像最適化等）を採用する前に、以下の無料代替手段を必ず検討する義務を負います。安易な有料API導入はFinOpsの敗北です。
+    *   **Free Alternatives Checklist**:
+        1.  **既存データからの抽出**: URL解析、メタデータ解析等で必要な情報を取得できないか検討する。
+        2.  **クライアントサイドAPI**: Browser Geolocation API、Web Crypto API等のブラウザ標準APIを活用する。
+        3.  **オープンデータの活用**: 郵便番号→住所DB、公開統計データ等を利用する。
+        4.  **1回取得→DB保存パターン**: 座標、住所補完結果、通貨レートなど頻繁に変わらないデータは、初回のみ取得してDB保存し再利用する。
+    *   **Documentation**: 有料APIを採用する場合は、「なぜ無料代替が不可能か」の理由を実装計画書に明記してください。
 
 ## 3. 設計によるセキュリティ (Security by Design - DevSecOps)
 *   **ゼロトラスト (Zero Trust)**:
@@ -108,6 +147,18 @@
     *   **The Single Source of Config**:
         *   **Prohibition**: コードの各所（コンポーネント内等）で直接 `process.env.NEXT_PUBLIC_...` を参照することは、変更時の修正漏れや型安全性の欠如を招くため禁止です。
         *   **Action**: 必ず `src/lib/config` (または `env.ts`) で一元管理し、アプリケーション全体からはその定数オブジェクトのみを参照してください。この層で存在チェック（Validation）を行うことを推奨します。
+    *   **The Environment Template Sync Protocol（環境変数テンプレート同期義務）**:
+        *   **Law**: プロジェクトルートに `.env.example`（または `.env.template`）を常設し、必要な全環境変数の**キーのみ**を記録する義務を負います（値は空文字またはプレースホルダ）。
+        *   **Sync Mandate**: 新しい環境変数を追加した場合、**同一PRで** `.env.example` も更新しなければなりません。未更新は「新規開発者のオンボーディング障害」とみなします。
+        *   **Git Safety**: `.env.local` / `.env.production` 等の実値を含むファイルは `.gitignore` に含め、**絶対にコミットしてはなりません**。
+        *   **Rationale**: `.env.example` が存在しない、または古い状態のプロジェクトは、新規メンバーが環境構築に何時間も費やし、既存メンバーに都度質問する「属人化の温床」です。
+    *   **The Environment Variable Drift Prevention Protocol（環境変数ドリフト防止義務）**:
+        *   **Law**: 環境変数の欠落や環境間の不整合（Drift）は、「ローカルでは動くがCI/本番で壊れる」最大の原因です。環境変数の完全性を自動的に検証する仕組みを構築してください。
+        *   **Action**:
+            1.  **Startup Validation**: アプリケーション起動時に、必須環境変数の存在チェック（バリデーション）を実行し、不足している場合は**起動を中断**してください。「`undefined` のまま動作して途中でクラッシュする」状態を物理的に防止します。
+            2.  **CI Parity Check**: CIパイプラインにおいて、`.env.example` に記載された全キーがCI環境のシークレット/変数として定義されていることを検証するステップを追加してください。
+            3.  **Type-Safe Config**: 環境変数は文字列として取得するだけでなく、Zodやio-ts等で**型レベルでバリデーション**し、不正な値（空文字列、不正なURL形式等）を起動時に検出してください。
+        *   **Rationale**: 環境変数の欠落は、コードレベルのバグではなくインフラ設定のバグであり、型チェックやLintでは検出できません。起動時バリデーションは、このカテゴリのバグを「デプロイ直後」に検出する唯一の確実な手段です。
 
 ## 4. 技術的負債とクリーンアップ (Technical Debt & Cleanup)
 *   **負債の返済 (Debt Paydown)**:
@@ -123,6 +174,11 @@
     *   **The Dependency Governance Protocol**:
         *   **Dual Governance**: ネイティブ依存を含むパッケージ（`tree-sitter` 等）で環境差異エラーが出る場合は、`package.json` の `overrides` フィールドを使用してバージョンを強制統一します。
         *   **The License Quarantine (AGPL Block)**: ライセンスガバナンスの詳細については、`60_security_privacy.md` の Rule 5 を参照し、**AGPL (Affero GPL)** の使用防止を徹底してください。
+        *   **The Lockfile Integrity Protocol（ロックファイル整合性保証）**:
+            *   **Law**: ロックファイル（`package-lock.json` / `yarn.lock`）の不整合によるCI失敗や「ゴーストエラー」を「大罪」として禁じます。
+            *   **CI Discipline**: CIパイプライン上では必ず `npm ci`（または相当コマンド）を使用し、ロックファイルを厳密に守らせてください。`npm install` をCIで使用することは、ロックファイルを無視する行為であり禁止です。
+            *   **Silver Bullet**: ローカルとCIで挙動が異なる場合、調査に時間を費やす前に `rm -rf node_modules package-lock.json && npm install` を実行し、ロックファイルを完全に再生成してください。
+            *   **Prohibition**: 依存関係変更後にロックファイルをコミットせずにPushすることを禁止します。
     *   **The Console Log Ban (Information Leakage)**:
         *   **Law**: 本番ビルドにおいて `console.log` を残すことは、デバッグ情報の垂れ流しであり、機密情報（トークンやPII）漏洩の温床です。
         *   **Action**: `eslint-plugin-no-console` を `error` に設定し、CIで物理的にブロックしてください。必要なログは `logger` ライブラリ経由でSentry等に送信します。
@@ -135,6 +191,13 @@
     *   **The Exhaustive Reference Scan (Grep First)**:
         *   **Law**: 「自分の記憶」に基づいたファイル削除は、未検知のインポートエラーやビルド破壊を招く「博打」です。
         *   **Action**: ファイルを削除・リネームする際は、必ずプロジェクト全体を対象にファイル名で **`grep` 検索** を行い、全ての参照箇所を特定・排除してから実行してください。
+    *   **The Dead Export Detection Protocol（デッドエクスポート検出義務）**:
+        *   **Law**: エクスポートされた関数・型・定数の使用箇所がゼロになった場合、即座に除去しなければなりません。「Dead Code」だけでなく「Dead Export」も負債です。
+        *   **Action**:
+            1.  監査時は `grep -r "functionName" src/` で全エクスポートの使用箇所を確認してください。
+            2.  使用箇所ゼロのエクスポートは即座に除去し、関連する型定義も連鎖クリーンアップしてください。
+            3.  型エイリアス（`type X = Y`）が唯一の使用箇所ならば、エイリアスごと除去を検討してください。
+        *   **Rationale**: Dead Exportは「誰かが使っているかもしれない」という心理的ブロックにより放置されやすいですが、未使用のエクスポートは依存グラフを複雑化し、Tree Shakingの効果を阻害し、リファクタリング時の認知負荷を増加させます。
     *   **The Ghost Feature Ban**: ユーザー導線が存在しない機能（公開されていない管理画面コード等）は負債です。YAGNI原則に従い、物理削除してください。
     *   **The Ghost Feature Revival (Full-Stack Coherence)**:
         *   **Law**: 管理画面で設定を変更しても、フロントエンドで何も変化しない機能（Ghost Feature）は、システムへの信頼を破壊するバグです。
@@ -269,8 +332,13 @@
 *   **Action**: フォーム関連のライブラリを導入・更新する際は、必ずこれら3者のエコシステム内での互換バージョンを確認し、一括でアップデートを行ってください。
 *   **No "as any"**: バージョン不整合による型エラーを `as any` で握りつぶすことは禁止です。根本原因であるバージョン乖離を解決してください。
 
-
-
+### 10.6. The Zod Nullable DB Alignment Protocol（DB NULL対応義務）
+*   **Law**: DBスキーマで `NULL` を許容するカラムに対応するZodスキーマは、`.optional()`（`undefined` を許容）ではなく **`.nullable()`**（`null` を許容）を使用しなければなりません。
+*   **Action**:
+    1.  **Schema Parity**: DBカラムが `DEFAULT NULL` または `NOT NULL` 制約なしの場合、対応するZodフィールドは `z.string().nullable()` のように `.nullable()` を適用してください。`.optional()` は `undefined` を許容しますが、DBの `NULL` とは意味が異なります。
+    2.  **Transform Awareness**: DBからの取得値が `null` であり、UI側で `undefined` として扱う必要がある場合は、`.nullable().transform(v => v ?? undefined)` で明示的に変換してください。暗黙の変換に依存してはなりません。
+    3.  **Migration Sync**: DBマイグレーションで `NOT NULL` 制約を追加・削除した場合、対応するZodスキーマの `.nullable()` / `.required()` を**同時に更新**してください。不一致はランタイムバリデーションエラーの直接原因です。
+*   **Rationale**: `null`（値が存在しない）と `undefined`（値が設定されていない）はJavaScript/TypeScriptにおいて異なる概念です。DBは `NULL` を返すのに対しZodが `.optional()` で定義されていると、バリデーションが通るが型が不正確になり、予期しない挙動を引き起こします。
 ## 11. ドキュメント運用 (Documentation Ops)
 *   **Living Documentation**:
     *   **Mermaid.js**: アーキテクチャ図は画像ではなくコード（Mermaid）で管理し、陳腐化を防ぎます。
@@ -282,6 +350,18 @@
     *   ドキュメントはコードと等価であり、Gitで管理し、PRレビューの対象とします。ドキュメント更新なきコード変更はマージ禁止です。
 *   **鮮度維持**:
     *   リンク切れチェックを自動化し、主要ルールは四半期ごとに見直します。
+*   **The README Standard Protocol（README必須セクション基準）**:
+    *   **Law**: プロジェクトのREADME.mdには以下のセクションを必ず含め、新規参画者が初日に開発環境を構築しPRを出せる状態を維持してください。
+    *   **必須セクション**:
+        | セクション | 内容 |
+        |:---------|:-----|
+        | **概要** | プロジェクトの目的（1-2文） |
+        | **技術スタック** | 主要フレームワーク・ライブラリ一覧 |
+        | **ローカル開発** | `npm install` → `npm run dev` の手順 |
+        | **環境変数** | `.env.example` の全変数と説明 |
+        | **ディレクトリ構成** | 主要ディレクトリの役割表 |
+        | **デプロイ** | 本番デプロイまでのフロー |
+    *   **更新義務**: 機能追加・アーキテクチャ変更時に関連ドキュメントの更新をPRチェックリストに含めてください。「コードが読めれば分かる」は禁止です。
 
 ## 12. エンジニアリング品質プロトコル (Engineering Quality Protocols)
 
@@ -305,13 +385,88 @@
 *   **Reason**: スタックオーバーフローを引き起こすだけでなく、不注意な実装（useEffect等との組み合わせ）により無限DB読み込みを誘発し、クラウド破産を招くためです。
 *   **Action**: 再帰的な構造（木構造の表示等）を扱う場合は、必ず **Depth Limit (最大深度)** を定数（例: `MAX_DEPTH = 5`）として定義し、それを超える場合は例外をスローするか、フラットなデータ構造への変換（Normalization）を検討してください。
 
+### 12.6. The Atomic Commits Protocol（原子的コミット基準）
+*   **Law**: 1つのコミットには「1つの論理的変更」のみを含めてください。フォーマット修正と機能追加を混在させてはなりません。
+*   **Revertability**: バグ発生時に「そのコミットだけ」をRevertすれば修正される粒度を維持してください。
+*   **Prohibition**: WIP（Work In Progress）コミットの本番ブランチへのプッシュを禁止します。作業途中のコミットは、マージ前にSquashで整理してください。
 
+### 12.7. The Conventional Commits Standard（セマンティックコミット規約）
+*   **Law**: コミットメッセージは `type(scope): subject` 形式を遵守してください。AI・ツールによる履歴解析やChangelog自動生成の精度を高めるために必須です。
+*   **Types**:
+    | Type | 用途 |
+    |:-----|:-----|
+    | `feat` | 新機能追加 |
+    | `fix` | バグ修正 |
+    | `refactor` | リファクタリング（機能変更なし） |
+    | `perf` | パフォーマンス改善 |
+    | `docs` | ドキュメント変更 |
+    | `style` | コードスタイル変更（フォーマット等） |
+    | `test` | テスト追加・修正 |
+    | `chore` | ビルド・CI設定変更 |
+    | `security` | セキュリティ修正 |
+*   **Breaking Change**: 破壊的変更がある場合は `feat!:` または footer に `BREAKING CHANGE:` を記載してください。
 
+### 12.8. The Code Review Protocol（コードレビュー基準）
+*   **Law**: コードレビューは品質の最終防衛線であり、属人化防止と知識共有の機会でもあります。
+*   **PRサイズ**: 変更行数は **400行以下** を目安とします。超過する場合はPRを分割してください。
+*   **レビュー観点チェックリスト**:
+    | 観点 | チェック内容 |
+    |:-----|:-----------|
+    | **型安全性** | `as any` の使用禁止、適切な型定義 |
+    | **セキュリティ** | PII露出なし、アクセス制御確認 |
+    | **パフォーマンス** | N+1クエリなし、不要な再レンダリングなし |
+    | **FinOps（コスト影響）** | 無限ループDB読み込みなし、キャッシュ戦略適切、AIトークン浪費なし |
+    | **国際化・ローカライズ** | UI文言が運用者の母国語で記述されているか |
+    | **アクセシビリティ** | キーボード操作可能、`aria-label` 適切 |
+*   **セルフレビュー**: PR作成者は提出前に上記チェックリストを自己確認し、PRテンプレートに記入してください。
 
+### 12.9. The CODEOWNERS Protocol（コード所有権管理）
+*   **Law**: コードベースの拡大に伴い、各領域の責任者を明確化してください。適切なレビュアーの自動アサインにより品質と速度を両立します。
+*   **Action**:
+    1.  `.github/CODEOWNERS` ファイルでディレクトリごとの所有者を定義してください。
+    2.  CODEOWNERSに指定された所有者のApproveをPRマージの必須条件としてください（Branch Protectionで強制）。
+    3.  チームメンバーの追加・退出時にCODEOWNERSを即時更新してください。
+    4.  新規ディレクトリ作成時はPRで所有者を明示してください。
+*   **Rationale**: 所有者が不明確なコードは、誰もレビューせず品質が低下します。「自分の領域」という責任感が品質を支えます。
 
+### 12.10. The Git Hooks Automation Protocol（Git Hooks自動化三層防御）
+*   **Law**: 「気をつける」という運用ルールではなく、「物理的に不可能にする仕組み（Code not Policy）」で品質を担保してください。
+*   **三層防御**:
+    | レイヤー | フック | 内容 | ツール例 |
+    |:---------|:-----|:-----|:--------|
+    | **Pre-Commit** | `pre-commit` | ステージングされたファイルに対してLint・フォーマットを自動実行 | `husky` + `lint-staged` |
+    | **Commit-Msg** | `commit-msg` | コミットメッセージがConventional Commits形式に準拠しているか検証 | `commitlint` |
+    | **Pre-Push** | `pre-push` | 保護ブランチ（`main`, `master`）への直接Pushを物理的にブロック | ブランチ名チェックスクリプト |
+*   **Action**:
+    1.  プロジェクト初期化時にGit Hooks管理ツールを導入してください。
+    2.  Pre-pushフックでカレントブランチを検査し、保護ブランチ名に一致する場合は `exit 1` で強制中断してください。
+    3.  `--no-verify` でのフック迂回は、ゼロトレランス（Zero Tolerance）とし禁止です。
+*   **Rationale**: サーバー側のBranch Protectionだけでは、ローカルでの誤Pushを防げません。クライアント側とサーバー側の二重防御（Defense in Depth）が必要です。
 
+### 12.11. The Branch Naming Convention（ブランチ命名規約）
+*   **Law**: ブランチ名は `type/summary` 形式で統一してください。履歴の可読性と自動化ツールとの連携のため必須です。
+*   **Types**: `feat/`, `fix/`, `refactor/`, `chore/`, `hotfix/`
+*   **Example**: `feat/user-profile`, `fix/login-redirect-loop`, `refactor/dto-cleanup`
+*   **Merge Strategy**: PR作成時は **Squash Merge** を前提とし、コミット履歴を汚さないでください。
+*   **Branch Cleanup Protocol（マージ後クリーンアップ）**:
+    1.  `git checkout main` で作業ブランチから離脱してください。
+    2.  `git pull origin main` でローカルの `main` を最新化してください。
+    3.  マージ済みブランチは即座に削除してください。放置されたブランチは「技術的負債」です。
+*   **Rationale**: 一貫性のないブランチ名は、CI/CDパイプラインやリリースノート自動生成を破壊し、履歴の追跡を困難にします。
+
+### 12.12. The SSOT Sync Protocol（SSOT同期プロトコル）
+*   **Law**: 作業ブランチのマージ完了後、またはブランチから離脱した際は、必ずローカルの `main` ブランチをリモートの状態と**100%同期**させなければなりません。ローカルの `main` は常に「Single Source of Truth（唯一の正解）」と一致していなければなりません。
+*   **Action**:
+    1.  **Post-Merge Sync**: 作業完了時は以下を実行してください：
+        *   `git checkout main`
+        *   `git pull origin main`
+        *   マージ済みブランチの削除
+    2.  **Pre-Task Verification**: 新規タスクを開始する際は、まずローカルの `main` が最新であることを確認してください。古い状態からのブランチ作成は、コンフリクトと手戻りの元凶です。
+    3.  **No Stale Development**: 古い `main` からブランチを切って開発を開始することを禁止します。`git log --oneline -1 origin/main` と `git log --oneline -1 main` の一致を確認してください。
+*   **Rationale**: ローカルとリモートの乖離は、マージコンフリクト、既に修正済みのバグへの対応、そして環境差異による予期しない動作の主原因です。「同期忘れ」を「プロセスの欠陥」として制度化することで、この種の事故を構造的に防止します。
 
 ## 13. 高度アーキテクチャ原則 (Advanced Architectural Mandates)
+
 
 ### 13.1. The Trinity DTO Mandate (Constitutional Pillar)
 *   **Law**: いかなる機能実装においても、以下の3点を遵守しないコードは、存在自体が憲法違反（Unconstitutional）となり、即時削除の対象となります。
@@ -822,3 +977,24 @@
     3.  **CI Pipeline**: GitHub Actions等のCIにおいて `migration:check` ジョブを常時稼働させ、ヒューマンエラーの最終防衛線としてください。このCIジョブの削除・無効化は禁止します。
     4.  **Custom Rules**: プロジェクト固有の危険パターン（例: `DROP TABLE` without `IF EXISTS`、`ALTER TABLE DROP COLUMN` without backup）もルールセットに追加可能な拡張設計としてください。
 *   **Rationale**: マイグレーションの事故は「本番データの不可逆的破壊」に直結します。コードレビューのみに依存した防衛は、レビュアーの見落としや緊急デプロイ時のスキップにより容易に突破されます。機械的な静的解析ガードは、24時間365日、一切の例外なく本番環境を守り続けます。
+
+### 13.60. The Feature Flag Lifecycle Protocol（フィーチャーフラグ運用規律）
+*   **Context**: Feature Flagは安全なリリースを可能にしますが、管理されないフラグはコードの複雑性を増大させ、技術的負債となります。フラグの作成から削除までのライフサイクルを厳格に管理してください。
+*   **Lifecycle**:
+    | フェーズ | 説明 |
+    |:--------|:-----|
+    | **作成** | フラグ名・目的・期限をドキュメント化 |
+    | **有効化** | ステージング環境で検証後、本番に段階展開 |
+    | **全展開** | 全ユーザーに展開完了、フラグ削除のカウントダウン開始 |
+    | **削除** | フラグ関連コードを全て削除し、クリーンな状態に戻す |
+*   **最大存続期間**: **90日**。超過したフラグは技術的負債として記録し、次スプリントで削除を優先してください。
+*   **命名規約**: `FF_<FEATURE_NAME>` 形式を推奨します。
+*   **Prohibition**: Feature Flagのネスト（入れ子）は認知的複雑性を爆発させるため**禁止**します。
+*   **Cleanup Obligation**: フラグを削除した際は、関連する条件分岐コード（`if (featureFlags.ff_xxx)`）も**同一PRで**削除しなければなりません。放置は技術的負債の蓄積とみなします。
+*   **四半期棚卸し義務**: 四半期末にフラグ一覧を棚卸しし、以下のルールを適用してください。
+    | 状態 | 日数 | 対応 |
+    |:-----|:-----|:-----|
+    | ON（全ユーザー展開済み） | > 30日 | フラグを削除し、新機能コードのみ残す |
+    | OFF（廃止決定） | > 30日 | フラグとレガシーコードの両方を削除 |
+    | 実験中 | > 90日 | 技術的負債として記録、次スプリントで決着 |
+*   **Rationale**: Feature Flagは「一時的なスイッチ」であり「永続的な設定」ではありません。放置されたフラグはコードパスを指数関数的に増加させ、テスト困難性を高め、予期しないバグの温床となります。定期的な棚卸しとライフサイクル管理により、コードベースの健全性を維持します。

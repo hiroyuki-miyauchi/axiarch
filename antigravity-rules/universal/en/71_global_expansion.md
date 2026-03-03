@@ -18,6 +18,10 @@
 *   **Currency & Numbers**:
     *   Treat price not just as a number but as an object of "Amount + Currency Code" (e.g., `{ amount: 1000, currency: 'JPY' }`).
     *   Use `Intl.NumberFormat` for display to automatically apply format matching the locale.
+*   **Translation Key Design Standard**:
+    *   **Namespace Design**: Split translation keys by feature/page into Namespaces (e.g., `common`, `auth`, `error`, `admin`).
+    *   **Naming Convention**: Use dot (`.`) as delimiter with a maximum depth of **3 levels** (e.g., `feature.section.element`).
+    *   **Current Application**: Pre-installing i18n libraries is unnecessary to prevent over-investment, but when consolidating UI text into constant files, follow the above Namespace structure.
 
 ## 3. RTL (Right-to-Left) Support
 *   **Logical Properties**:
@@ -41,3 +45,11 @@
     *   German etc. tend to be longer than English. Design buttons and labels to support variable length and prevent layout breaks.
 *   **Colors & Icons**:
     *   Meanings of colors and gestures differ by culture. Adopt global standard UI and avoid depending too much on specific cultures.
+
+## 6. Translation Quality Gate
+*   **Law**: When expanding to multiple languages, **releasing with machine translation only is prohibited**. All translated text MUST undergo **review by a native speaker**.
+*   **Action**:
+    1.  **Native Review Obligation**: Translated text must be reviewed by a native speaker of the target language (or a reviewer with equivalent linguistic proficiency).
+    2.  **Git-Managed Translation Files**: Translation files must be managed in JSON format (or equivalent) under Git version control to maintain change history traceability.
+    3.  **CI Check**: Introduce a mechanism to detect missing translation keys (keys that exist in code but are undefined in translation files) via CI.
+*   **Rationale**: Machine translation frequently misses context and nuance. Especially for short UI text, unnatural expressions damage credibility and user trust.

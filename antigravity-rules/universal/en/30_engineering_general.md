@@ -79,6 +79,37 @@
         *   **Law**: Features where admin settings change but nothing happens on frontend (Ghost Feature) are bugs destroying trust.
         *   **Action**: When adding admin settings, simultaneously implement frontend reflection logic (CSS var injection, API field display) and perform integration test. Half implementation is "incomplete".
     *   **TODO Management**: If leaving `// TODO:`, always include ticket number or deadline. Abandoned TODOs are technical debt.
+*   **Root Cause First (The Root Cause First Protocol)**:
+    *   **Prohibition**: Applying "just make it work" fixes (Band-Aid Fixes) without identifying the root cause when errors occur is prohibited.
+    *   **Process**:
+        1.  **Reproduce**: Reliably reproduce the error locally.
+        2.  **Diagnose**: Analyze logs, stack traces, dependency trees, etc. and verbalize "why it happened."
+        3.  **Fix Root**: Instead of ad-hoc mitigations (disabling SSL verification, type casts, `--legacy-peer-deps`), resolve the root cause (certificate renewal, type definition fix, `overrides` configuration).
+    *   **Rationale**: Band-Aid fixes are "time bombs." They work short-term but cause unpredictable failures during environment changes or library updates.
+*   **Config Change Impact Analysis (The Config Change Impact Analysis Protocol)**:
+    *   **Context**: Changes to project-wide configuration files — build settings (`next.config.ts`, etc.), compiler settings (`tsconfig.json`, etc.), style settings (`tailwind.config.ts`, etc.) — can propagate unexpected impacts across the entire codebase.
+    *   **Mandate**:
+        1.  **Impact Scan**: Before changing configuration, identify all potentially affected files using `grep`.
+        2.  **Approval Gate**: When affected files exceed 10, obtain reviewer or responsible person's approval before applying changes.
+        3.  **Atomic Fix**: Fix all affected files in the same commit (or PR) to prevent half-applied states.
+    *   **Scan Examples**:
+        *   `trailingSlash` change → Scan all `router.push` / `redirect` / `Link href`
+        *   `paths` alias change → Scan all `import` statements
+        *   `images.remotePatterns` change → Scan all `<Image>` components
+*   **The Silent Async Bug Pattern**:
+    *   **Law**: Promise-returning asynchronous operations such as database writes (`.insert()` / `.update()` / `.delete()` / `.upsert()`) and external API calls **MUST always have `await`**. A missing `await` causes writes to "silently fail" — no error is thrown and data is lost, making this the most diagnostically challenging bug.
+    *   **Action**:
+        1.  Immediately fix any Promise-returning operation inside an `async` function that lacks `await`.
+        2.  Enabling the ESLint rule `@typescript-eslint/no-floating-promises` is recommended.
+        3.  During audits, use `grep` to detect missing `await` on DB operations.
+    *   **Anti-Pattern**: `supabase.from('messages').insert({ content: text })` (❌ no await — Promise floats and silently fails)
+*   **The Codebase-as-Truth Protocol**:
+    *   **Law**: When using framework or library APIs, treat **"existing codebase implementation patterns"** as the source of truth over **"official documentation"**. Documentation may be outdated, but working code is always current.
+    *   **Action**:
+        1.  Before using an API or function, MUST search for existing usage examples with `grep` and follow the patterns established within the project.
+        2.  When official documentation contradicts existing code implementation, prioritize the existing code implementation.
+        3.  When introducing new patterns, verify consistency with the existing codebase and unify existing code first if inconsistencies exist.
+    *   **Rationale**: Official documentation can lag behind version upgrades or deprecations. Prevents time waste from "it doesn't work even though I followed the docs."
 
 ### 1.1. Supreme Directive: Omnichannel & Headless First Protocol
 *   **Web is just ONE Client**:
@@ -122,6 +153,14 @@
     *   **The Fixed Page Protocol (Dynamic Static Pages / SEO & Legal)**:
         *   **Law**: Creating "static but updatable pages" (Terms of Service, Privacy Policy, Legal Commerce Act) as physical `page.tsx` files is strictly prohibited.
         *   **Action**: Use dynamic routes like `src/app/(public)/[slug]/page.tsx` and fetch content from DB `fixed_pages` table (or `site_settings`). This eliminates code change/redeploy time lag for legal amendments and physically guarantees compliance.
+*   **API-Free First Protocol**:
+    *   **Law**: Before adopting paid external APIs (Geocoding, address autocomplete, image optimization, etc.), you are obligated to consider the following free alternatives. Casual adoption of paid APIs is a FinOps defeat.
+    *   **Free Alternatives Checklist**:
+        1.  **Extract from existing data**: Consider whether needed information can be obtained via URL parsing, metadata analysis, etc.
+        2.  **Client-side APIs**: Leverage browser-standard APIs such as Browser Geolocation API, Web Crypto API, etc.
+        3.  **Open data**: Utilize publicly available datasets such as postal code→address databases, public statistics, etc.
+        4.  **Fetch-once → DB-save pattern**: For data that doesn't change frequently (coordinates, address autocomplete results, currency rates), fetch once and save to DB for reuse.
+    *   **Documentation**: When adopting a paid API, explicitly state in the implementation plan "why free alternatives are not feasible."
 
 ## 3. Security by Design (DevSecOps)
 *   **Zero Trust**:
@@ -131,6 +170,18 @@
     *   **The Single Source of Config**:
         *   **Prohibition**: Directly referencing `process.env.NEXT_PUBLIC_...` throughout code (in components, etc.) causes modification omissions and lacks type safety—prohibited.
         *   **Action**: Centrally manage in `src/lib/config` (or `env.ts`) and reference only that constant object throughout the application. Recommend existence validation in this layer.
+    *   **The Environment Template Sync Protocol**:
+        *   **Law**: A `.env.example` (or `.env.template`) file MUST be maintained at the project root, recording **only the keys** of all required environment variables (values should be empty strings or placeholders).
+        *   **Sync Mandate**: When adding new environment variables, `.env.example` MUST also be updated **in the same PR**. Failure to do so is considered an "onboarding failure for new developers."
+        *   **Git Safety**: Files containing actual values such as `.env.local` / `.env.production` MUST be included in `.gitignore` and **MUST NEVER be committed**.
+        *   **Rationale**: Projects without a `.env.example`, or with an outdated one, are a "breeding ground for tribal knowledge" where new members spend hours on environment setup and constantly ask existing members for help.
+    *   **The Environment Variable Drift Prevention Protocol**:
+        *   **Law**: Missing environment variables or inconsistencies across environments (Drift) are the primary cause of "works locally but breaks in CI/production." Build mechanisms to automatically verify the completeness of environment variables.
+        *   **Action**:
+            1.  **Startup Validation**: Execute existence checks (validation) for all required environment variables at application startup, and **abort startup** if any are missing. Physically prevent the state of "running with `undefined` and crashing midway."
+            2.  **CI Parity Check**: Add a step in the CI pipeline to verify that all keys listed in `.env.example` are defined as secrets/variables in the CI environment.
+            3.  **Type-Safe Config**: Beyond retrieving environment variables as strings, perform **type-level validation** using Zod, io-ts, or similar to detect invalid values (empty strings, malformed URL formats, etc.) at startup.
+        *   **Rationale**: Missing environment variables are infrastructure configuration bugs, not code-level bugs, and cannot be detected by type checking or linting. Startup validation is the only reliable means to detect this category of bugs "immediately after deployment."
 
 ## 4. Technical Debt & Cleanup
 *   **Debt Paydown**:
@@ -146,6 +197,11 @@
     *   **The Dependency Governance Protocol**:
         *   **Dual Governance**: For environment difference errors with packages containing native dependencies (`tree-sitter`, etc.), use `package.json` `overrides` field to force version unification.
         *   **The License Quarantine (AGPL Block)**: For license governance details, refer to `60_security_privacy.md` Rule 5 and thoroughly prevent **AGPL (Affero GPL)** usage.
+        *   **The Lockfile Integrity Protocol**:
+            *   **Law**: CI failures and "ghost errors" caused by lockfile (`package-lock.json` / `yarn.lock`) inconsistencies are classified as a "mortal sin."
+            *   **CI Discipline**: MUST use `npm ci` (or equivalent) in CI pipelines to strictly enforce the lockfile. Using `npm install` in CI is an act of ignoring the lockfile and is prohibited.
+            *   **Silver Bullet**: When behavior differs between local and CI, before spending time investigating, execute `rm -rf node_modules package-lock.json && npm install` to completely regenerate the lockfile.
+            *   **Prohibition**: Pushing without committing the lockfile after dependency changes is prohibited.
     *   **The Console Log Ban (Information Leakage)**:
         *   **Law**: Leaving `console.log` in production builds is debug info spill and source of sensitive information (tokens, PII) leakage.
         *   **Action**: Set `eslint-plugin-no-console` to `error` and physically block in CI. Send necessary logs to Sentry etc. via `logger` library.
@@ -158,6 +214,13 @@
     *   **The Exhaustive Reference Scan (Grep First)**:
         *   **Law**: Deleting files based on "memory" is a gamble that causes undetected import errors and build breakage.
         *   **Action**: When deleting/renaming files, MUST **`grep` search** the entire project by filename to identify and eliminate all references before executing.
+    *   **The Dead Export Detection Protocol**:
+        *   **Law**: When the usage count of exported functions, types, or constants drops to zero, they MUST be immediately removed. Not just "Dead Code" — "Dead Exports" are also debt.
+        *   **Action**:
+            1.  During audits, verify usage of all exports with `grep -r "functionName" src/`.
+            2.  Remove exports with zero usage immediately, and chain-cleanup related type definitions.
+            3.  If a type alias (`type X = Y`) is the only usage site, consider removing the alias entirely.
+        *   **Rationale**: Dead Exports tend to be left alone due to the psychological block of "someone might be using this," but unused exports complicate the dependency graph, inhibit Tree Shaking effectiveness, and increase cognitive load during refactoring.
     *   **The Ghost Feature Ban**: Features with no user navigation (unpublished admin screen code, etc.) are debt. Physically delete per YAGNI principle.
     *   **The Ghost Feature Revival (Full-Stack Coherence)**:
         *   **Law**: Features where settings change in admin screen but nothing changes in frontend (Ghost Feature) are bugs that destroy system trust.
@@ -284,6 +347,14 @@
 *   **Action**: When introducing/updating form libraries, always confirm compatible versions within these three ecosystems and update en masse.
 *   **No "as any"**: Silencing type errors due to version mismatch with `as any` is prohibited. Solve the root cause (version divergence).
 
+### 10.6. The Zod Nullable DB Alignment Protocol (DB NULL Correspondence Mandate)
+*   **Law**: Zod schemas corresponding to DB columns that allow `NULL` MUST use **`.nullable()`** (allows `null`) instead of `.optional()` (allows `undefined`).
+*   **Action**:
+    1.  **Schema Parity**: When a DB column has `DEFAULT NULL` or lacks a `NOT NULL` constraint, the corresponding Zod field MUST use `.nullable()` such as `z.string().nullable()`. `.optional()` permits `undefined`, which has a different semantic meaning from DB `NULL`.
+    2.  **Transform Awareness**: When a value retrieved from the DB is `null` but needs to be handled as `undefined` on the UI side, use `.nullable().transform(v => v ?? undefined)` for explicit conversion. MUST NOT rely on implicit conversion.
+    3.  **Migration Sync**: When adding or removing `NOT NULL` constraints via DB migrations, the corresponding Zod schema's `.nullable()` / `.required()` MUST be **updated simultaneously**. Mismatch is a direct cause of runtime validation errors.
+*   **Rationale**: `null` (value does not exist) and `undefined` (value has not been set) are distinct concepts in JavaScript/TypeScript. When the DB returns `NULL` but the Zod schema is defined with `.optional()`, validation passes but the type becomes inaccurate, causing unexpected behavior.
+
 ## 11. Documentation Ops
 *   **Living Documentation**:
     *   **Mermaid.js**: Architecture diagrams must be code (Mermaid), not images, to prevent obsolescence.
@@ -292,6 +363,18 @@
     *   Documentation is equal to code; managed in Git and subject to PR review. No code merge without doc updates.
 *   **Freshness**:
     *   Automate link rot checks. Review key rules quarterly.
+*   **The README Standard Protocol**:
+    *   **Law**: The project's README.md MUST include the following sections to ensure new team members can set up their development environment and submit a PR on their first day.
+    *   **Required Sections**:
+        | Section | Content |
+        |:--------|:--------|
+        | **Overview** | Project purpose (1-2 sentences) |
+        | **Tech Stack** | Major frameworks and libraries |
+        | **Local Development** | `npm install` → `npm run dev` steps |
+        | **Environment Variables** | All variables in `.env.example` with descriptions |
+        | **Directory Structure** | Role of major directories |
+        | **Deployment** | Flow from local to production deployment |
+    *   **Update Obligation**: Include documentation updates in PR checklists when adding features or changing architecture. "The code speaks for itself" is prohibited.
 
 ## 12. Engineering Quality Protocols
 
@@ -315,6 +398,86 @@
 *   **Law**: Deep recursion with unclear termination in component trees or business logic is prohibited.
 *   **Reason**: Causes Stack Overflow and infinite DB reads (when combined with useEffect), leading to cloud bankruptcy.
 *   **Action**: Always define a **MAX_DEPTH** constant (e.g., 5) for recursive structures. Throw exception or normalize data if exceeded.
+
+### 12.6. The Atomic Commits Protocol
+*   **Law**: Each commit MUST contain only **one logical change**. Mixing formatting fixes with feature additions is prohibited.
+*   **Revertability**: Maintain granularity where reverting "just that commit" fixes a bug.
+*   **Prohibition**: Pushing WIP (Work In Progress) commits to production branches is prohibited. Organize commits via Squash before merge.
+
+### 12.7. The Conventional Commits Standard
+*   **Law**: Commit messages MUST follow the `type(scope): subject` format. This is mandatory for improving accuracy of AI/tool history analysis and automated Changelog generation.
+*   **Types**:
+    | Type | Purpose |
+    |:-----|:--------|
+    | `feat` | New feature |
+    | `fix` | Bug fix |
+    | `refactor` | Refactoring (no feature change) |
+    | `perf` | Performance improvement |
+    | `docs` | Documentation change |
+    | `style` | Code style change (formatting etc.) |
+    | `test` | Test addition/modification |
+    | `chore` | Build/CI configuration change |
+    | `security` | Security fix |
+*   **Breaking Change**: For breaking changes, use `feat!:` or include `BREAKING CHANGE:` in the footer.
+
+### 12.8. The Code Review Protocol
+*   **Law**: Code review is the last line of defense for quality, and an opportunity for preventing knowledge silos and sharing expertise.
+*   **PR Size**: Target **400 lines or fewer** of changes. Split PRs when exceeding.
+*   **Review Perspective Checklist**:
+    | Perspective | Check Content |
+    |:-----------|:-------------|
+    | **Type Safety** | No `as any` usage, proper type definitions |
+    | **Security** | No PII exposure, access control verified |
+    | **Performance** | No N+1 queries, no unnecessary re-renders |
+    | **FinOps (Cost Impact)** | No infinite loop DB reads, appropriate cache strategy, no AI token waste |
+    | **Internationalization / Localization** | UI text written in the operator's native language |
+    | **Accessibility** | Keyboard operable, appropriate `aria-label` |
+*   **Self-Review**: PR authors MUST self-check against the above checklist and fill in the PR template before submission.
+
+### 12.9. The CODEOWNERS Protocol
+*   **Law**: As the codebase grows, clarify the responsible person for each area. Auto-assignment of appropriate reviewers balances quality and speed.
+*   **Action**:
+    1.  Define owners per directory in the `.github/CODEOWNERS` file.
+    2.  Make Approve from designated CODEOWNERS a merge requirement (enforce via Branch Protection).
+    3.  Immediately update CODEOWNERS when team members are added or leave.
+    4.  Explicitly designate owners in PRs when creating new directories.
+*   **Rationale**: Code without clear owners receives no reviews and quality degrades. A sense of ownership ("my area") sustains quality.
+
+### 12.10. The Git Hooks Automation Protocol
+*   **Law**: Guarantee quality not through "being careful" (operational rules) but through "mechanisms that make violations physically impossible (Code not Policy)."
+*   **Three-Layer Defense**:
+    | Layer | Hook | Content | Tool Example |
+    |:------|:-----|:--------|:-------------|
+    | **Pre-Commit** | `pre-commit` | Auto-run lint/format on staged files | `husky` + `lint-staged` |
+    | **Commit-Msg** | `commit-msg` | Verify commit message conforms to Conventional Commits format | `commitlint` |
+    | **Pre-Push** | `pre-push` | Physically block direct pushes to protected branches (`main`, `master`) | Branch name check script |
+*   **Action**:
+    1.  Introduce a Git Hooks management tool during project initialization.
+    2.  In the pre-push hook, inspect the current branch and force abort with `exit 1` if it matches a protected branch name.
+    3.  Bypassing hooks via `--no-verify` is Zero Tolerance — prohibited.
+*   **Rationale**: Server-side Branch Protection alone cannot prevent accidental local pushes. Client-side and server-side Defense in Depth is required.
+
+### 12.11. The Branch Naming Convention
+*   **Law**: Branch names MUST follow the `type/summary` format. Mandatory for history readability and automation tool integration.
+*   **Types**: `feat/`, `fix/`, `refactor/`, `chore/`, `hotfix/`
+*   **Example**: `feat/user-profile`, `fix/login-redirect-loop`, `refactor/dto-cleanup`
+*   **Merge Strategy**: PRs should assume **Squash Merge** to keep commit history clean.
+*   **Branch Cleanup Protocol**:
+    1.  `git checkout main` to leave the working branch.
+    2.  `git pull origin main` to update local `main` to latest.
+    3.  Delete merged branches immediately. Abandoned branches are "technical debt."
+*   **Rationale**: Inconsistent branch names break CI/CD pipelines and automated release note generation, making history tracking difficult.
+
+### 12.12. The SSOT Sync Protocol
+*   **Law**: After merging a work branch or leaving a work branch, you MUST synchronize your local `main` branch **100%** with the remote state. Your local `main` must always match the "Single Source of Truth."
+*   **Action**:
+    1.  **Post-Merge Sync**: Upon completing work, execute the following:
+        *   `git checkout main`
+        *   `git pull origin main`
+        *   Delete merged branches
+    2.  **Pre-Task Verification**: Before starting a new task, verify that your local `main` is up-to-date. Creating branches from a stale `main` is the root cause of conflicts and rework.
+    3.  **No Stale Development**: Starting development from an outdated `main` branch is prohibited. Verify alignment by comparing `git log --oneline -1 origin/main` with `git log --oneline -1 main`.
+*   **Rationale**: Divergence between local and remote is the primary cause of merge conflicts, redundant bug fixes, and unexpected behavior due to environment differences. Institutionalizing "sync forgetting" as a "process defect" structurally prevents this class of incidents.
 
 ## 13. Advanced Architectural Mandates
 
@@ -795,3 +958,24 @@
     3.  **CI Pipeline**: Keep a `migration:check` job constantly running in CI (GitHub Actions, etc.) as the final defense line against human error. Deletion or disabling of this CI job is prohibited.
     4.  **Custom Rules**: Design the rule set to be extensible so project-specific dangerous patterns (e.g., `DROP TABLE` without `IF EXISTS`, `ALTER TABLE DROP COLUMN` without backup) can be added.
 *   **Rationale**: Migration accidents directly lead to "irreversible destruction of production data". Defense relying solely on code review is easily breached through reviewer oversights or skipping during emergency deployments. Mechanical static analysis guards protect the production environment 24/7, without any exceptions.
+
+### 13.60. The Feature Flag Lifecycle Protocol
+*   **Context**: Feature Flags enable safe releases, but unmanaged flags increase code complexity and become technical debt. Strictly manage the lifecycle from creation to deletion.
+*   **Lifecycle**:
+    | Phase | Description |
+    |:------|:-----------|
+    | **Creation** | Document flag name, purpose, and expiration date |
+    | **Activation** | Verify in staging environment, then gradually roll out to production |
+    | **Full Rollout** | Rollout complete to all users, start countdown to flag removal |
+    | **Removal** | Delete all flag-related code and restore to a clean state |
+*   **Maximum Lifespan**: **90 days**. Flags exceeding this duration MUST be recorded as technical debt and prioritized for removal in the next sprint.
+*   **Naming Convention**: The `FF_<FEATURE_NAME>` format is recommended.
+*   **Prohibition**: Nesting Feature Flags (flags within flags) is **prohibited** as it causes cognitive complexity to explode.
+*   **Cleanup Obligation**: When removing a flag, all related conditional branching code (e.g., `if (featureFlags.ff_xxx)`) MUST be deleted **in the same PR**. Leaving them behind is considered accumulation of technical debt.
+*   **Quarterly Inventory Obligation**: Conduct an inventory of all flags at the end of each quarter and apply the following rules.
+    | State | Days | Action |
+    |:------|:-----|:-------|
+    | ON (fully rolled out to all users) | > 30 days | Remove the flag and keep only the new feature code |
+    | OFF (deprecated) | > 30 days | Remove both the flag and the legacy code |
+    | Experimenting | > 90 days | Record as technical debt, resolve in next sprint |
+*   **Rationale**: Feature Flags are "temporary switches," not "permanent configurations." Abandoned flags exponentially increase code paths, raise testing difficulty, and become breeding grounds for unexpected bugs. Regular inventory and lifecycle management maintain codebase health.
