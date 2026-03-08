@@ -1,6 +1,6 @@
 # Compliance Matrix / 要件対照表
 
-> [!CRITICAL]
+> [!CAUTION]
 > **AI Agent Controls / AIへの重要指示**
 >
 > ### 🇯🇵 日本語指示 (Japanese Instructions)

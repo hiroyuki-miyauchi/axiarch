@@ -87,27 +87,93 @@
 
 ### 🇯🇵 日本語ガイド (Usage in Japanese)
 
-1.  **コピー (Copy)**: `antigravity-rules/` フォルダと `GEMINI.md` (Cursor派は `.cursorrules` も) をプロジェクトのルートにコピーします。
-    *   `cp -r antigravity-rules GEMINI.md .cursorrules /path/to/your/project/`
+1.  **コピー (Copy)**: 以下のファイル/フォルダをプロジェクトのルートにコピーします。
+    ```bash
+    cp -r antigravity-rules GEMINI.md /path/to/your/project/
+    ```
 
-2.  **初期化 (Initialize)**:
+2.  **AIエージェント用ポインター設定 (Agent Rules Pointer)**:
+    AIエージェントツール（Gemini CLI等）が`.agent/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`antigravity-rules/`を参照させます。
+    ```bash
+    # .agent/rules/ ディレクトリを作成
+    mkdir -p /path/to/your/project/.agent/rules
+
+    # prompt_pointer.md をポインターとして配置（本リポジトリの .agent/rules/ からコピー）
+    # ※ ルール本体はantigravity-rules/に一元管理。.agent/rules/にはポインターのみ配置。
+    cp .agent/rules/prompt_pointer.md /path/to/your/project/.agent/rules/prompt_pointer.md
+    ```
+
+    > [!CAUTION]
+    > **`.agent/rules/` にルール本体を新規作成してはならない。**
+    > ルールの追加・編集は必ず `antigravity-rules/` 内で行うこと。
+    > `.agent/rules/` はあくまで **ポインター（目次）** であり、ルール本体ではない。
+
+3.  **初期化 (Initialize)**:
     *   **`GEMINI.md` の編集**: `Project Native Language` を `Japanese` に設定します。
-    *   **クリーンアップ (Cleanup)**: 使用しない英語のルールのディレクトリを削除します。
-        *   `rm -rf antigravity-rules/universal/en antigravity-rules/blueprint/en`
-3.  **設定 (Configure)**: `antigravity-rules/blueprint/ja/01_project_lessons_log.md`（およびその他の青写真）を編集し、プロジェクト固有の要件を定義します。
+    *   **クリーンアップ (Cleanup)**: 使用しない英語ルールのディレクトリを削除します。
+        ```bash
+        rm -rf antigravity-rules/universal/en antigravity-rules/blueprint/en
+        ```
 
-4.  **開発開始 (Start)**: AI開発チームは、これらのルールを厳格に遵守して開発を行います。
+4.  **設定 (Configure)**: `antigravity-rules/blueprint/ja/01_project_lessons_log.md`（およびその他の青写真）を編集し、プロジェクト固有の要件を定義します。
+
+5.  **開発開始 (Start)**: AI開発チームは、これらのルールを厳格に遵守して開発を行います。
+
+---
 
 ### 🇺🇸 English Guide (Usage in English)
 
-1.  **Copy**: Copy the `antigravity-rules/` folder and `GEMINI.md` (and `.cursorrules` for Cursor users) to your project root.
-    *   `cp -r antigravity-rules GEMINI.md .cursorrules /path/to/your/project/`
+1.  **Copy**: Copy the following files/folders to your project root.
+    ```bash
+    cp -r antigravity-rules GEMINI.md /path/to/your/project/
+    ```
 
-2.  **Initialize**:
+2.  **Agent Rules Pointer Setup**:
+    If your AI agent tool (e.g., Gemini CLI) auto-loads `.agent/rules/`, place a **pointer file** to reference `antigravity-rules/`.
+    ```bash
+    # Create .agent/rules/ directory
+    mkdir -p /path/to/your/project/.agent/rules
+
+    # Place prompt_pointer.md as a pointer (copy from this repo's .agent/rules/)
+    # NOTE: Rule definitions live in antigravity-rules/. Only pointers go in .agent/rules/.
+    cp .agent/rules/prompt_pointer.md /path/to/your/project/.agent/rules/prompt_pointer.md
+    ```
+
+    > [!CAUTION]
+    > **DO NOT create new rule files in `.agent/rules/`.**
+    > All rule additions/edits MUST be made in `antigravity-rules/`.
+    > `.agent/rules/` is strictly a **pointer (table of contents)**, NOT the rules themselves.
+
+3.  **Initialize**:
     *   **Edit `GEMINI.md`**: Set `Project Native Language` to `English`.
     *   **Cleanup**: Delete the unused Japanese language directory.
-        *   `rm -rf antigravity-rules/universal/ja antigravity-rules/blueprint/ja`
-3.  **Configure**: Edit `antigravity-rules/blueprint/en/01_project_lessons_log.md` (and other blueprints) to define your project's specifics.
+        ```bash
+        rm -rf antigravity-rules/universal/ja antigravity-rules/blueprint/ja
+        ```
 
-4.  **Develop**: The AI Development Team will strictly adhere to these rules.
+4.  **Configure**: Edit `antigravity-rules/blueprint/en/01_project_lessons_log.md` (and other blueprints) to define your project's specifics.
+
+5.  **Develop**: The AI Development Team will strictly adhere to these rules.
+
+---
+
+### 📁 導入後のディレクトリ構成 (Post-Setup Directory Structure)
+
+```
+your-project/
+ ├── GEMINI.md                    ← 最高法規 / Supreme Law
+ ├── .agent/
+ │    └── rules/
+ │         └── prompt_pointer.md  ← ポインター（目次）/ Pointer (TOC)
+ ├── antigravity-rules/           ← ルール本体 / Rule Definitions
+ │    ├── INDEX.md
+ │    ├── README.md
+ │    ├── universal/              ← 不変ルール / Immutable
+ │    │    ├── ja/ (or en/)
+ │    │    └── ...
+ │    └── blueprint/              ← プロジェクト固有 / Project-Specific
+ │         ├── ja/ (or en/)
+ │         └── ...
+ └── src/                         ← プロジェクトコード / Your Code
+```
 

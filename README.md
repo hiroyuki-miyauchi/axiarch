@@ -13,6 +13,9 @@
 
 *   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **詳しい導入マニュアルはこちら**
 
+> [!TIP]
+> **`.agent/rules/` について**: Gemini CLI等のAIエージェントツールが自動読み込みする`.agent/rules/`ディレクトリには、`antigravity-rules/`を参照するための**ポインター（目次）**のみを配置します。ルール本体を`.agent/rules/`に直接書いてはいけません。詳細は[導入マニュアル](./antigravity-rules/README.md#-antigravity-setup--initialization-導入と初期化)をご覧ください。
+
 ---
 
 ### 🇺🇸 English (Secondary)
@@ -25,3 +28,7 @@ By copying the ruleset defined here into your project, you can instantly enforce
 For installation instructions, initialization steps, and detailed rule explanations, please refer to:
 
 *   **[antigravity-rules/README.md](./antigravity-rules/README.md)**: 👈 **See Installation Manual Here**
+
+> [!TIP]
+> **About `.agent/rules/`**: The `.agent/rules/` directory (auto-loaded by AI agent tools like Gemini CLI) should contain ONLY **pointers (table of contents)** that reference `antigravity-rules/`. Never write rule definitions directly in `.agent/rules/`. See the [Installation Manual](./antigravity-rules/README.md#-antigravity-setup--initialization-導入と初期化) for details.
+
