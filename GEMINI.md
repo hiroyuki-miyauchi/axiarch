@@ -121,8 +121,11 @@
       - **Class S（Universal / 不変の法則・Read-Only）**: `antigravity-rules/universal/{lang}/` 内のファイル。プロジェクトを超えた普遍的ルール。タスクの種類に応じて関連するファイルをAIが自律判断で選択しロードする。
       - **Class A（Blueprint / プロジェクト固有・更新対象）**: `antigravity-rules/blueprint/{lang}/` 内のファイル。プロジェクト固有の仕様・設計・教訓。タスクに関連するファイルを自律選択してロードする。`01_project_lessons_log.md`（教訓ログ）は優先度が高い。
     - **原則**: 全ファイルを毎回読む必要はない。INDEXとディレクトリ構造から、現在のタスクに必要なルールだけを自律判断で選択すること。
+    - **ファイル内参照（大規模ファイル対応）**: 1,000行以上の大規模ルールファイルは**全文ロード禁止**。ファイル末尾のAppendix（逆引き索引）またはファイル冒頭の目次を先に参照し、タスクに関連するセクションのみを行番号指定で自律選択してロードすること。
+      - 例：認証関連タスク → 対象ルールファイルの目次/索引を参照 → 「OAuth」「JWT」「MFA」のセクション番号を特定 → 該当セクションのみ行番号指定でロード
+      - 例：コスト最適化タスク → 索引から「FinOps」「料金」のセクションを特定 → 2〜3セクションのみロード（全セクションを全読しない）
     - **選択の指針（例）**:
-      - 技術スタック把握: Blueprint `00_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`）。Blueprint側もタスクに関連するファイルを自律選択。
+      - 技術スタック把握: Blueprint `00_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`33_web_frontend`, Supabase→`37_supabase_architecture`）。Blueprint側もタスクに関連するファイルを自律選択。
       - セキュリティ関連タスク → `60_security_privacy`, `61_legal_data_privacy`
       - UI/デザインタスク → `20_design_ux`
       - API設計タスク → `35_api_integration`, `30_engineering_general`
@@ -259,8 +262,11 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         - **Class S (Universal / Immutable / Read-Only)**: Files in `antigravity-rules/universal/{lang}/`. Universal rules that transcend projects. AI autonomously selects and loads files relevant to the current task.
         - **Class A (Blueprint / Project-Specific / Mutable)**: Files in `antigravity-rules/blueprint/{lang}/`. Project-specific specs, design, and lessons. AI autonomously selects task-relevant files. `01_project_lessons_log.md` (lessons log) has high priority.
     -   **Principle**: Do NOT load all files every time. Based on INDEX and directory structure, autonomously select only the rules needed for the current task.
+    -   **Intra-File Selection (Large File Handling)**: For large rule files exceeding 1,000 lines, **full-file loading is prohibited**. First reference the Appendix (reverse lookup index) at the end of the file or the table of contents at the beginning, then autonomously select and load only the task-relevant sections using line number ranges.
+        - Example: Authentication task → reference the target rule file’s TOC/index → identify sections for “OAuth” “JWT” “MFA” → load only those sections by line number
+        - Example: Cost optimization task → identify “FinOps” “Pricing” sections from the index → load only 2–3 sections (do not read all sections)
     -   **Selection Guide (examples)**:
-        - Tech stack: Read Blueprint `00_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`). Also autonomously select task-relevant Blueprint files.
+        - Tech stack: Read Blueprint `00_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`33_web_frontend`, Supabase→`37_supabase_architecture`). Also autonomously select task-relevant Blueprint files.
         - Security tasks → `60_security_privacy`, `61_legal_data_privacy`
         - UI/Design tasks → `20_design_ux`
         - API design tasks → `35_api_integration`, `30_engineering_general`

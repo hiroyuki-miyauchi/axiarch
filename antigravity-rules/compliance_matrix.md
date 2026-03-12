@@ -30,7 +30,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **UIアニメーション・パフォーマンス** <br> UI Animation & Performance | `universal/*/20_design_ux.md` | "60fps Target", "Haptics" <br> "60fpsターゲット", "ハプティクス" |
 | **セルフチェック** <br> Self-Check | `universal/*/30_engineering_general.md` | "Self-Check List", "Zero Warnings" <br> "セルフチェックリスト", "警告ゼロ" |
 | **最新技術の取り込み** <br> Adopting Latest Tech | `universal/*/30_engineering_general.md` | "Tech Radar", "Continuous Learning" <br> "テックレーダー", "継続的学習" |
-| **費用・経費観点** <br> Cost & Expense Perspective | `universal/*/32_backend_firebase.md` | "FinOps", "Cloud Bankruptcy Prevention" <br> "FinOps", "クラウド破産防止" |
+| **費用・経費観点** <br> Cost & Expense Perspective | `universal/*/32_firebase_architecture.md` | "FinOps", "Cloud Bankruptcy Prevention" <br> "FinOps", "クラウド破産防止" |
 | **WEB技術網羅 (CSS/BEM)** <br> Web Tech Coverage | `universal/*/33_web_frontend.md` | "CSS Architecture", "Performance" <br> "CSSアーキテクチャ", "パフォーマンス" |
 | **PDF/CSVエクスポート** <br> PDF/CSV Export | `universal/*/33_web_frontend.md` | "Export Functionality" <br> "エクスポート機能" |
 | **ネイティブアプリ技術網羅** <br> Native App Tech Coverage | `universal/*/36_native_platforms.md` | "SwiftUI/Jetpack Compose" <br> "SwiftUI / Jetpack Compose" |

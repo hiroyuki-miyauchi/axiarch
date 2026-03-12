@@ -72,12 +72,13 @@ your-project/
 |---|---|---|
 | 30 | [30_engineering_general.md](./universal/ja/30_engineering_general.md) | エンジニアリング全般。セルフチェックリスト、Zero Warnings、Tech Radar、CI/CD、Husky導入義務、コーディング規約、オムニチャネル配信義務、DTO分割義務、マッパー堅牢性、マイグレーション静的解析、フィーチャーフラグ運用規律。 |
 | 31 | [31_mobile_flutter.md](./universal/ja/31_mobile_flutter.md) | モバイル開発（Flutter）。状態管理、パフォーマンス、プラットフォーム固有対応。 |
-| 32 | [32_backend_firebase.md](./universal/ja/32_backend_firebase.md) | バックエンド（Firebase/GCP）。Cloud Functions、Firestore設計、セキュリティルール、FinOps、RLS無限再帰防止、クライアントDB直接アクセス禁止。 |
+| 32 | [32_firebase_architecture.md](./universal/ja/32_firebase_architecture.md) | バックエンド（Firebase/GCP）。Cloud Functions、Firestore設計、セキュリティルール、FinOps、RLS無限再帰防止、クライアントDB直接アクセス禁止。 |
 | 33 | [33_web_frontend.md](./universal/ja/33_web_frontend.md) | Webフロントエンド（Next.js）。CSSアーキテクチャ、パフォーマンス最適化、PDF/CSVエクスポート、Server Components、パフォーマンス予算（CWVデプロイメントゲート・バンドルサイズ・画像サイズ・Lighthouse CI自動ゲート・デグレーション対応）、Tiered DBクライアント分離。 |
 | 34 | [34_cms_headless.md](./universal/ja/34_cms_headless.md) | コンテンツ管理システム（Headless CMS）。コンテンツモデリング、API設計、プレビュー戦略（プレビュー認可・Dual Modeフェッチ）、パブリッシング信頼性（スケジューリング・ソフト404対策）。 |
 | 35 | [35_api_integration.md](./universal/ja/35_api_integration.md) | API統合とマイクロサービス。RESTful設計、バージョニング、レート制限、エラーハンドリング、Server Action戻り値厳格化、安全失敗契約、CORSガバナンス、APIゲートウェイ使用量計測。 |
 | 36 | [36_native_platforms.md](./universal/ja/36_native_platforms.md) | ネイティブプラットフォーム（Kotlin/Swift）。SwiftUI/Jetpack Compose、生体認証、エッジAI、オフラインアーキテクチャ。 |
-| 37 | [37_backend_supabase.md](./universal/ja/37_backend_supabase.md) | バックエンド・データ戦略（Supabase/PostgreSQL）。RLS（権限継承・動的テーブル参照禁止）、マイグレーション、Edge Functions、リアルタイム、時系列パーティション＆保持期間戦略、Coldデータオフロード、データ品質管理フレームワーク。 |
+| 37 | [37_supabase_architecture.md](./universal/ja/37_supabase_architecture.md) | Supabaseアーキテクチャ戦略。40セクション・138ルール・27クロスリファレンス。DB設計/RLS/Auth/Storage/Migration/Performance/Edge Functions/Realtime/Cron・Queues/Observability/pgvector・AI/Advanced Auth/Testing/Branching/PostgREST/CLI/Connection Pooling/Backup・DR/Rate Limiting/Vault/FDW/Data API Hardening/Multi-tenancy/pg_graphql/DB Functions・Triggers/Log Drain/Auth Hooks/Self-hosted・Email/SSR Integration/DB Extensions/Client SDK/Schema Design Patterns/Social Auth・SSO/Data Migration・Seeding。サービス別逆引き索引（Appendix A）付き。 |
+| 38 | [38_aws_architecture.md](./universal/ja/38_aws_architecture.md) | AWSクラウドアーキテクチャ戦略。137セクション・220+ルール・14コードスニペット。Well-Architected基盤から全主要AWSサービスまで網羅（TGW/DirectConnect/Detective/AI-ML応用/Snow Family/Lex/WorkSpaces/MediaConvert含む）。サービス別逆引き索引（Appendix A）付き。 |
 
 #### 40-49: AI・データ
 
@@ -99,7 +100,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 60 | [60_security_privacy.md](./universal/ja/60_security_privacy.md) | セキュリティとプライバシー。OWASP Top 10対策、認証・認可、データ暗号化、GDPR/APPI準拠、SRI（外部リソース改竄防止）、委託先セキュリティ管理（評価基準・SLAテンプレート・サブプロセッサー管理）、インシデント対応＆訓練。 |
+| 60 | [60_security_privacy.md](./universal/ja/60_security_privacy.md) | セキュリティとプライバシー。16セクション構成。ゼロトラスト7柱（NIST 800-207準拠）、認証・認可（FIDO2/Social Login/Session管理）、APIセキュリティ（BOLA/BFLA/SSRF防止）、サプライチェーン（SBOM/SLSA）、AI/LLMセキュリティ（OWASP LLM Top 10 2025）、コンテナセキュリティ（Pod Security Standards/イメージ署名）、ファイルアップロードセキュリティ、暗号化ポリシー（禁止アルゴリズム/PQC準備）、OWASP Top 10 2025マッピング、委託先管理、インシデント対応。逆引き索引（Appendix A）付き。 |
 | 61 | [61_legal_data_privacy.md](./universal/ja/61_legal_data_privacy.md) | 法務・ガバナンス・データ戦略。利用規約、プライバシーポリシー、データ最小化、忘れられる権利、反社会的勢力排除プロトコル、Cookie分類＆同意管理（CMP基準）、AI生成コンテンツ著作権、データライフサイクル管理、委託先データガバナンス。 |
 | 62 | [62_license_dependency.md](./universal/ja/62_license_dependency.md) | ライセンスと依存関係管理。ライセンスホワイトリスト、脆弱性スキャン、アップデート戦略、依存関係選定基準。 |
 | 63 | [63_ip_due_diligence.md](./universal/ja/63_ip_due_diligence.md) | 知的財産とExit戦略。特許、商標、デューデリジェンス対応、IP資産管理。 |
@@ -192,12 +193,13 @@ your-project/
 |---|---|---|
 | 30 | [30_engineering_general.md](./universal/en/30_engineering_general.md) | General engineering. Self-check list, Zero Warnings, Tech Radar, CI/CD, Husky mandate, coding standards, omnichannel delivery mandate, DTO segregation, mapper robustness, migration static analysis, feature flag lifecycle. |
 | 31 | [31_mobile_flutter.md](./universal/en/31_mobile_flutter.md) | Mobile engineering (Flutter). State management, performance, platform-specific handling. |
-| 32 | [32_backend_firebase.md](./universal/en/32_backend_firebase.md) | Backend (Firebase/GCP). Cloud Functions, Firestore design, security rules, FinOps, RLS infinite recursion prevention, client DB direct access prohibition. |
+| 32 | [32_firebase_architecture.md](./universal/en/32_firebase_architecture.md) | Backend (Firebase/GCP). Cloud Functions, Firestore design, security rules, FinOps, RLS infinite recursion prevention, client DB direct access prohibition. |
 | 33 | [33_web_frontend.md](./universal/en/33_web_frontend.md) | Web frontend (Next.js). CSS architecture, performance optimization, PDF/CSV export, Server Components, performance budget (CWV deployment gate, bundle size, image size, Lighthouse CI auto gate, regression response), tiered DB client separation. |
 | 34 | [34_cms_headless.md](./universal/en/34_cms_headless.md) | Content Management System (Headless CMS). Content modeling, API design, preview strategy (preview gate, dual mode fetching), publishing reliability (scheduling, soft 404). |
 | 35 | [35_api_integration.md](./universal/en/35_api_integration.md) | API integration & microservices. RESTful design, versioning, rate limiting, error handling, strict action return type, graceful failure contract, CORS governance, API gateway metering. |
 | 36 | [36_native_platforms.md](./universal/en/36_native_platforms.md) | Native platforms (Kotlin/Swift). SwiftUI/Jetpack Compose, biometrics, edge AI, offline architecture. |
-| 37 | [37_backend_supabase.md](./universal/en/37_backend_supabase.md) | Backend & data strategy (Supabase/PostgreSQL). RLS (inheritance, dynamic table reference prohibition), migrations, Edge Functions, realtime, time-series partitioning & retention, cold data offloading, data quality management framework. |
+| 37 | [37_supabase_architecture.md](./universal/en/37_supabase_architecture.md) | Supabase architecture strategy. 40 sections, 138 rules, 27 cross-references. Comprehensive coverage: DB design/RLS/Auth/Storage/Migration/Performance/Edge Functions/Realtime/Cron・Queues/Observability/pgvector・AI/Advanced Auth/Testing/Branching/PostgREST/CLI/Connection Pooling/Backup・DR/Rate Limiting/Vault/FDW/Data API Hardening/Multi-tenancy/pg_graphql/DB Functions・Triggers/Log Drain/Auth Hooks/Self-hosted・Email/SSR Integration/DB Extensions/Client SDK/Schema Design Patterns/Social Auth・SSO/Data Migration・Seeding. Service Quick Reference Index (Appendix A). |
+| 38 | [38_aws_architecture.md](./universal/en/38_aws_architecture.md) | AWS cloud architecture strategy. 137 sections, 220+ rules, 14 code snippets. Comprehensive coverage from Well-Architected to all major AWS services (including TGW/DirectConnect/Detective/Applied AI-ML/Snow Family/Lex/WorkSpaces/MediaConvert). Service Quick Reference Index (Appendix A). |
 
 #### 40-49: AI & Data
 
@@ -219,7 +221,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 60 | [60_security_privacy.md](./universal/en/60_security_privacy.md) | Security & privacy. OWASP Top 10, authentication/authorization, data encryption, GDPR/APPI compliance, SRI (subresource integrity), vendor security management (assessment standards, SLA template, sub-processor management), incident response & drills. |
+| 60 | [60_security_privacy.md](./universal/en/60_security_privacy.md) | Security & privacy. 16-section architecture. Zero Trust 7 pillars (NIST 800-207), authentication/authorization (FIDO2/Social Login/Session management), API security (BOLA/BFLA/SSRF prevention), supply chain security (SBOM/SLSA), AI/LLM security (OWASP LLM Top 10 2025), container security (Pod Security Standards/image signing), file upload security, cryptographic policy (prohibited algorithms/PQC readiness), OWASP Top 10 2025 mapping, vendor management, incident response. Quick Reference Index (Appendix A). |
 | 61 | [61_legal_data_privacy.md](./universal/en/61_legal_data_privacy.md) | Legal, governance & data strategy. Terms of service, privacy policy, data minimization, right to be forgotten, anti-social forces exclusion protocol, cookie classification & consent management (CMP standards), AI-generated content copyright, data lifecycle management, vendor data governance. |
 | 62 | [62_license_dependency.md](./universal/en/62_license_dependency.md) | License & dependency management. License whitelist, vulnerability scanning, update strategy, dependency selection criteria. |
 | 63 | [63_ip_due_diligence.md](./universal/en/63_ip_due_diligence.md) | IP strategy & due diligence. Patents, trademarks, due diligence preparation, IP asset management. |

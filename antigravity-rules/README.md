@@ -46,12 +46,12 @@
 #### 30-39: Engineering Core
 *   **30. Engineering General** ([🇯🇵](./universal/ja/30_engineering_general.md) / [🇺🇸](./universal/en/30_engineering_general.md))
 *   **31. Mobile (Flutter)** ([🇯🇵](./universal/ja/31_mobile_flutter.md) / [🇺🇸](./universal/en/31_mobile_flutter.md))
-*   **32. Backend (Firebase)** ([🇯🇵](./universal/ja/32_backend_firebase.md) / [🇺🇸](./universal/en/32_backend_firebase.md))
+*   **32. Backend (Firebase)** ([🇯🇵](./universal/ja/32_firebase_architecture.md) / [🇺🇸](./universal/en/32_firebase_architecture.md))
 *   **33. Web Frontend (Next.js)** ([🇯🇵](./universal/ja/33_web_frontend.md) / [🇺🇸](./universal/en/33_web_frontend.md))
 *   **34. CMS Strategy (Headless)** ([🇯🇵](./universal/ja/34_cms_headless.md) / [🇺🇸](./universal/en/34_cms_headless.md))
 *   **35. API Integration** ([🇯🇵](./universal/ja/35_api_integration.md) / [🇺🇸](./universal/en/35_api_integration.md))
 *   **36. Native Platforms** ([🇯🇵](./universal/ja/36_native_platforms.md) / [🇺🇸](./universal/en/36_native_platforms.md))
-*   **37. Backend - Supabase & PostgreSQL** ([🇯🇵](./universal/ja/37_backend_supabase.md) / [🇺🇸](./universal/en/37_backend_supabase.md))
+*   **37. Backend - Supabase & PostgreSQL** ([🇯🇵](./universal/ja/37_supabase_architecture.md) / [🇺🇸](./universal/en/37_supabase_architecture.md))
 
 #### 40-49: AI & Data
 *   **40. AI Implementation** ([🇯🇵](./universal/ja/40_ai_implementation.md) / [🇺🇸](./universal/en/40_ai_implementation.md))
