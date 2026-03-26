@@ -38,7 +38,7 @@ trigger: always_on
 **Class A（Blueprint / プロジェクト固有・更新対象）:**
 - **対象**: `antigravity-rules/blueprint/{lang}/` 内のファイル
 - **性質**: プロジェクト固有の仕様・設計・教訓。監査結果に基づき更新可能。
-- **ロード方式**: タスクに関連するファイルを自律選択してロードする。`01_project_lessons_log.md`（教訓ログ）は優先度が高い。
+- **ロード方式**: タスクに関連するファイルを自律選択してロードする。`010_project_lessons_log.md`（教訓ログ）は優先度が高い。
 
 > ※ `{lang}` は `GEMINI.md` の `Project Native Language` に従い `ja/` または `en/` に置換する。
 
@@ -49,10 +49,10 @@ trigger: always_on
   - 例：コスト最適化タスク → 索引から「FinOps」「料金」のセクションを特定 → 2〜3セクションのみロード（全セクションを全読しない）
 
 **選択の指針（例）:**
-- 技術スタック把握: Blueprint `00_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`）。Blueprint側もタスクに関連するファイルを自律選択。
-- セキュリティ関連タスク → `60_security_privacy`, `61_legal_data_privacy`
-- UI/デザインタスク → `20_design_ux`
-- API設計タスク → `35_api_integration`, `30_engineering_general`
+- 技術スタック把握: Blueprint `000_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`340_web_frontend`, Supabase→`320_supabase_architecture`）。Blueprint側もタスクに関連するファイルを自律選択。
+- セキュリティ関連タスク → `600_security_privacy`, `601_data_governance`
+- UI/デザインタスク → `200_design_ux`
+- API設計タスク → `301_api_integration`, `300_engineering_standards`
 
 **クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあり、現在のタスクに関連する場合は、そのリンク先も追加で読むこと。
 **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
@@ -95,7 +95,7 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
 **Class A (Blueprint / Project-Specific / Mutable):**
 - **Target**: Files in `antigravity-rules/blueprint/{lang}/`
 - **Nature**: Project-specific specs, design, and lessons. Can be updated based on audit results.
-- **Loading**: AI autonomously selects task-relevant files. `01_project_lessons_log.md` (lessons log) has high priority.
+- **Loading**: AI autonomously selects task-relevant files. `010_project_lessons_log.md` (lessons log) has high priority.
 
 > Note: Replace `{lang}` with `ja/` or `en/` based on the `Project Native Language` setting in `GEMINI.md`.
 
@@ -106,10 +106,10 @@ Scan the rules directory and classify into 2 classes, then autonomously load rel
   - Example: Cost optimization task → identify “FinOps” “Pricing” sections from the index → load only 2–3 sections (do not read all sections)
 
 **Selection Guide (examples):**
-- Tech stack: Read Blueprint `00_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`33_web_frontend`, Supabase→`37_backend_supabase`). Also autonomously select task-relevant Blueprint files.
-- Security tasks → `60_security_privacy`, `61_legal_data_privacy`
-- UI/Design tasks → `20_design_ux`
-- API design tasks → `35_api_integration`, `30_engineering_general`
+- Tech stack: Read Blueprint `000_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`340_web_frontend`, Supabase→`320_supabase_architecture`). Also autonomously select task-relevant Blueprint files.
+- Security tasks → `600_security_privacy`, `601_data_governance`
+- UI/Design tasks → `200_design_ux`
+- API design tasks → `301_api_integration`, `300_engineering_standards`
 
 **Cross-references**: If a loaded file references related rules and they are relevant to the current task, load those as well.
 **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.

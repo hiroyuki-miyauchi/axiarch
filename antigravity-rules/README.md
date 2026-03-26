@@ -31,55 +31,63 @@
 
 ### 📚 Universal Rules (Bilingual)
 
-#### 00-09: Core & Mindset
-*   **00. Core Philosophy & Mindset** ([🇯🇵](./universal/ja/00_core_mindset.md) / [🇺🇸](./universal/en/00_core_mindset.md))
+#### 000: Core & Mindset
+*   **000. Core Philosophy & Mindset** ([🇯🇵](./universal/ja/000_core_mindset.md) / [🇺🇸](./universal/en/000_core_mindset.md))
 
-#### 10-19: Business & Growth
-*   **10. Product & Business Strategy** ([🇯🇵](./universal/ja/10_product_business.md) / [🇺🇸](./universal/en/10_product_business.md))
-*   **11. Business & Finance** ([🇯🇵](./universal/ja/11_business_finance.md) / [🇺🇸](./universal/en/11_business_finance.md))
-*   **12. Growth & Marketing** ([🇯🇵](./universal/ja/12_growth_marketing.md) / [🇺🇸](./universal/en/12_growth_marketing.md))
-*   **13. Store Compliance & ASO** ([🇯🇵](./universal/ja/13_store_compliance.md) / [🇺🇸](./universal/en/13_store_compliance.md))
+#### 100–109: Business & Growth
+*   **100. Product & Business Strategy** ([🇯🇵](./universal/ja/100_product_strategy.md) / [🇺🇸](./universal/en/100_product_strategy.md))
+*   **101. Revenue & Monetization** ([🇯🇵](./universal/ja/101_revenue_monetization.md) / [🇺🇸](./universal/en/101_revenue_monetization.md))
+*   **102. Growth & Marketing** ([🇯🇵](./universal/ja/102_growth_marketing.md) / [🇺🇸](./universal/en/102_growth_marketing.md))
+*   **103. App Store Compliance & ASO** ([🇯🇵](./universal/ja/103_appstore_compliance.md) / [🇺🇸](./universal/en/103_appstore_compliance.md))
 
-#### 20-29: Design & UX
-*   **20. Design & UX Strategy** ([🇯🇵](./universal/ja/20_design_ux.md) / [🇺🇸](./universal/en/20_design_ux.md))
+#### 200: Design & UX
+*   **200. Design & UX Strategy** ([🇯🇵](./universal/ja/200_design_ux.md) / [🇺🇸](./universal/en/200_design_ux.md))
 
-#### 30-39: Engineering Core
-*   **30. Engineering General** ([🇯🇵](./universal/ja/30_engineering_general.md) / [🇺🇸](./universal/en/30_engineering_general.md))
-*   **31. Mobile (Flutter)** ([🇯🇵](./universal/ja/31_mobile_flutter.md) / [🇺🇸](./universal/en/31_mobile_flutter.md))
-*   **32. Backend (Firebase)** ([🇯🇵](./universal/ja/32_firebase_architecture.md) / [🇺🇸](./universal/en/32_firebase_architecture.md))
-*   **33. Web Frontend (Next.js)** ([🇯🇵](./universal/ja/33_web_frontend.md) / [🇺🇸](./universal/en/33_web_frontend.md))
-*   **34. CMS Strategy (Headless)** ([🇯🇵](./universal/ja/34_cms_headless.md) / [🇺🇸](./universal/en/34_cms_headless.md))
-*   **35. API Integration** ([🇯🇵](./universal/ja/35_api_integration.md) / [🇺🇸](./universal/en/35_api_integration.md))
-*   **36. Native Platforms** ([🇯🇵](./universal/ja/36_native_platforms.md) / [🇺🇸](./universal/en/36_native_platforms.md))
-*   **37. Backend - Supabase & PostgreSQL** ([🇯🇵](./universal/ja/37_supabase_architecture.md) / [🇺🇸](./universal/en/37_supabase_architecture.md))
+#### 300–399: Engineering Core (20-unit intervals)
+*   **300. Engineering Standards** ([🇯🇵](./universal/ja/300_engineering_standards.md) / [🇺🇸](./universal/en/300_engineering_standards.md))
+*   **301. API Integration** ([🇯🇵](./universal/ja/301_api_integration.md) / [🇺🇸](./universal/en/301_api_integration.md))
+*   **320. Supabase & PostgreSQL** ([🇯🇵](./universal/ja/320_supabase_architecture.md) / [🇺🇸](./universal/en/320_supabase_architecture.md))
+*   **340. Web Frontend (Next.js)** ([🇯🇵](./universal/ja/340_web_frontend.md) / [🇺🇸](./universal/en/340_web_frontend.md))
+*   **341. Headless CMS** ([🇯🇵](./universal/ja/341_headless_cms.md) / [🇺🇸](./universal/en/341_headless_cms.md))
+*   **342. Mobile (Flutter)** ([🇯🇵](./universal/ja/342_mobile_flutter.md) / [🇺🇸](./universal/en/342_mobile_flutter.md))
+*   **343. Native Platforms (Kotlin/Swift)** ([🇯🇵](./universal/ja/343_native_platforms.md) / [🇺🇸](./universal/en/343_native_platforms.md))
+*   **360. Firebase & GCP** ([🇯🇵](./universal/ja/360_firebase_gcp.md) / [🇺🇸](./universal/en/360_firebase_gcp.md))
+*   **361. AWS Cloud** ([🇯🇵](./universal/ja/361_aws_cloud.md) / [🇺🇸](./universal/en/361_aws_cloud.md))
 
-#### 40-49: AI & Data
-*   **40. AI Implementation** ([🇯🇵](./universal/ja/40_ai_implementation.md) / [🇺🇸](./universal/en/40_ai_implementation.md))
-*   **41. Analytics & Intelligence** ([🇯🇵](./universal/ja/41_analytics_intelligence.md) / [🇺🇸](./universal/en/41_analytics_intelligence.md))
+#### 400–409: AI & Data
+*   **400. AI Engineering** ([🇯🇵](./universal/ja/400_ai_engineering.md) / [🇺🇸](./universal/en/400_ai_engineering.md))
+*   **401. Data & Analytics** ([🇯🇵](./universal/ja/401_data_analytics.md) / [🇺🇸](./universal/en/401_data_analytics.md))
 
-#### 50-59: Operations & Reliability
-*   **50. Admin & Internal Tools** ([🇯🇵](./universal/ja/50_admin_tools.md) / [🇺🇸](./universal/en/50_admin_tools.md))
-*   **51. User Support & Success** ([🇯🇵](./universal/ja/51_user_support.md) / [🇺🇸](./universal/en/51_user_support.md))
-*   **52. SRE & Reliability** ([🇯🇵](./universal/ja/52_sre_reliability.md) / [🇺🇸](./universal/en/52_sre_reliability.md))
-*   **53. Crisis Management** ([🇯🇵](./universal/ja/53_crisis_management.md) / [🇺🇸](./universal/en/53_crisis_management.md))
+#### 500–509: Operations & Reliability
+*   **500. Internal Tools** ([🇯🇵](./universal/ja/500_internal_tools.md) / [🇺🇸](./universal/en/500_internal_tools.md))
+*   **501. Customer Experience** ([🇯🇵](./universal/ja/501_customer_experience.md) / [🇺🇸](./universal/en/501_customer_experience.md))
+*   **502. Site Reliability** ([🇯🇵](./universal/ja/502_site_reliability.md) / [🇺🇸](./universal/en/502_site_reliability.md))
+*   **503. Incident Response** ([🇯🇵](./universal/ja/503_incident_response.md) / [🇺🇸](./universal/en/503_incident_response.md))
 
-#### 60-69: Security & Legal
-*   **60. Security & Privacy** ([🇯🇵](./universal/ja/60_security_privacy.md) / [🇺🇸](./universal/en/60_security_privacy.md))
-*   **61. Legal & Data Governance** ([🇯🇵](./universal/ja/61_legal_data_privacy.md) / [🇺🇸](./universal/en/61_legal_data_privacy.md))
-*   **62. License & Dependency** ([🇯🇵](./universal/ja/62_license_dependency.md) / [🇺🇸](./universal/en/62_license_dependency.md))
-*   **63. IP Strategy & Due Diligence** ([🇯🇵](./universal/ja/63_ip_due_diligence.md) / [🇺🇸](./universal/en/63_ip_due_diligence.md))
+#### 600–609: Security & Legal
+*   **600. Security & Privacy** ([🇯🇵](./universal/ja/600_security_privacy.md) / [🇺🇸](./universal/en/600_security_privacy.md))
+*   **601. Data Governance** ([🇯🇵](./universal/ja/601_data_governance.md) / [🇺🇸](./universal/en/601_data_governance.md))
+*   **602. OSS Compliance** ([🇯🇵](./universal/ja/602_oss_compliance.md) / [🇺🇸](./universal/en/602_oss_compliance.md))
+*   **603. IP & Due Diligence** ([🇯🇵](./universal/ja/603_ip_due_diligence.md) / [🇺🇸](./universal/en/603_ip_due_diligence.md))
 
-#### 70-79: QA & Global
-*   **70. QA & Testing** ([🇯🇵](./universal/ja/70_qa_testing.md) / [🇺🇸](./universal/en/70_qa_testing.md))
-*   **71. Global Expansion** ([🇯🇵](./universal/ja/71_global_expansion.md) / [🇺🇸](./universal/en/71_global_expansion.md))
-*   **72. Constitution Authority** ([🇯🇵](./universal/ja/72_constitution_authority.md) / [🇺🇸](./universal/en/72_constitution_authority.md))
-*   **74. Language Protocol** ([🇯🇵](./universal/ja/74_language_protocol.md) / [🇺🇸](./universal/en/74_language_protocol.md))
+#### 700–729: Testing, QA & FinOps
+*   **700. QA & Testing** ([🇯🇵](./universal/ja/700_qa_testing.md) / [🇺🇸](./universal/en/700_qa_testing.md))
+*   **720. Cloud FinOps** ([🇯🇵](./universal/ja/720_cloud_finops.md) / [🇺🇸](./universal/en/720_cloud_finops.md))
+
+#### 800–809: Global & Governance
+*   **800. Internationalization** ([🇯🇵](./universal/ja/800_internationalization.md) / [🇺🇸](./universal/en/800_internationalization.md))
+*   **801. Governance** ([🇯🇵](./universal/ja/801_governance.md) / [🇺🇸](./universal/en/801_governance.md))
+*   **802. Language Protocol** ([🇯🇵](./universal/ja/802_language_protocol.md) / [🇺🇸](./universal/en/802_language_protocol.md))
 
 
 ### 📐 Blueprint Rules (Project Specific)
-*   **00. Project Overview & Architecture** ([🇯🇵](./blueprint/ja/00_project_overview.md) / [🇺🇸](./blueprint/en/00_project_overview.md))
-*   **01. Project Lessons Log** ([🇯🇵](./blueprint/ja/01_project_lessons_log.md) / [🇺🇸](./blueprint/en/01_project_lessons_log.md))
-*   **99. Project Specific Template** ([🇯🇵](./blueprint/ja/99_project_specific_template.md) / [🇺🇸](./blueprint/en/99_project_specific_template.md))
+*   **000. Project Overview & Architecture** ([🇯🇵](./blueprint/ja/000_project_overview.md) / [🇺🇸](./blueprint/en/000_project_overview.md))
+*   **001. Project Lessons Log** ([🇯🇵](./blueprint/ja/010_project_lessons_log.md) / [🇺🇸](./blueprint/en/010_project_lessons_log.md))
+*   **999. Project Specific Template** ([🇯🇵](./blueprint/ja/999_project_specific_template.md) / [🇺🇸](./blueprint/en/999_project_specific_template.md))
+
+### 📋 Reference Documents
+*   **[INDEX.md](./INDEX.md)** — 全ルールの詳細索引 / Detailed index of all rules
+*   **[Compliance Matrix](./compliance_matrix.md)** — 要件対照表 / User request ↔ Rule file mapping
 
 ---
 
@@ -115,7 +123,7 @@
         rm -rf antigravity-rules/universal/en antigravity-rules/blueprint/en
         ```
 
-4.  **設定 (Configure)**: `antigravity-rules/blueprint/ja/01_project_lessons_log.md`（およびその他の青写真）を編集し、プロジェクト固有の要件を定義します。
+4.  **設定 (Configure)**: `antigravity-rules/blueprint/ja/010_project_lessons_log.md`（およびその他の青写真）を編集し、プロジェクト固有の要件を定義します。
 
 5.  **開発開始 (Start)**: AI開発チームは、これらのルールを厳格に遵守して開発を行います。
 
@@ -151,7 +159,7 @@
         rm -rf antigravity-rules/universal/ja antigravity-rules/blueprint/ja
         ```
 
-4.  **Configure**: Edit `antigravity-rules/blueprint/en/01_project_lessons_log.md` (and other blueprints) to define your project's specifics.
+4.  **Configure**: Edit `antigravity-rules/blueprint/en/010_project_lessons_log.md` (and other blueprints) to define your project's specifics.
 
 5.  **Develop**: The AI Development Team will strictly adhere to these rules.
 
@@ -176,4 +184,3 @@ your-project/
  │         └── ...
  └── src/                         ← プロジェクトコード / Your Code
 ```
-
