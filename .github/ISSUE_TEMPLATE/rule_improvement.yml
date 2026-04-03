@@ -1,0 +1,71 @@
+name: "💡 ルール改善提案 / Rule Improvement Proposal"
+description: "新しいルールの追加や既存ルールの改善を提案 / Propose new rules or improvements to existing ones"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🇯🇵 日本語 / 🇺🇸 English
+        どちらの言語でも提案できます。/ You may propose in either language.
+
+        > [!IMPORTANT]
+        > Universal Rules は「憲法」です。変更提案は歓迎しますが、マージには慎重な議論が必要です。
+        > Universal Rules are the "Constitution." Change proposals are welcome, but merging requires careful discussion.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: "提案の種類 / Proposal Type"
+      options:
+        - "新しいルールの追加 / Add new rule"
+        - "既存ルールの改善 / Improve existing rule"
+        - "ルールの陳腐化対応 / Update outdated rule"
+        - "新しいBlueprintテンプレート / New Blueprint template"
+        - "プロンプトの改善・追加 / Improve or add prompt"
+        - "その他 / Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "対象スコープ / Scope"
+      description: "変更対象 / What will be changed"
+      options:
+        - "Universal Rules (憲法改正 / Constitutional amendment)"
+        - "Blueprint Templates"
+        - "Prompt Library"
+        - "Infrastructure"
+        - "Documentation"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "提案内容 / Proposal"
+      description: "何を追加・変更したいか / What you want to add or change"
+      placeholder: |
+        例: 300_engineering_standards.md に Rust のコーディング規約セクションを追加する
+        Example: Add a Rust coding standards section to 300_engineering_standards.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: "背景・理由 / Rationale"
+      description: "なぜこの変更が必要か / Why is this change needed"
+      placeholder: |
+        例: 業界標準の変化により現在のガイダンスが不適切になった
+        Example: Industry standard changes have made the current guidance inappropriate
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "参考資料 / References"
+      description: "関連する業界標準、ドキュメント、記事など / Related standards, docs, or articles"
+    validations:
+      required: false

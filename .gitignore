@@ -3,26 +3,41 @@
 .idea/
 .vscode/
 *.log
+tmp/
+.cache/
+
+# Secrets & Environments
 .env
 .env.*
 !.env.example
+*.key
+*.pem
+*.p12
+*.cert
+*.crt
+*.pfx
+*.jks
+*.keystore
+client_secret.json
+serviceAccountKey.json
+credentials.json
 
 # Generated Files
 *.pdf
 *.csv
 *.xlsx
 
-# Secrets
-*.key
-*.pem
-*.p12
-
-# Node
+# Web & Node.js
 node_modules/
 npm-debug.log
 yarn-error.log
+pnpm-debug.log
+lerna-debug.log
 dist/
-tmp/
+out/
+.next/
+*.tsbuildinfo
+coverage/
 
 # Flutter/Dart
 .dart_tool/
@@ -32,11 +47,17 @@ ios/Flutter/Generated.xcconfig
 ios/Flutter/flutter_export_environment.sh
 android/local.properties
 
-# Firebase
+# Firebase & GCP
 .firebase/
 firebase-debug.log
 
-# OS
+# OS & Editor
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+._*
+*.swp
+.history/
+
+# Social preview (uploaded via GitHub Settings, not committed)
+social-preview.png

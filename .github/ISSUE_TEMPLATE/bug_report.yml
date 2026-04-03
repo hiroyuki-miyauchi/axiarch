@@ -1,0 +1,60 @@
+name: "🐛 バグ報告 / Bug Report"
+description: "ルールの矛盾、欠陥、誤記を報告 / Report rule contradictions, flaws, or typos"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🇯🇵 日本語 / 🇺🇸 English
+        どちらの言語でも報告できます。/ You may report in either language.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "カテゴリ / Category"
+      description: "問題のあるファイルの種類 / Type of file with the issue"
+      options:
+        - "Universal Rules (universal/)"
+        - "Blueprint Templates (blueprint/)"
+        - "Prompt Library (rampart-prompts/)"
+        - "Infrastructure (LOADING_PROTOCOL, INDEX, etc.)"
+        - "AGENTS.md (Constitution)"
+        - "Documentation (README, etc.)"
+    validations:
+      required: true
+
+  - type: input
+    id: file
+    attributes:
+      label: "対象ファイル / Affected File"
+      description: "問題のあるファイルのパス / Path to the file with the issue"
+      placeholder: "e.g., rampart-rules/universal/ja/300_engineering_standards.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "問題の説明 / Description"
+      description: "何が問題か、どう矛盾しているか / What is the issue, how is it contradictory"
+      placeholder: |
+        例: セクション X のルールがセクション Y のルールと矛盾している
+        Example: Rule in section X contradicts the rule in section Y
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "期待される内容 / Expected Behavior"
+      description: "どうあるべきか / What should it say or do instead"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "補足情報 / Additional Context"
+      description: "AIエージェント名、発生した状況など / AI agent name, situation where this occurred, etc."
+    validations:
+      required: false

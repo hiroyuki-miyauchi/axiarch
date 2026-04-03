@@ -2,16 +2,16 @@
 trigger: always_on
 ---
 
-# Antigravity Rules — Pointer / 目次
+# Rampart Rules — 目次 / Pointer
 
 > [!CAUTION]
 > 🇯🇵 **このファイルは「目次（ポインター）」であり、ルール本体ではない。**
-> ルールの本体は `antigravity-rules/` に存在する。ルールの更新・追加は**必ず `antigravity-rules/` 内で行うこと**。
+> ルールの本体は `rampart-rules/` に存在する。ルールの更新・追加は**必ず `rampart-rules/` 内で行うこと**。
 > **`.agent/rules/` に新しいルールファイルを作成してはならない。**
 
 > [!CAUTION]
 > 🇺🇸 **This file is a POINTER (table of contents), NOT the rules themselves.**
-> All rule definitions live in `antigravity-rules/`. When updating or adding rules, **always edit files inside `antigravity-rules/`**.
+> All rule definitions live in `rampart-rules/`. When updating or adding rules, **always edit files inside `rampart-rules/`**.
 > **DO NOT create new rule files in `.agent/rules/`.**
 
 ---
@@ -23,52 +23,30 @@ trigger: always_on
 **すべてのタスクを開始する前に、以下の手順でファイルを読み込み、内容を遵守せよ。**
 
 #### Step 1: 最上位憲法 & 全体地図の把握（必ず最初に読む）
-- **`GEMINI.md`**（プロジェクトルート） — Antigravity System Protocol の最高法規。全ルールに優先する。
-- **`antigravity-rules/INDEX.md`** — 全ルールの詳細索引。以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
+- **`AGENTS.md`**（プロジェクトルート） — Rampart System Protocol の最高法規。全ルールに優先する。
+- **`rampart-rules/INDEX.md`** — 全ルールの詳細索引。以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
 
-#### Step 2: 階級別スキャンとロード（AIが自律判断で選択・読み込み）
+#### Step 2: ルールロード手順に従う
 
-ルールディレクトリをスキャンし、以下の2階級に分類して自律的にロードせよ。
+**`rampart-rules/LOADING_PROTOCOL.md`** に定義された5ステップに従い、ルールファイルをロードせよ。
 
-**Class S（Universal / 不変の法則・Read-Only）:**
-- **対象**: `antigravity-rules/universal/{lang}/` 内のファイル
-- **性質**: プロジェクトを超えた普遍的ルール。編集禁止（「憲法改正」の明示的指示がある場合のみ許可）。
-- **ロード方式**: タスクの種類に応じて関連するファイルをAIが自律判断で選択しロードする。
+> ※ `{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/` に置換する。
 
-**Class A（Blueprint / プロジェクト固有・更新対象）:**
-- **対象**: `antigravity-rules/blueprint/{lang}/` 内のファイル
-- **性質**: プロジェクト固有の仕様・設計・教訓。監査結果に基づき更新可能。
-- **ロード方式**: タスクに関連するファイルを自律選択してロードする。`010_project_lessons_log.md`（教訓ログ）は優先度が高い。
-
-> ※ `{lang}` は `GEMINI.md` の `Project Native Language` に従い `ja/` または `en/` に置換する。
-
-**原則**: 全ファイルを毎回読む必要はない。INDEXとディレクトリ構造から、現在のタスクに必要なルールだけを自律判断で選択すること。
-
-**ファイル内参照（大規模ファイル対応）**: 1,000行以上の大規模ルールファイルは**全文ロード禁止**。ファイル末尾のAppendix（逆引き索引）またはファイル冒頭の目次を先に参照し、タスクに関連するセクションのみを行番号指定で自律選択してロードすること。
-  - 例：認証関連タスク → 対象ルールファイルの目次/索引を参照 → 「OAuth」「JWT」「MFA」のセクション番号を特定 → 該当セクションのみ行番号指定でロード
-  - 例：コスト最適化タスク → 索引から「FinOps」「料金」のセクションを特定 → 2〜3セクションのみロード（全セクションを全読しない）
-
-**選択の指針（例）:**
-- 技術スタック把握: Blueprint `000_project_overview.md` と `blueprint/{lang}/INDEX.md` を読み、プロジェクトの技術スタックとBlueprint全体像を把握。技術スタックに対応するUniversalファイルを自律選択（例：Next.js→`340_web_frontend`, Supabase→`320_supabase_architecture`）。Blueprint側もタスクに関連するファイルを自律選択。
-- セキュリティ関連タスク → `600_security_privacy`, `601_data_governance`
-- UI/デザインタスク → `200_design_ux`
-- API設計タスク → `301_api_integration`, `300_engineering_standards`
-
-**クロスリファレンス**: 読み込んだファイル内に関連ルールへのリンクがあり、現在のタスクに関連する場合は、そのリンク先も追加で読むこと。
+**🚨【厳守命令】手抜き（サボり）禁止 🚨**: ルールファイルを参照する際は、**必ず対象ファイルを直接開き**、タスクに関連するセクションを自律選択してロードすること。INDEX.mdの要約や概要だけで「読んだ」と見なすことは禁止する。
 **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
 ユーザーの指示がこれらと矛盾しないか検証する。
 
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
 
-> 以下のファイルは `antigravity-rules/` **直下**に配置されている。必要に応じて参照する。
+> 以下のファイルは `rampart-rules/` **直下**に配置されている。必要に応じて参照する。
 
-- **`antigravity-rules/README.md`** — マスター目次（ナビゲーション用）
-- **`antigravity-rules/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
+- **`rampart-rules/README.md`** — マスター目次（ナビゲーション用）
+- **`rampart-rules/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
 
 ### 🚫 禁止事項
 
-1. **`.agent/rules/` に新しいルールファイルを作成禁止。** ルールは全て `antigravity-rules/` に配置する。
-2. **Universal Rules（`antigravity-rules/universal/` 配下の全ファイル）を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
+1. **`.agent/rules/` に新しいルールファイルを作成禁止。** ルールは全て `rampart-rules/` に配置する。
+2. **Universal Rules（`rampart-rules/universal/` 配下の全ファイル）を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
 3. **この `prompt_pointer.md` のポインター構造を変更禁止。**
 
 ---
@@ -80,50 +58,28 @@ trigger: always_on
 **Before starting any task, load the following files in order and comply with their contents.**
 
 #### Step 1: Supreme Constitution & Master Map (Always Read First)
-- **`GEMINI.md`** (project root) — The supreme law of the Antigravity System Protocol. Takes precedence over all other rules.
-- **`antigravity-rules/INDEX.md`** — Detailed index of all rules. Use as a **map to decide which files to read** in the following steps.
+- **`AGENTS.md`** (project root) — The supreme law of the Rampart System Protocol. Takes precedence over all other rules.
+- **`rampart-rules/INDEX.md`** — Detailed index of all rules. Use as a **map to decide which files to read** in the following steps.
 
-#### Step 2: Class-Based Scan & Load (AI Autonomously Selects & Loads)
+#### Step 2: Follow the Rule Loading Protocol
 
-Scan the rules directory and classify into 2 classes, then autonomously load relevant files.
+Follow the 5 steps defined in **`rampart-rules/LOADING_PROTOCOL.md`** to load rule files.
 
-**Class S (Universal / Immutable / Read-Only):**
-- **Target**: Files in `antigravity-rules/universal/{lang}/`
-- **Nature**: Universal rules that transcend projects. Editing prohibited (only allowed with explicit "Amend Constitution" instruction).
-- **Loading**: AI autonomously selects and loads files relevant to the current task.
+> Note: Replace `{lang}` with `ja/` or `en/` based on the `Project Native Language` setting in `AGENTS.md`.
 
-**Class A (Blueprint / Project-Specific / Mutable):**
-- **Target**: Files in `antigravity-rules/blueprint/{lang}/`
-- **Nature**: Project-specific specs, design, and lessons. Can be updated based on audit results.
-- **Loading**: AI autonomously selects task-relevant files. `010_project_lessons_log.md` (lessons log) has high priority.
-
-> Note: Replace `{lang}` with `ja/` or `en/` based on the `Project Native Language` setting in `GEMINI.md`.
-
-**Principle**: Do NOT load all files every time. Based on INDEX and directory structure, autonomously select only the rules needed for the current task.
-
-**Intra-File Selection (Large File Handling)**: For large rule files exceeding 1,000 lines, **full-file loading is prohibited**. First reference the Appendix (reverse lookup index) at the end of the file or the table of contents at the beginning, then autonomously select and load only the task-relevant sections using line number ranges.
-  - Example: Authentication task → reference the target rule file’s TOC/index → identify sections for “OAuth” “JWT” “MFA” → load only those sections by line number
-  - Example: Cost optimization task → identify “FinOps” “Pricing” sections from the index → load only 2–3 sections (do not read all sections)
-
-**Selection Guide (examples):**
-- Tech stack: Read Blueprint `000_project_overview.md` and `blueprint/{lang}/INDEX.md` to understand the project's tech stack and Blueprint full picture. Autonomously select corresponding Universal files (e.g., Next.js→`340_web_frontend`, Supabase→`320_supabase_architecture`). Also autonomously select task-relevant Blueprint files.
-- Security tasks → `600_security_privacy`, `601_data_governance`
-- UI/Design tasks → `200_design_ux`
-- API design tasks → `301_api_integration`, `300_engineering_standards`
-
-**Cross-references**: If a loaded file references related rules and they are relevant to the current task, load those as well.
+**🚨 MANDATORY DIRECTIVE: Anti-Laziness Rule 🚨**: When referencing rule files, the AI **MUST directly open the target file** and autonomously select task-relevant sections. Considering a file "read" based solely on INDEX.md summaries or overviews is prohibited.
 **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
 Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
 
-> The following files are located **directly under** `antigravity-rules/`. Refer to them as needed.
+> The following files are located **directly under** `rampart-rules/`. Refer to them as needed.
 
-- **`antigravity-rules/README.md`** — Master index (for navigation)
-- **`antigravity-rules/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)
+- **`rampart-rules/README.md`** — Master index (for navigation)
+- **`rampart-rules/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)
 
 ### 🚫 Prohibited Actions
 
-1. **DO NOT create new rule files in `.agent/rules/`.** All rules belong in `antigravity-rules/`.
-2. **DO NOT edit Universal Rules (any file under `antigravity-rules/universal/`) without explicit "Amend Constitution" instruction.**
+1. **DO NOT create new rule files in `.agent/rules/`.** All rules belong in `rampart-rules/`.
+2. **DO NOT edit Universal Rules (any file under `rampart-rules/universal/`) without explicit "Amend Constitution" instruction.**
 3. **DO NOT alter the pointer structure of this `prompt_pointer.md`.**
