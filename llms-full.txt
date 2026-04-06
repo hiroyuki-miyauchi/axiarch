@@ -1,0 +1,360 @@
+# Axiarch (AX-ee-ark) — Full Specification
+
+> Constitution-Driven AI Agent Governance Framework
+> Version: 1.0.0 | License: Apache 2.0
+> Repository: https://github.com/hiroyuki-miyauchi/axiarch
+
+Axiarch is an open-source governance framework that prevents quality drift,
+hallucination, and uncontrolled behavior in AI-assisted software development.
+It enforces minimum engineering standards through a multi-layer constitutional
+architecture, ensuring consistent output quality regardless of the AI agent
+or operator skill level.
+
+Designed and battle-tested on Google Antigravity. Compatible with Cursor,
+Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read
+AGENTS.md or Markdown-based rule files.
+
+## What Problem Does Axiarch Solve?
+
+Without governance, AI agents suffer from:
+- **Context amnesia**: Architectural decisions are forgotten between sessions
+- **Operator-dependent quality**: Output quality varies with instruction precision
+- **Vibe coding drift**: Code that looks correct but silently violates patterns
+- **Knowledge evaporation**: Hard-won lessons are lost and re-discovered repeatedly
+
+Axiarch addresses all four with constitutional enforcement.
+
+## Core Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│  AGENTS.md — Supreme Law                            │  ← Immutable
+│  (AI Behavior Constitution)                         │
+├─────────────────────────────────────────────────────┤
+│  Universal Rules — 30 files × 2 languages (JA/EN)  │  ← Immutable
+│  Engineering, Security, AI, SRE, FinOps, i18n...    │
+├─────────────────────────────────────────────────────┤
+│  Blueprint — Project-Specific Laws                  │  ← Mutable
+│  Project Overview, Feature Specs, Lessons Log       │
+├─────────────────────────────────────────────────────┤
+│  Execution Documents — Per-Task                     │  ← Generated
+│  task.md, implementation_plan.md, walkthrough.md    │
+├─────────────────────────────────────────────────────┤
+│  Feedback Loop — Crystallization                    │  ← Continuous
+│  Lessons → Rules → Better Lessons                   │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## AGENTS.md — The Constitution (8 Protocols)
+
+AGENTS.md is the supreme law governing AI agent behavior. It contains
+8 mandatory protocols that apply to every interaction:
+
+### Protocol 0: AI Self-Completion Mandate (Supreme Rule)
+The AI MUST NOT burden the user with verification tasks. All log checking,
+error analysis, build verification, environment variable inspection, and
+file content review must be performed by the AI using its own tools.
+
+### Protocol 1: Deployment Ban
+No `git push` without explicit user permission. All changes must pass
+type checking (`tsc --noEmit`) and build verification (`npm run build`)
+locally before requesting push approval.
+
+### Protocol 2: Language First
+Project Native Language (Japanese or English) determines document language.
+Code variables/functions use English. All plans, tasks, specifications,
+and explanations must use the project's native language.
+
+### Protocol 3: Database Integrity
+No manual SQL execution via DB management consoles. All migrations must
+go through CI/CD pipelines via Git commits. Local changes must be
+formalized as migration files.
+
+### Protocol 4: SSOT Sync
+After completing work, always sync with main branch (`git pull origin main`).
+Branches are created only when necessary. Verify local main is up-to-date
+before starting new tasks.
+
+### Protocol 5: Existing Functionality Protection
+Running features are "Stable Assets" — no unnecessary modification.
+Exceptions: security holes, constitution violations, critical bugs
+(require user approval). New features use isolation (wrapper components,
+extension hooks) rather than modifying existing code.
+
+### Protocol 6: Role & Behavior
+The AI acts as Senior Architect and Lead Engineer — not a passive coder.
+It proactively identifies missing specifications and provides immediate
+output without social pleasantries.
+
+### Protocol 7: Process & Documentation
+Strict workflow: Load rules (LOADING_PROTOCOL) → Blueprint First →
+Full-content output → Always generate task.md, implementation_plan.md,
+walkthrough.md. Includes Boot Sequence Protocol (Stop & Wait, No
+Hallucination, Exact Match Only).
+
+### Protocol 8: Continuous Improvement
+After each task, scan for lessons learned and crystallize them into
+Blueprint rules following CRYSTALLIZATION_PROTOCOL.
+
+---
+
+## LOADING_PROTOCOL.md — 5-Step Rule Loading
+
+The AI follows this protocol at the start of every conversation:
+
+### Step 1: Task Classification
+Classify the user's instruction into task types: security, architecture,
+performance, ui_design, api, i18n, finops, testing, or other.
+
+### Step 2: INDEX-Based File Identification
+Read INDEX.md to identify which Universal Rules and Blueprint files
+correspond to the task type. Uses a two-class system:
+- Class S (Universal): Immutable, project-transcending rules
+- Class A (Blueprint): Mutable, project-specific specs and lessons
+
+### Step 3: File Loading (Anti-Laziness Mandate)
+Actually open and read each identified file using tools. Reading only
+INDEX summaries is strictly prohibited. For large files (1000+ lines),
+use table of contents or appendix to selectively load relevant sections.
+
+### Step 4: Post-Load Verification
+Record loaded files in task.md. If any applicable file was missed,
+stop work and load it before proceeding.
+
+### Step 5: Begin Work
+Only after Steps 1-4 are complete may code modifications begin.
+
+---
+
+## CRYSTALLIZATION_PROTOCOL.md — Lesson Auto-Crystallization
+
+A 5-step process for converting lessons into persistent rules:
+
+1. **Classify**: Determine the lesson's domain (DB/Auth → engineering/,
+   Security → quality/, Design → design/, etc.)
+2. **Search**: Check if a domain file already exists in the Blueprint
+   folder. If yes, append to it.
+3. **Accumulate**: If no domain file exists, temporarily store in
+   governance/010_project_lessons_log.md with Domain/Target Folder tags.
+4. **Threshold Check**: When 3+ lessons of the same domain accumulate,
+   auto-create a proper domain file and move lessons there.
+5. **Update Index**: Maintain governance/010 as an index of unsorted
+   lessons + links to separated domain files.
+
+Design philosophy: Co-location principle — lessons are placed in the
+same folder as related rule files for maximum context efficiency.
+
+---
+
+## Universal Rules — 30 Files × 2 Languages (JA/EN)
+
+All rules are immutable ("Constitution"). 2,500+ engineering standards.
+
+### core/ — Foundation Philosophy (3 files)
+- **000_core_mindset.md**: Supreme behavioral principles. Priority hierarchy
+  (Security > UX > Profitability > DX), Zero Tolerance, Headless First,
+  SSOT, band-aid ban, Git/deploy protocols, regression prevention.
+- **100_governance.md**: Constitutional authority, amendment protocol,
+  AI agent authority control, multi-project federation.
+- **200_language_protocol.md**: Three-layer language model, code/document
+  language conventions, AI communication protocol.
+
+### product/ — Business & Growth (10 files)
+- **000_product_strategy.md**: MVP→PMF, monetization, unit economics,
+  review/trust systems, tag-based search, interactive engine.
+- **100_market_validation.md**: Build Trap avoidance, JTBD, Pain Severity
+  Scoring, TAM/SAM/SOM, Mom Test, MVP types, Sean Ellis Test, Retention
+  Curve, False PMF Signal protocol. 12 parts, 45 sections.
+- **200_go_to_market.md**: Positioning Canvas, Category Creation, ICP,
+  PLG/SLG/MLG/CLG, Product Hunt protocol, GTM KPI. 10 parts, 38 sections.
+- **300_revenue_monetization.md**: FinOps, Stripe, point economy, AI token
+  economics, dynamic pricing, tax/invoice compliance.
+- **400_pricing_strategy.md**: Value-Based Pricing, Van Westendorp PSM,
+  Usage-based metrics, Freemium design, Tier design, A/B test ethics,
+  enterprise negotiation. 9 parts, 35 sections.
+- **500_growth_marketing.md**: PLG, SEO/GEO, onboarding, retention,
+  ad feed integration, OGP, first-party data, KPI framework.
+- **600_brand_strategy.md**: Golden Circle, Brand Pyramid, Design Tokens,
+  Voice/Tone, copywriting, crisis response. 8 parts, 30 sections.
+- **700_appstore_compliance.md**: Apple/Google guidelines, IAP, privacy
+  manifests, ASO, pre-submission checklist.
+- **800_internationalization.md**: i18n/L10n, Unicode, CLDR, RTL,
+  translation workflows, regional compliance.
+- **900_fundraising_ir.md**: Default Alive philosophy, stage benchmarks,
+  pitch deck standard, term sheets, Data Room, investor reports.
+  8 parts, 32 sections.
+
+### design/ — Design & UX (1 file)
+- **000_design_ux.md**: Mobile-first, WCAG 2.1 AA, 60fps animations,
+  design system, Pixel Perfect, Omotenashi UX, error design, Ghost
+  Content protocol, IME handling, i18n readiness.
+
+### engineering/ — Technical Implementation (9 files)
+- **000_engineering_standards.md**: Engineering excellence. 13 parts,
+  80 sections. Code quality, infrastructure, DevSecOps, tech debt,
+  AI-first development, Green Coding, zero-bug policy, Git protocols,
+  quality protocols, advanced architecture (Trinity DTO, CQRS, Feature
+  Flag Lifecycle).
+- **100_api_integration.md**: RESTful design, versioning, rate limiting,
+  error handling, CORS governance, API gateway metering.
+- **200_supabase_architecture.md**: 60 sections, 200+ rules. DB design,
+  RLS, Auth, Storage, Migration, Edge Functions, Realtime, pgvector,
+  multi-tenancy, operational maturity model.
+- **300_web_frontend.md**: Next.js/React/TypeScript. 49 parts, 300
+  sections. App Router, Server/Client boundary, CSS architecture,
+  React 19, forms, state management, performance, SEO/GEO, accessibility,
+  testing, deployment, modern Web APIs, AI integration, 5-level maturity.
+- **310_headless_cms.md**: 80 parts, 160 sections, 131 rules. CMS
+  philosophy, content modeling, rendering, CDN, publishing workflows,
+  AI-Ready Content, Agentic CMS, multi-tenant, 40 anti-patterns.
+- **400_mobile_flutter.md**: 55 parts, 265 sections. Flutter 3.41+,
+  Riverpod 3.0+, Impeller, Clean Architecture, offline-first, security
+  (OWASP MASVS), Passkeys/FIDO2, 50 anti-patterns.
+- **410_native_platforms.md**: Kotlin 2.x, Swift 6, KMP, Jetpack Compose,
+  SwiftUI, on-device AI, security, 20 anti-patterns.
+- **500_firebase_gcp.md**: 55 parts. Cloud Run, Firestore, Auth, FCM,
+  Genkit, Vertex AI, Zero Trust, FinOps, Terraform, 30 anti-patterns.
+- **510_aws_cloud.md**: 155 sections, 240+ rules. Well-Architected
+  Framework, all major AWS services, 20 anti-patterns.
+
+### ai/ — AI & Data (2 files)
+- **000_ai_engineering.md**: 48 parts, 150+ sections. AI UX patterns,
+  ethics (EU AI Act), RAG (GraphRAG), Agentic AI (L1-L5, MCP/A2A),
+  guardrails, AI FinOps, LLMOps, 20 anti-patterns.
+- **100_data_analytics.md**: 60 parts, 206 sections. Event taxonomy,
+  A/B testing, Privacy Sandbox, OpenTelemetry, AIOps 2.0, LLM
+  observability, 25 anti-patterns.
+
+### operations/ — Operations & SRE (7 files)
+- **000_internal_tools.md**: 50 parts, 231 sections. Admin dashboard,
+  RBAC/ABAC, audit logging, AI integration, FinOps, 20 anti-patterns.
+- **100_sales_bizdev.md**: Challenger Sale, MEDDIC, Sales Funnel,
+  Partner evaluation. 10 parts, 38 sections.
+- **200_hr_organization.md**: Talent Density, Bar Raiser, OKR, Team
+  Topologies, Remote-First. 9 parts, 34 sections.
+- **300_customer_experience.md**: AI agent strategy, omnichannel,
+  Customer Health Score, churn prevention. 40 parts.
+- **400_site_reliability.md**: SLI/SLO/SLA, chaos engineering,
+  Platform Engineering, AIOps. 55 parts, 166 sections.
+- **500_incident_response.md**: ISO 22301/NIST CSF 2.0, BIA, crisis
+  communication, BCP/DR, blameless postmortem. 31 parts.
+- **700_partnership_ecosystem.md**: Partnership Maturity Model,
+  Ecosystem Flywheel, Developer Portal. 9 parts, 34 sections.
+
+### security/ — Security & Legal (4 files)
+- **000_security_privacy.md**: Zero Trust (NIST 800-207), FIDO2,
+  OWASP Top 10 2025, AI/LLM security (OWASP LLM Top 10), supply
+  chain (SBOM/SLSA), PQC readiness. 22 sections.
+- **100_data_governance.md**: GDPR/APPI/CCPA/EU AI Act, consent
+  management, RegTech, quantum crypto agility. 45 sections.
+- **200_oss_compliance.md**: License classification, SBOM (CycloneDX/
+  SPDX), SLSA v1.1, SCA tools. 49 sections, 280+ rules.
+- **300_ip_due_diligence.md**: Patents, trade secrets, AI-generated IP,
+  exit strategy, DD operations. 50 sections.
+
+### quality/ — Testing & QA (2 files)
+- **000_qa_testing.md**: Test philosophy, 10+ test types, security
+  testing, AI-driven testing, 5-level maturity model. 40 sections.
+- **600_cloud_finops.md**: FinOps Foundation 2026, FOCUS v1.3, AI/ML
+  FinOps, Agentic AI FinOps, K8s FinOps, GreenOps. 25 parts, 57 sections.
+
+---
+
+## Blueprint Templates — Project-Specific
+
+Mutable templates for each project:
+- **000_project_overview.md**: Project tech stack, architecture, goals
+- **010_project_lessons_log.md**: Central lessons index with auto-separation
+- **998_feature_spec_template.md**: Feature spec with Given/When/Then
+  acceptance criteria (SDD core)
+- **999_project_specific_template.md**: Custom project rules
+
+---
+
+## Prompt Library — 16 Templates × 2 Languages (JA/EN)
+
+Optional reusable prompt templates organized by role:
+
+### develop/ — Development & Execution (4 prompts)
+- **feature_development.md**: New feature implementation, improvement,
+  bug fixing, and compliance auditing
+- **refactoring_audit.md**: Non-destructive refactoring — structure,
+  type safety, DRY without behavior changes
+- **push_execute.md**: Quality gate, DB integrity, branch strategy,
+  and atomic push execution
+- **ci_fix.md**: CI/CD failure reproduction, root cause analysis, fix,
+  and rule feedback
+
+### audit/ — Quality & Integrity Auditing (5 prompts)
+- **fullstack_qa_audit.md**: 6-Pillar Silicon Valley Standard audit
+  with priority reporting and ROI proposals
+- **api_architecture_audit.md**: API design, DTO, Zero Trust,
+  omnichannel readiness
+- **data_integrity_audit.md**: JSON dump detection, Hybrid Sync,
+  Split Brain elimination, facade detection
+- **system_integrity_audit.md**: Type safety, API/DB sync, facade
+  detection, data monetization readiness
+- **deep_optimization_audit.md**: Media/LCP/SSR gap root cause
+  detection and full-system integrity
+
+### govern/ — Compliance & Governance (5 prompts)
+- **compliance_inspector_audit.md**: 8 Major Constitutional Violations
+  framework deep compliance audit
+- **constitution_compliance_audit.md**: 7 Major Violations scan
+- **governance_auditor.md**: 8-Pillar holistic governance audit
+- **blueprint_governance_audit.md**: Crystallize development insights
+  into Blueprint rules
+- **localization_audit.md**: 100% native UI, LTV, AI/GEO, legal
+  localization audit
+
+### operate/ — Incident Response & Onboarding (2 prompts)
+- **onboarding_audit.md**: Codebase deep understanding, architecture,
+  landmines, and first actions
+- **incident_response.md**: SRE-focused triage, 5 Whys RCA, emergency
+  fix, postmortem, recurrence prevention
+
+---
+
+## Agent Compatibility
+
+| Agent | Status | Native Config |
+|:------|:-------|:-------------|
+| Google Antigravity | ✅ Verified | `.agents/rules/prompt_pointer.md` |
+| Cursor | ⚠️ Expected | `.cursor/rules/axiarch.mdc` |
+| Claude Code | ⚠️ Expected | `CLAUDE.md` symlink → `AGENTS.md` |
+| GitHub Copilot | ⚠️ Expected | `.github/copilot-instructions.md` |
+| Windsurf | ⚠️ Expected | `.windsurfrules` |
+| Aider / Zed | ⚠️ Expected | Reads `AGENTS.md` directly |
+
+---
+
+## Quick Start
+
+```bash
+# Option 1: Interactive setup (recommended)
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
+
+# Option 2: Manual copy
+cp AGENTS.md /path/to/your/project/
+cp -r axiarch-rules /path/to/your/project/
+# Optional: cp -r axiarch-prompts /path/to/your/project/
+```
+
+## Language Support
+
+Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
+All 30 Universal Rules, 4 Blueprint templates, and 16 prompt templates are
+available in both languages. The init.sh setup script handles language
+selection and removes unused language directories automatically.
+
+## Links
+
+- Repository: https://github.com/hiroyuki-miyauchi/axiarch
+- Summary (llms.txt): https://github.com/hiroyuki-miyauchi/axiarch/blob/main/llms.txt
+- README (Japanese): https://github.com/hiroyuki-miyauchi/axiarch#-axiarch%E3%82%A2%E3%82%AF%E3%82%B7%E3%82%A2%E3%83%BC%E3%82%AF%E3%81%A8%E3%81%AF
+- README (English): https://github.com/hiroyuki-miyauchi/axiarch#-what-is-axiarch
+- Issues: https://github.com/hiroyuki-miyauchi/axiarch/issues
+- Discussions: https://github.com/hiroyuki-miyauchi/axiarch/discussions
+- Releases: https://github.com/hiroyuki-miyauchi/axiarch/releases

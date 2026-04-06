@@ -16,7 +16,7 @@ body:
       options:
         - "Universal Rules (universal/)"
         - "Blueprint Templates (blueprint/)"
-        - "Prompt Library (rampart-prompts/)"
+        - "Prompt Library (axiarch-prompts/)"
         - "Infrastructure (LOADING_PROTOCOL, INDEX, etc.)"
         - "AGENTS.md (Constitution)"
         - "Documentation (README, etc.)"
@@ -28,7 +28,7 @@ body:
     attributes:
       label: "対象ファイル / Affected File"
       description: "問題のあるファイルのパス / Path to the file with the issue"
-      placeholder: "e.g., rampart-rules/universal/ja/300_engineering_standards.md"
+      placeholder: "e.g., axiarch-rules/universal/ja/300_engineering_standards.md"
     validations:
       required: true
 

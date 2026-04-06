@@ -30,7 +30,7 @@
 
 ### 執行
 
-問題のある行為があった場合は、[GitHub Issues](https://github.com/hiroyuki-miyauchi/rampart/issues) からご報告ください。すべての報告はレビューおよび調査され、適切な対応がとられます。
+問題のある行為があった場合は、[GitHub Issues](https://github.com/hiroyuki-miyauchi/axiarch/issues) からご報告ください。すべての報告はレビューおよび調査され、適切な対応がとられます。
 
 ---
 
@@ -64,7 +64,7 @@ This Code of Conduct applies within all project spaces and when an individual is
 
 ### Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported via [GitHub Issues](https://github.com/hiroyuki-miyauchi/rampart/issues). All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported via [GitHub Issues](https://github.com/hiroyuki-miyauchi/axiarch/issues). All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate.
 
 ---
 

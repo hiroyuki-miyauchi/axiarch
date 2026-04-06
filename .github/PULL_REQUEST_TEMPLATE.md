@@ -20,7 +20,7 @@ Closes #
 
 - [ ] `universal/ja/` と `universal/en/` の両方を更新した（該当する場合） / Updated both `ja/` and `en/` (if applicable)
 - [ ] `blueprint/ja/` と `blueprint/en/` の両方を更新した（該当する場合） / Updated both `ja/` and `en/` (if applicable)
-- [ ] `rampart-prompts/ja/` と `rampart-prompts/en/` の両方を更新した（該当する場合） / Updated both `ja/` and `en/` (if applicable)
+- [ ] `axiarch-prompts/` の対象フォルダ（`develop/`, `audit/`, `govern/`, `operate/`）を `ja/` と `en/` の両方更新した（該当する場合） / Updated both `ja/` and `en/` in the relevant subfolder(s) of `axiarch-prompts/` (if applicable)
 
 ### スコープ確認 / Scope Confirmation
 

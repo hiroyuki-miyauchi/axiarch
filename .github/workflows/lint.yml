@@ -1,0 +1,103 @@
+name: "📋 Markdown Lint & Bilingual Symmetry Check"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # ===========================================================================
+  # Job 1: Markdown Lint
+  # ===========================================================================
+  markdown-lint:
+    name: "Markdown Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            **/*.md
+            !node_modules/**
+            !.git/**
+
+  # ===========================================================================
+  # Job 2: Bilingual Symmetry Check
+  # Ensures JA/EN file counts are always in sync
+  # ===========================================================================
+  bilingual-symmetry:
+    name: "Bilingual Symmetry Check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Universal Rules symmetry (ja/ vs en/)
+        run: |
+          set -euo pipefail
+          echo "🔍 Checking Universal Rules symmetry..."
+
+          ja_count=$(find axiarch-rules/universal/ja -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+          en_count=$(find axiarch-rules/universal/en -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+
+          echo "  universal/ja: ${ja_count} files"
+          echo "  universal/en: ${en_count} files"
+
+          if [ "$ja_count" != "$en_count" ]; then
+            echo "❌ FAIL: Universal Rules bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
+            echo "   All universal rule files must have both JA and EN counterparts."
+            exit 1
+          fi
+          echo "✅ Universal Rules: symmetric (${ja_count} files each)"
+
+      - name: Check Blueprint symmetry (ja/ vs en/)
+        run: |
+          set -euo pipefail
+          echo "🔍 Checking Blueprint symmetry..."
+
+          ja_count=$(find axiarch-rules/blueprint/ja -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+          en_count=$(find axiarch-rules/blueprint/en -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+
+          echo "  blueprint/ja: ${ja_count} files"
+          echo "  blueprint/en: ${en_count} files"
+
+          if [ "$ja_count" != "$en_count" ]; then
+            echo "❌ FAIL: Blueprint bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
+            echo "   All blueprint files must have both JA and EN counterparts."
+            exit 1
+          fi
+          echo "✅ Blueprint: symmetric (${ja_count} files each)"
+
+      - name: Check Prompt Library symmetry (ja/ vs en/) [Optional]
+        run: |
+          set -euo pipefail
+          echo "🔍 Checking Prompt Library symmetry (optional)..."
+
+          if [ ! -d "axiarch-prompts" ]; then
+            echo "ℹ️  axiarch-prompts/ not found — skipping (optional directory)."
+            exit 0
+          fi
+
+          # Count all .md files recursively under ja/ and en/ (supports role-based subdirectories)
+          ja_count=$(find axiarch-prompts/ja -maxdepth 2 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+          en_count=$(find axiarch-prompts/en -maxdepth 2 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+          echo "  axiarch-prompts/ja: ${ja_count} files (develop/ audit/ govern/ operate/)"
+          echo "  axiarch-prompts/en: ${en_count} files (develop/ audit/ govern/ operate/)"
+
+          if [ "$ja_count" != "$en_count" ]; then
+            echo "❌ FAIL: Prompt Library bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
+            echo "   All prompt files must have both JA and EN counterparts."
+            exit 1
+          fi
+          echo "✅ Prompt Library: symmetric (${ja_count} files each)"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "✅ All bilingual symmetry checks passed!"
+          echo "   Axiarch maintains perfect JA/EN parity."

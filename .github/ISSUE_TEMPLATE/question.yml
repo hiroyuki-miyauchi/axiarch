@@ -1,0 +1,67 @@
+name: "💬 質問 / Question"
+description: "Axiarchの使い方・動作に関する質問 / Questions about usage or behavior"
+labels: ["question"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💬 質問をお寄せいただきありがとうございます
+        ## Thank you for your question!
+
+        まず [README](https://github.com/hiroyuki-miyauchi/axiarch#readme) を確認してみてください。`axiarch-prompts/` を導入している場合は [Prompt Library README](https://github.com/hiroyuki-miyauchi/axiarch/blob/main/axiarch-prompts/README.md) も参照してください。
+        
+        Please check the [README](https://github.com/hiroyuki-miyauchi/axiarch#readme) first. If you have installed `axiarch-prompts/` (optional), also refer to the [Prompt Library README](https://github.com/hiroyuki-miyauchi/axiarch/blob/main/axiarch-prompts/README.md).
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: "カテゴリ / Category"
+      options:
+        - "セットアップ / Setup"
+        - "ルールの解釈 / Rule Interpretation"
+        - "プロンプトの使い方 / Prompt Usage"
+        - "エージェント互換性 / Agent Compatibility"
+        - "カスタマイズ / Customization"
+        - "その他 / Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: "質問内容 / Question"
+      description: "具体的に教えてください / Please be as specific as possible"
+      placeholder: "例: `feature_development.md` を Cursor で使う場合、どのように設定すればよいですか？"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "状況・コンテキスト / Context"
+      description: "使用しているエージェント・OS・プロジェクトタイプ等 / Agent, OS, project type, etc."
+      placeholder: |
+        - AI Agent: Google Antigravity / Cursor / Claude Code / GitHub Copilot / Other
+        - OS: macOS / Windows / Linux
+        - Project Type: Next.js / Flutter / Go / Python / Other
+    validations:
+      required: false
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: "試したこと / What You've Tried"
+      description: "すでに試したことがあれば教えてください / If you've already tried something, please share"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "確認事項 / Checklist"
+      options:
+        - label: "READMEを確認しました / I have read the README"
+          required: true
+        - label: "既存のIssueを検索しました / I have searched existing Issues"
+          required: true

@@ -1,0 +1,49 @@
+# =============================================================================
+# Axiarch — CODEOWNERS
+# =============================================================================
+# すべての変更はデフォルトでメンテナーのレビューが必要です。
+# All changes require maintainer review by default.
+
+* @hiroyuki-miyauchi
+
+# =============================================================================
+# AGENTS.md — 最高法規 / Supreme Law
+# =============================================================================
+# 「憲法改正」として特に厳格なレビューが必要。
+# Requires "Constitutional Amendment" review — highest scrutiny.
+
+AGENTS.md @hiroyuki-miyauchi
+
+# =============================================================================
+# Universal Rules — 不変の憲法 / Immutable Constitution
+# =============================================================================
+# Universal Rulesは「憲法」です。変更には明示的な憲法改正の承認が必要。
+# Universal Rules are the Constitution. Changes require explicit "Amend Constitution" approval.
+
+axiarch-rules/universal/ @hiroyuki-miyauchi
+axiarch-rules/LOADING_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/CRYSTALLIZATION_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/INDEX.md @hiroyuki-miyauchi
+axiarch-rules/compliance_matrix.md @hiroyuki-miyauchi
+
+# =============================================================================
+# Blueprint — プロジェクト固有テンプレート / Project-Specific Templates
+# =============================================================================
+# Blueprintは可変です。改善・追加を歓迎します（Issueでの事前議論を推奨）。
+# Blueprints are mutable. Improvements and additions welcome (prior Issue discussion recommended).
+
+axiarch-rules/blueprint/ @hiroyuki-miyauchi
+
+# =============================================================================
+# Prompt Library — 再利用可能プロンプト / Reusable Prompt Templates
+# =============================================================================
+# プロンプト集は可変です。改善・追加を歓迎します。
+# Prompt library is mutable. Improvements and additions welcome.
+
+axiarch-prompts/ @hiroyuki-miyauchi
+
+# =============================================================================
+# GitHub Config & Repository Health
+# =============================================================================
+
+.github/ @hiroyuki-miyauchi
