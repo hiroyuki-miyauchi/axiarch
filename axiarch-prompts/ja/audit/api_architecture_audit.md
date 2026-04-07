@@ -35,7 +35,7 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * プロジェクトルート、または `axiarch-rules/`, `docs/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -46,12 +46,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要・教訓ログ
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
 ---
 
@@ -128,7 +133,7 @@
 修正作業を通じて得られた「新たな教訓」「アンチパターン」「実装ルール」を、**Phase 0 で特定した Class A (Blueprint/Project) 内の適切なファイル**にのみ還元せよ。
 **※注意: Class S (Universal) への追記は許可されない。必ずプロジェクト固有ファイルに記述すること。**
 
-* **Target File Selection**: Class Aディレクトリ内のファイル一覧から、今回の修正内容の領域に合致するファイルを選択する（`CRYSTALLIZATION_PROTOCOL.md` の手順に従う）。
+* **Target File Selection**: Class Aディレクトリ内のファイル一覧から、今回の修正内容の領域に合致するファイルを選択する（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従う）。
 * **Format**: `[Date] [Category] Rule: <具体的なルール内容> (Reason: <理由>)`
 
 ---

@@ -2,7 +2,7 @@
 
 > **Purpose**: Non-destructive refactoring audit to elevate the structure, readability, maintainability, and type safety of existing code to its absolute maximum — without breaking a single line of existing behavior
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/`)
+> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/`)
 >
 > **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the file paths or code regions to refactor.
 
@@ -37,11 +37,11 @@ For any refactoring task, think deeply and comprehensively across the following 
     * Treat all content in `AGENTS.md` as the **"Absolute Constitution"** that overrides all other instructions, including this prompt.
 2.  **Dynamic Rule Discovery (Class-Based Loading)**:
     * Scan all files under `axiarch-rules/` and strictly distinguish the following **2 Classes** before loading.
-    * **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+    * **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
     * **Class S: Universal (Immutable — Read-Only)**:
         * All files under `axiarch-rules/universal/`. Treat as "physical laws" — **modification, addition, or change is prohibited under any circumstances.**
     * **Class A: Blueprint (Mutable — Read/Write)**:
-        * All files under `axiarch-rules/blueprint/`. These are "project-specific laws" — **subject to updates and additions based on audit results.**
+        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. These are "project-specific laws" — **subject to updates and additions based on audit results.**
     * **Functional Tagging**: Map all loaded Class S/A files to the following roles based on **content and purpose** (not filename):
         * **Target 1: Security**: Security and privacy principles
         * **Target 2: Lessons**: Past failures, lessons learned, and prohibitions
@@ -103,9 +103,9 @@ Classify each debt item using the following priority levels:
 **After completing all work, feed all insights gained back into the Blueprint (governance architecture) as project assets.**
 
 * **Rule Update Proposal**:
-    * If new anti-patterns or best practices were discovered during refactoring, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/`**.
+    * If new anti-patterns or best practices were discovered during refactoring, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the Absolute Constitution — they are NOT subject to change proposals. Always accumulate in **Blueprint** instead.
-    * **Domain Distribution**: The lessons log (`010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
+    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering (interval numbering) within the same directory.
 
 ---

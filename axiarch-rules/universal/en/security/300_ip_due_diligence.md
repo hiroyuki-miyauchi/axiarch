@@ -15,16 +15,16 @@
 
 ## Table of Contents
 
-- [I. IP Ownership & Rights Attribution (§1-§5)](#i-ip-ownership--rights-attribution-15)
-- [II. Patent Strategy (§6-§12)](#ii-patent-strategy-612)
-- [III. Trade Secrets & Confidential Information (§13-§16)](#iii-trade-secrets--confidential-information-1316)
-- [IV. Trademarks, Branding & Domains (§17-§19)](#iv-trademarks-branding--domains-1719)
-- [V. Copyright & Data Rights (§20-§22)](#v-copyright--data-rights-2022)
-- [VI. AI-Generated IP (§23-§26)](#vi-ai-generated-ip-2326)
-- [VII. Exit Strategy Foundation (§27-§34)](#vii-exit-strategy-foundation-2734)
-- [VIII. Due Diligence Operations (§35-§41)](#viii-due-diligence-operations-3541)
-- [IX. Governance & Ongoing Management (§42-§47)](#ix-governance--ongoing-management-4247)
-- [X. Compliance & Timeline (§48-§50)](#x-compliance--timeline-4850)
+- [I. IP Ownership & Rights Attribution (§1-§5)](#i-ip-ownership--rights-attribution-1-5)
+- [II. Patent Strategy (§6-§12)](#ii-patent-strategy-6-12)
+- [III. Trade Secrets & Confidential Information (§13-§16)](#iii-trade-secrets--confidential-information-13-16)
+- [IV. Trademarks, Branding & Domains (§17-§19)](#iv-trademarks-branding--domains-17-19)
+- [V. Copyright & Data Rights (§20-§22)](#v-copyright--data-rights-20-22)
+- [VI. AI-Generated IP (§23-§26)](#vi-ai-generated-ip-23-26)
+- [VII. Exit Strategy Foundation (§27-§34)](#vii-exit-strategy-foundation-27-34)
+- [VIII. Due Diligence Operations (§35-§41)](#viii-due-diligence-operations-35-41)
+- [IX. Governance & Ongoing Management (§42-§47)](#ix-governance--ongoing-management-42-47)
+- [X. Compliance & Timeline (§48-§50)](#x-compliance--timeline-48-50)
 - [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index)
 
 ---

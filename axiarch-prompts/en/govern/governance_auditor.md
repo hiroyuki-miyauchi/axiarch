@@ -2,7 +2,7 @@
 
 > **Purpose**: Holistic governance audit across 8 Pillars (Security / Business / Legal / AI / Architecture / Maintainability / UX / Performance) — with a structured report format for identifying unimplemented features, unaddressed risks, and constitutional violations
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/`)
+> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/`)
 >
 > **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to audit.
 
@@ -36,7 +36,7 @@ With **"maximizing privacy protection and security hardening" as the top priorit
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
-* **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 ### Class S: Universal Immutable Laws
 > [!IMPORTANT]
@@ -47,12 +47,12 @@ With **"maximizing privacy protection and security hardening" as the top priorit
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-    2.  **Lessons**: Past lesson logs (e.g., `010_project_lessons_log.md`, `0X0_lessons_{domain}.md`)
-    3.  **Domain Rules**: Security, billing, media, etc. (e.g., `100_security...`, `200_design...`)
-    4.  **Templates**: Feature specifications and project-specific rules (e.g., `998_feature_spec_template.md`)
+    2.  **Lessons**: Past lesson logs (e.g., `governance/010_project_lessons_log.md`)
+    3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`)
+    4.  **Templates**: Feature specifications and project-specific rules (e.g., `templates/000_feature_spec_template.md`, `templates/100_project_specific_template.md`)
 * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
     * **Target 1: Security**: Security and privacy principles
     * **Target 2: Lessons**: Past failures, lessons, and prohibited patterns
@@ -166,8 +166,8 @@ Based on the analysis results, present corrections and proposals according to th
 
 3. **Refactor**: Based on user approval or instructions, generate code that fixes violations. The principle is **non-destructive changes (don't break existing functionality)**, but drastic fixes are not avoided for security, privacy, legal, and environment-dependency defects.
 
-4. **Rule Update**: Add and update the knowledge gained from this audit (new rules, lessons) to appropriate files within **Class A (Blueprint) loaded in Phase 0**. Follow `CRYSTALLIZATION_PROTOCOL.md` procedures for distributed placement to appropriate domain files.
-    * **Domain Distribution**: The lessons log (`010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
+4. **Rule Update**: Add and update the knowledge gained from this audit (new rules, lessons) to appropriate files within **Class A (Blueprint) loaded in Phase 0**. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures for distributed placement to appropriate domain files.
+    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
     * **New File Creation**: If no suitable existing file exists, present a new file creation proposal following **3-digit Sparse Numbering** conventions within the same directory.
 
 ---

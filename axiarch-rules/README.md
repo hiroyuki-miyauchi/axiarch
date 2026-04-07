@@ -7,7 +7,7 @@
 >
 > **Separation of Concerns (AI Agent Instructions)**:
 >
-> ### 🇯🇵 日本語指示 (Japanese Instructions)
+> ## 🇯🇵 日本語指示 (Japanese Instructions)
 > *   **Universal Rules (`universal/`)**:
 >     *   **Status**: **Immutable (不変)** / プロジェクト作業では読み取り専用。
 >     *   **Action**: 明示的に「憲法改正」を指示されない限り、AIはこれらのファイルを編集してはならない。
@@ -15,7 +15,7 @@
 >     *   **Status**: **Mutable (可変)** / プロジェクト固有。
 >     *   **Action**: AIはプロジェクトのコンテキストを定義するために、これらのファイルを作成・編集すべきである。
 >
-> ### 🇺🇸 English Instructions
+> ## 🇺🇸 English Instructions
 > *   **Universal Rules (`universal/`)**:
 >     *   **Status**: **Immutable (不変)** / Read-Only for Project Tasks.
 >     *   **Action**: AI MUST NOT edit these files unless explicitly instructed to "Amend Constitution".

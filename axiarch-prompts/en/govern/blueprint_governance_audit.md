@@ -2,7 +2,7 @@
 
 > **Purpose**: A comprehensive prompt to crystallize development insights into Blueprint rules
 >
-> **Target**: Project-specific rules under `axiarch-rules/blueprint/`
+> **Target**: Project-specific rules under `axiarch-rules/blueprint/{lang}/`
 >
 > **Usage**: Paste this prompt into your AI agent's chat to execute
 
@@ -40,14 +40,14 @@ In the rule-making process, you must think deeply and comprehensively across **a
 1.  **Load Core Protocol (`AGENTS.md`)**:
     * If `AGENTS.md` exists in the root directory, its contents are the **inviolable constitution.** Even when competing with instructions below or general best practices, always prioritize `AGENTS.md`.
 2.  **Dynamic Rule Discovery (Autonomous Loading Specification)**:
-    * Target the `axiarch-rules/` directory, **autonomously select files in strict compliance with the `AGENTS.md` directives and the `LOADING_PROTOCOL.md` "Anti-Laziness Rule"**, and strictly classify into the following **2 Classes.**
+    * Target the `axiarch-rules/` directory, **autonomously select files in strict compliance with the `AGENTS.md` directives and the `axiarch-rules/LOADING_PROTOCOL.md` "Anti-Laziness Rule"**, and strictly classify into the following **2 Classes.**
 
-    * **Important**: Edit permissions and boundaries for each class (Universal/Blueprint) must strictly comply with `LOADING_PROTOCOL.md` and `AGENTS.md`.
+    * **Important**: Edit permissions and boundaries for each class (Universal/Blueprint) must strictly comply with `axiarch-rules/LOADING_PROTOCOL.md` and `AGENTS.md`.
     * **Action**: Select related rules and classify by content into the following categories to grasp their roles, then load:
-        1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-        2.  **Lessons**: Past lessons and logs (e.g., `010_project_lessons_log.md`, `0X0_lessons_{domain}.md`)
-        3.  **Domain Rules**: Security, billing, media, etc. (e.g., `100_security...`, `200_design...`)
-        4.  **Templates**: Feature specs and project-specific rules (e.g., `998_feature_spec_template.md`, `999_project_specific_template.md`)
+        1.  **Project Overview**: Project overview (e.g., `governance/000_project_overview.md`)
+        2.  **Lessons**: Past lessons and logs (e.g., `governance/010_project_lessons_log.md`)
+        3.  **Domain Rules**: Organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` mapping (e.g., `quality/`, `engineering/`, `design/`, `product/`, `ai/`, `specs/`)
+        4.  **Templates**: Feature specs and project-specific rules (e.g., `templates/000_feature_spec_template.md`, `templates/100_project_specific_template.md`)
 # Phase 2: Deep Context & Knowledge Synthesis
 Investigate the project's file system and synthesize "project knowledge" using the following procedure to identify risks and opportunities.
 
@@ -90,24 +90,16 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 ## 2. Structural Optimization
 **Refactor the governance architecture to be "readable, extensible, maintainable, and auditable."**
 
-* **Modularization**: Split appropriately by topic rather than creating one massive file.
-* **3-Digit Sparse Numbering Strategy (Important)**:
-    * Use **3-digit numeric prefixes** for filenames, aligned with the Universal Rules numbering system (`000`–`800` series).
-    * Use **large gaps (intervals of 100+)** to anticipate future insertions. Filling with sequential numbers (001, 002, 003...) is prohibited.
-    * **Blueprint Numbering Guide**:
-        * `000-099`: Project Overview & Lessons
-            * `000`: Project overview
-            * `010`: Lessons log (temporary accumulation point)
-            * `0X0`: Domain-specific lesson files (auto-split at threshold of 3 entries)
-        * `100-199`: Security, Legal & Localization
-        * `200-299`: Design & UI/UX
-        * `300-399`: Engineering & Architecture
-        * `400-499`: AI & Data
-        * `500-599`: Business & Monetization
-        * `900-999`: Templates & Utilities
-            * `998`: Feature specification template
-            * `999`: Project-specific rule template
-    * **Alignment with Universal Rules**: Blueprint numbering should be aware of the Universal Rules category system (`000` Core, `100` Product, `200` Design, `300` Engineering, `400` AI, `500` Operations, `600` Security, `700` QA, `800` Global) to facilitate cross-referencing.
+* **Folder-Based Organization (Critical)**:
+    * Blueprints are organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`).
+    * Domain-to-folder mapping MUST follow the Step 1 mapping table in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+    * **Co-location Principle**: Lessons are placed in the **same folder** as the rule files they relate to. When AI loads a domain folder, both rules AND historical lessons are available.
+* **3-Digit Sparse Numbering (Within-Folder Numbering)**:
+    * Use **3-digit numeric prefixes** for filenames within each folder.
+    * Use **large gaps** to anticipate future insertions. Sequential numbering (001, 002, 003...) is prohibited.
+    * `000_` is reserved for rule files. Do NOT use for crystallized lesson files.
+    * `governance/010_project_lessons_log.md` is fixed. Crystallized files in `governance/` use `020_` onwards.
+    * When numbering, actually check existing files in the target folder and autonomously determine the next available number.
 * **Cross-Referencing**: Ensure consistency between rules and add reference links where needed.
 * **Actionable**: Include concrete guidance on "how developers should write code," not just abstract principles.
 
@@ -125,7 +117,7 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 1.  **Analyze**:
     * Map existing rule files against project implementations and identify missing rules from **Execution Standards** perspectives (especially **localization quality**, security, legal, FinOps, AI, GEO).
 2.  **Plan**:
-    * Define the ideal file structure in `axiarch-rules/blueprint/` (filenames and roles). Apply the `CRYSTALLIZATION_PROTOCOL.md` naming conventions to ensure room for future expansion.
+    * Define the ideal folder and file structure in `axiarch-rules/blueprint/{lang}/`. Apply the `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping.
     * Ensure critical items like **Localization**, **Security**, **FinOps**, and **GEO/AI** are not buried.
 3.  **Write & Refactor**:
     * **Preservation (Critical)**:
@@ -133,12 +125,17 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
         * **"File deletion" is only permitted when 100% of its content has been confirmed migrated to a new file.** Consolidation that reduces information density is prohibited.
     * **Prohibition**: No changes, deletions, or moves to **Class S (Universal)** files whatsoever.
     * **Domain Distribution (Critical)**:
-        * **The lessons log (`010_project_lessons_log.md`) is a "temporary accumulation point," NOT the final destination.**
-        * Insights and lessons MUST be **distributed, promoted, and crystallized into relevant domain-specific Blueprint files in strict compliance with `CRYSTALLIZATION_PROTOCOL.md`.**
+        * **The lessons log (`governance/010_project_lessons_log.md`) is a "temporary accumulation point," NOT the final destination.**
+        * Insights and lessons MUST be distributed to the **corresponding domain folder** per the `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` Step 1 mapping table, and crystallized into domain-specific Blueprint files.
+        * When same-domain lessons reach 3+ entries in the lessons log, create a dedicated file in the corresponding domain folder and elevate the lessons.
+        * Examples (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` Step 1 mapping):
+            * Security lessons → `quality/{NNN}_security_policy.md`
+            * AI lessons → `ai/{NNN}_ai_content_rules.md`
+            * DB lessons → `engineering/{NNN}_database_auth.md`
     * **New Creation**: Create missing rules (e.g., **Localization UI Guidelines**, AI Cost Management Policy, Privacy Protection Guidelines, GEO Optimization Standards) as new files.
     * **Revision & Consolidation**: Review existing content and rewrite to be more strict and specific. Consolidate duplicated content.
     * **Protocol Compliance**:
-        * Rule loading order must comply with `LOADING_PROTOCOL.md`.
+        * Rule loading order must comply with `axiarch-rules/LOADING_PROTOCOL.md`.
 4.  **Final Verify**:
     * Confirm all rules meet **"Silicon Valley standards"** AND **"target market standards"** and function as the project's constitution.
     * **Safety Check**: Re-confirm that security and privacy descriptions are sufficiently thorough.
@@ -151,5 +148,5 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 * **Key Updates**: Major rules newly added or strengthened (especially **localization quality**, security, privacy, AI, FinOps, GEO, LTV perspectives).
 * **Next Action**: Guidelines for how developers should utilize and operate this governance architecture going forward.
 
-**Begin the thorough optimization and reconstruction of all project-specific rules (`axiarch-rules/blueprint/*.md`), leveraging the full knowledge of the project without degrading existing assets (rules).**
+**Begin the thorough optimization and reconstruction of all project-specific rules (`axiarch-rules/blueprint/{lang}/` — all domain folders), leveraging the full knowledge of the project without degrading existing assets (rules).**
 ````

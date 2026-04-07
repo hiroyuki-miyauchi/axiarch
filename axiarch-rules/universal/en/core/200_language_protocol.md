@@ -59,7 +59,7 @@
 - [Part XLI: Translation Cost Management & FinOps](#part-xli-translation-cost-management--finops)
 - [Part XLII: Language-Related Incident Response](#part-xlii-language-related-incident-response)
 - [Part XLIII: Speech Recognition (STT) Input Language Protocol](#part-xliii-speech-recognition-stt-input-language-protocol)
-- [Part XLIV: Quick Reference Index (Appendix A)](#part-xliv-quick-reference-index-appendix-a)
+- [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index)
 
 ---
 

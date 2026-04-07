@@ -59,7 +59,7 @@
 - [Part XLI: 翻訳コスト管理・FinOps言語](#part-xli-翻訳コスト管理finops言語)
 - [Part XLII: 言語関連インシデント対応](#part-xlii-言語関連インシデント対応)
 - [Part XLIII: 音声認識（STT）入力言語プロトコル](#part-xliii-音声認識stt入力言語プロトコル)
-- [Part XLIV: 逆引き索引（Appendix A）](#part-xliv-逆引き索引appendix-a)
+- [Part XLIV: 逆引き索引（Appendix A）](#part-xli-翻訳コスト管理finops言語)
 
 ---
 

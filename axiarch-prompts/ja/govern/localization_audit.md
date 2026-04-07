@@ -50,7 +50,7 @@
 
 ## Step 1: Load Core Protocol (`AGENTS.md`)
 * ルートディレクトリに `AGENTS.md` が存在する場合、**何よりも先にこのファイルを一言一句漏らさず全文読み込むこと。**
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 
@@ -63,13 +63,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`、`0X0_lessons_{domain}.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等（例: `100_security...`, `200_design...`）
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール（例: `998_feature_spec_template.md`）
-* **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要・教訓ログ
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
     * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
     * **Target 3: Design**: デザインシステム・世界観
@@ -148,7 +152,7 @@
 **全ての作業完了後、今回の作業を通じて得られた「新たな知見」や「ルールの不備」がある場合、それをプロジェクトの資産としてルールブックに還元してください。**
 
 * **Rule Update Proposal**:
-    * 今回の翻訳作業で確定した「用語集（Glossary）」や「禁止用語」があれば、**必ずプロジェクト固有のルールファイル（`axiarch-rules/blueprint/` 配下など）への追記を提案すること。**（`CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと）
+    * 今回の翻訳作業で確定した「用語集（Glossary）」や「禁止用語」があれば、**必ずプロジェクト固有のルールファイル（`axiarch-rules/blueprint/{lang}/` 配下（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う））への追記を提案すること。**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと）
     * **Universalルールの保護**: `axiarch-rules/universal/` 配下の不変ルールへの変更提案は原則禁止とする。
     * 変更の必要がない場合は「ルールの更新事項なし」と明記すること。
 

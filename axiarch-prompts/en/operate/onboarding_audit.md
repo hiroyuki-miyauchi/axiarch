@@ -2,7 +2,7 @@
 
 > **Purpose**: A structured onboarding audit to enable new AI agents or developers to deeply, accurately, and rapidly understand the codebase — establishing correct fundamentals before writing a single line of code
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/`)
+> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/`)
 >
 > **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then instruct it to "begin project onboarding."
 
@@ -36,11 +36,11 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
     * Treat all content in `AGENTS.md` as the **"Absolute Constitution"** that overrides all other instructions, including this prompt.
 2.  **Dynamic Rule Discovery (Class-Based Loading)**:
     * Scan all files under `axiarch-rules/` and strictly distinguish the following **2 Classes** before loading.
-    * **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+    * **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
     * **Class S: Universal (Immutable — Read-Only)**:
         * All files under `axiarch-rules/universal/`. Treat as "physical laws" — **modification, addition, or change is prohibited under any circumstances.**
     * **Class A: Blueprint (Mutable — Read/Write)**:
-        * All files under `axiarch-rules/blueprint/`. These are "project-specific laws" — **subject to updates and additions based on audit results.**
+        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. These are "project-specific laws" — **subject to updates and additions based on audit results.**
     * **Functional Tagging**: Map all loaded Class S/A files to the following roles based on **content and purpose** (not filename):
         * **Target 1: Security**: Security and privacy principles
         * **Target 2: Lessons**: Past failures, lessons learned, and prohibitions
@@ -70,13 +70,13 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 
 1.  **Design Pattern Extraction**: Identify and document established patterns in the existing code (component design, state management, error handling, authentication, testing strategy, etc.).
 2.  **Naming Convention Audit**: Investigate naming conventions for files, variables, functions, API endpoints, and DB tables. Check for drift.
-3.  **Blueprint Gap Analysis**: Identify gaps between what is specified in `axiarch-rules/blueprint/000_project_overview.md` and the actual implementation state.
+3.  **Blueprint Gap Analysis**: Identify gaps between what is specified in `axiarch-rules/blueprint/{lang}/governance/000_project_overview.md` and the actual implementation state.
 
 ---
 
 # Phase 3: Landmine Mapping
 
-1.  **Lessons Log Scan**: Scan `010_project_lessons_log.md` to understand past problems and their solutions. Summarize key lessons in `task.md` to prevent repetition.
+1.  **Lessons Log Scan**: Scan `governance/010_project_lessons_log.md` to understand past problems and their solutions. Summarize key lessons in `task.md` to prevent repetition.
 2.  **Landmine Map**: Pre-map "landmines" that new participants are most likely to trigger.
 
 ```
@@ -106,9 +106,9 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 **After completing all work, feed all insights gained back into the Blueprint (governance architecture) as project assets.**
 
 * **Rule Update Proposal**:
-    * If gaps or issues were discovered during onboarding, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/`**.
+    * If gaps or issues were discovered during onboarding, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the Absolute Constitution — they are NOT subject to change proposals. Always accumulate in **Blueprint** instead.
-    * **Domain Distribution**: The lessons log (`010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
+    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering within the same directory.
 
 ---

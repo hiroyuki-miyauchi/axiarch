@@ -2,7 +2,7 @@
 
 > **用途**: JSON逃がし・Hybrid Sync・Split Brain・ハリボテ実装の検知を軸とした、プロジェクト憲法への完全準拠監査
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/` + DB設計）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/` + DB設計）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、監査対象のコードまたはファイルパスを指示する。
 
@@ -41,7 +41,7 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -52,10 +52,10 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。詳細は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照。
 * **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
     1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`）
+    2.  **Lessons**: 過去の教訓・ログ（例: `governance/010_project_lessons_log.md`）
     3.  **Domain Rules**: DB・セキュリティ・アーキテクチャ等
     4.  **Templates**: 機能仕様・プロジェクト固有ルール
 
@@ -111,7 +111,7 @@
 **全ての作業完了後、今回の作業を通じて得られた「新たな知見」や「ルールの不備」がある場合、それをプロジェクトの資産としてルールブックに還元してください。**
 
 * **Rule Update Proposal**:
-    * 既存のルールに記述が足りない、または今回の実装で新たなベストプラクティス（または禁止事項）が確定した場合は、**具体的にどのファイル（Class A内の適切なファイル）のどこに何を追記すべきか**を提示すること（`CRYSTALLIZATION_PROTOCOL.md` の手順に従う）。
+    * 既存のルールに記述が足りない、または今回の実装で新たなベストプラクティス（または禁止事項）が確定した場合は、**具体的にどのファイル（Class A内の適切なファイル）のどこに何を追記すべきか**を提示すること（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従う）。
     * **Class S (Universal) の保護**: Universal Rules への変更・追加提案は原則禁止とする（組織全体の合意が必要なため）。
     * 特に **Class A の教訓ログ（Lessons）** への教訓追加が必要な場合は必ず提案すること。
     * 変更の必要がない場合は「ルールの更新事項なし」と明記すること。

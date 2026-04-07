@@ -2,7 +2,7 @@
 
 > **Purpose**: When CI/CD (e.g., GitHub Actions) fails, this prompt executes error reproduction, root cause analysis, fix, and rule feedback in a unified flow
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/`)
+> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/`)
 >
 > **Usage**: Paste this prompt into your AI agent's chat when CI is in a failing state. The AI will enter standby mode — then provide the CI error logs or workflow URL.
 
@@ -28,11 +28,11 @@ You don't just fix CI failures — you are responsible for **identifying root ca
     * If `AGENTS.md` exists in the root directory, its contents are the **inviolable constitution.** Strictly comply with quality standards, security, and deployment ban protocol.
 2.  **Dynamic Rule Discovery (Complete Rule Hierarchy Mastery)**:
     * Scan all files under `axiarch-rules/` directory and strictly distinguish between the following **2 Classes.**
-    * **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+    * **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
     * **Class S: Universal (Immutable)**:
         * All files under `axiarch-rules/universal/`. **Modification prohibited under all circumstances (Read-Only).**
     * **Class A: Blueprint (Project-Specific / Editable)**:
-        * All files under `axiarch-rules/blueprint/`. **Subject to updates and additions based on fix results (Read/Write).**
+        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. **Subject to updates and additions based on fix results (Read/Write).**
 
 # Phase 1: Reproduction & Root Cause Analysis
 **Based on CI error information provided by the user, execute the following.**
@@ -57,9 +57,9 @@ You don't just fix CI failures — you are responsible for **identifying root ca
 # Phase 3: Constitutional Evolution — Knowledge Feedback
 
 * **Rule Update Proposal**:
-    * If "lessons" or "new implementation rules (e.g., type definition handling)" were gained through this error fix, present proposals for additions/modifications to **relevant files in `axiarch-rules/blueprint/`.**
+    * If "lessons" or "new implementation rules (e.g., type definition handling)" were gained through this error fix, present proposals for additions/modifications to **relevant domain files in `axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the absolute constitution — NOT subject to change proposals.
-    * **Domain Distribution**: The lessons log (`010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `CRYSTALLIZATION_PROTOCOL.md`.
+    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
     * If no rule changes or additions are needed, explicitly state "No rule updates required."
 
 # Boot Sequence (Startup Behavior)

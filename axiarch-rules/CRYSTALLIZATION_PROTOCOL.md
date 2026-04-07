@@ -13,7 +13,7 @@
 
 1. [Overview / 概要](#overview--概要)
 2. [5-Step Auto-Crystallization / 5ステップ自動結晶化](#5-step-auto-crystallization--5ステップ自動結晶化)
-3. [Domain File Template / ドメインファイルテンプレート](#domain-file-template--ドメインファイルテンプレート)
+3. [Crystallized Rule File Template / 昇華ルールファイルテンプレート](#crystallized-rule-file-template--昇華ルールファイルテンプレート)
 4. [Structural Requirements / 構造要件](#structural-requirements--構造要件)
 5. [Examples / 具体例](#examples--具体例)
 
@@ -63,7 +63,7 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 ├──────────────────────────────────────────────────────┤
 │  Step 4: THRESHOLD CHECK (閾値チェック)               │
 │  governance/010 内の同一ドメイン教訓が 3件以上 になったか？ │
-│  ├── YES → 対応フォルダに NNN_lessons_{domain}.md 作成 │
+│  ├── YES → 対応フォルダに {NNN}_{topic}.md 作成       │
 │  │         governance/010 には参照リンクのみ残す        │
 │  └── NO  → governance/010 に留置                     │
 ├──────────────────────────────────────────────────────┤
@@ -98,8 +98,11 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 | ガバナンス・ルール / Governance | `governance/` | `governance/{NNN}_governance_rules.md` （010はインデックス固定のため020以降） |
 | 機能仕様 / Feature Spec | `specs/` | `specs/{NNN}_{feature_name}.md` |
 
-> **`{NNN}` の決定方法**: 昇華時に対象フォルダ内の既存ファイルをAIが実際に確認し、次の空き番号（10刷み）を自律判断する。番号は固定ではない。
+> **`{NNN}` の決定方法**: 昇華時に対象フォルダ内の既存ファイルをAIが実際に確認し、次の空き番号（10刻み）を自律判断する。番号は固定ではない。
 > `000_` はルールファイル用に予約（昇華ファイルには使わない）。ファイル名に **`lessons_` は不要**。内容を表すトピック名のみ使う。
+
+> **フォルダの拡張性 / Folder Extensibility**: 上記8フォルダは初期構成として事前準備されているが、**閉じたリストではない**。上記の対応表にないドメインの教訓が蓄積された場合、AIは新しいフォルダの作成を**ユーザーに提案**してよい（独断での作成は禁止）。ただし、まず既存フォルダへの分類を優先すること。
+> The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first.
 
 
 ---

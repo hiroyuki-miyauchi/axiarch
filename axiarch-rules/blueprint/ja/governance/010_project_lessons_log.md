@@ -74,24 +74,24 @@
 
 | ドメイン | 主な教訓の種類 | 関連 Universal ルール |
 |:--------|:------------|:--------------------|
-| DB・認証 | スキーマ設計、マイグレーション、RLS、認証フロー | `320_supabase`, `600_security` |
-| セキュリティ | 脆弱性、インシデント、プライバシー | `600_security_privacy` |
-| アーキテクチャ | 設計判断、ADR、レイヤー設計 | `300_engineering_standards` |
-| 品質 | テスト戦略、バグ回帰、コードレビュー | `700_qa_testing` |
-| デザイン | UI/UX判断、デザインシステム、A11y | `200_design_ux` |
-| 運用 | CI/CD、デプロイ、SRE、インシデント対応 | `502_site_reliability` |
-| ガバナンス | ルール運用、プロトコル改善、教訓管理 | `801_governance` |
-| パフォーマンス | 速度改善、メモリ、コスト最適化 | `300_engineering_standards`, `720_cloud_finops` |
-| FinOps | クラウドコスト、リソース効率 | `720_cloud_finops` |
+| DB・認証 | スキーマ設計、マイグレーション、RLS、認証フロー | `engineering/200_supabase_architecture`, `security/000_security_privacy` |
+| セキュリティ | 脆弱性、インシデント、プライバシー | `security/000_security_privacy` |
+| アーキテクチャ | 設計判断、ADR、レイヤー設計 | `engineering/000_engineering_standards` |
+| 品質 | テスト戦略、バグ回帰、コードレビュー | `quality/000_qa_testing` |
+| デザイン | UI/UX判断、デザインシステム、A11y | `design/000_design_ux` |
+| 運用 | CI/CD、デプロイ、SRE、インシデント対応 | `operations/400_site_reliability` |
+| ガバナンス | ルール運用、プロトコル改善、教訓管理 | `core/100_governance` |
+| パフォーマンス | 速度改善、メモリ、コスト最適化 | `engineering/000_engineering_standards`, `operations/600_cloud_finops` |
+| FinOps | クラウドコスト、リソース効率 | `operations/600_cloud_finops` |
 
 ### クロスリファレンス（関連 Universal ルール）
 
 | カテゴリ | 関連 Universal ルール |
 |---|---|
 | 教訓の結晶化プロセス | `AGENTS.md` §8 Continuous Improvement — Auto-Crystallization Protocol |
-| コア原則違反の教訓 | `000_core_mindset` |
-| セキュリティ教訓 | `600_security_privacy` |
-| パフォーマンス教訓 | `300_engineering_standards`, `700_qa_testing` |
+| コア原則違反の教訓 | `core/000_core_mindset` |
+| セキュリティ教訓 | `security/000_security_privacy` |
+| パフォーマンス教訓 | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
 | 設計判断の教訓 | 対象ドメインの Universal ルールを参照 |
 
 ---

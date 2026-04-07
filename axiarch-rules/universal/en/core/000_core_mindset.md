@@ -45,11 +45,11 @@ We strictly adhere to the following hierarchy of priorities in all decision-maki
         *   **Law**: "Low risk, so it can wait" is NOT allowed. **A small security hole or data leak risks losing all product credibility—the BIGGEST risk.**
         *   **Action**: When a risk is identified, regardless of severity, address it **immediately, without exception, thoroughly**. Do not proceed until the risk is zero. "It's just admin" or "It's just MVP" are not excuses.
     *   **Rule 0.2: The Anti-Overwrite Protocol (Surgical Precision Mandate)**:
-        - **Supreme Law (Rule 0.-1)**: "Full Overwrite" of existing files is considered **destructive behavior** and is prohibited for any reason.
-        - **Law**: Modifications must be "surgical"—change ONLY the affected parts via Replace/Insert. Protect existing code and adhere to "Don't touch working code" principle.
-        - **Action**: Always show diffs so the user can fully understand what changed.
-        - **AI Tool Mandate**: When AI agents modify files, full-file overwrite (e.g., `write_to_file` + Overwrite) is prohibited in principle. Use diff-based modification tools (e.g., `replace_file_content`, `multi_replace_file_content`) to edit only the target lines. Process multiple modifications as individual diff chunks to prevent unnecessary diff noise.
-        - **Rationale**: Full-file overwrite introduces unintended formatting changes and line-ending differences, polluting Git history and making change tracking via `git blame` impossible.
+        * **Supreme Law (Rule 0.-1)**: "Full Overwrite" of existing files is considered **destructive behavior** and is prohibited for any reason.
+        * **Law**: Modifications must be "surgical"—change ONLY the affected parts via Replace/Insert. Protect existing code and adhere to "Don't touch working code" principle.
+        * **Action**: Always show diffs so the user can fully understand what changed.
+        * **AI Tool Mandate**: When AI agents modify files, full-file overwrite (e.g., `write_to_file` + Overwrite) is prohibited in principle. Use diff-based modification tools (e.g., `replace_file_content`, `multi_replace_file_content`) to edit only the target lines. Process multiple modifications as individual diff chunks to prevent unnecessary diff noise.
+        * **Rationale**: Full-file overwrite introduces unintended formatting changes and line-ending differences, polluting Git history and making change tracking via `git blame` impossible.
 2.  **Level 2: User Experience (UX)**
     *   **Definition**: Overwhelming speed, offline-first, intuitive operation, "Wow" moments, mobile-first.
     *   **Criterion**: After satisfying Level 1, we aim for the world's most usable product.

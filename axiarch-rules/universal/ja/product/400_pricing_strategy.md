@@ -19,7 +19,7 @@
 - [Part III. 価格設定方法論](#part-iii-価格設定方法論)
 - [Part IV. パッケージング・ティア設計](#part-iv-パッケージングティア設計)
 - [Part V. 価格変更プロトコル](#part-v-価格変更プロトコル)
-- [Part VI. 価格実験（A/Bテスト）](#part-vi-価格実験abtesト)
+- [Part VI. 価格実験（A/Bテスト）](#part-vi-価格実験abテスト)
 - [Part VII. エンタープライズ価格交渉](#part-vii-エンタープライズ価格交渉)
 - [Part VIII. 価格KPIとモニタリング](#part-viii-価格kpiとモニタリング)
 - [Part IX. Appendix: 逆引き索引・クロスリファレンス](#part-ix-appendix-逆引き索引クロスリファレンス)

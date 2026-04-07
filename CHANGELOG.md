@@ -29,10 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 700–720: QA & FinOps
   - 800–802: Global & Governance
 - **Blueprint Templates** — プロジェクト固有テンプレート / Project-specific templates
-  - `000_project_overview.md` — プロジェクト概要 / Project overview
-  - `010_project_lessons_log.md` — 教訓ログ / Lessons log
-  - `998_feature_spec_template.md` — SDD機能仕様テンプレート / SDD feature spec template
-  - `999_project_specific_template.md` — プロジェクト固有ルール / Project-specific rules
+  - `governance/000_project_overview.md` — プロジェクト概要 / Project overview
+  - `governance/010_project_lessons_log.md` — 教訓ログ / Lessons log
+  - `templates/000_feature_spec_template.md` — SDD機能仕様テンプレート / SDD feature spec template
+  - `templates/100_project_specific_template.md` — プロジェクト固有ルール / Project-specific rules
 - **LOADING_PROTOCOL.md** — 5ステップのルールロード手順 / 5-step rule loading protocol
 - **CRYSTALLIZATION_PROTOCOL.md** — 教訓の自動結晶化プロトコル / Lesson auto-crystallization protocol
 - **INDEX.md** — 全ルールの詳細索引 / Detailed index of all rules

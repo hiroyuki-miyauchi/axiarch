@@ -26,7 +26,7 @@ In execution, **dynamically identify and load critical files as context** using 
 
 # Phase 0: Dynamic Context Loading
 Scan the project's rule directories and identify the following critical files **based on "role" rather than filename.**
-Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 1.  **Core Protocol**: `AGENTS.md` (or the top-level behavioral guidelines file).
     * **Role**: Behavioral guidelines, quality standards, and deployment ban protocol as an architect.
@@ -36,7 +36,7 @@ Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
     * *Search Hint*: `000_`, `600_security`, `constitution`
 3.  **Target 2: Project Lessons**
     * **Role**: Log file recording past failures and absolute prohibitions.
-    * **Class A (Blueprint)**: Under `axiarch-rules/blueprint/` → **Read/Write (update target)**
+    * **Class A (Blueprint)**: Under `axiarch-rules/blueprint/{lang}/` → **Read/Write (update target)**
     * *Search Hint*: `010_`, `lessons`
 4.  **Target 3: Development Workflow**
     * **Role**: File documenting Git/CI operations, branch strategy, and **Atomic Commits** standards.

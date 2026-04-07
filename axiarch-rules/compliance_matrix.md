@@ -3,11 +3,11 @@
 > [!CAUTION]
 > **AI Agent Controls / AIへの重要指示**
 >
-> ### 🇯🇵 日本語指示 (Japanese Instructions)
+> ## 🇯🇵 日本語指示 (Japanese Instructions)
 > *   **Universal Constitution (普遍憲法)**: `1. Axiarch（アクシアーク）普遍憲法` セクションに記載されているファイル（`universal/*/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。
 > *   **Blueprint (固有ルール)**: `2. プロジェクト固有ルール` セクションに記載されているファイル（`blueprint/*/` 配下）は、プロジェクトごとにカスタマイズされるべき領域です。AIは要件に応じてこれらを積極的に提案・更新してください。
 >
-> ### 🇺🇸 English Instructions
+> ## 🇺🇸 English Instructions
 > *   **Universal Constitution**: The files listed in the `1. Axiarch Universal Constitution` section (under `universal/*/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution").
 > *   **Blueprint Rules**: The files listed in the `2. Project-Specific Blueprint Rules` section (under `blueprint/*/`) are the area to be customized for each project. AI SHOULD proactively propose and update these files according to requirements.
 

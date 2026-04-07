@@ -26,7 +26,7 @@
 
 # Phase 0: Dynamic Context Loading (参照ファイルの動的特定)
 プロジェクト内のルール格納ディレクトリをスキャンし、**ファイル名ではなく「役割」に基づいて**以下の重要ファイルを特定・ロードしてください。
-※ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+※ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 1.  **Core Protocol**: `AGENTS.md`（または最上位の行動指針ファイル）。
     * **役割**: アーキテクトとしての行動指針、品質基準、デプロイ禁止プロトコル。
@@ -36,7 +36,7 @@
     * *Search Hint*: `000_`, `600_security`, `constitution`
 3.  **Target 2: Project Lessons (プロジェクト教訓)**
     * **役割**: 過去の失敗や絶対禁止事項が記録されたログファイル。
-    * **Class A (Blueprint)**: `axiarch-rules/blueprint/` 配下 → **Read/Write（更新対象）**
+    * **Class A (Blueprint)**: `axiarch-rules/blueprint/{lang}/` 配下 → **Read/Write（更新対象）**
     * *Search Hint*: `010_`, `lessons`
 4.  **Target 3: Development Workflow (開発フロー)**
     * **役割**: Git/CI運用、ブランチ戦略、**Atomic Commits**基準が書かれたファイル。

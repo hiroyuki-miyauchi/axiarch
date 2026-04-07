@@ -53,7 +53,7 @@ blueprint/ja/
 | ファイル | 説明 |
 |:--------|:----|
 | [000_project_overview.md](governance/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
-| `010_project_lessons_log.md` | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
+| [010_project_lessons_log.md](governance/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
 | `020_{topic}.md` ← 昇華自動生成 | ガバナンス系教訓が3件以上の時に自律作成。他ドメイン（DB・セキュリティ等）の教訓は対応ドメインフォルダへ正式ルールファイルとして昇華。 |
 
 ---

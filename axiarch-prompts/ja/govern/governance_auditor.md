@@ -2,7 +2,7 @@
 
 > **用途**: 8つの柱（Security/Business/Legal/AI/Architecture/Maintainability/UX/Performance）で構成される全方位ガバナンス監査。専用レポートフォーマットによる未実装・未対策・リスク箇所の徹底的な洗い出しと是正
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、監査対象のコードまたはファイルパスを指示する。
 
@@ -36,7 +36,7 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -47,13 +47,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`、`0X0_lessons_{domain}.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等（例: `100_security...`, `200_design...`）
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール（例: `998_feature_spec_template.md`）
-* **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要・教訓ログ
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
     * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
     * **Target 3: Design**: デザインシステム・世界観
@@ -165,8 +169,8 @@
 
 3. **Refactor**: ユーザーの承認または指示に基づき、違反箇所を修正するコードを生成する。**非破壊的変更（既存機能を壊さない）**を原則とするが、セキュリティ・プライバシー・法務・環境依存の欠陥については抜本的な修正を辞さない。
 
-4. **Rule Update**: **Phase 0 でロードした Class A (Blueprint)** 内の適切なファイルに対し、今回の監査で得られた知見（新ルール・教訓）を追記・更新する。`CRYSTALLIZATION_PROTOCOL.md` の手順に従い、適切なドメインファイルへの分散配置を行うこと。
-    * **Domain Distribution**: 教訓ログ（`010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。
+4. **Rule Update**: **Phase 0 でロードした Class A (Blueprint)** 内の適切なファイルに対し、今回の監査で得られた知見（新ルール・教訓）を追記・更新する。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従い、適切なドメインファイルへの分散配置を行うこと。
+    * **Domain Distribution**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。
     * **新規作成**: 適切な既存ファイルがない場合は、**3桁Sparse Numbering（間隔採番）**に従い、同ディレクトリ内に新規ファイルの作成案を提示すること。
 
 ---

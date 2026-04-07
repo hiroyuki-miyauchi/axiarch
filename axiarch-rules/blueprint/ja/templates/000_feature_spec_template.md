@@ -1,4 +1,4 @@
-# 998. 機能仕様テンプレート (Feature Specification Template)
+# 000. 機能仕様テンプレート (Feature Specification Template)
 
 > [!TIP]
 > **使い方**: このファイルをコピーし、Category 600–800 の番号帯でリネームしてください（例: `600_feature_payment.md`）。
@@ -86,10 +86,10 @@
 
 | カテゴリ | 要件 | 基準値 | 参照Universal |
 |:--------|:-----|:------|:-------------|
-| **パフォーマンス** | [例: API応答時間] | [例: ≤ 200ms] | `300_engineering_standards` §2.2 |
+| **パフォーマンス** | [例: API応答時間] | [例: ≤ 200ms] | `engineering/000_engineering_standards` §2.2 |
 | **スケーラビリティ** | [例: 同時接続数] | [例: 1,000 req/s] | — |
-| **可用性** | [例: SLA] | [例: 99.9%] | `502_site_reliability` |
-| **アクセシビリティ** | [例: WCAG準拠レベル] | [例: AA] | `200_design_ux` |
+| **可用性** | [例: SLA] | [例: 99.9%] | `operations/400_site_reliability` |
+| **アクセシビリティ** | [例: WCAG準拠レベル] | [例: AA] | `design/000_design_ux` |
 
 ---
 
@@ -181,19 +181,19 @@ graph LR
 
 ## 9. セキュリティ考慮事項 (Security Considerations)
 
-> `600_security_privacy` の基準に加え、この機能固有のリスクと対策。
+> `security/000_security_privacy` の基準に加え、この機能固有のリスクと対策。
 
 | リスク | 対策 | 参照Universal |
 |:-------|:-----|:-------------|
-| [例: 不正なユーザーによるデータ閲覧] | [例: RLSで `user_id` を検証] | `600_security_privacy` |
-| [例: 大量リクエストによるDoS] | [例: Rate Limiting 適用] | `301_api_integration` |
-| [例: PII漏洩] | [例: DTO で機密フィールドを除外] | `300_engineering_standards` §13.1 |
+| [例: 不正なユーザーによるデータ閲覧] | [例: RLSで `user_id` を検証] | `security/000_security_privacy` |
+| [例: 大量リクエストによるDoS] | [例: Rate Limiting 適用] | `engineering/100_api_integration` |
+| [例: PII漏洩] | [例: DTO で機密フィールドを除外] | `engineering/000_engineering_standards` §13.1 |
 
 ---
 
 ## 10. テスト戦略 (Test Strategy)
 
-> `700_qa_testing` の基準に加え、この機能固有のテスト計画。
+> `quality/000_qa_testing` の基準に加え、この機能固有のテスト計画。
 
 ### テストマトリクス
 
@@ -239,14 +239,14 @@ graph LR
 
 | セクション | 関連 Universal ルール |
 |:----------|:--------------------|
-| §1 機能概要 | `100_product_strategy` |
-| §2 ユーザーストーリー | `100_product_strategy`, `200_design_ux` |
-| §3 受け入れ条件 | `700_qa_testing` |
-| §4 非機能要件 | `300_engineering_standards`, `502_site_reliability` |
-| §5 エッジケース | `700_qa_testing`, `503_incident_response` |
-| §6 データモデル | `320_supabase_architecture`, `601_data_governance` |
-| §7 API設計 | `301_api_integration`, `300_engineering_standards` §13.1–§13.3 |
-| §8 UI/UX | `200_design_ux`, `340_web_frontend` |
-| §9 セキュリティ | `600_security_privacy`, `300_engineering_standards` §3.0–§3.5 |
-| §10 テスト | `700_qa_testing` |
-| §11 リリース | `300_engineering_standards` §13.13, `502_site_reliability` |
+| §1 機能概要 | `product/000_product_strategy` |
+| §2 ユーザーストーリー | `product/000_product_strategy`, `design/000_design_ux` |
+| §3 受け入れ条件 | `quality/000_qa_testing` |
+| §4 非機能要件 | `engineering/000_engineering_standards`, `operations/400_site_reliability` |
+| §5 エッジケース | `quality/000_qa_testing`, `operations/500_incident_response` |
+| §6 データモデル | `engineering/200_supabase_architecture`, `security/100_data_governance` |
+| §7 API設計 | `engineering/100_api_integration`, `engineering/000_engineering_standards` §13.1–§13.3 |
+| §8 UI/UX | `design/000_design_ux`, `engineering/300_web_frontend` |
+| §9 セキュリティ | `security/000_security_privacy`, `engineering/000_engineering_standards` §3.0–§3.5 |
+| §10 テスト | `quality/000_qa_testing` |
+| §11 リリース | `engineering/000_engineering_standards` §13.13, `operations/400_site_reliability` |

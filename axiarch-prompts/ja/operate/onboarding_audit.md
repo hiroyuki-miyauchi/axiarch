@@ -2,7 +2,7 @@
 
 > **用途**: 新しいAIエージェントまたは開発者がプロジェクトに参加する際に、コードベースを深く・正確に・高速に理解させ、正しい開発を最初から始めるための参入監査プロンプト
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、「プロジェクト理解を開始してください」と指示する。
 
@@ -37,11 +37,11 @@
     * `AGENTS.md` に記載された内容は、本プロンプトを含む他の全ての指示よりも優先される**「絶対憲法」**として扱う。
 2.  **Dynamic Rule Discovery（ルール階層の完全掌握）**:
     * `axiarch-rules/` ディレクトリ配下の全ファイルをスキャンし、以下の**2つの階級（Class）**を厳密に区別してロードせよ。
-    * **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+    * **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
     * **Class S: Universal（普遍・編集不可）**:
         * `axiarch-rules/universal/` 配下の全ファイル。これらは「物理法則」として扱い、**いかなる場合も修正・追加・変更を禁止（Read-Only）**とする。
     * **Class A: Blueprint（固有・編集可能）**:
-        * `axiarch-rules/blueprint/` 配下の全ファイル。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
+        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
     * **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
         * **Target 1: Security**: セキュリティ・プライバシー原則
         * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -71,13 +71,13 @@
 
 1.  **Design Pattern Extraction**: 既存コードから確立されているパターンを把握・記録する（コンポーネント設計・状態管理・エラーハンドリング・認証・テスト戦略など）。
 2.  **Naming Convention Audit**: ファイル・変数・関数・APIエンドポイント・DBテーブルの命名規約を調査し、ドリフトがないかチェックする。
-3.  **Blueprint Gap Analysis**: `axiarch-rules/blueprint/000_project_overview.md` に記載された仕様と実装状態のギャップを特定する。
+3.  **Blueprint Gap Analysis**: `axiarch-rules/blueprint/{lang}/governance/000_project_overview.md` に記載された仕様と実装状態のギャップを特定する。
 
 ---
 
 # Phase 3: Landmine Mapping（技術的負債・地雷の特定）
 
-1.  **Lessons Log Scan**: `010_project_lessons_log.md` をスキャンし、過去の問題と解決策を把握する。新規参入者が同じ問題を繰り返さないよう `task.md` にサマリーを記録する。
+1.  **Lessons Log Scan**: `governance/010_project_lessons_log.md` をスキャンし、過去の問題と解決策を把握する。新規参入者が同じ問題を繰り返さないよう `task.md` にサマリーを記録する。
 2.  **Landmine Map**: 新規参入者が踏みやすい「地雷」をマッピングする。
 
 ```
@@ -107,9 +107,9 @@
 **全ての作業完了後、得られた知見をプロジェクトの資産としてBlueprint（ガバナンスアーキテクチャ）に還元してください。**
 
 * **Rule Update Proposal**:
-    * 今回の参入監査で発見されたギャップや問題があれば、**`axiarch-rules/blueprint/` 内の関連ファイル**への追記・修正案を提示すること。
+    * 今回の参入監査で発見されたギャップや問題があれば、**`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため変更提案対象外。必ず**Blueprint**側に蓄積せよ。
-    * **Domain Distribution（ドメイン分散配置）**: 教訓ログ（`010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。`CRYSTALLIZATION_PROTOCOL.md` の手順に従い関連ドメイン別ファイルへ分散配置してルールとして昇格させること。
+    * **Domain Distribution（ドメイン分散配置）**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従い関連ドメイン別ファイルへ分散配置してルールとして昇格させること。
     * **新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い新規ファイルの作成案を提示すること。
 
 ---

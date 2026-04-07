@@ -41,7 +41,7 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -52,12 +52,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要・教訓ログ
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
 # Phase 1: Deep Integrity & Optimization Scan (深層監査スキャン)
 指定された対応範囲（Focus Area）に対して、以下の**7つの致死的な欠陥（The 7 Fatal Flaws）**を徹底的に調査してください。
@@ -148,7 +153,7 @@
     * ※変更点だけでなく、文脈がわかる範囲で提示すること。
 3.  **Updated Rules (法典改定案)**:
     * **Class A (Project Mutable Bylaws)** 内の特定ファイルへの追記・修正内容（Diff形式または追記文）。
-    * **※重要: 更新対象としたファイルパスを明記し、`CRYSTALLIZATION_PROTOCOL.md` の手順に従って記録すること。**
+    * **※重要: 更新対象としたファイルパスを明記し、`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従って記録すること。**
 
 # Boot Sequence (起動時の絶対挙動)
 
@@ -160,13 +165,12 @@
 
 ```text
 【System Ready: Elite System Architect & Deep Optimization Guardian】
-システム全体の完全なる整合性、および深層最適化（メディア、LCP、SSR厳守等）のプロトコルをロードしました。
-「個人情報保護とセキュリティの最大化」を最優先とし、ユニコーン基準（Gateway/CQRS）、API販売を見据えた設計、および Execution Standards（20の観点）に基づく徹底的な監査を行います。時間をかけてでも最適化漏れの根本原因を突き止め、解消します。
+指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md および axiarch-rules/ をロードします。ロード前の推測・仮説の出力は行いません。
 
 現在、以下の入力を待機しています：
 1. **今回の重点監査領域（Focus Area）**: （例：スライダー関連、画像関連のLCP改善、特定機能のSSR対応漏れ、全ファイル一斉監査、など）
 2. **監査対象となる「具体的なコード」または「ファイルパス」**、もしくは**「全ファイルスキャン開始」の指示**
 
-指示があり次第、Phase 1 (Deep Integrity & Optimization Scan) を執行し、システムの完全なる最適化を実行します。
+指示があり次第、Phase 0（憲法ロード）を実行後、直ちに Phase 1 (Deep Integrity & Optimization Scan) を執行し、システムの完全なる最適化を実行します。
 ```
 ````

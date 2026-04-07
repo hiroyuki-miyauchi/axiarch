@@ -50,7 +50,7 @@ In the translation and improvement process, think deeply and comprehensively acr
 
 ## Step 1: Load Core Protocol (`AGENTS.md`)
 * If `AGENTS.md` exists in the root directory, **load the entire file word-for-word before anything else.**
-* **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 
@@ -63,12 +63,12 @@ In the translation and improvement process, think deeply and comprehensively acr
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-    2.  **Lessons**: Past lesson logs (e.g., `010_project_lessons_log.md`, `0X0_lessons_{domain}.md`)
-    3.  **Domain Rules**: Security, billing, media, etc. (e.g., `100_security...`, `200_design...`)
-    4.  **Templates**: Feature specifications and project-specific rules (e.g., `998_feature_spec_template.md`)
+    2.  **Lessons**: Past lesson logs (e.g., `governance/010_project_lessons_log.md`)
+    3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`)
+    4.  **Templates**: Feature specifications and project-specific rules (e.g., `templates/000_feature_spec_template.md`, `templates/100_project_specific_template.md`)
 * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
     * **Target 1: Security**: Security and privacy principles
     * **Target 2: Lessons**: Past failures, lessons, and prohibited patterns
@@ -81,9 +81,9 @@ In the translation and improvement process, think deeply and comprehensively acr
 1.  **Zero Tolerance for Non-English UI Text**:
     * Any non-English text remaining in areas visible to users (including admins) is not a "bug" — it's "unacceptable."
     * **Examples**:
-        * Button: `保存` -> `Save`
-        * Placeholder: `メールアドレスを入力` -> `Enter your email address`
-        * Toast notification: `完了しました` -> `Saved successfully`
+        * Button: `Guardar` -> `Save` (or any non-English label → English equivalent)
+        * Placeholder: `Ingrese su correo` -> `Enter your email address`
+        * Toast notification: `Terminado` -> `Saved successfully`
 2.  **Context-Aware Translation**:
     * Literal translation (Machine Translation) is prohibited. Adopt natural, idiomatic English appropriate to the system's context (e-commerce, community platform, admin tool).
 3.  **Logical Exclusion (Items to exclude)**:
@@ -116,7 +116,7 @@ Scan the codebase and identify non-English text from the following **6 Hideouts*
 5.  **Admin Panel & Dev Tools**:
     * Not just general users — **admin panels (`/admin`)** are also operated by English speakers. No compromise on "English is fine for admins."
 6.  **Library Defaults**:
-    * Are UI library default language settings (calendars, pagination `次へ/前へ` etc.) still set to a non-English locale?
+    * Are UI library default language settings (calendars, pagination `Next/Previous` text, etc.) still set to a non-English locale?
 
 # Phase 2: Execution & Writing (Multi-Dimensional Translation Execution)
 For discovered non-English text, formulate correction proposals using the following **"Multi-Dimensional Decision Matrix."**
@@ -148,7 +148,7 @@ Not just translating to English — deeply consider **from AI, security, legal, 
 **After all work is complete, if there are "new insights" or "rule deficiencies" gained through this work, return them to the project's rulebook as project assets.**
 
 * **Rule Update Proposal**:
-    * If a "Glossary" or "prohibited terms" has been established through this translation work, **always propose additions to the project-specific rule files (under `axiarch-rules/blueprint/`, etc.).** (Follow `CRYSTALLIZATION_PROTOCOL.md` procedures.)
+    * If a "Glossary" or "prohibited terms" has been established through this translation work, **always propose additions to the project-specific rule files (under `axiarch-rules/blueprint/{lang}/`, per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping.).** (Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures.)
     * **Universal Rule Protection**: Proposals to modify immutable rules under `axiarch-rules/universal/` are prohibited in principle.
     * If no updates are needed, explicitly state "No rule updates required."
 
@@ -158,11 +158,11 @@ Not just translating to English — deeply consider **from AI, security, legal, 
 > **1. "English First" UI Policy (100% English UI)**
 > * **Buttons/Labels**: All button and label text must be in English. Any non-English text remaining is unacceptable.
 > * **System Messages**: All system messages must be in clear English: `Page not found`, `A system error occurred`.
-> * **Status Badges**: `有効` → `Active`, `保留中` → `Pending`, `キャンセル済み` → `Canceled`. Even if internal values (DB values) are in another language, **display (UI) must always be mapped to English**.
+> * **Status Badges**: Non-English status values (e.g., `Activo` → `Active`, `Pendiente` → `Pending`, `Cancelado` → `Canceled`). Even if internal values (DB values) are in another language, **display (UI) must always be mapped to English**.
 
 > [!IMPORTANT]
 > **2. "Validation & Error" Localization (English error messages)**
-> * Validation library (Zod, etc.) error messages must always be localized using `errorMap` or `message` options. Displaying `必須です` or `無効な入力` to users is developer negligence.
+> * Validation library (Zod, etc.) error messages must always be localized using `errorMap` or `message` options. Displaying non-English default messages (e.g., `Requerido` or `Entrada no válida`) to users is developer negligence.
 
 > [!CRITICAL]
 > **3. "No Logic Destruction" (Logic Protection Principle)**

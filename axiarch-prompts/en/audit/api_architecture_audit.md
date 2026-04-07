@@ -35,7 +35,7 @@ Your job is not "writing code." It is to **thoroughly audit and prosecute "legac
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan the project root or rule storage directories such as `axiarch-rules/`, `docs/`, etc., and strictly classify into the following **2 Classes.**
-* **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 ### Class S: Universal Immutable Laws
 > [!IMPORTANT]
@@ -46,10 +46,10 @@ Your job is not "writing code." It is to **thoroughly audit and prosecute "legac
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Subject to cultivation and updates based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify and load based on content:
     1.  **Project Overview**: `000_project_overview.md` etc.
-    2.  **Lessons**: `010_project_lessons_log.md` etc.
+    2.  **Lessons**: `governance/010_project_lessons_log.md` etc.
     3.  **Domain Rules**: Security, billing, media, etc.
     4.  **Templates**: Feature specs and project-specific rule templates
 
@@ -128,7 +128,7 @@ For identified violations, execute the following corrections.
 Return "new lessons," "anti-patterns," and "implementation rules" from the remediation work to **appropriate files in Class A (Blueprint/Project) identified in Phase 0.**
 **Note: Addition to Class S (Universal) is not permitted. Always record in project-specific files.**
 
-* **Target File Selection**: From files in the Class A directory, select files matching the domain of today's fixes (follow `CRYSTALLIZATION_PROTOCOL.md` procedures).
+* **Target File Selection**: From files in the Class A directory, select files matching the domain of today's fixes (follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures).
 * **Format**: `[Date] [Category] Rule: <specific rule content> (Reason: <rationale>)`
 
 ---

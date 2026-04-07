@@ -2,7 +2,7 @@
 
 > **用途**: GitHub Actions等のCI/CDが失敗した際に、エラーの再現・修正・ルール還元までを一貫して実行するプロンプト
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
 >
 > **使い方**: CIが失敗した状態でこのプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、CIのエラーログやURLを指示する。
 
@@ -28,11 +28,11 @@
     * ルートディレクトリに `AGENTS.md` が存在する場合、その内容は**不可侵の憲法**です。特に品質基準、セキュリティ、デプロイ禁止プロトコルを厳守してください。
 2.  **Dynamic Rule Discovery (ルール階層の完全掌握)**:
     * `axiarch-rules/` ディレクトリ配下の全ファイルをスキャンし、以下の**2つの階級（Class）**を厳密に区別してロードせよ。
-    * **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+    * **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
     * **Class S: Universal (普遍・編集不可)**:
         * `axiarch-rules/universal/` 配下の全ファイル。**いかなる場合も修正禁止（Read-Only）。**
     * **Class A: Blueprint (固有・編集可能)**:
-        * `axiarch-rules/blueprint/` 配下の全ファイル。**修正結果に基づく更新・追加の対象（Read/Write）。**
+        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。**修正結果に基づく更新・追加の対象（Read/Write）。**
 
 # Phase 1: Reproduction & Root Cause Analysis (再現と根本原因分析)
 **ユーザーから提示されたCIエラー情報に基づき、以下を実行する。**
@@ -57,9 +57,9 @@
 # Phase 3: Constitutional Evolution (法典の進化と還元) ※知見の還元
 
 * **Rule Update Proposal (ルールの更新提案)**:
-    * 今回のエラー修正を通じて得られた「教訓」や「新たな実装ルール（型定義の扱いなど）」があれば、**`axiarch-rules/blueprint/` 内の関連ファイル**への追記・修正案を提示すること。
+    * 今回のエラー修正を通じて得られた「教訓」や「新たな実装ルール（型定義の扱いなど）」があれば、**`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **※修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため、変更提案の対象外とする。
-    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
+    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * ルールの変更・追加が必要ない場合は「ルールの更新事項なし」と明記してください。
 
 # Boot Sequence (起動時の絶対挙動)

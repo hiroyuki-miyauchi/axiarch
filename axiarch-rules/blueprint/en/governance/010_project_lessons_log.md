@@ -74,24 +74,24 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 | Domain | Typical Lessons | Related Universal Rules |
 |:-------|:---------------|:-----------------------|
-| DB & Auth | Schema design, migrations, RLS, auth flows | `320_supabase`, `600_security` |
-| Security | Vulnerabilities, incidents, privacy | `600_security_privacy` |
-| Architecture | Design decisions, ADRs, layer design | `300_engineering_standards` |
-| Quality | Test strategy, bug regression, code review | `700_qa_testing` |
-| Design | UI/UX decisions, design system, A11y | `200_design_ux` |
-| Operations | CI/CD, deployment, SRE, incident response | `502_site_reliability` |
-| Governance | Rule operations, protocol improvements | `801_governance` |
-| Performance | Speed optimization, memory, cost | `300_engineering_standards`, `720_cloud_finops` |
-| FinOps | Cloud costs, resource efficiency | `720_cloud_finops` |
+| DB & Auth | Schema design, migrations, RLS, auth flows | `engineering/200_supabase_architecture`, `security/000_security_privacy` |
+| Security | Vulnerabilities, incidents, privacy | `security/000_security_privacy` |
+| Architecture | Design decisions, ADRs, layer design | `engineering/000_engineering_standards` |
+| Quality | Test strategy, bug regression, code review | `quality/000_qa_testing` |
+| Design | UI/UX decisions, design system, A11y | `design/000_design_ux` |
+| Operations | CI/CD, deployment, SRE, incident response | `operations/400_site_reliability` |
+| Governance | Rule operations, protocol improvements | `core/100_governance` |
+| Performance | Speed optimization, memory, cost | `engineering/000_engineering_standards`, `operations/600_cloud_finops` |
+| FinOps | Cloud costs, resource efficiency | `operations/600_cloud_finops` |
 
 ### Cross-Reference (Related Universal Rules)
 
 | Category | Related Universal Rule |
 |:---------|:---------------------|
 | Crystallization Process | `AGENTS.md` §8 Continuous Improvement — Auto-Crystallization Protocol |
-| Core Principle Violations | `000_core_mindset` |
-| Security Lessons | `600_security_privacy` |
-| Performance Lessons | `300_engineering_standards`, `700_qa_testing` |
+| Core Principle Violations | `core/000_core_mindset` |
+| Security Lessons | `security/000_security_privacy` |
+| Performance Lessons | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
 | Design Decision Lessons | Refer to the Universal rule of the target domain |
 
 ---

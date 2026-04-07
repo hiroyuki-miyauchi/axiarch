@@ -265,11 +265,11 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
 ## Blueprint Templates — Project-Specific
 
 Mutable templates for each project:
-- **000_project_overview.md**: Project tech stack, architecture, goals
-- **010_project_lessons_log.md**: Central lessons index with auto-separation
-- **998_feature_spec_template.md**: Feature spec with Given/When/Then
+- **governance/000_project_overview.md**: Project tech stack, architecture, goals
+- **governance/010_project_lessons_log.md**: Central lessons index with auto-separation
+- **templates/000_feature_spec_template.md**: Feature spec with Given/When/Then
   acceptance criteria (SDD core)
-- **999_project_specific_template.md**: Custom project rules
+- **templates/100_project_specific_template.md**: Custom project rules
 
 ---
 

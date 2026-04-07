@@ -1,4 +1,4 @@
-# 998. Feature Specification Template
+# 000. Feature Specification Template
 
 > [!TIP]
 > **Usage**: Copy this file and rename it within the Category 600–800 range (e.g., `600_feature_payment.md`).
@@ -86,10 +86,10 @@
 
 | Category | Requirement | Target | Reference Universal |
 |:---------|:-----------|:-------|:-------------------|
-| **Performance** | [e.g., API response time] | [e.g., ≤ 200ms] | `300_engineering_standards` §2.2 |
+| **Performance** | [e.g., API response time] | [e.g., ≤ 200ms] | `engineering/000_engineering_standards` §2.2 |
 | **Scalability** | [e.g., concurrent connections] | [e.g., 1,000 req/s] | — |
-| **Availability** | [e.g., SLA] | [e.g., 99.9%] | `502_site_reliability` |
-| **Accessibility** | [e.g., WCAG compliance level] | [e.g., AA] | `200_design_ux` |
+| **Availability** | [e.g., SLA] | [e.g., 99.9%] | `operations/400_site_reliability` |
+| **Accessibility** | [e.g., WCAG compliance level] | [e.g., AA] | `design/000_design_ux` |
 
 ---
 
@@ -181,19 +181,19 @@ graph LR
 
 ## 9. Security Considerations
 
-> Feature-specific risks and mitigations beyond `600_security_privacy` baselines.
+> Feature-specific risks and mitigations beyond `security/000_security_privacy` baselines.
 
 | Risk | Mitigation | Reference Universal |
 |:-----|:----------|:-------------------|
-| [e.g., Unauthorized data access] | [e.g., RLS validating `user_id`] | `600_security_privacy` |
-| [e.g., DoS via mass requests] | [e.g., Rate Limiting applied] | `301_api_integration` |
-| [e.g., PII leakage] | [e.g., DTO excludes sensitive fields] | `300_engineering_standards` §13.1 |
+| [e.g., Unauthorized data access] | [e.g., RLS validating `user_id`] | `security/000_security_privacy` |
+| [e.g., DoS via mass requests] | [e.g., Rate Limiting applied] | `engineering/100_api_integration` |
+| [e.g., PII leakage] | [e.g., DTO excludes sensitive fields] | `engineering/000_engineering_standards` §13.1 |
 
 ---
 
 ## 10. Test Strategy
 
-> Feature-specific test plan beyond `700_qa_testing` baselines.
+> Feature-specific test plan beyond `quality/000_qa_testing` baselines.
 
 ### Test Matrix
 
@@ -239,14 +239,14 @@ graph LR
 
 | Section | Related Universal Rules |
 |:--------|:----------------------|
-| §1 Feature Overview | `100_product_strategy` |
-| §2 User Stories | `100_product_strategy`, `200_design_ux` |
-| §3 Acceptance Criteria | `700_qa_testing` |
-| §4 Non-Functional Requirements | `300_engineering_standards`, `502_site_reliability` |
-| §5 Edge Cases | `700_qa_testing`, `503_incident_response` |
-| §6 Data Model | `320_supabase_architecture`, `601_data_governance` |
-| §7 API Design | `301_api_integration`, `300_engineering_standards` §13.1–§13.3 |
-| §8 UI/UX | `200_design_ux`, `340_web_frontend` |
-| §9 Security | `600_security_privacy`, `300_engineering_standards` §3.0–§3.5 |
-| §10 Test Strategy | `700_qa_testing` |
-| §11 Release Strategy | `300_engineering_standards` §13.13, `502_site_reliability` |
+| §1 Feature Overview | `product/000_product_strategy` |
+| §2 User Stories | `product/000_product_strategy`, `design/000_design_ux` |
+| §3 Acceptance Criteria | `quality/000_qa_testing` |
+| §4 Non-Functional Requirements | `engineering/000_engineering_standards`, `operations/400_site_reliability` |
+| §5 Edge Cases | `quality/000_qa_testing`, `operations/500_incident_response` |
+| §6 Data Model | `engineering/200_supabase_architecture`, `security/100_data_governance` |
+| §7 API Design | `engineering/100_api_integration`, `engineering/000_engineering_standards` §13.1–§13.3 |
+| §8 UI/UX | `design/000_design_ux`, `engineering/300_web_frontend` |
+| §9 Security | `security/000_security_privacy`, `engineering/000_engineering_standards` §3.0–§3.5 |
+| §10 Test Strategy | `quality/000_qa_testing` |
+| §11 Release Strategy | `engineering/000_engineering_standards` §13.13, `operations/400_site_reliability` |

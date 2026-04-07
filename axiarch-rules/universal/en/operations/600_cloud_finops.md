@@ -50,8 +50,8 @@
 
 ### §1. FinOps Philosophy and 6 Principles
 
-*   **Law**: FinOps aims not at "cost reduction" but at **"maximizing technology value."** Cost discussions must always be framed against business value.
-*   **FinOps Foundation 6 Principles (2025 Revision — "cloud" → "technology")**:
+-   **Law**: FinOps aims not at "cost reduction" but at **"maximizing technology value."** Cost discussions must always be framed against business value.
+-   **FinOps Foundation 6 Principles (2025 Revision — "cloud" → "technology")**:
 
     | # | Principle | Description |
     |:--|:---------|:-----------|
@@ -62,20 +62,20 @@
     | 5 | **Decisions are driven by the business value of technology** | Decisions based on ROI and unit economics |
     | 6 | **Take advantage of the variable cost model of technology** | Leverage the cloud's variable cost model as a weapon |
 
-*   **FinOps Priority Hierarchy**:
+-   **FinOps Priority Hierarchy**:
     1.  **Security** — Sacrificing security for cost reduction is **absolutely prohibited**
     2.  **Availability/Reliability** — SLA/SLO compliance takes priority
     3.  **Performance** — Cost reductions that degrade user experience are prohibited
     4.  **Cost Optimization** — Optimize only after the above three are secured
     5.  **Sustainability** — Achieve both cost optimization and carbon reduction
 
-*   **Cross-Reference**: `000_core_mindset.md` (Priority hierarchy)
+-   **Cross-Reference**: `000_core_mindset.md` (Priority hierarchy)
 
 ### §2. FinOps Foundation Framework 2026
 
-*   **Law**: FinOps practices must conform to the FinOps Foundation Framework and be driven through a systematic approach of 3 Phases × 6 Domains × 19 Capabilities.
+-   **Law**: FinOps practices must conform to the FinOps Foundation Framework and be driven through a systematic approach of 3 Phases × 6 Domains × 19 Capabilities.
 
-*   **3 Phases (Lifecycle)**:
+-   **3 Phases (Lifecycle)**:
 
     | Phase | Purpose | Key Activities |
     |:------|:--------|:-------------|
@@ -83,7 +83,7 @@
     | **Optimize** | Waste elimination and efficiency | Rightsizing, commitment purchasing, idle elimination |
     | **Operate** | Continuous improvement and culture | Policy automation, governance, KPI tracking |
 
-*   **6 Domains (2025 Revision — Expanded to Cloud+ Scope)**:
+-   **6 Domains (2025 Revision — Expanded to Cloud+ Scope)**:
     1.  **Understand Usage and Cost**
     2.  **Quantify Business Value**
     3.  **Optimize Usage and Cost**
@@ -91,19 +91,19 @@
     5.  **Align Organization**
     6.  **FinOps Practice Operations**
 
-*   **Cloud+ Scope (2025-2026 Expansion)**:
+-   **Cloud+ Scope (2025-2026 Expansion)**:
     - Public Cloud (AWS / GCP / Azure)
     - SaaS Spend
     - Private Cloud / Data Centers
     - AI/ML Workloads (GPU, tokens, inference costs)
     - Licensing (ITAM integration)
 
-*   **2026 New Capability — Executive Strategy Alignment**:
+-   **2026 New Capability — Executive Strategy Alignment**:
     - Directly connect FinOps practices to executive decision-making
     - Board-level cloud investment ROI reporting
     - Joint CFO/CTO technology investment governance
 
-*   **Convergence with Adjacent Disciplines (2026)**:
+-   **Convergence with Adjacent Disciplines (2026)**:
     - ITSM (IT Service Management)
     - ITAM (IT Asset Management)
     - ITFM (IT Financial Management)
@@ -112,9 +112,9 @@
 
 ### §3. FOCUS Specification (FinOps Open Cost and Usage Specification)
 
-*   **Law**: In multi-cloud, multi-vendor environments, billing data standardization must follow **FOCUS v1.3** (ratified December 2025).
+-   **Law**: In multi-cloud, multi-vendor environments, billing data standardization must follow **FOCUS v1.3** (ratified December 2025).
 
-*   **FOCUS Version History**:
+-   **FOCUS Version History**:
 
     | Version | Ratified | Key Additions |
     |:--------|:---------|:-------------|
@@ -123,13 +123,13 @@
     | **v1.2** | 2025-05 | SaaS/PaaS foundation, InvoiceId, multi-currency normalization |
     | **v1.3** | 2025-12 | **Contract Commitment Dataset**, Allocation columns, Data completeness flags |
 
-*   **FOCUS v1.3 New Features**:
+-   **FOCUS v1.3 New Features**:
     - **Contract Commitment Dataset**: Track contractual terms separately from cost/usage rows
     - **Allocation Columns**: Data generators expose how shared costs are split
     - **Data Recency / Completeness**: Providers timestamp datasets and flag completeness
     - **Service Provider vs Host Provider**: Distinguish resource provider from hosting location
 
-*   **Essential FOCUS Columns (v1.3 excerpt)**:
+-   **Essential FOCUS Columns (v1.3 excerpt)**:
 
     | Column | Description | Usage |
     |:-------|:-----------|:------|
@@ -145,13 +145,13 @@
     | `ServiceName` | Service name | Per-service cost analysis |
     | `Tags` | User-defined tags | Cost allocation |
 
-*   **FOCUS v1.4 Roadmap (2026 In Development)**:
+-   **FOCUS v1.4 Roadmap (2026 In Development)**:
     - FOCUS Invoice Dataset
     - Extended Contract Commitment dimensions
     - Non-functional requirements for provider consistency
     - Conformance certification program
 
-*   **Cross-Reference**: `361_aws_cloud.md` §37, `360_firebase_gcp.md` §25-§26
+-   **Cross-Reference**: `361_aws_cloud.md` §37, `360_firebase_gcp.md` §25-§26
 
 ---
 
@@ -159,9 +159,9 @@
 
 ### §4. FinOps Organizational Model
 
-*   **Law**: FinOps is not "extra work" but "the way we work." Establish a dedicated FinOps function (CoE) and permeate cost ownership across the entire organization.
+-   **Law**: FinOps is not "extra work" but "the way we work." Establish a dedicated FinOps function (CoE) and permeate cost ownership across the entire organization.
 
-*   **FinOps CoE Responsibilities**:
+-   **FinOps CoE Responsibilities**:
 
     | Responsibility | Description |
     |:-------------|:-----------|
@@ -173,7 +173,7 @@
     | **Vendor Negotiation** | Commitment purchases, EDP negotiations |
     | **AI FinOps** | AI/ML-specific cost management, circuit breaker operations |
 
-*   **Stakeholder RACI**:
+-   **Stakeholder RACI**:
 
     | Activity | FinOps CoE | Engineers | EM/PM | Finance | CTO/CFO |
     |:---------|:---------:|:---------:|:-----:|:-------:|:-------:|
@@ -187,9 +187,9 @@
 
 ### §5. FinOps Culture and Engineer Code of Conduct
 
-*   **Law**: "Cost is part of architecture." All engineers must understand cost implications and embed cost perspective into design and implementation decisions.
+-   **Law**: "Cost is part of architecture." All engineers must understand cost implications and embed cost perspective into design and implementation decisions.
 
-*   **Engineer Code of Conduct**:
+-   **Engineer Code of Conduct**:
     1.  **Design Time**: Include cost estimates in architecture design
     2.  **PR Review**: Document cost impact in PRs with infrastructure changes
     3.  **Monitoring**: Review team cost dashboards weekly
@@ -197,7 +197,7 @@
     5.  **Cleanup**: Immediately delete resources when no longer needed
     6.  **AI Cost Awareness**: Be conscious of token costs for AI/LLM calls
 
-*   **Cost Awareness Level Definition**:
+-   **Cost Awareness Level Definition**:
 
     | Level | State | Example Behavior |
     |:------|:------|:----------------|
@@ -211,15 +211,15 @@
 
 ### §6. Executive Strategy Alignment
 
-*   **Law**: FinOps must extend beyond technical teams and **directly connect to business strategy**. Establish a joint CFO/CTO governance structure for technology investment ROI.
-*   **Executive Report Mandatory Items**:
+-   **Law**: FinOps must extend beyond technical teams and **directly connect to business strategy**. Establish a joint CFO/CTO governance structure for technology investment ROI.
+-   **Executive Report Mandatory Items**:
     - **Cloud Unit Economics**: Monthly trend of cost per user, cost per transaction
     - **Commitment Coverage**: Coverage rate and savings from commitments
     - **Waste Rate**: Percentage of idle resources and unused commitments
     - **AI Investment ROI**: Return on investment for AI/ML workloads
     - **Forecast Accuracy**: Variance between forecast and actuals (Target: ±10%)
     - **Sustainability Metrics**: Carbon footprint trends (CSRD/SEC compliance)
-*   **Reporting Cadence**: Monthly (dashboards) + Quarterly (detailed review) + Annual (strategic review)
+-   **Reporting Cadence**: Monthly (dashboards) + Quarterly (detailed review) + Annual (strategic review)
 
 ---
 
@@ -227,9 +227,9 @@
 
 ### §7. Cost Visibility and Allocation Strategy
 
-*   **Law**: "Invisible costs are unmanageable." All cloud spend must remain allocatable across **4 dimensions: business unit, team, product, and environment**.
+-   **Law**: "Invisible costs are unmanageable." All cloud spend must remain allocatable across **4 dimensions: business unit, team, product, and environment**.
 
-*   **Allocation Models**:
+-   **Allocation Models**:
 
     | Model | Description | When to Use |
     |:------|:-----------|:-----------|
@@ -237,7 +237,7 @@
     | **Chargeback** | Actually charge costs to each team/BU budget | Mature FinOps, reinforcing accountability |
     | **Hybrid** | Showback for shared infra, Chargeback for dedicated | Practical approach for most organizations |
 
-*   **Shared Cost Allocation Methods**:
+-   **Shared Cost Allocation Methods**:
 
     | Method | Calculation | Example Use |
     |:-------|:-----------|:-----------|
@@ -247,9 +247,9 @@
 
 ### §8. Tagging & Labeling Standards
 
-*   **Law**: Untagged resources are "costs with unknown owners." **All cloud resources must have mandatory tags**, and creation of untagged resources must be prohibited by policy.
+-   **Law**: Untagged resources are "costs with unknown owners." **All cloud resources must have mandatory tags**, and creation of untagged resources must be prohibited by policy.
 
-*   **Mandatory Tags**:
+-   **Mandatory Tags**:
 
     | Tag Key | Description | Example |
     |:--------|:-----------|:--------|
@@ -260,7 +260,7 @@
     | `project` | Project name | `example-app`, `admin-dashboard` |
     | `managed-by` | Management method | `terraform`, `pulumi`, `manual` |
 
-*   **Recommended Tags (Optional)**:
+-   **Recommended Tags (Optional)**:
 
     | Tag Key | Description | Example |
     |:--------|:-----------|:--------|
@@ -269,7 +269,7 @@
     | `compliance` | Compliance requirements | `gdpr`, `hipaa`, `pci` |
     | `ai-workload` | AI workload flag | `true`, `inference`, `training` |
 
-*   **Tag Enforcement Policy**:
+-   **Tag Enforcement Policy**:
 
     ```hcl
     # AWS SCP — Deny untagged resource creation
@@ -291,13 +291,13 @@
     }
     ```
 
-*   **Tag Compliance Target**: **95%+** of resources with complete mandatory tags. Measure and report compliance rate monthly.
+-   **Tag Compliance Target**: **95%+** of resources with complete mandatory tags. Measure and report compliance rate monthly.
 
 ### §9. Cost Reporting and Dashboards
 
-*   **Law**: Cost data must be "pushed" not "pulled." Automatically distribute appropriate reports by tier to accelerate decision-making.
+-   **Law**: Cost data must be "pushed" not "pulled." Automatically distribute appropriate reports by tier to accelerate decision-making.
 
-*   **Tier-Based Report Requirements**:
+-   **Tier-Based Report Requirements**:
 
     | Audience | Frequency | Content | Delivery |
     |:---------|:----------|:--------|:---------|
@@ -306,7 +306,7 @@
     | **Engineers** | Daily | Service costs, resource costs, optimization recommendations | Dashboard |
     | **FinOps CoE** | Daily | Org-wide costs, commitment utilization, tag compliance | Dashboard + Alerts |
 
-*   **Dashboard Mandatory Metrics**:
+-   **Dashboard Mandatory Metrics**:
     - **Total Cost**: Daily/weekly/monthly total cost trends
     - **Cost by Service**: Service-level cost composition (Pareto analysis)
     - **Cost by Team**: Team-level costs (Showback/Chargeback)
@@ -319,9 +319,9 @@
 
 ### §10. Unit Economics
 
-*   **Law**: Managing total cost alone is insufficient. Track **unit costs tied to business metrics** to visualize "cost efficiency as you grow."
+-   **Law**: Managing total cost alone is insufficient. Track **unit costs tied to business metrics** to visualize "cost efficiency as you grow."
 
-*   **Mandatory Unit Metrics**:
+-   **Mandatory Unit Metrics**:
 
     | Metric | Formula | Target Direction |
     |:-------|:-------|:----------------|
@@ -332,8 +332,8 @@
     | **AI Cost per Query** | AI/ML cost ÷ AI query count | ↓ Decreasing |
     | **Gross Margin Impact** | (Revenue - Cloud cost) ÷ Revenue | ↑ Improving |
 
-*   **Mandate**: If unit cost worsens for 2 consecutive months, mandate investigation and improvement plan from FinOps CoE.
-*   **Cross-Reference**: `101_revenue_monetization.md` (Unit economics)
+-   **Mandate**: If unit cost worsens for 2 consecutive months, mandate investigation and improvement plan from FinOps CoE.
+-   **Cross-Reference**: `101_revenue_monetization.md` (Unit economics)
 
 ---
 
@@ -341,9 +341,9 @@
 
 ### §11. Rightsizing
 
-*   **Law**: Over-provisioning is "waste," not "safety." All compute resources must be **sized based on actual usage** and reviewed regularly.
+-   **Law**: Over-provisioning is "waste," not "safety." All compute resources must be **sized based on actual usage** and reviewed regularly.
 
-*   **Rightsizing Process**:
+-   **Rightsizing Process**:
     1.  **Data Collection**: Collect 2+ weeks of CPU/memory/network utilization metrics
     2.  **Analysis**: Identify resources with p95 utilization below 50% as candidates
     3.  **Recommendation**: Recommend next smaller instance type/size
@@ -351,7 +351,7 @@
     5.  **Application**: Gradual application via canary deployment
     6.  **Monitoring**: 2-week post-application performance monitoring
 
-*   **Rightsizing Criteria**:
+-   **Rightsizing Criteria**:
 
     | Metric | Threshold | Action |
     |:-------|:---------|:-------|
@@ -360,16 +360,16 @@
     | Memory utilization < 30% | 2 weeks sustained | Switch to memory-optimized |
     | GPU utilization < 30% | 1 week sustained | GPU sharing, scheduled stops, or Spot |
 
-*   **Tools**:
+-   **Tools**:
     - **AWS**: Compute Optimizer, Cost Optimization Hub, Trusted Advisor
     - **GCP**: Active Assist (Recommender), Cloud Billing Reports
     - **K8s**: VPA (Vertical Pod Autoscaler), Goldilocks
 
 ### §12. Commitment Strategy (RI / Savings Plans / CUD)
 
-*   **Law**: Stable production workloads must use **commitment discounts** to minimize on-demand pricing.
+-   **Law**: Stable production workloads must use **commitment discounts** to minimize on-demand pricing.
 
-*   **Commitment Purchase Decision Criteria**:
+-   **Commitment Purchase Decision Criteria**:
 
     | Criteria | Threshold | Recommended Action |
     |:---------|:---------|:-----------------|
@@ -377,7 +377,7 @@
     | Commitment coverage | Target 60-80% | Above 80% increases risk. Expand gradually |
     | Unused commitments | < 5% | Above 5% signals over-purchasing |
 
-*   **Provider-Specific Commitment Strategies**:
+-   **Provider-Specific Commitment Strategies**:
 
     | Provider | Option | Max Discount | Recommended Approach |
     |:---------|:-------|:------------|:--------------------|
@@ -392,9 +392,9 @@
 
 ### §13. Spot/Preemptible Strategy
 
-*   **Law**: Fault-tolerant workloads must aggressively leverage Spot/Preemptible instances for up to 90% cost savings.
+-   **Law**: Fault-tolerant workloads must aggressively leverage Spot/Preemptible instances for up to 90% cost savings.
 
-*   **Spot Suitability Criteria**:
+-   **Spot Suitability Criteria**:
 
     | Workload | Spot Suitability | Reason |
     |:---------|:---------------:|:-------|
@@ -408,7 +408,7 @@
 
 ### §14. Graviton/Arm Optimization
 
-*   **Law**: Workloads without x86 compatibility requirements should actively consider migration to **Arm-based processors** (AWS Graviton4 / GCP Tau T2A / Azure Cobalt 100) for up to **40% cost savings**.
+-   **Law**: Workloads without x86 compatibility requirements should actively consider migration to **Arm-based processors** (AWS Graviton4 / GCP Tau T2A / Azure Cobalt 100) for up to **40% cost savings**.
 
 ---
 
@@ -416,9 +416,9 @@
 
 ### §15. Storage Cost Optimization
 
-*   **Law**: Data "left as created" is the biggest cost risk. Apply lifecycle policies to all storage and implement automatic tiering based on data temperature.
+-   **Law**: Data "left as created" is the biggest cost risk. Apply lifecycle policies to all storage and implement automatic tiering based on data temperature.
 
-*   **Storage Tiering Strategy**:
+-   **Storage Tiering Strategy**:
 
     | Tier | Access Frequency | AWS | GCP | Use Case |
     |:-----|:----------------|:----|:----|:---------|
@@ -427,7 +427,7 @@
     | **Cold** | Quarterly | S3 Glacier Instant | Coldline | Backups |
     | **Archive** | Yearly or less | S3 Glacier Deep Archive | Archive | Compliance retention |
 
-*   **Lifecycle Rule (Mandatory)**:
+-   **Lifecycle Rule (Mandatory)**:
     ```json
     {
       "Rules": [{
@@ -445,9 +445,9 @@
 
 ### §16. Network & Data Transfer Costs
 
-*   **Law**: Data transfer costs (Egress) are the "hidden giant" of cloud bills. Optimize data flows at architecture design time and eliminate unnecessary cross-region/cross-AZ transfers.
+-   **Law**: Data transfer costs (Egress) are the "hidden giant" of cloud bills. Optimize data flows at architecture design time and eliminate unnecessary cross-region/cross-AZ transfers.
 
-*   **Data Transfer Cost Optimization**:
+-   **Data Transfer Cost Optimization**:
 
     | Strategy | Effect | Implementation |
     |:---------|:-------|:-------------|
@@ -464,9 +464,9 @@
 
 ### §17. Serverless Cost Optimization
 
-*   **Law**: Serverless is "pay for what you use" but inefficient implementations can explode costs. Continuously optimize function execution time, memory, and invocation counts.
+-   **Law**: Serverless is "pay for what you use" but inefficient implementations can explode costs. Continuously optimize function execution time, memory, and invocation counts.
 
-*   **Lambda/Cloud Run FinOps**:
+-   **Lambda/Cloud Run FinOps**:
 
     | Optimization | Method | Effect |
     |:------------|:-------|:-------|
@@ -478,9 +478,9 @@
 
 ### §18. Idle Resource Elimination
 
-*   **Law**: Costs spent on unused resources are "pure waste." Automate idle resource detection and elimination to achieve **zero zombie resources**.
+-   **Law**: Costs spent on unused resources are "pure waste." Automate idle resource detection and elimination to achieve **zero zombie resources**.
 
-*   **Idle Resource Detection Targets**:
+-   **Idle Resource Detection Targets**:
 
     | Resource Type | Detection Criteria | Action |
     |:-------------|:------------------|:-------|
@@ -492,7 +492,7 @@
     | **Unused RDS** | Zero connections for 7+ days | Snapshot then delete |
     | **Unused NAT Gateway** | Zero traffic for 7+ days | Delete |
 
-*   **Non-Production Scheduled Stops**:
+-   **Non-Production Scheduled Stops**:
     ```yaml
     # Dev/staging auto-stop schedule
     schedule:
@@ -508,9 +508,9 @@
 
 ### §19. Relational DB FinOps
 
-*   **Law**: Databases are a major cloud cost driver. Continuously optimize instance types, storage types, and I/O patterns to eliminate over-provisioning.
+-   **Law**: Databases are a major cloud cost driver. Continuously optimize instance types, storage types, and I/O patterns to eliminate over-provisioning.
 
-*   **RDS/Aurora Optimization Strategies**:
+-   **RDS/Aurora Optimization Strategies**:
 
     | Optimization | Method | Effect |
     |:------------|:-------|:-------|
@@ -524,9 +524,9 @@
 
 ### §20. NoSQL/DWH FinOps
 
-*   **Law**: NoSQL (DynamoDB, etc.) and DWH (BigQuery/Redshift, etc.) have different billing models requiring specialized optimization.
+-   **Law**: NoSQL (DynamoDB, etc.) and DWH (BigQuery/Redshift, etc.) have different billing models requiring specialized optimization.
 
-*   **DynamoDB Optimization**:
+-   **DynamoDB Optimization**:
 
     | Optimization | Method |
     |:------------|:-------|
@@ -536,7 +536,7 @@
     | **Table design** | Optimize partition key design to avoid hot partitions |
     | **Reserved capacity** | Reserved Capacity for stable usage (up to 77% discount) |
 
-*   **BigQuery Optimization**:
+-   **BigQuery Optimization**:
 
     | Optimization | Method |
     |:------------|:-------|
@@ -549,7 +549,7 @@
     | **Slot-based** | Capacity Pricing with autoscaling slots for large usage |
     | **CUD** | Spend-based CUD for 10-20% discount |
 
-*   **Redshift Optimization**:
+-   **Redshift Optimization**:
     - RA3 nodes for compute/storage separation
     - WLM (Workload Management) to limit costly queries
     - Redshift Serverless per-second metering
@@ -561,16 +561,16 @@
 
 ### §21. AI/GenAI FinOps Strategy
 
-*   **Law**: AI/ML workloads are the fastest-growing cloud cost category. **Track and manage AI costs separately from traditional cloud costs** with dedicated FinOps practices.
+-   **Law**: AI/ML workloads are the fastest-growing cloud cost category. **Track and manage AI costs separately from traditional cloud costs** with dedicated FinOps practices.
 
-*   **AI FinOps Characteristics**:
+-   **AI FinOps Characteristics**:
     - **GPU/TPU dependency**: 10-100x cost per unit vs traditional CPU workloads
     - **Burst nature**: Training is short-burst intensive; inference is low-frequency but always-on
     - **Prediction difficulty**: Usage depends on user behavior, making forecasting hard
     - **Token billing**: API-based billing varies significantly with request content
     - **Margin erosion**: 84%+ of companies report 6%+ gross margin erosion from AI costs
 
-*   **AI FinOps 30% Rule (Circuit Breaker)**:
+-   **AI FinOps 30% Rule (Circuit Breaker)**:
     - Trigger circuit breaker when AI workload costs **exceed 30% of monthly budget pace**
     - Actions on trigger: Rate limit enforcement → Non-critical AI feature suspension → Executive escalation
 
@@ -597,7 +597,7 @@
     }
     ```
 
-*   **AI FinOps Metric Framework**:
+-   **AI FinOps Metric Framework**:
 
     | Metric | Formula | Target |
     |:-------|:-------|:------|
@@ -608,7 +608,7 @@
     | **Cache Hit Rate** | Cache hits ÷ Total queries | ≥ 30% |
     | **Forecast Accuracy** | |Forecast - Actual| ÷ Forecast | ≤ 10% |
 
-*   **Cross-Reference**: `400_ai_engineering.md` (AI FinOps), `360_firebase_gcp.md` §25
+-   **Cross-Reference**: `400_ai_engineering.md` (AI FinOps), `360_firebase_gcp.md` §25
 
 ---
 
@@ -616,9 +616,9 @@
 
 ### §22. Autonomous Cost Optimization via Agentic AI
 
-*   **Law**: From 2026 onward, FinOps transitions from AI-assisted (advisory) to AI-executed (autonomous optimization). Build a phased approach for AI agents to continuously optimize costs.
+-   **Law**: From 2026 onward, FinOps transitions from AI-assisted (advisory) to AI-executed (autonomous optimization). Build a phased approach for AI agents to continuously optimize costs.
 
-*   **Agentic AI FinOps Maturity Levels**:
+-   **Agentic AI FinOps Maturity Levels**:
 
     | Level | Name | Capability | Human Involvement |
     |:------|:-----|:----------|:-----------------|
@@ -630,7 +630,7 @@
 
     **Mandate**: Target **L2 or above** by 2026. Introduce L3+ gradually.
 
-*   **AI Agent Executable Actions**:
+-   **AI Agent Executable Actions**:
 
     | Action | Risk | Automation Level |
     |:-------|:-----|:----------------|
@@ -642,14 +642,14 @@
     | Commitment purchase recommendation/execution | High | Automate from L4 |
     | Architecture change proposals | High | L5 only |
 
-*   **OpenCost MCP Server Integration (2025+)**:
+-   **OpenCost MCP Server Integration (2025+)**:
     - AI agents query K8s cost data in real-time through OpenCost's MCP server
     - Natural language cost analysis and optimization proposals
 
 ### §23. AI Agent Cost Governance
 
-*   **Law**: AI agents themselves are cost-generating entities. Track agent execution costs (tokens, API calls, compute) and ensure ROI.
-*   **Governance Rules**:
+-   **Law**: AI agents themselves are cost-generating entities. Track agent execution costs (tokens, API calls, compute) and ensure ROI.
+-   **Governance Rules**:
     - AI agent execution cost < Agent-generated savings — **maintain always**
     - Store agent action audit logs in immutable format
     - Human approval gate for high-risk actions ($1,000+ impact)
@@ -661,9 +661,9 @@
 
 ### §24. LLM Cost Optimization Strategy
 
-*   **Law**: Per-token LLM costs are declining rapidly, but usage explosion increases total cost (cost paradox). Systematically optimize LLM costs through **model routing, caching, and distillation**.
+-   **Law**: Per-token LLM costs are declining rapidly, but usage explosion increases total cost (cost paradox). Systematically optimize LLM costs through **model routing, caching, and distillation**.
 
-*   **LLM Cost Optimization Strategies**:
+-   **LLM Cost Optimization Strategies**:
 
     | Strategy | Description | Effect |
     |:---------|:-----------|:-------|
@@ -674,7 +674,7 @@
     | **Batch inference** | Batch processing of async requests | 30-50% reduction |
     | **Context length management** | Remove unnecessary context, summarize | 15-30% reduction |
 
-*   **Model Routing Implementation**:
+-   **Model Routing Implementation**:
     ```typescript
     function selectModel(task: AITask): ModelConfig {
       if (task.complexity === 'simple') {
@@ -687,7 +687,7 @@
     }
     ```
 
-*   **Token Economics Tracking Metrics**:
+-   **Token Economics Tracking Metrics**:
     - **Cost per AI Query**: Cost per single AI query
     - **Token Efficiency**: Output tokens ÷ Input tokens
     - **Cache Hit Rate**: Semantic cache hit rate (Target: 30%+)
@@ -696,8 +696,8 @@
 
 ### §25. LLM Pricing Model Strategy
 
-*   **Law**: LLM provider pricing models are rapidly changing. Avoid provider lock-in and maintain optimal cost structure through multi-provider strategies.
-*   **Pricing Model Comparison**:
+-   **Law**: LLM provider pricing models are rapidly changing. Avoid provider lock-in and maintain optimal cost structure through multi-provider strategies.
+-   **Pricing Model Comparison**:
 
     | Model | Method | When to Use |
     |:------|:-------|:-----------|
@@ -712,9 +712,9 @@
 
 ### §26. GPU Optimization Strategy
 
-*   **Law**: GPU/TPUs are the highest-cost cloud resources. Idle GPUs waste **dollars per hour**. Maximize utilization and leverage Spot aggressively.
+-   **Law**: GPU/TPUs are the highest-cost cloud resources. Idle GPUs waste **dollars per hour**. Maximize utilization and leverage Spot aggressively.
 
-*   **GPU Optimization Strategies**:
+-   **GPU Optimization Strategies**:
 
     | Strategy | Description | Use Case |
     |:---------|:-----------|:---------|
@@ -725,9 +725,9 @@
     | **Checkpointing** | Periodic intermediate result saving | Long training |
     | **Dynamic Batching** | Batch inference requests for throughput improvement | Inference serving |
 
-*   **GPU Utilization Target**: Maintain production GPU utilization at **70%+**. Below 30% warrants rightsizing or sharing.
+-   **GPU Utilization Target**: Maintain production GPU utilization at **70%+**. Below 30% warrants rightsizing or sharing.
 
-*   **GPU Cost Tracking Granularity**:
+-   **GPU Cost Tracking Granularity**:
     - Track GPU utilization: node-level → pod-level → container-level
     - OpenCost 2026 Roadmap: AI usage cost tracking (pod-level GPU attribution)
 
@@ -737,9 +737,9 @@
 
 ### §27. Kubernetes Cost Visibility
 
-*   **Law**: Kubernetes' shared infrastructure model complicates cost allocation. Implement **Namespace/Deployment/Pod-level** cost visibility to assign cost ownership to each team.
+-   **Law**: Kubernetes' shared infrastructure model complicates cost allocation. Implement **Namespace/Deployment/Pod-level** cost visibility to assign cost ownership to each team.
 
-*   **K8s Cost Visibility Tools**:
+-   **K8s Cost Visibility Tools**:
 
     | Tool | Features | Recommended For |
     |:-----|:---------|:---------------|
@@ -748,7 +748,7 @@
     | **CAST AI** | AI-driven auto-optimization | Automatic rightsizing |
     | **Finout** | Sub-hour granularity real-time monitoring | Multi-cloud K8s |
 
-*   **Mandatory Labels (K8s Resources)**:
+-   **Mandatory Labels (K8s Resources)**:
     ```yaml
     metadata:
       labels:
@@ -761,9 +761,9 @@
 
 ### §28. K8s Rightsizing and Autoscaling
 
-*   **Law**: Improper K8s resource requests/limits cause **35%+ waste**. Maximize resource efficiency with proper VPA/HPA combinations.
+-   **Law**: Improper K8s resource requests/limits cause **35%+ waste**. Maximize resource efficiency with proper VPA/HPA combinations.
 
-*   **Resource Setting Guidelines**:
+-   **Resource Setting Guidelines**:
 
     | Setting | Recommended Value | Rationale |
     |:--------|:-----------------|:---------|
@@ -772,7 +772,7 @@
     | **Memory Request** | p95 utilization + 10% margin | Prevent OOM |
     | **Memory Limit** | Request × 1.5 | Detect memory leaks |
 
-*   **Autoscaling Strategies**:
+-   **Autoscaling Strategies**:
     - **HPA**: Traffic-based scaling. Custom metrics support
     - **VPA**: Automatic request/limit adjustment
     - **Karpenter (AWS) / Cluster Autoscaler**: Node-level autoscaling
@@ -780,8 +780,8 @@
 
 ### §29. Multi-Tenant K8s Cost Allocation
 
-*   **Law**: Shared K8s cluster costs must be **fairly allocated based on actual resource consumption** to each tenant/team.
-*   **Allocation Methods**:
+-   **Law**: Shared K8s cluster costs must be **fairly allocated based on actual resource consumption** to each tenant/team.
+-   **Allocation Methods**:
     - **Resource consumption-based**: CPU time × rate + Memory time × rate + Storage × rate
     - **Namespace-based**: Aggregate total resource consumption within namespace
     - **Shared costs**: Control plane, node OS, monitoring tools evenly distributed
@@ -792,15 +792,15 @@
 
 ### §30. SaaS Spend Management
 
-*   **Law**: SaaS spend grows faster than cloud IaaS and has lower visibility. **Centrally manage all SaaS contracts** and optimize based on utilization.
+-   **Law**: SaaS spend grows faster than cloud IaaS and has lower visibility. **Centrally manage all SaaS contracts** and optimize based on utilization.
 
-*   **SaaS Management 4-Step Process**:
+-   **SaaS Management 4-Step Process**:
     1.  **Inventory**: Create inventory of all SaaS contracts
     2.  **Utilization measurement**: Actual users ÷ Purchased licenses
     3.  **Optimization**: Consider plan changes/cancellation if utilization < 50%
     4.  **Shadow IT detection**: Detect and govern unapproved SaaS usage
 
-*   **SaaS Utilization Criteria**:
+-   **SaaS Utilization Criteria**:
 
     | Utilization | Status | Action |
     |:-----------|:-------|:-------|
@@ -811,8 +811,8 @@
 
 ### §31. License Optimization (ITAM Integration)
 
-*   **Law**: Software license costs must be systematically managed through ITAM (IT Asset Management) integration.
-*   **Optimization Methods**:
+-   **Law**: Software license costs must be systematically managed through ITAM (IT Asset Management) integration.
+-   **Optimization Methods**:
     - **License pool sharing**: Cross-department shared usage (floating licenses)
     - **BYOL**: Leverage existing licenses for cloud migration
     - **OSS alternatives**: Consider migration when practical OSS alternatives exist
@@ -824,9 +824,9 @@
 
 ### §32. Budget Management and Forecasting
 
-*   **Law**: All cloud spend must have a **pre-set budget**. Spend without budgets is spend without control.
+-   **Law**: All cloud spend must have a **pre-set budget**. Spend without budgets is spend without control.
 
-*   **Budget Granularity**:
+-   **Budget Granularity**:
 
     | Granularity | Target | Set By |
     |:-----------|:-------|:------|
@@ -837,7 +837,7 @@
     | **Environment** | Production/staging/development | FinOps CoE |
     | **AI/ML** | AI-specific budget (separately managed) | AI Lead + FinOps CoE |
 
-*   **Forecast Models**:
+-   **Forecast Models**:
     - **Trend-based**: Forecast based on 3-6 month trend lines
     - **Event-based**: Factor in campaigns, releases, seasonal variations
     - **ML forecast**: ML-based forecast excluding outliers
@@ -845,9 +845,9 @@
 
 ### §33. Budget Alerts and Automated Response
 
-*   **Law**: Budget overruns must be detected by systems, not humans. Set multi-tier alerts.
+-   **Law**: Budget overruns must be detected by systems, not humans. Set multi-tier alerts.
 
-*   **Alert Thresholds (Multi-tier)**:
+-   **Alert Thresholds (Multi-tier)**:
 
     | Threshold | Action | Notify |
     |:---------|:-------|:------|
@@ -872,13 +872,13 @@
 
 ### §34. Cost Anomaly Detection
 
-*   **Law**: Cost anomalies must not wait until month-end invoices. Implement **ML-driven anomaly detection** and respond within 24 hours.
-*   **Anomaly Detection Implementation**:
+-   **Law**: Cost anomalies must not wait until month-end invoices. Implement **ML-driven anomaly detection** and respond within 24 hours.
+-   **Anomaly Detection Implementation**:
     - **AWS**: Cost Anomaly Detection (ML-driven)
     - **GCP**: Budget Alerts + Cloud Monitoring + BigQuery anomaly queries
     - **General**: Alert on ±30%+ day-over-day/week-over-week variance
 
-*   **Anomaly Response Flow**:
+-   **Anomaly Response Flow**:
     1.  **Detection**: Auto-detect via ML/rule-based
     2.  **Notification**: Immediate notification via Slack/PagerDuty
     3.  **Triage**: Determine if legitimate or illegitimate increase
@@ -891,9 +891,9 @@
 
 ### §35. Multi-Layer Defense for Bankruptcy Prevention
 
-*   **Law**: Cloud Bankruptcy is not "if" but "when." Build multi-layer defense with spending caps to create a **physically bankruptcy-proof structure**.
+-   **Law**: Cloud Bankruptcy is not "if" but "when." Build multi-layer defense with spending caps to create a **physically bankruptcy-proof structure**.
 
-*   **Multi-Layer Defense**:
+-   **Multi-Layer Defense**:
 
     | Layer | Function | Reference |
     |:------|:---------|:---------|
@@ -903,13 +903,13 @@
     | **L4: Spending cap** | Monthly credit card/billing account limits | — |
     | **L5: Insurance** | Cyber insurance for major cost incidents | — |
 
-*   **DDoS Cost Attack Mitigation**:
+-   **DDoS Cost Attack Mitigation**:
     - AWS Shield / Cloud Armor for DDoS mitigation
     - API Gateway / Cloud Endpoints rate limiting
     - CDN cache for origin protection
     - Auto scale-down policy on anomalous traffic
 
-*   **Cross-Reference**: `503_incident_response.md` §7.3
+-   **Cross-Reference**: `503_incident_response.md` §7.3
 
 ---
 
@@ -917,9 +917,9 @@
 
 ### §36. FinOps Policy Framework
 
-*   **Law**: FinOps policies should be implemented as "code," not "documents." Adopt **Policy-as-Code** to automatically detect and remediate violations.
+-   **Law**: FinOps policies should be implemented as "code," not "documents." Adopt **Policy-as-Code** to automatically detect and remediate violations.
 
-*   **Policy-as-Code Tools**:
+-   **Policy-as-Code Tools**:
 
     | Tool | Use Case | Provider |
     |:-----|:---------|:--------|
@@ -931,7 +931,7 @@
     | **Kyverno** | K8s-native policies | Kubernetes |
     | **Crossplane** | IaC policy + cost control | Multi-cloud |
 
-*   **Mandatory FinOps Policies (Minimum)**:
+-   **Mandatory FinOps Policies (Minimum)**:
     - Block untagged resource creation (§8)
     - Pre-approval for high-cost instance types
     - Non-production auto-stop schedules (§18)
@@ -941,8 +941,8 @@
 
 ### §37. Governance-as-Code Integration
 
-*   **Law**: Embed FinOps governance into CI/CD pipelines to detect cost issues at the earliest stage (Shift-Left).
-*   **Integration Points**:
+-   **Law**: Embed FinOps governance into CI/CD pipelines to detect cost issues at the earliest stage (Shift-Left).
+-   **Integration Points**:
     - **PR creation**: Infracost auto-comments cost estimates
     - **CI**: OPA/Sentinel policy violation checks
     - **CD**: Auto-tag verification, budget checks
@@ -954,9 +954,9 @@
 
 ### §38. IaC Cost Estimation and PR Review
 
-*   **Law**: Cost impact of infrastructure changes must be understood **at code review time**. Auto-attach cost estimates to PRs to prevent unexpected cost increases.
+-   **Law**: Cost impact of infrastructure changes must be understood **at code review time**. Auto-attach cost estimates to PRs to prevent unexpected cost increases.
 
-*   **Tools**:
+-   **Tools**:
 
     | Tool | Function | Integration |
     |:-----|:---------|:-----------|
@@ -965,7 +965,7 @@
     | **Scalr** | IaC policy + cost management | Terraform |
     | **Pulumi Cost Insights** | Pulumi-native cost estimation | Pulumi |
 
-*   **PR Cost Review Criteria**:
+-   **PR Cost Review Criteria**:
     - **Monthly +$100+**: Mandate cost impact description in PR
     - **Monthly +$1,000+**: Mandate FinOps CoE review
     - **Monthly +$10,000+**: Mandate CTO/CFO approval
@@ -987,8 +987,8 @@
 
 ### §39. IaC Cost Guardrails
 
-*   **Law**: Embed cost guardrails in IaC templates to prevent uncontrolled creation of high-cost resources.
-*   **Sentinel (Terraform) Policy Example**:
+-   **Law**: Embed cost guardrails in IaC templates to prevent uncontrolled creation of high-cost resources.
+-   **Sentinel (Terraform) Policy Example**:
     ```python
     # Prohibit high-cost instances
     import "tfplan/v2" as tfplan
@@ -1012,9 +1012,9 @@
 
 ### §40. CDN Cost Optimization
 
-*   **Law**: CDNs improve user experience and reduce origin Egress, but misconfigured caching creates waste. Target **90%+ cache hit ratio**.
+-   **Law**: CDNs improve user experience and reduce origin Egress, but misconfigured caching creates waste. Target **90%+ cache hit ratio**.
 
-*   **CDN Optimization Strategies**:
+-   **CDN Optimization Strategies**:
 
     | Strategy | Effect | Implementation |
     |:---------|:-------|:-------------|
@@ -1024,15 +1024,15 @@
     | **Regional CDN** | Local cache leverage | PoPs near key markets |
     | **Edge Compute** | Reduce origin requests | CloudFront Functions / Workers |
 
-*   **CDN Selection Criteria**:
+-   **CDN Selection Criteria**:
     - Single vs multi-CDN based on traffic patterns
     - Regional restrictions from regulatory constraints (data sovereignty)
     - Edge Compute capability assessment
 
 ### §41. IoT Cost Management
 
-*   **Law**: As IoT devices proliferate, telemetry data transfer and processing costs surge. Control costs through **edge data filtering** and message optimization.
-*   **IoT Cost Optimization**:
+-   **Law**: As IoT devices proliferate, telemetry data transfer and processing costs surge. Control costs through **edge data filtering** and message optimization.
+-   **IoT Cost Optimization**:
     - **Edge filtering**: Exclude unnecessary telemetry at the edge, reduce cloud transfer
     - **Payload compression**: Reduce payload size with Protocol Buffers / MessagePack
     - **Basic Ingest (AWS IoT)**: Bypass message broker to reduce costs
@@ -1045,8 +1045,8 @@
 
 ### §42. ETL/ELT Cost Optimization
 
-*   **Law**: Data pipelines can become the "hidden giant" of cloud costs. Optimize across 3 axes: scan volume, compute, and storage.
-*   **Optimization Strategies**:
+-   **Law**: Data pipelines can become the "hidden giant" of cloud costs. Optimize across 3 axes: scan volume, compute, and storage.
+-   **Optimization Strategies**:
 
     | Strategy | Target | Effect |
     |:---------|:-------|:-------|
@@ -1058,8 +1058,8 @@
 
 ### §43. Streaming Cost Management
 
-*   **Law**: Streaming processing (Kafka/Kinesis/Pub-Sub) costs scale with partition count, data retention period, and consumer count. Eliminate unnecessary throughput reservation.
-*   **Cost Optimization**:
+-   **Law**: Streaming processing (Kafka/Kinesis/Pub-Sub) costs scale with partition count, data retention period, and consumer count. Eliminate unnecessary throughput reservation.
+-   **Cost Optimization**:
     - **Partition count**: Set based on actual demand (over-provisioning prohibited)
     - **Retention period**: Default 7 days → Shorten to minimum required
     - **Consumer groups**: Eliminate duplicate consumption
@@ -1071,22 +1071,22 @@
 
 ### §44. Multi-Cloud Unified Cost Management
 
-*   **Law**: In multi-cloud environments, eliminate provider-siloed cost management and build a **unified cost visibility view**.
+-   **Law**: In multi-cloud environments, eliminate provider-siloed cost management and build a **unified cost visibility view**.
 
-*   **Multi-Account Structure (AWS Organizations Example)**:
+-   **Multi-Account Structure (AWS Organizations Example)**:
     - **Management Account**: Billing consolidation. No workloads deployed
     - **Security Account**: Security tool consolidation
     - **Log Archive Account**: Audit log consolidation
     - **Shared Services Account**: Shared infrastructure (CI/CD, monitoring, etc.)
     - **Workload Accounts**: Per-environment (dev/staging/prod)
 
-*   **Multi-Cloud Cost Integration**:
+-   **Multi-Cloud Cost Integration**:
     - Data standardization based on FOCUS specification (§3)
     - Cross-analysis via unified dashboards (Grafana + BigQuery, etc.)
     - Unified logical tag standard across all providers
     - Cross-provider cost comparison and optimal placement
 
-*   **Cross-Reference**: `361_aws_cloud.md` (AWS Organizations)
+-   **Cross-Reference**: `361_aws_cloud.md` (AWS Organizations)
 
 ---
 
@@ -1094,9 +1094,9 @@
 
 ### §45. Cost Integration into Developer Portals
 
-*   **Law**: FinOps must be **built-in** to developer workflows. Integrate cost information into developer portals (Backstage, etc.) and link service catalogs with costs.
+-   **Law**: FinOps must be **built-in** to developer workflows. Integrate cost information into developer portals (Backstage, etc.) and link service catalogs with costs.
 
-*   **Integration Points**:
+-   **Integration Points**:
 
     | Integration Target | Displayed Info | Effect |
     |:------------------|:-------------|:-------|
@@ -1107,8 +1107,8 @@
 
 ### §46. Golden Path Cost Optimization
 
-*   **Law**: Build an environment where developers automatically achieve cost optimization by choosing the "Golden Path."
-*   **Golden Path Examples**:
+-   **Law**: Build an environment where developers automatically achieve cost optimization by choosing the "Golden Path."
+-   **Golden Path Examples**:
     - Embed cost-optimized defaults in IaC templates
     - Built-in non-production auto-stop schedules in templates
     - Tagging as mandatory fields in templates
@@ -1120,9 +1120,9 @@
 
 ### §47. Security Service Cost Management
 
-*   **Law**: Security costs are "necessary expenses" but not unoptimizable. Analyze security service usage patterns and eliminate excessive protection levels or redundant features.
+-   **Law**: Security costs are "necessary expenses" but not unoptimizable. Analyze security service usage patterns and eliminate excessive protection levels or redundant features.
 
-*   **Security Service Cost Optimization**:
+-   **Security Service Cost Optimization**:
 
     | Service | Optimization Method |
     |:--------|:------------------|
@@ -1132,7 +1132,7 @@
     | **VPN/Direct Connect** | Size based on actual traffic |
     | **KMS** | Optimize key rotation frequency |
 
-*   **Mandate**: Security cost reduction must be **within bounds that do not degrade security level**. Strictly follow §1 priority hierarchy.
+-   **Mandate**: Security cost reduction must be **within bounds that do not degrade security level**. Strictly follow §1 priority hierarchy.
 
 ---
 
@@ -1140,15 +1140,15 @@
 
 ### §48. GreenOps — Carbon Tracking
 
-*   **Law**: Cost optimization and carbon reduction are **two sides of the same coin**. Visualize cloud carbon footprint and build a culture where efficiency improvements also contribute to sustainability.
+-   **Law**: Cost optimization and carbon reduction are **two sides of the same coin**. Visualize cloud carbon footprint and build a culture where efficiency improvements also contribute to sustainability.
 
-*   **Carbon Visibility Tools**:
+-   **Carbon Visibility Tools**:
     - **AWS**: Customer Carbon Footprint Tool
     - **GCP**: Carbon Footprint (BigQuery export supported)
     - **Azure**: Emissions Impact Dashboard
     - **GSF**: Software Carbon Intensity (SCI) Specification
 
-*   **SCI Formula (ISO Standard)**:
+-   **SCI Formula (ISO Standard)**:
     ```
     SCI = (E × I) + M
     E = Energy consumption (kWh)
@@ -1156,11 +1156,11 @@
     M = Embodied carbon (hardware manufacturing emission allocation)
     ```
 
-*   **SCI for AI (GSF Extension)**:
+-   **SCI for AI (GSF Extension)**:
     - Measure carbon footprint across entire AI/ML lifecycle (training + inference + data processing)
     - Quantify SCI impact of model size, batch size, and hardware selection
 
-*   **FinOps × GreenOps Shared Optimizations**:
+-   **FinOps × GreenOps Shared Optimizations**:
     - Idle resource elimination → Cost reduction + Carbon reduction
     - Rightsizing → Cost reduction + Power consumption reduction
     - Low-carbon region selection → Carbon reduction at same cost
@@ -1168,22 +1168,22 @@
 
 ### §49. Sustainable Cloud Architecture
 
-*   **Law**: Consider **carbon efficiency** during architecture design. Minimize environmental impact through low-carbon region selection, demand shaping, and efficient coding.
+-   **Law**: Consider **carbon efficiency** during architecture design. Minimize environmental impact through low-carbon region selection, demand shaping, and efficient coding.
 
-*   **Practices**:
+-   **Practices**:
     - **Region selection**: Prioritize regions with high renewable energy ratios (GCP: `us-central1`, AWS: `eu-north-1`, etc.)
     - **Demand shaping**: Schedule batch processing during low carbon-intensity hours (carbon-aware-sdk)
     - **Arm/Graviton**: Adopt power-efficient Arm architecture
     - **Serverless-first**: Zero power consumption when idle
     - **Data optimization**: Delete unnecessary data, compress, use efficient data structures
 
-*   **Regulatory Compliance**:
+-   **Regulatory Compliance**:
     - **EU CSRD**: Corporate Sustainability Reporting Directive — Digital service carbon reporting obligations
     - **SEC Climate Disclosure**: US SEC climate-related information disclosure rules
     - **Carbon Border Adjustment**: International carbon tariff compliance
     - **Action**: Pre-build sustainability reporting data collection pipelines
 
-*   **GSF carbon-aware-sdk Usage**:
+-   **GSF carbon-aware-sdk Usage**:
     ```typescript
     // Carbon-Aware Scheduling
     import { CarbonAwareApi } from '@greensoftware/carbon-aware-sdk';
@@ -1205,8 +1205,8 @@
 
 ### §50. TypeScript/JavaScript (Frontend/Backend Common)
 
-*   **Law**: Frontend bundle size and API call patterns directly impact cloud costs (CDN Egress, Lambda execution time, API Gateway invocation count).
-*   **FinOps Best Practices**:
+-   **Law**: Frontend bundle size and API call patterns directly impact cloud costs (CDN Egress, Lambda execution time, API Gateway invocation count).
+-   **FinOps Best Practices**:
     - **Tree Shaking**: Remove unused code to reduce bundle size → CDN Egress reduction
     - **Code splitting**: Route-based Lazy Loading for initial transfer reduction
     - **Image optimization**: Next.js Image / `<picture>` tag for optimal format auto-selection
@@ -1214,8 +1214,8 @@
 
 ### §51. HCL (Terraform)
 
-*   **Law**: Terraform modules must embed cost optimization settings as defaults.
-*   **FinOps-Aware Terraform Module Design**:
+-   **Law**: Terraform modules must embed cost optimization settings as defaults.
+-   **FinOps-Aware Terraform Module Design**:
     ```hcl
     variable "environment" {
       type    = string
@@ -1245,8 +1245,8 @@
 
 ### §52. Python (AI/ML Workloads)
 
-*   **Law**: Python-based AI/ML workloads have GPU utilization and memory management directly impacting costs.
-*   **FinOps Implementation Patterns**:
+-   **Law**: Python-based AI/ML workloads have GPU utilization and memory management directly impacting costs.
+-   **FinOps Implementation Patterns**:
     - **GPU Memory Management**: Proper `torch.cuda.empty_cache()` calls
     - **Mixed Precision Training**: FP16/BF16 for 30% GPU efficiency improvement
     - **Gradient Accumulation**: Smaller batch sizes to reduce memory
@@ -1254,8 +1254,8 @@
 
 ### §53. Go (Infrastructure/SRE)
 
-*   **Law**: Go-based CLI tools and SRE operators have cloud API call efficiency directly impacting costs.
-*   **FinOps Implementation Patterns**:
+-   **Law**: Go-based CLI tools and SRE operators have cloud API call efficiency directly impacting costs.
+-   **FinOps Implementation Patterns**:
     - **API Pagination**: Pagination for large resource list retrievals
     - **Exponential Backoff**: Avoid throttling-induced API billing
     - **Batch Operations**: Batch individual API calls
@@ -1267,7 +1267,7 @@
 
 ### §54. FinOps Maturity Model (5 Levels)
 
-*   **Law**: FinOps matures incrementally. Accurately assess your organization's current maturity level and plan specific actions to advance.
+-   **Law**: FinOps matures incrementally. Accurately assess your organization's current maturity level and plan specific actions to advance.
 
     | Level | Name | Characteristics | KPI Example |
     |:------|:-----|:---------------|:-----------|
@@ -1277,7 +1277,7 @@
     | **L4: Sprint** | Advanced | AI-driven optimization. Real-time cost management. GreenOps integrated | Waste Rate < 5% |
     | **L5: Fly** | Excellent | Fully automated FinOps. Business value aligned. ±5% forecast accuracy | Unit Cost decreasing > 10%/yr |
 
-*   **L1→L2 Transition Checklist**:
+-   **L1→L2 Transition Checklist**:
     - [ ] All resources have mandatory tags (95%+)
     - [ ] Monthly cloud costs viewable by all teams
     - [ ] Budget alerts set on all accounts
@@ -1287,7 +1287,7 @@
 
 ### §55. FinOps Tool Ecosystem
 
-*   **Tool Selection Matrix**:
+-   **Tool Selection Matrix**:
 
     | Category | Native Tools | Third-Party |
     |:---------|:------------|:-----------|
@@ -1339,7 +1339,7 @@
 
 ### §57. Future Outlook
 
-*   **FinOps 2027+ Directions**:
+-   **FinOps 2027+ Directions**:
     - **AI-Native FinOps**: Fully autonomous cost optimization by AI agents
     - **FinOps × Platform Engineering**: Complete cost info integration into developer portals
     - **Real-time FinOps**: Second-level cost tracking and instant optimization

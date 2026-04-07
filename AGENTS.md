@@ -24,11 +24,11 @@ For any instruction from the user, **before generating a response**, check the "
 **This section determines the behavior of the AI Agent.**
 
 -   **Project Native Language**: `[Japanese | English]` (Default: `Japanese`)
-  - **Japanese**: AIは日本語で対話します。下部の **[🇯🇵 日本語プロトコル]** セクションを参照し、遵守してください。
-  - **English**: AI communicates in English. Refer to the **[🇺🇸 English Protocol]** section below.
-  - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`axiarch-rules/universal/`、`axiarch-rules/blueprint/` 内の **使用しない方の言語フォルダを必ず削除** してください。`axiarch-prompts/` を導入している場合は、同様に使用しない言語フォルダを削除してください。
+    - **Japanese**: AIは日本語で対話します。下部の **[🇯🇵 日本語プロトコル]** セクションを参照し、遵守してください。
+    - **English**: AI communicates in English. Refer to the **[🇺🇸 English Protocol]** section below.
+    - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`axiarch-rules/universal/`、`axiarch-rules/blueprint/` 内の **使用しない方の言語フォルダを必ず削除** してください。`axiarch-prompts/`（任意）を導入している場合は、同様に使用しない言語フォルダを削除してください。
 
-  - *(Action for English)*: Set this value upon initialization and **delete the unused language folders** in `axiarch-rules/universal/` and `axiarch-rules/blueprint/`. If you have also installed `axiarch-prompts/` (optional), delete the unused language folder there as well.
+    - *(Action for English)*: Set this value upon initialization and **delete the unused language folders** in `axiarch-rules/universal/` and `axiarch-rules/blueprint/`. If you have also installed `axiarch-prompts/` (optional), delete the unused language folder there as well.
 
 ---
 
@@ -142,7 +142,7 @@ For any instruction from the user, **before generating a response**, check the "
 
 2.  **設計書ファースト / Blueprint First:**
     - **機能追加・DB変更・ロジック変更 / Major Changes:**
-      - コードを書く前に、必ず `axiarch-rules/blueprint/` 内の仕様書を更新・定義する。
+      - コードを書く前に、必ず `axiarch-rules/blueprint/{lang}/` 内の仕様書を更新・定義する（`CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）。
       - 設計の整合性を保つため、ここをスキップすることは禁止です。
     - **バグ修正・UI微調整・リファクタリング / Minor Fixes:**
       - Blueprintの更新は不要です。即座にコード修正（Implementation）を行ってください。
@@ -172,10 +172,10 @@ For any instruction from the user, **before generating a response**, check the "
     教訓の記録は以下のプロトコルに従い、AIが自律的に実行する。
     **詳細な手順は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照すること。**
     1. **分類**: 教訓のドメイン（DB・認証・セキュリティ・設計・品質・運用等）を判定する。
-    2. **既存ファイル検索**: `blueprint/` 内に該当ドメインのファイル（例: `engineering/300_database_auth.md`）が既に存在する場合、そのファイルに追記する。
-    3. **未分類の蓄積**: 該当ドメインのファイルが存在しない場合、`010_project_lessons_log.md` に一旦追記する。
+    2. **既存ファイル検索**: `blueprint/{lang}/` 内の対応ドメインフォルダ（例: `engineering/`）に該当ドメインのファイル（`{NNN}_{topic}.md` 形式）が既に存在する場合、そのファイルに追記する。
+    3. **未分類の蓄積**: 該当ドメインのファイルが存在しない場合、`governance/010_project_lessons_log.md` に一旦追記する。
     4. **閾値による自動分離**: `010` 内の同一ドメインの教訓が **3件以上** に達した場合、AIは自律的に新規ドメインファイル（例: `{folder}/{NNN}_{topic}.md`）を作成し、該当教訓を移動する。`010` にはドメインファイルへの参照リンクを残す。
-    5. **インデックス維持**: `010_project_lessons_log.md` は常に「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。
+    5. **インデックス維持**: `governance/010_project_lessons_log.md` は常に「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。
 
 
 
@@ -286,7 +286,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 
 2.  **Blueprint First:**
     -   **Major Changes (Feature add/DB change/Logic change):**
-        -   Before coding, you MUST update/define specifications in `axiarch-rules/blueprint/`.
+        -   Before coding, you MUST update/define specifications in `axiarch-rules/blueprint/{lang}/` (per `CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
         -   Skipping this is prohibited to maintain design integrity.
     -   **Minor Fixes (Bug fix/UI tweak/Refactor):**
         -   Blueprint update is unnecessary. Proceed immediately to Implementation.
@@ -316,10 +316,10 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         Lesson recording MUST follow this protocol, executed autonomously by the AI.
         **Detailed procedures: refer to `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.**
         1. **Classify**: Determine the lesson's domain (DB/Auth, Security, Architecture, Quality, Operations, etc.).
-        2. **Search existing files**: If a domain file (e.g., `engineering/300_database_auth.md`) already exists in `blueprint/`, append to that file.
-        3. **Accumulate if unclassified**: If no domain file exists, append to `010_project_lessons_log.md` temporarily.
+        2. **Search existing files**: If a domain file (`{NNN}_{topic}.md` format) already exists in the corresponding folder under `blueprint/{lang}/` (e.g., `engineering/`), append to that file.
+        3. **Accumulate if unclassified**: If no domain file exists, append to `governance/010_project_lessons_log.md` temporarily.
         4. **Threshold-based auto-separation**: When lessons of the **same domain reach 3 or more** in `010`, the AI MUST autonomously create a new domain file (e.g., `{folder}/{NNN}_{topic}.md`), move the relevant lessons there, and leave a reference link in `010`.
-        5. **Maintain index**: `010_project_lessons_log.md` MUST always function as an index: "unsorted lessons + links to separated domain files".
+        5. **Maintain index**: `governance/010_project_lessons_log.md` MUST always function as an index: "unsorted lessons + links to separated domain files".
 
 ---
 

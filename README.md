@@ -2,17 +2,17 @@
 
 # 🏰 Axiarch
 
-### 憲法駆動型 AIエージェントガバナンスフレームワーク
+## 憲法駆動型 AIエージェントガバナンスフレームワーク
 
-### Constitution-Driven AI Agent Governance Framework
+## Constitution-Driven AI Agent Governance Framework
 
 [![Release](https://img.shields.io/github/v/release/hiroyuki-miyauchi/axiarch?label=Version&color=brightgreen)](https://github.com/hiroyuki-miyauchi/axiarch/releases)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-30_files-green.svg)](#-universal-rules-30-files--jaen)
-[![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#)
+[![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
 [![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
-[日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch)
+[日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
 </div>
 
@@ -116,7 +116,8 @@ Originally designed for [Google Antigravity](https://labs.google/antigravity). S
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ⚠️ Via symlink |
-| ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Windsurf** | Various | ✅ Reads |
+| ⚠️ **Untested** — 未検証（動作する見込み） | **Windsurf** | `.windsurfrules` | ✅ Reads |
+| ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Other** | Various | ✅ Reads |
 
 > [!NOTE]
 > **JA**: 各AIエージェントには**固有の設定ディレクトリ**があります（例: Cursorは `.cursor/rules/`、Copilotは `.github/copilot-instructions.md`）。`AGENTS.md` は**主要エージェントが読める共通憲法**であり、各ツールのネイティブ設定（例：`.cursor/rules/`、`.github/copilot-instructions.md`）と**併用**されます。ツール固有のセットアップの代替ではありません。
@@ -167,8 +168,8 @@ Originally designed for [Google Antigravity](https://labs.google/antigravity). S
 |:-----|:---|:---|
 | `000_project_overview.md` | プロジェクト概要テンプレート | Project overview template |
 | `010_project_lessons_log.md` | 教訓ログ | Lessons log |
-| `998_feature_spec_template.md` | **機能仕様テンプレート（SDD核）** — 受け入れ条件(Given/When/Then)を機能単位で必須化 | **Feature spec template (SDD core)** — Acceptance Criteria (Given/When/Then) required per feature |
-| `999_project_specific_template.md` | プロジェクト固有ルールテンプレート | Project-specific rule template |
+| `000_feature_spec_template.md` | **機能仕様テンプレート（SDD核）** — 受け入れ条件(Given/When/Then)を機能単位で必須化 | **Feature spec template (SDD core)** — Acceptance Criteria (Given/When/Then) required per feature |
+| `100_project_specific_template.md` | プロジェクト固有ルールテンプレート | Project-specific rule template |
 
 ### 🔧 基盤 / Infrastructure
 
@@ -254,12 +255,12 @@ Originally designed for [Google Antigravity](https://labs.google/antigravity). S
 
 ### エージェント別セットアップ / Agent-Specific Setup
 
-| 手順 / Step | Antigravity | Cursor | Claude Code | Copilot |
-|:-----------|:------------|:-------|:------------|:--------|
-| 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ |
-| 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` シムリンク作成 | ❌ 不要 | ❌ 不要 | ✅ `ln -s AGENTS.md CLAUDE.md` | ❌ 不要 |
-| 4. 追加設定 | — | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` |
+| 手順 / Step | Antigravity | Cursor | Claude Code | Copilot | Windsurf |
+|:-----------|:------------|:-------|:------------|:--------|:---------|
+| 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
+| 3. `CLAUDE.md` シムリンク作成 | ❌ 不要 | ❌ 不要 | ✅ `ln -s AGENTS.md CLAUDE.md` | ❌ 不要 | ❌ 不要 |
+| 4. 追加設定 | — | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
 ### 1. プロジェクトにコピー / Copy to your project
 
@@ -327,7 +328,7 @@ rm -rf axiarch-prompts/ja  # For English projects
 | Step | JA | EN |
 |:-----|:---|:---|
 | 1 | `blueprint/*/000_project_overview.md` をプロジェクトに合わせて編集 | Edit `blueprint/*/000_project_overview.md` for your project |
-| 2 | 新機能は `998_feature_spec_template.md` を Category 600–800 にコピー | For new features, copy `998_feature_spec_template.md` to Category 600–800 |
+| 2 | 新機能は `000_feature_spec_template.md` を Category 600–800 にコピー | For new features, copy `000_feature_spec_template.md` to Category 600–800 |
 | 3 | **コードを書く前に受け入れ条件を書く**（Blueprint First） | **Write Acceptance Criteria before writing code** (Blueprint First) |
 | 4 | 開発開始 — AIエージェントは憲法に従う | Start development — AI agents will follow the constitution |
 

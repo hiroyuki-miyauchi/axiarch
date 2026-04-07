@@ -10,7 +10,7 @@
 ## 📑 目次 (Table of Contents)
 
 1. [Project Vision & Strategy](#1-project-vision--strategy)
-2. [Technology Stack Selection](#2-technology-stack-selection-the-standard)
+2. [Technology Stack Selection](#2-technology-stack-selection)
 3. [Design Identity](#3-design-identity-the-universal-ui)
 4. [Specific Fitness Functions](#4-specific-fitness-functions-quality-gates)
 5. [Standard Feature Modules](#5-standard-feature-modules-reference-specs)
@@ -67,7 +67,7 @@
 
 ## 6. Project Specific Operations
 *   **Deploy**: Vercel (Web), Codemagic (Mobile).
-*   **Security**: Tokyo Region Exclusive (東京リージョン固定), RLS Strict Mode.
+*   **Security**: リージョン固定（例: 東京リージョン、シンガポールリージョン等）, RLS Strict Mode.
 
 ---
 
@@ -89,18 +89,18 @@
 | RAG・AI・トークンコスト | §5 AI Module |
 | CMS・トリプルライト | §5 Content Module |
 | デプロイ・Vercel・Codemagic | §6 Operations |
-| RLS・セキュリティ・東京リージョン | §6 Operations |
+| RLS・セキュリティ・リージョン | §6 Operations |
 
 ### クロスリファレンス（セクション → Universal ルール）
 
 | セクション | 関連 Universal ルール |
 |---|---|
-| §1 Vision & Strategy | `000_core_mindset`, `100_product_strategy` |
-| §2 Tech Stack | `300_engineering_standards`, `320_supabase_architecture`, `340_web_frontend`, `342_mobile_flutter`, `360_firebase_gcp` |
-| §3 Design Identity | `200_design_ux` |
-| §4 Quality Gates | `300_engineering_standards`, `700_qa_testing` |
-| §5 Auth Module | `600_security_privacy`, `320_supabase_architecture` |
-| §5 Billing Module | `101_revenue_monetization` |
-| §5 AI Module | `400_ai_engineering` |
-| §5 Content Module | `341_headless_cms` |
-| §6 Operations | `502_site_reliability`, `360_firebase_gcp` |
+| §1 Vision & Strategy | `core/000_core_mindset`, `product/000_product_strategy` |
+| §2 Tech Stack | `engineering/000_engineering_standards`, `engineering/200_supabase_architecture`, `engineering/300_web_frontend`, `engineering/400_mobile_flutter`, `engineering/500_firebase_gcp` |
+| §3 Design Identity | `design/000_design_ux` |
+| §4 Quality Gates | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
+| §5 Auth Module | `security/000_security_privacy`, `engineering/200_supabase_architecture` |
+| §5 Billing Module | `product/300_revenue_monetization` |
+| §5 AI Module | `ai/000_ai_engineering` |
+| §5 Content Module | `engineering/310_headless_cms` |
+| §6 Operations | `operations/400_site_reliability`, `engineering/500_firebase_gcp` |

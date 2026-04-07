@@ -35,7 +35,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
-* **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 ### Class S: Universal Immutable Laws (Absolute Laws — Read-Only)
 > [!IMPORTANT]
@@ -46,12 +46,12 @@ In the audit and remediation process, think deeply and comprehensively across th
 ### Class A: Project Mutable Bylaws (Project-Specific Laws)
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-    2.  **Lessons**: Past lesson logs (e.g., `010_project_lessons_log.md`, `0X0_lessons_{domain}.md`)
-    3.  **Domain Rules**: Security, billing, media, etc. (e.g., `100_security...`, `200_design...`)
-    4.  **Templates**: Feature specifications and project-specific rules (e.g., `998_feature_spec_template.md`)
+    2.  **Lessons**: Past lesson logs (e.g., `governance/010_project_lessons_log.md`)
+    3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`)
+    4.  **Templates**: Feature specifications and project-specific rules (e.g., `templates/000_feature_spec_template.md`, `templates/100_project_specific_template.md`)
 * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
     * **Target 1: Security**: Security and privacy principles
     * **Target 2: Lessons**: Past failures, lessons, and prohibited patterns
@@ -141,8 +141,8 @@ Thoroughly investigate all files and all features against the loaded "laws" for 
     * ※ Present not just the changes but enough context to understand them.
 3.  **Updated Rules**:
     * Additions/modifications to specific files within **Class A (Project Mutable Bylaws)** (in diff format or appended text).
-    * **※Important: Specify the target file path and follow `CRYSTALLIZATION_PROTOCOL.md` procedures for recording.**
-    * **Domain Distribution**: The lessons log (`010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
+    * **※Important: Specify the target file path and follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures for recording.**
+    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
     * **New File Creation**: If no suitable existing file exists, present a new file creation proposal following **3-digit Sparse Numbering** (gap-based numbering, e.g., `100`, `200`) conventions within the same directory.
 
 ---

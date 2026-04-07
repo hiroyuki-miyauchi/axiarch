@@ -2,7 +2,7 @@
 
 > **Purpose**: Compliance audit against the project constitution — focused on detecting hybrid architecture remnants (JSON data dumping), Hybrid Sync / Split Brain elimination, lazy redirect (haribote) detection, and RDB unification enforcement
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/` + DB design)
+> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/` + DB design)
 >
 > **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to audit.
 
@@ -41,7 +41,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
-* **Important**: Follow the 5-step loading order defined in `LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
 
 ### Class S: Universal Immutable Laws
 > [!IMPORTANT]
@@ -52,10 +52,10 @@ In the audit and remediation process, think deeply and comprehensively across th
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-    2.  **Lessons**: Past lesson logs (e.g., `010_project_lessons_log.md`)
+    2.  **Lessons**: Past lesson logs (e.g., `governance/010_project_lessons_log.md`)
     3.  **Domain Rules**: DB, security, architecture, etc.
     4.  **Templates**: Feature specifications and project-specific rules
 
@@ -111,12 +111,12 @@ Based on the approved plan, implement according to the following standards.
 **After all work is complete, return any "new insights" or "rule deficiencies" gained through this work back to the rulebook as project assets.**
 
 * **Rule Update Proposal**:
-    * If existing rules are insufficient or new best practices (or prohibitions) were confirmed through implementation, present **which file (within Class A) and where specific content should be added** (follow `CRYSTALLIZATION_PROTOCOL.md` procedures).
+    * If existing rules are insufficient or new best practices (or prohibitions) were confirmed through implementation, present **which file (within Class A) and where specific content should be added** (follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures).
     * **Class S (Universal) Protection**: Change/addition proposals to Universal Rules are prohibited in principle (require organization-wide consensus).
     * If additions to **Class A lesson logs (Lessons)** are needed, always propose them.
     * If no changes are needed, explicitly state "No rule updates required."
 
-# Critical Constraint (絶対遵守事項)
+# Critical Constraint (Absolute Compliance Requirements)
 
 > [!CAUTION]
 > **Rule 0: No Hybrid Sync / Strict Migration Protocol**

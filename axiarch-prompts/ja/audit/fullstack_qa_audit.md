@@ -2,7 +2,7 @@
 
 > **用途**: セキュリティ・プライバシー最大化を筆頭に、シリコンバレー基準6つの柱（バグゼロ・機会損失ゼロ・非破壊的リファクタリング）で行う全方位品質・機会損失監査。優先度付き報告（Critical/High/Medium）・ROI提案・Domain Distribution・3桁Sparse Numberingによる知見還元を含んだ統合監査プロンプト
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、監査対象のコードまたはファイルパスを指示する。
 
@@ -37,7 +37,7 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -48,13 +48,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`、`0X0_lessons_{domain}.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等（例: `100_security...`, `200_design...`）
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール（例: `998_feature_spec_template.md`）
-* **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要・教訓ログ
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
     * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
     * **Target 3: Design**: デザインシステム・世界観
@@ -133,9 +137,9 @@
 **全ての作業完了後、ここまでの工程で得られた「重要な気付き」や「決定事項」を、プロジェクトの資産としてルールブックに還元してください。**
 
 * **Rule Update Proposal (ルールの更新提案)**:
-    * 今回の監査を通じて判明した新たなセキュリティ制約、ビジネスルール、AI活用ルール、アンチパターンがあれば、**`axiarch-rules/blueprint/` 内の関連ファイル**への追記・修正案を提示すること。
+    * 今回の監査を通じて判明した新たなセキュリティ制約、ビジネスルール、AI活用ルール、アンチパターンがあれば、**`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため、変更提案の対象外とする。必ず**プロジェクト固有ルール（Blueprint）**側に蓄積せよ。
-    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
+    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * **新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い、同ディレクトリ内に**新規ファイルの作成案**を提示すること。
     * 既存のルールが現状と矛盾していたり、古くなっている場合は最新の状態に更新する提案を行う。
     * ルール自体をより明確、かつ運用しやすい形にリファクタリングする提案も含める。

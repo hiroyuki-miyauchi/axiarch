@@ -86,7 +86,7 @@
 
 ### §1. SRE Core Principles
 
-*   **Law (Service Reliability Hierarchy)**: The purpose of SRE is not to make systems unbreakable, but to build mechanisms that recover quickly from failures and prevent the same failure from recurring.
+-   **Law (Service Reliability Hierarchy)**: The purpose of SRE is not to make systems unbreakable, but to build mechanisms that recover quickly from failures and prevent the same failure from recurring.
 
     | Layer | Content | Example |
     |:------|:--------|:--------|
@@ -98,7 +98,7 @@
     | **6. Development** | Build reliability into design | SLO-driven development |
     | **7. Product** | Deliver reliability as user experience | Error budget-driven decisions |
 
-*   **6 Core Principles**:
+-   **6 Core Principles**:
     1.  **Hope is not a strategy** — "It probably won't break" is not a strategy. Verify all assumptions
     2.  **Embrace risk** — Don't eliminate risk; quantify and manage it (Error Budget philosophy)
     3.  **Eliminate toil** — Systematically eliminate repetitive, manual, automatable work
@@ -106,11 +106,11 @@
     5.  **Measure everything** — You can't improve what you can't measure
     6.  **Slow is the New Down** — A technically "up" but slow service IS an outage. Prioritize P99 tail latency
 
-*   **The 50% Rule**: SRE engineers MUST spend at most 50% of their time on operations (including Toil). The remaining 50%+ must be dedicated to engineering (automation & improvement).
+-   **The 50% Rule**: SRE engineers MUST spend at most 50% of their time on operations (including Toil). The remaining 50%+ must be dedicated to engineering (automation & improvement).
 
 ### §2. SRE Role & Scope
 
-*   **Scope of This Rule (52)**:
+-   **Scope of This Rule (52)**:
 
     | Domain | This Rule (52) | Delegated To |
     |:-------|:-------------|:------------|
@@ -130,8 +130,8 @@
 
 ### §3. Evolution of SRE as Reliability Architect
 
-*   **Law**: Post-2025 SREs are not mere "server operators" but "architects of reliability," embedded across teams and systems to ensure reliability from the design phase.
-*   **SRE in the AI Era**: SRE responsibility extends to model performance monitoring, inference latency SLOs, GPU capacity planning, and similar domains.
+-   **Law**: Post-2025 SREs are not mere "server operators" but "architects of reliability," embedded across teams and systems to ensure reliability from the design phase.
+-   **SRE in the AI Era**: SRE responsibility extends to model performance monitoring, inference latency SLOs, GPU capacity planning, and similar domains.
 
 ---
 
@@ -139,14 +139,14 @@
 
 ### §4. SLI Design Principles
 
-*   **Law**: SLIs (Service Level Indicators) MUST directly reflect **user experience**. Internal metrics (CPU usage, etc.) are NOT SLIs but supporting indicators for root cause investigation.
-*   **4 SLI Selection Principles**:
+-   **Law**: SLIs (Service Level Indicators) MUST directly reflect **user experience**. Internal metrics (CPU usage, etc.) are NOT SLIs but supporting indicators for root cause investigation.
+-   **4 SLI Selection Principles**:
     1.  **User-centric**: Measure what users actually experience
     2.  **Measurable**: Automatically and continuously measurable
     3.  **Actionable**: Concrete actions can be taken when thresholds are exceeded
     4.  **Ratio-based**: Expressed as "good events / total events"
 
-*   **SLI Category Templates**:
+-   **SLI Category Templates**:
 
     | Category | SLI Definition | Measurement Method |
     |:---------|:-------------|:------------------|
@@ -160,8 +160,8 @@
 
 ### §5. SLO Definition & OpenSLO
 
-*   **Law**: SLOs MUST be defined at project inception and reviewed monthly. SLOs are "targets" not "promises"; decisions are driven by error budget burn rate.
-*   **SLO Design Template**:
+-   **Law**: SLOs MUST be defined at project inception and reviewed monthly. SLOs are "targets" not "promises"; decisions are driven by error budget burn rate.
+-   **SLO Design Template**:
 
     | Service Category | SLI (Indicator) | SLO (Target) | Measurement |
     |:----------------|:---------------|:-------------|:-----------|
@@ -173,7 +173,7 @@
     | **AI Response** | P95 Response Time | ≦ 3000ms | AI FinOps Dashboard |
     | **Error Rate** | 5xx Response ratio | ≦ 0.1% | Error tracking + Server Logs |
 
-*   **OpenSLO Compliance**: SLO definitions MUST be managed declaratively using the **OpenSLO specification** (YAML). Vendor-neutral, CI-validated.
+-   **OpenSLO Compliance**: SLO definitions MUST be managed declaratively using the **OpenSLO specification** (YAML). Vendor-neutral, CI-validated.
 
     ```yaml
     # openslo.yaml — OpenSLO specification-compliant SLO definition
@@ -209,22 +209,22 @@
                   query: sum(rate(http_requests_total[5m]))
     ```
 
-*   **SLO Controller**: In Kubernetes environments, deploy SLO Controllers to auto-generate alert rules and dashboards from SLO definitions.
-*   **Review Cadence**: Monthly review of SLI/SLO achievement with threshold adjustments.
-*   **Status Page**: Maintain an external status page with automated SLO integration. Concealing outages is "death of trust."
+-   **SLO Controller**: In Kubernetes environments, deploy SLO Controllers to auto-generate alert rules and dashboards from SLO definitions.
+-   **Review Cadence**: Monthly review of SLI/SLO achievement with threshold adjustments.
+-   **Status Page**: Maintain an external status page with automated SLO integration. Concealing outages is "death of trust."
 
 ### §6. SLA Management & Legal Considerations
 
-*   **Law**: SLAs MUST be set **more conservatively** than SLOs. SLAs carry legal binding force with penalties for violations.
-*   **SLO → SLA Conversion**: `SLA ≦ SLO - margin` (e.g., SLO 99.9% → SLA 99.5%)
-*   **Planned Maintenance**: 72-hour advance notice mandatory; ensure contractual exclusion from SLA calculations.
+-   **Law**: SLAs MUST be set **more conservatively** than SLOs. SLAs carry legal binding force with penalties for violations.
+-   **SLO → SLA Conversion**: `SLA ≦ SLO - margin` (e.g., SLO 99.9% → SLA 99.5%)
+-   **Planned Maintenance**: 72-hour advance notice mandatory; ensure contractual exclusion from SLA calculations.
 
 ### §7. External Dependency SLO Integration
 
-*   **Law**: System-wide SLO cannot exceed the SLO of its dependencies (**SLO Chain Rule**).
-*   **Dependency SLI**: Define SLIs per external service (payment API, email, CDN, etc.) and visualize on dependency maps.
-*   **Composite SLO Calculation**: `System SLO ≦ min(Service_A_SLO × Service_B_SLO × ...)`
-*   **Fallback Design**: Pre-define fallback strategies for external dependency SLO violations.
+-   **Law**: System-wide SLO cannot exceed the SLO of its dependencies (**SLO Chain Rule**).
+-   **Dependency SLI**: Define SLIs per external service (payment API, email, CDN, etc.) and visualize on dependency maps.
+-   **Composite SLO Calculation**: `System SLO ≦ min(Service_A_SLO × Service_B_SLO × ...)`
+-   **Fallback Design**: Pre-define fallback strategies for external dependency SLO violations.
 
 ---
 
@@ -232,8 +232,8 @@
 
 ### §8. Error Budget Fundamentals
 
-*   **Law**: Error budgets quantify "the allowable amount of unreliability." If SLO is 99.9%, the monthly error budget is 0.1% (~43 minutes).
-*   **Tiered Error Budget Policy**:
+-   **Law**: Error budgets quantify "the allowable amount of unreliability." If SLO is 99.9%, the monthly error budget is 0.1% (~43 minutes).
+-   **Tiered Error Budget Policy**:
 
     | Error Budget Remaining | State | Action |
     |:----------------------|:------|:-------|
@@ -245,7 +245,7 @@
 
 ### §9. Multi-Window / Multi-Burn-Rate Alerting
 
-*   **Law**: Monitor error budget burn rate across **multiple time windows** to minimize false positives while detecting critical consumption instantly.
+-   **Law**: Monitor error budget burn rate across **multiple time windows** to minimize false positives while detecting critical consumption instantly.
 
     | Window | Burn Rate Threshold | Alert Level | Meaning |
     |:-------|:-------------------|:-----------|:--------|
@@ -254,7 +254,7 @@
     | **1d / 2h** | > 3.0 | **P2 (4 hours)** | Slow but sustained consumption |
     | **3d / 6h** | > 1.0 | **Ticket** | Trend monitoring, create ticket |
 
-*   **Rationale**: Single-window alerting biases toward either false positives or missed detections. Follows the Google SRE Workbook Multi-Window approach.
+-   **Rationale**: Single-window alerting biases toward either false positives or missed detections. Follows the Google SRE Workbook Multi-Window approach.
 
 ---
 
@@ -262,7 +262,7 @@
 
 ### §10. Five Pillars: Metrics, Logs, Traces, Events, Profiles
 
-*   **Law**: Observability consists of **Metrics, Logs, Traces, Events, and Profiles**. Continuous Profiling is positioned as the 5th pillar.
+-   **Law**: Observability consists of **Metrics, Logs, Traces, Events, and Profiles**. Continuous Profiling is positioned as the 5th pillar.
 
     | Pillar | Purpose | Examples |
     |:-------|:--------|:--------|
@@ -272,7 +272,7 @@
     | **Events** | State change records for change tracking | Deploys, Config changes, Scaling |
     | **Profiles** | Detailed resource consumption analysis | CPU/Memory/Lock profiling |
 
-*   **Golden Signals (4 Key Signals)**: Monitor the following with highest priority for all services:
+-   **Golden Signals (4 Key Signals)**: Monitor the following with highest priority for all services:
     1.  **Latency**: P50/P95/P99. Prioritize P99 tail latency
     2.  **Traffic**: Demand on the system (RPS, etc.)
     3.  **Errors**: Ratio of failed requests
@@ -280,16 +280,16 @@
 
 ### §11. OpenTelemetry Integration & Pipeline Architecture
 
-*   **Law**: Use **OpenTelemetry (OTel)** as the industry standard for observability instrumentation. Direct dependency on vendor-specific SDKs is prohibited.
-*   **OTel Adoption Principles**:
+-   **Law**: Use **OpenTelemetry (OTel)** as the industry standard for observability instrumentation. Direct dependency on vendor-specific SDKs is prohibited.
+-   **OTel Adoption Principles**:
     1.  **Vendor-neutral instrumentation**: Use only OTel SDK in applications. Connect backends via OTel Collector
     2.  **Auto-instrumentation**: Maximize auto-instrumentation. Manual instrumentation only where necessary
     3.  **Semantic Conventions**: Follow OTel Semantic Conventions (`http.request.method`, `db.system`, etc.)
     4.  **Sampling Strategy**: Head-based / Tail-based sampling for cost management
 
-*   **OpAMP (Open Agent Management Protocol)**: Remote management protocol for OTel Collectors. Enables centralized configuration management, dynamic updates, and health monitoring for large-scale Collector fleets. Recommended as the standard for fleet management.
+-   **OpAMP (Open Agent Management Protocol)**: Remote management protocol for OTel Collectors. Enables centralized configuration management, dynamic updates, and health monitoring for large-scale Collector fleets. Recommended as the standard for fleet management.
 
-*   **OTel Collector Deployment Patterns**:
+-   **OTel Collector Deployment Patterns**:
 
     | Pattern | Configuration | Use Case |
     |:--------|:-------------|:---------|
@@ -339,19 +339,19 @@
 
 ### §12. eBPF-Based Observability
 
-*   **Law**: For kernel-level high-precision observability, use **eBPF**-based tooling. Instrumentation without application code changes.
-*   **Use Cases**:
+-   **Law**: For kernel-level high-precision observability, use **eBPF**-based tooling. Instrumentation without application code changes.
+-   **Use Cases**:
     1.  **Network Observability**: TCP retransmissions, connection latency, DNS resolution time
     2.  **Application Profiling**: Function-level CPU/memory usage (no code changes)
     3.  **Security Monitoring**: Syscall monitoring, anomalous process detection
     4.  **Performance Analysis**: I/O latency, scheduler latency
-*   **Tooling**: Grafana Beyla (auto-instrumentation), Cilium Hubble (network), bpftrace, Pixie
-*   **Note**: eBPF requires Linux kernel 5.10+. Verify availability in managed Kubernetes environments.
+-   **Tooling**: Grafana Beyla (auto-instrumentation), Cilium Hubble (network), bpftrace, Pixie
+-   **Note**: eBPF requires Linux kernel 5.10+. Verify availability in managed Kubernetes environments.
 
 ### §12-b. OTel CI/CD Observability
 
-*   **Law**: Treat CI/CD pipelines themselves as observability targets. Instrument each stage (build/test/deploy) with OTel traces.
-*   **OTel CI/CD Observability SIG (2025-2026)**:
+-   **Law**: Treat CI/CD pipelines themselves as observability targets. Instrument each stage (build/test/deploy) with OTel traces.
+-   **OTel CI/CD Observability SIG (2025-2026)**:
     1.  **Pipeline Traces**: Record all stages (build→test→deploy) as OTel spans. Ensure traceability for failure root causes
     2.  **Test Execution Metrics**: Auto-collect test execution time, flaky test rate, test coverage via OTel metrics
     3.  **Deploy Correlation**: Auto-correlate deploy events with SLI changes. Instantly detect deploy-caused SLI degradation
@@ -366,7 +366,7 @@
       OTEL_RESOURCE_ATTRIBUTES: "cicd.pipeline.name=main-build,deployment.environment=ci"
     ```
 
-*   **OTel Logs GA (2025)**: OTel Logs signal promoted to Stable (GA). Unified log collection via OTel SDK recommended. Phase out vendor-specific Log Agents.
+-   **OTel Logs GA (2025)**: OTel Logs signal promoted to Stable (GA). Unified log collection via OTel SDK recommended. Phase out vendor-specific Log Agents.
 
 ---
 
@@ -374,13 +374,13 @@
 
 ### §13. Structured Logging
 
-*   **Law**: All logs MUST be output in **JSON format (structured logging)**. Plaintext logs are prohibited.
-*   **Log Level Standard**:
-    *   `error`: Exceptions, unrecoverable states — Always enabled in production
-    *   `warn`: Deprecated usage, performance concerns — Always enabled in production
-    *   `info`: Important business events — Always enabled in production
-    *   `debug`: Development details — **Disabled** in production
-*   **Canonical Log Lines**: Output a single aggregated log line at request completion.
+-   **Law**: All logs MUST be output in **JSON format (structured logging)**. Plaintext logs are prohibited.
+-   **Log Level Standard**:
+    -   `error`: Exceptions, unrecoverable states — Always enabled in production
+    -   `warn`: Deprecated usage, performance concerns — Always enabled in production
+    -   `info`: Important business events — Always enabled in production
+    -   `debug`: Development details — **Disabled** in production
+-   **Canonical Log Lines**: Output a single aggregated log line at request completion.
 
     ```json
     {
@@ -401,8 +401,8 @@
 
 ### §14. Log Pipeline Reliability
 
-*   **Law**: Log loss means "operating blind." Guarantee the reliability of the log pipeline itself.
-*   **Requirements**:
+-   **Law**: Log loss means "operating blind." Guarantee the reliability of the log pipeline itself.
+-   **Requirements**:
     1.  **Backpressure Control**: Buffer when log generation exceeds processing speed. Sample when buffer limit is reached
     2.  **Log Loss Detection**: Detect sequence number or heartbeat gaps and trigger alerts
     3.  **Dead Letter Queue**: Route parse-error logs to DLQ instead of discarding
@@ -415,25 +415,25 @@
 
 ### §15. Tracing Foundation
 
-*   **Law**: Tag complex distributed transactions with `correlation_id` for end-to-end log traceability.
-*   **Trace Context Propagation**: Propagate `traceparent` headers compliant with W3C Trace Context across all services.
-*   **Outcome**: Maintain capability to identify "which request failed at which service at which step" within 60 seconds of failure.
+-   **Law**: Tag complex distributed transactions with `correlation_id` for end-to-end log traceability.
+-   **Trace Context Propagation**: Propagate `traceparent` headers compliant with W3C Trace Context across all services.
+-   **Outcome**: Maintain capability to identify "which request failed at which service at which step" within 60 seconds of failure.
 
 ### §16. Service Map & Dependency Visualization
 
-*   **Law**: **Auto-generate service maps** from distributed trace data to visualize inter-service dependencies, latency, and error rates in real time.
-*   **Applications**:
+-   **Law**: **Auto-generate service maps** from distributed trace data to visualize inter-service dependencies, latency, and error rates in real time.
+-   **Applications**:
     1.  **Dependency Discovery**: Identify unknown dependencies and bottlenecks
     2.  **Change Impact Analysis**: Predict affected services before deployment
     3.  **Failure Propagation Tracking**: Visualize cascade failure propagation paths
 
 ### §17. Request ID / Health Check Protocol
 
-*   **Request ID Protocol**: All API responses MUST include `x-request-id` in both response headers and error JSON bodies.
-*   **Health Check Protocol**: All applications MUST expose `/api/health` or `/healthz`.
-    *   **Liveness**: Is the process alive? (restart decision)
-    *   **Readiness**: Can it accept traffic? (routing decision)
-    *   **Startup**: Has initialization completed? (prevent premature kills)
+-   **Request ID Protocol**: All API responses MUST include `x-request-id` in both response headers and error JSON bodies.
+-   **Health Check Protocol**: All applications MUST expose `/api/health` or `/healthz`.
+    -   **Liveness**: Is the process alive? (restart decision)
+    -   **Readiness**: Can it accept traffic? (routing decision)
+    -   **Startup**: Has initialization completed? (prevent premature kills)
 
 ---
 
@@ -441,8 +441,8 @@
 
 ### §18. Continuous Profiling Principles
 
-*   **Law**: Continuous Profiling is the **5th pillar** of observability. Continuously collect profiles in production to identify performance bottlenecks at the code level.
-*   **Collection Targets**:
+-   **Law**: Continuous Profiling is the **5th pillar** of observability. Continuously collect profiles in production to identify performance bottlenecks at the code level.
+-   **Collection Targets**:
 
     | Profile Type | Purpose | Tooling |
     |:------------|:--------|:--------|
@@ -452,9 +452,9 @@
     | **Lock/Mutex** | Lock contention detection | Pyroscope |
     | **Wall Clock** | Real elapsed time bottlenecks | Pyroscope |
 
-*   **Low Overhead**: eBPF-based profilers maintain production overhead at 1-3%.
-*   **Flame Graphs**: Visualize profile data as flame graphs for intuitive hotspot identification.
-*   **Differential Analysis**: Compare pre/post-deployment profiles to auto-detect performance regressions.
+-   **Low Overhead**: eBPF-based profilers maintain production overhead at 1-3%.
+-   **Flame Graphs**: Visualize profile data as flame graphs for intuitive hotspot identification.
+-   **Differential Analysis**: Compare pre/post-deployment profiles to auto-detect performance regressions.
 
 ---
 
@@ -462,13 +462,13 @@
 
 ### §19. Frontend Monitoring
 
-*   **Law**: Deploy **Sentry** or equivalent for monitoring frontend script errors (Uncaught Exceptions) and hydration errors.
-*   **Scope**: Enabled only in production (`NODE_ENV=production`).
-*   **RUM (Real User Monitoring)**: Collect CWV (LCP/INP/CLS) from real users and compare with synthetic monitoring.
+-   **Law**: Deploy **Sentry** or equivalent for monitoring frontend script errors (Uncaught Exceptions) and hydration errors.
+-   **Scope**: Enabled only in production (`NODE_ENV=production`).
+-   **RUM (Real User Monitoring)**: Collect CWV (LCP/INP/CLS) from real users and compare with synthetic monitoring.
 
 ### §20. Web Vitals SLO
 
-*   **Law**: Define SLOs for Core Web Vitals and manage with error budgets.
+-   **Law**: Define SLOs for Core Web Vitals and manage with error budgets.
 
     | Metric | Good | Needs Improvement | Poor |
     |:-------|:-----|:-----------------|:-----|
@@ -476,7 +476,7 @@
     | **INP** | ≦ 200ms | 200-500ms | > 500ms |
     | **CLS** | ≦ 0.1 | 0.1-0.25 | > 0.25 |
 
-*   **SLO Target**: Achieve "Good" at the 75th percentile. Track monthly via CrUX data.
+-   **SLO Target**: Achieve "Good" at the 75th percentile. Track monthly via CrUX data.
 
 ---
 
@@ -484,13 +484,13 @@
 
 ### §21. PII Protection
 
-*   **Law**: Including PII (email, phone, tokens, etc.) in structured logs is **prohibited**.
-*   **Action**:
+-   **Law**: Including PII (email, phone, tokens, etc.) in structured logs is **prohibited**.
+-   **Action**:
     1.  Implement automatic masking (`***MASKED***`) at the Logger level
     2.  Include trace IDs in audit logs for bidirectional traceability
     3.  Define log retention periods with automatic deletion of expired logs
     4.  Implement RBAC for log access control
-*   **Cross-Reference**: `600_security_privacy.md` (PII Protection)
+-   **Cross-Reference**: `600_security_privacy.md` (PII Protection)
 
 ---
 
@@ -498,12 +498,12 @@
 
 ### §22. SLO-Based Alerting
 
-*   **Law**: Design alerts with **SLO-based** (error budget burn rate) alerting as primary, threshold-based as supplementary.
-*   **Principle**: Prioritize symptom-based alerting. Limit cause-based alerting to dashboard visualization.
+-   **Law**: Design alerts with **SLO-based** (error budget burn rate) alerting as primary, threshold-based as supplementary.
+-   **Principle**: Prioritize symptom-based alerting. Limit cause-based alerting to dashboard visualization.
 
 ### §23. Quantitative Alert Threshold Standards
 
-*   **The Alert Matrix**:
+-   **The Alert Matrix**:
 
     | Metric | Warning | Critical | Response Action |
     |:-------|:--------|:---------|:---------------|
@@ -518,7 +518,7 @@
 
 ### §24. Alert Fatigue Prevention
 
-*   **Countermeasures**:
+-   **Countermeasures**:
     1.  **Quiet Hours**: Suppress P2+ during nighttime (0:00-7:00). P0/P1 notify 24/7
     2.  **Alert Grouping**: Aggregate multiple alerts from the same root cause
     3.  **Flapping Detection**: Auto-suppress alerts that toggle frequently
@@ -540,8 +540,8 @@
 
 ### §26. On-Call Core Principles
 
-*   **Law**: On-call is the backbone of SRE. Build a fair system that prevents burden concentration.
-*   **Principles**:
+-   **Law**: On-call is the backbone of SRE. Build a fair system that prevents burden concentration.
+-   **Principles**:
     1.  **Rotation**: Fair rotation via PagerDuty (weekly recommended)
     2.  **Escalation**: Primary → 5-min no-response → Auto-escalate to Secondary
     3.  **Runbook Integration**: Pre-prepare runbooks for all P0/P1 alerts
@@ -551,8 +551,8 @@
 
 ### §27. On-Call Human Factors
 
-*   **Law**: On-call MUST be sustainable. Apply human factors engineering.
-*   **Design Requirements**:
+-   **Law**: On-call MUST be sustainable. Apply human factors engineering.
+-   **Design Requirements**:
     1.  **Minimize cognitive load**: Alerts must include "what's happening," "what to do," and "runbook link"
     2.  **Post-incident rest**: Guarantee minimum half-day recovery after SEV-1 response
     3.  **Page frequency tracking**: Monthly measurement of on-call "happiness" (night pages, response time)
@@ -564,15 +564,15 @@
 
 ### §28. Incident Response Flow Overview
 
-*   **Law**: Detailed protocols delegated to `503_incident_response.md`. This section defines SRE-specific perspectives.
-*   **SRE-Specific Response Obligations**:
+-   **Law**: Detailed protocols delegated to `503_incident_response.md`. This section defines SRE-specific perspectives.
+-   **SRE-Specific Response Obligations**:
     1.  **15-Minute Rule**: Begin first response within 15 minutes of critical incident detection
     2.  **Degraded Mode Decision**: Switch to limited functionality mode when MTTR target is exceeded
     3.  **Rollback Decision**: Immediate rollback per §39 rollback criteria
 
 ### §29. SRE-Specific Incident Metrics & DORA
 
-*   **Law**: Track the following metrics monthly.
+-   **Law**: Track the following metrics monthly.
 
     | Metric | Definition | Elite Target (2025) |
     |:-------|:----------|:-------------------|
@@ -583,8 +583,8 @@
     | **Deployment Frequency** | How often deployments occur | Daily or more |
     | **Incident Recurrence Rate** | Recurrence rate for same root cause | 0% |
 
-*   **DORA 7 Archetypes (2025)**: DORA transitioned from 4-tier classification (Low/Medium/High/Elite) to **7 archetypes** (8-measure based). Multi-dimensional evaluation of team throughput, stability, and performance is recommended.
-*   **DORA 7 Archetypes Detail**:
+-   **DORA 7 Archetypes (2025)**: DORA transitioned from 4-tier classification (Low/Medium/High/Elite) to **7 archetypes** (8-measure based). Multi-dimensional evaluation of team throughput, stability, and performance is recommended.
+-   **DORA 7 Archetypes Detail**:
 
     | Archetype | Characteristics | Countermeasures |
     |:----------|:---------------|:---------------|
@@ -596,7 +596,7 @@
     | **High Performers under Pressure** | High performance but burnout risk | Toil reduction, team expansion |
     | **Low Performers Scaling** | Growing but quality declining | Quality Gate introduction, gradual growth |
 
-*   **8-Measure Framework (2025)**: In addition to traditional 4 metrics, multi-dimensional evaluation including Reliability, AI Adoption Level, Team Culture Score, and Operational Load is recommended.
+-   **8-Measure Framework (2025)**: In addition to traditional 4 metrics, multi-dimensional evaluation including Reliability, AI Adoption Level, Team Culture Score, and Operational Load is recommended.
 
 ---
 
@@ -604,17 +604,17 @@
 
 ### §30. Blameless Post-mortem
 
-*   **Law**: Ask "why did the system allow this?" not "who is to blame?"
-*   **Post-mortem Obligations**:
-    *   **Scope**: All SEV-1/SEV-2 incidents
-    *   **Deadline**: Document RCA and actions within **48 hours** of resolution
-    *   **Deliverables**: Timeline, root cause, impact scope, improvement actions (with owners & deadlines)
-*   **5 Whys**: Don't stop at surface-level causes; drill down to systemic root causes.
+-   **Law**: Ask "why did the system allow this?" not "who is to blame?"
+-   **Post-mortem Obligations**:
+    -   **Scope**: All SEV-1/SEV-2 incidents
+    -   **Deadline**: Document RCA and actions within **48 hours** of resolution
+    -   **Deliverables**: Timeline, root cause, impact scope, improvement actions (with owners & deadlines)
+-   **5 Whys**: Don't stop at surface-level causes; drill down to systemic root causes.
 
 ### §31. Learning from Incidents (LFI)
 
-*   **Law**: Incidents are not "failures" but "learning opportunities." Build organizational learning processes.
-*   **LFI Framework**:
+-   **Law**: Incidents are not "failures" but "learning opportunities." Build organizational learning processes.
+-   **LFI Framework**:
     1.  **Just Culture**: Focus on system improvement, not individual punishment. Exceptions: gross negligence or malice
     2.  **Incident Story Sharing**: Monthly anonymized incident story sharing across the organization
     3.  **Pattern Analysis**: Extract common patterns from multiple incidents for systemic improvement
@@ -623,8 +623,8 @@
 
 ### §32. Decomposition-Based Triage
 
-*   **Law**: Post-large-change issues should use **incremental per-feature-group rollback** to identify minimum reproduction units, not wholesale rollback.
-*   **Server Log Sovereignty**: Use server logs as primary information source. Categorize using HTTP status and error stacks.
+-   **Law**: Post-large-change issues should use **incremental per-feature-group rollback** to identify minimum reproduction units, not wholesale rollback.
+-   **Server Log Sovereignty**: Use server logs as primary information source. Categorize using HTTP status and error stacks.
 
 ---
 
@@ -632,10 +632,10 @@
 
 ### §33. Automated Deployment Mandate
 
-*   **Law**: Production deployments MUST NEVER be performed via manual commands.
-*   **Prohibition**: "Manual deployment" is an "engineering suicide act" that invites operational mistakes.
-*   **Action**: Deployment is the automatic result of "verified code (PR)" passing through a "trusted pipeline (GitHub Actions, etc.)."
-*   **Pre-Deploy Gates**:
+-   **Law**: Production deployments MUST NEVER be performed via manual commands.
+-   **Prohibition**: "Manual deployment" is an "engineering suicide act" that invites operational mistakes.
+-   **Action**: Deployment is the automatic result of "verified code (PR)" passing through a "trusted pipeline (GitHub Actions, etc.)."
+-   **Pre-Deploy Gates**:
     1.  `tsc --noEmit` (type check) ✅
     2.  `npm run build` (build check) ✅
     3.  Automated tests passed ✅
@@ -643,11 +643,11 @@
 
 ### §34. Branch Hygiene & Preview Environment Management
 
-*   **Branch Hygiene**: "Delete after merge" is an engineer's reflex.
-*   **Preview Environment Evacuation**: If migration inconsistency occurs in a preview environment, abandon immediately and create a new one instead of wasting time on repair.
-*   **Gatekeeper**:
-    *   **Linter Zero Tolerance**: `eslint --max-warnings=0` mandatory
-    *   **Husky Guard**: Block direct pushes to `main`/`master` via `pre-push` hooks
+-   **Branch Hygiene**: "Delete after merge" is an engineer's reflex.
+-   **Preview Environment Evacuation**: If migration inconsistency occurs in a preview environment, abandon immediately and create a new one instead of wasting time on repair.
+-   **Gatekeeper**:
+    -   **Linter Zero Tolerance**: `eslint --max-warnings=0` mandatory
+    -   **Husky Guard**: Block direct pushes to `main`/`master` via `pre-push` hooks
 
 ---
 
@@ -655,7 +655,7 @@
 
 ### §35. Progressive Delivery Strategy
 
-*   **Law**: Release new features incrementally; avoid simultaneous rollout to all users.
+-   **Law**: Release new features incrementally; avoid simultaneous rollout to all users.
 
     | Strategy | Overview | Risk Mitigation | Use Case |
     |:---------|:--------|:---------------|:---------|
@@ -665,17 +665,17 @@
     | **Shadow Traffic** | Mirror production traffic to new service | Zero-risk validation | Backend overhaul |
     | **Dark Launch** | Deploy feature invisibly, collect metrics | Performance validation | Major changes |
 
-*   **SLO-Linked Rollback**: Auto-rollback if SLO violation detected during canary.
+-   **SLO-Linked Rollback**: Auto-rollback if SLO violation detected during canary.
 
 ### §36. Feature Flag Reliability
 
-*   **Law**: Feature Flags are powerful but unmanaged flags become technical debt.
-*   **Feature Flag Lifecycle**:
+-   **Law**: Feature Flags are powerful but unmanaged flags become technical debt.
+-   **Feature Flag Lifecycle**:
     1.  **Creation**: Always set TTL (expiration). Recommended: max 90 days
     2.  **Operation**: Visualize flag states and impact on dashboards
     3.  **Retirement**: Remove flags and guard conditions from code after full rollout
-*   **Stale Flag Detection**: Auto-detect flags unchanged for 90+ days and create cleanup tickets.
-*   **Flag Consistency**: Guarantee flag evaluation consistency in distributed systems (design for eventually consistent propagation delays).
+-   **Stale Flag Detection**: Auto-detect flags unchanged for 90+ days and create cleanup tickets.
+-   **Flag Consistency**: Guarantee flag evaluation consistency in distributed systems (design for eventually consistent propagation delays).
 
 ---
 
@@ -683,12 +683,12 @@
 
 ### §37. Immediate Rollback Principle
 
-*   **Law**: Rollback MUST always be executable in **a single step**.
+-   **Law**: Rollback MUST always be executable in **a single step**.
 
 ### §38. Destructive Migration Constraints
 
-*   **Law**: Deployments containing destructive migrations (`ALTER TABLE DROP COLUMN`, etc.) require **responsible person pre-approval**.
-*   **Expand & Contract Pattern**:
+-   **Law**: Deployments containing destructive migrations (`ALTER TABLE DROP COLUMN`, etc.) require **responsible person pre-approval**.
+-   **Expand & Contract Pattern**:
     1.  **Expand**: Add new columns/tables (no existing code impact)
     2.  **Migrate**: Move data to new structure
     3.  **Contract**: Remove old columns/tables (after all code migrated)
@@ -709,15 +709,15 @@
 
 ### §40. Chaos Engineering Principles
 
-*   **Law**: Premise: "Systems will fail." Intentionally inject failures to test resilience.
-*   **Hypothesis-Driven Experiment Design**:
+-   **Law**: Premise: "Systems will fail." Intentionally inject failures to test resilience.
+-   **Hypothesis-Driven Experiment Design**:
     1.  Define hypothesis → 2. Define steady state → 3. Inject failure → 4. Observe → 5. Analyze
-*   **Tooling**: ChaosMesh / Gremlin / Litmus / AWS Fault Injection Service
+-   **Tooling**: ChaosMesh / Gremlin / Litmus / AWS Fault Injection Service
 
 ### §41. GameDay Operations & DiRT
 
-*   **Law**: Systematize Google's **DiRT (Disaster Recovery Testing)**. Conduct regular organization-wide DR tests.
-*   **Maturity-Level GameDays**:
+-   **Law**: Systematize Google's **DiRT (Disaster Recovery Testing)**. Conduct regular organization-wide DR tests.
+-   **Maturity-Level GameDays**:
 
     | Level | Content | Environment | Frequency |
     |:------|:--------|:-----------|:----------|
@@ -727,7 +727,7 @@
     | **Level 4** | Unannounced production chaos test | Production | Semi-annual |
     | **Level 5** | Cross-region DiRT | Production (multi-region) | Annual |
 
-*   **DiRT Requirements**: Verify rollback procedures before execution. Pre-define blast radius and abort criteria.
+-   **DiRT Requirements**: Verify rollback procedures before execution. Pre-define blast radius and abort criteria.
 
 ---
 
@@ -735,7 +735,7 @@
 
 ### §42. Load Testing Standards
 
-*   **Law**: Identify bottlenecks through load testing before production traffic spikes.
+-   **Law**: Identify bottlenecks through load testing before production traffic spikes.
 
     | Target | Concurrency Target | Response Time Target |
     |:-------|:------------------|:-------------------:|
@@ -744,15 +744,15 @@
     | **Detail Pages** | 300 concurrent | ≦ 1.5s (p95) |
     | **AI/Realtime API** | 50 concurrent | ≦ 5.0s (p95) |
 
-*   **Bottleneck Response**: Block release if p95 exceeds **1.5x target**.
-*   **Prohibition**: Load testing in production is **prohibited**.
-*   **Tooling**: k6 / Grafana k6 Cloud / Gatling / Artillery
+-   **Bottleneck Response**: Block release if p95 exceeds **1.5x target**.
+-   **Prohibition**: Load testing in production is **prohibited**.
+-   **Tooling**: k6 / Grafana k6 Cloud / Gatling / Artillery
 
 ### §43. Failover Testing
 
-*   **Law**: Failover mechanisms cannot be guaranteed without regular testing.
-*   **Test Items**: DB read replica switchover, CDN origin failover, DNS failover, multi-region switchover
-*   **Frequency**: At least quarterly. Record results and track improvements.
+-   **Law**: Failover mechanisms cannot be guaranteed without regular testing.
+-   **Test Items**: DB read replica switchover, CDN origin failover, DNS failover, multi-region switchover
+-   **Frequency**: At least quarterly. Record results and track improvements.
 
 ---
 
@@ -772,21 +772,21 @@
 
 ### §45. Adaptive Capacity
 
-*   **Law**: Systems should have the ability to **adapt to unpredictable situations**. Design resilience that dynamically adapts beyond static thresholds.
-*   **Principles**:
+-   **Law**: Systems should have the ability to **adapt to unpredictable situations**. Design resilience that dynamically adapts beyond static thresholds.
+-   **Principles**:
     1.  **Graceful Stretch**: Under excessive load, gradually reduce quality while maintaining service
     2.  **Adaptive Throttling**: Dynamically adjust rate limits during traffic spikes
     3.  **Load Shedding**: Intentionally discard low-priority requests to protect high-priority ones during resource exhaustion
 
 ### §45-b. Adaptive Concurrency Limits
 
-*   **Law**: Instead of static concurrency limits, adopt patterns that **dynamically adjust Concurrency Limits**.
-*   **Principles**:
+-   **Law**: Instead of static concurrency limits, adopt patterns that **dynamically adjust Concurrency Limits**.
+-   **Principles**:
     1.  **Vegas Algorithm**: Inspired by TCP Vegas congestion control. Auto-reduce Concurrency Limit upon detecting latency increases
     2.  **Gradient Algorithm**: More responsive control based on the gradient (rate of increase) of latency
     3.  **Netflix Concurrency Limiter**: Reference implementation from Netflix OSS `concurrency-limits` library
-*   **Use Cases**: API Gateways, inter-service communication, DB connection pools
-*   **Benefits**: No manual tuning required. Auto-adapts to traffic pattern changes. Prevents cascade failures during overload.
+-   **Use Cases**: API Gateways, inter-service communication, DB connection pools
+-   **Benefits**: No manual tuning required. Auto-adapts to traffic pattern changes. Prevents cascade failures during overload.
 
 ---
 
@@ -801,7 +801,7 @@
 | **Tier 3: Auto-Failover** | Auto-switchover on primary failure | DB Read Replica promotion, DNS failover |
 | **Tier 4: AI-Driven Auto-Remediation** | Anomaly detection → auto-diagnosis → auto-repair | AIOps (see §88) |
 
-*   **Guardrails**: Set **safety constraints** on auto-remediation. Define hourly auto-restart limits, scaling caps, etc.
+-   **Guardrails**: Set **safety constraints** on auto-remediation. Define hourly auto-restart limits, scaling caps, etc.
 
 ---
 
@@ -809,8 +809,8 @@
 
 ### §47. Graceful Degradation
 
-*   **Law**: During outages, maintain core functionality in **limited functionality mode** instead of complete shutdown.
-*   **Feature Flag Integration**: Control each feature with Feature Flags for partial disabling **without redeployment**.
+-   **Law**: During outages, maintain core functionality in **limited functionality mode** instead of complete shutdown.
+-   **Feature Flag Integration**: Control each feature with Feature Flags for partial disabling **without redeployment**.
 
     ```typescript
     // Graceful Degradation via Feature Flags
@@ -824,8 +824,8 @@
 
 ### §48. Maintenance Mode Design
 
-*   **Law**: Manage maintenance state via DB settings (`site_settings`). Check in both Middleware and Server Actions.
-*   **Toggle Method**: No redeployment required. Instant toggle via Edge Config / DB flag / KV Store.
+-   **Law**: Manage maintenance state via DB settings (`site_settings`). Check in both Middleware and Server Actions.
+-   **Toggle Method**: No redeployment required. Instant toggle via Edge Config / DB flag / KV Store.
 
 ---
 
@@ -842,17 +842,17 @@
 | **TTFB** | ≦ 800ms | Server logs |
 | **JS Bundle Size** | ≦ 150KB (gzip) | Bundle Analyzer |
 
-*   **Measurement Cycle**: Lighthouse CI on PRs. Weekly CWV auto-measurement. Monthly CrUX report analysis.
-*   **Degradation Response**: If targets are missed for 2 consecutive weeks, create improvement tickets with highest priority.
+-   **Measurement Cycle**: Lighthouse CI on PRs. Weekly CWV auto-measurement. Monthly CrUX report analysis.
+-   **Degradation Response**: If targets are missed for 2 consecutive weeks, create improvement tickets with highest priority.
 
 ### §50. API Response Time Standards
 
-*   **Target**: API responses target **≦ 100ms**.
-*   **P99 Monitoring**: Track **P99 latency** in addition to P95. Alert on P99 > 1000ms. "Slow is the New Down."
+-   **Target**: API responses target **≦ 100ms**.
+-   **P99 Monitoring**: Track **P99 latency** in addition to P95. Alert on P99 > 1000ms. "Slow is the New Down."
 
 ### §51. Performance Budgets
 
-*   **Law**: Integrate performance budgets into CI/CD pipeline; fail builds on budget exceeded.
+-   **Law**: Integrate performance budgets into CI/CD pipeline; fail builds on budget exceeded.
 
     | Resource | Budget |
     |:---------|:-------|
@@ -875,9 +875,9 @@
 | **HOT** | 60s (1min) | Detail pages, reviews | Medium |
 | **REALTIME** | 0s | Payments, auth, inventory | Maximum |
 
-*   **Mandate**: Select a tier for every new query. Making everything REALTIME is prohibited.
-*   **Cache Invalidation Strategy**: TTL expiration + event-driven invalidation (Write-through / Write-behind).
-*   **Thundering Herd Prevention**: Implement Probabilistic Early Expiration / Request Coalescing to prevent mass requests on cache expiry.
+-   **Mandate**: Select a tier for every new query. Making everything REALTIME is prohibited.
+-   **Cache Invalidation Strategy**: TTL expiration + event-driven invalidation (Write-through / Write-behind).
+-   **Thundering Herd Prevention**: Implement Probabilistic Early Expiration / Request Coalescing to prevent mass requests on cache expiry.
 
 ---
 
@@ -885,8 +885,8 @@
 
 ### §53. Infrastructure as Code (IaC) Principles
 
-*   **Law**: Define all infrastructure as declarative code (Terraform / Pulumi / OpenTofu, etc.) under version control.
-*   **Principles**:
+-   **Law**: Define all infrastructure as declarative code (Terraform / Pulumi / OpenTofu, etc.) under version control.
+-   **Principles**:
     1.  **Declarative**: Describe the desired state
     2.  **Version Controlled**: All IaC code in Git with review/approval workflows
     3.  **Reproducible**: Reconstruct identical environments from the same code
@@ -895,8 +895,8 @@
 
 ### §54. GitOps & Declarative Infrastructure Management
 
-*   **Law**: Adopt GitOps flow with Git as "Single Source of Truth."
-*   **Principles**: Declarative → Version controlled → Auto-applied → Auto-reconciliation (Reconciliation Loop)
+-   **Law**: Adopt GitOps flow with Git as "Single Source of Truth."
+-   **Principles**: Declarative → Version controlled → Auto-applied → Auto-reconciliation (Reconciliation Loop)
 
 ---
 
@@ -912,8 +912,8 @@
 
 ### §56. Service Mesh Reliability
 
-*   **Law**: In microservice environments, use **Service Mesh** (Istio / Envoy / Linkerd) for inter-service communication reliability.
-*   **Features**:
+-   **Law**: In microservice environments, use **Service Mesh** (Istio / Envoy / Linkerd) for inter-service communication reliability.
+-   **Features**:
     1.  **mTLS**: Automatic encryption of inter-service communication
     2.  **Traffic Management**: Weighted routing, canary, mirroring
     3.  **Observability**: Auto-collection of inter-service latency and error rates
@@ -938,7 +938,7 @@
 
 ### §58. Resource Forecasting & Saturation Management
 
-*   **Law**: Resource saturation is a precursor to failure. Continuously monitor usage rates and growth rates.
+-   **Law**: Resource saturation is a precursor to failure. Continuously monitor usage rates and growth rates.
 
     | Resource | Warning | Critical | Action |
     |:---------|:-------|:---------|:-------|
@@ -948,13 +948,13 @@
     | **DB Connection Pool** | > 70% | > 90% | Pooler introduction / connection optimization |
     | **Network Bandwidth** | > 60% | > 80% | CDN utilization / bandwidth expansion |
 
-*   **Lead Time Calculation**: Calculate days until Critical threshold from current growth rate. Complete countermeasures **30 days** before projected breach.
+-   **Lead Time Calculation**: Calculate days until Critical threshold from current growth rate. Complete countermeasures **30 days** before projected breach.
 
 ### §59. Auto-Scaling Design
 
-*   **Law**: Auto-scaling MUST have **appropriate upper bounds**. Unbounded scaling invites cost explosion during DDoS.
-*   **Design Guidelines**: Scale out: CPU 70% or Memory 80%. Scale in: CPU 30% and Memory 40% (with cooldown). Explicitly define maximum instance count.
-*   **N+1 Redundancy**: Maintain capacity to handle all traffic even with one instance down.
+-   **Law**: Auto-scaling MUST have **appropriate upper bounds**. Unbounded scaling invites cost explosion during DDoS.
+-   **Design Guidelines**: Scale out: CPU 70% or Memory 80%. Scale in: CPU 30% and Memory 40% (with cooldown). Explicitly define maximum instance count.
+-   **N+1 Redundancy**: Maintain capacity to handle all traffic even with one instance down.
 
 ---
 
@@ -962,23 +962,23 @@
 
 ### §60. Toil Definition & Measurement
 
-*   **Law**: Toil is any work that is manual, repetitive, automatable, tactical, and non-scalable.
-*   **50% Rule**: Toil is capped at **50%**. When exceeded, prioritize Toil reduction tickets.
+-   **Law**: Toil is any work that is manual, repetitive, automatable, tactical, and non-scalable.
+-   **50% Rule**: Toil is capped at **50%**. When exceeded, prioritize Toil reduction tickets.
 
 ### §61. Toil Reduction Strategy
 
-*   **Automation Priority Matrix**:
+-   **Automation Priority Matrix**:
 
     | | High Frequency | Low Frequency |
     |:---|:-------------|:-------------|
     | **Low Automation Cost** | ✅ **Highest priority** | ✅ Automate early |
     | **High Automation Cost** | ⚠️ ROI evaluation | ❌ Manual acceptable |
 
-*   **Common Reduction Targets**: Manual deploy → CI/CD, Manual DB ops → Migrations, Manual cert renewal → Let's Encrypt, Manual log investigation → Dashboards
+-   **Common Reduction Targets**: Manual deploy → CI/CD, Manual DB ops → Migrations, Manual cert renewal → Let's Encrypt, Manual log investigation → Dashboards
 
 ### §62. Toil Budget
 
-*   **Law**: Each team sets a monthly Toil time cap. When exceeded, Toil reduction becomes the highest priority task.
+-   **Law**: Each team sets a monthly Toil time cap. When exceeded, Toil reduction becomes the highest priority task.
 
 ---
 
@@ -986,19 +986,19 @@
 
 ### §63. RPO/RTO Design
 
-*   **RPO**: **24 hours**. Daily backups.
-*   **RTO**: **2 hours**. Establish restore procedures for service resumption within 2 hours.
-*   **Cross-Reference**: `503_incident_response.md` §3 (BIA), §13 (DR Strategy)
+-   **RPO**: **24 hours**. Daily backups.
+-   **RTO**: **2 hours**. Establish restore procedures for service resumption within 2 hours.
+-   **Cross-Reference**: `503_incident_response.md` §3 (BIA), §13 (DR Strategy)
 
 ### §64. Backup Strategy
 
-*   **3-2-1-1 Rule**: 3 copies, 2 media types, 1 off-site, 1 immutable.
-*   **Off-Site Backup Mandate**: Regular logical backups to external storage (S3/R2, etc.) mandatory.
+-   **3-2-1-1 Rule**: 3 copies, 2 media types, 1 off-site, 1 immutable.
+-   **Off-Site Backup Mandate**: Regular logical backups to external storage (S3/R2, etc.) mandatory.
 
 ### §65. Fire Drill Protocol
 
-*   **Mandate**: Quarterly actual restore and operational verification. Untested backups "don't exist."
-*   **Verification Matrix**: Restore completion, table count match, row count integrity (±5%), RLS verification, app startup confirmation. Any failure triggers **P1 alert**.
+-   **Mandate**: Quarterly actual restore and operational verification. Untested backups "don't exist."
+-   **Verification Matrix**: Restore completion, table count match, row count integrity (±5%), RLS verification, app startup confirmation. Any failure triggers **P1 alert**.
 
 ---
 
@@ -1006,20 +1006,20 @@
 
 ### §66. Dependency Management
 
-*   **Lockfile Integrity**: `package-lock.json`/`pnpm-lock.yaml` is "sacred ground." Regenerate lockfile on CI errors.
-*   **SBOM**: Manage all dependencies in CycloneDX/SPDX format. Auto-generate at build time.
-*   **Cross-Reference**: `602_oss_compliance.md` (SBOM/SCA details)
+-   **Lockfile Integrity**: `package-lock.json`/`pnpm-lock.yaml` is "sacred ground." Regenerate lockfile on CI errors.
+-   **SBOM**: Manage all dependencies in CycloneDX/SPDX format. Auto-generate at build time.
+-   **Cross-Reference**: `602_oss_compliance.md` (SBOM/SCA details)
 
 ### §67. Vulnerability Scanning
 
-*   **Law**: Integrate into CI pipeline. Block merge on Critical/High.
-*   **Response SLA**: Critical: 24 hours, High: 1 week, Medium: Next sprint, Low: Backlog
+-   **Law**: Integrate into CI pipeline. Block merge on Critical/High.
+-   **Response SLA**: Critical: 24 hours, High: 1 week, Medium: Next sprint, Low: Backlog
 
 ### §68. Schema-Code Synchronization
 
-*   **Law**: Even Zero Defect code doesn't work if **DB schema is not applied**.
-*   **Action**: Migration Status Check, Schema Drift Detection, Deploy Pipeline integration.
-*   **Ghost Column Prevention**: Using column names in queries before migration is applied is prohibited.
+-   **Law**: Even Zero Defect code doesn't work if **DB schema is not applied**.
+-   **Action**: Migration Status Check, Schema Drift Detection, Deploy Pipeline integration.
+-   **Ghost Column Prevention**: Using column names in queries before migration is applied is prohibited.
 
 ---
 
@@ -1027,12 +1027,12 @@
 
 ### §69. Fail-Fast Configuration Mandate
 
-*   **Law**: Validate all critical environment variables at startup for existence and format. On missing: `process.exit(1)` immediately.
-*   **No Silent Fallbacks**: Silent fallbacks via default values for critical settings are prohibited.
+-   **Law**: Validate all critical environment variables at startup for existence and format. On missing: `process.exit(1)` immediately.
+-   **No Silent Fallbacks**: Silent fallbacks via default values for critical settings are prohibited.
 
 ### §70. Cache Reset Protocol
 
-*   **Law**: Before verification after core query logic/RLS policy/environment variable changes, **mandatory dev server force-kill and clean restart**.
+-   **Law**: Before verification after core query logic/RLS policy/environment variable changes, **mandatory dev server force-kill and clean restart**.
 
 ---
 
@@ -1048,13 +1048,13 @@
 
 ### §72. Zombie Resource Elimination
 
-*   **Law**: Monthly scan of all cloud environments to physically delete unused resources.
-*   **Targets**: Unused IPs, remaining preview environments, orphaned storage, stopped instances, over-retention backups
+-   **Law**: Monthly scan of all cloud environments to physically delete unused resources.
+-   **Targets**: Unused IPs, remaining preview environments, orphaned storage, stopped instances, over-retention backups
 
 ### §73. Telemetry Cost Management
 
-*   **Law**: Observability data costs grow exponentially if unmanaged. **Manage telemetry like infrastructure**.
-*   **Principles**:
+-   **Law**: Observability data costs grow exponentially if unmanaged. **Manage telemetry like infrastructure**.
+-   **Principles**:
     1.  **Telemetry Budget**: Set monthly budgets for metrics/logs/traces data volume
     2.  **Sampling Strategy**: Don't store all traces. Focus on errors and high latency with tail-based sampling
     3.  **Log Level Management**: Never enable debug logs in production. Monitor log volume anomalies
@@ -1063,10 +1063,10 @@
 
 ### §74. AI Cost Governance
 
-*   **Model Selection**: Tier 1 (high accuracy) for complex reasoning, Tier 2 (fast/low cost) for routine processing.
-*   **30% Profitability Rule**: AI cost MUST NOT exceed **30%** of plan monthly revenue.
-*   **Circuit Breaker**: Auto-shutdown AI features on API cost anomalies.
-*   **Spend Cap Phase**: Phase 1 (development) = ON, Phase 2 (growth) = OFF.
+-   **Model Selection**: Tier 1 (high accuracy) for complex reasoning, Tier 2 (fast/low cost) for routine processing.
+-   **30% Profitability Rule**: AI cost MUST NOT exceed **30%** of plan monthly revenue.
+-   **Circuit Breaker**: Auto-shutdown AI features on API cost anomalies.
+-   **Spend Cap Phase**: Phase 1 (development) = ON, Phase 2 (growth) = OFF.
 
 ---
 
@@ -1074,14 +1074,14 @@
 
 ### §75. Dashboard Required Metrics
 
-*   **Real-time**: Active users, RPS, Error rate, P95/P99 response time
-*   **Daily**: Core Web Vitals, DB connection pool peak, Cache hit rate, AI API usage
-*   **Weekly**: Unresolved error count and trends, SLO achievement rate, Vulnerability scan results
-*   **Monthly**: SLO review report, Toil ratio, Capacity plan status, Improvement action progress
+-   **Real-time**: Active users, RPS, Error rate, P95/P99 response time
+-   **Daily**: Core Web Vitals, DB connection pool peak, Cache hit rate, AI API usage
+-   **Weekly**: Unresolved error count and trends, SLO achievement rate, Vulnerability scan results
+-   **Monthly**: SLO review report, Toil ratio, Capacity plan status, Improvement action progress
 
 ### §76. SRE Reporting Obligations
 
-*   **Law**: Create monthly SLO review reports including: SLO achievement per service, error budget remaining, incident summary, Toil ratio, capacity risks.
+-   **Law**: Create monthly SLO review reports including: SLO achievement per service, error budget remaining, incident summary, Toil ratio, capacity risks.
 
 ---
 
@@ -1089,13 +1089,13 @@
 
 ### §77. Code-Not-Policy Mandate
 
-*   **Law**: Human "promises" are inevitably broken. Rule effectiveness is guaranteed only by **codified physical constraints**.
-*   **Action**: Implement automated CI checks, Git Hooks, startup-time validation.
+-   **Law**: Human "promises" are inevitably broken. Rule effectiveness is guaranteed only by **codified physical constraints**.
+-   **Action**: Implement automated CI checks, Git Hooks, startup-time validation.
 
 ### §78. SRE as Code
 
-*   **Law**: Codify and version-control SRE operational practices wherever possible.
-*   **Scope**:
+-   **Law**: Codify and version-control SRE operational practices wherever possible.
+-   **Scope**:
 
     | Domain | Codification Method | Tooling |
     |:-------|:-------------------|:--------|
@@ -1108,7 +1108,7 @@
 
 ### §79. Audit Trail Obligations
 
-*   **Law**: Mandate audit log instrumentation for destructive operations. Record before/after states, trace ID linkage, human-readable labels.
+-   **Law**: Mandate audit log instrumentation for destructive operations. Record before/after states, trace ID linkage, human-readable labels.
 
 ---
 
@@ -1116,8 +1116,8 @@
 
 ### §80. Production Readiness Review (PRR)
 
-*   **Law**: Conduct **PRR (Production Readiness Review)** before launching new services or major changes to production.
-*   **PRR Checklist**:
+-   **Law**: Conduct **PRR (Production Readiness Review)** before launching new services or major changes to production.
+-   **PRR Checklist**:
 
     | Category | Check Item |
     |:---------|:----------|
@@ -1134,7 +1134,7 @@
 
 ### §81. Reliability Review (Design Review)
 
-*   **Law**: Conduct Reliability Review with SRE participation at the design phase, verifying:
+-   **Law**: Conduct Reliability Review with SRE participation at the design phase, verifying:
     1.  Identification and elimination of Single Points of Failure (SPOF)
     2.  Failure Mode and Effects Analysis (FMEA)
     3.  Dependency reliability evaluation
@@ -1146,14 +1146,14 @@
 
 ### §82. Internal Developer Platform (IDP) Foundation
 
-*   **Law**: Build IDPs to maximize developer productivity by abstracting infrastructure complexity.
-*   **IDP Principles**: Self-Service, Golden Path, Guardrails, Product Mindset.
-*   **Platform as Product**: Treat the IDP as an internal product, continuously improving based on developer feedback. Measure NPS/CSAT, track adoption rates and satisfaction. "An unused platform is a failed platform."
+-   **Law**: Build IDPs to maximize developer productivity by abstracting infrastructure complexity.
+-   **IDP Principles**: Self-Service, Golden Path, Guardrails, Product Mindset.
+-   **Platform as Product**: Treat the IDP as an internal product, continuously improving based on developer feedback. Measure NPS/CSAT, track adoption rates and satisfaction. "An unused platform is a failed platform."
 
 ### §83. Golden Path & Service Templates
 
-*   **Law**: Use organization-approved **service templates** for new service launch.
-*   **Template Elements**: CI/CD config, health checks, structured logging, metrics instrumentation, SLO definitions, Dockerfile/IaC
+-   **Law**: Use organization-approved **service templates** for new service launch.
+-   **Template Elements**: CI/CD config, health checks, structured logging, metrics instrumentation, SLO definitions, Dockerfile/IaC
 
 ### §84. Developer Experience (DevEx) Metrics
 
@@ -1166,13 +1166,13 @@
 
 ### §85. Service Scorecard
 
-*   **Law**: Visualize reliability state of each service via **Service Scorecard**.
-*   **Scoring Items**: SLO achievement, On-Call load, Test coverage, Documentation freshness, Security scan results, Dependency currency
+-   **Law**: Visualize reliability state of each service via **Service Scorecard**.
+-   **Scoring Items**: SLO achievement, On-Call load, Test coverage, Documentation freshness, Security scan results, Dependency currency
 
 ### §85-b. Platform SLO
 
-*   **Law**: Define SLOs for the IDP itself to quantitatively manage platform reliability.
-*   **Platform SLI/SLO**:
+-   **Law**: Define SLOs for the IDP itself to quantitatively manage platform reliability.
+-   **Platform SLI/SLO**:
 
     | SLI | SLO | Meaning |
     |:---|:----|:--------|
@@ -1183,8 +1183,8 @@
 
 ### §85-c. Backstage Plugin Reliability
 
-*   **Law**: In Backstage-based IDPs, the Plugin ecosystem's reliability determines overall reliability.
-*   **Principles**:
+-   **Law**: In Backstage-based IDPs, the Plugin ecosystem's reliability determines overall reliability.
+-   **Principles**:
     1.  **Plugin SLO**: Define individual SLOs when introducing third-party Plugins
     2.  **Plugin Health Check**: Monitor each Plugin's API response and data freshness
     3.  **Fallback UI**: Display Degraded UI on Plugin failure (avoid full portal outage)
@@ -1196,29 +1196,29 @@
 
 ### §86. AI Anomaly Detection & Predictive Analysis
 
-*   **Law**: Leverage AI/ML to detect anomaly patterns that threshold-based monitoring cannot catch.
-*   **Applications**: Anomaly detection, Predictive analysis (capacity exhaustion forecasting), Log analysis (pattern extraction), Intelligent alerting
+-   **Law**: Leverage AI/ML to detect anomaly patterns that threshold-based monitoring cannot catch.
+-   **Applications**: Anomaly detection, Predictive analysis (capacity exhaustion forecasting), Log analysis (pattern extraction), Intelligent alerting
 
 ### §87. AI Trust Paradox & Human-AI Collaboration
 
-*   **Law**: AI amplifies SRE capabilities, but beware the **AI Trust Paradox** (increased Toil from verifying AI-generated configs/code).
-*   **Principles**:
+-   **Law**: AI amplifies SRE capabilities, but beware the **AI Trust Paradox** (increased Toil from verifying AI-generated configs/code).
+-   **Principles**:
     1.  **Human review of AI proposals**: AI-only auto-remediation execution limited to error budget remaining > 50%
     2.  **AI Verification Toil**: Measure AI output verification work as Toil. Prioritize building automated verification infrastructure
     3.  **Human-in-the-Loop**: Critical decisions (rollback, scaling, data deletion) require human approval
     4.  **AI SRE Agent Monitoring**: Log AI agent actions and detect unintended drift
 
-*   **AI Copilot for Incident Response**: AI assists incident response in real-time. Automatically searches past Post-mortems and similar incidents to suggest recommended remediation steps. Leverages MCP/A2A protocols for inter-agent collaboration, automating the flow from log analysis → root cause estimation → remediation proposal.
-    *   **Constraint**: AI Copilot proposals must always be verified by humans. Evaluate Copilot response quality monthly (accuracy rate, false positive rate).
+-   **AI Copilot for Incident Response**: AI assists incident response in real-time. Automatically searches past Post-mortems and similar incidents to suggest recommended remediation steps. Leverages MCP/A2A protocols for inter-agent collaboration, automating the flow from log analysis → root cause estimation → remediation proposal.
+    -   **Constraint**: AI Copilot proposals must always be verified by humans. Evaluate Copilot response quality monthly (accuracy rate, false positive rate).
 
 ### §87-b. MCP/A2A/ACP Integration Protocol
 
-*   **Law**: AIOps SRE agents communicate via standardized protocols: **MCP (Model Context Protocol)** / **A2A (Agent-to-Agent)** / **ACP (Agent Communication Protocol)**.
-*   **Architecture**:
+-   **Law**: AIOps SRE agents communicate via standardized protocols: **MCP (Model Context Protocol)** / **A2A (Agent-to-Agent)** / **ACP (Agent Communication Protocol)**.
+-   **Architecture**:
     1.  **MCP**: Unified protocol for AI agents to interact with tools (Grafana, PagerDuty, Terraform, etc.). Tool specs described in JSON Schema; agents dynamically discover and execute tools
     2.  **A2A**: Coordination between multiple AI agents. Chain execution: monitoring agent → analysis agent → remediation agent
     3.  **ACP**: Protocol for agent capability declaration and task delegation
-*   **SRE Operations Use Cases**:
+-   **SRE Operations Use Cases**:
     1.  **Incident Response**: Autonomous chain: monitoring agent → log analysis agent → runbook execution agent
     2.  **Capacity Planning**: Metrics collection agent → prediction agent → scaling execution agent
     3.  **Guardrails**: All inter-agent communication logged to audit trail. Blast radius limits applied at agent level
@@ -1239,17 +1239,17 @@
 
 ### §89. Multi-Region Design Principles
 
-*   **Law**: Mission-critical services MUST be designed to withstand single-region failure.
-*   **Principles**: Active-Passive / Active-Active selection, Cross-region replication, DNS failover, IaC reconstruction (within 15 minutes).
+-   **Law**: Mission-critical services MUST be designed to withstand single-region failure.
+-   **Principles**: Active-Passive / Active-Active selection, Cross-region replication, DNS failover, IaC reconstruction (within 15 minutes).
 
 ### §90. Vendor Lock-in Avoidance
 
-*   **Law**: **70%+** infrastructure dependency on a single vendor's proprietary features is "structural risk."
-*   **Action**: Abstraction layers, OTel + S3-compatible storage, Exit Strategy documentation.
+-   **Law**: **70%+** infrastructure dependency on a single vendor's proprietary features is "structural risk."
+-   **Action**: Abstraction layers, OTel + S3-compatible storage, Exit Strategy documentation.
 
 ### §91. Domain Management
 
-*   **Domain Auto-Renewal**: Domain expiry is a "hard-to-recover incident." Enable auto-renewal, keep Whois info current, DNS Sovereignty.
+-   **Domain Auto-Renewal**: Domain expiry is a "hard-to-recover incident." Enable auto-renewal, keep Whois info current, DNS Sovereignty.
 
 ---
 
@@ -1266,7 +1266,7 @@
 
 ### §93. On-Call Culture & Burnout Prevention
 
-*   Fair rotation, post-incident rest, page count limits, psychological safety, On-Call compensation.
+-   Fair rotation, post-incident rest, page count limits, psychological safety, On-Call compensation.
 
 ### §94. SRE Skill Matrix
 
@@ -1279,8 +1279,8 @@
 
 ### §95. SRE Education Program
 
-*   **Recommended Resources**: Google SRE Books (3 volumes), DORA State of DevOps Report, On-Call training (mentored shadowing)
-*   **New Member Onboarding**: Monitoring dashboard access, On-Call tool setup, Runbook orientation, Post-mortem case study review, 2-week On-Call shadowing, GameDay participation
+-   **Recommended Resources**: Google SRE Books (3 volumes), DORA State of DevOps Report, On-Call training (mentored shadowing)
+-   **New Member Onboarding**: Monitoring dashboard access, On-Call tool setup, Runbook orientation, Post-mortem case study review, 2-week On-Call shadowing, GameDay participation
 
 ---
 
@@ -1357,13 +1357,13 @@
 
 ### §101. DRE Core Principles
 
-*   **Law**: Databases are the foundation of reliability. Ensure data layer reliability based on Database Reliability Engineering (DRE) principles.
-*   **O'Reilly Principles**: "Hope is not a backup strategy." "Every DB metric is an SLI."
+-   **Law**: Databases are the foundation of reliability. Ensure data layer reliability based on Database Reliability Engineering (DRE) principles.
+-   **O'Reilly Principles**: "Hope is not a backup strategy." "Every DB metric is an SLI."
 
 ### §102. Connection Pool Management
 
-*   **Law**: Manage connections between applications and databases through **connection poolers** (PgBouncer / Supavisor, etc.). Direct connections are prohibited.
-*   **Design Guidelines**:
+-   **Law**: Manage connections between applications and databases through **connection poolers** (PgBouncer / Supavisor, etc.). Direct connections are prohibited.
+-   **Design Guidelines**:
     1.  **Pool Size**: `max_connections = (cores * 2) + disks` (PostgreSQL recommended formula)
     2.  **Mode**: Transaction mode recommended (when not using prepared statements)
     3.  **Monitoring**: Instrument active connections, wait queue length, connection acquisition latency as metrics
@@ -1371,8 +1371,8 @@
 
 ### §103. Migration Safety
 
-*   **Law**: Schema changes MUST follow the **Expand & Contract** pattern.
-*   **Safe Migration Procedures**:
+-   **Law**: Schema changes MUST follow the **Expand & Contract** pattern.
+-   **Safe Migration Procedures**:
     1.  **Lock Avoidance**: Set timeouts on `ALTER TABLE` (`SET lock_timeout = '5s'`)
     2.  **Index Creation**: Use `CREATE INDEX CONCURRENTLY`
     3.  **Large Table Changes**: Use default values for column additions (PostgreSQL 11+ avoids table rewrites)
@@ -1380,10 +1380,10 @@
 
 ### §104. Query Performance & Slow Query SLO
 
-*   **Law**: Slow queries directly harm user experience. Manage as SLO.
-*   **Slow Query SLI**: `Queries completing < 100ms / Total queries`
-*   **Slow Query SLO**: 99% of queries complete within 100ms
-*   **Countermeasures**:
+-   **Law**: Slow queries directly harm user experience. Manage as SLO.
+-   **Slow Query SLI**: `Queries completing < 100ms / Total queries`
+-   **Slow Query SLO**: 99% of queries complete within 100ms
+-   **Countermeasures**:
     1.  Enable `pg_stat_statements` with periodic review
     2.  `EXPLAIN ANALYZE` for query plan analysis
     3.  Auto-detection and suggestion of missing indexes
@@ -1391,9 +1391,9 @@
 
 ### §105. Replication & Autovacuum
 
-*   **Replication Lag SLO**: Maintain primary→replica delay within 1 second
-*   **Monitoring**: Real-time monitoring via `pg_stat_replication`. Alert on lag increase
-*   **Autovacuum Monitoring**: Track dead tuple ratio, autovacuum execution frequency and duration
+-   **Replication Lag SLO**: Maintain primary→replica delay within 1 second
+-   **Monitoring**: Real-time monitoring via `pg_stat_replication`. Alert on lag increase
+-   **Autovacuum Monitoring**: Track dead tuple ratio, autovacuum execution frequency and duration
 
 ---
 
@@ -1401,8 +1401,8 @@
 
 ### §106. API SLO Design
 
-*   **Law**: Define SLI/SLOs for API reliability at the endpoint level.
-*   **Per-Endpoint SLOs**:
+-   **Law**: Define SLI/SLOs for API reliability at the endpoint level.
+-   **Per-Endpoint SLOs**:
 
     | Endpoint Type | Availability SLO | Latency SLO (P95) | Latency SLO (P99) |
     |:-------------|:----------------|:------------------|:------------------|
@@ -1414,14 +1414,14 @@
 
 ### §107. Contract Testing
 
-*   **Law**: Guarantee API Consumer-Provider contracts through automated tests.
-*   **Implementation**: Introduce Pact / CDC (Consumer-Driven Contracts) and run automatically in CI.
-*   **Cross-Reference**: `700_qa_testing.md` (Testing Strategy)
+-   **Law**: Guarantee API Consumer-Provider contracts through automated tests.
+-   **Implementation**: Introduce Pact / CDC (Consumer-Driven Contracts) and run automatically in CI.
+-   **Cross-Reference**: `700_qa_testing.md` (Testing Strategy)
 
 ### §108. API Backward Compatibility & Deprecation Policy
 
-*   **Law**: Breaking changes to public APIs are **prohibited**. If unavoidable, follow this process:
-*   **Deprecation Lifecycle**:
+-   **Law**: Breaking changes to public APIs are **prohibited**. If unavoidable, follow this process:
+-   **Deprecation Lifecycle**:
     1.  **Announcement**: Announce deprecation at least 6 months in advance (`Sunset` header in API responses)
     2.  **Migration Support**: Provide migration guides to new API
     3.  **Usage Tracking**: Track remaining consumers of deprecated APIs
@@ -1429,16 +1429,16 @@
 
 ### §109. Adaptive Rate Limiting (SRE)
 
-*   **Law**: Rate limits should be **adaptive** based on system state, not fixed values.
-*   **Adaptive Rate Limiting**:
+-   **Law**: Rate limits should be **adaptive** based on system state, not fixed values.
+-   **Adaptive Rate Limiting**:
     1.  **Normal**: Standard rate limits (e.g., 100 req/min/user)
     2.  **High Load**: Dynamically tighten limits based on error budget burn rate
     3.  **Attack Detected**: Block individual IPs on anomalous pattern detection
 
 ### §110. API Gateway Reliability
 
-*   **Law**: API Gateway is the entry point for all API traffic. Redundant configuration is mandatory to prevent it from becoming a single point of failure.
-*   **Requirements**: Health checks, Circuit Breaker, Request/Response Transformation, Authentication/Authorization, Rate Limiting, Caching
+-   **Law**: API Gateway is the entry point for all API traffic. Redundant configuration is mandatory to prevent it from becoming a single point of failure.
+-   **Requirements**: Health checks, Circuit Breaker, Request/Response Transformation, Authentication/Authorization, Rate Limiting, Caching
 
 ---
 
@@ -1446,8 +1446,8 @@
 
 ### §111. DNS Reliability
 
-*   **Law**: DNS is the foundation of all service access. DNS failure = total service failure.
-*   **Requirements**:
+-   **Law**: DNS is the foundation of all service access. DNS failure = total service failure.
+-   **Requirements**:
     1.  **Redundancy**: Minimum 2 independent DNS providers (Dual-Provider DNS)
     2.  **DNSSEC**: Cryptographically guarantee DNS response authenticity
     3.  **DNS Failover**: Health-check-based automatic failover
@@ -1456,8 +1456,8 @@
 
 ### §112. TLS Certificate Management
 
-*   **Law**: TLS certificate expiry directly causes service outages. **Automated renewal is mandatory.**
-*   **Requirements**:
+-   **Law**: TLS certificate expiry directly causes service outages. **Automated renewal is mandatory.**
+-   **Requirements**:
     1.  **Auto-Issue & Renewal**: Leverage Let's Encrypt / ACM, etc.
     2.  **Expiry Monitoring**: Warning at 30 days, Critical at 7 days
     3.  **Certificate Transparency Logs**: Monitor CT Logs to detect unauthorized certificate issuance
@@ -1465,16 +1465,16 @@
 
 ### §113. CDN Reliability & Multi-CDN
 
-*   **Law**: Prepare a secondary CDN provider. Design automatic switchover on primary CDN failure.
-*   **Requirements**:
+-   **Law**: Prepare a secondary CDN provider. Design automatic switchover on primary CDN failure.
+-   **Requirements**:
     1.  **Origin Shield**: Mid-tier cache aggregating traffic to origin servers
     2.  **Cache Hit Rate SLO**: ≧ 90% target
     3.  **Purge Strategy**: Immediate purge on content updates with warm-up procedures
 
 ### §114. Network Observability
 
-*   **Law**: Network layer issues are often "invisible." Build network-specific observability.
-*   **Requirements**: Flow Logs analysis, TCP retransmission rate, connection timeout rate, DNS resolution time, network latency percentile distribution
+-   **Law**: Network layer issues are often "invisible." Build network-specific observability.
+-   **Requirements**: Flow Logs analysis, TCP retransmission rate, connection timeout rate, DNS resolution time, network latency percentile distribution
 
 ---
 
@@ -1482,7 +1482,7 @@
 
 ### §115. Model Inference SLO
 
-*   **Law**: Manage AI/ML model inference quality and speed via SLOs.
+-   **Law**: Manage AI/ML model inference quality and speed via SLOs.
 
     | SLI | SLO | Measurement |
     |:----|:----|:-----------|
@@ -1493,8 +1493,8 @@
 
 ### §116. GPU/TPU Capacity Planning
 
-*   **Law**: GPUs/TPUs are high-cost with supply constraints. Execute capacity planning carefully.
-*   **Requirements**:
+-   **Law**: GPUs/TPUs are high-cost with supply constraints. Execute capacity planning carefully.
+-   **Requirements**:
     1.  **GPU Utilization Tracking**: DCGM Exporter / NVIDIA SMI + Prometheus
     2.  **Right-Sizing**: Optimal GPU selection for inference workloads
     3.  **Spot Instance Utilization**: Use spot/preemptible GPUs for non-critical inference
@@ -1502,13 +1502,13 @@
 
 ### §117. Feature Store Reliability
 
-*   **Law**: Feature Store provides input data for model inference. Reliability degradation directly degrades model quality.
-*   **Requirements**: Feature freshness SLO (≦ 5min), Feature drift detection, Online/Offline store consistency, Access latency tracking
+-   **Law**: Feature Store provides input data for model inference. Reliability degradation directly degrades model quality.
+-   **Requirements**: Feature freshness SLO (≦ 5min), Feature drift detection, Online/Offline store consistency, Access latency tracking
 
 ### §118. LLM-Specific SRE
 
-*   **Law**: LLMs (Large Language Models) present SRE challenges distinct from traditional ML models.
-*   **Unique Challenges**:
+-   **Law**: LLMs (Large Language Models) present SRE challenges distinct from traditional ML models.
+-   **Unique Challenges**:
     1.  **Hallucination SLI**: Measure the ratio of factually incorrect outputs
     2.  **Prompt Version Management**: Manage prompt changes in Git; validate effects via A/B testing
     3.  **Token Budget Management**: Set and monitor per-request token consumption limits
@@ -1518,8 +1518,8 @@
 
 ### §119. AI Pipeline Reliability
 
-*   **Law**: Guarantee reliability across the entire pipeline: data ingestion → preprocessing → training → evaluation → deployment.
-*   **Requirements**:
+-   **Law**: Guarantee reliability across the entire pipeline: data ingestion → preprocessing → training → evaluation → deployment.
+-   **Requirements**:
     1.  **Data Drift Detection**: Monitor distribution differences between training and production data
     2.  **Model Degradation Detection**: Detect temporal degradation of inference accuracy
     3.  **Retraining Trigger**: Automatic pipeline trigger on accuracy drop or data drift detection
@@ -1531,8 +1531,8 @@
 
 ### §120. Release Candidate Management
 
-*   **Law**: Production releases MUST go through a **Release Candidate (RC)**. Direct release without RC certification is prohibited.
-*   **RC Process**:
+-   **Law**: Production releases MUST go through a **Release Candidate (RC)**. Direct release without RC certification is prohibited.
+-   **RC Process**:
     1.  **RC Cut**: Cut RC branch from main branch
     2.  **RC Validation**: Full test and load test in staging environment
     3.  **RC Approval**: Release approver decides based on test results
@@ -1540,8 +1540,8 @@
 
 ### §121. Cherry-Pick Protocol
 
-*   **Law**: Emergency fixes after RC are handled via **Cherry-Pick**. Prevents mixing of non-RC changes.
-*   **Requirements**:
+-   **Law**: Emergency fixes after RC are handled via **Cherry-Pick**. Prevents mixing of non-RC changes.
+-   **Requirements**:
     1.  State Cherry-Pick reason in PR
     2.  CI test pass on target branch
     3.  Review by 2+ reviewers
@@ -1549,13 +1549,13 @@
 
 ### §122. Release Train Model
 
-*   **Law**: Regular release cycles (Release Train) improve deployment predictability.
-*   **Model**: Weekly Train (Mon-Thu: feature addition, Fri: freeze, following Mon: release)
+-   **Law**: Regular release cycles (Release Train) improve deployment predictability.
+-   **Model**: Weekly Train (Mon-Thu: feature addition, Fri: freeze, following Mon: release)
 
 ### §123. Rollout Percentage Management
 
-*   **Law**: Large-scale change rollouts are staged incrementally, linked with SLI monitoring.
-*   **Stages**: 1% → 5% → 25% → 50% → 100%. Minimum 30-minute stability verification at each stage. Rollback to previous stage on SLI degradation.
+-   **Law**: Large-scale change rollouts are staged incrementally, linked with SLI monitoring.
+-   **Stages**: 1% → 5% → 25% → 50% → 100%. Minimum 30-minute stability verification at each stage. Rollback to previous stage on SLI degradation.
 
 ---
 
@@ -1563,16 +1563,16 @@
 
 ### §124. Carbon-Aware Computing
 
-*   **Law**: Compute resource usage carries environmental costs. SRE must incorporate sustainability into reliability design.
-*   **Principles**:
+-   **Law**: Compute resource usage carries environmental costs. SRE must incorporate sustainability into reliability design.
+-   **Principles**:
     1.  **Low-Carbon Region Selection**: Schedule batch and non-real-time workloads in regions with high renewable energy ratios
     2.  **Time-Shifting**: Move non-urgent tasks to time periods with low grid carbon intensity
     3.  **Carbon-Aware SDK**: Leverage the Green Software Foundation's Carbon Aware SDK
 
 ### §125. Green Metrics Dashboard
 
-*   **Law**: Visualize and track energy efficiency and carbon footprint.
-*   **Metrics**:
+-   **Law**: Visualize and track energy efficiency and carbon footprint.
+-   **Metrics**:
 
     | Metric | Definition | Target |
     |:-------|:----------|:-------|
@@ -1583,8 +1583,8 @@
 
 ### §126. Idle Resource Optimization
 
-*   **Law**: Idle resources are "environmental debt."
-*   **Action**:
+-   **Law**: Idle resources are "environmental debt."
+-   **Action**:
     1.  Auto-shutdown dev/staging environments during nights and weekends
     2.  Serverless First: Serverless-ify workloads that don't require always-on
     3.  Right-Sizing: Periodic review of over-provisioned instances
@@ -1595,8 +1595,8 @@
 
 ### §127. Downtime Cost Calculation Model
 
-*   **Law**: Justifying reliability investment requires quantifying the monetary impact of downtime.
-*   **Cost Elements**:
+-   **Law**: Justifying reliability investment requires quantifying the monetary impact of downtime.
+-   **Cost Elements**:
 
     | Element | Calculation Method |
     |:--------|:-----------------|
@@ -1608,23 +1608,23 @@
 
 ### §128. Reliability Opportunity Cost
 
-*   **Law**: Excessive reliability investment is also a cost. Compare the cost of raising SLO from 99.99% to 99.999% against the business value of that difference.
-*   **Principle**: "The cost of adding one Nine increases exponentially." Optimize SLO targets based on business requirements.
+-   **Law**: Excessive reliability investment is also a cost. Compare the cost of raising SLO from 99.99% to 99.999% against the business value of that difference.
+-   **Principle**: "The cost of adding one Nine increases exponentially." Optimize SLO targets based on business requirements.
 
 ### §129. Error Budget Economics
 
-*   **Law**: Convert the business impact of 1% error budget consumption into monetary value, and use it for Feature Release vs. reliability improvement decision-making.
-*   **Calculation**: `Value of 1% error budget = Monthly revenue × Estimated churn rate from SLO threshold breach`
+-   **Law**: Convert the business impact of 1% error budget consumption into monetary value, and use it for Feature Release vs. reliability improvement decision-making.
+-   **Calculation**: `Value of 1% error budget = Monthly revenue × Estimated churn rate from SLO threshold breach`
 
 ### §130. SRE Investment ROI
 
-*   **Law**: Measure and report SRE team investment ROI quarterly.
-*   **ROI Metrics**: Time savings from Toil reduction, Loss avoidance from MTTR reduction, Efficiency gains from automation, Reliability improvement from incident reduction
+-   **Law**: Measure and report SRE team investment ROI quarterly.
+-   **ROI Metrics**: Time savings from Toil reduction, Loss avoidance from MTTR reduction, Efficiency gains from automation, Reliability improvement from incident reduction
 
 ### §131. Reliability Debt Management
 
-*   **Law**: Reliability Debt is a form of technical debt. Track unresolved Post-mortem actions, stale runbooks, services without SLOs, etc. as "debt."
-*   **Debt Score**: Assign risk scores to each debt item and prioritize repayment.
+-   **Law**: Reliability Debt is a form of technical debt. Track unresolved Post-mortem actions, stale runbooks, services without SLOs, etc. as "debt."
+-   **Debt Score**: Assign risk scores to each debt item and prioritize repayment.
 
 ---
 
@@ -1632,7 +1632,7 @@
 
 ### §132. DORA / NIS2 / CRA Compliance
 
-*   **Law**: Map SRE practices to compliance requirements for EU financial sector (DORA), critical infrastructure operators (NIS2), and digital product manufacturers (CRA).
+-   **Law**: Map SRE practices to compliance requirements for EU financial sector (DORA), critical infrastructure operators (NIS2), and digital product manufacturers (CRA).
 
     | Regulation | SRE-Related Requirements | Corresponding SRE Practice |
     |:-----------|:----------------------|:-------------------------|
@@ -1650,19 +1650,19 @@
 
 ### §133. Evidence Package Auto-Generation
 
-*   **Law**: **Auto-generate** audit evidence to minimize audit preparation effort.
-*   **Auto-Collection Targets**: SLO achievement reports, Incident reports, Change history (Git log), Access logs, Vulnerability scan results, Backup verification records
+-   **Law**: **Auto-generate** audit evidence to minimize audit preparation effort.
+-   **Auto-Collection Targets**: SLO achievement reports, Incident reports, Change history (Git log), Access logs, Vulnerability scan results, Backup verification records
 
 ### §134. Compliance-as-Code
 
-*   **Law**: Define compliance requirements as code and auto-verify in CI pipelines.
-*   **Tooling**: OPA (Open Policy Agent) / Checkov / tfsec / Trivy
-*   **Example**: "All S3 buckets must have encryption enabled" → OPA policy verification → CI failure blocks merge
+-   **Law**: Define compliance requirements as code and auto-verify in CI pipelines.
+-   **Tooling**: OPA (Open Policy Agent) / Checkov / tfsec / Trivy
+-   **Example**: "All S3 buckets must have encryption enabled" → OPA policy verification → CI failure blocks merge
 
 ### §135. Audit Readiness Dashboard
 
-*   **Law**: Visualize regulatory compliance status in real-time.
-*   **Metrics**: Compliance fulfillment rate, Outstanding items count, Evidence auto-collection rate, Days until next audit
+-   **Law**: Visualize regulatory compliance status in real-time.
+-   **Metrics**: Compliance fulfillment rate, Outstanding items count, Evidence auto-collection rate, Days until next audit
 
 ---
 
@@ -1670,8 +1670,8 @@
 
 ### §136. Runbook Design Principles
 
-*   **Law**: Runbooks must target quality where "the least experienced on-call engineer can resolve the problem at 2 AM."
-*   **Components**:
+-   **Law**: Runbooks must target quality where "the least experienced on-call engineer can resolve the problem at 2 AM."
+-   **Components**:
     1.  **Trigger**: Which alert/condition triggers this Runbook
     2.  **Symptoms**: What is observed
     3.  **Diagnostic Steps**: Decision Tree format (If → Then → Else)
@@ -1681,23 +1681,23 @@
 
 ### §137. Runbook Automation Engine
 
-*   **Law**: Automate high-frequency Runbooks via an Automation Engine.
-*   **Progressive Automation**:
+-   **Law**: Automate high-frequency Runbooks via an Automation Engine.
+-   **Progressive Automation**:
     1.  **Manual Runbook**: Runbook as procedural document
     2.  **Semi-Automated**: Runbook with copy-paste executable scripts
     3.  **Automated with Approval**: One-button execution (human approval required)
     4.  **Fully Automated**: Auto-execution on alert trigger
-*   **Tooling**: Rundeck / PagerDuty Automation Actions / StackStorm
+-   **Tooling**: Rundeck / PagerDuty Automation Actions / StackStorm
 
 ### §138. Self-Service Remediation
 
-*   **Law**: Provide self-service capabilities for developers to remediate without SRE involvement.
-*   **Examples**: Cache flush, Pod restart, Feature Flag disable, Log level change
+-   **Law**: Provide self-service capabilities for developers to remediate without SRE involvement.
+-   **Examples**: Cache flush, Pod restart, Feature Flag disable, Log level change
 
 ### §139. ChatOps Integration
 
-*   **Law**: Enable Runbook execution directly from Slack/Teams or equivalent chat platforms.
-*   **Requirements**: Auto-recording of command execution logs, execution permission checks, result sharing to channels
+-   **Law**: Enable Runbook execution directly from Slack/Teams or equivalent chat platforms.
+-   **Requirements**: Auto-recording of command execution logs, execution permission checks, result sharing to channels
 
 ---
 
@@ -1705,49 +1705,49 @@
 
 ### §140. WebAssembly (Wasm) Runtime Reliability
 
-*   **Law**: As Wasm emerges as a server-side runtime, prepare for Wasm-specific reliability challenges.
-*   **Challenges**: Memory safety verification, Sandbox escape risk, Cold start characteristics (faster than Docker), Observability instrumentation (OTel Wasm SDK)
-*   **WASI 0.3.0 (Feb 2026 expected)**: WebAssembly System Interface 0.3.0 supports async/event-driven deployments. Adoption as container alternative accelerating.
-    *   **Edge devices**, **Serverless environments**, **CDN Workers** are promising adoption targets
-    *   Wasm binary size (few MB) and startup speed (milliseconds) are optimal for edge computing
+-   **Law**: As Wasm emerges as a server-side runtime, prepare for Wasm-specific reliability challenges.
+-   **Challenges**: Memory safety verification, Sandbox escape risk, Cold start characteristics (faster than Docker), Observability instrumentation (OTel Wasm SDK)
+-   **WASI 0.3.0 (Feb 2026 expected)**: WebAssembly System Interface 0.3.0 supports async/event-driven deployments. Adoption as container alternative accelerating.
+    -   **Edge devices**, **Serverless environments**, **CDN Workers** are promising adoption targets
+    -   Wasm binary size (few MB) and startup speed (milliseconds) are optimal for edge computing
 
 ### §140-b. Ambient Mesh (Sidecar-less Service Mesh)
 
-*   **Law**: Istio Ambient Mesh (ztunnel-based) stabilizes Sidecar-less Service Mesh. Significantly reduces resource consumption and operational complexity.
-*   **Benefits**:
+-   **Law**: Istio Ambient Mesh (ztunnel-based) stabilizes Sidecar-less Service Mesh. Significantly reduces resource consumption and operational complexity.
+-   **Benefits**:
     1.  **Resource Reduction**: CPU/memory savings from removing Sidecar proxies (100-200MB per Pod)
     2.  **Operational Simplification**: Eliminates Sidecar injection/upgrade complexity
     3.  **Zero-Trust mTLS**: Automatic L4-level mTLS via ztunnel
-*   **Note**: Add Waypoint Proxy for L7 policies (header-based routing, etc.). Gradual migration strategy recommended.
+-   **Note**: Add Waypoint Proxy for L7 policies (header-based routing, etc.). Gradual migration strategy recommended.
 
 ### §140-c. Confidential Computing SRE
 
-*   **Law**: SRE practices for confidential computing (TEE: Trusted Execution Environment) environments.
-*   **Challenges and Countermeasures**:
+-   **Law**: SRE practices for confidential computing (TEE: Trusted Execution Environment) environments.
+-   **Challenges and Countermeasures**:
     1.  **Observability Constraints**: External monitoring of TEE data is difficult. Deploy TEE-compatible observability agents inside enclaves
     2.  **Attestation Monitoring**: Metrics for TEE remote attestation success/failure
     3.  **Performance Overhead**: Account for 5-15% performance degradation from TEE in SLO targets
-*   **Use Cases**: Financial data processing, medical data analysis, multi-party ML training
+-   **Use Cases**: Financial data processing, medical data analysis, multi-party ML training
 
 ### §141. Quantum-Safe Cryptography Migration
 
-*   **Law**: Prepare migration plans for cryptographic algorithms in anticipation of practical quantum computing.
-*   **Action**: Post-Quantum Cryptography (PQC) migration planning, Staged introduction of hybrid cryptography, Countermeasures for "Harvest Now, Decrypt Later" threats
+-   **Law**: Prepare migration plans for cryptographic algorithms in anticipation of practical quantum computing.
+-   **Action**: Post-Quantum Cryptography (PQC) migration planning, Staged introduction of hybrid cryptography, Countermeasures for "Harvest Now, Decrypt Later" threats
 
 ### §142. Sovereign Cloud SRE
 
-*   **Law**: SRE practices for Sovereign Cloud environments that comply with data sovereignty requirements (GDPR, national data localization laws).
-*   **Challenges**: Redundancy design under regional constraints, DR strategy under cross-border data transfer restrictions, Local regulation compliance
+-   **Law**: SRE practices for Sovereign Cloud environments that comply with data sovereignty requirements (GDPR, national data localization laws).
+-   **Challenges**: Redundancy design under regional constraints, DR strategy under cross-border data transfer restrictions, Local regulation compliance
 
 ### §143. Digital Twin for Infrastructure
 
-*   **Law**: Build infrastructure Digital Twins to simulate change impacts in virtual environments.
-*   **Applications**: Capacity planning accuracy improvement, Virtual chaos engineering execution, Cost forecasting
+-   **Law**: Build infrastructure Digital Twins to simulate change impacts in virtual environments.
+-   **Applications**: Capacity planning accuracy improvement, Virtual chaos engineering execution, Cost forecasting
 
 ### §144. Edge Computing / Satellite Communication SRE
 
-*   **Law**: As LEO satellite networks (Starlink, etc.) and edge devices proliferate, apply SRE to environments that traditional data center-centric models cannot address.
-*   **Challenges**: Observability in high-latency/low-bandwidth environments, Autonomous edge remediation, Distributed consensus algorithms
+-   **Law**: As LEO satellite networks (Starlink, etc.) and edge devices proliferate, apply SRE to environments that traditional data center-centric models cannot address.
+-   **Challenges**: Observability in high-latency/low-bandwidth environments, Autonomous edge remediation, Distributed consensus algorithms
 
 ---
 
@@ -1755,18 +1755,18 @@
 
 ### §157. Observability 2.0 Principles
 
-*   **Law**: Beyond the traditional "three pillars (metrics, logs, traces)," **Observability 2.0** aims for intelligent observability integrating data correlation analysis, causal inference, and predictive analytics.
-*   **Principles**:
+-   **Law**: Beyond the traditional "three pillars (metrics, logs, traces)," **Observability 2.0** aims for intelligent observability integrating data correlation analysis, causal inference, and predictive analytics.
+-   **Principles**:
     1.  **Wide Events / Structured Events**: Center on high-cardinality, high-dimensional event data enabling slice-and-dice analysis across arbitrary dimensions
     2.  **Correlation over Collection**: Prioritize automatic correlation and causal inference between data signals over raw data collection volume
     3.  **Query-Driven Exploration**: Iterate hypothesis-testing via ad-hoc queries rather than depending on pre-defined dashboards
     4.  **Semantic Understanding**: Standardize data meaning through OTel Semantic Conventions v1.30+, enabling cross-tool analysis
-*   **OTel Collector v1.0 GA** (2025 stable release):
+-   **OTel Collector v1.0 GA** (2025 stable release):
     1.  **Stable API Guarantee**: v1.0 GA ensures backward compatibility for Collector configurations
     2.  **Profiling Signal**: OTel Profiling Signal promoted to stable. Unified CPU/memory profiling with metrics and traces
     3.  **eBPF Profiling Agent**: OTel eBPF Profiler collects kernel-level stack traces at <1% CPU overhead. Zero-code, multi-language support
     4.  **OpAMP Maturity**: OpAMP protocol reaches GA. Enables fleet management of thousands of Collectors
-*   **AI-Driven Observability**:
+-   **AI-Driven Observability**:
     1.  **LLM-Powered Log Analysis**: Natural language queries for log analysis via LLM ("What's the root cause of authentication errors in the past hour?")
     2.  **Causal Root Cause Analysis**: Anomaly detection → Causal graph construction → Automated root cause estimation
     3.  **Predictive Alerting**: Predict future failures from historical patterns and raise pre-emptive alerts
@@ -1774,8 +1774,8 @@
 
 ### §158. Observability Cost Optimization
 
-*   **Law**: Observability data is not "the more, the better." Manage telemetry investment from an **ROI optimization** perspective.
-*   **Principles**:
+-   **Law**: Observability data is not "the more, the better." Manage telemetry investment from an **ROI optimization** perspective.
+-   **Principles**:
     1.  **Telemetry ROI Analysis**: Quantitatively evaluate cost-vs-detection-value for each telemetry signal
     2.  **Adaptive Sampling**: Dynamically adjust sampling rates based on system state (normal: 1%, incident: 100%)
     3.  **Telemetry Pipeline SLO**: Manage telemetry data delivery latency via SLO (e.g., metrics ≦ 30s, logs ≦ 60s)
@@ -1788,8 +1788,8 @@
 
 ### §159. DORA Reliability Metric
 
-*   **Law**: DORA 2025 report formally elevated **Reliability** as the 5th core metric. Alongside the traditional 4 metrics (Deployment Frequency, Lead Time for Changes, Change Failure Rate, Time to Restore Service), it quantitatively measures **consistent system performance**.
-*   **DORA 5 Metrics Integrated Dashboard**:
+-   **Law**: DORA 2025 report formally elevated **Reliability** as the 5th core metric. Alongside the traditional 4 metrics (Deployment Frequency, Lead Time for Changes, Change Failure Rate, Time to Restore Service), it quantitatively measures **consistent system performance**.
+-   **DORA 5 Metrics Integrated Dashboard**:
 
     | Metric | Definition | Elite Target |
     |:-------|:----------|:-----------|
@@ -1799,13 +1799,13 @@
     | **Time to Restore Service** | Recovery time from failures | < 1 hour |
     | **Reliability** | SLO achievement rate, user-perceived quality | SLO 99.9%+ |
 
-*   **AI Amplifier Effect**: DORA 2025 concludes "AI amplifies an organization's existing culture." High-maturity teams accelerate with AI; low-maturity teams see dysfunction exposed by AI.
-*   **DORA AI Capabilities Model**: A capability model to maximize AI effectiveness. Prerequisite: DevOps/SRE foundational practices (CI/CD, automated testing, observability) must be sufficiently mature before AI tool adoption.
+-   **AI Amplifier Effect**: DORA 2025 concludes "AI amplifies an organization's existing culture." High-maturity teams accelerate with AI; low-maturity teams see dysfunction exposed by AI.
+-   **DORA AI Capabilities Model**: A capability model to maximize AI effectiveness. Prerequisite: DevOps/SRE foundational practices (CI/CD, automated testing, observability) must be sufficiently mature before AI tool adoption.
 
 ### §160. Revenue-Linked SLO
 
-*   **Law**: Directly couple SLOs with business KPIs to visualize the business value of reliability.
-*   **Implementation**:
+-   **Law**: Directly couple SLOs with business KPIs to visualize the business value of reliability.
+-   **Implementation**:
     1.  **Revenue per 9**: Calculate additional revenue from raising SLO from 99.9% to 99.99%
     2.  **Customer Journey SLO**: Set SLOs across the entire critical user journey (registration → billing → usage)
     3.  **SLO Breach → Business Impact Alert**: Include estimated revenue loss in alerts on SLO violations
@@ -1817,8 +1817,8 @@
 
 ### §161. SREaaS (SRE as a Service) Model
 
-*   **Law**: Not every organization needs a full-time SRE team. Consider leveraging SREaaS (external SRE) models.
-*   **Model Classification**:
+-   **Law**: Not every organization needs a full-time SRE team. Consider leveraging SREaaS (external SRE) models.
+-   **Model Classification**:
 
     | Model | Overview | Use Case |
     |:------|:---------|:---------|
@@ -1827,12 +1827,12 @@
     | **Embedded SREaaS** | External SRE embedded in internal teams | Scaling phase |
     | **Fractional SRE** | Part-time SRE expertise | Startups |
 
-*   **SREaaS Selection Criteria**: SLO formulation capability, On-Call quality, Runbook quality, Technology stack fit, Communication language
+-   **SREaaS Selection Criteria**: SLO formulation capability, On-Call quality, Runbook quality, Technology stack fit, Communication language
 
 ### §162. Developer-First SRE
 
-*   **Law**: Push SRE principles and tools to development teams, fostering a culture where developers own service reliability.
-*   **Principles**:
+-   **Law**: Push SRE principles and tools to development teams, fostering a culture where developers own service reliability.
+-   **Principles**:
     1.  **Shift-Left Reliability**: Embed SLO definitions, reliability testing, and observability instrumentation from the design phase
     2.  **Self-Service SRE Tooling**: Self-service tool suites developers can use without SRE approval (dashboard creation, alert configuration, Feature Flag management)
     3.  **DevEx SLO**: Manage developer productivity via SLOs
@@ -1852,8 +1852,8 @@
 
 ### §163. GenAI Application SRE
 
-*   **Law**: Generative AI applications present reliability challenges distinct from traditional web applications. Define dedicated SRE practices.
-*   **GenAI-Specific SLI/SLOs**:
+-   **Law**: Generative AI applications present reliability challenges distinct from traditional web applications. Define dedicated SRE practices.
+-   **GenAI-Specific SLI/SLOs**:
 
     | SLI | SLO | Measurement |
     |:----|:----|:-----------|
@@ -1863,19 +1863,19 @@
     | **Guardrail Trigger Rate** | ≦ 5% (false block rate) | Guardrail logs |
     | **Context Window Utilization** | ≧ 70% | Prompt analytics |
 
-*   **Prompt Version SLO**: Manage prompt changes in Git and validate effects via A/B testing. Auto-rollback when hallucination rate increase > 1 point due to prompt changes.
-*   **Model Router SRE**: Manage routing reliability across multiple LLM providers. Auto-failover on primary provider failure, cost/quality balancing.
+-   **Prompt Version SLO**: Manage prompt changes in Git and validate effects via A/B testing. Auto-rollback when hallucination rate increase > 1 point due to prompt changes.
+-   **Model Router SRE**: Manage routing reliability across multiple LLM providers. Auto-failover on primary provider failure, cost/quality balancing.
 
 ### §164. RAG Pipeline Reliability
 
-*   **Law**: Guarantee reliability at each stage of the RAG (Retrieval Augmented Generation) pipeline.
-*   **RAG Pipeline SLIs**:
+-   **Law**: Guarantee reliability at each stage of the RAG (Retrieval Augmented Generation) pipeline.
+-   **RAG Pipeline SLIs**:
     1.  **Retrieval Recall SLI**: Relevant document retrieval rate (≧ 90%)
     2.  **Embedding Freshness SLI**: Vector DB index update delay (≦ 15min)
     3.  **Context Relevance SLI**: Relevance score of context passed to LLM (≧ 0.8)
     4.  **Grounding SLI**: Rate of answers based on RAG sources (≧ 95%)
-*   **Vector DB Reliability**: Vector DB availability SLO (≧ 99.9%), Query latency SLO (P95 ≦ 50ms), Index integrity checks
-*   **Semantic Caching SRE**: Semantic cache reliability management. Cache hit rate SLO, semantic similarity threshold tuning, cache invalidation strategy
+-   **Vector DB Reliability**: Vector DB availability SLO (≧ 99.9%), Query latency SLO (P95 ≦ 50ms), Index integrity checks
+-   **Semantic Caching SRE**: Semantic cache reliability management. Cache hit rate SLO, semantic similarity threshold tuning, cache invalidation strategy
 
 ---
 
@@ -1883,8 +1883,8 @@
 
 ### §165. EU AI Act SRE Mapping
 
-*   **Law**: Map EU AI Act (enforcement begins 2025) requirements to SRE practices. High-Risk AI systems carry additional SRE obligations.
-*   **SRE Compliance Matrix**:
+-   **Law**: Map EU AI Act (enforcement begins 2025) requirements to SRE practices. High-Risk AI systems carry additional SRE obligations.
+-   **SRE Compliance Matrix**:
 
     | EU AI Act Requirement | SRE Practice | Section Reference |
     |:---------------------|:------------|:-----------------|
@@ -1897,8 +1897,8 @@
     | **Robustness & Accuracy** | Chaos engineering, Load testing | §40-§42 |
     | **Cybersecurity** | Vulnerability scanning, SBOM | §66-§68 |
 
-*   **CRA 2027 Timeline**: Cyber Resilience Act (CRA) reaches full enforcement in 2027. Digital product manufacturers must handle vulnerability processing (SBOM + 5 years of security updates). SRE teams must back-calculate CRA compliance timelines and complete foundation preparation by 2026.
-*   **CRA Regulatory Timeline Detail**:
+-   **CRA 2027 Timeline**: Cyber Resilience Act (CRA) reaches full enforcement in 2027. Digital product manufacturers must handle vulnerability processing (SBOM + 5 years of security updates). SRE teams must back-calculate CRA compliance timelines and complete foundation preparation by 2026.
+-   **CRA Regulatory Timeline Detail**:
 
     | Date | Milestone | SRE Action |
     |:-----|:----------|:-----------|
@@ -1906,14 +1906,14 @@
     | **2026/9/11** | Vulnerability reporting obligation begins | Automated incident detection/reporting infrastructure required |
     | **2027/12/11** | All obligations apply | SBOM, SLSA, patch management full compliance |
 
-*   **CRA Reporting Obligation (Sept 2026 start)**: Reporting of actively exploited vulnerabilities becomes mandatory. SRE teams must prepare:
+-   **CRA Reporting Obligation (Sept 2026 start)**: Reporting of actively exploited vulnerabilities becomes mandatory. SRE teams must prepare:
     1.  Automated initial report process within 24 hours of vulnerability detection
     2.  ENISA/national CSIRT reporting templates
     3.  Structured vulnerability management (CVE/CVSS/VEX integration)
 
 ### §165-b. EU AI Act Timeline Detail
 
-*   **Law**: Align SRE practices with EU AI Act's phased enforcement schedule.
+-   **Law**: Align SRE practices with EU AI Act's phased enforcement schedule.
 
     | Date | Scope | SRE Action |
     |:-----|:------|:-----------|
@@ -1924,8 +1924,8 @@
 
 ### §166. SOC2 / ISO27001 SRE Mapping Deep Dive
 
-*   **Law**: Comprehensively map SOC2 Trust Service Criteria (TSC) and ISO27001 Annex A controls to SRE practices.
-*   **SOC2 TSC Mapping**:
+-   **Law**: Comprehensively map SOC2 Trust Service Criteria (TSC) and ISO27001 Annex A controls to SRE practices.
+-   **SOC2 TSC Mapping**:
 
     | TSC | SRE Practice |
     |:----|:------------|
@@ -1935,8 +1935,8 @@
     | **CC8.1 (Change Management)** | CI/CD, PRR, Progressive Delivery |
     | **A1.2 (Recovery Planning)** | Fire Drill Protocol, RPO/RTO |
 
-*   **Automated Audit Story Generation**: Auto-generate audit stories from CI pipelines ("who, when, what, why changed"), targeting 80% reduction in audit preparation effort.
-*   **Continuous Compliance Monitoring**: Visualize compliance status in real-time dashboards and detect violations immediately. Block non-compliant resource deployments via Admission Controllers (OPA Gatekeeper / Kyverno).
+-   **Automated Audit Story Generation**: Auto-generate audit stories from CI pipelines ("who, when, what, why changed"), targeting 80% reduction in audit preparation effort.
+-   **Continuous Compliance Monitoring**: Visualize compliance status in real-time dashboards and detect violations immediately. Block non-compliant resource deployments via Admission Controllers (OPA Gatekeeper / Kyverno).
 
 ---
 
@@ -1944,8 +1944,8 @@
 
 ### §167. Incident Analytics Dashboard
 
-*   **Law**: Treat incident data as a strategic asset and build systematic analysis infrastructure.
-*   **Analysis Metrics**:
+-   **Law**: Treat incident data as a strategic asset and build systematic analysis infrastructure.
+-   **Analysis Metrics**:
 
     | Metric | Definition | Application |
     |:-------|:----------|:-----------|
@@ -1958,8 +1958,8 @@
 
 ### §168. Incident Pattern Mining
 
-*   **Law**: Cross-analyze multiple incidents to identify **systemic weaknesses**.
-*   **Methods**:
+-   **Law**: Cross-analyze multiple incidents to identify **systemic weaknesses**.
+-   **Methods**:
     1.  **Common Cause Analysis (CCA)**: Extract root cause patterns common to multiple incidents. Classify by dependency, time period, team, change type
     2.  **Temporal Pattern Detection**: Detect incidents concentrated at specific times/days/events (e.g., post-release)
     3.  **Correlation Matrix**: Analyze correlation between incident categories and change categories (deploy, config change, infra change)
@@ -1967,8 +1967,8 @@
 
 ### §169. Cognitive Incident Management
 
-*   **Law**: Quantify and optimize the **cognitive load** on humans during incident response.
-*   **Cognitive Incident Management (CIM) Framework**:
+-   **Law**: Quantify and optimize the **cognitive load** on humans during incident response.
+-   **Cognitive Incident Management (CIM) Framework**:
     1.  **Sensemaking Support**: AI/ML auto-attaches context to alerts. Accelerate understanding of "what's happening"
     2.  **Decision Support Matrix**: Integrate recommended actions into Runbooks based on severity × impact scope matrix
     3.  **Incident Fatigue Index**: Quantify cumulative On-Call engineer fatigue. Calculate from monthly pages × night-rate × avg response time; force rest on threshold breach
@@ -1980,8 +1980,8 @@
 
 ### §170. Multi-Cloud Reliability Strategy
 
-*   **Law**: In multi-cloud environments, consistent cross-cloud reliability management is essential.
-*   **Principles**:
+-   **Law**: In multi-cloud environments, consistent cross-cloud reliability management is essential.
+-   **Principles**:
     1.  **Abstraction Layer**: Abstract applications from cloud-specific APIs. Use multi-cloud IaC (Terraform / Pulumi / Crossplane)
     2.  **Unified Observability**: Integrate telemetry from all clouds around OTel. Minimize direct dependency on cloud-specific monitoring APIs
     3.  **Cross-Cloud SLO**: Define service-wide SLOs across clouds. Composite calculation of each cloud's availability SLO
@@ -1989,8 +1989,8 @@
 
 ### §171. Control Plane Redundancy
 
-*   **Law**: Multi-cloud Control Planes (DNS, LB, service mesh Control Plane) must not become single points of failure.
-*   **Patterns**:
+-   **Law**: Multi-cloud Control Planes (DNS, LB, service mesh Control Plane) must not become single points of failure.
+-   **Patterns**:
     1.  **DNS**: Multi-DNS provider (Route 53 + Cloudflare, etc.)
     2.  **Global Load Balancer**: Cross-cloud load balancing with health-check-based auto-failover
     3.  **Config Store**: Configuration sync mechanisms. Design for eventually consistent propagation
@@ -1998,8 +1998,8 @@
 
 ### §172. Cloud Portability SLO
 
-*   **Law**: Quantitatively manage dependency on specific clouds as SLOs.
-*   **Metrics**:
+-   **Law**: Quantitatively manage dependency on specific clouds as SLOs.
+-   **Metrics**:
 
     | Metric | Healthy | Needs Improvement | Danger |
     |:-------|:--------|:-----------------|:-------|
@@ -2013,8 +2013,8 @@
 
 ### §173. Pre-Merge Reliability Gate
 
-*   **Law**: Move reliability verification from **post-production deployment** to **pre-PR merge**.
-*   **CI Integration Checks**:
+-   **Law**: Move reliability verification from **post-production deployment** to **pre-PR merge**.
+-   **CI Integration Checks**:
     1.  **SLO Definition Check**: Auto-verify new service PRs include SLO definition files (OpenSLO YAML)
     2.  **OTel Instrumentation Check**: Static analysis for OTel instrumentation on key endpoints. Warn on uninstrumented endpoints
     3.  **Performance Budget Gate**: Auto-check bundle size and response time compliance in CI
@@ -2043,17 +2043,17 @@
 
 ### §174. Chaos as Code (CI-Integrated Chaos Testing)
 
-*   **Law**: Integrate chaos engineering into CI pipelines. Run small-scale reliability tests per PR.
-*   **Principles**:
+-   **Law**: Integrate chaos engineering into CI pipelines. Run small-scale reliability tests per PR.
+-   **Principles**:
     1.  **Toxiproxy Integration**: Inject network latency/errors during test execution to verify timeout and retry behavior
     2.  **Dependency Outage Simulation**: Set external dependency mocks to failure state to verify fallback behavior
     3.  **Resource Constraint Test**: Verify application behavior under memory/CPU limits
-*   **Tooling**: Toxiproxy / Testcontainers + Chaos / Steadybit
+-   **Tooling**: Toxiproxy / Testcontainers + Chaos / Steadybit
 
 ### §175. Test Environment Reliability SLO
 
-*   **Law**: Unstable test environments directly harm developer productivity. Define SLOs for test environments themselves.
-*   **Test Environment SLI/SLO**:
+-   **Law**: Unstable test environments directly harm developer productivity. Define SLOs for test environments themselves.
+-   **Test Environment SLI/SLO**:
 
     | SLI | SLO | Countermeasure |
     |:---|:----|:--------------|
@@ -2068,19 +2068,19 @@
 
 ### §176. SRE Metrics Warehouse Design
 
-*   **Law**: Build a data warehouse for integrated analysis of all SRE-related metrics.
-*   **Data Source Integration**:
+-   **Law**: Build a data warehouse for integrated analysis of all SRE-related metrics.
+-   **Data Source Integration**:
     1.  **SLO Achievement Data**: Monthly SLO achievement rates from OpenSLO / Sloth
     2.  **Incident Data**: Incident history from PagerDuty / OpsGenie
     3.  **Change Data**: Deploy history from Git / CI/CD
     4.  **Cost Data**: Usage and costs from cloud providers
     5.  **Observability Metrics**: Summary metrics from OTel backends
-*   **Analytics Platform**: Build SRE data lake on BigQuery / Snowflake / ClickHouse. Visualize with Grafana / Looker.
+-   **Analytics Platform**: Build SRE data lake on BigQuery / Snowflake / ClickHouse. Visualize with Grafana / Looker.
 
 ### §177. Historical SLO Trend Analysis
 
-*   **Law**: Analyze long-term SLO achievement trends to quantify system reliability evolution.
-*   **Analysis Items**:
+-   **Law**: Analyze long-term SLO achievement trends to quantify system reliability evolution.
+-   **Analysis Items**:
     1.  **Quarterly SLO Achievement Trends**: Improvement/degradation trends per service
     2.  **Error Budget Consumption Patterns**: Correlation with seasonality and release cycles
     3.  **Deploy Frequency vs Change Failure Rate**: Throughput-stability balance trends
@@ -2088,8 +2088,8 @@
 
 ### §178. SRE ROI Dashboard (CFO/CTO Facing)
 
-*   **Law**: Quantitatively prove SRE investment value to management via dashboard.
-*   **Metrics**:
+-   **Law**: Quantitatively prove SRE investment value to management via dashboard.
+-   **Metrics**:
 
     | Metric | Calculation | Audience |
     |:-------|:----------|:--------|
@@ -2105,18 +2105,18 @@
 
 ### §179. IoT Device Fleet Management SRE
 
-*   **Law**: Reliability management for thousands to millions of IoT device fleets requires approaches different from traditional server SRE.
-*   **Unique Challenges**:
+-   **Law**: Reliability management for thousands to millions of IoT device fleets requires approaches different from traditional server SRE.
+-   **Unique Challenges**:
     1.  **Large-Scale Fleet Management**: Per-device version and configuration management
     2.  **Connection Instability**: Observability design for intermittent connectivity
     3.  **Resource Constraints**: Instrumentation under memory/CPU limits (lightweight OTel agents)
     4.  **Physical Inaccessibility**: Remote remediation only. Physical intervention as last resort
-*   **Device SLO**: Manage device "operational rate," "data transmission success rate," "command response time" as SLI/SLOs.
+-   **Device SLO**: Manage device "operational rate," "data transmission success rate," "command response time" as SLI/SLOs.
 
 ### §180. OTA Update Reliability
 
-*   **Law**: OTA (Over-The-Air) firmware update failure means device bricking.
-*   **Reliability Requirements**:
+-   **Law**: OTA (Over-The-Air) firmware update failure means device bricking.
+-   **Reliability Requirements**:
     1.  **A/B Partitioning**: Dual partition for old/new firmware. Fallback to old version on update failure
     2.  **Staged Rollout**: 1%→5%→25%→100%. Verify device health metrics at each stage
     3.  **Rollback SLO**: Update failure rate ≦ 0.1%. Immediately halt rollout on breach
@@ -2125,8 +2125,8 @@
 
 ### §181. Edge Device Observability
 
-*   **Law**: Observability strategy for edge devices in low-bandwidth, high-latency environments.
-*   **Design Principles**:
+-   **Law**: Observability strategy for edge devices in low-bandwidth, high-latency environments.
+-   **Design Principles**:
     1.  **Local Buffering**: Buffer telemetry on-device and bulk-send on connection
     2.  **Adaptive Telemetry**: Dynamically adjust telemetry volume based on device state (normal: summary only, anomaly: detailed logs)
     3.  **Edge Aggregation**: Pre-aggregate telemetry at edge gateways to reduce cloud transfer volume

@@ -2,7 +2,7 @@
 
 > **用途**: 開発で得られた知見をBlueprintルールに網羅的に結晶化するためのプロンプト
 >
-> **対象**: `axiarch-rules/blueprint/` 配下のプロジェクト固有ルール
+> **対象**: `axiarch-rules/blueprint/{lang}/` 配下のプロジェクト固有ルール
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する
 
@@ -39,7 +39,7 @@
     * ルートディレクトリに `AGENTS.md` が存在する場合、その内容は**不可侵の憲法**です。
 2.  **Dynamic Rule Discovery (階級別ロード)**:
     * `axiarch-rules/` ディレクトリ配下をスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-    * **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+    * **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -50,12 +50,17 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **今回の監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/` 内の全ファイル。
-* **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
-    1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `010_project_lessons_log.md`, `0X0_lessons_{domain}.md`）
-    3.  **Domain Rules**: セキュリティ・課金・メディア等（例: `100_security...`, `200_design...`）
-    4.  **Templates**: 機能仕様・プロジェクト固有ルール（例: `998_feature_spec_template.md`, `999_project_specific_template.md`）
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+    * `governance/` — プロジェクト概要（`000_project_overview.md`）・教訓ログ（`governance/010_project_lessons_log.md`）
+    * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
+    * `quality/` — セキュリティ・QA
+    * `design/` — デザイン・UI/UX
+    * `product/` — FinOps・ビジネス・運用
+    * `ai/` — AI・コンテンツ
+    * `specs/` — 機能仕様
+    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
+* **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
 # Phase 2: Deep Context & Knowledge Synthesis (全知の統合と監査)
 プロジェクトのファイルシステムを調査し、以下の手順で「プロジェクトの知」を収集・統合し、リスクと機会を洗い出してください。
@@ -96,27 +101,19 @@
 * **Ops, Git & Quality**: コミットメッセージ規約、ブランチ運用、デプロイフロー、環境変数管理、テスト基準。
 * **UX & LTV**: アクセシビリティ基準（WCAG）、ユーザーファーストなエラーハンドリング、**顧客満足度を高めるUI規定（LTV向上）**。
 
-## 2. Structural Optimization & Sparse Numbering (構造の最適化と間隔採番)
+## 2. Structural Optimization (構造の最適化)
 **ガバナンス・アーキテクチャを「読みやすく、拡張しやすく、保守しやすく、監査しやすい」形にリファクタリングする。**
 
-* **Modularization**: 1つの巨大なファイルにするのではなく、トピックごとに適切に分割する。
-* **3-Digit Sparse Numbering Strategy (3桁間隔採番・重要)**:
-    * ファイル名のプレフィックスは**3桁数値**を使用し、Universal Rulesの採番体系（`000`〜`800`シリーズ）と整合させること。
-    * 将来の挿入を見越して**100単位で大きくギャップ**を取る。単純な連番（001, 002, 003...）で埋め尽くすことは禁止。
-    * **Blueprint 採番ガイド**:
-        * `000-099`: Project Overview & Lessons (プロジェクト概要・教訓)
-            * `000`: プロジェクト概要
-            * `010`: 教訓ログ（一時蓄積場所）
-            * `0X0`: ドメイン別教訓ファイル（閾値3件で自動分離）
-        * `100-199`: Security, Legal & Localization (セキュリティ・法務・日本語)
-        * `200-299`: Design & UI/UX (デザイン・体験)
-        * `300-399`: Engineering & Architecture (技術・設計)
-        * `400-499`: AI & Data (AI・データ)
-        * `500-599`: Business & Monetization (ビジネス・収益)
-        * `900-999`: Templates & Utilities (テンプレート・ユーティリティ)
-            * `998`: 機能仕様テンプレート
-            * `999`: プロジェクト固有ルールテンプレート
-    * **Universal Rulesとの対応**: Blueprint の採番はUniversal Rulesのカテゴリ体系（`000` Core, `100` Product, `200` Design, `300` Engineering, `400` AI, `500` Operations, `600` Security, `700` QA, `800` Global）を意識し、関連するUniversalルールとの参照を容易にすること。
+* **Folder-Based Organization (フォルダベース格納・重要)**:
+    * Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。
+    * ドメイン→フォルダの対応は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のStep 1対応表に従うこと。
+    * **Co-location原則**: 教訓はそれに関連するルールファイルと**同じフォルダ**に配置する。AIがあるドメインフォルダをロードするとき、ルールも過去の教訓もそこに存在する。
+* **3-Digit Sparse Numbering (フォルダ内の採番ルール)**:
+    * 各フォルダ内のファイル名プレフィックスは**3桁数値**を使用する。
+    * 将来の挿入を見越して**間隔を大きく**取る。連番（001, 002, 003...）は禁止。
+    * `000_` はルールファイル用に予約。教訓から昇華したファイルには使わない。
+    * `governance/010_project_lessons_log.md` は固定。`governance/` 内の昇華ファイルは `020_` 以降。
+    * 採番時は対象フォルダ内の既存ファイルを実際に確認し、次の空き番号を自律判断する。
 * **Cross-Referencing**: ルール同士で矛盾がないよう整合性を取り、必要に応じて参照リンクを貼る。
 * **Actionable**: 抽象論だけでなく、「開発者が具体的にどうコードを書くべきか」の指針を含める。
 
@@ -134,7 +131,7 @@
 1.  **Analyze (分析)**:
     * 既存のルールファイルと、プロジェクトの実装をマッピングし、**Execution Standards**（特に**日本語品質**・セキュリティ・法務・財務・AI・GEO等）の観点で欠落しているルールを特定する。
 2.  **Plan (構成案)**:
-    * `axiarch-rules/blueprint/` 内の理想的なファイル構成（ファイル名と役割など）を定義する。**3桁Sparse Numbering（間隔採番）**を適用し、将来の拡張余地を確保する。
+    * `axiarch-rules/blueprint/{lang}/` 内の理想的なフォルダ・ファイル構成を定義する。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に準拠すること。
     * **Localization** や **Security** や **FinOps**、**GEO/AI** などの重要項目が埋もれないよう配慮する。
 3.  **Write & Refactor (執筆・修正)**:
     * **Preservation (保護・最重要)**:
@@ -142,19 +139,20 @@
         * **「ファイル削除」は、その内容が新しいファイルに「100%移行」されたことが確認できた場合のみ許可される。** 情報量が減るような統合は禁止する。
     * **Prohibition**: **Class S (Universal)** ファイルへの変更・削除・移動は一切行わないこと。
     * **Domain Distribution (ドメイン分散配置・重要)**:
-        * **教訓ログ（`010_project_lessons_log.md`）は「一時的な蓄積場所」であり、最終目的地ではない。**
-        * 得られた知見・教訓は、**関連するドメイン別のBlueprintファイルに適切に分散配置**せよ。教訓ログに同一ドメインの知見が3件以上蓄積された場合、専用のドメインファイルに分離・移植すること。
-        * 例:
-            * セキュリティ関連の教訓 → セキュリティ規定ファイルに移植
-            * AI関連の教訓 → AI規定ファイルに移植
-            * UI/UX関連の教訓 → デザイン規定ファイルに移植
-        * **「教訓ログに書いたから終わり」は禁止。** 教訓は関連するルールファイルの具体的なセクションに統合し、ルールとして昇格させることで初めて結晶化が完了する。
+        * **教訓ログ（`governance/010_project_lessons_log.md`）は「一時的な蓄積場所」であり、最終目的地ではない。**
+        * 得られた知見・教訓は、`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従い、**対応するドメインフォルダ内のBlueprintファイルに分散配置**せよ。
+        * 教訓ログに同一ドメインの知見が3件以上蓄積された場合、対応フォルダに専用ファイルを作成し、教訓を昇華・移動すること。
+        * 例（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` Step 1対応表に準拠）:
+            * セキュリティ関連の教訓 → `quality/{NNN}_security_policy.md` に昇華
+            * AI関連の教訓 → `ai/{NNN}_ai_content_rules.md` に昇華
+            * DB関連の教訓 → `engineering/{NNN}_database_auth.md` に昇華
+        * **「教訓ログに書いたから終わり」は禁止。** 教訓は対応するドメインフォルダのルールファイルに統合し、ルールとして昇格させることで初めて結晶化が完了する。
         * 教訓ログにはドメインファイルへの参照リンクを残し、「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。
-    * **新規作成**: 足りないルール（例: **日本語UIガイドライン**、AIコスト管理規定、プライバシー保護ガイドライン、GEO対策基準）を新規ファイルとして作成する。
+    * **新規作成**: 足りないルール（例: **日本語UIガイドライン**、AIコスト管理規定、プライバシー保護ガイドライン、GEO対策基準）を対応するドメインフォルダ内に新規ファイルとして作成する。
     * **修正・統合**: 既存の内容を見直し、より厳格かつ具体的に書き換える。重複内容は統合する。
     * **Protocol Compliance (プロトコル準拠)**:
-        * 教訓の結晶化は `CRYSTALLIZATION_PROTOCOL.md` に定義された手順（分類→既存ファイル検索→未分類蓄積→閾値自動分離→インデックス維持）に従うこと。
-        * ルールのロード順序は `LOADING_PROTOCOL.md` の5ステップに準拠すること。
+        * 教訓の結晶化は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` に定義された5ステップ（分類→既存ファイル検索→未分類蓄積→閾値自動分離→インデックス維持）に厳密に従うこと。
+        * ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` の5ステップに準拠すること。
 4.  **Final Verify (最終確認)**:
     * 全てのルールが「シリコンバレー基準」かつ**「日本市場基準」**の品質であり、プロジェクトの憲法として機能するかを確認する。
     * **Safety Check**: セキュリティとプライバシーに関する記述が十分に手厚いか再確認する。
@@ -167,5 +165,5 @@
 * **Key Updates**: 今回新たに追加・強化した主要なルール（特に**日本語品質**、セキュリティ、プライバシー、AI、FinOps、GEO、LTVの観点）。
 * **Next Action**: 開発者がこのガバナンス・アーキテクチャをどう活用し、運用していくべきかの指針。
 
-**これより、プロジェクトの全知を結集し、既存の資産（ルール）を劣化させることなく、固有ルール全体（`axiarch-rules/blueprint/*.md`）の徹底的な最適化と再構築を開始してください。**
+**これより、プロジェクトの全知を結集し、既存の資産（ルール）を劣化させることなく、固有ルール全体（`axiarch-rules/blueprint/{lang}/` 内の全ドメインフォルダ）の徹底的な最適化と再構築を開始してください。**
 ````

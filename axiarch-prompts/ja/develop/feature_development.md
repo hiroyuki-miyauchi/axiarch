@@ -2,7 +2,7 @@
 
 > **用途**: 新機能の実装、既存機能の改修、バグ修正、憲法違反の監査・是正を網羅的に実行するプロンプト
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、具体的な実装要件を指示する。
 
@@ -77,11 +77,11 @@
     * **Override Power**: `AGENTS.md` に記載された内容は、本プロンプトを含む他の全ての指示よりも優先される**「絶対憲法」**として扱い、矛盾がある場合は `AGENTS.md` の記述に従え。
 2.  **Dynamic Rule Discovery (ルール階層の完全掌握)**:
     * `axiarch-rules/` ディレクトリ配下の全ファイルをスキャンし、以下の**2つの階級（Class）**を厳密に区別してロードせよ。
-    * **重要**: ルールのロード順序は `LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+    * **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
     * **Class S: Universal (普遍・編集不可)**:
         * `axiarch-rules/universal/` 配下の全ファイル。これらは「物理法則」として扱い、**いかなる場合も修正・追加・変更を禁止（Read-Only）**とする。
     * **Class A: Blueprint (固有・編集可能)**:
-        * `axiarch-rules/blueprint/` 配下の全ファイル。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
+        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
     * **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
         * **Target 1: Security**: セキュリティ・プライバシー原則
         * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -148,9 +148,9 @@
 **全ての作業完了後、ここまでの工程で得られた「重要な気付き」や「新ルール」をプロジェクトの資産としてガバナンス・アーキテクチャ（ブループリント）に還元してください。**
 
 * **Rule Update Proposal (ルールの更新提案)**:
-    * 今回の実装・運用を通じて、新たに発見された「アンチパターン（やってはいけないこと）」や「ベストプラクティス（やるべきこと）」があれば、**Target 1〜5** に該当する **`axiarch-rules/blueprint/` 内の関連ファイル**への追記・修正案を提示すること。
+    * 今回の実装・運用を通じて、新たに発見された「アンチパターン（やってはいけないこと）」や「ベストプラクティス（やるべきこと）」があれば、**Target 1〜5** に該当する **`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **※修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため、変更提案の対象外とする。必ず**プロジェクト固有ルール（Blueprint）**側に蓄積せよ。
-    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
+    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * **※新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い、同ディレクトリ内に**新規ファイルの作成案**を提示すること。
     * これにより、次回の開発サイクルにおいて、AI（あなた）は**より賢い状態で**スタートすることができる。
 
