@@ -1,12 +1,12 @@
-# 000. 機能仕様テンプレート (Feature Specification Template)
+# 998. 機能仕様テンプレート (Feature Specification Template)
 
 > [!TIP]
-> **使い方**: このファイルをコピーし、Category 600–800 の番号帯でリネームしてください（例: `600_feature_payment.md`）。
+> **使い方**: このファイルをコピーし、配置先ドメインフォルダ内の連番でリネームしてください（例: `product/010_feature_payment.md`）。
 > 各セクションを埋めることで、**「何をもって完了とするか」が明文化**されます。
 > Blueprint First の原則に従い、**コードを書く前に**このテンプレートを完成させてください。
 
 > [!IMPORTANT]
-> **SDD（仕様駆動開発）の核**: このテンプレートは Axiarch の「Blueprint First」を機能単位で実現するものです。
+> **Blueprint Firstの核**: このテンプレートは Axiarch の「Blueprint First」を機能単位で実現するものです。
 > 受け入れ条件（Acceptance Criteria）が定義されていない機能は、**実装を開始してはなりません**。
 
 ---

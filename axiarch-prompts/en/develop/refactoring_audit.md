@@ -105,7 +105,7 @@ Classify each debt item using the following priority levels:
 * **Rule Update Proposal**:
     * If new anti-patterns or best practices were discovered during refactoring, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the Absolute Constitution — they are NOT subject to change proposals. Always accumulate in **Blueprint** instead.
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering (interval numbering) within the same directory.
 
 ---

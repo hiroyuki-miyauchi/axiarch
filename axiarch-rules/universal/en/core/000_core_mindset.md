@@ -266,6 +266,7 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 | Language setting, English, Japanese | §3 Language Standard |
 | Constitution, Universal, Blueprint | §4 Governance |
 | Existing functionality protection | §4.1 Existing Functionality |
+| AI collaboration, proactive proposal, yapping ban | §5 AI-Owner Collaboration |
 | Git ban, push ban, deploy | §8.1 Deployment Ban |
 | Main branch, Husky | §8.2 Main Branch Sanctuary |
 | Migration immutability | §8.3 Migration Immutability |
@@ -277,10 +278,11 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 
 | Section | Related Universal Rules |
 |---|---|
-| §0 Hierarchy of Priorities | `600_security_privacy`, `601_data_governance`, `200_design_ux`, `720_cloud_finops` |
-| §1 Mindset | `300_engineering_standards`, `700_qa_testing` |
-| §2 Elite Roles | `100_product_strategy`, `101_revenue_monetization` |
-| §3 Language Standard | `802_language_protocol` |
-| §4 Governance | `801_governance` |
-| §7 Development Iron Rules | `300_engineering_standards`, `200_design_ux` |
-| §8 Global Governance | `300_engineering_standards`, `502_site_reliability` |
+| §0 Hierarchy of Priorities | `security/000_security_privacy`, `security/100_data_governance`, `design/000_design_ux`, `operations/600_cloud_finops` |
+| §1 Mindset | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
+| §2 Elite Roles | `product/000_product_strategy`, `product/300_revenue_monetization` |
+| §3 Language Standard | `core/200_language_protocol` |
+| §4 Governance | `core/100_governance` |
+| §5 AI-Owner Collaboration | `core/000_core_mindset` (this file) |
+| §7 Development Iron Rules | `engineering/000_engineering_standards`, `design/000_design_ux` |
+| §8 Global Governance | `engineering/000_engineering_standards`, `operations/400_site_reliability` |

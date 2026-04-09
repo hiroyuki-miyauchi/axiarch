@@ -11,7 +11,7 @@
 >
 > 1. ドメインに対応した Blueprint フォルダ内に正式プロジェクトルールファイルを昇華作成
 >    例: DB・認証の教訓 → `engineering/{NNN}_database_auth.md`
->    例: セキュリティの教訓 → `quality/{NNN}_security_policy.md`
+>    例: セキュリティの教訓 → `security/{NNN}_security_policy.md`
 > 2. 該当する教訓を新ファイルに移動
 > 3. このファイルにドメインファイルへの参照リンクを追記
 >
@@ -99,6 +99,10 @@
 ## Appendix B: ドメインファイルテンプレート
 
 > [!IMPORTANT]
-> ドメインファイル作成時の詳細なテンプレートと構造要件は
-> **[CRYSTALLIZATION_PROTOCOL.md](../../CRYSTALLIZATION_PROTOCOL.md)** を参照してください。
-> AIはドメインファイル作成時にこのプロトコルに厳格に従う義務があります。
+> **テンプレートの参照先**
+>
+> ドメイン教訓ファイルを新規作成する際は、**必ず** `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の
+> 「Crystallized Rule File Template」セクションに記載された**公式テンプレート**に従うこと。
+>
+> このファイルにテンプレートを二重管理すると CRYSTALLIZATION_PROTOCOL.md との乖離リスクが生じるため廃止。
+> **常に `CRYSTALLIZATION_PROTOCOL.md` を Single Source of Truth とすること。**

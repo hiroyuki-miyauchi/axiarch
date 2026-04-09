@@ -65,14 +65,14 @@
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
 * **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
-    * `governance/` — プロジェクト概要・教訓ログ
+    * `core/` — プロジェクト概要・教訓ログ
+    * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
-    * `quality/` — セキュリティ・QA
     * `design/` — デザイン・UI/UX
-    * `product/` — FinOps・ビジネス・運用
+    * `quality/` — QA・テスト
+    * `operations/` — SRE・インシデント・運用
+    * `product/` — ビジネス・要件
     * `ai/` — AI・コンテンツ
-    * `specs/` — 機能仕様
-    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
 * **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
     * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -150,6 +150,7 @@
 
 # Phase 3: Constitutional Evolution (法典の進化と還元)
 **全ての作業完了後、今回の作業を通じて得られた「新たな知見」や「ルールの不備」がある場合、それをプロジェクトの資産としてルールブックに還元してください。**
+    * **※結晶化ガード**: 結晶化する教訓は「今回の監査で実際に発見された問題」に限定。AI独自リサーチの追加は禁止。`universal/` との重複も確認すること。
 
 * **Rule Update Proposal**:
     * 今回の翻訳作業で確定した「用語集（Glossary）」や「禁止用語」があれば、**必ずプロジェクト固有のルールファイル（`axiarch-rules/blueprint/{lang}/` 配下（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う））への追記を提案すること。**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと）

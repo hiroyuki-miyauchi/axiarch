@@ -70,13 +70,13 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 
 1.  **Design Pattern Extraction**: Identify and document established patterns in the existing code (component design, state management, error handling, authentication, testing strategy, etc.).
 2.  **Naming Convention Audit**: Investigate naming conventions for files, variables, functions, API endpoints, and DB tables. Check for drift.
-3.  **Blueprint Gap Analysis**: Identify gaps between what is specified in `axiarch-rules/blueprint/{lang}/governance/000_project_overview.md` and the actual implementation state.
+3.  **Blueprint Gap Analysis**: Identify gaps between what is specified in `axiarch-rules/blueprint/{lang}/core/000_project_overview.md` and the actual implementation state.
 
 ---
 
 # Phase 3: Landmine Mapping
 
-1.  **Lessons Log Scan**: Scan `governance/010_project_lessons_log.md` to understand past problems and their solutions. Summarize key lessons in `task.md` to prevent repetition.
+1.  **Lessons Log Scan**: Scan `core/010_project_lessons_log.md` to understand past problems and their solutions. Summarize key lessons in `task.md` to prevent repetition.
 2.  **Landmine Map**: Pre-map "landmines" that new participants are most likely to trigger.
 
 ```
@@ -108,7 +108,7 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 * **Rule Update Proposal**:
     * If gaps or issues were discovered during onboarding, present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the Absolute Constitution — they are NOT subject to change proposals. Always accumulate in **Blueprint** instead.
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering within the same directory.
 
 ---

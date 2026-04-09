@@ -57,14 +57,14 @@
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
 * **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
-    * `governance/` — プロジェクト概要・教訓ログ
+    * `core/` — プロジェクト概要・教訓ログ
+    * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
-    * `quality/` — セキュリティ・QA
     * `design/` — デザイン・UI/UX
-    * `product/` — FinOps・ビジネス・運用
+    * `quality/` — QA・テスト
+    * `operations/` — SRE・インシデント・運用
+    * `product/` — ビジネス・要件
     * `ai/` — AI・コンテンツ
-    * `specs/` — 機能仕様
-    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
 * **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
 # Phase 1: Deep Constitutional Compliance Scan (深層憲法遵守スキャン)

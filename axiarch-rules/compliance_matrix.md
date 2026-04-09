@@ -4,17 +4,17 @@
 > **AI Agent Controls / AIへの重要指示**
 >
 > ## 🇯🇵 日本語指示 (Japanese Instructions)
-> *   **Universal Constitution (普遍憲法)**: `1. Axiarch（アクシアーク）普遍憲法` セクションに記載されているファイル（`universal/*/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。
-> *   **Blueprint (固有ルール)**: `2. プロジェクト固有ルール` セクションに記載されているファイル（`blueprint/*/` 配下）は、プロジェクトごとにカスタマイズされるべき領域です。AIは要件に応じてこれらを積極的に提案・更新してください。
+> *   **Layer 1: Universal Constitution (不変憲法)**: `1. Layer 1: Universal Rules` セクションに記載されているファイル（`universal/{lang}/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja` または `en` に置換してください。
+> *   **Layer 2: Blueprint (固有ルール/可変仕様)**: `2. Layer 2: Blueprint Rules` セクションに記載されているファイル（`blueprint/{lang}/` 配下）は、プロジェクトごとにカスタマイズされるべき領域です。AIは要件と教訓に応じてこれらを積極的に提案・更新してください。
 >
 > ## 🇺🇸 English Instructions
-> *   **Universal Constitution**: The files listed in the `1. Axiarch Universal Constitution` section (under `universal/*/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution").
-> *   **Blueprint Rules**: The files listed in the `2. Project-Specific Blueprint Rules` section (under `blueprint/*/`) are the area to be customized for each project. AI SHOULD proactively propose and update these files according to requirements.
+> *   **Layer 1: Universal Constitution**: The files listed in the `1. Layer 1: Universal Rules` section (under `universal/{lang}/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution"). Replace `{lang}` with `ja` or `en` based on the `Project Native Language` setting in `AGENTS.md`.
+> *   **Layer 2: Blueprint Rules**: The files listed in the `2. Layer 2: Blueprint Rules` section (under `blueprint/{lang}/`) are the area to be customized for each project. AI SHOULD proactively propose and update these files according to requirements and lessons.
 
 ユーザーの網羅的な要望（プロンプト）が、どのルールファイルでカバーされているかを証明する対照表です。
 This matrix proves which rule files cover the user's comprehensive requests (prompts).
 
-## 1. Axiarch Universal Constitution (Axiarch（アクシアーク）普遍憲法)
+## 1. Layer 1: Universal Rules (不変の普遍憲法 / Immutable Constitution)
 **Immutable / 編集禁止**
 
 | ユーザー要望 (User Request) <br> [JP / EN] | 対応ファイル <br> (Covered In) | 具体的なルール (Specific Rule) <br> [JP / EN] |
@@ -44,7 +44,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **オフラインファースト** <br> Offline-First | `universal/*/410_native_platforms.md` | "オフラインアーキテクチャ" <br> "Offline Architecture" |
 | **AI機能導入時の観点** <br> AI Implementation Perspective | `universal/*/000_ai_engineering.md` | "ストリーミングファースト", "楽観的UI" <br> "Streaming First", "Optimistic UI" |
 | **分析・解析・課題抽出** <br> Analytics & Insights | `universal/*/100_data_analytics.md` | "プライバシー重視の分析" <br> "Privacy-First Analytics" |
-| **管理画面運用観点** <br> Admin Operations Perspective | `universal/*/000_internal_tools.md` | "Retoolファースト", "監査ログ" <br> "Retool First", "Audit Logs" |
+| **管理画面運用観点** <br> Admin Operations Perspective | `universal/*/000_internal_tools.md` | "低コード/ノーコード優先検討", "監査ログ" <br> "Low-code/No-code First Evaluation", "Audit Logs" |
 | **お問い合わせ・FAQ観点** <br> Support & FAQ Perspective | `universal/*/300_customer_experience.md` | "サポート哲学" <br> "Support Philosophy" |
 | **ブラウザ・OS互換性** <br> Browser/OS Compatibility | `universal/*/400_site_reliability.md` | "ブラウザ互換性" <br> "Browser Compatibility" |
 | **カオスエンジニアリング** <br> Chaos Engineering | `universal/*/400_site_reliability.md` | "カオスエンジニアリング" <br> "Chaos Engineering" |
@@ -66,7 +66,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **ガバナンス・ルール管理** <br> Governance & Rule Management | `universal/*/100_governance.md` | "SSOTアーキテクチャ", "改正プロセス" <br> "SSOT Architecture", "Amendment Process" |
 | **言語プロトコル** <br> Language Protocol | `universal/*/200_language_protocol.md` | "ゼロトレランス", "プロジェクト言語ファースト" <br> "Zero Tolerance", "Project Language-First" |
 
-## 2. Project-Specific Blueprint Rules (プロジェクト固有ルール)
+## 2. Layer 2: Blueprint Rules (動的成長する固有仕様 / Mutable Project State)
 **Mutable / 積極提案・更新推奨**
 
 このセクションは、プロジェクト固有の要件を定義する「Blueprint」領域です。AIはここを積極的に参照し、提案・更新を行ってください。
@@ -74,11 +74,11 @@ This section defines the "Blueprint" area for project-specific requirements. AI 
 
 | ユーザー要望 (User Request) <br> [JP / EN] | 対応ファイル <br> (Covered In) | 具体的なルール (Specific Rule) <br> [JP / EN] |
 | :--- | :--- | :--- |
-| **プロジェクト概要・基本アーキテクチャ** <br> Project Overview & Architecture | `blueprint/*/governance/000_project_overview.md` | "技術スタック", "ディレクトリ構造" <br> "Tech Stack", "Directory Structure" |
-| **プロジェクト固有の教訓・ログ** <br> Project Lessons Log | `blueprint/*/governance/010_project_lessons_log.md` | "コンテキストログ", "固有の制約" <br> "Context Log", "Specific Constraints" |
-| **その他プロジェクト固有の要件** <br> Other Specific Requirements | `blueprint/*/templates/100_project_specific_template.md` | (As needed) |
+| **プロジェクト概要・基本アーキテクチャ** <br> Project Overview & Architecture | `blueprint/*/core/000_project_overview.md` | "技術スタック", "ディレクトリ構造" <br> "Tech Stack", "Directory Structure" |
+| **プロジェクト固有の教訓・ログ** <br> Project Lessons Log | `blueprint/*/core/010_project_lessons_log.md` | "コンテキストログ", "固有の制約" <br> "Context Log", "Specific Constraints" |
+| **その他プロジェクト固有の要件** <br> Other Specific Requirements | `blueprint/*/core/999_project_specific_template.md` | (As needed) |
 
-## 3. Reusable Prompt Templates (再利用可能プロンプトテンプレート)
+## 3. Layer 3: Prompts (任意実行エンジン / Optional Execution Engine)
 **Optional (任意) / Mutable**
 
 このセクションは、特定の高品質なタスクをAIエージェントに指示するための任意のプロンプトテンプレート集（`axiarch-prompts/`）を定義します。

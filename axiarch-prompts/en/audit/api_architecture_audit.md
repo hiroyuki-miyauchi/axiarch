@@ -46,10 +46,10 @@ Your job is not "writing code." It is to **thoroughly audit and prosecute "legac
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Subject to cultivation and updates based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify and load based on content:
     1.  **Project Overview**: `000_project_overview.md` etc.
-    2.  **Lessons**: `governance/010_project_lessons_log.md` etc.
+    2.  **Lessons**: `core/010_project_lessons_log.md` etc.
     3.  **Domain Rules**: Security, billing, media, etc.
     4.  **Templates**: Feature specs and project-specific rule templates
 

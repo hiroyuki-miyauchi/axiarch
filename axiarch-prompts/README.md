@@ -257,7 +257,7 @@ audit/system_integrity_audit → develop/push_execute
 | `constitution_compliance_audit.md` | Constitutional compliance scan — 7 Major Violations (architecture & monetization combined, type safety, optimization, facade, root cause) |
 | `governance_auditor.md` | Holistic governance audit — 8-Pillar framework (Security/Business/Legal/AI/Architecture/Maintainability/UX/Performance) with structured report format |
 | `blueprint_governance_audit.md` | Comprehensive audit prompt to crystallize development insights into Blueprint rules |
-| `localization_audit.md` | Localization audit — eliminating Lazy non-English UI text, achieving 100% English UI with LTV/AI/GEO/Legal multi-dimensional optimization |
+| `localization_audit.md` | Localization audit — eliminating untranslated/non-localized UI text, achieving 100% localized UI with LTV/AI/GEO/Legal multi-dimensional optimization |
 
 #### 🛡️ operate/ — Incident Response & Onboarding
 

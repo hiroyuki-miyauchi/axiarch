@@ -1,0 +1,16 @@
+# デザイン・UX (Design & UX)
+
+> このフォルダは `core/010_project_lessons_log.md` から結晶化された
+> **デザイン・UXドメイン** のプロジェクト固有ルールの配置先です。
+
+## 対応 Universal ルール
+
+| ファイル | 概要 |
+|:--------|:-----|
+| `universal/{lang}/design/000_design_ux.md` | デザイン・UX基準 |
+
+## 運用ガイド
+
+- 教訓の結晶化プロセスは `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` に従うこと
+- ファイル採番は 3桁 Sparse Numbering（10刻み、`000_` は予約）
+- 新規ドメインフォルダの作成は禁止（Universal と同型の既存フォルダのみ使用）

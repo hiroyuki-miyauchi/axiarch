@@ -41,7 +41,7 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
     * **Class S: Universal (Immutable — Read-Only)**:
         * All files under `axiarch-rules/universal/`. Treat as "physical laws" — **modification, addition, or change is prohibited under any circumstances.**
     * **Class A: Blueprint (Mutable — Read/Write)**:
-        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. "Project-specific laws" — **subject to updates and additions based on audit results.** Prioritize reviewing `governance/010_project_lessons_log.md` for similar past incidents.
+        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. "Project-specific laws" — **subject to updates and additions based on audit results.** Prioritize reviewing `core/010_project_lessons_log.md` for similar past incidents.
     * **Functional Tagging**: Map all loaded Class S/A files to the following roles based on **content and purpose** (not filename):
         * **Target 1: Security**: Security and privacy principles
         * **Target 2: Lessons**: Past failures, lessons learned, and prohibitions (highest focus on similar incident logs)
@@ -116,7 +116,7 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 * **Rule Update Proposal**:
     * Present addition/modification proposals for the relevant files in **`axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping) based on post-mortem insights.
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the Absolute Constitution — NOT subject to change proposals. Always accumulate in **Blueprint** instead.
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering within the same directory.
 
 ---

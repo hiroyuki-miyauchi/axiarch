@@ -1,27 +1,26 @@
 # Axiarch Development Rules (Master Index)
 
 > [!IMPORTANT]
-> **Axiarchの憲法 / Constitution of Axiarch**
-> 本フォルダ（`axiarch-rules/`）に含まれる全てのルールは、Axiarch（アクシアーク）フレームワークにおける絶対的な憲法であり、**個別プロジェクト開発時に編集してはならない**。
-> All rules contained in this folder (`axiarch-rules/`) are the absolute constitution of the Axiarch framework and **MUST NOT be edited during specific project development**.
->
+> **Axiarchの3層ガバナンス・アーキテクチャ / The Three-Layer Governance Architecture**
+> 本フォルダ（`axiarch-rules/`）は、Axiarch（アクシアーク）フレームワークの統治ルールを格納する。
+> 
 > **Separation of Concerns (AI Agent Instructions)**:
 >
 > ## 🇯🇵 日本語指示 (Japanese Instructions)
-> *   **Universal Rules (`universal/`)**:
->     *   **Status**: **Immutable (不変)** / プロジェクト作業では読み取り専用。
+> *   **Layer 1: Universal Rules (`universal/`)**:
+>     *   **Status**: **Immutable (不変)** / 不変の普遍憲法。プロジェクト作業では読み取り専用。
 >     *   **Action**: 明示的に「憲法改正」を指示されない限り、AIはこれらのファイルを編集してはならない。
-> *   **Blueprint Rules (`blueprint/`)**:
->     *   **Status**: **Mutable (可変)** / プロジェクト固有。
->     *   **Action**: AIはプロジェクトのコンテキストを定義するために、これらのファイルを作成・編集すべきである。
+> *   **Layer 2: Blueprint Rules (`blueprint/`)**:
+>     *   **Status**: **Mutable (可変)** / プロジェクト固有仕様。
+>     *   **Action**: AIはプロジェクトのコンテキストと教訓を蓄積するために、これらのファイルを作成・編集すべきである。
 >
 > ## 🇺🇸 English Instructions
-> *   **Universal Rules (`universal/`)**:
->     *   **Status**: **Immutable (不変)** / Read-Only for Project Tasks.
+> *   **Layer 1: Universal Rules (`universal/`)**:
+>     *   **Status**: **Immutable** / Immutable Constitution. Read-Only for Project Tasks.
 >     *   **Action**: AI MUST NOT edit these files unless explicitly instructed to "Amend Constitution".
-> *   **Blueprint Rules (`blueprint/`)**:
->     *   **Status**: **Mutable (可変)** / Project Specific.
->     *   **Action**: AI SHOULD create and edit these files to define project context.
+> *   **Layer 2: Blueprint Rules (`blueprint/`)**:
+>     *   **Status**: **Mutable** / Evolving Project State.
+>     *   **Action**: AI SHOULD create and edit these files to accumulate project context and lessons.
 
 > **言語基準 / Language Standard**:
 > 全てのルールは**日本語と英語**で提供される（Bilingual Documentation）。
@@ -29,7 +28,7 @@
 
 ## 📂 Rule Modules
 
-### 📚 Universal Rules (Bilingual)
+### 📚 Layer 1: Universal Rules (Immutable Constitution)
 
 #### 000: Core & Mindset
 *   **000. Core Philosophy & Mindset** ([🇯🇵](./universal/ja/core/000_core_mindset.md) / [🇺🇸](./universal/en/core/000_core_mindset.md))
@@ -88,15 +87,15 @@
 *   **802. Language Protocol** ([🇯🇵](./universal/ja/core/200_language_protocol.md) / [🇺🇸](./universal/en/core/200_language_protocol.md))
 
 
-### 📐 Blueprint Rules (Project Specific)
+### 📐 Layer 2: Blueprint Rules (Mutable Project State)
 
 > `universal/` と対称のフォルダ分け構造を採用。詳細は [blueprint/ja/INDEX.md](./blueprint/ja/INDEX.md) / [blueprint/en/INDEX.md](./blueprint/en/INDEX.md) を参照。
 > Adopts a subdirectory structure symmetric with `universal/`. See [blueprint/ja/INDEX.md](./blueprint/ja/INDEX.md) / [blueprint/en/INDEX.md](./blueprint/en/INDEX.md) for details.
 
-*   **000. Project Overview** ([🇯🇵](./blueprint/ja/governance/000_project_overview.md) / [🇺🇸](./blueprint/en/governance/000_project_overview.md))
-*   **010. Project Lessons Log** ([🇯🇵](./blueprint/ja/governance/010_project_lessons_log.md) / [🇺🇸](./blueprint/en/governance/010_project_lessons_log.md))
-*   **000. Feature Specification Template** ([🇯🇵](./blueprint/ja/templates/000_feature_spec_template.md) / [🇺🇸](./blueprint/en/templates/000_feature_spec_template.md))
-*   **100. Project Specific Template** ([🇯🇵](./blueprint/ja/templates/100_project_specific_template.md) / [🇺🇸](./blueprint/en/templates/100_project_specific_template.md))
+*   **000. Project Overview** ([🇯🇵](./blueprint/ja/core/000_project_overview.md) / [🇺🇸](./blueprint/en/core/000_project_overview.md))
+*   **010. Project Lessons Log** ([🇯🇵](./blueprint/ja/core/010_project_lessons_log.md) / [🇺🇸](./blueprint/en/core/010_project_lessons_log.md))
+*   **998. Feature Specification Template** ([🇯🇵](./blueprint/ja/core/998_feature_spec_template.md) / [🇺🇸](./blueprint/en/core/998_feature_spec_template.md))
+*   **999. Project Specific Template** ([🇯🇵](./blueprint/ja/core/999_project_specific_template.md) / [🇺🇸](./blueprint/en/core/999_project_specific_template.md))
 
 ### 📋 Reference Documents
 *   **[INDEX.md](./INDEX.md)** — 全ルールの詳細索引 / Detailed index of all rules
@@ -145,7 +144,7 @@
         # プロンプトライブラリがある場合: rm -rf axiarch-prompts/en
         ```
 
-4.  **設定 (Configure)**: `axiarch-rules/blueprint/ja/governance/000_project_overview.md` を編集してプロジェクト概要を定義し、`axiarch-rules/blueprint/ja/governance/010_project_lessons_log.md` を教訓記録の起点として準備します。
+4.  **設定 (Configure)**: `axiarch-rules/blueprint/ja/core/000_project_overview.md` を編集してプロジェクト概要を定義し、`axiarch-rules/blueprint/ja/core/010_project_lessons_log.md` を教訓記録の起点として準備します。
 
 5.  **開発開始 (Start)**: AI開発チームは、これらのルールを厳格に遵守して開発を行います。
 
@@ -183,7 +182,7 @@
         # If you copied the prompt library: rm -rf axiarch-prompts/ja
         ```
 
-4.  **Configure**: Edit `axiarch-rules/blueprint/en/governance/000_project_overview.md` to define your project overview, and prepare `axiarch-rules/blueprint/en/governance/010_project_lessons_log.md` as the starting point for lesson recording.
+4.  **Configure**: Edit `axiarch-rules/blueprint/en/core/000_project_overview.md` to define your project overview, and prepare `axiarch-rules/blueprint/en/core/010_project_lessons_log.md` as the starting point for lesson recording.
 
 5.  **Develop**: The AI Development Team will strictly adhere to these rules.
 
@@ -200,13 +199,13 @@ your-project/
  ├── axiarch-rules/           ← ルール本体 / Rule Definitions
  │    ├── INDEX.md
  │    ├── README.md
- │    ├── universal/              ← 不変ルール / Immutable
+ │    ├── universal/              ← 第1層: 不変憲法 / Layer 1: Immutable
  │    │    ├── ja/ (or en/)
  │    │    └── ...
- │    └── blueprint/              ← プロジェクト固有 / Project-Specific
+ │    └── blueprint/              ← 第2層: 固有ルール / Layer 2: Mutable State
  │         ├── ja/ (or en/)
  │         └── ...
- ├── axiarch-prompts/         ← 任意：プロンプト集 / Optional: Prompt Library
+ ├── axiarch-prompts/         ← Layer 3: 任意実行エンジン / Optional Execution Engine
  │    ├── ja/ (or en/)
  │    │    ├── develop/      ← 開発・実行 / Development & Execution
  │    │    ├── audit/        ← 品質監査 / Quality Auditing

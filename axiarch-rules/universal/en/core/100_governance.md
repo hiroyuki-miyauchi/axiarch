@@ -279,7 +279,7 @@ AI agents must reference rules following these steps:
 ### 5.1. Enactment Procedure
 
 -   **Constitutional Conformity Review**: When enacting a new Blueprint, verify that its content does not contradict any Constitutional provision.
--   **Template Compliance**: Follow the structure defined in `blueprint/{lang}/templates/100_project_specific_template.md`.
+-   **Template Compliance**: Follow the structure defined in `blueprint/{lang}/core/999_project_specific_template.md`.
 -   **Numbering Procedure**: Number according to [Part VIII: Numbering and Naming Conventions](#part-viii-numbering-and-naming-conventions).
 
 ### 5.2. Blueprint Amendment
@@ -1822,8 +1822,8 @@ When interpretation is required, apply the following methods in order:
 - [300_engineering_standards.md](./300_engineering_standards.md) — Engineering. Technical foundation for Feature Flag Pattern (Part XXV).
 - [INDEX.md](../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
 - [compliance_matrix.md](../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
-- [010_project_lessons_log.md](../../blueprint/en/governance/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
-- [100_project_specific_template.md](../../blueprint/en/templates/100_project_specific_template.md) — Template for new Blueprint creation.
+- [010_project_lessons_log.md](../../blueprint/en/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
+- [999_project_specific_template.md](../../blueprint/en/core/999_project_specific_template.md) — Template for new Blueprint creation.
 
 ### Cross-References
 

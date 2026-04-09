@@ -50,14 +50,14 @@
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
 * **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
-    * `governance/` — プロジェクト概要・教訓ログ
+    * `core/` — プロジェクト概要・教訓ログ
+    * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
-    * `quality/` — セキュリティ・QA
     * `design/` — デザイン・UI/UX
-    * `product/` — FinOps・ビジネス・運用
+    * `quality/` — QA・テスト
+    * `operations/` — SRE・インシデント・運用
+    * `product/` — ビジネス・要件
     * `ai/` — AI・コンテンツ
-    * `specs/` — 機能仕様
-    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
 * **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
     * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -139,7 +139,7 @@
 * **Rule Update Proposal (ルールの更新提案)**:
     * 今回の監査を通じて判明した新たなセキュリティ制約、ビジネスルール、AI活用ルール、アンチパターンがあれば、**`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため、変更提案の対象外とする。必ず**プロジェクト固有ルール（Blueprint）**側に蓄積せよ。
-    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
+    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`core/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * **新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い、同ディレクトリ内に**新規ファイルの作成案**を提示すること。
     * 既存のルールが現状と矛盾していたり、古くなっている場合は最新の状態に更新する提案を行う。
     * ルール自体をより明確、かつ運用しやすい形にリファクタリングする提案も含める。

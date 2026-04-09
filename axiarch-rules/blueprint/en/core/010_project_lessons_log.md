@@ -11,7 +11,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 >
 > 1. Creates a proper project rule file in the **corresponding Blueprint domain folder**
 >    e.g., DB & Auth lessons → `engineering/{NNN}_database_auth.md`
->    e.g., Security lessons → `quality/{NNN}_security_policy.md`
+>    e.g., Security lessons → `security/{NNN}_security_policy.md`
 > 2. Moves the relevant lessons to the new file
 > 3. Adds a reference link to this index
 >
@@ -99,43 +99,10 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 ## Appendix B: Domain File Template
 
 > [!IMPORTANT]
-> **Structural Compliance Requirement**
+> **Template Reference**
 >
-> When the AI creates a new domain lessons file, it **MUST** follow the template in `CRYSTALLIZATION_PROTOCOL.md`.
-> File location follows the **co-location principle**: DB/Architecture lessons → `engineering/`, Security → `quality/`, etc.
-> This ensures AI-navigable consistency across all domain files — matching the structural standards of `universal/` rules.
-
-```markdown
-# Lessons: {Domain Name}
-
-> **Domain**: {domain}
-> **Created**: {YYYY-MM-DD} (Auto-Crystallized from 010_project_lessons_log.md)
-> **Related Universal Rules**: `{rule_file_1}`, `{rule_file_2}`
-
----
-
-## 📑 Table of Contents
-
-1. [Lessons](#lessons)
-2. [Cross-Reference](#cross-reference)
-
----
-
-## Lessons
-
-### [YYYY-MM-DD] Lesson Title
-**Domain:** {domain}
-**Context:** ...
-**Problem:** ...
-**Solution/Rule:** ...
-**Reference:** ...
-
----
-
-## Cross-Reference
-
-| Related File | Relationship |
-|:-------------|:------------|
-| `{universal_rule}.md` | Governing rule for this domain |
-| `governance/010_project_lessons_log.md` | Index (source of crystallization) |
-```
+> When creating a new domain lessons file, **MUST** follow the official template in the
+> "Crystallized Rule File Template" section of `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+>
+> The inline template previously listed here has been retired to eliminate structural drift risk.
+> **Always treat `CRYSTALLIZATION_PROTOCOL.md` as the Single Source of Truth for templates.**

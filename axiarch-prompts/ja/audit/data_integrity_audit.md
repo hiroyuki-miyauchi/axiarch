@@ -52,10 +52,10 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。詳細は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照。
+* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。Blueprint はドメイン別フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）で構成される。詳細は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照。
 * **Action**: 内容に基づいて以下のカテゴリに分類し、ロードせよ。
     1.  **Project Overview**: プロジェクト概要（例: `000_project_overview.md`）
-    2.  **Lessons**: 過去の教訓・ログ（例: `governance/010_project_lessons_log.md`）
+    2.  **Lessons**: 過去の教訓・ログ（例: `core/010_project_lessons_log.md`）
     3.  **Domain Rules**: DB・セキュリティ・アーキテクチャ等
     4.  **Templates**: 機能仕様・プロジェクト固有ルール
 

@@ -2,7 +2,7 @@
 
 > Constitution-Driven AI Agent Governance Framework
 
-Axiarch is an open-source governance framework that prevents quality drift,
+Axiarch is an open-source governance framework that mitigates quality drift,
 hallucination, and uncontrolled behavior in AI-assisted software development.
 It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
@@ -16,24 +16,23 @@ Without governance, AI agents suffer from:
 - **Vibe coding drift**: Code that looks correct but silently violates patterns
 - **Knowledge evaporation**: Hard-won lessons are lost and re-discovered repeatedly
 
-Axiarch addresses all four with constitutional enforcement.
+Axiarch mitigates these risks by enforcing a firm quality floor and autonomous context loading through constitutional architecture.
 
-## Core Architecture
+## Core Architecture (Three-Layer Governance)
 
-- `AGENTS.md` — Supreme law (AI Behavior Constitution). 8 behavioral protocols.
-  Read by: Google Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider
-- `axiarch-rules/universal/` — 30 immutable rule files × 2 languages (JA/EN).
-  2,500+ engineering standards across Security, API, SRE, FinOps, i18n, QA, AI, Design.
-- `axiarch-rules/blueprint/` — Mutable project-specific templates.
-  Project overview, feature specs (Given/When/Then), lessons log.
-- `axiarch-prompts/` — **(Optional)** Reusable audit prompt templates × 2 languages.
-  Covers: feature development, QA, governance, compliance, localization, CI/CD, data integrity, refactoring, onboarding, incident response.
+- **Layer 1: Universal (Immutable Constitution)**
+  - `AGENTS.md` — Supreme law (AI Behavior Protocols). Read by: Google Antigravity, Cursor, Claude Code, etc.
+  - `axiarch-rules/universal/` — 38 immutable rule files (2,500+ engineering standards across Security, API, SRE, FinOps...).
+- **Layer 2: Blueprint (Mutable Project State)**
+  - `axiarch-rules/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
+- **Layer 3: Prompts (Optional Execution Framework)**
+  - `axiarch-prompts/` — Reusable audit/QA prompt templates to forcefully apply Layer 1/2 rules into action.
 
 ## Key Protocols
 
 - **LOADING_PROTOCOL.md**: 5-step rule hierarchy loading sequence
 - **CRYSTALLIZATION_PROTOCOL.md**: Automatic lesson-to-rule conversion
-- **Boot Sequence Protocol**: Prevents hallucination by enforcing rules-first behavior
+- **Boot Sequence Protocol**: Mitigates hallucination risk by enforcing rules-first behavior
 - **Blueprint First**: Specs required before code for major changes
 - **Deployment Ban Protocol**: No `git push` without explicit user approval
 
@@ -61,7 +60,7 @@ cp -r axiarch-rules /path/to/your/project/
 ## Language Support
 
 Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
-All 30 universal rules and 4 blueprint templates are available in both languages.
+All 38 universal rules and 4 blueprint templates are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also fully bilingual (JA/EN).
 
 ## License

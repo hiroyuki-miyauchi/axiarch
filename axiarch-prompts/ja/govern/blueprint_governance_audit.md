@@ -52,14 +52,14 @@
 > **今回の監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
 * **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
-    * `governance/` — プロジェクト概要（`000_project_overview.md`）・教訓ログ（`governance/010_project_lessons_log.md`）
+    * `core/` — プロジェクト概要（`000_project_overview.md`）・教訓ログ（`core/010_project_lessons_log.md`）・テンプレート
+    * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
-    * `quality/` — セキュリティ・QA
     * `design/` — デザイン・UI/UX
-    * `product/` — FinOps・ビジネス・運用
+    * `quality/` — QA・テスト
+    * `operations/` — SRE・インシデント・運用
+    * `product/` — FinOps・ビジネス
     * `ai/` — AI・コンテンツ
-    * `specs/` — 機能仕様
-    * `templates/` — テンプレート（`000_feature_spec_template.md`, `100_project_specific_template.md`）
 * **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
 # Phase 2: Deep Context & Knowledge Synthesis (全知の統合と監査)
@@ -74,6 +74,8 @@
     * **Execution Standards Check**: 現在のガバナンスルールが、**上記20の観点（特に日本語最適化、AI最適化、GEO、LTV、FinOps）**を網羅できているか監査する。
 3.  **Best Practice Gap (理想との乖離)**:
     * シリコンバレー基準のベストプラクティス（命名規則、ディレクトリ構成、エラー処理、Git運用など）に加え、**「プライバシー・バイ・デザイン」**や**「AIガバナンス」**や**「日本市場における最高品質（おもてなし品質）」**の観点が盛り込まれているか確認する。
+    * **※結晶化ガード**: このプロンプトの目的は「これまでの開発で実際に得られたがBlueprintに未反映の知見」を補完すること。AIがユーザーの明示的指示なしにコードベースと無関係な「一般的ベストプラクティス」を独自リサーチで追加することは禁止（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` SUPREME RULE参照）。
+    * **※Universal重複チェック**: 結晶化前に `universal/{lang}/` の対応ドメインフォルダに同様のルールが既に存在しないか確認すること。重複記載禁止。
 
 ---
 
@@ -105,17 +107,22 @@
 **ガバナンス・アーキテクチャを「読みやすく、拡張しやすく、保守しやすく、監査しやすい」形にリファクタリングする。**
 
 * **Folder-Based Organization (フォルダベース格納・重要)**:
-    * Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。
+    * Blueprint はドメイン別フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）で構成される。
     * ドメイン→フォルダの対応は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のStep 1対応表に従うこと。
     * **Co-location原則**: 教訓はそれに関連するルールファイルと**同じフォルダ**に配置する。AIがあるドメインフォルダをロードするとき、ルールも過去の教訓もそこに存在する。
 * **3-Digit Sparse Numbering (フォルダ内の採番ルール)**:
     * 各フォルダ内のファイル名プレフィックスは**3桁数値**を使用する。
     * 将来の挿入を見越して**間隔を大きく**取る。連番（001, 002, 003...）は禁止。
     * `000_` はルールファイル用に予約。教訓から昇華したファイルには使わない。
-    * `governance/010_project_lessons_log.md` は固定。`governance/` 内の昇華ファイルは `020_` 以降。
+    * `core/010_project_lessons_log.md` は固定。`core/` 内の昇華ファイルは `020_` 以降。
     * 採番時は対象フォルダ内の既存ファイルを実際に確認し、次の空き番号を自律判断する。
 * **Cross-Referencing**: ルール同士で矛盾がないよう整合性を取り、必要に応じて参照リンクを貼る。
 * **Actionable**: 抽象論だけでなく、「開発者が具体的にどうコードを書くべきか」の指針を含める。
+* **Structural Isomorphism (構造的同型性・重要)**:
+    * ルール反映時（昇華・新規作成・追記問わず）、**作成・変更するファイルが他の憲法ファイル（Universal / Blueprint）と同じ構造パターンを持つことを確認**し、欠落があれば補完すること。
+    * **Universal ファイルの標準構造パターン**: (1) タイトル行 `# {NNN}. {名称}` → (2) CAUTION/NOTE ブロック（ファイル位置づけ宣言）→ (3) IMPORTANT ブロック（Supreme Directive + 構成サマリ）→ (4) `## 目次`（テーブル or リスト形式）→ (5) 本文セクション（`##` → `###`）→ (6) `## Appendix A: 逆引き索引`（キーワード→セクション→関連ルール テーブル）
+    * **判定基準**: 「このファイルを `000_engineering_standards.md` や `200_language_protocol.md` と並べたとき、構造的に違和感がないか？」→ 違和感があれば揃える。
+    * 詳細は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` §4 Structural Isomorphism を参照。
 
 ## 3. Future-Proofing (将来への備え)
 **「今」だけでなく「未来」の拡張とリスクに耐えうるルールにする。**
@@ -139,11 +146,11 @@
         * **「ファイル削除」は、その内容が新しいファイルに「100%移行」されたことが確認できた場合のみ許可される。** 情報量が減るような統合は禁止する。
     * **Prohibition**: **Class S (Universal)** ファイルへの変更・削除・移動は一切行わないこと。
     * **Domain Distribution (ドメイン分散配置・重要)**:
-        * **教訓ログ（`governance/010_project_lessons_log.md`）は「一時的な蓄積場所」であり、最終目的地ではない。**
+        * **教訓ログ（`core/010_project_lessons_log.md`）は「一時的な蓄積場所」であり、最終目的地ではない。**
         * 得られた知見・教訓は、`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従い、**対応するドメインフォルダ内のBlueprintファイルに分散配置**せよ。
         * 教訓ログに同一ドメインの知見が3件以上蓄積された場合、対応フォルダに専用ファイルを作成し、教訓を昇華・移動すること。
         * 例（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` Step 1対応表に準拠）:
-            * セキュリティ関連の教訓 → `quality/{NNN}_security_policy.md` に昇華
+            * セキュリティ関連の教訓 → `security/{NNN}_security_policy.md` に昇華
             * AI関連の教訓 → `ai/{NNN}_ai_content_rules.md` に昇華
             * DB関連の教訓 → `engineering/{NNN}_database_auth.md` に昇華
         * **「教訓ログに書いたから終わり」は禁止。** 教訓は対応するドメインフォルダのルールファイルに統合し、ルールとして昇格させることで初めて結晶化が完了する。
@@ -151,7 +158,7 @@
     * **新規作成**: 足りないルール（例: **日本語UIガイドライン**、AIコスト管理規定、プライバシー保護ガイドライン、GEO対策基準）を対応するドメインフォルダ内に新規ファイルとして作成する。
     * **修正・統合**: 既存の内容を見直し、より厳格かつ具体的に書き換える。重複内容は統合する。
     * **Protocol Compliance (プロトコル準拠)**:
-        * 教訓の結晶化は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` に定義された5ステップ（分類→既存ファイル検索→未分類蓄積→閾値自動分離→インデックス維持）に厳密に従うこと。
+        * 教訓の結晶化は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` に定義されたステップ（分類→Universal重複チェック→既存ファイル検索→未分類蓄積→閾値自動分離→インデックス維持）に厳密に従うこと。
         * ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` の5ステップに準拠すること。
 4.  **Final Verify (最終確認)**:
     * 全てのルールが「シリコンバレー基準」かつ**「日本市場基準」**の品質であり、プロジェクトの憲法として機能するかを確認する。

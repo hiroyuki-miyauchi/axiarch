@@ -246,6 +246,11 @@ copy_files() {
   if ! $SETUP_COPILOT; then
     rm -f "$TARGET_DIR/.github/copilot-instructions.md" 2>/dev/null && \
       print_info "Removed: .github/copilot-instructions.md (not needed for ${AGENT_LABEL})"
+    # Clean up empty .github/ directory if nothing else remains
+    if [[ -d "$TARGET_DIR/.github" ]] && [ -z "$(ls -A "$TARGET_DIR/.github" 2>/dev/null)" ]; then
+      rmdir "$TARGET_DIR/.github" 2>/dev/null && \
+        print_info "Removed: empty .github/ directory"
+    fi
   fi
   if ! $SETUP_WINDSURF; then
     rm -f "$TARGET_DIR/.windsurfrules" 2>/dev/null && \
@@ -285,7 +290,7 @@ print_next_steps() {
     step=$((step + 1))
   fi
 
-  echo -e "  ${CYAN}${step}.${RESET} Edit ${BOLD}axiarch-rules/blueprint/${LANG_CODE}/governance/000_project_overview.md${RESET}"
+  echo -e "  ${CYAN}${step}.${RESET} Edit ${BOLD}axiarch-rules/blueprint/${LANG_CODE}/core/000_project_overview.md${RESET}"
   echo -e "       → Fill in your project's tech stack, architecture, and goals"
   step=$((step + 1))
   echo ""

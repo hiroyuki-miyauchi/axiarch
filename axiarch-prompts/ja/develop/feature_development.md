@@ -82,7 +82,7 @@ Webアプリケーション、クラウドインフラ、UI/UX、ビジネス戦
     * **Class S: Universal (普遍・編集不可)**:
         * `axiarch-rules/universal/` 配下の全ファイル。これらは「物理法則」として扱い、**いかなる場合も修正・追加・変更を禁止（Read-Only）**とする。
     * **Class A: Blueprint (固有・編集可能)**:
-        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
+        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
     * **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
         * **Target 1: Security**: セキュリティ・プライバシー原則
         * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -151,7 +151,7 @@ Webアプリケーション、クラウドインフラ、UI/UX、ビジネス戦
 * **Rule Update Proposal (ルールの更新提案)**:
     * 今回の実装・運用を通じて、新たに発見された「アンチパターン（やってはいけないこと）」や「ベストプラクティス（やるべきこと）」があれば、**Target 1〜5** に該当する **`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **※修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため、変更提案の対象外とする。必ず**プロジェクト固有ルール（Blueprint）**側に蓄積せよ。
-    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
+    * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`core/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * **※新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い、同ディレクトリ内に**新規ファイルの作成案**を提示すること。
     * これにより、次回の開発サイクルにおいて、AI（あなた）は**より賢い状態で**スタートすることができる。
 

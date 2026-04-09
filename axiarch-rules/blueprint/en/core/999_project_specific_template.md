@@ -1,7 +1,7 @@
-# 100. Project Specific Rules Template
+# 999. Project Specific Rules Template
 
 > [!TIP]
-> Copy this file to the corresponding domain folder in `axiarch-rules/blueprint/{lang}/`. Rename the file according to the folder's internal sequence (e.g., `quality/000_security_policy.md`).
+> Copy this file to the corresponding domain folder in `axiarch-rules/blueprint/{lang}/`. Rename the file according to the folder's internal sequence (e.g., `security/010_security_policy.md`).
 > Rules in `universal/` are the "Constitution," while `blueprint/` is the "Laws" — the place to concretize (or exceptionally override) the Constitution for project-specific context.
 
 ---
@@ -79,17 +79,22 @@
 | §4 Business KPIs | `product/000_product_strategy`, `product/300_revenue_monetization` |
 | §5 Security & Legal | `security/000_security_privacy`, `security/100_data_governance`, `security/200_oss_compliance` |
 
-### Blueprint Folder & Numbering Guide
+### Blueprint Folder & File Naming Guide
 
-| Folder | Range | Category | Examples |
-|:--------|:------|:--------|:------|
-| `governance/` | 000–099 | Governance & Logs | Project overview, lessons log |
-| `quality/` | 000–099 | Quality & Safety | Security policy, compliance |
-| `design/` | 000–099 | Design & UX | Design system, A11y |
-| `engineering/` | 000–099 | Engineering Core | System architecture, API design |
-| `ai/` | 000–099 | AI & Content | AI strategy, CMS |
-| `product/` | 000–099 | Business & Growth | Monetization, marketing |
-| `specs/` | 000–099 | Feature Specs | Domain-specific design |
-| `templates/` | 000–099 | Templates & Appendix | Template files |
+> [!IMPORTANT]
+> **Reserved numbers**: `998` and `999` are reserved for templates (`998_feature_spec_template.md`, `999_project_specific_template.md`).
+> All other numbers (`010`–`997`) are **freely available regardless of purpose**. Both project-specific rules and feature specs use the same sequential numbering within each folder.
 
-> **Folder-local numbering (consistent with Universal convention)**: Within each folder, use `000_`, `100_`, `200_`... in 100-unit increments. Do NOT use global numbering across folders.
+| Folder | Available Numbers | Examples |
+|:--------|:------------|:------|
+| `core/` | 010–997 | Lessons log (`010_`), crystallized rules, project-specific settings |
+| `security/` | 010–997 | Security policies, security feature specs |
+| `engineering/` | 010–997 | System-specific rules, engineering feature specs |
+| `design/` | 010–997 | Design system overrides, design feature specs |
+| `quality/` | 010–997 | Test strategy overrides, QA feature specs |
+| `operations/` | 010–997 | SRE, CI/CD overrides, operations feature specs |
+| `product/` | 010–997 | Business rules, feature specs (most common placement) |
+| `ai/` | 010–997 | AI strategy overrides, AI feature specs |
+
+> **Numbering rule**: Within each folder, use `010_`, `020_`, `030_`... in **10-unit increments** (to reserve insertion gaps for future files). Do NOT use global numbering across folders.
+

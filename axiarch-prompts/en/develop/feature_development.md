@@ -151,7 +151,7 @@ Eliminate all risks and guarantee complete quality across the following universa
 * **Rule Update Proposal**:
     * If "anti-patterns (things NOT to do)" or "best practices (things TO do)" were newly discovered, present proposals for additions/modifications to **relevant files in `axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping) mapped to **Targets 1–5.**
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the absolute constitution — NOT subject to change proposals. Always accumulate in **project-specific rules (Blueprint).**
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
     * **New File Creation**: If no suitable existing file exists, present a **new file creation proposal** following 3-digit Sparse Numbering conventions within the same directory.
     * This ensures that in the next development cycle, the AI (you) can **start in a smarter state.**
 

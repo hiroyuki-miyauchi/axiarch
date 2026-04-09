@@ -64,7 +64,7 @@ For any instruction from the user, **before generating a response**, check the "
 
 ### 1. DEPLOYMENT BAN PROTOCOL (デプロイ禁止プロトコル)
 **AIはいかなる理由があっても、ユーザーの明示的な許可（「PushしてOK」等の指示）なしに `git push` を実行してはならない。**
-作業完了時は必ず `tsc --noEmit` (型チェック) と `npm run build` (ビルドチェック) をローカルで通過させ、その結果を提示して承認を得ること。独断でのPushは厳禁とする。
+作業完了時は必ず技術スタックに応じた型チェック・ビルド検証コマンドをローカルで実行し（TypeScriptの場合: `tsc --noEmit` + `npm run build`）、その結果を提示して承認を得ること。独断でのPushは厳禁とする。
 
 ### 2. JAPANESE LANGUAGE FIRST PROTOCOL (日本語厳守プロトコル)
 
@@ -101,7 +101,7 @@ For any instruction from the user, **before generating a response**, check the "
    - 上記以外の理由（機能連携など）で変更が必要な場合：
      1. **Approval**: 変更箇所と理由を提示し、事前に承認を得る。
      2. **Minimal**: 変更は最小限に留める。
-     3. **Test**: 回帰テストを行い安全性を保証する。
+     3. **Test**: 回帰テストを行い安全性を担保する。
 4. **新機能の実装アプローチ**
    - 原則として「新機能」での分離実装 (Isolation) を優先する。
    - 既存コードへの直接追記よりも、ラッパーコンポーネントや拡張フックなどを用いた「非侵襲的」な拡張を推奨する。
@@ -142,7 +142,8 @@ For any instruction from the user, **before generating a response**, check the "
 
 2.  **設計書ファースト / Blueprint First:**
     - **機能追加・DB変更・ロジック変更 / Major Changes:**
-      - コードを書く前に、必ず `axiarch-rules/blueprint/{lang}/` 内の仕様書を更新・定義する（`CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）。
+      - コードを書く前に、必ず `axiarch-rules/blueprint/{lang}/` 内の仕様書を更新・定義する。手順は `blueprint/{lang}/INDEX.md` の「機能仕様の追加」ガイドに従うこと（テンプレート: `blueprint/{lang}/core/998_feature_spec_template.md`）。
+      - 仕様書作成後、`blueprint/{lang}/INDEX.md` の該当フォルダセクションにエントリを追記すること。
       - 設計の整合性を保つため、ここをスキップすることは禁止です。
     - **バグ修正・UI微調整・リファクタリング / Minor Fixes:**
       - Blueprintの更新は不要です。即座にコード修正（Implementation）を行ってください。
@@ -152,16 +153,17 @@ For any instruction from the user, **before generating a response**, check the "
     - `// ... rest of code` のような省略は禁止です。
 
 4.  **ドキュメント生成要件 / Documentation Requirements:**
-    - **常時作成 / Always Create:** タスクの大小や複雑さに関わらず、確認と記録のために以下の3ファイルを原則としてチャット内で生成・保存する。
+    - **常時作成 / Always Create:** タスクの大小や複雑さに関わらず、確認と記録のために以下の3ファイルを**必ず**チャット内で生成・保存する。
       - `task.md` (タスクリスト)
       - `implementation_plan.md` (実装計画書)
       - `walkthrough.md` (修正内容の確認)
-    - **検証 / Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経るフローを推奨する。
+    - **検証 / Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経ること。
 
 ### 8. Continuous Improvement (ルールの結晶化)
 
 **各タスクまたは作業セッションの最後に、以下の振り返りを必ず実施してください。**
 
+- **🚨 実務限定原則**: 記録対象は **「今回のタスクで実際に発生した問題・判断・発見」のみ**。AIが**ユーザーの明示的な指示なしに**独自にリサーチして追加した「ベストプラクティス」や「推奨事項」は **記録禁止**。判定基準：「この教訓は今回のタスクで**実際に何が起きたか**を記述しているか？」→ Yes なら記録、No なら記録禁止。
 - **トリガー / Trigger:** 作業の完了時、または重要な決定をした時。
 - **アクション / Action:**
   - 今回の作業で得られた「重要な気づき」「今後徹底すべきルール」「アンチパターン」がないかスキャンする。
@@ -170,12 +172,13 @@ For any instruction from the user, **before generating a response**, check the "
   - **新機能 / New Feature:** 全く新しい概念の機能の場合のみ、ルールディレクトリ内のテンプレート構成（もし存在すれば）に準拠して新規ファイルを作成する。
   - **教訓（自動結晶化プロトコル） / Lessons (Auto-Crystallization Protocol):**
     教訓の記録は以下のプロトコルに従い、AIが自律的に実行する。
-    **詳細な手順は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照すること。**
+    **詳細な全手順は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照すること。**
     1. **分類**: 教訓のドメイン（DB・認証・セキュリティ・設計・品質・運用等）を判定する。
-    2. **既存ファイル検索**: `blueprint/{lang}/` 内の対応ドメインフォルダ（例: `engineering/`）に該当ドメインのファイル（`{NNN}_{topic}.md` 形式）が既に存在する場合、そのファイルに追記する。
-    3. **未分類の蓄積**: 該当ドメインのファイルが存在しない場合、`governance/010_project_lessons_log.md` に一旦追記する。
-    4. **閾値による自動分離**: `010` 内の同一ドメインの教訓が **3件以上** に達した場合、AIは自律的に新規ドメインファイル（例: `{folder}/{NNN}_{topic}.md`）を作成し、該当教訓を移動する。`010` にはドメインファイルへの参照リンクを残す。
-    5. **インデックス維持**: `governance/010_project_lessons_log.md` は常に「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。
+    2. **重複チェック**: `universal/{lang}/` の対応ドメインフォルダに同様のルールが既に存在しないか確認する。存在する場合は記録不要（重複回避）。
+    3. **既存ファイル検索**: `blueprint/{lang}/` 内の対応ドメインフォルダに該当ドメインのファイル（`{NNN}_{topic}.md` 形式）が既に存在する場合、そのファイルに追記する。
+    4. **未分類の蓄積**: 該当ドメインのファイルが存在しない場合、`core/010_project_lessons_log.md` に一旦追記する。
+    5. **閾値による自動分離**: `010` 内の同一ドメインの教訓が **3件以上** に達した場合、AIは自律的に新規ドメインファイル（例: `{folder}/{NNN}_{topic}.md`）を作成し、該当教訓を移動する。`010` にはドメインファイルへの参照リンクを残す。
+    6. **インデックス更新 (UPDATE INDEX)**: `core/010_project_lessons_log.md` は常に「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。分離実行時は必ず「分離済みドメインファイル一覧」テーブルを更新すること。
 
 
 
@@ -213,7 +216,7 @@ For any instruction from the user, **before generating a response**, check the "
 
 ### 1. DEPLOYMENT BAN PROTOCOL
 **The AI MUST NOT execute `git push` without explicit user permission (e.g., "Push OK").**
-Always complete `tsc --noEmit` (type check) and `npm run build` (build check) locally and present the results for approval before pushing. Arbitrary pushing is strictly prohibited.
+Always complete the appropriate type-check and build verification commands for your tech stack locally (e.g., for TypeScript: `tsc --noEmit` and `npm run build`), and present the results for approval before pushing. Arbitrary pushing is strictly prohibited.
 
 ### 2. ENGLISH LANGUAGE FIRST PROTOCOL
 
@@ -247,7 +250,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
     -   If changes are required for reasons other than above (e.g., feature integration):
         1.  **Approval**: Present the changes and reasons to obtain prior approval.
         2.  **Minimal**: Keep changes to the absolute minimum.
-        3.  **Test**: Conduct regression tests to guarantee safety.
+        3.  **Test**: Conduct regression tests to safeguard stability.
 4.  **Implementation Approach for New Features**
     -   In principle, prioritize "Isolation" (implementation in new files).
     -   Recommend "Non-invasive" extensions using wrapper components or custom hooks rather than directly editing existing code.
@@ -286,7 +289,8 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 
 2.  **Blueprint First:**
     -   **Major Changes (Feature add/DB change/Logic change):**
-        -   Before coding, you MUST update/define specifications in `axiarch-rules/blueprint/{lang}/` (per `CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
+        -   Before coding, you MUST update/define specifications in `axiarch-rules/blueprint/{lang}/`. Follow the "Adding Feature Specs" guide in `blueprint/{lang}/INDEX.md` (template: `blueprint/{lang}/core/998_feature_spec_template.md`).
+        -   After creating the spec file, add an entry to the relevant folder section in `blueprint/{lang}/INDEX.md`.
         -   Skipping this is prohibited to maintain design integrity.
     -   **Minor Fixes (Bug fix/UI tweak/Refactor):**
         -   Blueprint update is unnecessary. Proceed immediately to Implementation.
@@ -296,7 +300,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
     -   Omissions like `// ... rest of code` are prohibited.
 
 4.  **Documentation Requirements:**
-    -   **Always Create:** Regardless of task size or complexity, generate and save the following 3 files for confirmation and record-keeping:
+    -   **Always Create:** Regardless of task size or complexity, **always** generate and save the following 3 files for confirmation and record-keeping:
         -   `task.md` (Task list)
         -   `implementation_plan.md` (Implementation plan)
         -   `walkthrough.md` (Change walkthrough)
@@ -306,6 +310,7 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
 
 **Always perform the following review at the end of each task or work session.**
 
+-   **🚨 Practical Experience Only**: Only record **problems, decisions, and discoveries that actually occurred during this task**. AI **MUST NOT** independently research and add "best practices" or "recommendations" **without explicit user instruction**. Litmus test: "Does this lesson describe **what actually happened** during this task?" → Yes = record. No = do NOT record.
 -   **Trigger:** Upon completion of work or when important decisions are made.
 -   **Action:**
     -   Scan for "Important realizations", "Rules to be enforced", or "Anti-patterns" obtained from this work.
@@ -316,10 +321,11 @@ Always complete `tsc --noEmit` (type check) and `npm run build` (build check) lo
         Lesson recording MUST follow this protocol, executed autonomously by the AI.
         **Detailed procedures: refer to `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.**
         1. **Classify**: Determine the lesson's domain (DB/Auth, Security, Architecture, Quality, Operations, etc.).
-        2. **Search existing files**: If a domain file (`{NNN}_{topic}.md` format) already exists in the corresponding folder under `blueprint/{lang}/` (e.g., `engineering/`), append to that file.
-        3. **Accumulate if unclassified**: If no domain file exists, append to `governance/010_project_lessons_log.md` temporarily.
-        4. **Threshold-based auto-separation**: When lessons of the **same domain reach 3 or more** in `010`, the AI MUST autonomously create a new domain file (e.g., `{folder}/{NNN}_{topic}.md`), move the relevant lessons there, and leave a reference link in `010`.
-        5. **Maintain index**: `governance/010_project_lessons_log.md` MUST always function as an index: "unsorted lessons + links to separated domain files".
+        2. **Dedup Check**: Verify that no similar rule already exists in `universal/{lang}/` under the corresponding domain folder. If it exists, do NOT record (avoid duplication).
+        3. **Search existing files**: If a domain file (`{NNN}_{topic}.md` format) already exists in the corresponding folder under `blueprint/{lang}/`, append to that file.
+        4. **Accumulate if unclassified**: If no domain file exists, append to `core/010_project_lessons_log.md` temporarily.
+        5. **Threshold-based auto-separation**: When lessons of the **same domain reach 3 or more** in `010`, the AI MUST autonomously create a new domain file (e.g., `{folder}/{NNN}_{topic}.md`), move the relevant lessons there, and leave a reference link in `010`.
+        6. **Update Index (UPDATE INDEX)**: `core/010_project_lessons_log.md` MUST always function as an index: "unsorted lessons + links to separated domain files". When separation is executed, ALWAYS update the "Separated Domain Files" table.
 
 ---
 

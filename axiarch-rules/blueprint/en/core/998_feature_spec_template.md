@@ -1,12 +1,12 @@
-# 000. Feature Specification Template
+# 998. Feature Specification Template
 
 > [!TIP]
-> **Usage**: Copy this file and rename it within the Category 600–800 range (e.g., `600_feature_payment.md`).
+> **Usage**: Copy this file and rename it using the next available number in the target domain folder (e.g., `product/010_feature_payment.md`).
 > Completing each section **explicitly defines "what constitutes done."**
 > Following the Blueprint First principle, **complete this template before writing code.**
 
 > [!IMPORTANT]
-> **SDD Core**: This template realizes Axiarch's "Blueprint First" at the feature level.
+> **Blueprint First Core**: This template realizes Axiarch's "Blueprint First" at the feature level.
 > Features without defined Acceptance Criteria **must not begin implementation.**
 
 ---

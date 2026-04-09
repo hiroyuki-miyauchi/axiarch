@@ -41,7 +41,7 @@
     * **Class S: Universal（普遍・編集不可）**:
         * `axiarch-rules/universal/` 配下の全ファイル。これらは「物理法則」として扱い、**いかなる場合も修正・追加・変更を禁止（Read-Only）**とする。
     * **Class A: Blueprint（固有・編集可能）**:
-        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
+        * `axiarch-rules/blueprint/{lang}/` 配下の全ファイル。Blueprint はドメイン別フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）で構成される。これらは「プロジェクト固有法」であり、**監査結果に基づく更新・追加の対象（Read/Write）**とする。
     * **Functional Tagging**: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
         * **Target 1: Security**: セキュリティ・プライバシー原則
         * **Target 2: Lessons**: 過去の失敗や教訓・禁止事項
@@ -105,7 +105,7 @@
 * **Rule Update Proposal**:
     * 今回のリファクタリングで発見された「アンチパターン」「ベストプラクティス」があれば、**`axiarch-rules/blueprint/{lang}/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
     * **修正禁止**: `AGENTS.md` および `axiarch-rules/universal/` は絶対憲法のため変更提案対象外。必ず**Blueprint**側に蓄積せよ。
-    * **Domain Distribution（ドメイン分散配置）**: 教訓ログ（`governance/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従い関連ドメイン別ファイルへ分散配置してルールとして昇格させること。
+    * **Domain Distribution（ドメイン分散配置）**: 教訓ログ（`core/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従い関連ドメイン別ファイルへ分散配置してルールとして昇格させること。
     * **新規作成**: 適切な既存ファイルがない場合は、3桁Sparse Numbering（間隔採番）に従い新規ファイルの作成案を提示すること。
 
 ---

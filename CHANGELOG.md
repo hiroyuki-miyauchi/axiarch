@@ -18,21 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **AGENTS.md** — AI行動憲法（8プロトコル定義） / AI Behavior Constitution (8 protocols)
-- **Universal Rules** — 30ファイル × 2言語（JA/EN）、2,500以上のエンジニアリング基準 / 30 files × 2 languages, 2,500+ engineering standards
+- **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上のエンジニアリング基準 / 38 files × 2 languages, 2,500+ engineering standards
   - 000: Core & Mindset
-  - 100–103: Product & Business Strategy
+  - 100–150: Product & Business Strategy
   - 200: Design & UX
   - 300–361: Engineering (Standards, API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS)
   - 400–401: AI & Data
-  - 500–503: Operations & Reliability
+  - 500–530: Operations & Reliability
   - 600–603: Security & Legal
   - 700–720: QA & FinOps
   - 800–802: Global & Governance
 - **Blueprint Templates** — プロジェクト固有テンプレート / Project-specific templates
-  - `governance/000_project_overview.md` — プロジェクト概要 / Project overview
-  - `governance/010_project_lessons_log.md` — 教訓ログ / Lessons log
-  - `templates/000_feature_spec_template.md` — SDD機能仕様テンプレート / SDD feature spec template
-  - `templates/100_project_specific_template.md` — プロジェクト固有ルール / Project-specific rules
+  - `core/000_project_overview.md` — プロジェクト概要 / Project overview
+  - `core/010_project_lessons_log.md` — 教訓ログ / Lessons log
+  - `core/998_feature_spec_template.md` — 機能仕様テンプレート / feature spec template
+  - `core/999_project_specific_template.md` — プロジェクト固有ルール / Project-specific rules
 - **LOADING_PROTOCOL.md** — 5ステップのルールロード手順 / 5-step rule loading protocol
 - **CRYSTALLIZATION_PROTOCOL.md** — 教訓の自動結晶化プロトコル / Lesson auto-crystallization protocol
 - **INDEX.md** — 全ルールの詳細索引 / Detailed index of all rules

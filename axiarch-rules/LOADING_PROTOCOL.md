@@ -57,7 +57,7 @@
 | 階級 / Class | 対象 / Target | 性質 (JA) | Nature (EN) |
 |:------------|:-------------|:---------|:-----------|
 | **Class S（Universal）** | `axiarch-rules/universal/{lang}/` | プロジェクトを超えた普遇的ルール。Read-Only。 | Universal rules transcending projects. Read-Only. |
-| **Class A（Blueprint）** | `axiarch-rules/blueprint/{lang}/` | プロジェクト固有の仕様・設計・教訓。更新可能。フォルダ構成: **`governance/`**（概要・教訓インデックス）・`quality/`（品質・安全）・`design/`（デザイン）・`engineering/`（エンジニアリング）・`ai/`（AI）・`product/`（ビジネス）・`specs/`（機能仕様）・`templates/`（テンプレート）。内容に応じて以下の4カテゴリに分類してロードすること：① **Project Overview**（`governance/000_project_overview.md`）、② **Lessons Index**（`governance/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ルールファイル。どのフォルダかはタスクに応じて自律判断。ファイル名に `lessons_` は含まない）、③ **Domain Rules**（各ドメインフォルダのルールファイル）、④ **Templates**（`templates/` 配下） | Project-specific specs, design, and lessons. Mutable. Folder structure: **`governance/`** (overview & lessons index), `quality/`, `design/`, `engineering/`, `ai/`, `product/`, `specs/`, `templates/`. Load by 4 categories: ① **Project Overview** (`governance/000_project_overview.md`), ② **Lessons** (`governance/010_project_lessons_log.md` index + domain rule files co-located as `{NNN}_{topic}.md` in each folder — no `lessons_` in filename; which folder depends on the task domain), ③ **Domain Rules**, ④ **Templates** |
+| **Class A（Blueprint）** | `axiarch-rules/blueprint/{lang}/` | プロジェクト固有の仕様・設計・教訓。更新可能。フォルダ構成: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリに分類してロードすること：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ルールファイル。どのフォルダかはタスクに応じて自律判断。ファイル名に `lessons_` は含まない）、③ **Domain Rules**（各ドメインフォルダのルールファイル）、④ **Templates** (`core/` template files)（`core/` 配下のテンプレートファイル） | Project-specific specs, design, and lessons. Mutable. Folder structure: **`core/`** (overview, lessons index & templates), `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`. Load by 4 categories: ① **Project Overview** (`core/000_project_overview.md`), ② **Lessons** (`core/010_project_lessons_log.md` index + domain rule files co-located as `{NNN}_{topic}.md` in each folder — no `lessons_` in filename; which folder depends on the task domain), ③ **Domain Rules**, ④ **Templates** (`core/` template files) |
 
 Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリから、ロードすべきファイルを列挙せよ。
 
@@ -68,15 +68,15 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 | タスクタイプ / Task Type | Universal フォルダ | Blueprint フォルダ |
 |:----------------------|:----------------|:----------------|
-| `security` | `security/` | `quality/` |
+| `security` | `security/` | `security/` |
 | `architecture` | `engineering/` | `engineering/` |
-| `performance` | `engineering/` + `operations/` | `engineering/` + `product/` |
+| `performance` | `engineering/` + `operations/` | `engineering/` + `operations/` |
 | `ui_design` | `design/` | `design/` |
 | `api` | `engineering/` | `engineering/` |
 | `i18n` | `product/` (国際化・翻訳ルールを参照) | `product/` |
-| `finops` | `operations/` (FinOps・クラウドコストルールを参照) | `product/` |
+| `finops` | `operations/` (FinOps・クラウドコストルールを参照) | `operations/` |
 | `testing` | `quality/` | `quality/` |
-| `other` | — | `governance/` (Project Overview + Lessonsを必ずロード) |
+| `other` | —（タスク内容に応じて自律判断） | `core/`（Project Overview + Lessons を必ずロード） |
 
 ---
 
@@ -134,16 +134,20 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 ```
 
 > **ロード完了の定義**: 以下の条件の全てを満たすこと。
-> 1. `governance/000_project_overview.md` または同等のプロジェクト概要ファイルが `view_file` で直接開かれていること。
+> 1. `blueprint/{lang}/core/000_project_overview.md` が `view_file` で直接開かれていること（タスクタイプ `other` または**初回ロード**時は必須。他タスクタイプでもロードを推奨）。**「初回ロード」とは、会話開始後（新規チャット/コンテキストリセット後）の最初のルールロードを指す。**
 > 2. Step 1 で特定したタスクタイプに対応するドメインルールファイルが `view_file` で直接開かれていること。
 > 3. ロードしたファイルのリストが task.md に記録されていること。
 >
 > ①②③ のいずれかでも欠けていれば、作業を中断して追加ロードすること。
+> ※ `000_project_overview.md` がテンプレート初期状態の場合（`[Project Name]` が未記入）、ロードは完了とみなすが、ユーザーに設定を促すこと。
 >
 > **Load Completion Definition**: ALL of the following must be satisfied.
-> 1. `governance/000_project_overview.md` (or equivalent) was opened with `view_file`.
+> 1. `blueprint/{lang}/core/000_project_overview.md` was opened with `view_file` (REQUIRED for `other` type or **first load**; recommended for other task types). **"First load" means the first rule loading after conversation start (new chat or context reset).**
 > 2. The domain rule file(s) corresponding to the task type from Step 1 were opened with `view_file`.
 > 3. The list of loaded files is recorded in task.md.
+>
+> If any of ①②③ is missing, STOP and load the missing files.
+> Note: If `000_project_overview.md` is still in its initial template state (`[Project Name]` unfilled), loading is considered complete, but prompt the user to configure it.
 
 ---
 

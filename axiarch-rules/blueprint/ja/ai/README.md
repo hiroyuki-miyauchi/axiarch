@@ -1,0 +1,17 @@
+# AI・データ分析 (AI & Data Analytics)
+
+> このフォルダは `core/010_project_lessons_log.md` から結晶化された
+> **AI・データ分析ドメイン** のプロジェクト固有ルールの配置先です。
+
+## 対応 Universal ルール
+
+| ファイル | 概要 |
+|:--------|:-----|
+| `universal/{lang}/ai/000_ai_engineering.md` | AIエンジニアリング基準 |
+| `universal/{lang}/ai/100_data_analytics.md` | データ分析基準 |
+
+## 運用ガイド
+
+- 教訓の結晶化プロセスは `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` に従うこと
+- ファイル採番は 3桁 Sparse Numbering（10刻み、`000_` は予約）
+- 新規ドメインフォルダの作成は禁止（Universal と同型の既存フォルダのみ使用）

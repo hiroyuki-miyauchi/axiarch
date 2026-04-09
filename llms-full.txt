@@ -4,7 +4,7 @@
 > Version: 1.0.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
-Axiarch is an open-source governance framework that prevents quality drift,
+Axiarch is an open-source governance framework that mitigates quality drift,
 hallucination, and uncontrolled behavior in AI-assisted software development.
 It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
@@ -22,27 +22,28 @@ Without governance, AI agents suffer from:
 - **Vibe coding drift**: Code that looks correct but silently violates patterns
 - **Knowledge evaporation**: Hard-won lessons are lost and re-discovered repeatedly
 
-Axiarch addresses all four with constitutional enforcement.
+Axiarch mitigates these risks by enforcing a firm quality floor and autonomous context loading through constitutional architecture.
 
 ## Core Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  AGENTS.md — Supreme Law                            │  ← Immutable
-│  (AI Behavior Constitution)                         │
-├─────────────────────────────────────────────────────┤
-│  Universal Rules — 30 files × 2 languages (JA/EN)  │  ← Immutable
-│  Engineering, Security, AI, SRE, FinOps, i18n...    │
-├─────────────────────────────────────────────────────┤
-│  Blueprint — Project-Specific Laws                  │  ← Mutable
-│  Project Overview, Feature Specs, Lessons Log       │
-├─────────────────────────────────────────────────────┤
-│  Execution Documents — Per-Task                     │  ← Generated
-│  task.md, implementation_plan.md, walkthrough.md    │
-├─────────────────────────────────────────────────────┤
-│  Feedback Loop — Crystallization                    │  ← Continuous
-│  Lessons → Rules → Better Lessons                   │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 1: Universal (Immutable Constitution)                 │
+│ ├─ AGENTS.md (Supreme Law / Behavior Protocols)             │
+│ └─ Universal Rules (38 files / Immutable Eng. Standards)    │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 2: Blueprint (Mutable Project State)                  │
+│ └─ Project Overview, Feature Specs, Lessons Log             │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 3: Prompts (Optional Execution Framework)             │
+│ └─ Task-specific prompts for auditing and QA execution      │
+├─────────────────────────────────────────────────────────────┤
+│ Execution Documents — Per-Task                       ← Gen. │
+│ task.md, implementation_plan.md, walkthrough.md             │
+├─────────────────────────────────────────────────────────────┤
+│ Feedback Loop — Crystallization                      ← Cont.│
+│ Lessons → Rules(Layer 2) → Better Lessons                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -130,17 +131,17 @@ Only after Steps 1-4 are complete may code modifications begin.
 
 ## CRYSTALLIZATION_PROTOCOL.md — Lesson Auto-Crystallization
 
-A 5-step process for converting lessons into persistent rules:
+A 6-step process for converting lessons into persistent rules:
 
 1. **Classify**: Determine the lesson's domain (DB/Auth → engineering/,
    Security → quality/, Design → design/, etc.)
 2. **Search**: Check if a domain file already exists in the Blueprint
    folder. If yes, append to it.
 3. **Accumulate**: If no domain file exists, temporarily store in
-   governance/010_project_lessons_log.md with Domain/Target Folder tags.
+   core/010_project_lessons_log.md with Domain/Target Folder tags.
 4. **Threshold Check**: When 3+ lessons of the same domain accumulate,
    auto-create a proper domain file and move lessons there.
-5. **Update Index**: Maintain governance/010 as an index of unsorted
+5. **Update Index**: Maintain core/010 as an index of unsorted
    lessons + links to separated domain files.
 
 Design philosophy: Co-location principle — lessons are placed in the
@@ -148,7 +149,7 @@ same folder as related rule files for maximum context efficiency.
 
 ---
 
-## Universal Rules — 30 Files × 2 Languages (JA/EN)
+## Layer 1: Universal Rules (Immutable Constitution)
 
 All rules are immutable ("Constitution"). 2,500+ engineering standards.
 
@@ -227,7 +228,7 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
   A/B testing, Privacy Sandbox, OpenTelemetry, AIOps 2.0, LLM
   observability, 25 anti-patterns.
 
-### operations/ — Operations & SRE (7 files)
+### operations/ — Operations & SRE (8 files)
 - **000_internal_tools.md**: 50 parts, 231 sections. Admin dashboard,
   RBAC/ABAC, audit logging, AI integration, FinOps, 20 anti-patterns.
 - **100_sales_bizdev.md**: Challenger Sale, MEDDIC, Sales Funnel,
@@ -240,6 +241,8 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
   Platform Engineering, AIOps. 55 parts, 166 sections.
 - **500_incident_response.md**: ISO 22301/NIST CSF 2.0, BIA, crisis
   communication, BCP/DR, blameless postmortem. 31 parts.
+- **600_cloud_finops.md**: FinOps Foundation 2026, FOCUS v1.3, AI/ML
+  FinOps, Agentic AI FinOps, K8s FinOps, GreenOps. 25 parts, 57 sections.
 - **700_partnership_ecosystem.md**: Partnership Maturity Model,
   Ecosystem Flywheel, Developer Portal. 9 parts, 34 sections.
 
@@ -254,26 +257,24 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
 - **300_ip_due_diligence.md**: Patents, trade secrets, AI-generated IP,
   exit strategy, DD operations. 50 sections.
 
-### quality/ — Testing & QA (2 files)
+### quality/ — Testing & QA (1 file)
 - **000_qa_testing.md**: Test philosophy, 10+ test types, security
   testing, AI-driven testing, 5-level maturity model. 40 sections.
-- **600_cloud_finops.md**: FinOps Foundation 2026, FOCUS v1.3, AI/ML
-  FinOps, Agentic AI FinOps, K8s FinOps, GreenOps. 25 parts, 57 sections.
 
 ---
 
-## Blueprint Templates — Project-Specific
+## Layer 2: Blueprint Templates (Mutable Project State)
 
 Mutable templates for each project:
-- **governance/000_project_overview.md**: Project tech stack, architecture, goals
-- **governance/010_project_lessons_log.md**: Central lessons index with auto-separation
-- **templates/000_feature_spec_template.md**: Feature spec with Given/When/Then
-  acceptance criteria (SDD core)
-- **templates/100_project_specific_template.md**: Custom project rules
+- **core/000_project_overview.md**: Project tech stack, architecture, goals
+- **core/010_project_lessons_log.md**: Central lessons index with auto-separation
+- **core/998_feature_spec_template.md**: Feature spec with Given/When/Then
+  acceptance criteria (Blueprint First core)
+- **core/999_project_specific_template.md**: Custom project rules
 
 ---
 
-## Prompt Library — 16 Templates × 2 Languages (JA/EN)
+## Layer 3: Prompts (Optional Execution Framework)
 
 Optional reusable prompt templates organized by role:
 
@@ -345,7 +346,7 @@ cp -r axiarch-rules /path/to/your/project/
 ## Language Support
 
 Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
-All 30 Universal Rules, 4 Blueprint templates, and 16 prompt templates are
+All 38 Universal Rules, 4 Blueprint templates, and 16 prompt templates are
 available in both languages. The init.sh setup script handles language
 selection and removes unused language directories automatically.
 

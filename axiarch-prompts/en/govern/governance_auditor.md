@@ -47,12 +47,12 @@ With **"maximizing privacy protection and security hardening" as the top priorit
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`governance/`, `engineering/`, `quality/`, `design/`, `product/`, `ai/`, `specs/`, `templates/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `000_project_overview.md`)
-    2.  **Lessons**: Past lesson logs (e.g., `governance/010_project_lessons_log.md`)
+    2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
     3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`)
-    4.  **Templates**: Feature specifications and project-specific rules (e.g., `templates/000_feature_spec_template.md`, `templates/100_project_specific_template.md`)
+    4.  **Templates**: Feature specifications and project-specific rules (e.g., `core/998_feature_spec_template.md`, `core/999_project_specific_template.md`)
 * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
     * **Target 1: Security**: Security and privacy principles
     * **Target 2: Lessons**: Past failures, lessons, and prohibited patterns
@@ -167,7 +167,8 @@ Based on the analysis results, present corrections and proposals according to th
 3. **Refactor**: Based on user approval or instructions, generate code that fixes violations. The principle is **non-destructive changes (don't break existing functionality)**, but drastic fixes are not avoided for security, privacy, legal, and environment-dependency defects.
 
 4. **Rule Update**: Add and update the knowledge gained from this audit (new rules, lessons) to appropriate files within **Class A (Blueprint) loaded in Phase 0**. Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures for distributed placement to appropriate domain files.
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
+    * **※Crystallization Guard**: Lessons MUST be limited to issues actually found in the codebase. AI MUST NOT add unrelated general best practices without explicit user instruction. Also verify no duplicate exists in `universal/`.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. **"Writing it in the lessons log and calling it done" is prohibited.**
     * **New File Creation**: If no suitable existing file exists, present a new file creation proposal following **3-digit Sparse Numbering** conventions within the same directory.
 
 ---

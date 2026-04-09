@@ -59,7 +59,7 @@ You don't just fix CI failures — you are responsible for **identifying root ca
 * **Rule Update Proposal**:
     * If "lessons" or "new implementation rules (e.g., type definition handling)" were gained through this error fix, present proposals for additions/modifications to **relevant domain files in `axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
     * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the absolute constitution — NOT subject to change proposals.
-    * **Domain Distribution**: The lessons log (`governance/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
     * If no rule changes or additions are needed, explicitly state "No rule updates required."
 
 # Boot Sequence (Startup Behavior)

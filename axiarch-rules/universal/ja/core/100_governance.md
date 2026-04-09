@@ -280,7 +280,7 @@ AIエージェントは以下の手順でルールを参照しなければなら
 ### 5.1. 制定手続き (Enactment Procedure)
 
 -   **憲法適合性審査**: 新規Blueprintの制定時は、その内容が憲法のいかなる条項にも矛盾しないことを確認しなければならない。
--   **テンプレート遵守**: `blueprint/{lang}/templates/100_project_specific_template.md` の構成に準拠すること。
+-   **テンプレート遵守**: `blueprint/{lang}/core/999_project_specific_template.md` の構成に準拠すること。
 -   **採番手続き**: [Part VIII: 採番・命名規約](#part-viii-採番命名規約) に従い採番する。
 
 ### 5.2. Blueprint改定手続き (Blueprint Amendment)
@@ -1831,8 +1831,8 @@ forbid(
 - [300_engineering_standards.md](./300_engineering_standards.md) — エンジニアリング。Feature Flagパターン（Part XXV）の技術的基盤。
 - [INDEX.md](../../INDEX.md) — 全ルールのマスター索引。ファイル追加・変更時に同期更新が必要。
 - [compliance_matrix.md](../../compliance_matrix.md) — 要件対照表。規制-ルールマッピングの管理場所。
-- [010_project_lessons_log.md](../../blueprint/ja/governance/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
-- [100_project_specific_template.md](../../blueprint/ja/templates/100_project_specific_template.md) — Blueprint新規作成時のテンプレート。
+- [010_project_lessons_log.md](../../blueprint/ja/core/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
+- [999_project_specific_template.md](../../blueprint/ja/core/999_project_specific_template.md) — Blueprint新規作成時のテンプレート。
 
 ### クロスリファレンス
 
