@@ -2498,7 +2498,7 @@
 ## 59. コンプライアンス & データ主権戦略 (Compliance & Data Sovereignty Strategy)
 
 ### Rule 59.1: The Regulatory Compliance Framework
--   **Law**: プロジェクトが対象とする法域の**データ保護規制**（GDPR, APPI, CCPA, SOC2等）を特定し、Supabase環境での技術的遵守措置を実装しなければなりません。
+-   **Law**: プロジェクトが対象とする法域の**データ保護規制**（GDPR, Global Privacy Laws, CCPA, SOC2等）を特定し、Supabase環境での技術的遵守措置を実装しなければなりません。
 -   **Action**:
     1.  **Data Classification**: 全データを以下のカテゴリに分類し、取り扱い基準を定義してください:
 

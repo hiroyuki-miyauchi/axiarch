@@ -302,7 +302,7 @@
 *   **Branch Naming Standard**: Use `type/summary` format (e.g., `feat/user-profile`, `fix/login-bug`). Types: `feat`, `fix`, `refactor`, `chore`.
 
 ### 10.1. Commit & PR Standards
-*   **Conventional Commits**: Follow `type(scope): subject` format strictly.
+*   **Conventional Commits**: Follow `type(scope): subject` format strictly. Describe details in the project's native language.
 *   **Atomic Commits**: Each commit contains only "one logical change."
 *   **The Pull Request Template Protocol**: Create `.github/pull_request_template.md` with mandatory "Type of change," "How to test," "Screenshots."
 *   **The CI Timeout Protocol**: All CI jobs must have `timeout-minutes: 10`. Builds exceeding 10 minutes indicate "design failure."
@@ -313,7 +313,7 @@
 *   **Branch Hygiene Mandate**: Delete merged branches immediately. Checking `git branch --merged` is an "engineer's breathing."
 *   **Omnichannel Check**: During review, prioritize checking "Is this also usable outside Web?"
 *   **Deployment Safety Protocol**:
-    *   **Supreme Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the absolute prohibition of AI Git operations.
+    *   **Supreme Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
     *   **The Automated Deployment Mandate (CD First)**: Manual deployment to production is **completely prohibited**. CI/CD pipeline only.
     *   **The Architectural Preservation Protocol**: Mark core feature files with `@preservation_level CRITICAL` to prevent AI-initiated destructive changes.
 *   **Security**: Never commit secrets. Mandate CI secret scanning (TruffleHog).
@@ -382,7 +382,7 @@
 *   **Law**: Add `Tooltip` to all technical terms and metrics in admin UIs, explaining "what it is and how it impacts the business" in layperson terms.
 
 ### 12.4. Localization First Protocol
-*   **Action**: Localize all error and validation messages (including Zod custom errors).
+*   **Action**: Localize all error and validation messages (including Zod custom errors) into the project's native language.
 
 ### 12.5. The Recursive Logic Ban (Infinite Recursion Shield)
 *   **Law**: Prohibit deep recursion with unclear termination conditions. Always define a **Depth Limit** constant.
@@ -566,19 +566,19 @@
 
 | Keyword | Section | Related Rules |
 |---------|---------|---------------|
-| Naming / kebab-case | §1.0 | `340_web_frontend`, `342_mobile_flutter` |
-| DTO / Type Mapping | §13.1, §13.6 | `340_web_frontend` |
-| Performance / LCP / CWV | §2.2 | `340_web_frontend`, `502_site_reliability` |
-| DevSecOps / Security | §3.0 – §3.5 | `600_security_privacy`, `601_data_governance` |
-| Supply Chain Security | §3.5 | `600_security_privacy` |
-| Technical Debt | §4.0 – §4.4 | `720_cloud_finops` |
-| AI-First / Code Review | §5.0 – §5.4 | `400_ai_engineering` |
-| Green Coding | §6.0 – §6.2 | `720_cloud_finops` |
-| Zero Bug Policy | §7.0 – §7.3 | `700_qa_testing`, `503_incident_response` |
-| Git / Version Control | §10.0 – §10.6 | `502_site_reliability` |
-| Documentation Ops | §11.0 – §11.2 | `500_internal_tools` |
-| Feature Flags | §13.13 | `502_site_reliability`, `700_qa_testing` |
-| Mutation Integrity | §13.5 | `340_web_frontend` |
-| CQRS / Cache | §13.4 | `502_site_reliability` |
-| Authentication / Access Control | §13.10 | `600_security_privacy` |
-| Migration Safety | §13.12 | `502_site_reliability` |
+| Naming / kebab-case | §1.0 | `engineering/300_web_frontend.md`, `engineering/400_mobile_flutter.md` |
+| DTO / Type Mapping | §13.1, §13.6 | `engineering/300_web_frontend.md` |
+| Performance / LCP / CWV | §2.2 | `engineering/300_web_frontend.md`, `operations/400_site_reliability.md` |
+| DevSecOps / Security | §3.0 – §3.5 | `security/000_security_privacy.md`, `security/100_data_governance.md` |
+| Supply Chain Security | §3.5 | `security/000_security_privacy.md` |
+| Technical Debt | §4.0 – §4.4 | `operations/600_cloud_finops.md` |
+| AI-First / Code Review | §5.0 – §5.4 | `ai/000_ai_engineering.md` |
+| Green Coding | §6.0 – §6.2 | `operations/600_cloud_finops.md` |
+| Zero Bug Policy | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
+| Git / Version Control | §10.0 – §10.6 | `operations/400_site_reliability.md` |
+| Documentation Ops | §11.0 – §11.2 | `operations/000_internal_tools.md` |
+| Feature Flags | §13.13 | `operations/400_site_reliability.md`, `quality/000_qa_testing.md` |
+| Mutation Integrity | §13.5 | `engineering/300_web_frontend.md` |
+| CQRS / Cache | §13.4 | `operations/400_site_reliability.md` |
+| Authentication / Access Control | §13.10 | `security/000_security_privacy.md` |
+| Migration Safety | §13.12 | `operations/400_site_reliability.md` |

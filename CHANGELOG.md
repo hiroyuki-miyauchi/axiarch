@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **AGENTS.md** — AI行動憲法（8プロトコル定義） / AI Behavior Constitution (8 protocols)
-- **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上のエンジニアリング基準 / 38 files × 2 languages, 2,500+ engineering standards
+- **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上の憲法基準 / 38 files × 2 languages, 2,500+ constitution standards
   - 000: Core & Mindset
   - 100–150: Product & Business Strategy
   - 200: Design & UX

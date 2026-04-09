@@ -335,7 +335,7 @@
 *   **Branch Naming Standard**: ブランチ名は `type/summary` 形式で統一します（例: `feat/user-profile`, `fix/login-bug`）。Types: `feat`, `fix`, `refactor`, `chore`。
 
 ### 10.1. コミット & PR基準 (Commit & PR Standards)
-*   **Conventional Commits**: `type(scope): subject` 形式を厳守します。本文には日本語で詳細を記述します。
+*   **Conventional Commits**: `type(scope): subject` 形式を厳守します。本文にはプロジェクト設定言語で詳細を記述します。
 *   **Atomic Commits**: 1つのコミットには「1つの論理的変更」のみを含めます。
 *   **The Pull Request Template Protocol**: `.github/pull_request_template.md` を作成し、"Type of change", "How to test", "Screenshots" の3項目は必須です。
 *   **The CI Timeout Protocol**: すべてのCIジョブには必ず `timeout-minutes: 10` を設定してください。10分を超えるビルドは「設計ミス」とみなします。
@@ -346,7 +346,7 @@
 *   **Branch Hygiene Mandate**: マージ済みのブランチは即時削除。`git branch --merged` の確認をエンジニアの呼吸としてください。
 *   **Omnichannel Check**: レビュー時は「Web以外でも利用可能か？」を最優先で確認します。
 *   **Deployment Safety Protocol**:
-    *   **Supreme Directive: The AI Git Ban**: AIによるGit操作の絶対禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
+    *   **Supreme Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
     *   **The Automated Deployment Mandate (CD First)**: 本番環境へのデプロイを手動コマンドで行うことは**完全禁止**。CI/CDパイプライン経由のみ。
     *   **The Architectural Preservation Protocol**: プロジェクトの中核機能ファイルには `@preservation_level CRITICAL` ヘッダーを付与し、AIの独断での破壊的変更を防止してください。
 *   **セキュリティ**: APIキー等の機密情報は厳正にコミットせず、CIでシークレットスキャン（TruffleHog）を義務付けます。
@@ -415,7 +415,7 @@
 *   **Law**: 管理画面上の専門用語や指標には必ず `Tooltip` を付与し、「それが何であり、ビジネスにどう影響するか」を素人の言葉で解説してください。
 
 ### 12.4. Localization First Protocol
-*   **Action**: エラーメッセージやバリデーションメッセージは、全て日本語化してください。
+*   **Action**: エラーメッセージやバリデーションメッセージは、全てプロジェクト設定言語にローカライズしてください。
 
 ### 12.5. The Recursive Logic Ban (Infinite Recursion Shield)
 *   **Law**: 終了条件が不明確な「深い再帰処理」を禁止します。再帰的な構造を扱う場合は、必ず **Depth Limit** を定数として定義してください。
@@ -599,20 +599,20 @@
 
 | キーワード | セクション | 関連ルール |
 |-----------|----------|-----------|
-| ネーミング / kebab-case | §1.0 | `340_web_frontend`, `342_mobile_flutter` |
-| DTO / 型変換 | §13.1, §13.6 | `340_web_frontend` |
-| パフォーマンス / LCP / CWV | §2.2 | `340_web_frontend`, `502_site_reliability` |
-| DevSecOps / セキュリティ | §3.0 – §3.5 | `600_security_privacy`, `601_data_governance` |
-| サプライチェーンセキュリティ | §3.5 | `600_security_privacy` |
-| 技術的負債 | §4.0 – §4.4 | `720_cloud_finops` |
-| AIファースト / コードレビュー | §5.0 – §5.4 | `400_ai_engineering` |
-| グリーンコーディング | §6.0 – §6.2 | `720_cloud_finops` |
-| ゼロバグ・ポリシー | §7.0 – §7.3 | `700_qa_testing`, `503_incident_response` |
-| Git / バージョン管理 | §10.0 – §10.6 | `502_site_reliability` |
-| ドキュメント運用 | §11.0 – §11.2 | `500_internal_tools` |
-| Feature Flags | §13.13 | `502_site_reliability`, `700_qa_testing` |
-| ミューテーション整合性 | §13.5 | `340_web_frontend` |
-| CQRS / キャッシュ | §13.4 | `502_site_reliability` |
-| 認証 / アクセス制御 | §13.10 | `600_security_privacy` |
-| マイグレーション安全 | §13.12 | `502_site_reliability` |
+| ネーミング / kebab-case | §1.0 | `engineering/300_web_frontend.md`, `engineering/400_mobile_flutter.md` |
+| DTO / 型変換 | §13.1, §13.6 | `engineering/300_web_frontend.md` |
+| パフォーマンス / LCP / CWV | §2.2 | `engineering/300_web_frontend.md`, `operations/400_site_reliability.md` |
+| DevSecOps / セキュリティ | §3.0 – §3.5 | `security/000_security_privacy.md`, `security/100_data_governance.md` |
+| サプライチェーンセキュリティ | §3.5 | `security/000_security_privacy.md` |
+| 技術的負債 | §4.0 – §4.4 | `operations/600_cloud_finops.md` |
+| AIファースト / コードレビュー | §5.0 – §5.4 | `ai/000_ai_engineering.md` |
+| グリーンコーディング | §6.0 – §6.2 | `operations/600_cloud_finops.md` |
+| ゼロバグ・ポリシー | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
+| Git / バージョン管理 | §10.0 – §10.6 | `operations/400_site_reliability.md` |
+| ドキュメント運用 | §11.0 – §11.2 | `operations/000_internal_tools.md` |
+| Feature Flags | §13.13 | `operations/400_site_reliability.md`, `quality/000_qa_testing.md` |
+| ミューテーション整合性 | §13.5 | `engineering/300_web_frontend.md` |
+| CQRS / キャッシュ | §13.4 | `operations/400_site_reliability.md` |
+| 認証 / アクセス制御 | §13.10 | `security/000_security_privacy.md` |
+| マイグレーション安全 | §13.12 | `operations/400_site_reliability.md` |
 

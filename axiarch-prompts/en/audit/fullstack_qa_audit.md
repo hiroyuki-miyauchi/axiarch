@@ -76,7 +76,7 @@ Scan the entire project using the following steps and perform gap analysis from 
         * **Future-Proofing**: Future-proofing, extensibility, maintainability, SEO, **AI/GEO (AI search) compliance, structured data**.
         * **Performance & FinOps**: Processing speed, scalability, operational costs (financial), resource optimization.
         * **UX/UI & Accessibility**: User-first experience, usability.
-        * **Legal**: Legal compliance (GDPR/APPI, etc.), alignment with terms of service.
+        * **Legal**: Legal compliance (GDPR/Global Privacy Laws, etc.), alignment with terms of service.
 
 ---
 

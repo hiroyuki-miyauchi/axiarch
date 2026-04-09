@@ -213,9 +213,9 @@
         3. **UI Standard**: Frontend MUST use `SecureActionModal` (or `OTPModal`) requiring explicit user approval and authentication.
 *   **Legal Notation**:
     *   **Specific Commercial Transactions**: Based on **applicable local laws** (e.g., Tokusho-ho in Japan), correct disclosure of operator info, return policies, etc. is mandatory.
-    *   **Payment Services Act**: Be cautious when issuing prepaid payment instruments (points) and only do so if compliant with regulations. Principles dictate using Apple/Google IAP.
+    *   **Financial Regulations**: Be cautious when issuing prepaid payment instruments (points) and only do so if compliant with regulations. Principles dictate using Apple/Google IAP.
     *   **The Service Termination Refund Protocol (End of Service Refund)**:
-        *   **Law**: Per Payment Services Act Article 20.1, upon service termination (End of Service), there is obligation to **refund in full** unused paid point balances. Maintain financial state where deposits or reserved assets cover total refund amount.
+        *   **Law**: Per Financial Regulations Article 20.1, upon service termination (End of Service), there is obligation to **refund in full** unused paid point balances. Maintain financial state where deposits or reserved assets cover total refund amount.
 *   **The Zombie Revenue Stop (Dormant Billing Stop)**:
     *   **Risk**: Continued billing while user is not using service (death, extended hospitalization, etc.) creates refund lawsuit and brand damage risk.
     *   **Law**: For paid members with **12 months** since last login, send email to confirm billing continuation; auto-stop subscription if no response.
@@ -261,7 +261,7 @@
             2.  **Bot Deterrence**: Grant only minimal resources to accounts with low-security authentication (Email Only, etc.) to suppress resource waste from bots and disposable accounts.
             3.  **Security Upgrade Incentive**: When users upgrade their security level, provide immediate feedback with concrete resource increases to function as an incentive for security enhancement.
         *   **Rationale**: By making security enhancement a "benefit" rather than an "obligation" for users, you promote voluntary improvement of security levels.
-*   **The 180-Day Expiration Protocol (Payment Services Act Avoidance)**:
+*   **The 180-Day Expiration Protocol (Financial Regulations Avoidance)**:
     *   **Law**: To avoid prepaid payment instrument deposit obligations (over 10M yen), recommend setting self-issued point expiration to **180 days (6 months) from issuance**.
     *   **Action**: Expire points via nightly batch processing with advance notifications (30 days, 7 days before). Issuance of non-expiring points is prohibited in principle.
 

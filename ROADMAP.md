@@ -15,7 +15,7 @@
 ### ✅ v1.0.0 — 初回公開リリース（2026-04-10）
 
 - **AGENTS.md** — AI行動憲法（8プロトコル）
-- **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上のエンジニアリング基準
+- **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上の憲法基準
 - **Blueprint Templates** — プロジェクト固有テンプレート（フォルダ分け構造、Universal と対称化）
 - **LOADING_PROTOCOL.md / CRYSTALLIZATION_PROTOCOL.md** — ルール管理プロトコル
 - **Prompt Library** — 16本 × 2言語（JA/EN）の再利用可能プロンプトテンプレート

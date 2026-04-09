@@ -10,9 +10,7 @@ It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
 or operator skill level.
 
-Designed and battle-tested on Google Antigravity. Compatible with Cursor,
-Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read
-AGENTS.md or Markdown-based rule files.
+Designed and validated through hundreds of real production sessions on Google Antigravity. Expected to work with Cursor, Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified.
 
 ## What Problem Does Axiarch Solve?
 
@@ -250,7 +248,7 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
 - **000_security_privacy.md**: Zero Trust (NIST 800-207), FIDO2,
   OWASP Top 10 2025, AI/LLM security (OWASP LLM Top 10), supply
   chain (SBOM/SLSA), PQC readiness. 22 sections.
-- **100_data_governance.md**: GDPR/APPI/CCPA/EU AI Act, consent
+- **100_data_governance.md**: GDPR/Global Privacy Laws/CCPA/EU AI Act, consent
   management, RegTech, quantum crypto agility. 45 sections.
 - **200_oss_compliance.md**: License classification, SBOM (CycloneDX/
   SPDX), SLSA v1.1, SCA tools. 49 sections, 280+ rules.

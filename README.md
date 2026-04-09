@@ -28,8 +28,8 @@
 ### 設計思想
 
 - **プロンプト集ではありません。** **操縦者が変わっても最低品質の床（Quality Floor）を力強く担保する**、多層防御のガバナンス設計です。
-- **操縦者に依存しない品質ベースラインの死守。** シニアエンジニアが使っても初心者が使っても、憲法が同一のエンジニアリング基準を強制します。
-- **3層ガバナンス分離。** 「絶対不変のエンジニアリング基準（Universal）」と「プロジェクトで成長する動的仕様（Blueprint）」の責務を物理層で分離し、AIの「コンテキスト忘却」や「ルール形骸化」のリスクを構造的に抑え込みます。
+- **操縦者に依存しない品質ベースラインの死守。** シニアエンジニアが使っても初心者が使っても、憲法が同一の憲法基準を強制します。
+- **3層ガバナンス分離。** 「絶対不変の憲法基準（Universal）」と「プロジェクトで成長する動的仕様（Blueprint）」の責務を物理層で分離し、AIの「コンテキスト忘却」や「ルール形骸化」のリスクを構造的に抑え込みます。
 
 ### なぜ必要か
 
@@ -50,16 +50,16 @@
 │ └─ Universal Rules (38ファイル: 不変の普遍的基準)               │
 ├─────────────────────────────────────────────────────────────┤
 │ 第2層: Blueprint (固有仕様 / Mutable)                         │
-│ └─ プロジェクト概要、機能仕様、教訓ログ等の可変ルール              │
+│ └─ プロジェクト概要、機能仕様、教訓ログ等の可変ルール              　│
 ├─────────────────────────────────────────────────────────────┤
-│ 第3層: Prompts (実行エンジン / Optional)                      │
-│ └─ 監査・品質担保タスク用の任意プロンプト・フレームワーク         │
+│ 第3層: Prompts (実行エンジン / Optional)                       │　
+│ └─ 監査・品質担保タスク用の任意プロンプト・フレームワーク            │
 ├─────────────────────────────────────────────────────────────┤
 │ 実行ドキュメント — タスク単位                           ← 生成   │
 │ task.md, implementation_plan.md, walkthrough.md             │
 ├─────────────────────────────────────────────────────────────┤
 │ フィードバックループ — 結晶化                           ← 継続的 │
-│ 教訓 → ルール(第2層) → より良い教訓                           │
+│ 教訓 → ルール(第2層) → より良い教訓                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -70,12 +70,12 @@
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to strictly govern and mitigate quality drift, hallucinations, and uncontrolled AI behavior in production development through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
-Designed and battle-tested on [Google Antigravity](https://labs.google/antigravity). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
+Designed and validated through hundreds of real production sessions on [Google Antigravity](https://labs.google/antigravity). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
 
 ### Core Design Philosophy
 
 - **Not a prompt collection.** It is a **multi-layered governance architecture** that safeguards minimum quality standards **regardless of who operates the AI agent.**
-- **Operator-independent quality baseline.** Whether a senior engineer or a beginner uses the AI, the constitution enforces the same engineering standards.
+- **Operator-independent quality baseline.** Whether a senior engineer or a beginner uses the AI, the constitution enforces the same constitution standards.
 - **Three-layer separation.** By physically decoupling "Immutable Universal standards" from "Mutable Blueprint states", Axiarch structurally mitigates 'context amnesia' and rule atrophy.
 
 ### The Problem
@@ -91,23 +91,23 @@ Designed and battle-tested on [Google Antigravity](https://labs.google/antigravi
 ### Architecture
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│ Layer 1: Universal (Immutable Constitution)                 │
-│ ├─ AGENTS.md (Supreme Law / Behavior Protocols)             │
+┌───────────────────────────────────────────────────────────────┐
+│ Layer 1: Universal (Immutable Constitution)                   │
+│ ├─ AGENTS.md (Supreme Law / Behavior Protocols)               │
 │ └─ Universal Rules (38 files / Immutable Universal Standards) │
-├─────────────────────────────────────────────────────────────┤
-│ Layer 2: Blueprint (Mutable Project State)                  │
-│ └─ Project Overview, Feature Specs, Lessons Log             │
-├─────────────────────────────────────────────────────────────┤
-│ Layer 3: Prompts (Optional Execution Framework)             │
-│ └─ Task-specific prompts for auditing and QA execution      │
-├─────────────────────────────────────────────────────────────┤
-│ Execution Documents — Per-Task                       ← Gen. │
-│ task.md, implementation_plan.md, walkthrough.md             │
-├─────────────────────────────────────────────────────────────┤
-│ Feedback Loop — Crystallization                      ← Cont.│
-│ Lessons → Rules(Layer 2) → Better Lessons                   │
-└─────────────────────────────────────────────────────────────┘
+├───────────────────────────────────────────────────────────────┤
+│ Layer 2: Blueprint (Mutable Project State)                    │
+│ └─ Project Overview, Feature Specs, Lessons Log               │
+├───────────────────────────────────────────────────────────────┤
+│ Layer 3: Prompts (Optional Execution Framework)               │
+│ └─ Task-specific prompts for auditing and QA execution        │
+├───────────────────────────────────────────────────────────────┤
+│ Execution Documents — Per-Task                       ← Gen.   │
+│ task.md, implementation_plan.md, walkthrough.md               │
+├───────────────────────────────────────────────────────────────┤
+│ Feedback Loop — Crystallization                      ← Cont.  │
+│ Lessons → Rules(Layer 2) → Better Lessons                     │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -361,7 +361,7 @@ rm -rf axiarch-prompts/ja  # For English projects
 ```text
 your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
- ├── CLAUDE.md                    ← Claude Code のみ（AGENTS.md へのシムリンク）
+ ├── CLAUDE.md                    ← Claude Code のみ（AGENTS.md へのシムリンク） / Claude Code only
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer
@@ -408,15 +408,15 @@ AIエージェントが登場する以前から、生成AI（ChatGPT等）を新
 - **Vibe Coding の引力。** 明示的な制約がなければ、すべてのセッションが "vibe coding" に引き寄せられる — 正しく見えるが、確立されたパターンを暗黙に違反するコード。
 - **知見の蒸発。** 苦労して得た教訓が失われ、同じ問題を何度も再発見させられる。
 
-業界全体も同じ問題に直面していました。AIが生成したコードがセキュリティ脆弱性の主要な原因となりつつあるとの報告、"AI slop"現象 — 低品質・重複コードの氾濫、コンテキストウィンドウの劣化による一貫性の喪失。個別ステップの成功率95%でも、マルチステップのワークフローでは60%以上の失敗率に膨れ上がります。
+業界全体も同じ問題に直面していました。AIが生成したコードがセキュリティ脆弱性の主要な原因となりつつあるとの報告、"AI slop"現象 — 低品質・重複コードの氾濫、コンテキストウィンドウの劣化による一貫性の喪失。たとえ個別ステップの成功率が高くとも、マルチステップのワークフローでは失敗率が大きく膨れ上がります。
 
 **気づき：** 問題はAIモデルではなく、*ガバナンスの不在*でした。セッション、操縦者、コンテキストリセットを超えて生き残る、永続的で強制力のあるガバナンス構造 — 「憲法」 — が存在しなかったのです。
 
-Axiarchがその答えです。作者自身、フロントエンドエンジニアとしての経験はあるものの、バックエンドやインフラは未経験からのスタートでした。だからこそ、**特定の言語やフレームワークに依存せず、エンジニア経験の深さに関わらず、AIと協働するすべての開発者 — 非エンジニアや個人開発者を含む — が最低限の品質底上げを実現できる**フレームワークを目指しました。
+この問題に対する一つの実践的アプローチとして構築したのが Axiarch です。作者自身、フロントエンドエンジニアとしての経験はあるものの、バックエンドやインフラは未経験からのスタートでした。だからこそ、**特定の言語やフレームワークに依存せず、エンジニア経験の深さに関わらず、AIと協働するすべての開発者 — 非エンジニアや個人開発者を含む — が最低限の品質底上げを実現できる**フレームワークを目指しました。
 
 世界中の開発者がAIエージェントの恩恵を最大限に受けられるように。特にAI活用においてまだ発展途上にある日本からの発信として、自国のAI活用促進にも貢献できればと考えています。そして何より、この取り組み自体が自身の知見を深めるプロセスでもあります。
 
-成果：2,500以上のエンジニアリング基準を網羅する38のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓を自動的にルールに変換するCrystallization Protocol。すべて、たった一つの `AGENTS.md` 憲法を通じて強制されます。
+成果：2,500以上の憲法基準を網羅する38のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓を自動的にルールに変換するCrystallization Protocol。すべて、たった一つの `AGENTS.md` 憲法を通じて強制されます。
 
 ### 🇺🇸 Why Axiarch Was Built
 
@@ -435,13 +435,13 @@ So the governance architecture was built **before** development began. Then it w
 - **Vibe coding gravity.** Without explicit constraints, every session tended toward "vibe coding" — code that looked correct but silently violated established patterns.
 - **Knowledge evaporation.** Hard-won lessons were lost and had to be re-discovered repeatedly.
 
-The industry was facing the same problem at scale. AI-generated code becoming a common vector for security vulnerabilities. The "AI slop" phenomenon — proliferation of low-quality, duplicated code — accelerating technical debt. Context window degradation causing models to lose coherence. Individual step reliability of 95% compounding to 60%+ failure rates across multi-step workflows.
+The industry was facing the same problem at scale. AI-generated code becoming a common vector for security vulnerabilities. The "AI slop" phenomenon — proliferation of low-quality, duplicated code — accelerating technical debt. Context window degradation causing models to lose coherence. High individual step reliability compounding into significant failure rates across multi-step workflows.
 
 **The realization:** The problem wasn't the AI model. It was the absence of *governance*. There was no "constitution" — no persistent, enforceable set of rules that survived across sessions, operators, and context resets.
 
-Axiarch was the answer. The author's own background — front-end engineering experience, but no prior back-end or infrastructure expertise — shaped the core design principle: **language-agnostic, framework-agnostic, and accessible regardless of engineering experience. A Constitution-Driven AI Agent Governance Framework that enables any developer working with AI — including non-engineers and solo developers — to raise their minimum quality floor.**
+Axiarch was built as one practical approach to this challenge. The author's own background — front-end engineering experience, but no prior back-end or infrastructure expertise — shaped the core design principle: **language-agnostic, framework-agnostic, and accessible regardless of engineering experience. A Constitution-Driven AI Agent Governance Framework that enables any developer working with AI — including non-engineers and solo developers — to raise their minimum quality floor.**
 
-The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 38 Universal Rule files covering 2,500+ engineering standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, a Crystallization Protocol that automatically converts lessons into rules. All enforced through a single `AGENTS.md` constitution that any AI agent can read.
+The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 38 Universal Rule files covering 2,500+ constitution standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, a Crystallization Protocol that automatically converts lessons into rules. All enforced through a single `AGENTS.md` constitution that any AI agent can read.
 
 ---
 

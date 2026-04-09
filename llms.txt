@@ -51,7 +51,7 @@ cp -r axiarch-rules /path/to/your/project/
 
 | Agent | Status |
 |:------|:-------|
-| Google Antigravity | ✅ Verified — battle-tested in production |
+| Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
 | Cursor | ⚠️ Expected to work (reads AGENTS.md) |
 | Claude Code | ⚠️ Expected to work (symlink AGENTS.md → CLAUDE.md) |
 | GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |

@@ -53,7 +53,7 @@
 *   **扱うデータの種類**:
     *   [個人情報、決済情報、医療情報など]
 *   **適用される法規制**:
-    *   [GDPR, APPI, 資金決済法, 薬機法など]
+    *   [GDPR, Global Privacy Laws, Financial Regulations, Healthcare Regulationsなど]
 
 ---
 
@@ -67,7 +67,7 @@
 | 技術選定・フレームワーク | §2 技術スタック |
 | ブランドカラー・フォント・デザイン例外 | §3 デザインシステム上書き |
 | KPI・LTV・CAC・ユニットエコノミクス | §4 ビジネスKPI |
-| 個人情報・法規制・GDPR・APPI | §5 セキュリティと法務 |
+| 個人情報・法規制・GDPR・Global Privacy Laws | §5 セキュリティと法務 |
 
 ### クロスリファレンス（セクション → Universal ルール）
 

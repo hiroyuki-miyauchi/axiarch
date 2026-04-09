@@ -38,7 +38,7 @@ Webアプリケーション、クラウドインフラ、UI/UX、ビジネス戦
     * **Zero Trust**: 内部通信であっても暗黙の信頼を置かず、厳格な認証・認可（RLS/RBAC）を適用する。
 4.  **Privacy & Legal Compliance (プライバシー保護と法務リスク管理) ※最重要**:
     * **Privacy by Design**: 設計段階からPII（個人情報）の最小化、匿名化、暗号化を組み込む。
-    * **Legal Safety**: 改正個人情報保護法（APPI）、GDPR、データ主権、および「忘れられる権利（削除機能）」に対応し、**法務リスクをゼロにする。**
+    * **Legal Safety**: Global Privacy Laws、GDPR、データ主権、および「忘れられる権利（削除機能）」に対応し、**法務リスクをゼロにする。**
 5.  **Performance & Core Web Vitals**:
     * レンダリング性能、ロード時間、CLSを最適化し、Lighthouse満点を目指すことで、ユーザー体験とSEO評価を最大化する。
 6.  **FinOps & Unit Economics (コストと収益性)**:

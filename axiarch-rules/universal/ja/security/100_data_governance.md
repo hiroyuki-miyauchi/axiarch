@@ -97,7 +97,7 @@
 | 規制 | 管轄 | 発効 | 主要義務 | 罰則上限 |
 |:-----|:-----|:-----|:---------|:---------|
 | **GDPR** | EU/EEA | 2018 | 同意管理、DPO設置、DPIA、データ主体の権利保障 | 全世界売上の4% or €20M |
-| **APPI** (改正) | 日本 | 2022 (2027改正予定) | 仮名加工・匿名加工、越境移転規制、漏洩報告義務 | 法人に1億円以下 |
+| **Global Privacy Laws** (改正) | 日本 | 2022 (2027改正予定) | 仮名加工・匿名加工、越境移転規制、漏洩報告義務 | 法人に1億円以下 |
 | **CCPA/CPRA** | 米国カリフォルニア | 2020/2023 | オプトアウト権、Sensitive PI保護、ADMT規制 | $7,500/件（故意） |
 | **EU AI Act** | EU | 2024施行(段階適用) | リスク分類、高リスクAI適合性評価、GPAI義務 | 全世界売上の7% or €35M |
 | **DSA/DMA** | EU | 2022/2024 | プラットフォーム透明性、ゲートキーパー義務 | 全世界売上の6% |
@@ -231,7 +231,7 @@
 -   **SLA管理**: 要求種別ごとの法定期限を自動追跡し、期限5日前にアラートを発火:
     -   GDPR: **30日**（延長時は+60日、理由通知必須）
     -   CCPA/CPRA: **45日**（延長時は+45日）
-    -   APPI: **30日**（速やかに対応する義務）
+    -   Global Privacy Laws: **30日**（速やかに対応する義務）
 -   **Anti-Pattern**: DSARをCSチームの手動メール対応に依存する運用は規模拡大時に破綻する。
 
 #### 3.6.1. DSAR API設計パターン
@@ -241,7 +241,7 @@
 interface DSARRequest {
   requestType: 'access' | 'deletion' | 'correction' | 'portability' | 'opt-out';
   subjectId: string;         // ユーザーIDまたはメール
-  jurisdiction: 'GDPR' | 'CCPA' | 'APPI' | 'LGPD' | 'PIPA';
+  jurisdiction: 'GDPR' | 'CCPA' | 'Global Privacy Laws' | 'LGPD' | 'PIPA';
   verificationMethod: 'authenticated' | 'email' | 'id_document';
   requestedAt: string;       // ISO 8601
 }
@@ -257,7 +257,7 @@ interface DSARResponse {
 const DSAR_DEADLINES: Record<string, number> = {
   'GDPR': 30,    // 30日（延長可能+60日）
   'CCPA': 45,    // 45日（延長可能+45日）
-  'APPI': 30,    // 30日
+  'Global Privacy Laws': 30,    // 30日
   'LGPD': 15,    // 15日
   'PIPA': 10,    // 10日
 };
@@ -534,7 +534,7 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **開示項目**: 事業者名、住所、電話番号、代表者名、販売価格、支払時期・方法、商品引渡時期、キャンセルポリシー。
 -   **最終確認画面**: 決済直前画面に**契約期間**、**課金タイミング**、**解約条件**を明確表示。
 
-#### 6.1.2. 資金決済法
+#### 6.1.2. Financial Regulations
 -   **供託金回避**: 前払式支払手段の発行は供託金義務のリスクあり。原則Apple/GoogleのIAP利用。
 
 #### 6.1.3. 広告表示義務（ステルスマーケティング規制）
@@ -950,7 +950,7 @@ SELECT cron.schedule(
 
 ### 12.4. 法域別データ保持期間テンプレート
 
-| データカテゴリ | GDPR（EU） | CCPA/CPRA（CA） | APPI（日本） | 共通推奨 |
+| データカテゴリ | GDPR（EU） | CCPA/CPRA（CA） | Global Privacy Laws | 共通推奨 |
 |:-------------|:----------|:--------------|:-----------|:--------|
 | **顧客アカウント情報** | 目的達成まで + 退会後3年 | 開示義務: 12ヶ月分 | 利用目的達成まで | 退会後**最長3年** |
 | **取引・決済データ** | 法定義務期間（税: 7年） | 法定義務期間 | 法定義務期間（税: 7年） | **法定期間に準拠** |
@@ -959,7 +959,7 @@ SELECT cron.schedule(
 | **CCTV・監視映像** | 72時間〜30日（国による） | 規定なし | 規定なし | **最長30日** |
 | **従業員データ** | 雇用終了後3〜10年（国による） | 雇用終了後の合理的期間 | 退職後3年（労基法） | **法定期間に準拠** |
 | **健康データ** | HIPAA: 6年 / GDPR: 目的達成まで | 規定なし | 個情法 + 医師法 | **法定期間に準拠** |
-| **子供のデータ** | COPPA/GDPR: 目的達成後速やかに削除 | COPPA: 合理的期間 | APPI: 同左 | **最短期間で削除** |
+| **子供のデータ** | COPPA/GDPR: 目的達成後速やかに削除 | COPPA: 合理的期間 | Global Privacy Laws: 同左 | **最短期間で削除** |
 
 -   **Mandate**: 上記はテンプレート。Blueprint側で具体的値を定義すること。
 -   **CCPA/CPRA開示義務**: プライバシーポリシーで各カテゴリの具体的保持期間を**公開する義務**あり。
@@ -1064,7 +1064,7 @@ SELECT cron.schedule(
 | 法域 | 監督機関への通知期限 | ユーザー通知 | 備考 |
 |:-----|:-------------------|:-----------|:-----|
 | **GDPR** | **72時間以内** | 高リスク時は「不当な遅延なく」 | 改正案で**96時間**に緩和検討中 |
-| **APPI** | 速報: **3-5日以内** / 確報: **30日以内** | 本人への通知義務 | 2027年改正で変更の可能性 |
+| **Global Privacy Laws** | 速報: **3-5日以内** / 確報: **30日以内** | 本人への通知義務 | 2027年改正で変更の可能性 |
 | **CCPA/CPRA** | 法定期限の明示なし | 「最も迅速な手段」で通知 | 州司法長官への報告は500件以上 |
 | **CA SB 446** | AG通知: **15日以内**（500件超） | **30日以内** | **2026.1施行**。従来の「最も迅速な手段」を30日に明確化 |
 | **New York** | NYDFS通知義務 | **30日以内** | **2024.12施行**。2025.3より「医療情報」「健康保険情報」もPI定義に追加 |
@@ -1107,7 +1107,7 @@ SELECT cron.schedule(
 -   [ ] 影響を受ける法域の特定（データ主体の所在地ベース）
 -   [ ] 各法域の**最短通知期限**の特定（§14.4参照）
 -   [ ] Lead Supervisory Authority（主導監督機関）の特定
--   [ ] 各法域の法定通知フォーマットの準備（GDPR: Art.33/34、APPI: PPC様式）
+-   [ ] 各法域の法定通知フォーマットの準備（GDPR: Art.33/34、Global Privacy Laws: PPC様式）
 -   [ ] 外部法律事務所（現地法域）の事前選定と緊急連絡体制の確認
 -   [ ] 多言語での影響者通知テンプレートの事前準備
 
@@ -1127,7 +1127,7 @@ interface JurisdictionDeadline {
 
 const NOTIFICATION_DEADLINES: JurisdictionDeadline[] = [
   { jurisdiction: 'EU/EEA', regulation: 'GDPR Art.33', deadlineHours: 72, authority: 'Lead DPA', notificationUrl: '' },
-  { jurisdiction: 'Japan', regulation: 'APPI', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
+  { jurisdiction: 'Japan', regulation: 'Global Privacy Laws', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
   { jurisdiction: 'US-CA', regulation: 'CCPA/SB446', deadlineHours: 720, authority: 'CA AG', notificationUrl: '' },
   { jurisdiction: 'Australia', regulation: 'Privacy Act (NDB)', deadlineHours: 720, authority: 'OAIC', notificationUrl: '' },
   { jurisdiction: 'US-Federal', regulation: 'CIRCIA', deadlineHours: 72, authority: 'CISA', notificationUrl: '' },
@@ -2263,7 +2263,7 @@ function determineRequiredAssessments(
 
 | 評価カテゴリ | 評価項目 | 重要度 |
 |:-----------|:---------|:------|
-| **規制カバレッジ** | 対象法域の規制への対応範囲（GDPR/CCPA/APPI/AI Act等） | 必須 |
+| **規制カバレッジ** | 対象法域の規制への対応範囲（GDPR/CCPA/Global Privacy Laws/AI Act等） | 必須 |
 | **自動追跡** | 規制変更の自動検知・アラート機能 | 必須 |
 | **統合性** | 既存ツール（SIEM、GRC、CMPなど）との連携 | 重要 |
 | **レポーティング** | 取締役会報告・規制当局提出用レポートの自動生成 | 重要 |
@@ -2474,7 +2474,7 @@ const cryptoConfig: CryptoConfig = {
 | キーワード | 参照セクション |
 |:----------|:-------------|
 | GDPR / Digital Omnibus | §2.1, §2.3, §3.4, §4.7, §6.2.1, §6.2.2, §16.2 |
-| APPI / 個人情報保護法 / 2027改正 | §2.1, §3.5, §6.1, §6.1.6 |
+| Global Privacy Laws / Privacy Laws / 2027改正 | §2.1, §3.5, §6.1, §6.1.6 |
 | CCPA / CPRA / ADMT | §2.1, §3.6, §3.7, §6.3.1, §6.3.2 |
 | EU AI Act / 段階施行 | §2.1, §2.3, §11.1-11.4, §25, §31 |
 | DSA / DMA | §2.1, §6.2.3, §15.3, §24.1 |
@@ -2490,7 +2490,7 @@ const cryptoConfig: CryptoConfig = {
 | 仮名加工 / 匿名加工 | §3.5 |
 | DPIA | §6.2.1, §6.2.2 |
 | 特定商取引法 | §6.1.1 |
-| 資金決済法 | §6.1.2 |
+| Financial Regulations | §6.1.2 |
 | ステルスマーケティング | §6.1.3 |
 | メール配信 | §6.1.4 |
 | 子供データ保護 / 年齢確認 | §7 |

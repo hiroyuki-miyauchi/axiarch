@@ -2411,7 +2411,7 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 
 ### §246. 同意管理プラットフォーム（CMP）
 
-- **用途**: GDPR/APPI/CCPA等の各地域プライバシー法対応
+- **用途**: GDPR/Global Privacy Laws/CCPA等の各地域プライバシー法対応
 - **標準SDK**: TCF 2.0（IAB Transparency & Consent Framework）準拠のCMP SDKを採用
 - **初回同意**: アプリ初回起動時に同意管理UIを表示。同意なきデータ収集は完全禁止
 - **同意状態管理**: `ConsentStatus`（`granted`/`denied`/`notDetermined`）をRiverpod Providerで管理

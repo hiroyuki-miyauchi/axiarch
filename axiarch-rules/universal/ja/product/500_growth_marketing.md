@@ -147,7 +147,7 @@
     *   **Law**: 全ての公開ページにおいて、`generateMetadata` を用いた `canonical` URLのリターンを義務付けます。
     *   **Action**: ページ遷移時にパンくずリスト（Breadcrumbs）の階層構造をJSON-LDとして動的に生成し、クローラにサイト構造を正確に伝えてください。
 *   **The Consent Mode v2 Protocol (Compliance Tracking)**:
-    *   **Context**: 欧州経済領域 (EEA) や日本国内の法規制（改正電気通信事業法等）への対応。
+    *   **Context**: 欧州経済領域 (EEA) や日本国内の法規制（改正Telecommunications Regulations等）への対応。
     *   **Law**: Google Consent Mode v2 を実装し、ユーザーの同意状態 (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`) に応じてタグの発火を動的に制御してください。
     *   **Action**: 同意管理プラットフォーム (CMP) を導入するか、自社で同意取得 UI を構築し、`gtag('consent', 'default'|'update', ...)` を正確に叩くフローを標準化します。
 *   **The Data Layer Standard (Standardized Observation)**:

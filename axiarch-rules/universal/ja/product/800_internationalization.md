@@ -53,7 +53,7 @@
 - **L10n ≠ Translation**: ローカライゼーションは翻訳ではない。文化適応・法的適応・技術適応を含む包括的プロセス
 - **優先順位の階層**:
   1. **機能的正確性**: データの正確な表示（通貨・日付・数値）
-  2. **法的コンプライアンス**: 各国規制への準拠（GDPR・APPI・CCPA等）
+  2. **法的コンプライアンス**: 各国規制への準拠（GDPR・Global Privacy Laws・CCPA等）
   3. **文化的適切性**: 文化的に不適切な表現・デザインの排除
   4. **言語的品質**: 翻訳の自然さ・専門用語の正確性
 - **Locale-Agnostic Code**: ビジネスロジックはロケールに依存しない設計。ロケール依存処理はUI層・フォーマット層に集約
@@ -598,7 +598,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 - **DMA**: ゲートキーパーのデータポータビリティ義務
 - **EU Data Act**: 2025年9月完全施行
 - **EU AI Act**: 2025年2月禁止AI施行、2025年8月汎用AI規則適用、**2026年8月高リスクAI規則施行**。多言語AI出力の透明性義務
-- **規制チェックリスト**: GDPR・CCPA/CPRA・APPI・PIPL・LGPD・PIPA・DPDPA・EAA・EU AI Act
+- **規制チェックリスト**: GDPR・CCPA/CPRA・Global Privacy Laws・PIPL・LGPD・PIPA・DPDPA・EAA・EU AI Act
 
 ### セクション 50: 多言語E-Invoicing
 
@@ -825,7 +825,7 @@ npx messageformat-validator locales/**/*.json
 
 - **EU**: TCF 2.2準拠CMP。事前同意必須
 - **米国**: GPP対応。オプトアウトリンク
-- **日本**: APPI/電気通信事業法準拠。外部送信規律
+- **日本**: Global Privacy Laws/Telecommunications Regulations準拠。外部送信規律
 - **技術実装**: ロケール別CMP SDK初期化。同意状態に基づくスクリプト動的制御
 
 ### セクション 74: データ越境移転の技術的制御
@@ -975,7 +975,7 @@ npx messageformat-validator locales/**/*.json
 - **ハングル組合せ**: 初声・中声・終声の組合せ処理。検索時のチョソンキー（初声）検索対応
 - **助詞変化**: 前の文字のパッチム（終声）有無で助詞変化（은/는、이/가、을/를）。プログラム的処理必要
 - **韓国語フォント**: `Noto Sans KR` プライマリ。`Malgun Gothic`/`Apple SD Gothic Neo` フォールバック
-- **PIPA準拠**: 韓国個人情報保護法。同意取得の厳格な要件
+- **PIPA準拠**: 韓国Privacy Laws。同意取得の厳格な要件
 - **住民登録番号（RRN）**: 収集制限規定。代替認証手段（PASS認証等）の提供
 - **韓国ウォン表示**: ゼロデシマル通貨。`₩` 記号前置
 
@@ -1029,7 +1029,7 @@ npx messageformat-validator locales/**/*.json
 - **タイ語ソート**: タイ語辞書順は複雑。ICU Collation活用
 - **仏暦**: 西暦+543。`Intl.DateTimeFormat` の `calendar: 'buddhist'`
 - **タイ数字**: `๐๑๒๓` 使用可能（ユーザー設定で切替）
-- **PDPA（タイ個人情報保護法）**: 2022年施行。同意管理義務
+- **PDPA（タイPrivacy Laws）**: 2022年施行。同意管理義務
 
 ### セクション 97: ベトナム語
 
@@ -1290,7 +1290,7 @@ npx messageformat-validator locales/**/*.json
 | [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI/LLM、RAG、Agentic AI |
 | [502_site_reliability.md](../operations/400_site_reliability.md) | マルチリージョン可用性 |
 | [600_security_privacy.md](../security/000_security_privacy.md) | データ保護、暗号化、暗号規制 |
-| [601_data_governance.md](../security/100_data_governance.md) | GDPR、APPI、越境データ、EU Data Act |
+| [601_data_governance.md](../security/100_data_governance.md) | GDPR、Global Privacy Laws、越境データ、EU Data Act |
 | [700_qa_testing.md](../quality/000_qa_testing.md) | VRT、アクセシビリティテスト |
 | [720_cloud_finops.md](../operations/600_cloud_finops.md) | クラウドコスト管理、GreenOps |
 | [802_language_protocol.md](../core/200_language_protocol.md) | 言語使用プロトコル、UI用語集 |

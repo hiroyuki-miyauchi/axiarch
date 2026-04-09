@@ -992,7 +992,7 @@
 ### 24.1. The Customer Support Compliance Standard（サポートコンプライアンス基準）
 -   **Law**: サポート業務において以下の規制・法令を遵守すること。
 -   **Data Protection**:
-    -   GDPR/APPI/CCPA等のデータ保護法に準拠した個人情報の取り扱い
+    -   GDPR/Global Privacy Laws/CCPA等のデータ保護法に準拠した個人情報の取り扱い
     -   サポートチケット内のPIIの最小限保持・期限付き削除
     -   ユーザーからのデータアクセス要求・削除要求（DSR）への対応プロセス
 -   **Consumer Rights**:
@@ -1012,9 +1012,9 @@
 -   **Response SLA**:
     -   GDPR: **30日以内**
     -   CCPA: **45日以内**
-    -   APPI: **遅滞なく**
+    -   Global Privacy Laws: **遅滞なく**
 -   **Process**: サポートチームがDSRを受領した場合、専用のワークフローを通じてデータ保護チームにルーティングすること。
--   **Cross-Reference**: `601_data_governance.md` — GDPR/APPI/CCPA準拠、データ主体の権利
+-   **Cross-Reference**: `601_data_governance.md` — GDPR/Global Privacy Laws/CCPA準拠、データ主体の権利
 
 ---
 
@@ -1647,6 +1647,6 @@
 | `502_site_reliability.md` | インシデント管理、可観測性 |
 | `503_incident_response.md` | P0インシデントのエスカレーション、障害コミュニケーション |
 | `600_security_privacy.md` | SPF/DKIM/DMARC、ボット防御、プロンプトインジェクション |
-| `601_data_governance.md` | GDPR/APPI/CCPA、ダークパターン禁止、子供保護、EU AI Act |
+| `601_data_governance.md` | GDPR/Global Privacy Laws/CCPA、ダークパターン禁止、子供保護、EU AI Act |
 | `700_qa_testing.md` | テスト戦略、アクセシビリティテスト |
 | `802_language_protocol.md` | 通知・メール言語プロトコル、多言語対応 |

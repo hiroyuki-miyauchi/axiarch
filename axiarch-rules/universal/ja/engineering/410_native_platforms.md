@@ -1717,7 +1717,7 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §150. 規制コンプライアンス
 
 - **GDPR**: EUユーザーへのデータ処理同意取得。データポータビリティ・削除権対応
-- **APPI**: 日本の個人情報保護法2025年改正への対応
+- **Global Privacy Laws**: 日本のPrivacy Laws2025年改正への対応
 - **CCPA/CPRA**: カリフォルニア消費者プライバシー法対応
 - **EU CRA（Cyber Resilience Act）**: 2027年施行。SBOM・脆弱性報告義務
 - **児童保護**: COPPA準拠。13歳未満ユーザーへの特別保護
@@ -2119,7 +2119,7 @@ fun `loadOrders should emit Success state`() = runTest {
 | Wear OS / watchOS | §140–§142 |
 | Android XR / ARCore | §143–§144 |
 | グリーンエンジニアリング / バッテリー | §145–§147 |
-| EU CRA / SBOM / GDPR / APPI | §150, §174 |
+| EU CRA / SBOM / GDPR / Global Privacy Laws | §150, §174 |
 | デザインシステム / Material 3 Expressive / HIG | §159–§161 |
 | Embedded Swift / IoT / Matter | §162–§164 |
 | HTTP/3 / gRPC / WebTransport | §165–§167 |

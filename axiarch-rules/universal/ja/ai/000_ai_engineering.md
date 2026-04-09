@@ -2050,7 +2050,7 @@ Output: {出力例}
 |:---|:---|:---|
 | CMS Triple Write | `341_headless_cms.md` | RAGデータソース品質 |
 | セキュリティ・PII | `600_security_privacy.md` | PII分類、プロンプトインジェクション |
-| データプライバシー | `601_data_governance.md` | GDPR、APPI、データ最小化 |
+| データプライバシー | `601_data_governance.md` | GDPR、Global Privacy Laws、データ最小化 |
 | API設計 | `301_api_integration.md` | AI API設計、レート制限 |
 | 分析・可観測性 | `401_data_analytics.md` | LLM可観測性、GenAIメトリクス |
 | QAテスト | `700_qa_testing.md` | AI駆動テスト、ハルシネーション検出 |

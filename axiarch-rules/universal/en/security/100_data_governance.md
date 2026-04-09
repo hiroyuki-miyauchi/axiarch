@@ -2474,7 +2474,7 @@ const cryptoConfig: CryptoConfig = {
 | Pseudonymization / Anonymization | §3.5 |
 | DPIA | §6.2.1, §6.2.2 |
 | Commercial Transactions Act | §6.1.1 |
-| Payment Services Act | §6.1.2 |
+| Financial Regulations | §6.1.2 |
 | Stealth Marketing | §6.1.3 |
 | Email Compliance | §6.1.4 |
 | Children's Data Protection / Age Gate | §7 |

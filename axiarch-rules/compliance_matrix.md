@@ -49,7 +49,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **ブラウザ・OS互換性** <br> Browser/OS Compatibility | `universal/*/400_site_reliability.md` | "ブラウザ互換性" <br> "Browser Compatibility" |
 | **カオスエンジニアリング** <br> Chaos Engineering | `universal/*/400_site_reliability.md` | "カオスエンジニアリング" <br> "Chaos Engineering" |
 | **セキュリティ最優先** <br> Security First | `universal/*/000_security_privacy.md` | "レベル1: セキュリティ > UX" <br> "Level 1: Security > UX" |
-| **法務・法的観点** <br> Legal Perspective | `universal/*/100_data_governance.md` | "GDPR/個人情報保護法", "利用規約" <br> "GDPR/CCPA/ePrivacy", "Terms of Service" |
+| **法務・法的観点** <br> Legal Perspective | `universal/*/100_data_governance.md` | "GDPR/Privacy Laws", "利用規約" <br> "GDPR/CCPA/ePrivacy", "Terms of Service" |
 | **利用規約・プライバシー観点** <br> Terms & Privacy Perspective | `universal/*/100_data_governance.md` | "プライバシーポリシー", "データ最小化" <br> "Privacy Policy", "Data Minimization" |
 | **ライセンス・プラグイン規約** <br> License/Plugin Rules | `universal/*/200_oss_compliance.md` | "ライセンスホワイトリスト" <br> "License Whitelist" |
 | **テスト観点** <br> Testing Perspective | `universal/*/000_qa_testing.md` | "シフトレフトテスト", "Flakyテスト" <br> "Shift Left Testing", "Flaky Tests" |
