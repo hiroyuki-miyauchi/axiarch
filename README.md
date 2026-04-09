@@ -395,7 +395,7 @@ your-project/
 
 Axiarch（アクシアーク）は、AIとの協働における品質課題への危機感から生まれました。
 
-AIエージェントが登場する以前から、生成AI（ChatGPT等）を新規事業の構想や実務の中で活用していました。コードを書かせてみることもありましたが、本格的な開発に使ったわけではありません。それでも、AIと向き合う中でひとつだけ確信していたことがありました — **ハルシネーション、コンテキストの喪失、品質のブレ。明確なルールなしにAIを使い続ければ、いつか必ず破綻する。**
+AIエージェントが登場する以前から、生成AI（ChatGPT等）を新規事業の構想や実務の中で活用していました。コードを書かせてみることもありましたが、本格的な開発に使ったわけではありません。それでも、AIと向き合う中でひとつだけ確信していたことがありました — **ハルシネーション、コンテキストの喪失、品質のブレ。明確なルールなしにAIを使い続ければ、品質は静かに劣化し、立て直しが難しくなる。**
 
 2025年、[Google Antigravity](https://labs.google/antigravity)のようなAIエージェントが登場したとき、直感しました：**「ガバナンス構造なしにこれを使い始めたら取り返しがつかない」**と。逆に言えば、**最初から「憲法」を整備すれば、品質を劇的に底上げできる**はずだと。
 
@@ -422,7 +422,7 @@ AIエージェントが登場する以前から、生成AI（ChatGPT等）を新
 
 Axiarch was born from a conviction that AI without governance will inevitably fail.
 
-Before AI agents existed, working with generative AI (ChatGPT, etc.) for business planning and day-to-day work revealed a persistent truth — **hallucinations, context loss, and inconsistent quality are inevitable without explicit rules.** AI is powerful, but using it without governance guarantees eventual failure.
+Before AI agents existed, working with generative AI (ChatGPT, etc.) for business planning and day-to-day work revealed a persistent truth — **hallucinations, context loss, and inconsistent quality are inevitable without explicit rules.** AI is powerful, but using it without governance means quality will quietly erode in ways that become increasingly hard to course-correct.
 
 When AI agents like [Google Antigravity](https://labs.google/antigravity) emerged in 2025, the intuition was immediate: **"Starting without a governance structure would be irreversible."** Conversely, **establishing a "constitution" from day one could dramatically raise the quality floor.**
 
