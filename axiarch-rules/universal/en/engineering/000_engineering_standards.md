@@ -449,7 +449,7 @@
     *   **Strict Segregation**: Physically separate DTOs containing sensitive fields into `AdminDTO` / `PublicDTO` at the type level.
     *   **No Raw Return**: Server Actions/APIs must never return raw DB types. Always return DTO types.
     *   **No Blind Spread**: Spread syntax (`...user`) in DTO transformation layers is **completely prohibited** as it leaks future sensitive columns.
-    *   **Select Specification Pattern**: `SELECT *` or `.select('*')` is prohibited. Explicitly enumerate required columns.
+    *   **Strict Field Selectionification Pattern**: `SELECT *` or `.select('*')` is prohibited. Explicitly enumerate required columns.
 *   **DTO Sync Obligation**: When Backend DTOs change, Frontend Props types must be updated **simultaneously**. One-sided updates directly cause `undefined` reference runtime errors.
 *   **DTO Boundary Casting**: Convert DB results to DTOs using explicit mapping functions (`toDTO(dbResult): MyDTO`), not `as any`.
 *   **DTO Segregation**: Prohibit bloated single type definition files. Split by feature domain (e.g., `types/store.ts`, `types/user.ts`).

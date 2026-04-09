@@ -298,7 +298,7 @@ AIエージェントは以下の手順でルールを参照しなければなら
     1.  **Phase 1（非推奨宣言）**: ファイル先頭に `> [!WARNING] DEPRECATED` を付与し、代替先を明記
     2.  **Phase 2（移行期間）**: 最低1リリースサイクル（または30日間）の移行期間を設ける
     3.  **Phase 3（物理削除）**: 移行完了後に物理削除。Red Buttonプロトコル（§9.2）の承認が必要
--   **記録義務**: 廃止の理由・代替先を教訓ログ（`010_project_lessons_log.md`）に記録する。
+-   **記録義務**: 廃止の理由・代替先を教訓ログ（`core/010_project_lessons_log.md`）に記録する。
 
 ### 5.4. ルールライフサイクル (Rule Lifecycle)
 
@@ -354,7 +354,7 @@ AIエージェントは以下の手順でルールを参照しなければなら
 
 ### 6.4. 判例蓄積 (Precedent Accumulation)
 
--   **判例の記録**: 紛争解決で得られた「判例（Precedent）」は `010_project_lessons_log.md` に蓄積する。
+-   **判例の記録**: 紛争解決で得られた「判例（Precedent）」は `core/010_project_lessons_log.md` に蓄積する。
 -   **判例の参照義務**: 同種の矛盾が再発した場合、過去の判例を参照し、一貫性のある解決を図る。
 -   **判例の拘束力**: 判例は「参考（Advisory）」であり、「拘束（Binding）」ではない。新しい事実や文脈に基づき、異なる判断を下すことは許容される。
 
@@ -690,7 +690,7 @@ AIエージェント → プロジェクトオーナー
     3.  新規ルールとして結晶化すべき知見がないか判定
 -   **出力先の優先順位**:
     1.  関連する既存Blueprintへの追記（最優先）
-    2.  教訓ログ（`010_project_lessons_log.md`）への追記
+    2.  教訓ログ（`core/010_project_lessons_log.md`）への追記
     3.  全く新しい概念の場合のみ、新規ファイルの作成
 
 ### 13.4. アンチパターン集 (Anti-Pattern Catalog)
@@ -929,7 +929,7 @@ forbid(
     2.  代替手段がない
     3.  プロジェクトオーナーの明示的承認がある
     4.  有効期限が設定されている
--   **Waiver記録**: 承認されたWaiverは `010_project_lessons_log.md` に以下を記録する。
+-   **Waiver記録**: 承認されたWaiverは `core/010_project_lessons_log.md` に以下を記録する。
     - 適用除外する条項のルールID
     - 除外の理由と正当性
     - 有効期限（最長90日。延長にはオーナーの再承認が必要）
@@ -1013,7 +1013,7 @@ forbid(
 
 ### 18.5. 解釈判例の蓄積 (Interpretation Precedent Accumulation)
 
--   **記録義務**: 解釈に関する判断は `010_project_lessons_log.md` に記録する。
+-   **記録義務**: 解釈に関する判断は `core/010_project_lessons_log.md` に記録する。
 -   **記録項目**:
     1.  対象のルールID・セクション番号
     2.  解釈が必要となった文脈
@@ -1551,7 +1551,7 @@ forbid(
     - **構造的負債**: ファイル構成の不整合、命名規則の不統一
     - **内容的負債**: 古い技術前提に基づくルール、現在の実態と乖離したルール
     - **運用的負債**: 更新されていない逆引き索引、不正確なクロスリファレンス
--   **返済計画**: 技術的負債を `010_project_lessons_log.md` に記録し、定期レビュー（§13.2）で優先順位を付けて返済する。
+-   **返済計画**: 技術的負債を `core/010_project_lessons_log.md` に記録し、定期レビュー（§13.2）で優先順位を付けて返済する。
 
 ### 28.5. 将来の技術変化への適応戦略 (Future Technology Adaptation Strategy)
 
@@ -1823,15 +1823,15 @@ forbid(
 ## クロスリファレンス
 
 - [AGENTS.md](file:///AGENTS.md) — 最高法規（L0）。本ドキュメントより上位。
-- [000_core_mindset.md](./000_core_mindset.md) — コアマインドセット。§4ガバナンスプロトコルは本ドキュメントの概要版。
-- [802_language_protocol.md](./802_language_protocol.md) — 言語プロトコル。バイリンガル同期義務の詳細規定。Part XXIIと密接に関連。
-- [600_security_privacy.md](./600_security_privacy.md) — セキュリティ。暗号学的整合性の技術的詳細。Part XIVと関連。
-- [700_qa_testing.md](./700_qa_testing.md) — QA・テスト。Policy-as-Codeテストの関連規定。Part XVと関連。
-- [400_ai_engineering.md](./400_ai_engineering.md) — AI実装。高度AIエージェントガバナンス（Part XXI）の技術的基盤。
-- [300_engineering_standards.md](./300_engineering_standards.md) — エンジニアリング。Feature Flagパターン（Part XXV）の技術的基盤。
+- [000_core_mindset.md](../core/000_core_mindset.md) — コアマインドセット。§4ガバナンスプロトコルは本ドキュメントの概要版。
+- [802_language_protocol.md](../core/200_language_protocol.md) — 言語プロトコル。バイリンガル同期義務の詳細規定。Part XXIIと密接に関連。
+- [600_security_privacy.md](../security/000_security_privacy.md) — セキュリティ。暗号学的整合性の技術的詳細。Part XIVと関連。
+- [700_qa_testing.md](../quality/000_qa_testing.md) — QA・テスト。Policy-as-Codeテストの関連規定。Part XVと関連。
+- [400_ai_engineering.md](../ai/000_ai_engineering.md) — AI実装。高度AIエージェントガバナンス（Part XXI）の技術的基盤。
+- [300_engineering_standards.md](../engineering/000_engineering_standards.md) — エンジニアリング。Feature Flagパターン（Part XXV）の技術的基盤。
 - [INDEX.md](../../INDEX.md) — 全ルールのマスター索引。ファイル追加・変更時に同期更新が必要。
 - [compliance_matrix.md](../../compliance_matrix.md) — 要件対照表。規制-ルールマッピングの管理場所。
-- [010_project_lessons_log.md](../../blueprint/ja/core/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
+- [core/010_project_lessons_log.md](../../blueprint/ja/core/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
 - [999_project_specific_template.md](../../blueprint/ja/core/999_project_specific_template.md) — Blueprint新規作成時のテンプレート。
 
 ### クロスリファレンス

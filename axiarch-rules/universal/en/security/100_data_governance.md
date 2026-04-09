@@ -97,7 +97,7 @@
 | Regulation | Jurisdiction | Effective | Key Obligations | Max Penalty |
 |:-----------|:------------|:----------|:---------------|:-----------|
 | **GDPR** | EU/EEA | 2018 | Consent management, DPO, DPIA, data subject rights | 4% global revenue or €20M |
-| **APPI** (Amended) | Japan | 2022 (2027 amendment expected) | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
+| **Global Privacy Laws** (Amended) | Japan | 2022 (2027 amendment expected) | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
 | **CCPA/CPRA** | California, US | 2020/2023 | Opt-out rights, sensitive PI, ADMT regulation | $7,500/violation (intentional) |
 | **EU AI Act** | EU | 2024 (phased) | Risk classification, high-risk AI conformity, GPAI obligations | 7% global revenue or €35M |
 | **DSA/DMA** | EU | 2022/2024 | Platform transparency, gatekeeper obligations | 6% global revenue |
@@ -144,7 +144,7 @@
 | **2026.1** | California SB 446: 30-day data breach notification obligation (AG notification 15 days) |
 | **2026.3** | COPPA 2.0 (KIDS Act): Protection scope expanded to under-17 (Senate passed) |
 | **2026.5** | CIRCIA: Critical infrastructure 72-hour reporting / ransomware payment 24-hour reporting effective (delayed from original 2025.10) |
-| **2027** | APPI Amendment Act expected effective (administrative monetary penalty, biometric data regulation, etc.) |
+| **2027** | Global Privacy Laws Amendment Act expected effective (administrative monetary penalty, biometric data regulation, etc.) |
 | **2027.4** | EU: Cross-border GDPR enforcement regulation (EU 2025/2518) fully applicable (15-month investigation deadlines, etc.) |
 | **2027.8** | EU AI Act: High-risk AI (product safety legislation: medical devices, aviation, etc.) |
 | **2025.8** | UK Arbitration Act 2025 effective: Changes to arbitrator immunity and governing law |
@@ -231,7 +231,7 @@
 -   **SLA Management**: Auto-track statutory deadlines per request type with alerts firing 5 days before deadline:
     -   GDPR: **30 days** (extension +60 days with justification notification)
     -   CCPA/CPRA: **45 days** (extension +45 days)
-    -   APPI: **30 days** (obligation to respond promptly)
+    -   Global Privacy Laws: **30 days** (obligation to respond promptly)
 -   **Anti-Pattern**: Relying on CS team manual email handling for DSARs will fail at scale.
 
 #### 3.6.1. DSAR API Design Pattern
@@ -241,7 +241,7 @@
 interface DSARRequest {
   requestType: 'access' | 'deletion' | 'correction' | 'portability' | 'opt-out';
   subjectId: string;         // User ID or email
-  jurisdiction: 'GDPR' | 'CCPA' | 'APPI' | 'LGPD' | 'PIPA';
+  jurisdiction: 'GDPR' | 'CCPA' | 'Global Privacy Laws' | 'LGPD' | 'PIPA';
   verificationMethod: 'authenticated' | 'email' | 'id_document';
   requestedAt: string;       // ISO 8601
 }
@@ -257,7 +257,7 @@ interface DSARResponse {
 const DSAR_DEADLINES: Record<string, number> = {
   'GDPR': 30,    // 30 days (extendable +60 days)
   'CCPA': 45,    // 45 days (extendable +45 days)
-  'APPI': 30,    // 30 days
+  'Global Privacy Laws': 30,    // 30 days
   'LGPD': 15,    // 15 days
   'PIPA': 10,    // 10 days
 };
@@ -521,53 +521,37 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 ### 5.6. Dispute Resolution & Arbitration Clauses
 -   **Arbitration**: Arbitration clauses recommended for B2B contracts. Specify governing law, arbitration institution, and language.
 -   **Class Action Waiver**: Class action waivers in B2C terms are invalid in the EU. US also has state-level restrictions.
--   **ADR**: Services targeting EU users must provide links to ODR (Online Dispute Resolution) platform.
+-   **ADR**: Services targeting EU users must### 6.1. Global Consumer Protection & E-Commerce Laws
 
----
-
-## §6. Regional Compliance
-
-### 6.1. Japanese Law
-
-#### 6.1.1. Act on Specified Commercial Transactions
--   When offering paid services, mandatory display of required disclosures within the app.
+#### 6.1.1. Clear Commercial Disclosures
+-   When offering paid services, mandatory display of required disclosures within the app is broadly required by international e-commerce laws.
 -   **Disclosure Items**: Business name, address, phone, representative, pricing, payment timing/method, delivery timing, cancellation policy.
 -   **Final Confirmation Screen**: Display **contract period**, **billing timing**, and **cancellation conditions** clearly on the pre-payment screen.
 
-#### 6.1.2. Payment Services Act
--   **Deposit Avoidance**: Issuing prepaid payment instruments carries deposit obligation risks. Prefer Apple/Google IAP.
+#### 6.1.2. Virtual Currency and Prepaid Instruments Regulation
+-   **Deposit Avoidance**: Issuing proprietary prepaid payment instruments often carries heavy deposit and reporting obligations depending on local regulations. Prefer established third-party payment gateways (e.g., Apple/Google IAP, Stripe) to mitigate risk.
 
-#### 6.1.3. Advertising Disclosure (Stealth Marketing Regulation)
--   **Law**: Content with monetary consideration from advertisers must display "PR" or "Ad" labeling.
+#### 6.1.3. Advertising Disclosure (Anti-Stealth Marketing)
+-   **Law**: Content with monetary consideration from advertisers must transparently display "PR", "Ad", or "Sponsored" labeling to comply with global advertising standards (e.g., FTC guidelines).
 -   **System Guard**: System-level automatic ad labeling on posts with `is_sponsored` flag.
 
 #### 6.1.4. Email Compliance
 -   **Opt-In**: Explicit prior consent required for promotional emails; record consent timestamp.
 -   **Sender Disclosure**: Display sender name, contact information, and unsubscribe method on all emails.
--   **Unsubscribe**: One-click unsubscribe link required.
+-   **Unsubscribe**: One-click unsubscribe link required (e.g., CAN-SPAM, GDPR).
 -   **Audit Trail**: Log all system email transmissions. Store email addresses masked.
 
-#### 6.1.5. Subscription Auto-Renewal Law
--   Clearly disclose auto-renewal facts and conditions **before** contract
--   Require explicit confirmation step **before** transitioning from free trial to paid
--   Provide cancellation method at **equal or lesser difficulty** than sign-up
--   Send reminder notification **7 days before** renewal
--   **FTC Click-to-Cancel Rule**: Obligation to enable cancellation via the same channel as registration.
+#### 6.1.5. Subscription Auto-Renewal Transparency
+-   Clearly disclose auto-renewal facts and conditions **before** contract.
+-   Require explicit confirmation step **before** transitioning from free trial to paid.
+-   Provide cancellation method at **equal or lesser difficulty** than sign-up.
+-   Send reminder notification **7 days before** renewal.
+-   **Click-to-Cancel Rule**: Obligation to enable cancellation via the same channel as registration is increasingly enforced globally.
 
-#### 6.1.6. APPI Amendment Act (Expected Enforcement 2027)
--   **Legislative Progress**: PPC initiated review in November 2023. Interim report June 2024. **"Amendment Policy Direction" officially published on January 9, 2026**. Amendment bill to be submitted to the ordinary Diet session (opening January 23, 2026). Expected enforcement 2027.
--   **Confirmed Policy Direction (2026.1)**:
-    -   **Introduction of Administrative Monetary Penalties**: New **administrative fines** for malicious large-scale personal data trading. Significantly strengthens the current guidance/recommendation/order-based enforcement regime
-    -   **AI Development Data Use Relaxation**: Policy to **permit use without consent** for AI training purposes of **special care-required personal information** (criminal history, medical history, race, etc.). Limited to statistical processing and model training
-    -   **Certified Organization Incident Reporting Relaxation**: Extends incident reporting deadline for certified organizations to **30 or 60 days** for unauthorized access (relaxed from current immediate reporting obligation)
--   **Items Still Under Discussion**:
-    -   **Injunctive Relief**: Discussion on introducing injunctive relief and damage recovery through qualified consumer organizations
-    -   **Biometric Data Regulation**: Current APPI does not classify biometric data as "special care-required personal information". Strengthening under consideration
-    -   **Children's Data**: Development of clear guidance for children's personal information (consent procedures, security measures)
-    -   **Improper Use Clarification**: Specifying and categorizing scope of improper use and unauthorized acquisition regulations
-    -   **Opt-Out System Strengthening**: Reinforcing obligations for third-party provision opt-out system
--   **Action**: Monitor bill deliberation in the 2026 Diet. Secure compliance budget **upon confirmation of penalty amounts and application criteria**. AI development relaxation directly impacts handling policies for special care-required personal information; develop response plan through AI Governance Committee (§11.9).
--   **Anti-Pattern**: "AI development relaxation is confirmed so we can freely use special care-required personal information for training data" is WRONG. Relaxation is limited to statistical processing and model training; **purpose limitation violations, re-identification, and third-party provision remain prohibited**.
+#### 6.1.6. Emerging Global Privacy Modernization Trends (Expected 2026-2027)
+-   **Legislative Progress**: Many jurisdictions are reviewing their primary privacy laws for modernization (e.g., introducing administrative monetary penalties for large-scale data trading).
+-   **AI Development Data Use Relaxation**: Some regions plan to clarify conditions to **permit use without consent** for AI training purposes of certain data. This is strictly limited to statistical processing and model training without re-identification.
+-   **Anti-Pattern**: "AI development relaxation is confirmed so we can freely use special care-required personal information for training data" is WRONG. **Purpose limitation violations, re-identification, and third-party provision remain strictly prohibited.**
 
 ### 6.2. EU Law
 
@@ -950,7 +934,7 @@ SELECT cron.schedule(
 
 ### 12.4. Jurisdiction-Specific Data Retention Period Template
 
-| Data Category | GDPR (EU) | CCPA/CPRA (CA) | APPI (Japan) | Common Recommendation |
+| Data Category | GDPR (EU) | CCPA/CPRA (CA) | Applicable Regional Law | Common Recommendation |
 |:-------------|:----------|:--------------|:-----------|:---------------------|
 | **Customer Account Info** | Until purpose achieved + 3 years post-deletion | Disclosure obligation: 12 months | Until purpose achieved | **Max 3 years** post-deletion |
 | **Transaction/Payment Data** | Statutory period (tax: 7 years) | Statutory period | Statutory period (tax: 7 years) | **Per statutory period** |
@@ -958,8 +942,8 @@ SELECT cron.schedule(
 | **Access Logs** | Legitimate interest period (recommended: 6 months) | No requirement | Recommended: 1 year | **6 months to 1 year** |
 | **CCTV/Surveillance** | 72 hours to 30 days (varies by country) | No requirement | No requirement | **Max 30 days** |
 | **Employee Data** | 3-10 years post-employment (varies) | Reasonable period post-employment | 3 years post-resignation (Labor Standards Act) | **Per statutory period** |
-| **Health Data** | HIPAA: 6 years / GDPR: until purpose achieved | No requirement | APPI + Medical Law | **Per statutory period** |
-| **Children's Data** | COPPA/GDPR: promptly delete after purpose achieved | COPPA: reasonable period | APPI: same | **Delete in shortest period** |
+| **Health Data** | HIPAA: 6 years / GDPR: until purpose achieved | No requirement | Global Privacy Laws + Medical Law | **Per statutory period** |
+| **Children's Data** | COPPA/GDPR: promptly delete after purpose achieved | COPPA: reasonable period | Global Privacy Laws: same | **Delete in shortest period** |
 
 -   **Mandate**: Above is a template. Define specific values in Blueprint.
 -   **CCPA/CPRA Disclosure Obligation**: Privacy policies must **publicly disclose** specific retention periods for each category.
@@ -1040,7 +1024,7 @@ SELECT cron.schedule(
 ## §14. Data Breach Legal Notification
 
 ### 14.1. Legal Basis
--   **Law**: GDPR Art.33/34, amended APPI Art.26 etc. mandate supervisory authority reporting and user notification upon personal data breaches.
+-   **Law**: GDPR Art.33/34, amended Global Privacy Laws Art.26 etc. mandate supervisory authority reporting and user notification upon personal data breaches.
 -   **Cross-Reference**: `600_security_privacy.md` §10.7, `503_incident_response.md` §3
 
 ### 14.2. 5-Phase Flow
@@ -1064,7 +1048,7 @@ SELECT cron.schedule(
 | Jurisdiction | Authority Notification | User Notification | Notes |
 |:-------------|:----------------------|:-----------------|:------|
 | **GDPR** | Within **72 hours** | "Without undue delay" for high-risk | Amendment proposes **96-hour** relaxation |
-| **APPI** | Preliminary: **3-5 days** / Final: **30 days** | Mandatory individual notification | 2027 amendment may change |
+| **Global Privacy Laws** | Preliminary: **3-5 days** / Final: **30 days** | Mandatory individual notification | 2027 amendment may change |
 | **CCPA/CPRA** | No explicit statutory deadline | "Most expedient means" | State AG report for 500+ records |
 | **CA SB 446** | AG notification: **15 days** (500+ records) | **30 days** | **Effective 2026.1**. Clarifies previous "most expedient means" to 30 days |
 | **New York** | NYDFS notification obligation | **30 days** | **Effective 2024.12**. From 2025.3, "medical information" and "health insurance information" added to PI definition |
@@ -1107,7 +1091,7 @@ SELECT cron.schedule(
 -   [ ] Identify affected jurisdictions (based on data subject locations)
 -   [ ] Identify **shortest notification deadline** per jurisdiction (§14.4 reference)
 -   [ ] Identify Lead Supervisory Authority
--   [ ] Prepare statutory notification formats per jurisdiction (GDPR: Art.33/34, APPI: PPC format)
+-   [ ] Prepare statutory notification formats per jurisdiction (GDPR: Art.33/34, Global Privacy Laws: PPC format)
 -   [ ] Pre-select external law firms (local jurisdictions) and confirm emergency contact arrangements
 -   [ ] Prepare multi-language affected party notification templates in advance
 
@@ -1127,7 +1111,7 @@ interface JurisdictionDeadline {
 
 const NOTIFICATION_DEADLINES: JurisdictionDeadline[] = [
   { jurisdiction: 'EU/EEA', regulation: 'GDPR Art.33', deadlineHours: 72, authority: 'Lead DPA', notificationUrl: '' },
-  { jurisdiction: 'Japan', regulation: 'APPI', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
+  { jurisdiction: 'Japan', regulation: 'Global Privacy Laws', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
   { jurisdiction: 'US-CA', regulation: 'CCPA/SB446', deadlineHours: 720, authority: 'CA AG', notificationUrl: '' },
   { jurisdiction: 'Australia', regulation: 'Privacy Act (NDB)', deadlineHours: 720, authority: 'OAIC', notificationUrl: '' },
   { jurisdiction: 'US-Federal', regulation: 'CIRCIA', deadlineHours: 72, authority: 'CISA', notificationUrl: '' },
@@ -2263,7 +2247,7 @@ function determineRequiredAssessments(
 
 | Evaluation Category | Evaluation Items | Importance |
 |:-------------------|:-----------------|:-----------|
-| **Regulatory Coverage** | Scope of supported regulations (GDPR/CCPA/APPI/AI Act, etc.) | Required |
+| **Regulatory Coverage** | Scope of supported regulations (GDPR/CCPA/Global Privacy Laws/AI Act, etc.) | Required |
 | **Auto-Tracking** | Automatic regulatory change detection and alerting | Required |
 | **Integration** | Interoperability with existing tools (SIEM, GRC, CMP, etc.) | Important |
 | **Reporting** | Auto-generation of board reports and regulatory authority submissions | Important |
@@ -2474,7 +2458,7 @@ const cryptoConfig: CryptoConfig = {
 | Keyword | Reference Section |
 |:--------|:-----------------|
 | GDPR / Digital Omnibus | §2.1, §2.3, §3.4, §4.7, §6.2.1, §6.2.2, §16.2 |
-| APPI / Personal Information Protection / 2027 Amendment | §2.1, §3.5, §6.1, §6.1.6 |
+| Global Privacy Laws / Personal Information Protection / 2027 Amendment | §2.1, §3.5, §6.1, §6.1.6 |
 | CCPA / CPRA / ADMT | §2.1, §3.6, §3.7, §6.3.1, §6.3.2 |
 | EU AI Act / Phased Enforcement | §2.1, §2.3, §11.1-11.4, §25, §31 |
 | DSA / DMA | §2.1, §6.2.3, §15.3, §24.1 |
@@ -2601,7 +2585,7 @@ const cryptoConfig: CryptoConfig = {
 | CMMC / Defense Industry / NIST SP 800-171 / CUI | §30.5 |
 | Federal Preemption / AI Litigation Task Force | §6.3.2 |
 | Oregon Precise Geolocation / Sensitive Data | §6.3.2 |
-| APPI Administrative Penalties / AI Development Relaxation / 2026 Bill | §6.1.6 |
+| Global Privacy Laws Administrative Penalties / AI Development Relaxation / 2026 Bill | §6.1.6 |
 | EU AI Act Enforcement Deferral / 2027.12 / Annex III | §2.3, §11.2 |
 | Data Ethics Board / Ethics Review / FAST Principles / Newspaper Test | §40 |
 | Ethical Risk Assessment / Ethics Triggers | §40.2, §40.3 |

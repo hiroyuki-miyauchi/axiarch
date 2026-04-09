@@ -313,7 +313,7 @@ view_product           // action_object is non-standard (use object_action)
 
 ### 6.2. Consent Management
 
-- **GDPR / APPI / CCPA**: Strictly respect user consent status
+- **GDPR / Global Privacy Laws / CCPA**: Strictly respect user consent status
 - **Explicit Consent**: Analytics cookies/tracking require **opt-in** (implicit consent prohibited)
 - **Script Control**: Do not load analytics scripts without consent (implement Consent Mode)
 - **GPC**: Respect browser Global Privacy Control signals for universal opt-out

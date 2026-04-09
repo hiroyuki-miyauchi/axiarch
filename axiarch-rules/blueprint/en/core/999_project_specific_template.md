@@ -82,7 +82,7 @@
 ### Blueprint Folder & File Naming Guide
 
 > [!IMPORTANT]
-> **Reserved numbers**: `998` and `999` are reserved for templates (`998_feature_spec_template.md`, `999_project_specific_template.md`).
+> **Reserved numbers**: `998` and `999` are reserved for templates (`core/998_feature_spec_template.md`, `core/999_project_specific_template.md`).
 > All other numbers (`010`–`997`) are **freely available regardless of purpose**. Both project-specific rules and feature specs use the same sequential numbering within each folder.
 
 | Folder | Available Numbers | Examples |

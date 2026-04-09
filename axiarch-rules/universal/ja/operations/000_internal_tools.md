@@ -523,7 +523,7 @@ const policy: ABACPolicy = {
 
 - **Rule 50.076**: 管理ツールの依存関係はSBOM（Software Bill of Materials）で管理する
 - 依存パッケージの脆弱性を週次でスキャンし、Critical/Highは72時間以内に対応する
-- → 詳細は [602_oss_compliance.md](./602_oss_compliance.md) を参照
+- → 詳細は [602_oss_compliance.md](../security/200_oss_compliance.md) を参照
 
 ### 8.8. AI Red Teaming for Admin
 
@@ -683,7 +683,7 @@ interface AuditLogEntry {
 
 - **Rule 50.096**: 監査ログはSIEM（Security Information and Event Management）に連携する
 - 標準フォーマット（CEF/OCSF）で出力し、SIEMでの相関分析を可能にする
-- → セキュリティ詳細は [600_security_privacy.md](./600_security_privacy.md) を参照
+- → セキュリティ詳細は [600_security_privacy.md](../security/000_security_privacy.md) を参照
 
 ### 10.7. WORM Storage（Write Once Read Many）
 
@@ -1127,7 +1127,7 @@ const userManagementTools = [
   - AIの操作範囲を明示的に定義（ホワイトリスト方式）
   - AIの操作は全て監査ログに`source: 'ai_agent'`として記録
   - AI操作の異常（通常と異なるパターン）を検知してアラート
-  - → AI安全性詳細は [400_ai_engineering.md](./400_ai_engineering.md) を参照
+  - → AI安全性詳細は [400_ai_engineering.md](../ai/000_ai_engineering.md) を参照
 
 ---
 
@@ -1641,7 +1641,7 @@ describe('Permission Matrix', () => {
   - インシデント報告体制（24時間以内の初報）
   - サプライチェーンセキュリティ管理
   - 経営層のサイバーセキュリティ教育義務
-  - → 詳細は [600_security_privacy.md](./600_security_privacy.md) を参照
+  - → 詳細は [600_security_privacy.md](../security/000_security_privacy.md) を参照
 
 ---
 
@@ -1673,7 +1673,7 @@ describe('Permission Matrix', () => {
   - トークン使用量のリアルタイム追跡
   - 月間予算上限の設定（予算到達で自動制限）
   - コスト/操作の効率指標（Cost per AI-assisted action）
-  - → FinOps詳細は [101_revenue_monetization.md](./101_revenue_monetization.md) を参照
+  - → FinOps詳細は [101_revenue_monetization.md](../product/300_revenue_monetization.md) を参照
 
 ### 36.5. FinOps Dashboard
 
@@ -1857,7 +1857,7 @@ describe('Permission Matrix', () => {
   - シークレットスキャン
   - コンテナイメージスキャン（使用する場合）
   - SBOM生成
-  - → 詳細は [602_oss_compliance.md](./602_oss_compliance.md) を参照
+  - → 詳細は [602_oss_compliance.md](../security/200_oss_compliance.md) を参照
 
 ---
 
@@ -1882,7 +1882,7 @@ describe('Permission Matrix', () => {
 - **Rule 50.422**: 管理ツールの運用もGreen SRE原則に従う:
   - カーボンアウェアなスケジューリング（低炭素時間帯での処理実行）
   - リージョン選択時のカーボン係数の考慮
-  - → 詳細は [502_site_reliability.md](./502_site_reliability.md) を参照
+  - → 詳細は [502_site_reliability.md](../operations/400_site_reliability.md) を参照
 
 ---
 
@@ -1902,7 +1902,7 @@ describe('Permission Matrix', () => {
   - データエクスポート時に越境転送チェックを実施
   - GDPR SCC（Standard Contractual Clauses）準拠の確認
   - 越境転送のログ記録
-  - → 詳細は [601_data_governance.md](./601_data_governance.md) を参照
+  - → 詳細は [601_data_governance.md](../security/100_data_governance.md) を参照
 
 ### 43.3. データローカライゼーション
 
@@ -2021,7 +2021,7 @@ describe('Permission Matrix', () => {
   2. 漏洩データの範囲特定
   3. 法的義務に基づく通知（GDPR: 72時間以内）
   4. フォレンジック調査の開始
-  5. → 詳細は [503_incident_response.md](./503_incident_response.md) を参照
+  5. → 詳細は [503_incident_response.md](../operations/500_incident_response.md) を参照
 
 ---
 
@@ -2086,7 +2086,7 @@ describe('Permission Matrix', () => {
 - **Rule 50.493**: 量子コンピュータ時代に備えた暗号アジリティ:
   - PQC（Post-Quantum Cryptography）への移行計画
   - 暗号アルゴリズムの抽象化レイヤー
-  - → 詳細は [600_security_privacy.md](./600_security_privacy.md) を参照
+  - → 詳細は [600_security_privacy.md](../security/000_security_privacy.md) を参照
 
 ---
 
@@ -2138,19 +2138,19 @@ describe('Permission Matrix', () => {
 
 | 関連トピック | 参照ルールファイル |
 |-------------|-------------------|
-| 認証・セキュリティ詳細 | [600_security_privacy.md](./600_security_privacy.md) |
-| データプライバシー・法務 | [601_data_governance.md](./601_data_governance.md) |
-| ライセンス・依存関係 | [602_oss_compliance.md](./602_oss_compliance.md) |
-| SRE・信頼性 | [502_site_reliability.md](./502_site_reliability.md) |
-| 危機管理・BCP | [503_incident_response.md](./503_incident_response.md) |
-| AI実装 | [400_ai_engineering.md](./400_ai_engineering.md) |
-| デザイン・UX | [200_design_ux.md](./200_design_ux.md) |
-| QA・テスト | [700_qa_testing.md](./700_qa_testing.md) |
-| エンジニアリング全般 | [300_engineering_standards.md](./300_engineering_standards.md) |
-| Webフロントエンド | [340_web_frontend.md](./340_web_frontend.md) |
-| API統合 | [301_api_integration.md](./301_api_integration.md) |
-| 財務・FinOps | [101_revenue_monetization.md](./101_revenue_monetization.md) |
-| ユーザーサポート | [501_customer_experience.md](./501_customer_experience.md) |
-| グローバル展開・i18n | [800_internationalization.md](./800_internationalization.md) |
-| 言語プロトコル | [802_language_protocol.md](./802_language_protocol.md) |
-| 憲法権威 | [801_governance.md](./801_governance.md) |
+| 認証・セキュリティ詳細 | [600_security_privacy.md](../security/000_security_privacy.md) |
+| データプライバシー・法務 | [601_data_governance.md](../security/100_data_governance.md) |
+| ライセンス・依存関係 | [602_oss_compliance.md](../security/200_oss_compliance.md) |
+| SRE・信頼性 | [502_site_reliability.md](../operations/400_site_reliability.md) |
+| 危機管理・BCP | [503_incident_response.md](../operations/500_incident_response.md) |
+| AI実装 | [400_ai_engineering.md](../ai/000_ai_engineering.md) |
+| デザイン・UX | [200_design_ux.md](../design/000_design_ux.md) |
+| QA・テスト | [700_qa_testing.md](../quality/000_qa_testing.md) |
+| エンジニアリング全般 | [300_engineering_standards.md](../engineering/000_engineering_standards.md) |
+| Webフロントエンド | [340_web_frontend.md](../engineering/300_web_frontend.md) |
+| API統合 | [301_api_integration.md](../engineering/100_api_integration.md) |
+| 財務・FinOps | [101_revenue_monetization.md](../product/300_revenue_monetization.md) |
+| ユーザーサポート | [501_customer_experience.md](../operations/300_customer_experience.md) |
+| グローバル展開・i18n | [800_internationalization.md](../product/800_internationalization.md) |
+| 言語プロトコル | [802_language_protocol.md](../core/200_language_protocol.md) |
+| 憲法権威 | [801_governance.md](../core/100_governance.md) |

@@ -297,7 +297,7 @@ AI agents must reference rules following these steps:
     1.  **Phase 1 (Deprecation Declaration)**: Add `> [!WARNING] DEPRECATED` at the file header and specify the replacement
     2.  **Phase 2 (Transition Period)**: Allow a minimum transition period of one release cycle (or 30 days)
     3.  **Phase 3 (Physical Deletion)**: Physical deletion after transition completion. Requires Red Button Protocol (§9.2) approval
--   **Recording Obligation**: Record the reason for deprecation and replacement in the lessons log (`010_project_lessons_log.md`).
+-   **Recording Obligation**: Record the reason for deprecation and replacement in the lessons log (`core/010_project_lessons_log.md`).
 
 ### 5.4. Rule Lifecycle
 
@@ -351,7 +351,7 @@ When contradictions arise, resolve in the following priority order:
 
 ### 6.4. Precedent Accumulation
 
--   **Recording**: "Precedents" from dispute resolution are accumulated in `010_project_lessons_log.md`.
+-   **Recording**: "Precedents" from dispute resolution are accumulated in `core/010_project_lessons_log.md`.
 -   **Reference Obligation**: When similar contradictions recur, past precedents must be referenced to ensure consistent resolutions.
 -   **Binding Nature**: Precedents are "Advisory", not "Binding". Different judgments based on new facts or contexts are permissible.
 
@@ -687,7 +687,7 @@ AI Agent → Project Owner
     3.  Determine whether insights should be crystallized as new rules
 -   **Output Destination Priority**:
     1.  Appending to related existing Blueprints (highest priority)
-    2.  Appending to the lessons log (`010_project_lessons_log.md`)
+    2.  Appending to the lessons log (`core/010_project_lessons_log.md`)
     3.  Creating new files only for entirely new concepts
 
 ### 13.4. Anti-Pattern Catalog
@@ -920,7 +920,7 @@ forbid(
     2.  No alternative means exist
     3.  Explicit approval from the project owner is obtained
     4.  An expiration date is set
--   **Waiver Recording**: Approved Waivers must record the following in `010_project_lessons_log.md`:
+-   **Waiver Recording**: Approved Waivers must record the following in `core/010_project_lessons_log.md`:
     - Rule ID of the exempted provision
     - Reason and justification for exemption
     - Expiration date (maximum 90 days; extension requires owner re-approval)
@@ -1004,7 +1004,7 @@ When interpretation is required, apply the following methods in order:
 
 ### 18.5. Interpretation Precedent Accumulation
 
--   **Recording Obligation**: Record interpretation judgments in `010_project_lessons_log.md`.
+-   **Recording Obligation**: Record interpretation judgments in `core/010_project_lessons_log.md`.
 -   **Recording Items**:
     1.  Target Rule ID and section number
     2.  Context that necessitated interpretation
@@ -1542,7 +1542,7 @@ When interpretation is required, apply the following methods in order:
     - **Structural Debt**: File structure inconsistencies, naming convention non-uniformity
     - **Content Debt**: Rules based on outdated technology assumptions, rules diverged from current reality
     - **Operational Debt**: Outdated quick reference indexes, inaccurate cross-references
--   **Repayment Plan**: Record technical debt in `010_project_lessons_log.md` and prioritize repayment during periodic reviews (§13.2).
+-   **Repayment Plan**: Record technical debt in `core/010_project_lessons_log.md` and prioritize repayment during periodic reviews (§13.2).
 
 ### 28.5. Future Technology Adaptation Strategy
 
@@ -1814,15 +1814,15 @@ When interpretation is required, apply the following methods in order:
 ## Cross-References
 
 - [AGENTS.md](file:///AGENTS.md) — Supreme Law (L0). Superior to this document.
-- [000_core_mindset.md](./000_core_mindset.md) — Core Mindset. §4 Governance Protocol is a summary version of this document.
-- [802_language_protocol.md](./802_language_protocol.md) — Language Protocol. Detailed provisions for bilingual sync obligations. Closely related to Part XXII.
-- [600_security_privacy.md](./600_security_privacy.md) — Security. Technical details for cryptographic integrity. Related to Part XIV.
-- [700_qa_testing.md](./700_qa_testing.md) — QA & Testing. Related provisions for Policy-as-Code testing. Related to Part XV.
-- [400_ai_engineering.md](./400_ai_engineering.md) — AI Implementation. Technical foundation for Advanced Agentic AI Governance (Part XXI).
-- [300_engineering_standards.md](./300_engineering_standards.md) — Engineering. Technical foundation for Feature Flag Pattern (Part XXV).
+- [000_core_mindset.md](../core/000_core_mindset.md) — Core Mindset. §4 Governance Protocol is a summary version of this document.
+- [802_language_protocol.md](../core/200_language_protocol.md) — Language Protocol. Detailed provisions for bilingual sync obligations. Closely related to Part XXII.
+- [600_security_privacy.md](../security/000_security_privacy.md) — Security. Technical details for cryptographic integrity. Related to Part XIV.
+- [700_qa_testing.md](../quality/000_qa_testing.md) — QA & Testing. Related provisions for Policy-as-Code testing. Related to Part XV.
+- [400_ai_engineering.md](../ai/000_ai_engineering.md) — AI Implementation. Technical foundation for Advanced Agentic AI Governance (Part XXI).
+- [300_engineering_standards.md](../engineering/000_engineering_standards.md) — Engineering. Technical foundation for Feature Flag Pattern (Part XXV).
 - [INDEX.md](../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
 - [compliance_matrix.md](../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
-- [010_project_lessons_log.md](../../blueprint/en/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
+- [core/010_project_lessons_log.md](../../blueprint/en/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
 - [999_project_specific_template.md](../../blueprint/en/core/999_project_specific_template.md) — Template for new Blueprint creation.
 
 ### Cross-References

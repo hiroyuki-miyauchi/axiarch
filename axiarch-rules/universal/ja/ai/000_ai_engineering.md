@@ -1136,7 +1136,7 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 
 - **不要な修飾語・冗長表現の削除**: システムプロンプトを定期的にレビューし、効率化する
 - **Abbreviation Strategy**: 頻出するパターンを短縮表現に置換
-- **Select Spec適用**: RAG取得時のフィールドを最小化し、プロンプトトークンを削減
+- **明示的なフィールド選択適用**: RAG取得時のフィールドを最小化し、プロンプトトークンを削減
 
 ### 38.2. キャッシュROI計算
 

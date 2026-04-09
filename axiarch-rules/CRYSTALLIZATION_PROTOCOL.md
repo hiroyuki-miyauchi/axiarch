@@ -153,8 +153,8 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 | 運用・インシデント / Operations | `operations/` | `operations/{NNN}_operations_rules.md` |
 | コア・ガバナンス / Core & Gov | `core/` | `core/{NNN}_governance_rules.md` （010はインデックス固定のため020以降） |
 
-> **`{NNN}` の決定方法**: 昇華時に対象フォルダ内の既存ファイルをAIが実際に確認し、次の空き番号（10刻み）を自律判断する。番号は固定ではない。
-> `000_` はルールファイル用に予約（昇華ファイルには使わない）。ファイル名に **`lessons_` は不要**。内容を表すトピック名のみ使う。
+> **`{NNN}` の決定方法 (Contextual Numbering)**: 昇華時に対象フォルダ内の既存ファイルをAIが実際に確認し、内容が関連する既存ファイルの近接番号を自律判断して割り当てる（基本は拡張余地を残すため10刻みとするが、空きがない場合は `011` や `015` などの間の番号を使用する）。枯渇を防ぐため厳密な10刻みは強制しない。 / **How to determine `{NNN}`**: The AI MUST check existing files in the target folder and assign a number close to related topics (default to increments of 10 to leave room, but use interstitial numbers like `011` or `015` if space is tight). Do not strictly force increments of 10.
+> 昇華ファイル含むすべてのファイルで `000`〜`999` の任意の空き番号を使用可能です。ファイル名に **`lessons_` は不要**。内容を表すトピック名のみ使う。
 
 > **フォルダの拡張性 / Folder Extensibility**: 上記8フォルダは初期構成として事前準備されているが、**閉じたリストではない**。上記の対応表にないドメインの教訓が蓄積された場合、AIは新しいフォルダの作成を**ユーザーに提案**してよい（独断での作成は禁止）。ただし、まず既存フォルダへの分類を優先すること。
 > The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first.
@@ -186,7 +186,7 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 - DB関連教訓 → `blueprint/{lang}/engineering/` 内を検索
 - セキュリティ教訓 → `blueprint/{lang}/security/` 内を検索
 - デザイン教訓 → `blueprint/{lang}/design/` 内を検索
-- ガバナンス教訓 → `blueprint/{lang}/core/` 内を検索（`010_project_lessons_log.md` は対象外）
+- ガバナンス教訓 → `blueprint/{lang}/core/` 内を検索（`core/010_project_lessons_log.md` は対象外）
 
 ---
 
@@ -222,10 +222,10 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 > **🇺🇸 Autonomous New Domain Folder Creation Prohibited**: Blueprint domain folders (`ai/`, `design/`, `engineering/`, `operations/`, `product/`, `quality/`, `security/`) are **pre-provisioned** with the same structure as Universal (each containing a `README.md`). AI is **prohibited** from **autonomously** creating new domain folders. Lessons MUST be placed ONLY in existing folders defined in the Step 1 mapping table. However, if a completely new domain arises that cannot be classified into existing folders, the AI MAY **propose** creating a new folder to the user (see Step 1 "Folder Extensibility").
 
 **採番ルール / Numbering Rules:**
-- **昇華時に対象フォルダ内の既存ファイルを実際に確認**し、次の空き番号（10刻み）を使用する（番号はフォルダの状態によって変わるため固定ではない）
-- `000_` はルールファイル用に予約（昇華ファイルには使わない）
-- `core/010_project_lessons_log.md`（中央インデックス）は固定。`core/` 内の昇華ルールファイルは `020_` 以降を使用
-- ファイル名に **`lessons_` は不要**。内容を表すトピック名のみ使う（例: `database_auth`, `security_policy`, `api_design`）
+- **🚨 空白地帯禁止 (No Blank Zones)**: 各ドメイン内で `000`〜`999` を独立して使用する（特定ドメイン専用の予約帯域は存在しない）。 / Use `000`-`999` independently per domain (no domain-specific reserved bands).
+- **文脈的採番 (Contextual Numbering)**: 昇華時に対象フォルダの既存ファイルを実際に確認し、関連トピックの近接番号を割り当てる。基本は10刻みで拡張余地を残すが、空きがない場合は間の番号（例: `011`, `015`）を使用する。厳密な10刻み強制による999枯渇を回避せよ。 / **Contextual Numbering**: Check existing files in the target folder and assign a number close to related topics (default to increments of 10, but use interstitial numbers like `011` or `015` if space is tight). Do not strictly force increments of 10.
+- `core/010_project_lessons_log.md`（中央インデックス）は固定。`core/` 内の昇華ルールファイルは `020_` 以降を使用 / `core/010_project_lessons_log.md` is fixed. Crystallized files in `core/` start from `020_`.
+- ファイル名に **`lessons_` は不要**。内容を表すトピック名のみ使う（例: `database_auth`, `security_policy`, `api_design`） / **Do not include `lessons_` in the file name**. Use only topic names describing the content.
 
 **作成例 / Creation Example:**
 ```
@@ -355,7 +355,7 @@ core/010 には参照リンクのみ残す / Leave only a reference link in core
 
 | # | 必須構造要素 | 説明 | Universal 実例 |
 |:--|:-----------|:-----|:--------------|
-| 1 | **タイトル行** `# {NNN}. {名称}` | ファイル冒頭のH1見出し。番号 + 名称 | `# 74. 言語プロトコル`, `# 30. エンジニアリングの卓越性`, `# 60. セキュリティとプライバシー` |
+| 1 | **タイトル行** `# {NNN}. {名称}` | ファイル冒頭のH1見出し。番号 + 名称 | `# 74. 言語プロトコル`, `# 30. エンジニアリング基準`, `# 60. セキュリティとプライバシー` |
 | 2 | **CAUTION/NOTE ブロック** | ファイルの位置づけ宣言（Universal=CAUTION, Blueprint=NOTE/TIP） | `> [!CAUTION] このファイルは Universal Rule（不変ルール）です。` |
 | 3 | **IMPORTANT ブロック** | Supreme Directive + 構成サマリ（`{N}パート・{M}セクション構成。`） | `> [!IMPORTANT] Supreme Directive（最高指令）...13パート・80セクション構成。` |
 | 4 | **`## 目次`** | テーブル形式（Part/セクション/行数）またはリスト形式の目次 | `## 目次` + `| Part | トピック | セクション | セクション数 |` |

@@ -82,7 +82,7 @@
 ### Blueprint フォルダ & ファイル命名ガイド
 
 > [!IMPORTANT]
-> **予約済み番号**: `998` と `999` はテンプレート用に予約されています（`998_feature_spec_template.md`、`999_project_specific_template.md`）。
+> **予約済み番号**: `998` と `999` はテンプレート用に予約されています（`core/998_feature_spec_template.md`、`core/999_project_specific_template.md`）。
 > それ以外の番号（`010`〜`997`）は**用途を問わず自由に使用可能**です。プロジェクト固有ルールも機能仕様書も、同じフォルダ内で連番として採番してください。
 
 | フォルダ | 使用可能番号 | 用途例 |

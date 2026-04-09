@@ -139,7 +139,7 @@
 -   **Law**: サイト設定やシステム設定は、単一のJSON/JSONBカラム（`config: jsonb`）への詰め込みを禁止し、**正規化されたカラム**で管理してください。
 -   **Reason**:
     1. **Query Performance**: SQLによる高速なWHERE句や集計が可能になります。
-    2. **Type Safety**: TypeScript/zodでの型推論が正確になり、「未定義キー」エラーを防ぎます。
+    2. **Type Safety**: TypeScript/zodでの型推論が正確になり、「未定義キー」エラーを低減します。
     3. **Integrity**: 外部キー制約やCHECK制約の適用が可能になります。
 -   **Migration**: 新しい設定項目追加時は、必ずDBマイグレーションを行ってください。
 -   **Exception (Dynamic Label Isolation Protocol)**: 以下のケースに限り、JSONBカラムの使用を例外的に許可します。ただし、そのJSONBカラムの責務を厳密に限定し、正規化すべきデータの混入を禁止します。
@@ -216,7 +216,7 @@
         -   30日後: 論理削除（`deleted_at` 設定）
         -   法定保持期間後: 物理削除またはPII完全匿名化
     4.  **Purge Logging**: パージ実行の記録（対象テーブル、削除件数、実行日時）を監査ログに残してください。
--   **Rationale**: データを無期限に保持することは、ストレージコストの増大、プライバシーリスクの拡大、そしてGDPR/APPI等のデータ最小化原則への違反を招きます。保持期間の自動管理により、コスト・コンプライアンス・パフォーマンスの三方良しを実現します。
+-   **Rationale**: データを無期限に保持することは、ストレージコストの増大、プライバシーリスクの拡大、そしてGDPR/APPI等のデータ最小化原則への違反を招きます。保持期間の自動管理により、コスト・コンプライアンス・パフォーマンスの三方良しをもたらします。
 
 ---
 
@@ -241,7 +241,7 @@
     -   **Registry Standards**:
         -   `public.is_admin()`: 管理者チェック。
         -   `public.is_owner(resource_id)`: 所有者チェック。
-        -   **Requirement**: ヘルパー関数は必ず **`SECURITY DEFINER`** 属性を付与し、かつ **`SET search_path = ''`** で検索パスを物理的に断ち切ってください。これにより、関数内部でのテーブル・関数参照は全てスキーマ修飾（例: `public.table_name`）を義務付け、Search Path 汚染によるインジェクション攻撃を物理的に不可能なレベルで排除します。
+        -   **Requirement**: ヘルパー関数は必ず **`SECURITY DEFINER`** 属性を付与し、かつ **`SET search_path = ''`** で検索パスを物理的に断ち切ってください。これにより、関数内部でのテーブル・関数参照は全てスキーマ修飾（例: `public.table_name`）を義務付け、Search Path 汚染によるインジェクション攻撃を抑制します。
 
 ### Rule 3.0.2: The Admin RLS Mandate (The "Locked Out" Lesson)
 -   **Context**: 「一般ユーザー権限」だけのポリシー（例: `user_id = auth.uid()`のみ）を書くと、管理者がそのテーブルを操作できなくなり、データ修正作業で詰みます。
@@ -292,7 +292,7 @@
 ### Rule 3.1: RLS Separation of Duties
 -   **Separation Protocol**:
     1.  **Select Policy**: 読み取り権限は `FOR SELECT` 専用ポリシーで管理。
-    2.  **Write Policy**: 書き込み権限は `FOR INSERT/UPDATE/DELETE` 専用ポリシーとし、**絶対に `SELECT` を含めてはなりません**。
+    2.  **Write Policy**: 書き込み権限は `FOR INSERT/UPDATE/DELETE` 専用ポリシーとし、**厳正に `SELECT` を含めてはなりません**。
 -   **Admin Strictness**: 「管理者だから全部OK」の `FOR ALL` は原則禁止。
 
 ### Rule 3.2: Permissive Policy Consolidation
@@ -394,7 +394,7 @@
 ## 5. 認証とセキュリティ (Auth & Security)
 -   **Gotrue Delegation**: 認証はSupabase Authに完全委任。
 -   **Notification Architecture**:
-    -   **Aggregation**: 同一リソースへの重複アクション（例: 複数人のいいね）は、通知テーブルで「集約」し、通知爆撃を防ぎます。
+    -   **Aggregation**: 同一リソースへの重複アクション（例: 複数人のいいね）は、通知テーブルで「集約」し、通知爆撃を低減します。
     -   **Async Delivery**: メール送信等は非同期ジョブ (`pgmq`等) を経由させます。
     -   **The Smart Notification Control Protocol (Email Bomb Prevention)**:
         -   **Law**: メール通知は即時送信せず、ジョブキューを介して数分〜数十分遅延させてください。
@@ -405,7 +405,7 @@
 -   **Law**: 2025年のSupabaseアップデートにより、新規テーブルには**RLSがデフォルトで有効**となります。この挙動を前提に、テーブル作成直後にポリシーを定義する運用を徹底しなければなりません。
 -   **Action**:
     1.  **Immediate Policy**: テーブル作成後、ポリシー未定義の状態で放置しないでください。RLS有効 + ポリシーなし = **全アクセス拒否**です。開発中であっても最低限 `TO authenticated` のポリシーを設定してください。
-    2.  **Event Triggers**: Supabaseの **Event Triggers** 機能を活用し、新規テーブル作成時に自動的にRLSを有効化するトリガーを設定してください。人為的な設定漏れを物理的に防止します。
+    2.  **Event Triggers**: Supabaseの **Event Triggers** 機能を活用し、新規テーブル作成時に自動的にRLSを有効化するトリガーを設定してください。人為的な設定漏れを物理的に抑制します。
     3.  **Dashboard Alerts**: ダッシュボードの **Security Alerts** で「RLSが無効なテーブル」の警告が表示された場合、即座に対処してください。これは §0.1（Zero Tolerance Linter Protocol）の適用対象です。
     4.  **Exposed Tables**: RLSが有効でもポリシーが `USING (true)` のテーブルは実質的に全公開です。ダッシュボードの **Exposed Tables** ラベルを定期的に確認し、意図しない公開がないか監査してください。
 
@@ -504,7 +504,7 @@
 -   **Prohibition**:
     -   Expandフェーズで `DROP COLUMN` や `ALTER COLUMN ... TYPE` を実行することは禁止です。
     -   Contractフェーズの実行前に、旧構造への参照がコードベース全体に存在しないことを `grep` で物理的に確認してください。
--   **Rationale**: 「ALTER TABLE ... RENAME COLUMN」のような一見単純な操作でも、デプロイのタイミング差で旧コードが新スキーマにアクセスし、障害を引き起こします。Expand-Contractパターンにより、スキーマとアプリケーションの変更を時間的に分離し、安全なゼロダウンタイムマイグレーションを実現します。
+-   **Rationale**: 「ALTER TABLE ... RENAME COLUMN」のような一見単純な操作でも、デプロイのタイミング差で旧コードが新スキーマにアクセスし、障害を引き起こします。Expand-Contractパターンにより、スキーマとアプリケーションの変更を時間的に分離し、安全なゼロダウンタイムマイグレーションをもたらします。
 
 ### Rule 7.8: The Data-Aware Defense Protocol（データ依存防衛プロトコル）
 -   **Law**: 本番DBには開発環境にない「汚れたデータ」（重複レコード、型不整合、不完全なデータ）が存在します。CI環境（クリーンなDB）はこの汚れを検知できないため、全てのDML（データ操作）は**「既にデータが存在する」前提**で防衛的に記述しなければなりません。
@@ -538,7 +538,7 @@
     -   **Action**: 関数内では全てのテーブル参照を `public.users` のように**スキーマ完全修飾**で記述することを義務付けます。`SET search_path = public` は妥協であり、エイリアス攻撃のリスクを残します。
 
 ### Rule 8.2: The Audit Log Mandate / WORM
--   DB変更操作は `audit_logs` に記録し、テーブルは **Append-Only (追記のみ)** としてRLSで改竄を防止します。
+-   DB変更操作は `audit_logs` に記録し、テーブルは **Append-Only (追記のみ)** としてRLSで改竄を抑制します。
 
 ### Rule 8.3: The Comprehensive RLS Audit
 -   **Cascading Verification**: 重要テーブル（ナビゲーション、設定等）のRLS変更時は、**匿名ユーザー（ログイン前）** でのアクセス確認を義務付けます。
@@ -576,7 +576,7 @@
 -   **Strict Column Enforced**: アプリケーション設定値はRDBの正規化されたカラムとして定義。`jsonb` を設定ファイル代わりに使うことは型安全性の観点から禁止します。
 -   **Tenant-Aware Naming (SaaS Readiness)**: 
     -   **Law**: 将来的なマルチテナント化（Whitelabel化）を見据え、内部リソース命名を区別してください。
-    -   **Action**: 顧客（テナント）ごとの設定には `site_` や `account_` を、全テナント共通の基盤設定にのみ `system_` を使用します。これにより `tenant_id` 追加時の設計破綻を物理的に防ぎます。
+    -   **Action**: 顧客（テナント）ごとの設定には `site_` や `account_` を、全テナント共通の基盤設定にのみ `system_` を使用します。これにより `tenant_id` 追加時の設計破綻を物理的に低減します。
 
 ### Rule 9.2: Static Page Ban (CMS Sovereignty)
 -   利用規約やプライバシーポリシー等は **Headless CMS** で管理し、ハードコードされた静的ファイルを作成することを禁止します。
@@ -618,7 +618,7 @@
           AND (published_at IS NULL OR published_at <= NOW())
         ```
     3.  **Indexing**: `published_at` は範囲検索で頻繁に使用されるため、インデックスの作成を推奨します。
--   **Rationale**: `status = 'public'` のみでのフィルタリングは、公開予約日前のコンテンツを漏洩させます。`published_at` のみでのフィルタリングは、下書き状態のコンテンツを公開します。両方のAND結合によってのみ、正確な公開制御が実現します。
+-   **Rationale**: `status = 'public'` のみでのフィルタリングは、公開予約日前のコンテンツを漏洩させます。`published_at` のみでのフィルタリングは、下書き状態のコンテンツを公開します。両方のAND結合によってのみ、正確な公開制御がもたらします。
 
 ---
 
@@ -725,7 +725,7 @@
     1.  **One Policy Per Role-Action**: 同一テーブルに対し、同一ロール（`authenticated`, `anon` 等）の同一アクション（`SELECT`, `INSERT` 等）で複数の Permissive ポリシーを作成しないでください。複数条件がある場合は `OR` で1つのポリシーにまとめます。
     2.  **No service_role Policy**: `service_role` はRLSを完全にバイパスするため、`service_role` 用のRLSポリシーを作成することは冗長であり禁止します。
     3.  **Policy Audit**: 既存ポリシーの追加・変更時は、同一テーブルの全ポリシーを一覧し、論理的な重複がないか確認してください。
--   **Rationale**: PostgreSQL の Permissive ポリシーは `OR` で結合されるため、意図せず広い範囲を許可してしまうリスクがあります。1ロール1アクション1ポリシーの原則により、権限の意図を明確にし、セキュリティホールを防ぎます。
+-   **Rationale**: PostgreSQL の Permissive ポリシーは `OR` で結合されるため、意図せず広い範囲を許可してしまうリスクがあります。1ロール1アクション1ポリシーの原則により、権限の意図を明確にし、セキュリティホールを低減します。
 
 ### Rule 12.3.1: The RLS Auth Function InitPlan Optimization（RLS認証関数InitPlan最適化）
 -   **Law**: RLSポリシー内で `auth.uid()`, `auth.role()`, `current_setting()` 等の認証関数を使用する際、必ず **`(select ...)`でラップ** し、各行での再評価を防がなければなりません。
@@ -733,7 +733,7 @@
     1.  **Subquery Wrap**: `USING (user_id = auth.uid())` ではなく `USING (user_id = (select auth.uid()))` と記述してください。
     2.  **All Auth Functions**: `auth.uid()`, `auth.role()`, `auth.jwt()`, `current_setting()` 等、セッション情報を返す全ての関数に適用してください。
     3.  **EXISTS内も同様**: `EXISTS (SELECT 1 FROM ... WHERE ... = auth.uid())` も、内部の `auth.uid()` を `(select auth.uid())` にラップしてください。
--   **Rationale**: ラップなしの場合、PostgreSQLは各行のスキャンごとにこれらの関数を再評価します（Volatile扱い）。`(select ...)`でラップすることで、PostgreSQLのオプティマイザは結果を**InitPlan（事前計算）**として1回だけ評価し、大規模テーブルでの劇的なパフォーマンス改善を実現します。
+-   **Rationale**: ラップなしの場合、PostgreSQLは各行のスキャンごとにこれらの関数を再評価します（Volatile扱い）。`(select ...)`でラップすることで、PostgreSQLのオプティマイザは結果を**InitPlan（事前計算）**として1回だけ評価し、大規模テーブルでの劇的なパフォーマンス改善をもたらします。
 -   **Anti-Pattern**:
     ```sql
     -- ❌ 禁止: 各行で auth.uid() が再評価される
@@ -765,7 +765,7 @@
 ### Rule 12.6: The RLS InitPlan Optimization Protocol（RLS InitPlan最適化義務）
 -   **Law**: RLS（Row Level Security）ポリシー内での `auth.uid()`、`auth.role()` 等のセッション関数呼び出しは、**`(SELECT auth.uid())` のようにサブクエリ（Sub-Select）として記述**しなければなりません。
 -   **Action**:
-    1.  **Sub-Select Wrapping**: RLSポリシーの `USING` 句や `WITH CHECK` 句で `auth.uid()` を使用する場合、必ず `(SELECT auth.uid())` の形式にしてください。これにより、PostgreSQLのクエリプランナが関数を一度だけ評価してその結果をInitPlanとしてキャッシュし、行ごとの再評価を防止します。
+    1.  **Sub-Select Wrapping**: RLSポリシーの `USING` 句や `WITH CHECK` 句で `auth.uid()` を使用する場合、必ず `(SELECT auth.uid())` の形式にしてください。これにより、PostgreSQLのクエリプランナが関数を一度だけ評価してその結果をInitPlanとしてキャッシュし、行ごとの再評価を抑制します。
     2.  **All Auth Functions**: `auth.uid()` だけでなく、`auth.role()`、`auth.jwt()` 等の全てのセッション関数に同じパターンを適用してください。
     3.  **Linter Integration**: Supabaseのセキュリティリンター等が `auth_rls_initplan` 警告を出す場合は、即座に修正してください。
     4.  **Performance Impact**: 大規模テーブル（数万行以上）では、このパターンの適用で数十倍のパフォーマンス差が生じる場合があります。
@@ -793,7 +793,7 @@
 -   **Law**: 管理画面等において、書き込み（Mutation）が特権クライアント（`service_role` 等）で実行される場合、**読み込み（Query for Edit Form）も同等の可視性を保証**しなければなりません。書き込みと読み込みで異なる権限レベルのクライアントを使用すると、「保存は成功するがリロードすると元に戻る」という不透明なバグが発生します。
 -   **Action**:
     1.  **Privilege Parity Check**: 書き込みに `createAdminClient()`（RLSバイパス）を使用している場合、対応する「編集のための取得」も同等の権限で実行されるか確認してください。読み込みが `anon` や制限された `authenticated` 権限で行われると、RLSにより一部のデータがフィルタされ、フォームに古いデータや空データが流し込まれます。
-    2.  **Select Spec Synchronization**: DTOで使用する Select Specification が、保存対象の全カラムを包含しているか確認してください。片方にだけカラムを追加すると、「保存はされるが編集画面に表示されない」片肺状態になります。
+    2.  **明示的なフィールド選択 Synchronization**: DTOで使用する 明示的なフィールド選択ification が、保存対象の全カラムを包含しているか確認してください。片方にだけカラムを追加すると、「保存はされるが編集画面に表示されない」片肺状態になります。
     3.  **Admin Gateway Awareness**: 管理目的が明示的な関数（例: `getAdminStoreById`）では、必要に応じて特権クライアントを使用するか、RLSポリシーを管理ロールに対して完全に開放してください。
     4.  **Post-Update Verification**: 重要度の高いミューテーション（画像の並び替え、ステータス変更等）では、更新直後に同じIDで `select` を実行し、現在値をログで確認する「Verification Fetch」パターンの適用を検討してください。
 -   **Rationale**: 特権クライアントによる書き込みは RLS をバイパスしてデータを正しく保存しますが、編集画面の再読み込み時に非特権クライアントが使用されると、RLS の `SELECT` ポリシーにより一部のカラムやレコードが除外されます。結果として、ユーザーは「保存したのに反映されない」と感じ、同じ操作を繰り返すことでデータの不整合がさらに拡大する悪循環に陥ります。
@@ -822,7 +822,7 @@
     2.  **Type**: `TEXT` 型（またはMarkdown対応が必要な場合は `TEXT`）を推奨します。`VARCHAR(n)` の文字数制限は運用時の障害要因となるため、特段の理由がない限り避けてください。
     3.  **Nullable**: 自由記述カラムは `NULL` を許容してください。全レコードに記述が必要な性質のものではありません。
     4.  **No Business Logic**: 自由記述カラムの値にビジネスロジック（条件分岐、フィルタリング）を依存させることを禁止します。ロジックに必要な情報は正規化カラムとして昇格させてください。
--   **Rationale**: スキーマ変更にはマイグレーション・デプロイ・テストのサイクルが必要であり、即座に対応できません。安全弁カラムの設置により、「今すぐ記録する必要がある」情報をロスなく保存でき、運用の柔軟性と開発速度の両立を実現します。
+-   **Rationale**: スキーマ変更にはマイグレーション・デプロイ・テストのサイクルが必要であり、即座に対応できません。安全弁カラムの設置により、「今すぐ記録する必要がある」情報をロスなく保存でき、運用の柔軟性と開発速度の両立をもたらします。
 
 ### Rule 2.13: The Time-Series Partitioning & Retention Protocol（時系列パーティション＆保持期間戦略）
 -   **Law**: ログデータ（`audit_logs`, `access_logs`）やトランザクション履歴（`point_transactions` 等）など、時系列で肥大化するテーブルには、`created_at` をキーとした**Range Partitioning**を設計しなければなりません。
@@ -848,7 +848,7 @@
     2.  **Chain of Trust**: テーブル階層が3段階以上（祖父→親→子）になる場合も、常に最上位の所有権まで遡って検証してください。中間テーブルだけの検証はセキュリティホールを生みます。
     3.  **SECURITY DEFINER for Cross-Table**: 権限チェックで他テーブル（`profiles` 等）を参照する必要がある場合は、`SECURITY DEFINER` 関数内でラップし、`search_path` を固定（`SET search_path = public, pg_temp`）してください。
     4.  **No Redundant Columns**: 子テーブルに `user_id` を重複して持たせることで権限チェックを「簡略化」するアプローチは、データ不整合の温床となるため非推奨です。権限は常に関係（Relation）で導出してください。
--   **Rationale**: 子テーブルごとに独立した権限ロジックを定義すると、親テーブルの権限変更時に子テーブルの更新漏れが発生し、セキュリティホールの原因となります。親テーブルの所有権を信頼の連鎖（Chain of Trust）として継承することで、権限ロジックの一元化と不整合の排除を実現します。
+-   **Rationale**: 子テーブルごとに独立した権限ロジックを定義すると、親テーブルの権限変更時に子テーブルの更新漏れが発生し、セキュリティホールの原因となります。親テーブルの所有権を信頼の連鎖（Chain of Trust）として継承することで、権限ロジックの一元化と不整合の排除をもたらします。
 
 ### Rule 2.16: The Brittle Table Reference Prohibition（動的テーブル参照禁止）
 -   **Law**: SQL関数（`CREATE FUNCTION`）やRPC内で、テーブル名を動的な文字列として結合（`EXECUTE 'SELECT * FROM ' || table_name`）することを**禁止**します。
@@ -876,7 +876,7 @@
     2.  **Asset Registry**: 主要データ資産を台帳化し、各資産の「所有者」「品質責任者」「収益可能性」を明記してください。
     3.  **Cleansing Mandate**: データはクレンジング済みの状態が常に維持されること。ゴミデータ（未検証の入力、重複レコード、型不正）の放置を禁止します。
     4.  **Alert Threshold**: いずれかの品質次元が目標値を下回った場合、アラートを発報し、30日以内に是正措置を完了してください。
--   **Rationale**: データ品質を定量的に管理しないと、「クリーンに見えるが実は矛盾だらけ」のデータが蓄積し、API外販・AI学習・分析の全てに悪影響を及ぼします。6次元フレームワークにより、品質劣化を構造的に防止します。
+-   **Rationale**: データ品質を定量的に管理しないと、「クリーンに見えるが実は矛盾だらけ」のデータが蓄積し、API外販・AI学習・分析の全てに悪影響を及ぼします。6次元フレームワークにより、品質劣化を構造的に抑制します。
 
 ---
 
@@ -1246,7 +1246,7 @@
 -   **Law**: PostgREST（Supabase Auto-generated REST API）でのデータ取得は、**必要最小限のカラム**のみを指定し、`select('*')` の安易な使用を禁止します。
 -   **Action**:
     1.  **Explicit Select**: `.select('id, name, created_at')` のように必要カラムを明示してください。`select('*')` は転送データ量を増大させ、Bandwidth課金に直結します（§16.3参照）。
-    2.  **Computed Columns**: PostgreSQLの Generated Columns やViewを活用し、API経由で計算結果を直接返却してください。クライアント側での再計算を排除します。
+    2.  **Computed Columns**: PostgreSQLの Generated Columns やViewを活用し、API経由で計算結果を直接返却してください。クライアント側での再計算を低減します。
     3.  **Type Generation**: `select()` で指定したカラムリストは `supabase gen types` で生成される型にも反映されます。型安全性を維持するため、select文の変更時は型の再生成を忘れずに実行してください。
 
 ### Rule 21.2: The Filtering & Embedding Protocol
@@ -1377,7 +1377,7 @@
         -   **SMS送信**: 1時間あたり同一電話番号に30通まで
         -   **サインアップ**: IPごとのレート制限あり
     2.  **Management API Customization**: ダッシュボードまたはManagement APIを通じてレート制限値をカスタマイズしてください。デフォルト値はスタートアップ向けであり、トラフィックの増加に応じて調整が必要です。
-    3.  **Client-Side Throttling**: クライアント側でも認証リクエストにスロットリングを実装してください。ボタンの連打やリトライループによる不必要なレート制限超過を防ぎます。
+    3.  **Client-Side Throttling**: クライアント側でも認証リクエストにスロットリングを実装してください。ボタンの連打やリトライループによる不必要なレート制限超過を低減します。
     4.  **Error Handling**: レート制限超過時のHTTP 429レスポンスを適切にハンドリングしてください。ユーザーに「しばらくお待ちください」等のメッセージを表示し、`Retry-After` ヘッダーに基づいてリトライタイミングを制御してください。
 
 ### Rule 25.2: The Custom API Rate Limiting Protocol
@@ -1617,7 +1617,7 @@
         -   RLSポリシー内で他のRLS保護テーブルを参照する場合（再帰防止）
         -   Auth Trigger（`auth.users`へのINSERT後にプロフィール自動作成等）
         -   FDW外部テーブルのデータを公開APIに制限公開する場合（§27.2参照）
-    3.  **search_path必須設定**: `SECURITY DEFINER`関数では必ず`SET search_path = ''`を設定してください。これにより、攻撃者が`search_path`を操作してオブジェクトを偽装するリスクを排除します。
+    3.  **search_path必須設定**: `SECURITY DEFINER`関数では必ず`SET search_path = ''`を設定してください。これにより、攻撃者が`search_path`を操作してオブジェクトを偽装するリスクを低減します。
         ```sql
         CREATE OR REPLACE FUNCTION public.get_user_profile(user_id UUID)
         RETURNS JSONB
@@ -1862,7 +1862,7 @@
         -- マイグレーション: pg_trgm有効化（テキスト類似検索）
         CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
         ```
-    3.  **Schema Isolation**: 拡張は`extensions`スキーマに作成することを推奨します（Supabaseデフォルト）。`public`スキーマへの関数汚染を防止します。
+    3.  **Schema Isolation**: 拡張は`extensions`スキーマに作成することを推奨します（Supabaseデフォルト）。`public`スキーマへの関数汚染を抑制します。
     4.  **推奨Extension一覧**:
         -   **pg_stat_statements**: クエリ統計（§36.2で詳述）— デフォルト有効
         -   **pgvector**: ベクトル類似検索（§17参照）
@@ -2104,7 +2104,7 @@
 ### Rule 42.1: The Asynchronous I/O (AIO) Optimization Protocol
 -   **Law**: PostgreSQL 18の**Asynchronous I/O（AIO）**サブシステム（`io_uring`ベース）の特性を理解し、I/O集約型ワークロードのパフォーマンス最適化に活用しなければなりません。
 -   **Action**:
-    1.  **Performance Awareness**: PostgreSQL 18のAIOは、シーケンシャルスキャンやVACUUMなどのI/O集約型操作で**2-3倍のスループット向上**を実現します。大規模なバッチ処理やデータ分析クエリで特に効果を発揮します。
+    1.  **Performance Awareness**: PostgreSQL 18のAIOは、シーケンシャルスキャンやVACUUMなどのI/O集約型操作で**2-3倍のスループット向上**をもたらします。大規模なバッチ処理やデータ分析クエリで特に効果を発揮します。
     2.  **Linux Requirement**: `io_uring`はLinuxカーネル5.1以上で利用可能です。Supabaseマネージド環境では自動的に有効化されますが、セルフホスト環境ではカーネルバージョンを確認してください。
     3.  **Monitoring**: AIOの効果は`pg_stat_io`ビューで確認できます。I/O待ち時間の削減をモニタリングし、パフォーマンスベースラインを更新してください。
 
@@ -2198,7 +2198,7 @@
         ```
     3.  **Fallback Auth**: Passkeysをサポートしないデバイス・ブラウザのために、従来のEmail/Password認証を**フォールバック**として維持してください。Passkeysのみの認証は現時点では推奨しません。
     4.  **MFA Complementarity**: Passkeysは単独で強力な認証ですが、高セキュリティ要件では`aal2`レベルのMFA（§18.2参照）と組み合わせることを推奨します。
--   **Rationale**: Passkeysはフィッシング耐性があり、パスワード漏洩リスクを根本的に排除します。2025年以降、主要ブラウザとOS全てがPasskeysをサポートしており、パスワードレス認証の標準として採用が進んでいます。
+-   **Rationale**: Passkeysはフィッシング耐性があり、パスワード漏洩リスクを大幅に低減します。2025年以降、主要ブラウザとOS全てがPasskeysをサポートしており、パスワードレス認証の標準として採用が進んでいます。
 
 ---
 
@@ -2330,7 +2330,7 @@
     3.  **Rollback Strategy**: マイグレーション失敗時の自動ロールバック手順を定義し、CIパイプラインに組み込んでください。§7.7（Expand-Contract）パターンの適用を推奨します。
     4.  **Secret Management**: Supabase APIキー、Service Roleキーは**GitHub Secrets**に格納し、ワークフローファイルへの直接記載を禁止します。
     5.  **Notification**: デプロイ成功/失敗をSlack/Discord等に通知し、チーム全体でデプロイ状況を可視化してください。
--   **Rationale**: 手動デプロイは「デプロイ忘れ」「環境差異」「手順ミス」の三重リスクを生みます。CI/CD自動化により、全環境で一貫したデプロイプロセスを保証し、人的エラーを構造的に排除します。
+-   **Rationale**: 手動デプロイは「デプロイ忘れ」「環境差異」「手順ミス」の三重リスクを生みます。CI/CD自動化により、全環境で一貫したデプロイプロセスを保証し、人的エラーを構造的に低減します。
 
 ---
 
@@ -2352,7 +2352,7 @@
         ```
     4.  **Deadlock Prevention**: 複数のAdvisory Lockを取得する場合は、常に同一の順序で取得してください。順序の不統一はデッドロックの原因です。
     5.  **Release Obligation**: Session Lockは必ず`pg_advisory_unlock`で明示的に解放してください。解放忘れはリソースリークです。
--   **Rationale**: アプリケーション層でのロック管理（Redis等）は追加のインフラ依存を生みます。PostgreSQLのAdvisory Locksを使用することで、DBと一体化した軽量な同時実行制御を実現し、外部依存を排除します。
+-   **Rationale**: アプリケーション層でのロック管理（Redis等）は追加のインフラ依存を生みます。PostgreSQLのAdvisory Locksを使用することで、DBと一体化した軽量な同時実行制御を実現し、外部依存を削減します。
 
 ---
 
@@ -2491,7 +2491,7 @@
     2.  **Stale-While-Revalidate**: 公開APIエンドポイントには`stale-while-revalidate`ディレクティブを活用し、キャッシュ更新中も古いデータを返すことでユーザー体験を維持してください。
     3.  **Cache Invalidation**: コンテンツ更新時はCDNのキャッシュを明示的にパージするか、URLにバージョンパラメータ（`?v=hash`）を付与してキャッシュバスティングを実行してください。
     4.  **Cloudflare Integration**: §1（Hybrid Stack）で定義したCloudflare CDNとSupabase Storageの統合を最適化し、画像変換（§6.2）のキャッシュヒット率を最大化してください。
--   **Rationale**: CDNキャッシュなしでは全リクエストがオリジンに到達し、Supabaseのコンピュート・ネットワーク使用量が不必要に増大します。適切なキャッシュ戦略により、コスト削減とレスポンス高速化を同時に実現します。
+-   **Rationale**: CDNキャッシュなしでは全リクエストがオリジンに到達し、Supabaseのコンピュート・ネットワーク使用量が不必要に増大します。適切なキャッシュ戦略により、コスト削減とレスポンス高速化を同時にもたらします。
 
 ---
 
@@ -2535,7 +2535,7 @@
     1.  **Quarterly Assessment**: 四半期ごとにチームでマチュリティ評価を実施し、改善計画を策定してください。
     2.  **L3 Target**: 新規プロジェクトは**L3（Defined）**到達を初期目標としてください。L3未満での本番リリースは原則禁止です。
     3.  **Gap Analysis**: 現在のレベルと目標レベルのギャップを特定し、本ドキュメントの該当セクションを参照して段階的に改善してください。
--   **Rationale**: 成熟度モデルは「何を改善すべきか」の優先順位を明確にし、闇雲なルール適用を防ぎます。段階的なアプローチにより、チームの負荷を適切に管理しながら運用品質を向上させます。
+-   **Rationale**: 成熟度モデルは「何を改善すべきか」の優先順位を明確にし、闇雲なルール適用を低減します。段階的なアプローチにより、チームの負荷を適切に管理しながら運用品質を向上させます。
 
 ---
 

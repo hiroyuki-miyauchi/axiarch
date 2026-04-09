@@ -83,7 +83,7 @@
             | **Page Load Including JSON-LD** | **< 1 second** | Prevent AI Crawler abandonment |
         *   **Action**:
             1.  **Cache-First Response**: Apply WARM cache (TTL ~5 minutes) to JSON-LD output to accelerate responses to AI Crawlers.
-            2.  **Select Specification**: Optimize data fetching during JSON-LD generation to retrieve only the minimum required fields. Fetching all columns is prohibited.
+            2.  **Strict Field Selectionification**: Optimize data fetching during JSON-LD generation to retrieve only the minimum required fields. Fetching all columns is prohibited.
             3.  **Freshness Signal**: Include `dateModified` / `updated_at` in JSON-LD to communicate "content freshness" to AI (linked with E-E-A-T Freshness Signal).
     *   **The Direct Answer Protocol (Answer First)**:
         *   **Context**: AI search engines (SGE, Perplexity) extract "direct answers" to user questions.
@@ -147,7 +147,7 @@
     *   **Law**: Mandate returning `canonical` URL using `generateMetadata` on all public pages.
     *   **Action**: Dynamically generate breadcrumb hierarchy structure as JSON-LD on page transitions to accurately convey site structure to crawlers.
 *   **The Consent Mode v2 Protocol (Compliance Tracking)**:
-    *   **Context**: Compliance with EEA regulations and domestic laws (Revised Telecommunications Business Act, etc.).
+    *   **Context**: Compliance with EEA regulations and domestic laws (Revised Applicable Regional Telecommunications Law, etc.).
     *   **Law**: Implement Google Consent Mode v2 and dynamically control tag firing according to user consent state (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`).
     *   **Action**: Introduce Consent Management Platform (CMP) or build in-house consent UI, and standardize flow that correctly calls `gtag('consent', 'default'|'update', ...)`.
 *   **The Data Layer Standard (Standardized Observation)**:

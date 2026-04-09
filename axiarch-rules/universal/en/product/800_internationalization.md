@@ -53,7 +53,7 @@
 - **L10n ≠ Translation**: Localization is not translation. It is a comprehensive process including cultural adaptation, legal adaptation, and technical adaptation
 - **Priority Hierarchy**:
   1. **Functional Accuracy**: Accurate display of data (currency, dates, numbers)
-  2. **Legal Compliance**: Adherence to regional regulations (GDPR, APPI, CCPA, etc.)
+  2. **Legal Compliance**: Adherence to regional regulations (GDPR, CCPA, Global Privacy Laws, etc.)
   3. **Cultural Appropriateness**: Elimination of culturally inappropriate expressions/designs
   4. **Linguistic Quality**: Natural translations, accurate terminology
 - **Locale-Agnostic Code**: Business logic MUST NOT depend on locale. Locale-dependent processing is confined to UI/formatting layers
@@ -502,7 +502,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 ### Section 38: Legal & Regulatory Localization
 
 - **Terms of Service / Privacy Policy**: Must be provided in target country language (GDPR Article 12, etc.)
-- **Consent Mechanisms**: EU: explicit opt-in (TCF 2.2), US: opt-out (GPP), Japan: APPI compliant
+- **Consent Mechanisms**: EU: explicit opt-in (TCF 2.2), US: opt-out (GPP), Japan: Global Privacy Laws compliant
 - **Age Restrictions**: Country-specific minimum age management
 - → See `601_data_governance.md`
 
@@ -598,7 +598,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 - **DMA**: Gatekeeper data portability obligations
 - **EU Data Act**: Full enforcement September 2025
 - **EU AI Act**: Feb 2025 prohibited AI enforcement, Aug 2025 general-purpose AI rules, **Aug 2026 high-risk AI rules enforcement**. Multilingual AI output transparency obligation
-- **Regulatory Checklist**: GDPR, CCPA/CPRA, APPI, PIPL, LGPD, PIPA, DPDPA, EAA, EU AI Act
+- **Regulatory Checklist**: GDPR, CCPA/CPRA, Global Privacy Laws, PIPL, LGPD, PIPA, DPDPA, EAA, EU AI Act
 
 ### Section 50: Multilingual E-Invoicing
 
@@ -825,7 +825,7 @@ npx messageformat-validator locales/**/*.json
 
 - **EU**: TCF 2.2 compliant CMP. Prior consent mandatory
 - **US**: GPP support. Opt-out links
-- **Japan**: APPI/Telecommunications Business Act compliance. External transmission regulations
+- **Japan**: Global Privacy Laws/Applicable Regional Telecommunications Law compliance. External transmission regulations
 - **Technical Implementation**: Locale-specific CMP SDK initialization. Dynamic script control based on consent state
 
 ### Section 74: Cross-Border Data Transfer Technical Controls
@@ -1279,21 +1279,21 @@ npx messageformat-validator locales/**/*.json
 
 | Rule File | Related Content |
 |---|---|
-| [100_product_strategy.md](../en/100_product_strategy.md) | Dynamic Pricing metadata, tier strategy |
-| [101_revenue_monetization.md](../en/101_revenue_monetization.md) | Payments, currency, FinOps |
-| [102_growth_marketing.md](../en/102_growth_marketing.md) | SEO/GEO, OGP, ASO |
-| [200_design_ux.md](../en/200_design_ux.md) | Accessibility, IME, layout |
-| [300_engineering_standards.md](../en/300_engineering_standards.md) | CI/CD, coding standards |
-| [340_web_frontend.md](../en/340_web_frontend.md) | CSS architecture, performance |
-| [341_headless_cms.md](../en/341_headless_cms.md) | Multilingual content management |
-| [320_supabase_architecture.md](../en/320_supabase_architecture.md) | DB design, timezone |
-| [400_ai_engineering.md](../en/400_ai_engineering.md) | AI/LLM, RAG, Agentic AI |
-| [502_site_reliability.md](../en/502_site_reliability.md) | Multi-region availability |
-| [600_security_privacy.md](../en/600_security_privacy.md) | Data protection, encryption, crypto regulation |
-| [601_data_governance.md](../en/601_data_governance.md) | GDPR, APPI, cross-border data, EU Data Act |
-| [700_qa_testing.md](../en/700_qa_testing.md) | VRT, accessibility testing |
-| [720_cloud_finops.md](../en/720_cloud_finops.md) | Cloud cost management, GreenOps |
-| [802_language_protocol.md](../en/802_language_protocol.md) | Language usage protocol, UI glossary |
+| [100_product_strategy.md](../product/000_product_strategy.md) | Dynamic Pricing metadata, tier strategy |
+| [101_revenue_monetization.md](../product/300_revenue_monetization.md) | Payments, currency, FinOps |
+| [102_growth_marketing.md](../product/500_growth_marketing.md) | SEO/GEO, OGP, ASO |
+| [200_design_ux.md](../design/000_design_ux.md) | Accessibility, IME, layout |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD, coding standards |
+| [340_web_frontend.md](../engineering/300_web_frontend.md) | CSS architecture, performance |
+| [341_headless_cms.md](../engineering/310_headless_cms.md) | Multilingual content management |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB design, timezone |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI/LLM, RAG, Agentic AI |
+| [502_site_reliability.md](../operations/400_site_reliability.md) | Multi-region availability |
+| [600_security_privacy.md](../security/000_security_privacy.md) | Data protection, encryption, crypto regulation |
+| [601_data_governance.md](../security/100_data_governance.md) | GDPR, Global Privacy Laws, cross-border data, EU Data Act |
+| [700_qa_testing.md](../quality/000_qa_testing.md) | VRT, accessibility testing |
+| [720_cloud_finops.md](../operations/600_cloud_finops.md) | Cloud cost management, GreenOps |
+| [802_language_protocol.md](../core/200_language_protocol.md) | Language usage protocol, UI glossary |
 
 | Section | Related Rule |
 |---|---|

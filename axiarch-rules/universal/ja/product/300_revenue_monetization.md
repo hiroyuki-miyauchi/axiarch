@@ -73,11 +73,11 @@
     *   **可視化**: 売上だけでなく、サーバーコスト（COGS）や広告費（CAC）をAPIで取得し、日次で概算PL（損益計算書）を可視化します。
     *   **限界利益**: 1取引あたりの限界利益（Unit Contribution Margin）がプラスであることを常に監視します。
 *   **FinOps (コスト管理)**:
-    *   **予算アラート**: AWS/GCP/Firebaseの予算アラート（Budget Alert）を必ず設定し、クラウド破産を防ぎます。
+    *   **予算アラート**: AWS/GCP/Firebaseの予算アラート（Budget Alert）を必ず設定し、クラウド破産を低減します。
     *   **コスト配分**: タグ付けにより、機能ごと・チームごとのコストを明確にします。
     *   **Cost Visualization Dashboard**: 管理画面において、「概算コスト($)」「機能別消費トークン」等の指標を日次で可視化し、推測ではなく事実に基づいてコスト対策を行います。
     *   **Exchange Rate Defense (為替リスク監視)**: 外貨建て（USD等）のクラウドサービスを利用する場合、月次決算時にコストを現地通貨に換算して記録し、為替変動による利益率低下を監視してください。急激な為替変動時にはプライシングの見直しトリガーを設定することを推奨します。
-    *   **Spend Cap Protocol**: フェーズ1（開発・ローンチ）では「Spend Cap」をONにし、クラウド破産を防ぎます。フェーズ2（成長期）で初めてOFFにします。
+    *   **Spend Cap Protocol**: フェーズ1（開発・ローンチ）では「Spend Cap」をONにし、クラウド破産を低減します。フェーズ2（成長期）で初めてOFFにします。
     *   **Scale First Credit Strategy（早すぎる最適化回避）**: マネージドサービスの基本枠（転送量・リクエスト数等）の使用率アラートが鳴るまでは、過剰なコスト削減（早すぎる最適化）を行わず、**ユーザー体験と機能開発に全リソースを集中**してください。基本枠を超過した場合に備え、手動復旧（Spend Cap解除等）の手順を事前に文書化しておくことを推奨します。
     *   **Cloud Bankruptcy Prevention (無限ループ対策)**:
         *   **Infinite Loop Ban**: `useEffect` や再帰処理による「無限DB読み込み（Infinite Reads）」は、数分で数百万リクエストを発生させ破産を招くため、ループ条件の厳格なレビューと、開発環境でのリミット設定を義務付けます。
@@ -89,7 +89,7 @@
             *   マージ・削除済みPRに紐づくPreview環境やブランチDB
             *   Storage内の孤立ファイル（参照レコードが存在しないアセット）
             *   停止中のDBインスタンスやサーバーレス関数（料金が発生し続けていないか確認）
-    *   **Preview Cleanup Protocol**: PRマージ後、CI/CDでPreview環境（ブランチDB等）を自動削除し、「マイグレーションの亡霊」を防ぎます。
+    *   **Preview Cleanup Protocol**: PRマージ後、CI/CDでPreview環境（ブランチDB等）を自動削除し、「マイグレーションの亡霊」を低減します。
     *   **Storage Tiering Protocol**: アクセス頻度の低いログやアーカイブデータは、Hot Storage（高価）から Cold Storage（S3 Glacier / R2 等の低価格帯）へ移動するライフサイクルポリシーを設定し、ストレージコストを最適化します。
     *   **Cache Hierarchy Standard (Cache-First FinOps)**: DB負荷とコストを最小化するため、全てのクエリに以下のキャッシュ階層を適用します。
         *   **STATIC (86400s)**: マスタデータ（カテゴリ、設定値）— DB負荷ゼロ。
@@ -113,13 +113,13 @@
 
 ## 2. 収益化モデル (Monetization Models)
 *   **サブスクリプション (Subscription)**:
-    *   **SKU設計**: プランは「松竹梅（例: Free, Pro, Business）」の3つに絞り、決定麻痺（Decision Paralysis）を防ぎます。
+    *   **SKU設計**: プランは「松竹梅（例: Free, Pro, Business）」の3つに絞り、決定麻痺（Decision Paralysis）を低減します。
     *   **年額プラン**: 年額プランには明確な割引（例: 2ヶ月分無料）を提示し、キャッシュフローを改善します。
 *   **フリーミアム (Freemium)**:
     *   **Aha! Moment**: 価値を実感する瞬間までは無料で体験させます。
     *   **Paywall**: 課金画面では、メリットを視覚的に訴求し、「いつでもキャンセル可能」を明記して不安を取り除きます。
 *   **Eコマース (E-Commerce)**:
-    *   **カゴ落ち対策**: ゲスト購入を許可し、強制的な会員登録を排除します。
+    *   **カゴ落ち対策**: ゲスト購入を許可し、強制的な会員登録を抑制します。
     *   **1クリック決済**: Apple Pay / Google Pay を導入し、入力の手間を極限まで減らします。
 *   **Feature Gating Strategy (Tier Restrictions)**:
     *   **Quota Enforcement**: 「登録数上限（Max N）」や「機能制限（Vision AI回数）」は、フロントエンドだけでなく、サーバーサイド（Guard/Policies）で厳格に強制します。
@@ -249,7 +249,7 @@
 *   **Ledger Architecture (不変台帳)**:
     *   **Immutable Ledger**: ポイント残高の直接更新 (`UPDATE`) は厳禁です。全ての変動は `point_transactions` への `INSERT` (Credit/Debit) として記録し、残高は集計により算出します。
 *   **Security & Fraud Prevention**:
-    *   **Idempotency**: ポイント付与・消費にはクライアント生成のUUID（`Idempotency-Key`）を必須とし、二重付与を防ぎます。
+    *   **Idempotency**: ポイント付与・消費にはクライアント生成のUUID（`Idempotency-Key`）を必須とし、二重付与を低減します。
     *   **Security-Tiered Allocation**: ユーザーの認証強度に応じて付与量を変動させ、MFA設定を推奨します。
         *   **Tier 1 (Email)**: 1 pt (Minimal / 捨て垢対策)
         *   **Tier 2 (Google Auth)**: 3 pts (Standard / Bot検知済み)
@@ -349,7 +349,7 @@
     1.  **Price as Data**: 価格情報はDBのテーブル（例: `plans`, `prices`）で管理し、コード内のハードコードを禁止します。
     2.  **Version Control**: 価格変更時は新しいレコードを作成し、`valid_from` / `valid_until` で有効期間を管理します。既存ユーザーの契約は変更の影響を受けないグランドファザリング設計を考慮してください。
     3.  **Display Sync**: 価格変更がフロントエンド（LP、料金ページ等）に即座に反映されるようキャッシュ無効化戦略を設計してください。
-    4.  **Server-Side Recalculation**: 価格・割引の最終計算は必ず**サーバーサイド**で再実行してください。フロントエンドでの表示価格はあくまで「参考価格」であり、決済処理時にサーバーサイドで再計算することで、フロントエンドの改ざんリスクを排除します。
+    4.  **Server-Side Recalculation**: 価格・割引の最終計算は必ず**サーバーサイド**で再実行してください。フロントエンドでの表示価格はあくまで「参考価格」であり、決済処理時にサーバーサイドで再計算することで、フロントエンドの改ざんリスクを根本から低減します。
 
 ### 7.3. The Pricing AB Test Protocol (価格A/Bテスト実験基盤)
 *   **Context**: 価格やプラン構成の最適化は、データに基づくA/Bテストにより継続的に行うべきですが、テストのたびにコード変更を要する設計では実験速度が著しく低下します。

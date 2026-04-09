@@ -41,7 +41,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 | — | *(No separated domain files yet)* | — | — |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
-<!-- Example: | 1 | DB & Auth | [engineering/010_database_auth.md](../engineering/010_database_auth.md) | 3 | -->
+<!-- Example: | 1 | DB & Auth | [engineering/010_database_auth.md](../engineering/200_supabase_architecture.md) | 3 | -->
 
 ---
 

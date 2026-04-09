@@ -69,7 +69,7 @@
 
 - **Rule 74.1**: Every project MUST define **one authoritative language** via `Project Native Language` in `AGENTS.md`
 - **Rule 74.2**: The authoritative language serves as the **default language** for all decision documents, user-facing text, and team communication
-- **Rule 74.3**: Changing the authoritative language requires a procedure equivalent to a "Constitutional Amendment" (→ see [801_governance.md](./801_governance.md) Part IV)
+- **Rule 74.3**: Changing the authoritative language requires a procedure equivalent to a "Constitutional Amendment" (→ see [801_governance.md](../core/100_governance.md) Part IV)
 
 ### 1.2. Three-Layer Language Usage Model
 
@@ -807,7 +807,7 @@ error.network.timeout     → "Connection timed out"
 
 ### 15.3. Sitemap & robots.txt
 
-- **Rule 74.161**: For multilingual sites, set `hreflang` attributes accurately on all pages (→ see [800_internationalization.md](./800_internationalization.md) Part X)
+- **Rule 74.161**: For multilingual sites, set `hreflang` attributes accurately on all pages (→ see [800_internationalization.md](../product/800_internationalization.md) Part X)
 - **Rule 74.162**: `robots.txt` is language-independent (written in English)
 
 ---
@@ -1133,7 +1133,7 @@ const label = t('auth.login.emial_label'); // Typo → compile error detection
 ### 23.3. Cookie Consent & Legal Notices
 
 - **Rule 74.230**: Cookie consent banners and legal notices MUST be displayed in the **Project Native Language**
-- **Rule 74.231**: Privacy regulation-required notices (GDPR/APPI, etc.) MUST be provided in the target users' language
+- **Rule 74.231**: Privacy regulation-required notices (GDPR/Global Privacy Laws, etc.) MUST be provided in the target users' language
 
 ---
 
@@ -1648,7 +1648,7 @@ charset = utf-8-bom
 
 ### 39.3. Regulatory Compliance Language
 
-- **Rule 74.396**: Privacy policies for GDPR / APPI / CCPA, etc., have an obligation to be provided in the target users' language
+- **Rule 74.396**: Privacy policies for GDPR / Global Privacy Laws / CCPA, etc., have an obligation to be provided in the target users' language
 - **Rule 74.397**: Language of documents submitted to regulatory authorities (FDA / PMDA, etc.) follows regulatory requirements
 
 ---
@@ -1751,7 +1751,7 @@ const LOCALE_CONFIG = {
   - Root cause (missing CI gates, review oversights, etc.)
   - Impact scope (number of affected users/screens)
   - Preventive measures (CI rule additions, checklist updates, etc.)
-- **Rule 74.423**: Record postmortem lessons in `010_project_lessons_log.md`
+- **Rule 74.423**: Record postmortem lessons in `core/010_project_lessons_log.md`
 
 ---
 
@@ -1827,15 +1827,15 @@ const LOCALE_CONFIG = {
 
 | Related Rule | Referenced Content | Boundary with This Rule |
 |---|---|---|
-| [000_core_mindset.md](./000_core_mindset.md) | Zero Tolerance principle | This rule specifies Zero Tolerance for language aspects |
-| [200_design_ux.md](./200_design_ux.md) | Accessibility & UX standards | This rule specializes in language aspects of accessibility |
-| [300_engineering_standards.md](./300_engineering_standards.md) | Coding conventions | This rule specializes in language selection criteria |
-| [301_api_integration.md](./301_api_integration.md) | API design standards | This rule specializes in API language policy |
-| [320_supabase_architecture.md](./320_supabase_architecture.md) | DB design standards | This rule specializes in DB naming language policy |
-| [400_ai_engineering.md](./400_ai_engineering.md) | AI implementation strategy | This rule specializes in AI communication language protocol |
-| [501_customer_experience.md](./501_customer_experience.md) | Email delivery standards | This rule specializes in notification language policy |
-| [600_security_privacy.md](./600_security_privacy.md) | Security standards | This rule specializes in multilingual safety guardrails |
-| [800_internationalization.md](./800_internationalization.md) | i18n architecture & L10n infrastructure | 71 = international expansion infrastructure, 74 = language selection rules |
-| [801_governance.md](./801_governance.md) Part XXII | Rule translation governance | 72 = translation management of rules themselves, 74 = product language protocol |
+| [000_core_mindset.md](../core/000_core_mindset.md) | Zero Tolerance principle | This rule specifies Zero Tolerance for language aspects |
+| [200_design_ux.md](../design/000_design_ux.md) | Accessibility & UX standards | This rule specializes in language aspects of accessibility |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | Coding conventions | This rule specializes in language selection criteria |
+| [301_api_integration.md](../engineering/100_api_integration.md) | API design standards | This rule specializes in API language policy |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB design standards | This rule specializes in DB naming language policy |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI implementation strategy | This rule specializes in AI communication language protocol |
+| [501_customer_experience.md](../operations/300_customer_experience.md) | Email delivery standards | This rule specializes in notification language policy |
+| [600_security_privacy.md](../security/000_security_privacy.md) | Security standards | This rule specializes in multilingual safety guardrails |
+| [800_internationalization.md](../product/800_internationalization.md) | i18n architecture & L10n infrastructure | 71 = international expansion infrastructure, 74 = language selection rules |
+| [801_governance.md](../core/100_governance.md) Part XXII | Rule translation governance | 72 = translation management of rules themselves, 74 = product language protocol |
 
 ---

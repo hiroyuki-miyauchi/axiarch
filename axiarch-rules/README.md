@@ -3,12 +3,14 @@
 > [!IMPORTANT]
 > **Axiarchの3層ガバナンス・アーキテクチャ / The Three-Layer Governance Architecture**
 > 本フォルダ（`axiarch-rules/`）は、Axiarch（アクシアーク）フレームワークの統治ルールを格納する。
+> この「普遍憲法（Layer 1）」「固有ルール（Layer 2）」「任意プロンプト（Layer 3）」による明確な責務分離こそが、ハルシネーションや品質ドリフトを抑制し、長期間にわたる自律駆動の品質ベースラインを維持するAxiarchの心臓部である。
+> Axiarchの最低実行条件は Layer 1 と Layer 2 の遵守であり、それ以外の拡張領域である Layer 3 (Prompts) などは完全に任意（オプショナル）である。
 > 
 > **Separation of Concerns (AI Agent Instructions)**:
 >
 > ## 🇯🇵 日本語指示 (Japanese Instructions)
 > *   **Layer 1: Universal Rules (`universal/`)**:
->     *   **Status**: **Immutable (不変)** / 不変の普遍憲法。プロジェクト作業では読み取り専用。
+>     *   **Status**: **Immutable (不変)** / 不変の普遍憲法。プロジェクトの普遍的原則と制約水準のベースラインを定義する領域。作業では読み取り専用。
 >     *   **Action**: 明示的に「憲法改正」を指示されない限り、AIはこれらのファイルを編集してはならない。
 > *   **Layer 2: Blueprint Rules (`blueprint/`)**:
 >     *   **Status**: **Mutable (可変)** / プロジェクト固有仕様。
@@ -16,7 +18,7 @@
 >
 > ## 🇺🇸 English Instructions
 > *   **Layer 1: Universal Rules (`universal/`)**:
->     *   **Status**: **Immutable** / Immutable Constitution. Read-Only for Project Tasks.
+>     *   **Status**: **Immutable** / Immutable Constitution. Defines the baseline of universal principles and constraint levels. Read-Only for Project Tasks.
 >     *   **Action**: AI MUST NOT edit these files unless explicitly instructed to "Amend Constitution".
 > *   **Layer 2: Blueprint Rules (`blueprint/`)**:
 >     *   **Status**: **Mutable** / Evolving Project State.
@@ -108,9 +110,9 @@
 ## 🚀 Axiarch Setup & Initialization (導入と初期化)
 
 > [!NOTE]
-> **🇯🇵**: 本フレームワークは [Google Antigravity](https://labs.google/antigravity) 上で設計・実戦検証されたものです。**他のAIエージェント**（Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みです。ルール本体は純粋なMarkdownであり動作すると考えられますが、**Antigravity以外での動作は検証していません。自己責任でご利用ください。**
+> **🇯🇵**: 本フレームワークは [Google Antigravity](https://labs.google/antigravity) 上で設計・実戦検証されたものです。**他のAIエージェント**（Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
 >
-> **🇺🇸**: This framework was designed and battle-tested on [Google Antigravity](https://labs.google/antigravity), but `AGENTS.md` is expected to work with **other AI agents** as well. The rules are pure Markdown and should be compatible, but **have NOT been tested outside Antigravity. Use at your own risk.**
+> **🇺🇸**: This framework was designed and battle-tested on [Google Antigravity](https://labs.google/antigravity). Through `AGENTS.md`, it is expected to work with **other AI agents**; however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
 
 ### 🇯🇵 日本語ガイド (Usage in Japanese)
 
@@ -199,10 +201,10 @@ your-project/
  ├── axiarch-rules/           ← ルール本体 / Rule Definitions
  │    ├── INDEX.md
  │    ├── README.md
- │    ├── universal/              ← 第1層: 不変憲法 / Layer 1: Immutable
+ │    ├── universal/              ← Layer 1: 不変憲法 / Immutable
  │    │    ├── ja/ (or en/)
  │    │    └── ...
- │    └── blueprint/              ← 第2層: 固有ルール / Layer 2: Mutable State
+ │    └── blueprint/              ← Layer 2: 固有ルール / Mutable State
  │         ├── ja/ (or en/)
  │         └── ...
  ├── axiarch-prompts/         ← Layer 3: 任意実行エンジン / Optional Execution Engine

@@ -45,18 +45,15 @@
 ### Rule 63.002: Completeness of IP Assignment (Global Jurisdictions)
 - Explicitly state that all copyrights, inventions, designs, and database rights vest in the legal entity
 - **Territoriality compliance**: Use IP assignment clauses valid in each jurisdiction:
-  - **Japan**: Copyright Act §15 (Work for Hire) + Patent Act §35 (Employee Inventions)
-  - **US**: Work for Hire Doctrine + Assignment Agreement (note California Labor Code §2870 exclusions)
-  - **EU**: Respect moral rights per member state (Germany UrhG §7: no waiver; France Code IP L.121-1: same)
+  - **US**: Work for Hire Doctrine + Assignment Agreement (note state-specific exclusions like California Labor Code §2870)
+  - **EU**: Respect moral rights per member state (e.g., Germany UrhG §7: no waiver; France Code IP L.121-1: same)
   - **China**: Copyright Law §18 + Patent Law §6 — explicit contract recommended for corporate ownership
-  - **South Korea**: Invention Promotion Act §10 — verify validity of pre-assignment
   - **India**: Patents Act §§19-21 — explicit assignment in employment contract required
 
 ### Rule 63.003: Compensation & Reward Systems
-- Establish internal rules for calculating **reasonable compensation** under Japan's Patent Act §35
+- Establish internal rules for calculating **reasonable compensation** for employee inventions where required by local statute (e.g., Germany ArbEG)
 - Design invention reward programs: staged rewards at filing, registration, and commercialization
 - Ensure transparency in the calculation process to mitigate compensation disputes
-- **Germany ArbEG**: Compensation follows statutory guidelines (license analogy method is standard)
 - **China**: Comply with minimum compensation standards (Patent Law Implementation Rules §77-78)
 
 ---
@@ -73,7 +70,7 @@
 ### Rule 63.011: IP Clauses in Contractor Agreements
 - **Mandatory clause checklist**:
   - [ ] Explicit IP ownership attribution to the commissioning party
-  - [ ] Moral rights non-assertion covenant (Japan jurisdiction)
+  - [ ] Moral rights non-assertion covenant (where jurisdictionally valid)
   - [ ] Third-Party IP Warranty (no unauthorized IP usage)
   - [ ] AI-generated code usage disclosure obligation
   - [ ] Source code and design document delivery obligation
@@ -123,7 +120,6 @@
 - **Jurisdiction-specific validity**:
   - US California: Non-competes generally unenforceable (Bus. & Prof. Code §16600) → use Garden Leave
   - US other states: Enforceable within reasonable scope (time, geography, industry)
-  - Japan: Enforceable within reasonable scope (case law — compensation payment is key factor)
   - EU: Varies by member state (Germany: HGB §74 ff.; France: compensation mandatory)
 
 ---
@@ -154,7 +150,7 @@ jobs:
   - IP assignment agreement completion status for new hires
   - IP clause adequacy in contractor agreements
   - Detection of unsigned CLA contributions
-  - OSS usage and license compliance (→ see [602_oss_compliance.md](./602_oss_compliance.md))
+  - OSS usage and license compliance (→ see [602_oss_compliance.md](../security/200_oss_compliance.md))
   - AI-generated code usage status and rights attribution record verification
 
 ---
@@ -266,8 +262,8 @@ jobs:
   - Technical effects through specific hardware integration
   - Technical solutions to specific technical problems in prior art
 
-### Rule 63.091: Software Patents in Japan & Europe
-- **Japan**: Must satisfy "utilization of natural law" (software information processing utilizing hardware resources)
+### Rule 63.091: Software Patents in Europe & Global
+- **Global Considerations**: Ensure claims satisfy technical requirements of targeted jurisdictions (e.g., hardware resource utilization or natural law utilization)
 - **Europe (EPO)**: "Further Technical Effect" argument is critical — COMVIK approach applied
 - **UPC**: Launched June 2023 → consider leveraging Unitary Patent (→ §12 for details)
 
@@ -279,16 +275,15 @@ jobs:
 - **Protected subject matter**: GUI/UI designs, icons, fonts, product appearance, packaging
 - **Dual protection with patents**: Protect technical inventions via patents, appearance/UI via design rights
 - **Filing strategy**:
-  - **Japan**: Design Act (2020 amendment expanded protection to image designs, architecture, interiors)
   - **US**: Design Patent (35 USC §171) — 15-year protection, no maintenance fees
   - **EU**: Registered Community Design (RCD) via EUIPO; 3-year Unregistered Community Design (UCD)
   - **Hague Agreement**: International filing to cover multiple jurisdictions simultaneously
 
 ### Rule 63.096: GUI/UI Design Protection Best Practices
 - **Documentation habits**: Record creation date, creator, and version history of designs
-- **File before publication**: File UI design applications before public disclosure (novelty requirement — especially Japan & EU)
+- **File before publication**: File UI design applications before public disclosure (novelty requirement — especially EU & China)
 - **Partial designs**: File characteristic UI elements as partial designs to optimize claim scope
-- **Animation/transitions**: Consider dynamic designs (Japan) and Animated Design Patents (US)
+- **Animation/transitions**: Consider dynamic designs and Animated Design Patents (US)
 
 ---
 
@@ -342,7 +337,6 @@ jobs:
   - Detect and block pasting of confidential code to AI Copilot/ChatGPT and other LLMs
 
 ### Rule 63.102: Legal Basis for Protection
-- **Japan**: Unfair Competition Prevention Act (§2(6)) — 2024 amendment strengthens limited-provision data protection
 - **US**: Defend Trade Secrets Act (DTSA, 2016) + state laws (UTSA)
   - **DTSA Whistleblower Immunity**: All contracts after May 11, 2016 must include immunity notice (18 USC §1833(b))
 - **EU**: Trade Secrets Directive (2016/943) — transposition completed across member states
@@ -435,7 +429,7 @@ rules:
 ### Rule 63.130: Trademark Filing Principles
 - **Filing timing**: File before public launch once product/service name is finalized
 - **Pre-filing searches**:
-  - Search national trademark databases (J-PlatPat, USPTO TESS, EUIPO TMview, WIPO Global Brand Database)
+  - Search national trademark databases (USPTO TESS, EUIPO TMview, WIPO Global Brand Database)
   - Confirm Common Law Rights (US)
   - AI-powered trademark search tools (TrademarkVision / Corsearch AI) for image similarity checks
 - **International filing**:
@@ -447,7 +441,7 @@ rules:
 - **Brand monitoring services**: Auto-monitor new filings and domain registrations (CompuMark / Corsearch / TrademarkNow)
 - **Usage evidence management**:
   - Periodically save timestamped screenshots of trademark use (ads, packaging, web)
-  - Japan: Prepare for non-use cancellation trials (3-year non-use)
+  - Prepare for non-use cancellation trials (typically 3-5 years non-use depending on jurisdiction)
   - US: Manage Section 8/9 Affidavit deadlines (years 5-6 and 9-10 post-registration)
 
 ### Rule 63.132: Brand Guidelines Internal Deployment
@@ -466,12 +460,12 @@ rules:
   - Rapid DMCA takedown response capability
   - AI-generated brand imitation content detection
 - **Offline infringement response**:
-  - Customs registration (PROTECT Act / JP Customs Tariff Law §69-11) for border measures
+  - Customs registration (e.g., US PROTECT Act) for border measures
   - Cease & Desist letters as appropriate
 
 ### Rule 63.141: Domain Dispute Resolution
 - **UDRP**: WIPO arbitration for bad-faith domain registrations
-- **JP-DRP**: .jp domain dispute resolution
+- **ccTLD DRPs**: Country code specific dispute resolution policies
 - **URS (Uniform Rapid Suspension System)**: Faster provisional suspension than UDRP
 - Consider preemptive acquisition of key TLDs against cybersquatting
 
@@ -509,10 +503,7 @@ rules:
     - Registered before infringement OR within 3 months of publication → statutory damages (up to $150,000/work) + attorney's fees
     - Registered after infringement → actual damages only
   - Software copyright registration: Submit first/last 25 pages of source code (redaction available for trade secret portions)
-- **Japan**: Registration not required for copyright to arise (no-formality principle), but useful for:
-  - Program work registration (Agency for Cultural Affairs) — presumption of rights
-  - First publication date registration — proof of protection period start
-- **International**: Berne Convention no-formality principle is standard, but strategic registration recommended in key jurisdictions
+- **International**: Berne Convention no-formality principle is standard, but strategic registration is recommended in key jurisdictions for enhanced enforcement capabilities and evidentiary presumption.
 
 ### Rule 63.156: Software Copyright & Code Protection
 - **Protection scope**: Source code and object code protected as copyrighted works (API structure contested per Oracle v. Google)
@@ -529,7 +520,6 @@ rules:
   - Switching cost reduction obligations for data holders
   - Public authority data access rights (emergencies)
   - Regulation of unfair contractual terms
-- **Japan**: Limited-provision data (Unfair Competition Prevention Act §2(7)) — 2024 amendment strengthens protection
 - **China**: Data Security Law (DSL) + PIPL data management rights
 - **Data property rights**: Most jurisdictions do not recognize ownership of data per se; indirect protection via contract, trade secrets, and database rights
 
@@ -538,7 +528,7 @@ rules:
   - Purpose limitation (explicitly state whether AI training is included)
   - Redistribution/secondary use restrictions
   - Data quality warranty level
-  - Data protection clauses if personal data included (GDPR/APPI compliant)
+  - Data protection clauses if personal data included (e.g., GDPR compliant)
   - Data return/deletion obligation upon contract termination
 - **Data marketplaces**: License design for Snowflake Marketplace / AWS Data Exchange sales
 
@@ -563,7 +553,7 @@ rules:
 - **Risk management**:
   - Verify original author's rights for NFT-ized works
   - Legal risks of wash trading and market manipulation
-  - Comply with crypto-asset regulations per jurisdiction (Japan: Payment Services Act, EU: MiCA)
+  - Comply with crypto-asset regulations per jurisdiction (e.g., EU: MiCA)
 
 ### Rule 63.167: Future of Blockchain IP Management
 - **On-chain IP registries**: WIPO/EPO research programs on blockchain-based patent/trademark registries
@@ -586,8 +576,8 @@ rules:
   - **Disclosure obligation** when registering works containing AI-generated material
   - AI-generated portions exceeding de minimis must be explicitly excluded
   - Existing copyright law principles deemed sufficient; no new legislation endorsed
-- **Japan (Agency for Cultural Affairs 2025)**: Copyright recognized when AI is used as "tool" and human makes creative contribution
 - **EU (AI Act + Copyright Directive)**: AI-generated content labeling obligation, training data copyright respect/opt-out compliance
+- **International Trend**: Copyright typically recognized only when AI is used merely as an assisting "tool" and a human makes creative contributions.
 - **Case law**: Thaler v. Perlmutter (2023 final) — AI cannot be registered as sole author
 
 ### Rule 63.171: Internal Guidelines for AI-Generated Content
@@ -618,8 +608,8 @@ rules:
   - Traditional Pannu factors do not apply to AI-assisted inventions under new framework
   - Human **significant contribution** to the "conception" of the invention is required
   - Duty of Candor compliance in AI utilization — appropriately disclose AI assistance
-- **Japan**: Inventors limited to natural persons (Patent Act §36)
 - **Europe**: EPO rejected AI as sole inventor in Dabus decision (2025 final)
+- **General Consensus**: Inventors are limited to natural persons across nearly all major jurisdictions.
 
 ### Rule 63.176: AI-Assisted Invention Filing Strategy
 - **Documentation obligation**: Detailed recording in invention notebooks of which stages AI was used vs. human creative judgment
@@ -636,7 +626,7 @@ rules:
 - When filing software inventions containing AI-generated code:
   - Frame claims as technical solutions to technical problems, not the code itself
   - Clearly delineate AI-generated vs. human-designed portions
-  - Confirm from licensing risk perspective (→ see [602_oss_compliance.md](./602_oss_compliance.md) AI-generated code section)
+  - Confirm from licensing risk perspective (→ see [602_oss_compliance.md](../security/200_oss_compliance.md) AI-generated code section)
 
 ---
 
@@ -646,7 +636,7 @@ rules:
 - **Copyright clearance**:
   - License verification when training data includes third-party copyrighted works
   - EU AI Act: General-purpose AI model providers must disclose training data summaries (full enforcement August 2026)
-  - Japan Copyright Act §30-4 (rights limitation for information analysis) — verify applicability
+  - Verify applicability of local copyright exceptions for text and data mining (TDM)
 - **Opt-out compliance**:
   - `robots.txt` `ai` directive, `ai.txt` (C2PA-compatible) for crawling control
   - TDM opt-out compliance (EU DSM Directive Article 4)
@@ -698,7 +688,7 @@ rules:
 
 ### Rule 63.191: Exit Strategy & IP Readiness Alignment
 - **M&A**: Acquirers prioritize IP completeness and exclusivity → thorough IP DD essential
-- **IPO**: IP risk disclosure required for SEC/JFSA → accurate risk factor descriptions
+- **IPO**: IP risk disclosure required for financial regulators (e.g., SEC) → accurate risk factor descriptions
 - **SPAC**: SEC 2024 final rules require IPO-equivalent disclosures → Target co-registrant liability (→ §32)
 - **Direct Listing**: No underwriter due diligence; voluntary IP risk disclosure even more critical
 - For tech companies where 80%+ of value resides in intangible assets, IP valuation is the core of deal valuation
@@ -742,7 +732,7 @@ rules:
 | **24 months prior** | Conduct IP audit, establish IP ledger, inventory technical debt |
 | **18 months prior** | File unfiled key inventions, international trademark filing, initial IP valuation |
 | **12 months prior** | Begin data room construction, VDR setup |
-| **9 months prior** | Complete OSS/license audit (→ see [602_oss_compliance.md](./602_oss_compliance.md)) |
+| **9 months prior** | Complete OSS/license audit (→ see [602_oss_compliance.md](../security/200_oss_compliance.md)) |
 | **6 months prior** | Conduct Mock Due Diligence, pre-create technical DD report |
 | **3 months prior** | Final data room update, draft IP representations & warranties |
 | **Pre-Exit** | Final IP inventory, confirm resolution of all open IP issues |
@@ -780,7 +770,7 @@ rules:
   - Full compliance with OSS licenses
   - No unauthorized access to material trade secrets
   - AI-generated code usage scope and rights attribution are clear
-  - Compliance with data privacy regulations (GDPR/APPI)
+  - Compliance with global data privacy regulations (e.g., GDPR, CCPA)
 
 ### Rule 63.221: Indemnification
 - Damages clause for discovered IP infringement
@@ -1028,7 +1018,7 @@ jobs:
 
 ### Rule 63.280: SCA-Integrated Automated License Audit
 - **SCA tools**: Use Snyk / FOSSA / Socket.dev / Black Duck for automated license compliance verification as part of DD
-- **Details** → see [602_oss_compliance.md](./602_oss_compliance.md)
+- **Details** → see [602_oss_compliance.md](../security/200_oss_compliance.md)
 
 ### Rule 63.281: Quantifying OSS Risk in M&A
 - **Black Duck 2025 Report findings**:
@@ -1371,15 +1361,15 @@ jobs:
 
 | Reference | Related Topics |
 |---|---|
-| [600_security_privacy.md](./600_security_privacy.md) | Access control, encryption, DLP, Zero Trust (§13, §15, §16) |
-| [601_data_governance.md](./601_data_governance.md) | Data protection regulation, AI regulation, GDPR, EU Data Act (§21, §23, §25, §48) |
-| [602_oss_compliance.md](./602_oss_compliance.md) | SBOM, SCA, license compliance, SLSA (§5, §35, §38) |
-| [700_qa_testing.md](./700_qa_testing.md) | Test coverage, code quality metrics (§37) |
-| [502_site_reliability.md](./502_site_reliability.md) | Availability, backup, DR (§37) |
-| [503_incident_response.md](./503_incident_response.md) | Incident response flow (§43) |
-| [400_ai_engineering.md](./400_ai_engineering.md) | AI implementation strategy, guardrails, RAG design (§23, §24, §26) |
-| [100_product_strategy.md](./100_product_strategy.md) | Monetization models, exit strategy business perspective (§27, §28) |
-| [101_revenue_monetization.md](./101_revenue_monetization.md) | FinOps, payments, IP valuation financial perspective (§28, §41) |
+| [600_security_privacy.md](../security/000_security_privacy.md) | Access control, encryption, DLP, Zero Trust (§13, §15, §16) |
+| [601_data_governance.md](../security/100_data_governance.md) | Data protection regulation, AI regulation, GDPR, EU Data Act (§21, §23, §25, §48) |
+| [602_oss_compliance.md](../security/200_oss_compliance.md) | SBOM, SCA, license compliance, SLSA (§5, §35, §38) |
+| [700_qa_testing.md](../quality/000_qa_testing.md) | Test coverage, code quality metrics (§37) |
+| [502_site_reliability.md](../operations/400_site_reliability.md) | Availability, backup, DR (§37) |
+| [503_incident_response.md](../operations/500_incident_response.md) | Incident response flow (§43) |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI implementation strategy, guardrails, RAG design (§23, §24, §26) |
+| [100_product_strategy.md](../product/000_product_strategy.md) | Monetization models, exit strategy business perspective (§27, §28) |
+| [101_revenue_monetization.md](../product/300_revenue_monetization.md) | FinOps, payments, IP valuation financial perspective (§28, §41) |
 
 ### Cross-References
 

@@ -730,16 +730,16 @@
 
 ### 24.1. The Customer Support Compliance Standard
 -   **Law**: Comply with the following regulations in support operations.
--   **Data Protection**: GDPR/APPI/CCPA-compliant PII handling; minimum retention/scheduled deletion of PII in tickets; DSR response process.
+-   **Data Protection**: GDPR/CCPA/Global Privacy Laws-compliant PII handling; minimum retention/scheduled deletion of PII in tickets; DSR response process.
 -   **Consumer Rights**: Cancellation freedom (dark pattern prohibition); legal complaint handling compliance; clear refund policy disclosure.
 -   **Accessibility Compliance**: WCAG 2.2 Level AA (Part XIX); EAA; ADA.
 -   **AI Transparency**: EU AI Act compliance (AI usage disclosure); AI decision explainability.
 
 ### 24.2. The Data Subject Request Protocol
 -   **Law**: Respond to user DSR (data access/deletion/correction) within legally mandated timeframes.
--   **Response SLA**: GDPR: **30 days**; CCPA: **45 days**; APPI: **without delay**.
+-   **Response SLA**: GDPR: **30 days**; CCPA: **45 days**; Global Privacy Laws: **without delay**.
 -   **Process**: When support receives DSR, route via dedicated workflow to data protection team.
--   **Cross-Reference**: `601_data_governance.md` — GDPR/APPI/CCPA compliance, Data subject rights
+-   **Cross-Reference**: `601_data_governance.md` — GDPR/CCPA/Global Privacy Laws compliance, Data subject rights
 
 ---
 
@@ -1128,6 +1128,6 @@
 | `502_site_reliability.md` | Incident management, Observability |
 | `503_incident_response.md` | P0 incident escalation, outage communication |
 | `600_security_privacy.md` | SPF/DKIM/DMARC, bot defense, prompt injection |
-| `601_data_governance.md` | GDPR/APPI/CCPA, dark pattern prohibition, child protection, EU AI Act |
+| `601_data_governance.md` | GDPR/CCPA/Global Privacy Laws, dark pattern prohibition, child protection, EU AI Act |
 | `700_qa_testing.md` | Test strategy, accessibility testing |
 | `802_language_protocol.md` | Notification/email language protocol, multilingual support |

@@ -2329,16 +2329,16 @@ monorepo/
 
 | 関連ルールファイル | 参照理由 |
 |:---|:---|
-| [000_core_mindset.md](../ja/000_core_mindset.md) | Headless First原則、既存機能保護 |
-| [200_design_ux.md](../ja/200_design_ux.md) | アクセシビリティ、デザインシステム、Content Design System |
-| [300_engineering_standards.md](../ja/300_engineering_standards.md) | CI/CD、コーディング規約、Event-Driven設計 |
-| [340_web_frontend.md](../ja/340_web_frontend.md) | Next.js、パフォーマンスバジェット、Edge Functions |
-| [301_api_integration.md](../ja/301_api_integration.md) | API設計、エラーハンドリング、CloudEvents |
-| [320_supabase_architecture.md](../ja/320_supabase_architecture.md) | DB設計、RLS、Storage |
-| [400_ai_engineering.md](../ja/400_ai_engineering.md) | RAG、AI生成コンテンツ、EU AI Act、MCP、Agentic AI、A2A |
-| [600_security_privacy.md](../ja/600_security_privacy.md) | Zero Trust、認証認可、OWASP、C2PA |
-| [601_data_governance.md](../ja/601_data_governance.md) | GDPR、プライバシー、DSA |
-| [602_oss_compliance.md](../ja/602_oss_compliance.md) | 依存関係管理 |
-| [800_internationalization.md](../ja/800_internationalization.md) | i18n、多言語、グローバル展開、MTPE |
-| [802_language_protocol.md](../ja/802_language_protocol.md) | CMS言語ガバナンス |
+| [000_core_mindset.md](../core/000_core_mindset.md) | Headless First原則、既存機能保護 |
+| [200_design_ux.md](../design/000_design_ux.md) | アクセシビリティ、デザインシステム、Content Design System |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD、コーディング規約、Event-Driven設計 |
+| [340_web_frontend.md](../engineering/300_web_frontend.md) | Next.js、パフォーマンスバジェット、Edge Functions |
+| [301_api_integration.md](../engineering/100_api_integration.md) | API設計、エラーハンドリング、CloudEvents |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB設計、RLS、Storage |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | RAG、AI生成コンテンツ、EU AI Act、MCP、Agentic AI、A2A |
+| [600_security_privacy.md](../security/000_security_privacy.md) | Zero Trust、認証認可、OWASP、C2PA |
+| [601_data_governance.md](../security/100_data_governance.md) | GDPR、プライバシー、DSA |
+| [602_oss_compliance.md](../security/200_oss_compliance.md) | 依存関係管理 |
+| [800_internationalization.md](../product/800_internationalization.md) | i18n、多言語、グローバル展開、MTPE |
+| [802_language_protocol.md](../core/200_language_protocol.md) | CMS言語ガバナンス |
 

@@ -78,7 +78,7 @@ Thoroughly investigate all files and all features against the loaded "laws" for 
 ## 3. Architecture & Monetization Standard Violation
 * **Target**: Deviations from unicorn-standard design patterns and data sales (API Sales) strategy.
 * **Audit**:
-    * Are specified architecture patterns — **Data Gateway, CQRS, Tiered Cache, Select Spec** — being ignored, with business logic written directly into UI (convention violation)?
+    * Are specified architecture patterns — **Data Gateway, CQRS, Tiered Cache, Strict Field Selection** — being ignored, with business logic written directly into UI (convention violation)?
     * When considering the strategy of **selling data externally via API (Monetization)** in the future, are the serialization design rules (enforcing the DTO pattern) — that ensure confidential information is automatically excluded — being broken? Are rules for semantic design targeting AI/GEO being ignored?
 
 ## 4. Type Safety & Data Synchronization Violation

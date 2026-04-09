@@ -523,7 +523,7 @@ const policy: ABACPolicy = {
 
 - **Rule 50.076**: Manage admin tool dependencies via SBOM (Software Bill of Materials)
 - Scan dependency vulnerabilities weekly; address Critical/High within 72 hours
-- → See [602_oss_compliance.md](./602_oss_compliance.md) for details
+- → See [602_oss_compliance.md](../security/200_oss_compliance.md) for details
 
 ### 8.8. AI Red Teaming for Admin
 
@@ -683,7 +683,7 @@ interface AuditLogEntry {
 
 - **Rule 50.096**: Integrate audit logs with SIEM (Security Information and Event Management)
 - Output in standard format (CEF/OCSF) for SIEM correlation analysis
-- → See [600_security_privacy.md](./600_security_privacy.md) for security details
+- → See [600_security_privacy.md](../security/000_security_privacy.md) for security details
 
 ### 10.7. WORM Storage (Write Once Read Many)
 
@@ -1126,7 +1126,7 @@ const userManagementTools = [
   - Explicitly define AI operation scope (whitelist approach)
   - Log all AI operations as `source: 'ai_agent'` in audit logs
   - Alert on anomalous AI operations (unusual patterns)
-  - → See [400_ai_engineering.md](./400_ai_engineering.md) for AI safety details
+  - → See [400_ai_engineering.md](../ai/000_ai_engineering.md) for AI safety details
 
 ---
 
@@ -1640,7 +1640,7 @@ describe('Permission Matrix', () => {
   - Incident reporting framework (initial report within 24 hours)
   - Supply chain security management
   - Executive cybersecurity education mandate
-  - → See [600_security_privacy.md](./600_security_privacy.md) for details
+  - → See [600_security_privacy.md](../security/000_security_privacy.md) for details
 
 ---
 
@@ -1672,7 +1672,7 @@ describe('Permission Matrix', () => {
   - Real-time token usage tracking
   - Monthly budget cap (auto-limit on budget reach)
   - Cost-per-action efficiency metric
-  - → See [101_revenue_monetization.md](./101_revenue_monetization.md) for FinOps details
+  - → See [101_revenue_monetization.md](../product/300_revenue_monetization.md) for FinOps details
 
 ### 36.5. FinOps Dashboard
 
@@ -1856,7 +1856,7 @@ describe('Permission Matrix', () => {
   - Secret scanning
   - Container image scanning (if applicable)
   - SBOM generation
-  - → See [602_oss_compliance.md](./602_oss_compliance.md) for details
+  - → See [602_oss_compliance.md](../security/200_oss_compliance.md) for details
 
 ---
 
@@ -1881,7 +1881,7 @@ describe('Permission Matrix', () => {
 - **Rule 50.422**: Align admin tool operations with Green SRE principles:
   - Carbon-aware scheduling (execute processing during low-carbon time periods)
   - Consider carbon coefficients in region selection
-  - → See [502_site_reliability.md](./502_site_reliability.md) for details
+  - → See [502_site_reliability.md](../operations/400_site_reliability.md) for details
 
 ---
 
@@ -1901,7 +1901,7 @@ describe('Permission Matrix', () => {
   - Cross-border transfer checks during data export
   - GDPR SCC (Standard Contractual Clauses) compliance verification
   - Cross-border transfer logging
-  - → See [601_data_governance.md](./601_data_governance.md) for details
+  - → See [601_data_governance.md](../security/100_data_governance.md) for details
 
 ### 43.3. Data Localization
 
@@ -2020,7 +2020,7 @@ describe('Permission Matrix', () => {
   2. Determine scope of breached data
   3. Legally mandated notifications (GDPR: within 72 hours)
   4. Initiate forensic investigation
-  5. → See [503_incident_response.md](./503_incident_response.md) for details
+  5. → See [503_incident_response.md](../operations/500_incident_response.md) for details
 
 ---
 
@@ -2085,7 +2085,7 @@ describe('Permission Matrix', () => {
 - **Rule 50.493**: Crypto agility for the quantum computing era:
   - PQC (Post-Quantum Cryptography) migration plan
   - Cryptographic algorithm abstraction layer
-  - → See [600_security_privacy.md](./600_security_privacy.md) for details
+  - → See [600_security_privacy.md](../security/000_security_privacy.md) for details
 
 ---
 
@@ -2137,19 +2137,19 @@ describe('Permission Matrix', () => {
 
 | Related Topic | Reference Rule File |
 |--------------|-------------------|
-| Authentication & Security Details | [600_security_privacy.md](./600_security_privacy.md) |
-| Data Privacy & Legal | [601_data_governance.md](./601_data_governance.md) |
-| License & Dependencies | [602_oss_compliance.md](./602_oss_compliance.md) |
-| SRE & Reliability | [502_site_reliability.md](./502_site_reliability.md) |
-| Crisis Management & BCP | [503_incident_response.md](./503_incident_response.md) |
-| AI Implementation | [400_ai_engineering.md](./400_ai_engineering.md) |
-| Design & UX | [200_design_ux.md](./200_design_ux.md) |
-| QA & Testing | [700_qa_testing.md](./700_qa_testing.md) |
-| General Engineering | [300_engineering_standards.md](./300_engineering_standards.md) |
-| Web Frontend | [340_web_frontend.md](./340_web_frontend.md) |
-| API Integration | [301_api_integration.md](./301_api_integration.md) |
-| Finance & FinOps | [101_revenue_monetization.md](./101_revenue_monetization.md) |
-| User Support | [501_customer_experience.md](./501_customer_experience.md) |
-| Global Expansion & i18n | [800_internationalization.md](./800_internationalization.md) |
-| Language Protocol | [802_language_protocol.md](./802_language_protocol.md) |
-| Constitution Authority | [801_governance.md](./801_governance.md) |
+| Authentication & Security Details | [600_security_privacy.md](../security/000_security_privacy.md) |
+| Data Privacy & Legal | [601_data_governance.md](../security/100_data_governance.md) |
+| License & Dependencies | [602_oss_compliance.md](../security/200_oss_compliance.md) |
+| SRE & Reliability | [502_site_reliability.md](../operations/400_site_reliability.md) |
+| Crisis Management & BCP | [503_incident_response.md](../operations/500_incident_response.md) |
+| AI Implementation | [400_ai_engineering.md](../ai/000_ai_engineering.md) |
+| Design & UX | [200_design_ux.md](../design/000_design_ux.md) |
+| QA & Testing | [700_qa_testing.md](../quality/000_qa_testing.md) |
+| General Engineering | [300_engineering_standards.md](../engineering/000_engineering_standards.md) |
+| Web Frontend | [340_web_frontend.md](../engineering/300_web_frontend.md) |
+| API Integration | [301_api_integration.md](../engineering/100_api_integration.md) |
+| Finance & FinOps | [101_revenue_monetization.md](../product/300_revenue_monetization.md) |
+| User Support | [501_customer_experience.md](../operations/300_customer_experience.md) |
+| Global Expansion & i18n | [800_internationalization.md](../product/800_internationalization.md) |
+| Language Protocol | [802_language_protocol.md](../core/200_language_protocol.md) |
+| Constitution Authority | [801_governance.md](../core/100_governance.md) |

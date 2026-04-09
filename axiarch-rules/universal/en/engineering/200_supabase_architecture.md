@@ -194,7 +194,7 @@
     | FK names match actual table definitions | Check Relationships section |
     | Array column empty checks are correct | Addition of `.neq('column', '{}')` |
     | nullable/optional matches DB definition | Cross-reference with auto-generated types |
--   **Rationale**: Schema-Reality Gaps are the primary cause of "silent bugs" that only manifest in production. By treating the type definition file as the "absolute truth" and eliminating guesswork-based implementation, these bugs are reduced to zero.
+-   **Rationale**: Schema-Reality Gaps are the primary cause of "silent bugs" that only manifest in production. By treating the type definition file as the "authoritative source" and eliminating guesswork-based implementation, these bugs are significantly reduced.
 
 ### Rule 2.18: The Automated Data Retention Protocol
 -   **Law**: Data that accumulates over time MUST have **category-based retention periods** defined, with mechanisms (Cron Job / Scheduled Task) to **automatically purge or anonymize** data after expiration.
@@ -214,7 +214,7 @@
         -   After 30 days: Logical deletion (`deleted_at` set)
         -   After legal retention period: Physical deletion or complete PII anonymization
     4.  **Purge Logging**: Record purge execution details (target tables, deletion count, execution timestamp) in audit logs.
--   **Rationale**: Retaining data indefinitely leads to increased storage costs, expanded privacy risks, and violations of data minimization principles under GDPR/APPI. Automated retention management achieves a triple win of cost, compliance, and performance.
+-   **Rationale**: Retaining data indefinitely leads to increased storage costs, expanded privacy risks, and violations of data minimization principles under GDPR/Global Privacy Laws. Automated retention management achieves a triple win of cost, compliance, and performance.
 
 ## 3. Integrity & Logic Strategy
 
@@ -588,7 +588,7 @@
 ## 11. Backend Governance
 
 ### Rule 11.1: The Data Residency Protocol (Rule 26.1)
--   **Law**: PII and legal docs must physically reside in specified regions (e.g., Japan) per GDPR/APPI.
+-   **Law**: PII and legal docs must physically reside in specified regions (e.g., Japan) per GDPR/Global Privacy Laws.
 -   **Action**: Design Multi-region Read/Local Write architectures considering future Data Localization requirements.
 
 ### Rule 11.2: The Audit Bypass Anti-Pattern (Server Action Mandate)
@@ -751,7 +751,7 @@
 -   **Law**: In admin panels and similar interfaces, when writes (Mutations) are executed with privileged clients (`service_role`, etc.), **reads (Query for Edit Form) must also guarantee equivalent visibility**. Using different privilege-level clients for writes and reads causes the opaque bug of "save succeeds but data reverts on reload."
 -   **Action**:
     1.  **Privilege Parity Check**: When using `createAdminClient()` (RLS bypass) for writes, verify that the corresponding "fetch for editing" is also executed with equivalent privileges. If reads use `anon` or restricted `authenticated` permissions, RLS filters out some data, feeding stale or empty data into the form.
-    2.  **Select Spec Synchronization**: Verify that the Select Specification used in DTOs encompasses all columns that are save targets. Adding a column to only one side creates a "half-lung" state where "data is saved but not displayed in the edit screen."
+    2.  **Strict Field Selection Synchronization**: Verify that the Strict Field Selectionification used in DTOs encompasses all columns that are save targets. Adding a column to only one side creates a "half-lung" state where "data is saved but not displayed in the edit screen."
     3.  **Admin Gateway Awareness**: In functions with explicit admin purposes (e.g., `getAdminStoreById`), use privileged clients as needed or fully open RLS policies for admin roles.
     4.  **Post-Update Verification**: For high-importance mutations (image reordering, status changes, etc.), consider applying the "Verification Fetch" pattern: immediately after update, execute a `select` with the same ID and verify current values via logs.
 -   **Rationale**: Writes via privileged clients bypass RLS and correctly save data, but when non-privileged clients are used during edit screen reload, RLS `SELECT` policies exclude some columns or records. As a result, users feel "data wasn't saved" and repeat the same operation, creating a vicious cycle of expanding data inconsistencies.
@@ -1021,7 +1021,7 @@
 -   **Action**:
     1.  **Log Drain**: In production, use Supabase's **Log Drain** feature to forward logs to external log management services (Datadog, Logflare, BigQuery, etc.). Native logs in the Supabase Dashboard have limited retention periods.
     2.  **Structured Logging**: Within Edge Functions, output structured logs in the format `console.log(JSON.stringify({ event, userId, duration }))` to facilitate search and filtering.
-    3.  **PII Exclusion**: Including PII (email addresses, passwords, tokens, etc.) in logs is strictly prohibited. Logs are accessible to all developers, and recording PII creates GDPR/APPI violation risks.
+    3.  **PII Exclusion**: Including PII (email addresses, passwords, tokens, etc.) in logs is strictly prohibited. Logs are accessible to all developers, and recording PII creates GDPR/Global Privacy Laws violation risks.
 
 ---
 
@@ -1183,7 +1183,7 @@
 -   **Action**:
     1.  **Separate Projects**: Each environment MUST be created as an **independent Supabase project**. Reusing a single project across environments (changing only env variables) is a breeding ground for data contamination and configuration errors.
     2.  **Environment Variable Isolation**: Each environment's `SUPABASE_URL` and `SUPABASE_ANON_KEY` MUST be strictly managed via environment variables. Hardcoding is prohibited.
-    3.  **Production Data Isolation**: When copying production data to development/staging environments, PII MUST be **anonymized/masked**. Unprocessed copies of production data create APPI/GDPR violation risks.
+    3.  **Production Data Isolation**: When copying production data to development/staging environments, PII MUST be **anonymized/masked**. Unprocessed copies of production data create Global Privacy Laws/GDPR violation risks.
     4.  **Migration Flow**: Migration application order is unidirectional: `Dev → Staging → Production`. Direct application to Production is prohibited per §7.6 (Zero SQL Editor Policy).
     5.  **Seed Data Separation**: Manage seed data (`seed.sql`) separately per environment to prevent development test data from contaminating production.
 
@@ -2307,10 +2307,10 @@
 ## 59. Compliance & Data Sovereignty Strategy
 
 ### Rule 59.1: The Regulatory Compliance Framework
--   **Law**: Identify applicable **data protection regulations** (GDPR, APPI, CCPA, SOC2) and implement technical compliance measures in the Supabase environment.
+-   **Law**: Identify applicable **data protection regulations** (GDPR, CCPA, Global Privacy Laws, SOC2) and implement technical compliance measures in the Supabase environment.
 -   **Action**:
     1.  **Data Classification**: Classify all data by sensitivity: Top Secret (Vault encryption), Confidential (TLS + RLS/CLS), Internal (RLS admin-only), Public.
-    2.  **Region Selection**: Choose Supabase project regions aligned with jurisdictional requirements (e.g., APPI → `ap-northeast-1`). Coordinate with §11.1.
+    2.  **Region Selection**: Choose Supabase project regions aligned with jurisdictional requirements (e.g., Global Privacy Laws → `ap-northeast-1`). Coordinate with §11.1.
     3.  **DSAR Automation**: Prepare RPC functions for automated user data export/deletion to respond to Data Subject Access Requests within 24 hours.
     4.  **SOC2 Alignment**: Implement SOC2 principles (encryption, access control, audit logs, incident response) at the application layer.
     5.  **Cookie Consent**: Coordinate with SSR framework (§35) cookie management; no tracking cookies without user consent.

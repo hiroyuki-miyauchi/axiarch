@@ -1717,7 +1717,7 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §150. Regulatory Compliance
 
 - **GDPR**: Data processing consent for EU users. Data portability and deletion rights
-- **APPI**: Compliance with Japan's 2025 Personal Information Protection Act amendments
+- **Global Privacy Laws**: Compliance with Japan's 2025 Personal Information Protection Act amendments
 - **CCPA/CPRA**: California Consumer Privacy Act compliance
 - **EU CRA (Cyber Resilience Act)**: Effective 2027. SBOM and vulnerability reporting obligations
 - **Child Protection**: COPPA compliance. Special protections for users under 13
@@ -2119,7 +2119,7 @@ fun `loadOrders should emit Success state`() = runTest {
 | Wear OS / watchOS | §140–§142 |
 | Android XR / ARCore | §143–§144 |
 | Green Engineering / Battery | §145–§147 |
-| EU CRA / SBOM / GDPR / APPI | §150, §174 |
+| EU CRA / SBOM / GDPR / Global Privacy Laws | §150, §174 |
 | Design System / Material 3 Expressive / HIG | §159–§161 |
 | Embedded Swift / IoT / Matter | §162–§164 |
 | HTTP/3 / gRPC / WebTransport | §165–§167 |
@@ -2138,16 +2138,16 @@ fun `loadOrders should emit Success state`() = runTest {
 
 | Related Rule | File | Related Topic |
 |-------------|------|--------------|
-| Mobile Development (Flutter) | [342_mobile_flutter.md](../en/342_mobile_flutter.md) | Flutter-specific best practices |
-| Store Submission Compliance | [103_appstore_compliance.md](../en/103_appstore_compliance.md) | IAP/ASO/Review Guidelines |
-| Security | [600_security_privacy.md](../en/600_security_privacy.md) | Zero Trust/OWASP/Encryption |
-| Design & UX | [200_design_ux.md](../en/200_design_ux.md) | Accessibility/Touch Targets |
-| AI Implementation | [400_ai_engineering.md](../en/400_ai_engineering.md) | On-Device AI/Edge ML |
-| QA & Testing | [700_qa_testing.md](../en/700_qa_testing.md) | Test Pyramid/E2E |
-| Engineering General | [300_engineering_standards.md](../en/300_engineering_standards.md) | CI/CD/Coding Conventions |
-| Legal & Privacy | [601_data_governance.md](../en/601_data_governance.md) | GDPR/Privacy Manifest/EU CRA |
-| License Management | [602_oss_compliance.md](../en/602_oss_compliance.md) | SBOM/Dependency Management |
-| SRE & Reliability | [502_site_reliability.md](../en/502_site_reliability.md) | Observability/SLO/Green SRE |
-| Analytics Intelligence | [401_data_analytics.md](../en/401_data_analytics.md) | OTel Mobile/Mobile Analytics |
-| Language Protocol | [802_language_protocol.md](../en/802_language_protocol.md) | Mobile-specific Language Protocol |
-| Global Expansion | [800_internationalization.md](../en/800_internationalization.md) | Mobile i18n/RTL Support |
+| Mobile Development (Flutter) | [342_mobile_flutter.md](../engineering/400_mobile_flutter.md) | Flutter-specific best practices |
+| Store Submission Compliance | [103_appstore_compliance.md](../product/700_appstore_compliance.md) | IAP/ASO/Review Guidelines |
+| Security | [600_security_privacy.md](../security/000_security_privacy.md) | Zero Trust/OWASP/Encryption |
+| Design & UX | [200_design_ux.md](../design/000_design_ux.md) | Accessibility/Touch Targets |
+| AI Implementation | [400_ai_engineering.md](../ai/000_ai_engineering.md) | On-Device AI/Edge ML |
+| QA & Testing | [700_qa_testing.md](../quality/000_qa_testing.md) | Test Pyramid/E2E |
+| Engineering General | [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD/Coding Conventions |
+| Legal & Privacy | [601_data_governance.md](../security/100_data_governance.md) | GDPR/Privacy Manifest/EU CRA |
+| License Management | [602_oss_compliance.md](../security/200_oss_compliance.md) | SBOM/Dependency Management |
+| SRE & Reliability | [502_site_reliability.md](../operations/400_site_reliability.md) | Observability/SLO/Green SRE |
+| Analytics Intelligence | [401_data_analytics.md](../ai/100_data_analytics.md) | OTel Mobile/Mobile Analytics |
+| Language Protocol | [802_language_protocol.md](../core/200_language_protocol.md) | Mobile-specific Language Protocol |
+| Global Expansion | [800_internationalization.md](../product/800_internationalization.md) | Mobile i18n/RTL Support |

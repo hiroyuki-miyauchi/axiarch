@@ -53,7 +53,7 @@ Project overview, lessons index, and templates.
 | File | Description |
 |:-----|:------------|
 | [000_project_overview.md](core/000_project_overview.md) | Project vision, tech stack, and immutable principles |
-| [010_project_lessons_log.md](core/010_project_lessons_log.md) | Lessons index + unsorted lesson accumulation. Origin point for Crystallization. |
+| [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | Lessons index + unsorted lesson accumulation. Origin point for Crystallization. |
 | [998_feature_spec_template.md](core/998_feature_spec_template.md) | **Feature spec template (Blueprint First core)**. Copy to the relevant domain folder to use. |
 | [999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
 
@@ -124,14 +124,14 @@ Strategies for generating next-generation "value".
 
 ### Adding Feature Specs (Blueprint First)
 1. **Copy `core/998_feature_spec_template.md`**
-2. Place it in the relevant domain folder (e.g., `product/600_feature_payment.md`)
+2. Place it in the relevant domain folder (e.g., `product/020_feature_payment.md` *Note: Use any available number from 000 to 999; there are no domain-specific numbering bands.*)
 3. **Write §3 Acceptance Criteria first** — do NOT write code while this section is empty
 4. Fill in remaining sections (data model, API design, test strategy, etc.)
 5. **Add an entry to the relevant folder section in this INDEX.md**
 
 ### Adding Project-Specific Rules
 1. Copy `core/999_project_specific_template.md`
-2. Place it in the corresponding folder with a number (e.g., `security/100_security_policy.md`)
+2. Place it in the corresponding folder with a number (e.g., `security/010_security_policy.md` *Note: Use any available number from 000 to 999; there are no domain-specific numbering bands.*)
 3. Fill each template section with project-specific content
 4. **Add an entry to the relevant folder section in this INDEX.md**
 

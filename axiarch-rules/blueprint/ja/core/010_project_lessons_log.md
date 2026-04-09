@@ -41,7 +41,7 @@
 | — | *(まだ分離されたドメインファイルはありません)* | — | — |
 
 <!-- AUTO-CRYSTALLIZATION: ドメインファイル作成時、上の表に行を追加してください -->
-<!-- 例: | 1 | DB・認証 | [engineering/010_database_auth.md](../engineering/010_database_auth.md) | 3 | -->
+<!-- 例: | 1 | DB・認証 | [engineering/010_database_auth.md](../engineering/200_supabase_architecture.md) | 3 | -->
 
 ---
 
@@ -64,7 +64,7 @@
 ### [Initial] プロジェクト開始時の教訓
 **Domain:** ガバナンス
 **Context:** 新規プロジェクトまたはルールの刷新時。
-**Rule:** `AGENTS.md` および `axiarch-rules` のプロトコルを絶対的な真実として遵守すること。
+**Rule:** `AGENTS.md` および `axiarch-rules` のプロトコルを基準として遵守すること。
 
 ---
 

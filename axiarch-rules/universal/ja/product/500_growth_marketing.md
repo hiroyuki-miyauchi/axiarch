@@ -83,7 +83,7 @@
             | **JSON-LDを含むページ読み込み** | **< 1秒** | AI Crawlerの離脱防止 |
         *   **Action**:
             1.  **Cache-First Response**: JSON-LD出力にはWARMキャッシュ（TTL 5分程度）を適用し、AI Crawlerへの応答を高速化してください。
-            2.  **Select Specification**: JSON-LD生成時のデータ取得は、必要最小限のフィールドのみを取得するように最適化してください。全カラムの取得は禁止です。
+            2.  **明示的なフィールド選択ification**: JSON-LD生成時のデータ取得は、必要最小限のフィールドのみを取得するように最適化してください。全カラムの取得は禁止です。
             3.  **Freshness Signal**: `dateModified` / `updated_at` をJSON-LDに含め、AIに「コンテンツの鮮度」を伝達してください（E-E-A-T Freshness Signalと連動）。
     *   **The Direct Answer Protocol (アンサーファースト)**:
         *   **Context**: AI検索エンジン（SGE, Perplexity）は、ユーザーの質問に対する「直接的な回答」を抜粋します。
@@ -116,7 +116,7 @@
     *   **Law**: フィルタ、ソート、ページネーション等のUI状態は、クエリパラメータ（例: `?area=tokyo&sort=rating`）で再現可能にします。
     *   **Action**:
         1.  **Shareable URLs**: ユーザーが状態を共有・ブックマークできるようにします。
-        2.  **Canonical Normalization**: 同一コンテンツへの複数URL（パラメータ順序違い等）は `canonical` タグで正規化し、SEO評価の分散を防ぎます。
+        2.  **Canonical Normalization**: 同一コンテンツへの複数URL（パラメータ順序違い等）は `canonical` タグで正規化し、SEO評価の分散を低減します。
 *   **インデックス制御 (Indexing Control)**:
     *   **Sitemap自動化**: `next-sitemap` 等を使用し、ビルド時または定期的（ISR）にXMLサイトマップを自動生成します。手動更新は禁止です。
     *   **Search Console API**: 記事公開や更新時に、Google Search Console APIを叩いてインデックス登録を即時リクエストする仕組みを整えます。
@@ -126,7 +126,7 @@
         *   **Action**: IndexNow APIキーをサーバーサイドに設定し、コンテンツ公開・更新のイベントフックで自動通知を発火させる仕組みを構築してください。
     *   **URLの永続性 (URL Persistence)**: リニューアル時、旧URL（例: WordPressの `/archives/123`）からの301リダイレクトを必ず設定し、SEO評価（Link Juice）を継承します。
     *   **The Pre-Launch Indexing Protocol (Sealed SEO)**:
-        *   **Law**: 正式ドメインへの移行およびステークホルダーからの明示的な「Launch承認」があるまで、`robots: noindex` 設定を**絶対に解除してはなりません**。
+        *   **Law**: 正式ドメインへの移行およびステークホルダーからの明示的な「Launch承認」があるまで、`robots: noindex` 設定を**厳正に解除してはなりません**。
         *   **Risk**: 未完成の状態でのインデックス登録は、ドメイン評価の毀損、重複コンテンツ、ブランドイメージの低下を招きます。
         *   **Action**: 開発・ステージング環境では、`next.config.js` や `middleware` でnoindex を強制し、本番かつ明示的承認後のみ解除するフローを構築してください。
     *   **The Hreflang Protocol (国際化URL戦略)**:
@@ -335,7 +335,7 @@
     *   **Action**:
         1.  **Feed Endpoint**: 商品データフィード (XML/TSV/JSON) を出力するAPIエンドポイント（例: `/api/feeds/ads`）を実装します。
         2.  **Realtime Sync**: 在庫、価格、ステータスの変更は、フィード経由で広告媒体に即時反映されるようにします。
-        3.  **Schema Compliance**: Google Merchant Center等のスキーマ要件を厳守し、審査エラーを未然に防ぎます。
+        3.  **Schema Compliance**: Google Merchant Center等のスキーマ要件を厳守し、審査エラーを未然に低減します。
 
 ### 6.1. The Brand Safety Protocol (ブランドセーフティ)
 *   **Context**: 外部広告ネットワーク経由で不適切な広告（ギャンブル、アダルト、暴力等）がサービス内に表示されると、ブランド毀損とユーザー信頼の喪失を招きます。
@@ -401,7 +401,7 @@
     *   **Law**: 詳細ページや記事ページなど、ソーシャル共有される可能性が高いページでは、タイトル、評価、画像を合成した**動的OGP画像**をオンデマンド生成し、SNS共有時のCTR（クリック率）を最大化します。
     *   **Action**:
         1.  **Server-Side Generation**: Edge Function やサーバーサイドのOGP画像生成ライブラリを使用し、リクエスト時に動的にOGP画像を生成します。
-        2.  **CDN Cache**: 生成コスト削減のため、CDNキャッシュ（例: `s-maxage=86400`）を適用し、同一ページへの繰り返しリクエストでは再生成を防ぎます。
+        2.  **CDN Cache**: 生成コスト削減のため、CDNキャッシュ（例: `s-maxage=86400`）を適用し、同一ページへの繰り返しリクエストでは再生成を低減します。
         3.  **Fallback**: 動的生成に失敗した場合、サイト共通のデフォルトOGP画像にフォールバックし、空のOGPを避けます。
 
 ## 10. First-Party Data & Attribution (ファーストパーティデータと帰属分析)
@@ -435,7 +435,7 @@
         *   **Relevance**: コンテンツ（記事、検索結果、推薦等）の末尾に「この情報は役に立ちましたか？ (Yes/No)」を配置し、コンテンツ品質のシグナルを収集します。
         *   **NPS (Net Promoter Score)**: サービス利用開始から一定期間（例: 30日）後のアクティブユーザーに、「このサービスを友人に勧めたいですか？ (0-10)」を問うモーダルを表示します。
     *   **Action**: 低評価（Detractor: 0-6）ユーザーには「どのような点が不満でしたか？」と深堀りの自由記述を促し、プロダクト改善のヒントを取得します（Product-Led Growth）。
-    *   **Frequency Control**: 同一ユーザーへのサーベイ表示は、最低でも**90日間隔**を空け、サーベイ疲れ（Survey Fatigue）を防ぎます。
+    *   **Frequency Control**: 同一ユーザーへのサーベイ表示は、最低でも**90日間隔**を空け、サーベイ疲れ（Survey Fatigue）を低減します。
 *   **The NPS/CSAT Measurement Standard Protocol (NPS/CSAT計測基準)**:
     *   **NPS (Net Promoter Score)**:
         *   **Survey Timing**: 登録後30日、60日、以降90日ごとにアプリ内またはメールでNPSアンケートを実施してください。

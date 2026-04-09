@@ -1,4 +1,4 @@
-# 30. エンジニアリングの卓越性 (Engineering Excellence - General)
+# 30. エンジニアリング基準 (Engineering Standards - General)
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
@@ -176,7 +176,7 @@
 ### 3.2. 環境変数テンプレート同期 (Environment Template Sync)
 *   **Law**: プロジェクトルートに `.env.example` を常設し、必要な全環境変数の**キーのみ**を記録する義務を負います。
 *   **Sync Mandate**: 新しい環境変数を追加した場合、**同一PRで** `.env.example` も更新しなければなりません。
-*   **Git Safety**: `.env.local` / `.env.production` 等の実値を含むファイルは `.gitignore` に含め、**絶対にコミットしてはなりません**。
+*   **Git Safety**: `.env.local` / `.env.production` 等の実値を含むファイルは `.gitignore` に含め、**厳正にコミットしてはなりません**。
 
 ### 3.3. 環境変数ドリフト防止 (Environment Variable Drift Prevention)
 *   **Law**: 環境変数の欠落や環境間の不整合（Drift）は、「ローカルでは動くがCI/本番で壊れる」最大の原因です。
@@ -274,7 +274,7 @@
 *   **ダークモード**: 有機EL（OLED）デバイスでの消費電力を抑えるため、真の黒（#000000）を使用したダークモードを推奨します。
 
 ### 6.1. データ転送量最適化 (Data Transfer Optimization)
-*   **圧縮**: 画像や動画は必ず最適化（AVIF/H.265）し、ネットワーク帯域の浪費を防ぎます。
+*   **圧縮**: 画像や動画は必ず最適化（AVIF/H.265）し、ネットワーク帯域の浪費を低減します。
 *   **Cache Maximization**: CDNキャッシュヒット率 **80%以上** を目標とし、静的アセットのオリジン負荷を最小化します。
 
 ### 6.2. Centralized Storage Shield（ストレージ集約）
@@ -349,7 +349,7 @@
     *   **Supreme Directive: The AI Git Ban**: AIによるGit操作の絶対禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
     *   **The Automated Deployment Mandate (CD First)**: 本番環境へのデプロイを手動コマンドで行うことは**完全禁止**。CI/CDパイプライン経由のみ。
     *   **The Architectural Preservation Protocol**: プロジェクトの中核機能ファイルには `@preservation_level CRITICAL` ヘッダーを付与し、AIの独断での破壊的変更を防止してください。
-*   **セキュリティ**: APIキー等の機密情報は絶対にコミットせず、CIでシークレットスキャン（TruffleHog）を義務付けます。
+*   **セキュリティ**: APIキー等の機密情報は厳正にコミットせず、CIでシークレットスキャン（TruffleHog）を義務付けます。
 *   **The Lockfile Regeneration Reflex**: CIのみが失敗する場合、まず `rm -rf package-lock.json node_modules && npm install` でLockfileを再生成してプッシュしてください。
 *   **The Connection Verification Protocol**: データベース接続エラー発生時は、まず `.env.local` の接続先を確認してください。
 
@@ -381,7 +381,7 @@
 ## Part XI: ドキュメント運用 (Documentation Ops)
 
 ### 11.0. Living Documentation（生きたドキュメント）
-*   **Mermaid.js**: アーキテクチャ図は画像ではなくコード（Mermaid）で管理し、陳腐化を防ぎます。
+*   **Mermaid.js**: アーキテクチャ図は画像ではなくコード（Mermaid）で管理し、陳腐化を低減します。
 *   **ADR**: 技術的な意思決定は `docs/adr` にMarkdownで記録します。
 *   **The Live Docs Requirement (DX)**: APIエンドポイント定義は Swagger UI や ReDoc を通じて常時可視化されなければなりません。実装とドキュメントの乖離は許されません。
 
@@ -482,7 +482,7 @@
     *   **Strict Segregation**: 機密性の高いフィールドを含むDTOは `AdminDTO` / `PublicDTO` のように型レベルで物理的に分離してください。
     *   **No Raw Return**: Server ActionsやAPIは生のDB型を返してはなりません。必ずDTO型を返してください。
     *   **No Blind Spread**: `...user` のようなスプレッド構文でのプロパティコピーは、将来追加される機密カラムを意図せず漏洩させるためDTO変換層では**完全禁止**です。
-    *   **Select Specification Pattern**: `SELECT *` や `.select('*')` を禁止します。必要なカラムのみを明示的に列挙してください。
+    *   **明示的なフィールド選択パターン**: `SELECT *` や `.select('*')` を禁止します。必要なカラムのみを明示的に列挙してください。
 *   **DTO同期義務**: BackendのDTOを変更した場合、FrontendのProps型も**同時に更新**してください。片方だけの更新は `undefined` 参照によるランタイムエラーの直接原因です。
 *   **DTO Boundary Casting**: DB結果からDTOへの変換は、`as any` ではなく明示的なマッピング関数（`toDTO(dbResult): MyDTO`）で各フィールドを個別にマップしてください。
 *   **DTO Segregation**: 肥大化した単一の型定義ファイルを禁止します。機能ドメイン単位で分割してください（例: `types/store.ts`, `types/user.ts`）。

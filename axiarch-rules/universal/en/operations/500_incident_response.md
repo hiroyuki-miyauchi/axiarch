@@ -242,7 +242,7 @@
     - Pre-create and periodically review runbooks (see §17)
     - Maintain emergency contact lists (secure alternatives beyond Slack: phone, SMS, alternative chat)
     - Pre-prepare forensic tools and log preservation procedures
-    - **Regulatory Report Templates**: Pre-prepare report templates for DORA/NIS2/CRA/GDPR/APPI/APRA CPS 230 regulations (see §34)
+    - **Regulatory Report Templates**: Pre-prepare report templates for DORA/NIS2/CRA/GDPR/Global Privacy Laws/APRA CPS 230 regulations (see §34)
     - **CSF 2.0 Community Profile**: Set IR priorities based on the incident risk management Community Profile defined by NIST SP 800-61 Rev.3
 -   **Detect (Detection & Analysis)**:
     - Detection via monitoring alerts or user reports
@@ -325,7 +325,7 @@
     | Regulation | Notification Deadline | Notification Target |
     |:----------|:---------------------|:-------------------|
     | **GDPR (EU)** | **Within 72 hours** | Supervisory authority + affected data subjects |
-    | **APPI (Japan)** | **Preliminary: promptly / Final: within 30 days** | PPC + affected individuals |
+    | **Applicable Regional Law** | **Preliminary: promptly / Final: within 30 days** | PPC + affected individuals |
     | **CCPA/CPRA (US CA)** | **Without unreasonable delay** | CA Attorney General + consumers |
     | **DORA (EU Financial)** | **Major ICT incident: within 4 hours (initial)** | Competent financial supervisory authority |
     | **NIS2 (EU)** | **Early warning: within 24 hours / Notification: within 72 hours** | Competent CSIRT + supervisory authority |
@@ -596,7 +596,7 @@
 -   **Data Breach User Email**:
     - Use legally vetted templates for swift and transparent notification
     - Required information: what happened, impact scope, user actions required (password change, etc.), contact information
--   **Cross-Reference**: `601_data_governance.md` (GDPR/APPI notification obligations)
+-   **Cross-Reference**: `601_data_governance.md` (GDPR/Global Privacy Laws notification obligations)
 
 ---
 
@@ -941,7 +941,7 @@
 -   **Compliance Requirements**:
     - **ISO 22301**: Consider BCMS certification (depending on scale)
     - **SOC 2 Type II**: Include BCP/DR as audit evidence for security/availability controls
-    - **GDPR/APPI**: Compliance with statutory deadlines for data breach notification (§7.2)
+    - **GDPR/Global Privacy Laws**: Compliance with statutory deadlines for data breach notification (§7.2)
     - **EU DORA**: ICT resilience requirements for the financial sector (§21)
     - **EU NIS2**: Security requirements for essential and important entities (§32)
     - **EU CRA**: Product vulnerability reporting for products with digital elements (§33)
@@ -1429,7 +1429,7 @@
     | **NIS2** | Within 24 hours | Within 72 hours | Within 1 month | EU essential/important entity significant incident |
     | **EU CRA** | Within 24 hours | Within 72 hours | Within 14 days | Actively exploited product vulnerability |
     | **GDPR** | Within 72 hours | — | — | Personal data breach |
-    | **APPI (Japan)** | Promptly (preliminary) | — | Within 30 days (final) | Personal data leak |
+    | **Applicable Regional Law** | Promptly (preliminary) | — | Within 30 days (final) | Personal data leak |
     | **CCPA/CPRA** | Without unreasonable delay | — | — | CA consumer data breach |
     | **APRA CPS 230 (Australia)** | Within 72 hours based on severity | — | As soon as reasonably practicable | Australian financial institution significant business service disruption |
     | **PIPA (South Korea)** | Within 72 hours | — | — | Personal data breach affecting 10,000+ records |
@@ -2238,7 +2238,7 @@
 | Agentic AI | §22 |
 | AiTM (Adversary-in-the-Middle) | §7.6 |
 | Alert Fatigue | §22, §45 |
-| APPI (Act on Protection of Personal Information) | §7.2, §34 |
+| Global Privacy Laws (Act on Protection of Personal Information) | §7.2, §34 |
 | APRA CPS 230 | §34 |
 | Assume Breach | §1 |
 | BCP (Business Continuity Plan) | §11 |
@@ -2348,7 +2348,7 @@
 | `400_ai_engineering.md` | AI Guardrails, AI Implementation |
 | `502_site_reliability.md` | SLI/SLO, RPO/RTO, Chaos Engineering, Observability, FinOps |
 | `600_security_privacy.md` | Security General, Vulnerability Management, Vendor Security, OT Security, Authentication & Access Control |
-| `601_data_governance.md` | GDPR/APPI/DORA Notification Obligations, Data Sovereignty, Legal Response, APRA CPS 230 |
+| `601_data_governance.md` | GDPR/Global Privacy Laws/DORA Notification Obligations, Data Sovereignty, Legal Response, APRA CPS 230 |
 | `602_oss_compliance.md` | SBOM, SCA, Supply Chain Security |
 | `700_qa_testing.md` | Resilience Testing, Penetration Testing |
 | `800_internationalization.md` | Data Sovereignty, Multi-Region Deployment |

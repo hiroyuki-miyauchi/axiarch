@@ -610,7 +610,7 @@
     -   **Search & Destroy**: 型システムでは検出できない参照（動的キー、JSONパス、テスト内フィクスチャ等）はプロジェクト全体でGrepし手動修正する。
 -   **垂直同期プロトコル（Vertical Synchronization Protocol）**:
     -   **Law**: フォームフィールドの欠落・不整合が疑われる場合、**DB Schema → DTO → Gateway/Service → UI Interface** の全レイヤーを **垂直に検証** する。
-    -   **Top-Down Trace**: DBテーブル定義 → DTO型定義 → Gateway/ServiceのSelect Spec → UIフォーム定義の順に存在と命名一貫性を確認。
+    -   **Top-Down Trace**: DBテーブル定義 → DTO型定義 → Gateway/Serviceの明示的なフィールド選択 → UIフォーム定義の順に存在と命名一貫性を確認。
     -   **Ghost Field Detection**: UIにのみ存在しDBに存在しない「幽霊フィールド」は即時排除。将来のために予約した未実装フィールドがフォーム監査で「不足」と誤認される原因。
     -   **Bottom-Up Verification**: DBに追加された新カラムが DTO → Gateway → UI の全レイヤーに伝播していることを確認。
     -   **Naming Consistency**: 全レイヤーでフィールド名が完全一致していることを確認。微妙な命名揺れ（`dog_description` vs `description_dog`）はサイレントなマッピング失敗の原因。

@@ -69,7 +69,7 @@
 
 - **Rule 74.1**: 全プロジェクトは `AGENTS.md` の `Project Native Language` で**一つの権威言語**を定義しなければならない
 - **Rule 74.2**: 権威言語は全ての意思決定文書・ユーザー対面テキスト・チーム内コミュニケーションの**デフォルト言語**として機能する
-- **Rule 74.3**: 権威言語の変更は「憲法改正」に準ずる手続きが必要（→ [801_governance.md](./801_governance.md) Part IV参照）
+- **Rule 74.3**: 権威言語の変更は「憲法改正」に準ずる手続きが必要（→ [801_governance.md](../core/100_governance.md) Part IV参照）
 
 ### 1.2. 言語使用の三層モデル
 
@@ -807,7 +807,7 @@ error.network.timeout     → 「接続がタイムアウトしました」
 
 ### 15.3. Sitemap・robots.txt
 
-- **Rule 74.161**: 多言語サイトの場合、`hreflang` 属性を全ページに正確に設定（→ [800_internationalization.md](./800_internationalization.md) Part X参照）
+- **Rule 74.161**: 多言語サイトの場合、`hreflang` 属性を全ページに正確に設定（→ [800_internationalization.md](../product/800_internationalization.md) Part X参照）
 - **Rule 74.162**: `robots.txt` は言語非依存（英語で記述）
 
 ---
@@ -1751,7 +1751,7 @@ const LOCALE_CONFIG = {
   - 発生原因（CIゲートの欠落、レビュー漏れ等）
   - 影響範囲（影響を受けたユーザー数・画面数）
   - 再発防止策（CIルール追加、チェックリスト更新等）
-- **Rule 74.423**: ポストモーテムの教訓は `010_project_lessons_log.md` に記録する
+- **Rule 74.423**: ポストモーテムの教訓は `core/010_project_lessons_log.md` に記録する
 
 ---
 
@@ -1827,15 +1827,15 @@ const LOCALE_CONFIG = {
 
 | 関連ルール | 参照内容 | 本ルールとの境界 |
 |---|---|---|
-| [000_core_mindset.md](./000_core_mindset.md) | ゼロ・トレランス原則 | 本ルールは言語面でのゼロ・トレランスを具体化 |
-| [200_design_ux.md](./200_design_ux.md) | アクセシビリティ・UX基準 | 本ルールは言語側面のアクセシビリティに特化 |
-| [300_engineering_standards.md](./300_engineering_standards.md) | コーディング規約 | 本ルールは言語選択基準に特化 |
-| [301_api_integration.md](./301_api_integration.md) | API設計基準 | 本ルールはAPIの言語ポリシーに特化 |
-| [320_supabase_architecture.md](./320_supabase_architecture.md) | DB設計基準 | 本ルールはDB命名の言語ポリシーに特化 |
-| [400_ai_engineering.md](./400_ai_engineering.md) | AI実装戦略 | 本ルールはAI通信の言語プロトコルに特化 |
-| [501_customer_experience.md](./501_customer_experience.md) | メール送信基準 | 本ルールは通知の言語ポリシーに特化 |
-| [600_security_privacy.md](./600_security_privacy.md) | セキュリティ基準 | 本ルールは多言語安全性ガードレールに特化 |
-| [800_internationalization.md](./800_internationalization.md) | i18nアーキテクチャ・L10n基盤 | 71=国際展開のインフラ、74=言語使い分けルール |
-| [801_governance.md](./801_governance.md) Part XXII | ルール翻訳ガバナンス | 72=ルール自体の翻訳管理、74=プロダクトの言語プロトコル |
+| [000_core_mindset.md](../core/000_core_mindset.md) | ゼロ・トレランス原則 | 本ルールは言語面でのゼロ・トレランスを具体化 |
+| [200_design_ux.md](../design/000_design_ux.md) | アクセシビリティ・UX基準 | 本ルールは言語側面のアクセシビリティに特化 |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | コーディング規約 | 本ルールは言語選択基準に特化 |
+| [301_api_integration.md](../engineering/100_api_integration.md) | API設計基準 | 本ルールはAPIの言語ポリシーに特化 |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB設計基準 | 本ルールはDB命名の言語ポリシーに特化 |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI実装戦略 | 本ルールはAI通信の言語プロトコルに特化 |
+| [501_customer_experience.md](../operations/300_customer_experience.md) | メール送信基準 | 本ルールは通知の言語ポリシーに特化 |
+| [600_security_privacy.md](../security/000_security_privacy.md) | セキュリティ基準 | 本ルールは多言語安全性ガードレールに特化 |
+| [800_internationalization.md](../product/800_internationalization.md) | i18nアーキテクチャ・L10n基盤 | 71=国際展開のインフラ、74=言語使い分けルール |
+| [801_governance.md](../core/100_governance.md) Part XXII | ルール翻訳ガバナンス | 72=ルール自体の翻訳管理、74=プロダクトの言語プロトコル |
 
 ---

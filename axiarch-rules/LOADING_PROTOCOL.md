@@ -57,7 +57,7 @@
 | 階級 / Class | 対象 / Target | 性質 (JA) | Nature (EN) |
 |:------------|:-------------|:---------|:-----------|
 | **Class S（Universal）** | `axiarch-rules/universal/{lang}/` | プロジェクトを超えた普遇的ルール。Read-Only。 | Universal rules transcending projects. Read-Only. |
-| **Class A（Blueprint）** | `axiarch-rules/blueprint/{lang}/` | プロジェクト固有の仕様・設計・教訓。更新可能。フォルダ構成: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリに分類してロードすること：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ルールファイル。どのフォルダかはタスクに応じて自律判断。ファイル名に `lessons_` は含まない）、③ **Domain Rules**（各ドメインフォルダのルールファイル）、④ **Templates** (`core/` template files)（`core/` 配下のテンプレートファイル） | Project-specific specs, design, and lessons. Mutable. Folder structure: **`core/`** (overview, lessons index & templates), `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`. Load by 4 categories: ① **Project Overview** (`core/000_project_overview.md`), ② **Lessons** (`core/010_project_lessons_log.md` index + domain rule files co-located as `{NNN}_{topic}.md` in each folder — no `lessons_` in filename; which folder depends on the task domain), ③ **Domain Rules**, ④ **Templates** (`core/` template files) |
+| **Class A（Blueprint）** | `axiarch-rules/blueprint/{lang}/` | プロジェクト固有の仕様・設計・教訓。更新可能。基本フォルダ構成（プロジェクトのドメインに合わせて自由な名称で拡張・変更可能）: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリにロード分類される：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ファイル。どのフォルダかは特定の名称に縛られず自律判断）、③ **Domain Rules**（各ドメインのルールファイル）、④ **Templates**（`core/` 等のテンプレートファイル） | Project-specific specs, design, and lessons. Mutable. Basic folder structure (freely extensible/changeable based on project domains): **`core/`** (overview, lessons index & templates), `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`. Load by 4 categories: ① **Project Overview** (`core/000_project_overview.md`), ② **Lessons** (`core/010_project_lessons_log.md` index + domain rule files co-located as `{NNN}_{topic}.md`), ③ **Domain Rules**, ④ **Templates** |
 
 Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリから、ロードすべきファイルを列挙せよ。
 
@@ -66,7 +66,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 ### タスクタイプ → フォルダ 対応表 / Task-Type to Folder Mapping
 
-| タスクタイプ / Task Type | Universal フォルダ | Blueprint フォルダ |
+| タスクタイプ / Task Type | Universal フォルダ | Blueprint フォルダ (※プロジェクトに応じて名称変更・新設可) |
 |:----------------------|:----------------|:----------------|
 | `security` | `security/` | `security/` |
 | `architecture` | `engineering/` | `engineering/` |
@@ -86,14 +86,16 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 > **Directly open each file identified in Step 2**, and autonomously select task-relevant sections from the file's table of contents or Appendix (reverse lookup index).
 
-### 🚨【厳守命令】手抜き（サボり）禁止 / Anti-Laziness Mandate 🚨
+### 🚨【厳守命令】手抜き（サボり）と幻覚の絶対禁止 / Anti-Laziness & Anti-Hallucination Mandate 🚨
 
-- INDEX.mdの要約や概要だけで「読んだ」と見なすことは**禁止**する。
-- 「ファイルを直接開く」とは、`view_file`ツール等でファイルの内容を実際に取得することを意味する。
-- 上記は自律ロード・ユーザー指示によるロードを問わず、**全てのルールファイル参照時に適用**される。
+- INDEX.mdの要約や概要だけで「読んだ」と見なすことは**一切禁止**する。
+- 「ファイルを直接開く」とは、`view_file`等のツールでファイルの内容を**実際に取得完了すること**を意味する。
+- **🚨 出力・回答の完全禁止（ハルシネーション対策）**: ツールがファイル内容を返し、AIがそれを完全に読み終える**前**に、「〇〇をロードします」「把握しました」「読み込み完了しました」といったテキストをユーザーへ先行して出力することは**ハルシネーション（幻覚）であり、いかなる場合も絶対禁止**とする。AIはツールの実行結果を内部で取得した**後**に、初めて思考・回答を行わなければならない。
+- 上記は自律ロード・ユーザー指示によるロードを問わず、**全てのルールファイル参照時に強制適用**される。
 
-> - Considering a file "read" based solely on INDEX.md summaries is **prohibited**.
+> - Considering a file "read" based solely on INDEX.md summaries is **strictly prohibited**.
 > - "Directly open the file" means actually retrieving the file's content using tools like `view_file`.
+> - **🚨 Absolute Output Ban (Anti-Hallucination)**: Outputting conversational text like "I am loading...", "Understood", or "Load complete" **before** the tool formally returns the file contents is **hallucination and strictly prohibited under any circumstances**. The AI MUST internalize the tool's execution result FIRST, and ONLY THEN generate thoughts or responses.
 > - The above applies to **all rule file references**, regardless of whether loading is autonomous or user-directed.
 
 ### 大規模ファイル対応 / Large File Handling

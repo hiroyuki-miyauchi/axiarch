@@ -438,7 +438,7 @@ const user = await requireAdmin(); // Internally performs auth + authz + audit l
 
 ## §7. Privacy by Design
 
-> **Reference**: ISO 31700, GDPR Art.25, APPI, CCPA/CPRA
+> **Reference**: ISO 31700, GDPR Art.25, Global Privacy Laws, CCPA/CPRA
 
 ### 7.1. Seven Principles
 
@@ -502,7 +502,7 @@ console.log('User login:', { userId: user.id, role: user.role });
 
 -   **Law**: Be aware of data storage locations (Country/Region) and comply with jurisdictional requirements.
 -   **Action**:
-    1.  Identify applicable data protection laws (GDPR, APPI, CCPA, etc.) for service regions.
+    1.  Identify applicable data protection laws (GDPR, CCPA, Global Privacy Laws, etc.) for service regions.
     2.  Place DB regions in the same or legally permissible regions as service delivery.
     3.  Apply legal frameworks (SCC/IDTA, etc.) for cross-border data transfers.
 
@@ -528,7 +528,7 @@ console.log('User login:', { userId: user.id, role: user.role });
     1.  **Shadow Data Discovery**: Auto-discover unmanaged data in managed services, logs, and backups.
     2.  **Data Flow Tracking**: Visualize where sensitive data flows and who accesses it.
     3.  **Excessive Access Detection**: Detect gaps between actual access patterns and granted permissions; recommend permission reduction.
-    4.  **Compliance Posture Assessment**: Score current compliance status against GDPR/APPI/CCPA requirements.
+    4.  **Compliance Posture Assessment**: Score current compliance status against GDPR/CCPA/Global Privacy Laws requirements.
 -   **Cross-Reference**: §7.3 (PII Sensitivity Classification), §29 (Security Governance)
 
 ### 8.3. Data Lineage & Catalog
@@ -548,7 +548,7 @@ console.log('User login:', { userId: user.id, role: user.role });
 | Law | Region | Consent Requirements | Deletion Right | Notification Period |
 |:----|:-------|:--------------------|:-------------|:-------------------|
 | **GDPR** | EU/EEA | Explicit opt-in | Yes (Right to be Forgotten) | Within 72 hours |
-| **APPI** | Japan | Purpose publication/notification | Yes (Disclosure/Correction/Cessation) | Promptly |
+| **Global Privacy Laws** | Japan | Purpose publication/notification | Yes (Disclosure/Correction/Cessation) | Promptly |
 | **CCPA/CPRA** | California | Opt-out right | Yes (Deletion right) | Within 45 days |
 | **LGPD** | Brazil | Explicit consent | Yes | Reasonable period |
 | **PIPA** | South Korea | Explicit consent | Yes | Without delay |
@@ -1583,13 +1583,13 @@ if (window.trustedTypes) {
 -   **Equivalent Terms**: Impose equivalent security/privacy conditions.
 -   **Chain Limitation**: Sub-sub-processing is **prohibited in principle**. Requires individual approval.
 -   **List Management**: Maintain and disclose complete sub-processor list.
--   **Cross-Reference**: GDPR Art.28(2), APPI sub-processor supervision obligation
+-   **Cross-Reference**: GDPR Art.28(2), Global Privacy Laws sub-processor supervision obligation
 
 ---
 
 ## §28. Regulatory Compliance Deep Dive
 
-> **Reference**: EU AI Act, NIS2, DORA, GDPR, APPI
+> **Reference**: EU AI Act, NIS2, DORA, GDPR, Global Privacy Laws
 
 ### 28.1. EU AI Act Compliance
 
@@ -1620,7 +1620,7 @@ if (window.trustedTypes) {
 
 ### 28.4. Cross-Regulatory Compliance Matrix
 
-| Requirement | GDPR | APPI | NIS2 | DORA | EU AI Act |
+| Requirement | GDPR | Global Privacy Laws | NIS2 | DORA | EU AI Act |
 |:-----------|:----:|:----:|:----:|:----:|:---------:|
 | Data Protection Impact Assessment | ✅ | — | — | — | ✅ (High-Risk) |
 | Incident Reporting | 72h | Promptly | 24h initial | 4h initial | 72h (significant) |
@@ -1803,7 +1803,7 @@ if (window.trustedTypes) {
 | EU AI Act | §28.1 |
 | EXIF | §15.2 |
 | File Upload | §15 |
-| GDPR / APPI / CCPA | §9.1 |
+| GDPR / Global Privacy Laws / CCPA | §9.1 |
 | Governance | §29 |
 | GraphQL | §20 |
 | HSTS | §12.1 |

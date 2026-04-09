@@ -1212,7 +1212,7 @@ switch (section.type) {
 
 ### 41.1. Personalization Strategy
 
-- **Rule 34.59**: CMS content personalization MUST comply with privacy regulations (GDPR/APPI) and be based on explicit consent only
+- **Rule 34.59**: CMS content personalization MUST comply with privacy regulations (GDPR/Global Privacy Laws) and be based on explicit consent only
 
 | Level | Method | Example |
 |:---|:---|:---|
@@ -1485,7 +1485,7 @@ Content Published
 
 | Regulation | CMS Requirements |
 |:---|:---|
-| **GDPR / APPI** | PII management, consent management, right to deletion, cross-border transfer |
+| **GDPR / Global Privacy Laws** | PII management, consent management, right to deletion, cross-border transfer |
 | **EU AI Act** | AI-generated content labeling, transparency obligations |
 | **DSA (Digital Services Act)** | UGC moderation obligations, transparency reports |
 | **DORA** | ICT risk management, incident reporting (financial CMS) |
@@ -2329,16 +2329,16 @@ monorepo/
 
 | Related Rule File | Reference Reason |
 |:---|:---|
-| [000_core_mindset.md](../en/000_core_mindset.md) | Headless First principles, existing functionality protection |
-| [200_design_ux.md](../en/200_design_ux.md) | Accessibility, design system, Content Design System |
-| [300_engineering_standards.md](../en/300_engineering_standards.md) | CI/CD, coding conventions, Event-Driven design |
-| [340_web_frontend.md](../en/340_web_frontend.md) | Next.js, performance budgets, Edge Functions |
-| [301_api_integration.md](../en/301_api_integration.md) | API design, error handling, CloudEvents |
-| [320_supabase_architecture.md](../en/320_supabase_architecture.md) | DB design, RLS, Storage |
-| [400_ai_engineering.md](../en/400_ai_engineering.md) | RAG, AI-generated content, EU AI Act, MCP, Agentic AI, A2A |
-| [600_security_privacy.md](../en/600_security_privacy.md) | Zero Trust, authentication/authorization, OWASP, C2PA |
-| [601_data_governance.md](../en/601_data_governance.md) | GDPR, privacy, DSA |
-| [602_oss_compliance.md](../en/602_oss_compliance.md) | Dependency management |
-| [800_internationalization.md](../en/800_internationalization.md) | i18n, multilingual, global expansion, MTPE |
-| [802_language_protocol.md](../en/802_language_protocol.md) | CMS language governance |
+| [000_core_mindset.md](../core/000_core_mindset.md) | Headless First principles, existing functionality protection |
+| [200_design_ux.md](../design/000_design_ux.md) | Accessibility, design system, Content Design System |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD, coding conventions, Event-Driven design |
+| [340_web_frontend.md](../engineering/300_web_frontend.md) | Next.js, performance budgets, Edge Functions |
+| [301_api_integration.md](../engineering/100_api_integration.md) | API design, error handling, CloudEvents |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB design, RLS, Storage |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | RAG, AI-generated content, EU AI Act, MCP, Agentic AI, A2A |
+| [600_security_privacy.md](../security/000_security_privacy.md) | Zero Trust, authentication/authorization, OWASP, C2PA |
+| [601_data_governance.md](../security/100_data_governance.md) | GDPR, privacy, DSA |
+| [602_oss_compliance.md](../security/200_oss_compliance.md) | Dependency management |
+| [800_internationalization.md](../product/800_internationalization.md) | i18n, multilingual, global expansion, MTPE |
+| [802_language_protocol.md](../core/200_language_protocol.md) | CMS language governance |
 

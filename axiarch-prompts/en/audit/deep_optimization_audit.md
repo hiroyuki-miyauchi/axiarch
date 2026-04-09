@@ -21,7 +21,7 @@ With **"Maximizing privacy protection and security hardening" as the top priorit
 
 1.  **End-to-End Data Flow**: Is type definition (Type) unbroken throughout the DB/Backend ⇔ API ⇔ Frontend data flow?
 2.  **Security & Privacy First**: Is authentication (Auth) and authorization physically enforced not just at the UI level but at the backend/API level? Is PII (personally identifiable information) strictly protected?
-3.  **Unicorn Architecture Standard**: Are architecture patterns that maximize scalability and maintainability — **Data Gateway, CQRS, Tiered Cache, Select Spec** — appropriately implemented and maintained for the project's scale and phase?
+3.  **Unicorn Architecture Standard**: Are architecture patterns that maximize scalability and maintainability — **Data Gateway, CQRS, Tiered Cache, Strict Field Selection** — appropriately implemented and maintained for the project's scale and phase?
 4.  **Future-Proofing & Data Monetization**: Is the current data structure designed as an "asset" that can immediately accommodate future **data sales (API Sales)**, external integrations, Public API exposure, monetization (payment integration), and omnichannel expansion?
 5.  **Deep Optimization & Root Cause Eradication**: Are there any areas falling into the same state as previously optimized items (slider-related, image-related, SEO, GEO, performance, LCP, SSR compliance, etc.)? Thoroughly and deeply analyze all files and all functions — taking as much time as needed — and if any such areas are found, identify the root cause and eliminate it.
 6.  **No "Facade"**: Thoroughly eliminate any place where UI exists but the backend logic is not connected, or where hardcoded values are used as workarounds.

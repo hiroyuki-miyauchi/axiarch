@@ -53,7 +53,7 @@ blueprint/ja/
 | ファイル | 説明 |
 |:--------|:----|
 | [000_project_overview.md](core/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
-| [010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
+| [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
 | [998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
 | [999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
 
@@ -124,14 +124,14 @@ SRE、インシデント管理、運用要件。
 
 ### 機能仕様の追加（Blueprint First の実践）
 1. **`core/998_feature_spec_template.md` をコピーする**
-2. 対応するドメインフォルダに配置する（例: `product/600_feature_payment.md`）
+2. 対応するドメインフォルダに配置する（例: `product/020_feature_payment.md` ※特定の番号帯域縛りはなく、フォルダ内で000〜999の空き番を使用する）
 3. **§3 受け入れ条件（Acceptance Criteria）を最優先で記述する** — このセクションが空の状態でコードを書いてはならない
 4. 残りのセクション（データモデル、API設計、テスト戦略等）を埋める
 5. **このファイル（INDEX.md）の該当フォルダセクションにエントリを追記する**
 
 ### プロジェクト固有ルールの追加
 1. `core/999_project_specific_template.md` をコピーする
-2. 対応するフォルダ内に番号付きで配置する（例: `security/100_security_policy.md`）
+2. 対応するフォルダ内に番号付きで配置する（例: `security/010_security_policy.md` ※特定の番号帯域縛りはなく、フォルダ内で000〜999の空き番を使用する）
 3. テンプレートの各セクションをプロジェクト固有の内容で埋める
 4. **このファイル（INDEX.md）の該当フォルダセクションにエントリを追記する**
 

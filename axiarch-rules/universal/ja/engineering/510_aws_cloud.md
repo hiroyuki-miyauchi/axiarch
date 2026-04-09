@@ -428,7 +428,7 @@
     3.  **Read Replica Strategy**:
         -   読み取り負荷の分散にはAurora Replicas（最大15台）を使用し、Readerエンドポイントでロードバランシングしてください。
         -   レプリカラグ（`AuroraReplicaLag`）を継続監視し、ラグが増大した場合はReaderインスタンスのサイジングを見直してください。
-    4.  **RDS Proxy Mandatory**: サーバーレス環境（Lambda）からのDB接続には**RDS Proxy**を必ず使用してください。Lambda関数の同時実行数増加時のDB接続数爆発を防止します。
+    4.  **RDS Proxy Mandatory**: サーバーレス環境（Lambda）からのDB接続には**RDS Proxy**を必ず使用してください。Lambda関数の同時実行数増加時のDB接続数爆発を抑制します。
     5.  **Performance Insights**: 全RDS/Auroraインスタンスで Performance Insights を有効化し、DBロード、トップSQL、ウェイトイベントを継続監視してください。
     6.  **Parameter Group**: デフォルトパラメータグループを使用せず、カスタムパラメータグループを作成してワークロードに最適化してください。
     7.  **Aurora Limitless Database**: ペタバイト級のデータ・数百万TPS要件には**Aurora Limitless Database**（2024年GA・PostgreSQL互換）を検討:
@@ -467,7 +467,7 @@
 ### Rule 5.1: The S3 Security Fortress
 -   **Law**: S3バケットのセキュリティは**多層防御（Defense in Depth）**で構築し、意図しないデータ公開を物理的に不可能にしてください。
 -   **Action**:
-    1.  **Block Public Access**: アカウントレベルおよびバケットレベルで**S3 Block Public Access**を有効化してください。例外は絶対に許可しないでください（静的サイトホスティングにはCloudFront + OAC を使用）。
+    1.  **Block Public Access**: アカウントレベルおよびバケットレベルで**S3 Block Public Access**を有効化してください。例外は厳正に許可しないでください（静的サイトホスティングにはCloudFront + OAC を使用）。
     2.  **Encryption Mandatory**: 全バケットでサーバーサイド暗号化を有効化。機密データには**SSE-KMS**（CMK）を使用し、キーの使用を監査してください。通常データは**SSE-S3**で十分です。
     3.  **Bucket Policy**: 最小権限の原則に基づき、必要なIAMロール/アカウントからのアクセスのみを許可してください。`"Principal": "*"` の使用を禁止。
     4.  **Versioning**: 重要なデータバケットではバージョニングを有効化し、誤削除・上書きからの復旧を可能にしてください。

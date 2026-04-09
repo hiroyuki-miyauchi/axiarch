@@ -610,10 +610,10 @@
     -   **Search & Destroy**: References undetectable by the type system (dynamic keys, JSON paths, test fixtures, etc.) must be found via project-wide Grep and fixed manually.
 -   **Vertical Synchronization Protocol**:
     -   **Law**: When form field gaps or inconsistencies are suspected, **vertically verify** all layers: **DB Schema → DTO → Gateway/Service → UI Interface**.
-    -   **Top-Down Trace**: Confirmed existence and naming consistency from DB table definition → DTO type definition → Gateway/Service Select Spec → UI form definition.
+    -   **Top-Down Trace**: Confirmed existence and naming consistency from DB table definition → DTO type definition → Gateway/Service Strict Field Selection → UI form definition.
     -   **Ghost Field Detection**: "Ghost fields" that exist only in UI but not in DB must be immediately eliminated. Unimplemented fields reserved for the future cause false positives in form audits.
     -   **Bottom-Up Verification**: Confirm that new columns added to DB have propagated through DTO → Gateway → UI layers.
-    -   **Naming Consistency**: Confirm field names are perfectly consistent across all layers. Subtle naming variations (`dog_description` vs `description_dog`) cause silent mapping failures.
+    -   **Naming Consistency**: Confirm field names are consistent across all layers. Subtle naming variations (`dog_description` vs `description_dog`) cause silent mapping failures.
 -   **Phantom File Awareness Protocol**:
     -   **Law**: When build errors indicate "non-existent files" or "line number mismatches," the bundler may be referencing actual files via re-exports or barrel files.
     -   Execute `grep -rn "error content" src/` to identify the real culprit. Never take error message filenames at face value.

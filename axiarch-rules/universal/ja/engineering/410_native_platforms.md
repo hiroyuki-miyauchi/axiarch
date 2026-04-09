@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > **Supreme Directive（最高指令）**
 > 「ネイティブは妥協ではなく、最高のユーザー体験への最短経路である。」
-> クロスプラットフォームファーストの環境であっても、OS固有の深い統合・最先端AI・ハードウェアアクセスにおいてネイティブ品質を絶対に妥協しない。
+> クロスプラットフォームファーストの環境であっても、OS固有の深い統合・最先端AI・ハードウェアアクセスにおいてネイティブ品質を厳正に妥協しない。
 > ネイティブプラットフォームの実装において、**セキュリティ > UX > パフォーマンス > 保守性 > 開発速度** の優先順位を厳守せよ。
 > この文書はネイティブプラットフォーム戦略に関するすべての設計判断の最上位基準である。
 > **40パート・186セクション構成。**
@@ -1557,7 +1557,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 - **構造化ログ**: JSON形式。タイムスタンプ、セッションID、ユーザーID（ハッシュ化）を含む
 - **ログレベル**: ERROR/WARN/INFO/DEBUG。リリースビルドはINFO以上のみ
-- **PII除外**: 個人情報はログに絶対に出力しない
+- **PII除外**: 個人情報はログに厳正に出力しない
 - **ローテーション**: ログファイルサイズ上限設定。古いログの自動削除
 
 ---
@@ -2138,16 +2138,16 @@ fun `loadOrders should emit Success state`() = runTest {
 
 | 関連ルール | ファイル | 関連トピック |
 |-----------|---------|------------|
-| モバイル開発 (Flutter) | [342_mobile_flutter.md](../ja/342_mobile_flutter.md) | Flutter固有ベストプラクティス |
-| ストア申請準拠 | [103_appstore_compliance.md](../ja/103_appstore_compliance.md) | IAP/ASO/審査ガイドライン |
-| セキュリティ | [600_security_privacy.md](../ja/600_security_privacy.md) | Zero Trust/OWASP/暗号化 |
-| デザイン・UX | [200_design_ux.md](../ja/200_design_ux.md) | アクセシビリティ/タッチターゲット |
-| AI実装 | [400_ai_engineering.md](../ja/400_ai_engineering.md) | オンデバイスAI/エッジML |
-| QA・テスト | [700_qa_testing.md](../ja/700_qa_testing.md) | テストピラミッド/E2E |
-| エンジニアリング全般 | [300_engineering_standards.md](../ja/300_engineering_standards.md) | CI/CD/コーディング規約 |
-| 法務・プライバシー | [601_data_governance.md](../ja/601_data_governance.md) | GDPR/Privacy Manifest/EU CRA |
-| ライセンス管理 | [602_oss_compliance.md](../ja/602_oss_compliance.md) | SBOM/依存関係管理 |
-| SRE・信頼性 | [502_site_reliability.md](../ja/502_site_reliability.md) | 可観測性/SLO/Green SRE |
-| 分析インテリジェンス | [401_data_analytics.md](../ja/401_data_analytics.md) | OTel Mobile/モバイル分析 |
-| 言語プロトコル | [802_language_protocol.md](../ja/802_language_protocol.md) | モバイル固有言語プロトコル |
-| グローバル展開 | [800_internationalization.md](../ja/800_internationalization.md) | モバイルi18n/RTL対応 |
+| モバイル開発 (Flutter) | [342_mobile_flutter.md](../engineering/400_mobile_flutter.md) | Flutter固有ベストプラクティス |
+| ストア申請準拠 | [103_appstore_compliance.md](../product/700_appstore_compliance.md) | IAP/ASO/審査ガイドライン |
+| セキュリティ | [600_security_privacy.md](../security/000_security_privacy.md) | Zero Trust/OWASP/暗号化 |
+| デザイン・UX | [200_design_ux.md](../design/000_design_ux.md) | アクセシビリティ/タッチターゲット |
+| AI実装 | [400_ai_engineering.md](../ai/000_ai_engineering.md) | オンデバイスAI/エッジML |
+| QA・テスト | [700_qa_testing.md](../quality/000_qa_testing.md) | テストピラミッド/E2E |
+| エンジニアリング全般 | [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD/コーディング規約 |
+| 法務・プライバシー | [601_data_governance.md](../security/100_data_governance.md) | GDPR/Privacy Manifest/EU CRA |
+| ライセンス管理 | [602_oss_compliance.md](../security/200_oss_compliance.md) | SBOM/依存関係管理 |
+| SRE・信頼性 | [502_site_reliability.md](../operations/400_site_reliability.md) | 可観測性/SLO/Green SRE |
+| 分析インテリジェンス | [401_data_analytics.md](../ai/100_data_analytics.md) | OTel Mobile/モバイル分析 |
+| 言語プロトコル | [802_language_protocol.md](../core/200_language_protocol.md) | モバイル固有言語プロトコル |
+| グローバル展開 | [800_internationalization.md](../product/800_internationalization.md) | モバイルi18n/RTL対応 |

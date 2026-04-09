@@ -819,7 +819,7 @@
 ## 14. Governance & Compliance
 
 ### Rule 14.1: The Compliance Framework
--   **Law**: Identify applicable compliance frameworks (SOC 2, PCI-DSS, HIPAA, GDPR, APPI) and implement technical controls.
+-   **Law**: Identify applicable compliance frameworks (SOC 2, PCI-DSS, HIPAA, GDPR, Global Privacy Laws) and implement technical controls.
 -   **Action**:
     1.  **AWS Artifact**: Obtain required AWS compliance reports (SOC, ISO, etc.) from AWS Artifact.
     2.  **Security Hub Standards**: Enable corresponding compliance standards (CIS, PCI-DSS, etc.) in Security Hub.
@@ -1381,7 +1381,7 @@
 ### Rule 32.2: The Data Sovereignty Protocol
 -   **Law**: Enforce data residency/sovereignty requirements. Guarantee data does not move to unintended Regions.
 -   **Action**:
-    1.  **Region Selection**: Choose Regions based on business needs and applicable laws (GDPR, APPI). Data stays in Region unless explicitly configured.
+    1.  **Region Selection**: Choose Regions based on business needs and applicable laws (GDPR, Global Privacy Laws). Data stays in Region unless explicitly configured.
     2.  **SCP Region Restriction**: Block resource creation in unapproved Regions via SCPs.
     3.  **Control Tower Sovereignty Controls**: Automate storage location monitoring and encryption enforcement.
     4.  **BYOK**: Consider KMS External Key Store (XKS) or CloudHSM for maximum key management control.

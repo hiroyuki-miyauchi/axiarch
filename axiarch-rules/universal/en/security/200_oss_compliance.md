@@ -132,7 +132,7 @@
 - **Rule**: For Copyleft/Permissive dual licenses, always choose the Permissive side
 - **Rule**: Document license selection rationale in the `licenses/decisions/` directory
 
-→ Cross-reference: [`601_data_governance.md`](./601_data_governance.md) §GenAI Copyright
+→ Cross-reference: [`601_data_governance.md`](../security/100_data_governance.md) §GenAI Copyright
 
 ---
 
@@ -187,7 +187,7 @@ if (violations.some(v => v.severity === 'REVIEW')) {
 }
 ```
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Supply Chain Security
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain Security
 
 ---
 
@@ -211,7 +211,7 @@ if (violations.some(v => v.severity === 'REVIEW')) {
 - **Rule**: Monitor user counts monthly when model license defines MAU limits
 - **Rule**: Monitor model license changes quarterly (e.g., Llama 2→3 license change)
 
-→ Cross-reference: [`601_data_governance.md`](./601_data_governance.md) §GenAI Copyright, [`400_ai_engineering.md`](./400_ai_engineering.md)
+→ Cross-reference: [`601_data_governance.md`](../security/100_data_governance.md) §GenAI Copyright, [`400_ai_engineering.md`](../ai/000_ai_engineering.md)
 
 ---
 
@@ -260,7 +260,7 @@ trivy image --scanners license --severity HIGH,CRITICAL myapp:latest
 - uses: actions/checkout@v4
 ```
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Supply Chain
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain
 
 ---
 
@@ -280,7 +280,7 @@ trivy image --scanners license --severity HIGH,CRITICAL myapp:latest
 | Icons | MIT, CC0 | CC-BY (attribution required) |
 | Images | Unsplash License, CC0 | CC-BY-NC (no commercial use) |
 
-→ Cross-reference: [`200_design_ux.md`](./200_design_ux.md)
+→ Cross-reference: [`200_design_ux.md`](../design/000_design_ux.md)
 
 ---
 
@@ -337,7 +337,7 @@ sbom:
 - **Rule**: Apply SemVer to SBOM versioning, incrementing minor version on component changes
 - **Rule**: Centrally manage SBOMs in a repository or platform (DependencyTrack, etc.)
 
-→ Cross-reference: [`300_engineering_standards.md`](./300_engineering_standards.md) §CI/CD
+→ Cross-reference: [`300_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD
 
 ---
 
@@ -356,7 +356,7 @@ sbom:
 | EU CRA: Conformity Assessment Body Notification | **2026-06** | Conformity assessment body notification obligation begins | — |
 | EU CRA: Vulnerability Reporting | **2026-09** | 24-hour reporting obligation for actively exploited vulnerabilities. ENISA notification mandatory | Up to €15M or 2.5% revenue |
 | EU CRA: Full Enforcement | **2027-12** | SBOM mandatory in product technical documentation. Machine-readable format. **10-year retention obligation**. 5-year security update obligation | Up to €15M or 2.5% revenue |
-| Japan METI SBOM Guidelines | 2023~ (recommended) | SBOM for software management. Effectively mandatory for government procurement | — |
+| APAC Regulatory Guidelines | 2023~ (phased) | SBOM for software management. Effectively mandatory for government procurement in certain APAC regions | — |
 | NIST SSDF Update | 2026 (planned) | SBOM requirement strengthening, SLSA compliance recommendation | — |
 
 > [!IMPORTANT]
@@ -369,7 +369,7 @@ sbom:
 - **Rule**: For financial sector, conduct ICT third-party risk assessment per DORA requirements (see §44)
 - **Rule**: For government procurement, provide SBOM fully compliant with CISA SBOM Minimum Elements v2
 
-→ Cross-reference: [`601_data_governance.md`](./601_data_governance.md) §EU Data Act
+→ Cross-reference: [`601_data_governance.md`](../security/100_data_governance.md) §EU Data Act
 
 ---
 
@@ -411,7 +411,7 @@ cosign verify myregistry.com/myapp:v1.0.0 \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Supply Chain, [`300_engineering_standards.md`](./300_engineering_standards.md) §CI/CD
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain, [`300_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD
 
 ---
 
@@ -498,7 +498,7 @@ jobs:
           api_key: ${{ secrets.SOCKET_API_KEY }}
 ```
 
-→ Cross-reference: [`300_engineering_standards.md`](./300_engineering_standards.md) §CI/CD
+→ Cross-reference: [`300_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD
 
 ---
 
@@ -549,7 +549,7 @@ jobs:
 | uuid (12KB) | crypto.randomUUID() | -100% |
 | classnames (1.5KB) | clsx (0.5KB) | -65% |
 
-→ Cross-reference: [`340_web_frontend.md`](./340_web_frontend.md) §Performance Budget
+→ Cross-reference: [`340_web_frontend.md`](../engineering/300_web_frontend.md) §Performance Budget
 
 ---
 
@@ -755,7 +755,7 @@ flowchart TD
     C --> J
 ```
 
-→ Cross-reference: [`603_ip_due_diligence.md`](./603_ip_due_diligence.md) §IP Asset Management
+→ Cross-reference: [`603_ip_due_diligence.md`](../security/300_ip_due_diligence.md) §IP Asset Management
 
 ---
 
@@ -787,12 +787,12 @@ flowchart TD
 - **Rule**: Immediately remove compromised package versions from lockfile
 - **Rule**: Use SBOM to identify impact scope across released builds
 - **Rule**: Immediately revoke potentially leaked credentials via `npm token revoke`
-- **Rule**: Record post-mortem results in lessons log (`010_project_lessons_log.md`)
+- **Rule**: Record post-mortem results in lessons log (`core/010_project_lessons_log.md`)
 - **Rule**: Migrate publishing tokens from long-lived to OIDC Trusted Publishing to eliminate theft risk
 - **Rule**: Enforce 2FA/WebAuthn for maintainer accounts to prevent phishing-based account takeover
 - **Rule**: Consider network-isolated CI builds to counter self-replicating malware (Shai-Hulud type)
 
-→ Cross-reference: [`503_incident_response.md`](./503_incident_response.md), [`600_security_privacy.md`](./600_security_privacy.md)
+→ Cross-reference: [`503_incident_response.md`](../operations/500_incident_response.md), [`600_security_privacy.md`](../security/000_security_privacy.md)
 
 ---
 
@@ -817,7 +817,7 @@ flowchart TD
 - **Rule**: Submit monthly report to leadership for risk status sharing
 - **Rule**: Conduct comprehensive license audit quarterly
 
-→ Cross-reference: [`401_data_analytics.md`](./401_data_analytics.md)
+→ Cross-reference: [`401_data_analytics.md`](../ai/100_data_analytics.md)
 
 ---
 
@@ -830,7 +830,7 @@ flowchart TD
 - **Rule**: Eliminate overlapping features across multiple tools to optimize costs
 - **Rule**: Monitor Private Registry bandwidth costs monthly
 
-→ Cross-reference: [`101_revenue_monetization.md`](./101_revenue_monetization.md) §FinOps
+→ Cross-reference: [`101_revenue_monetization.md`](../product/300_revenue_monetization.md) §FinOps
 
 ---
 
@@ -879,7 +879,7 @@ flowchart TD
 - **Rule**: Enable malware behavior analysis via Socket.dev or equivalent
 - **Rule**: Verify npm Provenance to confirm package publisher CI
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Supply Chain
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain
 
 ---
 
@@ -926,7 +926,7 @@ flowchart TD
 }
 ```
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Vulnerability Management
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Vulnerability Management
 
 ---
 
@@ -948,7 +948,7 @@ flowchart TD
 | Key Exchange | ECDH (P-256+) or X25519. RSA-2048+ |
 | Quantum Readiness | Begin hybrid mode (classical + PQC) evaluation |
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Cryptographic Policy, [`601_data_governance.md`](./601_data_governance.md) §Quantum Crypto Agility
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Cryptographic Policy, [`601_data_governance.md`](../security/100_data_governance.md) §Quantum Crypto Agility
 
 ---
 
@@ -980,7 +980,7 @@ cyclonedx merge \
   --output-file sbom-unified.cdx.json
 ```
 
-→ Cross-reference: [`300_engineering_standards.md`](./300_engineering_standards.md) §CI/CD
+→ Cross-reference: [`300_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD
 
 
 ---
@@ -1040,7 +1040,7 @@ gh attestation verify $(npm pack --dry-run 2>&1 | tail -1) \
   --owner myorg
 ```
 
-→ Cross-reference: [`600_security_privacy.md`](./600_security_privacy.md) §Supply Chain
+→ Cross-reference: [`600_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain
 
 ---
 
@@ -1099,7 +1099,7 @@ jobs:
 | 🟡 Medium | Potential Source-Available condition breach | Legal review + alternative evaluation |
 | 🟢 Low | Permissive license, attribution gap | Fix with NOTICE update |
 
-→ Cross-reference: [`601_data_governance.md`](./601_data_governance.md), [`603_ip_due_diligence.md`](./603_ip_due_diligence.md)
+→ Cross-reference: [`601_data_governance.md`](../security/100_data_governance.md), [`603_ip_due_diligence.md`](../security/300_ip_due_diligence.md)
 
 ---
 
@@ -1131,7 +1131,7 @@ flowchart TD
 - **Rule**: Revert to official version **within 48 hours** of official patch release when using temporary fork
 - **Rule**: Record all zero-day response steps chronologically
 
-→ Cross-reference: [`503_incident_response.md`](./503_incident_response.md), [`600_security_privacy.md`](./600_security_privacy.md)
+→ Cross-reference: [`503_incident_response.md`](../operations/500_incident_response.md), [`600_security_privacy.md`](../security/000_security_privacy.md)
 
 ---
 
@@ -1165,7 +1165,7 @@ flowchart TD
 | Copyleft Contamination Check | Run OSS code similarity scan in CI |
 | Recording Obligation | Document in PR description for large AI generation (50%+ of file) |
 
-→ Cross-reference: [`400_ai_engineering.md`](./400_ai_engineering.md), [`601_data_governance.md`](./601_data_governance.md) §GenAI Copyright
+→ Cross-reference: [`400_ai_engineering.md`](../ai/000_ai_engineering.md), [`601_data_governance.md`](../security/100_data_governance.md) §GenAI Copyright
 
 ---
 
@@ -1235,7 +1235,7 @@ In addition to CI-time SCA (build-time scanning), Runtime SCA continuously monit
 | False Positive Rate | High (installed but unused) | Low (execution-path based) |
 | Tools | Snyk, Socket.dev, Trivy | Oligo Security, Contrast Security |
 
-→ Cross-reference: [`502_site_reliability.md`](./502_site_reliability.md) §Observability
+→ Cross-reference: [`502_site_reliability.md`](../operations/400_site_reliability.md) §Observability
 
 ---
 
@@ -1378,7 +1378,7 @@ DORA (Digital Operational Resilience Act, Regulation (EU) 2022/2554) became effe
 - **Rule**: Document exit strategies for critical dependencies (frameworks, DBs, etc.)
 - **Rule**: Integrate OSS supply chain incidents into DORA incident reporting flow
 
-→ Cross-reference: §8 SBOM Regulatory Compliance, [`503_incident_response.md`](./503_incident_response.md)
+→ Cross-reference: §8 SBOM Regulatory Compliance, [`503_incident_response.md`](../operations/500_incident_response.md)
 
 ---
 
@@ -1574,17 +1574,17 @@ flowchart TD
 ---
 
 > **Cross-references (Related Rule Files)**:
-> - [`600_security_privacy.md`](./600_security_privacy.md) — Supply chain security, secrets management, cryptographic policy
-> - [`601_data_governance.md`](./601_data_governance.md) — GenAI copyright, EU Data Act, quantum crypto agility
-> - [`603_ip_due_diligence.md`](./603_ip_due_diligence.md) — IP management, due diligence
-> - [`300_engineering_standards.md`](./300_engineering_standards.md) — CI/CD, coding standards
-> - [`340_web_frontend.md`](./340_web_frontend.md) — Performance budget, bundle size
-> - [`400_ai_engineering.md`](./400_ai_engineering.md) — AI implementation, model management
-> - [`502_site_reliability.md`](./502_site_reliability.md) — Observability, runtime monitoring
-> - [`503_incident_response.md`](./503_incident_response.md) — Incident response flow
-> - [`101_revenue_monetization.md`](./101_revenue_monetization.md) — FinOps
-> - [`200_design_ux.md`](./200_design_ux.md) — Font & asset management
-> - [`401_data_analytics.md`](./401_data_analytics.md) — KPI dashboard
+> - [`600_security_privacy.md`](../security/000_security_privacy.md) — Supply chain security, secrets management, cryptographic policy
+> - [`601_data_governance.md`](../security/100_data_governance.md) — GenAI copyright, EU Data Act, quantum crypto agility
+> - [`603_ip_due_diligence.md`](../security/300_ip_due_diligence.md) — IP management, due diligence
+> - [`300_engineering_standards.md`](../engineering/000_engineering_standards.md) — CI/CD, coding standards
+> - [`340_web_frontend.md`](../engineering/300_web_frontend.md) — Performance budget, bundle size
+> - [`400_ai_engineering.md`](../ai/000_ai_engineering.md) — AI implementation, model management
+> - [`502_site_reliability.md`](../operations/400_site_reliability.md) — Observability, runtime monitoring
+> - [`503_incident_response.md`](../operations/500_incident_response.md) — Incident response flow
+> - [`101_revenue_monetization.md`](../product/300_revenue_monetization.md) — FinOps
+> - [`200_design_ux.md`](../design/000_design_ux.md) — Font & asset management
+> - [`401_data_analytics.md`](../ai/100_data_analytics.md) — KPI dashboard
 
 ### Cross-References
 

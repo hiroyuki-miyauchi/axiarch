@@ -2,7 +2,7 @@
 
 > このフォルダはプロジェクトの **中核設定・教訓ログ・テンプレート** を管理します。
 > 他のドメインフォルダ（`engineering/`, `security/` 等）とは異なり、
-> 結晶化された教訓の「一時蓄積場所」（`010_project_lessons_log.md`）を兼ねます。
+> 結晶化された教訓の「一時蓄積場所」（`core/010_project_lessons_log.md`）を兼ねます。
 
 ## 対応 Universal ルール
 
@@ -16,10 +16,10 @@
 
 | ファイル | 役割 |
 |:--------|:-----|
-| `000_project_overview.md` | プロジェクト概要・技術スタック定義 |
-| `010_project_lessons_log.md` | 教訓の中央インデックス（結晶化の起点） |
-| `998_feature_spec_template.md` | 機能仕様テンプレート |
-| `999_project_specific_template.md` | プロジェクト固有ルールテンプレート |
+| `core/000_project_overview.md` | プロジェクト概要・技術スタック定義 |
+| `core/010_project_lessons_log.md` | 教訓の中央インデックス（結晶化の起点） |
+| `core/998_feature_spec_template.md` | 機能仕様テンプレート |
+| `core/999_project_specific_template.md` | プロジェクト固有ルールテンプレート |
 
 ## 運用ガイド
 

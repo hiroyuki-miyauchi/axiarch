@@ -2,7 +2,7 @@
 
 > This folder manages the project's **core configuration, lessons log, and templates**.
 > Unlike other domain folders (`engineering/`, `security/`, etc.),
-> it also serves as the "temporary accumulation point" for crystallized lessons (`010_project_lessons_log.md`).
+> it also serves as the "temporary accumulation point" for crystallized lessons (`core/010_project_lessons_log.md`).
 
 ## Corresponding Universal Rules
 
@@ -16,10 +16,10 @@
 
 | File | Role |
 |:-----|:-----|
-| `000_project_overview.md` | Project overview & tech stack definition |
-| `010_project_lessons_log.md` | Central lessons index (crystallization origin) |
-| `998_feature_spec_template.md` | Feature specification template |
-| `999_project_specific_template.md` | Project-specific rules template |
+| `core/000_project_overview.md` | Project overview & tech stack definition |
+| `core/010_project_lessons_log.md` | Central lessons index (crystallization origin) |
+| `core/998_feature_spec_template.md` | Feature specification template |
+| `core/999_project_specific_template.md` | Project-specific rules template |
 
 ## Operating Guide
 

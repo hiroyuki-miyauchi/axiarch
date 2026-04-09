@@ -21,7 +21,7 @@
 
 1.  **End-to-End Data Flow**: DB/Backend ⇔ API ⇔ Frontend のデータフローにおいて、型定義(Type)が一度も途切れていないか。
 2.  **Security & Privacy First**: 認証(Auth)と認可(Authorization)がUIだけでなくバックエンド/APIレベルで物理的に強制され、PII（個人情報）が厳格に保護されているか。
-3.  **Unicorn Architecture Standard**: **Data Gateway, CQRS, 階層型キャッシュ, Select Spec** といった、スケーラビリティと保守性を極限まで高めるアーキテクチャパターンが、プロジェクトの規模やフェーズに応じて適切に実装・維持されているか。
+3.  **Unicorn Architecture Standard**: **Data Gateway, CQRS, 階層型キャッシュ, 明示的なフィールド選択** といった、スケーラビリティと保守性を極限まで高めるアーキテクチャパターンが、プロジェクトの規模やフェーズに応じて適切に実装・維持されているか。
 4.  **Future-Proofing & Data Monetization**: 現在のデータ構造やAPI設計が、将来の**データ販売（API Sales）**、外部連携、オムニチャネル化に即座に対応できる「資産」として、Amazon API Mandate等の基準を満たして設計されているか。
 5.  **No "Facade" (ハリボテ禁止)**: UIはあるが裏側のロジックが繋がっていない、またはハードコードされた値で誤魔化している箇所を徹底排除する。
 

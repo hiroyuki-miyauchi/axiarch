@@ -1279,21 +1279,21 @@ npx messageformat-validator locales/**/*.json
 
 | ルールファイル | 関連内容 |
 |---|---|
-| [100_product_strategy.md](../ja/100_product_strategy.md) | Dynamic Pricingメタデータ、ティア戦略 |
-| [101_revenue_monetization.md](../ja/101_revenue_monetization.md) | 決済・通貨・FinOps |
-| [102_growth_marketing.md](../ja/102_growth_marketing.md) | SEO/GEO、OGP、ASO |
-| [200_design_ux.md](../ja/200_design_ux.md) | アクセシビリティ、IME、レイアウト |
-| [300_engineering_standards.md](../ja/300_engineering_standards.md) | CI/CD、コーディング規約 |
-| [340_web_frontend.md](../ja/340_web_frontend.md) | CSSアーキテクチャ、パフォーマンス |
-| [341_headless_cms.md](../ja/341_headless_cms.md) | 多言語コンテンツ管理 |
-| [320_supabase_architecture.md](../ja/320_supabase_architecture.md) | DB設計、タイムゾーン |
-| [400_ai_engineering.md](../ja/400_ai_engineering.md) | AI/LLM、RAG、Agentic AI |
-| [502_site_reliability.md](../ja/502_site_reliability.md) | マルチリージョン可用性 |
-| [600_security_privacy.md](../ja/600_security_privacy.md) | データ保護、暗号化、暗号規制 |
-| [601_data_governance.md](../ja/601_data_governance.md) | GDPR、APPI、越境データ、EU Data Act |
-| [700_qa_testing.md](../ja/700_qa_testing.md) | VRT、アクセシビリティテスト |
-| [720_cloud_finops.md](../ja/720_cloud_finops.md) | クラウドコスト管理、GreenOps |
-| [802_language_protocol.md](../ja/802_language_protocol.md) | 言語使用プロトコル、UI用語集 |
+| [100_product_strategy.md](../product/000_product_strategy.md) | Dynamic Pricingメタデータ、ティア戦略 |
+| [101_revenue_monetization.md](../product/300_revenue_monetization.md) | 決済・通貨・FinOps |
+| [102_growth_marketing.md](../product/500_growth_marketing.md) | SEO/GEO、OGP、ASO |
+| [200_design_ux.md](../design/000_design_ux.md) | アクセシビリティ、IME、レイアウト |
+| [300_engineering_standards.md](../engineering/000_engineering_standards.md) | CI/CD、コーディング規約 |
+| [340_web_frontend.md](../engineering/300_web_frontend.md) | CSSアーキテクチャ、パフォーマンス |
+| [341_headless_cms.md](../engineering/310_headless_cms.md) | 多言語コンテンツ管理 |
+| [320_supabase_architecture.md](../engineering/200_supabase_architecture.md) | DB設計、タイムゾーン |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI/LLM、RAG、Agentic AI |
+| [502_site_reliability.md](../operations/400_site_reliability.md) | マルチリージョン可用性 |
+| [600_security_privacy.md](../security/000_security_privacy.md) | データ保護、暗号化、暗号規制 |
+| [601_data_governance.md](../security/100_data_governance.md) | GDPR、APPI、越境データ、EU Data Act |
+| [700_qa_testing.md](../quality/000_qa_testing.md) | VRT、アクセシビリティテスト |
+| [720_cloud_finops.md](../operations/600_cloud_finops.md) | クラウドコスト管理、GreenOps |
+| [802_language_protocol.md](../core/200_language_protocol.md) | 言語使用プロトコル、UI用語集 |
 
 | セクション | 関連ルール |
 |---|---|

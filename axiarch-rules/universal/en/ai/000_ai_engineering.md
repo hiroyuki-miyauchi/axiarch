@@ -226,7 +226,7 @@
 | Privacy Risk | PII processing scope, data flows | Feature addition + semi-annually |
 | Bias Risk | Category/region/attribute bias | Model change + quarterly |
 | Financial Risk | Cost overruns, API loops | Monthly |
-| Regulatory Risk | EU AI Act/APPI compliance status | Semi-annually + regulation changes |
+| Regulatory Risk | EU AI Act/Global Privacy Laws compliance status | Semi-annually + regulation changes |
 | Reputation Risk | Brand damage scenarios | Quarterly |
 
 ### 5.3. AI Decision Log
@@ -290,7 +290,7 @@
 ### 7.2. Regulation Response Checklist
 
 - **Rule 40.8**: Before releasing new AI features, confirm target market regulatory requirements and conduct compliance gap analysis
-- Also verify cross-areas with data protection laws such as GDPR/APPI
+- Also verify cross-areas with data protection laws such as GDPR/Global Privacy Laws
 
 ---
 
@@ -334,7 +334,7 @@
 
 ### 9.1. User Data AI Training Opt-Out Protocol
 
-- **Rule 40.11**: Mandate Opt-In/Opt-Out control for AI training use of user data, compliant with GDPR/APPI "purpose limitation" principles
+- **Rule 40.11**: Mandate Opt-In/Opt-Out control for AI training use of user data, compliant with GDPR/Global Privacy Laws "purpose limitation" principles
 
 | Item | Requirement |
 |:---|:---|
@@ -1117,7 +1117,7 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 
 - **Remove unnecessary modifiers/redundant expressions**: Periodically review and optimize system prompts
 - **Abbreviation Strategy**: Replace frequently occurring patterns with shortened expressions
-- **Select Spec Application**: Minimize fields during RAG retrieval to reduce prompt tokens
+- **Strict Field Selection Application**: Minimize fields during RAG retrieval to reduce prompt tokens
 
 ### 38.2. Cache ROI Calculation
 
@@ -2030,7 +2030,7 @@ Output: {output example}
 |:---|:---|:---|
 | CMS Triple Write | `341_headless_cms.md` | RAG data source quality |
 | Security & PII | `600_security_privacy.md` | PII classification, prompt injection |
-| Data Privacy | `601_data_governance.md` | GDPR, APPI, data minimization |
+| Data Privacy | `601_data_governance.md` | GDPR, Global Privacy Laws, data minimization |
 | API Design | `301_api_integration.md` | AI API design, rate limiting |
 | Analytics & Observability | `401_data_analytics.md` | LLM observability, GenAI metrics |
 | QA Testing | `700_qa_testing.md` | AI-driven testing, hallucination detection |

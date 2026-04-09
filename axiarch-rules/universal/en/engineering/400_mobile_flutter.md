@@ -1769,7 +1769,7 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 ### §184. Privacy & Compliance
 
 - **Privacy Manifest (iOS)**: Declare API usage reasons in `PrivacyInfo.xcprivacy`
-- **GDPR/APPI compliance**: Implement user data collection, storage, and deletion flows
+- **GDPR/Global Privacy Laws compliance**: Implement user data collection, storage, and deletion flows
 - **Consent management**: Display data collection consent UI on first launch. Data transmission without consent prohibited
 - **Data deletion**: Complete deletion of all local data on user account deletion
 
@@ -2311,7 +2311,7 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 
 ### §246. Consent Management Platform (CMP)
 
-- **Use case**: GDPR/APPI/CCPA and regional privacy law compliance
+- **Use case**: GDPR/CCPA/Global Privacy Laws and regional privacy law compliance
 - **Standard SDK**: Adopt TCF 2.0 (IAB Transparency & Consent Framework) compliant CMP SDK
 - **Initial Consent**: Display consent management UI on first app launch. Data collection without consent is completely prohibited
 - **Consent State Management**: Manage `ConsentStatus` (`granted`/`denied`/`notDetermined`) with Riverpod Provider

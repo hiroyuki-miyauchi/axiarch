@@ -89,7 +89,7 @@
 ## 3. コンポーネント実装ガイド (Component Guidelines)
 ### 3.1. Implementation Patterns
 -   **Skeleton Loader**:
-    -   データ読み込み中（Suspense）は、スピナーではなく **Skeleton Screen** (`<Skeleton />`) を使用し、レイアウトシフト（CLS）を防ぎます。
+    -   データ読み込み中（Suspense）は、スピナーではなく **Skeleton Screen** (`<Skeleton />`) を使用し、レイアウトシフト（CLS）を低減します。
 -   **Feedback Hierarchy**:
     -   **Toast**: 成功・通知（非同期）。
     -   **Inline Alert**: 文脈依存のエラー。
@@ -102,7 +102,7 @@
     -   **Menu (1000)**: Navigation Drawer 等。
     -   **Action**: 恣意的な `z-50` 等のマジックナンバーは禁止し、この階層構造を厳守してください。
 -   **Optimistic UI (楽観的更新)**:
-    -   いいね等の軽量アクションは、サーバー応答を待たずに即座に表示更新し、ネイティブアプリ並みの応答速度を実現します。
+    -   いいね等の軽量アクションは、サーバー応答を待たずに即座に表示更新し、ネイティブアプリ並みの応答速度をもたらします。
 -   **The Sortable Table Standard**:
     -   **Law**: 管理画面の一覧テーブル（ユーザー、商品、ログ等）において、「項目の並び替え（Sort）ができない」状態は、業務ツールとして不完全（Incomplete）です。
     -   **Action**: 必ず `SortableTableHead` コンポーネントを使用し、ヘッダークリックによるサーバーサイドソート（`sortBy`, `sortOrder`）を標準機能として実装してください。矢印アイコンの挙動やパラメータ名は全機能で統一を義務付けます。
@@ -122,7 +122,7 @@
     -   **Anti-Pattern**: コンポーネント内で直接 `fetch` を行ったり、特定ページのDOM構造に依存したステート管理を行うことは、再利用性と移植性を破壊する設計違反です。
     -   **Goal**: UIコンポーネントは、将来的に別のプラットフォーム（React Native等）へ移植する際に、ロジックを修正せず「表示層」だけ交換すれば動く状態を維持してください。
 -   **The Modal Standard Architecture (ポータル & Close UX)**:
-    -   **Law**: すべてのモーダルはDOM最上位へレンダリングされる `Portal` パターンを使用しなければなりません。親要素の `overflow: hidden` や `z-index` の制約によるクリッピングを防止します。
+    -   **Law**: すべてのモーダルはDOM最上位へレンダリングされる `Portal` パターンを使用しなければなりません。親要素の `overflow: hidden` や `z-index` の制約によるクリッピングを抑制します。
     -   **Close Button**: モーダルの閉じるボタンは、右上に統一された視覚デザイン（円形背景付き等）で配置し、プロジェクト全体で一貫させてください。閉じる手段が不明瞭なモーダルはUXの欠陥です。
 -   **The Mobile Media Upload Protocol (モバイルメディアアップロード対応)**:
     -   **Law**: モバイルデバイスの標準撮影形式（例: iOSのHEIC/HEIF）はブラウザで直接表示できないことが多いため、ファイルアップロード機能を備えるコンポーネントでは、これらの形式への対応を考慮してください。
@@ -352,7 +352,7 @@
     -   **エンプティステート (Empty States)**: データがない状態（Zero Data）を「エラー」ではなく「オンボーディングの機会」と捉えます。「記録がありません」だけでなく、「最初の記録を追加しましょう」という明確なCall to Action (CTA) を配置します。
 -   **一般消費者視点 (General Consumer Perspective)**:
     -   **専門用語禁止**: UI上のテキストには「データベース」「同期」「API」などの技術用語を一切使用しません。「保存」「更新」「連携」など、誰でもわかる言葉を選びます。
-    -   **直感性**: 「説明書を読まなくても使える」をゴールとします。アイコンには必ずラベルを併記し、意味の曖昧さを排除します。
+    -   **直感性**: 「説明書を読まなくても使える」をゴールとします。アイコンには必ずラベルを併記し、意味の曖昧さをなくします。
     -   **Focus Ring Protocol (Rule 0.99: Accessibility Sight)**:
         -   **Law**: フォーカス状態（Tabキー操作等）が視覚的に認識できないUIは、キーボードユーザーにとって「暗闇の迷路」であり、アクセシビリティ上の敗北です。
         -   **Action**: ブラウザ標準のフォーカスリングを消去（`outline-none`）した場合は、必ず代替となる**高コントラストなフォーカスリング**（例: `ring-2 ring-primary ring-offset-2`）を再定義してください。「見えないフォーカス（Invisible Focus）」はバグとして扱います。
@@ -444,8 +444,8 @@
 ### 14.1. The Responsive Safety Protocol (No-Trap Mandate)
 -   **Law**: PCとSPではインタラクションの物理法則が異なります。
 -   **Action**:
-    1.  **SP (Drawer Safety)**: Drawer内のスクロール領域には `data-vaul-no-drag` を付与し、誤閉鎖を防ぎます。
-    2.  **PC (Viewport Safety)**: Popover等の浮動要素には必ず `max-height` を設定し、画面外へのはみ出しを防ぎます。
+    1.  **SP (Drawer Safety)**: Drawer内のスクロール領域には `data-vaul-no-drag` を付与し、誤閉鎖を低減します。
+    2.  **PC (Viewport Safety)**: Popover等の浮動要素には必ず `max-height` を設定し、画面外へのはみ出しを低減します。
     3.  **Responsive Split**: モバイルでは `Drawer`、PCでは `Popover` を使い分ける実装を標準とします。
     4.  **iOS Input Zoom Defense (iOSズーム防止)**: iOS Safariでは入力フィールドの `font-size` が **16px未満** の場合、フォーカス時に自動ズームインしUXを損ないます。モバイルビューにおける `input`, `textarea`, `select` の `font-size` は **16px (`text-base`)** 以上を強制してください。
 

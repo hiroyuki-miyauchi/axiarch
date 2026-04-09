@@ -154,7 +154,7 @@ jobs:
   - 新規入社者のIP譲渡契約の締結状況
   - 外部委託契約のIP条項の適切性
   - CLA未署名コントリビューションの検出
-  - OSS利用状況とライセンス適合性（→ [602_oss_compliance.md](./602_oss_compliance.md) 参照）
+  - OSS利用状況とライセンス適合性（→ [602_oss_compliance.md](../security/200_oss_compliance.md) 参照）
   - AI生成コードの使用状況と権利帰属の記録確認
 
 ---
@@ -636,7 +636,7 @@ rules:
 - AI生成コードを含むソフトウェア発明の出願時:
   - コード自体ではなく、技術的課題に対する技術的解決策としてクレームを構成
   - AI生成部分と人間設計部分の切り分けを明確にする
-  - ライセンスリスクの観点からも確認（→ [602_oss_compliance.md](./602_oss_compliance.md) §AI生成コード参照）
+  - ライセンスリスクの観点からも確認（→ [602_oss_compliance.md](../security/200_oss_compliance.md) §AI生成コード参照）
 
 ---
 
@@ -742,7 +742,7 @@ rules:
 | **24ヶ月前** | IP監査の実施、IP台帳の整備、技術的負債の棚卸し |
 | **18ヶ月前** | 未出願の重要発明の出願、商標の国際出願、IP評価の初回実施 |
 | **12ヶ月前** | データルームの構築開始、VDR（Virtual Data Room）のセットアップ |
-| **9ヶ月前** | OSS/ライセンス監査の完了（→ [602_oss_compliance.md](./602_oss_compliance.md) 参照） |
+| **9ヶ月前** | OSS/ライセンス監査の完了（→ [602_oss_compliance.md](../security/200_oss_compliance.md) 参照） |
 | **6ヶ月前** | Mock Due Diligence（模擬DD）の実施、技術DDレポートの事前作成 |
 | **3ヶ月前** | データルームの最終更新、IP表明保証の草案作成 |
 | **Exit直前** | 最終IP棚卸し、未解決IP課題の解決確認 |
@@ -1028,7 +1028,7 @@ jobs:
 
 ### Rule 63.280: SCA連携による自動ライセンス監査
 - **SCAツールの活用**: Snyk / FOSSA / Socket.dev / Black Duck 等を用い、DDプロセスの一環としてライセンスコンプライアンスを自動検証
-- **詳細は** → [602_oss_compliance.md](./602_oss_compliance.md) を参照
+- **詳細は** → [602_oss_compliance.md](../security/200_oss_compliance.md) を参照
 
 ### Rule 63.281: M&AにおけるOSSリスクの定量化
 - **Black Duck 2025レポートの知見**:
@@ -1371,15 +1371,15 @@ jobs:
 
 | 参照先 | 関連トピック |
 |---|---|
-| [600_security_privacy.md](./600_security_privacy.md) | アクセス制御、暗号化、DLP、ゼロトラスト（§13, §15, §16関連） |
-| [601_data_governance.md](./601_data_governance.md) | データ保護規制、AI規制、GDPR、EU Data Act（§21, §23, §25, §48関連） |
-| [602_oss_compliance.md](./602_oss_compliance.md) | SBOM、SCA、ライセンスコンプライアンス、SLSA（§5, §35, §38関連） |
-| [700_qa_testing.md](./700_qa_testing.md) | テストカバレッジ、コード品質指標（§37関連） |
-| [502_site_reliability.md](./502_site_reliability.md) | 可用性、バックアップ、DR（§37関連） |
-| [503_incident_response.md](./503_incident_response.md) | インシデント対応フロー（§43関連） |
-| [400_ai_engineering.md](./400_ai_engineering.md) | AI実装戦略、ガードレール、RAG設計（§23, §24, §26関連） |
-| [100_product_strategy.md](./100_product_strategy.md) | 収益化モデル、EXIT戦略の事業観点（§27, §28関連） |
-| [101_revenue_monetization.md](./101_revenue_monetization.md) | FinOps、決済、IP評価の財務観点（§28, §41関連） |
+| [600_security_privacy.md](../security/000_security_privacy.md) | アクセス制御、暗号化、DLP、ゼロトラスト（§13, §15, §16関連） |
+| [601_data_governance.md](../security/100_data_governance.md) | データ保護規制、AI規制、GDPR、EU Data Act（§21, §23, §25, §48関連） |
+| [602_oss_compliance.md](../security/200_oss_compliance.md) | SBOM、SCA、ライセンスコンプライアンス、SLSA（§5, §35, §38関連） |
+| [700_qa_testing.md](../quality/000_qa_testing.md) | テストカバレッジ、コード品質指標（§37関連） |
+| [502_site_reliability.md](../operations/400_site_reliability.md) | 可用性、バックアップ、DR（§37関連） |
+| [503_incident_response.md](../operations/500_incident_response.md) | インシデント対応フロー（§43関連） |
+| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI実装戦略、ガードレール、RAG設計（§23, §24, §26関連） |
+| [100_product_strategy.md](../product/000_product_strategy.md) | 収益化モデル、EXIT戦略の事業観点（§27, §28関連） |
+| [101_revenue_monetization.md](../product/300_revenue_monetization.md) | FinOps、決済、IP評価の財務観点（§28, §41関連） |
 
 ### クロスリファレンス
 
