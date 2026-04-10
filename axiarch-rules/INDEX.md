@@ -236,7 +236,7 @@ your-project/
 
 > **Status: Immutable** — DO NOT edit unless explicitly instructed to "Amend Constitution".
 
-#### 000: Core & Mindset
+#### core/: Core & Mindset
 
 | # | File | Summary |
 |---|---|---|
