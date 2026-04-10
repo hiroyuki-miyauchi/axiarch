@@ -156,15 +156,15 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | Category | Files | JA | EN |
 |:---------|:------|:---|:---|
-| **000** Core & Mindset | 1 | 開発哲学、Supreme Directive | Development philosophy, Supreme Directive |
-| **100** Product & Business | 9 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
-| **200** Design & UX | 1 | デザインシステム、A11y | Design system, accessibility |
-| **300** Engineering | 9 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS |
-| **400** AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
-| **500** Operations | 7 | 内部ツール、営業・BizDev、HR、CX、SRE、インシデント、パートナーシップ | Internal tools, sales/BizDev, HR, CX, SRE, incident response, partnerships |
-| **600** Security & Legal | 4 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産 | Security, data governance, OSS compliance, IP |
-| **700** QA & FinOps | 2 | テスト戦略、クラウドFinOps | Test strategy, Cloud FinOps |
-| **800** Global & Governance | 3 | i18n、ガバナンス、言語プロトコル | i18n, governance, language protocol |
+| Core & Mindset | 1 | 開発哲学、Supreme Directive | Development philosophy, Supreme Directive |
+| Product & Business | 9 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
+| Design & UX | 1 | デザインシステム、A11y | Design system, accessibility |
+| Engineering | 9 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS |
+| AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
+| Operations | 7 | 内部ツール、営業・BizDev、HR、CX、SRE、インシデント、パートナーシップ | Internal tools, sales/BizDev, HR, CX, SRE, incident response, partnerships |
+| Security & Legal | 4 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産 | Security, data governance, OSS compliance, IP |
+| QA & FinOps | 2 | テスト戦略、クラウドFinOps | Test strategy, Cloud FinOps |
+| Global & Governance | 3 | i18n、ガバナンス、言語プロトコル | i18n, governance, language protocol |
 
 ### 📐 Blueprint (プロジェクト固有テンプレート / Project-Specific Templates)
 

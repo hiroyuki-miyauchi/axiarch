@@ -32,10 +32,10 @@
 
 ### 📚 Layer 1: Universal Rules (Immutable Constitution)
 
-#### 000: Core & Mindset
+#### Core & Mindset
 *   **000. Core Philosophy & Mindset** ([🇯🇵](./universal/ja/core/000_core_mindset.md) / [🇺🇸](./universal/en/core/000_core_mindset.md))
 
-#### 100–199: Business & Growth
+#### Business & Growth
 *   **100. Product & Business Strategy** ([🇯🇵](./universal/ja/product/000_product_strategy.md) / [🇺🇸](./universal/en/product/000_product_strategy.md))
 *   **101. Revenue & Monetization** ([🇯🇵](./universal/ja/product/300_revenue_monetization.md) / [🇺🇸](./universal/en/product/300_revenue_monetization.md))
 *   **102. Growth & Marketing** ([🇯🇵](./universal/ja/product/500_growth_marketing.md) / [🇺🇸](./universal/en/product/500_growth_marketing.md))
@@ -46,10 +46,10 @@
 *   **140. Brand Strategy** ([🇯🇵](./universal/ja/product/600_brand_strategy.md) / [🇺🇸](./universal/en/product/600_brand_strategy.md))
 *   **150. Fundraising & IR** ([🇯🇵](./universal/ja/product/900_fundraising_ir.md) / [🇺🇸](./universal/en/product/900_fundraising_ir.md))
 
-#### 200: Design & UX
+#### Design & UX
 *   **200. Design & UX Strategy** ([🇯🇵](./universal/ja/design/000_design_ux.md) / [🇺🇸](./universal/en/design/000_design_ux.md))
 
-#### 300–399: Engineering Core
+#### Engineering Core
 *   **300. Engineering Standards** ([🇯🇵](./universal/ja/engineering/000_engineering_standards.md) / [🇺🇸](./universal/en/engineering/000_engineering_standards.md))
 *   **301. API Integration** ([🇯🇵](./universal/ja/engineering/100_api_integration.md) / [🇺🇸](./universal/en/engineering/100_api_integration.md))
 *   **320. Supabase & PostgreSQL** ([🇯🇵](./universal/ja/engineering/200_supabase_architecture.md) / [🇺🇸](./universal/en/engineering/200_supabase_architecture.md))
@@ -60,11 +60,11 @@
 *   **360. Firebase & GCP** ([🇯🇵](./universal/ja/engineering/500_firebase_gcp.md) / [🇺🇸](./universal/en/engineering/500_firebase_gcp.md))
 *   **361. AWS Cloud** ([🇯🇵](./universal/ja/engineering/510_aws_cloud.md) / [🇺🇸](./universal/en/engineering/510_aws_cloud.md))
 
-#### 400–409: AI & Data
+#### AI & Data
 *   **400. AI Engineering** ([🇯🇵](./universal/ja/ai/000_ai_engineering.md) / [🇺🇸](./universal/en/ai/000_ai_engineering.md))
 *   **401. Data & Analytics** ([🇯🇵](./universal/ja/ai/100_data_analytics.md) / [🇺🇸](./universal/en/ai/100_data_analytics.md))
 
-#### 500–599: Operations & Reliability
+#### Operations & Reliability
 *   **500. Internal Tools** ([🇯🇵](./universal/ja/operations/000_internal_tools.md) / [🇺🇸](./universal/en/operations/000_internal_tools.md))
 *   **501. Customer Experience** ([🇯🇵](./universal/ja/operations/300_customer_experience.md) / [🇺🇸](./universal/en/operations/300_customer_experience.md))
 *   **502. Site Reliability** ([🇯🇵](./universal/ja/operations/400_site_reliability.md) / [🇺🇸](./universal/en/operations/400_site_reliability.md))
@@ -73,17 +73,17 @@
 *   **520. HR & Organization** ([🇯🇵](./universal/ja/operations/200_hr_organization.md) / [🇺🇸](./universal/en/operations/200_hr_organization.md))
 *   **530. Partnership & Ecosystem** ([🇯🇵](./universal/ja/operations/700_partnership_ecosystem.md) / [🇺🇸](./universal/en/operations/700_partnership_ecosystem.md))
 
-#### 600–609: Security & Legal
+#### Security & Legal
 *   **600. Security & Privacy** ([🇯🇵](./universal/ja/security/000_security_privacy.md) / [🇺🇸](./universal/en/security/000_security_privacy.md))
 *   **601. Data Governance** ([🇯🇵](./universal/ja/security/100_data_governance.md) / [🇺🇸](./universal/en/security/100_data_governance.md))
 *   **602. OSS Compliance** ([🇯🇵](./universal/ja/security/200_oss_compliance.md) / [🇺🇸](./universal/en/security/200_oss_compliance.md))
 *   **603. IP & Due Diligence** ([🇯🇵](./universal/ja/security/300_ip_due_diligence.md) / [🇺🇸](./universal/en/security/300_ip_due_diligence.md))
 
-#### 700–729: Testing, QA & FinOps
+#### Testing, QA & FinOps
 *   **700. QA & Testing** ([🇯🇵](./universal/ja/quality/000_qa_testing.md) / [🇺🇸](./universal/en/quality/000_qa_testing.md))
 *   **720. Cloud FinOps** ([🇯🇵](./universal/ja/operations/600_cloud_finops.md) / [🇺🇸](./universal/en/operations/600_cloud_finops.md))
 
-#### 800–809: Global & Governance
+#### Global & Governance
 *   **800. Internationalization** ([🇯🇵](./universal/ja/product/800_internationalization.md) / [🇺🇸](./universal/en/product/800_internationalization.md))
 *   **801. Governance** ([🇯🇵](./universal/ja/core/100_governance.md) / [🇺🇸](./universal/en/core/100_governance.md))
 *   **802. Language Protocol** ([🇯🇵](./universal/ja/core/200_language_protocol.md) / [🇺🇸](./universal/en/core/200_language_protocol.md))
