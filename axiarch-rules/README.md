@@ -110,9 +110,9 @@
 ## 🚀 Axiarch Setup & Initialization (導入と初期化)
 
 > [!NOTE]
-> **🇯🇵**: 本フレームワークは [Google Antigravity](https://labs.google/antigravity) 上で設計・実戦検証されたものです。**他のAIエージェント**（Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
+> **🇯🇵**: 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で設計・実戦検証されたものです。**他のAIエージェント**（Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
 >
-> **🇺🇸**: This framework was designed and validated through hundreds of real production sessions on [Google Antigravity](https://labs.google/antigravity). Through `AGENTS.md`, it is expected to work with **other AI agents**; however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
+> **🇺🇸**: This framework was designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Through `AGENTS.md`, it is expected to work with **other AI agents**; however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
 
 ### 🇯🇵 日本語ガイド (Usage in Japanese)
 
