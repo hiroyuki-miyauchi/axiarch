@@ -52,7 +52,7 @@
 > **今回の監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
 * **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
-    * `core/` — プロジェクト概要（`000_project_overview.md`）・教訓ログ（`core/010_project_lessons_log.md`）・テンプレート
+    * `core/` — プロジェクト概要（`core/000_project_overview.md`）・教訓ログ（`core/010_project_lessons_log.md`）・テンプレート
     * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
     * `design/` — デザイン・UI/UX

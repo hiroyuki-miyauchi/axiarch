@@ -1829,10 +1829,10 @@ forbid(
 - [700_qa_testing.md](../quality/000_qa_testing.md) — QA・テスト。Policy-as-Codeテストの関連規定。Part XVと関連。
 - [400_ai_engineering.md](../ai/000_ai_engineering.md) — AI実装。高度AIエージェントガバナンス（Part XXI）の技術的基盤。
 - [300_engineering_standards.md](../engineering/000_engineering_standards.md) — エンジニアリング。Feature Flagパターン（Part XXV）の技術的基盤。
-- [INDEX.md](../../INDEX.md) — 全ルールのマスター索引。ファイル追加・変更時に同期更新が必要。
-- [compliance_matrix.md](../../compliance_matrix.md) — 要件対照表。規制-ルールマッピングの管理場所。
-- [core/010_project_lessons_log.md](../../blueprint/ja/core/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
-- [999_project_specific_template.md](../../blueprint/ja/core/999_project_specific_template.md) — Blueprint新規作成時のテンプレート。
+- [INDEX.md](../../../INDEX.md) — 全ルールのマスター索引。ファイル追加・変更時に同期更新が必要。
+- [compliance_matrix.md](../../../compliance_matrix.md) — 要件対照表。規制-ルールマッピングの管理場所。
+- [core/010_project_lessons_log.md](../../../blueprint/ja/core/010_project_lessons_log.md) — 教訓ログ。判例蓄積・結晶化・Waiver記録・解釈判例・技術的負債の出力先。
+- [999_project_specific_template.md](../../../blueprint/ja/core/999_project_specific_template.md) — Blueprint新規作成時のテンプレート。
 
 ### クロスリファレンス
 
