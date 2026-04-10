@@ -170,10 +170,10 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | File | JA | EN |
 |:-----|:---|:---|
-| `000_project_overview.md` | プロジェクト概要テンプレート | Project overview template |
+| `core/000_project_overview.md` | プロジェクト概要テンプレート | Project overview template |
 | `core/010_project_lessons_log.md` | 教訓ログ | Lessons log |
-| `998_feature_spec_template.md` | **機能仕様テンプレート（Blueprint Firstの核）** — 受け入れ条件(Given/When/Then)を機能単位で必須化 | **Feature spec template (Blueprint First core)** — Acceptance Criteria (Given/When/Then) required per feature |
-| `999_project_specific_template.md` | プロジェクト固有ルールテンプレート | Project-specific rule template |
+| `core/998_feature_spec_template.md` | **機能仕様テンプレート（Blueprint Firstの核）** — 受け入れ条件(Given/When/Then)を機能単位で必須化 | **Feature spec template (Blueprint First core)** — Acceptance Criteria (Given/When/Then) required per feature |
+| `core/999_project_specific_template.md` | プロジェクト固有ルールテンプレート | Project-specific rule template |
 
 ### 🔧 基盤 / Infrastructure
 
@@ -351,8 +351,8 @@ rm -rf axiarch-prompts/ja  # For English projects
 
 | Step | JA | EN |
 |:-----|:---|:---|
-| 1 | `blueprint/*/000_project_overview.md` をプロジェクトに合わせて編集 | Edit `blueprint/*/000_project_overview.md` for your project |
-| 2 | 新機能は `998_feature_spec_template.md` を対応するドメインフォルダにコピー | For new features, copy `998_feature_spec_template.md` to the corresponding domain folder |
+| 1 | `blueprint/*/core/000_project_overview.md` をプロジェクトに合わせて編集 | Edit `blueprint/*/core/000_project_overview.md` for your project |
+| 2 | 新機能は `core/998_feature_spec_template.md` を対応するドメインフォルダにコピー | For new features, copy `core/998_feature_spec_template.md` to the corresponding domain folder |
 | 3 | **コードを書く前に受け入れ条件を書く**（Blueprint First） | **Write Acceptance Criteria before writing code** (Blueprint First) |
 | 4 | 開発開始 — AIエージェントは憲法に従う | Start development — AI agents will follow the constitution |
 
