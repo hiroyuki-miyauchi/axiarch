@@ -1820,10 +1820,10 @@ When interpretation is required, apply the following methods in order:
 - [700_qa_testing.md](../quality/000_qa_testing.md) — QA & Testing. Related provisions for Policy-as-Code testing. Related to Part XV.
 - [400_ai_engineering.md](../ai/000_ai_engineering.md) — AI Implementation. Technical foundation for Advanced Agentic AI Governance (Part XXI).
 - [300_engineering_standards.md](../engineering/000_engineering_standards.md) — Engineering. Technical foundation for Feature Flag Pattern (Part XXV).
-- [INDEX.md](../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
-- [compliance_matrix.md](../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
-- [core/010_project_lessons_log.md](../../blueprint/en/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
-- [999_project_specific_template.md](../../blueprint/en/core/999_project_specific_template.md) — Template for new Blueprint creation.
+- [INDEX.md](../../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
+- [compliance_matrix.md](../../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
+- [core/010_project_lessons_log.md](../../../blueprint/en/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
+- [999_project_specific_template.md](../../../blueprint/en/core/999_project_specific_template.md) — Template for new Blueprint creation.
 
 ### Cross-References
 
