@@ -97,7 +97,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 000 | [000_design_ux.md](./universal/ja/design/000_design_ux.md) | デザインとUX戦略。モバイルファースト、アクセシビリティ（WCAG 2.1 AA詳細基準・Image Alt Text）、アニメーション（60fps）、タッチターゲット、デザインシステム、Pixel Perfect基準、おもてなしUX（Input Normalization・ロケール入力補助）、エラーページ設計基準、エラーメッセージUX基準、Ghost Contentプロトコル、リッチ選択UI、IME対応、i18n準備基準。 |
+| 000 | [000_design_ux.md](./universal/ja/design/000_design_ux.md) | デザインとUX戦略（**25パート構成、2026-04-12改定**）。Supreme Directive: Consistency > Accessibility > Delight > Aesthetics > Dev Speed。W3C DTCG 2025.10準拠Design Token（3層階層: Global/Semantic/Component）、CSS Color Module 4（P3/Oklch）、WCAG 2.2 AA + EN 301 549（Target Size 2.5.8、Focus Appearance 2.4.13、Accessible Authentication 3.3.8）、Dark Pattern Complete Ban（FTC/DSA/CPRA/CCPA規制対応）、AI UX 5類型（Chat/Copilot/Agent/Ambient/Proactive）、Agentic AI UXパターン（Intent Preview/Autonomy Dial）、Generative UI（GenUI）、Motion Token Architecture（prefers-reduced-motion準拠）、Spatial Computing & XR UX（visionOS HIG）、パフォーマンスUX（CWV意識）、UXリサーチ & 計測（NPS/SUS/CSAT）、成熟度モデル（5段階）、アンチパターン・カタログ（30選）。技術スタック固有実装はengineering/へ委譲。 |
 
 #### engineering/: 技術実装全般
 
@@ -263,7 +263,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 000 | [000_design_ux.md](./universal/en/design/000_design_ux.md) | Design & UX strategy. Mobile-first, accessibility (WCAG 2.1 AA detailed criteria, image alt text), animations (60fps), touch targets, design system, Pixel Perfect standards, Hospitality UX (input normalization, locale input assistance), error page design, error message UX, Ghost Content protocol, rich selection UI, IME handling, i18n readiness. |
+| 000 | [000_design_ux.md](./universal/en/design/000_design_ux.md) | Design & UX Strategy (**25 Parts, updated 2026-04-12**). Supreme Directive: Consistency > Accessibility > Delight > Aesthetics > Dev Speed. W3C DTCG 2025.10 compliant Design Tokens (3-tier hierarchy: Global/Semantic/Component), CSS Color Module 4 (P3/Oklch), WCAG 2.2 AA + EN 301 549 (Target Size 2.5.8, Focus Appearance 2.4.13, Accessible Authentication 3.3.8), Dark Pattern Complete Ban (FTC/DSA/CPRA/CCPA regulatory compliance), AI UX 5 Types (Chat/Copilot/Agent/Ambient/Proactive), Agentic AI UX Patterns (Intent Preview/Autonomy Dial), Generative UI (GenUI), Motion Token Architecture (prefers-reduced-motion compliant), Spatial Computing & XR UX (visionOS HIG), Performance UX (CWV awareness), UX Research & Measurement (NPS/SUS/CSAT), Maturity Model (5 levels), Anti-Pattern Catalog (30 items). Tech stack-specific implementation delegated to engineering/. |
 
 #### engineering/: Engineering Implementation
 

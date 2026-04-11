@@ -1,10 +1,10 @@
 # Crystallization Protocol (教訓の結晶化プロトコル)
 
 > [!IMPORTANT]
-> **🇯🇵**: このプロトコルは `AGENTS.md` §8「Continuous Improvement」の詳細手順書です。
+> **🇯🇵**: このプロトコルは `AGENTS.md` §9「Continuous Improvement」の詳細手順書です。
 > AIが教訓を記録する際に自律的に実行する必要があります。
 >
-> **🇺🇸**: This protocol is the detailed procedure for `AGENTS.md` §8 "Continuous Improvement".
+> **🇺🇸**: This protocol is the detailed procedure for `AGENTS.md` §9 "Continuous Improvement".
 > The AI MUST execute this autonomously when recording lessons.
 
 ---

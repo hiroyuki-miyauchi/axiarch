@@ -88,7 +88,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 | Category | Related Universal Rule |
 |:---------|:---------------------|
-| Crystallization Process | `AGENTS.md` §8 Continuous Improvement — Auto-Crystallization Protocol |
+| Crystallization Process | `AGENTS.md` §9 Continuous Improvement — Auto-Crystallization Protocol |
 | Core Principle Violations | `core/000_core_mindset` |
 | Security Lessons | `security/000_security_privacy` |
 | Performance Lessons | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
