@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-24
+> 改定日: 2026-04-12
 
 > [!IMPORTANT]
 > **Supreme Directive（最高指令）**
@@ -10,7 +10,7 @@
 > すべてのデザイン判断は一貫性・アクセシビリティ・感動を優先しなければならない。
 > **一貫性 > アクセシビリティ > 感動 > 美学 > 開発速度** の優先順位を厳守せよ。
 > この文書はデザインとUX戦略に関するすべての設計判断の最上位基準である。
-> **15パート・62セクション構成。**
+> **25パート構成。**
 
 ---
 
@@ -24,7 +24,7 @@
 | IV | パフォーマンスアニメーション | §4 |
 | V | アダプタビリティとフォルダブル | §5 |
 | VI | アクセシビリティとインクルージョン | §6 |
-| VII | ユーザー主権 | §7 |
+| VII | ユーザー主権 & Ethical UX | §7 |
 | VIII | ツールとワークフロー | §8 |
 | IX | AI UX戦略 | §9 |
 | X | ユーザーオンボーディングとガイダンス | §10 |
@@ -33,6 +33,11 @@
 | XIII | Design Ops & ツール | §13 |
 | XIV | インタラクションセーフティプロトコル | §14 |
 | XV | ローカライゼーションと国際化 | §15 |
+| XVI | モーション・トークン・アーキテクチャ | §16 |
+| XVII | パフォーマンスUX | §17 |
+| XVIII | Spatial Computing & XR UX | §18 |
+| XIX | UXリサーチ & 計測 | §19 |
+| XX | 成熟度モデル & アンチパターン | §20 |
 
 ---
 
@@ -71,9 +76,25 @@
 ## 2. デザインエンジニアリング (Design Engineering)
 
 ### 2.1. デザイン・トークン (Design Tokens)
--   **Single Source of Truth**: 色、スペーシング、タイポグラフィ、シャドウ、角丸などの全てのデザイン値は、FigmaのVariablesで定義し、コード（Tailwind Config / CSS Variables）と100%同期させます。
+-   **Single Source of Truth**: 色、スペーシング、タイポグラフィ、シャドウ、角丸、モーションなどの全てのデザイン値は、FigmaのVariablesで定義し、コード（CSS Variables / Design Token JSON）と100%同期させます。
 -   **ハードコード禁止**: `px` や `#hex` を直接コードに書くことは**厳禁**です。必ずトークン（例: `color-primary-500`, `spacing-4`）を使用します。
--   **Dynamic Theme**: テーマ設定 (`site_settings`) は、Runtime (`RootLayout`) でDBから取得し、CSS変数として注入します。
+-   **W3C DTCG準拠 (W3C Design Tokens Community Group)**:
+    -   **規格**: **W3C DTCG Specification 2025.10 (Stable)** に準拠し、以下の原則を遵守します。
+    -   **JSON形式**: `.tokens.json` を標準トークン定義形式とします。
+    -   **エイリアス/参照 (Alias / Reference)**: トークン参照（`{color.primary.500}`）を活用し、変更の伝播を一元化します。
+    -   **型安全性 (Type Safety)**: 各トークンに型（`color`, `dimension`, `duration`, `cubicBezier` 等）を明示的に指定します。
+    -   **マルチブランド/マルチテーマ**: 単一のトークン定義から複数ブランド・複数テーマ（light/dark/high-contrast）を生成できる構造を維持します。
+    -   **トークンパイプライン**: Figma → JSON → Style Dictionary（または同等ツール）→ プラットフォームコード（CSS/Swift/Kotlin/Dart）の自動変換パイプラインを構築します。
+-   **トークン階層設計 (Token Hierarchy)**:
+    1.  **Global Tokens (Primitive)**: 生の値（`blue-500: #3B82F6`, `space-4: 16px`）
+    2.  **Semantic Tokens (Alias)**: 意味ある参照（`color-primary: {blue-500}`, `color-error: {red-500}`）
+    3.  **Component Tokens**: コンポーネント固有の値（`button-bg-primary: {color-primary}`）
+-   **命名規則**: `{category}-{property}-{variant}-{state}` 形式で標準化します。
+    -   例: `color-text-primary-default`, `spacing-padding-card-sm`
+-   **Dynamic Theme**: テーマ設定はRuntime（例: `RootLayout`）でDBまたは設定から取得し、CSS変数として注入します。ユーザーがOS設定自動追従と手動選択の両方でダーク/ライトモードを切り替えられるようにします。
+-   **CSS Color Module 4対応**:
+    -   モダン色空間（**Display P3**, **Oklch**）の採用を推奨します。`oklch()` は知覚的均一性（Perceptual Uniformity）が高く、プログラマティックな色操作に最適です。
+    -   **フォールバック**: P3/Oklch非対応ブラウザ向けに `@supports (color: oklch(0 0 0))` でプログレッシブエンハンスメントを実装します。
 -   **The Locale Format Mandate (Date/Currency/Number)**:
     -   **Law**: 日付、通貨、数値のフォーマットは**ロケール依存**です。特定の形式（例: `MM/DD/YYYY`）をハードコードすることを禁止します。
     -   **Action**:
@@ -81,9 +102,12 @@
         2. **Currency**: 通貨記号と桁区切りは `Intl.NumberFormat` を使用し、ロケールに応じた正しい形式で表示してください。
         3. **Consistency**: アプリケーション全体で統一されたロケール設定を維持し、混在を防いでください。
         4. **Form Field Order Locale Compliance**: 個人情報フォーム（氏名、住所等）のフィールド順序はロケールの慣習に従ってください。氏名の姓・名の順序、住所の大小順序（例: 日本は「姓→名」「都道府県→番地」、欧米は「First→Last」「番地→州」）が異なります。ロケールと異なる順序の強制は禁止です。
--   **Dark Mode Readiness (ダークモード準備)**:
-    -   **CSS Variable Separation**: 全UIカラーはCSS変数（`hsl(var(--...))` トークン）で定義し、ライト/ダークモードの切替がCSS変数の上書きのみで完結する設計を維持してください。
+-   **Dark Mode & テーマ戦略 (Dark Mode & Theme Strategy)**:
+    -   **CSS Variable Separation**: 全UIカラーはCSS変数（`hsl(var(--...))` または `oklch(var(--...))` トークン）で定義し、ライト/ダーク/ハイコントラストモードの切替がCSS変数の上書きのみで完結する設計を維持してください。
+    -   **反転禁止**: ダークモードは単純な色反転ではありません。背景コントラスト、エレベーション表現（ダーク背景では影の代わりにサーフェス明度差を使用）、彩度調整を独立して設計してください。
+    -   **High-Contrast Mode**: 将来的にWCAG AAA（7:1）を満たすハイコントラストテーマを提供できる設計を維持してください。
     -   **Semantic Token Mandate**: ハードコードされた色値（`#ffffff`, `bg-white` 等）の使用を禁止し、セマンティックトークン（`bg-background`, `text-foreground`）を使用してください。
+    -   **ロールベースの命名**: 色は「見た目」ではなく「役割」で命名してください。`blue-500` ではなく `color-primary` を使用します。
     -   **Loading State Unification (ローディング状態の統一)**: データ取得中のローディング表示は以下に統一してください：ページレベルは `loading.tsx` による Suspense Boundary + Skeleton、コンポーネントレベルは `<Skeleton />` コンポーネント、アクションレベルはボタンの `disabled` + スピナーアイコン。ローディング表示なしの「真っ白画面」はUXの致命的欠陥として扱います。
 
 ## 3. コンポーネント実装ガイド (Component Guidelines)
@@ -230,13 +254,15 @@
 
 
 ## 6. アクセシビリティと包括性 (Accessibility & Inclusivity)
--   **WCAG 2.1 AA基準 (WCAG 2.1 AA Standard)**:
+-   **WCAG 2.2 AA基準 (WCAG 2.2 AA Standard)**:
+    -   **準拠基準**: **WCAG 2.2 Level AA** + **EN 301 549**（EAA技術基準）を最低ベースラインとします。
     -   **コントラスト (Contrast)**: テキストと背景のコントラスト比は最低 **4.5:1** を確保します（WCAG 1.4.3）。
     -   **大きなテキスト (Large Text)**: 18px以上（または太字14px以上）のテキストの場合は **3:1以上** で可とします。
     -   **UIコンポーネント (UI Components)**: ボタン等の操作要素の境界線やアイコンも、背景との **3:1以上** のコントラスト比を確保してください（WCAG 1.4.11）。
     -   **スケーリング (Scale)**: フォントサイズはユーザー設定（Dynamic Type / Text Scaling）に追従しなければなりません。
--   **タッチ領域 (Touch Targets - Mobile First)**:
-    -   **ルール**: すべてのインタラクティブ要素は最低 **44x44dp (iOS) / 48x48dp (Android)** のタッチ領域を確保します。
+-   **ターゲットサイズ (Target Size - WCAG 2.2 新基準)**:
+    -   **最小ターゲットサイズ**: すべてのインタラクティブ要素は最低 **24x24 CSS px** のターゲットサイズを確保します（WCAG 2.2 2.5.8）。
+    -   **推奨サイズ**: **44x44dp (iOS HIG)** / **48x48dp (Material Design)** を推奨します。
     -   **到達性 (Reachability)**: 頻繁に使用するアクションは画面下部（親指の届く範囲）に配置します。
     -   **The Fat Finger Protocol (Label Wrapping)**:
         -   **Law**: チェックボックスやラジオボタンを単体で配置することを禁止します。
@@ -248,8 +274,14 @@
     -   **装飾画像**: 純粋に装飾目的の画像は `alt=""` とし、スクリーンリーダーに無視させてください。
     -   **省略禁止**: `alt` 属性の省略（`undefined` になる）は厳禁です。必ず空文字（`""`）か具体的テキストを指定してください。
 -   **A11y Legal Defense (ADA/EAA Compliance)**:
-    -   **Risk**: アクセシビリティ対応不足は、米国障害者法 (ADA Title III) や欧州アクセシビリティ法 (EAA) に基づく訴訟リスクを生じます。
-    -   **Mandate**: `aria-label` の欠如、コントラスト比不足は「バグ」ではなく「法的瑕疵」として扱います。CIでの自動チェックに加え、四半期に一度のスクリーンリーダー（VoiceOver/NVDA等）による実機検証を義務付けます。
+    -   **Risk**: アクセシビリティ対応不足は、米国障害者法 (ADA Title III)、欧州アクセシビリティ法 (EAA、2025年6月施行)、障害者差別解消法（日本）に基づく訴訟リスクを生じます。
+    -   **Mandate**: `aria-label` の欠如、コントラスト比不足は「バグ」ではなく「法的瑕疵」として扱います。
+-   **Focus Appearance (WCAG 2.2 新基準)**:
+    -   **フォーカスインジケータ**: キーボードナビゲーション時のフォーカスインジケータは、明確なコントラストとサイズ要件を満たさなければなりません（WCAG 2.2 2.4.13）。
+    -   **Focus Not Obscured**: フォーカスされた要素が固定ヘッダーやフローティングポップアップの背後に隠れてはなりません（WCAG 2.2 2.4.11）。
+-   **Accessible Authentication (WCAG 2.2 新基準)**:
+    -   **Law**: 認証フローでは、パスワードの再入力、複雑なロジックパズル、情報の記憶等の複雑な認知タスクを強制してはなりません（WCAG 2.2 3.3.8）。
+    -   **Action**: Passkeys（FIDO2）、ソーシャルログイン、パスワードマネージャーの自動入力を優先してください。
 -   **A11y Zero Tolerance CI (Build Gate)**:
     -   **Mandate**: `axe-core` または `pa11y-ci` をCIパイプラインに組み込み、レベル `critical` および `serious` の違反が1つでも検出された場合、**ビルドを強制失敗**させます。
     -   **Exemption**: UIライブラリ内部の修正不可能な外部要因に限り、理由を文書化した上で例外リスト（Ignore Config）への追加を許可します。
@@ -308,14 +340,30 @@
     -   **Mandate**: 新規ページ・主要UIコンポーネントのリリース前に、ターゲットロケールの言語設定でVoiceOver（iOS/macOS）またはNVDA（Windows）による読み上げテストを実施してください。
     -   **Checklist**: ボタン読み上げ（操作がターゲット言語で伝わること）、フォームラベル（入力目的がターゲット言語で読み上げられること）、エラーメッセージ（`aria-live` での即時通知）、数値・通貨（自然な読み上げ）を確認項目としてください。
 
-## 7. ユーザー主権 (User Sovereignty - User First)
+## 7. ユーザー主権 & Ethical UX (User Sovereignty & Ethical UX)
 -   **データ所有権 (Data Ownership)**:
     -   ユーザーは自分のデータを完全にコントロールできる権利を持ちます。「エクスポート」「完全削除」はわかりやすい場所に配置します。
--   **ダークパターンの禁止 (No Dark Patterns)**:
-    -   ユーザーを欺くデザイン（退会を隠す、勝手にカートに追加する等）は厳禁です。
-    -   **喜びの指標 (Delight Metric)**: ユーザーが「操作していて楽しい」と感じる瞬間（Micro-delights）を意図的に設計します。
+-   **ダークパターンの完全禁止 (Dark Pattern Complete Ban)**:
+    -   **Law**: ダークパターンは「デザイン最適化」ではなく**「法的リスク」**として扱います。
+    -   **規制環境**:
+        -   **FTC（米国）**: Section 5 + Negative Option Ruleでの執行強化。Click-to-Cancel義務。
+        -   **DSA（EU）**: ユーザーの自律を歪めるまたは制限する操作的インターフェースの禁止（グローバル年間売上の最大6%の罰金）。
+        -   **CPRA/CCPA（カリフォルニア）**: ダークパターンを通じて得た同意の明示的な禁止。
+    -   **具体的禁止事項**:
+        -   **Confirmshaming**: 辞退ボタンに罪悪感を誘発する表現（「いいえ、品質は気にしません」）
+        -   **Roach Motel**: 登録は簡単だが退会は困難
+        -   **Hidden Costs**: 最終購入時に発覚する追加料金
+        -   **Pre-checked Boxes**: デフォルトでチェック済みのオプトイン
+        -   **Forced Continuity**: 明示的通知なしの無料トライアル後自動課金
+        -   **Trick Questions**: 二重否定や混乱を招く表現
+    -   **対称性原則 (Symmetry Principle)**: 退会/オプトアウトのフローは、登録/オプトインのフローと同等の容易さで設計しなければなりません。
 -   **透明性 (Transparency)**:
     -   AIの判断根拠や、なぜそのコンテンツが表示されたかをユーザーが理解できるようにします（Explainable AI）。
+    -   アルゴリズムによる推薦には「なぜこれが表示されていますか？」の説明を提供してください。
+-   **同意とプライバシーUX (Consent & Privacy UX)**:
+    -   **粒度別同意 (Granular Consent)**: カテゴリ別（必須/分析/マーケティング）で同意を取得してください。「全て許可」ボタンだけでは不十分です。
+    -   **撤回可能 (Revocable)**: 同意はいつでも容易に撤回できなければなりません。
+    -   **平易な言葉 (Plain Language)**: プライバシーポリシーの要約は法律用語ではなく、ユーザーが理解できる平易な言葉で提示してください。
 
 ## 8. ツールとワークフロー (Tools & Workflow)
 -   **Figma**: 信頼できる唯一の情報源（Source of Truth）。正確なトークンのハンドオフにはDev Modeを使用します。
@@ -323,19 +371,41 @@
 -   **インクルーシブ・コピーライティング (Inclusive Copywriting)**:
     -   性別、人種、年齢、能力に関わらず、誰もが排除されない言葉選び（Inclusive Language）を行います。
 
-## 9. AI UX戦略 (AI UX Strategy - Latency Management)
+## 9. AI UX戦略 (AI UX Strategy)
+-   **AI UX哲学 (AI UX Philosophy)**:
+    -   **Law**: AIは「ツール」ではなく「協力者」として設計します。透明性・制御性・安全性の3原則を優先します。
+-   **AIインタラクションパターン（5類型）**:
+    -   **Chat**: テキストベースの対話。検索・Q&A・カジュアルな問い合わせに適します。
+    -   **Copilot**: 作業画面のサイドパネルアシスタント。ユーザーのコンテキストを理解しリアルタイムで支援。
+        -   *Assistive*: サイドパネルでの継続的タスク支援
+        -   *Immersive*: フルスクリーンのデータ集約型AIワークスペース
+        -   *Embedded*: インラインの最小限トリガー（「書き直す」「要約」ボタン等）
+    -   **Agent**: 自律的なマルチステップタスク実行。ユーザーが目標を定義し、AIが計画・実行。
+    -   **Ambient**: バックグラウンドでインテリジェントに動作し、必要時のみプロアクティブに表面化。
+    -   **Proactive**: ユーザーの行動パターンに基づき予測・提案。
+-   **Agentic AI UXパターン**:
+    -   **Intent Preview**: アクション実行前に計画プレビューを表示し、ユーザーが承認・編集・拒否できるようにします。
+    -   **Autonomy Dial**: AIの自律性レベルをユーザーが調整できるようにします（「提案のみ」「承認後実行」「完全自律」）。
+    -   **Explainable Rationale**: AIの判断根拠と信頼度を透明に表示します。ブラックボックス出力は禁止です。
+    -   **Action Audit & Recovery**: 全ての自律アクションをログし、容易な「元に戻す」/「ロールバック」機能を提供します。
+-   **Generative UI (GenUI)**:
+    -   **動的コンポーネント選択**: AIが事前定義されたブランドUIコンポーネントライブラリから適切なコンポーネントを選択し、ライブデータを注入します。
+    -   **アダプティブレイアウト**: ユーザーの現在のタスクや履歴に基づきUIを動的に再構成します。
+    -   **コンテキスチュアルアシスタンス**: 関連コンテキストでのみ表示されるサーフェス（サイドパネル、ツールチップ、埋め込みオーバーレイ）。チャット疲労を防止します。
 -   **ストリーミング・ファースト (Streaming First)**:
-    -   AIの生成待ち時間は「体感ゼロ」でなければなりません。
-    -   **ストリーミング応答 (Streaming Responses)**: 回答が完了するのを待たず、1トークンずつリアルタイムに表示します（タイピングアニメーション）。
--   **楽観的更新 (Optimistic Updates)**:
-    -   ユーザーのアクション（送信ボタン押下など）に対しては、AIの処理を待たずに即座にUIを反応させます（チャットバブルの即時表示など）。
+    -   AIの生成待ち時間は「体感ゼロ」でなければなりません。完了を待たず1トークンずつリアルタイムに表示します。
+    -   ユーザーのアクション（送信ボタン押下等）に対してはAIの処理を待たず即座にUIを反応させます。
 -   **透明性 (Transparency)**:
-    -   AIが「考えている」状態（Thinking...）と「書いている」状態（Generating...）を視覚的に区別し、ユーザーに安心感を与えます。
+    -   AIが「考えている」状態（Thinking...）と「書いている」状態（Generating...）を視覚的に区別します。
+    -   **AIコンテンツの判別**: AI生成コンテンツと人間が作成したコンテンツを視覚的に差別化します（グローエフェクト、専用アイコン等）。
+    -   **信頼度シグナル**: AIの信頼度をユーザーに伝えるメカニズムを設計します。
+-   **AI失敗ハンドリング (AI Failure Handling)**:
+    -   AIエラーの優雅なリカバリーパスを設計します。修正・再生成・比較のUIパターンを提供します。
+    -   **Human-in-the-Loop**: Copilot体験では、AI出力を常に「提案」として扱います。ユーザーが最終判断権を持つ設計を維持します。
 -   **The Quota Framing Protocol (制限表現の心理学)**:
     -   **Law**: AI生成やAPI利用回数などの利用制限（Quota）を表示する際、「ケチで制限している」と感じさせる文言を禁止します。
     -   **NG**: 「回数制限に達しました」「利用制限オーバーです」
     -   **OK**: 「今月のAI生成パワーを使い切りました。プランをアップグレードして上限を解放しますか？」
-    -   **Effect**: 制限の存在を「この機能が特別で強力だからこそ制限がある」と正当化し、ユーザーの納得感とプレミアム感を同時に高めてください。
 
 ## 10. ユーザーオンボーディングとガイド (User Onboarding & Guidance)
 -   **コーチマーク (Coach Marks)**:
@@ -558,19 +628,182 @@
 
 ---
 
+## 16. モーション・トークン・アーキテクチャ (Motion Token Architecture)
+
+### 16.1. モーション・デザイン・トークン義務 (Motion Design Token Mandate)
+-   **Law**: モーション設計はDesign Tokenとして構造化しなければなりません。以下のトークンカテゴリを定義してください。
+-   **Duration**:
+    -   `motion.duration.instant: 100ms`
+    -   `motion.duration.fast: 150ms`
+    -   `motion.duration.normal: 250ms`
+    -   `motion.duration.slow: 400ms`
+    -   `motion.duration.complex: 600ms`
+-   **Easing**:
+    -   `motion.easing.standard: cubic-bezier(0.4, 0, 0.2, 1)`
+    -   `motion.easing.decelerate: cubic-bezier(0, 0, 0.2, 1)`
+    -   `motion.easing.accelerate: cubic-bezier(0.4, 0, 1, 1)`
+    -   `motion.easing.spring: cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+-   **Properties**: `motion.property.enter`, `motion.property.exit`, `motion.property.hover`, `motion.property.expand`
+-   **クロスプラットフォーム一貫性**: トークンを通じてWeb / iOS / Android / Flutterで同一のモーション体験を保証します。
+
+### 16.2. prefers-reduced-motion 準拠
+-   **Law**: 前庭障害や高いモーション感度を持つユーザーへの配慮は**法的義務**です（EAA/WCAG 2.2 2.3.3）。
+-   **Action**:
+    1. すべてのアニメーションに `prefers-reduced-motion: reduce` メディアクエリで代替挙動を定義してください。
+    2. Reduced Motionモードでは即時遷移（`duration: 0ms`）またはクロスフェード（`opacity` のみ）に切り替えます。
+    3. **Essential Motion例外**: コンテンツ理解に不可欠なアニメーション（プログレスバー等）は完全無効化ではなく減速にとどめてください。
+
+---
+
+## 17. パフォーマンスUX (Performance UX)
+
+### 17.1. 知覚パフォーマンス (Perceived Performance)
+-   **Law**: 「ユーザーが感じる速さ」は実際の速度よりも重要です。
+-   **Skeleton > Spinner**: ローディング中はスピナーよりSkeletonを使用してコンテンツの形状をプレビューします。
+-   **Optimistic UI**: 軽量アクションではサーバー応答前にUIを更新します。
+-   **即時フィードバック**: ボタン押下時は100ms以内に視覚的フィードバックを保証します。
+
+### 17.2. Core Web Vitals (CWV) 意識
+-   **LCP** (Largest Contentful Paint): 最大のファーストビュー要素を2.5秒以内に表示。
+-   **FID/INP** (Interaction to Next Paint): インタラクションから次の描画まで200ms以下。
+-   **CLS** (Cumulative Layout Shift): レイアウトシフトを0.1以下に維持。
+-   **設計への影響**: 画像/フォントの遅延読み込み、適切なサイジング、`font-display: swap` をデザイン段階から計画してください。
+
+### 17.3. Progressive Enhancement
+-   JavaScriptなしでもコア機能が動作する設計を維持してください（実行可能な範囲で）。
+-   エンハンスメント（アニメーション、インタラクション）は段階的に追加します。
+
+---
+
+## 18. Spatial Computing & XR UX
+
+### 18.1. 空間デザイン原則 (Spatial Design Principles)
+-   **Depth as Hierarchy**: 3D空間では距離が階層ツールとなります。ユーザーに近い要素ほどアクティブ/重要に感じます。
+-   **Ergonomic Zones**: インタラクティブ要素は自然な到達範囲内に配置し、ユーザーの疲労を防止します。
+-   **Grounding Effect**: UIを物理世界にアンカーし、モーション酔いや認知負荷を軽減します。
+
+### 18.2. マルチモーダル入力デザイン (Multimodal Input Design)
+-   **Eye Tracking**: 「視線は新しいホバー」。アイトラッキング + ジェスチャー入力の組み合わせを設計します。
+-   **Gesture Input**: 確認アクションにはサブトルなジェスチャー（ピンチ、タップ）を活用します。
+-   **Voice Input**: 複雑なコマンドやナビゲーションには音声を活用します。
+-   **Input Agnostic**: 入力方法に依存しない設計。視線・手・声・コントローラーは相互交換可能であるべきです。
+
+### 18.3. ボリュメトリック・デザインシステム (Volumetric Design System)
+-   フラットなデザインシステムから「空間デザインシステム」への長期的な拡張を計画します。
+-   コンポーネントが3D空間でどう振る舞うかを定義します（壁面アンカー vs 空中浮遊、視線反応 vs タッチ反応）。
+
+### 18.4. visionOS / HIG (Apple) 準拠
+-   **Windowing & Volumes**: Shared Spaceでのウィンドウベース体験を優先します。
+-   **Materials**: Liquid Glass等のシステムマテリアルを使用して環境との調和を維持します。
+-   **Spatial Audio**: UIフィードバックとしてのSpatial Audioを計画します。
+-   **Comfort & Safety**: ユーザーが没入状態から容易に離脱できることを保証します。
+
+---
+
+## 19. UXリサーチ & 計測 (UX Research & Measurement)
+
+### 19.1. UXリサーチ手法 (UX Research Methods)
+-   **定量手法**: A/Bテスト、ファネル分析、ヒートマップ、タスク完了率、エラー率。
+-   **定性手法**: ユーザーインタビュー、ユーザビリティテスト（モデレート/アンモデレート）、日記調査、カードソート。
+-   **Continuous Discovery**: Teresa TorresのOpportunity Solution Treeを活用した継続的な仮説検証。
+
+### 19.2. UX KPIs
+-   **NPS (Net Promoter Score)**: ユーザー推奨度測定。
+-   **SUS (System Usability Scale)**: 標準化されたユーザビリティスコア。
+-   **Task Success Rate**: タスク完了率。
+-   **Time on Task**: タスク完了時間。
+-   **Error Rate**: エラー発生率。
+-   **CSAT (Customer Satisfaction Score)**: 顧客満足度。
+
+### 19.3. デザインレビュープロセス (Design Review Process)
+-   **ヒューリスティック評価**: NielsenのUsability Heuristics 10項目に基づく定期的な専門家レビュー。
+-   **アクセシビリティ監査**: §6のCI Gate に加え、四半期ごとの手動A11y監査を義務付けます。
+-   **競合分析**: 四半期ごとの競合プロダクトのUX分析。
+
+---
+
+## 20. 成熟度モデル & アンチパターン (Maturity Model & Anti-Patterns)
+
+### 20.1. UXデザイン成熟度モデル（5段階）
+
+| レベル | 名称 | 特徴 |
+|--------|------|------|
+| L1 | Ad-hoc | デザインシステムなし。個人の判断でUI作成。一貫性ゼロ。 |
+| L2 | Emerging | 基本的なカラーパレットとタイポグラフィが定義済み。一部コンポーネント再利用。 |
+| L3 | Structured | Design Token定義済み。Figma-Code同期パイプライン稼働。WCAG AA準拠。A11y CIゲート。 |
+| L4 | Integrated | W3C DTCG準拠トークン。Motion Token Architecture。Agentic AI UX実装。継続的UXリサーチ。 |
+| L5 | Optimized | 全プラットフォームで一貫したデザイン体験。Spatial Computing対応。データ駆動UX最適化。Design System as a Product。 |
+
+### 20.2. アンチパターン・カタログ（30選）
+
+| # | アンチパターン | 影響 |
+|---|-------------|------|
+| 1 | ハードコードされた色 | テーマ切替不可。ダークモード対応困難。 |
+| 2 | Div地獄 | A11y破壊。スクリーンリーダー使用不可。 |
+| 3 | Z-indexマジックナンバー | レイヤー競合。UI要素の不可視。 |
+| 4 | スピナー依存 | CLS悪化。体感速度低下。 |
+| 5 | 色のみの情報伝達 | 色覚多様性ユーザーの情報喪失。法的リスク。 |
+| 6 | ネイティブdate/time入力 | クロスブラウザ不整合。デザイン一貫性破壊。 |
+| 7 | ラベルなし入力 | A11yバグ。スクリーンリーダー使用不可。 |
+| 8 | 二重スクロール | モバイルUX破壊。コンテンツ到達不能。 |
+| 9 | `alt`属性欠如 | A11y法的瑕疵。SEOペナルティ。 |
+| 10 | UI上の技術用語 | ユーザー離脱。サポートコスト増大。 |
+| 11 | フォーカスリング除去 | キーボードユーザー操作不能。法的リスク。 |
+| 12 | Modal Escape未対応 | A11yバグ。ユーザー閉じ込め。 |
+| 13 | Placeholder-onlyラベル | 入力時の目的喪失。A11y違反。 |
+| 14 | 行き止まりエラー画面 | 100%離脱。信頼破壊。 |
+| 15 | ダークパターン使用 | 法的リスク（FTC/DSA/CPRA罰金）。ブランド毀損。 |
+| 16 | 固定フォントサイズ(px) | ユーザー設定無視。A11y違反。 |
+| 17 | 二重送信防止なし | データ重複。Race Condition。 |
+| 18 | DnDクリッピング | ドラッグ要素不可視。操作不能。 |
+| 19 | カスタムカルーセル | タッチ問題。A11y非準拠。 |
+| 20 | 場当たりアニメーション | 一貫性なし。パフォーマンス低下。prefers-reduced-motion無視。 |
+| 21 | Headless UI違反 | コンポーネント再利用不可。プラットフォーム移植困難。 |
+| 22 | レスポンシブ未検証 | モバイル/タブレットでのUI崩壊。 |
+| 23 | エラーメッセージ散在 | 翻訳漏れ。トーン不統一。保守困難。 |
+| 24 | IME非対応検索 | CJK言語ユーザーの検索失敗。 |
+| 25 | 200%ズームテスト未実施 | コンテンツ切れ。A11y違反。 |
+| 26 | 非対称同意UX | 規制違反（CPRA/DSA）。罰金リスク。 |
+| 27 | prefers-reduced-motion無視 | 前庭障害ユーザーの健康被害。EAA違反。 |
+| 28 | 不透明なAI出力 | ユーザー不信。EU AI Act違反リスク。 |
+| 29 | スキーマなし設計 | 実装時の破綻確定。手戻りコスト増大。 |
+| 30 | Design Tokenなし | テーマ切替不可。マルチプラットフォーム展開阻害。 |
+
+---
+
 ## Appendix A: 逆引き索引
 
 | キーワード | セクション | 関連ルール |
 |-----------|----------|-----------|
-| Material Design / Expressive | §1 | `340_web_frontend`, `342_mobile_flutter` |
-| デザイントークン / CSS | §2, §3 | `340_web_frontend`, `300_engineering_standards` |
-| アニメーション / モーション | §4 | `343_native_platforms` |
-| レスポンシブ / フォルダブル | §5 | `342_mobile_flutter`, `343_native_platforms` |
-| アクセシビリティ / WCAG | §6 | `800_internationalization`, `340_web_frontend` |
-| ユーザー主権 | §7 | `600_security_privacy`, `601_data_governance` |
-| AI UX / レイテンシ | §9 | `400_ai_engineering` |
-| オンボーディング | §10 | `102_growth_marketing`, `501_customer_experience` |
-| セーフティUI | §11, §14 | `600_security_privacy`, `503_incident_response` |
-| おもてなし | §12 | `501_customer_experience` |
-| ローカライゼーション / i18n | §15 | `800_internationalization`, `802_language_protocol` |
+| Material Design / Expressive / HIG | §1 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter` |
+| デザイントークン / W3C DTCG / CSS | §2 | `engineering/300_web_frontend`, `engineering/000_engineering_standards` |
+| タイポグラフィ / CJK / Font | §1.1, §3.3 | `product/800_internationalization` |
+| カラー / ダークモード / P3 / Oklch | §2.1 | `engineering/300_web_frontend` |
+| レスポンシブ / フォルダブル / Any-Screen | §5 | `engineering/400_mobile_flutter`, `engineering/410_native_platforms` |
+| コンポーネント / Headless UI / Skeleton | §3 | `engineering/300_web_frontend` |
+| フィードバック / Toast / Z-Index | §3.1, §14.3 | `engineering/300_web_frontend` |
+| アニメーション / Motion Token / 60fps | §4, §16 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter` |
+| ハプティクス / サウンド | §3.5 | `engineering/400_mobile_flutter`, `engineering/410_native_platforms` |
+| アクセシビリティ / WCAG 2.2 / EAA | §6 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter`, `security/100_data_governance` |
+| フォーム / IME / 入力 | §14.1, §14.2, §15.3 | `engineering/300_web_frontend` |
+| ナビゲーション / パンくず / タブ | §3.3, §10 | `engineering/300_web_frontend` |
+| エラー / リカバリー / エラーカタログ | §12, §15.2, §15.5 | `engineering/300_web_frontend`, `operations/300_customer_experience` |
+| セーフティUI / 破壊的操作 / DnD | §11, §14.4 | `security/000_security_privacy` |
+| オンボーディング / エンプティステート | §10 | `product/500_growth_marketing`, `operations/300_customer_experience` |
+| マイクロコピー / ライティング / Tooltip | §10 | `product/600_brand_strategy` |
+| AI UX / Agentic / GenUI / Copilot | §9 | `ai/000_ai_engineering` |
+| ユーザー主権 / ダークパターン / Ethical UX | §7 | `security/100_data_governance`, `product/000_product_strategy` |
+| おもてなし / 先回り / ロケールフォーマット | §12 | `product/800_internationalization` |
+| i18n / ローカライゼーション | §15 | `product/800_internationalization`, `core/200_language_protocol` |
+| パフォーマンスUX / CWV / 知覚 | §17 | `engineering/000_engineering_standards`, `operations/400_site_reliability` |
+| Spatial Computing / XR / visionOS | §18 | `engineering/410_native_platforms` |
+| UXリサーチ / 計測 / NPS | §19 | `ai/100_data_analytics`, `product/100_market_validation` |
+| 成熟度モデル / アンチパターン | §20 | すべてのルール（共通） |
 
+---
+
+> **Cross-Reference（技術スタック固有ルール参照）**
+> 本ファイルは技術スタック非依存のUniversalデザイン原則を定義します。フレームワーク固有の実装詳細（React Hooks順序、Hydration Mismatch、suppressHydrationWarning、Server Componentの境界、Hard Session Refresh等）については以下を参照してください：
+> - Web: `engineering/300_web_frontend.md`
+> - Mobile (Flutter): `engineering/400_mobile_flutter.md`
+> - Native (Kotlin/Swift): `engineering/410_native_platforms.md`

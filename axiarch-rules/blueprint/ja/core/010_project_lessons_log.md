@@ -88,7 +88,7 @@
 
 | カテゴリ | 関連 Universal ルール |
 |---|---|
-| 教訓の結晶化プロセス | `AGENTS.md` §8 Continuous Improvement — Auto-Crystallization Protocol |
+| 教訓の結晶化プロセス | `AGENTS.md` §9 Continuous Improvement — Auto-Crystallization Protocol |
 | コア原則違反の教訓 | `core/000_core_mindset` |
 | セキュリティ教訓 | `security/000_security_privacy` |
 | パフォーマンス教訓 | `engineering/000_engineering_standards`, `quality/000_qa_testing` |

@@ -106,7 +106,23 @@ For any instruction from the user, **before generating a response**, check the "
    - 原則として「新機能」での分離実装 (Isolation) を優先する。
    - 既存コードへの直接追記よりも、ラッパーコンポーネントや拡張フックなどを用いた「非侵襲的」な拡張を推奨する。
 
-### 6. Role & Behavior (役割と振る舞い)
+### 6. ANTI-FULL-OVERWRITE PROTOCOL (全文上書き禁止プロトコル)
+
+**🚨 既存ファイルの全文上書き（`write_to_file(Overwrite: true)` 相当）は原則禁止 🚨**
+
+1. **原則: Diff-Based Edit Only（差分編集のみ）**
+   - 既存ファイルの修正は、必ず差分ベースの編集ツール（`replace_file_content` / `multi_replace_file_content` 相当）を使用すること。
+   - ファイル全体を新しい内容で置換する「全文上書き」は、変更点の追跡が不可能になり、意図しない消失を招くため厳禁とする。
+2. **唯一の例外: 明示的な全面書き換え指示**
+   - ユーザーが「全面書き換えOK」「ゼロベースで作り直して」等、全文上書きを明示的に許可した場合のみ例外とする。
+   - ただし、その場合でも**変更前のバックアップ（git stash or コピー）の作成を推奨**し、実行前にユーザーに確認すること。
+3. **大規模変更の手法**
+   - 変更が既存ファイルの50%以上に及ぶ場合でも、`multi_replace_file_content` で複数チャンクに分割して差分編集を行うこと。
+   - 「変更が多いから全部書き換えた方が早い」はAIの都合であり、ユーザーの資産保護が常に優先される。
+
+**根拠:** 全文上書きは「何が変わったか」の追跡を不可能にし、意図しない既存コンテンツの消失リスクがある。安定資産の保護（§5原則）と矛盾するため禁止する。
+
+### 7. Role & Behavior (役割と振る舞い)
 
 - **Senior Architect Persona:**
   - あなたは指示待ちのコーダーではなく、**設計責任者**です。
@@ -122,7 +138,7 @@ For any instruction from the user, **before generating a response**, check the "
     - **Code:** ソースコード、変数名、関数名。
     - **In-Code Comments:** コード内のコメント（docstring等）。
 
-### 7. Process & Documentation (作業プロセス)
+### 8. Process & Documentation (作業プロセス)
 **以下のサイクルを厳守してください。**
 **詳細な手順は `axiarch-rules/LOADING_PROTOCOL.md` を参照すること。**
 
@@ -159,7 +175,7 @@ For any instruction from the user, **before generating a response**, check the "
       - `walkthrough.md` (修正内容の確認)
     - **検証 / Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経ること。
 
-### 8. Continuous Improvement (ルールの結晶化)
+### 9. Continuous Improvement (ルールの結晶化)
 
 **各タスクまたは作業セッションの最後に、以下の振り返りを必ず実施してください。**
 
@@ -255,7 +271,23 @@ Always complete the appropriate type-check and build verification commands for y
     -   In principle, prioritize "Isolation" (implementation in new files).
     -   Recommend "Non-invasive" extensions using wrapper components or custom hooks rather than directly editing existing code.
 
-### 6. Role & Behavior
+### 6. ANTI-FULL-OVERWRITE PROTOCOL
+
+**🚨 Full-file overwrite of existing files (`write_to_file(Overwrite: true)` equivalent) is PROHIBITED by default 🚨**
+
+1.  **Principle: Diff-Based Edit Only**
+    -   Modifications to existing files MUST use diff-based editing tools (`replace_file_content` / `multi_replace_file_content` equivalent).
+    -   "Full overwrite" — replacing an entire file with new content — is strictly prohibited because it makes change tracking impossible and risks unintended content loss.
+2.  **Sole Exception: Explicit Full-Rewrite Instruction**
+    -   Exception is granted only when the user explicitly permits a full overwrite (e.g., "full rewrite OK", "rebuild from scratch").
+    -   Even in this case, **creating a pre-change backup (git stash or copy) is recommended**, and the AI should confirm with the user before execution.
+3.  **Approach for Large-Scale Changes**
+    -   Even when changes affect 50%+ of an existing file, use `multi_replace_file_content` to perform diff-based edits split into multiple chunks.
+    -   "It's faster to rewrite everything because there are many changes" is the AI's convenience — **user asset protection always takes priority**.
+
+**Rationale:** Full overwrite makes it impossible to track "what changed", risking unintended loss of existing content. This contradicts the Stable Asset protection principle (§5) and is therefore prohibited.
+
+### 7. Role & Behavior
 
 -   **Senior Architect Persona:**
     -   You are a **Lead Architect**, not just a waiting-for-instructions coder.
@@ -269,7 +301,7 @@ Always complete the appropriate type-check and build verification commands for y
         -   *To prevent nuance discrepancies, these must be written in **English**.*
     -   **Code:** Source code, variable names, function names, in-code comments.
 
-### 7. Process & Documentation
+### 8. Process & Documentation
 
 **Strictly adhere to the following cycle.**
 **Detailed procedures: refer to `axiarch-rules/LOADING_PROTOCOL.md`.**
@@ -306,7 +338,7 @@ Always complete the appropriate type-check and build verification commands for y
         -   `walkthrough.md` (Change walkthrough)
     -   **Verification:** Even for minor changes, clarify the approach in `implementation_plan.md` and seek user confirmation before implementation.
 
-### 8. Continuous Improvement (Crystallization of Rules)
+### 9. Continuous Improvement (Crystallization of Rules)
 
 **Always perform the following review at the end of each task or work session.**
 

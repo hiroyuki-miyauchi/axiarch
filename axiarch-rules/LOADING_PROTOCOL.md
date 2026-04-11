@@ -1,7 +1,7 @@
 # LOADING_PROTOCOL.md — ルールロード手順書 / Rule Loading Protocol
 
-> **このファイルはルールロードの詳細手順を定義する。AGENTS.md §7 から参照される。**
-> **This file defines the detailed rule loading procedure. Referenced from AGENTS.md §7.**
+> **このファイルはルールロードの詳細手順を定義する。AGENTS.md §8 から参照される。**
+> **This file defines the detailed rule loading procedure. Referenced from AGENTS.md §8.**
 
 > Universal Rules はプロジェクトで使う可能性のある全技術領域のベストプラクティスライブラリです。AIは LOADING_PROTOCOL に従い、タスクに必要なファイルのみを選択的にロードします。使わない技術のルールが存在しても問題ありません。それ自体が、将来の採用時や未知の技術に直面したときの品質担保の源泉です。
 >

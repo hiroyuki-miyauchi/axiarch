@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-04-12
 
 > [!IMPORTANT]
 > **Supreme Directive**
@@ -10,7 +10,7 @@
 > All design decisions must prioritize consistency, accessibility, and delight.
 > Strictly follow the priority order: **Consistency > Accessibility > Delight > Aesthetics > Development Speed**.
 > This document is the supreme standard for all design and UX strategy decisions.
-> **15 Parts, 62 Sections.**
+> **25 Parts.**
 
 ---
 
@@ -24,7 +24,7 @@
 | IV | Performance Animation | §4 |
 | V | Adaptability & Foldables | §5 |
 | VI | Accessibility & Inclusivity | §6 |
-| VII | User Sovereignty | §7 |
+| VII | User Sovereignty & Ethical UX | §7 |
 | VIII | Tools & Workflow | §8 |
 | IX | AI UX Strategy | §9 |
 | X | User Onboarding & Guidance | §10 |
@@ -33,6 +33,11 @@
 | XIII | Design Ops & Tools | §13 |
 | XIV | Interaction Safety Protocols | §14 |
 | XV | Localization & Internationalization | §15 |
+| XVI | Motion Token Architecture | §16 |
+| XVII | Performance UX | §17 |
+| XVIII | Spatial Computing & XR UX | §18 |
+| XIX | UX Research & Measurement | §19 |
+| XX | Maturity Model & Anti-Patterns | §20 |
 
 ---
 
@@ -72,9 +77,25 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 ## 2. Design Engineering
 
 ### 2.1. Design Tokens
--   **Single Source of Truth**: Define all values (color, spacing, typo) in Figma Variables and sync 100% with Code (Tailwind/CSS Variables).
+-   **Single Source of Truth**: Define all values (color, spacing, typography, shadow, radius, motion, etc.) in Figma Variables and sync 100% with code (CSS Variables / Design Token JSON).
 -   **No Hardcoding**: Writing `px` or `#hex` directly is **strictly prohibited**. Use tokens.
--   **Dynamic Theme**: Theme settings (`site_settings`) must be fetched from DB at Runtime (`RootLayout`) and injected as CSS variables.
+-   **W3C DTCG Compliance (W3C Design Tokens Community Group)**:
+    -   **Standard**: Comply with **W3C DTCG Specification 2025.10 (Stable)** and follow these principles.
+    -   **JSON Format**: `.tokens.json` is the standard token definition format.
+    -   **Alias / Reference**: Leverage token references (`{color.primary.500}`) to centralize change propagation.
+    -   **Type Safety**: Explicitly specify types (`color`, `dimension`, `duration`, `cubicBezier`, etc.) for each token.
+    -   **Multi-Brand / Multi-Theme**: Maintain a structure that can generate multiple brands and multiple themes (light/dark/high-contrast) from a single token definition.
+    -   **Token Pipeline**: Build an automated conversion pipeline: Figma → JSON → Style Dictionary (or equivalent) → Platform Code (CSS/Swift/Kotlin/Dart).
+-   **Token Hierarchy**:
+    1.  **Global Tokens (Primitive)**: Raw values (`blue-500: #3B82F6`, `space-4: 16px`)
+    2.  **Semantic Tokens (Alias)**: Meaningful references (`color-primary: {blue-500}`, `color-error: {red-500}`)
+    3.  **Component Tokens**: Component-specific values (`button-bg-primary: {color-primary}`)
+-   **Naming Convention**: Standardize as `{category}-{property}-{variant}-{state}` format.
+    -   Example: `color-text-primary-default`, `spacing-padding-card-sm`
+-   **Dynamic Theme**: Theme settings are fetched from DB or config at Runtime (e.g., `RootLayout`) and injected as CSS variables. Support both OS-auto-follow and manual dark/light toggle.
+-   **CSS Color Module 4 Support**:
+    -   Recommend adoption of modern color spaces (**Display P3**, **Oklch**). `oklch()` provides high Perceptual Uniformity, ideal for programmatic color manipulation.
+    -   **Fallback**: Implement progressive enhancement with `@supports (color: oklch(0 0 0))` for browsers that do not support P3/Oklch.
 -   **The Locale Format Mandate (Date/Currency/Number)**:
     -   **Law**: Date, currency, and number formats are **locale-dependent**. Hardcoding specific formats (e.g., `MM/DD/YYYY`) is prohibited.
     -   **Action**:
@@ -82,9 +103,12 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         2. **Currency**: Display currency symbols and digit separators using `Intl.NumberFormat` in correct format for locale.
         3. **Consistency**: Maintain unified locale settings across the application and prevent mixing.
         4. **Form Field Order Locale Compliance**: Form fields for personal information (name, address, etc.) MUST follow locale-specific ordering conventions. Name ordering (e.g., "Last → First" in Japan vs "First → Last" in Western countries) and address ordering (e.g., "Prefecture → Street" in Japan vs "Street → State" in Western countries) differ by locale. Forcing an order contrary to the locale is prohibited.
--   **Dark Mode Readiness**:
-    -   **CSS Variable Separation**: Define all UI colors as CSS variables (`hsl(var(--...))` tokens) and maintain a design where light/dark mode switching is completed solely by overriding CSS variables.
+-   **Dark Mode & Theme Strategy**:
+    -   **CSS Variable Separation**: Define all UI colors as CSS variables (`hsl(var(--...))` or `oklch(var(--...))` tokens) and maintain a design where light/dark/high-contrast mode switching is completed solely by overriding CSS variables.
+    -   **No Inversion**: Dark mode is NOT simple color inversion. Design background contrast, elevation expression (use surface luminance difference instead of shadows on dark backgrounds), and saturation adjustment independently.
+    -   **High-Contrast Mode**: Maintain a design that can serve a high-contrast theme meeting WCAG AAA (7:1) in the future.
     -   **Semantic Token Mandate**: Prohibit usage of hardcoded color values (`#ffffff`, `bg-white`, etc.) and use semantic tokens (`bg-background`, `text-foreground`) instead.
+    -   **Role-Based Naming**: Name colors by "role" not "appearance". Use `color-primary` instead of `blue-500`.
     -   **Loading State Unification**: Unify loading displays during data fetching as follows: Page level uses `loading.tsx` with Suspense Boundary + Skeleton, Component level uses `<Skeleton />` component, Action level uses button `disabled` + spinner icon. A blank white screen without any loading indicator is treated as a critical UX deficiency.
 
 ## 3. Component Implementation Guidelines
@@ -216,10 +240,16 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         -   Both touch (Touch) and mouse (Hover) interactions comfortable?
 
 ## 6. Accessibility & Inclusivity
--   **WCAG 2.1 AA**: Contrast ratio 4.5:1+ (WCAG 1.4.3), supports dynamic type scaling.
+-   **WCAG 2.2 AA Standard**:
+    -   **Baseline**: **WCAG 2.2 Level AA** + **EN 301 549** (EAA technical standard) as minimum baseline.
+    -   **Contrast**: Minimum **4.5:1** text-to-background contrast ratio (WCAG 1.4.3).
     -   **Large Text**: Text at 18px or above (or bold at 14px or above) may use a contrast ratio of **3:1 or above**.
     -   **UI Components**: Borders and icons of interactive elements such as buttons must also maintain a contrast ratio of **3:1 or above** against the background (WCAG 1.4.11).
--   **Touch Targets**: Minimum 44x44dp (iOS) / 48x48dp (Android). Important actions at the bottom.
+    -   **Scaling**: Font sizes must follow user settings (Dynamic Type / Text Scaling).
+-   **Target Size (WCAG 2.2 New Criterion)**:
+    -   **Minimum Target Size**: All interactive elements must maintain a minimum target size of **24x24 CSS px** (WCAG 2.2 2.5.8).
+    -   **Recommended Size**: **44x44dp (iOS HIG)** / **48x48dp (Material Design)** recommended.
+    -   **Reachability**: Important actions at screen bottom (thumb-reachable zone).
 -   **The Fat Finger Protocol (Label Wrapping)**:
     -   **Law**: Prohibit placing checkboxes/radio buttons standalone.
     -   **Action**: Always wrap with `<label>` tag (or `shadcn/ui` `Label` component) including text to maximize touch target area. "Tapping text doesn't respond" is a bug.
@@ -232,8 +262,14 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: UI where focus state (Tab key navigation, etc.) is not visually recognizable is a "maze in the dark" for keyboard users—accessibility failure.
     -   **Action**: When removing browser default focus ring (`outline-none`), MUST redefine **high-contrast focus ring** (e.g., `ring-2 ring-primary ring-offset-2`). "Invisible Focus" is treated as a bug.
 -   **A11y Legal Defense (ADA/EAA Compliance)**:
-    -   **Risk**: Insufficient accessibility creates litigation risk under the Americans with Disabilities Act (ADA Title III) and European Accessibility Act (EAA).
-    -   **Mandate**: Missing `aria-label` and insufficient contrast ratios are not "bugs" but "legal deficiencies." In addition to automated CI checks, mandate quarterly manual verification with screen readers (VoiceOver/NVDA, etc.).
+    -   **Risk**: Insufficient accessibility creates litigation risk under the Americans with Disabilities Act (ADA Title III), European Accessibility Act (EAA, effective June 2025), and equivalent national legislation.
+    -   **Mandate**: Missing `aria-label` and insufficient contrast ratios are not "bugs" but "legal deficiencies.".
+-   **Focus Appearance (WCAG 2.2 New Criterion)**:
+    -   **Focus Indicator**: Keyboard navigation focus indicators must meet clear contrast and size requirements (WCAG 2.2 2.4.13).
+    -   **Focus Not Obscured**: Focused elements must not be hidden behind fixed headers or floating popups (WCAG 2.2 2.4.11).
+-   **Accessible Authentication (WCAG 2.2 New Criterion)**:
+    -   **Law**: Authentication flows must not force complex cognitive tasks such as re-entering passwords, solving complex logic puzzles, or memorizing information (WCAG 2.2 3.3.8).
+    -   **Action**: Prioritize Passkeys (FIDO2), social login, and password manager auto-fill.
 -   **A11y Zero Tolerance CI (Build Gate)**:
     -   **Mandate**: Integrate `axe-core` or `pa11y-ci` into the CI pipeline. If even one `critical` or `serious` violation is detected, **force the build to fail**.
     -   **Exemption**: Only for unfixable external factors within UI library internals—addition to the exception list (Ignore Config) is permitted after documenting the reason.
@@ -292,25 +328,66 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Mandate**: Before releasing new pages or major UI components, conduct read-aloud testing with VoiceOver (iOS/macOS) or NVDA (Windows) configured in the target locale's language settings.
     -   **Checklist**: Verify button announcements (operations communicated in target language), form labels (input purpose read in target language), error messages (immediate notification via `aria-live`), and numeric/currency values (natural pronunciation).
 
-## 7. User Sovereignty (User First)
+## 7. User Sovereignty & Ethical UX
 -   **Data Ownership**: Users control their data (Easy Export/Delete).
--   **No Dark Patterns**: No deception. Design for "Delight Metrics".
--   **Transparency**: Explainable AI (Why this content?).
+-   **Dark Pattern Complete Ban**:
+    -   **Law**: Dark patterns are treated as **"legal risk"**, not "design optimization".
+    -   **Regulatory Landscape**:
+        -   **FTC (US)**: Section 5 + Negative Option Rule enforcement strengthening. Click-to-Cancel mandate.
+        -   **DSA (EU)**: Prohibition of manipulative interfaces that distort or restrict user autonomy (up to 6% of global annual revenue in fines).
+        -   **CPRA/CCPA (California)**: Explicit prohibition of consent obtained through dark patterns.
+    -   **Specific Prohibitions**:
+        -   **Confirmshaming**: Guilt-inducing decline button wording ("No, I don't care about quality")
+        -   **Roach Motel**: Easy to sign up, hard to cancel
+        -   **Hidden Costs**: Additional charges discovered at final purchase
+        -   **Pre-checked Boxes**: Default checked opt-ins
+        -   **Forced Continuity**: Auto-billing after free trial without explicit notification
+        -   **Trick Questions**: Double negatives or confusing phrasing
+    -   **Symmetry Principle**: Opt-out/cancellation flows must be designed with equal ease as opt-in/registration flows.
+-   **Transparency**: Explainable AI (Why this content?). Provide "Why am I seeing this?" explanations for algorithmic recommendations.
+-   **Consent & Privacy UX**:
+    -   **Granular Consent**: Obtain consent per category (essential/analytics/marketing). A single "Allow All" button is insufficient.
+    -   **Revocable**: Consent must be easily revocable at any time.
+    -   **Plain Language**: Present privacy policy summaries in plain language users can understand, not legal jargon.
 
 ## 8. Tools & Workflow
 -   **Figma**: The Source of Truth. Use Dev Mode.
 -   **Rive**: Use for complex vector animations.
 -   **Inclusive Copywriting**: Language that excludes no one.
 
-## 9. AI UX Strategy (Latency Management)
--   **Streaming First**: Zero perceived latency. Stream responses immediately.
--   **Optimistic Updates**: React UI immediately to user actions before AI finishes.
+## 9. AI UX Strategy
+-   **AI UX Philosophy**:
+    -   **Law**: AI is designed as a "collaborator" not a "tool". Prioritize the 3 principles of transparency, controllability, and safety.
+-   **AI Interaction Patterns (5 Types)**:
+    -   **Chat**: Text-based dialogue. Suitable for search, Q&A, casual inquiries.
+    -   **Copilot**: Side-panel assistant for work screens. Understands user context and provides real-time support.
+        -   *Assistive*: Continuous task support in side panel
+        -   *Immersive*: Full-screen data-intensive AI workspace
+        -   *Embedded*: Inline minimal triggers ("Rewrite", "Summarize" buttons, etc.)
+    -   **Agent**: Autonomous multi-step task execution. User defines goals, AI plans and executes.
+    -   **Ambient**: Operates intelligently in background, surfaces proactively only when needed.
+    -   **Proactive**: Predicts and suggests based on user behavior patterns.
+-   **Agentic AI UX Patterns**:
+    -   **Intent Preview**: Display plan preview before action execution so users can approve, edit, or reject.
+    -   **Autonomy Dial**: Allow users to adjust AI autonomy level ("Suggest Only", "Execute After Approval", "Full Autonomy").
+    -   **Explainable Rationale**: Transparently display AI reasoning and confidence levels. Black box output is prohibited.
+    -   **Action Audit & Recovery**: Log all autonomous actions and provide easy "Undo" / "Rollback" capabilities.
+-   **Generative UI (GenUI)**:
+    -   **Dynamic Component Selection**: AI selects appropriate components from a pre-defined brand UI component library and injects live data.
+    -   **Adaptive Layout**: Dynamically reconfigure UI based on user's current task and history.
+    -   **Contextual Assistance**: Surfaces (side panels, tooltips, embedded overlays) that appear only in relevant contexts. Prevent chat fatigue.
+-   **Streaming First**: Zero perceived latency. Stream responses token-by-token in real-time.
+    -   React UI immediately to user actions before AI finishes processing.
 -   **Transparency**: Visually distinguish "Thinking" vs "Generating".
+    -   **AI Content Differentiation**: Visually differentiate AI-generated content from human-created content (glow effects, dedicated icons, etc.).
+    -   **Confidence Signals**: Design mechanisms to convey AI confidence levels to users.
+-   **AI Failure Handling**:
+    -   Design graceful recovery paths for AI errors. Provide correction, regeneration, and comparison UI patterns.
+    -   **Human-in-the-Loop**: In Copilot experiences, always treat AI output as "suggestions". Maintain design where users hold final judgment authority.
 -   **The Quota Framing Protocol**:
     -   **Law**: When displaying usage limits (Quota) for AI generation, API calls, etc., wording that makes users feel "stingy restrictions" is prohibited.
     -   **NG**: "You have reached your limit" / "Usage limit exceeded"
     -   **OK**: "You've used all your AI generation power this month. Upgrade your plan to unlock more?"
-    -   **Effect**: Justify the existence of limits as "this feature is so special and powerful that limits exist", simultaneously increasing user acceptance and premium perception.
 
 ## 10. User Onboarding & Guidance
 -   **Coach Marks**: Context-aware tooltips. Always skippable.
@@ -514,19 +591,182 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 
 ---
 
+## 16. Motion Token Architecture
+
+### 16.1. Motion Design Token Mandate
+-   **Law**: Motion design must be structured as Design Tokens. Define the following token categories.
+-   **Duration**:
+    -   `motion.duration.instant: 100ms`
+    -   `motion.duration.fast: 150ms`
+    -   `motion.duration.normal: 250ms`
+    -   `motion.duration.slow: 400ms`
+    -   `motion.duration.complex: 600ms`
+-   **Easing**:
+    -   `motion.easing.standard: cubic-bezier(0.4, 0, 0.2, 1)`
+    -   `motion.easing.decelerate: cubic-bezier(0, 0, 0.2, 1)`
+    -   `motion.easing.accelerate: cubic-bezier(0.4, 0, 1, 1)`
+    -   `motion.easing.spring: cubic-bezier(0.175, 0.885, 0.32, 1.275)`
+-   **Properties**: `motion.property.enter`, `motion.property.exit`, `motion.property.hover`, `motion.property.expand`
+-   **Cross-Platform Consistency**: Guarantee identical motion experience across Web / iOS / Android / Flutter through tokens.
+
+### 16.2. prefers-reduced-motion Compliance
+-   **Law**: Accommodating users with vestibular disorders or high motion sensitivity is a **legal obligation** (EAA/WCAG 2.2 2.3.3).
+-   **Action**:
+    1. Define alternative behavior for all animations with `prefers-reduced-motion: reduce` media query.
+    2. In reduced motion mode, switch to instant transitions (`duration: 0ms`) or crossfade (`opacity` only).
+    3. **Essential Motion Exception**: Animations essential for content understanding (progress bars, etc.) should be slowed rather than completely disabled.
+
+---
+
+## 17. Performance UX
+
+### 17.1. Perceived Performance
+-   **Law**: "How fast the user feels" is more important than actual speed.
+-   **Skeleton > Spinner**: Use Skeleton for loading to preview content shapes rather than spinners.
+-   **Optimistic UI**: Update UI before server response for lightweight actions.
+-   **Instant Feedback**: Guarantee visual feedback within 100ms of button press.
+
+### 17.2. Core Web Vitals (CWV) Awareness
+-   **LCP** (Largest Contentful Paint): Display the largest first-view element within 2.5 seconds.
+-   **FID/INP** (Interaction to Next Paint): Interaction to next paint within 200ms.
+-   **CLS** (Cumulative Layout Shift): Maintain layout shift below 0.1.
+-   **Design Impact**: Plan image/font lazy loading, appropriate sizing, and `font-display: swap` from the design stage.
+
+### 17.3. Progressive Enhancement
+-   Maintain designs where core functionality works without JavaScript (where feasible).
+-   Add enhancements (animations, interactions) progressively.
+
+---
+
+## 18. Spatial Computing & XR UX
+
+### 18.1. Spatial Design Principles
+-   **Depth as Hierarchy**: In 3D space, distance becomes a hierarchy tool. Elements closer to user feel more active/important.
+-   **Ergonomic Zones**: Place interactive elements within natural reach to prevent user fatigue.
+-   **Grounding Effect**: Anchor UI to the physical world to reduce motion sickness and cognitive load.
+
+### 18.2. Multimodal Input Design
+-   **Eye Tracking**: "Gaze is the new hover". Design eye tracking + gesture input combinations.
+-   **Gesture Input**: Use subtle gestures (pinch, tap) for confirmation actions.
+-   **Voice Input**: Leverage voice for complex commands and navigation.
+-   **Input Agnostic**: Design independent of input method. Gaze, hand, voice, and controller should be interchangeable.
+
+### 18.3. Volumetric Design System
+-   Plan long-term extension from flat design systems to "spatial design systems".
+-   Define how components behave in 3D space (wall-anchored vs floating, gaze-reactive vs touch-reactive).
+
+### 18.4. visionOS / HIG (Apple) Compliance
+-   **Windowing & Volumes**: Prioritize window-based experiences in Shared Space.
+-   **Materials**: Use system materials like Liquid Glass to maintain harmony with the environment.
+-   **Spatial Audio**: Plan Spatial Audio as UI feedback.
+-   **Comfort & Safety**: Guarantee users can easily exit immersive states.
+
+---
+
+## 19. UX Research & Measurement
+
+### 19.1. UX Research Methods
+-   **Quantitative Methods**: A/B testing, funnel analysis, heatmaps, task completion rate, error rate.
+-   **Qualitative Methods**: User interviews, usability testing (moderated/unmoderated), diary studies, card sorting.
+-   **Continuous Discovery**: Leverage Teresa Torres's Opportunity Solution Tree for continuous hypothesis validation.
+
+### 19.2. UX KPIs
+-   **NPS (Net Promoter Score)**: User recommendation measurement.
+-   **SUS (System Usability Scale)**: Standardized usability score.
+-   **Task Success Rate**: Task completion rate.
+-   **Time on Task**: Task completion time.
+-   **Error Rate**: Error occurrence rate.
+-   **CSAT (Customer Satisfaction Score)**: Customer satisfaction.
+
+### 19.3. Design Review Process
+-   **Heuristic Evaluation**: Regular expert reviews based on Nielsen's 10 Usability Heuristics.
+-   **Accessibility Audit**: In addition to the CI Gate in §6, mandate quarterly manual A11y audit.
+-   **Competitive Analysis**: Quarterly UX analysis of competing products.
+
+---
+
+## 20. Maturity Model & Anti-Patterns
+
+### 20.1. UX Design Maturity Model (5 Levels)
+
+| Level | Name | Characteristics |
+|-------|------|-----------------|
+| L1 | Ad-hoc | No design system. UI created by individual judgment. Zero consistency. |
+| L2 | Emerging | Basic color palette and typography defined. Some component reuse. |
+| L3 | Structured | Design Tokens defined. Figma-Code sync pipeline operational. WCAG AA compliant. A11y CI gate. |
+| L4 | Integrated | W3C DTCG compliant tokens. Motion Token Architecture. Agentic AI UX implemented. Continuous UX research. |
+| L5 | Optimized | Consistent design experience across all platforms. Spatial Computing ready. Data-driven UX optimization. Design System as a Product. |
+
+### 20.2. Anti-Pattern Catalog (30 Items)
+
+| # | Anti-Pattern | Impact |
+|---|-------------|--------|
+| 1 | Hardcoded colors | Theme switching impossible. Dark mode difficulties. |
+| 2 | Div hell | A11y destruction. Screen reader unusable. |
+| 3 | Z-index magic numbers | Layer conflicts. UI element invisibility. |
+| 4 | Spinner dependency | CLS degradation. Perceived speed decrease. |
+| 5 | Color-only information | Information loss for color vision diversity users. Legal risk. |
+| 6 | Native date/time input | Cross-browser inconsistency. Design consistency destruction. |
+| 7 | Unlabeled inputs | A11y bug. Screen reader unusable. |
+| 8 | Double scrolling | Mobile UX destruction. Content unreachable. |
+| 9 | Missing `alt` attribute | A11y legal deficiency. SEO penalty. |
+| 10 | Technical jargon in UI | User churn. Support cost increase. |
+| 11 | Focus ring removal | Keyboard user inability. Legal risk. |
+| 12 | Modal Escape unhandled | A11y bug. User trapped. |
+| 13 | Placeholder-only label | Purpose lost during input. A11y violation. |
+| 14 | Dead-end error screen | 100% churn. Trust destruction. |
+| 15 | Dark pattern usage | Legal risk (FTC/DSA/CPRA fines). Brand damage. |
+| 16 | Fixed font size (px) | User settings ignored. A11y violation. |
+| 17 | No double-submit prevention | Data duplication. Race Condition. |
+| 18 | DnD clipping | Dragged element invisible. Operation impossible. |
+| 19 | Custom carousel | Touch issues. A11y non-compliant. |
+| 20 | Ad-hoc animations | No consistency. Performance degradation. prefers-reduced-motion ignored. |
+| 21 | Headless UI violation | Component reuse impossible. Platform portability hindered. |
+| 22 | Responsive not verified | UI breakage on mobile/tablet. |
+| 23 | Scattered error messages | Translation leaks. Tone inconsistency. Maintenance difficulty. |
+| 24 | IME-unaware search | CJK language user search failure. |
+| 25 | 200% zoom untested | Content clipping. A11y violation. |
+| 26 | Asymmetric consent UX | Regulatory violation (CPRA/DSA). Fine risk. |
+| 27 | prefers-reduced-motion ignored | Health harm to vestibular disorder users. EAA violation. |
+| 28 | Opaque AI output | User distrust. EU AI Act violation risk. |
+| 29 | Design without schema | Implementation failure guaranteed. Rework cost increase. |
+| 30 | No Design Tokens | Theme switching impossible. Multi-platform expansion blocked. |
+
+---
+
 ## Appendix A: Quick Reference Index
 
 | Keyword | Sections | Related Rules |
 |---------|----------|---------------|
-| Material Design / Expressive | §1 | `340_web_frontend`, `342_mobile_flutter` |
-| Design Tokens / CSS | §2, §3 | `340_web_frontend`, `300_engineering_standards` |
-| Animation / Motion | §4 | `343_native_platforms` |
-| Responsive / Foldable | §5 | `342_mobile_flutter`, `343_native_platforms` |
-| Accessibility / WCAG | §6 | `800_internationalization`, `340_web_frontend` |
-| User Sovereignty | §7 | `600_security_privacy`, `601_data_governance` |
-| AI UX / Latency | §9 | `400_ai_engineering` |
-| Onboarding | §10 | `102_growth_marketing`, `501_customer_experience` |
-| Safety UI | §11, §14 | `600_security_privacy`, `503_incident_response` |
-| Hospitality / Omotenashi | §12 | `501_customer_experience` |
-| Localization / i18n | §15 | `800_internationalization`, `802_language_protocol` |
+| Material Design / Expressive / HIG | §1 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter` |
+| Design Tokens / W3C DTCG / CSS | §2 | `engineering/300_web_frontend`, `engineering/000_engineering_standards` |
+| Typography / CJK / Font | §1.1, §3.3 | `product/800_internationalization` |
+| Color / Dark Mode / P3 / Oklch | §2.1 | `engineering/300_web_frontend` |
+| Responsive / Foldable / Any-Screen | §5 | `engineering/400_mobile_flutter`, `engineering/410_native_platforms` |
+| Component / Headless UI / Skeleton | §3 | `engineering/300_web_frontend` |
+| Feedback / Toast / Z-Index | §3.1, §14.3 | `engineering/300_web_frontend` |
+| Animation / Motion Token / 60fps | §4, §16 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter` |
+| Haptics / Sound | §3.5 | `engineering/400_mobile_flutter`, `engineering/410_native_platforms` |
+| Accessibility / WCAG 2.2 / EAA | §6 | `engineering/300_web_frontend`, `engineering/400_mobile_flutter`, `security/100_data_governance` |
+| Form / IME / Input | §14.1, §14.2, §15.3 | `engineering/300_web_frontend` |
+| Navigation / Breadcrumb / Tab | §3.3, §10 | `engineering/300_web_frontend` |
+| Error / Recovery / Error Catalog | §12, §15.2, §15.5 | `engineering/300_web_frontend`, `operations/300_customer_experience` |
+| Safety UI / Destructive Actions / DnD | §11, §14.4 | `security/000_security_privacy` |
+| Onboarding / Empty State | §10 | `product/500_growth_marketing`, `operations/300_customer_experience` |
+| Microcopy / Writing / Tooltip | §10 | `product/600_brand_strategy` |
+| AI UX / Agentic / GenUI / Copilot | §9 | `ai/000_ai_engineering` |
+| User Sovereignty / Dark Patterns / Ethical UX | §7 | `security/100_data_governance`, `product/000_product_strategy` |
+| Hospitality / Anticipatory / Locale Format | §12 | `product/800_internationalization` |
+| i18n / Localization | §15 | `product/800_internationalization`, `core/200_language_protocol` |
+| Performance UX / CWV / Perceived | §17 | `engineering/000_engineering_standards`, `operations/400_site_reliability` |
+| Spatial Computing / XR / visionOS | §18 | `engineering/410_native_platforms` |
+| UX Research / Measurement / NPS | §19 | `ai/100_data_analytics`, `product/100_market_validation` |
+| Maturity Model / Anti-Patterns | §20 | All rules (universal) |
 
+---
+
+> **Cross-Reference (Tech Stack-Specific Rule References)**
+> This file defines technology stack-agnostic Universal design principles. For framework-specific implementation details (React Hooks ordering, Hydration Mismatch, suppressHydrationWarning, Server Component boundaries, Hard Session Refresh, etc.), refer to:
+> - Web: `engineering/300_web_frontend.md`
+> - Mobile (Flutter): `engineering/400_mobile_flutter.md`
+> - Native (Kotlin/Swift): `engineering/410_native_platforms.md`

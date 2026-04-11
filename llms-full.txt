@@ -46,10 +46,10 @@ Axiarch mitigates these risks by enforcing a firm quality floor and autonomous c
 
 ---
 
-## AGENTS.md — The Constitution (8 Protocols)
+## AGENTS.md — The Constitution (9 Protocols)
 
 AGENTS.md is the supreme law governing AI agent behavior. It contains
-8 mandatory protocols that apply to every interaction:
+9 mandatory protocols that apply to every interaction:
 
 ### Protocol 0: AI Self-Completion Mandate (Supreme Rule)
 The AI MUST NOT burden the user with verification tasks. All log checking,
@@ -82,18 +82,25 @@ Exceptions: security holes, constitution violations, critical bugs
 (require user approval). New features use isolation (wrapper components,
 extension hooks) rather than modifying existing code.
 
-### Protocol 6: Role & Behavior
+### Protocol 6: Anti-Full-Overwrite
+Full-file overwrite of existing files is prohibited by default. All
+modifications must use diff-based editing tools. Exception granted only
+when user explicitly permits (e.g., "full rewrite OK"). Even for large
+changes (50%+ of file), use multi-chunk diff edits. User asset protection
+always takes priority over AI convenience.
+
+### Protocol 7: Role & Behavior
 The AI acts as Senior Architect and Lead Engineer — not a passive coder.
 It proactively identifies missing specifications and provides immediate
 output without social pleasantries.
 
-### Protocol 7: Process & Documentation
+### Protocol 8: Process & Documentation
 Strict workflow: Load rules (LOADING_PROTOCOL) → Blueprint First →
 Full-content output → Always generate task.md, implementation_plan.md,
 walkthrough.md. Includes Boot Sequence Protocol (Stop & Wait, No
 Hallucination, Exact Match Only).
 
-### Protocol 8: Continuous Improvement
+### Protocol 9: Continuous Improvement
 After each task, scan for lessons learned and crystallize them into
 Blueprint rules following CRYSTALLIZATION_PROTOCOL.
 
@@ -186,9 +193,11 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
   8 parts, 32 sections.
 
 ### design/ — Design & UX (1 file)
-- **000_design_ux.md**: Mobile-first, WCAG 2.1 AA, 60fps animations,
-  design system, Pixel Perfect, Omotenashi UX, error design, Ghost
-  Content protocol, IME handling, i18n readiness.
+- **000_design_ux.md**: 25-part complete edition (v3.0). Supreme Directive:
+  Consistency > Accessibility > Delight > Aesthetics > Dev Speed. W3C DTCG
+  2025.10 Design Tokens, WCAG 2.2 AA + WCAG 3.0 forward compatibility (APCA),
+  Dark Pattern ban (FTC/DSA/EU DFA), Agentic AI UX patterns, Calm UI,
+  Voice UI, Design System as a Product, Design FinOps, 35 anti-patterns.
 
 ### engineering/ — Technical Implementation (9 files)
 - **000_engineering_standards.md**: Engineering excellence. 13 parts,

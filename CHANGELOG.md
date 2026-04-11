@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] — 2026-04-12
+
+### ✨ Design & UX Strategy v3.0 / AGENTS.md Protocol 6 追加
+
+### Added
+
+- **AGENTS.md §6: Anti-Full-Overwrite Protocol** — 既存ファイルの全文上書き（`write_to_file(Overwrite: true)` 相当）を原則禁止する新プロトコル。差分編集（`replace_file_content` / `multi_replace_file_content`）を義務化 / New protocol prohibiting full-file overwrite of existing files by default. Mandates diff-based editing.
+- **`.github/workflows/release.yml`** — PRマージ時にCHANGELOG.mdからバージョンを自動検出し、タグ作成→GitHub Release生成まで一気通貫で自動実行するCI/CDワークフロー / Auto-detect version from CHANGELOG.md on PR merge, create tag & GitHub Release automatically
+
+### Changed
+
+- **`universal/{ja,en}/design/000_design_ux.md`** — 25パート完成版 v3.0 にリファクタリング / Refactored to 25-part complete edition v3.0
+  - 新規5パート追加: §21 Calm UI, §22 Voice UI, §23 Design System as a Product, §24 WCAG 3.0前方互換性, §25 Design FinOps
+  - 技術固有ルール（React/Hydration）を `engineering/` へ委譲
+  - EU Digital Fairness Act (DFA) 追加、アンチパターン 30→35選に拡張
+  - JA/EN完全構造同期（§25, ###96, 1046行）
+- **AGENTS.md** — §5.1→§6昇格、全セクション番号リナンバー（§6→§7, §7→§8, §8→§9） / Section renumbering: Anti-Full-Overwrite promoted to §6, subsequent sections renumbered
+- **`axiarch-rules/INDEX.md`** — Design UX概要文を25パート完成版に同期 / Design UX summary synced to 25-part edition
+- **`axiarch-rules/LOADING_PROTOCOL.md`** — §7→§8 参照更新 / Reference updated §7→§8
+- **`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`** — §8→§9 参照更新 / Reference updated §8→§9
+- **`blueprint/{ja,en}/core/010_project_lessons_log.md`** — §8→§9 参照更新 / Reference updated §8→§9
+- **`ROADMAP.md`** — 8プロトコル→9プロトコル / 8 protocols → 9 protocols
+- **`llms-full.txt`** — Protocol 6追加、Protocol 7-9リナンバー、Design概要更新 / Protocol 6 added, 7-9 renumbered, Design summary updated
+
+---
+
 ## [1.0.0] — 2026-04-10
 
 ### 🎉 Initial Public Release
@@ -17,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **AGENTS.md** — AI行動憲法（8プロトコル定義） / AI Behavior Constitution (8 protocols)
+- **AGENTS.md** — AI行動憲法（9プロトコル定義） / AI Behavior Constitution (9 protocols)
 - **Universal Rules** — 38ファイル × 2言語（JA/EN）、2,500以上の憲法基準 / 38 files × 2 languages, 2,500+ constitution standards
   - 000: Core & Mindset
   - 100–150: Product & Business Strategy
@@ -57,4 +83,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.1.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0
