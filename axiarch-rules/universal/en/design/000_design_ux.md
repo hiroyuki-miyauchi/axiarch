@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-04-12
+> Last Updated: 2026-04-19 (Rev 4)
 
 > [!IMPORTANT]
 > **Supreme Directive**
@@ -10,7 +10,7 @@
 > All design decisions must prioritize consistency, accessibility, and delight.
 > Strictly follow the priority order: **Consistency > Accessibility > Delight > Aesthetics > Development Speed**.
 > This document is the supreme standard for all design and UX strategy decisions.
-> **25 Parts.**
+> **37 Parts (§1–§37).**
 
 ---
 
@@ -38,6 +38,23 @@
 | XVIII | Spatial Computing & XR UX | §18 |
 | XIX | UX Research & Measurement | §19 |
 | XX | Maturity Model & Anti-Patterns | §20 |
+| XXI | Design System Governance | §21 |
+| XXII | Data Visualization & Information Architecture | §22 |
+| XXIII | AI-Generated UI Governance | §23 |
+| XXIV | Cross-Platform Token Federation | §24 |
+| XXV | Sustainability & Green UX | §25 |
+| XXVI | Neurodiversity & Inclusive UX | §26 |
+| XXVII | Digital Wellbeing & Ethical Digital Design | §27 |
+| XXVIII | Voice & Conversational UX | §28 |
+| XXIX | Adaptive & Personalization UX | §29 |
+| XXX | Design Tokens 2.0 / Advanced Token Architecture | §30 |
+| XXXI | Edge & Offline-First Design | §31 |
+| XXXII | Gamification Design Governance | §32 |
+| XXXIII | Design QA & Visual Regression | §33 |
+| XXXIV | Biometrics & Authentication UX | §34 |
+| XXXV | Content Safety & Trust Design | §35 |
+| XXXVI | Real-Time Collaboration UX | §36 |
+| XXXVII | Platform Engineering & Design System Ops | §37 |
 
 ---
 
@@ -154,21 +171,13 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: Standard capture formats of mobile devices (e.g., iOS HEIC/HEIF) often cannot be directly displayed in browsers. Components with file upload functionality should account for these formats.
     -   **Action**: To reduce server load, client-side automatic conversion to universal formats (JPEG/PNG/WebP) before upload is recommended. Requiring users to manually convert is a mobile UX failure.
 
-### 3.2. The React/Hydration Hardening Protocol (Lesson 42.18)
--   **The Hooks Order Guarantee**:
-    -   **Law**: React Hooks (`useEffect`, `useState`) MUST be declared BEFORE any conditional return (`if`, `return`).
-    -   **Violation**: "Rendered more hooks" is a rudimentary error caused by Early Return.
-    -   **Action**: Force fixed placement of **Hooks Definition Block** at the top of every component.
--   **The Anchor Nesting Prohibition (Hydration Mismatch)**:
-    -   **Law**: Placing `<a>` or `<button>` inside `<a>` is an HTML violation and main cause of Hydration Mismatch.
-    -   **Action**: Do not nest. Use `onClick` on parent or Overlay CSS (`absolute inset-0`).
--   **The suppressHydrationWarning Standard**:
-    -   **Law**: Not a magic wand.
-    -   **Allowed**: Only for text nodes inevitably differing between server/client (Date, Random).
-    -   **Banned**: Hiding HTML structure mismatches (nesting errors) is strictly prohibited.
--   **The Hidden Element & Ghost Dimension Protocol**:
-    -   **Law 1**: `display: none` (`hidden`) still consumes Render Cost. Use conditional rendering (`{ isOpen && ... }`) for heavy trees like Drawers.
-    -   **Law 2**: Hidden elements have 0 dimensions. Trigger `resize` event or force remount when showing `ResizeObserver`-dependent components to prevent "Ghost Dimension".
+### 3.2. Frontend Integration Protocol (Universal Principles)
+-   **Lifecycle Rule Compliance**: UI components MUST strictly follow framework-specific lifecycle conventions (proper side-effect management, safe state update timing, etc.). Refer to tech-stack-specific rules for framework details.
+-   **Hydration Safety (Server/Client Consistency)**: Initial state mismatches between SSR and client hydration cause UX failures (flickering, layout shift, non-interactivity). Maintain designs where SSR/CSR are consistent, with exceptions only for inevitably different elements (timestamps, random values, etc.).
+-   **Conditional Rendering over Visibility**: High-cost UI trees (drawers, dialogs, mega menus, etc.) MUST use **conditional rendering** (excluded from DOM when display flag is `false`) rather than `display:none` concealment, to release memory and rendering resources.
+-   **Ghost Dimension Prevention**: When size-dependent initialization (carousels, maps, charts, etc.) occurs inside initially hidden elements, explicitly trigger `resize` or force remount when the element becomes visible to prevent "Ghost Dimension" (broken layout).
+-   **Interactive Element Nesting Prohibition**: Nesting interactive elements (e.g., `<a>` inside `<a>`, `<button>` inside `<a>`) is an HTML specification violation. To make an entire clickable card a link, use an absolutely-positioned overlay link technique.
+-   **Cross-Reference**: For framework-specific implementation details (React Hooks ordering, Hydration Mismatch handling, suppressHydrationWarning, Server Component boundary design, etc.), refer to `engineering/300_web_frontend.md`.
 
 ### 3.3. Layout Architecture
 -   **The Single Container Protocol**:
@@ -213,7 +222,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 
 ## 5. Adaptability & Foldables
 
-### 4.1. Universal Responsiveness
+### 5.1. Universal Responsiveness
 -   **Rule**: "Mobile First" is obsolete. We design for **"Any-Screen"**.
 -   **Foldables**: Be Hinge-Aware and maintain continuity across states.
 -   **Large Screens**: Use Canonical Layouts. Do not just stretch mobile UI.
@@ -388,6 +397,16 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: When displaying usage limits (Quota) for AI generation, API calls, etc., wording that makes users feel "stingy restrictions" is prohibited.
     -   **NG**: "You have reached your limit" / "Usage limit exceeded"
     -   **OK**: "You've used all your AI generation power this month. Upgrade your plan to unlock more?"
+
+-   **MCP (Model Context Protocol) UX Integration Protocol**:
+    -   **Background**: MCP (Model Context Protocol), released by Anthropic in 2024 and now an open standard, provides a standardized interface connecting AI agents with external tools and data sources. When applications connect to external MCP servers, appropriate UI governance becomes essential.
+    -   **Tool Call Transparency**: When AI agents invoke external tools (file operations, API calls, DB access, etc.), display "which tool is being invoked for what purpose" to the user in the UI.
+    -   **Permission UI**: When connecting to MCP servers, provide a UI that allows users to explicitly grant consent on first connection. Recommend offering OAuth-equivalent granularity so users can select "read-only" vs. "write access" per tool.
+    -   **Action Log UI**: All actions executed by agents via MCP (file creation/deletion, API calls, etc.) must be displayed as human-readable logs in the UI, maintaining a design where users can review and undo them (integrate with §9's "Action Audit & Recovery").
+    -   **Minimal Scope Principle**: Access permissions to MCP servers must be limited to the minimum necessary for task completion. Acquiring "full permissions" is prohibited; designing sessions to be destroyed after task completion is recommended.
+-   **Multimodal AI UX**:
+    -   **Modality-State Display**: When using AI that processes multiple modalities (text, images, audio, video, etc.), display "what the AI is currently processing" (which modality it is recognizing) in the UI.
+    -   **Per-Modality Review UI**: For inputs across image, audio, and text modalities, providing a "per-modality review UI" where users can individually confirm or remove each modality input is recommended.
 
 ## 10. User Onboarding & Guidance
 -   **Coach Marks**: Context-aware tooltips. Always skippable.
@@ -627,9 +646,29 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Instant Feedback**: Guarantee visual feedback within 100ms of button press.
 
 ### 17.2. Core Web Vitals (CWV) Awareness
--   **LCP** (Largest Contentful Paint): Display the largest first-view element within 2.5 seconds.
--   **FID/INP** (Interaction to Next Paint): Interaction to next paint within 200ms.
--   **CLS** (Cumulative Layout Shift): Maintain layout shift below 0.1.
+-   **LCP** (Largest Contentful Paint): Display the largest first-view element within **2.5 seconds**.
+    -   **Design Action**: Preload hero images with `<link rel="preload">`. Optimize to WebP or AVIF format.
+-   **INP** (Interaction to Next Paint): Interaction to next paint within **200ms**. (Officially replaced FID in March 2024.)
+    -   **200ms Budget Breakdown**: **Input Delay ≤ 50ms** (lightweight event handlers) + **Processing Time ≤ 100ms** (minimize rendering work) + **Presentation Delay ≤ 50ms** (paint optimization).
+    -   **Long Task Splitting**: Split tasks exceeding 50ms using `setTimeout` / `requestIdleCallback` to free the main thread.
+        ```javascript
+        // Scheduler API pattern for splitting Long Tasks (Chrome 115+ stable)
+        async function processHeavyTask(items) {
+          for (const item of items) {
+            await scheduler.yield(); // Yield to main thread
+            processItem(item);
+          }
+        }
+        // Fallback: yield via setTimeout(0)
+        function yieldToMain() {
+          return new Promise(resolve => setTimeout(resolve, 0));
+        }
+        ```
+    -   **Animation Preservation**: Removing animations to "improve INP" is prohibited. Leverage GPU composited layers (`transform`/`opacity`) to free the main thread without sacrificing motion.
+    -   **React 19 Compiler / PPR Support**: Leverage React 19 Compiler's Auto-Memoization and Next.js 15+ Partial Prerendering (PPR) to optimize hydration priority for interactive elements. Designs that return static shells instantly and stream dynamic content directly improve INP.
+-   **CLS** (Cumulative Layout Shift): Maintain layout shift below **0.1**.
+    -   **Design Action**: Specify explicit `width`/`height` on images, videos, and ad slots. Use `font-display: optional` or `swap` for fonts.
+-   **TTFB** (Time to First Byte): Target server response time within **800ms**. Prioritize CDN edge caching and SSG.
 -   **Design Impact**: Plan image/font lazy loading, appropriate sizing, and `font-display: swap` from the design stage.
 
 ### 17.3. Progressive Enhancement
@@ -683,6 +722,19 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Accessibility Audit**: In addition to the CI Gate in §6, mandate quarterly manual A11y audit.
 -   **Competitive Analysis**: Quarterly UX analysis of competing products.
 
+### 19.4. AI-Augmented UX Research
+-   **AI-Assisted Qualitative Analysis**:
+    -   **Interview Transcription**: Leverage AI summarization tools (e.g., Otter.ai, Dovetail, Grain) to automate transcription and theme extraction from user interviews. However, **insight validation MUST be performed by humans**.
+    -   **Pattern Detection**: Apply AI-based sentiment and theme classification to large volumes of qualitative data (NPS free-text, app store reviews, etc.) to accelerate discovery of priority issues.
+-   **Synthetic Usability Testing**:
+    -   **Law**: AI simulation-based synthetic user testing is a "supplementary tool" and MUST NOT replace real user testing.
+    -   **Permitted Use**: Only for identifying rough issues in prototypes as a pre-screening step before real user testing.
+-   **Behavioral Analytics Ethics**:
+    -   AI-based user behavior prediction and segmentation MUST be disclosed in privacy policies and designed to be opt-out capable (§7 Ethical UX compliant).
+-   **UX Data Quality Gate**:
+    -   A/B tests MUST be conducted with sample sizes sufficient to achieve a minimum **statistical significance level of p<0.05**. Decision-making based on small samples is prohibited.
+    -   **Novelty Effect Mitigation**: Run A/B tests for a minimum of 2 weeks to eliminate "Novelty Effect" bias.
+
 ---
 
 ## 20. Maturity Model & Anti-Patterns
@@ -697,7 +749,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 | L4 | Integrated | W3C DTCG compliant tokens. Motion Token Architecture. Agentic AI UX implemented. Continuous UX research. |
 | L5 | Optimized | Consistent design experience across all platforms. Spatial Computing ready. Data-driven UX optimization. Design System as a Product. |
 
-### 20.2. Anti-Pattern Catalog (30 Items)
+### 20.2. Anti-Pattern Catalog (46 Items)
 
 | # | Anti-Pattern | Impact |
 |---|-------------|--------|
@@ -731,6 +783,927 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 | 28 | Opaque AI output | User distrust. EU AI Act violation risk. |
 | 29 | Design without schema | Implementation failure guaranteed. Rework cost increase. |
 | 30 | No Design Tokens | Theme switching impossible. Multi-platform expansion blocked. |
+| 31 | AI-generated UI released without review | Broken accessibility and inconsistent design infiltration. |
+| 32 | Color-only data visualization | Information loss for color vision diversity users. Legal risk. |
+| 33 | A/B test terminated ignoring Novelty Effect | Flawed decision-making. Inaccurate ROI measurement. |
+| 34 | Design system without version control | Unmanaged breaking changes. Frequent regressions. |
+| 35 | High bitrate-dependent visual effects | UX failure on low-power mode/slow networks. Green UX violation. |
+| 36 | No ADHD/cognitive-considerate design | Cognitive overload. Lower task completion. Inclusion violation. |
+| 37 | Notification/push abuse | User burnout. Increased app deletion risk. |
+| 38 | Screen time manipulation design | Addiction-inducing design. Regulatory risk (DSA/UK Online Safety Act). Brand damage. |
+| 39 | No VUI/Voice UI fallback | Dead-end on speech recognition failure. A11y violation. |
+| 40 | Opaque personalization | User distrust. Filter bubble. EU AI Act violation risk. |
+| 41 | No Token Scoping (global pollution) | Theme collision. Component isolation impossible. Large-scale ops failure. |
+| 42 | Silent failure when offline | Data loss. User frustration. Increased churn rate. |
+| 43 | No privacy indicator in Voice UI | Suspicion of always-listening. Regulatory risk (GDPR/CCPA). |
+| 44 | No opt-out for personalization | Regulatory violation (GDPR Art.21/DSA). User trust erosion. |
+| 45 | Stale UI served via outdated Service Worker | Cache pollution. Production bugs persist unexpectedly long. |
+| 46 | Gender/cultural bias in voice commands | Reduced recognition accuracy for specific user groups. Inclusion violation. |
+| 47 | No Passkey/biometric authentication UI | Forces legacy passwords. Phishing risk continues. WCAG 3.3.8 violation. |
+| 48 | No trust signals on AI/user-generated content | EU DSA Art.16 violation risk. Misinformation spread. Brand damage. |
+| 49 | No Conflict UI in real-time collaboration | Data overwrite/loss. Breakdown of user trust. |
+| 50 | No Figma-to-code sync automation for design system | Permanent Token Drift. Quality degradation from design-implementation divergence. |
+
+---
+
+## 21. Design System Governance
+
+### 21.1. Design System as a Product (DSaaP)
+-   **Strategic Positioning**: A design system MUST be operated as a **Product**, not merely a library. Assign dedicated PM/DX engineers and manage a roadmap, backlog, and release cycle.
+-   **SLA Definition**: Establish response SLAs for design system bug reports (e.g., Critical=24h, Major=1week, Minor=1month).
+-   **Internal Customers**: Product teams are "customers" of the design system. Regularly collect user feedback (e.g., quarterly surveys) and make ROI visible.
+
+### 21.2. Contribution Model
+-   **Closed Model**: Only the core team can make changes. High quality but slow velocity. Suited for small teams.
+-   **Federated Model**: Product teams can submit PRs under clear Contribution Guidelines. Quality gates (review + CI) are mandatory. **Recommended model.**
+-   **Open Model**: For large organizations. A dedicated Design System Team serves as the final "gatekeeper" with approval authority.
+-   **Governance Gate**: Regardless of model, only components passing the following gates may be released:
+    1. Figma design review approval
+    2. Accessibility (WCAG AA) compliance
+    3. Jest/Storybook unit tests passed (≥80% coverage)
+    4. Cross-browser and cross-device verification complete
+
+### 21.3. Versioning & Deprecation
+-   **SemVer Compliance**: Component libraries MUST be managed under `MAJOR.MINOR.PATCH` Semantic Versioning.
+    -   **MAJOR**: Breaking changes (API signature changes, component deletion)
+    -   **MINOR**: Backward-compatible feature additions
+    -   **PATCH**: Bug fixes
+-   **Deprecation Protocol**:
+    1. Tag components with `@deprecated` and provide a migration guide to successor components
+    2. Maintain a minimum deprecation period of **2 MINOR versions** (or 3 months)
+    3. Send Deprecation Notices to consuming teams in advance
+    4. After deprecation period ends, delete entirely (no stubs) to optimize bundle size
+-   **Breaking Change Policy**: For MAJOR version bumps, providing migration scripts (codemods) is strongly recommended.
+
+### 21.4. Design System Metrics
+-   **Adoption Rate**: Measure what percentage of all UI components are composed of design system components. Target: **≥85%**.
+-   **Component Health Score**: A composite metric of test coverage × accessibility score × Figma sync rate.
+-   **Time-to-Ship Reduction**: Compare feature implementation effort before and after design system adoption to visualize ROI.
+
+---
+
+## 22. Data Visualization & Information Architecture
+
+### 22.1. Data Visualization Principles
+-   **Purpose First**: Select chart types based on the "message to convey", not "visual aesthetics".
+    | Purpose | Recommended Chart Type |
+    |---------|----------------------|
+    | Change (time series) | Line chart, Area chart |
+    | Comparison | Bar chart (horizontal/vertical), Grouped bar chart |
+    | Proportion/Composition | Stacked bar chart (preferred over pie charts) |
+    | Correlation | Scatter plot, Bubble chart |
+    | Distribution | Histogram, Box plot, Violin plot |
+    | Geographic data | Choropleth map, Proportional symbol map |
+-   **Data-Ink Ratio**: Following Tufte's principle, eliminate unnecessary decoration (3D effects, excessive grid lines, gradients) and focus on the data itself.
+-   **Zero-Line Mandate**: Bar chart Y-axes MUST always start at zero. Truncation creates exaggeration and distorts information.
+
+### 22.2. Chart Accessibility
+-   **Color-Only Prohibition**: Data series in charts MUST be distinguished using patterns (hatching), marker shapes (●■▲), and labels in addition to color.
+-   **Text Alternative**: Provide a data summary for all charts via `aria-label` or `<title>`/`<desc>` tags.
+    ```html
+    <!-- SVG chart example -->
+    <svg role="img" aria-labelledby="chart-title chart-desc">
+      <title id="chart-title">Monthly Revenue Trend (2025)</title>
+      <desc id="chart-desc">Monthly revenue from January to December 2025. Peak was August at $1.2M, lowest was February at $450K.</desc>
+    </svg>
+    ```
+-   **Data Table Provision**: For complex charts, provide equivalent data in an HTML table or downloadable CSV.
+-   **Interactive Support**: Enable keyboard navigation of data points (arrow keys) and announce selected values via `aria-live`.
+
+### 22.3. Information Architecture
+-   **5 Key IA Components (Rosenfeld/Morville)**:
+    1. **Organization**: Classify content into logical groups (aligned with user mental models)
+    2. **Labeling**: Consistent terminology (§10 Zero Jargon compliant)
+    3. **Navigation**: Always clarify current location, destination, and return path
+    4. **Search**: Faceted search and autocomplete as top priority
+    5. **Discovery**: Progressive Disclosure to guide users toward advanced features
+-   **Card Sorting**: When designing new navigation structures, conduct open/closed card sorting with users to validate mental models.
+-   **Tree Testing**: Measure the rate at which users reach target content (Task Success Rate) with the final navigation structure. Target: **≥80%**.
+
+### 22.4. Dashboard Design Standards
+-   **Information Density Hierarchy**: Design dashboards in 3 layers:
+    1. **Layer 1 (Summary / KPI)**: Most critical metrics at the top. Business state comprehensible at a glance.
+    2. **Layer 2 (Analysis / Trend)**: Detailed charts and period comparisons.
+    3. **Layer 3 (Detail / Drill-down)**: Individual records and Raw Data.
+-   **Cognitive Load Limit**: Recommend a maximum of **7±2 charts** per dashboard view (Miller's Law).
+-   **Real-Time Update**: When data auto-refreshes, display an update indicator (e.g., "Last updated: XX seconds ago") so users can gauge data freshness.
+
+---
+
+## 23. AI-Generated UI Governance
+
+### 23.1. Quality Gate for AI-Generated Code (Vibe Coding Era)
+-   **Background**: As UI generation via LLMs and AI coding assistants (GitHub Copilot, Cursor, Gemini, etc.) becomes mainstream, there is a sharply increasing risk of code that appears functional but lacks **accessibility, security, and design system consistency** entering the codebase.
+-   **Mandatory Review Items for AI-Generated UI**:
+    1. **A11y**: No WCAG AA-level violations detected by axe-core / Lighthouse
+    2. **Design Token Consistency**: No hardcoded color or spacing values infiltrating the code
+    3. **Component Duplication**: No possibility of substitution with existing design system components
+    4. **TypeScript Type Safety**: No unrestricted use of `any` / `unknown`
+    5. **Security**: No improper use of `innerHTML` or `dangerouslySetInnerHTML`
+-   **Self-Serve Checklist**: When including AI-generated UI code in a PR, the author MUST self-verify the above 5 items and document the verification results in the PR description.
+
+### 23.2. AI Content Disclosure
+-   **Legal Context**: The EU AI Act (in force 2024) mandates disclosure of AI-generated text, images, audio, and video (Article 50).
+-   **Disclosure UI Standards**:
+    -   Display a dedicated badge for AI-generated content (e.g., ✨ AI Generated).
+    -   **Glow Effect**: Visually distinguish AI content with a subtle gradient background (e.g., `linear-gradient(135deg, #667eea22, #764ba222)`).
+    -   **Editability Disclosure**: When users can edit or delete generated content, provide clear UI affordances for those actions.
+-   **Human Review Label**: Labels like "AI-generated, reviewed by experts" are effective for building trust. However, false "human-reviewed" labels are strictly prohibited.
+
+### 23.3. Prompt Injection Defense in UI
+-   **Risk**: When user input is directly concatenated into AI prompts, malicious users may manipulate prompts to trigger unintended behavior.
+-   **UI-Layer Countermeasures**:
+    -   Implement character count limits (`maxLength`) and character type restrictions on input fields.
+    -   Clearly separate user input from internal prompt context to prevent conflation in the UI.
+    -   Apply UI-layer validation for suspicious input (excessive special characters, extremely long text, etc.).
+
+---
+
+## 24. Cross-Platform Token Federation
+
+### 24.1. Universal Token Pipeline
+-   **Goal**: From a single design token definition (W3C DTCG format), automatically generate code for **Web, iOS, Android, Flutter, and Electron** to ensure design consistency across all platforms.
+-   **Recommended Pipeline**:
+    ```
+    Figma Variables
+        ↓ (Figma Variables Plugin or manual export)
+    tokens.json (W3C DTCG format / Style Dictionary compatible)
+        ↓ (Style Dictionary / Theo / Token Transformer)
+    ├── CSS Custom Properties (Web)
+    ├── Swift Package (iOS: UIColor, Font, Spacing)
+    ├── Kotlin Object (Android: Color, Dimension)
+    └── Dart Package (Flutter: ThemeData)
+    ```
+-   **CI Automation**: Build a CI pipeline that automatically generates and commits the above platform code for all platforms when a token definition file PR is merged.
+
+### 24.2. Platform-Specific Token Overrides
+-   **Tier 1 (Global)**: Base values shared across all platforms (colors, spacing base values)
+-   **Tier 2 (Platform)**: Platform-specific overrides (e.g., iOS Dynamic Type, Android Material Dynamic Color)
+-   **Tier 3 (Component)**: Component-level dedicated tokens
+-   **Prohibition**: Directly overriding Tier 1 definitions in platform code is prohibited. Always create a Tier 2 Platform Override file to maintain change traceability.
+
+### 24.3. Token Drift Detection
+-   **Token Drift**: A state where code values have diverged from the design definition (Figma, etc.). It is a primary cause of design system quality degradation.
+-   **Automated Detection**: Introduce CI scripts that automatically compare token values in implementation code against Figma/tokens.json definitions during PR review and report discrepancies.
+-   **Weekly Sync**: Generate a weekly Token Drift Report and establish a cycle for both design and engineering teams to review it.
+
+---
+
+## 25. Sustainability & Green UX
+
+### 25.1. Digital Carbon Footprint
+-   **Background**: The global ICT industry accounts for approximately 4% of CO2 emissions—equivalent to the aviation industry. UI design choices directly impact energy consumption.
+-   **Measurement Tools**: Use Website Carbon Calculator, Ecograder, or Sustainableweb to quantitatively measure page CO2 emissions.
+-   **Target**: Set a CO2 emission target of **≤0.5g CO2/page view** for new pages (global median: ~0.8g).
+
+### 25.2. Eco-Friendly UI Design
+-   **Dark Mode Power Consumption**: On OLED displays, pure black (#000000) backgrounds can reduce power consumption by up to 60%. Dark mode is simultaneously a UX initiative and a Green initiative.
+    -   **Pure Black Option**: Providing a "Pure Black" theme option based on `#000000` as a dark mode variant is recommended.
+-   **Animation Power Efficiency**:
+    -   `prefers-reduced-motion` compliance (§16.2) is both a legal obligation and a power-saving measure.
+    -   Eliminate unnecessary infinite-loop animations (other than loading indicators).
+-   **Image & Video Optimization**:
+    -   Prioritize AVIF format (30% reduction vs. WebP) with WebP as fallback.
+    -   Auto-play video is prohibited (§6 Auto-Play Ban compliant). User-initiated playback only.
+    -   Standardize `loading="lazy"` for all off-screen images.
+-   **Font Optimization**:
+    -   Subset web fonts using `unicode-range` to include only the required character ranges.
+    -   Prefer system font stacks when feasible.
+
+### 25.3. Carbon-Aware UX
+-   **Concept**: A design approach that leverages real-time variation in electricity grid carbon intensity (g CO2eq/kWh) to schedule heavy processing during periods when renewable energy is abundant.
+-   **Application Scenarios**:
+    -   Provide scheduling UIs for large batch processing (AI training, video encoding, etc.) that run during low-carbon periods.
+    -   Consider a "Green Mode" that automatically switches to high-quality rendering during low carbon intensity periods and compressed data mode during high carbon intensity periods.
+-   **APIs**: Use Electricity Maps API, WattTime API, etc. to retrieve carbon intensity data.
+
+### 25.4. Sustainable Design Ops
+-   **Deprecation Cleanup**: Remove deprecated, unused components from bundles to reduce user download size.
+-   **Third-Party Script Audit**: Periodically audit third-party scripts (analytics, ads, chat widgets, etc.) and remove unnecessary ones. Weigh each script's CO2 cost against its business value.
+-   **Performance Budget (Page Weight)**:
+    | Resource Type | Budget Limit |
+    |---------------|-------------|
+    | HTML | 50KB |
+    | CSS (compressed) | 100KB |
+    | JS (compressed) | 300KB |
+    | Images (total) | 500KB |
+    | Web Fonts | 100KB |
+    - Budget overruns MUST be detected and flagged in CI/CD build gates (Bundlesize, Lighthouse CI, etc.).
+
+## 26. Neurodiversity & Inclusive UX
+
+### 26.1. Neurodiversity Design Principles
+-   **Background**: Users with neurodivergent conditions such as ADHD, ASD (Autism Spectrum Disorder), Dyslexia, and Sensory Processing Disorder are estimated to comprise approximately 15–20% of the population (WHO). Considering these users is an accessibility obligation and simultaneously improves the experience of all users (**Social Model of Disability**).
+-   **ADHD-Friendly Design**:
+    -   **Cognitive Load Reduction**: Minimize information density per screen and use Progressive Disclosure to present information incrementally.
+    -   **Visual Focus Guidance**: Apply visual "focus emphasis" (border reinforcement, color highlights) to important CTAs and forms to assist attention guidance.
+    -   **Task Chunking**: Split long forms or tasks into multiple steps and provide explicit feedback upon completion of each step.
+    -   **Enforce Auto-Save**: Considering mid-input abandonment, strictly adhere to §14.5 Auto-Save Protocol.
+    -   **Minimize Interruption Notifications**: Keep in-task interrupt notifications to a minimum (provide granular notification control settings).
+-   **ASD-Friendly Design**:
+    -   **Absolute Consistency**: Per-screen UI pattern variations cause significant stress for ASD users. Enforce §20.0 The Consistency Mandate to the maximum degree.
+    -   **Eliminate Ambiguous Expressions**: Eliminate icon-only buttons, context-dependent abbreviations, and implicit operation procedures. Always provide labels and explicit explanations.
+    -   **Sensory Stimulus Control**: Eliminate auto-play video, flashing elements, and intense particle effects. Providing settings for users to adjust sensory stimulus levels is recommended.
+-   **Dyslexia-Friendly Design**:
+    -   **Font Selection**: Adopt dyslexia-friendly fonts (OpenDyslexic, etc.) as a switchable option, or use highly readable general fonts (Inter, Atkinson Hyperlegible, etc.) as defaults.
+    -   **Character Spacing & Line Height**: Use `letter-spacing: 0.05em` or more and `line-height: 1.6` or more as body text baselines (per §1.1 Typography Localization Protocol).
+    -   **Left-Aligned Text**: Justified (full-width-aligned) text creates uneven word spacing that makes reading difficult for dyslexic users. **Text must always be left-aligned (`text-left`)**.
+    -   **Contrast Options**: Pure white backgrounds (#FFFFFF) can be too glaring for some dyslexic users. Providing a "Soft White" (e.g., `#FAF9F6`) or "Paper" theme is recommended.
+
+### 26.2. Cognitive Accessibility
+-   **COGA Compliance (W3C Cognitive and Learning Disabilities Accessibility Task Force)**: Following W3C COGA guidelines (to be integrated into WCAG 2.1/2.2), implement:
+    -   **Recognizable Patterns**: Use industry-standard UI patterns (hamburger menu, search icon, etc.) to leverage cognitive familiarity.
+    -   **Error Prevention**: Provide confirmation screens before form submission and pre-disclose input constraints (character limits, allowed character types, etc.).
+    -   **Timeout Warnings**: Alert users at least **20 seconds before** session timeout and provide an extension option (WCAG 2.2 2.2.6).
+    -   **Simple Navigation**: Maintain a navigation structure where primary features are reachable within 3 clicks.
+-   **Reading Level**: UI text directed at users should be kept at a difficulty level understandable to middle school students (approximately 6th-8th grade reading level for English). Flesch-Kincaid readability checks are recommended.
+
+### 26.3. Inclusive Language Protocol
+-   **Prohibit Outdated Terms**: Do not use terms that negatively characterize disability conditions (outdated clinical or derogatory language).
+-   **Person-First / Identity-First Choice**: Whether to use "person with a disability (Person-First)" or "disabled person (Identity-First)" should follow community preferences. User research is recommended before standardizing on either.
+-   **Gender-Neutral Language**: Avoid expressions that assume a specific gender (e.g., "he," "male user," etc.) and use gender-neutral expressions (e.g., "the user," "the team member").
+-   **Cultural Sensitivity**: Colors, symbols, and illustrations carry different cultural meanings by region (e.g., white symbolizes mourning in some Asian contexts). Conduct cultural validation of icons, colors, and illustrations when expanding globally.
+
+---
+
+## 27. Digital Wellbeing & Ethical Digital Design
+
+### 27.1. Digital Wellbeing Design Principles
+-   **Background**: From 2025 onward, the UK Online Safety Act, EU DSA (Digital Services Act), US CHILDS proposals, and similar regulations are making "Design-based Manipulation" — particularly towards minors — a subject of regulation. Wellbeing design is both an ethical obligation and legal risk management.
+-   **Screen Time Respect Protocol**:
+    -   **Design Natural Stopping Points**: Design explicit "ending points" at content endpoints (end of articles, end of videos). Chains of infinite scroll and auto-play may be viewed as design-based addiction induction.
+    -   **Break Reminders**: For apps expected to be used for extended periods (games, social media, learning apps, etc.), providing optional break reminder functionality after a set time (e.g., 60 minutes) is recommended. Make it configurable to turn off.
+    -   **Usage Time Visualization**: Providing dashboards where users can understand and control their in-app usage time is recommended.
+-   **Anti-Addiction Pattern Checklist**:
+    -   **Prohibited**: Limitless infinite scroll (no endpoint)
+    -   **Prohibited**: Notifications that excessively promote social comparison ("User X has achieved more than you")
+    -   **Prohibited**: UX that induces fear of losing badges or streaks (Loss Aversion Exploitation)
+    -   **Prohibited**: Targeted advertising/profiling for minor users
+    -   **Recommended**: Gentle disengagement nudges (e.g., "Would you like to wrap up for today?")
+
+### 27.2. Vulnerable User Protection
+-   **Age Verification & Age-Appropriate Content**: Implement appropriate age verification UIs for age-restricted content (alcohol, gambling, adult content, etc.) and prevent access by minors.
+-   **Mental Health Consideration**: Content dealing with self-harm or suicide-related topics must always provide crisis support resources (emergency contacts, etc.) in accordance with Safe Messaging Guidelines (WHO guidelines).
+-   **Gambling-Like UX Prohibition**: When implementing random reward mechanisms (gacha, loot boxes, etc.):
+    1. Disclose probabilities explicitly (mandated by many regulations)
+    2. Provide monthly spending cap (Spending Cap) setting functionality
+    3. Prohibit provision to minor users
+
+### 27.3. Privacy by Design in UX
+-   **Data Minimization UX Expression**: Place inline "Why this data is needed" explanatory text at collection points to communicate data minimization to users.
+-   **Consent Fatigue Prevention**: Do not flood users with consent banners and pop-ups. Request only essential consents and consolidate optional items in a settings screen.
+-   **Data Deletion UX**: Account deletion and data deletion flows must:
+    1. Be placed in easily discoverable locations (Settings > Account, etc.)
+    2. Be initiatable within 2 clicks
+    3. Allow users to track deletion progress until completion within 30 days (GDPR compliant)
+-   **Cross-Reference**: §7 (User Sovereignty & Ethical UX), `security/100_data_governance.md`
+
+### 27.4. Ethical AI & Algorithmic Transparency
+-   **Algorithm Recommendation Transparency**: Provide UI (e.g., "Why is this shown to me?" and "Show less of this") that allows users to understand and control the basis of recommendations (content recommendations, search rankings, etc.).
+-   **Bias Disclosure**: In contexts where AI influences human decisions (hiring screening, credit scoring, etc.), there is an obligation to disclose the training data and model bias risks of AI systems to users (EU AI Act Art. 13 compliant).
+-   **Human Override**: For significant decisions (insurance rejection, loan screening, hiring rejection, etc.), the right for users to request human review of AI-automated decisions (EU AI Act Art. 14 compliant) must be made explicit in the UI.
+
+---
+
+## 28. Voice & Conversational UX
+
+### 28.1. Voice UI Design Principles (VUI)
+-   **Background**: The rapid expansion of smart speakers, voice assistants (Siri, Google Assistant, Alexa), in-vehicle UIs, XR headsets, and LLM-based conversational AI has made **voice a primary UI paradigm**. From 2026 onward, VUI design is a core domain, not an optional feature.
+-   **Voice-First vs. Voice-Enhanced**:
+    -   **Voice-First**: Voice is the only interface (smart speakers, in-vehicle). No visual UI.
+    -   **Voice-Enhanced**: Voice added to existing GUI (voice commands in mobile apps, website read-aloud). MUST coexist with visual accessibility (§6).
+-   **VUI Feedback Triad (3-Step Feedback)**:
+    1. **Acknowledgment**: Immediately confirm that the user's voice input was received (e.g., "Got it", "One moment please").
+    2. **Progress**: For longer processing, periodically provide status (e.g., "Searching...").
+    3. **Result**: Return the result in a concise, actionable form.
+-   **7 Principles of Conversational Design**:
+    1. **Brevity**: Voice responses must be shorter than visual responses. Max 3 choices per response.
+    2. **Context Retention**: Remember the context of previous utterances. Never ask for the same information twice.
+    3. **Natural Language Tolerance**: Accept paraphrase variations (treat "cancel", "stop", "quit", "exit" as synonyms).
+    4. **Graceful Fallback**: On recognition failure, follow 3 steps: apologize → ask again → offer an alternative input method.
+    5. **Initiative Balance**: Design "Open Prompts" where users can take the lead, rather than AI-only-driven flows.
+    6. **Error Prevention**: High-stakes actions (deletion, purchase) MUST require voice confirmation ("Are you sure you want to delete?").
+    7. **Exit Path**: Always support exit commands ("cancel", "stop", "help") at any point in the conversation.
+
+### 28.2. Voice Accessibility
+-   **WCAG 2.2 + Voice Guidelines**: Voice UIs must also satisfy WCAG 2.2 Understandable and Operable principles.
+-   **STT/TTS Quality Standards**:
+    -   **STT (Speech-to-Text)**: Periodically measure recognition accuracy across target locale accents, dialects, and noisy environments. Target: **≥95% recognition accuracy on primary use cases**.
+    -   **TTS (Text-to-Speech)**: Read aloud at natural cadence and speed (150–160 wpm) and support SSML (Speech Synthesis Markup Language) to customize pronunciation of proper nouns and acronyms.
+-   **Multi-Language / Multi-Dialect Support**: Design to tolerate dialect variations or provide a graceful prompt for users to speak more clearly. Rigid dialect rejection causes user churn.
+-   **Noisy Environment UX**: For high-noise environments (public transit, etc.), provide a Push-to-Talk UI (record only while button is held) as a fallback.
+
+### 28.3. Voice Privacy & Consent
+-   **No Always-On Listening by Default**: Recording beyond Wake Word is prohibited by default. Prefer Push-to-Talk or explicit activation gestures.
+-   **Recording State Visual Indicator**: When the microphone is active, MUST display a visual indicator (red blinking dot, microphone icon). Designs where users cannot tell if they are being listened to are strictly prohibited.
+-   **Voice Data Retention Policy Disclosure**: Explain the retention period, purpose, and third-party sharing of voice recordings to users in plain language at the point of collection. Verify GDPR/CCPA compliance.
+-   **Data Deletion UI**: Place a clear UI for users to delete their voice history in a prominent location in settings (per §27.3 Data Deletion UX).
+
+### 28.4. Voice + Visual Integration (Multimodal)
+-   **Voice + Screen Coordination**: When reflecting voice command results in the visual UI, keep the gap between voice response and screen update within 100ms (maintaining perceived performance, per §17.1).
+-   **Handoff Protocol**: When a user switches from voice input to touch mid-interaction, design a "modality handoff" that carries input content seamlessly without data loss.
+-   **Context Sharing**: When a user says "delete this", implement context linking so the system accurately understands "this" refers to the focused element on screen.
+
+---
+
+## 29. Adaptive & Personalization UX
+
+### 29.1. Ethical Design Principles for Personalization
+-   **Background**: From 2026 onward, AI-powered Hyper-Personalization is the frontline of competitive advantage. However, risks of **filter bubbles, privacy violations, bias amplification, and addiction induction** are also growing. The following principles are design judgment criteria for maintaining that balance.
+-   **4 Ethical Personalization Principles**:
+    1. **Transparency**: Users can recognize that personalization is active (e.g., "Showing based on your preferences").
+    2. **Controllability**: Users can adjust the intensity of personalization or disable it entirely.
+    3. **Diversity**: To prevent filter bubbles (confinement to homogeneous content), embed intentional "Serendipity Injection" of diverse content into the design.
+    4. **Explainability**: Provide a feature for users to verify "why this is shown" (per §7 Transparency).
+
+### 29.2. Context-Adaptive UI Patterns
+-   **Time-of-Day Adaptation**: Adapt the UI based on the user's usage time of day.
+    -   Morning: Summary/digest-first view prioritizing key takeaways
+    -   Evening: Automatic shift to lower contrast and warmer color tones (Blue Light Reduction)
+-   **Frequency-Based Adaptation**: Prioritize frequently used features in the UI and progressively simplify rarely used ones (Progressive Disclosure adaptive version).
+-   **Device Context Adaptation**:
+    -   Mobile: Automatically switch to one-hand optimized layout
+    -   Desktop: Expand to professional view with keyboard shortcuts and high-density information
+    -   XR/Spatial: Anchor UI in space (per §18)
+-   **Network-Aware Design**: Dynamically lower image/video quality and switch to low-bandwidth mode based on connection quality (adaptive serving).
+    ```javascript
+    // Network Information API (implementation reference)
+    const connection = navigator.connection;
+    if (connection.effectiveType === '2g' || connection.saveData) {
+      // Switch to low-quality mode: higher image compression, disable video
+      setQualityMode('low');
+    }
+    ```
+
+### 29.3. Privacy Design for Personalization
+-   **Data Minimization Obligation**: Data required for personalization must be the minimum necessary. Excessive collection for the purpose of building a full user profile is prohibited.
+-   **On-Device Inference First**: From a privacy-protection perspective, prioritize architectures that perform inference on-device without sending data to servers (Core ML, TensorFlow Lite, etc.).
+-   **Opt-Out UI Mandate**: Based on GDPR Art. 21 (Right to Object), place a UI in a prominent location in settings where users can object to personalization processing and request it to stop.
+-   **Ethical Boundaries for A/B Testing**: Personalization experiments (A/B tests) within the same user group must be designed to IRB (Institutional Review Board) equivalent standards, with prior assessment of impacts on price discrimination and vulnerable users.
+
+### 29.4. Technical Governance for Adaptive Design
+-   **Feature Flag Integration**: Control personalization features via Feature Flags (LaunchDarkly, etc.) and maintain designs that allow immediate global rollback when issues arise.
+-   **Model Drift Monitoring**: Periodically monitor the recommendation accuracy of personalization models and trigger automatic alerts when accuracy falls below thresholds (e.g., CTR drops by ≥20%).
+-   **Group Fairness Validation**: Conduct quarterly verification that personalization results do not produce unfair disparities for specific demographic groups (gender, age, ethnicity, etc.).
+
+---
+
+## 30. Design Tokens 2.0 / Advanced Token Architecture
+
+> [!NOTE]
+> This section is an advanced extension of §2 (Design Tokens foundational rules). It presupposes §2 fundamentals and addresses advanced token management at enterprise scale from 2025 onward.
+
+### 30.1. Figma Variables 2.0 & DTCG Modes (Scopes and Modes)
+-   **Scoping**: Use Figma Variables' "Scope" feature to restrict the applicable properties of each token, eliminating the risk of color tokens being misapplied as spacing at design time.
+    ```
+    color-primary: scope=[Fill, Stroke] (NOT spacing, NOT font-size)
+    spacing-4: scope=[Gap, Padding, Margin] (NOT color)
+    ```
+-   **Modes**: Implement the W3C DTCG "$theme" concept to generate multiple modes from a single token definition.
+    ```json
+    {
+      "color-bg-surface": {
+        "$type": "color",
+        "$value": "oklch(98% 0 0)",
+        "$modes": {
+          "dark": "oklch(10% 0 0)",
+          "high-contrast": "oklch(100% 0 0)",
+          "pure-black": "oklch(0% 0 0)"
+        }
+      }
+    }
+    ```
+-   **Nested Modes**: Manage combinations of brand modes × theme modes.
+    ```
+    Brand A / Light → Brand A / Dark
+    Brand B / Light → Brand B / Dark
+    ```
+
+### 30.2. Component-Scoped Tokens
+-   **Problem**: With only global tokens, a style change to Component A can unintentionally propagate to Component B — a "global pollution" issue.
+-   **Solution — Component-Local Tokens**:
+    ```css
+    /* Isolate component-specific tokens via CSS variable namespacing */
+    .c-button {
+      --c-button-bg: var(--color-primary);
+      --c-button-fg: var(--color-on-primary);
+      --c-button-radius: var(--radius-md);
+      background: var(--c-button-bg);
+      color: var(--c-button-fg);
+      border-radius: var(--c-button-radius);
+    }
+    /* Component variant overrides modify only local tokens */
+    .c-button--danger {
+      --c-button-bg: var(--color-error);
+    }
+    ```
+-   **Naming Convention**: Standardize component-local tokens as `--c-{component}-{property}` and clearly distinguish them from global tokens (`--color-*`).
+
+### 30.3. Enterprise Multi-Brand Token Management
+-   **Brand Hierarchy Design**:
+    ```
+    Tier 0: Primitive Tokens (raw values: blue-500, space-4)
+    Tier 1: Global Semantic Tokens (color-primary) ← common across brands
+    Tier 2: Brand Tokens (brand-a-color-primary) ← brand-specific overrides
+    Tier 3: Component Tokens (button-bg) ← component-specific
+    ```
+-   **Token Library as NPM Package**: At enterprise scale, publish token definitions as a private NPM package shared across all products via `@company/tokens` imports. Apply SemVer to version management (per §21.3).
+-   **Token Diff PR Automation**: Build a GitHub Actions workflow that automatically comments a token diff report (summary of additions, changes, and deletions) on `tokens.json` change PRs.
+
+### 30.4. Runtime Token Injection
+-   **Dynamic Multi-Tenant Support**: In SaaS and multi-tenant apps, fetch per-tenant brand colors from the DB and dynamically inject them as CSS custom properties in a `<style>` tag.
+    ```typescript
+    // Server-side token injection example (Next.js App Router)
+    async function RootLayout({ children }) {
+      const tenant = await getCurrentTenant();
+      const tokens = tenant.brandTokens; // { primaryColor: 'oklch(55% 0.2 250)' }
+      return (
+        <html>
+          <head>
+            <style>{`:root { --color-primary: ${tokens.primaryColor}; }`}</style>
+          </head>
+          <body>{children}</body>
+        </html>
+      );
+    }
+    ```
+-   **CSP Compliance**: Dynamic `<style>` injection may violate Content Security Policy `style-src` directives. Consider Nonce-based style injection or CSS Variables via `element.style.setProperty()` as alternatives.
+
+---
+
+## 31. Edge & Offline-First Design
+
+### 31.1. Offline-First Design Philosophy
+-   **Background**: Approximately 4 billion people worldwide use slow or unstable mobile connections (2G/3G). A UI that assumes constant connectivity fails as a global product. Offline-first is both an ethical and business imperative.
+-   **4 Levels of Offline-First**:
+    | Level | Coverage | Target State |
+    |-------|----------|--------------|
+    | L0 | Silent crash when offline | ❌ Prohibited |
+    | L1 | Offline detection + user notification | ✅ Minimum standard |
+    | L2 | Read from cache (read-only offline) | ✅ Recommended |
+    | L3 | Offline writes + auto-sync on reconnect (Background Sync) | ✅ Gold standard |
+-   **Design Principles**:
+    -   Design for network as: "faster when available, functional when not".
+    -   Treat local as the source of truth for data operations; sync with server asynchronously (Offline-first CRDT philosophy).
+    -   Provide non-intrusive UI so users can always recognize their current connectivity state.
+
+### 31.2. Service Worker Design Governance
+-   **Cache Strategy Selection**:
+    | Strategy | Use Case | Description |
+    |----------|----------|-------------|
+    | Cache First | Static assets (CSS/JS/Font/Icon) | Cache-priority. Fallback to network if cache miss. |
+    | Network First | API responses, dynamic content | Network-priority. Fall back to cache on failure. |
+    | Stale While Revalidate | News feeds, product listings | Return cache immediately while revalidating from network in background. |
+    | Network Only | Payments, auth, security-sensitive ops | No caching. Always via network. |
+-   **Service Worker Update Governance**:
+    -   **Update Detection UI**: When a new Service Worker version enters waiting state, display a "New version available. Update now?" banner to users and trigger `skipWaiting()` via user action.
+    -   **No Silent Force Update**: Silent auto-update in the background (automatic `skipWaiting()` during active user sessions) is prohibited as it causes data loss.
+    -   **Version Management**: Include the Service Worker version in the cache name (e.g., `cache-v1.2.3`). Always implement old cache deletion (`caches.delete()`) on version upgrade.
+
+### 31.3. Background Sync & Push UX
+-   **Background Sync**:
+    -   Queue actions performed by users while offline (form submissions, data updates, etc.) in IndexedDB and auto-submit when connectivity is restored.
+    -   On successful submission, notify users via Toast: "Your entry has been saved (recorded while you were offline)".
+    -   On submission failure (e.g., 409 Conflict), present users with choices ("Overwrite with local version", "Accept server version", "Manual merge") to preserve user agency.
+-   **Web Push Notifications Governance**:
+    -   **Permission Request Timing**: Requesting notification permission immediately after `DOMContentLoaded` results in rejection rates above 90% due to lack of user context. Always request after the user understands the value (after first key action completion, or on a dedicated "Notification Settings" page).
+    -   **Notification Frequency Cap**: Recommend a maximum of **3 push notifications per day** (per §27.1 Anti-Addiction Pattern).
+    -   **Notification Relevance Scoring**: Before sending, evaluate "Is this highly relevant to this user right now?" using a model, and implement push scoring that only sends when the relevance score exceeds a threshold.
+
+### 31.4. IndexedDB & Local Data Design
+-   **Schema Version Management**: IndexedDB schema changes (adding/removing Object Stores, index changes) MUST be managed via version numbers (`onupgradeneeded`). Schema migration failures cause data loss.
+-   **Library Recommendation**: Raw IndexedDB API is complex and error-prone. Use `Dexie.js` or `idb` instead. Both also provide TypeScript type safety.
+    ```typescript
+    // Dexie.js usage example
+    import Dexie from 'dexie';
+    const db = new Dexie('MyApp');
+    db.version(1).stores({ drafts: '++id, createdAt, syncStatus' });
+    db.version(2).stores({ drafts: '++id, createdAt, syncStatus, priority' });
+    // v2 adds priority field (automatic migration)
+    ```
+-   **Storage Quota Management**: Monitor local storage usage with `navigator.storage.estimate()` and notify users / prompt cache cleanup when usage exceeds 85%.
+-   **Prohibition on Local Storage of Sensitive Data**: Storing sensitive information such as passwords, credit card numbers, and security tokens in IndexedDB/localStorage is strictly prohibited (per security rules in `security/000_security_privacy.md`).
+
+---
+
+## 32. Gamification Design Governance
+
+> [!WARNING]
+> Gamification is simultaneously a tool for increasing engagement and a tool for inducing dependency. The following rules define design judgment criteria for maintaining that balance.
+
+### 32.1. Gamification Design Principles
+
+-   **Purpose-Driven Gamification**: Before introducing gamification elements (badges, points, rankings, streaks, etc.), clearly define "what behavioral change is being encouraged." Introducing gamification solely to "somehow increase engagement" is prohibited.
+-   **Behavioral Science Foundation**:
+    -   **Protecting Intrinsic Motivation**: External rewards (points, badges) increase short-term engagement, but over-reliance diminishes intrinsic motivation ("using it because it's fun") — the **Undermining Effect**. Only attach rewards to behaviors with inherent value.
+    -   **Prohibition of Variable Ratio Schedules**: Implementation of random rewards (gacha, etc.) must be strictly governed per §27.2 (Gambling-Like UX Prohibition).
+    -   **Milestone-Based Rewards Recommended**: Design rewards granted at meaningful milestones as "commemorations of achievement." These should function as meaningful progress visualization, not arbitrary rewards.
+
+### 32.2. Game Mechanics Implementation Guidelines
+
+-   **Badge Design**:
+    -   **Scarcity Balance**: Badges lose value when too easily attained. However, badges that are too difficult cause churn. Target an attainment rate achievable by the **top 20–40% of users**.
+    -   **Meaningful Achievement**: Badges must be "commemorations of genuinely meaningful actions." Auto-granted badges for simple login counts quickly lose their value.
+    -   **Opt-Out Provision**: Provide opt-out settings for users who do not wish to receive badge notifications or participate in rankings.
+    -   **Accessibility**: Provide `alt` text for badge images to ensure screen readers accurately convey badge meaning.
+
+-   **Points / Currency Design**:
+    -   **Transparent Exchange Rate**: Clearly display the exchange rate between points and actual value (currency, rewards). Points that "somehow accumulate" erode user trust.
+    -   **Expiration UX Sensitivity**: When points are approaching expiration, design notifications that encourage spending but **do not induce anxiety** (maintain the boundary with Loss Aversion Exploitation).
+    -   **Minor User Purchase Limits**: If a point purchase feature exists, implement purchase caps for minor users and a parental consent flow.
+
+-   **Leaderboard Design**:
+    -   **Ethics of Relative Comparison**: Global rankings force "comparison with others," causing discomfort for lower-ranked users. Prioritize **local rankings (friends only)** or **self-comparison (against last week's self)**.
+    -   **Privacy**: Listing in rankings defaults to OFF (opt-in only) is recommended.
+    -   **Competition vs. Cooperation Balance**: Cooperative gamification (team challenges, etc.) carries lower social division risk than competitive models and is effective for community building.
+
+-   **Streak Design**:
+    -   **Prohibition of Exploiting Loss Aversion (Linked to §27.1 Anti-Addiction Pattern)**: Making excessive fear of losing a streak the core of the design is prohibited. Base the design on positive reinforcement ("I did it again today") and eliminate coercive messaging like "losing it makes everything pointless."
+    -   **Streak Protection Feature**: Providing a "Streak Shield" or similar protection for unavoidable interruptions (travel, illness, etc.) is recommended. Excessive penalties negatively impact wellbeing.
+
+### 32.3. Gamification Measurement & Ethics Audit
+
+-   **KPIs**:
+    | Metric | Purpose | Note |
+    |--------|---------|------|
+    | Task Completion Rate | Determine behavioral change success | Primary goal |
+    | Session Duration | Engagement measurement | Excessive increase is a dependency signal |
+    | Opt-Out Rate | Gamification rejection rate | High rate signals design revision needed |
+    | NPS (Net Promoter Score) | Overall satisfaction | Compare before and after gamification introduction |
+
+-   **Quarterly Ethics Audit**: Verify the following each quarter:
+    1.  **Dependency Metrics**: Is the DAU/MAU ratio rising sharply beyond design intent?
+    2.  **Vulnerable User Impact**: Is there abnormal concentration of spending/usage time among minor users?
+    3.  **Regulatory Compliance**: Alignment with DSA, UK Online Safety Act, and applicable national consumer protection laws
+    4.  **Dark Pattern Verification**: Consistency with §7's dark pattern prohibition list
+
+---
+
+## 33. Design QA & Visual Regression
+
+> [!NOTE]
+> Visual regression prevention is the "guardian of quality." This section defines the framework for continuously and automatically guaranteeing that design system changes do not introduce unintended destructive effects on UI.
+
+### 33.1. Visual Regression Testing Framework
+
+-   **Law**: Component changes, token updates, and library upgrades that introduce unintended visual changes (regressions) to existing UI are the worst form of "silent bugs" — changes that reviewers cannot catch slip into production. Visual regression testing is a mandatory CI requirement.
+-   **Recommended Tools**:
+    | Tool | Characteristics | Recommended Use Case |
+    |------|----------------|---------------------|
+    | **Chromatic** | Storybook integration. Cloud-based visual diff. For SaaS projects. | Mainstream recommendation |
+    | **Percy** (BrowserStack) | Strong cross-browser support. Enterprise-grade. | Cross-browser compatibility-critical projects |
+    | **Playwright + pixelmatch** | E2E screenshot comparison. Self-hosted. Cost-conscious. | Open-source-oriented projects |
+    | **Backstop.js** | Simple setup. Page-level comparison. | Retroactive addition to legacy projects |
+
+-   **CI Pipeline Integration**:
+    ```yaml
+    # GitHub Actions: Visual Regression Example (Chromatic)
+    - name: Run Chromatic Visual Testing
+      uses: chromaui/action@v11
+      with:
+        projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        exitOnceUploaded: false
+        onlyChanged: true  # Only Stories related to changed files
+        autoAcceptChanges: false  # Always require human review
+    ```
+
+### 33.2. Storybook Design Governance
+
+-   **Story Coverage Mandate**:
+    -   All new UI components MUST include at minimum the following Stories:
+        1.  **Default**: Default state
+        2.  **Loading**: Skeleton/spinner state during data fetching
+        3.  **Error**: Error state (error message + recovery UI)
+        4.  **Empty**: Empty data state (per §10 Empty State guidelines)
+        5.  **Dark Mode**: Dark theme (`globals.theme: 'dark'`)
+        6.  **Mobile (375px)**: Layout at mobile width
+    -   **A11y Addon Mandate**: Install `@storybook/addon-a11y` in all projects to automatically run axe-core accessibility checks with each Story render.
+    -   **Token Coverage**: Components using Design Tokens must document token value violations (hardcoded values) alongside Storybook args.
+
+-   **Story Quality Gate**:
+    ```typescript
+    // Required fields in Storybook meta definition
+    const meta: Meta<typeof Button> = {
+      title: 'UI/Button',
+      component: Button,
+      tags: ['autodocs'],          // Auto-documentation generation
+      parameters: {
+        a11y: { disable: false },  // Always enable A11y checks
+        chromatic: {
+          modes: {                 // Chromatic mode support
+            light: { theme: 'light' },
+            dark: { theme: 'dark' },
+          },
+        },
+      },
+      argTypes: {
+        // Explicitly define all Props (ensure documentation quality)
+      },
+    };
+    ```
+
+### 33.3. Design QA Process
+
+-   **Mandating a Design QA Phase**: MUST incorporate a **Design QA phase** as a required step in the release flow for new features and UI modifications.
+    ```
+    Design (Figma)
+        ↓
+    Implementation (Code)
+        ↓
+    【Design QA】← Required step
+      ├── Visual comparison with Figma design (using Dev Mode)
+      ├── Visual regression test approval (Chromatic, etc.)
+      ├── A11y automated check (axe-core CI)
+      └── Responsive verification across 3 environments (§5.1 Universal Beauty Protocol)
+        ↓
+    Staging verification
+        ↓
+    Production release
+    ```
+
+-   **Design Review Checklist (Pre-PR Merge)**:
+    | Checklist Item | Owner | Verification Method |
+    |----------------|-------|---------------------|
+    | Implementation matches Figma design | Designer or Frontend Engineer | Figma Dev Mode + Browser comparison |
+    | No visual regressions | CI auto + Reviewer approval | Chromatic / Percy |
+    | No A11y violations (critical/serious) | CI auto | axe-core / Lighthouse |
+    | Design Token compliance | CI auto | Token Drift Checker (§24.3) |
+    | Dark mode display verification | Implementer + Reviewer | Storybook / DevTools |
+    | Mobile (375px) display verification | Implementer | DevTools / Physical device |
+
+-   **Pixel-Perfect Definition**: Requiring 100% pixel-perfect match is unrealistic. Apply the following tolerance standards:
+    -   **Tolerated**: Font rendering differences (across OS/browser): ±1px
+    -   **Tolerated**: Color differences due to anti-aliasing: ≤5% luminance difference
+    -   **Not Tolerated**: Spacing differences, explicit color changes, element position shifts (≥2px)
+
+### 33.4. Storybook-Driven Development (SDD)
+
+-   **SDD Recommended**: The approach of developing new components first in Storybook before integrating into pages (Storybook-Driven Development) is recommended.
+    -   **Benefits**: Components available for immediate isolated review. A11y checks applied early. Faster feedback loop with designers.
+    -   **Workflow**:
+        1. Review design in Figma
+        2. Implement component in Storybook (using mocks/MSW)
+        3. Designer reviews and approves in Storybook
+        4. Integration into pages
+        5. Visual regression approval via Chromatic
+
+---
+
+
+
+## 34. Biometrics & Authentication UX
+
+> [!IMPORTANT]
+> Passkeys and biometric authentication are the "gold standard for frictionless authentication". As of 2026, FIDO2/WebAuthn support is a mandatory requirement for all new products.
+
+### 34.1. Passkey (FIDO2/WebAuthn) UX Design Principles
+
+-   **Background**: Apple, Google, and Microsoft completed platform-wide passkey support (2023–), and as of 2026, passkeys are supported across all major browsers and OSes as the "successor standard to passwords". Under WCAG 2.2 3.3.8 (Accessible Authentication), adopting authentication methods that do not require complex cognitive tasks is a **legal obligation**.
+-   **Passkey-First Design Principles**:
+    1.  **Registration Flow UX**: Display a "Set up a passkey?" banner immediately after the first successful login or account creation, and actively guide users toward the secure authentication method.
+    2.  **Authentication Trigger UI**: Passkey authentication button labels MUST explicitly state the biometric type: "Sign in with Face ID", "Sign in with fingerprint", etc. The generic label "Sign in with passkey" is also acceptable.
+    3.  **Fallback Guarantee**: When a device does not support passkeys or authentication fails, always clearly present alternative methods: SMS OTP, email OTP, or password.
+    4.  **Cross-Device Support**: Implement CTAP2 (Cross-Device Authentication) UI using QR codes, enabling authentication via a smartphone passkey even in a PC browser.
+
+    ```typescript
+    // WebAuthn Authentication Flow Implementation (Minimum configuration)
+    async function authenticateWithPasskey() {
+      const options = await fetchAuthenticationOptions(); // Retrieve challenge from server
+      try {
+        const credential = await navigator.credentials.get({
+          publicKey: options,
+        });
+        await verifyCredential(credential); // Server-side verification
+      } catch (err) {
+        if (err.name === 'NotAllowedError') {
+          // User cancelled → guide to alternative methods (do NOT display error)
+          showAlternativeLoginOptions();
+        } else {
+          showFriendlyError('Authentication failed. Please try another method.');
+        }
+      }
+    }
+    ```
+
+-   **Passkey Registration UX Design**:
+    -   On the registration confirmation screen, explicitly display "This passkey will be saved to this device" to clearly communicate the storage location and provide user reassurance.
+    -   For multi-device environments, provide a UI in account settings for viewing, deleting, and managing registered passkeys by device.
+    -   **Device Loss Scenario**: Proactively provide an account recovery flow (backup codes, fallback to email/SMS authentication) in case of device loss, ensuring users are never locked out.
+
+### 34.2. Biometric Authentication UX
+
+-   **Platform API Utilization**: Maximize the use of platform-native APIs for Face ID/Touch ID (iOS) and fingerprint/facial recognition (Android), avoiding custom implementations. Native APIs guarantee appropriate privacy handling and OS-level security.
+-   **Clear Authentication State Display**:
+    -   In progress (scanning): Clear indicator with animation
+    -   Success: Immediate success feedback (haptics + screen transition)
+    -   Failure: Clear display of remaining attempts + guidance to alternative methods
+-   **Privacy Declaration**: Provide explicit UI text stating "Biometric data is stored on your device and is never sent to servers" to dispel user concerns.
+-   **Conditional UI**: Use HTML `autocomplete="username webauthn"` to implement **Conditional UI** that automatically displays passkey candidates in the autocomplete when the form is focused.
+
+    ```html
+    <!-- Conditional UI Implementation Example -->
+    <input
+      type="email"
+      autocomplete="username webauthn"
+      placeholder="Email address"
+    />
+    ```
+
+### 34.3. Multi-Factor Authentication (MFA) UX
+
+-   **Two-Factor Authentication UI Standards**:
+    -   TOTP (authenticator app) input: Set `inputmode="numeric"` + `autocomplete="one-time-code"` on the 6-digit input field to support iOS SMS autocomplete and Autofill.
+    -   SMS OTP: After OTP is sent, display a "Sent icon + countdown timer for remaining validity" to reduce user anxiety.
+    -   **Auto-Focus on Authentication Code**: Automatically focus the OTP input field to minimize physical keyboard and IME interference.
+-   **Remember This Device UX**: Activate the "Trust this device for 30 days" option ONLY when the user explicitly checks it (Pre-checked prohibited: compliance with §7 Dark Pattern Ban).
+-   **Cross-Reference**: §6 (Authentication Accessibility), `security/000_security_privacy.md`
+
+---
+
+## 35. Content Safety & Trust Design
+
+> [!WARNING]
+> The EU DSA (Digital Services Act) and UK Online Safety Act mandate platforms to provide UI for responding to illegal content. Content trust design is a compliance requirement.
+
+### 35.1. Content Reporting & Flag UI (EU DSA Art.16 Compliant)
+
+-   **Illegal Content Report UI (Mandatory)**: For platforms subject to EU DSA Art.16 (Very Large Online Platforms), it is a legal obligation to provide a **"Report (Flag)" button** on all user-generated content.
+    -   **Report Flow Design**:
+        1.  Category selection for reason (Spam / Harassment / Misinformation / Illegal content / Copyright infringement, etc.)
+        2.  Optional supplementary text field
+        3.  Submission confirmation + "Your report has been received. Check status here" link
+    -   **Response UX**: After reporting, issue a "report ID" and provide a **transparency dashboard** where users can track the response status (recommended).
+-   **Content Moderation Result UX**:
+    -   When content is removed or hidden, notify the poster of the "reason for removal" and "means to appeal" (EU DSA Art.17 compliant).
+    -   The appeal flow MUST be designed with equal ease as the reporting flow (§7 Symmetry Principle compliant).
+
+### 35.2. Trust Signal Design
+
+-   **Content Trust Hierarchy**:
+    | Content Type | Trust Signal Design |
+    |--------------|--------------------|
+    | Official / Verified Account | Verification badge (✓) + hover tooltip explaining verification reason |
+    | AI-Generated Content | Dedicated badge (§23 compliant) + glow effect |
+    | User-Generated Content | Report button always visible + community guidelines compliance display |
+    | Confidential / Sensitive Content | Content warning (confirmation required to view) design |
+    | Disputed / Misinformation Content | "Reviewed" label + link to fact-checking organization |
+
+-   **Author Trust Display**: Recommend providing **context cards** displaying contextual information such as account creation date and post history summary on user profiles (togglable via privacy settings).
+-   **Pre-Share Fact-Check Nudge**: When sharing external links, design **Friction Nudges** such as "This article was published more than 2 weeks ago. Have you checked for the latest information?" to suppress misinformation spread.
+
+### 35.3. Sensitive Content UX (Safe Messaging Design)
+
+-   **Content Warning Patterns**:
+    -   For graphic violence, self-harm, or sexual content, place a **blur overlay + warning text + "Show content" button** until the content is expanded.
+    -   Use `aria-hidden="true"` to hide post-warning content from screen readers, and design to reveal it after a confirmation action.
+-   **Mental Health-Related Content**: For searches or posts containing keywords related to self-harm or suicide, automatically display crisis resources based on **Safe Messaging Guidelines (WHO-compliant)** (§27.2 compliant).
+-   **Age Verification UX (Age Gate)**:
+    -   For age-restricted content, recommend a direct date-of-birth input method (`YYYY/MM/DD`). Click-through type ("I am 18+" button only) is considered invalid from a regulatory standpoint.
+    -   After passing the Age Gate, do not re-display it during the same session (avoid UX penalty), but do not cache it.
+
+### 35.4. Content Integrity & Provenance
+
+-   **C2PA (Content Credentials) Support**: Plan for future adoption of **Content Credentials UI** that embeds creator and tool information as metadata for images and videos, adhering to the C2PA (Coalition for Content Provenance and Authenticity) standard promoted by Adobe, Microsoft, and others.
+-   **Watermarking UX**: For AI-generated images and videos, recommend applying steganographic invisible watermarks (e.g., Google SynthID). Double-protect with an "AI-generated" badge visible to users (§23 compliant) and invisible watermarks for machine detection.
+-   **Cross-Reference**: §23 (AI-Generated UI Governance), §27 (Digital Wellbeing), `security/100_data_governance.md`
+
+---
+
+## 36. Real-Time Collaboration UX
+
+> [!NOTE]
+> Figma / Linear / Notion / Google Docs-style real-time collaborative editing is the "default experience" for SaaS products from 2026 onwards. While CRDT technology maturity has lowered implementation barriers, UX design complexity has increased.
+
+### 36.1. Presence Design (Presence Indicators)
+
+-   **Awareness UI**: In real-time collaboration environments, **Presence UI** that allows users to always know "who is here now" is essential.
+    -   **User Cursors**: Display the cursor position of other users in real time. Attach an avatar + name to each cursor. Automatically assign a color per user (Design Token: `--c-user-{index}-color`); recommend limiting to a maximum of 8 simultaneous displays.
+    -   **Focus Area Display**: Provide Focus Indicators such as "Person A is viewing Section 3" to prevent overlapping work.
+    -   **Active User List**: Always display a list of avatars of users currently in the session. Users who go offline should be distinguished by graying out.
+-   **Presence Privacy Settings**: Provide an option to "hide current work status from other users (ghost mode)". Default is ON (shared), but allow changes from privacy settings.
+
+### 36.2. Conflict Resolution UX
+
+-   **CRDT (Conflict-free Replicated Data Type)-Based UI Design**: When CRDTs are adopted, most conflicts are automatically merged, but semantic conflicts (e.g., simultaneous edits to the same field) can still occur.
+    -   **Auto-Merge Transparency**: When an automatic merge occurs, display a subtle toast notification: "Changes have been merged". Recommend providing a link to a **change history UI** where users can review how the merge was performed.
+    -   **Conflict Detection UI**:
+        ```
+        ┌─────────────────────────────────────────┐
+        │ ⚠️  Conflict detected                       │
+        │                                         │
+        │ Your change          Person A's change   │
+        │ [Priority: High]     [Priority: Medium]  │
+        │                                         │
+        │ [Use my version]     [Use their version] │
+        │ [Manual merge...]                        │
+        └─────────────────────────────────────────┘
+        ```
+    -   Always provide users with **3 choices (my version / their version / manual merge)** to guarantee zero data loss.
+-   **Optimistic Updates and Rollback**: Reflect user actions to the local state immediately (Optimistic UI), and automatically restore operations from the **Undo queue** when server sync fails.
+
+### 36.3. Version History UX
+
+-   **Undo/Redo Scope Design**: In multi-user environments, "undo only my own operations" aligns with user intuition. Global Undo that involves other users' operations is prohibited.
+-   **Version Snapshot UI**:
+    -   **Auto-Snapshot**: Automatically create a snapshot before significant changes (mass deletion, structural changes, etc.).
+    -   **Named Versions**: Provide the ability for users to manually assign version names, enabling natural restore operations such as "go back to how it looked yesterday evening".
+    -   **Diff View**: Provide a UI for visually comparing changes between versions in Diff format (added: green / deleted: red).
+-   **Contribution Visualization**: Provide a **Blame feature** (similar concept to Git blame) that displays "who changed what and when" for each content element, improving team accountability.
+
+### 36.4. Comment & Feedback System UX
+
+-   **Contextual Comments**: **Inline comments** tied to "specific elements or text ranges" rather than the "entire page" are recommended (Google Docs-style).
+-   **Thread UX**:
+    -   Allow comments to be nested in reply threads, with a maximum depth of 3 levels (unlimited nesting causes cognitive overload).
+    -   Provide a **Resolve feature** for threads, and keep resolved comments retained in a default-collapsed state (available for reference as history).
+-   **Notification Design**: Deliver notifications for replies and @mentions in **real-time push**, while also providing a "digest notification" option (e.g., hourly) (preventing notification fatigue: §27.1 compliant).
+-   **Cross-Reference**: §14 (Interaction Safety Protocols), §19 (UX Research)
+
+---
+
+## 37. Platform Engineering & Design System Ops
+
+> [!NOTE]
+> Evolving design system operations from "manual work" to "automated pipelines" is a prerequisite for Design Ops Maturity Level 5 from 2026 onwards.
+
+### 37.1. Figma REST API & Design Automation
+
+-   **Figma REST API Usage Scenarios**:
+    -   **Token Extraction**: Build a Bot that regularly retrieves Figma Variables via the Figma REST API and automatically commits them as `tokens.json` in W3C DTCG format (eliminating manual exports).
+    -   **Design Quality Reports**: Build automated check reports that generate usage statistics for components, Variable application status, and detection of undefined styles.
+    -   **Design-Implementation Divergence Detection**: Design a workflow that automatically compares Figma component specifications with Storybook component Props definitions and periodically reports divergence to Slack/GitHub.
+
+    ```typescript
+    // Figma REST API: Example of retrieving Variables
+    const response = await fetch(
+      `https://api.figma.com/v1/files/${FILE_ID}/variables/local`,
+      { headers: { 'X-Figma-Token': FIGMA_TOKEN } }
+    );
+    const { variables, variableCollections } = await response.json();
+    // Convert to W3C DTCG format → write to tokens.json
+    ```
+
+-   **Design Sprint Automation**:
+    -   Recommend building a GitHub Actions / Make (formerly Integromat) workflow that detects Figma frame status changes (Draft/Ready/Shipped) via Webhook and **automatically updates Jira/Linear ticket status**.
+
+### 37.2. Internal Developer Portal (IDP) & Design System Integration
+
+-   **Background**: With the spread of Platform Engineering (Internal Developer Platforms: IDPs), integrating IDPs like Backstage with the design system makes it possible to build an **Integrated Developer Portal** where "component catalog → Storybook → Figma Spec" can be explored from a single source.
+-   **Catalog Integration Design**:
+    -   Integrate a design system plugin into Backstage (or equivalent IDP) and build a catalog where **component name → Storybook URL → Figma Frame URL → npm package version** can be referenced in one place.
+    -   Display **README and usage statistics** (number of uses and version distribution across projects) in the catalog, and automate the decision to deprecate unused components.
+-   **Golden Path Definition**: Use the IDP to define an "approved step-by-step flow (Golden Path)" for adding new components, updating existing components, and deprecations, ensuring governance consistency.
+
+### 37.3. Advanced Continuous Integration for Design Systems
+
+-   **Progressive Design CI**:
+    ```yaml
+    # GitHub Actions: Advanced Design System CI example
+    name: Design System CI
+    on: [push, pull_request]
+    jobs:
+      token-validation:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - name: Validate W3C DTCG Token Schema
+            run: npx @tokens-studio/sd-transforms validate tokens.json
+          - name: Check Token Drift vs Figma
+            run: node scripts/token-drift-check.js
+            env:
+              FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+      component-quality:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Storybook Build
+            run: npm run build-storybook
+          - name: A11y Test (axe-core)
+            run: npx storybook test --coverage
+          - name: Visual Regression (Chromatic)
+            uses: chromaui/action@v11
+            with:
+              projectToken: ${{ secrets.CHROMATIC_TOKEN }}
+    ```
+
+-   **Migration from Snapshot Tests to Visual Tests**: DOM snapshots from `jest-snapshot` have high maintenance costs and do not detect actual visual changes. Recommend fully migrating to visual regression testing with Chromatic/Percy.
+
+### 37.4. Design System Monitoring & Observability
+
+-   **Design System Observability**:
+    -   **Adoption Analytics**: Build a **usage dashboard** that tracks how many times and in which versions each component in the component library is being used across real projects.
+    -   **Breaking Change Impact Assessment**: Before a MAJOR version release, pre-calculate the number of affected projects using `semver-diff` tools or dependency graph analysis, and visualize release risk.
+    -   **Error Rate Tracking**: Classify errors from error tracking tools like Sentry by component, and integrate "this component is causing ◯ errors in production" into the health score (§21.4 compliant).
+
+-   **SLO (Service Level Objective) Definitions**:
+    | SLO Metric | Target |
+    |------------|---------|
+    | Storybook Build Time | ≤ 5 minutes |
+    | Visual Regression Review Time | ≤ 24 hours |
+    | Critical A11y Bug Fix Time | ≤ 24 hours |
+    | Token Drift Detection to Fix | ≤ 1 week |
+    | MAJOR Breaking Change Deprecation Notice Lead Time | ≥ 3 months |
+
+-   **Cross-Reference**: §21 (Design System Governance), §24 (Cross-Platform Token Federation), §33 (Design QA & Visual Regression), `engineering/000_engineering_standards.md`
 
 ---
 
@@ -755,18 +1728,44 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 | Onboarding / Empty State | §10 | `product/500_growth_marketing`, `operations/300_customer_experience` |
 | Microcopy / Writing / Tooltip | §10 | `product/600_brand_strategy` |
 | AI UX / Agentic / GenUI / Copilot | §9 | `ai/000_ai_engineering` |
+| MCP / Tool Call Transparency / Permission UI | §9 | `ai/000_ai_engineering`, `security/000_security_privacy` |
+| Multimodal AI UX / Modality State Display | §9 | `ai/000_ai_engineering` |
 | User Sovereignty / Dark Patterns / Ethical UX | §7 | `security/100_data_governance`, `product/000_product_strategy` |
 | Hospitality / Anticipatory / Locale Format | §12 | `product/800_internationalization` |
 | i18n / Localization | §15 | `product/800_internationalization`, `core/200_language_protocol` |
 | Performance UX / CWV / Perceived | §17 | `engineering/000_engineering_standards`, `operations/400_site_reliability` |
 | Spatial Computing / XR / visionOS | §18 | `engineering/410_native_platforms` |
 | UX Research / Measurement / NPS | §19 | `ai/100_data_analytics`, `product/100_market_validation` |
+| AI-Augmented UX Research / Synthetic Testing / Behavioral Analytics Ethics | §19.4 | `ai/100_data_analytics`, `ai/000_ai_engineering` |
 | Maturity Model / Anti-Patterns | §20 | All rules (universal) |
+| Design System Governance / DSaaP / SemVer | §21 | `engineering/000_engineering_standards` |
+| Data Visualization / Chart A11y / IA | §22 | `ai/100_data_analytics`, `engineering/300_web_frontend` |
+| AI-Generated UI / Vibe Coding / EU AI Act Disclosure | §23 | `ai/000_ai_engineering`, `security/000_security_privacy` |
+| Cross-Platform / Token Pipeline / Token Drift | §24 | `engineering/400_mobile_flutter`, `engineering/410_native_platforms` |
+| Sustainability / Green UX / Carbon-Aware | §25 | `operations/400_site_reliability` |
+| Neurodiversity / ADHD / Cognitive Accessibility | §26 | `security/100_data_governance`, `product/000_product_strategy` |
+| Digital Wellbeing / Ethical Design / Screen Time | §27 | `security/100_data_governance`, `product/000_product_strategy` |
+| Voice UX / VUI / Voice Accessibility / STT/TTS | §28 | `ai/000_ai_engineering`, `engineering/410_native_platforms` |
+| Personalization / Filter Bubble / Context Adaptation | §29 | `ai/100_data_analytics`, `security/100_data_governance`, `product/000_product_strategy` |
+| Design Tokens 2.0 / Modes / Scoping / Multi-Brand | §30 | `engineering/300_web_frontend`, `engineering/000_engineering_standards` |
+| Offline-First / Service Worker / Background Sync / IndexedDB | §31 | `engineering/300_web_frontend`, `operations/400_site_reliability` |
+| Gamification / Game Mechanics / Points / Badges / Ethics | §32 | `product/000_product_strategy`, `security/100_data_governance` |
+| Visual Regression / Design QA / Storybook / Chromatic / CI | §33 | `engineering/000_engineering_standards`, `engineering/300_web_frontend` |
+| Passkey / FIDO2 / WebAuthn / Biometric Auth / Conditional UI | §34 | `security/000_security_privacy` |
+| Content Safety / DSA Art.16 / Trust Signal / Age Gate / C2PA | §35 | `security/100_data_governance`, `product/000_product_strategy` |
+| Real-Time Collaboration / CRDT / Conflict Resolution / Presence | §36 | `engineering/000_engineering_standards`, `engineering/300_web_frontend` |
+| Platform Engineering / IDP / Figma API / Design System CI / SLO | §37 | `engineering/000_engineering_standards` |
 
 ---
 
 > **Cross-Reference (Tech Stack-Specific Rule References)**
-> This file defines technology stack-agnostic Universal design principles. For framework-specific implementation details (React Hooks ordering, Hydration Mismatch, suppressHydrationWarning, Server Component boundaries, Hard Session Refresh, etc.), refer to:
-> - Web: `engineering/300_web_frontend.md`
-> - Mobile (Flutter): `engineering/400_mobile_flutter.md`
-> - Native (Kotlin/Swift): `engineering/410_native_platforms.md`
+> This file (§1–§37) defines technology stack-agnostic Universal design and UX principles. For framework-specific implementation details, refer to:
+> - **Web (React/Next.js, etc.)**: `engineering/300_web_frontend.md` — Hooks ordering, Hydration Mismatch, suppressHydrationWarning, Server Component boundaries, Hard Session Refresh
+> - **Mobile (Flutter)**: `engineering/400_mobile_flutter.md` — Widget lifecycle and platform-specific UI
+> - **Native (Kotlin/Swift)**: `engineering/410_native_platforms.md` — HIG/Material-specific implementation, Haptics API
+> - **AI/ML**: `ai/000_ai_engineering.md` — GenAI quality assurance, EU AI Act detailed compliance, Voice AI integration
+> - **Data Analytics**: `ai/100_data_analytics.md` — Measurement, A/B testing methodologies, Personalization model governance
+> - **Internationalization**: `product/800_internationalization.md` — i18n library selection, translation workflows
+> - **Site Reliability**: `operations/400_site_reliability.md` — Service Worker monitoring, offline metrics
+> - **Product Strategy**: `product/000_product_strategy.md` — Gamification ethics, dependency design risk
+> - **Engineering Standards**: `engineering/000_engineering_standards.md` — Visual regression automation, CI quality gates

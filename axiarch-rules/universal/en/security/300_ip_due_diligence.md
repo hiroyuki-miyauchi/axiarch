@@ -2,14 +2,14 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-04-19
 
 > [!IMPORTANT]
 > **Supreme Directive**
 > "Intellectual property is the invisible moat — unprotected IP is an invitation to competitors."
 > All IP decisions must treat protection, ownership clarity, and due diligence as non-negotiable.
 > Strictly follow: **IP Protection > Legal Compliance > Business Strategy > Speed**.
-> **50 Sections.**
+> **61 Sections.**
 
 ---
 
@@ -25,7 +25,19 @@
 - [VIII. Due Diligence Operations (§35-§41)](#viii-due-diligence-operations-35-41)
 - [IX. Governance & Ongoing Management (§42-§47)](#ix-governance--ongoing-management-42-47)
 - [X. Compliance & Timeline (§48-§50)](#x-compliance--timeline-48-50)
+- [XI. Geopolitical Risk & Export Controls (§51)](#xi-geopolitical-risk--export-controls-51)
+- [XII. GenAI Supply Chain IP Governance (§52)](#xii-genai-supply-chain-ip-governance-52)
+- [XIII. IP Monetization Strategy (§53)](#xiii-ip-monetization-strategy-53)
+- [XIV. Antitrust & IP (§54)](#xiv-antitrust--ip-54)
+- [XV. VC Fundraising & IP Milestones (§55)](#xv-vc-fundraising--ip-milestones-55)
+- [XVI. IP Automation Under EU AI Act Full Enforcement (§56)](#xvi-ip-automation-under-eu-ai-act-full-enforcement-56)
+- [XVII. Clean Tech & Carbon Credit IP (§57)](#xvii-clean-tech--carbon-credit-ip-57)
+- [XVIII. IP Litigation Finance (§58)](#xviii-ip-litigation-finance-58)
+- [XIX. Layered IP Protection Strategy (§59)](#xix-layered-ip-protection-strategy-59)
+- [XX. Sovereign IP & National Security (§60)](#xx-sovereign-ip--national-security-60)
+- [XXI. IP-Centric Deal Architecture (§61)](#xxi-ip-centric-deal-architecture-61)
 - [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index)
+- [Appendix B: Global Jurisdiction IP Protection Matrix](#appendix-b-global-jurisdiction-ip-protection-matrix)
 
 ---
 
@@ -1243,7 +1255,14 @@ jobs:
 | **Jun 2026** | Colorado AI Act takes effect | High-risk AI system governance obligations |
 | **Aug 2026** | EU AI Act: Full enforcement (all risk categories) | Complete AI-related IP attribution and disclosure compliance |
 | **2027** | EU CRA (Cyber Resilience Act): Software security requirements fully enforced | SBOM/vulnerability management and IP protection alignment |
+| **2027** | EU CSDDD (Corporate Sustainability Due Diligence Directive): Corporate sustainability DD obligations (incl. supply chain) | Assess green IP disclosure obligations in supply chain context (→ §57) |
+| **2027 Q1** | India DPDP Act (Digital Personal Data Protection Act) expected to take effect | Review data processing policies for training datasets and IP-related confidential information targeting the Indian market |
+| **2027 Q2** | Brazil LGPD Second Amendment (enhanced data processing obligations for IP-related data expected) | Confirm local law compliance for IP monetization strategies targeting South American markets |
+| **2027** | CHIPS Act (US): IP disclosure and compulsory license conditions for subsidy recipients enter full effect | If holding semiconductor/hardware IP, integrate with national security review process (→ §60) |
+| **2028** | WIPO: Member state conferences on international AI-copyright standards (negotiations ongoing) | Monitor global harmonization trends for AI-IP attribution |
 | **2028** | Japan: Next Unfair Competition Prevention Act amendment (under review) | Monitor trade secret and limited-provision data protection trends |
+| **2028** | EU Cyber Solidarity Act: Full enforcement | AI/cloud system IP disclosures may be required by European cyber authorities |
+| **2028–2030** | Quantum computing practicality window: Practical threat to existing RSA/ECC crypto | Final PQC migration and IP strategy integration phase (→ §50 Rule 63.362) |
 
 ### Rule 63.351: Compliance Monitoring
 - **Quarterly**: Scan IP-related legislation and case law developments in key jurisdictions
@@ -1283,11 +1302,16 @@ jobs:
 | Technology | IP Protection Methods | Considerations |
 |---|---|---|
 | **Quantum Computing** | Patents (quantum algorithms, gate design) + trade secrets | IP updates alongside quantum-resistant crypto migration |
+| **Post-Quantum Cryptography (PQC)** | Patents (PQC implementation optimization, HW acceleration) + NIST standards participation | Standard algorithms themselves difficult to patent — implementation optimization is the main battleground |
+| **Agentic AI / MCP / A2A** | Patents (agent orchestration methods) + trade secrets (prompt design) | Inter-agent IP attribution is a gray zone — human oversight records are mandatory |
+| **OSS AI Model Fine-Tuning** | Protect delta weights (LoRA/QLoRA) as trade secrets | Check Llama/Mistral etc. license terms carefully (commercial use restrictions) |
 | **Web3/Decentralized Apps** | Patents + trade secrets (smart contract logic) | OSS-first ecosystem — careful license strategy design |
 | **Metaverse/XR** | Design rights (virtual space) + trademarks (virtual brands) | Jurisdiction issues for IP infringement in virtual worlds |
 | **BMI (Brain-Machine Interface)** | Patents + trade secrets + ethics review | Intersection with medical device regulations, bioethics |
 | **Synthetic Biology** | Patents (gene sequences, bioprocesses) + trade secrets | Utility of natural laws, lessons from CRISPR patent disputes |
 | **Edge AI** | Patents (on-device models) + trade secrets (training data processing) | IP protection for model compression techniques |
+| **Spatial Computing / XR / Vision Pro-class** | Design rights (virtual space UI) + patents (depth sensing, eye-tracking) + trademarks (virtual brands) | IP infringement jurisdiction in physical-virtual hybrid spaces is unsettled — international arbitration clauses are mandatory in all license agreements |
+| **Neurotech / BCI Wearables** | Patents (signal processing algorithms, electrode design) + mandatory ethics review | Neural data is PII at the highest confidentiality tier — apply GDPR/APPI maximum-sensitivity protections |
 
 ### Rule 63.361: Building Future Technology IP Portfolios
 - **Early filing strategy**: Secure foundational patents before technology matures
@@ -1295,29 +1319,1079 @@ jobs:
 - **Standards participation**: Join emerging technology standards bodies (W3C / IEEE / IETF) for SEP acquisition
 - **Technology roadmap alignment**: Sync 3-5 year technology roadmaps with IP filing strategy
 
+### Rule 63.362: Post-Quantum Cryptography (PQC) IP Strategy
+- **NIST PQC Standards finalized (August 2024)**: CRYSTALS-Kyber (ML-KEM), CRYSTALS-Dilithium (ML-DSA), FALCON (FN-DSA), SPHINCS+ (SLH-DSA)
+  - The standard algorithms themselves are difficult to patent → **Patent opportunities in high-speed implementation, hardware acceleration, and hybrid migration tooling**
+  - Optimizing TLS 1.3 + PQC hybrid key exchange implementations is an important patent territory
+- **Harvest Now, Decrypt Later (HNDL) risk mitigation**:
+  - Synchronize PQC migration plans with patent strategy; secure patents on migration tools and the migration process itself
+  - Early filing recommended for hybrid operation techniques combining legacy cryptographic protocols with PQC
+
+### Rule 63.363: Agentic AI / MCP / A2A Protocol IP Issues
+- **Gray Zone IP Attribution — Mandatory Protocol**:
+  - Copyright for outputs from multiple AI agents collaborating is not yet legally settled
+  - **Principle**: Copyright claims viable only for portions where humans substantially contributed to orchestration design, goal-setting, and output evaluation
+  - **Documentation obligation**: Fully preserve agent execution logs (each agent's assigned steps, decision processes) (→ §23)
+- **IP Protection for Prompts and Workflow Design**:
+  - Complex multi-agent orchestration designs: prioritize **trade secret** protection (public disclosure enables easy competitor replication)
+  - Patent focus on technical innovations: inter-agent coordination protocols, task decomposition/assignment algorithms
+- **MCP (Model Context Protocol) Usage Precautions**:
+  - Business logic and prompt templates embedded in MCP servers: manage as trade secrets
+  - When using third-party MCP servers: confirm ToS (data usage and IP attribution clauses)
+
+### Rule 63.364: Open-Source AI Model Fine-Tuning Strategy
+- **Commercial License Verification (Mandatory)**:
+
+| Base Model | License | Commercial Use | Fine-Tuning Restrictions |
+|---|---|---|---|
+| Llama 3.x | Meta Llama 3 Community License | Separate application required if MAU >700M | Permitted (commercial use of logo/name restricted) |
+| Mistral / Mixtral | Apache 2.0 | Free | Permitted |
+| Gemma 2 | Gemma Terms of Use | Permitted | Restrictions on use against Google-competing products |
+| Phi-4 | MIT | Free | Permitted |
+
+- **Fine-Tuned Model Protection Policy**:
+  - While inheriting base model license, **protect delta weights (LoRA Adapter / QLoRA) as trade secrets**
+  - Proprietary training datasets and data pipelines for fine-tuning: protect via patent or trade secret
+  - Novel architectural improvements (new attention mechanisms, positional encoding, etc.): consider patent filing
+  - **When serving via SaaS**: AGPL-licensed models may trigger OSS source disclosure obligations for network-based delivery — verify carefully
+
+---
+
+# XIII. IP Monetization Strategy (§53)
+
+---
+
+## §53. IP as a Standalone Revenue Stream
+
+### Rule 63.390: IP Licensing Monetization Framework
+- **Monetization Model Types**:
+
+| Model | Overview | Best Fit | Revenue Scale |
+|---|---|---|---|
+| **Licensing (Non-exclusive)** | Grant same IP license to multiple licensees | Widely adopted tech (incl. SEPs) | Medium–Large |
+| **Licensing (Exclusive)** | Exclusive license to single licensee | Strong synergy in specific market | Large |
+| **Cross-licensing** | Mutual IP exchange, effectively royalty-free | Litigation avoidance, R&D acceleration with competitors | Cash-neutral |
+| **Patent Pool Participation** | Contribute patents to MPEG-LA / Via / Avanci etc. | SEP holders, standards technology | Medium–Large (stable) |
+| **IP Holding Company (IPCo)** | Establish dedicated IP holding/licensing entity | Large portfolios, business separation | Large |
+| **Outright Assignment** | Transfer full IP ownership to third party | Strategically non-core IP, fundraising | Lump sum |
+| **IP Tokenization / Fractional** | Fractional ownership sold on blockchain | Liquidity creation, multi-investor participation | Emerging / uncertain |
+
+### Rule 63.391: Licensing Program Design
+- **Royalty Rate-Setting Principles**:
+  - Use **industry benchmark rates (§28 Rule 63.202)** as reference
+  - **Comparable License Agreements (CLAs)**: Collect and database past comparable licensing precedents as negotiation basis
+  - **Nash Bargaining Solution**: Economic framework for rate-setting (SSPPU: Smallest Saleable Patent Practicing Unit as calculation basis)
+  - **Royalty Stacking**: Evaluate the reasonableness of total stacked royalties when multiple IPs overlap (especially critical in FRAND context)
+
+- **Licensing Agreement Mandatory Clauses**:
+  - [ ] Explicit licensed IP identification (patent numbers, version-controlled IP list as attachment)
+  - [ ] Scope of license (geography, field, purpose, sublicense rights)
+  - [ ] Royalty basis (SSPPU / end-product price / fixed fee)
+  - [ ] Reporting & Audit Rights (annual, cost allocation, trigger conditions)
+  - [ ] Most Favored Licensee (MFN) clause consideration (exercise caution for SEP/FRAND)
+  - [ ] Grantback clause for improvement inventions (non-exclusive strongly recommended; exclusive creates antitrust risk)
+  - [ ] Termination conditions (patent invalidation, payment default, bankruptcy)
+  - [ ] Arbitration & governing law (recommend WIPO/ICC arbitration for licensing disputes)
+
+### Rule 63.392: IPCo (IP Holding Company) Strategy
+- **IPCo Design Objectives**:
+  - Ring-fence IP from operating company risks (litigation, insolvency)
+  - Tax efficiency optimization (IP-favorable jurisdictions: Netherlands "Innovation Box", Ireland "Knowledge Development Box", Luxembourg "IP Box")
+  - Centralized licensing program management
+
+- **Tax Considerations for IPCo Establishment**:
+  - **BEPS (Base Erosion and Profit Shifting)**: Comply with OECD BEPS Action 13 (transfer pricing, country-by-country reporting)
+  - **Pillar Two (Global Minimum Tax 15%)**: Confirm effective tax rate in IPCo jurisdiction (calculate top-up tax for erosion prevention)
+  - **Transfer pricing documentation**: Prepare ALP (Arm's Length Principle)-based valuation at IP transfer (country-by-country reporting obligation)
+
+### Rule 63.393: Patent Pools and Licensing Consortia
+- **Participation Decision Criteria**:
+  - Whether company patents are recognized as essential technology within the pool (Essentiality evaluation)
+  - Whether the pool's royalty rate meets FRAND conditions accepted in the market
+  - Impact on competitor relationships through pool participation (shared licensing → licenses granted to competitors)
+
+- **Major Patent Pools (as of 2025)**:
+
+| Pool | Technology Area | Notes |
+|---|---|---|
+| **MPEG-LA** | HEVC / VVC / H.264 / AVC | Encoders and decoders covered |
+| **Via Licensing (under Sisvel)** | Wi-Fi / Bluetooth / 4G / 5G | Pool for standardized SEPs |
+| **Avanci** | IoT / Automotive (4G/5G) | FRAND consolidated licensing model |
+| **Access Advance** | VVC / H.266 / HEVC Plus | Next-gen video compression standard |
+| **Open Patent Alliance (OPA)** | Wi-Fi / Bluetooth | Low-cost access for SMEs |
+
+### Rule 63.394: PAE (Patent Assertion Entity) vs. Operating Company — Attack & Defense
+- **Defensive Strategy (when attacked by PAE)**:
+  - File IPR (Inter Partes Review) at PTAB (Patent Trial and Appeal Board) for invalidation
+  - Prioritize negotiated settlement (weigh against total litigation cost)
+  - Join LOT Network / OIN if not already a member
+  - Leverage anti-PAE defense services (RPX / Unified Patents)
+
+- **Offensive Strategy (active enforcement of own IP)**:
+  - Always conduct FTO analysis before enforcement actions (pre-assess retaliatory litigation risk)
+  - Consider ITC Section 337 (import exclusion orders — fast and powerful but strict requirements)
+  - Utilize litigation cost insurance and contingency fee law firms
+
+### Rule 63.395: IP Licensing KPIs and Financial Management
+- **Mandatory KPIs**:
+  - License revenue (absolute + as percentage of total business revenue)
+  - Active licensee count (by region and field)
+  - Reporting/audit cycle compliance rate (count of delinquent licensees)
+  - Unpaid/delayed royalty incidents and collection rate
+  - Average negotiation duration for new license acquisitions
+
+- **Financial Management of License Revenue**:
+  - Visualize license revenue as **an independent line item on the P&L** (directly impacts IPO and investor valuations)
+  - Separate management of guaranteed fees (fixed) and running royalties (variable) (per ASC 606 / IFRS 15)
+  - Map to intangible asset amortization (GAAP/IFRS in-progress intangible asset accounting)
+
+---
+
+# XIV. Antitrust & IP (§54)
+
+---
+
+## §54. IP × Competition Law in the GenAI Era
+
+### Rule 63.400: Overview of Antitrust-IP Intersection
+- **Core Tension**: IP grants temporary monopoly rights (patents: 20 years, copyright: 70+ years) — competition law regulates market monopolies
+- **IP Exemption Principle**: IP enforcement is generally not anticompetitive, but the following acts are regulated:
+  - IP sheltering with intent to monopolize entire markets
+  - SEP license refusals in violation of FRAND terms
+  - Patent evergreening (artificially extending market monopolies to block competitor entry)
+  - Price coordination through anticompetitive patent pools or cross-licensing
+
+### Rule 63.401: GenAI Monopoly Risk (2025-2026 Latest Developments)
+- **Global AI Monopoly Investigations**:
+  - **EU**: European Commission investigating competitive concerns from OpenAI / Microsoft / Google / AWS / NVIDIA in AI markets (2025–)
+  - **US**: DOJ/FTC investigating FANG/Big Tech enclosure of base models (API access restriction, data monopolization)
+  - **UK**: CMA identified AI supply chain competition risks in "AI Foundation Models: Initial Report" (2024)
+  - **Japan**: Japan Fair Trade Commission investigating dominance abuse risks by AI system providers (2024 report)
+
+- **Specific Antitrust Risk Scenarios**:
+  - Exclusive API access restriction → downstream startup market exclusion
+  - Training data monopolization (e.g., full internet snapshot → insurmountable entry barrier for later entrants)
+  - GPU-AI software bundling (tying arrangement)
+  - Patent/model monopolization via acqui-hires of competing startups by AI-capable incumbents
+
+### Rule 63.402: FRAND Principle Extension to GenAI
+- **Academic and Regulatory Trends (2025-2026)**:
+  - Some regulators and academics advocate FRAND-like access obligations for AI foundation model training data and inference APIs
+  - EU AI Act Article 53: GPAI providers must disclose technical documentation and training data summaries → FRAND-like transparency requirements
+  - **Key watch point**: Mandatory compulsory access (Compulsory Access) to foundation model APIs is emerging on the regulatory agenda
+- **Strategic Implications**:
+  - As market share grows, exclusionary IP exercise faces stricter regulation
+  - Pre-assess risk that your AI technology/data will face FRAND-like disclosure demands
+
+### Rule 63.403: Global Antitrust Compliance for IP
+- **US (DOJ/FTC)**:
+  - **IP Licensing Antitrust Guidelines (2017 version)**: DOJ/FTC guidance on IP licensing (currently under revision for AI/digital markets)
+  - **Single Entity Doctrine**: Cross-licensing among affiliated entities is generally lawful; price coordination among unrelated competitors is illegal
+  - **Market Definition**: Define AI/IP markets (patent class, technology market, innovation market)
+
+- **EU (European Commission / DG COMP)**:
+  - **TTBER (Technology Transfer Block Exemption Regulation) 2014/316/EU**: Block exemption for patent and know-how licensing in EU (safe harbor from competition law)
+  - TTBER market share thresholds: **20%** or below for competing undertakings; **30%** or below for non-competing undertakings = safe harbor
+  - **Hardcore restrictions**: Price-fixing, market partitioning, and output limitations fall outside TTBER safe harbor
+
+- **Japan (Japan Fair Trade Commission)**:
+  - **Guidelines for the Use of Intellectual Property under the Antimonopoly Act (2023 revision)**: Criteria for IP licensing restriction assessment
+  - **Dominance abuse**: Large platforms refusing IP licenses to startups
+
+- **China (SAMR — State Administration for Market Regulation)**:
+  - Comply with provisions prohibiting exclusion of competition through IP abuse (effective 2023)
+  - Risk of administrative sanctions for FRAND violations on SEPs (strengthened post-Qualcomm case)
+
+### Rule 63.404: Patent Evergreening vs. Legitimate Continuation Strategy
+- **Illegitimate Evergreening (Regulated)**:
+  - Artificially extending market monopoly through patent renewal based solely on minor formulation/process changes
+  - Mass filing of improvement patents without novelty/inventive step to create blocking positions (especially pharma and AI)
+  - Pay-for-Delay (Reverse Payment Settlements): Paying generic companies to delay market entry
+
+- **Distinction from Legitimate Continuation Strategies (→§8 Rule 63.072)**:
+  - Filings containing substantive technical improvements are justified
+  - Document internal review procedures for assessing the presence of improvement to reduce evergreening classification risk
+
+### Rule 63.405: Digital Markets Act (DMA) & IP Intersection
+- **EU Digital Markets Act (DMA) — Effective 2023**:
+  - **Gatekeeper designation**: Google / Apple / Meta / Amazon / Microsoft / ByteDance are designated "gatekeepers" — subject to additional obligations
+  - **IP Intersection Points**:
+    - **Interoperability obligation**: Messaging service interoperability mandate → Protocol patents may effectively require FRAND-like disclosure
+    - **Data portability obligation**: User data transfer → Reconcile with database rights and trade secrets
+    - **App store reform**: Third-party app distribution obligation → Mandated access to platform IP
+  - **Response strategy**: Even non-gatekeepers should assess indirect DMA compliance exposure from transactions with gatekeeper entities
+
+### Rule 63.406: Antitrust Compliance Program for IP
+- **Mandatory Elements of IP Licensing Antitrust Compliance**:
+  - [ ] Annual antitrust law training for IP licensing staff
+  - [ ] "Do's and Don'ts" guide for information exchange and license negotiations with competitors
+  - [ ] Antitrust law review (external counsel) before entering cross-licenses or patent pools
+  - [ ] Regular verification of TTBER market share thresholds (EU) — establish response flow for threshold breach
+  - [ ] Pre-assess competition authority notification obligations for IP-related M&A and JVs
+
+---
+
+
+# XI. Geopolitical Risk & Export Controls (§51)
+
+---
+
+## §51. IP × Sovereign Risk
+
+### Rule 63.370: IP Risk Landscape in the Tech Sovereignty Era
+- **Background**: US-China tech rivalry, Russia sanctions, and Taiwan Strait risks directly impact IP transfer, protection, and enforcement
+- **Risk Categories**:
+  - **Export Control Risk**: Company IP (patent technology, software, cryptographic tech) triggering export restrictions
+  - **Forced IP Transfer Risk**: Countries/contracts requiring technology licensing as a condition for market access
+  - **National Jurisdiction IP Invalidation Risk**: Inability to enforce rights in adversarial countries under geopolitical tension
+  - **Supply Chain Disruption Risk**: Technology suppliers becoming subject to sanctions or export restrictions
+
+### Rule 63.371: Export Control Regulations & IP Intersection
+- **EAR (Export Administration Regulations / US)**:
+  - Classify software, code, and algorithms on EAR-controlled items list (ECCN) — especially cryptographic tech: ECCN 5D002, 5E002
+  - **Fundamental Research Exclusion (FRE)**: Research conducted with educational institutions intended for publication may be EAR-exempt
+  - **License Exception TSR**: Leverage applicable exceptions for technology transfers
+  - Disclosing internal technology to non-citizen employees also qualifies as **Deemed Export** and may be subject to EAR controls
+- **ITAR (International Traffic in Arms Regulations / US)**:
+  - Consult legal counsel on ITAR applicability for defense/space/cyber-weapon IP
+  - ITAR restrictions limit technology disclosure to foreign nationals (impacts hiring and development structure)
+- **EU Export Control Regulations (EG No 428/2009, as amended)**:
+  - Comply with EU dual-use technology export controls
+  - Intangible Technology Transfer (ITT) controls for cybersecurity technology
+- **Japan: Foreign Exchange and Foreign Trade Act (FEFTA)**:
+  - Prior notification required for foreign investment in core sectors with high-technology strategic value
+  - Export license may be required for transfer of sensitive technology to foreign countries
+
+```yaml
+# Export Control Checklist (IP Perspective)
+ip_export_control_checklist:
+  eccn_classification:
+    - action: "Classify all products, software, and crypto libraries under ECCN"
+    - action: "Maintain ledger distinguishing EAR99 (unrestricted) vs. ECCN-classified items"
+  deemed_export:
+    - action: "Confirm ECCN classification before disclosing technology to non-citizen employees/interns"
+    - action: "Assess export control risk for cloud dev environments by location and access permissions"
+  license_enforcement:
+    - action: "Verify export destination is not on sanctions lists (OFAC SDN / BIS Entity List)"
+    - action: "Confirm EAR applicability before embedding into OSS (OSS itself typically EAR99, but combined deployments may trigger controls)"
+```
+
+### Rule 63.372: IP Risk Management in China, Russia, & Other Jurisdictions
+- **China IP Protection Strategy**:
+  - Patent filing in China publicly discloses technology in exchange for rights → Trade secret/patent bifurcation strategy is critical
+  - **Confidentiality Examination**: Filing a patent first in a foreign country for inventions developed/held in China requires CNIPA confidentiality examination approval (violation renders Chinese patent rights null)
+  - JV Mandatory Requirements: Manage Background IP in a separate legal entity; grant only licensing to JV
+  - **Hong Kong**: IP protection currently independent of mainland China, but continue monitoring National Security Law (NSL) impact
+- **Russia/Ukraine Situation**:
+  - License agreements with sanctioned entities/individuals require OFAC license
+  - Russia 2022 law amendment: Authorizes compulsory licensing to sanctioned countries without compensating patent holders → Erodes practical enforcement in Russia
+- **India**:
+  - Pre-assess compulsory licensing risk under national security provisions (Patents Act §§100-103)
+  - Pharmaceutical/AI sector compulsory licensing risk evaluation
+
+### Rule 63.373: Strategies for Technology Decoupling
+- **Geopolitical Diversification of IP Portfolio**:
+  - Manage IP for high geopolitical risk regions separately from low-risk regions
+  - Concentrate critical IP legal domicile in politically stable jurisdictions (Singapore, Netherlands, Ireland, etc.)
+- **Technology Partitioning**:
+  - Separate core technology (critical competitive advantage) from general-purpose technology
+  - Core tech: Managed on-premises/private cloud; restrict access by non-citizen employees
+  - General-purpose tech: May be shared with global development teams
+- **FDI (Foreign Direct Investment) Review Response**:
+  - Pre-assess IP ownership changes that trigger CFIUS (US) / FIRB (Australia) / NSI Act (UK) / Inbound Investment Review (Japan)
+  - Develop response plans for M&A transactions requiring CFIUS review (heightened criteria post-FIRRMA)
+
+### Rule 63.374: Security Export Controls & R&D Governance
+- **Separation of Basic Research and Applied Research**:
+  - Physically segregate open-publication basic research (FRE-eligible) from confidentiality-required applied research (EAR/ITAR-relevant) through org design, processes, and IT systems
+  - **Research Security Program**: Implement NIST-recommended Research Security Program (per NSPM-33)
+- **International Joint Research IP Clauses**:
+  - Be alert to government access rights (march-in rights, etc.) in the IP of joint research involving foreign government funding
+  - Mandate DUAL USE EXPORT review for research on dual-use military/civilian technologies
+
+---
+
+# XII. GenAI Supply Chain IP Governance (§52)
+
+---
+
+## §52. IP Accountability Chain Across the GenAI Supply Chain
+
+### Rule 63.380: IP Attribution in AI Agent Collaborative Outputs
+- **Core Issue**: LLM → Tool Call → Subagent → Final Output creates a GenAI supply chain where "whose intellectual property is it?" becomes ambiguous
+- **Current Legal Position (as of 2026)**:
+  - Copyright for multi-agent collaboratively generated content arises only for parts where humans made substantial creative contributions (→ §23)
+  - When an **Agent Orchestrator** operates under human direction, the copyright of the final output tends to be attributed to the human or legal entity
+  - Fully autonomous AI agent outputs (no human-in-the-loop) are unlikely to receive copyright protection
+
+### Rule 63.381: IP Clause Management with GenAI Service Providers
+- **ToS Review When Using Model APIs (Mandatory)**:
+
+| Provider | Output Rights | Training Use | Commercial Use | Enterprise Differences |
+|---|---|---|---|---|
+| **OpenAI API** | Attributed to user | Opt-out available (API Tier) | Permitted | DPA agreement explicitly prohibits training use |
+| **Anthropic API** | Attributed to user | Opt-out available | Permitted | Enterprise tier guarantees non-training |
+| **Google Gemini API** | Attributed to user | Conditional (except Enterprise) | Permitted | Vertex AI: non-training |
+| **Azure OpenAI** | Attributed to user | Non-training by default | Permitted | Enterprise standard: non-training |
+
+- **Enterprise API Mandate**: For confidential projects, only Enterprise APIs (with contractual non-training guarantees) must be used
+- **ToS Change Monitoring**: Review major AI provider ToS quarterly; track changes to IP clauses
+
+### Rule 63.382: Code Generation & Completion Tool IP Risk Management
+- **IP Risks When Using GitHub Copilot / Cursor / Codeium, etc.**:
+  - **Copyright Infringement Risk**: AI may reproduce copyrighted works from training data (enabling filtering features is recommended)
+  - **Patent Infringement Risk**: Certain algorithm patterns may reproduce patented technology
+  - **License Breach Risk**: OSS code may be embedded in generated code without license attribution
+- **Technical Countermeasures**:
+
+```yaml
+# GitHub Copilot: IP Protection Settings
+copilot_ip_protection:
+  duplicate_detection:
+    enabled: true  # Hide suggestions matching public code
+  suggestions_matching_public_code: "blocked"  # Block references to public code
+  code_referencing:
+    enabled: true  # Enable source citation for code suggestions
+  
+# Cursor: Proprietary Code Leakage Prevention
+cursor_privacy:
+  privacy_mode: true  # Do not transmit code to Anthropic servers
+  indexing_local_only: true  # Restrict indexing to local only
+```
+
+- **AI-Generated Code Documentation Obligation**: Record the `% of AI contribution` in commit comments or PR templates (→ §23, §24)
+
+### Rule 63.383: Multi-Modal AI Output IP Management
+- **Image, Video, Voice Generation IP Management**:
+  - **Images**: Review ToS for DALL·E / Midjourney / Stable Diffusion; understand commercial use restrictions on generated images
+  - **Voice**: Note neighboring rights of voice talent/artists (monitor regulatory trends for AI Voice Cloning jurisdiction by jurisdiction)
+  - **Video**: Embed C2PA (Content Authenticity Initiative) metadata in AI-generated video to certify provenance
+  - **AI-Generated Content Labeling Obligation**: EU AI Act §50 (full enforcement August 2026) mandates technical marking of AI-generated content
+- **Deep Fake & Impersonation Risk**:
+  - Strengthen brand monitoring to detect Deep Fake usage of company brand, executive faces, and voices
+  - Evidence preservation strategy for Cease & Desist targets involving "Synthetic Media" usage
+
+### Rule 63.384: Integrated Quality, Security, and IP Management for AI Output
+- **AI-Generated Code Supply Chain Risk**:
+  - LLMs may generate code patterns with vulnerabilities (automate cross-checking against CWE Top 25)
+  - Integrate SAST/DAST scanning of AI-generated code into CI/CD (→ [000_security_privacy.md](../security/000_security_privacy.md) §AI-SPM)
+- **Automated License Detection for AI-Generated Code**:
+
+```python
+# AI-generated code license/IP detection pipeline example
+# Integrated into CI/CD; runs automatically before merge
+
+steps:
+  - name: "Detect AI-generated code fingerprints"
+    run: |
+      # Detect similarity with public repository code
+      scancode-toolkit --output-format json --license --copyright ./src
+      
+  - name: "AI code attribution check"
+    run: |
+      # Verify AI-generated code annotations in PRs
+      python scripts/check_ai_attribution.py --pr-diff ${{ github.event.pull_request.number }}
+      
+  - name: "License conflict detection"
+    run: |
+      # Detect OSS license contamination in AI-generated code
+      fossa analyze --include-unused-deps
+```
+
+### Rule 63.385: Integrating AI Governance Frameworks with IP
+- **AI Bill of Materials (AI BOM / AIBOM)**:
+  - Inventory all AI models in use, fine-tuning data, inference engines, and prompt templates
+  - Record license, attribution, and export control (EAR/ITAR) classification for each component
+  - Integrate AI BOM with SBOM (Software Bill of Materials) and store in VDR (→ §35)
+- **AI Governance × IP Integration Checklist**:
+
+```markdown
+## GenAI × IP Governance Integration Checklist
+### API & Model Management
+- [ ] ToS reviewed for all AI model APIs in use (commercial use & training data conditions)
+- [ ] Services with Enterprise contracts (non-training guarantee) documented
+- [ ] Quarterly ToS change monitoring system in place
+
+### Code Generation
+- [ ] AI-generated code copyright attribution recording process established
+- [ ] Duplicate Detection enabled for GitHub Copilot, etc.
+- [ ] SAST/LINT for AI-generated code integrated into CI/CD
+- [ ] AI contribution ratio recorded in PR templates
+
+### Content Generation
+- [ ] C2PA metadata attachment process for AI-generated content established
+- [ ] EU AI Act §50 labeling compliance completed (before August 2026)
+- [ ] Deep Fake / brand impersonation monitoring deployed
+
+### AI BOM
+- [ ] AI BOM prepared and integrated with SBOM/VDR
+- [ ] AI model ECCN classification reviewed from EAR/ITAR perspective
+- [ ] IP clearance for fine-tuning data completed
+```
+
+
+---
+
+# XV. VC Fundraising & IP Milestones (§55)
+
+---
+
+## §55. VC Investment Round IP Milestone Framework
+
+### Rule 63.410: Mandatory IP Readiness Standards by Round
+
+> [!IMPORTANT]
+> **IP gaps are a direct driver of valuation haircuts.** Achieve the following milestones at least 3 months before each round closes.
+
+| Round | Target Raise | Required IP Milestones | Risk if Unmet |
+|---|---|---|---|
+| **Pre-Seed / Seed** | ~$2M | All IP assignment agreements signed, NDAs in place, core IP identified | Founder IP ownership gap surfaces during Series A DD |
+| **Series A** | $2M–$15M | ≥1 patent filed, trademark registered (key markets), IP ledger established | 10–20% valuation reduction risk |
+| **Series B** | $15M–$50M | ≥5 patents, clean OSS audit, automated SBOM generation | Fails Coatue / a16z DD standards; DDO standby costs incurred |
+| **Series C+** | $50M+ | External IP valuation report, Exit Ready Scorecard ≥80%, AI-IP policy adopted | Strategic co-investors withdraw |
+| **Pre-IPO** | — | Exit Ready Scorecard 100%, SEC/regulator disclosure prep complete, IP insurance in place | IPO review cites incomplete IP risk disclosure |
+
+### Rule 63.411: Seed-Stage IP Priorities (Founder Checklist)
+
+**Phase 1: Day-1 (Entity Formation)**
+- [ ] IP Assignment Agreements executed by all founders (include prior invention exclusions)
+- [ ] Copyright attribution confirmed for core code and algorithms (no freelance-era code included)
+- [ ] Domain names registered under company entity
+- [ ] Template NDAs ready (investor DD, recruiting)
+
+**Phase 2: Before First External Capital or $1M ARR**
+- [ ] Trademark pre-clearance search (USPTO/EUIPO/J-PlatPat) and filing decision
+- [ ] Patent vs. trade secret analysis meeting for core IP (→ §6 Rule 63.050)
+- [ ] Background IP declaration documenting boundary between founders' prior employer IP and company IP
+- [ ] AI-generated code usage tracking begins
+
+```yaml
+# Seed Stage IP Checklist (store in GitHub repo Wiki)
+seed_ip_checklist:
+  day_one:
+    - item: "IP Assignment Agreement - All Founders"
+      owner: "Legal / CEO"
+      deadline: "Day 1"
+    - item: "Prior Invention Disclosure - All Founders"
+      owner: "All Founders"
+      deadline: "Day 1"
+    - item: "Domain Registration under Company Entity"
+      owner: "CTO"
+      deadline: "Day 7"
+  pre_series_a:
+    - item: "Trademark Search + Filing Decision"
+      owner: "Legal"
+      deadline: "Before public launch"
+    - item: "Core Patent Analysis (file vs. trade secret)"
+      owner: "CTO + Legal"
+      deadline: "Before Series A"
+    - item: "OSS License Audit (SCA tool integration)"
+      owner: "CTO"
+      deadline: "Before Series A"
+```
+
+### Rule 63.412: Responding to VC-Side DD at Series A/B
+
+**Common VC IP DD Questions (Prepare These Answers)**:
+
+| VC Question | Required Response / Evidence |
+|---|---|
+| "Who owns the IP?" | IP Assignment Agreement list (all employees + founders) |
+| "What OSS are you using?" | SBOM and SCA report (latest version) |
+| "Any AI-generated code?" | AI usage policy and usage logs |
+| "Are you infringing any competitor patents?" | FTO analysis report (core product area) |
+| "What about the departed co-founder's IP?" | Assignment agreement + departure IP checklist completion certificate |
+| "Do you have patents? What's the plan?" | Patent portfolio roadmap and filing timeline |
+
+### Rule 63.413: IP as a Negotiating Asset in VC Term Sheets
+
+- **IP Bargaining Power**: A strong IP portfolio provides valuation justification in Term Sheet negotiations
+- **License Revenue Disclosure**: Report any existing license revenue as an MRR-equivalent metric in valuation models
+- **IP Reps & Warranties (Preferred Stock Purchase Agreement)**:
+  - Understand typical VC-required IP representations in advance
+  - **MAC (Material Adverse Change) clauses**: Ensure material IP risks (e.g., pending patent litigation) are disclosed before closing to avoid triggering MAC conditions
+- **VC-Led Patent Programs**: a16z, Google Ventures, and similar VCs offer IP-building support programs for portfolio companies — leverage them proactively
+
+---
+
+# XVI. IP Automation Under EU AI Act Full Enforcement (§56)
+
+---
+
+## §56. EU AI Act Article 53/96 Compliant IP Automation Pipeline
+
+### Rule 63.420: EU AI Act IP Impact Map (Full Enforcement: August 2026)
+
+| AI Act Article | Impact on IP Practice | Required Response |
+|---|---|---|
+| **Art. 10 (Training Data)** | Documentation obligation for data quality and appropriateness | Data Card + license record maintenance |
+| **Art. 11 & Annex IV (Technical Documentation)** | GPAI & high-risk AI: create and maintain detailed technical docs | Automated Model Card generation pipeline |
+| **Art. 12 (Record-Keeping)** | Autonomous systems must retain operation logs | Structured storage of AI agent logs |
+| **Art. 13 (Transparency)** | Users must be notified when interacting with AI | AI usage disclosure in UI/UX |
+| **Art. 50 (AI-Generated Content)** | Mandatory machine-readable marking of AI-generated content | Automated C2PA metadata attachment |
+| **Art. 53 (GPAI Obligations)** | GPAI providers: publish copyright compliance policy + training data summary | Automated IP clearance reports |
+| **Art. 96 (Rollback & Records)** | High-risk AI: maintain change history + decision records | Git-linked AI model version control |
+
+### Rule 63.421: Article 53 Compliant Training Data IP Clearance Pipeline
+
+```yaml
+# EU AI Act Art.53 Compliant: Training Data IP Clearance Pipeline
+name: GPAI Training Data IP Clearance
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # Monthly
+  workflow_dispatch:
+
+jobs:
+  ip-clearance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan training data licenses
+        run: |
+          python scripts/scan_dataset_licenses.py \
+            --dataset-manifest datasets/manifest.json \
+            --output reports/license_clearance_$(date +%Y%m).json
+      
+      - name: Check TDM opt-out compliance
+        run: |
+          # EU DSM Directive Art.4 TDM Opt-out verification
+          python scripts/check_tdm_optout.py \
+            --sources datasets/web_scrape_sources.txt \
+            --output reports/tdm_optout_$(date +%Y%m).json
+      
+      - name: Generate copyright summary (Art. 53)
+        run: |
+          # Art.53(1)(d): Generate copyright compliance policy and training data summary
+          python scripts/generate_copyright_summary.py \
+            --clearance-report reports/license_clearance_$(date +%Y%m).json \
+            --output public/training-data-summary.md
+      
+      - name: Upload to VDR and regulatory docs
+        run: |
+          ./scripts/upload-to-vdr.sh reports/ --category AI-Compliance
+      
+      - name: Notify IP team on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: '#ip-compliance'
+          slack-message: "Warning: AI Act Art.53 IP Clearance Failed - Review Required"
+```
+
+### Rule 63.422: Article 50 Compliant C2PA Content Authentication Automation
+
+- **C2PA (Content Authenticity Initiative)** metadata must be automatically attached to AI-generated content
+- **EU AI Act Art.50** (enforced August 2026): Machine-readable marking mandatory for AI-generated content
+
+```python
+# C2PA metadata attachment implementation (reference code)
+# Execute in CI/CD after "AI Content Generation" step
+
+from c2pa import Builder, SigningAlg, create_signer
+
+def attach_c2pa_manifest(
+    input_file: str,
+    output_file: str,
+    ai_model_name: str,
+    ai_model_version: str,
+    human_author: str,
+    creation_timestamp: str
+) -> None:
+    """
+    Attach C2PA manifest to AI-generated content to prove
+    EU AI Act Art.50 compliance and copyright attribution.
+    """
+    manifest = {
+        "claim_generator": "CompanyName/IPGovernanceSystem@1.0",
+        "title": f"AI-Assisted Content - {creation_timestamp}",
+        "assertions": [
+            {
+                "label": "c2pa.training-mining",
+                "data": {"entries": {"c2pa.ai_generative_training": "notAllowed"}}
+            },
+            {
+                "label": "stds.schema-org.CreativeWork",
+                "data": {
+                    "@type": "CreativeWork",
+                    "author": [{"@type": "Person", "name": human_author}],
+                    "description": (
+                        f"Human-AI collaborative work. "
+                        f"AI Model: {ai_model_name} v{ai_model_version}. "
+                        f"Human creative judgment applied."
+                    )
+                }
+            }
+        ]
+    }
+    builder = Builder(manifest)
+    # Retrieve signing keys from HSM/KMS (never hardcode)
+    signer = create_signer(
+        sign_cert="certs/company_ip_cert.pem",
+        private_key="certs/company_ip_key.pem",
+        alg=SigningAlg.ES256,
+        tsa_url="http://timestamp.digicert.com"
+    )
+    builder.sign_file(signer, input_file, output_file)
+```
+
+### Rule 63.423: GPAI Technical Documentation (Article 11) Auto-Generation Template
+
+```markdown
+## GPAI Model Card / Technical Documentation (Art. 11 / Annex XI Compliant)
+### Model Information
+- Model Name: {model_name}
+- Version: {version}  /  Last Updated: {date}
+- Provider: {company_name}  /  Risk Tier: {risk_tier}
+
+### Training Data Summary (Art. 53(1)(d))
+| Dataset | License | Size | TDM Opt-out Compliant |
+|---|---|---|---|
+| {dataset_1} | {license} | {size} | Yes / No |
+
+### Copyright Compliance Policy
+- TDM opt-out monitoring: Monthly automated scan
+- Issue data removal SLA: Within 48 hours
+- Reference: [Training Data IP Clearance Report](./reports/license_clearance_latest.json)
+
+### IP Attribution (→ §23 Rule 63.171)
+- Human-authored components: {list}
+- AI-generated components: {list}
+- C2PA manifest: Attached
+```
+
+### Rule 63.424: EU AI Act Enforcement Schedule & IP Response Timeline
+
+| Date | Enforcement Event | IP Response Required |
+|---|---|---|
+| **Aug 1, 2024** | AI Act enters into force | Understand GPAI rules; begin IP policy review |
+| **Feb 2, 2025** | Prohibited AI practices apply | Assess IP risks from prohibited-use AI outputs |
+| **Aug 2, 2025** | GPAI obligations apply (Art.53) | Training data IP clearance system operational |
+| **Aug 2, 2026** | Full enforcement | Art.50 content marking, high-risk AI obligations fully met |
+| **Ongoing** | Delegated acts / guidelines updates | Quarterly monitoring of EU AI Office publications |
+
+---
+
+# XVII. Clean Tech & Carbon Credit IP (§57)
+
+---
+
+## §57. Green IP, Carbon Credits & Integrated IP Strategy
+
+### Rule 63.430: 2026 Climate Tech × IP Strategic Importance
+
+- **Context**: Global climate investment surpassing ~$1.8T/year in 2024 makes cleantech patents among the fastest-growing IP categories
+- **Investor expectations**: ESG-focused institutional investors evaluate "IP portfolios contributing to environmental improvement" as a non-financial KPI
+- **International competition**: China holds 50%+ of global solar/EV/battery patents — early-filing strategies in Japan/EU/US are critical
+
+### Rule 63.431: Green Patent Accelerated Examination Programs
+
+| Office | Program | Examination Speed | Eligibility |
+|---|---|---|---|
+| **Japan (JPO)** | Super Accelerated Examination | 36 months → ~9 months | "Implemented" environment tech (carbon reduction, energy efficiency) |
+| **US (USPTO)** | Climate Change Mitigation Pilot | ~12 months → 6 months | CPC Y02 subclass technologies |
+| **Europe (EPO)** | PACE | ~24 months → 6 months | Written request (no conditions) |
+| **China (CNIPA)** | Priority Examination (Green Tech) | ~22 months → 9 months | Energy saving, new energy, environmental protection |
+| **WIPO** | WIPO GREEN | Matching platform | Register green tech IP for licensee matching |
+
+```markdown
+# Green Patent Filing Checklist
+- [ ] Confirm technology falls under CPC Y02 (Climate Change Mitigation) subclass
+- [ ] Apply for national green accelerated examination simultaneously with PCT base filing
+- [ ] Register on WIPO GREEN platform (for licensee discovery)
+- [ ] Include quantitative sustainability metrics in filing (e.g., CO₂ reduction/kWh efficiency gains)
+```
+
+### Rule 63.432: Carbon Credits × IP Legal Structure
+
+Carbon credits (emission rights) are property rights but not IP rights per se. Indirect IP protection methods:
+
+| Protected Subject | IP Method | Example |
+|---|---|---|
+| **Carbon Measurement Algorithm** | Patent + Trade Secret | MRV (Measurement, Reporting, Verification) process patents |
+| **Carbon Market Platform** | Copyright + Patent | Exchange software, smart contracts |
+| **Abatement Technology Itself** | Patent | CCUS (Carbon Capture, Utilization & Storage) process patents |
+| **ESG Dataset** | DB Right (EU) + Contract | Proprietary high-precision emissions data collection & processing |
+| **Certification Standards** | Copyright + Trademark | Proprietary carbon certification scheme IP protection |
+
+```yaml
+# Carbon IP Registry — IP Ledger Extension (→ §42 Rule 63.310)
+carbon_ip_registry:
+  patents:
+    - title: "CO2 Measurement Algorithm v2 (CEMS Integration)"
+      filing_date: "2025-01-15"
+      jurisdiction: [US, EP, JP, CN]
+      green_track: true
+      cpc_code: "Y02P90/65"  # Climate Change Mitigation Technologies
+      business_unit: "Climate Analytics"
+  trade_secrets:
+    - name: "Proprietary MRV Calculation Engine"
+      access_level: "RESTRICTED"
+      authorized_teams: ["climate-tech@company.com"]
+      last_audit: "2026-Q1"
+  trademarks:
+    - mark: "CarbonVerify™"
+      jurisdictions: [US, EU, JP]
+      class: [42]  # Scientific and technological services
+```
+
+### Rule 63.433: Carbon Market IP Risk Management
+
+- **Double-counting & fraud IP countermeasures**:
+  - Blockchain-based carbon credit tokenization (→ §22) reduces double-counting risk
+  - Protect the smart contract logic underlying token infrastructure as proprietary IP
+  - Counter VCS/CORSIA/J-Credit certification imitation schemes: trademark protection of certification brands is effective
+
+### Rule 63.434: Green IP ESG Portfolio Disclosure
+
+- **TCFD/ISSB (IFRS S2) compliant disclosure**:
+  - Quantitatively disclose number and technology domains of climate-related IP (CO₂ reduction, energy efficiency, circular economy)
+  - Maintain flow diagrams showing how environmental technology patents contribute to product/service environmental performance
+
+- **CSRD (EU Corporate Sustainability Reporting Directive) compliance**:
+  - ESRS (European Sustainability Reporting Standards) requires disclosure of intangible assets including IP
+  - **Disclosure example**: "Our patented technology (Patent No. EP0000000) reduces CO₂ emissions of Product Y by Z%, validating our climate commitment"
+
+- **Greenwashing prevention (→ linked with §46 Rule 63.341)**:
+  - Always separately report patent "acquisition" vs. "actual use and quantified effects"
+  - Confirm alignment with EU Corporate Sustainability Due Diligence Directive (CSDDD)
+
+### Rule 63.435: Clean Tech Technology Transfer & Geopolitical IP Risk
+
+- **TRIPS Agreement & Compulsory Licensing (Green Tech)**:
+  - TRIPS Article 31: Risk of compulsory licensing in national emergency (including climate response)
+  - India, South Africa and others advocate applying compulsory licensing to green technology patents
+  - **Mitigation**: Voluntary licensing listings on WIPO GREEN reduce regulatory risk
+
+- **UNFCCC Technology Mechanism**:
+  - Strategic engagement with international framework for technology transfer from developed to developing nations
+  - Design transparent licensing programs to avoid being characterized as "protectionism"
+
+---
+
+# XVIII. IP Litigation Finance (§58)
+
+---
+
+## §58. Third-Party Litigation Finance (TPLF) for IP Enforcement
+
+### Rule 63.440: IP Litigation Finance Overview \& Strategic Positioning
+- **Market size (2025)**: The global TPLF (Third-Party Litigation Finance) market has grown to over $175B, with IP litigation as the largest segment
+- **Basic structure**: Litigation financers fund all litigation costs (law firm fees, discovery, expert witnesses) and receive compensation as a percentage (typically 25–40%) or a multiple (2–4x) of the recovery from judgments or settlements
+- **Strategic significance**:
+  - Enables IP enforcement without equity dilution or balance sheet impact
+  - May be the only viable means for cash-constrained startups to resist infringement by large corporations
+  - VC investors increasingly view litigation finance as a legitimate IP protection mechanism for portfolio companies
+
+### Rule 63.441: Key Litigation Funders \& Case Suitability
+
+| Funder | Primary Case Types | Minimum Case Value | Notes |
+|---|---|---|---|
+| **Burford Capital** | Patents, trademarks, license contract breaches | $5M+ | Largest funder; also offers portfolio financing |
+| **Harbour Litigation Funding** | Composite IP portfolios | $3M+ | Strong in European and Asian cases |
+| **Longford Capital** | US patent litigation (incl. ITC) | $2M+ | Specialized ITC Section 337 team |
+| **Woodsford** | UPC-compliant European patents | €1M+ | Focused on European patent litigation post-UPC |
+| **Parabellum Capital** | Trade secrets, unfair competition | $5M+ | Specialized in tech company trade secret cases |
+
+```yaml
+# IP Litigation Finance — Case Suitability Assessment Checklist
+ip_litigation_finance_assessment:
+  merit_indicators:
+    - "Patent validity confidence ≥ 70% (outside counsel opinion)"
+    - "Infringement clearly demonstrable via claim chart"
+    - "Recoverable damages ≥ $5M (patent) / ≥ $2M (trade secret)"
+    - "Defendant collectability confirmed"
+    - "Statute of Limitations has adequate time remaining"
+  disqualifiers:
+    - "Asserted patent at high risk of invalidation by prior art"
+    - "Infringement proof relies solely on circumstantial evidence"
+    - "Defendant already in bankruptcy proceedings or asset concealment suspected"
+```
+
+### Rule 63.442: Mandatory Clauses in Funding Agreements
+- **Disclosure Obligation**: Many US federal courts now require disclosure of litigation finance agreements (2024 NJ and California district court rules) — pre-confirm disclosure scope
+- **Funder Control Limitations**:
+  - Final settlement authority must remain with the client company (prohibit funder-directed forced settlement)
+  - Clearly restrict funder veto rights over litigation strategy changes (law firm substitution, addition)
+- **Non-Recourse Confirmation**: Explicitly state this is Non-Recourse financing (no claim on company assets upon losing)
+- **Privilege Protection**: Verify Attorney-Client Privilege (ACP) protection for information disclosed to funder — confirm applicability of Common Interest Privilege
+- **Assignment Restrictions**: Notice and consent conditions if funding agreement may be sold to secondary market
+- **EXIT Provisions**: Treatment of funding agreement upon M\&A or IPO (early repayment terms, rights succession)
+
+### Rule 63.443: IP Finance Disclosure to VCs / Investors
+- **DD Positioning**: Litigation finance agreements should be included in financial models as "Contingent Assets" not "Contingent Liabilities"
+- **R\&W Impact**: Appropriately disclose existence of litigation finance agreements in M\&A (pre-assess Change of Control clause implications)
+- **IPO Impact**: Disclose financed litigation in progress in SEC Form S-1 if the case outcome could materially impact business or financials
+
+### Rule 63.444: Ethical \& Regulatory Considerations
+- **Attorney Ethics Rules**: Confirm funder control does not violate Model Rules of Professional Conduct 1.8(f) (third-party compensation) and 5.4 (division of legal fees)
+- **Japan**: TPLF legality is a gray zone under Attorney Act §72 (non-attorney legal services) — confirm distinction from direct fee-bearing schemes with legal counsel for domestic cases
+- **EU Regulatory Trend**: European Parliament reviewing TPLF directive (2024–2025) — potential mandatory capital requirements and conflict of interest disclosure for funders
+- **Tax Treatment**: Tax treatment of litigation finance proceeds (funder's share of recovery) varies by jurisdiction (US: generally treated as Ordinary Income)
+
+---
+
+# XIX. Layered IP Protection Strategy (§59)
+
+---
+
+## §59. IP Stacking: Hybrid Layered IP Protection Framework
+
+### Rule 63.450: Design Principles for Layered IP Protection
+
+> [!IMPORTANT]
+> **Never rely on a single IP right. Layer multiple IP rights strategically so that if a competitor circumvents one right, others remain operative — building a "multi-line defense."**
+
+- **IP Stacking defined**: Strategically combining patents, trademarks, copyrights, design rights, trade secrets, database rights, and contractual protections for a single product or technology
+- **Why it matters**:
+  - Patents expire after 20 years, but trademarks can persist indefinitely through renewal
+  - Even if a patent is invalidated in an IPR proceeding, trade secret protection survives
+  - Trademark, copyright, and design rights compensate when AI-generated alternatives circumvent patents
+
+### Rule 63.451: Product-Level IP Stacking Matrix
+
+| Protected Asset | Patent | Trademark | Copyright | Design Right | Trade Secret | Database Right | Contract |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Core Algorithm** | ✅ | — | △ | — | ✅ | — | ✅ NDA |
+| **UI/UX Design** | — | ✅ | ✅ | ✅ | △ | — | ✅ |
+| **Brand Name/Logo** | — | ✅✅ | ✅ | ✅ | — | — | ✅ |
+| **Trained AI Model** | △ | — | △ | — | ✅✅ | ✅(EU) | ✅ ToS |
+| **Dataset** | — | — | — | — | ✅ | ✅✅(EU) | ✅ |
+| **API Endpoint Design** | △ | — | ✅ | — | ✅ | — | ✅ |
+| **Prompt Templates** | — | — | △ | — | ✅✅ | — | ✅ |
+| **Hardware Product** | ✅✅ | ✅ | — | ✅ | ✅ | — | ✅ |
+
+✓✓: Strongly recommended, ✓: Recommended, △: Conditional, —: Not applicable
+
+### Rule 63.452: IP Protection Timeline Strategy
+
+```markdown
+## IP Stacking Timeline (10-Year Defense Roadmap from Launch)
+| Phase | Period | Primary IP Instruments | Supplementary Instruments |
+|---|---|---|---|
+| **Launch Phase** | Day 1-12M | Trademark (clearance search → filing) + NDA | Copyright (auto-arises) |
+| **Growth Phase** | 12-36M | Patent filing (core inventions) + Design filings | Database rights (EU) |
+| **Expansion Phase** | 36-84M | Continuation strategy + International trademark expansion | Trade secret hardening |
+| **Maturity Phase** | 84M+ | Patent expiry countermeasures → shift emphasis to trademark/copyright | IPCo utilization (→§53) |
+```
+
+### Rule 63.453: Anti-Design-Around Stacking
+
+- **Single-patent dependency risk**: Competitors intentionally design around patents to create non-infringing substitute products
+- **Countermeasures**:
+  1. **Claim bracketing**: Beyond core patent, file continuation applications covering implementation variations (→ §8 Rule 63.072)
+  2. **Design right UI bracketing**: Protect GUI visual expression via design rights so that functional design-arounds still constitute infringement on appearance
+  3. **Trademark market lock**: Register product names, logos, sounds, colors as multiple trademarks so competitors cannot launch products that "look the same"
+  4. **Trade secret moat**: Keep the most critical "Secret Sauce" undisclosed and maintained as a trade secret (→ §6 Rule 63.050)
+
+### Rule 63.454: IP Stacking for Spatial Computing and Wearables
+
+- **IP strategy for MR/XR products (Apple Vision Pro-class)**:
+  - **Depth sensing / eye-tracking**: Patent sensor fusion algorithms
+  - **Hand gesture UI**: GUI design rights + touchless interaction patents
+  - **Spatial audio**: Patent audio processing algorithms + trademark spatial audio brand
+  - **Brand display in virtual space**: 3D trademark registration for virtual brands (USPTO 3D marks)
+  - For IP infringement in virtual worlds, **international arbitration clauses (WIPO / ICC) must be mandated in all license agreements**
+
+- **Neurotech / BCI Wearable IP priorities**:
+  - **Neural data is PII at the highest confidentiality tier**: Neural signal data carries extremely high re-identification risk; treat as "special category data" under GDPR/APPI maximum-sensitivity provisions
+  - **Data collection consent and IP intersection**: Repurposing research neural data for commercial AI model training requires additional consent and copyright clearance
+  - **Ethics review integration**: Integrate IP rights attribution clarification into IRB (Institutional Review Board) approval workflows
+
+---
+
+# XX. Sovereign IP & National Security (§60)
+
+---
+
+## §60. Sovereign IP & National Security IP Framework
+
+### Rule 63.460: CHIPS Act and IP Governance (US and Allies)
+
+> [!CAUTION]
+> **Companies receiving CHIPS Act subsidies are subject to mandatory government access rights, compulsory license conditions, and Clawback provisions on covered IP. Align IP strategy with subsidy applications before filing.**
+
+- **Key IP-related obligations under the CHIPS and Science Act (2022)**:
+  - **Profit-sharing provision**: If profits exceed a defined threshold after subsidy receipt, a portion of the excess must be returned to the government
+  - **Compulsory license risk**: Provisions allowing government to obtain licenses to subsidized technologies when national security requires it
+  - **Foreign Entity of Concern (FEOC) restrictions**: For 10 years after subsidy receipt, prohibited from material technology sharing or joint ventures with China, Russia, North Korea, or Iran
+  - **Reporting obligations**: Periodic reporting on technology usage and licensing activity
+
+```yaml
+# CHIPS Act IP Compliance Checklist
+chips_act_ip_compliance:
+  pre_application:
+    - "Identify and catalog subsidy-eligible IP (patents, manufacturing processes, know-how)"
+    - "Reflect profit-sharing thresholds in financial models"
+    - "Assess FEOC restriction impact on current and future license agreements"
+  during_performance:
+    - "Establish quarterly IP usage reporting framework"
+    - "Implement FEOC pre-clearance workflow for technical sharing with foreign partners"
+  post_completion:
+    - "Monitor FEOC technology sharing prohibition compliance for 10 years"
+    - "Annual assessment of profit levels that trigger Clawback provisions"
+```
+
+### Rule 63.461: Dual-Use Research of Concern (DURC) and IP Governance
+
+- **DURC defined**: Research conducted for legitimate scientific purposes that carries an unintended risk of posing a threat to public health, safety, security, economic security, or national security
+- **Impact on IP strategy**:
+  - Results of DURC-designated research are subject to Research Security rules under US NSPM-33 (National Security Presidential Memorandum)
+  - Joint research, publication, and patent filing with foreign researchers may require **government pre-review**
+  - OSS releases and tech blog publications of findings may also be subject to controls as "Deemed Exports"
+
+- **DURC Risk Assessment Framework**:
+  1. **Technology classification**: Cross-reference against NSPM-33 critical and emerging technology list (AI, quantum, bio, advanced manufacturing, space)
+  2. **Funding source verification**: Identify foreign government/corporate funding and conduct FRGC (Foreign Research Grant Compliance) review
+  3. **Co-author/access review**: Apply Need-to-Know access restrictions to foreign national researchers
+  4. **Document protective measures**: Maintain records of IP protection measures and access controls as DD evidence
+
+### Rule 63.462: EU Critical Raw Materials Act and IP Supply Chains
+
+- **EU Critical Raw Materials Act (CRM Act, in force 2024)**:
+  - IP protection for mining and processing technologies for strategic materials (lithium, cobalt, rare earths) is becoming a key European industrial policy issue
+  - **IP obligations overview**:
+    - Companies receiving public subsidies for CRM Act-targeted projects are expected to disclose IP portfolios and maintain transparency around technology transfer conditions
+    - Technology transfers or licenses to Chinese entities may trigger advance notification obligations
+  - **Strategic implication**: Integrate CRM-related IP (manufacturing process patents, refining technology) across the supply chain with geopolitical risk assessment (→ §51)
+
+### Rule 63.463: Advanced FDI Review and IP Intersection
+
+- **CFIUS Post-FIRRMA Strengthening (2022 TID Rulesets)**:
+  - **Expanded TID US Business definition**: Companies handling Critical Technologies, Critical Infrastructure, or sensitive data face mandatory declaration requirements
+  - **Critical Technology**: EAR-controlled, ITAR-controlled, and NSF-designated emerging technologies — cross-reference with IP portfolio is mandatory
+  - Pre-assess that IP transfer via M&A to foreign parties is a primary CFIUS trigger (→ §51 Rule 63.373)
+
+- **UK National Security and Investment Act (NSI Act, 2022)**:
+  - M&A, IP licensing, and joint ventures in 17 critical sectors (AI, quantum, advanced materials, engineering biology, defense) require **mandatory advance notification**
+  - Standalone assignment of IP (patent/trade secret transfer) may also require review (confirm 2024 guidance)
+
+- **Japan FEFTA Tightening Trends**:
+  - Scrutiny of foreign capital IP control in core sectors (semiconductors, AI, space, defense) is intensifying
+  - For M&A involving IP transfer of "technologies with high technical superiority," pre-consultation with authorities is recommended
+
+### Rule 63.464: Sovereign IP Strategy (Responding to National-Level IP Protection)
+
+- **"Sovereign AI" policies and IP**:
+  - Many countries are asserting sovereignty over domestic AI infrastructure and training data. Risk that enterprises face restrictions on transferring or licensing domestically-developed AI models abroad
+  - **Countermeasure**: Design "local IP holding structures" via country-specific legal entities (→ §61 IP Deal Architecture)
+
+- **Data Localization Laws vs. IP**:
+  - Data localization mandates from Russia (FZ-242), China (PIPL/DSL), India (DPDP), and others impede free movement of global IP data
+  - Localization obligations for **training data and model weights** must be pre-assessed with local legal experts in each jurisdiction
+
+---
+
+# XXI. IP-Centric Deal Architecture (§61)
+
+---
+
+## §61. M&A and Fundraising Deal Design with IP at the Core
+
+### Rule 63.470: Principles of IP-Centric Deal Structuring
+
+> [!IMPORTANT]
+> **"Where IP sits" determines the deal's tax efficiency, risk allocation, and integration cost. Make IP strategy the first item on the deal design agenda.**
+
+- **Deal design differences by IP Siting**:
+  - **OpCo-IPCo structure**: Separate IP holding company (IPCo) from operating company (OpCo); OpCo licenses IP from IPCo
+    - In M&A: Acquirer can take only IPCo while leaving OpCo behind (business risk separation)
+    - Bankruptcy protection: IPCo remains independent and can continue operations even if OpCo files for bankruptcy
+  - **Single-entity structure**: Hold IP integrated within the operating company — practical from a management cost perspective for startups and SMEs
+
+### Rule 63.471: Precision Design of IP Earnout Mechanisms
+
+- **IP Earnout defined**: Structure in which additional consideration is paid after M&A closing when IP achieves specific revenue or milestone triggers
+- **Checklist and mandatory clauses**:
+  - [ ] **Earnout Base**: Explicitly identify which IP's revenue (license fees / product sales / patent verdict recovery) forms the calculation base
+  - [ ] **Calculation period**: Typically 12-36 months; calibrate to technology maturation speed
+  - [ ] **Acceleration clause**: Triggers for accelerated payment if acquirer intentionally undermines Earnout by not actively licensing the IP
+  - [ ] **Milestone definitions**: Define specifically — "patent grant," "initial license revenue $1M," "FDA/CE Mark obtained," etc.
+  - [ ] **Accounting and audit rights**: Seller's right to have an independent accountant verify Earnout calculations (Audit Right)
+  - [ ] **MAC carveout**: Clause exempting Earnout shortfall caused by market-wide collapse (pandemic/war)
+
+```yaml
+# IP Earnout Calculation Model (Conceptual Example)
+ip_earnout_model:
+  base_consideration: "$50M (at closing)"
+  earn_out_period: "36 months"
+  milestones:
+    - trigger: "Patent EP0000000 European registration complete"
+      payment: "$2M"
+      deadline: "Within 18 months of closing"
+    - trigger: "Cumulative license revenue $5M achieved"
+      payment: "$5M (capped at 20% of profit)"
+      deadline: "Within 36 months of closing"
+    - trigger: "FTO analysis confirmed clean (core product area)"
+      payment: "$1M"
+      deadline: "Within 6 months of closing"
+  acceleration_trigger: "Acquirer ceases licensing activity on covered IP within 12 months of agreement"
+  acceleration_amount: "50% of remaining unclaimed Earnout paid immediately"
+```
+
+### Rule 63.472: Advanced IP Escrow Design
+
+- **Enhancing standard Escrow (→ §30 Rule 63.221)**:
+  - **IP-dedicated Escrow account**: Segregate a portion of M&A consideration (typically 10-20%) into a dedicated IP Escrow account for IP-related R&W breach coverage
+  - **Basket / Deductible**: Set minimum IP claim thresholds (De Minimis: $50K-$200K) and aggregate mini-basket (1-2%)
+  - **Reverse Break-up Fee**: Contractually specify compensation to seller if acquirer refuses to close citing CFIUS review or IP regulatory issues
+
+- **Source Code Escrow**:
+  - In SaaS company M&A/fundraising, acquirers/investors may require source code to be deposited with a third-party Escrow agent
+  - **Major agents**: Iron Mountain / NCC Group / EscrowTech
+  - **Release triggers**: Licensee obtains source code access upon business cessation, bankruptcy, or material breach
+  - **Update obligations**: Quarterly source code updates and re-deposit to escrow
+
+### Rule 63.473: IP Protection and Financing via SPV (Special Purpose Vehicle)
+
+- **IP-SPV structure**:
+  1. Parent company transfers specific IP portfolio to an SPV
+  2. SPV securitizes/issues bonds against IP collateral or raises third-party financing
+  3. Parent company receives license-back from SPV (maintaining business continuity)
+
+- **IP-SPV use cases**:
+  - Debt financing using IP as collateral without impairing the balance sheet
+  - Bankruptcy-remote structure protecting IP from litigation and insolvency risks
+  - Carve-out sale of only specific IP assets in M&A
+
+- **Tax and accounting considerations**:
+  - IP transfer to SPV requires transfer pricing valuation based on Arm's Length Principle (ALP)
+  - Confirm compliance with IFRS/GAAP intangible asset recognition and amortization rules
+  - Pre-assess whether BEPS Pillar Two global minimum tax of 15% applies to the SPV jurisdiction (→ §53 Rule 63.392)
+
+### Rule 63.474: IP Considerations in Secondary Transactions
+
+- **IP risks in the secondary market**:
+  - LP interest transfers and GP succession make portfolio company IP status a key DD target
+  - **Continuation Vehicles (CVs)**: Fund-specific entities holding specific portfolio company IP for long-term — IP asset valuation is the core of the reference price
+  - IP obsolescence risk and injunction risk fluctuate during the CV operation period — mandate annual IP re-valuation
+
+- **IP protection in GP-led secondaries**:
+  - Pre-confirm that Change of Control clauses may apply even when LP interests transfer from old to new investors
+  - Review "sponsor change clauses" in target company NDAs and license agreements
+
 ---
 
 ## Appendix A: Quick Reference Index
 
-> Index for quickly identifying relevant sections from tasks or keywords.
+> Index for quickly identifying relevant sections by task or keyword.
 
-| Keyword | Related Sections |
+| Keyword | Related Section |
 |---|---|
-| CLA / Contributor | §2, §5 |
+| CLA / Contributors | §2, §5 |
 | IP Assignment / Work for Hire | §1, §4, §5 |
 | Joint Development / JV | §3 |
-| Employee Departure / Exit IP | §4 |
-| Patent Filing / Defensive Publication | §6, §7, §8 |
+| Employee Departure / IP | §4 |
+| Patent Filing / Defensive Publishing | §6, §7, §8 |
 | Patent Portfolio | §8, §28 |
-| SEP / FRAND | §9 |
-| Software Patent / Alice Test | §10 |
+| SEP / FRAND | §9, §53, §54 |
+| Software Patent / Alice | §10 |
 | Design Patent / Design Rights | §11 |
-| UPC / Unitary Patent | §12, §40 |
+| UPC / Unitary Patent / European IP | §12, §40 |
 | Trade Secret | §6, §13 |
 | NDA / Confidentiality | §14 |
 | Remote Work / BYOD | §15 |
 | GenAI / AI Copilot / LLM Risk | §16, §23, §24, §26 |
-| Trademark / Branding | §17, §18 |
+| Trademark / Brand | §17, §18 |
 | Domain / DNS | §19 |
 | Copyright Registration / USCO | §20 |
 | Data Rights / Database Rights / EU Data Act | §21 |
@@ -1332,7 +2406,7 @@ jobs:
 | Direct Listing | §27 |
 | IP Valuation | §28 |
 | Exit Readiness / Roadmap | §29 |
-| Representations & Warranties | §30, §45 |
+| R&W / Representations & Warranties | §30, §45 |
 | IPO Disclosure / SEC | §31, §32 |
 | Post-Merger / PMI | §33 |
 | Carve-out / Spin-off | §34 |
@@ -1341,19 +2415,69 @@ jobs:
 | Technical DD | §37 |
 | OSS DD / License DD | §38 |
 | Vendor Lock-in | §39 |
-| Cross-Border Disputes / ITC / WIPO Arbitration | §40 |
+| Cross-border Disputes / ITC / WIPO Arbitration | §40 |
 | IP-backed Financing | §41 |
 | IP Ledger / Inventory | §42 |
 | IP Infringement / Litigation | §43 |
 | Maturity Model | §44 |
 | IP Insurance | §45 |
-| ESG / Sustainability / Green Patent | §46 |
+| ESG / Sustainability / Green Patent | §46, §57 |
 | Open Innovation / CVC / University-Industry | §47 |
 | Compliance Timeline | §48 |
 | IP Education / IP Champion | §49 |
 | Quantum / Web3 / Metaverse / Future Tech | §50 |
+| PQC / Post-Quantum Cryptography IP | §50 |
+| Agentic AI / MCP / A2A IP | §50, §52 |
+| OSS AI Fine-Tuning / LoRA / QLoRA | §50 |
 | Garden Leave / Non-compete | §4 |
 | UDRP / Domain Disputes | §18 |
+| Geopolitics / Export Controls / EAR / ITAR / CFIUS | §51 |
+| Tech Decoupling / FDI Review / Inbound Investment | §51 |
+| GenAI Supply Chain / AI ToS / AI BOM | §52 |
+| Deep Fake / AI-Generated Content / C2PA | §52, §56 |
+| AI Agents / Agent Output / Copyright Attribution | §23, §52 |
+| IP Monetization / Licensing / Patent Pool / IPCo | §53 |
+| PAE / NPE / IPR Review / Patent Invalidation | §53 |
+| Antitrust / Competition Law / Monopoly | §54 |
+| GenAI Monopoly / AI Foundation Model / DMA / TTBER | §54 |
+| Patent Evergreening / Continuation Legitimacy | §54, §8 |
+| VC Fundraising / Series A / Seed IP | §55 |
+| IP Readiness / Round-by-Round Milestones | §55 |
+| EU AI Act / GPAI / Art.53 / Art.50 | §56, §25 |
+| C2PA / Content Authentication / AI Content Marking | §52, §56 |
+| Green Patent / Carbon / Clean Tech | §57, §46 |
+| Carbon Credits / CCUS / MRV | §57 |
+| CSRD / TCFD / ISSB / ESG Disclosure | §57, §46 |
+| Litigation Finance / TPLF / Burford / Success Fee | §58 |
+| IP Enforcement / Non-Recourse / Funding | §58, §43 |
+| Contingent Asset / Litigation Cost / IPO Disclosure (Active Suit) | §58, §31 |
+| Layered IP Protection / Stacking / Hybrid Strategy | §59 |
+| National Security / CHIPS Act / CFIUS / Sovereign IP | §60, §51 |
+| DURC / Dual-Use Research / Advanced Export Controls | §60, §51 |
+| Deal Architecture / Earnout IP Mechanism / IP Escrow | §61, §30 |
+| SPV / IP HoldCo / Ring-Fencing | §61, §53 |
+| Spatial Computing / Neurotech / XR | §50, §59 |
+| Global Jurisdiction IP Protection Matrix | Appendix B |
+
+---
+
+## Appendix B: Global Jurisdiction IP Protection Matrix
+
+> A quick-reference table for cross-jurisdictional comparison of representative IP rights in major legal systems. For details, see the respective sections (§1-§12, §20-§21, §51).
+
+| Protected Asset | 🇺🇸 US | 🇯🇵 Japan | 🇪🇺 EU (unified) | 🇨🇳 China | 🇮🇳 India | 🇧🇷 Brazil |
+|---|---|---|---|---|---|---|
+| **Patents** | USPTO (20yr) / AIA first-to-file | JPO (20yr) first-to-file | EPO + UPC (20yr) | CNIPA (20yr) | IPO (20yr) | INPI (20yr) |
+| **Utility Models** | — | JPO (10yr) | Country-level (DE etc.) | CNIPA (10yr) | — | INPI (15yr) |
+| **Trademarks** | USPTO (10yr renewal) prior-use rights | JPO (10yr renewal) first-to-file | EUIPO (10yr renewal) | CNIPA (10yr renewal) first-to-file | IPO (10yr renewal) | INPI (10yr renewal) |
+| **Design Rights** | Design Patent (15yr) | Design Registration (25yr) | RCD (25yr) / UCD (3yr) | CNIPA (15yr) | IPO (15yr) | INPI (10yr) |
+| **Copyright** | Author+70yr (optional registration) | Author+70yr (no formality) | Author+70yr (no formality) | Author+50yr | Author+60yr | Author+70yr |
+| **Trade Secrets** | DTSA / state laws | Unfair Competition Prevention Act | Trade Secrets Directive | Anti-Unfair Competition Law (2019 amendment) | Trade Secrets Act 2018 | Civil Code |
+| **Database Rights** | Copyright law only (no sui generis) | Copyright law (compilation works) | Directive 96/9/EC (15yr) | Copyright law | — | — |
+| **AI Inventorship** | Natural persons only (2025 revised guidance) | Natural persons only | Natural persons only (Dabus 2025 final) | Natural persons only | — | — |
+| **AI-Authored Works** | Human creative contribution required (USCO 2025 Report) | Human creative contribution required | Labeling obligation + human contribution required | — | — | — |
+| **FDI/IP Review Body** | CFIUS (FIRRMA) | Foreign Exchange Council (FEFTA) | EU FDI Screening Framework | SAMR / CSRC | FIPB (abolished) → automatic approval | CADE |
+| **Green Patent Fast Track** | USPTO Climate Change Mitigation Pilot | JPO Super Early Examination | EPO PACE | CNIPA Priority Examination | IPO Green Channel | — |
 
 ---
 
@@ -1361,22 +2485,12 @@ jobs:
 
 | Reference | Related Topics |
 |---|---|
-| [600_security_privacy.md](../security/000_security_privacy.md) | Access control, encryption, DLP, Zero Trust (§13, §15, §16) |
-| [601_data_governance.md](../security/100_data_governance.md) | Data protection regulation, AI regulation, GDPR, EU Data Act (§21, §23, §25, §48) |
-| [602_oss_compliance.md](../security/200_oss_compliance.md) | SBOM, SCA, license compliance, SLSA (§5, §35, §38) |
-| [700_qa_testing.md](../quality/000_qa_testing.md) | Test coverage, code quality metrics (§37) |
-| [502_site_reliability.md](../operations/400_site_reliability.md) | Availability, backup, DR (§37) |
-| [503_incident_response.md](../operations/500_incident_response.md) | Incident response flow (§43) |
-| [400_ai_engineering.md](../ai/000_ai_engineering.md) | AI implementation strategy, guardrails, RAG design (§23, §24, §26) |
-| [100_product_strategy.md](../product/000_product_strategy.md) | Monetization models, exit strategy business perspective (§27, §28) |
-| [101_revenue_monetization.md](../product/300_revenue_monetization.md) | FinOps, payments, IP valuation financial perspective (§28, §41) |
-
-### Cross-References
-
-| Section | Related Rules |
-|---------|---------------|
-| §1–§10 (IP Strategy & Registration) | `100_product_strategy`, `000_core_mindset` |
-| §11–§20 (Patent & Trade Secret) | `600_security_privacy` |
-| §21–§30 (OSS & License) | `602_oss_compliance` |
-| §31–§40 (AI & Data IP) | `400_ai_engineering`, `601_data_governance` |
-| §41–§50 (Contracts & Compliance) | `801_governance`, `103_appstore_compliance` |
+| [000_security_privacy.md](../security/000_security_privacy.md) | Access control, encryption, DLP, Zero Trust, AI-SPM (§13, §15, §16, §52) |
+| [100_data_governance.md](../security/100_data_governance.md) | Data protection regulation, AI regulation, GDPR, EU Data Act (§21, §23, §25, §48, §60) |
+| [200_oss_compliance.md](../security/200_oss_compliance.md) | SBOM, SCA, license compliance, SLSA, AI BOM (§5, §35, §38, §52) |
+| [000_qa_testing.md](../quality/000_qa_testing.md) | Test coverage, code quality metrics (§37) |
+| [400_site_reliability.md](../operations/400_site_reliability.md) | Availability, backup, DR (§37) |
+| [500_incident_response.md](../operations/500_incident_response.md) | Incident response flow (§43) |
+| [000_ai_engineering.md](../ai/000_ai_engineering.md) | AI implementation strategy, guardrails, RAG design, Agentic AI (§23, §24, §26, §52, §59) |
+| [000_product_strategy.md](../product/000_product_strategy.md) | Monetization models, exit strategy business perspective (§27, §28, §53, §61) |
+| [300_revenue_monetization.md](../product/300_revenue_monetization.md) | FinOps, payments, IP valuation financial perspective (§28, §41, §53, §61) |

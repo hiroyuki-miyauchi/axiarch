@@ -429,7 +429,7 @@ const response = await aiRouter.generate({
 });
 
 // ❌ 禁止: ハードコーディング
-const response = await gemini("gemini-2.0-flash", userMessage);
+const response = await gemini("gemini-x.x-flash", userMessage); // 特定モデルIDの直書き
 ```
 
 ### 12.2. モデル選定基準
@@ -442,7 +442,7 @@ const response = await gemini("gemini-2.0-flash", userMessage);
 | `Tier.VISION` | 画像解析、OCR | マルチモーダル、即時認識 |
 | `Tier.EMBEDDING` | 検索、類似度計算 | 高次元ベクトル、多言語対応 |
 
-- **Current Standard（2025-2026時点）**: Gemini 2.0 Flash を標準採用（コストパフォーマンス最適）
+- **Current Standard**: 各世代の「標準軽量モデル」（その時点でコストパフォーマンスが最適なモデル）を `Tier.FAST` にマッピングする。具体的なモデルIDはプロジェクトのBlueprint（設定ファイル）で管理し、本憲法では固定しない。
 - **Vision AI Standards**: Thinkingモデルは即時認識タスク（OCR等）には不適切。`Tier.VISION` には非Thinkingモデルを使用する
 
 ### 12.3. フォールバック・A/Bルーティング
@@ -1162,7 +1162,7 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 ### 39.2. Vision AI
 
 - **プライバシー**: 画像解析は可能な限りOn-Device（クライアントサイド）で実行。「生画像データ」はデバイス外に出さない
-- **Vision AI Standards**: Thinkingモデルは即時認識タスクには禁止。`gemini-2.0-flash` を使用
+- **Vision AI Standards**: Thinkingモデルは即時認識タスク（OCR等）には禁止。`Tier.VISION` にマッピングされた非Thinkingの軽量マルチモーダルモデルを使用すること
 - **アクセシビリティ**: 解析結果は `alt` テキスト・音声読み上げに対応
 
 ### 39.3. Voice AI

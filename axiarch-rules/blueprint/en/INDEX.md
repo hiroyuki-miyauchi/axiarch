@@ -175,6 +175,6 @@ Strategies for generating next-generation "value".
 
 ---
 
-**Last Updated**: 2026-04-08
-**Version**: v1.1.0 — Fully Isomorphic 8-folder structure with Universal
+**Last Updated**: 2026-04-29
+**Version**: v1.2.0 — Fully Isomorphic 8-folder structure with Universal, YAGNI-based structural normalization
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

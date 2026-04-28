@@ -410,7 +410,7 @@ const response = await aiRouter.generate({
 });
 
 // ❌ Prohibited: Hardcoding
-const response = await gemini("gemini-2.0-flash", userMessage);
+const response = await gemini("gemini-x.x-flash", userMessage); // Hardcoded model ID
 ```
 
 ### 12.2. Model Selection Criteria
@@ -423,7 +423,7 @@ const response = await gemini("gemini-2.0-flash", userMessage);
 | `Tier.VISION` | Image analysis, OCR | Multimodal, instant recognition |
 | `Tier.EMBEDDING` | Search, similarity computation | High-dimensional vectors, multilingual |
 
-- **Current Standard (2025-2026)**: Gemini 2.0 Flash as standard (optimal cost-performance)
+- **Current Standard**: Map each generation's "standard lightweight model" (the model with optimal cost-performance at that time) to `Tier.FAST`. Specific model IDs are managed in the project's Blueprint (configuration files) and are not fixed in this constitution.
 - **Vision AI Standards**: Thinking models are unsuitable for instant recognition tasks (OCR, etc.). Use non-Thinking models for `Tier.VISION`
 
 ### 12.3. Fallback & A/B Routing
@@ -1143,7 +1143,7 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 ### 39.2. Vision AI
 
 - **Privacy**: Execute image analysis on-device (client-side) whenever possible. Do not transmit "raw image data" off-device
-- **Vision AI Standards**: Thinking models are prohibited for instant recognition tasks. Use `gemini-2.0-flash`
+- **Vision AI Standards**: Thinking models are prohibited for instant recognition tasks (OCR, etc.). Use a non-Thinking lightweight multimodal model mapped to `Tier.VISION`
 - **Accessibility**: Make analysis results compatible with `alt` text and screen readers
 
 ### 39.3. Voice AI
