@@ -2,15 +2,15 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-04-28 (v4.0) | Previous: v3.2 (2026-04-28)
 
 > [!IMPORTANT]
 > **Supreme Directive**
-> "Growth without retention is a leaking bucket — fix the bucket before pouring more water."
+> "Growth without retention is a leaking bucket — fix the bucket before pouring more water. And before you pour, confirm the bucket is in the right market (PMF)."
 > All growth strategies must be data-driven, privacy-compliant, and architecturally sustainable.
-> Strictly follow the priority order: **Retention > Organic Growth > Paid Acquisition > Viral Loops**.
+> Strictly follow the priority order: **PMF Validation > Retention > Organic Growth > Paid Acquisition > Viral Loops**.
 > This document is the supreme standard for all growth and marketing strategy decisions.
-> **12 Parts, 48 Sections.**
+> **30 Parts, 200+ Sections. 2026 CMO Standard (AI-Native, Privacy-First, Brand-Led, Global-Ready).**
 
 ---
 
@@ -18,18 +18,36 @@
 
 | Part | Topic | Sections |
 |------|-------|----------|
-| I | Product-Led Growth (PLG) | §1 |
-| II | Technical SEO & GEO | §2 |
+| I | Product-Led Growth (PLG) & ASO | §1 |
+| II | Technical SEO & GEO & Voice/Multimodal Search | §2 |
 | III | Onboarding Optimization | §3 |
 | IV | Retention Strategy | §4 |
-| V | Marketing Technology (MarTech Stack) | §5 |
+| V | Marketing Technology (MarTech Stack) & CDP | §5 |
 | VI | Marketing Feeds & Integrations | §6 |
 | VII | Traffic Risk Diversification | §7 |
 | VIII | Growth Performance Architecture | §8 |
-| IX | Dynamic OGP & Social Sharing | §9 |
-| X | First-Party Data & Attribution | §10 |
+| IX | Dynamic OGP & Social Sharing & Social Commerce | §9 |
+| X | First-Party Data & Zero-Party Data & Attribution | §10 |
 | XI | Product Feedback & Continuous Improvement | §11 |
 | XII | KPI Measurement Framework | §12 |
+| XIII | AI-Native Growth Protocol | §13 |
+| XIV | Community-Led Growth & Creator Economy & Influencer | §14 |
+| XV | Paid Acquisition Governance | §15 |
+| XVI | Growth FinOps | §16 |
+| XVII | Anti-Pattern Catalog | §17 |
+| **XVIII** | **Brand Equity & Positioning** | **§18** |
+| **XIX** | **Product-Market Fit (PMF) Measurement** | **§19** |
+| **XX** | **Email Marketing Lifecycle Architecture** | **§20** |
+| **XXI** | **Growth Loops & Flywheel Design** | **§21** |
+| **XXII** | **Revenue Operations (RevOps) Alignment** | **§22** |
+| **XXIII** | **Content Marketing Architecture** | **§23** |
+| **XXIV** | **Internationalization & Localization Growth Strategy** | **§24** |
+| **XXV** | **Video & Short-Form Content Growth** | **§25** |
+| **XXVI** | **Conversational Marketing** | **§26** |
+| **XXVII** | **Partner & Ecosystem Growth** | **§27** |
+| **XXVIII** | **Growth Security & Anti-Fraud** | **§28** |
+| **XXIX** | **Sustainable & Ethical Growth** | **§29** |
+| **XXX** | **Growth Team Operating Model** | **§30** |
 
 ---
 
@@ -54,6 +72,37 @@
         *   If a user cancels within a short period (e.g., 24 hours) after using a referral code, revoke the issued points.
         *   Set a monthly cap on the referrer's cumulative referral count, and conduct manual review when the cap is exceeded.
     *   **Tracking**: Record referral codes (`ref=XXXXXX`) at user registration and track the Referral Funnel via analytics.
+
+### 1.2. App Store Optimization (ASO) Protocol
+
+> **Applicability**: This protocol applies to **projects with mobile apps (iOS / Android)**. For web-only projects, SEO/GEO (§2) serves as the equivalent.
+
+*   **The ASO Optimization Framework**:
+    *   **Law**: Systematically optimize app store discoverability and install conversion rate (CVR).
+
+        | Optimization Area | Actions | Standards |
+        |:-----------------|:--------|:---------|
+        | **Keyword Optimization** | Place primary search terms in title, subtitle, and keyword fields | Monitor keyword rankings monthly. Review keywords outside Top 10 quarterly |
+        | **Visual Optimization** | Condense core value proposition in first screenshot. Conduct icon A/B testing | Screenshot A/B testing **mandatory quarterly** |
+        | **Description Optimization** | Concentrate USP and primary keywords in first 3 lines (visible before fold) | Sync-update description on major updates |
+        | **Review Management** | Place in-app prompting immediately after Aha Moment | Review response SLA: **within 48 hours** for all reviews |
+        | **Localization** | Culturally optimize title and screenshots per target market (literal translation prohibited) | Individual optimization mandatory for primary markets (JP, US, EU) |
+
+    *   **ASO KPI Dashboard**:
+
+        | Metric | Frequency | Target |
+        |:------|:---------|:------|
+        | **Keyword Ranking** | Weekly | Top 10 for primary 10 keywords |
+        | **Impression → Install CVR** | Weekly | > 25% (vs. category average) |
+        | **Average Rating** | Weekly | ≥ 4.5 |
+        | **Review Response Rate** | Weekly | 100% (respond to all reviews) |
+        | **Uninstall Rate (D7)** | Monthly | < 30% |
+
+    *   **Review Prompt Timing**: Review request dialogs should only appear at the following times:
+        1.  **After Aha Moment** (immediately after experiencing core value)
+        2.  **After positive interactions** (success experiences, goal achievements, etc.)
+        3.  **Only if not displayed within the past 30 days**
+    *   **Prohibition**: Review requests immediately after app launch or negative experiences (after errors, etc.) are **prohibited** (increased low-rating risk).
 
 ## 2. Technical SEO & GEO (Generative Engine Optimization)
 *   **The GEO Mandate**:
@@ -207,7 +256,76 @@
         | 10 | Page load speed is LCP ≦ 2.5s |
         | 11 | Included in robots.txt / sitemap.xml |
         | 12 | noindex is not unintentionally set |
-    *   **Action**: Use as SEO perspective verification items during PR review.
+    *   **Action**: Use as SEO review checklist items during PR reviews.
+
+### 2.2. Voice Search & Multimodal Search Protocol
+
+> **Context**: Searches via smart speakers and voice assistants (Siri, Google Assistant, Alexa) account for over 30% of all searches and are growing. Google Lens and other multimodal searches are also expanding. Different optimization from traditional text SEO is required.
+
+*   **The Voice Search Optimization Protocol**:
+    *   **Law**: Pages targeting voice search citations must follow this structure.
+
+        | Requirement | Implementation |
+        |:-----------|:--------------|
+        | **Conversational Q&A Structure** | Use H2/H3 as natural language questions ("What is...?", "How to...?"), followed by 1-2 sentence concise answers |
+        | **Speakable Schema** | Specify voice-readable sections using Schema.org's `speakable` property |
+        | **Featured Snippet Optimization** | Structure answers as concise 40-60 word paragraphs or numbered lists |
+        | **Local Voice Query Support** | Prepare FAQ structures for Local Intent questions ("nearby...", "where is...?") |
+
+*   **The Multimodal Search Protocol**:
+    *   **Law**: Apply the following multimodal optimizations to all public content.
+
+        | Modality | Optimization | Schema |
+        |:---------|:------------|:-------|
+        | **Image Search** | Specific `alt` attributes on all images + high-resolution WebP/AVIF + image sitemap | `ImageObject` |
+        | **Video Search** | Chapter (`Clip`) markup + thumbnails + transcripts on videos | `VideoObject` + `Clip` |
+        | **Visual Search** | Product images comply with Google Merchant Center guidelines (white background, multiple angles) | `Product` + `Offer` |
+
+### 2.3. Passage Ranking Protocol
+
+> **Context**: Google Passage Ranking displays specific "passages (paragraphs)" within a page in search results, not just the entire page. Individual sections within long-form pages can independently appear in search results.
+
+*   **The Passage Ranking Optimization Standard**:
+    *   **Law**: Long-form content (1,000+ words) must follow this structure.
+        1.  **Self-Contained Sections**: Compose self-contained answer blocks for each H2/H3 section. Each section must be understandable without reading preceding or following sections
+        2.  **Front-Loaded Answers**: State the conclusion/answer within the first 50 words of each section
+        3.  **Semantic Separation**: Different topics must be separated into different H2/H3 headings. Do not mix multiple topics in a single section
+
+### 2.4. AI Overview & SGE Optimization Protocol
+
+> **Context**: Google's AI Overviews (formerly SGE) generate AI-summarized answers at the top of SERPs, significantly reducing traditional organic CTR. Optimization for "AI citation" is now a survival requirement for organic traffic.
+
+*   **The AI Overview Optimization Standard**:
+    *   **Law**: Content must be structured for AI citation eligibility using the following criteria.
+
+        | Criterion | Requirement |
+        |:----------|:-----------|
+        | **Concise Answer Block** | Provide a definitive answer in the first 50 words of H2/H3 sections |
+        | **Structured Data** | Implement FAQ, HowTo, and Article schema for AI extraction |
+        | **E-E-A-T Signals** | Author byline, credentials, last-updated date, and citation sources |
+        | **Comprehensive Coverage** | Cover the topic from multiple angles (vs, alternatives, use cases, pros/cons) |
+
+    *   **AI Citation Monitoring**: Track AI Overview citation rate via GSC and third-party tools. Maintain citation rate > 20% for target keywords.
+    *   **Cannibalization Defense**: If AI Overview cannibalizes organic CTR by > 30%, implement long-tail keyword pivoting and unique data/analysis that AI cannot replicate.
+
+### 2.5. Programmatic SEO at Scale (pSEO)
+
+> **Context**: Programmatic SEO generates thousands of pages from structured data (e.g., "[City] × [Category]", "[Product] vs [Competitor]"). High scalability but equally high risk of thin content penalties.
+
+*   **The pSEO Governance Protocol**:
+    *   **Law**: Programmatic SEO pages must satisfy ALL of the following quality gates.
+
+        | Gate | Requirement |
+        |:-----|:-----------|
+        | **Unique Value Threshold** | Each page must provide > 50% unique content (not just template fill) |
+        | **Data Freshness** | Source data must be updated at least monthly |
+        | **Thin Content Prevention** | Pages with < 300 words or no unique data are noindexed automatically |
+        | **Internal Link Graph** | Each pSEO page must receive ≥ 2 internal links from non-pSEO pages |
+
+    *   **Prohibited pSEO Patterns**:
+        1.  Pages generated solely by replacing city/product names in templates (zero unique insight)
+        2.  Auto-generated pages without editorial review for quality
+        3.  Doorway pages designed only for search engine crawling without user value
 
 ## 3. Onboarding Optimization
 *   **Shortening to Aha! Moment**:
@@ -323,6 +441,42 @@
         *   Decision-making without statistical significance (avoiding HiPPO: Highest Paid Person's Opinion)
         *   Experiments that disadvantage users (dark patterns)
 
+### 4.5. Predictive Churn Protocol
+
+> **Context**: ML-based churn prediction models improve intervention ROI by 15-25% compared to rule-based approaches by identifying at-risk users before behavioral signals become apparent.
+
+*   **The Predictive Churn Standard**:
+    *   **Law**: Churn prediction models must satisfy the following criteria.
+
+        | Criterion | Requirement |
+        |:----------|:-----------|
+        | **Model Accuracy** | AUC-ROC > 0.80. Below this, rule-based fallback is required |
+        | **Prediction Window** | Predict churn 14-30 days before occurrence (sufficient intervention time) |
+        | **Feature Set** | Must include: login frequency, feature usage depth, support ticket count, payment failures |
+        | **Retraining Cadence** | Monthly retraining with latest 90-day data |
+
+    *   **Intervention Ladder**: Automated escalation based on churn risk score.
+
+        | Risk Score | Intervention | Owner |
+        |:----------|:------------|:------|
+        | **0.3-0.5** | Personalized in-app message + value highlight email | Marketing |
+        | **0.5-0.7** | Exclusive offer + one-on-one CS outreach | CS Team |
+        | **0.7-1.0** | Executive escalation + custom retention offer | VP-level |
+
+### 4.6. Gamification Framework
+
+> **Context**: Gamification elements (points, badges, streaks) increase DAU/MAU by 15-30% when properly implemented, but poorly designed gamification creates superficial engagement without retention improvement.
+
+*   **The Gamification Design Standard**:
+    *   **Law**: Gamification elements must follow the Octalysis Framework and satisfy the following behavioral design criteria.
+
+        | Element | Design Principle | Anti-Pattern |
+        |:--------|:----------------|:-------------|
+        | **Streak** | Reward streak continuation + provide grace period (miss 1 day penalty-free) | Punishing streak breaks harshly (leads to permanent disengagement) |
+        | **Badge** | Tied to meaningful achievements reflecting real value usage | Awarding badges for trivial actions (badge inflation) |
+        | **Leaderboard** | Segmented by cohort (not absolute ranking). Rotating reset | Global leaderboards that discourage new users |
+        | **Progress Bar** | Clear endpoint + milestone rewards at 25%/50%/75% | Never-ending progress bars without achievable goals |
+
 ## 5. Marketing Technology (MarTech Stack)
 *   **Attribution**:
     *   **AppsFlyer / Adjust**: Accurately measure mobile app install paths and identify which ad channels are bringing in high LTV users.
@@ -385,6 +539,25 @@
 *   **Action**: Separate `items` table main data from `marketing_metadata` (jsonb or dedicated table), building dependency where marketers editing the latter doesn't break base system logic (order processing, notifications).
 *   **Rationale**: Physically avoid "tight coupling tragedy" where changing product name for ad optimization (AB test) also changes shipping label name.
 
+### 7.2. The Server-Side GTM Migration Protocol (sGTM)
+
+> **Context**: Client-side GTM (tag container running in the browser) has a 30-40% data loss risk due to Ad Blockers, ITP, and browser privacy features. sGTM migrates tag processing to the cloud and converts to First-Party Endpoints, simultaneously improving data accuracy and privacy compliance.
+
+*   **The sGTM Migration Mandate**:
+    *   **Law**: In addition to the CAPI Protocol (§7 CAPI Direct Connection Protocol), plan the server-side migration of the GTM container itself.
+
+        | Phase | Action | Purpose |
+        |:------|:-------|:--------|
+        | **Phase 1** | Deploy sGTM container on Cloud Run / Cloud Functions | Server-side tag processing |
+        | **Phase 2** | Switch client-side GA tags to route through sGTM | First-Party Endpoint (`sgtm.yourdomain.com`) |
+        | **Phase 3** | Consolidate key conversion tags (Meta CAPI, Google Ads) through sGTM | Centralized PII auto-hashing & deduplication |
+
+    *   **Benefits**:
+        *   **Improved Data Accuracy**: Measurement infrastructure unaffected by Ad Blockers
+        *   **PII Protection**: Centralized enforcement of server-side SHA-256 hashing
+        *   **Page Speed Improvement**: LCP improvement through reduction of client-side JS tags
+    *   **Prohibition**: Keeping client-side Pixels as "backup" after sGTM migration is permitted, but plaintext transmission of PII (email addresses, phone numbers, etc.) remains **strictly prohibited**.
+
 ## 8. Growth Performance Architecture
 *   **The Growth-Critical Performance Mandate**:
     *   **Law**: Pages directly linked to user Acquisition and Retention (LPs, feeds, search results, etc.) MUST prioritize performance, making cache strategy mandatory.
@@ -397,6 +570,39 @@
         *   **Offline-First**: Cache already-read content locally to enable viewing even offline.
     *   **Mandate**: Pages directly linked to growth KPIs (DAU/MAU, session duration) MUST apply Cache Hierarchy (refer to `101_revenue_monetization.md` §1 Cache Hierarchy Standard).
 
+### 8.2. Growth Engineering Foundation Protocol
+
+> **Context**: Balancing speed and risk management for growth initiatives requires Feature Flags for progressive rollouts and reliable measurement infrastructure (Instrumentation). These are "growth infrastructure" and must be established before individual initiatives.
+
+*   **Feature Flag Governance**:
+    *   **Law**: All A/B tests and progressive rollouts MUST be managed via Feature Flag management tools (LaunchDarkly / Unleash / Statsig, etc.). Manual code-level `if/else` branching is prohibited.
+
+        | Rule | Standard |
+        |:-----|:--------|
+        | **Naming Convention** | `{team}_{feature}_{experiment_id}` (e.g., `growth_onboarding_ab001`) |
+        | **Kill Switch** | All production Feature Flags must implement immediate disable capability. Maintain **rollback-ready state within 5 minutes** |
+        | **Rollout Strategy** | New features follow 1% → 10% → 50% → 100% progressive rollout as standard |
+        | **Flag Debt Cleanup** | Flag definitions and code branches MUST be removed **within 90 days** after experiment conclusion. Abandoned Dead Flags are technical debt |
+
+    *   **Flag Audit**: Monthly review of all Flags, classifying and managing them as "Active," "Complete (pending deletion)," or "Permanent (OpsFlag)."
+
+*   **Product Analytics Instrumentation Standard**:
+    *   **Law**: To ensure growth measurement reliability, all product events MUST be sent using the following unified schema.
+
+        | Field | Type | Required | Description |
+        |:------|:-----|:---------|:-----------|
+        | `event_name` | string | ✅ | snake_case (e.g., `sign_up_complete`, `store_detail_view`) |
+        | `user_id` | string | ✅ | Authenticated user ID (anonymous_id when unauthenticated) |
+        | `session_id` | string | ✅ | Session identifier |
+        | `timestamp` | ISO 8601 | ✅ | Event occurrence time (UTC) |
+        | `properties` | object | ✅ | Event-specific attributes (free-form, but catalog management mandatory) |
+
+    *   **Dual Tracking Mandate**: Critical conversion events (`sign_up`, `purchase`, `subscription_start`, etc.) MUST use **dual transmission via Client-side (GA4) and Server-side (BigQuery direct, etc.)**. Client-side alone risks 30-40% data loss due to Ad Blockers and browser restrictions.
+    *   **Data Quality Gate**: Execute weekly Event Schema Validation Reports to detect:
+        *   Required field missing rate > 1%
+        *   Type mismatches (e.g., null values in `user_id`)
+        *   Undefined event name transmissions (events not in catalog)
+
 ## 9. Dynamic OGP & Social Sharing
 *   **The Dynamic OGP Protocol**:
     *   **Law**: For pages with high social sharing potential (detail pages, articles, etc.), generate **dynamic OGP images** on-demand by compositing title, ratings, and images to maximize CTR (Click-Through Rate) on SNS sharing.
@@ -404,6 +610,29 @@
         1.  **Server-Side Generation**: Use Edge Functions or server-side OGP image generation libraries to dynamically generate OGP images at request time.
         2.  **CDN Cache**: Apply CDN caching (e.g., `s-maxage=86400`) to prevent regeneration on repeated requests to the same page, reducing generation costs.
         3.  **Fallback**: If dynamic generation fails, fall back to a site-wide default OGP image to avoid empty OGP.
+
+### 9.2. Social Commerce Protocol
+
+> **Context**: In-platform purchasing via Instagram Shopping, TikTok Shop, YouTube Shopping, etc. is rapidly expanding. Building seamless flows from product discovery to checkout within social platforms is essential.
+
+*   **The Social Commerce Integration Standard**:
+    *   **Law**: When deploying social commerce, comply with the following integration protocol.
+
+        | Platform | Integration Requirement | Sync Method |
+        |:---------|:----------------------|:------------|
+        | **Instagram Shopping** | Product Catalog metadata sync | Auto-sync via Marketing Feed Protocol (§6) |
+        | **TikTok Shop** | Product registration + real-time inventory sync | API integration (TikTok Shop API) |
+        | **YouTube Shopping** | In-video product tags + Merchant Center integration | Via Google Merchant Center |
+
+    *   **Product Catalog SSOT**: Product catalogs for social commerce must use the internal DB as SSOT, with distribution to each platform automated through the Marketing Feed Protocol (§6). Manual individual registration is prohibited.
+    *   **Social Commerce KPI**:
+
+        | Metric | Definition | Measurement Frequency |
+        |:-------|:-----------|:---------------------|
+        | **Social GMV** | Total transaction value via social channels | Monthly |
+        | **Social CVR** | Conversion rate via social channels | Weekly |
+        | **Social ROAS** | ROAS for social commerce advertising | Weekly |
+        | **Content-to-Commerce Rate** | Purchase conversion rate from UGC/influencer content | Monthly |
 
 ## 10. First-Party Data & Attribution
 *   **The First-Party Data Strategy**:
@@ -428,6 +657,55 @@
     *   Using spaces or multibyte characters
     *   Misusing `utm_term` (only allowed for search ad auto-assignment)
 *   **Management**: Centrally manage UTM parameter lists in spreadsheets etc., and prevent duplicates and notation inconsistencies.
+
+### 10.2. Zero-Party Data Collection Protocol
+
+*   **Definition**: Zero-Party Data (ZPD) refers to data that users **actively and intentionally** share with the service (survey responses, preference declarations, diagnostic tool results, etc.). Unlike First-Party Data based on "behavioral observation," ZPD is fundamentally based on "self-declaration."
+
+*   **The ZPD Collection Framework**:
+    *   **Law**: ZPD collection must be structured using the following 4 patterns, with collection timing and usage purpose pre-defined for each.
+
+        | Pattern | Collection Method | Recommended Timing | Usage |
+        |:--------|:-----------------|:-------------------|:------|
+        | **Preference Center** | Preference declarations in user settings (category interests, notification frequency, etc.) | Post-onboarding or on settings change | Content recommendations, email segmentation |
+        | **Interactive Quiz** | Capture user state/preferences via diagnostic or quiz format | Landing pages, featured content | Lead scoring, personalized LP |
+        | **Wishlist / Favorites** | Users explicitly declare "want" or "interested" | Any time during browsing | Retargeting, stock notifications, recommendations |
+        | **Onboarding Survey** | Brief capture of usage intent, expectations, and attributes at first use | Immediately after registration (3 questions max recommended) | Initial segment classification, Aha Moment guidance optimization |
+
+    *   **Consent & Ethics**: The following are mandatory when collecting ZPD.
+        1.  **Purpose Disclosure**: Clearly state "what this data will be used for" in the UI before collection
+        2.  **Opt-in Only**: ZPD provision must always be opt-in (voluntary) and skippable
+        3.  **Erasure Right**: Provide a UI that allows users to delete or modify their ZPD at any time
+        4.  **No Dark Patterns**: UIs that force responses (hiding skip buttons, blocking navigation, etc.) are strictly prohibited
+
+*   **The ZPD-to-Personalization Pipeline**:
+    *   **Law**: Collected ZPD must be utilized for real-time personalization through the following pipeline.
+    *   **Pipeline**:
+        ```
+        ZPD Collection → Immediate storage in CDP/database → Automatic segment update
+        → Real-time experience changes (content recommendations, email delivery, UI display optimization)
+        → Impact measurement (monthly review of CTR/CVR change rates)
+        ```
+    *   **Freshness Rule**: ZPD must be automatically flagged as "stale" after **12 months** from collection, triggering a re-confirmation prompt. Since user preferences change over time, perpetual personalization based on outdated ZPD causes accuracy degradation.
+
+### 10.3. Privacy Sandbox Readiness Protocol
+
+> **Context**: With the phased deprecation of third-party cookies, Google's Privacy Sandbox APIs are becoming the new standard for ad targeting and conversion measurement. A planned migration from cookie-dependent measurement infrastructure is necessary.
+
+*   **The Privacy Sandbox Migration Mandate**:
+    *   **Law**: In preparation for third-party cookie deprecation, develop a plan to adopt the following Privacy Sandbox APIs and migrate in stages.
+
+        | API | Purpose | Cookie Replacement Target | Priority |
+        |:---|:--------|:------------------------|:---------|
+        | **Topics API** | Interest-based ad targeting | Third-party cookie-dependent retargeting | 🟠 High |
+        | **Attribution Reporting API** | Conversion measurement (event-level + summary reports) | Third-party cookie-dependent attribution | 🔴 Critical |
+        | **Protected Audiences API** | Remarketing (formerly FLEDGE) | Cookie-dependent remarketing audiences | 🟠 High |
+
+    *   **Migration Strategy**:
+        1.  **Parallel Run**: Run current cookie-dependent measurement and Privacy Sandbox APIs in parallel, validating data discrepancies
+        2.  **First-Party Foundation**: Use §10's First-Party Data Strategy as the foundation, with Privacy Sandbox as a complementary secondary signal
+        3.  **Server-Side Priority**: Prioritize §7's CAPI Direct Connection Protocol and §7.2's sGTM as the primary measurement infrastructure, positioning Privacy Sandbox APIs as client-side supplementary tools
+    *   **Prohibition**: Building measurement infrastructure that depends solely on Privacy Sandbox APIs is prohibited. First-Party Data + Server-Side measurement must always be the Primary Signal.
 
 ## 11. Product Feedback & Continuous Improvement
 *   **The Feedback Loop Protocol (NPS/CSAT)**:
@@ -479,19 +757,1225 @@
 
 ---
 
+## 13. AI-Native Growth Protocol
+
+> **Supreme Directive**: AI is the "automation engine" of growth. However, autonomous AI initiatives must explicitly define measurement, control, and accountability.
+
+### 13.1. Agentic Growth Automation
+
+*   **The AI Growth Agent Governance Protocol**:
+    *   **Mandate**: All automated initiatives using LLM/AI agents (content generation, A/B testing, bid optimization, etc.) MUST pass through the following control gates.
+
+        | Gate | Requirement |
+        |:-----|:------------|
+        | **Human-in-the-loop** | Automation with budget impact > $1,000/month requires human approval |
+        | **Audit Log** | Store AI decision rationale, inputs, and outputs for 90 days |
+        | **Kill Switch** | Implement the ability to immediately stop automation upon anomaly detection |
+        | **Bias Check** | Conduct monthly fairness audits on targeting AI |
+
+    *   **Prohibited Actions**:
+        *   Auto-generation of dark patterns (false urgency, hidden costs, etc.) by AI
+        *   Behavioral profiling without user consent
+        *   Price discrimination (dynamic pricing based on Protected Class attributes)
+
+### 13.2. AI Content Generation for Growth
+
+*   **The AI Content Quality Gate**:
+    *   **Law**: All marketing content generated by AI (SEO articles, ad copy, emails) MUST pass through the following QA gates.
+    *   **Gate Checklist**:
+        - `[ ]` Fact-Check complete — verify numbers and proper nouns against primary sources
+        - `[ ]` E-E-A-T compliant — author information and source attribution included
+        - `[ ]` AI disclosure — disclose AI-generated nature in regulated regions (EU AI Act Art.50, etc.)
+        - `[ ]` Plagiarism check — similarity rate with existing content < 20%
+
+### 13.3. Predictive Growth Analytics
+
+*   **The Predictive LTV Model Standard**:
+    *   **Law**: Build LTV prediction models for new users and apply them to channel evaluation.
+    *   **Minimum Requirements**:
+        *   Include D7 retention as an input feature
+        *   Evaluate model prediction accuracy (RMSE) monthly
+        *   Dynamically set CPA ceilings based on predicted LTV
+    *   **Action**: Predicted LTV (pLTV) = `∑ (Monthly ARPU × Predicted Retention Months × Gross Margin)`
+
+### 13.4. EU AI Act Art.50 Compliance Protocol (Marketing AI Transparency Mandate)
+
+> **Context**: EU AI Act Article 50 establishes transparency obligations for AI-generated content. In the marketing domain, AI-generated ads, content, and personalization are direct regulatory targets. All AI-generated marketing content distributed to EEA markets must comply with this protocol.
+
+*   **The AI Transparency Mandate**:
+    *   **Law**: AI-generated marketing content (text, images, video, audio) distributed to EEA markets MUST disclose its AI-generated nature in a **machine-readable format**.
+
+        | Content Type | Disclosure Method | Implementation Requirement |
+        |:------------|:-----------------|:--------------------------|
+        | **Text (SEO articles, emails, ad copy)** | HTML meta tag: `<meta name="ai-generated" content="true">` + page footer display | Integrate auto-tagging into CI/CD pipeline |
+        | **Images (ad creatives, OGP)** | Embed `AI Generated: true` in EXIF/XMP metadata | Auto-tag in image generation pipeline |
+        | **Video / Audio** | Display "AI Generated" at content opening or in description | Add to pre-distribution checklist |
+
+    *   **Prohibition**:
+        1.  Concealing AI generation and falsely presenting content as "human-written" is **strictly prohibited**
+        2.  AI-generated **deepfakes** (ads mimicking real persons' faces or voices) are permitted only with the person's explicit consent. Deepfake ads without consent carry legal risks and are **absolutely prohibited**
+        3.  Presenting AI-generated content as "expert opinion" or "physician recommendation" is **prohibited** (E-E-A-T trustworthiness degradation)
+
+*   **The AI Marketing Audit Trail**:
+    *   **Law**: The following information MUST be retained in logs for **90 days** for AI-generated marketing content.
+
+        | Record Item | Details |
+        |:-----------|:-------|
+        | **Model Used** | Model name and version (e.g., GPT-4o, Claude 3.5 Sonnet) |
+        | **Input Prompt** | Full text (or summary) of the prompt used for generation |
+        | **Generation Timestamp** | UTC timestamp |
+        | **Human Reviewer** | Name of the approver when passing QA gate |
+        | **Distribution Region** | Regional tag for distribution target (EEA / non-EEA) |
+
+    *   **Compliance Gate**: Before distributing AI-generated content to EEA markets, it MUST pass both the §13.2 Quality Gate checklist AND the Art.50 transparency requirements.
+
+*   **The C2PA Content Credentials Protocol (Content Provenance Proof)**:
+    *   **Context**: C2PA (Coalition for Content Provenance and Authenticity) is an international standard for cryptographically proving content's creation and editing history. It is gaining adoption as the most effective technical means to guarantee AI transparency obligations under the EU AI Act.
+    *   **Law**: For EEA-targeted distribution of AI-generated images and videos, in addition to EXIF/XMP metadata, the following C2PA compliance is recommended.
+
+        | Requirement | Implementation | Priority |
+        |:-----------|:--------------|:---------|
+        | **C2PA Manifest Embedding** | Embed C2PA manifest (generation model, timestamp, edit history) with cryptographic signature in AI-generated images | 🟠 Recommended |
+        | **Content Credentials Display** | Place links to verification UIs (e.g., Adobe Content Credentials) on distribution pages | 🟡 Optional |
+        | **AI Watermark** | Embed invisible watermarks (e.g., SynthID) in AI-generated images | 🟠 Recommended |
+
+    *   **Action**: Integrate C2PA libraries (`c2pa-node` / `c2pa-python`) into the AI image generation pipeline to automatically attach Manifests at generation time.
+
+### 13.5. Synthetic A/B Testing Protocol
+
+> **Context**: Synthetic A/B Testing using LLMs for simulation experiments is an emerging method to accelerate hypothesis screening without using production traffic. However, since LLM simulations contain biases, they cannot be used for final decision-making.
+
+*   **The Synthetic A/B Testing Governance Protocol**:
+    *   **Law**: LLM-based simulation experiments must operate under the following constraints.
+
+        | Use Case | Permitted/Prohibited | Rationale |
+        |:---------|:--------------------|:----------|
+        | **Hypothesis Screening** | ✅ Permitted | Rapidly narrow down promising hypotheses from many candidates |
+        | **Copywriting Candidate Selection** | ✅ Permitted | Pre-filter ad copy and email subject line candidates |
+        | **Final Strategy Decision** | ❌ Prohibited | High risk of incorrect decisions due to LLM simulation biases |
+        | **Statistical Significance Substitute** | ❌ Prohibited | p < 0.05 testing can only be determined through production A/B tests (§4 Experimentation Protocol) |
+
+    *   **Workflow**: Synthetic A/B → Narrow to 2-3 promising hypotheses → Final validation through production A/B test (§4 Experimentation Protocol)
+    *   **Audit Trail**: Store Synthetic A/B results (input prompts, simulation results, adoption decisions) for 90 days, consistent with §13.4 AI Marketing Audit Trail.
+
+### 13.6. Multi-Agent Growth Orchestration
+
+> **Context**: 2026 marketing automation is transitioning from single AI tools to Multi-Agent Architectures where multiple AI agents collaboratively plan, execute, and analyze campaigns.
+
+*   **The Multi-Agent Governance Protocol**:
+    *   **Law**: AI agent collaboration in marketing must operate under the following architecture.
+
+        | Layer | Agent Role | Human Intervention Level |
+        |:------|:----------|:------------------------|
+        | **Planning Agent** | Campaign strategy design & targeting | 🔴 Approval Required |
+        | **Execution Agent** | Content generation, scheduling, bid optimization | 🟠 Monitoring |
+        | **Analysis Agent** | Performance analysis, anomaly detection, optimization proposals | 🟢 Autonomous |
+
+    *   **Conflict Resolution**: Multiple agents performing conflicting operations on the same campaign or user segment is prohibited. Control via Priority Queue (Planning > Analysis > Execution).
+    *   **Kill Switch**: An immediate stop button for all AI agents MUST be implemented. Humans must be able to halt all automated operations within 30 seconds.
+
+### 13.7. RAG-Powered Personalization Protocol
+
+> **Context**: RAG (Retrieval-Augmented Generation) based real-time personalization provides accuracy beyond traditional rule-based segmentation. However, it carries privacy risks requiring strict governance.
+
+*   **The RAG Personalization Governance**:
+    *   **Law**: RAG-based personalization must comply with the following privacy guardrails.
+
+        | Guardrail | Requirement | Verification |
+        |:----------|:-----------|:------------|
+        | **PII Exclusion** | Do not store PII directly in RAG retrieval sources | Data pipeline audit (monthly) |
+        | **Consent Check** | Verify user consent before personalization | Consent Mode v2 integration |
+        | **Explainability** | Must be able to explain why content was recommended | Recommendation reason log retention |
+        | **Opt-Out** | Provide complete opt-out from personalization | Explicit toggle in settings |
+
+    *   **KPI**: Personalization accuracy targets: **CTR Lift > 15%** and **CVR Lift > 10%** (vs. non-personalized group).
+
+### 13.8. AI Creative Optimization Protocol
+
+> **Context**: AI-powered ad creative generation and optimization can improve creative team productivity by 3-5x, but brand consistency and quality control remain challenges.
+
+*   **The AI Creative Governance**:
+    *   **Law**: AI-generated creatives must be managed under the following loop.
+
+        ```
+        AI Creative Optimization Loop:
+        1. Generate: AI creates multiple variations
+        2. Gate: Brand Playbook compliance check (§18.2 integration)
+        3. Test: Dynamic selection via Multi-Armed Bandit (MAB)
+        4. Learn: Feed performance data back to model
+        5. Rotate: Automatic rotation upon Creative Fatigue detection
+        ```
+
+    *   **Creative Fatigue Detection**: When CTR of the same creative **drops 30% from initial delivery**, automatically flag for rotation.
+    *   **Human Override**: If AI optimization results conflict with brand guidelines, the human Creative Director retains veto power.
+
+---
+
+## 14. Community-Led Growth (CLG) & Creator Economy
+
+> **Supreme Directive**: Community is the "external growth engine" of the product, with trust as capital. CLG prioritizes long-term brand equity over short-term growth metrics.
+
+### 14.1. Community Infrastructure
+
+*   **The Community Platform Selection Protocol**:
+    *   **Mandate**: Community platform selection MUST be evaluated against the following criteria.
+
+        | Criterion | Priority | Description |
+        |:---------|:---------|:------------|
+        | **Data Ownership** | 🔴 Critical | User data ownership must reside with the service |
+        | **Export Capability** | 🔴 Critical | Full content and member data export functionality |
+        | **API Integration** | 🟠 High | Real-time sync to proprietary DB |
+        | **Moderation** | 🟠 High | AI-assisted content moderation features |
+
+    *   **Anti-Pattern**: Platform dependency (operating solely on external platforms like Facebook Groups, LINE, etc.) carries the risk of "loss of data sovereignty" and is prohibited. These may only be used as supplements to a self-owned community.
+
+### 14.2. Creator Economy Protocol
+
+*   **The Creator Incentive Design Standard**:
+    *   **Tiers**:
+
+        | Tier | Condition | Benefits |
+        |:-----|:----------|:---------|
+        | **Bronze** | 1+ UGC/month | Badge + profile highlight display |
+        | **Silver** | 5 UGC/month + engagement rate > 5% | Revenue share (10% of ad revenue) |
+        | **Gold** | Follower growth > 100/month | Dedicated support + revenue share (20%) |
+
+    *   **Revenue Share Formula**: `Creator Revenue = (Page Views × CPM × 0.7) × Creator Share Rate`
+    *   **Payment**: Monthly settlement. Minimum payment threshold $10 (unpaid balances roll over to next month).
+
+### 14.3. Community Health Metrics
+
+*   **The Community KPI Standard**:
+    *   **Key Metrics**:
+
+        | Metric | Definition | Target |
+        |:-------|:-----------|:-------|
+        | **DAU/MAU (Community)** | Community engagement depth | > 20% |
+        | **Content Quality Score** | Quality score by moderation AI | > 3.5/5.0 |
+        | **Toxicity Rate** | Ratio of deleted content | < 0.5% |
+        | **Creator Retention** | Ratio of creators who post the following month | > 60% |
+
+### 14.4. Influencer Marketing Governance
+
+> **Context**: The 2023 Japanese Act against Unjustifiable Premiums and Misleading Representations (stealth marketing regulation) and FTC Endorsement Guides have tightened transparency requirements for influencer marketing. Violations are subject to administrative actions and brand damage.
+
+*   **The Influencer Governance Protocol**:
+    *   **Mandatory Disclosure**: All influencer posts must include the following disclosures.
+
+        | Region | Required Disclosure | Format |
+        |:-------|:-------------------|:-------|
+        | **Japan** | "広告" / "PR" / "提供" clearly stated | At the beginning of the post (hashtags only is insufficient) |
+        | **US** | `#ad` or `#sponsored` + FTC-compliant disclosure | Placed in the first line of the post |
+        | **EU** | Disclosure compliant with country-specific regulations | Prioritize platform's Paid Partnership feature |
+
+    *   **Influencer Selection Matrix (5-Axis Evaluation)**:
+
+        | Axis | Criterion | Weight |
+        |:-----|:---------|:-------|
+        | **Audience Fit** | Overlap rate with target ICP (§22.1) | 30% |
+        | **Engagement Quality** | Engagement rate (post bot exclusion) > 3% | 25% |
+        | **Brand Safety** | Check for past controversies / competitor partnerships | 20% |
+        | **Content Quality** | Portfolio quality and consistency | 15% |
+        | **Cost Efficiency** | CPE (Cost Per Engagement) reasonableness | 10% |
+
+    *   **ROI Measurement**: `Earned Media Value (EMV) = Impressions × Industry CPM × Engagement Multiplier`
+    *   **Contract Requirements**: Influencer contracts must include the following mandatory clauses.
+        1.  Content approval process (pre-review rights)
+        2.  Competitive exclusion clause (prohibition of competitor product PR during contract)
+        3.  Usage rights scope and duration
+        4.  Performance criteria and compensation structure
+
+---
+
+## 15. Paid Acquisition Governance
+
+> **Supreme Directive**: Paid acquisition is "water poured into a bucket." Even with ROAS > 1, poor retention turns it to scorched earth. Scale paid acquisition only after the retention foundation is established.
+
+### 15.1. Paid Channel Governance
+
+*   **The ROAS Gate Protocol**:
+    *   **Law**: Budget expansion to new paid channels is permitted ONLY after passing ALL of the following gates.
+
+        | Gate | Threshold |
+        |:-----|:----------|
+        | **Blended ROAS** | > 2.5x (90 days) |
+        | **CAC Payback Period** | < 12 months |
+        | **D30 Retention (Paid-Acquired Users)** | > 30% |
+        | **LTV:CAC ratio** | > 3:1 |
+
+    *   **Budget Circuit Breaker (4-Stage)**: Apply the following 4-stage automatic controls based on the degree of weekly CAC deterioration vs. the prior month.
+
+        | Stage | Trigger Condition | Automatic Action | Human Intervention |
+        |:------|:-----------------|:----------------|:-------------------|
+        | **Stage 1: Advisory** | CAC +15% deterioration | Alert issued, dashboard warning displayed | Begin root cause analysis within 72 hours |
+        | **Stage 2: Throttle** | CAC +30% deterioration | 50% budget cut, auto-stop low-efficiency channels | Human review mandatory (within 48 hours) |
+        | **Stage 3: Degrade** | CAC +50% deterioration | 80% budget cut, continue only top 2 channels | Executive escalation mandatory |
+        | **Stage 4: Halt** | CAC +100% deterioration (2x) | Immediate halt of all paid acquisition | Emergency review meeting within 24 hours |
+
+        *   **Recovery Protocol**: Recovery from each Stage is permitted only when CAC falls below the trigger threshold for 2 consecutive weeks, relaxing one stage at a time. Direct recovery from Stage 4 to normal operations is prohibited.
+
+### 15.2. Creative Governance
+
+*   **The Ad Creative Policy Protocol**:
+    *   **Prohibition List**:
+        - Unsubstantiated superlatives ("#1 in Japan", "Industry's Best", etc. without third-party certification)
+        - Before/After comparisons that are misleading
+        - Fear-Based Marketing (exploiting user anxieties)
+        - Stealth marketing (ad content without PR/Sponsored disclosure)
+    *   **Compliance Check**: All new creatives MUST pass a legal compliance checklist before deployment (consumer protection laws, drug/cosmetics regulations, specific commercial transaction laws, etc.).
+
+### 15.3. Multi-Touch Attribution
+
+*   **The Attribution Model Standard**:
+    *   **Recommended Model**: Adopt Data-Driven Attribution (DDA). Rule-based models (Last Click, etc.) create single-channel evaluation bias and should be deprecated.
+    *   **Implementation**:
+
+        ```
+        Attribution Signal Priority:
+        1. Server-Side (CAPI / Enhanced Conversions) — Highest priority
+        2. First-Party Cookie (1st-party data) — Second priority
+        3. Browser Pixel — Lowest priority (Fallback only)
+        ```
+
+    *   **Holdout Testing**: Conduct Incremental Lift tests (Conversion Lift or holdout experiments) quarterly to measure the true effect of paid acquisition.
+
+### 15.4. Retail Media Networks Protocol (RMN)
+
+> **Context**: Retail Media Networks (Amazon Ads, Walmart Connect, Instacart Ads, etc.) have grown to a $60B+ market by 2026. They feature high-precision targeting using retailers' First-Party Data.
+
+*   **The RMN Governance Protocol**:
+    *   **Law**: RMN advertising must operate under the following criteria.
+
+        | Criterion | Requirement |
+        |:----------|:-----------|
+        | **ROAS Threshold** | RMN-specific ROAS > 3.0x (after retail margin consideration) |
+        | **Data Integration** | Integrate RMN conversion data into internal CDP |
+        | **Brand Safety** | Placements outside product pages require pre-approval |
+        | **Competitor Adjacency** | Ads on competitor product pages controlled by Brand Safety Protocol |
+
+    *   **First-Party Data Leverage**: RMN purchase data must be integrated with §10 First-Party Data strategy for cross-channel LTV calculation.
+
+### 15.5. CTV & DOOH Advertising Protocol
+
+> **Context**: Connected TV (CTV) and Digital Out-of-Home (DOOH) are next-generation programmatic ad channels. Measurement standardization remains a challenge.
+
+*   **The CTV/DOOH Governance Protocol**:
+    *   **Law**: CTV/DOOH advertising must comply with the following operational standards.
+
+        | Channel | Measurement Standard | KPI | Minimum Test Period |
+        |:--------|:--------------------|:----|:-------------------|
+        | **CTV** | View Completion Rate (VCR) + Brand Lift Study | VCR > 85%, Brand Lift > 5pt | 4 weeks |
+        | **DOOH** | Impression Multiplier + Footfall Measurement | CPM Efficiency + Footfall Lift | 2 weeks |
+
+    *   **Cross-Device Attribution**: CTV/DOOH touchpoints must be attributed to internal CDP via device graph or deterministic matching. Performance reporting based solely on probabilistic matching is prohibited.
+    *   **Frequency Capping**: CTV ad frequency cap is **3 times per week per household** as a default.
+
+---
+
+## 16. Growth FinOps
+
+> **Supreme Directive**: Marketing budget is an "investment" — always evaluate it by the LTV:CAC ratio. Make decisions based on Unit Economics, not intuition.
+
+### 16.1. Unit Economics Governance
+
+*   **The Growth Unit Economics Standard**:
+    *   **Core Equation**: `Healthy Growth = LTV > 3× CAC AND Payback < 12 months`
+    *   **Mandatory Metrics**:
+
+        | Metric | Formula | Monitoring Frequency |
+        |:-------|:--------|:--------------------|
+        | **CAC** | Total acquisition cost ÷ New paid customers | Weekly |
+        | **Blended CAC** | (All marketing + sales costs) ÷ All new customers | Monthly |
+        | **LTV** | ARPU × Gross Margin × Avg. retention months | Monthly |
+        | **CAC Payback** | CAC ÷ (Monthly ARPU × Gross Margin) | Monthly |
+        | **Magic Number** | Quarterly ARR increase ÷ Prior quarter S&M spend | Quarterly |
+
+    *   **Magic Number Benchmark**:
+        - `> 1.5`: Aggressive paid acquisition investment phase
+        - `0.75 - 1.5`: Maintain current state and focus on efficiency
+        - `< 0.75`: Suppress paid acquisition and prioritize retention improvement
+
+### 16.2. AI Marketing Cost Management (AI Add-on P&L Mandate)
+
+*   **Context**: AI initiative costs (AI-generated content, AI bid optimization, AI analytics tools, LLM API costs, etc.) differ in nature from traditional marketing expenses, involving rapid model cost fluctuations and unpredictable token consumption. Mixing these with standard marketing costs obscures the true ROI of AI initiatives.
+*   **The AI Marketing P&L Standard**:
+    *   **Law**: AI-related marketing costs must be separated from standard marketing budgets and managed under an independent P&L (Profit & Loss statement).
+
+        | Cost Category | Examples | Allocation |
+        |:-------------|:---------|:-----------|
+        | **L1: Inference Cost** | LLM API calls, image generation APIs | AI Add-on P&L |
+        | **L2: Infrastructure Cost** | AI-specific tool licenses, GPU instances | AI Add-on P&L |
+        | **L3: Orchestration Cost** | Personnel costs for AI workflow development & maintenance | AI Add-on P&L |
+
+    *   **AI Add-on Margin Target**: 30% or above (aligned with `300_revenue_monetization` AI COGS 3-layer structure)
+    *   **Model Cost Deflation Sharing**: When AI model costs decrease, a minimum of 50% of the savings must be reinvested in marketing efficiency improvements (more experiments, higher-quality content). Converting 100% to profit is prohibited.
+    *   **Review Cadence**: Review AI P&L monthly, visualizing token unit price, total costs, and cost-to-effect ratio on dashboards.
+
+### 16.3. Marketing Cost Attribution
+
+*   **The MarTech Cost Governance Protocol**:
+    *   **Law**: Review the costs of MarTech Stack tools monthly and quantify ROI.
+    *   **Framework**:
+
+        ```
+        MarTech ROI = (Incremental Revenue from Tool - Tool Cost) / Tool Cost × 100%
+        ```
+
+    *   **Sunset Rule**: Tools with negative ROI for 2 consecutive quarters should be reviewed for deprecation. MarTech Sprawl is prohibited.
+    *   **Budget Allocation Model**:
+
+        | Category | Recommended Allocation |
+        |:---------|:-----------------------|
+        | Retention initiatives | 40% |
+        | Organic growth (SEO/Content) | 30% |
+        | Paid acquisition | 20% |
+        | Experiments & new channels | 10% |
+
+### 16.4. AI Cost Forecasting & Scenario Modeling
+
+> **Context**: AI initiative costs are highly volatile (token price fluctuations, sudden usage spikes, etc.), making traditional linear budget planning inadequate. Proactive cost management is essential.
+
+*   **The AI Cost Forecasting Protocol**:
+    *   **Law**: AI marketing initiative cost forecasts must be developed under three scenarios.
+
+        | Scenario | Assumptions | Purpose |
+        |:---------|:-----------|:--------|
+        | **Optimistic** | Token unit price -20%, efficiency improvement | Budget ceiling setting |
+        | **Base** | Current trend continuation | Monthly budget plan baseline |
+        | **Pessimistic** | Token unit price +30%, usage 2x | Stress testing & Circuit Breaker threshold setting |
+
+    *   **Automated Alerts**: When actual costs deviate from Base scenario by **> 15%**, trigger automated alerts. Linked with §15.1 Budget Circuit Breaker.
+    *   **Forecast Accuracy**: Maintain monthly forecast accuracy at `MAPE (Mean Absolute Percentage Error) < 20%`.
+
+### 16.5. Marketing ROI Prediction Protocol
+
+> **Context**: Marketing Mix Modeling (MMM) is an aggregate data-based causal inference method designed for the privacy regulation era (Cookie deprecation, ATT). It enables ROI measurement without relying on individual-level tracking.
+
+*   **The MMM Governance Protocol**:
+    *   **Law**: Marketing ROI prediction and optimization must be conducted under the following framework.
+
+        | Method | Application | Accuracy Target |
+        |:-------|:-----------|:---------------|
+        | **MMM (Marketing Mix Modeling)** | Cross-channel budget allocation optimization | R² > 0.85 |
+        | **Incrementality Testing** | True incremental effect measurement per channel | Quarterly execution |
+        | **Unified Measurement** | MMM + MTA + Incrementality integration | Annual calibration |
+
+    *   **Separation of Signals**: Seasonality and external factors (economic indicators, competitive dynamics, PR exposure) must be separated as control variables. Extract only the pure effect of marketing initiatives.
+    *   **Budget Reallocation Cadence**: Budget allocation changes based on MMM results are conducted **quarterly**. Monthly major changes are prohibited due to insufficient statistical reliability.
+
+---
+
+## 17. Anti-Pattern Catalog
+
+> **Supreme Directive**: Great engineers anticipate anti-patterns and avoid them at the design stage. All staff must master the following failure patterns and absolutely prevent recurrence.
+
+### 17.1. Growth Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:-----------------|
+| AP-G01 | **Vanity Metrics Trap** | Reporting DAU growth as success while revenue stagnates | Prohibit reporting metrics not tied to North Star Metric |
+| AP-G02 | **Growth Hacking Without Retention** | Rapid growth via acquisition but D30 below 10% | Freeze paid acquisition until D30 > 30% |
+| AP-G03 | **Referral Fraud Blindspot** | Good K-Factor calculation but fraudulent accounts mixed in | Mandate device fingerprint verification |
+| AP-G04 | **Survey Bombing** | Sending NPS/CSAT weekly to all users, resulting in < 2% response rate | Strictly enforce 90-day interval and 7-day slot throttling |
+| AP-G05 | **Dark Pattern Funnel** | High registration rates but immediate cancellations after first use | Remove dark patterns via UX review; prioritize trust-building |
+
+### 17.2. SEO / GEO Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:-----------------|
+| AP-S01 | **Thin Content Factory** | AI-mass-produced articles penalized by core updates | Mandate E-E-A-T compliance, author attribution, and Quality Gates |
+| AP-S02 | **Canonical Hell** | Multiple URLs for the same content causing dispersed SEO scores | Integrate canonical auto-tests into CI pipeline |
+| AP-S03 | **Staging Index Leak** | Staging environment gets indexed, causing brand damage | Mandate noindex middleware via Pre-Launch Protocol |
+| AP-S04 | **GEO Ignorance** | High SEO scores but zero citations in AI search | Apply llms.txt, FAQPage, and Answer-First structure to all pages |
+
+### 17.3. MarTech / Attribution Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:-----------------|
+| AP-M01 | **Last-Click Myopia** | Full budget concentrated on Paid Search; SEO contribution invisible | Migrate to DDA (Data-Driven Attribution) |
+| AP-M02 | **UTM Chaos** | Report Source dispersed as "Google", "google", "Google.com" | Enforce UTM naming conventions (§10.1) with universal awareness |
+| AP-M03 | **MarTech Sprawl** | 10+ tools with overlapping features, monthly costs exceeding $10K | Deprecate unused tools via quarterly ROI review |
+| AP-M04 | **PII in Pixel** | Unhashed email sent via frontend Pixel, causing GDPR violation | Strictly enforce server-side SHA-256 hashing (§7 CAPI Protocol) |
+
+### 17.4. Paid Acquisition Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:-----------------|
+| AP-P01 | **ROAS Mirage** | Blended ROAS 3x but 24-month payback causes cash flow collapse | Evaluate LTV:CAC ratio and Payback Period simultaneously |
+| AP-P02 | **Budget Runaway** | AI bidding exhausts weekly budget in 48 hours due to bidding wars | Implement Budget Circuit Breaker (§15.1) for auto-stop |
+| AP-P03 | **Creative Fatigue Blindspot** | Same creative used for 3 months; CTR drops 70% | Set weekly Frequency Cap & CTR drop alerts |
+
+### 17.5. Brand & PMF Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-B01 | **Brand Blindspot** | Impression counted but Brand Recall / SOV never measured | Mandate quarterly BHI 5-axis measurement (§18.1) |
+| AP-B02 | **Competitive Ignorance** | Weeks pass before discovering a competitor's major product launch | Build real-time monitoring stack (§18.3) |
+| AP-B03 | **Scale Before PMF** | Tens of millions spent on paid acquisition with Sean Ellis Score at 20% | Freeze paid acquisition scaling until PMF Scoreboard 4/5 criteria met (§19.2) |
+
+### 17.6. Email, Content & RevOps Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-E01 | **Email Deliverability Neglect** | Bulk sending without DMARC setup; spam rate exceeds 0.3%; domain blacklisted | Mandate SPF/DKIM/DMARC implementation (§20.1) |
+| AP-E02 | **List Hoarding** | Retaining large volumes of addresses with zero opens for 18 months; sender reputation eroded | Mandate periodic list cleaning (warning: 6-month inactive) (§20.1) |
+| AP-C01 | **Content Without ROI** | 500 blog posts published annually; zero leads from content | Mandate Content ROI Framework quantitative evaluation (§23.2) |
+| AP-C02 | **Siloed RevOps** | Marketing tracks MQLs, Sales tracks SQLs, CS tracks NPS—each independently | Build shared dashboard where all teams align on MQL→SQL conversion rate (§22) |
+
+### 17.7. Growth Engineering & Compliance Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-Z01 | **Zero-Party Data Abuse** | Prompting all users every session for preferences, destroying UX | Limit ZPD collection to 4 patterns (§10.2). Apply 12-month staleness rule |
+| AP-A01 | **ASO Neglect** | App Store screenshots not updated for 12 months; CVR declining | Mandate quarterly screenshot A/B testing (§1.2) |
+| AP-AI01 | **EU AI Act Non-Compliance** | Distributing AI-generated ads to EEA without any AI disclosure metadata | Mandate Art.50-compliant machine-readable disclosure on all AI-generated content (§13.4) |
+| AP-FE01 | **Feature Flag Debt** | 50+ Dead Flags remaining 6 months after experiment conclusion; codebase complexity escalating | Enforce 90-day Flag Debt Cleanup. Conduct monthly Flag Audit (§8.2) |
+
+### 17.8. Internationalization & Localization Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-I01 | **Google Translate Launch** | Entered foreign market with machine translation only; CVR at 1/5 of domestic | Enter at Localization Maturity L3+ (Cultural Adaptation) (§24.2) |
+| AP-I02 | **One-Size-Fits-All Campaign** | Global campaign translated and deployed to all markets; engagement low everywhere | Implement local optimization based on Cultural Adaptation Protocol (§24.3) |
+| AP-I03 | **Regulatory Blindspot** | Serving CCPA-only compliant ads in GDPR markets; privacy violation | Pre-check Regional Regulatory Compliance Matrix (§24.4) |
+
+### 17.9. Video, Partner & Ecosystem Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-V01 | **Video Without Strategy** | Posting randomly to TikTok/Reels with no follower growth | Structure using Hook-Retain-CTA Framework (§25.1) |
+| AP-V02 | **Partner Revenue Mirage** | Double-counting partner-sourced sales as own marketing attribution | Strictly distinguish Partner-Sourced vs Partner-Influenced (§27.5) |
+| AP-V03 | **Affiliate Fraud Tolerance** | Ignoring Cookie Stuffing and Click Fraud by affiliates; cost wastage | Implement fraud detection system and compliance audit (§27.4) |
+
+### 17.10. Security & Ethics Anti-Patterns
+
+| # | Anti-Pattern | Symptom | Correct Response |
+|:--|:-------------|:--------|:----------------|
+| AP-S01 | **Bot-Inflated Metrics** | 20%+ of registrations are bot accounts; KPIs inflated | Implement Bot Detection & Prevention Protocol (§28.1) |
+| AP-S02 | **Greenwashing** | Claiming sustainability without specific data or third-party certification | Comply with ESG-Aligned Marketing Protocol checklist (§29.1) |
+| AP-S03 | **Dark Pattern Creep** | Incremental UX changes unintentionally forming dark patterns | Conduct Annual UX Ethics Audit (§29.4) |
+| AP-S04 | **Experiment Without Ethics** | Deploying disadvantageous A/B test variants to vulnerable groups (elderly, children) | Apply Ethical AI Marketing Standard's vulnerable population protections (§29.3) |
+
+---
+
+
+## 18. Brand Equity & Positioning
+
+> **Supreme Directive**: Brand is the invisible growth engine. A strong brand structurally lowers CAC, generates price premiums, and creates competitive moats. CMOs must measure and manage brand equity with the same rigor as performance marketing.
+
+### 18.1. Brand Health Measurement (Brand Health Index)
+
+*   **The Brand Health Index (BHI) Standard**:
+    *   **Mandate**: Quantitatively evaluate brand health across the following 5 axes quarterly and report to leadership.
+
+        | Axis | Metric | Measurement Method | Benchmark |
+        |:----|:------|:-----------------|:---------|
+        | **Awareness** | Unaided / Aided Recall | Market research (N≥200) | Top 3 in category |
+        | **Consideration** | Consideration rate | Survey + branded search volume | > 30% |
+        | **Preference** | Selection rate vs. competitors | NPS vs. competitors | Competitor avg. +10pt |
+        | **Loyalty** | NPS Promoter rate | NPS survey | > 40% |
+        | **Share of Voice** | Industry share of mentions | Social listening | > Market share |
+
+*   **The Share of Voice Protocol**:
+    *   **Law**: Measure Share of Voice (SOV) monthly using social listening tools (Brandwatch / Sprout Social).
+    *   **Nielsen Law of SOV**: When SOV > market share, the brand is in a "growth phase." When SOV falls below market share, prioritize increasing investment in organic content and PR immediately.
+
+### 18.2. Brand Positioning Governance
+
+*   **The Brand Positioning Protocol**:
+    *   **Law**: Document the following 5 elements in a Brand Playbook stored in `axiarch-rules/blueprint/` to serve as the consistency standard for all creatives.
+
+        | Element | Description |
+        |:--------|:-----------|
+        | **Target Customer** | Persona (who the brand is for) |
+        | **Category** | The category you compete in |
+        | **Differentiation** | Unique differentiating factor (USP) |
+        | **Reason to Believe** | Evidence backing the differentiation |
+        | **Brand Promise** | The promise to users (1 sentence) |
+
+    *   **Brand Consistency Protocol**: Define visual identity and Tone of Voice (ToV) in the Brand Playbook; AI-generated content must also pass the §13.2 Quality Gate.
+    *   **Prohibition**: Changing brand colors or fonts per campaign is prohibited as "brand damage."
+
+### 18.3. Competitive Intelligence
+
+*   **The Competitive Intelligence Protocol**:
+    *   **Monitoring Stack**:
+
+        | Target | Tool Examples | Frequency |
+        |:-------|:-------------|:---------|
+        | Competitor SEO changes | Semrush / Ahrefs | Weekly |
+        | Competitor ad creatives | Meta Ad Library | Weekly |
+        | Competitor product releases | ProductHunt / Press | Real-time |
+        | Competitor social engagement | Brandwatch | Monthly |
+        | Competitor pricing changes | Auto-scraping | Monthly |
+
+    *   **CI Response Playbook**: When a competitor makes a significant move (pricing change, new feature launch), submit an initial response draft to leadership **within 48 hours**.
+    *   **Prohibition**: Data collection through impersonation of competitors (Astroturfing) is absolutely prohibited for legal and ethical reasons.
+
+---
+
+## 19. Product-Market Fit (PMF) Measurement Protocol
+
+> **Supreme Directive**: Scaling is an action taken AFTER PMF. Acquisition initiatives without PMF are a scorched-earth tactic. Paid acquisition, community scaling, and international expansion are permitted only after passing the PMF Gate.
+
+### 19.1. PMF Gate Protocol
+
+*   **The Sean Ellis Test (Required)**:
+    *   **Method**: Ask active users (used within the last 2 weeks): "How would you feel if you could no longer use this service?" Measure the percentage responding "Very disappointed."
+    *   **Gate**: **≥ 40%** respond "Very disappointed" → PMF achieved.
+    *   **Minimum Sample**: Requires N ≥ 100 active user responses. Frequency: Monthly.
+*   **Retention-Based PMF Signal**:
+    *   The most reliable PMF indicator is the "flattening of the retention curve."
+    *   **Law**: Large-scale investment in paid acquisition is prohibited until the retention curve flattens at 20% or above after D30.
+
+### 19.2. PMF Scoreboard
+
+*   **The PMF Scoreboard Standard**:
+
+    | Signal | Weak PMF | Strong PMF | Measurement |
+    |:-------|:---------|:----------|:-----------|
+    | **Sean Ellis Score** | < 40% | ≥ 40% | Survey |
+    | **D30 Retention** | < 20% | > 30% | Cohort analysis |
+    | **NPS** | < 20 | > 40 | NPS survey |
+    | **Organic Growth Rate** | < 10%/month | > 20%/month | User growth trend |
+    | **Support Ticket Volume** | Rapidly increasing | Flat or declining | Ticket count |
+
+    *   **Decision Gate**: Scale phase transition is approved only when **4 or more** of the above 5 indicators meet the "Strong PMF" criteria.
+
+---
+
+## 20. Email Marketing Lifecycle Architecture
+
+> **Supreme Directive**: Email is the highest-ROI owned media channel (average ROI: 3,600%). However, poor delivery infrastructure leads to "sender reputation collapse" where all emails land in spam folders. Infrastructure first, strategy second.
+
+### 20.1. Email Deliverability Foundation
+
+*   **The Email Authentication Protocol**:
+    *   **Mandate**: Implement the following authentication on all sending domains (Google/Yahoo! Bulk Sender requirements since 2024).
+
+        | Authentication | Configuration | Goal |
+        |:-------------|:-------------|:----|
+        | **SPF** | Declare authorized sending servers via DNS TXT record | Pass |
+        | **DKIM** | Sign with 2048-bit key | Pass |
+        | **DMARC** | Set to `p=quarantine` or above (target: `p=reject`) | Enforced |
+        | **BIMI** | Display brand logo in email clients (recommended) | Optional |
+
+*   **Sender Reputation Monitoring**:
+    *   **Law**: Monitor the following metrics weekly and immediately halt sending + investigate when alert thresholds are exceeded.
+
+        | Metric | Warning Threshold | Critical Threshold |
+        |:------|:----------------|:-----------------|
+        | **Bounce Rate** | > 1.5% | > 2.0% |
+        | **Spam Complaint Rate** | > 0.08% | > 0.1% |
+        | **Unsubscribe Rate** | > 0.3% | > 0.5% |
+        | **Open Rate** | < 20% | < 10% |
+
+### 20.2. Lifecycle Email Design
+
+*   **The Lifecycle Email Architecture**:
+
+    | Stage | Trigger | Purpose | Timing |
+    |:-----|:--------|:--------|:------|
+    | **Welcome** | Registration complete | Guide to Aha Moment | Immediate + D3 + D7 |
+    | **Activation** | No first use after 3 days | Drive core feature experience | D3, D7 |
+    | **Engagement** | Regular active users | Deliver additional value | Weekly |
+    | **Upsell** | 80% of paid plan usage | Drive upgrade | Upon reaching threshold |
+    | **At-Risk** | 14 days inactive | Prevent churn | D14, D21 |
+    | **Reactivation** | 30 days inactive | Drive return (with incentive) | D30 |
+    | **Sunset** | 90 days inactive | Maintain list hygiene | D90 (final contact notice) |
+
+*   **List Hygiene Protocol**:
+    *   Hard bounces → Immediate deletion within 48 hours
+    *   No opens for 6+ months → Move to re-engagement sequence → Delete if no response
+    *   **Prohibition**: Single Opt-in is prohibited. Double Opt-in (DOI) is the standard.
+
+### 20.3. Email Performance Benchmarks
+
+*   **The Email KPI Standard**:
+
+    | Metric | Industry Average | Internal Target |
+    |:------|:---------------|:--------------|
+    | **Open Rate** | 20-25% | > 30% |
+    | **Click-to-Open Rate (CTOR)** | 10-15% | > 20% |
+    | **Conversion Rate** | 1-3% | > 5% |
+    | **Unsubscribe Rate** | < 0.5% | < 0.3% |
+
+    *   **Subject Line Law**: Subject lines must be **40 characters or fewer**, maximum 1 emoji; any claims of urgency or statistics must be factual.
+    *   **A/B Test Priority**: Test in order: Subject line → Pre-header → Send time → CTA copy.
+
+---
+
+## 21. Growth Loops & Flywheel Architecture
+
+> **Supreme Directive**: Growth loops are "structure," not "tactics." When loops exist, growth compounds. Growth without loops is linear and will inevitably plateau. Every growth initiative must explicitly state which loop it accelerates.
+
+### 21.1. Growth Loop Taxonomy
+
+*   **The Four Growth Loop Types**:
+
+    | Loop Type | Mechanism | Example | Recommended Phase |
+    |:---------|:---------|:--------|:----------------|
+    | **Viral Loop** | User A shares → User B registers → B also shares | Referral programs, shared content | Post-PMF, initial scale |
+    | **Content Loop** | Content published → SEO traffic → Users grow → UGC grows → SEO strengthens | Review sites, Q&A platforms | Long-term organic growth |
+    | **Paid Loop** | Ad investment → New acquisition → Revenue → Re-invest in ads | D2C, SaaS | After ROAS validation |
+    | **Product Loop** | Usage increases → Data accumulates → AI accuracy improves → Value increases → Usage increases | AI products | Product-led |
+
+*   **The Loop Efficiency (LE) Measurement Protocol**:
+    *   **Law**: Measure each loop's efficiency (LE = Output ÷ Input) monthly; loops with LE < 1 must undergo loop redesign.
+    *   **Compounding Check**: Quarterly evaluate which loop contributes most to growth and optimize resource allocation accordingly.
+
+### 21.2. Flywheel Design
+
+*   **The Growth Flywheel Protocol**:
+    *   **Design Principle**: Design a "flywheel structure" where multiple loops connect, with each loop's Output becoming the Input for another loop.
+    *   **Example Structure**:
+        ```
+        PLG (free usage) → UGC generation (accelerates Content Loop) → Increased SEO traffic (new acquisition)
+        → Paid conversion (funds Paid Loop) → Improved AI accuracy (strengthens Product Loop)
+        → More UGC/word-of-mouth (strengthens Viral Loop) → Flywheel accelerates
+        ```
+    *   **Flywheel Bottleneck Analysis**: Measure "conversion rates" between loops monthly to identify and improve bottlenecks (the least efficient connection point).
+
+---
+
+## 22. Revenue Operations (RevOps) Alignment
+
+> **Supreme Directive**: Siloed Marketing, Sales, and Customer Success teams inhibit revenue maximization. RevOps is the governance framework for achieving a state where "all revenue-related teams operate on the same data, processes, and tools."
+
+### 22.1. Lead Management & Funnel Definition
+
+*   **The Lead Stage Definition Protocol**:
+    *   **Law**: Agree on and document the following lead stages across all teams, clearly defining the "handoff criteria" between Marketing ↔ Sales.
+
+        | Stage | Definition | Responsible Team |
+        |:-----|:----------|:---------------|
+        | **MQL** (Marketing Qualified Lead) | Scoring criteria met (behavioral score ≥ X points) | Marketing → notifies Sales |
+        | **SQL** (Sales Qualified Lead) | Sales contacts and confirms purchase intent | Sales determines |
+        | **SAL** (Sales Accepted Lead) | Sales formally accepts the MQL | Joint Marketing/Sales confirmation |
+        | **Opportunity** | Deal stage (specific proposal/quote) | Sales |
+        | **Customer** | Contract closed | CS |
+
+    *   **SLA**: Sales must make initial contact **within 24 hours** of MQL creation. Monitor SLA violation rate weekly.
+
+### 22.2. Lead Scoring
+
+*   **The Lead Scoring Standard**:
+    *   **Behavioral Score**: Define as page view (+1pt), content download (+5pt), demo request (+20pt), pricing page view (+10pt), etc.
+    *   **Demographic Score**: Add points when industry, company size, and role match the Ideal Customer Profile (ICP).
+    *   **Score Decay**: If no activity for 30 days, decay score by 50% (prevents MQL misclassification based on stale scores).
+    *   **Mandate**: Validate and recalibrate scoring logic against actual conversion rate data quarterly.
+
+### 22.3. Revenue Attribution
+
+*   **The Full-Funnel Attribution Protocol**:
+    *   **Law**: Implement full-funnel attribution from lead to close to measure marketing initiative revenue contribution.
+    *   **Model**: W-shaped attribution (First Touch 30% · Lead Creation 30% · Opportunity Creation 30% · Last Touch 10%) as default. Rule-based Last-Click-only evaluation is prohibited.
+    *   **Dashboard**: Monitor Cost Per Lead (CPL), Cost Per SQL (CPSQL), and Customer Acquisition Cost (CAC) weekly.
+
+---
+
+## 23. Content Marketing Architecture
+
+> **Supreme Directive**: Content is an "asset"; advertising is an "expense." Content compounds over time once created; advertising stops immediately when paused. Evaluate content investment from an LTV perspective.
+
+### 23.1. Content Architecture by Funnel Stage
+
+*   **The Full-Funnel Content Protocol**:
+    *   **Law**: Define purpose, format, and KPI clearly for each funnel stage before creating content.
+
+        | Funnel Stage | Purpose | Content Formats | KPI |
+        |:-----------|:--------|:--------------|:----|
+        | **ToFu** (Top of Funnel) | Awareness & traffic acquisition | Blog, video, social posts, podcast | Organic traffic, impressions |
+        | **MoFu** (Middle of Funnel) | Consideration & lead nurturing | Whitepapers, webinars, comparison articles | Lead count, email signup rate |
+        | **BoFu** (Bottom of Funnel) | Conversion & decision support | Case studies, demo videos, ROI calculators | Conversion rate, opportunity rate |
+
+### 23.2. Content ROI Measurement
+
+*   **The Content ROI Framework**:
+    *   **Law**: Quantitatively measure ROI for all content investment. "Volume of content" is not a result.
+    *   **Formula**:
+        ```
+        Content ROI = (Revenue via content - Content production cost) / Content production cost × 100%
+        ```
+    *   **Content Efficiency Score (CES)**: `CES = (Leads acquired × Lead value) / Content production cost`
+    *   **Sunset Rule**: Content with < 50 monthly organic visits AND zero leads after 12 months must be evaluated for "update or consolidate or delete."
+
+### 23.3. Content Repurposing
+
+*   **The Content Repurposing Protocol**:
+    *   **Law**: High-quality content should be converted to 5 formats from 1 piece to maximize production cost efficiency.
+
+        | Source Content | Repurpose Targets |
+        |:-------------|:----------------|
+        | Blog post | 5× social posts, email newsletter, short video script |
+        | Webinar | Blog post, YouTube video, 3× clips, SlideShare |
+        | Customer case study | Press release, LP, sales proposal, social posts |
+
+    *   **Editorial Calendar Governance**: Review content calendar monthly; record owner, publish date, target keyword, and funnel stage for every piece of content.
+
+---
+
+## 24. Internationalization & Localization Growth Strategy (i18n Growth)
+
+> **Supreme Directive**: Global expansion is "market adaptation," not "translation." Without understanding culture, regulations, and payment customs, international launch leads to brand damage and resource waste.
+
+### 24.1. Market Entry Framework
+
+*   **The Beachhead Market Selection Protocol**:
+    *   **Law**: New market entry must be quantitatively evaluated on the following 5 axes, entering markets in order of total score.
+
+        | Axis | Evaluation Criteria | Weight |
+        |:-----|:-------------------|:-------|
+        | **Market Size (TAM)** | Target segment market size | 25% |
+        | **Competitive Intensity** | Number and strength of local competitors | 20% |
+        | **Regulatory Complexity** | Strictness of privacy laws & advertising regulations | 20% |
+        | **Cultural Distance** | Cultural distance based on Hofstede index | 15% |
+        | **Payment Infrastructure** | Adoption of local payment methods | 20% |
+
+    *   **Go/No-Go Gate**: Before entry, verify that PMF (§19) + Unit Economics (§16.1) hold in the target market. Large-scale investment without verification is prohibited.
+
+### 24.2. Localization Maturity Model
+
+*   **The 5-Level Maturity Model**:
+
+    | Level | Name | Description | Applicable Condition |
+    |:------|:-----|:-----------|:--------------------|
+    | **L1** | Machine Translation Only | Machine translation only | Test markets & MVP validation |
+    | **L2** | Human-Reviewed Translation | Human-reviewed translation | Initial entry, low-risk markets |
+    | **L3** | Cultural Adaptation (Transcreation) | Culturally adapted translation | Minimum standard for formal entry |
+    | **L4** | Market-Native Content | Native content by local team | Growth markets |
+    | **L5** | Autonomous Local Growth Engine | Independent local growth team | Major markets |
+
+    *   **Minimum Entry Level**: L3 or above is mandatory for commercial service entry. L1-L2 launches are limited to internal testing and beta versions.
+
+### 24.3. Cultural Adaptation Protocol
+
+*   **The Cultural Checklist**:
+    *   **Law**: Marketing materials for new markets must pass all of the following checklist items.
+
+        | Check Item | Verification Content |
+        |:----------|:--------------------|
+        | **Colors & Symbols** | Verify cultural meaning of colors (e.g., white = mourning in some countries, red = luck/danger) |
+        | **Gestures & Images** | Cultural appropriateness of hand signs and person imagery |
+        | **Numbers, Dates & Currency** | Local format compliance (CLDR standard) |
+        | **Humor & Metaphors** | Elimination of culturally inappropriate figurative expressions |
+        | **Religious Considerations** | Consideration for religious holidays and taboos |
+
+### 24.4. Regional Regulatory Compliance Matrix
+
+*   **The Regulatory Compliance Matrix**:
+
+    | Region | Privacy Law | Marketing-Specific Regulation | Required Actions |
+    |:-------|:-----------|:-----------------------------|:----------------|
+    | **EU/EEA** | GDPR | ePrivacy Directive, DSA | Consent Mode v2, Cookie Banner, AI disclosure |
+    | **US-CA** | CCPA/CPRA | CAN-SPAM, TCPA | Opt-out rights, Do Not Sell |
+    | **Japan** | APPI | Act against Unjustifiable Premiums, Specified Commercial Transactions Act | Prior consent, ad labeling, cancellation flow |
+    | **China** | PIPL | Advertising Law, Cybersecurity Law | Data localization, review |
+    | **Brazil** | LGPD | CDC (Consumer Protection Code) | DPO appointment, consent management |
+    | **India** | DPDPA | IT Act | Localization, consent management |
+
+### 24.5. Global Campaign Operations
+
+*   **The Global Campaign Standard**:
+    *   **Timezone-Aware Scheduling**: Email and push notification delivery must be aligned with the recipient's local timezone. UTC batch delivery is prohibited.
+    *   **Multi-Currency Budget Allocation**: Advertising budgets must be managed in local currency, with monthly monitoring for exchange rate fluctuation-driven budget overruns.
+    *   **Brand Consistency vs Local Adaptation Balance**: Based on global brand guidelines (§18.2), allow up to 30% adaptation latitude for local markets.
+
+---
+
+## 25. Video & Short-Form Content Growth
+
+> **Supreme Directive**: Video dominates the discovery layer. Short-form video (under 60 seconds) in particular benefits from algorithm preference and represents the last frontier of organic reach.
+
+### 25.1. Short-Form Content Strategy
+
+*   **The Hook-Retain-CTA Framework**:
+    *   **Law**: Short-form videos (TikTok/Reels/Shorts) must structurally incorporate the following 3 elements.
+
+        | Element | Timing | Requirement |
+        |:--------|:------|:-----------|
+        | **Hook** | 0-3 sec | Attention-grabbing opening (question, surprise, contrast) |
+        | **Retain** | 3-50 sec | Value delivery (education, entertainment, story) |
+        | **CTA** | Last 3 sec | Clear action instruction (follow, comment, link) |
+
+    *   **Platform-Specific Optimization**:
+
+        | Platform | Optimal Length | Recommended Format | Algorithm Priority Metric |
+        |:---------|:-------------|:------------------|:-------------------------|
+        | **TikTok** | 15-30 sec | 9:16 vertical, text overlay | Completion rate, shares |
+        | **Instagram Reels** | 15-30 sec | 9:16 vertical, brand filter | Saves, reach |
+        | **YouTube Shorts** | 30-60 sec | 9:16 vertical, no thumbnail needed | View count, subscription conversion |
+
+### 25.2. Video SEO Protocol
+
+*   **The Video SEO Standard**:
+    *   **Law**: Video content must satisfy all of the following SEO requirements.
+
+        | Requirement | Implementation |
+        |:-----------|:--------------|
+        | **VideoObject Schema** | `VideoObject` + `Clip` (chapters) structured data on all video pages |
+        | **Transcript** | Full transcript for all videos (subtitle file + HTML embed) |
+        | **Video Sitemap** | Auto-generated video sitemap submitted to GSC |
+        | **Thumbnail** | Custom thumbnail (with text, high contrast, 1280×720+) |
+
+### 25.3. Live Commerce Protocol
+
+*   **The Live Commerce Standard**:
+    *   **Law**: Live commerce operations must comply with the following standards.
+
+        | Element | Standard |
+        |:--------|:--------|
+        | **Purchase Flow** | One-tap purchase during live (cart add → checkout) within 3 clicks |
+        | **Inventory Sync** | Real-time inventory sync (out-of-stock display delay within 5 seconds) |
+        | **Archive** | Publish archive within 30 minutes post-live for repurposing |
+        | **KPI** | Concurrent viewers, CVR (viewers → purchasers), average order value |
+
+### 25.4. AI Video Generation Governance
+
+*   **The AI Video Governance Protocol**:
+    *   **Law**: AI-generated videos must integrate with §13.4 (EU AI Act Art.50) and §13.5 (C2PA), applying the following additional criteria.
+        1.  **Deepfake Prohibition**: Synthesis of real persons' faces/voices is permitted only with written consent
+        2.  **Quality Gate**: AI-generated videos require human creative review before publication
+        3.  **C2PA Manifest**: Embed C2PA-compliant content credentials in AI-generated videos
+
+---
+
+## 26. Conversational Marketing
+
+> **Supreme Directive**: 1-to-1 conversations with customers are the highest ROI marketing channel. However, if bot experience falls below human quality, it becomes counterproductive. Scaling at the expense of conversation quality is prohibited.
+
+### 26.1. Channel Integration Protocol
+
+*   **The Conversational Channel Matrix**:
+    *   **Law**: Conversational marketing channels must be selected based on the following matrix.
+
+        | Channel | Primary Markets | Use Cases | Integration Requirements |
+        |:--------|:---------------|:----------|:------------------------|
+        | **WhatsApp Business API** | EU, LATAM, SEA, India | Cart abandonment, support, order notifications | Meta Business API + CDP data integration |
+        | **LINE Official Account** | Japan, Taiwan, Thailand | CRM integration, rich menus, points integration | LINE Messaging API + internal DB sync |
+        | **RCS (Rich Communication Services)** | Global (Android) | Interactive messages, carousels | RCS Business Messaging API |
+        | **Web Chat / In-App Chat** | All markets | Real-time support, lead capture | WebSocket + CRM integration |
+
+### 26.2. Chatbot Funnel Design
+
+*   **The Chatbot Quality Standard**:
+    *   **Law**: Chatbot funnels must be designed with the following architecture.
+
+        ```
+        Chatbot Funnel Architecture:
+        1. Intent Classification → NLU model intent classification
+        2. Routing → Branch to purchase intent / support / information gathering
+        3. Resolution → Auto-resolve or human handoff
+        4. Lead Scoring → Assign lead score based on conversation content
+        ```
+
+    *   **Human Handoff Criteria**: Immediately escalate to human operators in the following cases.
+        1.  Negative sentiment detected 3 consecutive times via sentiment analysis
+        2.  Same question repeated (3+ times)
+        3.  Purchase amount above defined threshold (high-value deals)
+        4.  User's explicit request for human support
+
+### 26.3. Conversational Commerce Protocol
+
+*   **The In-Chat Purchase Standard**:
+    *   **Law**: In-conversation purchase flows must comply with the following standards.
+        1.  **Cart Abandonment Recovery**: Send message within 30 minutes of cart abandonment. Recovery rate target > 10%
+        2.  **Payment Integration**: PCI DSS-compliant payment completed within chat (minimize external redirects)
+        3.  **Order Confirmation**: Automatically send confirmation message within chat within 5 seconds of order completion
+
+### 26.4. Messaging KPI Standard
+
+*   **The Conversational KPI Framework**:
+
+    | Metric | Definition | Target |
+    |:-------|:----------|:-------|
+    | **First Response Time** | Response time to first message | < 30 sec (Bot), < 2 min (Human) |
+    | **Resolution Rate** | Rate resolved without human intervention | > 70% |
+    | **CSAT (In-Conversation)** | Post-conversation satisfaction score | > 4.0/5.0 |
+    | **Opt-in Rate** | Messaging permission rate | > 25% |
+    | **Unsubscribe Rate** | Monthly opt-out rate | < 2% |
+
+### 26.5. AI Conversational Agent Quality
+
+*   **The AI Agent Guardrails**:
+    *   **Law**: AI chat agents must implement the following guardrails.
+        1.  **Hallucination Prevention**: Limit to RAG-based responses; prohibit generation of information not in training data
+        2.  **Conversation Log Retention**: Retain all conversation logs for 90 days (stated in privacy policy)
+        3.  **Escalation Trigger**: Automatically escalate to human when AI confidence is below 0.7
+        4.  **Disclosure**: Clearly inform users they are conversing with AI (EU AI Act compliance)
+
+---
+
+## 27. Partner & Ecosystem Growth
+
+> **Supreme Directive**: Partnerships leverage others' distribution channels and brand assets. However, without accurate contribution measurement and contract management, partner relationships create dependency risks.
+
+### 27.1. Partnership Tier Model
+
+*   **The Partnership Tier Standard**:
+    *   **Law**: Partners must be classified and managed according to the following 4 tiers.
+
+        | Tier | Type | Revenue Contribution | Support Level |
+        |:-----|:-----|:--------------------|:-------------|
+        | **Platinum** | Strategic Alliance | > $1M ARR or core technology dependency | Dedicated partner manager, joint roadmap |
+        | **Gold** | Channel Partner | $100K-$1M ARR | Quarterly business review, priority support |
+        | **Silver** | Affiliate Partner | $10K-$100K ARR | Monthly report, standard support |
+        | **Bronze** | Referral Partner | < $10K ARR | Automated management, self-serve portal |
+
+### 27.2. API-Led Growth Protocol
+
+*   **The API Growth Standard**:
+    *   **Law**: API partner programs must follow the following framework.
+
+        | Element | Standard |
+        |:--------|:--------|
+        | **Developer Portal** | Complete docs + sandbox + getting started guide provided |
+        | **DX (Developer Experience)** | API first-call-to-success time < 15 minutes |
+        | **Revenue Sharing** | Transparent Rev Share model (typically 15-30%) |
+        | **Rate Limiting** | Rate limits by partner tier. Gradual scale-up system |
+
+### 27.3. Co-Marketing Framework
+
+*   **The Co-Marketing Standard**:
+    *   **Law**: Co-marketing campaigns must agree on the following terms in advance.
+        1.  **Shared KPIs**: Define common success metrics before campaign launch
+        2.  **Creative Approval**: Dual approval flow for brand consistency maintenance
+        3.  **Lead Sharing**: Clear rules for lead sharing (opt-in required, compliant with §10 First-Party Data policy)
+        4.  **Cost Sharing**: Budget split and settlement method documented in writing
+
+### 27.4. Affiliate Fraud Prevention
+
+*   **The Affiliate Integrity Protocol**:
+    *   **Law**: Affiliate programs must implement the following fraud prevention measures.
+
+        | Fraud Type | Detection Method | Action |
+        |:----------|:----------------|:-------|
+        | **Cookie Stuffing** | Abnormal click-to-conversion ratio detection | Auto-flag and deduction |
+        | **Click Fraud** | IP/device fingerprint analysis | Automatic blocking |
+        | **Self-Referral** | Account cross-referencing | Ban and claw-back |
+        | **Brand Bidding** | Trademark keyword monitoring | Violation warning → contract termination |
+
+### 27.5. Partner Attribution Standard
+
+*   **The Partner Attribution Protocol**:
+    *   **Law**: Partner contribution must be clearly classified into the following categories to prevent double-counting.
+
+        | Category | Definition | Attribution |
+        |:---------|:----------|:-----------|
+        | **Partner-Sourced** | Deal initiated through partner | 100% partner attribution |
+        | **Partner-Influenced** | Existing deal where partner made contribution | Weighted split (by agreement) |
+        | **Independent** | Deal with no partner involvement | 0% partner attribution |
+
+---
+
+## 28. Growth Security & Anti-Fraud
+
+> **Supreme Directive**: Growth with security holes generates "fake metrics." Bot registrations, click fraud, and promotion abuse waste marketing budget and mislead KPIs.
+
+### 28.1. Bot Detection & Prevention Protocol
+
+*   **The Bot Prevention Standard**:
+    *   **Law**: Critical growth touchpoints must implement the following multi-layered bot detection.
+
+        | Layer | Technology | Application |
+        |:------|:----------|:-----------|
+        | **L1: Challenge** | reCAPTCHA v3 / hCaptcha / Turnstile | Registration, form submission |
+        | **L2: Behavioral** | Session-level mouse movement/keyboard pattern analysis | Post-login suspicious behavior |
+        | **L3: Device Fingerprint** | Device-level unique identification | Multiple account detection |
+        | **L4: AI Analysis** | ML-based anomaly detection | Large-scale coordinated attacks |
+
+    *   **KPI**: Bot account rate must be maintained **below 2%** of total registrations.
+
+### 28.2. Click Fraud & Ad Fraud Prevention
+
+*   **The Ad Fraud Prevention Standard**:
+    *   **Law**: Click fraud and ad fraud must be managed under the following framework.
+
+        | Fraud Type | Detection Method | Response |
+        |:----------|:----------------|:---------|
+        | **Invalid Clicks** | IP-level abnormal click rate detection | Filter from billing + refund request |
+        | **Ad Stacking** | Viewability measurement (MRC standard) | IVT (Invalid Traffic) deduction |
+        | **Domain Spoofing** | ads.txt / sellers.json verification | Placement blacklisting |
+        | **SDK Spoofing** | Install verification (Adjust/AppsFlyer) | Source blocking |
+
+    *   **IVT Rate**: Maintain Invalid Traffic rate below **3%**. Mandate third-party verification (DoubleVerify, IAS, etc.).
+
+### 28.3. Promotion Abuse Prevention
+
+*   **The Promotion Integrity Protocol**:
+    *   **Law**: Coupon codes and promotional offers must incorporate the following anti-abuse measures.
+        1.  **Single-Use Enforcement**: One-time-use coupon codes are technically linked to individual accounts
+        2.  **Velocity Check**: Flag when the same user uses 3+ promotions within 24 hours
+        3.  **Referral Loop Detection**: Flag circular referral patterns (A→B→C→A)
+        4.  **Geo-Fencing**: Region-limited promotions are verified against IP and billing address
+
+### 28.4. Security Incident Response for Growth
+
+*   **The Growth Security Incident Response**:
+    *   **Law**: Security incidents impacting growth metrics must follow this escalation.
+
+        | Severity | Example | Response Time | Action |
+        |:---------|:--------|:-------------|:-------|
+        | **P0: Critical** | Mass bot registration attack, data breach | < 30 min | Emergency shutdown + executive escalation |
+        | **P1: High** | Promotion code mass exploitation, click farm attack | < 2 hours | Automatic blocking + investigation start |
+        | **P2: Medium** | Suspicious referral pattern detection | < 24 hours | Monitoring escalation + evidence preservation |
+        | **P3: Low** | Individual fraudulent account detection | < 72 hours | Account lock + review |
+
+---
+
+## 29. Sustainable & Ethical Growth
+
+> **Supreme Directive**: Unsustainable growth creates long-term brand damage and regulatory risk. Ethical growth maximizes long-term shareholder value.
+
+### 29.1. ESG-Aligned Marketing Protocol
+
+*   **The Green Marketing Standard**:
+    *   **Law**: Environmental and sustainability claims in marketing must comply with the following standards.
+
+        | Claim Type | Requirement | Prohibited |
+        |:----------|:-----------|:----------|
+        | **Carbon Neutral** | Third-party certified (SBTi, etc.) | Self-declared without specific data |
+        | **Sustainable Product** | Specific data-backed claims with evidence | Vague expressions like "Eco-friendly" |
+        | **Social Impact** | Measurable social KPIs presented | Empty CSR sloganeering |
+
+    *   **EU Green Claims Directive Compliance**: Claims distributed in EU markets must be substantiated based on EU Green Claims Directive criteria.
+
+### 29.2. Carbon-Aware Marketing Operations
+
+*   **The Digital Carbon Footprint Standard**:
+    *   **Law**: Recognize the environmental impact of digital marketing and operate under the following standards.
+
+        | Domain | Standard | KPI |
+        |:-------|:--------|:----|
+        | **Email** | Don't send unnecessary emails (reduce list) | Carbon per email < 4g CO2 |
+        | **Ad Creative** | Optimize image size / reduce video autoplay | Data transferred per impression (bytes) |
+        | **Web Pages** | Core Web Vitals optimization ≈ carbon reduction | Transfer size per page < 500KB |
+
+### 29.3. Ethical AI Marketing Standard
+
+*   **The Ethical AI Marketing Protocol**:
+    *   **Law**: AI-driven marketing must satisfy the following ethical standards.
+
+        | Principle | Implementation |
+        |:---------|:--------------|
+        | **Transparency** | AI-generated content is clearly disclosed (§13.4 integration) |
+        | **Fairness** | Marketing AI models undergo bias audit (quarterly) |
+        | **Non-Manipulation** | AI-optimized persuasion techniques do not exploit psychological vulnerabilities |
+        | **Vulnerable Population Protection** | Apply additional guardrails for marketing to children and elderly |
+
+### 29.4. Dark Pattern Prevention Protocol
+
+*   **The Dark Pattern Zero Tolerance Protocol**:
+    *   **Law**: The following dark patterns are **absolutely prohibited** in marketing and product design.
+
+        | Dark Pattern | Definition | Prohibited Example |
+        |:-------------|:----------|:------------------|
+        | **Confirm Shaming** | Making opt-out choices sound negative | "No thanks, I don't want to save money" |
+        | **Roach Motel** | Easy to sign up, extremely hard to cancel | Multi-step cancellation requiring phone call |
+        | **Hidden Costs** | Revealing fees at final checkout step | Shipping and tax appearing only at payment screen |
+        | **Forced Continuity** | Auto-renewing subscriptions without prominent notice | Trial → auto-transition to paid without notification |
+        | **Misdirection** | Drawing attention to trick into unintended choice | Large "Accept All Cookies" button vs tiny "Manage" |
+
+    *   **Annual Audit**: Conduct annual UX Ethics Audit to check for unintentional dark pattern creep.
+
+---
+
+## 30. Growth Team Operating Model
+
+> **Supreme Directive**: The speed and quality of a growth team determine a product's growth trajectory. Maximizing experimentation velocity while maintaining quality is the structural challenge.
+
+### 30.1. Growth Squad Structure
+
+*   **The Growth Squad Standard**:
+    *   **Law**: Growth teams must be structured as follows.
+
+        | Role | Responsibility | Staffing |
+        |:-----|:-------------|:--------|
+        | **Growth Lead** | Overall strategy, OKR setting, cross-functional coordination | 1 person per squad |
+        | **Growth Engineer** | Experiment implementation, Feature Flag management, data pipeline | 1-2 people |
+        | **Growth Designer** | A/B test UI design, LP optimization | 1 person |
+        | **Growth Analyst** | Experiment analysis, KPI monitoring, insight discovery | 1 person |
+        | **Growth Marketer** | Channel strategy, content, campaign execution | 1-2 people |
+
+    *   **Minimum Viable Squad**: Growth Lead + Growth Engineer + Growth Analyst (minimum 3 people). Below this, allocate as part-time roles of existing team members.
+
+### 30.2. Growth Sprint Methodology
+
+*   **The Growth Sprint Standard**:
+    *   **Law**: Growth activities must run on the following 2-week sprint cycle.
+
+        | Day | Activity | Output |
+        |:----|:--------|:-------|
+        | **Mon W1** | Sprint Planning. Hypothesis prioritization (ICE Score) | Sprint Backlog |
+        | **Tue-Fri W1** | Experiment implementation & launch | Deployed experiments |
+        | **Mon W2** | Mid-sprint check. Early data review | Pivot/Continue decision |
+        | **Tue-Thu W2** | Data collection continuation + next sprint hypothesis development | Hypothesis pool |
+        | **Fri W2** | Sprint Review. Result analysis + learning sharing | Sprint Report |
+
+    *   **ICE Scoring**: `ICE = Impact (1-10) × Confidence (1-10) × Ease (1-10)`. Execute experiments in priority order.
+    *   **Experiment Velocity Target**: Minimum **4 experiments per squad per sprint** (8 experiments/month).
+
+### 30.3. Growth OKR Framework
+
+*   **The Growth OKR Standard**:
+    *   **Law**: Growth team OKRs must follow this structure.
+
+        ```
+        Objective: [Qualitative growth goal]
+        KR1: [Quantitative acquisition metric] (e.g., Registration CVR: 5% → 8%)
+        KR2: [Quantitative retention metric] (e.g., D30 Retention: 25% → 35%)
+        KR3: [Quantitative efficiency metric] (e.g., CAC: ¥5,000 → ¥3,500)
+        KR4: [Quantitative experimentation metric] (e.g., Monthly experiments: 6 → 12)
+        ```
+
+    *   **Review Cadence**: OKR progress check weekly, formal review quarterly.
+    *   **Stretch Target**: Set KRs at 70% achievability level. 100% achievement of all KRs indicates insufficient ambition.
+
+### 30.4. Knowledge Management Protocol
+
+*   **The Growth Knowledge Base Standard**:
+    *   **Law**: Growth team learnings must be accumulated and shared in the following format.
+        1.  **Experiment Log**: Record all experiment hypotheses, results, and learnings (regardless of success/failure). Mandatory fields: hypothesis, metric, result, statistical significance, learning
+        2.  **Playbook Library**: Successful patterns are documented as playbooks. Regularly updated and version-managed
+        3.  **Failure Archive**: Failed experiments are logged with reasons. Preventing recurrence of the same failures is mandatory
+        4.  **Cross-Team Sharing**: Monthly Growth Review meetings to share learnings across the organization
+
+---
+
 ## Appendix A: Quick Reference Index
 
 | Keyword | Sections | Related Rules |
 |---------|----------|---------------|
-| PLG / Viral Loop | §1 | `101_revenue_monetization`, `501_customer_experience` |
-| SEO / GEO | §2 | `340_web_frontend`, `800_internationalization` |
+| PLG / Viral Loop / **ASO** | §1, **§1.2** | `101_revenue_monetization`, `501_customer_experience` |
+| SEO / GEO / **Voice Search** / **Multimodal** / **Passage Ranking** | §2, **§2.2**, **§2.3** | `340_web_frontend`, `800_internationalization` |
 | Onboarding | §3 | `200_design_ux`, `501_customer_experience` |
 | Retention / Churn | §4 | `101_revenue_monetization`, `401_data_analytics` |
 | MarTech Stack | §5 | `301_api_integration`, `401_data_analytics` |
 | Ad Feeds | §6 | `101_revenue_monetization` |
-| Traffic Diversification | §7 | `600_security_privacy` |
-| Performance Architecture | §8 | `300_engineering_standards`, `502_site_reliability` |
-| OGP / Social Sharing | §9 | `340_web_frontend` |
-| First-Party Data | §10 | `601_data_governance`, `600_security_privacy` |
+| Traffic Diversification / **sGTM** | §7, **§7.2** | `600_security_privacy` |
+| Performance Architecture / **Feature Flags** / **Instrumentation** | §8, **§8.2** | `300_engineering_standards`, `502_site_reliability` |
+| OGP / Social Sharing / **Social Commerce** | §9, **§9.2** | `340_web_frontend`, `101_revenue_monetization` |
+| First-Party Data / **ZPD** / **Privacy Sandbox** | §10, **§10.2**, **§10.3** | `601_data_governance`, `600_security_privacy` |
 | Product Feedback | §11 | `501_customer_experience`, `700_qa_testing` |
 | KPI Framework | §12 | `401_data_analytics`, `720_cloud_finops` |
+| AI-Native Growth / **EU AI Act Art.50** / **C2PA** / **Synthetic A/B** | §13, **§13.4**, **§13.5** | `000_product_strategy`, `ai/`, `600_security_privacy` |
+| Community-Led Growth | §14 | `501_customer_experience`, `600_brand_strategy` |
+| Paid Acquisition / **4-Stage Circuit Breaker** | §15, **§15.1** | `300_revenue_monetization`, `401_data_analytics` |
+| Growth FinOps / **AI Add-on P&L** | §16, **§16.2** | `720_cloud_finops`, `300_revenue_monetization` |
+| Anti-Patterns | §17 | Cross-section reference |
+| Brand Equity / SOV / Competitive Intelligence | §18 | `600_brand_strategy`, `401_data_analytics` |
+| PMF / Sean Ellis Test / Retention Curve | §19 | `000_product_strategy`, `401_data_analytics` |
+| Email Marketing / SPF/DKIM/DMARC / Lifecycle | §20 | `600_security_privacy`, `501_customer_experience` |
+| Growth Loops / Flywheel | §21 | `000_product_strategy`, `101_revenue_monetization` |
+| RevOps / MQL / SQL / Lead Scoring | §22 | `300_revenue_monetization`, `401_data_analytics` |
+| Content ROI / ToFu-MoFu-BoFu / Repurposing | §23 | `401_data_analytics`, `600_brand_strategy` |
+| **Internationalization** / Localization / Cultural Adaptation / Regional Regulations | **§24** | `800_internationalization`, `600_security_privacy` |
+| **Video** / Short-Form / TikTok / Video SEO / Live Commerce | **§25** | `340_web_frontend`, `200_design_ux` |
+| **Conversational Marketing** / WhatsApp / LINE / Chatbot | **§26** | `301_api_integration`, `501_customer_experience` |
+| **Partner** / Affiliate / API-Led Growth / Co-Marketing | **§27** | `101_revenue_monetization`, `301_api_integration` |
+| **Growth Security** / Bot Detection / Click Fraud / Promotion Abuse | **§28** | `600_security_privacy`, `700_qa_testing` |
+| **Sustainable Growth** / ESG / Dark Pattern Prevention / Ethical AI / Inclusive | **§29** | `600_security_privacy`, `200_design_ux` |
+| **Growth Team Operations** / Growth Sprint / OKR / Experiment Velocity / Knowledge Mgmt | **§30** | `000_product_strategy`, `300_engineering_standards` |
+| **Multi-Agent** / RAG / AI Creative Optimization | **§13.6-13.8** | `ai/`, `600_security_privacy` |
+| **RMN** / CTV / DOOH | **§15.4-15.5** | `101_revenue_monetization`, `401_data_analytics` |
+| **AI Cost Forecasting** / MMM / ROI Prediction | **§16.4-16.5** | `720_cloud_finops`, `401_data_analytics` |

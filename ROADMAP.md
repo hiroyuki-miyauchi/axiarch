@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.0.0  
+> **現在の安定版 / Current Stable**: v1.2.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -32,7 +32,23 @@
 
 ---
 
-### 🔮 v1.2.0 — エコシステム & 自動化（検討中）
+### ✅ v1.1.0 — Design & UX Strategy v3.0 / Protocol 6（2026-04-12）
+
+- **AGENTS.md §6: Anti-Full-Overwrite Protocol** — 差分編集義務化プロトコル追加
+- **`universal/{ja,en}/design/000_design_ux.md`** — 25パート完成版 v3.0
+- **`.github/workflows/release.yml`** — CHANGELOG自動バージョン検出 → タグ・Release自動生成
+
+---
+
+### ✅ v1.2.0 — Universal Rules 大規模ブラッシュアップ（2026-04-29）
+
+- **Universal Rules** — 全16ファイル × 2言語を2026 Staff Engineer基準に拡張（57ファイル変更、+59,500行）
+- **Blueprint 構造正規化** — YAGNI原則に基づき、ドメインフォルダ README に結晶化プロトコル説明を追加
+- **`.github/dependabot.yml`** — GitHub Actions 依存関係自動更新
+
+---
+
+### 🔮 v1.3.0 — エコシステム & 自動化（検討中）
 
 - **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
@@ -86,7 +102,23 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
-### 🔮 v1.2.0 — Ecosystem & Automation (Under Consideration)
+### ✅ v1.1.0 — Design & UX Strategy v3.0 / Protocol 6 (2026-04-12)
+
+- **AGENTS.md §6: Anti-Full-Overwrite Protocol** — Added diff-based editing mandate protocol
+- **`universal/{ja,en}/design/000_design_ux.md`** — 25-part complete edition v3.0
+- **`.github/workflows/release.yml`** — Auto-detect version from CHANGELOG → auto-create tag & Release
+
+---
+
+### ✅ v1.2.0 — Universal Rules Major Brushup (2026-04-29)
+
+- **Universal Rules** — Expanded all 16 files × 2 languages to 2026 Staff Engineer standards (57 files changed, +59,500 lines)
+- **Blueprint Structure Normalization** — Added crystallization protocol explanation to domain folder READMEs based on YAGNI principle
+- **`.github/dependabot.yml`** — Dependabot for GitHub Actions dependencies
+
+---
+
+### 🔮 v1.3.0 — Ecosystem & Automation (Under Consideration)
 
 - **Axiarch CLI** — Automated setup via `npx axiarch-init`
 - **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)

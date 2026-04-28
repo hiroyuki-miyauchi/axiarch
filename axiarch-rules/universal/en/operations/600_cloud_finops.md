@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited without explicit "Amend Constitution" instruction.**
-> Last Updated: 2026-03-28
+> Last Updated: 2026-04-15
 
 > [!IMPORTANT]
 > **Supreme Directive**
@@ -10,7 +10,7 @@
 > - Cloud cost optimization is not a one-time project but a **continuous operational discipline**.
 > - FinOps integrates engineering, finance, and business to maximize technology value.
 > - **"Designing architecture without knowing its cost is like building a house without knowing its budget."**
-> **25 Parts, 57 Sections.**
+> **35 Parts, 93 Sections (Revised 2026-04-15).**
 
 ---
 
@@ -41,6 +41,16 @@
 - [Part XXIII: GreenOps & Sustainability](#part-xxiii-greenops--sustainability)
 - [Part XXIV: Language-Specific Sections](#part-xxiv-language-specific-sections)
 - [Part XXV: Maturity Model, Anti-Patterns & Future Outlook](#part-xxv-maturity-model-anti-patterns--future-outlook)
+- [Part XXVI: Observability FinOps](#part-xxvi-observability-finops)
+- [Part XXVII: Contract & Vendor Negotiation](#part-xxvii-contract--vendor-negotiation)
+- [Part XXVIII: DR/BCP FinOps](#part-xxviii-drbcp-finops)
+- [Part XXIX: Cost-Aware Architecture](#part-xxix-cost-aware-architecture)
+- [Part XXX: Cloud Migration FinOps](#part-xxx-cloud-migration-finops)
+- [Part XXXI: API Economy FinOps](#part-xxxi-api-economy-finops)
+- [Part XXXII: Developer Cost Experience](#part-xxxii-developer-cost-experience)
+- [Part XXXIII: Waste Classification Framework](#part-xxxiii-waste-classification-framework)
+- [Part XXXIV: Hybrid Cloud FinOps](#part-xxxiv-hybrid-cloud-finops)
+- [Part XXXV: FinOps Benchmarking & KPI](#part-xxxv-finops-benchmarking--kpi)
 - [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index)
 - [Appendix B: Cross-References](#appendix-b-cross-references)
 
@@ -676,13 +686,17 @@
 
 -   **Model Routing Implementation**:
     ```typescript
+    // Model Routing Implementation (Tier Abstraction)
+    // Specific model IDs and costs are managed in config files,
+    // enabling zero-code-change switching during model generation transitions
     function selectModel(task: AITask): ModelConfig {
+      const models = getModelConfig(); // Load from config file or DB
       if (task.complexity === 'simple') {
-        return { model: 'gemini-2.0-flash-lite', costPerMToken: 0.075 };
+        return models.fast;   // Tier.FAST: Lightest model
       } else if (task.complexity === 'moderate') {
-        return { model: 'gemini-2.0-flash', costPerMToken: 0.15 };
+        return models.smart;  // Tier.SMART: Standard model
       } else {
-        return { model: 'gemini-2.5-pro', costPerMToken: 1.25 };
+        return models.thinking; // Tier.THINKING: High-accuracy reasoning model
       }
     }
     ```
@@ -1352,6 +1366,641 @@
 
 ---
 
+## Part XXVI: Observability FinOps
+
+### §58. Observability Cost Management Strategy
+
+-   **Law**: Observability (logs, metrics, traces) costs can reach **15-25%** of total cloud spend. "Monitor the cost of monitoring itself."
+-   **Observability Cost Structure**:
+
+    | Cost Element | Driver | Typical Proportion |
+    |:------------|:-------|:-----------------|
+    | **Log ingestion** | Data volume (GB/day) × ingestion rate | 40-50% |
+    | **Metrics storage** | Cardinality (unique time series) × retention period | 20-30% |
+    | **Trace ingestion** | Span count × sampling rate | 15-25% |
+    | **Query/Analysis** | Query execution count × scan volume | 5-10% |
+
+-   **Observability FinOps 3 Principles**:
+    1.  **Pre-collection filtering**: Collect only necessary data ("send everything, think later" is prohibited)
+    2.  **Tiered retention**: Optimize retention periods based on data temperature
+    3.  **Sampling strategy**: Intelligent sampling instead of full collection
+
+### §59. Log Cost Optimization
+
+-   **Law**: Logging is not "peace of mind through recording." **Log ingestion cost directly correlates with data volume** — collect only necessary logs at appropriate granularity.
+-   **Log Optimization Strategies**:
+
+    | Strategy | Effect | Implementation |
+    |:---------|:-------|:--------------|
+    | **Log level control** | 30-50% reduction | Production: WARN+ only, Debug: dev environments only |
+    | **Structured logging** | 20-30% reduction | JSON structure for parse efficiency, exclude unnecessary fields |
+    | **Sampling** | 50-80% reduction | 1% sample of healthy requests, 100% for errors |
+    | **Observability Pipeline** | 30-60% reduction | Edge filtering via Vector/Fluent Bit |
+    | **Cold storage tiering** | 40-70% reduction | 7d → S3/GCS, 30d → Glacier/Archive |
+
+-   **Observability Pipeline Implementation**:
+    ```yaml
+    # Vector.toml — Log filtering pipeline
+    [sources.app_logs]
+    type = "kubernetes_logs"
+
+    [transforms.filter_noise]
+    type = "filter"
+    inputs = ["app_logs"]
+    condition = '.level != "DEBUG" && .message != "health check"'
+
+    [transforms.reduce_fields]
+    type = "remap"
+    inputs = ["filter_noise"]
+    source = '''
+      del(.kubernetes.pod_labels)
+      del(.kubernetes.namespace_labels)
+    '''
+
+    [sinks.datadog]
+    type = "datadog_logs"
+    inputs = ["reduce_fields"]
+    ```
+
+-   **Log Retention Policy**:
+
+    | Environment | Hot Storage | Warm Storage | Archive |
+    |:-----------|:-----------|:-----------|:--------|
+    | **Production** | 14 days | 90 days | 365 days (extend per compliance requirements) |
+    | **Staging** | 7 days | 30 days | None |
+    | **Development** | 3 days | None | None |
+
+### §60. Metrics Cardinality Management
+
+-   **Law**: Metrics cardinality (number of unique time series) explosion is the **biggest risk** for Observability cost surge. Prohibit unrestricted label/tag additions.
+-   **Cardinality Explosion Prevention**:
+
+    | Risk Factor | Countermeasure | Effect |
+    |:-----------|:--------------|:-------|
+    | **High-cardinality labels** | Prohibit labels like `user_id`, `request_id` | 10-100x cardinality reduction |
+    | **Unused metrics** | Auto-disable metrics unqueried for 30 days | 20-40% reduction |
+    | **Duplicate metrics** | Eliminate duplicate collection across app/infra | 10-20% reduction |
+    | **Aggregation interval** | Aggregate from 1s → 15s/60s (per use case) | 15-60x reduction |
+
+-   **Cardinality Budget**:
+    - Set per-team cardinality caps (e.g., 100K time series per team)
+    - Alert at 80% of cap
+    - Mandate cardinality impact assessment for new metric additions
+
+### §61. Distributed Tracing Cost Management
+
+-   **Law**: Full trace collection leads to cost explosion. Use **intelligent sampling** to maintain quality while controlling costs.
+-   **Sampling Strategies**:
+
+    | Strategy | Method | Recommended For |
+    |:---------|:-------|:---------------|
+    | **Head-based sampling** | Probabilistic sample at request start | Low cost, uniform traffic |
+    | **Tail-based sampling** | Prioritize errors/latency post-completion | High quality, cost efficient |
+    | **Priority sampling** | Set sampling rates by importance | Business-critical path focus |
+
+-   **Recommended Sampling Rates**:
+
+    | Condition | Sampling Rate |
+    |:----------|:-------------|
+    | Normal response (< p50 latency) | 0.1-1% |
+    | Slow response (> p95 latency) | 100% |
+    | Error response (4xx/5xx) | 100% |
+    | Business-critical path | 10-50% |
+    | Health checks / internal comms | 0% |
+
+### §62. Observability Tool Selection — FinOps Perspective
+
+-   **Law**: Evaluate Observability tools not just by features but by **cost structure**. Optimal solution differs between GB billing vs seat billing vs cardinality billing.
+-   **Tool Cost Structure Comparison**:
+
+    | Tool | Billing Model | Cost Characteristics |
+    |:-----|:-------------|:--------------------|
+    | **Datadog** | Host-based + Log GB + Custom metrics | Expensive for few hosts, heavy logs |
+    | **Grafana Cloud** | Metrics time series + Log GB + Trace spans | OSS-based, self-hosting possible |
+    | **New Relic** | GB Ingest all-in billing | Simple but expensive at scale |
+    | **AWS CloudWatch** | Log GB + Metrics + Dashboards | Low cost for AWS-native, expensive for custom |
+    | **OSS Stack** | Infrastructure cost only (Prometheus + Loki + Tempo) | Lowest cost but requires ops skills |
+
+-   **FinOps Selection Criteria**: If monthly Observability cost **exceeds 20% of total cloud spend**, mandatory evaluation of tool change or phased OSS migration.
+
+---
+
+## Part XXVII: Contract & Vendor Negotiation
+
+### §63. Cloud Contract Negotiation Strategy
+
+-   **Law**: Cloud provider contract negotiation is the **largest lever** for discounts beyond commitment purchases (§12). Negotiate strategically.
+-   **Major Contract Types**:
+
+    | Contract Type | Target | Typical Discount | Minimum Commitment |
+    |:-------------|:-------|:---------------|:-----------------|
+    | **AWS EDP** (Enterprise Discount Program) | Annual spend $1M+ | 5-15% | Annual commitment |
+    | **AWS PPA** (Private Pricing Agreement) | Large service-specific usage | 10-30% | Service-specific |
+    | **GCP CUD** (Committed Use Discounts) | Compute/DB | 20-57% | 1yr/3yr |
+    | **GCP CNDA** (Cloud Net Direct Access) | Annual spend $500K+ | 3-12% | Annual commitment |
+    | **Azure MACC** (Microsoft Azure Consumption Commitment) | Annual spend $100K+ | 5-20% | Annual commitment |
+
+-   **Negotiation Timing**:
+    - **Fiscal year-end (March/December)**: Maximum quota pressure on providers → maximum discount opportunity
+    - **60 days before renewal**: Early negotiation for favorable terms
+    - **After obtaining competing proposals**: Leverage multi-cloud strategy as negotiation card
+
+### §64. Commitment Portfolio Management
+
+-   **Law**: Manage commitments (RI/SP/CUD) like a **financial portfolio**. Implement diversified investment, rebalancing, and maturity management.
+-   **Portfolio Management Principles**:
+
+    | Principle | Description | Implementation |
+    |:---------|:-----------|:--------------|
+    | **Staged purchases** | Purchase quarterly instead of all at once | Demand fluctuation risk diversification |
+    | **Coverage target** | Cover 60-80% of stable workloads | Prevent over-purchasing |
+    | **Maturity diversification** | Avoid simultaneous expiry of all commitments | Risk diversification |
+    | **Unused monitoring** | Immediately rebalance when unused rate > 5% | Waste prevention |
+    | **Resale/Exchange** | Sell unnecessary RIs on Marketplace or Exchange | Loss minimization |
+
+-   **Commitment Lifecycle Management**:
+    ```
+    Purchase Decision → Utilization Monitoring → Quarterly Review → Rebalance → Maturity Mgmt
+    │                    │                        │                  │             │
+    └─ ROI Analysis      └─ Utilization < 80%     └─ Portfolio       └─ Exchange/  └─ Renewal
+                           → Immediate Alert        Optimization       Sell         60d Notice
+                                                    Report             Decision
+    ```
+
+### §65. Multi-Year Contract Design
+
+-   **Law**: 3-year contracts offer maximum discounts but carry **technology change risk**. Design the balance between flexibility and cost reduction.
+-   **Contract Duration Decision Matrix**:
+
+    | Factor | 1-Year Recommended | 3-Year Recommended |
+    |:-------|:------------------|:------------------|
+    | **Workload stability** | High variability, growing | Stable, predictable |
+    | **Technology change** | Rapidly evolving (AI/ML etc.) | Mature (DB/Network etc.) |
+    | **Business outlook** | Uncertain | Clear 3-year plan |
+    | **Discount differential** | Sufficient discount at 1-year | Significant additional discount at 3-year |
+
+-   **Hybrid Strategy**: Core infrastructure (DB/Network) on 3-year, AI/ML workloads on 1-year, experimental/growth workloads on on-demand — recommend **3-tier composition**.
+
+### §66. Vendor Lock-in Cost Analysis
+
+-   **Law**: Vendor lock-in is an **invisible cost**. Regularly assess switching costs and maintain negotiation leverage.
+-   **Lock-in Cost Evaluation Items**:
+
+    | Evaluation Item | Content | Frequency |
+    |:---------------|:--------|:----------|
+    | **Data migration cost** | Egress fees + conversion cost + downtime | Annual |
+    | **Re-implementation cost** | Engineering effort for provider-specific service replacements | Annual |
+    | **Contract penalties** | Early termination penalties, unused commitment write-offs | At renewal |
+    | **Operations retraining** | Team skill migration cost | Annual |
+    | **Business opportunity cost** | Innovation freeze during migration period | Annual |
+
+-   **Anti-Lock-in Strategy**: If provider-specific service usage exceeds **60% of total spend**, mandatory evaluation of abstraction layer introduction or multi-cloud distribution.
+
+---
+
+## Part XXVIII: DR/BCP FinOps
+
+### §67. DR Configuration Cost Comparison
+
+-   **Law**: DR configuration selection must include **cost efficiency** alongside RPO/RTO. Choose "optimally fit DR for business requirements," not "the best DR."
+-   **DR Configuration Cost/Recovery Matrix**:
+
+    | DR Configuration | RTO | RPO | Cost vs Production | Recommended Workloads |
+    |:----------------|:----|:----|:------------------|:---------------------|
+    | **Active-Active** | ~0min | ~0min | 100-200% | Mission-critical (payments etc.) |
+    | **Warm Standby** | 10-30min | Minutes | 30-50% | Business-critical |
+    | **Pilot Light** | 1-4hrs | Tens of minutes | 5-15% | Important but no immediate recovery needed |
+    | **Backup & Restore** | 4-24hrs | Hours | 1-5% | Non-critical |
+
+-   **Cost Optimization Strategies**:
+    - **Pilot Light + Auto-Scaling**: Minimal standby config, expand via Auto-Scaling on failure (optimal cost/recovery balance)
+    - **Multi-Region Spot**: Use Spot for DR resources (fallback to on-demand on failure)
+    - **Infrastructure as Code**: Provision DR environment on-demand via Terraform/Pulumi (minimize maintenance cost)
+
+### §68. RPO/RTO × Cost Tradeoff Design
+
+-   **Law**: Cost increases **exponentially** with each RPO/RTO reduction. Set appropriate RPO/RTO based on Business Impact Analysis (BIA).
+-   **Cost Efficiency Framework**:
+    ```
+    DR Cost Efficiency = (Business Impact per Hour of Downtime × Expected Downtime)
+                       ÷ Annual DR Cost
+    
+    Target: DR Cost Efficiency > 3.0 (3x+ risk mitigation vs DR cost)
+    ```
+-   **Service Tier DR Strategy**:
+
+    | Tier | SLA | RPO | RTO | DR Config | Monthly DR Cost Estimate |
+    |:-----|:----|:----|:----|:---------|:----------------------|
+    | **Tier-1** (Payment/Auth) | 99.99% | < 1min | < 5min | Active-Active | Production × 80-100% |
+    | **Tier-2** (Core API) | 99.95% | < 15min | < 30min | Warm Standby | Production × 30-50% |
+    | **Tier-3** (Admin) | 99.9% | < 1hr | < 4hrs | Pilot Light | Production × 5-15% |
+    | **Tier-4** (Batch/Analytics) | 99.5% | < 24hrs | < 24hrs | Backup & Restore | Production × 1-5% |
+
+### §69. DR Test & Drill Cost Management
+
+-   **Law**: DR testing is mandatory, but manage test costs. Optimize costs with a **phased test strategy** instead of full production-equivalent tests.
+-   **DR Test Strategy**:
+
+    | Test Type | Frequency | Cost | Content |
+    |:----------|:---------|:-----|:--------|
+    | **Tabletop exercise** | Monthly | Zero | Scenario-based discussion |
+    | **Component test** | Monthly | Low | Individual tests (DB recovery, DNS failover) |
+    | **Partial failover** | Quarterly | Medium | DR site switchover for specific services |
+    | **Full failover** | Annual | High | DR site switchover for all services |
+    | **Chaos Engineering** | Ongoing | Low | Random fault injection for resilience validation |
+
+---
+
+## Part XXIX: Cost-Aware Architecture
+
+### §70. Cost-Driven Design Principles
+
+-   **Law**: Cost optimization must be **built in at design time**, not addressed retroactively. Mandate cost evaluation in architecture design reviews.
+-   **Design Review Mandatory Check Items**:
+
+    | Check Item | Question | Criteria |
+    |:----------|:---------|:--------|
+    | **Compute model** | Is the Serverless/Container/VM selection rationale clear? | Present cost comparison table |
+    | **Data transfer path** | Are cross-region/cross-AZ transfers minimized? | Estimate Egress costs |
+    | **Storage strategy** | Is data temperature-based tiering designed? | Define lifecycle policies |
+    | **Scaling strategy** | Are scale-out/in strategies and cost caps set? | Estimate maximum cost |
+    | **AI/ML integration** | Is cost impact of AI call count and model selection evaluated? | Estimate token costs |
+
+### §71. Compute Model Selection Framework
+
+-   **Law**: Select the most cost-efficient compute model based on workload characteristics. Selection "because we're used to it" is prohibited.
+-   **Compute Model Decision Matrix**:
+
+    | Characteristic | Serverless | Container (Fargate/Cloud Run) | Container (K8s) | VM |
+    |:--------------|:---------:|:---------------------------:|:---------------:|:--:|
+    | **Request pattern** | Spiky/irregular | Medium/predictable | Large/stable | Stable/stateful |
+    | **Execution time** | < 15min | < 60min | Unlimited | Unlimited |
+    | **Cold start tolerance** | ○ | △ | ✕ | ✕ |
+    | **Monthly cost (equivalent load)** | Lowest to highest※ | Medium | Medium-low | Low-medium |
+    | **Operations overhead** | Minimal | Low | High | Highest |
+
+    ※ Serverless can be cheapest or most expensive depending on traffic. Threshold analysis mandatory.
+
+-   **Serverless Economic Breakpoints**:
+    - **< 1M requests/month**: Serverless is most cost efficient
+    - **1M-10M requests/month**: Comparative analysis with containers required
+    - **> 10M requests/month**: Containers/VMs are typically more cost efficient
+
+### §72. Cache Strategy Economics
+
+-   **Law**: Caching is both a "performance improvement" and a "cost optimization" strategy. Quantitatively evaluate cache investment ROI.
+-   **Cache ROI Calculation**:
+    ```
+    Cache ROI = (Origin Cost × Cache Hit Rate × Request Volume)
+              ÷ Cache Infrastructure Cost
+    
+    Target: Cache ROI > 5.0
+    ```
+-   **Cache Tiering Strategy**:
+
+    | Tier | Technology | TTL | Cost Characteristics |
+    |:-----|:----------|:----|:--------------------|
+    | **L0: Browser cache** | Cache-Control, ETag | Minutes-hours | Zero cost |
+    | **L1: CDN cache** | CloudFront/Cloud CDN | Hours-days | Major Egress reduction |
+    | **L2: Application cache** | Redis/Memcached | Seconds-minutes | DB load reduction |
+    | **L3: Query cache** | Materialized Views | Minutes-hours | Compute cost reduction |
+    | **L4: Semantic cache (AI)** | Similar query result reuse | Minutes-hours | Significant LLM token cost reduction |
+
+### §73. Event-Driven vs Polling Cost Comparison
+
+-   **Law**: Polling (periodic queries) is simple but **wastes compute resources**. Migrating to event-driven architecture enables significant cost reduction.
+-   **Cost Comparison**:
+
+    | Method | Monthly Cost Example | Notes |
+    |:-------|:-------------------|:------|
+    | **Polling (1-min interval)** | ~$15/month (Lambda + API GW) | Executes even when no changes |
+    | **Event-driven (EventBridge)** | ~$1/month | Executes only on change |
+    | **Reduction rate** | **~93%** | Greater effect with fewer events |
+
+-   **Migration Decision**: If change frequency is **below 10% of polling interval**, mandate migration to event-driven.
+
+### §74. Multi-Region Cost Design
+
+-   **Law**: Multi-region deployment trades availability for **2-4x cost increase**. Design optimal region strategy based on business requirements.
+-   **Region Strategy Options**:
+
+    | Strategy | Availability | Cost Multiplier | Use Case |
+    |:---------|:------------|:---------------|:---------|
+    | **Single Region** | 99.95% | 1.0x | Non-global services |
+    | **Multi-AZ** | 99.99% | 1.1-1.3x | Most production workloads |
+    | **Active-Passive Multi-Region** | 99.99%+ | 1.3-2.0x | Global services |
+    | **Active-Active Multi-Region** | 99.999% | 2.0-4.0x | Mission-critical |
+
+-   **Cost Optimization Key**: Data replication (cross-region transfer fees) comprises **40-60%** of multi-region costs. Minimizing replication data scope is the primary cost reduction point.
+
+---
+
+## Part XXX: Cloud Migration FinOps
+
+### §75. Migration Phase Cost Management
+
+-   **Law**: During cloud migration, "dual-run" (parallel operation of old and new environments) temporarily inflates costs **1.5-3x**. Embed cost management into migration plans.
+-   **Migration Phase Cost Characteristics**:
+
+    | Phase | Duration | Cost Characteristics | FinOps Focus |
+    |:------|:---------|:--------------------|:------------|
+    | **Assessment** | 1-3 months | Consulting/tool costs | TCO comparison analysis |
+    | **Pilot migration** | 1-2 months | Minimal new environment cost | POC cost cap setting |
+    | **Large-scale migration** | 3-12 months | Maximum cost during dual-run | Weekly cost tracking |
+    | **Optimization** | 1-3 months | Normalizing as old environment shrinks | Baseline establishment |
+    | **Steady-state operation** | Ongoing | Optimized cost | Continuous FinOps |
+
+### §76. Dual-Run Period Optimization
+
+-   **Law**: **Minimize** dual-run period. Immediately stop and delete old environment resources for migrated workloads — "keeping it just in case" is prohibited.
+-   **Dual-Run Cost Reduction Checklist**:
+    - [ ] Stop old environment resources within 48 hours of migration completion
+    - [ ] Delete after 7-day monitoring period post-stop
+    - [ ] Evaluate residual value of old environment commitments (RIs) and consider Marketplace resale
+    - [ ] Review timelines for incomplete migration workloads weekly
+    - [ ] Minimize old environment data retention costs (archive migration)
+
+### §77. Post-Migration Cost Baseline Establishment
+
+-   **Law**: Establish a **new environment cost baseline** within 30 days of migration completion as the basis for ongoing optimization.
+-   **Baseline Establishment Procedure**:
+    1.  **Collect 30 days of cost actuals**
+    2.  **Finalize service-level and team-level** cost allocation
+    3.  **Set Unit Economics** (§10) baseline values
+    4.  **Set optimization targets** (20-30% reduction from baseline)
+    5.  **Develop commitment purchase plan** (§12, §64) (after confirming 3 months of stable operation post-migration)
+-   **Cross-Reference**: §12 (Commitment strategy), §64 (Portfolio management)
+
+---
+
+## Part XXXI: API Economy FinOps
+
+### §78. API Consumption Cost Management
+
+-   **Law**: External API (SaaS API, Cloud API, AI API) consumption costs are rapidly growing hidden cost drivers. **Visualize and budget all API consumption costs**.
+-   **API Consumption Cost Classification**:
+
+    | API Type | Billing Model | Cost Management Method |
+    |:---------|:-------------|:---------------------|
+    | **AI/LLM API** | Token-based billing | Model routing + caching (see §24) |
+    | **SaaS API** (Stripe/Twilio etc.) | Transaction-based billing | Batch processing + unnecessary call elimination |
+    | **Data API** (Maps/Weather etc.) | Request-based billing | Caching + tile prefetch |
+    | **Cloud API** (AWS API etc.) | Free to request-based | Throttling + batch processing |
+
+-   **API Consumption Cost Reduction Techniques**:
+    - **Response caching**: Cache identical request results within TTL (30-60% reduction)
+    - **Batch requests**: Consolidate individual API calls into batches (40-70% reduction)
+    - **Deduplication**: Eliminate duplicate requests (10-30% reduction)
+    - **Conditional requests**: Fetch only on change via ETag/If-Modified-Since (20-50% reduction)
+
+### §79. API Monetization Optimization
+
+-   **Law**: When providing APIs externally, accurately understand the API's cost structure and set pricing that **ensures margin**.
+-   **API Cost Calculation**:
+    ```
+    API Cost per Call = (Compute Cost + Data Transfer Cost + Storage Cost 
+                       + Dependency API Cost) ÷ Total API Calls
+    
+    API Margin = (API Revenue per Call - API Cost per Call) ÷ API Revenue per Call
+    
+    Target: API Margin ≥ 60%
+    ```
+-   **Pricing Model Selection**:
+
+    | Model | Application | Advantage | Risk |
+    |:------|:-----------|:---------|:-----|
+    | **Per-request** | Lightweight APIs | Simple | Revenue decline at high volume |
+    | **Tiered** | General-purpose APIs | Predictable | Unfairness perception between tiers |
+    | **Usage + base fee** | Enterprise APIs | Stable revenue + growth headroom | Complex design |
+    | **Value-based** | AI/Data APIs | Value-aligned | Difficult to measure value |
+
+### §80. API Gateway Billing Optimization
+
+-   **Law**: API Gateway (AWS API Gateway / GCP API Gateway / Kong etc.) costs must also be optimized based on workload patterns.
+-   **API Gateway Cost Comparison**:
+
+    | Service | Billing Model | Monthly @ 1M Requests | Recommended Use Case |
+    |:--------|:-------------|:---------------------|:--------------------|
+    | **AWS API Gateway (REST)** | $3.50/1M requests + data transfer | ~$3.50 | Low-medium traffic |
+    | **AWS API Gateway (HTTP)** | $1.00/1M requests | ~$1.00 | High traffic, simple |
+    | **AWS ALB** | $0.40/1M requests + LCU | ~$1.50 | Internal microservices |
+    | **CloudFlare Workers** | $0.50/1M requests | ~$0.50 | Edge processing |
+    | **Self-hosted (Kong/Envoy)** | Infrastructure cost only | Variable | Large-scale, control-focused |
+
+-   **Optimization Strategy**: When monthly request count **exceeds 10M**, evaluate migration from REST API Gateway to HTTP API Gateway or ALB.
+
+---
+
+## Part XXXII: Developer Cost Experience
+
+### §81. IDE-Integrated Cost Feedback
+
+-   **Law**: Engineers should be cost-aware **during coding**, not at "month-end reports." Integrate real-time cost feedback into IDEs/editors.
+-   **Developer Cost Experience Tools**:
+
+    | Tool/Method | Integration Point | Effect |
+    |:-----------|:-----------------|:-------|
+    | **Infracost VSCode Extension** | Cost display during IaC editing | Cost awareness at design time |
+    | **Cloud Cost Linter** | Local check before PR | Pre-detect over-provisioned resource definitions |
+    | **Backstage Cost Widget** | Cost display in service catalog | Service owner cost responsibility awareness |
+    | **Slack Bot** | Daily/weekly team cost summary | Continuous awareness building |
+
+-   **Shift-Left Cost Principle**: The later cost issues are discovered, the more expensive to fix.
+    ```
+    Design-time fix cost: 1x
+    PR-time fix cost: 5x
+    Post-production fix cost: 50x
+    ```
+
+### §82. CI/CD Pipeline Cost Tracking
+
+-   **Law**: Track and optimize CI/CD pipeline costs (build time × runner cost × execution count) themselves.
+-   **CI/CD Cost Optimization**:
+
+    | Optimization | Effect | Implementation |
+    |:------------|:-------|:--------------|
+    | **Cache layer optimization** | 50% build time reduction | Docker Layer Cache / npm Cache |
+    | **Differential builds** | Eliminate unnecessary builds | path-filter / Nx / Turborepo |
+    | **Spot runners** | 60-90% runner cost reduction | GitHub Actions Spot / EC2 Spot |
+    | **Parallelism optimization** | Resource efficiency | Threshold analysis for optimal parallelism |
+    | **Schedule optimization** | Peak avoidance | Off-peak execution for non-urgent builds |
+
+-   **CI/CD Cost KPI**: Track `Build Cost / Deploy Count` and report monthly trends.
+
+### §83. Engineering Cost Scorecard
+
+-   **Law**: Introduce team-level **cost efficiency scorecards** and gamify cost awareness.
+-   **Scorecard Items**:
+
+    | Metric | Calculation | Target | Weight |
+    |:-------|:-----------|:-------|:-------|
+    | **Tag completeness** | Mandatory tag compliance rate | ≥ 95% | 20% |
+    | **Commitment utilization** | In-use ÷ Purchased | ≥ 80% | 20% |
+    | **Idle rate** | Idle resource cost ÷ Total cost | ≤ 5% | 20% |
+    | **Unit Cost improvement** | MoM Unit Cost change rate | ↓ Improving | 20% |
+    | **Budget compliance** | Actuals ÷ Budget | 90-110% | 20% |
+
+-   **Scorecard Operations**: Publish monthly team rankings. Incentivize top teams with innovation budget additions.
+
+---
+
+## Part XXXIII: Waste Classification Framework
+
+### §84. 5-Category Waste Classification
+
+-   **Law**: Viewing cloud waste as just "idle resources" is insufficient. Use **5-category systematic classification** to root out structural waste.
+-   **5 Waste Categories**:
+
+    | Category | Definition | Typical Examples | Industry Average Waste Rate |
+    |:---------|:----------|:----------------|:--------------------------|
+    | **Idle** | Unused resources | Stopped instances, unattached EIP/EBS | 5-10% |
+    | **Overprovisioned** | Resources oversized for utilization | m5.xlarge at 20% CPU utilization | 15-25% |
+    | **Orphaned** | Resources with unknown owners | Untagged resources, resources created by departed employees | 3-8% |
+    | **Sprawl** | Unplanned proliferation | Unnecessary environment proliferation, duplicate services | 5-15% |
+    | **Architectural** | Inefficient design patterns | Inappropriate compute model selection, absent caching | 10-20% |
+
+-   **Estimated Total Waste Rate**: A typical organization wastes **30-50%** of cloud spend.
+
+### §85. Automated Waste Detection Framework
+
+-   **Law**: Waste detection must be systematic, not manual. **Set automated detection rules for all 5 categories**.
+-   **Automated Detection Rules**:
+
+    | Category | Detection Rule | Tools |
+    |:---------|:-------------|:------|
+    | **Idle** | Zero CPU/zero connections for 7+ days | CloudWatch / Cloud Monitoring / see §18 |
+    | **Overprovisioned** | p95 CPU < 40% for 14+ days | Compute Optimizer / Active Assist / see §11 |
+    | **Orphaned** | Missing mandatory tags + exists 90+ days | Tag policies + custom scripts |
+    | **Sprawl** | Zero deployments for 9+ months | IaC State analysis |
+    | **Architectural** | Flagged in quarterly architecture reviews | Well-Architected Review |
+
+### §86. Waste Reduction Sprint
+
+-   **Law**: Conduct a **Waste Reduction Sprint** quarterly for organization-wide concentrated cost reduction.
+-   **Sprint Execution Procedure**:
+    1.  **Week 1: Discovery phase** — All teams scan their resources for waste
+    2.  **Week 2: Execution phase** — Immediate deletion of low-risk waste, planning for high-risk waste
+    3.  **Week 3: Verification phase** — Measure reduction effects, regression testing
+    4.  **Retrospective**: Announce reduction rankings + plan next improvements
+
+-   **Typical Results**: Each Sprint achieves **10-20% reduction** in monthly cloud spend.
+
+---
+
+## Part XXXIV: Hybrid Cloud FinOps
+
+### §87. On-Premises + Cloud TCO Comparison
+
+-   **Law**: In hybrid environments, question the assumption "cloud is cheaper." Conduct **TCO (Total Cost of Ownership) comparison** based on workload characteristics.
+-   **TCO Comparison Items**:
+
+    | Item | On-Premises | Cloud |
+    |:-----|:----------|:------|
+    | **Hardware** | Purchase / Depreciation | None (OpEx) |
+    | **Power/Cooling** | Electricity / HVAC costs | Included |
+    | **Network** | Line costs | Egress fees |
+    | **Personnel** | DC operations team | Not required (some DevOps) |
+    | **Licensing** | On-premises version | Cloud version (often more expensive) |
+    | **Scalability** | Pre-purchase required | On-demand |
+    | **DR/BCP** | Separate site required | Multi-region |
+
+-   **TCO Breakpoint**: For stable 24/7 workloads with utilization **above 70%**, on-premises may have TCO advantage (especially GPU workloads).
+
+### §88. Workload Placement Optimization
+
+-   **Law**: Placing all workloads in cloud is not always optimal. Design **optimal placement strategy** based on workload characteristics.
+-   **Workload Placement Decision Matrix**:
+
+    | Workload Characteristic | Recommended Placement | Reason |
+    |:-----------------------|:---------------------|:-------|
+    | **Spiky/irregular** | Cloud | On-demand scaling |
+    | **Stable/24-7/high utilization** | On-prem or commitments | Predictable and cheaper |
+    | **Data sovereignty requirements** | On-prem / Sovereign Cloud | Compliance mandatory |
+    | **GPU always-on** | On-prem + cloud burst | GPU TCO dramatically advantageous |
+    | **Experimental/development** | Cloud | Flexibility priority |
+    | **Latency-critical** | Edge/On-prem | Physical proximity |
+
+### §89. Hybrid Environment Cost Allocation
+
+-   **Law**: Hybrid environments require a mechanism to **uniformly allocate** on-premises and cloud costs. Leverage FOCUS specification (§3) Cloud+ scope.
+-   **Unified Cost Allocation Model**:
+    - **On-premises cost normalization**: Normalize hardware depreciation + power + personnel to monthly
+    - **Unified dashboard**: Build "on-prem + cloud" unified view via Grafana / Vantage
+    - **Allocation keys**: Apply unified tag/label standards across both environments (see §8)
+-   **Cross-Reference**: §3 (FOCUS specification), §8 (Tag standards), §44 (Multi-cloud unified management)
+
+---
+
+## Part XXXV: FinOps Benchmarking & KPI
+
+### §90. Industry Benchmark Standards
+
+-   **Law**: Compare your FinOps metrics against **industry benchmarks** for objective maturity assessment.
+-   **Key Benchmarks (FinOps Foundation 2026 Survey-Based)**:
+
+    | Metric | Top 10% | Median | Bottom 25% |
+    |:-------|:-------|:------|:-----------|
+    | **Cloud waste rate** | < 10% | 25-35% | > 50% |
+    | **Commitment coverage** | > 85% | 60-70% | < 40% |
+    | **Commitment utilization** | > 95% | 80-85% | < 70% |
+    | **Tag completeness** | > 98% | 70-80% | < 50% |
+    | **Budget accuracy (variance)** | ±5% | ±15-20% | > ±30% |
+    | **Unit Cost improvement (YoY)** | > 15% | 5-10% | Worsening |
+    | **Anomaly detection → response time** | < 2hrs | 24-48hrs | > 1 week |
+    | **FinOps automation rate** | > 70% | 30-40% | < 10% |
+
+### §91. FinOps KPI Dashboard Design
+
+-   **Law**: Design FinOps KPIs in a **3-layer structure** (Executive / Management / Engineering) with appropriate granularity per layer.
+-   **3-Layer KPI Framework**:
+
+    | Layer | Audience | KPI Examples | Update Frequency |
+    |:------|:---------|:------------|:----------------|
+    | **Executive** | CTO/CFO | Cloud Unit Economics, Gross Margin Impact, YoY Cost Trend | Monthly |
+    | **Management** | EM/PdM | Team-level costs, Budget compliance, Commitment utilization | Weekly |
+    | **Engineering** | Engineers | Service-level costs, Resource utilization, Optimization recommendations | Daily/Real-time |
+
+-   **KPI Dashboard Mandatory Components**:
+    - **Trend graphs**: Monthly/weekly cost trends (with YoY comparison)
+    - **Pareto analysis**: What % of cost do top 10 services/resources represent
+    - **Alert status**: List of active anomaly/budget overrun alerts
+    - **Scorecard**: Team-level FinOps scores (see §83)
+    - **Commitment health**: Coverage rate, utilization rate, maturity calendar
+
+### §92. FinOps Scorecard (Organizational)
+
+-   **Law**: Express the overall FinOps health of the organization as a **single score** for executive reporting and improvement tracking.
+-   **FinOps Overall Score Calculation**:
+
+    | Domain | Weight | Calculation | Maximum |
+    |:-------|:-------|:-----------|:--------|
+    | **Visibility** | 20% | (Tag completeness + Dashboard coverage) / 2 | 20pt |
+    | **Optimization** | 30% | (Commitment utilization + Waste reduction rate + Rightsizing execution rate) / 3 | 30pt |
+    | **Budget management** | 20% | Budget accuracy + Anomaly detection speed | 20pt |
+    | **Culture** | 15% | Engineers at L2+ rate + Sprint participation rate | 15pt |
+    | **Automation** | 15% | FinOps automation rate | 15pt |
+    | **Total** | 100% | — | 100pt |
+
+-   **Score Tiers**:
+    - **90-100pt**: World-Class (industry top)
+    - **70-89pt**: Optimized
+    - **50-69pt**: Developing
+    - **< 50pt**: Foundational
+
+### §93. Cross-Organization Comparison Framework
+
+-   **Law**: Build a framework for **fair comparison** of FinOps maturity across multiple business units/products.
+-   **Normalized Metrics**:
+    - **Size normalization**: Compare using **Unit Cost** (per user, per transaction) instead of absolute amounts
+    - **Growth rate adjustment**: Rapidly growing teams naturally increase costs — evaluate by **Unit Cost improvement rate**
+    - **Workload characteristic adjustment**: Do not evaluate AI-heavy teams and web frontend teams on identical criteria
+-   **Fairness Rules**:
+    - Allocate shared resources (network/security/monitoring) evenly across teams
+    - New products get 6-month baseline period, excluded from rankings
+    - Allow GPU/AI-utilizing teams to be compared in separate categories
+
+---
+
 ## Appendix A: Quick Reference Index
 
 | Keyword | Section |
@@ -1402,6 +2051,31 @@
 | Tool ecosystem | §55 |
 | Top 30 Anti-patterns | §56 |
 | Future outlook | §57 |
+| Observability / Log cost / Metrics | §58, §59, §60 |
+| Tracing / Sampling | §61 |
+| Observability tool selection | §62 |
+| Cloud contracts / EDP / CNDA / PPA | §63 |
+| Commitment portfolio | §64 |
+| Multi-year contracts | §65 |
+| Vendor lock-in | §66 |
+| DR / BCP / Disaster recovery cost | §67, §68, §69 |
+| Cost-driven design / Cost-Aware | §70 |
+| Compute model selection | §71 |
+| Cache economics / Cache ROI | §72 |
+| Event-driven vs Polling | §73 |
+| Multi-region cost | §74 |
+| Cloud migration / Dual-run | §75, §76, §77 |
+| API consumption cost / API monetization | §78, §79 |
+| API Gateway billing | §80 |
+| IDE cost feedback / Shift-Left | §81 |
+| CI/CD cost / Build cost | §82 |
+| Cost scorecard | §83, §92 |
+| Waste classification / Idle / Overprovisioned / Orphaned | §84, §85 |
+| Waste Reduction Sprint | §86 |
+| Hybrid Cloud / On-premises / TCO | §87, §88, §89 |
+| Industry benchmarks | §90 |
+| FinOps KPI dashboard | §91 |
+| Cross-organization comparison | §93 |
 
 ---
 
@@ -1424,8 +2098,8 @@
 
 ---
 
-**Last Updated**: 2026-03-28
-**Structure**: 25 Parts, 57 Sections.
+**Last Updated**: 2026-04-15
+**Structure**: 35 Parts, 93 Sections.
 **FinOps Foundation Framework**: 2026 (Cloud+ Scope)
 **FOCUS Specification**: v1.3 (2025-12 ratified)
 **GSF SCI Specification**: ISO Standard

@@ -142,7 +142,7 @@
 - **Cross-Reference**: `602_oss_compliance.md`
 - **Next.js 16 破壊的変更対応**: Next.js 16へのアップグレード時は Node.js 20.9+ および TypeScript 5+ が必須。AMPサポートは廃止済み。`middleware.ts` は `proxy.ts` に移行（詳細は Part LI 参照）
 
-### §301. Tailwind CSS 4 Deep Dive [新規]
+### §301. Tailwind CSS 4 Deep Dive
 
 - **Rule 33.294**: Tailwind CSS 4の新アーキテクチャを理解し、最大限に活用する
 - **CSS-First Configuration**: `tailwind.config.ts` から CSS 内の `@theme` ディレクティブへ移行。設定をCSS内で完結させる
@@ -230,7 +230,7 @@ export const env = createEnv({
 - **Action**: `experimental.ppr: true` を `next.config.ts` で有効化し、ページ単位で `export const experimental_ppr = true` を宣言
 - **Next.js 16 Cache Components**: PPRの安定版として `'use cache'` ディレクティブがGA化。動的コンポーネント内でもキャッシュ境界を宣言可能
 
-### §302. The next/after API Protocol [新規]
+### §302. The next/after API Protocol
 
 - **Rule 33.295**: Next.js 15+ の `after()` API を活用し、レスポンス送信後の非ブロッキング処理を実装する
 - **Use Cases**: ログ記録、アナリティクスイベント送信、キャッシュ無効化等のレスポンスに影響しないサイドエフェクト
@@ -393,7 +393,7 @@ export async function POST(request: Request) {
 }
 ```
 
-### §303. The CSS Layers (`@layer`) Protocol [新規]
+### §303. The CSS Layers (`@layer`) Protocol
 
 - **Rule 33.296**: **CSS Cascade Layers** (`@layer`) を活用し、スタイルの優先順位をカスケードレベルで制御する
 - **Layer Order**: レイヤーの宣言順序がカスケード優先順位を決定する。後に宣言されたレイヤーが優先される
@@ -416,7 +416,7 @@ export async function POST(request: Request) {
 }
 ```
 
-### §304. The CSS `:has()` Selector Protocol [新規]
+### §304. The CSS `:has()` Selector Protocol
 
 - **Rule 33.297**: CSS `:has()` セレクタ（親セレクタ）を活用し、子要素の状態に基づくスタイリングをJavaScript不要で実装する
 - **Form Validation Styling**: `:has(:invalid)` でフォームグループ全体のエラー状態をスタイリングする
@@ -539,7 +539,7 @@ export async function POST(request: Request) {
 - **Font Preloading**: `preinit()` でクリティカルフォントを先行初期化
 - **Third-Party DNS**: 外部サービスへの `prefetchDNS()` でDNS解決時間を最小化
 
-### §48b. useEffectEvent Hook [新規]
+### §48b. useEffectEvent Hook
 
 - **Rule 33.304**: React 19.2で安定化された `useEffectEvent` フックを活用し、Effect内の非リアクティブロジックを分離する
 - **Problem**: `useEffect` の依存配列に含めたくないが、最新値を参照したいロジック（例: ログ送信時の最新state参照）
@@ -565,7 +565,7 @@ function ChatRoom({ roomId, theme }: Props) {
 }
 ```
 
-### §305. React Activity コンポーネント [新規]
+### §305. React Activity コンポーネント
 
 - **Rule 33.298**: React 19.2で GA に昇格した `<Activity>` コンポーネントを活用し、非表示コンポーネントの状態を保持したままDOMから除外する
 - **Mode**: `mode="visible"` で通常表示、`mode="hidden"` でDOMから除外しつつ状態を保持
@@ -594,7 +594,7 @@ function TabPanel({ activeTab }: { activeTab: string }) {
 }
 ```
 
-### §306. React `<ViewTransition>` GA 統合 [新規]
+### §306. React `<ViewTransition>` GA 統合
 
 - **Rule 33.299**: React の `<ViewTransition>` コンポーネント（GA版）を活用し、ルート遷移・UI状態変更のアニメーションを宣言的に実装する
 - **Declarative API**: `startTransition` と連携し、Reactの更新サイクル内でView Transitions APIを自動的にトリガーする
@@ -619,7 +619,7 @@ function NavigationLink({ href, children }: Props) {
 }
 ```
 
-### §305b. cacheSignal() API [新規]
+### §305b. cacheSignal() API
 
 - **Rule 33.325**: React 19.2で導入された `cacheSignal()` APIを活用し、RSC（React Server Components）のキャッシュライフサイクルを精密に制御する
 - **Purpose**: `cache()` APIで生成されたキャッシュの有効期間に連動する `AbortSignal` を提供する。キャッシュが無効化された際に進行中の非同期処理（fetch、DB接続等）を自動キャンセルする
@@ -639,14 +639,14 @@ const getProduct = cache(async (id: string) => {
 });
 ```
 
-### §305c. React Performance Tracks (Chrome DevTools) [新規]
+### §305c. React Performance Tracks (Chrome DevTools)
 
 - **Rule 33.326**: React 19.2で導入された **Performance Tracks** を活用し、Chrome DevToolsのPerformanceパネルでReactのスケジューラ挙動・コンポーネントレンダリングを可視化する
 - **Feature**: コンポーネント名付きの専用トラックがDevToolsに表示され、レンダリング時間・再レンダリング原因・Suspenseバウンダリの解決タイミングを視覚的に把握可能
 - **INP Debugging**: ユーザーインタラクションに対するReactの応答パスをトラックで追跡し、INP劣化の根本原因を特定する
 - **Status**: Chrome 131+ でデフォルト有効。React DevTools Profilerと併用し、Lab Data / Field Data の両面から分析する
 
-### §305d. Batching Suspense Boundaries for SSR [新規]
+### §305d. Batching Suspense Boundaries for SSR
 
 - **Rule 33.327**: React 19.2で改善された **SSR Suspense バウンダリのバッチ処理** を理解し、SSRストリーミングの一貫性を向上させる
 - **Behavior**: 複数のSuspenseバウンダリが同時に解決可能な場合、クライアントとサーバーで一貫した順序でコンテンツを表示する。アニメーションやレイアウトシフトの一貫性が向上
@@ -944,7 +944,7 @@ type ActionResult<T> =
 
 - **Rule 33.100**: コード入力フィールドにはプレーンな `<textarea>` ではなく、構文ハイライト付きエディタコンポーネント（Monaco Editor / CodeMirror）を使用する
 
-### §307. The Long Animation Frames (LoAF) API Protocol [新規]
+### §307. The Long Animation Frames (LoAF) API Protocol
 
 - **Rule 33.300**: **Long Animation Frames (LoAF) API** を活用し、INP劣化の原因を特定する
 - **Long Tasksとの違い**: Long Tasks API は50ms超のタスクを検出するが、原因の特定が困難。LoAF はスクリプト単位の帰属・レンダリング時間を含む詳細データを提供
@@ -972,7 +972,7 @@ const observer = new PerformanceObserver((list) => {
 observer.observe({ type: 'long-animation-frame', buffered: true });
 ```
 
-### §308. The Scheduler.yield() API Protocol [新規]
+### §308. The Scheduler.yield() API Protocol
 
 - **Rule 33.301**: **`scheduler.yield()`** を活用し、メインスレッドの長時間ブロッキングを回避する
 - **INP改善**: 長いタスクを `scheduler.yield()` で分割し、ブラウザがユーザーインタラクションに応答する機会を確保する
@@ -1325,7 +1325,7 @@ async function processLargeDataset(items: Item[]) {
 - **Rule 33.154**: Cookie同意バナーを法域に応じて実装する（GDPR: オプトイン / 日本: オプトアウト）
 - **Consent Management**: ユーザーの同意状態に基づきトラッキングスクリプトのロードを制御する
 
-### §155b. The Post-Privacy Sandbox Tracking Strategy [新規]
+### §155b. The Post-Privacy Sandbox Tracking Strategy
 
 - **Rule 33.328**: Google Privacy Sandbox は **2025年10月に正式廃止**された。サードパーティCookieはChromiumブラウザで当面存続するが、以下のプライバシーAPIへの移行を推進する:
     - **CHIPS (Cookies Having Independent Partitioned State)**: パーティション化されたCookieで安全なクロスサイトデータ管理
@@ -1473,7 +1473,7 @@ async function processLargeDataset(items: Item[]) {
 - **Rule 33.180**: CSS Grid LevelsのMasonry Layout（`grid-template-rows: masonry`）が安定化次第、JavaScriptベースのMasonryライブラリ（Masonry.js等）を段階的に置き換える
 - **Progressive Enhancement**: `@supports (grid-template-rows: masonry)` でフィーチャーディテクトし、CSSネイティブ実装にフォールバック
 
-### §309. The Navigation API Protocol [新規]
+### §309. The Navigation API Protocol
 
 - **Rule 33.302**: **Navigation API** を活用し、SPAナビゲーションをブラウザネイティブで制御する
 - **vs History API**: History API よりも直感的なイベントドリブンナビゲーションを提供
@@ -1499,7 +1499,7 @@ navigation.addEventListener('navigate', (event) => {
 });
 ```
 
-### §310. The CSS `color-mix()` & Relative Color Syntax Protocol [新規]
+### §310. The CSS `color-mix()` & Relative Color Syntax Protocol
 
 - **Rule 33.303**: CSS `color-mix()` 関数と **Relative Color Syntax** を活用し、設計トークンの動的な色操作をCSS純正で実現する
 - **color-mix()**: 2色を任意の比率で混合（`color-mix(in oklch, var(--primary), white 20%)`）
@@ -1654,7 +1654,7 @@ navigation.addEventListener('navigate', (event) => {
 - **Rule 33.204**: Content Security Policy は `'strict-dynamic'` + nonce ベースのポリシーを推奨する
 - **Report-Only**: 導入初期は `Content-Security-Policy-Report-Only` でレポート収集し、ブロッキングはしない
 
-### §203b. The CSP Level 3 Protocol [新規]
+### §203b. The CSP Level 3 Protocol
 
 - **Rule 33.329**: **CSP Level 3** Working Draft（W3C 2026）へ段階的に移行する
 - **Enhanced Directives**: `script-src-elem`, `script-src-attr`, `style-src-elem`, `style-src-attr` でスクリプト・スタイルの適用範囲をより精密に制御
@@ -1674,7 +1674,7 @@ navigation.addEventListener('navigate', (event) => {
 
 - **Rule 33.207**: `Permissions-Policy` ヘッダーを設定し、ブラウザ機能（カメラ、マイク、位置情報等）へのアクセスを明示的に制御する。不要な機能は `=()` で無効化
 
-### §206b. The OWASP 2026 Compliance Protocol [新規]
+### §206b. The OWASP 2026 Compliance Protocol
 
 - **Rule 33.330**: **OWASP Top 10 2026** の新カテゴリをフロントエンド設計に反映する:
     - **A03: Software Supply Chain Failures**: npm/pnpmの依存パッケージの脆弱性監視を強化する。`npm audit --audit-level=high` のCIゲート化に加え、lockfileの差分レビューを必須化。依存パッケージの署名検証（npm provenance）の導入を検討する
@@ -2127,7 +2127,7 @@ navigation.addEventListener('navigate', (event) => {
 
 ## Part LI: Next.js 16 移行 & 新機能 ⚛️
 
-### §311. The proxy.ts Migration Protocol [新規]
+### §311. The proxy.ts Migration Protocol
 
 - **Rule 33.305**: Next.js 16 では `middleware.ts` が `proxy.ts` に置き換えられた。全プロジェクトで `proxy.ts` への移行を実施する
 - **Runtime**: `proxy.ts` は Node.js ランタイムで実行される（Edge Runtime ではない）。全Node.js APIが利用可能
@@ -2158,7 +2158,7 @@ export const config = {
 };
 ```
 
-### §312. The `use cache` GA Protocol [新規]
+### §312. The `use cache` GA Protocol
 
 - **Rule 33.306**: Next.js 16で GA に昇格した `'use cache'` ディレクティブを活用し、明示的なキャッシュ制御を実装する
 - **Scope**: ページ全体、コンポーネント単位、関数単位でキャッシュを適用可能
@@ -2179,26 +2179,26 @@ async function getProduct(id: string) {
 }
 ```
 
-### §313. Turbopack File System Caching [新規]
+### §313. Turbopack File System Caching
 
 - **Rule 33.307**: Turbopack の **ファイルシステムキャッシング**（Beta）を有効化し、大規模アプリケーションの起動時間を大幅に短縮する
 - **Config**: `next.config.ts` に `experimental.turbopackFileSystemCaching: true` を設定
 - **Benefit**: 2回目以降の `next dev` / `next build` でインクリメンタルキャッシュを活用し、起動時間を最大70%短縮
 - **Cache Location**: `.next/cache/turbopack` に自動保存。CIでのキャッシュ保存を推奨
 
-### §314. Next.js DevTools MCP Protocol [新規]
+### §314. Next.js DevTools MCP Protocol
 
 - **Rule 33.308**: **Next.js DevTools MCP**（Model Context Protocol）サーバーを活用し、AI支援のデバッグ環境を構築する
 - **Feature**: ビルドエラー、パフォーマンスボトルネック、ルーティング問題をAIアシスタントがコンテキストを理解した上で分析
 - **Integration**: VS Code / Cursor 等のAI対応エディタと連携し、開発効率を向上
 
-### §315. The updateTag API Protocol [新規]
+### §315. The updateTag API Protocol
 
 - **Rule 33.309**: Next.js 16 の `updateTag()` API を活用し、キャッシュタグの値をリバリデーションなしに更新する
 - **vs revalidateTag**: `revalidateTag()` はキャッシュを無効化して再取得。`updateTag()` は値を直接更新し、サーバー負荷を軽減
 - **Use Case**: リアルタイムに近い更新（在庫数、いいね数等）でキャッシュ効率を最大化
 
-### §316. The Incremental Prefetching Protocol [新規]
+### §316. The Incremental Prefetching Protocol
 
 - **Rule 33.310**: Next.js 16 の **インクリメンタルプリフェッチ**を活用し、ビューポート検出とホバートリガーに基づく段階的プリフェッチを実現する
 - **Layout Deduplication**: 共有レイアウトは1回のみダウンロードし、ルート個別のデータのみ追加フェッチ
@@ -2208,14 +2208,14 @@ async function getProduct(id: string) {
 
 ## Part LII: GraphQL Frontend Architecture 🌐
 
-### §317. GraphQL Client Standard [新規]
+### §317. GraphQL Client Standard
 
 - **Rule 33.311**: GraphQL クライアントには **urql** または **Apollo Client** を使用する。以下の基準で選択:
     - **urql**: 軽量・シンプル・SSR友好。小〜中規模プロジェクト推奨
     - **Apollo Client**: 高度なキャッシュ・ローカル状態統合。大規模プロジェクト推奨
 - **Codegen**: `graphql-codegen` で型安全なフック・ドキュメントを自動生成する。手書きGraphQLクエリの型定義は禁止
 
-### §318. The Fragment Colocation Protocol [新規]
+### §318. The Fragment Colocation Protocol
 
 - **Rule 33.312**: GraphQL Fragment はデータを消費するコンポーネントと同一ファイルに配置する（Fragment Colocation）
 - **Benefit**: コンポーネントが必要とするデータ構造が一目で把握可能。不要フィールドの残留を防止
@@ -2239,13 +2239,13 @@ export function UserAvatar({ user }: { user: FragmentType<typeof UserAvatar_user
 }
 ```
 
-### §319. The Persisted Query Protocol [新規]
+### §319. The Persisted Query Protocol
 
 - **Rule 33.313**: 本番環境では **Persisted Queries** を使用し、GraphQLクエリ文字列のネットワーク転送とセキュリティリスクを削減する
 - **APQ**: Automatic Persisted Queries（APQ）でハッシュベースのクエリ識別を実装
 - **Security**: 未登録クエリの実行拒否により、GraphQLインジェクション攻撃を防止
 
-### §320. The GraphQL Error Handling Protocol [新規]
+### §320. The GraphQL Error Handling Protocol
 
 - **Rule 33.314**: GraphQL のエラーハンドリングは「部分成功」パターンを前提とする
 - **Partial Data**: `data` と `errors` が同時に返される場合、利用可能なデータは表示しつつエラーを通知する
@@ -2255,13 +2255,13 @@ export function UserAvatar({ user }: { user: FragmentType<typeof UserAvatar_user
 
 ## Part LIII: 型安全APIクライアント & tRPC 🔀
 
-### §321. tRPC Standard [新規]
+### §321. tRPC Standard
 
 - **Rule 33.315**: フルスタックTypeScriptプロジェクトでは **tRPC** を検討し、エンドツーエンドの型安全性を実現する
 - **Benefit**: APIスキーマ定義・型生成・クライアントコード生成が不要。TypeScript型がそのままAPI契約
 - **Limitation**: TypeScript以外のクライアント（モバイルアプリ等）にはREST API / GraphQL を併用する
 
-### §322. The OpenAPI TypeScript Client Protocol [新規]
+### §322. The OpenAPI TypeScript Client Protocol
 
 - **Rule 33.316**: REST APIクライアントには `openapi-typescript` + `openapi-fetch` を使用し、OpenAPIスキーマから型安全なクライアントを自動生成する
 - **Codegen**: CIパイプラインに型生成を統合し、APIスキーマ変更時に型不整合を自動検出する
@@ -2280,13 +2280,13 @@ const { data, error } = await client.GET('/api/products/{id}', {
 });
 ```
 
-### §323. The API Schema Versioning Protocol [新規]
+### §323. The API Schema Versioning Protocol
 
 - **Rule 33.317**: APIスキーマのバージョン管理を実施し、フロントエンド・バックエンド間の契約を明確化する
 - **Contract Testing**: Pact等のConsumer-Driven Contract Testingでフロントエンドの期待するAPIレスポンス構造をテストする
 - **Breaking Change Detection**: CIでAPIスキーマの破壊的変更（フィールド削除、型変更等）を自動検出する
 
-### §324. The API Response Normalization Protocol [新規]
+### §324. The API Response Normalization Protocol
 
 - **Rule 33.318**: APIレスポンスの正規化はフロントエンド側の責務としてDTO変換層で実施する
 - **Adapter Pattern**: `api/adapters/` にAPIレスポンス → フロントエンドモデルの変換ロジックを集約する
@@ -2296,7 +2296,7 @@ const { data, error } = await client.GET('/api/products/{id}', {
 
 ## Part LIV: フロントエンドデータ品質 & Schema Contract 🌐
 
-### §325. The Frontend Data Quality Gate [新規]
+### §325. The Frontend Data Quality Gate
 
 - **Rule 33.319**: フロントエンドで受信する外部データ（API・WebSocket・localStorage等）は、消費前に必ず Zod でバリデーションする
 - **Trust Boundary**: フロントエンドの Trust Boundary は「自コンポーネントの props」まで。外部データはすべて untrusted として扱う
@@ -2330,19 +2330,19 @@ async function fetchProduct(id: string): Promise<Product | null> {
 }
 ```
 
-### §326. The Schema Contract Testing Protocol [新規]
+### §326. The Schema Contract Testing Protocol
 
 - **Rule 33.320**: フロントエンドとバックエンドの間に**スキーマ契約テスト**を導入し、API構造の不整合を早期検出する
 - **Implementation**: Zodスキーマ定義をフロントエンドとバックエンドで共有し、CIで整合性をテストする
 - **Monorepo**: `packages/schemas/` に共有スキーマパッケージを配置する
 
-### §327. The Stale Data Detection Protocol [新規]
+### §327. The Stale Data Detection Protocol
 
 - **Rule 33.321**: キャッシュされたデータの鮮度を管理し、Stale Dataがユーザーに表示されるリスクを最小化する
 - **Staleness Indicator**: キャッシュ有効期限を超えたデータには表示上の「最終更新: X分前」インジケータを付与する
 - **Auto-Refresh**: `document.visibilitychange` イベントでタブ再表示時に自動リフレッシュする
 
-### §328. The Runtime Type Narrowing Protocol [新規]
+### §328. The Runtime Type Narrowing Protocol
 
 - **Rule 33.322**: Union型のランタイム型絞り込みには Discriminated Union パターンを必須とする
 - **Discriminant Field**: `type` / `kind` / `status` 等の判別フィールドで型を絞り込む
@@ -2369,13 +2369,13 @@ function ProductList({ response }: { response: ApiResponse }) {
 }
 ```
 
-### §329. The Data Invariant Protocol [新規]
+### §329. The Data Invariant Protocol
 
 - **Rule 33.323**: ビジネスクリティカルなデータの不変条件（Invariant）をフロントエンドでも検証する
 - **Examples**: 在庫数 ≥ 0、価格 > 0、開始日 ≤ 終了日、合計金額 = 各明細の合計
 - **Implementation**: `invariant()` ユーティリティ関数でランタイムチェックし、違反時は即座にエラーレポート
 
-### §330. The Null Object Pattern Protocol [新規]
+### §330. The Null Object Pattern Protocol
 
 - **Rule 33.324**: DBレコードの未設定フィールドを `null` でコンポーネントに渡す代わりに、**Null Object パターン**でデフォルト値を持つオブジェクトに変換する
 - **Benefit**: コンポーネント層での null チェック分岐を排除し、コードの可読性とテスタビリティを向上

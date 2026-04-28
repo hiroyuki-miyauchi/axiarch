@@ -1,7 +1,7 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Version: 1.0.0 | License: Apache 2.0
+> Version: 1.2.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that mitigates quality drift,
