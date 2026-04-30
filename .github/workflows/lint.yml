@@ -41,11 +41,11 @@ jobs:
           set -euo pipefail
           echo "🔍 Checking Universal Rules symmetry..."
 
-          ja_count=$(find axiarch-rules/universal/ja -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
-          en_count=$(find axiarch-rules/universal/en -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+          ja_count=$(find axiarch-rules/ja/universal -name "*.md" | wc -l | tr -d ' ')
+          en_count=$(find axiarch-rules/en/universal -name "*.md" | wc -l | tr -d ' ')
 
-          echo "  universal/ja: ${ja_count} files"
-          echo "  universal/en: ${en_count} files"
+          echo "  ja/universal: ${ja_count} files"
+          echo "  en/universal: ${en_count} files"
 
           if [ "$ja_count" != "$en_count" ]; then
             echo "❌ FAIL: Universal Rules bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
@@ -59,11 +59,11 @@ jobs:
           set -euo pipefail
           echo "🔍 Checking Blueprint symmetry..."
 
-          ja_count=$(find axiarch-rules/blueprint/ja -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
-          en_count=$(find axiarch-rules/blueprint/en -maxdepth 1 -name "*.md" | wc -l | tr -d ' ')
+          ja_count=$(find axiarch-rules/ja/blueprint -name "*.md" | wc -l | tr -d ' ')
+          en_count=$(find axiarch-rules/en/blueprint -name "*.md" | wc -l | tr -d ' ')
 
-          echo "  blueprint/ja: ${ja_count} files"
-          echo "  blueprint/en: ${en_count} files"
+          echo "  ja/blueprint: ${ja_count} files"
+          echo "  en/blueprint: ${en_count} files"
 
           if [ "$ja_count" != "$en_count" ]; then
             echo "❌ FAIL: Blueprint bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"

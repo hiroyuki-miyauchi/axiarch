@@ -41,19 +41,19 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
 > **このクラスのファイルは「物理法則」である。いかなる場合も修正・追記は禁止する（Read-Only）。**
-* **Target Path**: `axiarch-rules/universal/` 内の全ファイル。
+* **Target Path**: `axiarch-rules/{lang}/universal/` 内の全ファイル。
 * **Action**: これらを「絶対遵守すべき基準」としてロードする。
 
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
-* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
     * `core/` — プロジェクト概要・教訓ログ
     * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
@@ -153,7 +153,7 @@
     * ※変更点だけでなく、文脈がわかる範囲で提示すること。
 3.  **Updated Rules (法典改定案)**:
     * **Class A (Project Mutable Bylaws)** 内の特定ファイルへの追記・修正内容（Diff形式または追記文）。
-    * **※重要: 更新対象としたファイルパスを明記し、`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従って記録すること。**
+    * **※重要: 更新対象としたファイルパスを明記し、`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` の手順に従って記録すること。**
 
 # Boot Sequence (起動時の絶対挙動)
 

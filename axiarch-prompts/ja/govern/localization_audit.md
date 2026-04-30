@@ -50,21 +50,21 @@
 
 ## Step 1: Load Core Protocol (`AGENTS.md`)
 * ルートディレクトリに `AGENTS.md` が存在する場合、**何よりも先にこのファイルを一言一句漏らさず全文読み込むこと。**
-* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
 > **このクラスのファイルは「物理法則」である。いかなる場合も修正・追記は禁止する（Read-Only）。**
-* **Target Path**: `axiarch-rules/universal/` 内の全ファイル。
+* **Target Path**: `axiarch-rules/{lang}/universal/` 内の全ファイル。
 * **Action**: これらを「絶対遵守すべき基準」としてロードする。
 
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
-* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
     * `core/` — プロジェクト概要・教訓ログ
     * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
@@ -153,8 +153,8 @@
     * **※結晶化ガード**: 結晶化する教訓は「今回の監査で実際に発見された問題」に限定。AI独自リサーチの追加は禁止。`universal/` との重複も確認すること。
 
 * **Rule Update Proposal**:
-    * 今回の翻訳作業で確定した「用語集（Glossary）」や「禁止用語」があれば、**必ずプロジェクト固有のルールファイル（`axiarch-rules/blueprint/{lang}/` 配下（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う））への追記を提案すること。**（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと）
-    * **Universalルールの保護**: `axiarch-rules/universal/` 配下の不変ルールへの変更提案は原則禁止とする。
+    * 今回の翻訳作業で確定した「用語集（Glossary）」や「禁止用語」があれば、**必ずプロジェクト固有のルールファイル（`axiarch-rules/{lang}/blueprint/` 配下（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う））への追記を提案すること。**（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと）
+    * **Universalルールの保護**: `axiarch-rules/{lang}/universal/` 配下の不変ルールへの変更提案は原則禁止とする。
     * 変更の必要がない場合は「ルールの更新事項なし」と明記すること。
 
 # Critical Constraint (絶対遵守事項)

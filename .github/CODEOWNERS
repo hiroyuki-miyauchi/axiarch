@@ -20,11 +20,16 @@ AGENTS.md @hiroyuki-miyauchi
 # Universal Rulesは「憲法」です。変更には明示的な憲法改正の承認が必要。
 # Universal Rules are the Constitution. Changes require explicit "Amend Constitution" approval.
 
-axiarch-rules/universal/ @hiroyuki-miyauchi
-axiarch-rules/LOADING_PROTOCOL.md @hiroyuki-miyauchi
-axiarch-rules/CRYSTALLIZATION_PROTOCOL.md @hiroyuki-miyauchi
-axiarch-rules/INDEX.md @hiroyuki-miyauchi
-axiarch-rules/compliance_matrix.md @hiroyuki-miyauchi
+axiarch-rules/ja/universal/ @hiroyuki-miyauchi
+axiarch-rules/en/universal/ @hiroyuki-miyauchi
+axiarch-rules/ja/LOADING_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/en/LOADING_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/ja/CRYSTALLIZATION_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/en/CRYSTALLIZATION_PROTOCOL.md @hiroyuki-miyauchi
+axiarch-rules/ja/INDEX.md @hiroyuki-miyauchi
+axiarch-rules/en/INDEX.md @hiroyuki-miyauchi
+axiarch-rules/ja/compliance_matrix.md @hiroyuki-miyauchi
+axiarch-rules/en/compliance_matrix.md @hiroyuki-miyauchi
 
 # =============================================================================
 # Blueprint — プロジェクト固有テンプレート / Project-Specific Templates
@@ -32,7 +37,8 @@ axiarch-rules/compliance_matrix.md @hiroyuki-miyauchi
 # Blueprintは可変です。改善・追加を歓迎します（Issueでの事前議論を推奨）。
 # Blueprints are mutable. Improvements and additions welcome (prior Issue discussion recommended).
 
-axiarch-rules/blueprint/ @hiroyuki-miyauchi
+axiarch-rules/ja/blueprint/ @hiroyuki-miyauchi
+axiarch-rules/en/blueprint/ @hiroyuki-miyauchi
 
 # =============================================================================
 # Prompt Library — 再利用可能プロンプト / Reusable Prompt Templates

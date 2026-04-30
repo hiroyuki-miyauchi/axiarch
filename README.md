@@ -119,7 +119,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | ✅ **Verified** — 実務で実証済み | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
-| ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ⚠️ Via symlink |
+| ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Windsurf** | `.windsurfrules` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Other** | Various | ✅ Reads |
 
@@ -250,7 +250,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.cursor/rules/axiarch.mdc` | 🔶 **Cursor のみ** / **Cursor only** | Cursor固有のポインター。`init.sh` で自動コピー / Cursor-specific pointer. Auto-copied by `init.sh` |
 | `.github/copilot-instructions.md` | 🔶 **Copilot のみ** / **Copilot only** | Copilot固有のポインター。`init.sh` で自動コピー / Copilot-specific pointer. Auto-copied by `init.sh` |
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
-| `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | `AGENTS.md` へのシムリンク。`init.sh` で自動作成 / Symlink to `AGENTS.md`. Auto-created by `init.sh` |
+| `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -267,7 +267,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 |:-----------|:------------|:-------|:------------|:--------|:---------|
 | 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` シムリンク作成 | ❌ 不要 | ❌ 不要 | ✅ `ln -s AGENTS.md CLAUDE.md` | ❌ 不要 | ❌ 不要 |
+| 3. `CLAUDE.md` ポインター配置 | ❌ 不要 | ❌ 不要 | ✅ `cp CLAUDE.md /path/to/project/` | ❌ 不要 | ❌ 不要 |
 | 4. 追加設定 | — | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
 ### 1. プロジェクトにコピー / Copy to your project
@@ -300,9 +300,9 @@ mkdir -p /path/to/your/project/.agents/rules
 cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/
 
 # === Claude Code ===
-# Claude CodeはCLAUDE.mdをネイティブに読むのでシムリンクを作成。
-# Claude Code reads CLAUDE.md natively — create a symlink.
-cd /path/to/your/project && ln -s AGENTS.md CLAUDE.md
+# Claude CodeはCLAUDE.mdをネイティブに読むのでポインターをコピー。
+# Claude Code reads CLAUDE.md natively — copy the pointer file.
+cp CLAUDE.md /path/to/your/project/CLAUDE.md
 
 # === Cursor ===
 # ネイティブ設定ファイルが同梱されています。init.sh で自動コピーされます。
@@ -337,9 +337,9 @@ cp .windsurfrules /path/to/your/project/
 # Edit AGENTS.md → Set Project Native Language to Japanese or English
 
 # 使用しない言語ディレクトリを削除 / Delete unused language directory:
-rm -rf axiarch-rules/universal/en axiarch-rules/blueprint/en  # For Japanese projects
+rm -rf axiarch-rules/en  # For Japanese projects
 # OR
-rm -rf axiarch-rules/universal/ja axiarch-rules/blueprint/ja  # For English projects
+rm -rf axiarch-rules/ja  # For English projects
 
 # axiarch-prompts/ をコピーした場合 / If you copied axiarch-prompts/:
 rm -rf axiarch-prompts/en  # For Japanese projects
@@ -351,7 +351,7 @@ rm -rf axiarch-prompts/ja  # For English projects
 
 | Step | JA | EN |
 |:-----|:---|:---|
-| 1 | `blueprint/*/core/000_project_overview.md` をプロジェクトに合わせて編集 | Edit `blueprint/*/core/000_project_overview.md` for your project |
+| 1 | `{lang}/blueprint/core/000_project_overview.md` をプロジェクトに合わせて編集 | Edit `{lang}/blueprint/core/000_project_overview.md` for your project |
 | 2 | 新機能は `core/998_feature_spec_template.md` を対応するドメインフォルダにコピー | For new features, copy `core/998_feature_spec_template.md` to the corresponding domain folder |
 | 3 | **コードを書く前に受け入れ条件を書く**（Blueprint First） | **Write Acceptance Criteria before writing code** (Blueprint First) |
 | 4 | 開発開始 — AIエージェントは憲法に従う | Start development — AI agents will follow the constitution |
@@ -361,18 +361,17 @@ rm -rf axiarch-prompts/ja  # For English projects
 ```text
 your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
- ├── CLAUDE.md                    ← Claude Code のみ（AGENTS.md へのシムリンク） / Claude Code only
+ ├── CLAUDE.md                    ← Claude Code のみ（ポインター） / Claude Code only (pointer)
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer
  ├── axiarch-rules/               ← 必須：ルール本体 / Required: Rule Definitions
- │    ├── INDEX.md
- │    ├── LOADING_PROTOCOL.md
- │    ├── CRYSTALLIZATION_PROTOCOL.md
- │    ├── universal/              ← 不変 / Immutable
- │    │    └── ja/ (or en/)
- │    └── blueprint/              ← プロジェクト固有 / Project-Specific
- │         └── ja/ (or en/)
+ │    └── ja/ (or en/)             ← 言語選択 / Language selected
+ │         ├── INDEX.md
+ │         ├── LOADING_PROTOCOL.md
+ │         ├── CRYSTALLIZATION_PROTOCOL.md
+ │         ├── universal/          ← 不変 / Immutable
+ │         └── blueprint/          ← プロジェクト固有 / Project-Specific
  ├── axiarch-prompts/             ← 任意：プロンプト集 / Optional: Prompt Library
  │    ├── ja/                     ← 日本語版 / Japanese
  │    │    ├── develop/           ← 開発・実行 / Development & Execution
@@ -491,9 +490,9 @@ The goal extends beyond personal use: to contribute to the global adoption of AI
 **EN**: Contributions are welcome. Please open an issue to discuss proposed changes before submitting a pull request.
 
 > [!IMPORTANT]
-> **JA**: Universal Rules (`universal/`) は**憲法**です。変更には明示的な「憲法改正」の承認が必要です。Blueprintテンプレートや基盤ファイルは通常のコントリビュートを受け付けます。
+> **JA**: Universal Rules (`{lang}/universal/`) は**憲法**です。変更には明示的な「憲法改正」の承認が必要です。Blueprintテンプレートや基盤ファイルは通常のコントリビュートを受け付けます。
 >
-> **EN**: Universal Rules (`universal/`) are the **Constitution**. Modifications require explicit "Amend Constitution" approval. Blueprint templates and infrastructure files accept standard contributions.
+> **EN**: Universal Rules (`{lang}/universal/`) are the **Constitution**. Modifications require explicit "Amend Constitution" approval. Blueprint templates and infrastructure files accept standard contributions.
 
 ---
 

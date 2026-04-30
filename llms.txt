@@ -53,7 +53,7 @@ cp -r axiarch-rules /path/to/your/project/
 |:------|:-------|
 | Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
 | Cursor | ⚠️ Expected to work (reads AGENTS.md) |
-| Claude Code | ⚠️ Expected to work (symlink AGENTS.md → CLAUDE.md) |
+| Claude Code | ⚠️ Expected to work (reads CLAUDE.md pointer file) |
 | GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |
 | Windsurf / Aider / Zed | ⚠️ Expected to work |
 

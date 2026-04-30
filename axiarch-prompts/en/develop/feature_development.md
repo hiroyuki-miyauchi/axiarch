@@ -2,7 +2,7 @@
 
 > **Purpose**: A comprehensive prompt for new feature implementation, existing feature improvement, bug fixing, and constitutional compliance auditing
 >
-> **Target**: Entire project (source code + `axiarch-rules/blueprint/{lang}/`)
+> **Target**: Entire project (source code + `axiarch-rules/{lang}/blueprint/`)
 >
 > **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide specific implementation requirements.
 
@@ -78,11 +78,11 @@ Eliminate all risks and guarantee complete quality across the following universa
     * **Override Power**: Contents of `AGENTS.md` take precedence over ALL other instructions including this prompt, treated as the **"absolute constitution."** In case of conflict, follow `AGENTS.md`.
 2.  **Dynamic Rule Discovery (Complete Rule Hierarchy Mastery)**:
     * Scan all files under `axiarch-rules/` directory and strictly distinguish between the following **2 Classes.**
-    * **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
+    * **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
     * **Class S: Universal (Immutable)**:
-        * All files under `axiarch-rules/universal/`. Treat as "laws of physics" — **modification, addition, or change is prohibited under all circumstances (Read-Only).**
+        * All files under `axiarch-rules/{lang}/universal/`. Treat as "laws of physics" — **modification, addition, or change is prohibited under all circumstances (Read-Only).**
     * **Class A: Blueprint (Project-Specific / Editable)**:
-        * All files under `axiarch-rules/blueprint/{lang}/`. Blueprint is organized into domain folders per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`. These are "project-specific laws" — **subject to updates and additions based on audit results (Read/Write).**
+        * All files under `axiarch-rules/{lang}/blueprint/`. Blueprint is organized into domain folders per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`. These are "project-specific laws" — **subject to updates and additions based on audit results (Read/Write).**
     * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
         * **Target 1: Security**: Security and privacy principles
         * **Target 2: Lessons**: Past failures, lessons, and prohibited patterns
@@ -149,9 +149,9 @@ Eliminate all risks and guarantee complete quality across the following universa
 **After all work is complete, return the "critical insights" and "new rules" gained through this process back to the project's governance architecture (blueprint) as assets.**
 
 * **Rule Update Proposal**:
-    * If "anti-patterns (things NOT to do)" or "best practices (things TO do)" were newly discovered, present proposals for additions/modifications to **relevant files in `axiarch-rules/blueprint/{lang}/`** (per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping) mapped to **Targets 1–5.**
-    * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/universal/` are the absolute constitution — NOT subject to change proposals. Always accumulate in **project-specific rules (Blueprint).**
-    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+    * If "anti-patterns (things NOT to do)" or "best practices (things TO do)" were newly discovered, present proposals for additions/modifications to **relevant files in `axiarch-rules/{lang}/blueprint/`** (per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping) mapped to **Targets 1–5.**
+    * **Modification Prohibited**: `AGENTS.md` and `axiarch-rules/{lang}/universal/` are the absolute constitution — NOT subject to change proposals. Always accumulate in **project-specific rules (Blueprint).**
+    * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
     * **New File Creation**: If no suitable existing file exists, present a **new file creation proposal** following 3-digit Sparse Numbering conventions within the same directory.
     * This ensures that in the next development cycle, the AI (you) can **start in a smarter state.**
 

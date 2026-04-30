@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.0.0"
+AXIARCH_VERSION="1.2.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -170,14 +170,12 @@ copy_files() {
 
   cp -r "$SOURCE_DIR/axiarch-rules" "$TARGET_DIR/axiarch-rules"
 
-  # Remove unused language directories
-  local REMOVE_DIRS=(
-    "$TARGET_DIR/axiarch-rules/universal/${UNUSED_LANG}"
-    "$TARGET_DIR/axiarch-rules/blueprint/${UNUSED_LANG}"
-  )
-  for d in "${REMOVE_DIRS[@]}"; do
-    [[ -d "$d" ]] && rm -rf "$d" && print_info "Removed unused: ${d#"$TARGET_DIR/"}"
-  done
+  # Remove unused language directory (new structure: axiarch-rules/{lang}/)
+  local UNUSED_LANG_DIR="$TARGET_DIR/axiarch-rules/${UNUSED_LANG}"
+  if [[ -d "$UNUSED_LANG_DIR" ]]; then
+    rm -rf "$UNUSED_LANG_DIR"
+    print_info "Removed unused: axiarch-rules/${UNUSED_LANG}/"
+  fi
   print_info "Copied: axiarch-rules/ (${LANG_LABEL} only)"
 
   # === Optional: axiarch-prompts/ ===
@@ -207,12 +205,10 @@ copy_files() {
   fi
 
   if $SETUP_CLAUDE; then
-    if [[ ! -e "$TARGET_DIR/CLAUDE.md" ]]; then
-      ln -s AGENTS.md "$TARGET_DIR/CLAUDE.md"
-      print_info "Created symlink: CLAUDE.md → AGENTS.md (Claude Code)"
-    else
-      print_warn "CLAUDE.md already exists — skipping symlink."
-    fi
+    cp "$SOURCE_DIR/CLAUDE.md" \
+       "$TARGET_DIR/CLAUDE.md" 2>/dev/null || \
+      print_warn "CLAUDE.md not found — skipping."
+    print_info "Copied: CLAUDE.md (Claude Code)"
   fi
 
   if $SETUP_COPILOT; then
@@ -280,7 +276,7 @@ print_next_steps() {
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Claude Code" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} → AGENTS.md symlink — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "GitHub Copilot" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md${RESET} — auto-configured"
@@ -290,7 +286,7 @@ print_next_steps() {
     step=$((step + 1))
   fi
 
-  echo -e "  ${CYAN}${step}.${RESET} Edit ${BOLD}axiarch-rules/blueprint/${LANG_CODE}/core/000_project_overview.md${RESET}"
+  echo -e "  ${CYAN}${step}.${RESET} Edit ${BOLD}axiarch-rules/${LANG_CODE}/blueprint/core/000_project_overview.md${RESET}"
   echo -e "       → Fill in your project's tech stack, architecture, and goals"
   step=$((step + 1))
   echo ""
