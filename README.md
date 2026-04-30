@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-38_files-green.svg)](#-universal-rules-38-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
@@ -23,7 +23,7 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** こそが Axiarch の中核です。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存せず、プロジェクト全体の最低品質（Quality Floor）を力強く底上げします。
 
-[Google Antigravity](https://antigravity.google/) 上で設計・実戦検証済み。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（Cursor、Claude Code、GitHub Copilot 等）とも互換性がある見込み**です — ただし動作は未検証です。
+[Google Antigravity](https://antigravity.google/) 上で設計・実戦検証済み。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（OpenAI Codex、Cursor、Claude Code、GitHub Copilot 等）とも互換性がある見込み**です — ただし動作は未検証です。
 
 ### 設計思想
 
@@ -70,7 +70,7 @@
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to strictly govern and mitigate quality drift, hallucinations, and uncontrolled AI behavior in production development through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
-Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
+Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (OpenAI Codex, Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
 
 ### Core Design Philosophy
 
@@ -117,6 +117,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | 状態 / Status | Agent | Native Config | AGENTS.md |
 |:--------------|:------|:-------------|:----------|
 | ✅ **Verified** — 実務で実証済み | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ⚠️ **Untested** — 未検証（動作する見込み） | **OpenAI Codex** | `AGENTS.md` (native) | ✅ Native |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ✅ Reads |
@@ -124,9 +125,9 @@ Designed and validated through hundreds of real production sessions on [Google A
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Other** | Various | ✅ Reads |
 
 > [!NOTE]
-> **JA**: 各AIエージェントには**固有の設定ディレクトリ**があります（例: Cursorは `.cursor/rules/`、Copilotは `.github/copilot-instructions.md`）。`AGENTS.md` は**主要エージェントが読める共通憲法**であり、各ツールのネイティブ設定（例：`.cursor/rules/`、`.github/copilot-instructions.md`）と**併用**されます。ツール固有のセットアップの代替ではありません。
+> **JA**: 各AIエージェントには**固有の設定ディレクトリ**があります（例: Cursorは `.cursor/rules/`、Copilotは `.github/copilot-instructions.md`）。`AGENTS.md` は**主要エージェントが読める共通憲法**であり、各ツールのネイティブ設定（例：`.cursor/rules/`、`.github/copilot-instructions.md`）と**併用**されます。ツール固有のセットアップの代替ではありません。OpenAI Codexは `AGENTS.md` 自体をネイティブ設定として採用しているため、追加のポインターファイルは不要です。
 >
-> **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). `AGENTS.md` is a **shared constitution readable by major agents**, designed to complement each tool's native config (e.g., `.cursor/rules/`, `.github/copilot-instructions.md`). It is NOT a replacement for tool-specific setup.
+> **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). `AGENTS.md` is a **shared constitution readable by major agents**, designed to complement each tool's native config (e.g., `.cursor/rules/`, `.github/copilot-instructions.md`). It is NOT a replacement for tool-specific setup. OpenAI Codex natively uses `AGENTS.md` as its configuration format, so no additional pointer file is needed.
 
 > [!IMPORTANT]
 > **JA**: 本ガバナンス・アーキテクチャは **[Google Antigravity](https://antigravity.google/)** 上で設計・実戦検証されたものです。ルール本体は純粋なMarkdownであり、AIモデルの概念的な仕組みはツール間で共通であるため他のエージェントでも動作する見込みですが、**他ツールでの動作は検証していません。ご利用は自己責任でお願いします。Antigravity以外の環境での動作保証はいたしません。**
@@ -263,12 +264,12 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 ### エージェント別セットアップ / Agent-Specific Setup
 
-| 手順 / Step | Antigravity | Cursor | Claude Code | Copilot | Windsurf |
-|:-----------|:------------|:-------|:------------|:--------|:---------|
-| 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` ポインター配置 | ❌ 不要 | ❌ 不要 | ✅ `cp CLAUDE.md /path/to/project/` | ❌ 不要 | ❌ 不要 |
-| 4. 追加設定 | — | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
+| 手順 / Step | Antigravity | Codex | Cursor | Claude Code | Copilot | Windsurf |
+|:-----------|:------------|:------|:-------|:------------|:--------|:---------|
+| 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
+| 3. `CLAUDE.md` ポインター配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `cp CLAUDE.md /path/to/project/` | ❌ 不要 | ❌ 不要 |
+| 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
 ### 1. プロジェクトにコピー / Copy to your project
 
@@ -299,6 +300,11 @@ cp -r axiarch-prompts /path/to/your/project/
 mkdir -p /path/to/your/project/.agents/rules
 cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/
 
+# === OpenAI Codex ===
+# CodexはAGENTS.mdをネイティブ設定として読むため、追加設定は不要です。
+# Codex reads AGENTS.md natively — no additional setup needed.
+# (AGENTS.md is already copied in Step 1)
+
 # === Claude Code ===
 # Claude CodeはCLAUDE.mdをネイティブに読むのでポインターをコピー。
 # Claude Code reads CLAUDE.md natively — copy the pointer file.
@@ -326,9 +332,9 @@ cp .windsurfrules /path/to/your/project/
 ```
 
 > [!CAUTION]
-> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Cursor、Claude Code、GitHub Copilotでは不要です。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
+> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Codex、Cursor、Claude Code、GitHub Copilotでは不要です。特にCodexは `AGENTS.md` 自体がネイティブ設定なので、Step 1の2点コピーだけで動作します。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
 >
-> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Cursor, Claude Code, or GitHub Copilot. Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
+> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Codex, Cursor, Claude Code, or GitHub Copilot. Codex in particular uses `AGENTS.md` as its native config, so the 2-item copy in Step 1 is all you need. Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
 
 ### 3. 初期化 / Initialize
 
@@ -425,7 +431,7 @@ Before AI agents existed, working with generative AI (ChatGPT, etc.) for busines
 
 When AI agents like [Google Antigravity](https://antigravity.google/) emerged in 2025, the intuition was immediate: **"Starting without a governance structure would be irreversible."** Conversely, **establishing a "constitution" from day one could dramatically raise the quality floor.**
 
-So the governance architecture was built **before** development began. Then it was deployed into real production development and refined through hundreds of real production sessions building Inucomi.
+So the governance architecture was built **before** development began. Then it was deployed into real production development and refined through hundreds of real production sessions.
 
 **Through that process, patterns that were impossible to solve without governance became clear:**
 

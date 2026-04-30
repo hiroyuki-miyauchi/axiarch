@@ -69,6 +69,7 @@
 | :--- | :--- | :--- |
 | **プロジェクト概要・基本アーキテクチャ** | `blueprint/core/000_project_overview.md` | "技術スタック", "ディレクトリ構造" |
 | **プロジェクト固有の教訓・ログ** | `blueprint/core/010_project_lessons_log.md` | "コンテキストログ", "固有の制約" |
+| **機能仕様テンプレート（Blueprint First）** | `blueprint/core/998_feature_spec_template.md` | "受け入れ条件", "Given/When/Then" |
 | **その他プロジェクト固有の要件** | `blueprint/core/999_project_specific_template.md` | (必要に応じて) |
 
 ## 3. Layer 3: Prompts (任意実行エンジン)

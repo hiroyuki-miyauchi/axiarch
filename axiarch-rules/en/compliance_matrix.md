@@ -69,6 +69,7 @@ This section defines the "Blueprint" area for project-specific requirements. AI 
 | :--- | :--- | :--- |
 | **Project Overview & Architecture** | `blueprint/core/000_project_overview.md` | "Tech Stack", "Directory Structure" |
 | **Project Lessons Log** | `blueprint/core/010_project_lessons_log.md` | "Context Log", "Specific Constraints" |
+| **Feature Specification Template (Blueprint First)** | `blueprint/core/998_feature_spec_template.md` | "Acceptance Criteria", "Given/When/Then" |
 | **Other Specific Requirements** | `blueprint/core/999_project_specific_template.md` | (As needed) |
 
 ## 3. Layer 3: Prompts (Optional Execution Engine)

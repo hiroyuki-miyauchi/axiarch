@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.2.0"
+AXIARCH_VERSION="1.3.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -83,11 +83,12 @@ select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
   echo "  1) Google Antigravity — Verified ✅"
-  echo "  2) Cursor — Expected to work ⚠️"
-  echo "  3) Claude Code — Expected to work ⚠️"
-  echo "  4) GitHub Copilot — Expected to work ⚠️"
-  echo "  5) Windsurf — Expected to work ⚠️"
-  echo "  6) Other / Universal (AGENTS.md only)"
+  echo "  2) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
+  echo "  3) Cursor — Expected to work ⚠️"
+  echo "  4) Claude Code — Expected to work ⚠️"
+  echo "  5) GitHub Copilot — Expected to work ⚠️"
+  echo "  6) Windsurf — Expected to work ⚠️"
+  echo "  7) Other / Universal (AGENTS.md only)"
   echo ""
   read -rp "選択してください / Enter choice [1]: " agent_choice
   agent_choice="${agent_choice:-1}"
@@ -101,11 +102,12 @@ select_agent() {
 
   case "$agent_choice" in
     1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    2) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
-    3) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
-    4) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
-    5) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
-    6) AGENT_LABEL="Other / Universal" ;;
+    2) AGENT_LABEL="OpenAI Codex" ;;
+    3) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
+    4) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
+    6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
+    7) AGENT_LABEL="Other / Universal" ;;
     *) print_warn "無効な選択。Universal設定を使用します。" ;;
   esac
   print_success "Agent: ${AGENT_LABEL}"
@@ -271,6 +273,9 @@ print_next_steps() {
   local step=2
   if [[ "$AGENT_LABEL" == "Google Antigravity" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md${RESET} — auto-configured"
+    step=$((step + 1))
+  elif [[ "$AGENT_LABEL" == "OpenAI Codex" ]]; then
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} is Codex's native config — no additional setup needed"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Cursor" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc${RESET} — auto-configured"

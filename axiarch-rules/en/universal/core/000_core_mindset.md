@@ -68,7 +68,7 @@ We strictly adhere to the following hierarchy of priorities in all decision-maki
 
 ### 1.1. Zero Tolerance
 *   **Bugs & Warnings**: We mandate **0** errors and warnings. Yellow text in the console is a shame.
-*   **Compatibility**: We guarantee full operation on all modern browsers, OSs, and devices. "It works on my machine" is forbidden.
+*   **Compatibility**: We mandate full operation on all modern browsers, OSs, and devices. "It works on my machine" is forbidden.
 
 ### 1.2. Omnichannel / Headless First Mandate
 *   **Web is just ONE Client**: When designing the entire system, the "Website" is just one of many clients.
@@ -154,7 +154,7 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
     *   **Security & Privacy**: Security holes, privacy leak risk, data loss risk.
     *   **Constitution Violation**: Serious violations of the Axiarch Constitution.
     *   **Critical Bugs**: Bugs that fatally affect service operation.
-*   **Standard Procedure**: If changes are needed for other reasons (feature integration, etc.), present the changes and reasons for prior approval, keep changes minimal, and guarantee safety through regression testing.
+*   **Standard Procedure**: If changes are needed for other reasons (feature integration, etc.), present the changes and reasons for prior approval, keep changes minimal, and ensure safety through regression testing.
 *   **New Feature Implementation Approach**: Prioritize "Isolation" by implementing in new files. Prefer "non-invasive" extensions using wrapper components or extension hooks rather than direct additions to existing code.
 
 ## 5. AI-Owner Collaboration Protocol

@@ -99,7 +99,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で設計・実戦検証されたものです。**他のAIエージェント**（Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
+> 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で設計・実戦検証されたものです。**他のAIエージェント**（OpenAI Codex, Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
 
 1.  **コピー (Copy)**: 以下のファイル/フォルダをプロジェクトのルートにコピーします。（`axiarch-prompts/` は任意です）
     ```bash
@@ -108,7 +108,7 @@
     ```
 
 2.  **AIエージェント用ポインター設定 (Agent Rules Pointer)**:
-    AIエージェントツール（Gemini CLI等）が`.agents/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`axiarch-rules/`を参照させます。
+    AIエージェントツール（Antigravity等）が`.agents/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`axiarch-rules/`を参照させます。
     ```bash
     # .agents/rules/ ディレクトリを作成
     mkdir -p /path/to/your/project/.agents/rules

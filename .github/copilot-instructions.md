@@ -34,7 +34,7 @@
 
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
 
-> 以下のファイルは `axiarch-rules/` **直下**に配置されている。必要に応じて参照する。
+> 以下のファイルは `axiarch-rules/{lang}/` 配下に配置されている。必要に応じて参照する。
 
 - **`axiarch-rules/{lang}/README.md`** — マスター目次（ナビゲーション用）
 - **`axiarch-rules/{lang}/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
@@ -69,7 +69,7 @@ Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
 
-> The following files are located **directly under** `axiarch-rules/`. Refer to them as needed.
+> The following files are located under `axiarch-rules/{lang}/`. Refer to them as needed.
 
 - **`axiarch-rules/{lang}/README.md`** — Master index (for navigation)
 - **`axiarch-rules/{lang}/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)

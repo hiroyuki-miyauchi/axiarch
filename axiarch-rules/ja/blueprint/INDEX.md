@@ -177,5 +177,5 @@ SRE、インシデント管理、運用要件。
 ---
 
 **Last Updated**: 2026-04-29
-**Version**: v1.2.0 — Universal と完全同型（Isomorphic）8フォルダ構成、YAGNI原則に基づく構造正規化
+**Version**: v1.3.0 — Universal と完全同型（Isomorphic）8フォルダ構成、YAGNI原則に基づく構造正規化
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

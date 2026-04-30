@@ -20,12 +20,12 @@
 - **LOADING_PROTOCOL.md / CRYSTALLIZATION_PROTOCOL.md** — ルール管理プロトコル
 - **Prompt Library** — 16本 × 2言語（JA/EN）の再利用可能プロンプトテンプレート
   - 役割別4フォルダ構成（`develop/`, `audit/`, `govern/`, `operate/`）
-- **`init.sh`** — インタラクティブセットアップスクリプト（Antigravity検証済み、Cursor/Claude Code/Copilot/Windsurf対応見込み）
+- **`init.sh`** — インタラクティブセットアップスクリプト（Antigravity検証済み、Codex/Cursor/Claude Code/Copilot/Windsurf対応見込み）
 - **`.github/CODEOWNERS`** — ガバナンス責任範囲の明確化
 - **`.github/workflows/lint.yml`** — Markdown + JA/EN対称性CI自動検証
 - **`llms.txt`** — AI検索エンジン最適化（GEO）
 - **`question.yml`** — Q&A用 Issue テンプレート
-- **Cursor / Claude Code / Copilot / Windsurf 向けセットアップガイド** — README内エージェント別手順 + `init.sh` 自動化
+- **Codex / Cursor / Claude Code / Copilot / Windsurf 向けセットアップガイド** — README内エージェント別手順 + `init.sh` 自動化
 - **AGENTS.md 起動プロトコル** — エージェント非依存の汎用 Boot Sequence Protocol
 - **GitHub Discussions** の有効化 — Q&A・ユースケース共有
 - **`llms-full.txt`** — AI検索エンジン向け完全仕様書（詳細版）
@@ -98,12 +98,12 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **LOADING_PROTOCOL.md / CRYSTALLIZATION_PROTOCOL.md** — Rule management protocols
 - **Prompt Library** — 16 templates × 2 languages (JA/EN), reusable prompt library
   - Role-based 4-folder structure (`develop/`, `audit/`, `govern/`, `operate/`)
-- **`init.sh`** — Interactive setup script (Antigravity verified, Cursor/Claude Code/Copilot/Windsurf expected)
+- **`init.sh`** — Interactive setup script (Antigravity verified, Codex/Cursor/Claude Code/Copilot/Windsurf expected)
 - **`.github/CODEOWNERS`** — Clear governance responsibility boundaries
 - **`.github/workflows/lint.yml`** — Automated Markdown + JA/EN symmetry CI
 - **`llms.txt`** — AI search engine optimization (GEO)
 - **`question.yml`** — Q&A issue template
-- **Setup guides for Cursor / Claude Code / Copilot / Windsurf** — Agent-specific setup in README + `init.sh` automation
+- **Setup guides for Codex / Cursor / Claude Code / Copilot / Windsurf** — Agent-specific setup in README + `init.sh` automation
 - **AGENTS.md boot protocol** — Agent-agnostic generic Boot Sequence Protocol
 - Enable **GitHub Discussions** — Q&A and use case sharing
 - **`llms-full.txt`** — Full spec document for AI search engines (detailed version)

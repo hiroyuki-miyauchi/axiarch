@@ -16,7 +16,7 @@
 >     *   **Action**: AI SHOULD create and edit these files to accumulate project context and lessons.
 
 > **Language Standard**:
-> All rules are provided in **Japanese and English** to ensure global scalability and perfect communication.
+> All rules are provided in **Japanese and English** to ensure global scalability and clear communication.
 
 ## 📂 Rule Modules
 
@@ -99,7 +99,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework was designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Through `AGENTS.md`, it is expected to work with **other AI agents**; however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
+> This framework was designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Through `AGENTS.md`, it is expected to work with **other AI agents** (OpenAI Codex, Cursor, Claude Code, GitHub Copilot, etc.); however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
 
 1.  **Copy**: Copy the following files/folders to your project root. (`axiarch-prompts/` is optional)
     ```bash
@@ -108,7 +108,7 @@
     ```
 
 2.  **Agent Rules Pointer Setup**:
-    If your AI agent tool (e.g., Gemini CLI) auto-loads `.agents/rules/`, place a **pointer file** to reference `axiarch-rules/`.
+    If your AI agent tool (e.g., Antigravity) auto-loads `.agents/rules/`, place a **pointer file** to reference `axiarch-rules/`.
     ```bash
     # Create .agents/rules/ directory
     mkdir -p /path/to/your/project/.agents/rules
