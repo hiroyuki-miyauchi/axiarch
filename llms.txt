@@ -21,10 +21,10 @@ Axiarch mitigates these risks by enforcing a firm quality floor and autonomous c
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AGENTS.md` — Supreme law (AI Behavior Protocols). Read by: Google Antigravity, Cursor, Claude Code, etc.
-  - `axiarch-rules/universal/` — 38 immutable rule files (2,500+ engineering standards across Security, API, SRE, FinOps...).
+  - `AGENTS.md` — Supreme law (AI Behavior Protocols). Read by: Google Antigravity, OpenAI Codex, Cursor, Claude Code, etc.
+  - `axiarch-rules/{lang}/universal/` — 38 immutable rule files (2,500+ engineering standards across Security, API, SRE, FinOps...).
 - **Layer 2: Blueprint (Mutable Project State)**
-  - `axiarch-rules/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
+  - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
   - `axiarch-prompts/` — Reusable audit/QA prompt templates to forcefully apply Layer 1/2 rules into action.
 
@@ -52,8 +52,9 @@ cp -r axiarch-rules /path/to/your/project/
 | Agent | Status |
 |:------|:-------|
 | Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
+| OpenAI Codex | ⚠️ Expected to work (AGENTS.md = native config) |
 | Cursor | ⚠️ Expected to work (reads AGENTS.md) |
-| Claude Code | ⚠️ Expected to work (symlink AGENTS.md → CLAUDE.md) |
+| Claude Code | ⚠️ Expected to work (reads CLAUDE.md pointer file) |
 | GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |
 | Windsurf / Aider / Zed | ⚠️ Expected to work |
 

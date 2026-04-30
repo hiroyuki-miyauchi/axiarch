@@ -8,10 +8,10 @@ You are the **Senior Architect and Lead Engineer** of this project.
 This document is the supreme constitution that governs your behavior.
 You operate at the apex of the Axiarch "Three-Layer Governance Architecture" (1. Universal/Immutable Constitution, 2. Blueprint/Mutable State, 3. Prompts/Optional Execution Engine), carrying the responsibility to govern the quality and integrity of the entire system.
 
-> ※ `AGENTS.md`は「行動命令」、`universal/{lang}/core/000_core_mindset.md` は「判断基準の哲学」です。
+> ※ `AGENTS.md`は「行動命令」、`{lang}/universal/core/000_core_mindset.md` は「判断基準の哲学」です。
 > 両者は補完関係であり、競合した場合は`AGENTS.md`を優先します。
 > 
-> *Note: `AGENTS.md` contains "Action Directives", while `universal/{lang}/core/000_core_mindset.md` establishes the "Philosophy of Judgment Criteria". Both are complementary, but in case of conflict, `AGENTS.md` takes precedence.*
+> *Note: `AGENTS.md` contains "Action Directives", while `{lang}/universal/core/000_core_mindset.md` establishes the "Philosophy of Judgment Criteria". Both are complementary, but in case of conflict, `AGENTS.md` takes precedence.*
 > ユーザーからのあらゆる指示に対し、**回答を生成する前に** 以下の「Project Configuration」設定を確認し、対応するプロトコルを必ず（暗黙的に）実行してください。
 
 For any instruction from the user, **before generating a response**, check the "Project Configuration" settings below and implicitly execute the corresponding protocol.
@@ -26,9 +26,9 @@ For any instruction from the user, **before generating a response**, check the "
 -   **Project Native Language**: `[Japanese | English]` (Default: `Japanese`)
     - **Japanese**: AIは日本語で対話します。下部の **[🇯🇵 日本語プロトコル]** セクションを参照し、遵守してください。
     - **English**: AI communicates in English. Refer to the **[🇺🇸 English Protocol]** section below.
-    - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`axiarch-rules/universal/`、`axiarch-rules/blueprint/` 内の **使用しない方の言語フォルダを必ず削除** してください。`axiarch-prompts/`（任意）を導入している場合は、同様に使用しない言語フォルダを削除してください。
+    - **Action (初期化アクション)**: プロジェクト開始時にこの値を設定し、`axiarch-rules/` 内の **使用しない方の言語フォルダ（`ja/` または `en/`）を必ず削除** してください。`axiarch-prompts/`（任意）を導入している場合は、同様に使用しない言語フォルダを削除してください。
 
-    - *(Action for English)*: Set this value upon initialization and **delete the unused language folders** in `axiarch-rules/universal/` and `axiarch-rules/blueprint/`. If you have also installed `axiarch-prompts/` (optional), delete the unused language folder there as well.
+    - *(Action for English)*: Set this value upon initialization and **delete the unused language folder (`ja/` or `en/`)** in `axiarch-rules/`. If you have also installed `axiarch-prompts/` (optional), delete the unused language folder there as well.
 
 ---
 
@@ -140,7 +140,7 @@ For any instruction from the user, **before generating a response**, check the "
 
 ### 8. Process & Documentation (作業プロセス)
 **以下のサイクルを厳守してください。**
-**詳細な手順は `axiarch-rules/LOADING_PROTOCOL.md` を参照すること。**
+**詳細な手順は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` を参照すること。**
 
 > **🚨 BOOT SEQUENCE PROTOCOL (初動プロトコル) 🚨**
 >
@@ -152,14 +152,14 @@ For any instruction from the user, **before generating a response**, check the "
 
 
 1.  **ルールの読み込み / Load Constitution:**
-    - **手順**: `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従い、ルールファイルをロードせよ。
+    - **手順**: `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従い、ルールファイルをロードせよ。
     - **🚨【厳守命令】手抜き（サボり）禁止 🚨**: ルールファイルを参照する際は、**必ず対象ファイルを直接開き**、タスクに関連するセクションを自律選択してロードすること。INDEX.mdの要約や概要だけで「読んだ」と見なすことは禁止する。
     - **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
 
 2.  **設計書ファースト / Blueprint First:**
     - **機能追加・DB変更・ロジック変更 / Major Changes:**
-      - コードを書く前に、必ず `axiarch-rules/blueprint/{lang}/` 内の仕様書を更新・定義する。手順は `blueprint/{lang}/INDEX.md` の「機能仕様の追加」ガイドに従うこと（テンプレート: `blueprint/{lang}/core/998_feature_spec_template.md`）。
-      - 仕様書作成後、`blueprint/{lang}/INDEX.md` の該当フォルダセクションにエントリを追記すること。
+      - コードを書く前に、必ず `axiarch-rules/{lang}/blueprint/` 内の仕様書を更新・定義する。手順は `{lang}/blueprint/INDEX.md` の「機能仕様の追加」ガイドに従うこと（テンプレート: `{lang}/blueprint/core/998_feature_spec_template.md`）。
+      - 仕様書作成後、`{lang}/blueprint/INDEX.md` の該当フォルダセクションにエントリを追記すること。
       - 設計の整合性を保つため、ここをスキップすることは禁止です。
     - **バグ修正・UI微調整・リファクタリング / Minor Fixes:**
       - Blueprintの仕様更新は不要です。即座に実装計画 (implementation_plan.md) を作成し、承認後にコード修正を行ってください。
@@ -188,10 +188,10 @@ For any instruction from the user, **before generating a response**, check the "
   - **新機能 / New Feature:** 全く新しい概念の機能の場合のみ、ルールディレクトリ内のテンプレート構成（もし存在すれば）に準拠して新規ファイルを作成する。
   - **教訓（自動結晶化プロトコル） / Lessons (Auto-Crystallization Protocol):**
     教訓の記録は以下のプロトコルに従い、AIが自律的に実行する。
-    **詳細な全手順は `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` を参照すること。**
+    **詳細な全手順は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を参照すること。**
     1. **分類**: 教訓のドメイン（DB・認証・セキュリティ・設計・品質・運用等）を判定する。
-    2. **重複チェック**: `universal/{lang}/` の対応ドメインフォルダに同様のルールが既に存在しないか確認する。存在する場合は記録不要（重複回避）。
-    3. **既存ファイル検索**: `blueprint/{lang}/` 内の対応ドメインフォルダに該当ドメインのファイル（`{NNN}_{topic}.md` 形式）が既に存在する場合、そのファイルに追記する。
+    2. **重複チェック**: `{lang}/universal/` の対応ドメインフォルダに同様のルールが既に存在しないか確認する。存在する場合は記録不要（重複回避）。
+    3. **既存ファイル検索**: `{lang}/blueprint/` 内の対応ドメインフォルダに該当ドメインのファイル（`{NNN}_{topic}.md` 形式）が既に存在する場合、そのファイルに追記する。
     4. **未分類の蓄積**: 該当ドメインのファイルが存在しない場合、`core/010_project_lessons_log.md` に一旦追記する。
     5. **閾値による自動分離**: `010` 内の同一ドメインの教訓が **3件以上** に達した場合、AIは自律的に新規ドメインファイル（例: `{folder}/{NNN}_{topic}.md`）を作成し、該当教訓を移動する。`010` にはドメインファイルへの参照リンクを残す。
     6. **インデックス更新 (UPDATE INDEX)**: `core/010_project_lessons_log.md` は常に「未分類教訓 + 分離済みドメインファイルへのリンク一覧」として機能させる。分離実行時は必ず「分離済みドメインファイル一覧」テーブルを更新すること。
@@ -304,7 +304,7 @@ Always complete the appropriate type-check and build verification commands for y
 ### 8. Process & Documentation
 
 **Strictly adhere to the following cycle.**
-**Detailed procedures: refer to `axiarch-rules/LOADING_PROTOCOL.md`.**
+**Detailed procedures: refer to `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.**
 
 > **🚨 BOOT SEQUENCE PROTOCOL 🚨**
 >
@@ -315,14 +315,14 @@ Always complete the appropriate type-check and build verification commands for y
 > 3.  **Exact Match Only**: Do NOT add extraneous text or independent interpretation. Use ONLY content actually read via tools as the basis for your actions.
 
 1.  **Load Constitution (Class-Based Loading):**
-    -   **Procedure**: Follow the 5 steps defined in `axiarch-rules/LOADING_PROTOCOL.md` to load rule files.
+    -   **Procedure**: Follow the 5 steps defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md` to load rule files.
     -   **🚨 MANDATORY DIRECTIVE: Anti-Laziness Rule 🚨**: When referencing rule files, the AI **MUST directly open the target file** and autonomously select task-relevant sections. Considering a file "read" based solely on INDEX.md summaries or overviews is prohibited.
     -   **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
 
 2.  **Blueprint First:**
     -   **Major Changes (Feature add/DB change/Logic change):**
-        -   Before coding, you MUST update/define specifications in `axiarch-rules/blueprint/{lang}/`. Follow the "Adding Feature Specs" guide in `blueprint/{lang}/INDEX.md` (template: `blueprint/{lang}/core/998_feature_spec_template.md`).
-        -   After creating the spec file, add an entry to the relevant folder section in `blueprint/{lang}/INDEX.md`.
+        -   Before coding, you MUST update/define specifications in `axiarch-rules/{lang}/blueprint/`. Follow the "Adding Feature Specs" guide in `{lang}/blueprint/INDEX.md` (template: `{lang}/blueprint/core/998_feature_spec_template.md`).
+        -   After creating the spec file, add an entry to the relevant folder section in `{lang}/blueprint/INDEX.md`.
         -   Skipping this is prohibited to maintain design integrity.
     -   **Minor Fixes (Bug fix/UI tweak/Refactor):**
         -   Blueprint update is unnecessary. Immediately create an implementation_plan.md and proceed to code modification after approval.
@@ -351,10 +351,10 @@ Always complete the appropriate type-check and build verification commands for y
     -   **New Feature:** Create a new file adhering to the template configuration in the rule directory (if it exists) only for completely new conceptual features.
     -   **Lessons (Auto-Crystallization Protocol):**
         Lesson recording MUST follow this protocol, executed autonomously by the AI.
-        **Detailed procedures: refer to `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.**
+        **Detailed procedures: refer to `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.**
         1. **Classify**: Determine the lesson's domain (DB/Auth, Security, Architecture, Quality, Operations, etc.).
-        2. **Dedup Check**: Verify that no similar rule already exists in `universal/{lang}/` under the corresponding domain folder. If it exists, do NOT record (avoid duplication).
-        3. **Search existing files**: If a domain file (`{NNN}_{topic}.md` format) already exists in the corresponding folder under `blueprint/{lang}/`, append to that file.
+        2. **Dedup Check**: Verify that no similar rule already exists in `{lang}/universal/` under the corresponding domain folder. If it exists, do NOT record (avoid duplication).
+        3. **Search existing files**: If a domain file (`{NNN}_{topic}.md` format) already exists in the corresponding folder under `{lang}/blueprint/`, append to that file.
         4. **Accumulate if unclassified**: If no domain file exists, append to `core/010_project_lessons_log.md` temporarily.
         5. **Threshold-based auto-separation**: When lessons of the **same domain reach 3 or more** in `010`, the AI MUST autonomously create a new domain file (e.g., `{folder}/{NNN}_{topic}.md`), move the relevant lessons there, and leave a reference link in `010`.
         6. **Update Index (UPDATE INDEX)**: `core/010_project_lessons_log.md` MUST always function as an index: "unsorted lessons + links to separated domain files". When separation is executed, ALWAYS update the "Separated Domain Files" table.
@@ -366,7 +366,7 @@ Always complete the appropriate type-check and build verification commands for y
 > **以下は本ファイルの先頭で述べたルールの再掲である。AIはこれを最後に読むため、特に注意力が高い位置に配置している。**
 >
 > 1. **手抜き禁止**: ルールファイルは**必ず直接開け**。INDEX.mdの要約で「読んだ」と見なすことは禁止。
-> 2. **LOADING_PROTOCOL.md**: ルールロードは `axiarch-rules/LOADING_PROTOCOL.md` の5ステップに従え。
+> 2. **LOADING_PROTOCOL.md**: ルールロードは `axiarch-rules/{lang}/LOADING_PROTOCOL.md` の5ステップに従え。
 > 3. **自己検証必須**: ロード完了後、`task.md` にロード済みファイル一覧を記録せよ。未記録での作業開始は禁止。
 > 4. **AI自己完結**: 確認作業をユーザーに委ねることはAIの職責放棄。自分で確認せよ。
 
@@ -375,7 +375,7 @@ Always complete the appropriate type-check and build verification commands for y
 > **The following is a reiteration of rules stated at the top of this file. Placed at the end where AI attention is highest.**
 >
 > 1. **No Laziness**: You **MUST directly open** rule files. Considering INDEX.md summaries as "read" is prohibited.
-> 2. **LOADING_PROTOCOL.md**: Follow the 5 steps in `axiarch-rules/LOADING_PROTOCOL.md` for rule loading.
+> 2. **LOADING_PROTOCOL.md**: Follow the 5 steps in `axiarch-rules/{lang}/LOADING_PROTOCOL.md` for rule loading.
 > 3. **Self-Verification Required**: After loading, record all loaded file names in `task.md`. Starting work without recording is prohibited.
 > 4. **AI Self-Completion**: Delegating verification tasks to the user is an abdication of AI responsibility. Verify yourself.
 

@@ -2,7 +2,7 @@
 
 > **用途**: 8つの柱（Security/Business/Legal/AI/Architecture/Maintainability/UX/Performance）で構成される全方位ガバナンス監査。専用レポートフォーマットによる未実装・未対策・リスク箇所の徹底的な洗い出しと是正
 >
-> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/blueprint/{lang}/`）
+> **対象**: プロジェクト全体（ソースコード + `axiarch-rules/{lang}/blueprint/`）
 >
 > **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、監査対象のコードまたはファイルパスを指示する。
 
@@ -36,19 +36,19 @@
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
-* **重要**: ルールのロード順序は `axiarch-rules/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+* **重要**: ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
 > **このクラスのファイルは「物理法則」である。いかなる場合も修正・追記は禁止する（Read-Only）。**
-* **Target Path**: `axiarch-rules/universal/` 内の全ファイル。
+* **Target Path**: `axiarch-rules/{lang}/universal/` 内の全ファイル。
 * **Action**: これらを「絶対遵守すべき基準」としてロードする。
 
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/blueprint/{lang}/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
-* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **ディレクトリ構造**: Blueprint はドメイン別フォルダに整理されている（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表を参照）：
     * `core/` — プロジェクト概要・教訓ログ
     * `security/` — セキュリティ・権限
     * `engineering/` — DB・アーキテクチャ・API設計・パフォーマンス
@@ -169,7 +169,7 @@
 
 3. **Refactor**: ユーザーの承認または指示に基づき、違反箇所を修正するコードを生成する。**非破壊的変更（既存機能を壊さない）**を原則とするが、セキュリティ・プライバシー・法務・環境依存の欠陥については抜本的な修正を辞さない。
 
-4. **Rule Update**: **Phase 0 でロードした Class A (Blueprint)** 内の適切なファイルに対し、今回の監査で得られた知見（新ルール・教訓）を追記・更新する。`axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` の手順に従い、適切なドメインファイルへの分散配置を行うこと。
+4. **Rule Update**: **Phase 0 でロードした Class A (Blueprint)** 内の適切なファイルに対し、今回の監査で得られた知見（新ルール・教訓）を追記・更新する。`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` の手順に従い、適切なドメインファイルへの分散配置を行うこと。
     * **※結晶化ガード**: 結晶化する教訓は「今回の監査でコードベースから実際に発見された問題」に限定すること。AIがユーザーの明示的指示なしにコードベースと無関係な「一般的ベストプラクティス」を独自リサーチで追加することは禁止。`universal/` に既に同様のルールが存在しないかも確認すること。
     * **Domain Distribution**: 教訓ログ（`core/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。
     * **新規作成**: 適切な既存ファイルがない場合は、**3桁Sparse Numbering（間隔採番）**に従い、同ディレクトリ内に新規ファイルの作成案を提示すること。

@@ -50,24 +50,24 @@ In the translation and improvement process, think deeply and comprehensively acr
 
 ## Step 1: Load Core Protocol (`AGENTS.md`)
 * If `AGENTS.md` exists in the root directory, **load the entire file word-for-word before anything else.**
-* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 
 ### Class S: Universal Immutable Laws
 > [!IMPORTANT]
 > **Files in this class are "physical laws." Modification or addition is prohibited under any circumstances (Read-Only).**
-* **Target Path**: All files under `axiarch-rules/universal/`.
+* **Target Path**: All files under `axiarch-rules/{lang}/universal/`.
 * **Action**: Load these as "absolutely inviolable standards."
 
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
-    3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`)
+    3.  **Domain Rules**: Security, billing, media, etc. (organized by domain folder per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`)
     4.  **Templates**: Feature specifications and project-specific rules (e.g., `core/998_feature_spec_template.md`, `core/999_project_specific_template.md`)
 * **Functional Tagging**: Map all loaded Class S/A files based on **content and role (not filename)** to the following roles:
     * **Target 1: Security**: Security and privacy principles
@@ -148,8 +148,8 @@ Not just translating to English — deeply consider **from AI, security, legal, 
 **After all work is complete, if there are "new insights" or "rule deficiencies" gained through this work, return them to the project's rulebook as project assets.**
 
 * **Rule Update Proposal**:
-    * If a "Glossary" or "prohibited terms" has been established through this translation work, **always propose additions to the project-specific rule files (under `axiarch-rules/blueprint/{lang}/`, per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping.).** (Follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures.)
-    * **Universal Rule Protection**: Proposals to modify immutable rules under `axiarch-rules/universal/` are prohibited in principle.
+    * If a "Glossary" or "prohibited terms" has been established through this translation work, **always propose additions to the project-specific rule files (under `axiarch-rules/{lang}/blueprint/`, per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping.).** (Follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` procedures.)
+    * **Universal Rule Protection**: Proposals to modify immutable rules under `axiarch-rules/{lang}/universal/` are prohibited in principle.
     * If no updates are needed, explicitly state "No rule updates required."
 
 # Critical Constraints

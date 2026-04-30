@@ -1,7 +1,7 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Version: 1.2.0 | License: Apache 2.0
+> Version: 1.3.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that mitigates quality drift,
@@ -10,7 +10,7 @@ It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
 or operator skill level.
 
-Designed and validated through hundreds of real production sessions on Google Antigravity. Expected to work with Cursor, Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified.
+Designed and validated through hundreds of real production sessions on Google Antigravity. Expected to work with OpenAI Codex, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified.
 
 ## What Problem Does Axiarch Solve?
 
@@ -172,14 +172,20 @@ All rules are immutable ("Constitution"). 2,500+ engineering standards.
   review/trust systems, tag-based search, interactive engine.
 - **100_market_validation.md**: Build Trap avoidance, JTBD, Pain Severity
   Scoring, TAM/SAM/SOM, Mom Test, MVP types, Sean Ellis Test, Retention
-  Curve, False PMF Signal protocol. 12 parts, 45 sections.
+  Curve, False PMF Signal protocol, Founder-Market Fit, Regulatory PMF,
+  Marketplace PMF, Platform & API PMF, PLG-SLG Hybrid PMF, AI-Native
+  Validation, PMF Decay & Erosion. 18 parts, 105+ sections, 120 rules.
 - **200_go_to_market.md**: Positioning Canvas, Category Creation, ICP,
-  PLG/SLG/MLG/CLG, Product Hunt protocol, GTM KPI. 10 parts, 38 sections.
+  PLG/SLG/MLG/CLG/ELG, Product Hunt protocol, GTM KPI, ABM 3 Tier,
+  Signal-Based GTM, Agentic GTM, Competitive Displacement. 15 parts,
+  80+ sections, 101 rules.
 - **300_revenue_monetization.md**: FinOps, Stripe, point economy, AI token
   economics, dynamic pricing, tax/invoice compliance.
 - **400_pricing_strategy.md**: Value-Based Pricing, Van Westendorp PSM,
-  Usage-based metrics, Freemium design, Tier design, A/B test ethics,
-  enterprise negotiation. 9 parts, 35 sections.
+  Usage-based metrics, Freemium design, Tier design, GBB Framework,
+  AI-Native Monetization, Agentic AI Pricing, Price Psychology,
+  Enterprise negotiation, Dynamic Pricing, Global multi-currency.
+  17 parts, 87 sections, 99 rules, 30 anti-patterns.
 - **500_growth_marketing.md**: PLG, SEO/GEO, onboarding, retention,
   ad feed integration, OGP, first-party data, KPI framework.
 - **600_brand_strategy.md**: Golden Circle, Brand Pyramid, Design Tokens,
@@ -330,8 +336,9 @@ Optional reusable prompt templates organized by role:
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
 | Google Antigravity | ✅ Verified | `.agents/rules/prompt_pointer.md` |
+| OpenAI Codex | ⚠️ Expected | `AGENTS.md` (native — no additional setup) |
 | Cursor | ⚠️ Expected | `.cursor/rules/axiarch.mdc` |
-| Claude Code | ⚠️ Expected | `CLAUDE.md` symlink → `AGENTS.md` |
+| Claude Code | ⚠️ Expected | `CLAUDE.md` pointer file |
 | GitHub Copilot | ⚠️ Expected | `.github/copilot-instructions.md` |
 | Windsurf | ⚠️ Expected | `.windsurfrules` |
 | Aider / Zed | ⚠️ Expected | Reads `AGENTS.md` directly |

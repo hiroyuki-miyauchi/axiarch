@@ -28,7 +28,7 @@ body:
     attributes:
       label: "対象ファイル / Affected File"
       description: "問題のあるファイルのパス / Path to the file with the issue"
-      placeholder: "e.g., axiarch-rules/universal/ja/300_engineering_standards.md"
+      placeholder: "e.g., axiarch-rules/ja/universal/engineering/000_engineering_standards.md"
     validations:
       required: true
 

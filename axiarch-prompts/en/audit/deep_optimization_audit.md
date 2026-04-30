@@ -41,18 +41,18 @@ In the audit and remediation process, think deeply and comprehensively across th
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
-* **Important**: Follow the 5-step loading order defined in `axiarch-rules/LOADING_PROTOCOL.md`.
+* **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 ### Class S: Universal Immutable Laws
 > [!IMPORTANT]
 > **Files in this class are "physical laws." Modification or addition is prohibited under any circumstances (Read-Only).**
-* **Target Path**: All files under `axiarch-rules/universal/`.
+* **Target Path**: All files under `axiarch-rules/{lang}/universal/`.
 * **Action**: Load these as "absolutely inviolable standards."
 
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/blueprint/{lang}/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md`.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized into domain folders (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`) per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -148,7 +148,7 @@ Thoroughly investigate the specified Focus Area for the following **7 Fatal Flaw
     * ※ Present not just the changes but enough context to understand them.
 3.  **Updated Rules**:
     * Additions/modifications to specific files within **Class A (Project Mutable Bylaws)** (in diff format or appended text).
-    * **※Important: Specify the target file path and follow `axiarch-rules/CRYSTALLIZATION_PROTOCOL.md` procedures for recording.**
+    * **※Important: Specify the target file path and follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` procedures for recording.**
 
 # Boot Sequence (Startup Behavior)
 

@@ -24,11 +24,11 @@ trigger: always_on
 
 #### Step 1: 最上位憲法 & 全体地図の把握（必ず最初に読む）
 - **`AGENTS.md`**（プロジェクトルート） — Axiarch System Protocol の最高法規。全ルールに優先する。
-- **`axiarch-rules/INDEX.md`** — 全ルールの詳細索引。以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
+- **`axiarch-rules/{lang}/INDEX.md`** — 全ルールの詳細索引。以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
 
 #### Step 2: ルールロード手順に従う
 
-**`axiarch-rules/LOADING_PROTOCOL.md`** に定義された5ステップに従い、ルールファイルをロードせよ。
+**`axiarch-rules/{lang}/LOADING_PROTOCOL.md`** に定義された5ステップに従い、ルールファイルをロードせよ。
 
 > ※ `{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/` に置換する。
 
@@ -38,15 +38,15 @@ trigger: always_on
 
 #### Step 3: ルートレベルの参照ファイル（必要時のみ）
 
-> 以下のファイルは `axiarch-rules/` **直下**に配置されている。必要に応じて参照する。
+> 以下のファイルは `axiarch-rules/{lang}/` 配下に配置されている。必要に応じて参照する。
 
-- **`axiarch-rules/README.md`** — マスター目次（ナビゲーション用）
-- **`axiarch-rules/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
+- **`axiarch-rules/{lang}/README.md`** — マスター目次（ナビゲーション用）
+- **`axiarch-rules/{lang}/compliance_matrix.md`** — 要件対照表（Universal/Blueprintの責務分離確認用）
 
 ### 🚫 禁止事項
 
 1. **`.agents/rules/` に新しいルールファイルを作成禁止。** ルールは全て `axiarch-rules/` に配置する。
-2. **Universal Rules（`axiarch-rules/universal/` 配下の全ファイル）を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
+2. **Universal Rules（`axiarch-rules/{lang}/universal/` 配下の全ファイル）を無断で編集禁止。** 「憲法改正」の明示的指示がある場合のみ許可。
 3. **この `prompt_pointer.md` のポインター構造を変更禁止。**
 
 ---
@@ -59,11 +59,11 @@ trigger: always_on
 
 #### Step 1: Supreme Constitution & Master Map (Always Read First)
 - **`AGENTS.md`** (project root) — The supreme law of the Axiarch System Protocol. Takes precedence over all other rules.
-- **`axiarch-rules/INDEX.md`** — Detailed index of all rules. Use as a **map to decide which files to read** in the following steps.
+- **`axiarch-rules/{lang}/INDEX.md`** — Detailed index of all rules. Use as a **map to decide which files to read** in the following steps.
 
 #### Step 2: Follow the Rule Loading Protocol
 
-Follow the 5 steps defined in **`axiarch-rules/LOADING_PROTOCOL.md`** to load rule files.
+Follow the 5 steps defined in **`axiarch-rules/{lang}/LOADING_PROTOCOL.md`** to load rule files.
 
 > Note: Replace `{lang}` with `ja/` or `en/` based on the `Project Native Language` setting in `AGENTS.md`.
 
@@ -73,13 +73,13 @@ Verify that user instructions do not contradict these.
 
 #### Step 3: Root-Level Reference Files (As Needed)
 
-> The following files are located **directly under** `axiarch-rules/`. Refer to them as needed.
+> The following files are located under `axiarch-rules/{lang}/`. Refer to them as needed.
 
-- **`axiarch-rules/README.md`** — Master index (for navigation)
-- **`axiarch-rules/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)
+- **`axiarch-rules/{lang}/README.md`** — Master index (for navigation)
+- **`axiarch-rules/{lang}/compliance_matrix.md`** — Compliance matrix (for Universal/Blueprint responsibility verification)
 
 ### 🚫 Prohibited Actions
 
 1. **DO NOT create new rule files in `.agents/rules/`.** All rules belong in `axiarch-rules/`.
-2. **DO NOT edit Universal Rules (any file under `axiarch-rules/universal/`) without explicit "Amend Constitution" instruction.**
+2. **DO NOT edit Universal Rules (any file under `axiarch-rules/{lang}/universal/`) without explicit "Amend Constitution" instruction.**
 3. **DO NOT alter the pointer structure of this `prompt_pointer.md`.**
