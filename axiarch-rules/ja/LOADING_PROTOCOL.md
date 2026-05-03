@@ -18,6 +18,18 @@
 
 ---
 
+## 🛡️ 強制執行機構（ENFORCEMENT MECHANISM）🛡️
+
+**Claude Code を採用するプロジェクトには `.claude/settings.json` の `UserPromptSubmit` フックが標準で配置される**。このフックは**毎ユーザープロンプト送信時**に system reminder を注入し、AI に AGENTS.md プロトコル（および本ファイルの BOOT SEQUENCE）の暗黙実行を強制する。
+
+このフックの削除・無効化は**「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。
+
+フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3原則を遵守すること。
+
+> 他エージェント（Antigravity / Codex / Cursor / Copilot / Windsurf）は固有のロード機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため本フックは不要。
+
+---
+
 ## Step 1: タスク分類
 
 ユーザーの指示を読み、以下のタスクタイプに分類せよ。複数該当する場合は全て選択する。

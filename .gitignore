@@ -59,8 +59,15 @@ Desktop.ini
 *.swp
 .history/
 
-# Claude Code worktrees & session data (never commit)
-.claude/
+# Claude Code: ignore session data and personal settings; allow committed team config (settings.json)
+.claude/worktrees/
+.claude/projects/
+.claude/settings.local.json
+
+# Axiarch per-task working documents (regenerated per session, never committed)
+task.md
+implementation_plan.md
+walkthrough.md
 
 # Social preview (uploaded via GitHub Settings, not committed)
 social-preview.png
