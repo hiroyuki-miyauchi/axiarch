@@ -27,7 +27,7 @@
 | VII | Zero Bug Policy | §7.0 – §7.3 | 4 |
 | VIII | Continuous Learning & Verification | §8.0 – §8.2 | 3 |
 | IX | Compatibility & Testing | §9.0 – §9.5 | 6 |
-| X | Git & Version Control | §10.0 – §10.6 | 7 |
+| X | CI/Deploy & Auxiliary Standards (※ pure git moved to `600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
 | XI | Documentation Ops | §11.0 – §11.2 | 3 |
 | XII | Engineering Quality Protocols | §12.1 – §12.12 | 12 |
 | XIII | Advanced Architectural Mandates | §13.1 – §13.15 | 15 |
@@ -40,7 +40,7 @@
 | XX | AI Agent & Orchestration Safety | §20.1 – §20.5 | 5 |
 | XXI | Privacy Engineering | §21.1 – §21.7 | 7 |
 | XXII | Advanced Runtime Security Hardening | §22.1 – §22.8 | 8 |
-| | | **Total** | **147** |
+| | | **Total** | **145** |
 
 ---
 
@@ -527,24 +527,14 @@
 
 ---
 
-## Part X: Git & Version Control
+## Part X: CI/Deploy & Auxiliary Standards
 
+> [!NOTE]
+> **v1.3.2 Restructure**: Daily Git workflow rules (Trunk-Based Development, Conventional Commits, Branch Hygiene, Worktree Hygiene, etc.) have been consolidated into `engineering/600_git_workflow.md`. This Part now retains only auxiliary CI/Deploy/DB-related rules transitionally (§10.4–10.6 are candidates for relocation to `engineering/200_supabase_architecture.md` or `engineering/300_web_frontend.md` in future releases).
 
-### 10.0. Trunk Based Development
-*   **Principle**: Eliminate long-lived branches. Merge short-lived branches to `main` frequently (daily).
-*   **Stacked Diffs**: Avoid giant PRs by stacking small, dependent PRs.
-*   **Branch Naming Standard**: Use `type/summary` format (e.g., `feat/user-profile`, `fix/login-bug`). Types: `feat`, `fix`, `refactor`, `chore`.
-
-### 10.1. Commit & PR Standards
-*   **Conventional Commits**: Follow `type(scope): subject` format strictly. Describe details in the project's native language.
-*   **Atomic Commits**: Each commit contains only "one logical change."
-*   **The Pull Request Template Protocol**: Create `.github/pull_request_template.md` with mandatory "Type of change," "How to test," "Screenshots."
+### 10.1. CI/Deployment Safety Standards
 *   **The CI Timeout Protocol**: All CI jobs must have `timeout-minutes: 10`. Builds exceeding 10 minutes indicate "design failure."
-*   **PR Size**: Keep PRs small. Direct push to `main` is prohibited; CI pass and review approval are mandatory.
-*   **Husky Guard (Deep Defense)**: Mandate `pre-push` hook to block direct pushes to `main`.
-*   **The Automated Git Hooks Protocol (Lint Staged)**: Mandate `lint-staged` for automatic `eslint --fix` and `prettier --write` on committed files.
 *   **The Red Button Checklist**: Before production deployment, mandatory verification of Legal, Security (RLS), FinOps (Spend Cap), and Data.
-*   **Branch Hygiene Mandate**: Delete merged branches immediately. Checking `git branch --merged` is an "engineer's breathing."
 *   **Omnichannel Check**: During review, prioritize checking "Is this also usable outside Web?"
 *   **Deployment Safety Protocol**:
     *   **Supreme Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
@@ -557,10 +547,6 @@
 ### 10.2. The IPv6 Deployment Protocol
 *   **Law**: Do not attempt to fix CI Supabase connection failures caused by IPv6 resolution issues through application code changes.
 *   **Action**: Establish connections via Connection Pooler (IPv4).
-
-### 10.3. The Branch Hygiene Mandate (Garbage Collection)
-*   **Law**: Abandoned branches are the #1 cause of environment-gap accidents.
-*   **Action**: Before final task notification, verify `git branch --merged` and delete merged branches.
 
 ### 10.4. The Migration Immutability Protocol (History Protection)
 *   **Law**: Using column names planned for future implementation but not yet applied via migration is prohibited.
@@ -1335,7 +1321,8 @@
 | Mutation Testing / Stryker | §9.3 | `quality/000_qa_testing.md` |
 | Property-Based Testing / Chaos / Litmus | §9.4 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
 | **Visual Regression Testing** | **§9.5** | `quality/000_qa_testing.md`, `engineering/300_web_frontend.md` |
-| Git / Version Control | §10.0 – §10.6 | `operations/400_site_reliability.md` |
+| Git Workflow (pure) | `engineering/600_git_workflow.md` (all parts) | — |
+| CI/Deploy Auxiliary | §10.1, §10.2, §10.4 – §10.6 | `operations/400_site_reliability.md` |
 | Documentation Ops | §11.0 – §11.2 | `operations/000_internal_tools.md` |
 | Feature Flags | §13.13 | `operations/400_site_reliability.md`, `quality/000_qa_testing.md` |
 | Mutation Integrity | §13.5 | `engineering/300_web_frontend.md` |

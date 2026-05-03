@@ -8,7 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/hiroyuki-miyauchi/axiarch?label=Version&color=brightgreen)](https://github.com/hiroyuki-miyauchi/axiarch/releases)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Rules](https://img.shields.io/badge/Universal_Rules-38_files-green.svg)](#-universal-rules-38-files--jaen)
+[![Rules](https://img.shields.io/badge/Universal_Rules-39_files-green.svg)](#-universal-rules-39-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
 [![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
@@ -149,7 +149,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 |:-----|:---|:---|
 | `AGENTS.md` | AI行動憲法（Google Antigravityで設計、他エージェントでも動作見込み） | AI Behavior Constitution (designed on Google Antigravity, compatible with other agents) |
 
-### 📚 Universal Rules (38 files × JA/EN)
+### 📚 Universal Rules (39 files × JA/EN)
 
 > Universal Rules はプロジェクトで使う可能性のある全技術領域のベストプラクティスライブラリです。AIは LOADING_PROTOCOL に従い、タスクに必要なファイルのみを選択的にロードします。使わない技術のルールが存在しても問題ありません。それ自体が、将来の採用時や未知の技術に直面したときの品質担保の源泉です。
 >
@@ -160,7 +160,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | Core & Mindset | 1 | 開発哲学、Supreme Directive | Development philosophy, Supreme Directive |
 | Product & Business | 9 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
 | Design & UX | 1 | デザインシステム、A11y | Design system, accessibility |
-| Engineering | 9 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS |
+| Engineering | 10 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS、**Git Workflow** | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS, **Git Workflow** |
 | AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
 | Operations | 7 | 内部ツール、営業・BizDev、HR、CX、SRE、インシデント、パートナーシップ | Internal tools, sales/BizDev, HR, CX, SRE, incident response, partnerships |
 | Security & Legal | 4 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産 | Security, data governance, OSS compliance, IP |
