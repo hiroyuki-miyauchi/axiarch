@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-05-04
 
 > [!IMPORTANT]
 > **Supreme Directive**
@@ -10,10 +10,13 @@
 > All cloud infrastructure design decisions MUST be based on the **Well-Architected Framework's 6 pillars** and the **IaC Only principle**.
 > Console manual operations (ClickOps) constitute a **serious violation** under this constitution.
 > **"Security is not an afterthought. Build it in from Day 0."**
-> **156 Sections.**
+> **"Cost is not a non-functional requirement. It is a business requirement."**
+> **"AI agents are subject to IAM. Apply the same least-privilege principle as humans."**
+> **164 Sections.**
 
 > [!NOTE]
-> **File Overview**: 155 sections, 240+ rules, 15 code snippets. Comprehensive coverage from AWS Well-Architected foundations to all major AWS services.
+> **File Overview**: 163 sections, 260+ rules, 20 code snippets. Comprehensive coverage from AWS Well-Architected foundations to all major AWS services.
+> §0 expanded with Core Philosophy (Directive 0.1–0.8) — Updated 2026-05-04.
 > Includes Quick Reference Index (Appendix A).
 
 ---
@@ -80,6 +83,37 @@
 ---
 
 ## 0. AWS Cloud Supreme Directives
+
+> [!NOTE]
+> **§0 Core Philosophy Overview**
+> This section defines **the philosophical foundation** for *why* we use AWS and *how* we use it.
+> Specific service configuration and implementation rules are delegated to individual sections (§1–§163).
+> All 8 principles in Directive 0.1–0.8 serve as the root of every design decision in this file.
+
+### The AWS Way
+
+We choose AWS not merely to "move to the cloud."
+We choose it **"to follow the AWS Well-Architected Way and maximize the benefits of cloud-native design."**
+
+Three foundational vows govern all design decisions:
+
+1. **Managed First**: Even when we *could* build and operate something ourselves, if an AWS managed service is a viable alternative, we **always** choose the managed service. "Pride in self-managed infrastructure" is the enemy of scale.
+2. **Event-Driven by Default**: Coupling between components is achieved through events (SQS/SNS/EventBridge), not synchronous API calls. This simultaneously delivers loose coupling, scalability, and fault tolerance.
+3. **Immutable Infrastructure**: The standard is to **replace** servers, not **reconfigure** them. Infrastructure is cattle, not pets.
+
+### Core Anti-Patterns (Philosophy-Level Prohibitions)
+
+| Anti-Pattern | Symptom | Root Cause | Remedy |
+|:-------------|:--------|:-----------|:-------|
+| **Lift & Shift Thinking** | Recreating on-premises architecture on EC2 | Misunderstanding cloud-native design | Mandate a migration plan to managed services |
+| **ClickOps Dependency** | Manually creating/modifying resources in console | Undeveloped IaC culture | Track IaC adoption rate weekly |
+| **Monolith in Container** | Containerizing monolith as-is | Failure to implement microservice design | Gradual decomposition via Strangler Fig Pattern |
+| **Security as Afterthought** | Adding security config last | DevSecOps not adopted | Apply zero-trust design from Day 0 |
+| **Cost Blindness** | Creating resources without cost awareness | Absent FinOps culture | Make cost alerts mandatory for all resources |
+| **Single Account Everything** | Running all environments in one AWS account | Misunderstanding multi-account strategy | Isolate via Organizations + Landing Zone |
+| **AI Agent = Human Exception** | Granting Admin permissions to AI agents | Failure to adapt to new threat models | Apply least-privilege per Directive 0.7 |
+
+---
 
 ### Supreme Directive 0.1: The Well-Architected Compliance Mandate
 -   **Law**: Compliance with the **AWS Well-Architected Framework's 6 pillars** is mandatory for all AWS infrastructure design, construction, and operations.
@@ -178,6 +212,82 @@
       }]
     }
     ```
+
+### Supreme Directive 0.5: The Platform Engineering Mandate
+-   **Law**: Infrastructure teams must not be "teams that manually create resources upon request." They must be **teams that build and provide a platform enabling development teams to self-service provision infrastructure**.
+-   **Philosophy**: To achieve "You build it, you run it," developers need a **Golden Path** — a set of approved, opinionated infrastructure blueprints they can deploy without worrying about infrastructure complexity.
+-   **Mandate**:
+    1.  **Golden Path Catalog**: Maintain a service catalog (AWS Service Catalog / Internal CDK Constructs) with approved infrastructure patterns (VPC configurations, ECS clusters, RDS clusters, etc.) available for self-service provisioning.
+    2.  **Paved Road Over Guard Rails**: Adopt a design philosophy of "making the right path easy" rather than "prohibiting wrong paths via rules." Prioritize building recommended configuration templates over restrictive SCPs.
+    3.  **IDP Metrics**: Measure Internal Developer Platform adoption (Golden Path usage rate / total deployments) quarterly. Target 80%+.
+    4.  **Backstage / Port Integration**: Integrate with developer portals (Backstage, etc.) to centralize the service catalog, documentation, and on-call information.
+-   **Anti-pattern**: Infrastructure teams continuing to operate Ticket-Driven (ticket → manual response). This is a hard ceiling on scale and a bottleneck for development velocity.
+
+### Supreme Directive 0.6: The Cost-as-a-Feature Mandate
+-   **Law**: Cloud costs are not "incidental infrastructure overhead." They must be defined and managed as **product requirements** from the design phase.
+-   **Philosophy**: Writing "code that works" is insufficient. Writing "code that generates profit" is true engineering. Code written without cost awareness is a time bomb that kills the business.
+-   **Mandate**:
+    1.  **Cost-per-Request Target**: Define a "cost-per-request target" for every API endpoint and batch job, and compare against actuals.
+    2.  **Budget as Code**: Manage `aws-budgets` configuration in IaC. Define budget-exceeded actions (alert → auto-stop) as code.
+    3.  **Cost Review Gate**: Add "cost impact assessment" as a mandatory item in PR reviews. PRs including new resource provisioning MUST NOT be merged without a monthly cost estimate.
+    4.  **Shared Cost Accountability**: Maintain per-team cost dashboards so everyone can see who is spending what. Eliminate the "someone else is paying" mentality.
+-   **Reference — Monthly Cost Estimation Checklist (Mandatory PR Item)**:
+    ```markdown
+    ## Cost Impact Assessment
+    - [ ] New resources: [service name] x [qty] ≈ $XXX/month
+    - [ ] Data transfer cost: ≈ $XXX/month
+    - [ ] Storage cost: ≈ $XXX/month
+    - [ ] Total additional cost: ≈ $XXX/month
+    - [ ] Impact on existing budget: [No impact / Requires budget adjustment]
+    ```
+-   **Anti-pattern**: Merging a `db.t3.medium` → `db.r6g.2xlarge` upgrade without a cost estimate. Differences of tens of thousands of dollars per month appear "without anyone noticing."
+
+### Supreme Directive 0.7: The Agentic AI Governance Mandate
+-   **Law**: When AI agents (Amazon Bedrock Agents / LangChain / AutoGen, etc.) invoke AWS APIs, **the same IAM least-privilege principle as human operators MUST be applied**. Excessive permission grants justified by "it's AI" or "it's automation" are strictly prohibited.
+-   **Philosophy**: AI agents are powerful, but if abused (e.g., via Prompt Injection), they can become the most dangerous attack vector. Treat agents as "external systems requiring verification," not "trusted human proxies."
+-   **Mandate**:
+    1.  **Agent-Specific IAM Role**: Create dedicated IAM roles for AI agents, permitting only the minimum AWS API actions that agent requires. Never grant AdminPolicy.
+    2.  **Scope Limitation**: Separate permissions per tool (Lambda) within Bedrock agent `ActionGroup`. Apply least-privilege policies to each Lambda.
+    3.  **Human-in-the-Loop Guardrail**: For actions involving writes, deletions, or IAM changes to production, prohibit autonomous agent execution and always insert a human approval step.
+    4.  **Prompt Injection Defense**: Do not trust user input processed by agents. Use Bedrock Guardrails `DENY` filters to detect and block prompt injection attempts.
+    5.  **Audit Trail**: Record all agent actions (tools invoked, APIs executed, results) in CloudTrail and CloudWatch Logs. Maintain full auditability.
+-   **Reference — Minimum-Privilege Lambda Execution Role for Bedrock Agent**:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "dynamodb:Query"
+        ],
+        "Resource": [
+          "arn:aws:s3:::agent-read-only-bucket/*",
+          "arn:aws:dynamodb:us-east-1:ACCOUNT_ID:table/AgentDataTable"
+        ]
+      }]
+    }
+    ```
+    > **🚫 Prohibited**: `"Action": "*", "Resource": "*"` — Granting Admin permissions to an AI agent creates a zero-day equivalent risk.
+
+### Supreme Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate
+-   **Law**: Always be aware of "which region your data resides in." Data sovereignty based on legal and regulatory requirements must be guaranteed from the design phase. Simultaneously, migration plans toward **Post-Quantum Cryptography (PQC)** in preparation for quantum computer-based decryption must be established now.
+-   **Philosophy**: The assumption that "current encryption is secure" is collapsing on a 5–10 year horizon. "Harvest Now, Decrypt Later (HNDL)" attacks are already a present-day threat. Encryption of long-term retention data is a problem of today.
+
+#### 8-A. Data Sovereignty
+-   **Mandate**:
+    1.  **Data Residency Map**: For every data category (PII, healthcare, financial, logs, etc.), maintain an explicit data residency map showing "storage region," "processing region," and "backup region."
+    2.  **AWS Region Restriction SCP**: Physically prohibit data storage/transfer to unauthorized regions via SCP (see Directive 0.4 SCP example).
+    3.  **GDPR / APPI Alignment**: For EU resident user data transfers outside the EU, and Japanese user data transfers abroad, document appropriate legal bases (SCCs, adequacy decisions, etc.).
+    4.  **Data Perimeter Enforcement**: Use AWS Organizations Data Perimeter (`aws:SourceAccount`/`aws:PrincipalOrgID` condition keys) to enforce boundaries preventing data exfiltration outside the organization. See §147 for details.
+
+#### 8-B. Post-Quantum Readiness
+-   **Mandate**:
+    1.  **PQC Inventory**: Inventory all currently used cryptographic algorithms (RSA, ECDSA, DH, etc.) and identify algorithms vulnerable to quantum computers.
+    2.  **TLS Hybrid Mode**: Track the readiness of AWS KMS / ACM / CloudFront for PQC hybrid TLS (NIST standards: ML-KEM / ML-DSA) and execute migration plans upon GA.
+    3.  **Long-Term Data Priority**: Prioritize PQC adoption for sensitive long-term retention data (10+ years). This carries the highest HNDL attack risk.
+    4.  **Crypto Agility**: Never hardcode cryptographic algorithms. Externalize them as configuration (Crypto Agility). Mandate designs where future algorithm changes can be implemented without code modifications.
+-   **Anti-pattern**: Deferring action because "quantum computers are not yet practical." HNDL attacks are executable today, and long-term retention data is already at risk.
 
 ---
 
