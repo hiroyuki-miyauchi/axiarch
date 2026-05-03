@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-24
+> 改定日: 2026-05-04
 
 > [!IMPORTANT]
 > **Supreme Directive（最高指令）**
@@ -10,10 +10,13 @@
 > クラウドインフラの全設計判断は **Well-Architected Framework の6ピラー** と **IaC Only 原則** に基づいて行わなければならない。
 > コンソール手動操作（ClickOps）は本憲法において **重大な違反** である。
 > **「セキュリティは後付けではない。Day 0から組み込め。」**
-> **156セクション構成。**
+> **「コストは非機能要件ではない。ビジネス要件そのものである。」**
+> **「AIエージェントもIAMの支配下に置け。人間と同じ最小権限原則を適用せよ。」**
+> **164セクション構成。**
 
 > [!NOTE]
-> **ファイル概要**: 155セクション・240+ルール・15コードスニペット構成。AWS Well-Architected基盤から全主要AWSサービスまで網羅。
+> **ファイル概要**: 163セクション・260+ルール・20コードスニペット構成。AWS Well-Architected基盤から全主要AWSサービスまで網羅。
+> §0にコア・フィロソフィー（Directive 0.1〜0.8）を拡充（2026-05-04 改定）。
 > サービス別逆引き索引（Appendix A）付き。
 
 ---
@@ -80,6 +83,37 @@
 ---
 
 ## 0. AWSクラウド至高の命令 (AWS Cloud Supreme Directives)
+
+> [!NOTE]
+> **§0 コア・フィロソフィー概要**
+> このセクションは「なぜAWSを使うのか」「どのような原則でAWSを使うのか」を定義する**哲学的基盤**である。
+> 具体的なサービス設定・実装ルールは各セクション（§1〜§163）に委ねる。
+> Directive 0.1〜0.8 の8原則すべてが、本ファイル全体の設計判断の根拠となる。
+
+### The AWS Way（AWS Wayの宣言）
+
+我々がAWSを選択するのは、単に「クラウドに移行するため」ではない。
+**「AWS Well-Architected Wayに従い、クラウドネイティブの恩恵を最大限に享受するため」**である。
+
+以下の3つの誓いを全設計判断の根拠とする：
+
+1. **Managed First（マネージドサービス優先の誓い）**: 自前で構築・運用できるものでも、AWSのマネージドサービスで代替できる場合は**必ず**マネージドサービスを選択する。「自前運用の誇り」はスケールの敵である。
+2. **Event-Driven by Default（イベント駆動設計の誓い）**: コンポーネント間の結合は、同期API呼び出しではなくイベント（SQS/SNS/EventBridge）を介して行う。これにより疎結合・スケーラビリティ・耐障害性を同時に実現する。
+3. **Immutable Infrastructure（イミュータブルインフラの誓い）**: サーバーの「設定変更」ではなく「置き換え」を標準とする。インフラはペットではなく家畜である。
+
+### コアアンチパターン（哲学レベルの禁止事項）
+
+| アンチパターン | 症状 | 根本原因 | 対処 |
+|:-------------|:-----|:--------|:----|
+| **Lift & Shift思考** | EC2上でオンプレと同じ構成を再現する | クラウドネイティブ設計の未理解 | マネージドサービスへの移行計画を義務化 |
+| **ClickOps依存** | コンソールで手動リソース作成・変更 | IaC文化の未定着 | IaC化率を週次メトリクスで追跡 |
+| **Monolith in Container** | モノリスをそのままコンテナ化 | マイクロサービス設計の未実施 | Strangler Fig Patternで段階的分解 |
+| **Security as Afterthought** | セキュリティ設定を最後に追加 | DevSecOpsの未導入 | ゼロトラスト設計をDay 0から実施 |
+| **Cost Blindness** | コスト意識なしのリソース作成 | FinOps文化の欠如 | 全リソースにコストアラートを必須化 |
+| **Single Account Everything** | 全環境を単一AWSアカウントで運用 | マルチアカウント戦略の未理解 | Organizations + Landing Zoneで分離 |
+| **AI Agent = Human Exception** | AIエージェントにAdmin権限を付与 | 新しい脅威モデルへの未対応 | Directive 0.7に従い最小権限を適用 |
+
+---
 
 ### Supreme Directive 0.1: The Well-Architected Compliance Mandate
 -   **Law**: AWSインフラの設計・構築・運用において、**AWS Well-Architected Framework の6ピラー**への準拠を義務付けます。
@@ -178,6 +212,82 @@
       }]
     }
     ```
+
+### Supreme Directive 0.5: The Platform Engineering Mandate（内部開発者プラットフォーム原則）
+-   **Law**: インフラチームは「リクエストを受けて手動でリソースを作成するチーム」ではなく、**開発チームがセルフサービスでインフラをプロビジョニングできるプラットフォームを構築・提供するチーム**でなければならない。
+-   **Philosophy**: "You build it, you run it" を実現するには、開発者がインフラの複雑さを意識せずに、承認された構成のみをデプロイできる**Golden Path（黄金の道）**が必要である。
+-   **Mandate**:
+    1.  **Golden Path Catalog**: サービスカタログ（AWS Service Catalog / Internal CDK Constructs）を整備し、承認済みのインフラパターン（VPC構成、ECSクラスター、RDSクラスター等）をセルフサービスで払い出せる状態にする。
+    2.  **Paved Road Over Guard Rails**: 「ルールで禁止する」のではなく「正しい道を歩きやすくする」設計思想を採用する。禁止事項のSCPより、推奨構成のテンプレートを優先して整備する。
+    3.  **IDP Metrics**: Internal Developer Platform の採用率（Golden Path利用率 / 全デプロイ数）を四半期ごとに測定し、80%以上を目標とする。
+    4.  **Backstage / Port Integration**: 開発者ポータル（Backstage等）との統合により、サービスカタログ・ドキュメント・オンコール情報を一元化する。
+-   **Anti-pattern**: インフラチームがTicket-Driven（チケット起票→手動対応）で運用し続けること。これはスケールの天井であり、開発速度のボトルネックである。
+
+### Supreme Directive 0.6: The Cost-as-a-Feature Mandate（コスト機能要件化原則）
+-   **Law**: クラウドコストは「インフラの付随コスト」ではなく、**プロダクトの機能要件**として設計段階から定義・管理しなければならない。
+-   **Philosophy**: 「動くコードを書く」だけでは不十分。「利益を生むコードを書く」ことが真のエンジニアリングである。コストを意識しないコードは、ビジネスを殺す時限爆弾である。
+-   **Mandate**:
+    1.  **Cost-per-Request Target**: 全APIエンドポイント・バッチジョブに「1リクエストあたりのコスト目標」を定義し、実測値と比較する。
+    2.  **Budget as Code**: `aws-budgets` の設定をIaCで管理し、予算超過時のアクション（アラート→自動停止）をコードで定義する。
+    3.  **Cost Review Gate**: PRレビューに「コスト影響評価」を必須項目として追加する。新規リソースのプロビジョニングを含むPRは、月額コスト試算なしにマージしてはならない。
+    4.  **Shared Cost Accountability**: チームごとのコストダッシュボードを整備し、誰がどれだけのコストを使っているかを可視化する。コストの「誰かが払ってくれる」意識を根絶する。
+-   **Reference — 月額コスト試算チェックリスト（PR必須項目）**:
+    ```markdown
+    ## コスト影響評価
+    - [ ] 新規リソース: [サービス名] x [数量] ≈ ¥XXX/月
+    - [ ] データ転送コスト: ≈ ¥XXX/月
+    - [ ] ストレージコスト: ≈ ¥XXX/月
+    - [ ] 合計追加コスト: ≈ ¥XXX/月
+    - [ ] 既存予算への影響: [影響なし / 要予算調整]
+    ```
+-   **Anti-pattern**: コスト試算なしに `db.t3.medium` → `db.r6g.2xlarge` へのアップグレードをマージすること。月数十万円の差異が「気づかないうちに」発生する。
+
+### Supreme Directive 0.7: The Agentic AI Governance Mandate（AIエージェントガバナンス原則）
+-   **Law**: Amazon Bedrock Agents / LangChain / AutoGen等のAIエージェントがAWS APIを呼び出す場合、**人間のオペレーターと同等のIAM最小権限原則を適用しなければならない**。「AIだから」「自動化だから」という理由での権限の過剰付与は厳禁とする。
+-   **Philosophy**: AIエージェントは強力だが、悪用されれば（Prompt Injection等）最大の攻撃経路になり得る。エージェントを「信頼できる人間の代理」ではなく「検証が必要な外部システム」として扱え。
+-   **Mandate**:
+    1.  **Agent-Specific IAM Role**: AIエージェント専用のIAMロールを作成し、そのエージェントが必要とする最小限のAWS APIアクションのみを許可する。絶対にAdminPolicyを付与しない。
+    2.  **Scope Limitation**: Bedrockエージェントの`ActionGroup`はツール（Lambda）単位で権限を分離し、各Lambdaには最小権限ポリシーを適用する。
+    3.  **Human-in-the-Loop Guardrail**: 本番環境への書き込み・削除・IAM変更を伴うアクションには、エージェントからの自動実行を禁止し、必ず人間の承認ステップを挟む。
+    4.  **Prompt Injection Defense**: エージェントが処理するユーザー入力を信頼しない。Bedrock Guardrailsの`DENY`フィルターでプロンプトインジェクション試行を検知・ブロックする。
+    5.  **Audit Trail**: エージェントの全アクション（呼び出したツール・実行したAPI・結果）をCloudTrailおよびCloudWatch Logsに記録し、監査可能な状態を維持する。
+-   **Reference — Bedrockエージェント用最小権限Lambda実行ロール例**:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "dynamodb:Query"
+        ],
+        "Resource": [
+          "arn:aws:s3:::agent-read-only-bucket/*",
+          "arn:aws:dynamodb:ap-northeast-1:ACCOUNT_ID:table/AgentDataTable"
+        ]
+      }]
+    }
+    ```
+    > **🚫 禁止**: `"Action": "*", "Resource": "*"` — AIエージェントへのAdmin権限付与はゼロデイ攻撃と同等のリスクを生む。
+
+### Supreme Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate（データ主権・量子耐性原則）
+-   **Law**: データは「どのリージョンに存在するか」を常に意識し、法的・規制的要件に基づいたデータ主権を設計段階から保証しなければならない。同時に、量子コンピューターによる暗号解読に備えた**Post-Quantum Cryptography（PQC）**への移行計画を今から策定しなければならない。
+-   **Philosophy**: 「現在の暗号は安全」という前提は、5〜10年のスパンで崩壊しつつある。「Harvest Now, Decrypt Later（HNDL）」攻撃はすでに現実の脅威である。長期保存データの暗号化は今日の問題である。
+
+#### 8-A. データ主権（Data Sovereignty）
+-   **Mandate**:
+    1.  **Data Residency Map**: 全データカテゴリ（PII、医療、財務、ログ等）について「保存リージョン」「処理リージョン」「バックアップリージョン」を明示したデータ残留マップを整備・維持する。
+    2.  **AWS Region Restriction SCP**: 許可リージョン外へのデータ保存・転送を、SCPで物理的に禁止する（Directive 0.4のSCP例を参照）。
+    3.  **GDPR / APPI Alignment**: EU在住ユーザーデータのEU外転送、日本国内ユーザーデータの国外転送には、適切な法的根拠（SCC、十分性決定等）を文書化する。
+    4.  **Data Perimeter Enforcement**: AWS Organizations Data Perimeter（`aws:SourceAccount`/`aws:PrincipalOrgID`条件キー）でデータが組織外に流出しないよう境界を強制する。詳細は§147参照。
+
+#### 8-B. 量子耐性暗号準備（Post-Quantum Readiness）
+-   **Mandate**:
+    1.  **PQC Inventory**: 現在使用している全暗号アルゴリズム（RSA、ECDSA、DH等）をインベントリ化し、量子コンピューターに脆弱なアルゴリズムを特定する。
+    2.  **TLS Hybrid Mode**: AWS KMS・ACM・CloudFrontのPQCハイブリッドTLS（NIST標準: ML-KEM / ML-DSA）の対応状況を追跡し、GAと同時に移行計画を実行する。
+    3.  **Long-Term Data Priority**: 機密性の高い長期保存データ（10年以上）は最優先でPQC対応する。HNDL攻撃リスクが最も高いため。
+    4.  **Crypto Agility**: 暗号アルゴリズムをハードコードせず、設定として外部化する（Crypto Agility）。将来のアルゴリズム変更をコード修正なしに実施できる設計を義務化する。
+-   **Anti-pattern**: 「量子コンピューターはまだ実用化されていない」を理由に対応を先送りすること。HNDL攻撃は今すぐ実行可能であり、長期保存データはすでにリスク下にある。
 
 ---
 

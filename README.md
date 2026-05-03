@@ -252,6 +252,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.github/copilot-instructions.md` | 🔶 **Copilot のみ** / **Copilot only** | Copilot固有のポインター。`init.sh` で自動コピー / Copilot-specific pointer. Auto-copied by `init.sh` |
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
+| `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 🆕 v1.4.0: `UserPromptSubmit` 強制執行フック。`init.sh` で自動コピー / Enforcement hook. Auto-copied by `init.sh` |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -268,8 +269,25 @@ Designed and validated through hundreds of real production sessions on [Google A
 |:-----------|:------------|:------|:-------|:------------|:--------|:---------|
 | 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` ポインター配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `cp CLAUDE.md /path/to/project/` | ❌ 不要 | ❌ 不要 |
+| 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
 | 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
+
+### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.4.0+)
+
+> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、`UserPromptSubmit` フックが**毎ユーザープロンプト送信時**に AGENTS.md プロトコルの暗黙実行を強制します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題を物理的に防止する仕組みです。
+>
+> **EN**: Claude Code projects ship with `.claude/settings.json` containing a `UserPromptSubmit` hook that compels implicit AGENTS.md protocol execution **on every user prompt**. This physically prevents the AI from skipping LOADING_PROTOCOL just because a prompt feels "casual."
+
+| ファイル / File | 役割 / Role | コミット / Commit |
+|:----------------|:------------|:------------------|
+| `.claude/settings.json` | チーム共有の Axiarch 強制フック / Team-shared Axiarch enforcement hook | ✅ **必須** / **Required** |
+| `.claude/settings.local.json` | 個人の権限・許可設定 / Personal permissions | ❌ gitignored |
+| `.claude/worktrees/`, `.claude/projects/` | Claude Code セッションデータ / Claude Code session data | ❌ gitignored |
+
+> [!CAUTION]
+> **JA**: このフックの**削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要です。詳細は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` の「強制執行機構」セクションを参照。
+>
+> **EN**: **Removing or disabling this hook is a constitution-amending destructive change** requiring explicit owner approval. See "Enforcement Mechanism" in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 ### 1. プロジェクトにコピー / Copy to your project
 
@@ -307,8 +325,12 @@ cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/
 
 # === Claude Code ===
 # Claude CodeはCLAUDE.mdをネイティブに読むのでポインターをコピー。
+# v1.4.0以降は強制執行フック (.claude/settings.json) も配置する。
 # Claude Code reads CLAUDE.md natively — copy the pointer file.
+# v1.4.0+: also place the enforcement hook (.claude/settings.json).
 cp CLAUDE.md /path/to/your/project/CLAUDE.md
+mkdir -p /path/to/your/project/.claude
+cp .claude/settings.json /path/to/your/project/.claude/settings.json
 
 # === Cursor ===
 # ネイティブ設定ファイルが同梱されています。init.sh で自動コピーされます。
@@ -368,6 +390,8 @@ rm -rf axiarch-prompts/ja  # For English projects
 your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
  ├── CLAUDE.md                    ← Claude Code のみ（ポインター） / Claude Code only (pointer)
+ ├── .claude/                     ← Claude Code のみ / Claude Code only
+ │    └── settings.json           ← 🆕 v1.4.0: UserPromptSubmit 強制執行フック（コミット必須） / Enforcement hook (must commit)
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer

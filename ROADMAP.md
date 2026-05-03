@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.3.2  
+> **現在の安定版 / Current Stable**: v1.4.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -74,7 +74,18 @@
 
 ---
 
-### 🔮 v1.4.0 — エコシステム & 自動化（検討中）
+### ✅ v1.4.0 — Claude Code 強制執行機構（UserPromptSubmit Hook）（2026-05-04）
+
+- **`.claude/settings.json` 新規同梱** — Claude Code 採用プロジェクトに `UserPromptSubmit` フックを標準配置。**毎ユーザープロンプト送信時**にバイリンガル system reminder を注入し、AI に AGENTS.md プロトコルと LOADING_PROTOCOL の BOOT SEQUENCE 実行を物理的に強制
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` に「強制執行機構」セクション追加** — フック削除を「憲法改正」レベルの破壊的変更と明記
+- **`CLAUDE.md` の `@AGENTS.md` import 削除** — フック経由の Read ロード（`view_file` 履歴付与・`task.md` 記録発火）に統一し、Anti-Laziness Rule との整合を確保
+- **`.gitignore` 細分化** — `.claude/` 全無視を `worktrees/` / `projects/` / `settings.local.json` の3項目に分解。チーム共有設定 `.claude/settings.json` をコミット可能に
+- **`init.sh` 拡張** — `SETUP_CLAUDE` 分岐で `.claude/settings.json` を配布、非 Claude Code 選択時のみ `.claude/` 削除（既存採用者の `worktrees/` 温存）
+- **後方互換性 100%** — 既存 v1.3.x 採用プロジェクトはフック不在でも従来通り動作（自律遵守モード）
+
+---
+
+### 🔮 v1.5.0 — エコシステム & 自動化（検討中）
 
 - **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
@@ -170,7 +181,18 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
-### 🔮 v1.4.0 — Ecosystem & Automation (Under Consideration)
+### ✅ v1.4.0 — Claude Code Enforcement Mechanism (UserPromptSubmit Hook) (2026-05-04)
+
+- **NEW `.claude/settings.json`** — Claude Code projects ship with a standard `UserPromptSubmit` hook that injects a bilingual system reminder **on every user prompt submission**, physically compelling the AI to execute the AGENTS.md protocol and LOADING_PROTOCOL BOOT SEQUENCE
+- **NEW "Enforcement Mechanism" section in `axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — Declares hook removal as a constitution-amending destructive change
+- **Removed `@AGENTS.md` import from `CLAUDE.md`** — Unified loading via the hook-driven Read flow (preserves `view_file` history and triggers `task.md` recording), aligning with the Anti-Laziness Rule
+- **Refined `.gitignore`** — Split `.claude/` blanket ignore into `worktrees/` / `projects/` / `settings.local.json`, allowing the team-shared `.claude/settings.json` to be committed
+- **Extended `init.sh`** — `SETUP_CLAUDE` branch now distributes `.claude/settings.json`; `.claude/` cleanup runs only for non-Claude-Code agents (preserves existing adopters' `worktrees/`)
+- **100% Backwards Compatible** — Existing v1.3.x adopters work without the hook (autonomous-enforcement mode)
+
+---
+
+### 🔮 v1.5.0 — Ecosystem & Automation (Under Consideration)
 
 - **Axiarch CLI** — Automated setup via `npx axiarch-init`
 - **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)

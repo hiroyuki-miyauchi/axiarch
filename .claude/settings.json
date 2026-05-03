@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[AXIARCH BOOT] Before responding, you MUST implicitly execute AGENTS.md (supreme law) — Project Configuration + protocols, including LOADING_PROTOCOL.md BOOT SEQUENCE. No skipping. / 応答前に AGENTS.md (最高法規) の Project Configuration とプロトコルを必ず暗黙実行せよ。LOADING_PROTOCOL.md の BOOT SEQUENCE 含む。スキップ禁止。'"
+          }
+        ]
+      }
+    ]
+  }
+}

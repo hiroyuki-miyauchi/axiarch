@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.3.2"
+AXIARCH_VERSION="1.4.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -219,6 +219,14 @@ copy_files() {
        "$TARGET_DIR/CLAUDE.md" 2>/dev/null || \
       print_warn "CLAUDE.md not found — skipping."
     print_info "Copied: CLAUDE.md (Claude Code)"
+
+    # === Claude Code: enforcement hook (v1.4.0+) ===
+    if [[ -f "$SOURCE_DIR/.claude/settings.json" ]]; then
+      mkdir -p "$TARGET_DIR/.claude"
+      cp "$SOURCE_DIR/.claude/settings.json" \
+         "$TARGET_DIR/.claude/settings.json"
+      print_info "Copied: .claude/settings.json (UserPromptSubmit enforcement hook)"
+    fi
   fi
 
   if $SETUP_COPILOT; then
@@ -248,6 +256,14 @@ copy_files() {
   if ! $SETUP_CLAUDE; then
     rm -f "$TARGET_DIR/CLAUDE.md" 2>/dev/null && \
       print_info "Removed: CLAUDE.md (not needed for ${AGENT_LABEL})"
+    # Only remove the Axiarch-distributed enforcement hook config; preserve user session data (worktrees/, projects/, settings.local.json)
+    rm -f "$TARGET_DIR/.claude/settings.json" 2>/dev/null && \
+      print_info "Removed: .claude/settings.json (not needed for ${AGENT_LABEL})"
+    # Remove .claude/ directory only if now empty (preserves user data)
+    if [[ -d "$TARGET_DIR/.claude" ]] && [ -z "$(ls -A "$TARGET_DIR/.claude" 2>/dev/null)" ]; then
+      rmdir "$TARGET_DIR/.claude" 2>/dev/null && \
+        print_info "Removed: empty .claude/ directory"
+    fi
   fi
   if ! $SETUP_COPILOT; then
     rm -f "$TARGET_DIR/.github/copilot-instructions.md" 2>/dev/null && \

@@ -18,6 +18,18 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 ---
 
+## 🛡️ ENFORCEMENT MECHANISM 🛡️
+
+**Projects adopting Claude Code ship with a `UserPromptSubmit` hook in `.claude/settings.json`**. The hook fires **on every user prompt submission**, injecting a system reminder that compels the AI to implicitly execute the AGENTS.md protocol (including this file's BOOT SEQUENCE).
+
+Removing or disabling this hook is a **constitution-amending destructive change** requiring explicit owner approval.
+
+When the hook is not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
+
+> Other agents (Antigravity / Codex / Cursor / Copilot / Windsurf) have native loading mechanisms (e.g., Antigravity auto-loads `.agents/rules/`) and do not require this hook.
+
+---
+
 ## Step 1: Task Classification
 
 Read the user's instruction and classify it into the following task types. Select all that apply.

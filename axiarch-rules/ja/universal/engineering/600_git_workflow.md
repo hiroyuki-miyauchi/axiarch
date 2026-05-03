@@ -195,8 +195,11 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 - **Required `.gitignore` Entries**:
 
     ```gitignore
-    # Claude Code worktrees & session data (never commit)
-    .claude/
+    # Claude Code: ignore session data and personal settings only
+    # (do NOT blanket-ignore .claude/ — it may contain team-shared config that should be committed)
+    .claude/worktrees/
+    .claude/projects/
+    .claude/settings.local.json
 
     # Antigravity session data (if applicable)
     .agents/sessions/
@@ -246,6 +249,6 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 ---
 
-**Last Updated**: 2026-05-03 (v1.3.2)
+**Last Updated**: 2026-05-04 (v1.4.0)
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Engineering — Git Workflow & Repository Hygiene
