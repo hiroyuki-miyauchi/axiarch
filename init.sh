@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.3.0"
+AXIARCH_VERSION="1.3.2"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -187,6 +187,14 @@ copy_files() {
     [[ -d "$UNUSED_PROMPT_DIR" ]] && rm -rf "$UNUSED_PROMPT_DIR" && \
       print_info "Removed unused: axiarch-prompts/${UNUSED_LANG}"
     print_info "Copied: axiarch-prompts/${LANG_CODE}/"
+  fi
+
+  # === Required: scripts/ (utility scripts incl. .git/config hygiene) ===
+  if [[ -d "$SOURCE_DIR/scripts" ]]; then
+    mkdir -p "$TARGET_DIR/scripts"
+    cp -R "$SOURCE_DIR/scripts/." "$TARGET_DIR/scripts/"
+    chmod +x "$TARGET_DIR/scripts/"*.sh 2>/dev/null || true
+    print_info "Copied: scripts/ (incl. check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===

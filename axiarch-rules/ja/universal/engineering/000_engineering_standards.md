@@ -27,7 +27,7 @@
 | VII | ゼロバグ・ポリシー | §7.0 – §7.3 | 4 |
 | VIII | 継続的学習と検証 | §8.0 – §8.2 | 3 |
 | IX | 互換性とテスト | §9.0 – §9.5 | 6 |
-| X | Gitとバージョン管理 | §10.0 – §10.6 | 7 |
+| X | CI/Deploy & 補助規約 (※ pure git は `600_git_workflow.md` へ移動) | §10.1, §10.2, §10.4 – §10.6 | 5 |
 | XI | ドキュメント運用 | §11.0 – §11.2 | 3 |
 | XII | エンジニアリング品質プロトコル | §12.1 – §12.12 | 12 |
 | XIII | 高度アーキテクチャ原則 | §13.1 – §13.15 | 15 |
@@ -40,7 +40,7 @@
 | XX | AIエージェント・オーケストレーション安全基準 | §20.1 – §20.5 | 5 |
 | XXI | **プライバシー・エンジニアリング** | **§21.1 – §21.7** | **7** |
 | XXII | **ランタイム・セキュリティ強化** | **§22.1 – §22.8** | **8** |
-| | | **合計** | **147** |
+| | | **合計** | **145** |
 
 ---
 
@@ -560,23 +560,14 @@
 
 ---
 
-## Part X: Git とバージョン管理 (Git & Version Control)
+## Part X: CI/Deploy & 補助規約 (CI/Deployment & Auxiliary Standards)
 
-### 10.0. Trunk Based Development（トランクベース開発）
-*   **原則**: 長寿命のブランチは廃止し、短命のブランチから `main` へ頻繁に（毎日）マージします。
-*   **Stacked Diffs**: 巨大なPRを避け、依存関係のある小さなPRを積み重ねる手法を推奨します。
-*   **Branch Naming Standard**: ブランチ名は `type/summary` 形式で統一します（例: `feat/user-profile`, `fix/login-bug`）。Types: `feat`, `fix`, `refactor`, `chore`。
+> [!NOTE]
+> **v1.3.2 構造変更**: 日常的な Git workflow（Trunk-Based Development、Conventional Commits、Branch Hygiene、Worktree Hygiene 等）は `engineering/600_git_workflow.md` へ集約されました。本Partは CI/Deploy/DB 関連の補助的なルールのみを暫定的に保持しています（§10.4–10.6 は今後 `engineering/200_supabase_architecture.md` や `engineering/300_web_frontend.md` への再配置を検討予定）。
 
-### 10.1. コミット & PR基準 (Commit & PR Standards)
-*   **Conventional Commits**: `type(scope): subject` 形式を厳守します。本文にはプロジェクト設定言語で詳細を記述します。
-*   **Atomic Commits**: 1つのコミットには「1つの論理的変更」のみを含めます。
-*   **The Pull Request Template Protocol**: `.github/pull_request_template.md` を作成し、"Type of change", "How to test", "Screenshots" の3項目は必須です。
+### 10.1. CI/Deployment Safety Standards (CI・デプロイ安全基準)
 *   **The CI Timeout Protocol**: すべてのCIジョブには必ず `timeout-minutes: 10` を設定してください。10分を超えるビルドは「設計ミス」とみなします。
-*   **100行ルール**: PRは小さく保ちます。`main` への直接プッシュは禁止し、CI通過とレビュー承認を必須とします。
-*   **Husky Guard (Deep Defense)**: 全てのプロジェクトにおいて、`pre-push` フックによる `main` ブランチへの直接プッシュ禁止を義務とします。
-*   **The Automated Git Hooks Protocol (Lint Staged)**: `lint-staged` を導入し、コミットされるファイルに対して自動的に `eslint --fix` と `prettier --write` を実行することを義務付けます。
 *   **The Red Button Checklist**: 本番デプロイ直前には、Legal、Security（RLS）、FinOps（Spend Cap）、Dataの指差し確認を義務付けます。
-*   **Branch Hygiene Mandate**: マージ済みのブランチは即時削除。`git branch --merged` の確認をエンジニアの呼吸としてください。
 *   **Omnichannel Check**: レビュー時は「Web以外でも利用可能か？」を最優先で確認します。
 *   **Deployment Safety Protocol**:
     *   **Supreme Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
@@ -589,10 +580,6 @@
 ### 10.2. The IPv6 Deployment Protocol
 *   **Law**: CI環境において、Supabase (PostgreSQL) への接続が IPv6 名前解決の不備により失敗する現象を、アプリケーションのコード修正で解決しようとしてはなりません。
 *   **Action**: 必ず Connection Pooler (IPv4) 経由の接続を確立してください。
-
-### 10.3. The Branch Hygiene Mandate (Garbage Collection)
-*   **Law**: 作業ブランチを放置することは、環境差異による事故の最大の原因です。
-*   **Action**: タスク完了報告の直前に、必ず `git branch --merged` を確認し、マージ済みの作業ブランチを削除してください。
 
 ### 10.4. The Migration Immutability Protocol (History Protection)
 *   **Law**: 将来の実装予定にあるカラム名を、実際のDBマイグレーション完了前にコードで使用することは禁止です。
@@ -1361,7 +1348,8 @@
 | ゼロバグ・ポリシー | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
 | Testing Trophy / テスト戦略 | §9.3 | `quality/000_qa_testing.md` |
 | Property-Based Testing / Chaos / Litmus | §9.4 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
-| Git / バージョン管理 | §10.0 – §10.6 | `operations/400_site_reliability.md` |
+| Git Workflow（pure） | `engineering/600_git_workflow.md` 全パート | — |
+| CI/Deploy 補助 | §10.1, §10.2, §10.4 – §10.6 | `operations/400_site_reliability.md` |
 | ドキュメント運用 | §11.0 – §11.2 | `operations/000_internal_tools.md` |
 | Feature Flags | §13.13 | `operations/400_site_reliability.md`, `quality/000_qa_testing.md` |
 | ミューテーション整合性 | §13.5 | `engineering/300_web_frontend.md` |

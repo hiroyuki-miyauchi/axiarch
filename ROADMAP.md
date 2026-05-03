@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.3.1  
+> **現在の安定版 / Current Stable**: v1.3.2  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -61,6 +61,16 @@
 - **`CLAUDE.md`** — `@AGENTS.md` import 構文追加により、Claude Code 起動時に AGENTS.md（最高法規・9プロトコル）全文が自動 inline 注入される機構を実装
 - **物理的 BOOT SEQUENCE 強制** — AI の自律ロード行動に依存せず、プロトコル遵守を初動から保証
 - **後方互換性 100%** — 他エージェント（Cursor / Copilot / Windsurf / Antigravity / Codex）には影響なし
+
+---
+
+### ✅ v1.3.2 — Universal Engineering 600 新設 + Git Workflow Refactor + Worktree Hygiene（2026-05-03）
+
+- **`engineering/600_git_workflow.md` 新設** — 日常的な Git 運用（Trunk-Based / Commit & PR / Branch Hygiene / **Worktree Hygiene Protocol** / Repository Hygiene）をドメイン非依存の Universal Rule として集約（5パート・18ルール）
+- **`.git/config` 汚染問題（Antigravity Go ベース language server クラッシュ）の恒久対策** — `[extensions] worktreeConfig = true` 残留検出・修復プロトコルを Universal に永続化
+- **`scripts/check-git-config-clean.sh` 新規配布** — 自動検出・修復スクリプト（`--fix` / `--quiet` / `--full-clean` モード対応）。`init.sh` 経由で全採用プロジェクトに自動配布
+- **構造正規化** — `engineering/000` Part X から pure-git workflow を 600 へ抽出（§10.0 / §10.3 / §10.1 部分移動）
+- **後方互換性 100%** — 既存採用プロジェクトは `git pull` で新ルールと script を取得。3シナリオ（Claude Code 単体 / Antigravity 単体 / 並行使用）全てで Pareto-improvement
 
 ---
 
@@ -147,6 +157,16 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **`CLAUDE.md`** — Added `@AGENTS.md` import syntax to auto-inline AGENTS.md (Supreme Law / 9 protocols) into the system prompt at Claude Code session start
 - **Physical BOOT SEQUENCE Enforcement** — Protocol compliance guaranteed from the first turn, no longer depending on AI's autonomous file-loading behavior
 - **100% Backwards Compatible** — No effect on other agents (Cursor / Copilot / Windsurf / Antigravity / Codex)
+
+---
+
+### ✅ v1.3.2 — Universal Engineering 600 + Git Workflow Refactor + Worktree Hygiene (2026-05-03)
+
+- **NEW `engineering/600_git_workflow.md`** — Consolidates daily Git operations (Trunk-Based / Commit & PR / Branch Hygiene / **Worktree Hygiene Protocol** / Repository Hygiene) as a domain-agnostic Universal Rule (5 parts, 18 rules)
+- **Permanent fix for `.git/config` pollution problem (Antigravity Go-based language server crash)** — Detection and repair protocol for `[extensions] worktreeConfig = true` residue persisted to Universal level
+- **NEW `scripts/check-git-config-clean.sh` distribution** — Auto-detection and repair script (`--fix` / `--quiet` / `--full-clean` modes). Distributed automatically to all adopting projects via `init.sh`
+- **Structural normalization** — Extracted pure-git workflow from `engineering/000` Part X into 600 (§10.0 / §10.3 / partial §10.1)
+- **100% Backwards Compatible** — Existing adopters obtain new rules and script via `git pull`. Pareto-improvement across all three scenarios (Claude Code only / Antigravity only / parallel use)
 
 ---
 
