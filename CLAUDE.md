@@ -1,5 +1,7 @@
 # Axiarch Rules — 目次 / Pointer
 
+@AGENTS.md
+
 > [!CAUTION]
 > 🇯🇵 **このファイルは「目次（ポインター）」であり、ルール本体ではない。**
 > ルールの本体は `axiarch-rules/` に存在する。ルールの更新・追加は**必ず `axiarch-rules/` 内で行うこと**。
