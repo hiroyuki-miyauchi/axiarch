@@ -59,5 +59,8 @@ Desktop.ini
 *.swp
 .history/
 
+# Claude Code worktrees & session data (never commit)
+.claude/
+
 # Social preview (uploaded via GitHub Settings, not committed)
 social-preview.png

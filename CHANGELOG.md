@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] — 2026-05-03
+
+### ✨ Claude Code `@import` 統合 / Claude Code `@import` Integration
+
+### Added
+
+- **`CLAUDE.md`** — `@AGENTS.md` import 構文を追加。Claude Code 起動時に AGENTS.md（最高法規・9プロトコル）全文が system prompt へ自動 inline され、BOOT SEQUENCE PROTOCOL の物理的強制を実現。AI の自律的な Read tool 実行に依存せず初動からプロトコル遵守を保証 / Added `@AGENTS.md` import syntax. AGENTS.md (Supreme Law / 9 protocols) is now auto-inlined into the system prompt at Claude Code session start, providing physical enforcement of BOOT SEQUENCE PROTOCOL without depending on the AI to autonomously read it. Reference: <https://code.claude.com/docs/en/memory.md#import-additional-files>
+
+### Compatibility
+
+- 後方互換性100%。Claude Code 専用機能のため、他エージェント（Cursor / Copilot / Windsurf / Antigravity / Codex）には影響なし / Fully backwards compatible. Claude Code-specific feature — no effect on other agents
+- トークン消費: 新規セッション開始時のみ +約 8K tokens（メッセージ毎の追加消費なし） / +~8K tokens at session start only (zero per-message overhead)
+
+---
+
 ## [1.3.0] — 2026-04-30
 
 ### 🏗️ バイリンガル構造リアーキテクチャ / Bilingual Directory Re-Architecture

@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.3.0  
+> **現在の安定版 / Current Stable**: v1.3.1  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -53,6 +53,14 @@
 - **ディレクトリ構造の全面再編** — `axiarch-rules/universal/{lang}/` → `axiarch-rules/{lang}/universal/` へ「言語ファースト」構造に移行（156ファイル変更）
 - **`CLAUDE.md`** — Claude Code固有のポインターファイルを新規追加（旧シムリンク方式を廃止）
 - **全クロスリファレンス同期** — ポインター5種、プロンプト32本、CI/CD、設定ファイル等の全パス参照を更新
+
+---
+
+### ✅ v1.3.1 — Claude Code `@import` 統合（2026-05-03）
+
+- **`CLAUDE.md`** — `@AGENTS.md` import 構文追加により、Claude Code 起動時に AGENTS.md（最高法規・9プロトコル）全文が自動 inline 注入される機構を実装
+- **物理的 BOOT SEQUENCE 強制** — AI の自律ロード行動に依存せず、プロトコル遵守を初動から保証
+- **後方互換性 100%** — 他エージェント（Cursor / Copilot / Windsurf / Antigravity / Codex）には影響なし
 
 ---
 
@@ -131,6 +139,14 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **Full directory restructure** — Migrated from `axiarch-rules/universal/{lang}/` to `axiarch-rules/{lang}/universal/` ("Language-First" layout, 156 files changed)
 - **`CLAUDE.md`** — Added Claude Code-specific pointer file (replaced former symlink approach)
 - **Full cross-reference sync** — Updated all path references across 5 pointers, 32 prompts, CI/CD, and config files
+
+---
+
+### ✅ v1.3.1 — Claude Code `@import` Integration (2026-05-03)
+
+- **`CLAUDE.md`** — Added `@AGENTS.md` import syntax to auto-inline AGENTS.md (Supreme Law / 9 protocols) into the system prompt at Claude Code session start
+- **Physical BOOT SEQUENCE Enforcement** — Protocol compliance guaranteed from the first turn, no longer depending on AI's autonomous file-loading behavior
+- **100% Backwards Compatible** — No effect on other agents (Cursor / Copilot / Windsurf / Antigravity / Codex)
 
 ---
 
