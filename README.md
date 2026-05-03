@@ -47,7 +47,7 @@
 ┌─────────────────────────────────────────────────────────────┐
 │ 第1層: Universal (普遍憲法 / Immutable)                       │
 │ ├─ AGENTS.md (最高法規 / 行動プロトコル)                        │
-│ └─ Universal Rules (38ファイル: 不変の普遍的基準)               │
+│ └─ Universal Rules (39ファイル: 不変の普遍的基準)               │
 ├─────────────────────────────────────────────────────────────┤
 │ 第2層: Blueprint (固有仕様 / Mutable)                         │
 │ └─ プロジェクト概要、機能仕様、教訓ログ等の可変ルール              　│
@@ -94,7 +94,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 ┌───────────────────────────────────────────────────────────────┐
 │ Layer 1: Universal (Immutable Constitution)                   │
 │ ├─ AGENTS.md (Supreme Law / Behavior Protocols)               │
-│ └─ Universal Rules (38 files / Immutable Universal Standards) │
+│ └─ Universal Rules (39 files / Immutable Universal Standards) │
 ├───────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                    │
 │ └─ Project Overview, Feature Specs, Lessons Log               │
@@ -421,7 +421,7 @@ AIエージェントが登場する以前から、生成AI（ChatGPT等）を新
 
 世界中の開発者がAIエージェントの恩恵を最大限に受けられるように。特にAI活用においてまだ発展途上にある日本からの発信として、自国のAI活用促進にも貢献できればと考えています。そして何より、この取り組み自体が自身の知見を深めるプロセスでもあります。
 
-成果：2,500以上の憲法基準を網羅する38のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓を自動的にルールに変換するCrystallization Protocol。すべて、たった一つの `AGENTS.md` 憲法を通じて強制されます。
+成果：2,500以上の憲法基準を網羅する39のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓を自動的にルールに変換するCrystallization Protocol。すべて、たった一つの `AGENTS.md` 憲法を通じて強制されます。
 
 ### 🇺🇸 Why Axiarch Was Built
 
@@ -446,7 +446,7 @@ The industry was facing the same problem at scale. AI-generated code becoming a 
 
 Axiarch was built as one practical approach to this challenge. The author's own background — front-end engineering experience, but no prior back-end or infrastructure expertise — shaped the core design principle: **language-agnostic, framework-agnostic, and accessible regardless of engineering experience. A Constitution-Driven AI Agent Governance Framework that enables any developer working with AI — including non-engineers and solo developers — to raise their minimum quality floor.**
 
-The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 38 Universal Rule files covering 2,500+ constitution standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, a Crystallization Protocol that automatically converts lessons into rules. All enforced through a single `AGENTS.md` constitution that any AI agent can read.
+The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 39 Universal Rule files covering 2,500+ constitution standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, a Crystallization Protocol that automatically converts lessons into rules. All enforced through a single `AGENTS.md` constitution that any AI agent can read.
 
 ---
 
