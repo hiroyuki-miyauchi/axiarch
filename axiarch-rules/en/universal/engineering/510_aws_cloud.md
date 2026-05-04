@@ -12,11 +12,13 @@
 > **"Security is not an afterthought. Build it in from Day 0."**
 > **"Cost is not a non-functional requirement. It is a business requirement."**
 > **"AI agents are subject to IAM. Apply the same least-privilege principle as humans."**
+> **"Failure is not something to avoid. It is something to design for."**
+> **"Observability is not a debug tool. It is the primary language of architecture."**
 > **164 Sections.**
 
 > [!NOTE]
 > **File Overview**: 163 sections, 260+ rules, 20 code snippets. Comprehensive coverage from AWS Well-Architected foundations to all major AWS services.
-> §0 expanded with Core Philosophy (Directive 0.1–0.8) — Updated 2026-05-04.
+> §0 Core Philosophy (Directive 0.1–0.12) expanded — Updated 2026-05-04. Directives 0.9–0.12 newly added (Resilience & Chaos, Observability-First, Compliance-by-Design, Ops Excellence Culture).
 > Includes Quick Reference Index (Appendix A).
 
 ---
@@ -88,7 +90,8 @@
 > **§0 Core Philosophy Overview**
 > This section defines **the philosophical foundation** for *why* we use AWS and *how* we use it.
 > Specific service configuration and implementation rules are delegated to individual sections (§1–§163).
-> All 8 principles in Directive 0.1–0.8 serve as the root of every design decision in this file.
+> All 12 principles in Directive 0.1–0.12 serve as the root of every design decision in this file.
+> **[Updated 2026-05-04]** Directive 0.9 (Resilience & Chaos), 0.10 (Observability-First), 0.11 (Compliance-by-Design), 0.12 (Ops Excellence Culture) newly added.
 
 ### The AWS Way
 
@@ -112,6 +115,10 @@ Three foundational vows govern all design decisions:
 | **Cost Blindness** | Creating resources without cost awareness | Absent FinOps culture | Make cost alerts mandatory for all resources |
 | **Single Account Everything** | Running all environments in one AWS account | Misunderstanding multi-account strategy | Isolate via Organizations + Landing Zone |
 | **AI Agent = Human Exception** | Granting Admin permissions to AI agents | Failure to adapt to new threat models | Apply least-privilege per Directive 0.7 |
+| **Resilience as Afterthought** | Designing for availability only after an outage | Absent failure-first design mindset | Implement chaos engineering per Directive 0.9 |
+| **Observability as Debug Tool** | Checking logs only during incidents | Treating observability as a monitoring substitute | Mandate metrics/traces/logs from design Day 0 |
+| **Compliance as Checkbox** | Security/compliance review conducted the week before release | Compliance-by-Design not applied | Encode regulatory requirements in IaC and CI pipelines |
+| **Heroic Ops Culture** | Incident response dependent on individual "heroes" | Runbook/Game Day culture not cultivated | Systematize and automate operations per Directive 0.12 |
 
 ---
 
@@ -288,6 +295,165 @@ Three foundational vows govern all design decisions:
     3.  **Long-Term Data Priority**: Prioritize PQC adoption for sensitive long-term retention data (10+ years). This carries the highest HNDL attack risk.
     4.  **Crypto Agility**: Never hardcode cryptographic algorithms. Externalize them as configuration (Crypto Agility). Mandate designs where future algorithm changes can be implemented without code modifications.
 -   **Anti-pattern**: Deferring action because "quantum computers are not yet practical." HNDL attacks are executable today, and long-term retention data is already at risk.
+
+### Supreme Directive 0.9: The Resilience & Chaos Engineering Mandate
+-   **Law**: In all AWS infrastructure design, **treat "failures will happen" as an immutable premise. Design systems that recover automatically from failure, rather than systems that attempt to prevent failure**.
+-   **Philosophy**: "99.99% availability" is not a target — it is the starting point of design. The essential value of cloud is not "never breaking" but "breaking without being noticed." Chaos engineering is the only empirical method to prevent production incidents.
+-   **Mandate**:
+    1.  **Failure Mode Analysis**: For every component, analyze "if this component fails, how does it impact the system?" during the design phase. Explicitly document Single Points of Failure (SPOFs) in design documents and record decisions to accept, eliminate, or mitigate each.
+    2.  **Multi-AZ by Default**: All production compute, database, and cache resources must be distributed across 2+ AZs. Single-AZ placement must pass an approval process as an "intentional design decision" (see §2.1 and §4.1).
+    3.  **Graceful Degradation**: Design for "reduced functionality with continued operation" rather than total system shutdown when a dependency fails. Example: product browsing continues when the payment service fails; rule-based fallback activates when AI inference fails.
+    4.  **Chaos Engineering Protocol**: Conduct quarterly game days including:
+        -   **AZ Failure Simulation**: Zero out traffic to a specific AZ and measure automatic failover and recovery time (RTO).
+        -   **Dependency Failure Injection**: Use AWS Fault Injection Service (FIS) to inject delays, timeouts, and errors into API/DB/cache layers. Validate Circuit Breaker behavior.
+        -   **Network Partition Test**: Block inter-subnet communication within a VPC and verify service independence.
+    5.  **Recovery Targets**: Define RTO (Recovery Time Objective) and RPO (Recovery Point Objective) for all production workloads and validate achievement via game day measurements.
+-   **Reference — AWS FIS Fault Injection Experiment Template (ECS Task Termination)**:
+    ```json
+    {
+      "description": "ECS Task Termination - Resilience Test",
+      "targets": {
+        "ecs-tasks": {
+          "resourceType": "aws:ecs:task",
+          "resourceTags": { "Environment": "staging" },
+          "selectionMode": "PERCENT(30)"
+        }
+      },
+      "actions": {
+        "terminate-tasks": {
+          "actionId": "aws:ecs:stop-task",
+          "targets": { "Tasks": "ecs-tasks" }
+        }
+      },
+      "stopConditions": [{
+        "source": "aws:cloudwatch:alarm",
+        "value": "arn:aws:cloudwatch:...:alarm:ServiceHealthAlarm"
+      }]
+    }
+    ```
+    > **Target**: Stopping 30% of ECS tasks must result in ALB health checks returning all tasks to Healthy within 2 minutes.
+-   **Anti-pattern**: Not conducting game days because "it's too risky in production." An incident without a game day is equivalent to combat without any training. Conduct regularly in Staging and expand to production incrementally.
+
+### Supreme Directive 0.10: The Observability-First Mandate
+-   **Law**: Observability is not something "added after the system is running." It must be **built into the design from Day 0**. The three pillars — logs, metrics, and traces — are treated as first-class citizens on par with code.
+-   **Philosophy**: "We have logs, so we can observe" is an illusion. True observability is "the ability to identify the cause of an unknown failure by asking questions from the outside alone."
+-   **Mandate**:
+    1.  **The Three Pillars (Mandatory)**:
+        -   **Metrics**: Instrument all services with Golden Signals (latency, error rate, throughput, saturation) and send as CloudWatch custom metrics.
+        -   **Traces**: Attach a `TraceId` to every request. Implement cross-service-boundary distributed tracing via X-Ray or OpenTelemetry (OTEL) (see §7.3).
+        -   **Logs**: Output all logs in JSON structured format with `service`, `environment`, `trace_id`, and `request_id` as required fields.
+    2.  **Structured Logging Standard**:
+        -   Required fields: `timestamp`, `level`, `service`, `trace_id`, `request_id`, `message`
+        -   Prohibited: Free-text logs (`console.log("Error: " + err)`). Logs that cannot be machine-parsed are noise, not logs.
+    3.  **SLO-Driven Alerting**:
+        -   Define SLIs (Service Level Indicators) and SLOs (Service Level Objectives) for all production services.
+        -   Alert based on SLO "Error Budget consumption rate" to reduce over-reliance on individual metric threshold alerts.
+        -   Example: "Alert PagerDuty when error rate has consumed 50% of the Error Budget in the past 1 hour."
+    4.  **Observability as Code**: Define all CloudWatch dashboards, alarms, and Log Metric Filters in IaC and version-control in Git. Treat "manually created dashboards" as configuration drift.
+-   **Reference — Golden Signals CloudWatch Alarm Template (CDK)**:
+    ```typescript
+    // Golden Signals: Latency P99 Alarm
+    new cloudwatch.Alarm(this, 'LatencyP99Alarm', {
+      metric: new cloudwatch.Metric({
+        namespace: 'MyService',
+        metricName: 'LatencyP99',
+        dimensionsMap: { ServiceName: 'OrderAPI' },
+        statistic: 'p99',
+        period: cdk.Duration.minutes(1),
+      }),
+      threshold: 500,          // 500ms SLO
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+      alarmDescription: 'OrderAPI P99 latency exceeded 500ms SLO for 3 consecutive minutes',
+    });
+    ```
+-   **Anti-pattern**: "We'll build dashboards later." Enabling X-Ray for the first time during a production incident. These are design failures that repeat with every outage.
+
+### Supreme Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate
+-   **Law**: Deeply understand AWS's **Shared Responsibility Model** so that every engineer recognizes "what AWS guarantees" vs. "what we must guarantee." Compliance requirements (GDPR, SOC2, PCI-DSS, etc.) are not "things checked before release" — they are **embedded in the design and code from the start**.
+-   **Philosophy**: AWS guarantees the security "of" the cloud (physical infrastructure). However, the security "in" the cloud — what runs on that infrastructure, what data it holds, who can access it — is 100% our responsibility. "It's AWS, so it's secure" is an abdication of responsibility.
+-   **Mandate**:
+    1.  **Responsibility Boundary Map**: Every team must understand and document:
+        -   **AWS's Responsibility**: Physical infrastructure, hypervisor, managed service patches, global network.
+        -   **Our Responsibility**: OS/app patches, IAM configuration, data encryption, network configuration, application code, data classification, access control, incident response.
+    2.  **Compliance as Code**:
+        -   Implement regulatory requirements (GDPR Article 25 Privacy by Design, etc.) as AWS Config Rules, SCPs, and IaC policies.
+        -   Convert "compliance requirement checklists" into automated CI/CD pipeline tests that block non-compliant deployments.
+        -   Example: "All S3 buckets must have encryption enabled" validated automatically via AWS Config rule.
+    3.  **Data Classification Protocol**:
+        -   Assign "sensitivity levels" (Public / Internal / Confidential / Restricted) to all data assets and apply encryption, access control, and logging corresponding to that level.
+        -   Use **Amazon Macie** for automatic detection and classification of data containing PII (see §119).
+    4.  **Audit-Ready by Default**:
+        -   CloudTrail, Config, and Security Hub are "always-running infrastructure," not "things enabled when an audit arrives."
+        -   Guarantee tamper-proof audit trails (logs, config change history) via Object Lock (WORM).
+-   **Reference — Automated Encryption Policy by Data Classification Tag (SCP)**:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Sid": "DenyUnencryptedObjectsForConfidentialBuckets",
+        "Effect": "Deny",
+        "Action": "s3:PutObject",
+        "Resource": "*",
+        "Condition": {
+          "StringEquals": { "s3:prefix": ["confidential/", "restricted/"] },
+          "StringNotEquals": { "s3:x-amz-server-side-encryption": "aws:kms" }
+        }
+      }]
+    }
+    ```
+-   **Anti-pattern**: An organizational structure where compliance teams conduct "security reviews one week before release." This defers problems and causes the cost of fixing discovered risks to grow exponentially.
+
+### Supreme Directive 0.12: The Operational Excellence Culture Mandate
+-   **Law**: Operations are not the "cleanup" of engineering — they are a **core engineering activity that constitutes product quality and reliability**. The cultural shift from "it just needs to work" to "it must sustainably operate at scale" must be achieved through concrete processes and measurement.
+-   **Philosophy**: Organizations that depend on "heroic incident response" collapse as they scale. Incidents are not solved by individual heroism — they are prevented and auto-recovered by team systems and culture.
+-   **Mandate**:
+    1.  **Runbook Mandate**:
+        -   Maintain a **Runbook** for every service deployed to production. Deployment without a runbook is an "incomplete release."
+        -   Minimum required contents: architecture overview, dependency map, health check URLs, alert catalog, incident response flow, rollback procedures, escalation contacts.
+        -   Runbooks are managed in the same repository as code and updated via the same code review process.
+    2.  **Postmortem Culture**:
+        -   Conduct a Blameless Postmortem for every P1/P2 production incident within 48 hours of resolution and document it within 72 hours.
+        -   The purpose of postmortems is not "finding who is at fault" but "discovering system vulnerabilities and driving improvement."
+        -   Every Action Item must have an owner and deadline, with progress reviewed in the next postmortem.
+    3.  **Game Day Protocol**:
+        -   Conduct quarterly planned "Game Days" (linked to Directive 0.9's Chaos Engineering Protocol).
+        -   Position game days as "validation experiments for Runbooks" — a venue for discovering procedural gaps and automation deficiencies.
+        -   Record results in the same format as postmortems and iterate on improvements.
+    4.  **Automation-First Operations**:
+        -   All recurring manual operational tasks (scaling, certificate renewal, patching, backup verification) are candidates for automation.
+        -   Apply the principle "automate any task performed twice" and measure automation rate (automated tasks / all recurring tasks) quarterly. Target: **90%+**.
+        -   Prioritize automation of recurring tasks using EventBridge Scheduler, Systems Manager Automation, and Step Functions.
+    5.  **Operational Metrics (DORA)**:
+        -   Measure the DORA 4 metrics (Deployment Frequency, Lead Time for Changes, Change Failure Rate, Mean Time to Recovery) and conduct monthly team reviews.
+        -   Elite performer targets: Deployment Frequency ≥ weekly, Lead Time ≤ 1 day, Change Failure Rate ≤ 5%, MTTR ≤ 1 hour.
+-   **Reference — DORA Metrics CloudWatch Design (CDK)**:
+    ```typescript
+    // Send deployment frequency as a custom metric (CDK / CodePipeline integration)
+    const deployFrequencyMetric = new cloudwatch.Metric({
+      namespace: 'DORA/Metrics',
+      metricName: 'DeploymentFrequency',
+      dimensionsMap: { ServiceName: 'OrderAPI', Environment: 'production' },
+      statistic: 'Sum',
+      period: cdk.Duration.days(7),
+    });
+
+    // Change failure rate alarm (threshold: alert above 5%)
+    new cloudwatch.Alarm(this, 'ChangeFailureRateAlarm', {
+      metric: new cloudwatch.MathExpression({
+        expression: 'failed_deploys / total_deploys * 100',
+        usingMetrics: {
+          failed_deploys: failedDeployMetric,
+          total_deploys: totalDeployMetric,
+        },
+      }),
+      threshold: 5,
+      evaluationPeriods: 1,
+      alarmDescription: 'Change failure rate exceeded 5% (DORA Elite target)',
+    });
+    ```
+-   **Anti-pattern**: "We'll figure out the response when an incident happens." "The runbook is in my head." "We'll do the retrospective next sprint." These are all symptoms of heroic ops dependency. Only systematization, automation, and documentation realize a scalable operations organization.
 
 ---
 

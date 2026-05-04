@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-05-04 (Rev.8)
+> 改定日: 2026-05-04 (Rev.11)
 
 > [!IMPORTANT]
 > **Supreme Law Declaration (最高法規宣言)**
@@ -10,7 +10,7 @@
 > 1.  本ドキュメント群 (`axiarch-rules/{lang}/universal/*.md`) は、本プロジェクトの開発・運用・ビジネスにおける**最高法規**です。
 > 2.  本憲法に違反するコード、設計、運用判断は、いかなる理由があっても**却下（Reject）**されます。
 > 3.  全開発者（AI Agentを含む）は、タスク開始前に本憲法を確認し、遵守する義務を負います。
-> **17セクション構成（§1.1〜§1.13, §9.1〜§9.7）。**
+> **21セクション構成（§1.1〜§1.17, §9.1〜§9.7）。**
 
 > [!IMPORTANT]
 > **絶対的な基盤 (Absolute Foundation)**
@@ -34,8 +34,12 @@
    - §1.9 Cognitive Load Minimization
    - §1.10 Security-by-Design Protocol
    - §1.11 AI-Augmented Engineering Protocol
-   - §1.12 Privacy-by-Architecture Protocol *(NEW)*
-   - §1.13 Accessibility-by-Design Protocol *(NEW)*
+   - §1.12 Privacy-by-Architecture Protocol
+   - §1.13 Accessibility-by-Design Protocol
+   - §1.14 Post-Quantum Readiness Protocol
+   - §1.15 Regulatory Agility Protocol
+   - §1.16 Developer Wellbeing & Sustainable Velocity Protocol
+   - §1.17 Technology Governance Protocol
 3. [§2. シリコンバレー・エリート・ロール定義](#2-シリコンバレーエリートロール定義-silicon-valley-elite-roles)
 4. [§3. 言語基準とプロトコル](#3-言語基準とプロトコル-language-standard--protocol)
 5. [§4. ガバナンス・プロトコル](#4-ガバナンスプロトコル-governance-protocol)
@@ -43,11 +47,9 @@
 7. [§6. シリコンバレーDNA](#6-シリコンバレーdna-silicon-valley-dna)
 8. [§7. 開発・運用の鉄則](#7-開発運用の鉄則-development--operations-iron-rules)
 9. [§8. グローバル・ガバナンス・プロトコル](#8-グローバルガバナンスプロトコル-global-governance-protocols)
-   - §8.1〜§8.6（既存）
-   - §8.7 AI-Generated Code Provenance Protocol *(NEW)*
+   - §8.1〜§8.7
 10. [§9. Agentic AI 時代プロトコル](#9-agentic-ai-時代プロトコル-agentic-ai-era-protocol)
-    - §9.1〜§9.6（既存）
-    - §9.7 AI Safety & Alignment Protocol *(NEW)*
+    - §9.1〜§9.7
 11. [Appendix A: 逆引き索引](#appendix-a-逆引き索引)
 
 ---
@@ -197,6 +199,15 @@
 *   **Dependency Supply Chain Security（依存関係サプライチェーン）**:
     *   使用する全パッケージの **CVE（共通脆弱性識別子）スコア** を継続的に監視する（`dependabot`, `renovate` 等による自動PR）。
     *   CVSS スコア 7.0以上（High/Critical）の未修正脆弱性を持つ依存関係をマージしてはならない。
+*   **OWASP準拠義務（2025年最新版）**:
+    *   **OWASP Top 10 2025**（A01:Broken Access Control〜A10:SSRF）を全プロジェクトの脆弱性チェックリストの基底として採用する。
+    *   AIシステムを含むプロジェクトでは **OWASP LLM Top 10**（LLM01:Prompt Injection / LLM02:Insecure Output Handling / LLM06:Sensitive Information Disclosure 等）を必ず追加適用する。
+    *   セキュリティレビューの完了条件は「OWASP Top 10 全項目へのリスク評価書の添付」とする。
+*   **SBOM義務（Software Bill of Materials）**:
+    *   全プロジェクトにおいて、使用する全依存関係の **SBOM（ソフトウェア部品表）** を CI/CD パイプラインで自動生成・維持することを義務とする（NTIA / CISA 2025 mandate 準拠）。
+    *   SBOM フォーマットは **SPDX 2.3** または **CycloneDX 1.6** を採用し、`sbom.json` として成果物リポジトリに保存する。
+    *   SBOM に記載のない依存関係を本番環境で実行することを禁止する（Shadow Dependency の撲滅）。
+    *   **アクション**: `syft` / `cdxgen` 等のツールを CI パイプラインに組み込み、Pull Request ごとに差分 SBOM を生成して変更内容を可視化する。
 
 ### 1.11. AI-Augmented Engineering Protocol（AI増幅エンジニアリング・プロトコル）
 AIをコード補完ツールとして矮小化せず、**「チーム全体の知的能力を10倍に増幅するパートナー」**として戦略的に活用する哲学を定める。
@@ -216,6 +227,11 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
 *   **AI-Assisted Code Review（AI支援コードレビュー）**:
     *   Pull RequestにAIレビューボット（例: CodeRabbit, GitHub Copilot Code Review）を組み込み、人間レビューの**前段フィルタ**として活用する。
     *   AIレビューは「チェックリストの自動化」であり、アーキテクチャ判断・ビジネスロジック検証は人間が担う。この境界を混同してはならない。
+*   **Anti-Vibe Coding Protocol（ノーチェックAI実装の禁止）**:
+    *   「AIが出力したコードをそのままコピペしてコミットする」行為を **Vibe Coding（無責任AI実装）** と定義し、憲法違反とする。
+    *   AIが生成した全コードは、エンジニアが「自分で書いたコードと同等の責任を持って理解・検証」してからマージすること。
+    *   **判定基準**: 「このコードをゼロから説明できるか？」がNoであれば、マージ不可。
+    *   **アンチパターン禁止**: 「AIに任せた」「Cursorが書いた」を言い訳にする行為は§1.11 AI Output Verification Mandateと合わせて厳禁。
 
 ### 1.12. Privacy-by-Architecture Protocol（設計時プライバシー内蔵プロトコル）
 プライバシーは「セキュリティ」とは独立した設計原則である。**GDPR Article 25「設計段階からのデータ保護（Privacy by Design）」** を全プロジェクトの強制要件とする。
@@ -251,6 +267,104 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
 *   **Inclusive Design Mindset（インクルーシブデザイン思想）**:
     *   障害者向けの対応は全ユーザーのUXを向上させる（例: 字幕は騒がしい環境でのユーザーに、キーボード操作はパワーユーザーにも有益）。
     *   「アクセシビリティ対応 = 制約」ではなく「アクセシビリティ対応 = より良いUX設計」と定義する。
+
+### 1.14. Post-Quantum Readiness Protocol（耐量子暗号対応プロトコル）
+暗号基盤は「今安全なら問題ない」ではなく、**「将来の量子コンピュータに対しても安全であることを設計段階で保証する」** 思想で構築せよ。NIST PQC標準（FIPS 203/204/205、2024年確定）を前提とする。
+
+> [!IMPORTANT]
+> **"Harvest Now, Decrypt Later" リスク**: 今日暗号化されたデータが、将来の量子コンピュータによって解読されるリスクは現実的脅威である。機密性の高いデータ（医療・金融・個人情報）を扱うシステムは、2026年時点でPQC移行計画の策定を義務とする。
+
+*   **Crypto Agility（暗号アジリティ）の強制**:
+    *   暗号アルゴリズムをハードコードしてはならない。アルゴリズムIDを設定ファイルまたは環境変数で管理し、**コードを変更せずにアルゴリズムを切り替えられるアーキテクチャ**を必須とする。
+    *   `ENCRYPTION_ALGORITHM=AES-256-GCM` をハードコードするのではなく、`crypto_config.algorithm` のような設定可能なパラメータとして管理する。
+*   **NIST PQC標準アルゴリズムへの移行ロードマップ**:
+    *   **ML-KEM (FIPS 203)**: 鍵カプセル化（旧: CRYSTALS-Kyber）→ 非対称鍵交換の代替候補
+    *   **ML-DSA (FIPS 204)**: デジタル署名（旧: CRYSTALS-Dilithium）→ コード署名・認証トークン署名の代替候補
+    *   **SLH-DSA (FIPS 205)**: ハッシュベース署名（旧: SPHINCS+）→ 長期的な証明書・ファームウェア署名の代替候補
+    *   **アクション**: 2026年中に利用中の暗号アルゴリズムの棚卸し（Crypto Inventory）を実施し、高リスク箇所からHybrid方式（従来+PQC）での段階移行を開始する。
+*   **Transport Layer Security**:
+    *   TLS 1.2 以下を本番環境で使用することを禁止し、TLS 1.3をデフォルトとする。
+    *   将来的なTLS 1.4（PQC対応）への移行を前提にした設定管理を行う。
+*   **対象データの優先順位付け**:
+    *   機密性の長期要件（例: 医療記録は30年保持義務）が高いデータほど、PQC移行の優先度が高い。
+    *   PII・認証トークン・署名鍵・バックアップデータの順で棚卸しを実施する。
+
+### 1.15. Regulatory Agility Protocol（規制変化対応プロトコル）
+法規制は「静的な制約」ではなく、**「継続的に進化する設計要件」**である。Compliance-by-Architecture（設計段階からコンプライアンスを内蔵）を思想の柱とし、規制変化を最小コストで吸収できる構造を義務とする。
+
+> [!IMPORTANT]
+> **2025-2027 規制サージ（Regulatory Surge）**: EU AI Act（全面適用2026年8月）、DORA（デジタル運用強靱性法、2025年1月施行）、中国AI生成コンテンツ規制、米国州別プライバシー法（50州体制へ）が同時並行で施行中。「対応は後で」は構造的負債を生む。
+
+*   **Compliance-as-Code（コンプライアンスのコード化）**:
+    *   規制要件を人間が読む文書としてのみ管理するのではなく、**自動検証可能なルール（Policy-as-Code）**として表現する。
+    *   例: OPA（Open Policy Agent）/Regula によるIaC規制チェック、axe-core によるアクセシビリティ規制チェック。
+    *   「コンプライアンス担当が確認しました」は証拠にならない。CIパイプラインのグリーンが証拠である。
+*   **Regulatory Radar（規制レーダー）**:
+    *   プロジェクトに影響する規制の施行スケジュール（6〜24ヶ月先）を常に把握し、`axiarch-rules/blueprint/` に **Regulatory Timeline** として記録・更新する。
+    *   監視対象（最低限）: GDPR/CCPA改正・EU AI Act・DSA/DMA・DORA・各国個人情報保護法・業界固有規制（HIPAA/PCI-DSS等）
+*   **Abstraction Layers for Compliance（コンプライアンスの抽象化層）**:
+    *   規制変化への対応コストを最小化するため、コンプライアンスロジックを**独立したサービス・レイヤー**に分離する。
+    *   例: 同意管理は `ConsentService` に集中（§1.12参照）、データ削除は `ErasureService` に集中、ログ保持期間は設定値として外出し。
+    *   規制が変わった際に「コードを全面書き換え」ではなく「設定値・サービスの差し替え」で対応できる構造が合格点。
+*   **Regulatory Risk Assessment Gate（規制リスク評価ゲート）**:
+    *   新機能の設計前に、以下を必ず評価する:
+        1. **適用規制の特定**: 「この機能はGDPR/EU AI Act/PCI-DSS等のどの規制が適用されるか？」
+        2. **リスク分類**: High（直接対象）/ Medium（間接影響）/ Low（無影響）
+        3. **対応コストの見積もり**: 規制対応をゼロから行う場合のコスト試算
+    *   Highリスク機能については、法務・コンプライアンス担当への確認（またはAI Actのリスク評価書）を実装開始条件とする。
+*   **Jurisdictional Architecture（管轄区分アーキテクチャ）**:
+    *   データの生成・保存・処理が複数の法域（Jurisdiction）にまたがる場合、**データ主権（Data Residency）**要件を設計段階で定義する。
+    *   EU居住者データのEU域外転送禁止（GDPR Chapter 5）、中国データのオンショア要件（PIPL/DSL）等を、アーキテクチャ図に明記する義務を負う。
+
+### 1.16. Developer Wellbeing & Sustainable Velocity Protocol（開発者健全性・持続可能速度プロトコル）
+優れたエンジニアリングは**持続可能な速度（Sustainable Velocity）**によってのみ実現される。バーンアウトしたチームが生み出すコードは、技術的負債の最大の源泉である。
+
+*   **Sustainable Pace Mandate（持続可能ペースの義務化）**:
+    *   「今週だけ無理をする」が「今月の常態」になることを構造的に防ぐ。
+    *   継続的な残業・深夜作業・休日作業を「努力」と美化せず、**プロセス設計の失敗**として扱う。
+    *   WIP（Work In Progress）制限を設け、同時並行タスクの過多による品質劣化を防ぐ。
+*   **Cognitive Debt Recognition（認知負債の認識）**:
+    *   疲弊状態のエンジニアは「早く見えるが後に手戻りが多い」コードを生成する。
+    *   技術的負債のルート原因に「チームの疲弊」が含まれないか、スプリントレトロスペクティブで必ず確認する。
+*   **Boredom is a Signal（単調作業はシグナル）**:
+    *   同じ手作業を3回以上繰り返していると気づいたら、**自動化の義務**が発生する。「繰り返し作業に慣れる」のではなく「繰り返しを消す」のがエンジニアの本分である。
+*   **Psychological Safety（心理的安全性）**:
+    *   「知らない」「間違えた」「わからない」を言える環境を維持することが、システム品質の前提条件である。
+    *   エラーの責任を個人に帰属させる「犯人探し（Blame Culture）」を禁止し、システム改善で再発を防ぐ文化を維持する。
+*   **Learning Budget（学習予算）**:
+    *   開発速度の向上は、技術学習への継続的投資によってのみ持続する。
+    *   スプリントの10〜20%を技術的探索・学習・リファクタリングに充てることを推奨する（「速く動く」と「学ぶ」はトレードオフではない）。
+
+### 1.17. Technology Governance Protocol（技術選定・ライフサイクル・ガバナンス）
+優れた技術選定は「流行」ではなく、**「長期的な保守コスト・チームの認知負荷・エコシステムの健全性」**を根拠とした構造的判断であるべきである。
+
+*   **Anti-Golden Hammer（ハンマー病の禁止）**:
+    *   「すでに知っている技術」「最近使った技術」を問題の性質と無関係に使い続けることを **Golden Hammer アンチパターン** と定義し、禁止する。
+    *   技術選定の判断基準: **①問題との適合性 → ②チームの習熟度 → ③エコシステムの成熟度 → ④TCO（総所有コスト）** の順で評価すること。
+*   **Tech Radar（技術レーダー）**:
+    *   プロジェクトで使用する全技術（言語・フレームワーク・インフラ・外部サービス）を以下の4象限で分類し、`axiarch-rules/{lang}/blueprint/` に **Tech Radar** として記録・定期更新する:
+        *   **Adopt（採用）**: 本番環境で積極的に使用。推奨。
+        *   **Trial（試験）**: 限定スコープで試験中。本番採用前の評価段階。
+        *   **Assess（評価）**: 将来の採用を検討中。リサーチ段階。
+        *   **Hold（保留/廃止）**: 新規採用禁止。既存利用は移行計画を策定せよ。
+    *   **更新義務**: 四半期ごと（または重大な技術変更時）に Tech Radar を見直す。
+*   **Golden Path（推奨パス）の整備**:
+    *   開発者が「最初から最善の選択をできる」よう、プロジェクト標準の技術スタック・ツールチェーン・テンプレートを **Golden Path** として整備・維持する。
+    *   Golden Path は「強制」ではなく「最小抵抗経路（Paved Road）」として機能させ、逸脱する場合は ADR（Architecture Decision Record）での根拠提示を義務とする。
+*   **ADR（Architecture Decision Record）義務トリガー**:
+    *   以下のいずれかに該当する意思決定は、必ず ADR を作成してから実施する:
+        1. 新しい言語・フレームワーク・データベースの採用または廃止
+        2. API 設計の破壊的変更（Breaking Change）
+        3. インフラアーキテクチャの変更（クラウド移行、マルチリージョン化等）
+        4. セキュリティポリシーの変更
+        5. ドメイン境界の再定義（マイクロサービスの分割・統合）
+    *   **ADR テンプレート最小要素**: タイトル / ステータス / コンテキスト / 決定内容 / 比較した代替案 / トレードオフ / 結果
+    *   「口頭で決まった」「Slackで共有した」は ADR の代替にならない。
+*   **Deprecation Protocol（廃止プロトコル）**:
+    *   Tech Radar で **Hold** に分類された技術には、必ず **移行期限（Migration Deadline）** と **移行先技術** を明示した Deprecation Plan を策定する。
+    *   Deprecation Plan なき Hold 技術の使用継続は「技術的負債の積極的な積み上げ」とみなし、次のスプリントで計画化を義務付ける。
+
+---
 
 ## 2. シリコンバレー・エリート・ロール定義 (Silicon Valley Elite Roles)
 AIは以下の役割を状況に応じて瞬時に切り替え、**「シリコンバレーの超優秀な人材」**として振る舞います。
@@ -341,15 +455,22 @@ AIは以下の役割を状況に応じて瞬時に切り替え、**「シリコ�
 *   **Platform Engineering Mindset (プラットフォーム思考)**:
     *   個別機能の実装よりも「チーム全体の生産性を10倍にするプラットフォームの構築」を優先する。
     *   Self-service基盤（開発者が承認待ちなしに自律的に作業できる環境）の整備を継続的に推進する。
+    *   **Golden Path の指針**: 「最も安全で最も速い経路」を整備することがプラットフォームチームの責務。開発者が最良の選択をするコストをゼロにする。
+    *   **Platform as a Product**: 内部プラットフォームも「ユーザー（開発者）がいるプロダクト」として扱い、NPS（推奨度）を定期計測せよ。
 *   **Sustainability DNA（サステナビリティの内蔵）**:
     *   コードを書くことは、電力を消費することである。不必要なAPIコール・冗長なバッチ処理・過剰なクラウドリソース確保はすべて「環境への無責任」とみなす。
     *   SCI（Software Carbon Intensity）を可能な限りプロジェクトKPIに組み込み、エネルギー効率の高い設計（GreenOps）を技術選定の評価軸に加える。
     *   **「動けば良い」から「サステナブルに動く」への発想転換**を全ての技術的意思決定に反映させよ。
 *   **Async-First Culture（非同期ファースト文化）**:
-    *   リモートワーク・マルチエージェント時代において、「番が山なければ話せない」はボトルネックである。非同期コミュニケーションをデフォルトとせよ。
-    *   **Written-First（文字ベース）**: 意思決定・設計・レビューは口頭でなくテキストで行う。「ちょっと軳足」のミーティングよりも、デザインドキュメントとPRコメントが真実のソースである。
+    *   リモートワーク・マルチエージェント時代において、「全員揃わないと話せない」はボトルネックである。非同期コミュニケーションをデフォルトとせよ。
+    *   **Written-First（文字ベース）**: 意思決定・設計・レビューは口頭でなくテキストで行う。「ちょっと話せる？」のミーティングよりも、デザインドキュメントとPRコメントが真実のソースである。
     *   **Decision Log（意思決定ログ）**: 重要な技術的意思決定（技術選定・アーキテクチャ変更・ドメイン境界の変更）はADR（Architecture Decision Record）として記録する。「口頭で決まった」は存在しない。
     *   **アンチパターン禁止**: 「今話せる？」のチャットメッセージで決まる設計判断、アーカイブされないミーティング筆記を記録とみなすことは禁止。
+*   **Disagree and Commit（反対したうえでコミット）**:
+    *   チームの意思決定に異論がある場合、**反対意見を明確に表明した上で**、決定後は全力でコミットする。
+    *   「表面上は同意したが実は納得していない（False Harmony）」は品質と実行速度の最大の敵である。
+    *   **議論のルール**: 反論は「感情」ではなく「データと根拠」で行う。個人攻撃・感情的反発は禁止。
+    *   **タイムボックス**: 決定できない議論に無制限の時間を使わない。合意に至らない場合は決定権者が裁定し、チームは従う。
 
 
 ## 7. 開発・運用の鉄則 (Development & Operations Iron Rules)
@@ -480,6 +601,10 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 *   **Show Your Work（思考の可視化）**:
     *   重要な判断を下す際は、「なぜその選択をしたか（Why）」「何と比較したか（Alternatives）」「何を捨てたか（Trade-offs）」を必ず明示する。
     *   「AIがそう判断した」は説明にならない。判断の根拠をユーザーが検証可能な形で提示すること。
+*   **Chain-of-Thought Auditability（推論連鎖の監査可能性）**:
+    *   複数ステップの推論を経た判断においては、その**推論の連鎖（Chain-of-Thought）を記録・提示可能な状態に保つ**こと。
+    *   AIが「何を見て」「どう解釈し」「なぜその行動を選んだか」の全ステップを、後から人間が追跡・検証できる形で出力する。
+    *   特に高リスク判断（セキュリティ・デプロイ・データ削除）においては、推論連鎖の提示なしに行動を開始してはならない。
 *   **Uncertainty Declaration（不確実性の宣言）**:
     *   AIが確信を持てない領域については、**「これは推測です（Confidence: Low）」** と明示する。確信があるかのように振る舞うことは禁止。
     *   特に: セキュリティ判断、法的解釈、パフォーマンス予測は確信度を必ず付与する。
@@ -499,6 +624,19 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 *   **AI Act Readiness（AI規制対応）**:
     *   EU AI Act（2025年施行）が定めるハイリスクAIシステムの要件（透明性、人間監督、精度要件）を設計段階から考慮する。
     *   AIが生成したコンテンツ・判断には、必ずその旨を明示する機構を設ける（Article 50準拠）。
+*   **Dual Newspaper Test（デュアル新聞テスト）**:
+    *   AIの判断・行動が倫理的に正しいかを評価する際、以下の二面から自己審査せよ:
+        1. **「AI害悪」紙**: 「このAIは有害・不公平・プライバシー侵害的な行動をしたか？」→ No であること。
+        2. **「AI過保護」紙**: 「このAIは過度に拒否・回避して人間を助けられなかったか？」→ No であること。
+    *   両方の紙で報道されない行動のみが「倫理的に適切な行動」である。
+*   **AI Model Governance（AIモデルガバナンス）**:
+    *   使用するAIモデル（LLM・Vision・Embedding等）の選定は、以下の評価軸で記録・承認を経ること:
+        *   **性能**: ベンチマーク結果、ハルシネーション率
+        *   **コスト**: 1トークンあたりコスト、月間予算
+        *   **プライバシー**: データがモデルの学習に使用されるか（オプトアウト可否）
+        *   **ライセンス・利用規約**: 商用利用可否、出力の著作権帰属
+    *   モデルのバージョン変更（メジャーアップグレード・モデル切り替え）は ADR（§1.17参照）の作成を義務とする。
+    *   **モデルドリフト検知**: モデルのバージョン更新後は72時間以内に出力品質・コスト・レイテンシの3指標を比較検証し、異常を検知した場合は即時ロールバックを実行する。
 
 ### 9.5. Human-in-the-Loop Mandate（人間監督義務）
 
@@ -528,6 +666,10 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 *   **Agentic Loop Detection（エージェントループ検知）**:
     *   エージェントが同一操作を繰り返す（無限ループ・振動）パターンを検知するタイムアウト機構と最大試行回数制限を必ず実装する。
     *   閾値（例: 同一ツール3回連続失敗、または総ステップ数50超）に達した場合、自律実行を停止し**人間にエスカレーション**する。
+*   **AI Agent Memory Isolation（エージェントメモリ分離）**:
+    *   複数エージェントが並列動作する環境において、**あるエージェントのコンテキスト（セッション変数・中間状態）が別エージェントに漏洩・汚染（Context Bleed）することを物理的に防止する**設計を義務とする。
+    *   各エージェントのメモリ・ステートは独立したサンドボックスで管理し、共有する場合は明示的なインターフェース（API・メッセージキュー等）のみを通じて行う。
+    *   **長期メモリの検証**: Vectorストアや外部メモリ（例: mem0, Zep）を用いる場合、「誰が書き込んだか」のAttribution追跡と、定期的な古いメモリのPurge（TTL設定）を義務とする。
 *   **MCP (Model Context Protocol) Governance**:
     *   MCPサーバーは外部リソース（DB・ファイルシステム・外部API）への直接アクセスを可能にするため、**最小権限の原則**を厳格に適用する。
     *   MCPツールの公開スコープは「読み取り専用（Read-Only）」をデフォルトとし、書き込み操作は明示的な許可リスト（Allowlist）でのみ解禁する。
@@ -581,18 +723,24 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 | コスト・設計時コスト・30%ルール・Cost-to-Serve | §1.8 Cost as First-Class Citizen |
 | 認知負荷・複雑さ・Self-Documenting・2枚のピザ | §1.9 Cognitive Load Minimization |
 | Security-by-Design・STRIDE・Zero Trust・SAST・CVE | §1.10 Security-by-Design |
-| AI増幅・プロンプト設計・AI出力検証・コンテキスト管理 | §1.11 AI-Augmented Engineering |
+| AI増幅・プロンプト設計・AI出力検証・Vibe Coding禁止 | §1.11 AI-Augmented Engineering |
 | Privacy by Design・GDPR・PII・データ最小化・同意アーキテクチャ | §1.12 Privacy-by-Architecture |
 | アクセシビリティ・WCAG・EAA・ADA・A11y・POUR・インクルーシブデザイン | §1.13 Accessibility-by-Design |
-| マルチエージェント・MCP・Prompt Injection・エージェントループ | §9.6 Multi-Agent Orchestration |
+| PQC・量子暗号・Crypto Agility・ML-KEM・ML-DSA・耐量子 | §1.14 Post-Quantum Readiness |
+| 規制対応・Compliance-as-Code・EU AI Act・DORA・データ主権・管轄 | §1.15 Regulatory Agility |
+| 開発者健全性・持続可能速度・バーンアウト・心理的安全性・学習予算 | §1.16 Developer Wellbeing |
+| マルチエージェント・MCP・Prompt Injection・エージェントループ・メモリ分離 | §9.6 Multi-Agent Orchestration |
 | AI安全性・アライメント・緊急停止・修正可能性・自己修正禁止 | §9.7 AI Safety & Alignment |
 | AI生成コード・来歴・ライセンス汚染・コードリスク分類 | §8.7 AI-Generated Code Provenance |
+| SBOM・依存関係・Shadow Dependency・CycloneDX・SPDX | §1.10 Security-by-Design |
+| Tech Radar・Golden Hammer禁止・ADR・Deprecation・技術選定 | §1.17 Technology Governance |
+| Dual Newspaper Test・Model Governance・モデルドリフト・AIモデル選定 | §9.4 倫理的AIガバナンス |
 | CEO・CTO・SRE・ロール定義 | §2 エリート・ロール |
 | 言語設定・日本語・英語 | §3 言語基準 |
 | 憲法・Universal・Blueprint | §4 ガバナンス |
 | 既存機能保護・安定資産 | §4.1 既存機能保護 |
 | サステナビリティ・GreenOps・SCI | §6 シリコンバレーDNA |
-| Async-First・意思決定ログ・ADR・非同期コミュニケーション | §6 シリコンバレーDNA |
+| Async-First・意思決定ログ・ADR・Disagree and Commit | §6 シリコンバレーDNA |
 | AI協働・能動的提案・Yapping禁止 | §5 AI-オーナー協働 |
 | Day 1・Radical Candor・10倍思考 | §6 シリコンバレーDNA |
 | Git禁止・Push禁止・デプロイ | §8.1 デプロイ禁止 |
@@ -603,7 +751,7 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 | ブランチ衛生・削除 | §8.6 ブランチ衛生 |
 | AIエージェント・自律AI・委任レベル | §9.1 AI委任成熟度モデル |
 | 可逆性・元に戻せない操作・Git Safety | §9.2 可逆性優先原則 |
-| 推論透明性・幻覚防止・不確実性 | §9.3 推論透明性プロトコル |
+| 推論透明性・幻覚防止・不確実性・Chain-of-Thought監査 | §9.3 推論透明性プロトコル |
 | 倫理・バイアス・プライバシー・EU AI Act | §9.4 倫理的AIガバナンス |
 | 人間監督・エスカレーション・承認ゲート | §9.5 人間監督義務 |
 
@@ -622,6 +770,10 @@ AIへの委任レベルを明確に定義し、各レベルに応じた自律度
 | §1.11 AI-Augmented Engineering | `ai/000_ai_governance`, `quality/000_qa_testing`, `engineering/000_engineering_standards` |
 | §1.12 Privacy-by-Architecture | `security/100_data_governance`, `security/000_security_privacy` |
 | §1.13 Accessibility-by-Design | `design/000_design_ux`, `quality/000_qa_testing` |
+| §1.14 Post-Quantum Readiness | `security/000_security_privacy`, `engineering/000_engineering_standards`, `security/200_oss_compliance` |
+| §1.15 Regulatory Agility | `security/100_data_governance`, `core/100_governance`, `product/000_product_strategy` |
+| §1.16 Developer Wellbeing | `engineering/000_engineering_standards`, `quality/000_qa_testing`, `core/100_governance` |
+| §1.17 Technology Governance | `engineering/000_engineering_standards`, `core/100_governance`, `quality/000_qa_testing` |
 | §2 エリート・ロール | `product/000_product_strategy`, `product/300_revenue_monetization` |
 | §3 言語基準 | `core/200_language_protocol` |
 | §4 ガバナンス | `core/100_governance` |

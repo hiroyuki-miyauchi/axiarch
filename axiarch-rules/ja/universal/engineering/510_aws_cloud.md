@@ -12,11 +12,13 @@
 > **「セキュリティは後付けではない。Day 0から組み込め。」**
 > **「コストは非機能要件ではない。ビジネス要件そのものである。」**
 > **「AIエージェントもIAMの支配下に置け。人間と同じ最小権限原則を適用せよ。」**
+> **「失敗は回避するものではなく、前提として設計するものである。」**
+> **「可観測性はデバッグツールではない。それはアーキテクチャの第一言語である。」**
 > **164セクション構成。**
 
 > [!NOTE]
 > **ファイル概要**: 163セクション・260+ルール・20コードスニペット構成。AWS Well-Architected基盤から全主要AWSサービスまで網羅。
-> §0にコア・フィロソフィー（Directive 0.1〜0.8）を拡充（2026-05-04 改定）。
+> §0にコア・フィロソフィー（Directive 0.1〜0.12）を拡充（2026-05-04 改定）。Directive 0.9〜0.12を新規追加（Resilience・Observability-First・Compliance-by-Design・Ops Excellence Culture）。
 > サービス別逆引き索引（Appendix A）付き。
 
 ---
@@ -88,7 +90,8 @@
 > **§0 コア・フィロソフィー概要**
 > このセクションは「なぜAWSを使うのか」「どのような原則でAWSを使うのか」を定義する**哲学的基盤**である。
 > 具体的なサービス設定・実装ルールは各セクション（§1〜§163）に委ねる。
-> Directive 0.1〜0.8 の8原則すべてが、本ファイル全体の設計判断の根拠となる。
+> Directive 0.1〜0.12 の12原則すべてが、本ファイル全体の設計判断の根拠となる。
+> **[2026-05-04 改定]** Directive 0.9（Resilience & Chaos）・0.10（Observability-First）・0.11（Compliance-by-Design）・0.12（Ops Excellence Culture）を新規追加。
 
 ### The AWS Way（AWS Wayの宣言）
 
@@ -112,6 +115,10 @@
 | **Cost Blindness** | コスト意識なしのリソース作成 | FinOps文化の欠如 | 全リソースにコストアラートを必須化 |
 | **Single Account Everything** | 全環境を単一AWSアカウントで運用 | マルチアカウント戦略の未理解 | Organizations + Landing Zoneで分離 |
 | **AI Agent = Human Exception** | AIエージェントにAdmin権限を付与 | 新しい脅威モデルへの未対応 | Directive 0.7に従い最小権限を適用 |
+| **Resilience as Afterthought** | 障害が発生してから初めて可用性を設計する | 失敗前提設計の欠如 | Directive 0.9に従いカオスエンジニアリングを実施 |
+| **Observability as Debug Tool** | ログはデバッグ時だけ見る | 可観測性を監視の代替としか捉えていない | メトリクス・トレース・ログを設計初日から義務化 |
+| **Compliance as Checkbox** | リリース直前にセキュリティ/コンプライアンスレビューを実施 | Compliance-by-Designの未適用 | 規制要件をIaCとCIパイプラインに埋め込む |
+| **Heroic Ops Culture** | 障害対応が属人的な「英雄」に依存 | ランブック・ゲームデー文化の未醸成 | Directive 0.12に従い運用を体系化・自動化 |
 
 ---
 
@@ -288,6 +295,165 @@
     3.  **Long-Term Data Priority**: 機密性の高い長期保存データ（10年以上）は最優先でPQC対応する。HNDL攻撃リスクが最も高いため。
     4.  **Crypto Agility**: 暗号アルゴリズムをハードコードせず、設定として外部化する（Crypto Agility）。将来のアルゴリズム変更をコード修正なしに実施できる設計を義務化する。
 -   **Anti-pattern**: 「量子コンピューターはまだ実用化されていない」を理由に対応を先送りすること。HNDL攻撃は今すぐ実行可能であり、長期保存データはすでにリスク下にある。
+
+### Supreme Directive 0.9: The Resilience & Chaos Engineering Mandate（失敗前提設計原則）
+-   **Law**: AWSインフラの全設計において、**「障害は発生する」を不変の前提とし、障害を予防するのではなく、障害から自動的に回復できるシステムを設計しなければならない**。
+-   **Philosophy**: 「可用性99.99%」は目標ではなく、設計の出発点である。クラウドの本質的価値は「壊れないこと」ではなく「壊れても気づかれないこと」にある。カオスエンジニアリングは本番障害を防ぐ唯一の実証的手段である。
+-   **Mandate**:
+    1.  **Failure Mode Analysis（障害モード分析）**: 全コンポーネントについて「このコンポーネントが障害を起こしたとき、システム全体にどう影響するか」を設計フェーズで必ず分析する。Single Point of Failure（SPOF）を設計書で明示し、受容・排除・低減の判断を文書化する。
+    2.  **Multi-AZ by Default**: 全本番ワークロードのコンピュート・DB・キャッシュは2AZ以上に分散配置する。単一AZ配置は「意図的な設計選択」として承認プロセスを経ること（詳細は§2.1・§4.1参照）。
+    3.  **Graceful Degradation（縮退運転設計）**: 依存するサービスが障害を起こした場合、システム全体が停止するのではなく「機能を縮小して継続動作」するよう設計する。例: 決済サービス障害時でも商品閲覧は継続、AI推論障害時はルールベースにフォールバック。
+    4.  **Chaos Engineering Protocol**: 四半期ごとに以下のゲームデーを実施する：
+        -   **AZ障害シミュレーション**: 特定AZのトラフィックをゼロにし、自動フェイルオーバーと回復時間（RTO）を計測。
+        -   **依存サービス障害注入**: AWS Fault Injection Service（FIS）でAPI/DB/キャッシュの遅延・タイムアウト・エラーを注入し、Circuit Breakerの動作を検証。
+        -   **ネットワーク分断テスト**: VPCのサブネット間通信を遮断し、サービスの独立性を確認。
+    5.  **Recovery Targets**: 全本番ワークロードにRTO（目標復旧時間）とRPO（目標復旧時点）を定義し、ゲームデーの実測値で達成を検証する。
+-   **Reference — AWS FIS障害注入実験テンプレート（ECSタスク停止）**:
+    ```json
+    {
+      "description": "ECS Task Termination - Resilience Test",
+      "targets": {
+        "ecs-tasks": {
+          "resourceType": "aws:ecs:task",
+          "resourceTags": { "Environment": "staging" },
+          "selectionMode": "PERCENT(30)"
+        }
+      },
+      "actions": {
+        "terminate-tasks": {
+          "actionId": "aws:ecs:stop-task",
+          "targets": { "Tasks": "ecs-tasks" }
+        }
+      },
+      "stopConditions": [{
+        "source": "aws:cloudwatch:alarm",
+        "value": "arn:aws:cloudwatch:...:alarm:ServiceHealthAlarm"
+      }]
+    }
+    ```
+    > **目標**: ECSタスクの30%を停止しても、ALBのヘルスチェックが2分以内に全タスクをHealthyに復旧させること。
+-   **Anti-pattern**: 「本番でゲームデーはリスクが高い」を理由に実施しないこと。ゲームデーなしでの障害は「演習なしの本番戦争」と同義である。Staginで定期実施し、本番への拡張を段階的に行え。
+
+### Supreme Directive 0.10: The Observability-First Mandate（可観測性ファースト原則）
+-   **Law**: 可観測性（Observability）はシステムが稼働してから「追加する」ものではなく、**Day 0から設計に組み込まれなければならない**。ログ・メトリクス・トレースの三本柱は、コードと同等の「ファーストクラス市民」として扱う。
+-   **Philosophy**: 「ログが出ていれば観測できている」は幻想である。本当の可観測性とは「未知の障害の原因を、外部から質問だけで特定できる状態」である。
+-   **Mandate**:
+    1.  **The Three Pillars（三本柱の義務化）**:
+        -   **Metrics（メトリクス）**: 全サービスにGolden Signals（レイテンシ・エラー率・スループット・サチュレーション）を計装し、CloudWatchカスタムメトリクスとして送信する。
+        -   **Traces（分散トレース）**: 全リクエストに`TraceId`を付与し、X-RayまたはOpenTelemetry（OTEL）でサービス境界を越えたトレースを実現する（§7.3参照）。
+        -   **Logs（構造化ログ）**: 全ログをJSON構造化形式で出力し、`service`・`environment`・`trace_id`・`request_id`を必須フィールドとする。
+    2.  **Structured Logging Standard（構造化ログ標準）**:
+        -   必須フィールド: `timestamp`, `level`, `service`, `trace_id`, `request_id`, `message`
+        -   禁止: フリーテキストログ（`console.log("Error: " + err)`）。機械解析不能なログは「ログではなくノイズ」である。
+    3.  **SLO-Driven Alerting（SLOベースのアラーティング）**:
+        -   全本番サービスにSLI（サービスレベル指標）とSLO（サービスレベル目標）を定義する。
+        -   アラートはSLOの「Error Budget消費率」に基づいて発報し、個別メトリクスの閾値アラートへの過度な依存を排除する。
+        -   例: 「過去1時間のエラー率がError Budgetの50%を消費した場合にPagerDutyに通知」
+    4.  **Observability as Code**: CloudWatchダッシュボード・アラーム・Log Metric Filtersは全てIaCで定義し、Gitでバージョン管理する。「手でダッシュボードを作った」状態をドリフトとして扱う。
+-   **Reference — Golden Signals CloudWatch Alarmテンプレート（CDK）**:
+    ```typescript
+    // Golden Signals: Latency P99 Alarm
+    new cloudwatch.Alarm(this, 'LatencyP99Alarm', {
+      metric: new cloudwatch.Metric({
+        namespace: 'MyService',
+        metricName: 'LatencyP99',
+        dimensionsMap: { ServiceName: 'OrderAPI' },
+        statistic: 'p99',
+        period: cdk.Duration.minutes(1),
+      }),
+      threshold: 500,          // 500ms SLO
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+      alarmDescription: 'OrderAPI P99 latency exceeded 500ms SLO for 3 consecutive minutes',
+    });
+    ```
+-   **Anti-pattern**: メトリクスは「後でダッシュボードを作る」。本番障害時に初めてX-Rayを有効化する。これらは「設計の失敗」であり、障害のたびに繰り返される。
+
+### Supreme Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate（責任共有・コンプライアンス内在化原則）
+-   **Law**: AWSの**責任共有モデル（Shared Responsibility Model）**を深く理解し、「AWSが担保する範囲」と「我々が担保しなければならない範囲」を全エンジニアが認識しなければならない。また、コンプライアンス要件（GDPR・APPI・SOC2・PCI-DSS等）は「リリース前にチェックするもの」ではなく、**設計とコードに最初から埋め込むもの**である。
+-   **Philosophy**: AWSは「物理的なインフラの安全性」を担保する。しかし「そのインフラ上で何を動かし、どのデータを持ち、誰にアクセスさせるか」の責任は100%我々にある。「AWSだから安全」は責任の放棄である。
+-   **Mandate**:
+    1.  **Responsibility Boundary Map（責任境界マップ）**: 全チームが以下を理解・明文化する：
+        -   **AWSの責任**: 物理インフラ・ハイパーバイザー・マネージドサービスのパッチ・グローバルネットワーク。
+        -   **我々の責任**: OS/アプリのパッチ・IAM設定・データ暗号化・ネットワーク設定・アプリケーションコード・データ分類・アクセス制御・インシデント対応。
+    2.  **Compliance as Code（コンプライアンスのコード化）**:
+        -   規制要件（GDPR Article 25の Privacy by Design・APPI 安全管理措置等）をAWS Config Rules・SCPs・IaCポリシーとして実装する。
+        -   「コンプライアンス要件チェックリスト」はCI/CDパイプラインの自動テストに変換し、非準拠状態のデプロイをブロックする。
+        -   例: 「全S3バケットの暗号化が有効であること」をAWS Configルールとして自動検証。
+    3.  **Data Classification Protocol（データ分類義務）**:
+        -   全データアセットに「機密度レベル」（Public / Internal / Confidential / Restricted）を付与し、そのレベルに応じた暗号化・アクセス制御・ログ記録を適用する。
+        -   PII（個人情報）を含むデータには**Amazon Macie**で自動検出・分類を実施する（§119参照）。
+    4.  **Audit-Ready by Default（常時監査可能状態）**:
+        -   CloudTrail・Config・Security Hubは「監査が来たときに有効化するもの」ではなく「常時稼働しているインフラ」として扱う。
+        -   監査証跡（ログ・設定変更履歴）はObject Lock（WORM）で改竄防止を保証する。
+-   **Reference — Data Classification Tagによる自動暗号化Policy例（SCP）**:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Sid": "DenyUnencryptedObjectsForConfidentialBuckets",
+        "Effect": "Deny",
+        "Action": "s3:PutObject",
+        "Resource": "*",
+        "Condition": {
+          "StringEquals": { "s3:prefix": ["confidential/", "restricted/"] },
+          "StringNotEquals": { "s3:x-amz-server-side-encryption": "aws:kms" }
+        }
+      }]
+    }
+    ```
+-   **Anti-pattern**: コンプライアンス担当者が「リリース1週間前にセキュリティレビュー」を実施する組織体制。これは問題の先送りであり、発見されたリスクの修正コストが指数関数的に高くなる。
+
+### Supreme Directive 0.12: The Operational Excellence Culture Mandate（運用文化原則）
+-   **Law**: 運用はエンジニアリングの「後始末」ではなく、**プロダクトの品質と信頼性を構成する中核的エンジニアリング活動**である。「動けばよい」から「持続的に安定稼働できる」への文化転換を、具体的なプロセスと計測によって実現しなければならない。
+-   **Philosophy**: 「英雄的な障害対応（Heroic Ops）」に依存する組織は、スケールするにつれて崩壊する。障害は個人の英雄心で解決するものではなく、チームのシステムと文化で予防・自動回復するものである。
+-   **Mandate**:
+    1.  **Runbook Mandate（ランブック義務化）**:
+        -   本番環境にデプロイされる全サービスについて、**Runbook（運用手順書）**を整備する。ランブックなしのデプロイは「未完成リリース」とみなす。
+        -   最低限含むべき項目: アーキテクチャ概要・依存サービス・ヘルスチェックURL・アラート一覧・障害対応フロー・ロールバック手順・エスカレーション先。
+        -   ランブックはコードと同じリポジトリで管理し、コードレビューと同じプロセスで更新する。
+    2.  **Postmortem Culture（ポストモーテム文化）**:
+        -   全本番インシデント（P1/P2）は、発生後48時間以内にBlameless Postmortem（無責任追及型でない振り返り）を実施し、72時間以内に文書化する。
+        -   ポストモーテムの目的は「犯人捜し」ではなく「システムの脆弱性の発見と改善」である。
+        -   Action Item（改善施策）は必ずオーナーとDeadlineを設定し、次のPostrmortemで進捗を確認する。
+    3.  **Game Day Protocol（ゲームデー実施義務）**:
+        -   四半期ごとに「計画的な障害演習（Game Day）」を実施する（Directive 0.9のChaos Engineering Protocolと連動）。
+        -   ゲームデーは「Runbookの検証実験」として位置づけ、手順の不備・自動化の欠如を発見する場とする。
+        -   結果はポストモーテムと同じフォーマットで記録し、改善を継続する。
+    4.  **Automation-First Operations（自動化ファースト運用）**:
+        -   人間が繰り返し実施する運用作業（スケール調整・証明書更新・パッチ適用・バックアップ確認）は、全て自動化の対象とする。
+        -   「2回繰り返した手動作業は自動化する」を原則とし、自動化率（自動化タスク数 / 全定期作業数）を四半期ごとに測定・改善する。目標: **90%以上**。
+        -   EventBridge Scheduler・Systems Manager Automation・Step Functionsを活用した定期作業の自動化を優先する。
+    5.  **Operational Metrics（運用メトリクスの計測）**:
+        -   DORA 4指標（デプロイ頻度・変更リードタイム・変更失敗率・サービス復旧時間）を計測し、月次でチーム内レビューを実施する。
+        -   目標水準（Elite performers基準）: デプロイ頻度≥週1回、変更リードタイム≤1日、変更失敗率≤5%、MTTR≤1時間。
+-   **Reference — DORA指標計測 CloudWatch メトリクス設計**:
+    ```typescript
+    // デプロイ頻度をカスタムメトリクスとして送信（CDK / CodePipeline連携）
+    const deployFrequencyMetric = new cloudwatch.Metric({
+      namespace: 'DORA/Metrics',
+      metricName: 'DeploymentFrequency',
+      dimensionsMap: { ServiceName: 'OrderAPI', Environment: 'production' },
+      statistic: 'Sum',
+      period: cdk.Duration.days(7),
+    });
+
+    // 変更失敗率アラーム（閾値: 5%超で警告）
+    new cloudwatch.Alarm(this, 'ChangeFailureRateAlarm', {
+      metric: new cloudwatch.MathExpression({
+        expression: 'failed_deploys / total_deploys * 100',
+        usingMetrics: {
+          failed_deploys: failedDeployMetric,
+          total_deploys: totalDeployMetric,
+        },
+      }),
+      threshold: 5,
+      evaluationPeriods: 1,
+      alarmDescription: 'Change failure rate exceeded 5% (DORA Elite target)',
+    });
+    ```
+-   **Anti-pattern**: 「障害があってから対応を考える」「ランブックは頭の中にある」「振り返りは次のスプリントで」— これらは全て「英雄依存文化」の症状である。体系化・自動化・文書化によってのみ、スケーラブルな運用組織が実現する。
 
 ---
 
