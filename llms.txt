@@ -22,7 +22,7 @@ Axiarch mitigates these risks by enforcing a firm quality floor and autonomous c
 
 - **Layer 1: Universal (Immutable Constitution)**
   - `AGENTS.md` — Supreme law (AI Behavior Protocols). Read by: Google Antigravity, OpenAI Codex, Cursor, Claude Code, etc.
-  - `axiarch-rules/{lang}/universal/` — 38 immutable rule files (2,500+ engineering standards across Security, API, SRE, FinOps...).
+  - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ engineering standards across Security, API, SRE, FinOps...).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
@@ -61,7 +61,7 @@ cp -r axiarch-rules /path/to/your/project/
 ## Language Support
 
 Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
-All 38 universal rules and 4 blueprint templates are available in both languages.
+All 39 universal rules and 4 blueprint templates are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also fully bilingual (JA/EN).
 
 ## License

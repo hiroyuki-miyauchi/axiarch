@@ -2,14 +2,14 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-28 | Version 6.0 — 技術最新化（Temporal Stage 4 / CLDR 49 / Unicode 18.0 / next-intl 4.0）
+> 改定日: 2026-05-06 | Version 6.1 — 規制フロンティア・新興UX・翻訳品質・危機対応 拡張
 
 > [!IMPORTANT]
 > **Supreme Directive（最高指令）**
 > 「国際化は翻訳ではない — すべてのユーザーの文化に対するアーキテクチャ的敬意である。」
 > すべてのi18n決定は文化的正確性・アーキテクチャの拡張性・ユーザー信頼を優先しなければならない。
 > **文化的正確性 > 機能的パリティ > パフォーマンス > スピード** の優先順位を厳守せよ。
-> **25パート・114セクション構成。**
+> **29パート・133セクション構成。**
 
 ---
 
@@ -40,6 +40,10 @@
 - [Part XXIII: 言語固有セクション — ラ米・アフリカ・新興市場](#part-xxiii-言語固有セクション--ラ米アフリカ新興市場)
 - [Part XXIV: アンチパターン30選](#part-xxiv-アンチパターン30選)
 - [Part XXV: 組織・プロセス・成熟度](#part-xxv-組織プロセス成熟度)
+- [Part XXVI: 2026 規制フロンティア — 多言語コンプライアンス](#part-xxvi-2026-規制フロンティア--多言語コンプライアンス)
+- [Part XXVII: 新興UXパラダイム — XR・Generative UI・リアルタイム協調](#part-xxvii-新興uxパラダイム--xrgenerative-uiリアルタイム協調)
+- [Part XXVIII: 翻訳品質フロンティア — MQM・QE・Domain Adaptation](#part-xxviii-翻訳品質フロンティア--mqmqedomain-adaptation)
+- [Part XXIX: 危機対応・レジリエンス i18n](#part-xxix-危機対応レジリエンス-i18n)
 - [Appendix A: 逆引き索引](#appendix-a-逆引き索引)
 - [Appendix B: クロスリファレンス](#appendix-b-クロスリファレンス)
 
@@ -1202,6 +1206,244 @@ npx messageformat-validator locales/**/*.json
 
 ---
 
+## Part XXVI: 2026 規制フロンティア — 多言語コンプライアンス
+
+### セクション 115: EU AI Act 多言語遵守（2026年8月施行）
+
+- **Article 50（透明性義務）**: AI生成コンテンツ・チャットボット・ディープフェイクへのラベル付け義務。**ユーザーの母語または少なくともEU24公用語で表示**
+- **Article 13（GPAI Instructions for Use）**: 汎用AIモデル提供者は EU 24公用語すべてで Instructions for Use を提供必須（Annex XII）
+- **Article 11（Technical Documentation）**: リスク分類・テスト結果・評価指標の言語版（最低限、EU公用語の代表言語：英・独・仏・西・伊）
+- **Article 52（Foundation Model Transparency）**: トレーニングデータ概要を多言語で公開
+- **多言語UI における AI 表示**: 「これは AI による生成です」相当の表記を**全UIロケールに翻訳**してデプロイ。英語のみ表示は違反
+- **罰則**: 最大 €35M または全世界年商 7%（GDPR比 1.75倍）。多言語表示漏れも重大違反扱い
+- **実装パターン**: AI 生成バナー・ウォーターマーク・モーダルを `i18n keys` 化し、全対応言語で必ず翻訳プロセスを通過させる
+- → `security/100_data_governance.md` EU AI Act セクション参照
+
+### セクション 116: India DPDP Act 多言語通知義務
+
+- **DPDP Act 2023 / 施行 2025-2026**: Schedule 1 言語 = **インド憲法 8th Schedule の 22指定言語**（Hindi, Bengali, Telugu, Marathi, Tamil, Urdu, Gujarati, Kannada, Odia, Malayalam, Punjabi, Assamese, Maithili, Santali, Kashmiri, Nepali, Konkani, Sindhi, Dogri, Manipuri, Bodo, Sanskrit）
+- **Notice Translation Mandate**: Data Fiduciary は Privacy Notice を**ユーザーが選択した Schedule 1 言語**で提供義務（DPDP §6(3)）
+- **Consent Manager の多言語対応**: DPDP は中央集権的 Consent Manager を導入予定、UIは22言語対応必須
+- **子供（< 18歳）の保護**: Verifiable parental consent も多言語で取得
+- **Cross-Border Data Transfer Whitelist**: 政府指定国リストへの言語別開示
+- **罰則**: 最大 ₹250 crore（約45億円）/ 違反種別別。多言語通知欠落は重大違反
+- **実装パターン**: Privacy Notice の 22言語版 を CMS で集中管理、ユーザーロケールベース自動配信
+- → `security/100_data_governance.md` インド規制セクション参照
+
+### セクション 117: 中東・GCC圏 — Saudi PDPL ・UAE PDPL Arabic 義務
+
+- **Saudi PDPL（2023施行 / 2024 完全強制）**: Privacy Notice **Arabic + English 両言語必須**。Arabic のみ・English のみは違反
+- **UAE PDPL（Federal Decree-Law No. 45/2021）**: ユーザー言語選択尊重、Arabic/English 二言語UI必須
+- **Bahrain・Kuwait・Oman・Qatar**: 各国PDPLが Arabic First / English Optional の傾向、消費者向けは Arabic 必須
+- **DIFC Data Protection Law 2020**: Free Zone 内は英語フォールバック許容、ただしリージョン外接続時は Arabic 表示推奨
+- **Sharia Compliance × i18n**: 金融商品（Islamic Banking）の利率表示は Arabic で「ハラル証明書」連携必須、地域別商品名翻訳に注意
+- **政府機関連携 API**: Absher（KSA）・UAE Pass などの多言語ID連携時、Arabic デフォルト表示
+- → `security/100_data_governance.md` 中東規制 / `product/300_revenue_monetization.md` Islamic Finance 参照
+
+### セクション 118: China PIPL 多言語越境データ転送開示
+
+- **PIPL Article 39（越境データ通知）**: データ移転先・目的・保有期間を**簡体中文で必須開示**。多言語UIでも中文版が原本
+- **CAC Standard Contract（2023施行）**: 越境データ転送契約の中文版が法的優先版
+- **Cybersecurity Review for AI（2025強化）**: 生成AIサービス提供時の多言語安全性評価
+- **Hong Kong PDPO（独立法制）**: 繁体中文 + English 二言語必須、簡体中文のみは違反
+- **Macau Personal Data Protection Act**: 繁体中文 + Portuguese + English 三言語推奨
+- **Taiwan PDPA 改正（2025）**: 繁体中文必須、簡体中文のみは消費者保護法違反
+- **実装パターン**: 中文圏は **「簡体中文（zh-CN）」「繁体中文（zh-TW / zh-HK）」を別ロケールとして厳格分離**
+- → `security/100_data_governance.md` 中華圏規制セクション参照
+
+### セクション 119: ラ米・アフリカ新興規制フレームワーク
+
+- **Brazil LGPD（強制施行）**: Portuguese (pt-BR) 必須、ANPD が多言語表示違反を取り締まり強化
+- **Mexico LFPDPPP 改正（2025）**: Spanish (es-MX) + indigenous languages（Náhuatl, Maya）への配慮義務化進行中
+- **Colombia Ley 1581 / Decreto 1377**: Spanish (es-CO) 必須、SIC（情報産業監督庁）が多言語適切性を審査
+- **Argentina PDPA 改正（2026予定）**: GDPR Adequacy 取得目標、Spanish (es-AR) + Portuguese 隣接配慮
+- **South Africa POPIA**: 英語 + Afrikaans + 9 official languages（Zulu, Xhosa, Sotho 等）配慮、Information Regulator がモニタリング
+- **Nigeria NDPA 2023**: English + Hausa, Yoruba, Igbo 配慮、特に金融・健康系
+- **Kenya DPA 2019**: English + Swahili 二言語推奨、Office of Data Protection Commissioner が指導
+- **共通実装パターン**: 公式言語以外でも**マイノリティ言語版 Privacy Notice** を CDN 配信、地域別フォールバック設計
+- → `security/100_data_governance.md` 新興市場規制 / `product/000_product_strategy.md` ティア戦略 参照
+
+---
+
+## Part XXVII: 新興UXパラダイム — XR・Generative UI・リアルタイム協調
+
+### セクション 120: AR/XR・WebXR i18n
+
+- **3D空間内テキスト**: WebXR / Three.js / Unity / Unreal における多言語テキスト描画
+- **テキストオクルージョン**: 物体背後に隠れた多言語テキストの可読性確保（depth-aware rendering）
+- **RTL in 3D**: アラビア語・ヘブライ語の右起点配置を3D空間で正しくレンダリング
+- **CJK 3Dフォント**: NotoSans CJK の3D描画パフォーマンス最適化、Font Atlas 言語別分割
+- **音声入力多言語**: VR/AR内の音声コマンド多言語対応（手の使えない状況での Voice UI）
+- **アバター多言語**: アバターの口元アニメーション言語別Visemes対応
+- **Apple Vision Pro / Meta Quest 言語設定継承**: OS言語をアプリに自動継承
+- **空間音響字幕**: 3D空間内字幕配置、視野角対応
+- → `design/000_design_ux.md` XR デザイン参照
+
+### セクション 121: Generative UI 多言語対応
+
+- **動的UI生成 × i18n**: AIが生成するUIコンポーネント・レイアウトを多言語で破綻なく表示
+- **レイアウト適応性**: 生成UIが言語別テキスト長変動（独語+30%、CJK-50%）を自動吸収する設計
+- **コンテキスト保持**: ユーザーロケールを Generative UI コンテキストに常時注入
+- **Streaming UI 多言語**: チャンク単位の UI 配信で部分言語混在を回避
+- **Generative Form 多言語**: AI生成フォームのラベル・バリデーションメッセージを翻訳キー化
+- **Multimodal Generative UI**: 画像 + テキスト + 音声を統合した UI の文化的適切性
+- **AI生成エラー回復**: 翻訳欠落時のグレースフルフォールバック（英語 → ユーザー言語自動翻訳）
+- → `ai/000_ai_engineering.md` Generative UI セクション参照
+
+### セクション 122: リアルタイム多言語協調編集（CRDT）
+
+- **CRDT × i18n**: Yjs / Automerge / Liveblocks による多言語コラボレーティブ編集
+- **ロケール認識マージ**: 同一ドキュメント上の異言語編集をロケール別チャンクで保持
+- **インライン翻訳プレビュー**: 他ユーザーのロケールで自分の編集をリアルタイムプレビュー
+- **多言語コメント**: コメント機能の言語自動検出 + 受信者ロケールで翻訳表示
+- **競合解決の文化適応**: マージ競合UIの文化的適切性（協調 vs 個人優先）
+- **Y.js Awareness 多言語**: ユーザープレゼンスのロケール表示
+- **Collaborative Spell-check 多言語**: 言語ごとのスペルチェック・文法チェック（Hunspell + LanguageTool）
+- → `engineering/300_web_frontend.md` Realtime Collaboration 参照
+
+### セクション 123: Shadow DOM・Web Components i18n境界
+
+- **境界越え i18n コンテキスト**: Shadow DOM が i18n プロバイダー（React Context等）を遮断する問題
+- **Custom Element の `:lang()` セレクタ対応**: Shadow DOM 内でも親の `lang` 属性を継承
+- **Slotted Content の翻訳**: `<slot>` 経由で渡されるコンテンツの翻訳責任分界
+- **Constructable Stylesheets × RTL**: 共有 CSS の論理プロパティ統一
+- **Shadow Parts の文化適応**: `::part()` 経由のスタイル上書きで RTL 対応
+- **Microfrontend i18n**: 複数フレームワーク混在時の翻訳キー名前空間衝突回避
+- **Module Federation × i18n**: 動的ロードされるモジュールの翻訳ファイル配信
+- → `engineering/300_web_frontend.md` Web Components / Microfrontend 参照
+
+### セクション 124: フォルダブル・マルチディスプレイ i18n
+
+- **折りたたみ画面の言語別レイアウト**: Galaxy Fold / Pixel Fold 等で展開時UIに長文翻訳が収まる設計
+- **デュアルディスプレイ**: 一方を原文・もう一方を翻訳に分割表示するパターン
+- **Surface Duo × i18n**: Microsoft Surface Duo の Hinge UX で多言語並列表示
+- **CarPlay / Android Auto 多言語**: 車載UIの多言語対応、地域別音声コマンド
+- **Wearable i18n**: Apple Watch / Wear OS の極小UIにおける CJK・Arabic レイアウト最適化
+- **画面密度別フォントサブセット**: ハイDPI（Retina/4K）と低DPI（IoT表示）の言語別フォント切替
+- **TV / Tizen / WebOS i18n**: 大画面UI多言語、リモコン入力多言語
+- → `design/000_design_ux.md` レスポンシブ・マルチデバイス参照
+
+---
+
+## Part XXVIII: 翻訳品質フロンティア — MQM・QE・Domain Adaptation
+
+### セクション 125: MQM（Multidimensional Quality Metrics）深掘り
+
+- **ASTM F2575 / MQM 2.0 標準**: ASTM International が標準化した翻訳品質メトリクス
+- **MQM Issue Typology**: 7主要カテゴリ × 30+詳細タイプ
+  - Accuracy（誤訳・追加・欠落・未翻訳）
+  - Fluency（文法・スペル・句読点・タイポ）
+  - Terminology（用語不一致・ドメイン外）
+  - Style（文体不適合・冗長）
+  - Locale Convention（数値・日付・通貨フォーマット）
+  - Audience Appropriateness（読者適合性）
+  - Design（タグ・改行・フォーマット）
+- **Severity Weighting**: Minor (1) / Major (5) / Critical (25) の重み付け
+- **MQM Score 計算式**: `100 - (Σ(severity × count) / total_words × 100)`
+- **品質基準**: マーケティング/法務 95+、UI 90+、ヘルプドキュメント 85+
+- **MQM Dashboard 統合**: TMS / LSP との連携で自動レポーティング
+- **AI評価との比較**: COMET（自動）と MQM（人手）の相関分析
+- → `quality/000_qa_testing.md` 品質メトリクス参照
+
+### セクション 126: 制約付きデコーディング・用語一貫性
+
+- **Constrained Beam Search**: 用語集（Glossary）の必須出現を強制するデコーディング
+- **Lexical Constraints**: ブランド名・商標・専門用語の一貫した訳語強制
+- **Trie-based Constrained Decoding**: 用語Trie構築による高速制約適用
+- **Soft vs Hard Constraints**: 用語強制（Hard）vs 推奨（Soft）の使い分け
+- **Glossary Versioning**: 用語集のバージョン管理、ロールバック対応
+- **マルチモーダル制約**: 画像内テキスト（OCR後の翻訳）でも用語一貫性適用
+- **DNT（Do Not Translate）リスト**: 製品名・コードスニペット・ファイル名の翻訳除外
+- → `ai/000_ai_engineering.md` 制約付き生成 参照
+
+### セクション 127: 参照不要品質推定（Quality Estimation Without Reference）
+
+- **xCOMET-22 / xCOMET-XL**: 参照訳不要で品質推定する最新モデル
+- **CometKiwi**: 多言語対応QEモデル、低リソース言語にも対応
+- **Sentence-level QE vs Word-level QE**: 文単位 vs 単語単位の品質推定
+- **Confidence Score 活用**: 閾値ベースのヒューマンレビュー振り分け
+- **Active Learning**: 低品質推定セグメントを優先的に人間レビュー → モデル再学習
+- **QE Drift Detection**: 本番運用中のQEモデル精度劣化検知（ドメインシフト対応）
+- **多言語QEベンチマーク**: WMT QE Shared Task の結果活用
+- → `ai/000_ai_engineering.md` Quality Estimation 参照
+
+### セクション 128: ドメイン適応・Vertical 翻訳
+
+- **Domain Adaptation 戦略**:
+  - **In-Context Learning**: Few-shot で用語例提示
+  - **LoRA Fine-tuning**: 軽量Adapterでドメイン特化
+  - **Full Fine-tuning**: 大規模ドメイン特化モデル
+- **法務翻訳**: 法律用語の厳密対応、判例引用、契約条項の構造保持
+- **医療翻訳**: ICD-10/SNOMED 等の医学用語標準遵守、患者向け平易版
+- **金融翻訳**: 数値・通貨・規制用語、Bloomberg / Reuters スタイル準拠
+- **技術翻訳**: API ドキュメント、コードコメント、エラーメッセージの一貫性
+- **マーケティング翻訳（Transcreation）**: 直訳ではなく文化的再創造
+- **ゲーム翻訳**: 文字数制限・口調・ファン慣習考慮
+- **Domain Glossary 自動構築**: パラレルコーパスから用語抽出 → ヒューマンレビュー
+- → `ai/000_ai_engineering.md` Fine-tuning セクション参照
+
+### セクション 129: 翻訳安全性分類器・有害コンテンツ検出
+
+- **多言語毒性分類器**: Detoxify / Perspective API / Llama Guard 多言語版
+- **ハルシネーション検出**: 翻訳における事実改変・捏造の検出
+- **Faithfulness Classifier**: 原文と訳文の意味整合性スコア化
+- **Cultural Insensitivity Detection**: 文化的に不適切な表現の自動検出
+- **Bias Detection**: 性別・人種・宗教バイアスの言語横断検出
+- **PII Leak in Translation**: 翻訳プロセスでのPII漏洩検知（特にAI APIに送信時）
+- **Output Filter Pipeline**: 翻訳完了 → 安全性分類器 → 不合格時ブロック・再翻訳
+- **Red Teaming for Translation**: 翻訳安全性の敵対的テスト
+- → `security/000_security_privacy.md` AI セキュリティ参照
+
+---
+
+## Part XXIX: 危機対応・レジリエンス i18n
+
+### セクション 130: 多言語インシデント対応・ステータスページ
+
+- **Statuspage 多言語**: Atlassian Statuspage / Cachet / Better Stack の多言語対応
+- **インシデント通知の即時翻訳**: 英語ファースト → 即時翻訳パイプライン → 全言語配信（< 5分）
+- **Severity 別言語優先度**: P1（全言語並列）・P2（主要言語）・P3（英語+α）
+- **構造化メッセージ**: ICU MessageFormat ベースのテンプレート、変数注入で誤訳ゼロ
+- **タイムスタンプ多言語表示**: ユーザーロケール自動変換、UTC併記
+- **多言語ポストモーテム**: RCA レポートの言語別配信、技術用語DNT
+- **Webhook → Slack/Teams 多言語**: 通知Bot のロケール認識
+- → `operations/400_site_reliability.md` Incident Response 参照
+
+### セクション 131: 多言語緊急通信（Push / SMS / Email）
+
+- **APNs / FCM ロケール認識**: デバイス言語に応じたペイロード切替
+- **SMS 多言語制限**: GSM-7（英数字・160文字）vs UCS-2（CJK・70文字）の文字数差吸収
+- **Email 多言語MIME**: `Content-Type: text/html; charset=utf-8`、From名のRFC 2047エンコード
+- **緊急通知テンプレート**: 災害・障害・セキュリティイベント用の事前承認済み多言語テンプレート
+- **方言・敬語**: 緊急時は標準語・丁寧語ベース、地域方言は避ける
+- **Geofencing × 多言語**: 地域固有の言語自動選択（東京 → 日本語、San Francisco → English）
+- **Accessibility × Emergency**: WCAG 緊急情報の多言語スクリーンリーダー対応
+- → `engineering/300_web_frontend.md` Push / Notification 参照
+
+### セクション 132: ローカライゼーション継続性・TMSフェイルオーバー
+
+- **TMS Single Point of Failure 回避**: Phrase / Lokalise / Crowdin の API 障害時のフォールバック
+- **翻訳ファイルの分散保持**: TMS + Git + S3 の三重バックアップ
+- **フォールバック連鎖**: ユーザー言語 → 親言語（fr-CA → fr-FR → fr）→ 英語 → キー名表示
+- **Build-time vs Runtime フォールバック**: 静的サイトはビルド時、SaaSはランタイムフォールバック
+- **CI/CD での翻訳ファイル検証**: Missing Key / Stale Key / Orphan Key の自動検出
+- **Translation Bus 障害**: 翻訳メモリ更新パイプラインの冪等性確保
+- **災害復旧（DR）**: TMS データの地域別レプリケーション、RTO/RPO 設定
+- → `operations/400_site_reliability.md` DR / `engineering/000_engineering_standards.md` CI/CD 参照
+
+### セクション 133: 多言語バグバウンティ・脆弱性開示プログラム
+
+- **VDP 多言語化**: Vulnerability Disclosure Program のページを主要言語で公開
+- **PGP/GPG キー多言語**: セキュリティ報告窓口の暗号鍵情報を多言語で提供
+- **Bug Bounty Platform 多言語**: HackerOne / Bugcrowd / Intigriti の多言語対応
+- **報告書 Triage 言語**: 受信報告の言語自動判定 → 適切な言語担当者にルーティング
+- **CVE / CVSS 説明多言語**: 公開アドバイザリの多言語版（少なくとも英語+日本語+中文）
+- **責任ある開示タイムライン**: 地域別休日考慮（中華圏春節・イスラム圏ラマダン等）
+- **インシデント発表多言語化**: 重大脆弱性公表時の即時翻訳プロトコル
+- → `security/000_security_privacy.md` VDP / Responsible Disclosure 参照
+
+---
+
 ## Appendix A: 逆引き索引
 
 | 技術 / サービス | 関連セクション |
@@ -1272,6 +1514,25 @@ npx messageformat-validator locales/**/*.json
 | サステナブルi18n | 114 |
 | アンチパターン | 106-110 |
 | 成熟度モデル | 111 |
+| EU AI Act 多言語遵守 | 49, 62, 75, 115 |
+| India DPDP Act / Schedule 1 | 116 |
+| Saudi PDPL / UAE PDPL / GCC | 117 |
+| China PIPL / Hong Kong PDPO / Taiwan PDPA | 118 |
+| LGPD / LFPDPPP / POPIA / NDPA | 119 |
+| WebXR / AR / VR i18n | 120 |
+| Generative UI 多言語 | 121 |
+| CRDT / Yjs / Automerge | 122 |
+| Shadow DOM / Web Components | 123 |
+| Foldable / Wearable / CarPlay | 124 |
+| MQM / ASTM F2575 | 125 |
+| Constrained Decoding / Glossary | 126 |
+| xCOMET-22 / CometKiwi / QE | 127 |
+| Domain Adaptation / LoRA | 128 |
+| Translation Safety / Faithfulness | 129 |
+| Multilingual Statuspage / Incident | 130 |
+| 多言語Push/SMS/Email緊急通信 | 131 |
+| TMS Failover / DR | 132 |
+| 多言語VDP / Bug Bounty | 133 |
 
 ---
 
@@ -1313,3 +1574,13 @@ npx messageformat-validator locales/**/*.json
 | §85–§87 (音声 / マルチモーダル) | `ai/000_ai_engineering` |
 | §88–§105 (言語固有) | `design/000_design_ux`, `security/100_data_governance` |
 | §114 (サステナブルi18n) | `operations/600_cloud_finops` |
+| §115–§119 (規制フロンティア) | `security/100_data_governance`, `product/000_product_strategy` |
+| §120–§124 (新興UXパラダイム) | `design/000_design_ux`, `engineering/300_web_frontend`, `ai/000_ai_engineering` |
+| §125–§129 (翻訳品質フロンティア) | `quality/000_qa_testing`, `ai/000_ai_engineering` |
+| §130–§133 (危機対応・レジリエンス) | `operations/400_site_reliability`, `security/000_security_privacy` |
+
+---
+
+**Last Updated**: 2026-05-06 (v1.5.0)
+**Authority**: Universal Constitution (axiarch core)
+**Classification**: Product — Global Expansion & i18n

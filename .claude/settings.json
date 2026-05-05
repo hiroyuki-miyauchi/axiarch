@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[AXIARCH BOOT] Before responding, you MUST implicitly execute AGENTS.md (supreme law) — Project Configuration + protocols, including LOADING_PROTOCOL.md BOOT SEQUENCE. No skipping. / 応答前に AGENTS.md (最高法規) の Project Configuration とプロトコルを必ず暗黙実行せよ。LOADING_PROTOCOL.md の BOOT SEQUENCE 含む。スキップ禁止。'"
+            "command": "echo '[AXIARCH BOOT] Before responding, you MUST implicitly execute AGENTS.md (supreme law) — Project Configuration + protocols, including LOADING_PROTOCOL.md BOOT SEQUENCE. Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all). No skipping. / 応答前に AGENTS.md (最高法規) の Project Configuration とプロトコルを必ず暗黙実行せよ。LOADING_PROTOCOL.md の BOOT SEQUENCE 含む。応答言語は AGENTS.md の Project Native Language に厳守（見出し・要約・ラベル・箇条書き・表すべて）。スキップ禁止。'"
           }
         ]
       }
