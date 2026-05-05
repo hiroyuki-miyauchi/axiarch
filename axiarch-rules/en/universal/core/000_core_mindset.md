@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-05-04 (Rev.8)
+> Last Updated: 2026-05-04 (Rev.11)
 
 > [!IMPORTANT]
 > **Supreme Law Declaration**
@@ -10,7 +10,7 @@
 > 1.  These documents (`axiarch-rules/{lang}/universal/*.md`) are the **Supreme Law** of this project's development, operations, and business.
 > 2.  Code, design, and operational decisions that violate this Constitution will be **Rejected** regardless of reason.
 > 3.  All developers (including AI Agents) are obligated to review and comply with this Constitution before starting any task.
-> **17 Sections (§1.1–§1.13, §9.1–§9.7).**
+> **21 Sections (§1.1–§1.17, §9.1–§9.7).**
 
 > [!IMPORTANT]
 > **Absolute Foundation**
@@ -34,8 +34,12 @@
    - §1.9 Cognitive Load Minimization
    - §1.10 Security-by-Design Protocol
    - §1.11 AI-Augmented Engineering Protocol
-   - §1.12 Privacy-by-Architecture Protocol *(NEW)*
-   - §1.13 Accessibility-by-Design Protocol *(NEW)*
+   - §1.12 Privacy-by-Architecture Protocol
+   - §1.13 Accessibility-by-Design Protocol
+   - §1.14 Post-Quantum Readiness Protocol
+   - §1.15 Regulatory Agility Protocol
+   - §1.16 Developer Wellbeing & Sustainable Velocity Protocol
+   - §1.17 Technology Governance Protocol
 3. [§2. Silicon Valley Elite Roles](#2-silicon-valley-elite-roles)
 4. [§3. Language Standard & Protocol](#3-language-standard--protocol)
 5. [§4. Governance Protocol](#4-governance-protocol)
@@ -43,11 +47,9 @@
 7. [§6. Silicon Valley DNA](#6-silicon-valley-dna)
 8. [§7. Development & Operations Iron Rules](#7-development--operations-iron-rules)
 9. [§8. Global Governance Protocols](#8-global-governance-protocols)
-   - §8.1–§8.6 (existing)
-   - §8.7 AI-Generated Code Provenance Protocol *(NEW)*
+   - §8.1–§8.7
 10. [§9. Agentic AI Era Protocol](#9-agentic-ai-era-protocol)
-    - §9.1–§9.6 (existing)
-    - §9.7 AI Safety & Alignment Protocol *(NEW)*
+    - §9.1–§9.7
 11. [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index)
 
 ---
@@ -196,6 +198,15 @@ Security is not something to "address after release." It is a **quality attribut
 *   **Dependency Supply Chain Security**:
     *   Continuously monitor the **CVE (Common Vulnerabilities and Exposures) score** of all packages used (via automated PRs from `dependabot`, `renovate`, etc.).
     *   Never merge dependencies with unpatched vulnerabilities scoring CVSS 7.0 or above (High/Critical).
+*   **OWASP Compliance Mandate (2025 Edition)**:
+    *   Adopt **OWASP Top 10 2025** (A01:Broken Access Control–A10:SSRF) as the baseline vulnerability checklist for all projects.
+    *   For projects incorporating AI systems, **OWASP LLM Top 10** (LLM01:Prompt Injection / LLM02:Insecure Output Handling / LLM06:Sensitive Information Disclosure, etc.) must be additionally applied.
+    *   Security review completion requires attaching a risk assessment document covering all OWASP Top 10 items.
+*   **SBOM Mandate (Software Bill of Materials)**:
+    *   All projects must automatically generate and maintain a **SBOM (Software Bill of Materials)** for all dependencies via the CI/CD pipeline (compliant with NTIA / CISA 2025 mandate).
+    *   SBOM format must be **SPDX 2.3** or **CycloneDX 1.6**, saved as `sbom.json` in the artifact repository.
+    *   Running dependencies in production that are not listed in the SBOM is prohibited (Shadow Dependency elimination).
+    *   **Action**: Integrate `syft` / `cdxgen` or equivalent tools into the CI pipeline to generate diff SBOMs per Pull Request, making dependency changes visible.
 
 ### 1.11. AI-Augmented Engineering Protocol
 Do not diminish AI to a mere code-completion tool. Define the philosophy of strategically leveraging AI as **"a partner that amplifies the entire team's intellectual capacity by 10x."**
@@ -215,6 +226,11 @@ Do not diminish AI to a mere code-completion tool. Define the philosophy of stra
 *   **AI-Assisted Code Review**:
     *   Embed AI review bots (e.g., CodeRabbit, GitHub Copilot Code Review) into Pull Requests and leverage them as a **pre-filter** for human review.
     *   AI review is the "automation of checklists"; architectural decisions and business logic validation are carried by humans. Do not conflate these roles.
+*   **Anti-Vibe Coding Protocol (No-Review AI Implementation Ban)**:
+    *   "Copy-pasting AI-generated code and committing without review" is defined as **Vibe Coding (irresponsible AI implementation)** and constitutes a constitutional violation.
+    *   All AI-generated code must be understood and verified by the engineer with the same accountability as code they wrote themselves, before merging.
+    *   **Judgment Criterion**: If you cannot explain this code from scratch, it cannot be merged.
+    *   **Anti-Pattern Ban**: Using "the AI did it" or "Cursor wrote it" as an excuse is strictly prohibited in conjunction with §1.11 AI Output Verification Mandate.
 
 ### 1.12. Privacy-by-Architecture Protocol
 Privacy is a design principle independent from security. **GDPR Article 25 "Data Protection by Design and by Default"** is a mandatory requirement for all projects.
@@ -250,6 +266,104 @@ Accessibility is not an "optional feature" — it is a **legal obligation and a 
 *   **Inclusive Design Mindset**:
     *   Accessibility improvements benefit all users (e.g., captions help users in noisy environments; keyboard navigation helps power users).
     *   Define "accessibility = better UX design," not "accessibility = constraint."
+
+### 1.14. Post-Quantum Readiness Protocol
+Cryptographic foundations must not be designed as "safe if secure today" but as **"guaranteed to remain secure against future quantum computers, proven at the design stage."** NIST PQC standards (FIPS 203/204/205, finalized 2024) are the mandatory baseline.
+
+> [!IMPORTANT]
+> **"Harvest Now, Decrypt Later" Risk**: Data encrypted today can be stored and decrypted later by a quantum computer. This is a realistic, present-day threat. Systems handling long-lived sensitive data (healthcare, finance, PII) are obligated to define a PQC migration plan by 2026.
+
+*   **Crypto Agility (Mandatory)**:
+    *   Cryptographic algorithms must NEVER be hardcoded. Manage algorithm IDs via configuration files or environment variables so that **algorithms can be swapped without changing code.**
+    *   Instead of hardcoding `AES-256-GCM`, manage it as a configurable parameter such as `crypto_config.algorithm`.
+*   **NIST PQC Migration Roadmap**:
+    *   **ML-KEM (FIPS 203)**: Key encapsulation (formerly CRYSTALS-Kyber) → Replacement candidate for asymmetric key exchange
+    *   **ML-DSA (FIPS 204)**: Digital signatures (formerly CRYSTALS-Dilithium) → Replacement candidate for code signing and auth token signing
+    *   **SLH-DSA (FIPS 205)**: Hash-based signatures (formerly SPHINCS+) → Replacement candidate for long-lived certificates and firmware signing
+    *   **Action**: Conduct a Crypto Inventory of all algorithms in use by end of 2026, and begin phased migration using Hybrid mode (classical + PQC) for highest-risk areas first.
+*   **Transport Layer Security**:
+    *   TLS 1.2 and below are prohibited in production environments. TLS 1.3 is the mandatory default.
+    *   Configuration must be managed with the assumption of future migration to TLS 1.4 (PQC-enabled).
+*   **Data Priority Triage**:
+    *   Data with high long-term confidentiality requirements (e.g., medical records with 30-year retention obligations) demands highest PQC migration priority.
+    *   Conduct inventory in this order: PII → auth tokens → signing keys → backup data.
+
+### 1.15. Regulatory Agility Protocol
+Legal regulations are not "static constraints" but **"continuously evolving design requirements."** Compliance-by-Architecture—embedding compliance into the design phase—is the governing philosophy; building systems that absorb regulatory changes at minimum cost is mandatory.
+
+> [!IMPORTANT]
+> **2025-2027 Regulatory Surge**: EU AI Act (full application August 2026), DORA (Digital Operational Resilience Act, in force January 2025), China AI-generated content regulations, and US state-level privacy laws (progressing toward 50-state coverage) are all simultaneously in force. "We'll handle compliance later" creates structural debt.
+
+*   **Compliance-as-Code**:
+    *   Regulatory requirements must not be managed only as human-readable documents but expressed as **automatically verifiable rules (Policy-as-Code).**
+    *   Examples: IaC compliance checks via OPA (Open Policy Agent) / Regula; accessibility compliance checks via axe-core.
+    *   "The compliance team reviewed it" is not evidence. A green CI pipeline is evidence.
+*   **Regulatory Radar**:
+    *   Continuously track the enforcement schedule (6–24 months ahead) of regulations affecting the project, and record and update them as a **Regulatory Timeline** in `axiarch-rules/blueprint/`.
+    *   Minimum monitoring scope: GDPR/CCPA amendments, EU AI Act, DSA/DMA, DORA, national privacy laws, industry-specific regulations (HIPAA/PCI-DSS, etc.)
+*   **Abstraction Layers for Compliance**:
+    *   Separate compliance logic into **independent service layers** to minimize the cost of responding to regulatory change.
+    *   Examples: Consent management centralized in `ConsentService` (see §1.12); data deletion centralized in `ErasureService`; log retention periods externalized as configuration values.
+    *   A system passes if regulatory changes can be absorbed by "swapping configuration values or services" rather than "full code rewrite."
+*   **Regulatory Risk Assessment Gate**:
+    *   Before designing any new feature, always evaluate:
+        1. **Applicable Regulation Identification**: "Which regulations apply to this feature (GDPR, EU AI Act, PCI-DSS, etc.)?"
+        2. **Risk Classification**: High (directly in scope) / Medium (indirect impact) / Low (no impact)
+        3. **Compliance Cost Estimate**: Cost estimate for implementing compliance from scratch
+    *   For High-risk features, a legal/compliance review (or EU AI Act risk assessment) is a prerequisite for beginning implementation.
+*   **Jurisdictional Architecture**:
+    *   When data is generated, stored, or processed across multiple jurisdictions, **Data Residency** requirements must be defined at the design stage.
+    *   Obligations such as EU resident data transfer restrictions outside the EU (GDPR Chapter 5) and China data onshoring requirements (PIPL/DSL) must be explicitly noted in architecture diagrams.
+
+### 1.16. Developer Wellbeing & Sustainable Velocity Protocol
+Excellent engineering is achieved only through **Sustainable Velocity**. Code produced by a burned-out team is the greatest source of technical debt.
+
+*   **Sustainable Pace Mandate**:
+    *   Structurally prevent "overworking just this week" from becoming "the standard this month."
+    *   Do not romanticize chronic overtime, late-night work, or weekend work as "dedication"—treat it as **a failure of process design.**
+    *   Set WIP (Work In Progress) limits to prevent quality degradation from excessive parallel tasks.
+*   **Cognitive Debt Recognition**:
+    *   Exhausted engineers produce code that "looks fast but generates more rework later."
+    *   Always check in sprint retrospectives whether "team exhaustion" is a root cause of technical debt.
+*   **Boredom is a Signal**:
+    *   If you find yourself repeating the same manual task 3+ times, an **obligation to automate** arises. "Getting used to repetitive work" is not the goal—"eliminating the repetition" is the engineer's duty.
+*   **Psychological Safety**:
+    *   Maintaining an environment where "I don't know," "I was wrong," and "I don't understand" can be expressed is a prerequisite for system quality.
+    *   Prohibit "Blame Culture" (attributing error responsibility to individuals) and maintain a culture of preventing recurrence through system improvement.
+*   **Learning Budget**:
+    *   Improvements in development velocity are only sustainable through continuous investment in technical learning.
+    *   Recommend allocating 10–20% of sprint capacity to technical exploration, learning, and refactoring ("moving fast" and "learning" are not a trade-off).
+
+### 1.17. Technology Governance Protocol
+Superior technology selection must be based not on "trends" but on **structural judgment grounded in long-term maintenance cost, team cognitive load, and ecosystem health.**
+
+*   **Anti-Golden Hammer**:
+    *   Continuing to use "already familiar technology" or "recently used technology" regardless of the problem's nature is defined as the **Golden Hammer anti-pattern** and is prohibited.
+    *   Technology selection criteria: **① Fitness for the problem → ② Team proficiency → ③ Ecosystem maturity → ④ TCO (Total Cost of Ownership)** — evaluate in this order.
+*   **Tech Radar**:
+    *   Classify all technologies used in the project (languages, frameworks, infrastructure, external services) into the following four quadrants and record/update them as a **Tech Radar** in `axiarch-rules/{lang}/blueprint/`:
+        *   **Adopt**: Actively used in production. Recommended.
+        *   **Trial**: Being tested in a limited scope. Evaluation stage before production adoption.
+        *   **Assess**: Under consideration for future adoption. Research stage.
+        *   **Hold**: New adoption prohibited. Existing usage must have a migration plan.
+    *   **Update Obligation**: Review the Tech Radar every quarter (or upon any significant technology change).
+*   **Golden Path (Paved Road)**:
+    *   Prepare and maintain a **Golden Path** — the project's standard technology stack, toolchain, and templates — so developers can "make the best choices from the start."
+    *   The Golden Path operates as a "path of least resistance (Paved Road)," not a mandate. Deviations require an ADR (Architecture Decision Record) with documented rationale.
+*   **ADR (Architecture Decision Record) Obligation Triggers**:
+    *   Any decision matching the following must produce an ADR before implementation:
+        1. Adopting or retiring a new language, framework, or database
+        2. Breaking changes to API design
+        3. Infrastructure architecture changes (cloud migration, multi-region, etc.)
+        4. Security policy changes
+        5. Domain boundary redefinition (microservice split or consolidation)
+    *   **ADR Minimum Template**: Title / Status / Context / Decision / Alternatives Considered / Trade-offs / Consequences
+    *   "We decided verbally" or "shared on Slack" are not substitutes for an ADR.
+*   **Deprecation Protocol**:
+    *   Technologies classified as **Hold** in the Tech Radar must have a Deprecation Plan specifying a **Migration Deadline** and **Target Replacement Technology**.
+    *   Continued use of a Hold technology without a Deprecation Plan is treated as "active accumulation of technical debt" and must be planned for resolution in the next sprint.
+
+---
 
 ## 2. Silicon Valley Elite Roles
 AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
@@ -338,6 +452,8 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 *   **Platform Engineering Mindset**:
     *   Prioritize "building the platform that makes the entire team 10x more productive" over individual feature implementation.
     *   Continuously invest in self-service infrastructure (environments where developers can work autonomously without waiting for approvals).
+    *   **Golden Path Directive**: Providing "the safest and fastest path" is the platform team's responsibility. Reduce to zero the cost for developers to make the best choice.
+    *   **Platform as a Product**: Treat internal platforms as "products with users (developers)" and regularly measure NPS (Net Promoter Score).
 *   **Sustainability DNA**:
     *   Writing code consumes electricity. Unnecessary API calls, redundant batch processing, and excessive cloud resource provisioning are all "environmental irresponsibility."
     *   Where possible, incorporate SCI (Software Carbon Intensity) into project KPIs and add energy-efficient design (GreenOps) as an evaluation axis for technology selection.
@@ -347,6 +463,11 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
     *   **Written-First**: Decisions, designs, and reviews must be done in text, not verbal meetings. Design documents and PR comments are the true source of truth.
     *   **Decision Log**: All significant technical decisions (technology selection, architecture changes, domain boundary modifications) must be recorded as ADRs (Architecture Decision Records). "We decided verbally" does not exist.
     *   **Anti-Pattern Ban**: Design decisions made via "Got a minute?" chat messages, and unarchived meeting notes treated as official records, are prohibited.
+*   **Disagree and Commit**:
+    *   When there is disagreement on a team decision, **clearly express the dissent**, then commit fully once the decision is made.
+    *   "Surface agreement without genuine buy-in (False Harmony)" is the greatest enemy of quality and execution speed.
+    *   **Debate Rules**: Counter-arguments must be made with "data and rationale," not "emotion." Personal attacks and emotional reactions are prohibited.
+    *   **Timeboxing**: Do not spend unlimited time on undecidable debates. If consensus is not reached, the decision-maker rules and the team follows.
 
 
 ## 7. Development & Operations Iron Rules
@@ -477,6 +598,10 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 *   **Show Your Work**:
     *   When making important decisions, always state "Why this choice (Why)", "What was compared (Alternatives)", and "What was traded off (Trade-offs)".
     *   "The AI decided so" is not an explanation. Present reasoning in a verifiable form.
+*   **Chain-of-Thought Auditability**:
+    *   For decisions made through multi-step reasoning, **maintain the Chain-of-Thought in a recordable and presentable state.**
+    *   Output all steps—"what the AI observed," "how it interpreted," and "why it chose that action"—in a form that humans can later trace and verify.
+    *   For high-risk decisions (security, deploy, data deletion), action must not begin without first presenting the full reasoning chain.
 *   **Uncertainty Declaration**:
     *   When AI lacks confidence, explicitly state **"This is an estimate (Confidence: Low)"**. Projecting false confidence is prohibited.
     *   Security judgments, legal interpretations, and performance predictions must always include a confidence level.
@@ -496,6 +621,19 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 *   **AI Act Readiness**:
     *   Consider EU AI Act requirements (in effect 2025) for high-risk systems from the design stage.
     *   AI-generated content and decisions must have mechanisms to clearly disclose their AI origin (Article 50).
+*   **Dual Newspaper Test**:
+    *   When evaluating whether AI judgment or action is ethically appropriate, self-audit from these two angles:
+        1. **"AI Harm" paper**: "Did this AI take harmful, unfair, or privacy-invasive actions?" → Must be No.
+        2. **"AI Over-refusal" paper**: "Did this AI refuse or avoid helping people excessively?" → Must be No.
+    *   Only actions that would NOT be reported by either paper constitute "ethically appropriate behavior."
+*   **AI Model Governance**:
+    *   Selection of AI models used (LLM, Vision, Embedding, etc.) must be documented and approved across the following evaluation axes:
+        *   **Performance**: Benchmark results, hallucination rate
+        *   **Cost**: Per-token cost, monthly budget
+        *   **Privacy**: Whether data is used for model training (opt-out availability)
+        *   **License / Terms of Service**: Commercial use eligibility, copyright ownership of outputs
+    *   Model version changes (major upgrades or model replacement) require ADR creation (see §1.17).
+    *   **Model Drift Detection**: Within 72 hours of any model version update, compare output quality, cost, and latency across 3 metrics; if anomalies are detected, immediately execute a rollback.
 
 ### 9.5. Human-in-the-Loop Mandate
 
@@ -525,6 +663,10 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 *   **Agentic Loop Detection**:
     *   Always implement timeout mechanisms and maximum retry limits to detect patterns where an agent repeats the same operation (infinite loops, oscillation).
     *   When a threshold is reached (e.g., the same tool fails 3 consecutive times, or total step count exceeds 50), stop autonomous execution and **escalate to a human.**
+*   **AI Agent Memory Isolation**:
+    *   In environments where multiple agents operate in parallel, the design must **physically prevent one agent's context (session variables, intermediate state) from leaking into or contaminating another agent's context (Context Bleed).**
+    *   Each agent's memory and state must be managed in an isolated sandbox; sharing must occur only through explicit interfaces (APIs, message queues, etc.).
+    *   **Long-term Memory Validation**: When using vector stores or external memory (e.g., mem0, Zep), mandate Attribution tracking of "who wrote what" and regular Purge of stale memories (TTL settings).
 *   **MCP (Model Context Protocol) Governance**:
     *   MCP servers enable direct access to external resources (DB, file systems, external APIs); therefore, the **principle of least privilege** must be strictly applied.
     *   The public scope of MCP tools defaults to "Read-Only"; write operations are only unlocked via an explicit Allowlist.
@@ -578,18 +720,24 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 | Cost, design-time cost, 30% rule, Cost-to-Serve | §1.8 Cost as First-Class Citizen |
 | Cognitive load, complexity, Self-Documenting, Two-Pizza | §1.9 Cognitive Load Minimization |
 | Security-by-Design, STRIDE, Zero Trust, SAST, CVE, supply chain | §1.10 Security-by-Design |
-| AI amplification, prompt engineering, AI output verification, context management | §1.11 AI-Augmented Engineering |
+| AI amplification, prompt engineering, AI output verification, Vibe Coding ban | §1.11 AI-Augmented Engineering |
 | Privacy by Design, GDPR, PII, data minimization, consent architecture | §1.12 Privacy-by-Architecture |
 | Accessibility, WCAG, EAA, ADA, A11y, POUR, inclusive design | §1.13 Accessibility-by-Design |
-| Multi-agent, MCP, Prompt Injection, agent loop detection | §9.6 Multi-Agent Orchestration |
+| PQC, post-quantum cryptography, Crypto Agility, ML-KEM, ML-DSA | §1.14 Post-Quantum Readiness |
+| Regulatory compliance, Compliance-as-Code, EU AI Act, DORA, data residency | §1.15 Regulatory Agility |
+| Developer wellbeing, sustainable velocity, burnout, psychological safety, learning budget | §1.16 Developer Wellbeing |
+| Multi-agent, MCP, Prompt Injection, agent loop detection, memory isolation | §9.6 Multi-Agent Orchestration |
 | AI safety, alignment, emergency stop, corrigibility, self-modification ban | §9.7 AI Safety & Alignment |
 | AI-generated code, provenance, license contamination, code risk classification | §8.7 AI-Generated Code Provenance |
+| SBOM, dependencies, Shadow Dependency, CycloneDX, SPDX | §1.10 Security-by-Design |
+| Tech Radar, Anti-Golden Hammer, ADR, Deprecation, technology selection | §1.17 Technology Governance |
+| Dual Newspaper Test, Model Governance, model drift, AI model selection | §9.4 Ethical AI Governance |
 | CEO, CTO, SRE, role definitions | §2 Elite Roles |
 | Language setting, English, Japanese | §3 Language Standard |
 | Constitution, Universal, Blueprint | §4 Governance |
 | Existing functionality protection | §4.1 Existing Functionality |
 | Sustainability, GreenOps, SCI, carbon | §6 Silicon Valley DNA |
-| Async-First, ADR, decision log, asynchronous communication | §6 Silicon Valley DNA |
+| Async-First, ADR, decision log, Disagree and Commit | §6 Silicon Valley DNA |
 | AI collaboration, proactive proposal, yapping ban | §5 AI-Owner Collaboration |
 | Day 1, Radical Candor, 10x thinking | §6 Silicon Valley DNA |
 | Git ban, push ban, deploy | §8.1 Deployment Ban |
@@ -600,7 +748,7 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 | Branch hygiene, cleanup | §8.6 Branch Hygiene |
 | AI agent, autonomous AI, delegation level | §9.1 AI Delegation Maturity Model |
 | Reversibility, irreversible ops, Git Safety | §9.2 Reversibility-First Principle |
-| Reasoning transparency, hallucination guard, uncertainty | §9.3 Transparent Reasoning Protocol |
+| Reasoning transparency, hallucination guard, uncertainty, Chain-of-Thought audit | §9.3 Transparent Reasoning Protocol |
 | Ethics, bias, privacy, EU AI Act | §9.4 Ethical AI Governance |
 | Human oversight, escalation, approval gate | §9.5 Human-in-the-Loop Mandate |
 
@@ -618,6 +766,10 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 | §1.11 AI-Augmented Engineering | `ai/000_ai_governance`, `quality/000_qa_testing`, `engineering/000_engineering_standards` |
 | §1.12 Privacy-by-Architecture | `security/100_data_governance`, `security/000_security_privacy` |
 | §1.13 Accessibility-by-Design | `design/000_design_ux`, `quality/000_qa_testing` |
+| §1.14 Post-Quantum Readiness | `security/000_security_privacy`, `engineering/000_engineering_standards`, `security/200_oss_compliance` |
+| §1.15 Regulatory Agility | `security/100_data_governance`, `core/100_governance`, `product/000_product_strategy` |
+| §1.16 Developer Wellbeing | `engineering/000_engineering_standards`, `quality/000_qa_testing`, `core/100_governance` |
+| §1.17 Technology Governance | `engineering/000_engineering_standards`, `core/100_governance`, `quality/000_qa_testing` |
 | §2 Elite Roles | `product/000_product_strategy`, `product/300_revenue_monetization` |
 | §3 Language Standard | `core/200_language_protocol` |
 | §4 Governance | `core/100_governance` |

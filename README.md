@@ -252,7 +252,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.github/copilot-instructions.md` | 🔶 **Copilot のみ** / **Copilot only** | Copilot固有のポインター。`init.sh` で自動コピー / Copilot-specific pointer. Auto-copied by `init.sh` |
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
-| `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 🆕 v1.4.0: `UserPromptSubmit` 強制執行フック。`init.sh` で自動コピー / Enforcement hook. Auto-copied by `init.sh` |
+| `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | `UserPromptSubmit` 強制執行フック。`init.sh` で自動コピー / Enforcement hook. Auto-copied by `init.sh` |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -272,7 +272,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
 | 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
-### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.4.0+)
+### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism
 
 > **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、`UserPromptSubmit` フックが**毎ユーザープロンプト送信時**に AGENTS.md プロトコルの暗黙実行を強制します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題を物理的に防止する仕組みです。
 >
@@ -325,9 +325,9 @@ cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/
 
 # === Claude Code ===
 # Claude CodeはCLAUDE.mdをネイティブに読むのでポインターをコピー。
-# v1.4.0以降は強制執行フック (.claude/settings.json) も配置する。
+# 強制執行フック (.claude/settings.json) も配置する。
 # Claude Code reads CLAUDE.md natively — copy the pointer file.
-# v1.4.0+: also place the enforcement hook (.claude/settings.json).
+# Also place the enforcement hook (.claude/settings.json).
 cp CLAUDE.md /path/to/your/project/CLAUDE.md
 mkdir -p /path/to/your/project/.claude
 cp .claude/settings.json /path/to/your/project/.claude/settings.json
@@ -391,7 +391,7 @@ your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
  ├── CLAUDE.md                    ← Claude Code のみ（ポインター） / Claude Code only (pointer)
  ├── .claude/                     ← Claude Code のみ / Claude Code only
- │    └── settings.json           ← 🆕 v1.4.0: UserPromptSubmit 強制執行フック（コミット必須） / Enforcement hook (must commit)
+ │    └── settings.json           ← UserPromptSubmit 強制執行フック（コミット必須） / Enforcement hook (must commit)
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer
