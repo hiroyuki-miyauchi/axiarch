@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] — 2026-05-06
+
+### 🆕 Universal Rules 大規模拡充 + Hook 言語遵守強化 / Major Universal Rules Expansion + Hook Language Enforcement
+
+axiarch v1.4.0 リリース後の累積改修を統合する minor bump。Universal Rules 6 ファイル（`core_mindset.md` / `510_aws_cloud.md` / `600_git_workflow.md` / `700_appstore_compliance.md` / `900_fundraising_ir.md` / `800_internationalization.md`）を 2026 Staff Engineer 基準で大規模拡充。`.claude/settings.json` の `UserPromptSubmit` フックには **Project Native Language 厳守** 指令を追加し、AI が日本語プロジェクトで英語見出し・要約を出すサボりを物理的に防止。
+
+Aggregates the cumulative refactors after the v1.4.0 release. Major expansion of 6 Universal Rule files (`core_mindset.md` / `510_aws_cloud.md` / `600_git_workflow.md` / `700_appstore_compliance.md` / `900_fundraising_ir.md` / `800_internationalization.md`) to 2026 Staff Engineer standards. Enhanced the `UserPromptSubmit` hook in `.claude/settings.json` with an explicit **Project Native Language adherence** directive that physically prevents the AI from emitting English headings/summaries in Japanese-native projects.
+
+### Added — Universal Rules 拡充（Constitution Amendment）
+
+- **`axiarch-rules/{ja,en}/universal/core/000_core_mindset.md` Rev.14** — §1.14 Post-Quantum Readiness / §1.15 Regulatory Agility / §1.16 Developer Wellbeing & Sustainable Velocity / §1.17 Technology Governance（main の Rev.9 由来）+ §1.18 SBOM & Supply Chain Security / §1.19 AI-Native Test Strategy / §1.20 Evaluation-Driven Development / §1.21 Feature Flag & Progressive Delivery / §1.22 Platform Reliability Engineering / §1.23 Developer Experience as Product / §1.24 Responsible AI Disclosure / §1.25 Data Architecture Sovereignty / §1.26 API Design Governance / §1.27 Green Software Engineering / §1.28 Incident Response & Business Continuity / §1.29 AI Regulatory Compliance Governance / §1.30 Ethical Engineering & Societal Impact / §1.31 Type Safety as Foundation / §1.32 Compositional Architecture / §1.33 Inversion Thinking & Pre-Mortem / §1.34 YAGNI Discipline & Rule of Three / §1.35 Strong Opinions, Weakly Held / Disagree & Commit / §9.8 Model Governance / §9.9 Agentic Workflow Design Patterns / §9.10 AI Cost Governance / §9.11 Computer Use Agent Safety を追加 — 総 46 セクション / Total 46 sections
+- **`axiarch-rules/{ja,en}/universal/engineering/510_aws_cloud.md`** — Supreme Directive 0.9 Resilience & Chaos Engineering / 0.10 Observability-First / 0.11 Shared Responsibility & Compliance-by-Design / 0.12 Operational Excellence Culture を追加（Directive 0.1〜0.12 構成）/ Added 4 new directives
+- **`axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md`** — 18 ルール / 5 Part → **45 ルール / 10 Part** に大規模拡充。§2.6 Merge Strategy / §2.7 Force-Push Protocol / §2.8 Commit Body & Trailers (AI Co-Authored-By) / §2.9 Fixup・Autosquash / §2.10 Conventional Commit Validation / Part 6 Branch Protection & Code Review (4 rules incl. §6.4 AI-Assisted PR Review) / Part 7 Tags, Releases & History (7 rules incl. §7.6 git maintenance) / Part 8 Repository Configuration & Assets (4 rules incl. §8.3 .git-blame-ignore-revs) / Part 9 Modern Tooling & Automation (5 rules incl. §9.4 Shallow Clone & Sparse Checkout) / Part 10 Anti-Pattern Catalog / Expanded from 18 rules / 5 Parts to 45 rules / 10 Parts
+- **`axiarch-rules/{ja,en}/universal/product/700_appstore_compliance.md`** — 5 Part / 101 行 → **20 Part / 約 1,099 行**。Apple Privacy Stack（ATT・Privacy Manifests `PrivacyInfo.xcprivacy`・Required Reason API・Privacy Nutrition Labels）/ StoreKit 2 / Sign in with Apple / Account Deletion 5.1.1(v) / TestFlight・Phased Release・Expedited / Google Play AAB 必須化 / Play Integrity API / 子供向けアプリ（COPPA・GDPR-K）/ DMA Compliance / Generative AI App Compliance / Specialized Verticals（Health/Finance/Crypto/Games） / Expanded from 5 Parts / 101 lines to 20 Parts / ~1,099 lines
+- **`axiarch-rules/{ja,en}/universal/product/900_fundraising_ir.md`** — 7 Part / 340 行 → **15 Part / 約 1,110 行**。Cap Table & ESOP 設計 / SAFE / Convertible Note / Bridge / KISS / Term Sheet 数学（Liquidation Preference・Anti-Dilution Full Ratchet vs Weighted Average）/ FEFTA・CFIUS・EU FDI Screening / MNPI / Tax Considerations（QSBS）/ IPO Preparation / M&A Exit / Founder Wellbeing / Investor Tech Stack / Anti-Pattern Catalog / Expanded from 7 Parts / 340 lines to 15 Parts / ~1,110 lines
+- **`axiarch-rules/{ja,en}/universal/product/800_internationalization.md` v6.0 → v6.1** — 25 Part / 114 セクション → **29 Part / 133 セクション**。Part XXVI 2026 規制フロンティア（EU AI Act Article 50/13/11/52・India DPDP Schedule 1 22 言語・Saudi/UAE PDPL Arabic 義務・China PIPL/HK PDPO/Taiwan PDPA・LATAM/Africa: LGPD/LFPDPPP/POPIA/NDPA）/ Part XXVII 新興UXパラダイム（AR/XR・WebXR・Generative UI 多言語・CRDT Yjs/Automerge・Shadow DOM/Web Components 境界・Foldable/Wearable/CarPlay）/ Part XXVIII 翻訳品質フロンティア（MQM ASTM F2575 deep dive・Constrained Decoding・xCOMET-22/CometKiwi・Domain Adaptation・Translation Safety Classifiers）/ Part XXIX 危機対応・レジリエンス（多言語インシデント・緊急通信・TMSフェイルオーバー・多言語VDP）/ Expanded from 25 Parts / 114 sections to 29 Parts / 133 sections
+
+### Changed
+
+- **`.claude/settings.json`** — `UserPromptSubmit` フックの system reminder メッセージに `Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all)` / `応答言語は AGENTS.md の Project Native Language に厳守（見出し・要約・ラベル・箇条書き・表すべて）` を追加。AI が日本語プロジェクトで英語見出し・要約・ラベルを出すサボりを物理的に防止 / Hook reminder now explicitly enforces `Project Native Language` adherence for all output structures, physically blocking the language-mixing failure mode
+- **`axiarch-rules/{ja,en}/INDEX.md`** — 拡充された Universal Rules（000_core_mindset / 510_aws_cloud / 600_git_workflow / 700_appstore_compliance / 800_internationalization / 900_fundraising_ir）の説明欄を全件更新 / All affected INDEX entries updated
+- **`init.sh`** — `AXIARCH_VERSION` 1.4.0 → 1.5.0 / Bumped version
+- **`README.md`** — Version バッジは GitHub Releases 連動で自動更新 / Version badge auto-updates via GitHub Releases
+- **`ROADMAP.md`** — 安定版 v1.4.0 → v1.5.0、JA/EN リリース履歴追記、旧「v1.5.0 検討中」セクションを v1.6.0 に繰り下げ / Stable bumped, history added, prior "v1.5.0 (under consideration)" section deferred to v1.6.0
+- **`llms-full.txt`** — Version 1.4.0 → 1.5.0
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — Universal Rules の拡充は既存ルール非破壊・純粋追補。既存採用者は `git pull` のみで取得可能 / Fully backwards compatible: all expansions are additive; existing adopters obtain new rules via `git pull`
+- ✅ **既存ファイルレイアウト変更なし** — `init.sh` / 配布物の構造は v1.4.0 と同一 / No layout changes; distribution structure identical to v1.4.0
+- ⚠️ **トークンコスト** — Universal Rules 大規模拡充により、関連タスク（Git workflow / appstore / fundraising / i18n）でのロード時のトークン量が増加。`task.md` 記録義務 + LOADING_PROTOCOL の Step 2 自律選択により、必要セクションのみのオンデマンドロードを推奨 / Token cost rises during related-task loading; mitigate via on-demand section selection per LOADING_PROTOCOL Step 2
+- ⚠️ **フックメッセージサイズ** — system reminder に約 60 トークン追加（前バージョン比 +75%）。プロンプトキャッシュとは独立だが影響軽微 / Hook reminder grows by ~60 tokens (+75% over prior); negligible impact independent of prompt cache
+- 📌 **アップグレード手順** — `git pull` → `init.sh` 再実行（フックメッセージ更新を取得するため必須）/ Upgrade: `git pull` then re-run `init.sh` (mandatory to pick up the new hook reminder)
+
+### References
+
+- PR #25 — `feat: Universal core_mindset Rev.9 + AWS Cloud Directives 0.9-0.12`
+- PR #26 — `feat: core_mindset Rev.14 (46 sections) + 600_git_workflow expansion (10 parts / 45 rules)`
+- PR #27 — `feat: deep expansion of 700_appstore_compliance + 900_fundraising_ir + 800 v6.1 + hook language enforcement`
+
+---
+
 ## [1.4.0] — 2026-05-04
 
 ### 🆕 Claude Code Enforcement Mechanism — UserPromptSubmit Hook / Claude Code 強制執行機構

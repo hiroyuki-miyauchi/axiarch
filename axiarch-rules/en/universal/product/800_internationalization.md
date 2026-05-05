@@ -2,14 +2,14 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Revision Date: 2026-03-28 | Version 6.0 — Technology Update (Temporal Stage 4 / CLDR 49 / Unicode 18.0 / next-intl 4.0)
+> Revision Date: 2026-05-06 | Version 6.1 — Regulatory Frontier / Emerging UX / Translation Quality / Crisis Response Expansion
 
 > [!IMPORTANT]
 > **Supreme Directive**
 > "Internationalization is not translation — it is architectural respect for every user's culture."
 > All i18n decisions MUST prioritize cultural accuracy, architectural extensibility, and user trust.
 > **Cultural Accuracy > Functional Parity > Performance > Speed** — Enforce this priority hierarchy strictly.
-> **25 Parts, 114 Sections structure.**
+> **29 Parts, 133 Sections structure.**
 
 ---
 
@@ -40,6 +40,10 @@
 - [Part XXIII: Language-Specific — LATAM, Africa & Emerging Markets](#part-xxiii-language-specific--latam-africa--emerging-markets)
 - [Part XXIV: 30 Anti-Patterns](#part-xxiv-30-anti-patterns)
 - [Part XXV: Organization, Process & Maturity](#part-xxv-organization-process--maturity)
+- [Part XXVI: 2026 Regulatory Frontier — Multilingual Compliance](#part-xxvi-2026-regulatory-frontier--multilingual-compliance)
+- [Part XXVII: Emerging UX Paradigms — XR, Generative UI, Real-time Collaboration](#part-xxvii-emerging-ux-paradigms--xr-generative-ui-real-time-collaboration)
+- [Part XXVIII: Translation Quality Frontier — MQM, QE, Domain Adaptation](#part-xxviii-translation-quality-frontier--mqm-qe-domain-adaptation)
+- [Part XXIX: Crisis Response & Resilience i18n](#part-xxix-crisis-response--resilience-i18n)
 - [Appendix A: Reverse Lookup Index](#appendix-a-reverse-lookup-index)
 - [Appendix B: Cross-References](#appendix-b-cross-references)
 
@@ -1202,6 +1206,244 @@ npx messageformat-validator locales/**/*.json
 
 ---
 
+## Part XXVI: 2026 Regulatory Frontier — Multilingual Compliance
+
+### Section 115: EU AI Act Multilingual Compliance (Effective August 2026)
+
+- **Article 50 (Transparency Obligations)**: Mandatory labeling for AI-generated content, chatbots, and deepfakes. **Display in user's native language or at minimum the 24 EU official languages**
+- **Article 13 (GPAI Instructions for Use)**: General-Purpose AI model providers MUST provide Instructions for Use in all 24 EU official languages (Annex XII)
+- **Article 11 (Technical Documentation)**: Risk classification, test results, and evaluation metrics translated (minimum: representative EU languages — English, German, French, Spanish, Italian)
+- **Article 52 (Foundation Model Transparency)**: Publish training data summary in multiple languages
+- **AI Disclosure in Multilingual UI**: Phrases equivalent to "This is AI-generated" MUST be **translated and deployed in all UI locales**. English-only display is a violation
+- **Penalties**: Up to €35M or 7% of global annual turnover (1.75x of GDPR). Multilingual disclosure gaps treated as serious violations
+- **Implementation Pattern**: Convert AI-generated banners, watermarks, and modals into `i18n keys` to ensure they pass through the translation pipeline for all supported languages
+- → See `security/100_data_governance.md` EU AI Act section
+
+### Section 116: India DPDP Act Multilingual Notice Mandate
+
+- **DPDP Act 2023 / Enforcement 2025-2026**: Schedule 1 languages = **22 languages designated by India's Constitution 8th Schedule** (Hindi, Bengali, Telugu, Marathi, Tamil, Urdu, Gujarati, Kannada, Odia, Malayalam, Punjabi, Assamese, Maithili, Santali, Kashmiri, Nepali, Konkani, Sindhi, Dogri, Manipuri, Bodo, Sanskrit)
+- **Notice Translation Mandate**: Data Fiduciary MUST provide Privacy Notice in **the Schedule 1 language chosen by the user** (DPDP §6(3))
+- **Multilingual Consent Manager**: DPDP plans a centralized Consent Manager — UI must support 22 languages
+- **Children's (< 18) Protection**: Verifiable parental consent must also be obtained in multiple languages
+- **Cross-Border Data Transfer Whitelist**: Per-language disclosure for government-designated country lists
+- **Penalties**: Up to ₹250 crore (~$30M USD) per violation type. Multilingual notice gaps are serious violations
+- **Implementation Pattern**: Manage 22-language Privacy Notice versions centrally in CMS, automatically deliver based on user locale
+- → See `security/100_data_governance.md` India regulation section
+
+### Section 117: Middle East / GCC — Saudi PDPL & UAE PDPL Arabic Mandate
+
+- **Saudi PDPL (effective 2023 / fully enforced 2024)**: Privacy Notice **MUST be in both Arabic + English**. Arabic-only or English-only is a violation
+- **UAE PDPL (Federal Decree-Law No. 45/2021)**: Respect user's language choice; Arabic/English bilingual UI mandatory
+- **Bahrain, Kuwait, Oman, Qatar**: Each country's PDPL trends toward Arabic-First / English-Optional; consumer-facing requires Arabic
+- **DIFC Data Protection Law 2020**: English fallback acceptable within Free Zone, but Arabic display recommended for connections outside the region
+- **Sharia Compliance × i18n**: Interest disclosure for Islamic Banking products requires Arabic with "Halal Certificate" linkage; mind region-specific product name translations
+- **Government API Integration**: When integrating with Absher (KSA), UAE Pass, etc., default to Arabic display
+- → See `security/100_data_governance.md` Middle East / `product/300_revenue_monetization.md` Islamic Finance
+
+### Section 118: China PIPL Multilingual Cross-Border Data Transfer Disclosure
+
+- **PIPL Article 39 (Cross-Border Data Notice)**: Mandatory disclosure of transfer destination, purpose, retention period **in Simplified Chinese**. Even on multilingual UI, the Chinese version is the original
+- **CAC Standard Contract (effective 2023)**: Chinese version of cross-border data transfer contracts is the legally controlling version
+- **Cybersecurity Review for AI (strengthened 2025)**: Multilingual safety assessment for generative AI services
+- **Hong Kong PDPO (independent legal system)**: Traditional Chinese + English bilingual mandatory; Simplified Chinese only is a violation
+- **Macau Personal Data Protection Act**: Traditional Chinese + Portuguese + English trilingual recommended
+- **Taiwan PDPA Amendment (2025)**: Traditional Chinese mandatory; Simplified-only violates consumer protection law
+- **Implementation Pattern**: For Chinese-speaking regions, **strictly separate "Simplified Chinese (zh-CN)" and "Traditional Chinese (zh-TW / zh-HK)" as distinct locales**
+- → See `security/100_data_governance.md` Greater China section
+
+### Section 119: LATAM & Africa Emerging Regulatory Frameworks
+
+- **Brazil LGPD (fully enforced)**: Portuguese (pt-BR) mandatory; ANPD strengthening enforcement of multilingual display violations
+- **Mexico LFPDPPP Amendment (2025)**: Spanish (es-MX) + indigenous language consideration (Náhuatl, Maya) mandate progressing
+- **Colombia Ley 1581 / Decreto 1377**: Spanish (es-CO) mandatory; SIC (Industry & Commerce Superintendency) reviews multilingual appropriateness
+- **Argentina PDPA Reform (planned 2026)**: Targeting GDPR Adequacy; Spanish (es-AR) + Portuguese adjacent consideration
+- **South Africa POPIA**: English + Afrikaans + 9 official languages (Zulu, Xhosa, Sotho, etc.) consideration; Information Regulator monitoring
+- **Nigeria NDPA 2023**: English + Hausa, Yoruba, Igbo consideration, especially in finance and healthcare
+- **Kenya DPA 2019**: English + Swahili bilingual recommended; Office of Data Protection Commissioner provides guidance
+- **Common Implementation Pattern**: Beyond official languages, design **minority-language Privacy Notice versions** delivered via CDN with regional fallback
+- → See `security/100_data_governance.md` Emerging Markets / `product/000_product_strategy.md` Tier Strategy
+
+---
+
+## Part XXVII: Emerging UX Paradigms — XR, Generative UI, Real-time Collaboration
+
+### Section 120: AR/XR & WebXR i18n
+
+- **3D Spatial Text**: Multilingual text rendering in WebXR / Three.js / Unity / Unreal
+- **Text Occlusion**: Ensure readability of multilingual text hidden behind objects (depth-aware rendering)
+- **RTL in 3D**: Render Arabic and Hebrew right-origin layout correctly in 3D space
+- **CJK 3D Fonts**: Optimize 3D rendering performance of NotoSans CJK; per-language Font Atlas splitting
+- **Multilingual Voice Input**: Multilingual voice command support in VR/AR (Voice UI for hands-busy contexts)
+- **Avatar Multilingual**: Per-language Visemes for avatar mouth animations
+- **Apple Vision Pro / Meta Quest Language Inheritance**: Auto-inherit OS language to apps
+- **Spatial Audio Subtitles**: Subtitle placement in 3D space; field-of-view adaptive
+- → See `design/000_design_ux.md` XR Design
+
+### Section 121: Generative UI Multilingual Support
+
+- **Dynamic UI Generation × i18n**: Display AI-generated UI components and layouts in multiple languages without breakage
+- **Layout Adaptability**: Generated UI absorbs per-language text length variation (German +30%, CJK -50%) automatically
+- **Context Preservation**: Always inject user locale into Generative UI context
+- **Streaming UI Multilingual**: Chunk-level UI delivery to avoid partial-language mixing
+- **Generative Form Multilingual**: Convert AI-generated form labels and validation messages into translation keys
+- **Multimodal Generative UI**: Cultural appropriateness of UIs combining image + text + voice
+- **AI-Generated Error Recovery**: Graceful fallback for missing translations (English → user-language auto-translation)
+- → See `ai/000_ai_engineering.md` Generative UI section
+
+### Section 122: Real-time Multilingual Collaborative Editing (CRDT)
+
+- **CRDT × i18n**: Multilingual collaborative editing with Yjs / Automerge / Liveblocks
+- **Locale-Aware Merge**: Preserve cross-language edits on the same document via per-locale chunks
+- **Inline Translation Preview**: Real-time preview of one's edits in collaborator's locale
+- **Multilingual Comments**: Auto-detect comment language + display in receiver's locale
+- **Cultural Adaptation of Conflict Resolution**: Cultural appropriateness of merge conflict UI (collaborative vs individual-priority)
+- **Y.js Awareness Multilingual**: Display user presence with locale info
+- **Collaborative Spell-check Multilingual**: Per-language spell/grammar check (Hunspell + LanguageTool)
+- → See `engineering/300_web_frontend.md` Realtime Collaboration
+
+### Section 123: Shadow DOM & Web Components i18n Boundaries
+
+- **Cross-Boundary i18n Context**: Issue of Shadow DOM blocking i18n providers (e.g., React Context)
+- **Custom Element `:lang()` Selector Support**: Inherit parent's `lang` attribute even inside Shadow DOM
+- **Slotted Content Translation**: Translation responsibility boundary for content passed via `<slot>`
+- **Constructable Stylesheets × RTL**: Unified logical properties in shared CSS
+- **Shadow Parts Cultural Adaptation**: RTL support via `::part()` style overrides
+- **Microfrontend i18n**: Avoid translation key namespace collisions across mixed frameworks
+- **Module Federation × i18n**: Translation file delivery for dynamically loaded modules
+- → See `engineering/300_web_frontend.md` Web Components / Microfrontend
+
+### Section 124: Foldable & Multi-Display i18n
+
+- **Foldable Screen Per-Language Layout**: Design where unfolded UI accommodates long translations on Galaxy Fold / Pixel Fold
+- **Dual Display**: Pattern showing source on one display, translation on the other
+- **Surface Duo × i18n**: Multilingual side-by-side display in Microsoft Surface Duo Hinge UX
+- **CarPlay / Android Auto Multilingual**: In-vehicle UI multilingual support, region-specific voice commands
+- **Wearable i18n**: Optimize CJK/Arabic layout on Apple Watch / Wear OS extreme small UI
+- **Per-DPI Font Subsets**: Per-language font switching between high-DPI (Retina/4K) and low-DPI (IoT displays)
+- **TV / Tizen / WebOS i18n**: Multilingual large-screen UI; multilingual remote-control input
+- → See `design/000_design_ux.md` Responsive / Multi-Device
+
+---
+
+## Part XXVIII: Translation Quality Frontier — MQM, QE, Domain Adaptation
+
+### Section 125: MQM (Multidimensional Quality Metrics) Deep Dive
+
+- **ASTM F2575 / MQM 2.0 Standard**: Translation quality metrics standardized by ASTM International
+- **MQM Issue Typology**: 7 main categories × 30+ detailed types
+  - Accuracy (mistranslation, addition, omission, untranslated)
+  - Fluency (grammar, spelling, punctuation, typo)
+  - Terminology (term inconsistency, out-of-domain)
+  - Style (style mismatch, verbosity)
+  - Locale Convention (number, date, currency formatting)
+  - Audience Appropriateness (reader fit)
+  - Design (tags, line breaks, formatting)
+- **Severity Weighting**: Minor (1) / Major (5) / Critical (25)
+- **MQM Score Formula**: `100 - (Σ(severity × count) / total_words × 100)`
+- **Quality Standards**: Marketing/Legal 95+, UI 90+, Help Docs 85+
+- **MQM Dashboard Integration**: Auto-reporting via TMS / LSP integration
+- **Comparison with AI Evaluation**: Correlation analysis between COMET (automatic) and MQM (human)
+- → See `quality/000_qa_testing.md` Quality Metrics
+
+### Section 126: Constrained Decoding & Terminology Consistency
+
+- **Constrained Beam Search**: Decoding that enforces required appearance of glossary terms
+- **Lexical Constraints**: Force consistent translation of brand names, trademarks, technical terms
+- **Trie-based Constrained Decoding**: Fast constraint application via term Trie construction
+- **Soft vs Hard Constraints**: Differentiate between term enforcement (Hard) and recommendation (Soft)
+- **Glossary Versioning**: Glossary version control with rollback support
+- **Multimodal Constraints**: Apply terminology consistency even to in-image text (post-OCR translation)
+- **DNT (Do Not Translate) List**: Exclude product names, code snippets, file names from translation
+- → See `ai/000_ai_engineering.md` Constrained Generation
+
+### Section 127: Quality Estimation Without Reference
+
+- **xCOMET-22 / xCOMET-XL**: Latest reference-free quality estimation models
+- **CometKiwi**: Multilingual QE model with low-resource language support
+- **Sentence-level QE vs Word-level QE**: Sentence-level vs word-level quality estimation
+- **Confidence Score Utilization**: Threshold-based human review routing
+- **Active Learning**: Prioritize low-confidence segments for human review → model retraining
+- **QE Drift Detection**: Detect QE model accuracy degradation in production (domain shift adaptation)
+- **Multilingual QE Benchmarks**: Leverage WMT QE Shared Task results
+- → See `ai/000_ai_engineering.md` Quality Estimation
+
+### Section 128: Domain Adaptation & Vertical Translation
+
+- **Domain Adaptation Strategies**:
+  - **In-Context Learning**: Few-shot term examples
+  - **LoRA Fine-tuning**: Lightweight Adapter for domain specialization
+  - **Full Fine-tuning**: Large-scale domain-specialized model
+- **Legal Translation**: Strict legal terminology, case-law citations, contract clause structure preservation
+- **Medical Translation**: Compliance with ICD-10/SNOMED medical terminology standards; patient-friendly versions
+- **Financial Translation**: Numbers, currency, regulatory terms, Bloomberg / Reuters style adherence
+- **Technical Translation**: Consistency across API documentation, code comments, error messages
+- **Marketing Translation (Transcreation)**: Cultural recreation rather than literal translation
+- **Game Translation**: Character limits, tone, fan-convention awareness
+- **Auto-build Domain Glossary**: Term extraction from parallel corpus → human review
+- → See `ai/000_ai_engineering.md` Fine-tuning section
+
+### Section 129: Translation Safety Classifiers & Harmful Content Detection
+
+- **Multilingual Toxicity Classifiers**: Multilingual versions of Detoxify / Perspective API / Llama Guard
+- **Hallucination Detection**: Detect fact alteration / fabrication in translation
+- **Faithfulness Classifier**: Score semantic alignment between source and translation
+- **Cultural Insensitivity Detection**: Auto-detect culturally inappropriate expressions
+- **Bias Detection**: Cross-language detection of gender/race/religion bias
+- **PII Leak in Translation**: Detect PII leakage during translation process (especially when sent to AI APIs)
+- **Output Filter Pipeline**: Translation complete → safety classifier → block/retranslate on failure
+- **Red Teaming for Translation**: Adversarial testing of translation safety
+- → See `security/000_security_privacy.md` AI Security
+
+---
+
+## Part XXIX: Crisis Response & Resilience i18n
+
+### Section 130: Multilingual Incident Response & Status Pages
+
+- **Multilingual Statuspage**: Multilingual support for Atlassian Statuspage / Cachet / Better Stack
+- **Instant Translation of Incident Notifications**: English-first → instant translation pipeline → all-language delivery (< 5 min)
+- **Per-Severity Language Priority**: P1 (all languages parallel) / P2 (major languages) / P3 (English + α)
+- **Structured Messages**: ICU MessageFormat-based templates with variable injection — zero mistranslation
+- **Multilingual Timestamp Display**: Auto-convert to user locale, with UTC reference
+- **Multilingual Postmortem**: Per-language RCA report delivery; technical terms as DNT
+- **Webhook → Slack/Teams Multilingual**: Locale-aware notification bots
+- → See `operations/400_site_reliability.md` Incident Response
+
+### Section 131: Multilingual Emergency Communications (Push / SMS / Email)
+
+- **APNs / FCM Locale Awareness**: Switch payload based on device language
+- **SMS Multilingual Constraints**: Absorb character-count differences between GSM-7 (alphanumeric, 160 chars) and UCS-2 (CJK, 70 chars)
+- **Email Multilingual MIME**: `Content-Type: text/html; charset=utf-8`; RFC 2047 encoding for From name
+- **Emergency Notification Templates**: Pre-approved multilingual templates for disasters, outages, security events
+- **Dialect & Honorifics**: Standard language and polite-form base for emergencies; avoid regional dialects
+- **Geofencing × Multilingual**: Region-specific language auto-selection (Tokyo → Japanese, San Francisco → English)
+- **Accessibility × Emergency**: WCAG-compliant multilingual screen-reader support for emergency information
+- → See `engineering/300_web_frontend.md` Push / Notification
+
+### Section 132: Localization Continuity & TMS Failover
+
+- **Avoid TMS Single Point of Failure**: Fallback when Phrase / Lokalise / Crowdin APIs fail
+- **Distributed Translation File Storage**: Triple backup of TMS + Git + S3
+- **Fallback Chain**: User language → parent language (fr-CA → fr-FR → fr) → English → key name display
+- **Build-time vs Runtime Fallback**: Build-time for static sites, runtime for SaaS
+- **CI/CD Translation File Validation**: Auto-detect Missing Key / Stale Key / Orphan Key
+- **Translation Bus Failures**: Ensure idempotency of translation memory update pipelines
+- **Disaster Recovery (DR)**: Regional replication of TMS data; RTO/RPO settings
+- → See `operations/400_site_reliability.md` DR / `engineering/000_engineering_standards.md` CI/CD
+
+### Section 133: Multilingual Bug Bounty & Vulnerability Disclosure Programs
+
+- **Multilingual VDP**: Publish Vulnerability Disclosure Program pages in major languages
+- **PGP/GPG Keys Multilingual**: Provide encryption key information for security reporting in multiple languages
+- **Multilingual Bug Bounty Platforms**: Multilingual support for HackerOne / Bugcrowd / Intigriti
+- **Report Triage Language**: Auto-detect language of incoming reports → route to appropriate-language responder
+- **CVE / CVSS Multilingual Descriptions**: Multilingual versions of public advisories (at minimum English + Japanese + Chinese)
+- **Responsible Disclosure Timeline**: Region-specific holiday consideration (Lunar New Year, Ramadan, etc.)
+- **Multilingual Incident Announcements**: Instant translation protocol for major vulnerability disclosure
+- → See `security/000_security_privacy.md` VDP / Responsible Disclosure
+
+---
+
 ## Appendix A: Reverse Lookup Index
 
 | Technology / Service | Related Sections |
@@ -1272,6 +1514,25 @@ npx messageformat-validator locales/**/*.json
 | Sustainable i18n | 114 |
 | Anti-Patterns | 106-110 |
 | Maturity Model | 111 |
+| EU AI Act Multilingual Compliance | 49, 62, 75, 115 |
+| India DPDP Act / Schedule 1 | 116 |
+| Saudi PDPL / UAE PDPL / GCC | 117 |
+| China PIPL / Hong Kong PDPO / Taiwan PDPA | 118 |
+| LGPD / LFPDPPP / POPIA / NDPA | 119 |
+| WebXR / AR / VR i18n | 120 |
+| Generative UI Multilingual | 121 |
+| CRDT / Yjs / Automerge | 122 |
+| Shadow DOM / Web Components | 123 |
+| Foldable / Wearable / CarPlay | 124 |
+| MQM / ASTM F2575 | 125 |
+| Constrained Decoding / Glossary | 126 |
+| xCOMET-22 / CometKiwi / QE | 127 |
+| Domain Adaptation / LoRA | 128 |
+| Translation Safety / Faithfulness | 129 |
+| Multilingual Statuspage / Incident | 130 |
+| Multilingual Push/SMS/Email Emergency | 131 |
+| TMS Failover / DR | 132 |
+| Multilingual VDP / Bug Bounty | 133 |
 
 ---
 
@@ -1313,3 +1574,13 @@ npx messageformat-validator locales/**/*.json
 | §85–§87 (Voice / Multimodal) | `ai/000_ai_engineering` |
 | §88–§105 (Language-Specific) | `design/000_design_ux`, `security/100_data_governance` |
 | §114 (Sustainable i18n) | `operations/600_cloud_finops` |
+| §115–§119 (Regulatory Frontier) | `security/100_data_governance`, `product/000_product_strategy` |
+| §120–§124 (Emerging UX Paradigms) | `design/000_design_ux`, `engineering/300_web_frontend`, `ai/000_ai_engineering` |
+| §125–§129 (Translation Quality Frontier) | `quality/000_qa_testing`, `ai/000_ai_engineering` |
+| §130–§133 (Crisis Response & Resilience) | `operations/400_site_reliability`, `security/000_security_privacy` |
+
+---
+
+**Last Updated**: 2026-05-06 (v1.5.0)
+**Authority**: Universal Constitution (axiarch core)
+**Classification**: Product — Global Expansion & i18n

@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.4.0  
+> **現在の安定版 / Current Stable**: v1.5.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -85,7 +85,20 @@
 
 ---
 
-### 🔮 v1.5.0 — エコシステム & 自動化（検討中）
+### ✅ v1.5.0 — Universal Rules 大規模拡充 + Hook 言語遵守強化（2026-05-06）
+
+- **`core_mindset.md` (Rev.14)** — §1.14-§1.17（Post-Quantum / Regulatory Agility / Developer Wellbeing / Technology Governance）+ §1.18-§1.35（SBOM / AI-Native Test / Evaluation-Driven / Feature Flag / Platform Reliability / DevX as Product / Responsible AI / Data Architecture / API Design / Green Software / Incident Response / AI Regulatory / Ethical Engineering / Type Safety / Compositional Architecture / Inversion Thinking / YAGNI / Strong Opinions Weakly Held）+ §9.8-§9.11（Model Governance / Agentic Workflow Patterns / AI Cost Governance / Computer Use Agent Safety）を追加。総 46 セクション
+- **`engineering/510_aws_cloud.md`** — Supreme Directives 0.9 Resilience & Chaos Engineering / 0.10 Observability-First / 0.11 Shared Responsibility & Compliance-by-Design / 0.12 Operational Excellence Culture を追加（合計 0.1〜0.12）
+- **`engineering/600_git_workflow.md`** — 18 ルール / 5 Part → **45 ルール / 10 Part** へ大規模拡充。§2.6 Merge Strategy / §2.7 Force-Push Protocol / §2.8 Commit Body & Trailers / §2.9 Fixup・Autosquash / §2.10 Conventional Commit Validation 追加、Part 6 Branch Protection & Code Review、Part 7 Tags/Releases/History、Part 8 Repository Configuration & Assets、Part 9 Modern Tooling & Automation、Part 10 Anti-Pattern Catalog 新設
+- **`product/700_appstore_compliance.md`** — 5 Part / 101 行 → **20 Part / 約 1,099 行**（Apple Privacy Stack: ATT・Privacy Manifests・Required Reason API・Privacy Nutrition Labels、StoreKit 2、Sign in with Apple、Account Deletion 5.1.1(v)、TestFlight、Google Play AAB、Play Integrity API、子供向けアプリ・DMA・GenAI コンプライアンス、Specialized Verticals）
+- **`product/900_fundraising_ir.md`** — 7 Part / 340 行 → **15 Part / 約 1,110 行**（Cap Table & ESOP / SAFE・Convertible Note / Term Sheet 数学・Anti-Dilution / FEFTA・CFIUS・MNPI・税制 / IPO 準備 / M&A Exit / Founder Wellbeing / Investor Tech Stack / Anti-Pattern Catalog）
+- **`product/800_internationalization.md` (v6.1)** — 25 Part / 114 セクション → **29 Part / 133 セクション**。Part XXVI 2026 規制フロンティア（EU AI Act / India DPDP / Saudi PDPL / China PIPL / LATAM・アフリカ）、Part XXVII 新興UXパラダイム（XR・Generative UI・CRDT・Shadow DOM・Foldable）、Part XXVIII 翻訳品質フロンティア（MQM ASTM F2575・Constrained Decoding・xCOMET-22 / CometKiwi・Domain Adaptation・翻訳安全性分類器）、Part XXIX 危機対応・レジリエンス を追加
+- **`.claude/settings.json` フックメッセージ強化** — `UserPromptSubmit` system reminder に `Output language MUST follow Project Native Language in AGENTS.md（見出し・要約・ラベル・箇条書き・表すべて）` を追加。AI が日本語プロジェクトで英語見出し・要約を出すサボりを物理的に防止
+- **後方互換性 100%** — Universal Rules 拡充は既存ルール非破壊・純粋追補。フックメッセージ強化は既存採用者にも `git pull` で自動適用
+
+---
+
+### 🔮 v1.6.0 — エコシステム & 自動化（検討中）
 
 - **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
@@ -192,7 +205,20 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
-### 🔮 v1.5.0 — Ecosystem & Automation (Under Consideration)
+### ✅ v1.5.0 — Major Universal Rules Expansion + Hook Language Enforcement (2026-05-06)
+
+- **`core_mindset.md` (Rev.14)** — Added §1.14-§1.17 (Post-Quantum / Regulatory Agility / Developer Wellbeing / Technology Governance) + §1.18-§1.35 (SBOM / AI-Native Test / Evaluation-Driven / Feature Flag / Platform Reliability / DevX as Product / Responsible AI / Data Architecture / API Design / Green Software / Incident Response / AI Regulatory / Ethical Engineering / Type Safety / Compositional Architecture / Inversion Thinking / YAGNI / Strong Opinions Weakly Held) + §9.8-§9.11 (Model Governance / Agentic Workflow Patterns / AI Cost Governance / Computer Use Agent Safety). Total 46 sections
+- **`engineering/510_aws_cloud.md`** — Added Supreme Directives 0.9 Resilience & Chaos Engineering / 0.10 Observability-First / 0.11 Shared Responsibility & Compliance-by-Design / 0.12 Operational Excellence Culture (now 0.1–0.12)
+- **`engineering/600_git_workflow.md`** — Expanded from 18 rules / 5 Parts to **45 rules / 10 Parts**. Added §2.6 Merge Strategy / §2.7 Force-Push Protocol / §2.8 Commit Body & Trailers / §2.9 Fixup・Autosquash / §2.10 Conventional Commit Validation, plus Part 6 Branch Protection & Code Review, Part 7 Tags/Releases/History, Part 8 Repository Configuration & Assets, Part 9 Modern Tooling & Automation, Part 10 Anti-Pattern Catalog
+- **`product/700_appstore_compliance.md`** — Expanded from 5 Parts / 101 lines to **20 Parts / ~1,099 lines** (Apple Privacy Stack: ATT, Privacy Manifests, Required Reason API, Privacy Nutrition Labels; StoreKit 2; Sign in with Apple; Account Deletion 5.1.1(v); TestFlight; Google Play AAB; Play Integrity API; Children's Apps; DMA; GenAI compliance; Specialized Verticals)
+- **`product/900_fundraising_ir.md`** — Expanded from 7 Parts / 340 lines to **15 Parts / ~1,110 lines** (Cap Table & ESOP / SAFE & Convertible Note / Term Sheet math & Anti-Dilution / FEFTA, CFIUS, MNPI, Tax / IPO Preparation / M&A Exit / Founder Wellbeing / Investor Tech Stack / Anti-Pattern Catalog)
+- **`product/800_internationalization.md` (v6.1)** — Expanded from 25 Parts / 114 sections to **29 Parts / 133 sections**. Added Part XXVI 2026 Regulatory Frontier (EU AI Act / India DPDP / Saudi PDPL / China PIPL / LATAM & Africa), Part XXVII Emerging UX Paradigms (XR / Generative UI / CRDT / Shadow DOM / Foldable), Part XXVIII Translation Quality Frontier (MQM ASTM F2575 / Constrained Decoding / xCOMET-22 / CometKiwi / Domain Adaptation / Translation Safety Classifiers), Part XXIX Crisis Response & Resilience
+- **`.claude/settings.json` hook message enhanced** — Added `Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all)` to the `UserPromptSubmit` system reminder. Physically prevents AI from emitting English headings/summaries in Japanese-native projects
+- **100% Backwards Compatible** — Universal Rules expansions are non-breaking and purely additive. Hook message enhancement applies automatically to existing adopters via `git pull`
+
+---
+
+### 🔮 v1.6.0 — Ecosystem & Automation (Under Consideration)
 
 - **Axiarch CLI** — Automated setup via `npx axiarch-init`
 - **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)

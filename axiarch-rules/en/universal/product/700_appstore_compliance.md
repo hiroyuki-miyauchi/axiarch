@@ -1094,6 +1094,6 @@ These four layers are **defense-in-depth, not duplicates**. All MUST be respecte
 
 ---
 
-**Last Updated**: 2026-05-06 (v1.5.0-pending)
+**Last Updated**: 2026-05-06 (v1.5.0)
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Product — Store Guidelines & Compliance
