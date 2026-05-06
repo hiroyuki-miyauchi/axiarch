@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.3  
+> **現在の安定版 / Current Stable**: v1.5.4  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -132,12 +132,30 @@
 
 ---
 
+### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
+
+- **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
+- **Check 3 にフォールバック分岐追加** — hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` リテラルが含まれることを確認することで、inline 形式（v1.4.0–v1.5.2）と externalized 形式（v1.5.3+）の双方で PASS する設計に
+- **Check 4 の grep pattern を拡張** — v1.5.2+ の transcript JSONL で hook 出力ラベルが `success` → `additional context` に変わっていたため、`grep -cE "UserPromptSubmit hook (success|additional context)"` で両方マッチするよう修正
+- **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `scripts/axiarch-boot-reminder.sh` のコメントと `scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
+- **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` を追記** — v1.5.3 新規スクリプトの言及漏れ訂正
+- **`core/010_project_lessons_log.md` (ja/en) に v1.5.4 教訓を結晶化（CRYSTAL §4 ACCUMULATE）** — 「hook format/command 変更時は診断 grep 対象も同 PR で更新する責務」をガバナンス domain に蓄積（2 件目、昇華閾値 3+ 未達のため §4 段階で完結）
+- **18 ラウンド調査で Check 3 else 分岐の false-negative bug 発見・修正** — hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
+- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
+- **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え（→ Lessons log に結晶化済）
+
+---
+
 ### 🔮 v1.6.0 — エコシステム & 自動化（検討中）
 
 - **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
 - **AI Agent Compatibility Matrix** — 各AIエージェントの動作確認状況を定期更新
 - **コミュニティ貢献プロンプト** — ユーザー投稿プロンプトの審査・統合フロー
+- **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
+- **`init.sh` 配布後の syntax 検証** — `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` を `bash -n` で配布後検証（v1.5.4 deferred、`.claude/settings.json` の `jq` 検証と対称化）
+- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 でバージョン記述ポリシー厳密化、汎用ファイルから version-free 化を完了させる）
+- **`decision: "block"` による prompt-level 物理強制** — 現状 v1.5.3 の動的 reminder 警告強化を超えて、`task.md` 記録欠落時に prompt 自体を遮断する選択肢（副作用大のため慎重検討）
 
 ---
 
@@ -287,12 +305,30 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
+### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
+
+- **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
+- **Check 3 fallback branch** — When the hook command delegates to `scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
+- **Check 4 grep pattern expanded** — v1.5.2+ transcripts log `UserPromptSubmit hook additional context` instead of the legacy `UserPromptSubmit hook success`. Pattern updated to `grep -cE "UserPromptSubmit hook (success|additional context)"` to match both
+- **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `scripts/axiarch-boot-reminder.sh` (header comment) and `scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
+- **`README.md` required-files table updated** — Added the missing reference to `axiarch-boot-reminder.sh` (introduced in v1.5.3 but never listed)
+- **`core/010_project_lessons_log.md` (ja/en) lesson crystallized (CRYSTAL §4 ACCUMULATE)** — "When changing hook format/command form, update the diagnostic's grep targets in the same patch" recorded under the Governance domain (2nd entry; below the 3+ promotion threshold, so §4 ACCUMULATE is sufficient)
+- **18th-round audit: Check 3 else-branch false-negative fix** — When the hook command contains neither `AXIARCH BOOT` literal nor `axiarch-boot-reminder.sh` reference (i.e. fully broken hook), the diagnostic was emitting `print_warn` without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI integrations would falsely report success. Now correctly fails the run
+- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
+- **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together (→ crystallized into the Lessons log)
+
+---
+
 ### 🔮 v1.6.0 — Ecosystem & Automation (Under Consideration)
 
 - **Axiarch CLI** — Automated setup via `npx axiarch-init`
 - **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)
 - **AI Agent Compatibility Matrix** — Regularly updated behavior verification matrix for each AI agent
 - **Community Prompt Contributions** — User-submitted prompt review and integration flow
+- **shellcheck CI integration** — Add static analysis for `scripts/*.sh` to `lint.yml` (deferred from v1.5.4)
+- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` after copy, mirroring the existing `jq` validation for `.claude/settings.json` (deferred from v1.5.4)
+- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**: 2026-05-06 (v1.5.0)` footers; keep date only, completing the version-free policy for generic files (started in v1.5.4)
+- **`decision: "block"` for prompt-level enforcement** — Beyond v1.5.3's dynamic-reminder warning approach, optionally block the prompt entirely when `task.md` lacks load-history (large side-effect, requires careful evaluation)
 
 ---
 

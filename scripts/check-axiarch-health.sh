@@ -95,11 +95,25 @@ elif command -v jq &>/dev/null; then
     print_pass "UserPromptSubmit hook defined (${HOOK_COUNT} entries)"
     HOOK_CMD=$(jq -r '[.hooks.UserPromptSubmit[]?.hooks[]?.command // empty][0]' \
       "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+    # AXIARCH BOOT marker can live in two places:
+    #   (1) directly in the inline command (v1.4.0–v1.5.2)
+    #   (2) in scripts/axiarch-boot-reminder.sh referenced by the command (v1.5.3+)
     if [[ "${HOOK_CMD}" == *"AXIARCH BOOT"* ]]; then
-      print_pass "Axiarch BOOT marker present"
+      print_pass "Axiarch BOOT marker present (inline)"
+    elif [[ "${HOOK_CMD}" == *"axiarch-boot-reminder.sh"* ]]; then
+      # v1.5.3+ externalized form: check the referenced script
+      REMINDER_SCRIPT="${PROJECT_DIR}/scripts/axiarch-boot-reminder.sh"
+      if [[ -f "${REMINDER_SCRIPT}" ]] && grep -q "AXIARCH BOOT" "${REMINDER_SCRIPT}" 2>/dev/null; then
+        print_pass "Axiarch BOOT marker present (via scripts/axiarch-boot-reminder.sh)"
+      else
+        print_warn "Hook references axiarch-boot-reminder.sh but the script is missing or lacks the marker"
+        print_info "Re-run init.sh or copy scripts/axiarch-boot-reminder.sh from axiarch repo"
+        EXIT_CODE=1
+      fi
     else
-      print_warn "Hook command does not contain '[AXIARCH BOOT]' marker"
-      print_info "Replace with the official axiarch settings.json"
+      print_warn "Hook command does not contain '[AXIARCH BOOT]' marker (inline or via reminder script)"
+      print_info "Replace with the official axiarch settings.json (delegates to scripts/axiarch-boot-reminder.sh)"
+      EXIT_CODE=1
     fi
   else
     print_fail "No UserPromptSubmit hook entries found"
@@ -121,7 +135,10 @@ if [[ -d "${SESSION_DIR}" ]]; then
     | xargs ls -t 2>/dev/null | head -1)
   if [[ -n "${LATEST_JSONL}" ]]; then
     print_info "Latest session: $(basename "${LATEST_JSONL}")"
-    FIRE_COUNT=$(grep -c "UserPromptSubmit hook success" "${LATEST_JSONL}" 2>/dev/null || true)
+    # v1.5.2+: hook output uses hookSpecificOutput.additionalContext format,
+    # so transcripts log "UserPromptSubmit hook additional context" instead of
+    # the legacy "UserPromptSubmit hook success". Match both for compatibility.
+    FIRE_COUNT=$(grep -cE "UserPromptSubmit hook (success|additional context)" "${LATEST_JSONL}" 2>/dev/null || true)
     FIRE_COUNT="${FIRE_COUNT:-0}"
     USER_TURN_COUNT=$(grep -c '"type":"user"' "${LATEST_JSONL}" 2>/dev/null || true)
     USER_TURN_COUNT="${USER_TURN_COUNT:-0}"
