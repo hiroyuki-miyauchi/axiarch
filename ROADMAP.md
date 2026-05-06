@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.3  
+> **現在の安定版 / Current Stable**: v1.5.4  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -129,6 +129,16 @@
 - **物理 block ではなく警告強化** — `decision: "block"` で prompt を遮断する選択肢もあったが副作用大のため採用せず、「violation を毎ターン認識させる」設計
 - **ROADMAP の v1.5.2 記述を honest 化** — 「Plan mode 表示汚染を解消」が過剰だったため「format クリーン化（system-reminder ラップ自体は残る）」に修正
 - **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh` を手動コピー
+
+---
+
+### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
+
+- **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
+- **Check 3 にフォールバック分岐追加** — hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` リテラルが含まれることを確認することで、inline 形式（v1.4.0–v1.5.2）と externalized 形式（v1.5.3+）の双方で PASS する設計に
+- **Check 4 の grep pattern を拡張** — v1.5.2+ の transcript JSONL で hook 出力ラベルが `success` → `additional context` に変わっていたため、`grep -cE "UserPromptSubmit hook (success|additional context)"` で両方マッチするよう修正
+- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
+- **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え
 
 ---
 
@@ -284,6 +294,16 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **Warning strengthening, not hard block** — `decision: "block"` was considered for prompt-level enforcement, but the side-effects are too large; instead we make the AI **aware of violations every turn**
 - **ROADMAP v1.5.2 entry honesty-corrected** — "Plan-mode pollution fixed" was overstated; replaced with "format cleanup (system-reminder wrap remains)"
 - **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually copy `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh`
+
+---
+
+### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
+
+- **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
+- **Check 3 fallback branch** — When the hook command delegates to `scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
+- **Check 4 grep pattern expanded** — v1.5.2+ transcripts log `UserPromptSubmit hook additional context` instead of the legacy `UserPromptSubmit hook success`. Pattern updated to `grep -cE "UserPromptSubmit hook (success|additional context)"` to match both
+- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
+- **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together
 
 ---
 

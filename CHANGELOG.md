@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.4] — 2026-05-06
+
+### 🩹 健全性診断スクリプトの v1.5.3 互換性 patch / Health-Diagnostic Compatibility Patch for v1.5.3
+
+v1.5.3 で `.claude/settings.json` の hook command を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に**外出し化**したことで、`scripts/check-axiarch-health.sh` の Check 3 (`AXIARCH BOOT` marker grep) と Check 4 (`UserPromptSubmit hook success` grep) が**誤検出**を起こす状態になっていた。本 patch は両 check を v1.5.2/v1.5.3 双方の format に対応させる pure 互換性修正。
+
+After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Check 3 (inline marker grep) and Check 4 (legacy `success` log grep) produced **false negatives** on freshly-installed v1.5.3 projects. This patch makes both checks compatible with both v1.5.2 (inline) and v1.5.3+ (externalized) formats.
+
+### Fixed
+
+- **Check 3 — `AXIARCH BOOT` marker detection** — Hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` が含まれることを確認するフォールバック分岐を追加。inline 形式 (v1.4.0–v1.5.2) と externalized 形式 (v1.5.3+) の両方をパスできるようになった / Added fallback branch that inspects the externalized script for the `AXIARCH BOOT` literal when the hook command delegates to `scripts/axiarch-boot-reminder.sh`
+- **Check 4 — Session firing history grep pattern** — v1.5.2+ の transcript JSONL では hook 出力ラベルが `UserPromptSubmit hook success` から `UserPromptSubmit hook additional context` に変わっていたため、grep を `grep -cE "UserPromptSubmit hook (success|additional context)"` に拡張 / Expanded grep to match both legacy and current transcript labels (`success` ⇄ `additional context`)
+
+### Changed
+
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.3 → 1.5.4
+- **`llms-full.txt`** — Version 1.5.3 → 1.5.4
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — v1.4.0〜v1.5.2 の inline format も依然 PASS。配布済みスクリプトは `git pull && bash init.sh` で再配布可能
+- ✅ **依存追加なし** — pure bash 修正のみ
+- 📌 **アップグレード手順** — 採用先で `bash scripts/check-axiarch-health.sh` を再実行し、Check 3/4 が PASS することを確認
+
+### Diagnostic Outcome
+
+- **v1.5.3 リグレッションの確認**: 本 axiarch リポジトリで Check 3 が「Hook command does not contain AXIARCH BOOT」、Check 4 が「Hook never fired」を誤検出。`bash scripts/check-axiarch-health.sh` を実行し両 PASS 化を実証
+- **設計反省**: hook command を externalize する変更時、診断スクリプトの grep 対象も同時更新する責務を見落としていた。今後は format 変更を伴う patch と diagnostic update をセットでリリースする運用に切り替え
+
+### References
+
+- v1.5.3 で外出し化した script: `scripts/axiarch-boot-reminder.sh`
+- v1.5.2 で format 変更された hook 出力ラベル: `additionalContext` (cf. <https://code.claude.com/docs/en/hooks#hookspecificoutput>)
+
+---
+
 ## [1.5.3] — 2026-05-06
 
 ### 🛡️ 動的違反検出 reminder + v1.5.2 記述の honesty 修正 / Dynamic Violation-Detection Reminder + v1.5.2 Honesty Correction
