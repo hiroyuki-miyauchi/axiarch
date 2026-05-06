@@ -37,6 +37,10 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
+ ├── scripts/                  ← Recommended: diagnostic & health-check scripts
+ │    ├── README.md                  ← Index & usage guide
+ │    ├── check-axiarch-health.sh    ← Axiarch full-protocol health diagnostic (10-stage)
+ │    └── check-git-config-clean.sh  ← .git/config integrity check (worktree residue)
  └── src/                       ← Your project code
 ```
 

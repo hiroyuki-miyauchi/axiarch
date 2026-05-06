@@ -161,6 +161,13 @@ If no domain lessons file exists, temporarily append to `core/010_project_lesson
 When same-domain lessons reach **3 or more** in `core/010_project_lessons_log.md` (central index), AI MUST create a proper rule file in the **corresponding Blueprint folder** per the Step 1 mapping table, and elevate the lessons there.
 
 > [!CAUTION]
+> **🚨 "Just appended" is NOT completion — Step 5 MUST run before declaring task done**
+>
+> A common past failure: AI assumes "I appended to `core/010`, crystallization done" and never executes Step 5 — letting 3+ same-domain lessons accumulate without promotion. **Step 4 (ACCUMULATE) alone is NOT completion.** Before returning the final response of every task, AI MUST execute Step 5 (THRESHOLD CHECK), and if any domain has 3+ unsorted lessons, **promote them to a dedicated Blueprint file BEFORE declaring task completion**.
+>
+> Violations are externally detectable via `bash scripts/check-axiarch-health.sh` Check 6. Declaring task completion while 3+ unsorted lessons exist in any domain = **protocol violation**.
+
+> [!CAUTION]
 > **Autonomous New Domain Folder Creation Prohibited**: Blueprint domain folders (`ai/`, `design/`, `engineering/`, `operations/`, `product/`, `quality/`, `security/`) are **pre-provisioned** with the same structure as Universal (each containing a `README.md`). AI is **prohibited** from **autonomously** creating new domain folders. Lessons MUST be placed ONLY in existing folders defined in the Step 1 mapping table. However, if a completely new domain arises that cannot be classified into existing folders, the AI MAY **propose** creating a new folder to the user (see Step 1 "Folder Extensibility").
 
 **Numbering Rules:**

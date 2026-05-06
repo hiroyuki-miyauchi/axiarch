@@ -28,6 +28,10 @@ When the hook is not present, the AI MUST self-enforce the BOOT SEQUENCE 3 princ
 
 > Other agents (Antigravity / Codex / Cursor / Copilot / Windsurf) have native loading mechanisms (e.g., Antigravity auto-loads `.agents/rules/`) and do not require this hook.
 
+### 🔍 Hook Diagnostic
+
+When you suspect "the hook is not working", run **`bash scripts/check-axiarch-health.sh`** for one-shot diagnosis (hook enablement, firing history, and AI adherence via `task.md`). Standard axiarch tool, distributed automatically by `init.sh`. See `README.md` "Enforcement Mechanism Troubleshooting" for details.
+
 ---
 
 ## Step 1: Task Classification

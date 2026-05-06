@@ -28,6 +28,10 @@
 
 > 他エージェント（Antigravity / Codex / Cursor / Copilot / Windsurf）は固有のロード機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため本フックは不要。
 
+### 🔍 フック診断
+
+「フックが動いていない気がする」場合は **`bash scripts/check-axiarch-health.sh`** を実行せよ。フック有効化・発火履歴・AI 遵守（`task.md` ロード履歴）を一発診断する axiarch 標準ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Enforcement Mechanism トラブルシュート」章を参照。
+
 ---
 
 ## Step 1: タスク分類

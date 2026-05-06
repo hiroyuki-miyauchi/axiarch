@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.0  
+> **現在の安定版 / Current Stable**: v1.5.1  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -95,6 +95,20 @@
 - **`product/800_internationalization.md` (v6.1)** — 25 Part / 114 セクション → **29 Part / 133 セクション**。Part XXVI 2026 規制フロンティア（EU AI Act / India DPDP / Saudi PDPL / China PIPL / LATAM・アフリカ）、Part XXVII 新興UXパラダイム（XR・Generative UI・CRDT・Shadow DOM・Foldable）、Part XXVIII 翻訳品質フロンティア（MQM ASTM F2575・Constrained Decoding・xCOMET-22 / CometKiwi・Domain Adaptation・翻訳安全性分類器）、Part XXIX 危機対応・レジリエンス を追加
 - **`.claude/settings.json` フックメッセージ強化** — `UserPromptSubmit` system reminder に `Output language MUST follow Project Native Language in AGENTS.md（見出し・要約・ラベル・箇条書き・表すべて）` を追加。AI が日本語プロジェクトで英語見出し・要約を出すサボりを物理的に防止
 - **後方互換性 100%** — Universal Rules 拡充は既存ルール非破壊・純粋追補。フックメッセージ強化は既存採用者にも `git pull` で自動適用
+
+---
+
+### ✅ v1.5.1 — Hook 効果最大化 + 結晶化プロトコル遵守強化（2026-05-06）
+
+- **`scripts/check-axiarch-health.sh` 新規配布（全プロトコル監視）** — Axiarch 公式健全性診断ツール。**10 段階の遵守チェック** を一発実行：Hook 関連 4 / `task.md` 遵守 / 結晶化閾値 / **§8 Process & Documentation** / **§1 Deployment Ban** / **§4 SSOT Sync** / **§2 Language First**。「どこサボってるか」が一発でわかる。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示
+- **`scripts/README.md` 新規** — scripts/ ディレクトリの索引兼ガイド（バイリンガル）。各診断ツールの目的・使い方・診断項目・推奨ワークフローを記載。採用先が `scripts/` 配下の存在意義を即座に把握できる
+- **`.claude/settings.json` フックメッセージ二重強化** — （1）`task.md` 記録義務（AGENTS.md §8.4 準拠）追加、（2）**CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK 遵守義務追加**。「`core/010` への追記 = 完了は誤認」を明示し、3件以上のドメインがあれば Blueprint への昇華まで完了させる義務を AI に課す
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 強化** — 強い CAUTION ブロック追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行」「違反は `scripts/check-axiarch-health.sh` Check 6 で外部検証可能」
+- **`README.md` トラブルシュート章新設（縮小版）** — Enforcement Mechanism サブセクション直下に `bash scripts/check-axiarch-health.sh` への誘導 + 公式 docs 参照
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — 「強制執行機構」セクションに診断スクリプト参照を追記
+- **`init.sh`** — `.claude/settings.json` 配布直後に `jq` JSON 構文検証を追加（jq 不在時はスキップ、依存追加なし）。`scripts/` 既存配布ロジックで診断スクリプトも自動配布対象
+- **真因確定**: AI 遵守ギャップ（フック発火 ≠ AI 遵守、結晶化「追記 = 完了」誤認）。3 並列調査で「JSON 構造誤り説」「Bash permission 不足説」をともに反証
+- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書き + `scripts/check-axiarch-health.sh` をコピー
 
 ---
 
@@ -215,6 +229,20 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **`product/800_internationalization.md` (v6.1)** — Expanded from 25 Parts / 114 sections to **29 Parts / 133 sections**. Added Part XXVI 2026 Regulatory Frontier (EU AI Act / India DPDP / Saudi PDPL / China PIPL / LATAM & Africa), Part XXVII Emerging UX Paradigms (XR / Generative UI / CRDT / Shadow DOM / Foldable), Part XXVIII Translation Quality Frontier (MQM ASTM F2575 / Constrained Decoding / xCOMET-22 / CometKiwi / Domain Adaptation / Translation Safety Classifiers), Part XXIX Crisis Response & Resilience
 - **`.claude/settings.json` hook message enhanced** — Added `Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all)` to the `UserPromptSubmit` system reminder. Physically prevents AI from emitting English headings/summaries in Japanese-native projects
 - **100% Backwards Compatible** — Universal Rules expansions are non-breaking and purely additive. Hook message enhancement applies automatically to existing adopters via `git pull`
+
+---
+
+### ✅ v1.5.1 — Hook Efficacy + Crystallization Adherence Strengthening (2026-05-06)
+
+- **NEW `scripts/check-axiarch-health.sh` (full-protocol monitoring)** — Official Axiarch health diagnostic with **10-stage compliance check**: Hook (4) + `task.md` adherence + crystallization threshold + **§8 Process & Documentation** + **§1 Deployment Ban** + **§4 SSOT Sync** + **§2 Language First**. Pinpoints exactly where the AI is slacking. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review
+- **NEW `scripts/README.md`** — Bilingual index & guide for the `scripts/` directory. Each diagnostic tool's purpose, usage, check items, and recommended workflow documented in one place
+- **`.claude/settings.json` reminder doubly strengthened** — Added (1) `task.md` recording mandate (per AGENTS.md §8.4) and (2) **CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK execution mandate**. Explicitly states "appending to `core/010` is NOT completion" and forces AI to promote 3+ unsorted domains to Blueprint files before declaring task done
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 strengthened** — Added strong CAUTION block: "Step 4 (ACCUMULATE) alone is NOT completion", "Step 5 MUST run before task completion", "violations externally detectable via `scripts/check-axiarch-health.sh` Check 6"
+- **NEW concise Troubleshooting subsection in `README.md`** — Directs users to `bash scripts/check-axiarch-health.sh` plus official-docs links
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — Added one-paragraph reference to the diagnostic script
+- **`init.sh`** — Optional `jq` JSON syntax validation post-copy; existing `scripts/` distribution covers the new diagnostic
+- **Root cause confirmed**: AI adherence gap (hook firing ≠ AI adherence, crystallization "appending = done" misconception). 3-parallel investigation refuted both "JSON structure error" and "Bash permission insufficient" hypotheses
+- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json` + copy `scripts/check-axiarch-health.sh`
 
 ---
 
