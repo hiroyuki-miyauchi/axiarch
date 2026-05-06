@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1] — 2026-05-06
+
+### 🛡️ Hook 効果最大化 + 結晶化プロトコル遵守強化 / Hook Efficacy Maximization + Crystallization Adherence Strengthening
+
+v1.5.0 リリース後、作者から「フックが毎回動いていない気がする」「結晶化プロトコルも守られていない（3件以上溜まっても `core/010` に蓄積し続ける）」という 2 つの懸念。共通の真因は **AI 遵守ギャップ** — フックは技術的に発火し、プロトコルもテキストとして存在しているのに、AI が `task.md` 記録を怠り、「`core/010` に追記したから完了」と誤認して Step 5 (THRESHOLD CHECK) をスキップする。
+
+本 patch は **「ドキュメント丸投げではなくツールで遵守を強制する」** 設計に転換：診断スクリプト `scripts/check-axiarch-health.sh` を新規配布し、フック発火 / `task.md` 記録 / 結晶化閾値の 3 軸を一発検証可能に。フックメッセージ・CRYSTALLIZATION_PROTOCOL §5 自体も「追記 = 完了は誤認」を明示する形で強化。
+
+After v1.5.0, the author raised two concerns: "the hook seems not to fire every time" and "the Crystallization Protocol is not enforced — lessons keep accumulating in `core/010` past the 3-lesson threshold". The common root cause is the **AI adherence gap** — the hook fires technically and the protocols exist as text, but the AI skips `task.md` logging and mistakes "appended to `core/010`" for completion, never executing Step 5 (THRESHOLD CHECK).
+
+This patch shifts from "documentation hand-off" to **"tool-enforced adherence"**: a new diagnostic script `scripts/check-axiarch-health.sh` provides one-shot verification across hook firing, `task.md` adherence, and crystallization threshold. The hook reminder and `CRYSTALLIZATION_PROTOCOL §5` itself are also strengthened to explicitly state "just appending is NOT completion".
+
+### Added
+
+- **`scripts/check-axiarch-health.sh`**（新規）— **Axiarch 公式健全性診断ツール（全プロトコル監視）**。`bash scripts/check-axiarch-health.sh` で **10 段階の遵守チェック** を一発実行：（1-4）Hook 関連（`.claude/settings.json` 存在・JSON 構文・hook 構造・発火履歴）/ （5）LOADING_PROTOCOL Step 4 遵守（`task.md` ロード履歴）/ （6）CRYSTALLIZATION_PROTOCOL §5 遵守（3件以上のドメイン検出）/ **（7）AGENTS.md §8 Process & Documentation（task.md / implementation_plan.md / walkthrough.md 存在）** / **（8）§1 Deployment Ban（force-push / 直 main commit 検出）** / **（9）§4 SSOT Sync（main 同期状態）** / **（10）§2 Language First（Project Native Language 整合性）**。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示。`init.sh` で自動配布 / NEW: Official Axiarch health diagnostic with **10-stage protocol-wide compliance check**. Covers hook firing, AI adherence, crystallization threshold, AGENTS §1/§2/§4/§8/§9 + LOADING_PROTOCOL. Surfaces "where the AI is slacking" at a glance. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review. Auto-distributed by `init.sh`
+- **`scripts/README.md`**（新規）— scripts/ ディレクトリの索引兼ガイド。各診断ツール（`check-axiarch-health.sh` / `check-git-config-clean.sh`）の目的・使い方・診断項目・推奨ワークフローをバイリンガルで記載。採用者が `scripts/` 配下の存在意義を一発で把握できるようにする / NEW: `scripts/` index & guide. Bilingual documentation of each diagnostic tool's purpose, usage, check items, and recommended workflow
+
+### Changed
+
+- **`.claude/settings.json`** — `UserPromptSubmit` フックの reminder 文言を強化:
+  - **`task.md` 記録義務（AGENTS.md §8.4 準拠）** を追加 / `Record all loaded rule files in task.md per AGENTS.md §8.4`
+  - **CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK の遵守義務** を追加。「追記 = 完了は誤認」を明示し、3件以上のドメインがあれば Blueprint 専用ファイルへの昇華まで完了させてからタスク完了を宣言する義務を AI に課す / Added mandatory `CRYSTALLIZATION_PROTOCOL §5 THRESHOLD CHECK` execution on task completion; "just appending to `core/010` is NOT completion"
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5** — 強い CAUTION ブロックを追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行せよ」「違反は `scripts/check-axiarch-health.sh` Check 6 で検出可能」を明記 / Added a strong CAUTION block to §5 stating that Step 4 alone is not completion and that Step 5 MUST run before task completion; violations are externally detectable
+- **`README.md`** — 「Enforcement Mechanism」サブセクション直下に **トラブルシュート章**（縮小版・約 10 行）を新設。`bash scripts/check-axiarch-health.sh` への誘導、誤情報訂正（`permissions.allow Bash(echo *)` 不要）、公式 docs リンク / Added concise "Troubleshooting" subsection directing users to `scripts/check-axiarch-health.sh`
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — 「強制執行機構」セクションに **診断ツール参照（v1.5.1+）** を追記（`scripts/check-axiarch-health.sh` 案内、1 段落）/ Added one-paragraph reference to the diagnostic script
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.0 → 1.5.1。`.claude/settings.json` 配布直後に **`jq` による JSON 構文検証**（`jq` 不在時はスキップ、依存追加なし）。`scripts/` 既存配布で `check-axiarch-health.sh` も自動配布対象 / Bumped version; added optional `jq` JSON validation post-copy; existing `scripts/` distribution covers the new diagnostic
+- **`llms-full.txt`** — Version 1.5.0 → 1.5.1
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — 既存採用者は `git pull` + `init.sh` 再実行、または `.claude/settings.json` 手動上書きでアップグレード可能。フック message の文字数は約 600 → 約 1,534 文字（実測トークン換算: ~150 → ~380、**+153%**）に増えるが、プロンプトキャッシュ独立のため影響軽微（毎ターン system reminder として注入）/ Fully backwards compatible; reminder grows from ~600 to ~1,534 chars (~150 → ~380 tokens, **+153%**), independent of prompt cache so impact remains negligible (injected as system reminder per turn)
+- ✅ **Universal Rules 改訂なし** — `core_mindset.md` / `600_git_workflow.md` / `700_appstore_compliance.md` 等の憲法部分は変更なし / No constitutional changes
+- ⚠️ **`task.md` の活用前提** — 既存 axiarch 採用者は `task.md` が `.gitignore` 対象（per-session 作業ドキュメント）であることが多い。AI 遵守確認時は手動で開いてロード履歴を確認する運用 / `task.md` is typically gitignored as per-session document; manually inspect for load logs
+
+### Diagnostic Outcome (3 並列調査の結論 / 3-parallel investigation conclusions)
+
+調査で**反証された**説：
+
+- ❌ **JSON 構造誤り説** — 公式 hooks.md の必須ネスト構造に準拠（`{hooks: {UserPromptSubmit: [{hooks: [...]}]}}`）
+- ❌ **Bash permission 不足説** — hook の `command` 型は harness が `child_process` で直接 spawn する経路で、`permissions.allow Bash(...)` の審査対象外。本セッション transcript で `hook success` 観測済みの事実が直接否定
+
+採用された真因：
+
+- ✅ **AI 遵守ギャップ** — フックは発火しているが、AI が reminder の指示（AGENTS.md / LOADING_PROTOCOL 暗黙実行・`task.md` 記録）をサボるケースで「動いていない感」が生じる
+- ✅ **結晶化プロトコル違反パターン** — 子プロジェクト inucomi の Wave 1-15 実例：「`core/010` への追記 = 結晶化完了」と誤認し、3件以上のドメイン（セキュリティ 27件・パフォーマンス 6件・型安全 5件・a11y 4件・リファクタリング 4件・Server Action 3件 = 6 ドメイン違反）を Blueprint へ昇華せず放置。Step 5 (THRESHOLD CHECK) を一度も実行していなかった
+
+### References
+
+- 公式 docs: [Claude Code Hooks](https://code.claude.com/docs/en/hooks) / [Claude Code Permissions](https://code.claude.com/docs/en/permissions)
+
+---
+
 ## [1.5.0] — 2026-05-06
 
 ### 🆕 Universal Rules 大規模拡充 + Hook 言語遵守強化 / Major Universal Rules Expansion + Hook Language Enforcement

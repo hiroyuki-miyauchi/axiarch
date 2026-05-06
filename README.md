@@ -253,6 +253,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | `UserPromptSubmit` 強制執行フック。`init.sh` で自動コピー / Enforcement hook. Auto-copied by `init.sh` |
+| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集（`check-axiarch-health.sh` で全プロトコル遵守を一発診断、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー / Diagnostic & health check scripts (`check-axiarch-health.sh` for full-protocol compliance one-shot, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -289,6 +290,23 @@ Designed and validated through hundreds of real production sessions on [Google A
 >
 > **EN**: **Removing or disabling this hook is a constitution-amending destructive change** requiring explicit owner approval. See "Enforcement Mechanism" in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
+#### 🔍 トラブルシュート / Troubleshooting
+
+> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**フック有効化・発火履歴・AI 遵守（task.md ロード履歴）を一発診断**します。`init.sh` 経由で自動配布される axiarch 標準ツールです。
+>
+> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **One-shot diagnosis** of hook enablement, firing history, and AI adherence (task.md load logs). Distributed automatically via `init.sh`.
+
+```bash
+bash scripts/check-axiarch-health.sh
+# Or from another directory:
+bash /path/to/project/scripts/check-axiarch-health.sh /path/to/project
+```
+
+> [!NOTE]
+> **JA**: 公式仕様: [Hooks](https://code.claude.com/docs/en/hooks) / [Permissions](https://code.claude.com/docs/en/permissions)。`permissions.allow` に `Bash(echo *)` を追加する必要は**ありません**（hook command は permission 経路外）。
+>
+> **EN**: Official spec: [Hooks](https://code.claude.com/docs/en/hooks) / [Permissions](https://code.claude.com/docs/en/permissions). Adding `Bash(echo *)` to `permissions.allow` is **NOT required** (hook commands are spawned outside the permission pipeline).
+
 ### 1. プロジェクトにコピー / Copy to your project
 
 > [!TIP]
@@ -304,6 +322,9 @@ curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.
 # 必須の2つだけコピー / Copy only the 2 required items
 cp AGENTS.md /path/to/your/project/
 cp -r axiarch-rules /path/to/your/project/
+
+# 推奨：診断・ヘルスチェックスクリプト集 / Recommended: diagnostic & health-check scripts
+cp -r scripts /path/to/your/project/
 
 # 任意：プロンプト集もコピー / Optional: copy prompt library
 cp -r axiarch-prompts /path/to/your/project/

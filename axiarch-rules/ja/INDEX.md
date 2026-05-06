@@ -45,6 +45,10 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
+ ├── scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集
+ │    ├── README.md                  ← 索引・使い方ガイド
+ │    ├── check-axiarch-health.sh    ← Axiarch 全プロトコル健全性診断（10 段階）
+ │    └── check-git-config-clean.sh  ← .git/config 健全性チェック（worktree 残留）
  └── src/                       ← プロジェクトコード
 ```
 
