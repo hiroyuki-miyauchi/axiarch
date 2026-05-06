@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.3] — 2026-05-06
+
+### 🛡️ 動的違反検出 reminder + v1.5.2 記述の honesty 修正 / Dynamic Violation-Detection Reminder + v1.5.2 Honesty Correction
+
+v1.5.2 リリース後、作者から **「v1.5.2 で UI 汚染が完全には消えていない」「ルール厳守も強くなっていない」** との指摘。実態確認の結果、(1) 公式 docs の「more discretely」は format 改善程度で、system-reminder ラップ自体は残ることが判明、(2) v1.5.2 は**形式変更のみ**で AI 遵守強化はなされていなかった。
+
+本 patch は (A) v1.5.2 の honest 化（ROADMAP 修正）と (B) **動的違反検出 reminder** で、AI が毎ターン**現在の違反状況**を自覚できる仕組みを実装。物理 block ではなく「警告強化」の方向で副作用最小化。
+
+After v1.5.2, the author pointed out that (1) UI pollution was not actually eliminated and (2) AI adherence was not strengthened. Investigation confirmed both: official docs' "more discretely" only means format improvement (the `<system-reminder>` wrap remains), and v1.5.2 changed format only, not adherence. This patch corrects v1.5.2 narrative honestly and adds a **dynamic violation-detection reminder** that surfaces current violations every turn.
+
+### Added
+
+- **`scripts/axiarch-boot-reminder.sh`**（新規）— UserPromptSubmit hook の外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に 🚨 フラグを追記:
+  - **Check A**: `task.md` にロード履歴（AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 参照）が未記録
+  - **Check B**: `axiarch-rules/{ja,en}/blueprint/core/010_project_lessons_log.md` で 3 件以上溜まったドメイン（CRYSTALLIZATION §5 違反）
+  - JSON 出力は pure bash で `jq` 依存なし
+  / NEW: Externalized hook script that dynamically appends 🚨 violation flags when (A) `task.md` lacks load history or (B) crystallization threshold is breached. Pure bash JSON output (no `jq`)
+
+### Changed
+
+- **`.claude/settings.json`** — `command` を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に簡素化。settings.json 自体がスリムに / Hook command externalized; settings.json itself becomes much slimmer
+- **`ROADMAP.md` v1.5.2 記述を honest 化** — 「Plan mode 表示汚染を解消」「`<system-reminder>` でラップされない」が誤りだったため修正。実態は「format クリーン化（system-reminder ラップ自体は残る）」 / Honesty fix: removed overstated claims, clarified that `<system-reminder>` wrap remains
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.2 → 1.5.3
+- **`llms-full.txt`** — Version 1.5.2 → 1.5.3
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — フックメッセージのコア内容は v1.5.1 から変わらず（VIOLATION フラグは違反時のみ追記）
+- ✅ **依存追加なし** — pure bash で JSON 構築、`jq` 不要
+- ✅ **物理 block 不採用** — `decision: "block"` で prompt 遮断する選択肢もあったが、副作用が大きいため警告強化に留めた
+- ⚠️ **採用先で `axiarch-boot-reminder.sh` の実行権限が必要** — `init.sh` の `chmod +x` ロジックで自動付与される
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行、または手動で `.claude/settings.json` と `scripts/axiarch-boot-reminder.sh` をコピー
+
+### Diagnostic Outcome
+
+- **v1.5.2 の効果評価**: format クリーン化のみ（success ラベル → additional context ラベル変更）。**Plan mode UI への表示自体は残る**（system-reminder ラップ仕様による）
+- **v1.5.3 の遵守強化**: AI が毎ターン違反状況を自覚 → 静的 reminder 単独より遵守率向上が期待できる（物理強制ではないが「観測可能性」の段階的進化）
+- **v1.6.0 候補**: `decision: "block"` による prompt-level 物理強制（ただし副作用大）
+
+### References
+
+- 公式 docs: [Claude Code Hooks](https://code.claude.com/docs/en/hooks) — `hookSpecificOutput.additionalContext` 仕様
+- 関連: v1.5.2 の「discretely」誤解釈を訂正
+
+---
+
 ## [1.5.2] — 2026-05-06
 
 ### 🪶 Hook Output 形式変更 — discrete injection で Plan mode 汚染解消 / Hook Output Format Switched to Discrete Injection

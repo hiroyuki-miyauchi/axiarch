@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.2  
+> **現在の安定版 / Current Stable**: v1.5.3  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -112,13 +112,23 @@
 
 ---
 
-### ✅ v1.5.2 — Hook Output 形式変更（discrete injection / Plan mode 汚染解消）（2026-05-06）
+### ✅ v1.5.2 — Hook Output 形式変更（additionalContext / format クリーン化）（2026-05-06）
 
-- **`.claude/settings.json` フック出力形式を変更** — 現行 `echo` (transcript 全表示) → `printf` で **`hookSpecificOutput.additionalContext` JSON 形式** に切り替え。公式 docs (code.claude.com/docs/en/hooks) 推奨の "more discretely" injected 形式
-- **Plan mode 表示汚染を解消** — additionalContext は `<system-reminder>` でラップされず Claude の context に直接注入されるため、Plan file・transcript・UI が大量 reminder で汚れない
-- **AI への visibility 維持** — context への直接注入で遵守は確保（v1.5.1 のメッセージ内容を完全保持）
+- **`.claude/settings.json` フック出力形式を変更** — `echo` (transcript 全表示) → `printf` で **`hookSpecificOutput.additionalContext` JSON 形式** に切り替え。公式 docs (code.claude.com/docs/en/hooks) 推奨の format
+- **Format クリーン化** — system-reminder のラベルが `UserPromptSubmit hook success` から `UserPromptSubmit hook additional context` に変わり、より自然な形に。**ただし system-reminder ラップ自体は残るため「完全 invisible」ではない**（公式 "more discretely" は完全消去ではなく format 改善程度を意味する）
+- **AI への visibility 維持** — context 直接注入で遵守は確保（v1.5.1 のメッセージ内容を完全保持）
 - **依存追加なし** — `printf` は POSIX 標準（jq 不要）。既存採用者の互換性 100%
-- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書きでアップグレード
+
+---
+
+### ✅ v1.5.3 — 動的違反検出 reminder + ROADMAP 整合化（2026-05-06）
+
+- **`scripts/axiarch-boot-reminder.sh` 新規** — フック呼び出しを inline `printf` から専用スクリプトに切り出し。スクリプトはプロジェクト状態（`task.md` ロード履歴 / `core/010` 結晶化閾値）を毎ターン動的にチェックし、違反検出時に reminder に **🚨 [VIOLATION-A/B]** フラグを追記する仕組み。これで AI は静的命令だけでなく**現在の違反状況**を毎ターン自覚できる
+- **`.claude/settings.json` 簡素化** — `command` を `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に変更。長文インライン JSON が消え、settings.json 自体がスリム化
+- **依存追加なし** — JSON 出力は pure bash（`escape_json` 関数で実装、`jq` 不要）
+- **物理 block ではなく警告強化** — `decision: "block"` で prompt を遮断する選択肢もあったが副作用大のため採用せず、「violation を毎ターン認識させる」設計
+- **ROADMAP の v1.5.2 記述を honest 化** — 「Plan mode 表示汚染を解消」が過剰だったため「format クリーン化（system-reminder ラップ自体は残る）」に修正
+- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh` を手動コピー
 
 ---
 
@@ -256,13 +266,24 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
-### ✅ v1.5.2 — Hook Output Format Change (discrete injection, Plan-mode pollution fix) (2026-05-06)
+### ✅ v1.5.2 — Hook Output Format Change (additionalContext / format cleanup) (2026-05-06)
 
-- **`.claude/settings.json` hook output format switched** — From `echo` (transcript full-display) to `printf` emitting **`hookSpecificOutput.additionalContext` JSON**, the official docs-recommended "more discrete" injection (code.claude.com/docs/en/hooks)
-- **Plan-mode pollution fixed** — `additionalContext` is injected directly into Claude's context rather than wrapped in `<system-reminder>`, so Plan files / transcript / UI no longer show bulky reminder text every turn
+- **`.claude/settings.json` hook output format switched** — From `echo` (transcript full-display) to `printf` emitting **`hookSpecificOutput.additionalContext` JSON**, the official docs-recommended format (code.claude.com/docs/en/hooks)
+- **Format cleanup** — system-reminder label changed from `UserPromptSubmit hook success` to `UserPromptSubmit hook additional context` for a more natural form. **However, the system-reminder wrap itself remains** — "more discretely" in official docs means format improvement, not full invisibility
 - **AI visibility preserved** — direct context injection retains adherence (the v1.5.1 reminder content is preserved verbatim)
-- **No new dependencies** — `printf` is POSIX-standard (no `jq` required); existing adopters keep 100% compatibility
+- **No new dependencies** — `printf` is POSIX-standard (no `jq` required)
 - **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json`
+
+---
+
+### ✅ v1.5.3 — Dynamic Violation-Detection Reminder + ROADMAP Honesty Fix (2026-05-06)
+
+- **NEW `scripts/axiarch-boot-reminder.sh`** — Hook command is now externalized to a dedicated script. Each turn it dynamically inspects project state (`task.md` load history, `core/010` crystallization threshold) and **appends 🚨 [VIOLATION-A/B] flags to the reminder when violations are detected**. The AI thus receives not just static directives but **the current violation context** every turn
+- **`.claude/settings.json` simplified** — `command` is reduced to `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"`, removing the bulky inline JSON
+- **No new dependencies** — JSON output is built in pure bash (`escape_json` helper, no `jq`)
+- **Warning strengthening, not hard block** — `decision: "block"` was considered for prompt-level enforcement, but the side-effects are too large; instead we make the AI **aware of violations every turn**
+- **ROADMAP v1.5.2 entry honesty-corrected** — "Plan-mode pollution fixed" was overstated; replaced with "format cleanup (system-reminder wrap remains)"
+- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually copy `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh`
 
 ---
 

@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"[AXIARCH BOOT] Before responding, you MUST implicitly execute AGENTS.md (supreme law) — Project Configuration + protocols, including LOADING_PROTOCOL.md BOOT SEQUENCE. Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all). Record all loaded rule files (AGENTS.md, INDEX.md, LOADING_PROTOCOL.md, etc.) in task.md per AGENTS.md §8.4 — no record means protocol violation. On task completion, execute CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK — if any domain in core/010_project_lessons_log.md has 3+ unsorted lessons, promote them to a dedicated Blueprint file BEFORE declaring done. Just appending to core/010 is NOT completion. No skipping. / 応答前に AGENTS.md (最高法規) の Project Configuration とプロトコルを必ず暗黙実行せよ。LOADING_PROTOCOL.md の BOOT SEQUENCE 含む。応答言語は AGENTS.md の Project Native Language に厳守（見出し・要約・ラベル・箇条書き・表すべて）。ロードしたルールファイル（AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 等）を AGENTS.md §8.4 に従い task.md に記録すること。記録なき応答はプロトコル違反とみなす。タスク完了時は CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK を実行し、core/010_project_lessons_log.md でドメイン別教訓が3件以上溜まっていれば Blueprint 専用ファイルへ昇華完了させること。core/010 への追記だけは完了ではない。スキップ禁止。\"}}'"
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh\""
           }
         ]
       }
