@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.1  
+> **現在の安定版 / Current Stable**: v1.5.2  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -109,6 +109,16 @@
 - **`init.sh`** — `.claude/settings.json` 配布直後に `jq` JSON 構文検証を追加（jq 不在時はスキップ、依存追加なし）。`scripts/` 既存配布ロジックで診断スクリプトも自動配布対象
 - **真因確定**: AI 遵守ギャップ（フック発火 ≠ AI 遵守、結晶化「追記 = 完了」誤認）。3 並列調査で「JSON 構造誤り説」「Bash permission 不足説」をともに反証
 - **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書き + `scripts/check-axiarch-health.sh` をコピー
+
+---
+
+### ✅ v1.5.2 — Hook Output 形式変更（discrete injection / Plan mode 汚染解消）（2026-05-06）
+
+- **`.claude/settings.json` フック出力形式を変更** — 現行 `echo` (transcript 全表示) → `printf` で **`hookSpecificOutput.additionalContext` JSON 形式** に切り替え。公式 docs (code.claude.com/docs/en/hooks) 推奨の "more discretely" injected 形式
+- **Plan mode 表示汚染を解消** — additionalContext は `<system-reminder>` でラップされず Claude の context に直接注入されるため、Plan file・transcript・UI が大量 reminder で汚れない
+- **AI への visibility 維持** — context への直接注入で遵守は確保（v1.5.1 のメッセージ内容を完全保持）
+- **依存追加なし** — `printf` は POSIX 標準（jq 不要）。既存採用者の互換性 100%
+- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書きでアップグレード
 
 ---
 
@@ -243,6 +253,16 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **`init.sh`** — Optional `jq` JSON syntax validation post-copy; existing `scripts/` distribution covers the new diagnostic
 - **Root cause confirmed**: AI adherence gap (hook firing ≠ AI adherence, crystallization "appending = done" misconception). 3-parallel investigation refuted both "JSON structure error" and "Bash permission insufficient" hypotheses
 - **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json` + copy `scripts/check-axiarch-health.sh`
+
+---
+
+### ✅ v1.5.2 — Hook Output Format Change (discrete injection, Plan-mode pollution fix) (2026-05-06)
+
+- **`.claude/settings.json` hook output format switched** — From `echo` (transcript full-display) to `printf` emitting **`hookSpecificOutput.additionalContext` JSON**, the official docs-recommended "more discrete" injection (code.claude.com/docs/en/hooks)
+- **Plan-mode pollution fixed** — `additionalContext` is injected directly into Claude's context rather than wrapped in `<system-reminder>`, so Plan files / transcript / UI no longer show bulky reminder text every turn
+- **AI visibility preserved** — direct context injection retains adherence (the v1.5.1 reminder content is preserved verbatim)
+- **No new dependencies** — `printf` is POSIX-standard (no `jq` required); existing adopters keep 100% compatibility
+- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json`
 
 ---
 

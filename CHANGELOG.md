@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.2] — 2026-05-06
+
+### 🪶 Hook Output 形式変更 — discrete injection で Plan mode 汚染解消 / Hook Output Format Switched to Discrete Injection
+
+v1.5.1 リリース後、作者から **「プラン表示形式が汚くなる」「ロードしたルールがプラン・タスクに表示されない」** との指摘。3 並列調査の結果、**`echo` 出力（transcript 全表示）方式に起因する UI 汚染** と判明。公式 docs (code.claude.com/docs/en/hooks) 推奨の **`hookSpecificOutput.additionalContext` JSON 形式** に切り替え、reminder を context に discrete に注入することで解消。
+
+After v1.5.1, the author reported "Plan display becomes ugly" and "loaded-rules disclosure mandate is being ignored in plans/tasks". A 3-parallel investigation pinpointed the root cause as **UI pollution from the `echo` (transcript-full-display) output format**. Switched to the official docs-recommended **`hookSpecificOutput.additionalContext` JSON format** for discrete context injection.
+
+### Changed
+
+- **`.claude/settings.json`** — フック `command` を `echo '...'` から `printf '%s' '{...hookSpecificOutput.additionalContext...}'` 形式に変更。公式仕様で「Wrapped in system reminders. The `additionalContext` field is added more **discretely**」と明記された推奨形式に準拠 / Switched the hook `command` from `echo` to `printf '%s' '{...hookSpecificOutput.additionalContext...}'` JSON form, the official-docs-recommended discrete-injection format
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.1 → 1.5.2 / Bumped version
+- **`llms-full.txt`** — Version 1.5.1 → 1.5.2
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — フックメッセージ内容は v1.5.1 と完全同一（形式のみ変更）。AI 遵守要求（task.md 記録義務 + CRYSTAL §5 遵守）は維持 / Fully backwards compatible; reminder content is bit-identical to v1.5.1, only the wire format changes
+- ✅ **依存追加なし** — `printf` は POSIX 標準。`jq` 不要（v1.5.1 で追加した optional jq バリデーションも維持） / No new dependencies; `printf` is POSIX-standard, no `jq` required
+- ✅ **Plan mode 汚染解消** — `additionalContext` は `<system-reminder>` ラップではなく context 直接注入。Plan files / transcript / UI の毎ターン reminder 表示が消える / Plan files / transcript / UI no longer show the bulky reminder text each turn
+- ⚠️ **AI への visibility 維持** — context 直接注入のため、AI は同等に reminder を認識（公式 docs で確認済み）/ AI still sees the reminder via context injection
+- 📌 **アップグレード手順** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` を上書き / Upgrade: `git pull && bash init.sh`, or manually overwrite `.claude/settings.json`
+
+### References
+
+- 公式 docs: [Claude Code Hooks](https://code.claude.com/docs/en/hooks) — `hookSpecificOutput.additionalContext` 仕様
+- 関連 commit: v1.5.1（reminder 内容の本格強化）
+
+---
+
 ## [1.5.1] — 2026-05-06
 
 ### 🛡️ Hook 効果最大化 + 結晶化プロトコル遵守強化 / Hook Efficacy Maximization + Crystallization Adherence Strengthening
