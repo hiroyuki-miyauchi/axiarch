@@ -113,6 +113,7 @@ elif command -v jq &>/dev/null; then
     else
       print_warn "Hook command does not contain '[AXIARCH BOOT]' marker (inline or via reminder script)"
       print_info "Replace with the official axiarch settings.json (delegates to scripts/axiarch-boot-reminder.sh)"
+      EXIT_CODE=1
     fi
   else
     print_fail "No UserPromptSubmit hook entries found"

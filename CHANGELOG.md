@@ -22,6 +22,7 @@ After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Ch
 - **`scripts/axiarch-boot-reminder.sh` のコメントから version literal 除去** — `# Static base reminder (..., identical content to v1.5.1/v1.5.2)` は汎用ファイルへのバージョン記述ポリシー違反だったため version-free に書き換え / Removed `v1.5.1/v1.5.2` literal from the externalized reminder script's header comment to comply with the version-string-policy
 - **`scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から version literal 除去** — Check 3 fail-path の helper メッセージから `(v1.5.3+ uses ...)` を削除（採用先のランタイム出力は version-free を厳守） / Removed `(v1.5.3+ ...)` literal from a runtime-visible `print_info` line in the diagnostic
 - **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` 言及追加** — v1.5.3 で新規追加されたが必須ファイル表で言及漏れだった件を訂正 / Added the missing reference to `axiarch-boot-reminder.sh` in the required-files table
+- **`scripts/check-axiarch-health.sh` Check 3 の else 分岐に `EXIT_CODE=1` 追加（false-negative 修正）** — v1.5.1 で導入された Check 3 の else 分岐（hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない hook 完全破損状態）で `print_warn` だけ出力して `EXIT_CODE=1` を設定していなかった bug。CI 連携で false negative（hook 壊れているのに exit 0）になる致命的問題。18 ラウンド調査で発見・修正 / Critical false-negative fix: Check 3's else branch (hook command lacks both `AXIARCH BOOT` and `axiarch-boot-reminder.sh` literals — i.e. completely broken hook) was emitting `print_warn` without setting `EXIT_CODE=1`, causing CI integrations to falsely report success on a broken hook. Discovered in the 18th-round audit
 
 ### Changed
 

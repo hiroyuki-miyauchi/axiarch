@@ -140,6 +140,7 @@
 - **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `scripts/axiarch-boot-reminder.sh` のコメントと `scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
 - **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` を追記** — v1.5.3 新規スクリプトの言及漏れ訂正
 - **`core/010_project_lessons_log.md` (ja/en) に v1.5.4 教訓を結晶化（CRYSTAL §4 ACCUMULATE）** — 「hook format/command 変更時は診断 grep 対象も同 PR で更新する責務」をガバナンス domain に蓄積（2 件目、昇華閾値 3+ 未達のため §4 段階で完結）
+- **18 ラウンド調査で Check 3 else 分岐の false-negative bug 発見・修正** — hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
 - **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
 - **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え（→ Lessons log に結晶化済）
 
@@ -308,6 +309,7 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `scripts/axiarch-boot-reminder.sh` (header comment) and `scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
 - **`README.md` required-files table updated** — Added the missing reference to `axiarch-boot-reminder.sh` (introduced in v1.5.3 but never listed)
 - **`core/010_project_lessons_log.md` (ja/en) lesson crystallized (CRYSTAL §4 ACCUMULATE)** — "When changing hook format/command form, update the diagnostic's grep targets in the same patch" recorded under the Governance domain (2nd entry; below the 3+ promotion threshold, so §4 ACCUMULATE is sufficient)
+- **18th-round audit: Check 3 else-branch false-negative fix** — When the hook command contains neither `AXIARCH BOOT` literal nor `axiarch-boot-reminder.sh` reference (i.e. fully broken hook), the diagnostic was emitting `print_warn` without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI integrations would falsely report success. Now correctly fails the run
 - **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
 - **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together (→ crystallized into the Lessons log)
 
