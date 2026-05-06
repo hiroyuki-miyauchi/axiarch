@@ -20,17 +20,23 @@
 
 ## 🛡️ 強制執行機構（ENFORCEMENT MECHANISM）🛡️
 
-**Claude Code を採用するプロジェクトには `.claude/settings.json` の `UserPromptSubmit` フックが標準で配置される**。このフックは**毎ユーザープロンプト送信時**に system reminder を注入し、AI に AGENTS.md プロトコル（および本ファイルの BOOT SEQUENCE）の暗黙実行を強制する。
+**Claude Code を採用するプロジェクトには `.claude/settings.json` に 3 種類のフックが標準で配置される**（v1.5.5+）：
 
-このフックの削除・無効化は**「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。
+| フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
+|:--|:--|:--|:--|
+| `SessionStart` | 会話開始時 | `task.md` 自動ブートストラップ + AGENTS.md §8 (Documentation Requirements) reminder 注入 | `scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続強制 | `scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 既存ファイルへの全面書き換えを **物理遮断**（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` で whitelist 可 | `scripts/axiarch-protect-antifull.sh` |
 
-フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3原則を遵守すること。
+**この 3 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は v1.5.5 で追加された **Reminder ではなく Physical Block** のパラダイムシフト機構（学術裏付け: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防止不可能だった §6 違反を構造的に遮断する。
 
-> 他エージェント（Antigravity / Codex / Cursor / Copilot / Windsurf）は固有のロード機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため本フックは不要。
+フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
+
+> 他エージェント（Antigravity / Codex / Cursor / Copilot / Windsurf）は固有のロード機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため本フック群は不要。
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash scripts/check-axiarch-health.sh`** を実行せよ。フック有効化・発火履歴・AI 遵守（`task.md` ロード履歴）を一発診断する axiarch 標準ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Enforcement Mechanism トラブルシュート」章を参照。
+「フックが動いていない気がする」場合は **`bash scripts/check-axiarch-health.sh`** を実行せよ。3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）を含む 12 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Enforcement Mechanism トラブルシュート」章を参照。
 
 ---
 

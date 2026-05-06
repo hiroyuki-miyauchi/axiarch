@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.5.4"
+AXIARCH_VERSION="1.5.5"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -194,7 +194,7 @@ copy_files() {
     mkdir -p "$TARGET_DIR/scripts"
     cp -R "$SOURCE_DIR/scripts/." "$TARGET_DIR/scripts/"
     chmod +x "$TARGET_DIR/scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: scripts/ (diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -330,7 +330,7 @@ print_next_steps() {
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify enforcement (recommended):${RESET}"
   echo -e "       → ${BOLD}bash scripts/check-axiarch-health.sh${RESET}"
-  echo -e "         (10-stage diagnostic: hook firing, AI adherence, crystallization, AGENTS protocols)"
+  echo -e "         (12-stage diagnostic: 3-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, more)"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."

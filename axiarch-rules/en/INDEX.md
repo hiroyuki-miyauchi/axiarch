@@ -37,11 +37,13 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
- ├── scripts/                  ← Recommended: diagnostic & health-check scripts
- │    ├── README.md                  ← Index & usage guide
- │    ├── check-axiarch-health.sh    ← Axiarch full-protocol health diagnostic (10-stage)
- │    ├── axiarch-boot-reminder.sh   ← UserPromptSubmit hook externalized script (dynamic violation flags)
- │    └── check-git-config-clean.sh  ← .git/config integrity check (worktree residue)
+ ├── scripts/                  ← Recommended: diagnostic & hook externalized scripts
+ │    ├── README.md                    ← Index & usage guide
+ │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (12-stage)
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized script (dynamic violation flags)
+ │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook externalized script (§6 physical block, v1.5.5+)
+ │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (task.md auto-bootstrap, v1.5.5+)
+ │    └── check-git-config-clean.sh    ← .git/config integrity check (worktreeConfig residue)
  └── src/                       ← Your project code
 ```
 

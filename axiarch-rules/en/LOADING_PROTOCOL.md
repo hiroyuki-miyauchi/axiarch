@@ -20,17 +20,23 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 ## 🛡️ ENFORCEMENT MECHANISM 🛡️
 
-**Projects adopting Claude Code ship with a `UserPromptSubmit` hook in `.claude/settings.json`**. The hook fires **on every user prompt submission**, injecting a system reminder that compels the AI to implicitly execute the AGENTS.md protocol (including this file's BOOT SEQUENCE).
+**Projects adopting Claude Code ship with three hooks in `.claude/settings.json`** (v1.5.5+):
 
-Removing or disabling this hook is a **constitution-amending destructive change** requiring explicit owner approval.
+| Hook | Fires when | Role | Externalised script |
+|:--|:--|:--|:--|
+| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | **Physically blocks** full-overwrite of existing files (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` | `scripts/axiarch-protect-antifull.sh` |
 
-When the hook is not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
+**Removing or disabling any of these three hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular is the v1.5.5 paradigm shift from **reminder to physical block** (academically backed by arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It structurally prevents §6 violations that reminder-only enforcement could not reliably stop.
 
-> Other agents (Antigravity / Codex / Cursor / Copilot / Windsurf) have native loading mechanisms (e.g., Antigravity auto-loads `.agents/rules/`) and do not require this hook.
+When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
+
+> Other agents (Antigravity / Codex / Cursor / Copilot / Windsurf) have native loading mechanisms (e.g., Antigravity auto-loads `.agents/rules/`) and do not require these hooks.
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash scripts/check-axiarch-health.sh`** for one-shot diagnosis (hook enablement, firing history, and AI adherence via `task.md`). Standard axiarch tool, distributed automatically by `init.sh`. See `README.md` "Enforcement Mechanism Troubleshooting" for details.
+When you suspect "the hook is not working", run **`bash scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 12-stage diagnostic includes wiring verification for all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart). Distributed automatically by `init.sh`. See `README.md` "Enforcement Mechanism Troubleshooting" for details.
 
 ---
 

@@ -6,9 +6,10 @@
 # Usage:
 #   bash scripts/check-axiarch-health.sh [PROJECT_DIR]
 #
-# Diagnoses Axiarch enforcement health across 10 verifiable stages spanning
-# the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, and AGENTS.md
-# protocols (§1, §2, §4, §8 — verifiable subset):
+# Diagnoses Axiarch enforcement health across 12 verifiable stages spanning
+# the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
+# protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), and the v1.5.5
+# physical-block / bootstrap hooks:
 #
 #   Check 1-4  Hook layer (settings presence, JSON syntax, hook structure, firing log)
 #   Check 5    LOADING_PROTOCOL Step 4 — task.md adherence
@@ -17,10 +18,12 @@
 #   Check 8    AGENTS §1 Deployment Ban — push hygiene
 #   Check 9    AGENTS §4 SSOT Sync — main parity
 #   Check 10   AGENTS §2 Language First — Project Native Language consistency
+#   Check 11   AGENTS §6 ANTI-FULL-OVERWRITE — PreToolUse hook physical block
+#   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init)
 #
 # Out of Scope (semantic judgment required, manual review):
 #   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
-#   §6 Anti-Full-Overwrite / §7 Role & Behavior
+#   §7 Role & Behavior
 #
 # Designed to detect the "AI adherence gap" early and force tool-based remediation
 # instead of leaving users to manually debug.
@@ -358,6 +361,65 @@ else
 fi
 
 # =============================================================================
+# Check 11: Physical Block — PreToolUse hook wiring (v1.5.5+)
+# =============================================================================
+print_section "Check 11: PreToolUse hook (§6 ANTI-FULL-OVERWRITE physical block)"
+if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
+  print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
+elif command -v jq &>/dev/null; then
+  PRE_HOOK_CMD=$(jq -r '[.hooks.PreToolUse[]?.hooks[]?.command // empty][0] // empty' \
+    "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+  if [[ -z "${PRE_HOOK_CMD}" ]]; then
+    print_warn "PreToolUse hook not configured — §6 violations cannot be physically blocked"
+    print_info "Add a PreToolUse hook calling scripts/axiarch-protect-antifull.sh (Write matcher)"
+    print_info "(reminder-only enforcement is insufficient per Control Illusion arXiv:2502.15851)"
+  elif [[ "${PRE_HOOK_CMD}" == *"axiarch-protect-antifull.sh"* ]]; then
+    PROTECT_SCRIPT="${PROJECT_DIR}/scripts/axiarch-protect-antifull.sh"
+    if [[ -f "${PROTECT_SCRIPT}" ]] && [[ -x "${PROTECT_SCRIPT}" ]]; then
+      print_pass "PreToolUse hook wired to scripts/axiarch-protect-antifull.sh"
+    else
+      print_warn "PreToolUse hook references the script but it is missing or not executable"
+      print_info "Re-run init.sh to redistribute and chmod +x"
+      EXIT_CODE=1
+    fi
+  else
+    print_info "PreToolUse hook present but does not reference the official axiarch script"
+    print_info "(custom hook detected — manual review recommended)"
+  fi
+else
+  print_warn "Skipped (jq not installed)"
+fi
+
+# =============================================================================
+# Check 12: Bootstrap — SessionStart hook wiring (v1.5.5+)
+# =============================================================================
+print_section "Check 12: SessionStart hook (task.md auto-bootstrap)"
+if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
+  print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
+elif command -v jq &>/dev/null; then
+  SS_HOOK_CMD=$(jq -r '[.hooks.SessionStart[]?.hooks[]?.command // empty][0] // empty' \
+    "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+  if [[ -z "${SS_HOOK_CMD}" ]]; then
+    print_warn "SessionStart hook not configured — task.md will not be auto-initialised"
+    print_info "Add a SessionStart hook calling scripts/axiarch-init-task-md.sh"
+  elif [[ "${SS_HOOK_CMD}" == *"axiarch-init-task-md.sh"* ]]; then
+    INIT_SCRIPT="${PROJECT_DIR}/scripts/axiarch-init-task-md.sh"
+    if [[ -f "${INIT_SCRIPT}" ]] && [[ -x "${INIT_SCRIPT}" ]]; then
+      print_pass "SessionStart hook wired to scripts/axiarch-init-task-md.sh"
+    else
+      print_warn "SessionStart hook references the script but it is missing or not executable"
+      print_info "Re-run init.sh to redistribute and chmod +x"
+      EXIT_CODE=1
+    fi
+  else
+    print_info "SessionStart hook present but does not reference the official axiarch script"
+    print_info "(custom hook detected — manual review recommended)"
+  fi
+else
+  print_warn "Skipped (jq not installed)"
+fi
+
+# =============================================================================
 # Out-of-Scope Notice
 # =============================================================================
 print_section "Out of Scope (Manual Review Required)"
@@ -365,8 +427,8 @@ print_info "These protocols are not externally verifiable and require human revi
 print_info "  - §0 AI Self-Completion Mandate"
 print_info "  - §3 Database Integrity (manual SQL detection)"
 print_info "  - §5 Existing Functionality Protection"
-print_info "  - §6 Anti-Full-Overwrite (semantic intent)"
 print_info "  - §7 Role & Behavior"
+print_info "(§6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Check 11)"
 
 # =============================================================================
 # Summary
@@ -374,8 +436,9 @@ print_info "  - §7 Role & Behavior"
 print_section "Summary"
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_pass "All automated checks passed across hook + crystallization + AGENTS protocols"
-  print_info "Verifiable: §1, §2, §4, §8, §9 + LOADING_PROTOCOL + Hook"
-  print_info "Manual review needed: §0, §3, §5, §6, §7 (see Out of Scope above)"
+  print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (3) + Bootstrap"
+  print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
+  print_info "(§6 ANTI-FULL-OVERWRITE became externally verifiable in v1.5.5 via PreToolUse hook — Check 11)"
 else
   print_warn "Some checks failed/warned — see above for which protocol the AI is slacking on"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"

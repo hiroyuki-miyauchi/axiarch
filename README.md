@@ -252,8 +252,8 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.github/copilot-instructions.md` | 🔶 **Copilot のみ** / **Copilot only** | Copilot固有のポインター。`init.sh` で自動コピー / Copilot-specific pointer. Auto-copied by `init.sh` |
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
-| `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | `UserPromptSubmit` 強制執行フック。`init.sh` で自動コピー / Enforcement hook. Auto-copied by `init.sh` |
-| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集（`check-axiarch-health.sh` で全プロトコル遵守を一発診断、`axiarch-boot-reminder.sh` で UserPromptSubmit hook の動的違反検出 reminder を生成、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー / Diagnostic & health-check scripts (`check-axiarch-health.sh` for full-protocol compliance, `axiarch-boot-reminder.sh` for the dynamic violation-detection reminder used by the UserPromptSubmit hook, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` |
+| `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 3 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write)）の強制執行設定。`init.sh` で自動コピー / Three-hook enforcement config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher). Auto-copied by `init.sh` |
+| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を 12 段階診断、`axiarch-boot-reminder.sh` で動的違反検出 reminder、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー / Diagnostic & hook scripts (`check-axiarch-health.sh` 12-stage compliance, `axiarch-boot-reminder.sh` dynamic violation reminder, `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -273,28 +273,35 @@ Designed and validated through hundreds of real production sessions on [Google A
 | 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
 | 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
-### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism
+### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.5.5+ — 3 hooks)
 
-> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、`UserPromptSubmit` フックが**毎ユーザープロンプト送信時**に AGENTS.md プロトコルの暗黙実行を強制します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題を物理的に防止する仕組みです。
+> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**3 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap」三層強制**を実現します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却を構造的に防止します。
 >
-> **EN**: Claude Code projects ship with `.claude/settings.json` containing a `UserPromptSubmit` hook that compels implicit AGENTS.md protocol execution **on every user prompt**. This physically prevents the AI from skipping LOADING_PROTOCOL just because a prompt feels "casual."
+> **EN**: Claude Code projects ship with `.claude/settings.json` containing **three hooks** that implement a three-layer enforcement of the AGENTS.md protocol — **Reminder + Physical Block + Bootstrap**. This structurally prevents the AI from skipping LOADING_PROTOCOL on "casual" prompts, from §6 ANTI-FULL-OVERWRITE violations, and from forgetting task.md recording.
+
+| フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
+|:--|:--|:--|:--|
+| `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出）注入 / Inject factual + dynamic-violation reminder | `scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `scripts/axiarch-protect-antifull.sh` |
 
 | ファイル / File | 役割 / Role | コミット / Commit |
 |:----------------|:------------|:------------------|
-| `.claude/settings.json` | チーム共有の Axiarch 強制フック / Team-shared Axiarch enforcement hook | ✅ **必須** / **Required** |
+| `.claude/settings.json` | チーム共有の Axiarch 強制フック / Team-shared Axiarch enforcement hooks | ✅ **必須** / **Required** |
+| `.claude/axiarch-overwrite-allow.txt` | §6 物理遮断の whitelist (任意) / Whitelist for §6 physical block (optional) | 🔷 任意 / Optional |
 | `.claude/settings.local.json` | 個人の権限・許可設定 / Personal permissions | ❌ gitignored |
 | `.claude/worktrees/`, `.claude/projects/` | Claude Code セッションデータ / Claude Code session data | ❌ gitignored |
 
 > [!CAUTION]
-> **JA**: このフックの**削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要です。詳細は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` の「強制執行機構」セクションを参照。
+> **JA**: この **3 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要です。特に v1.5.5 で追加された `PreToolUse` は **「Reminder ではなく Physical Block」のパラダイムシフト**機構（学術裏付け: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）。詳細は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` の「強制執行機構」セクションを参照。
 >
-> **EN**: **Removing or disabling this hook is a constitution-amending destructive change** requiring explicit owner approval. See "Enforcement Mechanism" in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
+> **EN**: **Removing or disabling any of these three hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular (added in v1.5.5) is the **"reminder → physical block" paradigm shift** mechanism (academic backing: arXiv:2503.18666 AgentSpec, arXiv:2502.15851 Control Illusion). See "Enforcement Mechanism" in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 #### 🔍 トラブルシュート / Troubleshooting
 
-> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**フック有効化・発火履歴・AI 遵守（task.md ロード履歴）を一発診断**します。`init.sh` 経由で自動配布される axiarch 標準ツールです。
+> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**12 段階の axiarch 標準診断**で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）と AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。`init.sh` 経由で自動配布。
 >
-> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **One-shot diagnosis** of hook enablement, firing history, and AI adherence (task.md load logs). Distributed automatically via `init.sh`.
+> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **12-stage axiarch diagnostic** verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) plus AI adherence (task.md load logs / crystallization threshold). Distributed automatically via `init.sh`.
 
 ```bash
 bash scripts/check-axiarch-health.sh
@@ -412,7 +419,7 @@ your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
  ├── CLAUDE.md                    ← Claude Code のみ（ポインター） / Claude Code only (pointer)
  ├── .claude/                     ← Claude Code のみ / Claude Code only
- │    └── settings.json           ← UserPromptSubmit 強制執行フック（コミット必須） / Enforcement hook (must commit)
+ │    └── settings.json           ← 3 hooks 強制執行設定（SessionStart / UserPromptSubmit / PreToolUse、コミット必須） / Three-hook enforcement config (must commit)
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer
