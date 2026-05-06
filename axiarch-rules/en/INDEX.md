@@ -40,6 +40,7 @@ your-project/
  ├── scripts/                  ← Recommended: diagnostic & health-check scripts
  │    ├── README.md                  ← Index & usage guide
  │    ├── check-axiarch-health.sh    ← Axiarch full-protocol health diagnostic (10-stage)
+ │    ├── axiarch-boot-reminder.sh   ← UserPromptSubmit hook externalized script (dynamic violation flags)
  │    └── check-git-config-clean.sh  ← .git/config integrity check (worktree residue)
  └── src/                       ← Your project code
 ```

@@ -11,6 +11,7 @@
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
 | [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（10 段階） / Full-protocol compliance health diagnostic (10-stage) | 「フックが動いていない気がする」「結晶化されていない」と感じた時 / When you suspect protocol violations |
+| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**。毎ターン違反検出して reminder に 🚨 フラグを追記 / Externalized hook script; appends violation flags to the reminder each turn | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
 
 ---
@@ -56,6 +57,36 @@ bash scripts/check-axiarch-health.sh /path/to/project
 
 - `0` — 全自動チェック通過 / All automated checks passed
 - `1` — 1 件以上の violation / At least one violation detected
+
+---
+
+## `axiarch-boot-reminder.sh`
+
+### 概要 / Overview
+
+`.claude/settings.json` の `UserPromptSubmit` hook から呼ばれる外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に **🚨 フラグ**を追記する：
+
+- **Check A**: `task.md` にロード履歴（AGENTS.md / INDEX.md / LOADING_PROTOCOL.md）が未記録
+- **Check B**: `core/010_project_lessons_log.md` で 3 件以上溜まったドメイン（CRYSTALLIZATION §5 違反）
+
+JSON 出力は pure bash（`jq` 依存なし）。物理 block ではなく **警告強化** で副作用最小化。
+
+### 使い方 / Usage
+
+直接実行する用途は通常なし（hook 経由で自動呼出）。デバッグ時のみ：
+
+```bash
+bash scripts/axiarch-boot-reminder.sh | jq .
+# → hookSpecificOutput.additionalContext に reminder + 違反フラグ
+```
+
+### 仕組み / Mechanism
+
+1. `CLAUDE_PROJECT_DIR` または相対パスからプロジェクトルートを解決
+2. 静的 base reminder（バイリンガル）を組み立て
+3. Check A / B を実行
+4. 違反検出時は base reminder に flag を追記
+5. JSON 形式で `printf` 出力
 
 ---
 
