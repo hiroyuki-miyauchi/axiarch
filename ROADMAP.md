@@ -152,6 +152,10 @@
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
 - **AI Agent Compatibility Matrix** — 各AIエージェントの動作確認状況を定期更新
 - **コミュニティ貢献プロンプト** — ユーザー投稿プロンプトの審査・統合フロー
+- **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
+- **`init.sh` 配布後の syntax 検証** — `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` を `bash -n` で配布後検証（v1.5.4 deferred、`.claude/settings.json` の `jq` 検証と対称化）
+- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 でバージョン記述ポリシー厳密化、汎用ファイルから version-free 化を完了させる）
+- **`decision: "block"` による prompt-level 物理強制** — 現状 v1.5.3 の動的 reminder 警告強化を超えて、`task.md` 記録欠落時に prompt 自体を遮断する選択肢（副作用大のため慎重検討）
 
 ---
 
@@ -321,6 +325,10 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 - **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)
 - **AI Agent Compatibility Matrix** — Regularly updated behavior verification matrix for each AI agent
 - **Community Prompt Contributions** — User-submitted prompt review and integration flow
+- **shellcheck CI integration** — Add static analysis for `scripts/*.sh` to `lint.yml` (deferred from v1.5.4)
+- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` after copy, mirroring the existing `jq` validation for `.claude/settings.json` (deferred from v1.5.4)
+- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**: 2026-05-06 (v1.5.0)` footers; keep date only, completing the version-free policy for generic files (started in v1.5.4)
+- **`decision: "block"` for prompt-level enforcement** — Beyond v1.5.3's dynamic-reminder warning approach, optionally block the prompt entirely when `task.md` lacks load-history (large side-effect, requires careful evaluation)
 
 ---
 
