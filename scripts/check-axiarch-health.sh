@@ -8,7 +8,7 @@
 #
 # Diagnoses Axiarch enforcement health across 12 verifiable stages spanning
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
-# protocols (§1, §2, §4, §6, §8 — verifiable subset), and the v1.5.5
+# protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), and the v1.5.5
 # physical-block / bootstrap hooks:
 #
 #   Check 1-4  Hook layer (settings presence, JSON syntax, hook structure, firing log)
@@ -436,8 +436,9 @@ print_info "(§6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Che
 print_section "Summary"
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_pass "All automated checks passed across hook + crystallization + AGENTS protocols"
-  print_info "Verifiable: §1, §2, §4, §8, §9 + LOADING_PROTOCOL + Hook"
-  print_info "Manual review needed: §0, §3, §5, §6, §7 (see Out of Scope above)"
+  print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (3) + Bootstrap"
+  print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
+  print_info "(§6 ANTI-FULL-OVERWRITE became externally verifiable in v1.5.5 via PreToolUse hook — Check 11)"
 else
   print_warn "Some checks failed/warned — see above for which protocol the AI is slacking on"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"

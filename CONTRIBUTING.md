@@ -42,6 +42,35 @@ Axiarchの全ドキュメントは日英バイリンガルです。ドキュメ�
 - `axiarch-prompts/` を導入している場合は、`ja/` と `en/` の対応するフォルダ（`develop/`, `audit/`, `govern/`, `operate/`）の両方を更新（任意導入の場合のみ）
 - 片方の言語だけの変更は受け付けません
 
+### 🚨 Axiarch 本体（OSS template）運用ルール — Maintainer Guide
+
+> [!CAUTION]
+> **Axiarch 本体は採用先プロジェクトに配布される template です。** 採用先用の baseline と、axiarch 開発者側で蓄積される情報を厳格に区別する必要があります。本セクションは axiarch 本体の maintainer 向けガイドです。
+
+#### Lesson の蓄積場所（重要）
+
+| 種類 | 蓄積場所 | 例 |
+|:--|:--|:--|
+| **採用先で蓄積する Lesson**（採用先プロジェクト固有の知見） | `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` | DB スキーマ設計の失敗例、特定インシデント対応 等 |
+| **axiarch 開発側で蓄積する Lesson**（本体改善で得た知見） | `CHANGELOG.md` の Diagnostic Outcome / Design retrospective セクション、`ROADMAP.md` の対応バージョンセクション、commit body | hook format 変更時の運用、release 設計の反省 等 |
+
+**🚫 axiarch 本体の `core/010_project_lessons_log.md` には、`[Initial]` entry 以外を追加しないこと。** 本ファイルは採用先プロジェクトが自身の知見を蓄積する **template/baseline** であり、axiarch 開発側の lesson を蓄積すると採用先に noise が配布される。
+
+過去事例（v1.5.4 中間 commit）: 開発側で得た「hook format 変更時の運用ルール」を `core/010` に結晶化追加した結果、採用先 noise になる問題が発生。v1.5.5 で revert し、本ガイドを明文化した。
+
+#### 採用先で削除推奨されるファイル（README の必須ファイル表参照）
+
+- `CHANGELOG.md` / `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md` / `LICENSE` / `NOTICE`
+- これらは axiarch 本体の repository 管理用であり、採用先では不要。
+
+#### 採用先で書き換えられる template（axiarch 本体では placeholder 形式を保つ）
+
+- `AGENTS.md` の `Project Native Language: [Japanese | English]` placeholder
+- `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` の sample 値
+- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
+
+axiarch 本体では実値ではなく **template 形式** を維持する。`init.sh` が採用先で動的に書き換える設計。
+
 ---
 
 ## 🇺🇸 English
@@ -85,3 +114,32 @@ All Axiarch documentation is bilingual (JA/EN). When modifying or adding documen
 - Update both `ja/blueprint/` and `en/blueprint/`
 - If you have installed `axiarch-prompts/` (optional), update both `ja/` and `en/` in the corresponding subfolders (`develop/`, `audit/`, `govern/`, `operate/`)
 - Changes in only one language will not be accepted
+
+### 🚨 Axiarch Core (OSS Template) Operational Rules — Maintainer Guide
+
+> [!CAUTION]
+> **Axiarch core is a template distributed to adopting projects.** Strictly separate the adopter-side baseline from information accumulated by axiarch maintainers. This section is a guide for axiarch maintainers.
+
+#### Lesson Accumulation Location (Critical)
+
+| Type | Storage location | Examples |
+|:--|:--|:--|
+| **Adopter-side lessons** (project-specific insights) | `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` | DB schema design failures, specific incident handling, etc. |
+| **Axiarch maintainer-side lessons** (knowledge from improving the core) | `CHANGELOG.md` Diagnostic Outcome / Design retrospective sections, `ROADMAP.md` corresponding-version section, commit body | Hook format change operations, release design retrospectives, etc. |
+
+**🚫 Do NOT add anything other than the `[Initial]` entry to `core/010_project_lessons_log.md` in axiarch core.** This file is a template/baseline for adopting projects to accumulate their own insights; storing axiarch maintainer-side lessons here ships noise to adopters.
+
+Past incident (v1.5.4 interim commit): A maintainer-side lesson on "hook format change operations" was crystallised into `core/010`, becoming adopter noise. v1.5.5 reverted this and documented the policy here.
+
+#### Files recommended for deletion in adopter projects (see Required Files table in README)
+
+- `CHANGELOG.md` / `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md` / `LICENSE` / `NOTICE`
+- These are axiarch core repository management files and not needed in adopter projects.
+
+#### Templates rewritten in adopter projects (keep placeholder form in axiarch core)
+
+- `Project Native Language: [Japanese | English]` placeholder in `AGENTS.md`
+- Sample values in `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`
+- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
+
+In axiarch core, maintain **template form** rather than concrete values. `init.sh` rewrites these dynamically in adopter projects.

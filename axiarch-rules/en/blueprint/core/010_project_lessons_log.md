@@ -68,15 +68,6 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 ---
 
-### [2026-05-06] When changing the hook output format or command form, update the diagnostic script's grep targets in the same patch
-**Domain:** Governance
-**Context:** v1.5.2 changed the hook output format from `echo` plain text to `printf` JSON (`hookSpecificOutput.additionalContext`); v1.5.3 then externalized the hook command from inline `printf` to `bash scripts/axiarch-boot-reminder.sh`. As a result, the transcript JSONL label changed from `success` to `additional context`, and the `command` field in `.claude/settings.json` no longer contains the `AXIARCH BOOT` literal directly.
-**Problem:** `scripts/check-axiarch-health.sh` Check 3 (inline marker grep) and Check 4 (`success` literal grep) kept searching for the legacy strings, producing **false negatives** ("Hook command does not contain AXIARCH BOOT", "Hook never fired") on the new, healthy state. This forced an emergency v1.5.4 compatibility patch.
-**Solution/Rule:** **Patches that change the hook's output format or command form carry the responsibility of updating the diagnostic script's grep targets in the same PR.** Concretely: (1) during pre-PR review for any format-changing patch, run `grep -rn "<old_label>" scripts/` to identify affected diagnostics; (2) bundle the diagnostic update into the same commit; (3) verify that `bash scripts/check-axiarch-health.sh` passes all stages on the receiving project before merge.
-**Reference:** PR #29 (v1.5.1 diagnostic script introduction) / PR #30 (v1.5.2 format change) / PR #31 (v1.5.3 hook externalization) / v1.5.4 commit (Check 3/4 compatibility patch)
-
----
-
 ## Appendix A: Reverse Index & Cross-Reference
 
 ### Recommended Domain Categories

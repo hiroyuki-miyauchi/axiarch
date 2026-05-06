@@ -330,7 +330,7 @@ print_next_steps() {
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify enforcement (recommended):${RESET}"
   echo -e "       → ${BOLD}bash scripts/check-axiarch-health.sh${RESET}"
-  echo -e "         (10-stage diagnostic: hook firing, AI adherence, crystallization, AGENTS protocols)"
+  echo -e "         (12-stage diagnostic: 3-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, more)"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."

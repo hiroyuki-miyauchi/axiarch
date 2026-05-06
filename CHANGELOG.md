@@ -83,7 +83,7 @@ After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Ch
 
 - **`init.sh`** — `AXIARCH_VERSION` 1.5.3 → 1.5.4
 - **`llms-full.txt`** — Version 1.5.3 → 1.5.4
-- **`axiarch-rules/{ja,en}/blueprint/core/010_project_lessons_log.md`** — v1.5.4 で得た教訓を結晶化（CRYSTAL §4 ACCUMULATE）：「hook の format/command 形式変更時は診断スクリプトの grep 対象も同 PR 内で同時更新する責務を負う」。ガバナンス domain 2 件目（昇華閾値 3+ 未達のため §4 段階で完結） / Crystallized the v1.5.4 lesson into the project lessons log: "When changing hook output format or command form, update the diagnostic's grep targets in the same patch"
+- **`axiarch-rules/{ja,en}/blueprint/core/010_project_lessons_log.md`** — Initial entry のみ保持（axiarch 本体は OSS template のため、axiarch 開発側で得た lesson は本ファイルに残さず CHANGELOG / ROADMAP / commit body に記録する方針）。v1.5.4 中間 commit で誤って開発側 lesson を結晶化した記述があったが本 release で訂正 / Kept the Initial entry only — axiarch is an OSS template, so lessons learned by axiarch maintainers are recorded in CHANGELOG / ROADMAP / commit bodies, not in this template file. An interim mistake (crystallizing a maintainer-side lesson here) was reverted in this release
 
 ### Compatibility
 

@@ -132,6 +132,20 @@
 
 ---
 
+### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
+
+- **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
+- **Check 3 にフォールバック分岐追加** — hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` リテラルが含まれることを確認することで、inline 形式（v1.4.0–v1.5.2）と externalized 形式（v1.5.3+）の双方で PASS する設計に
+- **Check 4 の grep pattern を拡張** — v1.5.2+ の transcript JSONL で hook 出力ラベルが `success` → `additional context` に変わっていたため、`grep -cE "UserPromptSubmit hook (success|additional context)"` で両方マッチするよう修正
+- **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `scripts/axiarch-boot-reminder.sh` のコメントと `scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
+- **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` を追記** — v1.5.3 新規スクリプトの言及漏れ訂正
+- **`core/010_project_lessons_log.md` (ja/en) は Initial entry のみに restore** — axiarch は OSS template のため、axiarch 開発者側で得た lesson は本ファイルに残さず CHANGELOG / ROADMAP / commit body に記録する方針。v1.5.4 中間 commit で誤って開発側 lesson を結晶化した記述があったため訂正
+- **18 ラウンド調査で Check 3 else 分岐の false-negative bug 発見・修正** — hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
+- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
+- **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え（→ axiarch 本体の `core/010` には残さず CHANGELOG / commit body に記録、CONTRIBUTING.md Maintainer Guide で再発防止）
+
+---
+
 ### ✅ v1.5.5 — Physical Block + Tone Refactor + SessionStart Bootstrap（2026-05-07）
 
 26 ラウンド徹底市場調査（4 並列 Agent: AI compliance frameworks / 競合 AI ツール / Claude Code 公式機能 / 学術 2024-2026）の統合分析を踏まえ、**「Reminder → Physical Block」パラダイムシフト**を実装。
@@ -142,22 +156,9 @@
 - **`scripts/check-axiarch-health.sh` Check 11/12 追加** — 12 段階診断に拡張（PreToolUse / SessionStart 配線確認）
 - **`.claude/settings.json` に 3 hook 配線** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
 - **`.claude/axiarch-overwrite-allow.txt` whitelist サポート** — 自動生成 artefact 等の正当な full-overwrite に escape hatch
+- **`CONTRIBUTING.md` に Maintainer Guide 追記** — 「lessons_log は Initial のみ保持」「採用先で削除推奨ファイル」「placeholder 形式を保つ template」を ja/en 対称的に明文化、再発防止
 - **学術裏付け**: arXiv:2503.18666 (AgentSpec ICSE'26 — 90%+ 阻止) / arXiv:2502.15851 (Control Illusion — instruction-hierarchy 失敗の構造的回避) / arXiv:2310.01798 (Huang — single-LLM self-correct 不可、external verifier 必須)
 - **後方互換性 100%** — 既存 UserPromptSubmit hook 維持、新 hook 追加のみ、依存追加なし（pure bash）
-
----
-
-### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
-
-- **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
-- **Check 3 にフォールバック分岐追加** — hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` リテラルが含まれることを確認することで、inline 形式（v1.4.0–v1.5.2）と externalized 形式（v1.5.3+）の双方で PASS する設計に
-- **Check 4 の grep pattern を拡張** — v1.5.2+ の transcript JSONL で hook 出力ラベルが `success` → `additional context` に変わっていたため、`grep -cE "UserPromptSubmit hook (success|additional context)"` で両方マッチするよう修正
-- **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `scripts/axiarch-boot-reminder.sh` のコメントと `scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
-- **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` を追記** — v1.5.3 新規スクリプトの言及漏れ訂正
-- **`core/010_project_lessons_log.md` (ja/en) に v1.5.4 教訓を結晶化（CRYSTAL §4 ACCUMULATE）** — 「hook format/command 変更時は診断 grep 対象も同 PR で更新する責務」をガバナンス domain に蓄積（2 件目、昇華閾値 3+ 未達のため §4 段階で完結）
-- **18 ラウンド調査で Check 3 else 分岐の false-negative bug 発見・修正** — hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
-- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
-- **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え（→ Lessons log に結晶化済）
 
 ---
 
@@ -343,6 +344,20 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
+### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
+
+- **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
+- **Check 3 fallback branch** — When the hook command delegates to `scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
+- **Check 4 grep pattern expanded** — v1.5.2+ transcripts log `UserPromptSubmit hook additional context` instead of the legacy `UserPromptSubmit hook success`. Pattern updated to `grep -cE "UserPromptSubmit hook (success|additional context)"` to match both
+- **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `scripts/axiarch-boot-reminder.sh` (header comment) and `scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
+- **`README.md` required-files table updated** — Added the missing reference to `axiarch-boot-reminder.sh` (introduced in v1.5.3 but never listed)
+- **`core/010_project_lessons_log.md` (ja/en) restored to Initial entry only** — axiarch is an OSS template; lessons learned by axiarch maintainers belong in CHANGELOG / ROADMAP / commit bodies, not in this template file. An interim commit mistakenly crystallized a maintainer-side lesson here, and this release reverts it
+- **18th-round audit: Check 3 else-branch false-negative fix** — When the hook command contains neither `AXIARCH BOOT` literal nor `axiarch-boot-reminder.sh` reference (i.e. fully broken hook), the diagnostic was emitting `print_warn` without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI integrations would falsely report success. Now correctly fails the run
+- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
+- **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together (recorded in CHANGELOG / commit bodies, not in axiarch core's `core/010` — see CONTRIBUTING.md Maintainer Guide for the policy)
+
+---
+
 ### ✅ v1.5.5 — Physical Block + Tone Refactor + SessionStart Bootstrap (2026-05-07)
 
 Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI compliance frameworks / competitor tools / Claude Code official / academic 2024-2026), v1.5.5 implements the **"reminder → physical block" paradigm shift**.
@@ -353,22 +368,9 @@ Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI
 - **`scripts/check-axiarch-health.sh` Check 11/12 added** — Diagnostic extended to 12 stages (PreToolUse / SessionStart wiring verification)
 - **`.claude/settings.json` three-hook wiring** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
 - **`.claude/axiarch-overwrite-allow.txt` whitelist support** — escape hatch for legitimate full-overwrite cases (autogenerated artefacts etc.)
+- **`CONTRIBUTING.md` Maintainer Guide added** — Documents "lessons_log keeps Initial only", "files recommended for deletion in adopters", and "templates kept in placeholder form" symmetrically in JA/EN to prevent regression
 - **Academic backing**: arXiv:2503.18666 (AgentSpec ICSE'26 — 90%+ block rate) / arXiv:2502.15851 (Control Illusion — structural workaround for instruction-hierarchy failure) / arXiv:2310.01798 (Huang — single-LLM self-correction insufficient, external verifier required)
 - **100% Backwards Compatible** — existing UserPromptSubmit hook preserved, new hooks added only, no new dependencies (pure bash)
-
----
-
-### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
-
-- **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
-- **Check 3 fallback branch** — When the hook command delegates to `scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
-- **Check 4 grep pattern expanded** — v1.5.2+ transcripts log `UserPromptSubmit hook additional context` instead of the legacy `UserPromptSubmit hook success`. Pattern updated to `grep -cE "UserPromptSubmit hook (success|additional context)"` to match both
-- **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `scripts/axiarch-boot-reminder.sh` (header comment) and `scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
-- **`README.md` required-files table updated** — Added the missing reference to `axiarch-boot-reminder.sh` (introduced in v1.5.3 but never listed)
-- **`core/010_project_lessons_log.md` (ja/en) lesson crystallized (CRYSTAL §4 ACCUMULATE)** — "When changing hook format/command form, update the diagnostic's grep targets in the same patch" recorded under the Governance domain (2nd entry; below the 3+ promotion threshold, so §4 ACCUMULATE is sufficient)
-- **18th-round audit: Check 3 else-branch false-negative fix** — When the hook command contains neither `AXIARCH BOOT` literal nor `axiarch-boot-reminder.sh` reference (i.e. fully broken hook), the diagnostic was emitting `print_warn` without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI integrations would falsely report success. Now correctly fails the run
-- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
-- **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together (→ crystallized into the Lessons log)
 
 ---
 
