@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.5.4"
+AXIARCH_VERSION="1.5.5"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -194,7 +194,7 @@ copy_files() {
     mkdir -p "$TARGET_DIR/scripts"
     cp -R "$SOURCE_DIR/scripts/." "$TARGET_DIR/scripts/"
     chmod +x "$TARGET_DIR/scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: scripts/ (diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===

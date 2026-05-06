@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.5] — 2026-05-07
+
+### 🚦 Physical Block + Tone Refactor + SessionStart Bootstrap / 物理遮断 + トーン リファクタ + セッション開始ブートストラップ
+
+26 ラウンド徹底市場調査（4 並列 Agent: AI compliance frameworks / competitor tools / Claude Code official features / academic 2024-2026）の統合分析を踏まえ、**「Reminder → Physical Block」のパラダイムシフト**を実装。学術的に裏付けされた 3 改善を v1.5.5 patch として bundling：(1) `PreToolUse` hook で §6 ANTI-FULL-OVERWRITE を物理遮断、(2) `SessionStart` hook で task.md 自動ブートストラップ、(3) reminder 文を CAPS / 強調記号から事実陳述へリファクタ（9 protocols 反復構造は維持）。
+
+Based on a 4-agent parallel market study (AI compliance frameworks / competitor tools / Claude Code official / academic 2024-2026), v1.5.5 implements the **"reminder → physical block" paradigm shift**. Three academically-backed improvements are bundled: (1) `PreToolUse` hook physically blocks §6 ANTI-FULL-OVERWRITE violations, (2) `SessionStart` hook auto-bootstraps task.md, (3) reminder text refactored from CAPS / emphasis markers to factual statements (repetition structure across 9 protocols preserved).
+
+### Added
+
+- **`scripts/axiarch-protect-antifull.sh`**（新規）— PreToolUse hook の外出しスクリプト。`Write` tool 呼び出しを傍受し、対象が既存ファイルの場合 `decision: "block"` JSON + exit 2 で物理遮断。`.claude/axiarch-overwrite-allow.txt` で whitelist サポート / NEW: PreToolUse hook script that intercepts `Write` calls; blocks (decision:"block" JSON + exit 2) when the target file already exists. Whitelist via `.claude/axiarch-overwrite-allow.txt`
+- **`scripts/axiarch-init-task-md.sh`**（新規）— SessionStart hook の外出しスクリプト。会話開始時に task.md の存在を確認、無ければ load-history scaffold で自動生成。常に reminder を `additionalContext` で注入 / NEW: SessionStart hook script that checks for task.md, scaffolds it if missing (with load-history table stub), and always injects a reminder via `additionalContext`
+- **`scripts/check-axiarch-health.sh` Check 11 / Check 12 追加** — 12 段階診断に拡張。Check 11 = PreToolUse hook の配線確認、Check 12 = SessionStart hook の配線確認 / Diagnostic extended to 12 stages: Check 11 = PreToolUse wiring, Check 12 = SessionStart wiring
+
+### Changed
+
+- **`.claude/settings.json`** — 3 hook 配線（SessionStart / UserPromptSubmit / PreToolUse(Write matcher)）。SessionStart と PreToolUse が新規追加 / Three-hook wiring: SessionStart, UserPromptSubmit, PreToolUse with `Write` matcher
+- **`scripts/axiarch-boot-reminder.sh` reminder 文の事実陳述化リファクタ** — CAPS / `🚨【厳守命令】` / `No skipping` 等の強圧表現を排除し、`This project enforces axiarch governance` のような事実陳述に統一。Anthropic 公式ガイドおよび Robert Glaser 「Prompts as Programs in GPT-5」に基づく科学的最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持 / Reminder tone refactored from CAPS/imperative to factual statement per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". Repetition structure preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.4 → 1.5.5
+- **`llms-full.txt`** — Version 1.5.4 → 1.5.5
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — 既存 hook (`UserPromptSubmit`) は維持、新 hook 追加のみ。fallback 採用先で新 hook が動かなくても既存挙動は変わらない
+- ✅ **依存追加なし** — pure bash 実装、`jq` は optional（grep + sed フォールバック完備）
+- ✅ **`.claude/axiarch-overwrite-allow.txt` で whitelist 拡張** — 自動生成 build artefact 等で正当な full-overwrite が必要な場合の escape hatch
+- ⚠️ **採用先で `init.sh` 再実行が必要** — `chmod +x` で新 hook scripts に実行権限が付与される
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行 OR 手動で `.claude/settings.json` + `scripts/axiarch-{protect-antifull,init-task-md}.sh` をコピー + `chmod +x`
+
+### Diagnostic Outcome
+
+- **Mock test verification**:
+  - 既存ファイルへの `Write` → JSON `{"decision":"block",...}` + stderr message + exit 2 で物理遮断 ✅
+  - 新規ファイルへの `Write` → allow (exit 0) ✅
+  - `Edit` tool → allow (exit 0)、Write 以外は無干渉 ✅
+  - SessionStart hook → 正常 JSON 出力で additionalContext 注入 ✅
+- **axiarch repo against itself**: 全 12 段階 PASS（Check 11/12 含む）
+- **学術裏付けスコア**:
+  - PreToolUse block: arXiv:2503.18666 (AgentSpec, ICSE'26) で 90%+ 阻止実証
+  - SessionStart bootstrap: arXiv:2502.15851 (Control Illusion) の instruction-hierarchy 失敗を構造的回避
+  - Tone refactor: Anthropic 公式 + Robert Glaser、9 protocols 反復は arXiv:2512.14982 で保持
+
+### References
+
+- 4-agent market research transcript（本リリース commit body 参照）
+- arXiv:2503.18666 — AgentSpec: Customizable Runtime Enforcement for AI Agents (ICSE'26)
+- arXiv:2502.15851 — Control Illusion: failed instruction hierarchies in LLMs
+- arXiv:2512.14982 — Prompt Repetition Improves Non-Reasoning LLMs
+- arXiv:2412.16339 — Deliberative Alignment (OpenAI)
+- arXiv:2412.14093 — Alignment Faking (Anthropic)
+- arXiv:2310.01798 — Huang et al.: LLMs Cannot Self-Correct Reasoning Yet
+- Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
+
+---
+
 ## [1.5.4] — 2026-05-06
 
 ### 🩹 健全性診断スクリプトの v1.5.3 互換性 patch / Health-Diagnostic Compatibility Patch for v1.5.3

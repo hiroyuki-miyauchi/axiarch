@@ -45,11 +45,13 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
- ├── scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集
- │    ├── README.md                  ← 索引・使い方ガイド
- │    ├── check-axiarch-health.sh    ← Axiarch 全プロトコル健全性診断（10 段階）
- │    ├── axiarch-boot-reminder.sh   ← UserPromptSubmit hook の外出しスクリプト（動的違反検出）
- │    └── check-git-config-clean.sh  ← .git/config 健全性チェック（worktree 残留）
+ ├── scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
+ │    ├── README.md                    ← 索引・使い方ガイド
+ │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（12 段階）
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出）
+ │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
+ │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（task.md 自動初期化、v1.5.5+）
+ │    └── check-git-config-clean.sh    ← .git/config 健全性チェック（worktree 残留）
  └── src/                       ← プロジェクトコード
 ```
 

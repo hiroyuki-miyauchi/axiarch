@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.4  
+> **現在の安定版 / Current Stable**: v1.5.5  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -132,6 +132,21 @@
 
 ---
 
+### ✅ v1.5.5 — Physical Block + Tone Refactor + SessionStart Bootstrap（2026-05-07）
+
+26 ラウンド徹底市場調査（4 並列 Agent: AI compliance frameworks / 競合 AI ツール / Claude Code 公式機能 / 学術 2024-2026）の統合分析を踏まえ、**「Reminder → Physical Block」パラダイムシフト**を実装。
+
+- **`scripts/axiarch-protect-antifull.sh` 新規** — PreToolUse hook で `Write` tool を傍受、既存ファイル対象なら `decision:"block"` JSON + exit 2 で**物理遮断**。§6 ANTI-FULL-OVERWRITE 違反を完全防止
+- **`scripts/axiarch-init-task-md.sh` 新規** — SessionStart hook で会話開始時に task.md 自動ブートストラップ（不在時は load-history scaffold 生成）
+- **`scripts/axiarch-boot-reminder.sh` トーンリファクタ** — `🚨【厳守命令】` `No skipping` 等の CAPS / 命令調を排し、`This project enforces axiarch governance` の事実陳述に統一。Anthropic 公式 + Robert Glaser「Prompts as Programs in GPT-5」に基づく最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持
+- **`scripts/check-axiarch-health.sh` Check 11/12 追加** — 12 段階診断に拡張（PreToolUse / SessionStart 配線確認）
+- **`.claude/settings.json` に 3 hook 配線** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
+- **`.claude/axiarch-overwrite-allow.txt` whitelist サポート** — 自動生成 artefact 等の正当な full-overwrite に escape hatch
+- **学術裏付け**: arXiv:2503.18666 (AgentSpec ICSE'26 — 90%+ 阻止) / arXiv:2502.15851 (Control Illusion — instruction-hierarchy 失敗の構造的回避) / arXiv:2310.01798 (Huang — single-LLM self-correct 不可、external verifier 必須)
+- **後方互換性 100%** — 既存 UserPromptSubmit hook 維持、新 hook 追加のみ、依存追加なし（pure bash）
+
+---
+
 ### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
 
 - **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
@@ -146,16 +161,39 @@
 
 ---
 
-### 🔮 v1.6.0 — エコシステム & 自動化（検討中）
+### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
-- **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
-- **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
-- **AI Agent Compatibility Matrix** — 各AIエージェントの動作確認状況を定期更新
-- **コミュニティ貢献プロンプト** — ユーザー投稿プロンプトの審査・統合フロー
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案を v1.6.0 として纏める方針。
+
+- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では Write のみ block、Edit による潜在的に大規模な変更は post-hoc で検出）
+- **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加し、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上（出典: Cursor Rules / `.claude/rules/` path-scoped）
+- **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
+- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決
 - **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
-- **`init.sh` 配布後の syntax 検証** — `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` を `bash -n` で配布後検証（v1.5.4 deferred、`.claude/settings.json` の `jq` 検証と対称化）
-- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 でバージョン記述ポリシー厳密化、汎用ファイルから version-free 化を完了させる）
-- **`decision: "block"` による prompt-level 物理強制** — 現状 v1.5.3 の動的 reminder 警告強化を超えて、`task.md` 記録欠落時に prompt 自体を遮断する選択肢（副作用大のため慎重検討）
+- **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
+- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 で確立した version-free 方針の完遂）
+- **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
+
+---
+
+### 🔮 v1.7.0 — Static Lint & Process Supervision（Tier 3、検討中）
+
+学術裏付けが強く工数も大きい改善案を v1.7.0 として独立計画。
+
+- **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` / `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反 / `compliance_matrix.md` 同期 を PR 時に強制チェック（出典: <https://github.com/nedcodes-ok/cursor-lint-action>）
+- **IFEval 風自動回帰スイート** — `tests/ifeval/` に「task.md 記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
+- **Deliberative Alignment 模倣 — Protocol Recall 強制** — 高リスク tool 実行前に「9 protocols のうち今回該当するものを列挙し、各々への適合理由を 1 行ずつ書け」reasoning step を必須化。OpenAI o3 で safety 違反 13%→0.4% を達成（出典: arXiv:2412.16339）
+- **AI Agent Compatibility Matrix** — 各 AI エージェント（Claude Code / Cursor / Windsurf / Cline / Antigravity / Codex / Copilot）の動作確認状況を定期更新するメタ仕様
+
+---
+
+### 🔮 v2.0.0 — AgentSpec DSL & Constitutional AI 系譜（戦略、長期）
+
+- **AgentSpec 型 DSL 導入** — `axiarch-rules/policies/*.spec` で trigger + predicate + enforcement を宣言的記述。ICSE'26 (arXiv:2503.18666) で「コードエージェント不正実行 90%+ 阻止」実証された手法を OSS 化。axiarch を Anthropic Constitutional AI 系譜の OSS 実装として再定義（出典: arXiv:2503.18666 / Constitutional AI Bai et al. 2022 / C3AI WWW'25）
+- **Multi-Agent Verification** — 重要 commit 前に Architect role / Auditor role の 2 sub-agent で相互検証（出典: arXiv:2305.14325 / arXiv:2510.12697）
+- **Axiarch CLI** — `npx axiarch-init` による自動セットアップ
+- **コミュニティ貢献プロンプト** — ユーザー投稿プロンプトの審査・統合フロー
+- **`decision: "block"` 一般化** — v1.5.5 で `Write` matcher を block しているが、Bash / Edit にも段階的拡張（whitelist 駆動）
 
 ---
 
@@ -305,6 +343,21 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
+### ✅ v1.5.5 — Physical Block + Tone Refactor + SessionStart Bootstrap (2026-05-07)
+
+Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI compliance frameworks / competitor tools / Claude Code official / academic 2024-2026), v1.5.5 implements the **"reminder → physical block" paradigm shift**.
+
+- **NEW `scripts/axiarch-protect-antifull.sh`** — PreToolUse hook that intercepts `Write` calls and **physically blocks** (decision:"block" JSON + exit 2) when the target file already exists, preventing §6 ANTI-FULL-OVERWRITE violations
+- **NEW `scripts/axiarch-init-task-md.sh`** — SessionStart hook that auto-bootstraps task.md on session start (scaffolds with load-history table when missing)
+- **`scripts/axiarch-boot-reminder.sh` tone refactor** — Stripped CAPS / imperative markers (🚨/`No skipping`) and shifted to factual statements ("This project enforces axiarch governance"), per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". The 9-protocol repetition structure is preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
+- **`scripts/check-axiarch-health.sh` Check 11/12 added** — Diagnostic extended to 12 stages (PreToolUse / SessionStart wiring verification)
+- **`.claude/settings.json` three-hook wiring** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
+- **`.claude/axiarch-overwrite-allow.txt` whitelist support** — escape hatch for legitimate full-overwrite cases (autogenerated artefacts etc.)
+- **Academic backing**: arXiv:2503.18666 (AgentSpec ICSE'26 — 90%+ block rate) / arXiv:2502.15851 (Control Illusion — structural workaround for instruction-hierarchy failure) / arXiv:2310.01798 (Huang — single-LLM self-correction insufficient, external verifier required)
+- **100% Backwards Compatible** — existing UserPromptSubmit hook preserved, new hooks added only, no new dependencies (pure bash)
+
+---
+
 ### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
 
 - **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
@@ -319,16 +372,39 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ---
 
-### 🔮 v1.6.0 — Ecosystem & Automation (Under Consideration)
+### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
 
+Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes).
+
+- **`PostToolUse` hook + git diff verification** — Measure diff line count after Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only blocks `Write`; large Edit changes detected post-hoc)
+- **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per file type. Reduces tokens, improves relevance (sources: Cursor Rules / `.claude/rules/` path-scoped)
+- **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf Cascade Memories / Codeium Memories, designed around `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation" problem via persistent context
+- **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue
+- **shellcheck CI integration** — Add `scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
+- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` after copy, mirroring the existing `jq` validation
+- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files
+- **HealthCheck Workflow** — Automated repository health diagnostics (empty Blueprint, accumulated Lessons-log overflow detection, etc.)
+
+---
+
+### 🔮 v1.7.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+
+Improvements with strong academic backing but larger implementation effort, planned independently for v1.7.0.
+
+- **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation / Universal-vs-Blueprint responsibility checks / `compliance_matrix.md` sync as PR gates (source: <https://github.com/nedcodes-ok/cursor-lint-action>)
+- **IFEval-style auto-regression suite** — Convert "task.md recording obligation" / "core/010 crystallization threshold" to verifiable instructions in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 / arXiv:2512.14754)
+- **Deliberative-Alignment imitation — forced Protocol Recall** — Before high-risk tool calls, require a reasoning step: "list which of the 9 protocols apply now and write one-line justification per match". OpenAI o3 reduced safety violations 13%→0.4% with this approach (source: arXiv:2412.16339)
+- **AI Agent Compatibility Matrix** — Meta-spec for periodic verification status of each AI agent (Claude Code / Cursor / Windsurf / Cline / Antigravity / Codex / Copilot)
+
+---
+
+### 🔮 v2.0.0 — AgentSpec DSL & Constitutional AI Lineage (Strategic, Long-Term)
+
+- **AgentSpec-style DSL adoption** — Declarative trigger + predicate + enforcement in `axiarch-rules/policies/*.spec`. OSS-ifies the technique that achieves 90%+ block rate in ICSE'26 (arXiv:2503.18666). Repositions axiarch as the OSS implementation in the Anthropic Constitutional AI lineage (sources: arXiv:2503.18666 / Constitutional AI Bai et al. 2022 / C3AI WWW'25)
+- **Multi-Agent Verification** — Architect / Auditor sub-agent cross-checking before critical commits (sources: arXiv:2305.14325 / arXiv:2510.12697)
 - **Axiarch CLI** — Automated setup via `npx axiarch-init`
-- **HealthCheck Workflow** — Automated repository health diagnostics (detecting empty Blueprint, accumulated Lessons log overflow, etc.)
-- **AI Agent Compatibility Matrix** — Regularly updated behavior verification matrix for each AI agent
 - **Community Prompt Contributions** — User-submitted prompt review and integration flow
-- **shellcheck CI integration** — Add static analysis for `scripts/*.sh` to `lint.yml` (deferred from v1.5.4)
-- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-boot-reminder.sh` / `check-axiarch-health.sh` after copy, mirroring the existing `jq` validation for `.claude/settings.json` (deferred from v1.5.4)
-- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**: 2026-05-06 (v1.5.0)` footers; keep date only, completing the version-free policy for generic files (started in v1.5.4)
-- **`decision: "block"` for prompt-level enforcement** — Beyond v1.5.3's dynamic-reminder warning approach, optionally block the prompt entirely when `task.md` lacks load-history (large side-effect, requires careful evaluation)
+- **`decision: "block"` generalisation** — v1.5.5 blocks `Write` only; gradual extension to Bash / Edit (whitelist-driven)
 
 ---
 
