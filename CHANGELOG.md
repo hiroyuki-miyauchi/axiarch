@@ -19,11 +19,15 @@ After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Ch
 
 - **Check 3 — `AXIARCH BOOT` marker detection** — Hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` が含まれることを確認するフォールバック分岐を追加。inline 形式 (v1.4.0–v1.5.2) と externalized 形式 (v1.5.3+) の両方をパスできるようになった / Added fallback branch that inspects the externalized script for the `AXIARCH BOOT` literal when the hook command delegates to `scripts/axiarch-boot-reminder.sh`
 - **Check 4 — Session firing history grep pattern** — v1.5.2+ の transcript JSONL では hook 出力ラベルが `UserPromptSubmit hook success` から `UserPromptSubmit hook additional context` に変わっていたため、grep を `grep -cE "UserPromptSubmit hook (success|additional context)"` に拡張 / Expanded grep to match both legacy and current transcript labels (`success` ⇄ `additional context`)
+- **`scripts/axiarch-boot-reminder.sh` のコメントから version literal 除去** — `# Static base reminder (..., identical content to v1.5.1/v1.5.2)` は汎用ファイルへのバージョン記述ポリシー違反だったため version-free に書き換え / Removed `v1.5.1/v1.5.2` literal from the externalized reminder script's header comment to comply with the version-string-policy
+- **`scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から version literal 除去** — Check 3 fail-path の helper メッセージから `(v1.5.3+ uses ...)` を削除（採用先のランタイム出力は version-free を厳守） / Removed `(v1.5.3+ ...)` literal from a runtime-visible `print_info` line in the diagnostic
+- **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` 言及追加** — v1.5.3 で新規追加されたが必須ファイル表で言及漏れだった件を訂正 / Added the missing reference to `axiarch-boot-reminder.sh` in the required-files table
 
 ### Changed
 
 - **`init.sh`** — `AXIARCH_VERSION` 1.5.3 → 1.5.4
 - **`llms-full.txt`** — Version 1.5.3 → 1.5.4
+- **`axiarch-rules/{ja,en}/blueprint/core/010_project_lessons_log.md`** — v1.5.4 で得た教訓を結晶化（CRYSTAL §4 ACCUMULATE）：「hook の format/command 形式変更時は診断スクリプトの grep 対象も同 PR 内で同時更新する責務を負う」。ガバナンス domain 2 件目（昇華閾値 3+ 未達のため §4 段階で完結） / Crystallized the v1.5.4 lesson into the project lessons log: "When changing hook output format or command form, update the diagnostic's grep targets in the same patch"
 
 ### Compatibility
 

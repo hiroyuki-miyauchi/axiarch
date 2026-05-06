@@ -68,6 +68,15 @@
 
 ---
 
+### [2026-05-06] hook の format/command 形式変更時は診断スクリプトの grep 対象も同時更新する
+**Domain:** ガバナンス
+**Context:** v1.5.2 で hook 出力 format を `echo` ベタテキストから `printf` JSON (`hookSpecificOutput.additionalContext`) に変更し、v1.5.3 で hook command を inline `printf` から `bash scripts/axiarch-boot-reminder.sh` に外出しした。これにより transcript JSONL のラベルが `success` → `additional context` に変わり、`.claude/settings.json` の `command` 文字列に `AXIARCH BOOT` リテラルが直接出現しなくなった。
+**Problem:** `scripts/check-axiarch-health.sh` の Check 3（inline marker grep）と Check 4（`success` 文字列 grep）が format 変更後も legacy 文字列を探し続けた結果、新しい正常状態を「Hook command does not contain AXIARCH BOOT」「Hook never fired」と**誤検出（false negative）**する状態になり、v1.5.4 で緊急 patch が必要になった。
+**Solution/Rule:** **Hook 出力の format / command 形式を変更する patch では、診断スクリプトの grep 対象を同 PR 内で同時更新する責務を負う**。具体的には：(1) format 変更を伴う patch の Pre-PR レビューで `grep -rn "<old_label>" scripts/` を必ず実行し、影響範囲を洗い出す、(2) 変更を伴う commit に diagnostic update も同梱、(3) 採用先で `bash scripts/check-axiarch-health.sh` 全 PASS 確認まで完了させる。
+**Reference:** PR #29 (v1.5.1 診断スクリプト導入) / PR #30 (v1.5.2 format 変更) / PR #31 (v1.5.3 hook 外出し) / v1.5.4 commit (Check 3/4 互換性 patch)
+
+---
+
 ## Appendix A: 逆引き索引 & クロスリファレンス
 
 ### 推奨ドメインカテゴリ
