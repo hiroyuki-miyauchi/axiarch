@@ -253,7 +253,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 3 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write)）の強制執行設定。`init.sh` で自動コピー / Three-hook enforcement config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher). Auto-copied by `init.sh` |
-| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を 12 段階診断、`axiarch-boot-reminder.sh` で動的違反検出 reminder、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー / Diagnostic & hook scripts (`check-axiarch-health.sh` 12-stage compliance, `axiarch-boot-reminder.sh` dynamic violation reminder, `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` |
+| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を **13 段階診断**（v1.6.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減）、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts (`check-axiarch-health.sh` 13-stage compliance with `--quiet` flag, `axiarch-boot-reminder.sh` dynamic violation reminder + two-stage TTL (87% token reduction), `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -273,16 +273,16 @@ Designed and validated through hundreds of real production sessions on [Google A
 | 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
 | 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
-### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.5.5+ — 3 hooks)
+### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.6.0+ — 3 hooks + TTL)
 
-> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**3 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap」三層強制**を実現します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却を構造的に防止します。
+> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**3 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap」三層強制**を実現します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却を構造的に防止します。**v1.6.0+ では `axiarch-boot-reminder.sh` に TTL 二段階出力（default 30 分）を導入し、長時間 session で token 約 87% 削減**（24k → 3k 累計）。
 >
-> **EN**: Claude Code projects ship with `.claude/settings.json` containing **three hooks** that implement a three-layer enforcement of the AGENTS.md protocol — **Reminder + Physical Block + Bootstrap**. This structurally prevents the AI from skipping LOADING_PROTOCOL on "casual" prompts, from §6 ANTI-FULL-OVERWRITE violations, and from forgetting task.md recording.
+> **EN**: Claude Code projects ship with `.claude/settings.json` containing **three hooks** that implement a three-layer enforcement of the AGENTS.md protocol — **Reminder + Physical Block + Bootstrap**. This structurally prevents the AI from skipping LOADING_PROTOCOL on "casual" prompts, from §6 ANTI-FULL-OVERWRITE violations, and from forgetting task.md recording. **v1.6.0+ adds two-stage TTL output (default 30 min) to `axiarch-boot-reminder.sh`, reducing per-session reminder token cost ~87%** (24k → 3k cumulative).
 
 | フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
 |:--|:--|:--|:--|
 | `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `scripts/axiarch-init-task-md.sh` |
-| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出）注入 / Inject factual + dynamic-violation reminder | `scripts/axiarch-boot-reminder.sh` |
+| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 + **v1.6.0+ TTL 短縮版 short-circuit**）注入 / Inject factual + dynamic-violation reminder + **v1.6.0+ TTL short-circuit `[AXIARCH OK]`** | `scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `scripts/axiarch-protect-antifull.sh` |
 
 | ファイル / File | 役割 / Role | コミット / Commit |
@@ -299,9 +299,9 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 #### 🔍 トラブルシュート / Troubleshooting
 
-> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**12 段階の axiarch 標準診断**で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）と AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。`init.sh` 経由で自動配布。
+> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**13 段階の axiarch 標準診断**（v1.6.0+）で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
 >
-> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **12-stage axiarch diagnostic** verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) plus AI adherence (task.md load logs / crystallization threshold). Distributed automatically via `init.sh`.
+> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **13-stage axiarch diagnostic** (v1.6.0+) verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
 
 ```bash
 bash scripts/check-axiarch-health.sh
@@ -419,7 +419,7 @@ your-project/
  ├── AGENTS.md                    ← 必須：最高法規 / Required: Supreme Law
  ├── CLAUDE.md                    ← Claude Code のみ（ポインター） / Claude Code only (pointer)
  ├── .claude/                     ← Claude Code のみ / Claude Code only
- │    └── settings.json           ← 3 hooks 強制執行設定（SessionStart / UserPromptSubmit / PreToolUse、コミット必須） / Three-hook enforcement config (must commit)
+ │    └── settings.json           ← 3 hooks 強制執行設定（SessionStart / UserPromptSubmit + v1.6.0 TTL / PreToolUse、コミット必須） / Three-hook enforcement config + v1.6.0 reminder TTL (must commit)
  ├── .agents/                     ← Antigravity のみ / Antigravity only
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター / Pointer
