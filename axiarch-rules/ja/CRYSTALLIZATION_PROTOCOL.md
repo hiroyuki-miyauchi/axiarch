@@ -159,14 +159,21 @@ Step 1 で特定した **Blueprint フォルダ内** に同ドメインのルー
 
 ### Step 5: THRESHOLD CHECK (閾値チェック)
 
-`core/010_project_lessons_log.md`（中央インデックス）内の同一ドメインの教訓が **3件以上** に達した場合、AIは自律的に Step 1 の対応表に従い **対応 Blueprint フォルダ**内に正式ルールファイルを作成し、教訓を昇華・移動する。
+`core/010_project_lessons_log.md`（中央インデックス）内の教訓は、**以下の 2 つの trigger** のいずれかが発火した時点で Step 1 の対応表に従い **対応 Blueprint フォルダ**内に正式ルールファイルとして昇華・移動する：
+
+| Trigger | 条件 | 検出 |
+|:--|:--|:--|
+| **(a) Count Trigger（件数）** | 同一 domain で **3 件以上** 蓄積 | `check-axiarch-health.sh` Check 6 / `axiarch-boot-reminder.sh` Check B |
+| **(b) Time-Axis Trigger（時間軸、v1.6.0+）** | 単一 lesson でも `[YYYY-MM-DD]` 日付から **180 日以上経過** | `check-axiarch-health.sh` Check 6 / `axiarch-boot-reminder.sh` Check C |
+
+**Time-Axis Trigger の意義**: 既存の sublimated file が網羅的になり「3 件未達」で長期放置される lesson を防ぐ。`AXIARCH_LESSON_STALE_DAYS` 環境変数で閾値調整可能（default 180、`0` で disable）。
 
 > [!CAUTION]
 > **🚨 「追記 = 完了」は誤認 — タスク完了前に必ず Step 5 を実行せよ**
 >
-> 過去の実装で「`core/010` に追記したから結晶化完了」と誤認し、3件以上溜まったドメインを Blueprint へ昇華せず放置するケースが頻発した。**Step 4 (ACCUMULATE) は完了ではない**。AIは応答を返す前、毎タスク完了の最後に Step 5 (THRESHOLD CHECK) を必ず実行し、**3件以上のドメインがあれば Blueprint 専用ファイルへの昇華まで完了させてから** タスク完了を宣言すること。
+> 過去の実装で「`core/010` に追記したから結晶化完了」と誤認し、3件以上溜まったドメインを Blueprint へ昇華せず放置するケースが頻発した。**Step 4 (ACCUMULATE) は完了ではない**。AIは応答を返す前、毎タスク完了の最後に Step 5 (THRESHOLD CHECK) を必ず実行し、**(a) 3件以上のドメイン、または (b) 180 日以上前の lesson があれば Blueprint 専用ファイルへの昇華まで完了させてから** タスク完了を宣言すること。
 >
-> 違反検出は `bash scripts/check-axiarch-health.sh` の Check 6 で外部から検証可能。3件超ドメインが存在する状態でタスク完了を宣言した場合は **プロトコル違反** とみなす。
+> 違反検出は `bash scripts/check-axiarch-health.sh` の Check 6 で外部から検証可能。閾値超過状態でタスク完了を宣言した場合は **プロトコル違反** とみなす。
 
 > [!CAUTION]
 > **新規ドメインフォルダの独断作成禁止**: Blueprint の各ドメインフォルダ（`ai/`, `design/`, `engineering/`, `operations/`, `product/`, `quality/`, `security/`）は、Universal と同型の構造で**事前に配置済み**（各フォルダに `README.md` が存在）。AIが**独断で**新しいドメインフォルダを作成することは**禁止**する。教訓の配置先は、Step 1 の対応表に定義された既存フォルダのみとする。ただし、既存フォルダに分類できない全く新しいドメインが発生した場合は、**ユーザーに新規フォルダの作成を提案**してよい（Step 1「フォルダの拡張性」参照）。

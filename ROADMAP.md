@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.5  
+> **現在の安定版 / Current Stable**: v1.6.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -162,24 +162,42 @@
 
 ---
 
-### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### ✅ v1.6.0 — Reminder TTL + 時間軸結晶化 + Pre-commit Installer + Session 跨ぎ基準 + APPEND ガイド（2026-05-08）
 
-26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案を v1.6.0 として纏める方針。
+採用先プロジェクトの実運用フィードバック「ガバナンス機能評価レポート」で抽出された 5 項目を minor release として bundling。「設計 vs 現実」の乖離（context budget / token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造的に解消。
+
+- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回 fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら `[AXIARCH OK]` short-circuit、違反検出時は強制 full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token 約 87% 削減**（24k → 3k）
+- **Check C — Stale Lesson Detection** — `core/010` の `[YYYY-MM-DD]` 日付が 180 日以上経過した lesson を `🚨 [VIOLATION-C]` として検出。`AXIARCH_LESSON_STALE_DAYS` で閾値調整可
+- **`check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — 既存の count threshold (3+ per domain, trigger (a)) に **time-axis trigger (b)** 追加。stale lesson の長期放置を防止
+- **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — 既存の `blueprint/{domain}/{NNN}_{topic}.md` を一覧表示、AI が **APPEND** を選択しやすくする。「12 連続 N/A」フィードバックの根治
+- **`check-axiarch-health.sh --quiet` flag** — pre-commit / CI 用 silent mode
+- **`init.sh` Pre-commit Hook Installer (opt-in)** — STEP 3.5 で質問、`.git/hooks/pre-commit` への append/create、lefthook/pre-commit-framework/husky 検出時は warn のみ。`AXIARCH_PRECOMMIT_SKIP=1` で per-commit bypass
+- **`CRYSTALLIZATION_PROTOCOL.md` (ja/en) Step 5** — Dual-trigger table 化（count + time-axis）、time-axis trigger の意義を明文化
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4** — 「Cross-Session Re-load Criteria」セクション追加。「全文 load = サボり禁止」と「context budget の現実」のトレードオフを 4 状況別に明示的解消、`task.md` 履歴を SSOT として参照
+- **学術裏付け**: Memory in LLMs serial-position effects / Constitutional AI 系譜 / Anthropic「reminder less is more」公式ガイダンス
+- **後方互換性 100%** — TTL/Check C/pre-commit installer すべて opt-in or env var 制御、既存環境破壊なし
+
+---
+
+### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装したため、本 Tier 2 群を v1.7.0 に整理。
 
 - **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では Write のみ block、Edit による潜在的に大規模な変更は post-hoc で検出）
 - **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加し、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上（出典: Cursor Rules / `.claude/rules/` path-scoped）
 - **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
-- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決
+- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
 - **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
 - **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
 - **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 で確立した version-free 方針の完遂）
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
+- **Post-release README integration 自動検証** — v1.4.0+→v1.6.0 で繰り返し発生した「新リリース機能の README 反映漏れ」（24/27/28 ラウンド + v1.6.0 で `12 段階` 残留検出）を防ぐため、`scripts/check-axiarch-health.sh` に Check 14（README ↔ scripts/* の version-related term grep）を追加検討
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.8.0 — Static Lint & Process Supervision（Tier 3、検討中）
 
-学術裏付けが強く工数も大きい改善案を v1.7.0 として独立計画。
+学術裏付けが強く工数も大きい改善案を v1.8.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` / `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反 / `compliance_matrix.md` 同期 を PR 時に強制チェック（出典: <https://github.com/nedcodes-ok/cursor-lint-action>）
 - **IFEval 風自動回帰スイート** — `tests/ifeval/` に「task.md 記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
@@ -374,24 +392,42 @@ Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI
 
 ---
 
-### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### ✅ v1.6.0 — Reminder TTL + Time-Axis Crystallization + Pre-commit Installer + Session Re-load Criteria + APPEND Guide (2026-05-08)
 
-Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes).
+Bundles five improvements driven by adopter-project feedback ("governance functional evaluation report"). Structurally resolves the design-vs-reality gap (context budget, token cost, sublimated-file recognition, stale-lesson neglect).
+
+- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — First fire returns full reminder + writes timestamp; subsequent fires within TTL (default 30 min) with no violations return short-circuit `[AXIARCH OK]`; any violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables. **Token impact: ~24k → ~3k (87% reduction in long sessions)**
+- **Check C — Stale Lesson Detection** — Detects any `core/010` lesson dated `>180 days` ago as `🚨 [VIOLATION-C]`. Threshold tunable via `AXIARCH_LESSON_STALE_DAYS`
+- **`check-axiarch-health.sh` Check 6 expanded — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) joined by **time-axis trigger (b)**. Prevents long-term neglect of stale lessons
+- **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI prefers APPEND. Addresses "12 consecutive N/A" feedback at the root
+- **`check-axiarch-health.sh --quiet` flag** — Silent mode for pre-commit / CI usage
+- **`init.sh` Pre-commit Hook Installer (opt-in)** — STEP 3.5 asks the user; appends/creates `.git/hooks/pre-commit` axiarch block; warns instead of overwriting when lefthook/pre-commit-framework/husky is detected. Bypass per-commit via `AXIARCH_PRECOMMIT_SKIP=1`
+- **`CRYSTALLIZATION_PROTOCOL.md` (ja/en) Step 5** — Replaced single trigger with dual-trigger table (count + time-axis); time-axis rationale documented
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4** — New "Cross-Session Re-load Criteria" section explicitly resolves the "full load = no laziness" vs "context budget reality" trade-off across 4 situations; `task.md` history is the Single Source of Truth
+- **Academic backing**: Memory-in-LLMs serial-position effects / Constitutional AI lineage / Anthropic "reminder less is more" official guidance
+- **100% Backwards Compatible** — TTL / Check C / pre-commit installer all opt-in or env-var controlled; existing setups untouched
+
+---
+
+### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+
+Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); these Tier-2 items are now organised under v1.7.0.
 
 - **`PostToolUse` hook + git diff verification** — Measure diff line count after Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only blocks `Write`; large Edit changes detected post-hoc)
 - **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per file type. Reduces tokens, improves relevance (sources: Cursor Rules / `.claude/rules/` path-scoped)
 - **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf Cascade Memories / Codeium Memories, designed around `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation" problem via persistent context
-- **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue
+- **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue (complementary to v1.6.0 reminder TTL)
 - **shellcheck CI integration** — Add `scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
 - **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` after copy, mirroring the existing `jq` validation
 - **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty Blueprint, accumulated Lessons-log overflow detection, etc.)
+- **Post-release README integration auto-verification** — Prevent the recurring "new release feature → README update missed" pattern (24/27/28th-round audits + v1.6.0 `12-stage` residue). Add Check 14 to `scripts/check-axiarch-health.sh` to grep for stale version-related terms across README ↔ scripts/*
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.8.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
-Improvements with strong academic backing but larger implementation effort, planned independently for v1.7.0.
+Improvements with strong academic backing but larger implementation effort, planned independently for v1.8.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation / Universal-vs-Blueprint responsibility checks / `compliance_matrix.md` sync as PR gates (source: <https://github.com/nedcodes-ok/cursor-lint-action>)
 - **IFEval-style auto-regression suite** — Convert "task.md recording obligation" / "core/010 crystallization threshold" to verifiable instructions in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 / arXiv:2512.14754)

@@ -39,8 +39,8 @@ your-project/
  │         └── operate/
  ├── scripts/                  ← Recommended: diagnostic & hook externalized scripts
  │    ├── README.md                    ← Index & usage guide
- │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (12-stage)
- │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized script (dynamic violation flags)
+ │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (13-stage, --quiet support v1.6.0+)
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized (dynamic violations + two-stage TTL, v1.6.0+)
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook externalized script (§6 physical block, v1.5.5+)
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (task.md auto-bootstrap, v1.5.5+)
  │    └── check-git-config-clean.sh    ← .git/config integrity check (worktreeConfig residue)

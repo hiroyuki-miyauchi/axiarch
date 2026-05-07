@@ -137,6 +137,25 @@ If a loaded file references related rules and they are relevant to the current t
 > If any of ①②③ is missing, STOP and load the missing files.
 > Note: If `000_project_overview.md` is still in its initial template state (`[Project Name]` unfilled), loading is considered complete, but prompt the user to configure it.
 
+### Cross-Session Re-load Criteria (v1.6.0+)
+
+Explicit resolution of the trade-off between "full load = no laziness" and "context budget reality."
+
+| Situation | Re-load Scope | Rationale |
+|:--|:--|:--|
+| **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AGENTS §8 (4) obligation |
+| **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | INDEX.md → task type → folder mapping is stable |
+| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context | YAGNI principle, context-budget protection |
+| **Long session resumed after pause (e.g. compaction trigger)** | Verify `task.md` load history; re-load only missing files. However, when the `[AXIARCH BOOT]` reminder TTL expires (v1.6.0+ default 30 min), perform full re-verification | `axiarch-boot-reminder.sh` TTL state; mitigates serial-position effects in LLM memory |
+
+> **Operational Principles**:
+> - **Treat the `task.md` load history as the Single Source of Truth**. If a file is listed there, no re-load is required; if absent, re-load is mandatory.
+> - **Memory-inherited skipping across sessions is permitted, but the AI MUST explicitly record what was skipped in task.md** (e.g., "Continued from prior session; AGENTS.md / INDEX.md re-verification skipped per LOADING_PROTOCOL Step 4 session-continuation rule").
+> - **When in doubt, full re-load**. Hallucination prevention (AGENTS.md §0 SUPREME RULE) outweighs context-budget savings.
+
+> **Problem this addresses (v1.6.0 background)**:
+> The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this reduces token cost ~87% while maintaining adherence rate.
+
 ---
 
 ## Step 5: Begin Work

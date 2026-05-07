@@ -10,8 +10,8 @@
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
-| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（12 段階） / Full-protocol compliance health diagnostic (12-stage) | 「フックが動いていない気がする」「結晶化されていない」と感じた時 / When you suspect protocol violations |
-| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**。毎ターン違反検出して reminder に 🚨 フラグを追記 / Externalized hook script; appends violation flags to the reminder each turn | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
+| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（13 段階、`--quiet` 対応） / Full-protocol compliance health diagnostic (13-stage, supports `--quiet`) | 「フックが動いていない気がする」「結晶化されていない」と感じた時 / When you suspect protocol violations |
+| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力）。毎ターン違反検出して reminder に 🚨 フラグを追記、TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL); appends violation flags + short-circuits within TTL | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に task.md を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps task.md on session start | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
@@ -22,9 +22,9 @@
 
 ### 概要 / Overview
 
-**Axiarch 公式健全性診断ツール**。Hook + LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AGENTS.md 全 9 プロトコルのうち**外部検証可能な 8 領域**を一発診断する（v1.5.5 で §6 ANTI-FULL-OVERWRITE が物理遮断対象に追加）。「どこサボってるか」が一発でわかる設計。
+**Axiarch 公式健全性診断ツール**。Hook + LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AGENTS.md 全 9 プロトコルのうち**外部検証可能な 8 領域**を一発診断する（v1.5.5 で §6 ANTI-FULL-OVERWRITE が物理遮断対象に追加、v1.6.0 で sublimated files index 追加）。「どこサボってるか」が一発でわかる設計。
 
-The official Axiarch health diagnostic. One-shot 12-stage check covering hook firing, AI adherence, crystallization threshold, the verifiable subset of AGENTS.md protocols, and the v1.5.5 physical-block / bootstrap hooks.
+The official Axiarch health diagnostic. One-shot 13-stage check covering hook firing, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AGENTS.md protocols, the v1.5.5 physical-block / bootstrap hooks, and the v1.6.0 sublimated-files index. `--quiet` flag for pre-commit usage.
 
 ### 使い方 / Usage
 
@@ -52,6 +52,15 @@ bash scripts/check-axiarch-health.sh /path/to/project
 | 10 | AGENTS §2 | Project Native Language 整合性 / Language-first consistency |
 | 11 | AGENTS §6 | PreToolUse hook 配線確認（物理遮断） / PreToolUse hook wiring (physical block) — **v1.5.5+** |
 | 12 | Bootstrap | SessionStart hook 配線確認 / SessionStart hook wiring — **v1.5.5+** |
+| 13 | Sublimated Index | 既存の `blueprint/{domain}/{NNN}_*.md` を一覧表示し APPEND を促進 / Lists existing sublimated files to promote APPEND — **v1.6.0+** |
+
+### 環境変数 / Environment Variables（v1.6.0+）
+
+| 変数 / Variable | デフォルト / Default | 説明 / Description |
+|:--|:--:|:--|
+| `AXIARCH_REMINDER_TTL_SECONDS` | `1800` (30 分) | `axiarch-boot-reminder.sh` の short-circuit TTL。`0` で disable / Two-stage reminder TTL; `0` disables short-circuit |
+| `AXIARCH_LESSON_STALE_DAYS` | `180` | Check 6 (b) / Check C の time-axis trigger 閾値（日数）。`0` で disable / Time-axis trigger threshold; `0` disables Check C |
+| `AXIARCH_PRECOMMIT_SKIP` | unset | `1` をセットすると pre-commit hook を 1 回だけ bypass / Set to `1` to bypass the pre-commit hook for one commit |
 
 ### Out of Scope（外部検証困難・人間レビュー必須） / Manual Review Required
 

@@ -4,22 +4,25 @@
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
 # Usage:
-#   bash scripts/check-axiarch-health.sh [PROJECT_DIR]
+#   bash scripts/check-axiarch-health.sh [PROJECT_DIR] [--quiet|-q]
 #
-# Diagnoses Axiarch enforcement health across 12 verifiable stages spanning
+# --quiet : suppress all output except errors (for pre-commit hook usage)
+#
+# Diagnoses Axiarch enforcement health across 13 verifiable stages spanning
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
-# protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), and the v1.5.5
-# physical-block / bootstrap hooks:
+# protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), the v1.5.5
+# physical-block / bootstrap hooks, and the v1.6.0 sublimated-file guide:
 #
 #   Check 1-4  Hook layer (settings presence, JSON syntax, hook structure, firing log)
 #   Check 5    LOADING_PROTOCOL Step 4 — task.md adherence
-#   Check 6    CRYSTALLIZATION_PROTOCOL §5 — lessons_log threshold (3+ per domain)
+#   Check 6    CRYSTALLIZATION_PROTOCOL §5 — count threshold (3+) + time-axis (>180d, v1.6.0+)
 #   Check 7    AGENTS §8 Process & Documentation — task docs presence
 #   Check 8    AGENTS §1 Deployment Ban — push hygiene
 #   Check 9    AGENTS §4 SSOT Sync — main parity
 #   Check 10   AGENTS §2 Language First — Project Native Language consistency
-#   Check 11   AGENTS §6 ANTI-FULL-OVERWRITE — PreToolUse hook physical block
-#   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init)
+#   Check 11   AGENTS §6 ANTI-FULL-OVERWRITE — PreToolUse hook physical block (v1.5.5+)
+#   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
+#   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #
 # Out of Scope (semantic judgment required, manual review):
 #   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
@@ -34,20 +37,42 @@ set -euo pipefail
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 
-print_pass()    { echo -e "${GREEN}✅ $1${RESET}"; }
-print_fail()    { echo -e "${RED}❌ $1${RESET}"; }
-print_warn()    { echo -e "${YELLOW}⚠️  $1${RESET}"; }
-print_info()    { echo -e "   ${CYAN}→${RESET} $1"; }
-print_section() { echo ""; echo -e "${BOLD}${BLUE}== $1 ==${RESET}"; }
+# v1.6.0+: --quiet flag suppresses verbose output (for pre-commit hook usage).
+# Errors / warnings still go to stderr; exit code conveys overall result.
+QUIET_MODE=false
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --quiet|-q) QUIET_MODE=true ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+set -- "${ARGS[@]+"${ARGS[@]}"}"
+
+if "${QUIET_MODE}"; then
+  print_pass()    { :; }
+  print_fail()    { echo -e "${RED}❌ $1${RESET}" >&2; }
+  print_warn()    { :; }
+  print_info()    { :; }
+  print_section() { :; }
+else
+  print_pass()    { echo -e "${GREEN}✅ $1${RESET}"; }
+  print_fail()    { echo -e "${RED}❌ $1${RESET}"; }
+  print_warn()    { echo -e "${YELLOW}⚠️  $1${RESET}"; }
+  print_info()    { echo -e "   ${CYAN}→${RESET} $1"; }
+  print_section() { echo ""; echo -e "${BOLD}${BLUE}== $1 ==${RESET}"; }
+fi
 
 PROJECT_DIR="${1:-$(pwd)}"
 EXIT_CODE=0
 HOOK_FILE_OK=true
 HOOK_JSON_OK=true
 
-echo ""
-echo -e "${BOLD}${CYAN}🛡️  Axiarch Health Diagnostic — $(date +%Y-%m-%d\ %H:%M:%S)${RESET}"
-echo "   Project: ${PROJECT_DIR}"
+if ! "${QUIET_MODE}"; then
+  echo ""
+  echo -e "${BOLD}${CYAN}🛡️  Axiarch Health Diagnostic — $(date +%Y-%m-%d\ %H:%M:%S)${RESET}"
+  echo "   Project: ${PROJECT_DIR}"
+fi
 
 # =============================================================================
 # Check 1: .claude/settings.json existence
@@ -222,14 +247,50 @@ if [[ -n "${LESSONS_LOG}" ]]; then
       print_fail "Crystallization threshold breached — ${LESSONS_LOG}"
       echo "   Domains with 3+ unsorted lessons:"
       printf '%b' "${OFFENDERS}" | awk 'NF {print "     - " $0}'
-      print_info "→ Per CRYSTALLIZATION_PROTOCOL §5, the AI MUST create a dedicated"
-      print_info "   domain file in the corresponding Blueprint folder and migrate"
-      print_info "   these lessons. Re-instruct the AI: 'Execute CRYSTALLIZATION"
+      print_info "→ Per CRYSTALLIZATION_PROTOCOL §5 trigger (a), the AI MUST create a"
+      print_info "   dedicated domain file in the corresponding Blueprint folder and"
+      print_info "   migrate these lessons. Re-instruct the AI: 'Execute CRYSTALLIZATION"
       print_info "   PROTOCOL Step 5 — promote 3+ accumulated domains to dedicated files'."
       EXIT_CODE=1
     else
       DOMAIN_COUNT=$(echo "${DOMAIN_LIST}" | sort -u | wc -l | awk '{print $1}')
-      print_pass "Below threshold (${DOMAIN_COUNT} domains, all <3 lessons)"
+      print_pass "Below count threshold (${DOMAIN_COUNT} domains, all <3 lessons)"
+    fi
+  fi
+
+  # ---------------------------------------------------------------------------
+  # Check 6 (v1.6.0+): Time-axis trigger — stale lesson detection
+  # CRYSTALLIZATION_PROTOCOL §5 trigger (b): any lesson dated > N days ago
+  # ---------------------------------------------------------------------------
+  STALE_DAYS_LIMIT="${AXIARCH_LESSON_STALE_DAYS:-180}"
+  if [[ "${STALE_DAYS_LIMIT}" -gt 0 ]]; then
+    NOW_EPOCH_C6=$(date +%s 2>/dev/null || echo "0")
+    if [[ "${NOW_EPOCH_C6}" -gt 0 ]]; then
+      THRESHOLD_C6=$(( NOW_EPOCH_C6 - STALE_DAYS_LIMIT * 86400 ))
+      STALE_FOUND=""
+      while IFS= read -r dated_line; do
+        [[ -z "${dated_line}" ]] && continue
+        l_date=$(printf '%s' "${dated_line}" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+        [[ -z "${l_date}" ]] && continue
+        l_epoch=$(date -d "${l_date}" +%s 2>/dev/null \
+          || date -j -f "%Y-%m-%d" "${l_date}" +%s 2>/dev/null \
+          || echo "")
+        [[ -z "${l_epoch}" ]] && continue
+        if [[ "${l_epoch}" -lt "${THRESHOLD_C6}" ]]; then
+          age=$(( (NOW_EPOCH_C6 - l_epoch) / 86400 ))
+          STALE_FOUND+="${l_date} (${age} days old)\n"
+        fi
+      done < <(grep -E '^### \[[0-9]{4}-[0-9]{2}-[0-9]{2}\]' "${LESSONS_LOG}" 2>/dev/null)
+      if [[ -n "${STALE_FOUND}" ]]; then
+        print_fail "Crystallization time-axis trigger breached — stale lesson(s) detected:"
+        printf '%b' "${STALE_FOUND}" | awk 'NF {print "     - " $0}'
+        print_info "→ Per CRYSTALLIZATION_PROTOCOL §5 trigger (b), the AI MUST review"
+        print_info "   stale lessons (>${STALE_DAYS_LIMIT} days) and either promote them to a Blueprint"
+        print_info "   file or update them with current understanding."
+        EXIT_CODE=1
+      else
+        print_pass "Below time-axis threshold (no lesson older than ${STALE_DAYS_LIMIT} days)"
+      fi
     fi
   fi
 else
@@ -417,6 +478,42 @@ elif command -v jq &>/dev/null; then
   fi
 else
   print_warn "Skipped (jq not installed)"
+fi
+
+# =============================================================================
+# Check 13: Existing sublimated files — APPEND candidates (v1.6.0+)
+# Surfaces existing crystallized lessons files so the AI can APPEND to them
+# instead of accumulating new lessons in core/010 (which often leaves them
+# below the 3+ count threshold and untouched indefinitely).
+# =============================================================================
+print_section "Check 13: Existing sublimated files (APPEND candidates)"
+SUBLIMATED_FOUND=""
+for lang in ja en; do
+  blueprint_dir="${PROJECT_DIR}/axiarch-rules/${lang}/blueprint"
+  [[ -d "${blueprint_dir}" ]] || continue
+  # Find domain-folder files (NNN_topic.md) excluding core/000/010/998/999
+  while IFS= read -r f; do
+    base=$(basename "${f}")
+    domain=$(basename "$(dirname "${f}")")
+    # Skip core templates / index
+    [[ "${domain}" == "core" ]] && [[ "${base}" =~ ^(000|010|998|999) ]] && continue
+    # Skip README files
+    [[ "${base}" == "README.md" ]] && continue
+    # Match pattern: NNN_topic.md
+    if [[ "${base}" =~ ^[0-9]{3}_ ]]; then
+      SUBLIMATED_FOUND+="${domain}/${base}\n"
+    fi
+  done < <(find "${blueprint_dir}" -mindepth 2 -maxdepth 2 -name "*.md" -type f 2>/dev/null | sort)
+  [[ -n "${SUBLIMATED_FOUND}" ]] && break  # one language is enough
+done
+
+if [[ -z "${SUBLIMATED_FOUND}" ]]; then
+  print_info "No sublimated files yet — new lessons will accumulate in core/010 until count/time triggers fire"
+else
+  print_pass "Sublimated files exist — prefer APPEND over new core/010 entry when domain matches:"
+  printf '%b' "${SUBLIMATED_FOUND}" | awk 'NF {print "     - blueprint/" $0}'
+  print_info "(per CRYSTALLIZATION_PROTOCOL §3 SEARCH: AI should APPEND to existing"
+  print_info " domain files first, only adding to core/010 if no match found)"
 fi
 
 # =============================================================================
