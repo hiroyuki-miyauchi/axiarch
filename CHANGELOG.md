@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] — 2026-05-08
+
+### 🪶 Reminder TTL + Time-Axis Crystallization + Pre-commit Installer + Session Re-load Criteria + APPEND Guide / リマインダー TTL + 時間軸結晶化 + pre-commit installer + session 跨ぎ基準 + APPEND ガイド
+
+実運用フィードバック（採用先プロジェクト「ガバナンス機能評価レポート」）の 5 項目改善を minor release として bundling。**「設計 vs 現実」の乖離（context budget / token cost / 既存 sublimated file 認識率 / stale lesson 放置）**を構造的に解消する。
+
+Bundles five improvements driven by adopter-project feedback ("governance functional evaluation report"). Structurally resolves the design-vs-reality gap (context budget, token cost, sublimated-file recognition, stale-lesson neglect).
+
+### Added
+
+- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)**（v1.6.0+）— First fire (or after TTL expires) returns the **full reminder** + writes timestamp; subsequent fires within TTL with no violations return a short-circuit `[AXIARCH OK]` reminder. State file: `${TMPDIR}/axiarch-reminder-{project_hash}.timestamp`. TTL configurable via `AXIARCH_REMINDER_TTL_SECONDS` (default 1800 = 30 min; `0` disables). Token impact: ~24k cumulative → ~3k (87% reduction in long sessions) / TTL 二段階出力により長時間 session で token 約 87% 削減
+- **`scripts/axiarch-boot-reminder.sh` Check C — Stale Lesson Detection** — Any `core/010` lesson dated `>180 days` (configurable via `AXIARCH_LESSON_STALE_DAYS`) appends a `🚨 [VIOLATION-C]` flag, ensuring single-domain lessons do not get neglected indefinitely / 180 日以上経過の lesson 検出
+- **`scripts/check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) now joined by **time-axis trigger (b)** detecting `[YYYY-MM-DD]` dated lessons older than threshold days. Surfaces stale-lesson backlog
+- **`scripts/check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI can prefer **APPEND to existing files** over new `core/010` entries (per CRYSTAL §3 SEARCH). Addresses inucomi-style "12 consecutive N/A" feedback where lessons fit existing file scope but get added to `core/010`
+- **`scripts/check-axiarch-health.sh --quiet` flag** — Silent mode for pre-commit / CI usage; suppresses verbose output, only error to stderr + exit code conveys result
+- **`init.sh` Pre-commit Hook Installer (opt-in)** — New STEP 3.5 prompts `Install pre-commit hook? [y/N]`. When enabled: (a) detects existing lefthook / pre-commit-framework / husky and warns instead of overwriting, (b) appends axiarch block to existing `.git/hooks/pre-commit` or creates new file, (c) marker-based idempotency. Bypass per-commit via `AXIARCH_PRECOMMIT_SKIP=1`
+
+### Changed
+
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` Step 5** — Replaced single "3+ count" trigger with **dual-trigger table** (count + time-axis), explicitly documenting why time-axis trigger matters for projects with comprehensive sublimated files
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Added **"Cross-Session Re-load Criteria"** section explicitly resolving the "full load = no laziness" vs "context budget reality" trade-off. Defines re-load scope per situation (new session / task type changed / continuing / long pause). Documents `task.md` load history as Single Source of Truth
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.5 → 1.6.0; new `select_precommit` + `install_precommit_hook` functions wired into `main()`
+- **`llms-full.txt`** — Version 1.5.5 → 1.6.0
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — TTL は `AXIARCH_REMINDER_TTL_SECONDS=0` で完全 disable 可（v1.5.5 挙動再現）。Check C は `AXIARCH_LESSON_STALE_DAYS=0` で disable 可。pre-commit installer は完全 opt-in
+- ✅ **依存追加なし** — pure bash 実装、`shasum` は macOS / Linux 標準。`date -d` (GNU) と `date -j -f` (BSD) の dual-fallback
+- ✅ **lefthook / pre-commit-framework / husky 既存環境を破壊しない** — 検出して warn のみ
+- ✅ **既存 `.git/hooks/pre-commit` を上書きしない** — append + marker による idempotency
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行（pre-commit installer は opt-in 質問あり）
+
+### Diagnostic Outcome
+
+- **Mock test verification**:
+  - TTL 二段階：first fire = full / TTL 内 = short-circuit `[AXIARCH OK]` / TTL 強制無効化 = full ✅
+  - Check 6 time-axis: 180 日以下 lesson のみ → "Below time-axis threshold" PASS ✅
+  - Check 13: axiarch 本体は sublimated file 不在 → "No sublimated files yet" 案内 ✅
+  - `--quiet` mode: PASS 時完全 silent + exit 0 / 違反時 stderr only ✅
+- **axiarch repo against itself**: 全 13 段階 PASS（Check 13 含む）
+
+### References
+
+- 採用先 「ガバナンス機能評価レポート」（実運用フィードバック）
+- AGENTS.md §0 SUPREME RULE / §6 ANTI-FULL-OVERWRITE / §8 Process & Documentation / §9 Continuous Improvement
+- v1.5.5 PreToolUse hook が本 release の implementation 中に**実機発火し作者の Write 操作を物理遮断した実証あり**（Edit による段階実装に切り替え）
+- Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
+
+---
+
 ## [1.5.5] — 2026-05-07
 
 ### 🚦 Physical Block + Tone Refactor + SessionStart Bootstrap / 物理遮断 + トーン リファクタ + セッション開始ブートストラップ

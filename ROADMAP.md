@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.5.5  
+> **現在の安定版 / Current Stable**: v1.6.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -162,7 +162,24 @@
 
 ---
 
-### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### ✅ v1.6.0 — Reminder TTL + 時間軸結晶化 + Pre-commit Installer + Session 跨ぎ基準 + APPEND ガイド（2026-05-08）
+
+採用先プロジェクトの実運用フィードバック「ガバナンス機能評価レポート」で抽出された 5 項目を minor release として bundling。「設計 vs 現実」の乖離（context budget / token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造的に解消。
+
+- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回 fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら `[AXIARCH OK]` short-circuit、違反検出時は強制 full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token 約 87% 削減**（24k → 3k）
+- **Check C — Stale Lesson Detection** — `core/010` の `[YYYY-MM-DD]` 日付が 180 日以上経過した lesson を `🚨 [VIOLATION-C]` として検出。`AXIARCH_LESSON_STALE_DAYS` で閾値調整可
+- **`check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — 既存の count threshold (3+ per domain, trigger (a)) に **time-axis trigger (b)** 追加。stale lesson の長期放置を防止
+- **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — 既存の `blueprint/{domain}/{NNN}_{topic}.md` を一覧表示、AI が **APPEND** を選択しやすくする。「12 連続 N/A」フィードバックの根治
+- **`check-axiarch-health.sh --quiet` flag** — pre-commit / CI 用 silent mode
+- **`init.sh` Pre-commit Hook Installer (opt-in)** — STEP 3.5 で質問、`.git/hooks/pre-commit` への append/create、lefthook/pre-commit-framework/husky 検出時は warn のみ。`AXIARCH_PRECOMMIT_SKIP=1` で per-commit bypass
+- **`CRYSTALLIZATION_PROTOCOL.md` (ja/en) Step 5** — Dual-trigger table 化（count + time-axis）、time-axis trigger の意義を明文化
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4** — 「Cross-Session Re-load Criteria」セクション追加。「全文 load = サボり禁止」と「context budget の現実」のトレードオフを 4 状況別に明示的解消、`task.md` 履歴を SSOT として参照
+- **学術裏付け**: Memory in LLMs serial-position effects / Constitutional AI 系譜 / Anthropic「reminder less is more」公式ガイダンス
+- **後方互換性 100%** — TTL/Check C/pre-commit installer すべて opt-in or env var 制御、既存環境破壊なし
+
+---
+
+### 🔮 v1.7.0 — Static Lint & Process Supervision（Tier 3、検討中）
 
 26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案を v1.6.0 として纏める方針。
 
@@ -374,7 +391,24 @@ Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI
 
 ---
 
-### 🔮 v1.6.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### ✅ v1.6.0 — Reminder TTL + Time-Axis Crystallization + Pre-commit Installer + Session Re-load Criteria + APPEND Guide (2026-05-08)
+
+Bundles five improvements driven by adopter-project feedback ("governance functional evaluation report"). Structurally resolves the design-vs-reality gap (context budget, token cost, sublimated-file recognition, stale-lesson neglect).
+
+- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — First fire returns full reminder + writes timestamp; subsequent fires within TTL (default 30 min) with no violations return short-circuit `[AXIARCH OK]`; any violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables. **Token impact: ~24k → ~3k (87% reduction in long sessions)**
+- **Check C — Stale Lesson Detection** — Detects any `core/010` lesson dated `>180 days` ago as `🚨 [VIOLATION-C]`. Threshold tunable via `AXIARCH_LESSON_STALE_DAYS`
+- **`check-axiarch-health.sh` Check 6 expanded — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) joined by **time-axis trigger (b)**. Prevents long-term neglect of stale lessons
+- **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI prefers APPEND. Addresses "12 consecutive N/A" feedback at the root
+- **`check-axiarch-health.sh --quiet` flag** — Silent mode for pre-commit / CI usage
+- **`init.sh` Pre-commit Hook Installer (opt-in)** — STEP 3.5 asks the user; appends/creates `.git/hooks/pre-commit` axiarch block; warns instead of overwriting when lefthook/pre-commit-framework/husky is detected. Bypass per-commit via `AXIARCH_PRECOMMIT_SKIP=1`
+- **`CRYSTALLIZATION_PROTOCOL.md` (ja/en) Step 5** — Replaced single trigger with dual-trigger table (count + time-axis); time-axis rationale documented
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4** — New "Cross-Session Re-load Criteria" section explicitly resolves the "full load = no laziness" vs "context budget reality" trade-off across 4 situations; `task.md` history is the Single Source of Truth
+- **Academic backing**: Memory-in-LLMs serial-position effects / Constitutional AI lineage / Anthropic "reminder less is more" official guidance
+- **100% Backwards Compatible** — TTL / Check C / pre-commit installer all opt-in or env-var controlled; existing setups untouched
+
+---
+
+### 🔮 v1.7.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
 Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes).
 

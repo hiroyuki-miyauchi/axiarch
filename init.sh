@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.5.5"
+AXIARCH_VERSION="1.6.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -129,6 +129,99 @@ select_prompts() {
     print_success "Prompt library will be copied."
   else
     print_info "Skipping prompt library."
+  fi
+}
+
+# =============================================================================
+# STEP 3.5 (v1.6.0+): Optional pre-commit hook installation
+# Installs `bash scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
+# so axiarch protocol violations (3 hooks wired, threshold breaches, etc.) are
+# caught before commits land.
+# =============================================================================
+select_precommit() {
+  echo ""
+  echo -e "${BOLD}Pre-commit hook 自動 install / Pre-commit hook auto-install (任意 / Optional):${RESET}"
+  echo "  Installs: bash scripts/check-axiarch-health.sh --quiet → .git/hooks/pre-commit"
+  echo "  Effect: blocks commits when axiarch protocol violations are detected"
+  echo "  Existing pre-commit / lefthook / pre-commit-framework setups are detected & preserved"
+  echo ""
+  read -rp "Install? / インストールしますか？ [y/N]: " pc_choice
+  pc_choice="${pc_choice:-N}"
+  INSTALL_PRECOMMIT=false
+  if [[ "$pc_choice" =~ ^[Yy]$ ]]; then
+    INSTALL_PRECOMMIT=true
+    print_success "Pre-commit hook will be installed (after file copy)."
+  else
+    print_info "Skipping pre-commit hook installation."
+  fi
+}
+
+install_precommit_hook() {
+  $INSTALL_PRECOMMIT || return 0
+
+  local git_dir="${TARGET_DIR}/.git"
+  if [[ ! -d "${git_dir}" ]]; then
+    print_warn "Pre-commit install skipped: ${TARGET_DIR} is not a git repository."
+    return 0
+  fi
+
+  # Detect lefthook / pre-commit-framework / husky and warn (do not break their setup)
+  if [[ -f "${TARGET_DIR}/lefthook.yml" ]] || [[ -f "${TARGET_DIR}/.lefthook.yml" ]]; then
+    print_warn "lefthook detected — please add axiarch check to lefthook.yml manually:"
+    print_info "  pre-commit:"
+    print_info "    commands:"
+    print_info "      axiarch:"
+    print_info "        run: bash scripts/check-axiarch-health.sh --quiet"
+    return 0
+  fi
+  if [[ -f "${TARGET_DIR}/.pre-commit-config.yaml" ]]; then
+    print_warn ".pre-commit-config.yaml detected — please add axiarch check as a local hook manually."
+    return 0
+  fi
+  if [[ -d "${TARGET_DIR}/.husky" ]]; then
+    print_warn ".husky/ detected — please add 'bash scripts/check-axiarch-health.sh --quiet' to .husky/pre-commit manually."
+    return 0
+  fi
+
+  local hook_path="${git_dir}/hooks/pre-commit"
+  local marker="# === axiarch pre-commit hook (auto-installed by init.sh) ==="
+  local axiarch_block
+  axiarch_block=$(cat <<'PRECOMMIT'
+
+# === axiarch pre-commit hook (auto-installed by init.sh) ===
+# Blocks commits when axiarch protocol violations are detected.
+# Set AXIARCH_PRECOMMIT_SKIP=1 to bypass for one commit.
+if [[ -z "${AXIARCH_PRECOMMIT_SKIP:-}" ]] && [[ -x "scripts/check-axiarch-health.sh" ]]; then
+  bash scripts/check-axiarch-health.sh --quiet || {
+    echo ""
+    echo "❌ axiarch pre-commit hook blocked the commit."
+    echo "   Run: bash scripts/check-axiarch-health.sh   (full output)"
+    echo "   Bypass once: AXIARCH_PRECOMMIT_SKIP=1 git commit ..."
+    exit 1
+  }
+fi
+# === axiarch pre-commit hook end ===
+PRECOMMIT
+)
+
+  if [[ -f "${hook_path}" ]]; then
+    if grep -qF "${marker}" "${hook_path}" 2>/dev/null; then
+      print_info "Pre-commit hook already contains axiarch block — skipping."
+      return 0
+    fi
+    # Append to existing pre-commit hook (do not overwrite user logic)
+    printf '%s\n' "${axiarch_block}" >> "${hook_path}"
+    chmod +x "${hook_path}"
+    print_success "Appended axiarch block to existing ${hook_path}"
+  else
+    # Create new pre-commit hook
+    cat > "${hook_path}" <<'NEWHOOK'
+#!/usr/bin/env bash
+set -uo pipefail
+NEWHOOK
+    printf '%s\n' "${axiarch_block}" >> "${hook_path}"
+    chmod +x "${hook_path}"
+    print_success "Created ${hook_path} with axiarch block"
   fi
 }
 
@@ -350,8 +443,10 @@ main() {
   select_language
   select_agent
   select_prompts
+  select_precommit
   prepare_source
   copy_files
+  install_precommit_hook
   print_next_steps
 }
 

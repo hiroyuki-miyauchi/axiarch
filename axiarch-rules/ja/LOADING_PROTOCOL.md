@@ -137,6 +137,25 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 > ①②③ のいずれかでも欠けていれば、作業を中断して追加ロードすること。
 > ※ `000_project_overview.md` がテンプレート初期状態の場合（`[Project Name]` が未記入）、ロードは完了とみなすが、ユーザーに設定を促すこと。
 
+### Session 跨ぎ時の Re-load 判定基準（v1.6.0+）
+
+「全文 load = サボり禁止」の原則と「context budget の現実的制約」のトレードオフを明示的に解消するための判定基準。
+
+| 状況 | Re-load 範囲 | 根拠 |
+|:--|:--|:--|
+| **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AGENTS §8 (4) 義務 |
+| **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | INDEX.md → タスクタイプ → 対応フォルダ の関係は不変 |
+| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用 | YAGNI 原則、context budget 保護 |
+| **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴を確認、欠落 file のみ再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
+
+> **判定の運用原則**:
+> - **task.md のロード履歴を Single Source of Truth として参照**する。履歴に file 名があれば re-load 不要、無ければ load 必須。
+> - 「session 跨ぎ後の memory 継承による省略」は許容するが、**省略した事実を task.md に明示的に記録**する（例: 「Continued from prior session, AGENTS.md / INDEX.md re-verification skipped per LOADING_PROTOCOL Step 4 session-continuation rule」）。
+> - **疑わしい時は full re-load**。context budget の節約より、ハルシネーション防止が優先（AGENTS.md §0 SUPREME RULE）。
+
+> **本基準が解決する問題（v1.6.0 改善背景）**:
+> 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により解消。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、token cost を約 87% 削減しつつ遵守率を維持する。
+
 ---
 
 ## Step 5: 作業開始
