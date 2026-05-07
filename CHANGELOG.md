@@ -55,6 +55,12 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 - v1.5.5 PreToolUse hook が本 release の implementation 中に**実機発火し作者の Write 操作を物理遮断した実証あり**（Edit による段階実装に切り替え）
 - Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
 
+### Out of Scope（次バージョン以降に deferred — see ROADMAP）
+
+- **v1.7.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 14)
+- **v1.8.0 (Tier 3)**: `axiarch-doctor` CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
+
 ---
 
 ## [1.5.5] — 2026-05-07
