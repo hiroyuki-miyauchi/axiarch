@@ -179,24 +179,25 @@
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
-26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案を v1.6.0 として纏める方針。
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装したため、本 Tier 2 群を v1.7.0 に整理。
 
 - **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では Write のみ block、Edit による潜在的に大規模な変更は post-hoc で検出）
 - **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加し、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上（出典: Cursor Rules / `.claude/rules/` path-scoped）
 - **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
-- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決
+- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
 - **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
 - **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
 - **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 で確立した version-free 方針の完遂）
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
+- **Post-release README integration 自動検証** — v1.4.0+→v1.6.0 で繰り返し発生した「新リリース機能の README 反映漏れ」（24/27/28 ラウンド + v1.6.0 で `12 段階` 残留検出）を防ぐため、`scripts/check-axiarch-health.sh` に Check 14（README ↔ scripts/* の version-related term grep）を追加検討
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.8.0 — Static Lint & Process Supervision（Tier 3、検討中）
 
-学術裏付けが強く工数も大きい改善案を v1.7.0 として独立計画。
+学術裏付けが強く工数も大きい改善案を v1.8.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` / `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反 / `compliance_matrix.md` 同期 を PR 時に強制チェック（出典: <https://github.com/nedcodes-ok/cursor-lint-action>）
 - **IFEval 風自動回帰スイート** — `tests/ifeval/` に「task.md 記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
@@ -408,24 +409,25 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
 
-Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes).
+Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); these Tier-2 items are now organised under v1.7.0.
 
 - **`PostToolUse` hook + git diff verification** — Measure diff line count after Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only blocks `Write`; large Edit changes detected post-hoc)
 - **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per file type. Reduces tokens, improves relevance (sources: Cursor Rules / `.claude/rules/` path-scoped)
 - **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf Cascade Memories / Codeium Memories, designed around `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation" problem via persistent context
-- **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue
+- **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue (complementary to v1.6.0 reminder TTL)
 - **shellcheck CI integration** — Add `scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
 - **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` after copy, mirroring the existing `jq` validation
 - **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty Blueprint, accumulated Lessons-log overflow detection, etc.)
+- **Post-release README integration auto-verification** — Prevent the recurring "new release feature → README update missed" pattern (24/27/28th-round audits + v1.6.0 `12-stage` residue). Add Check 14 to `scripts/check-axiarch-health.sh` to grep for stale version-related terms across README ↔ scripts/*
 
 ---
 
-### 🔮 v1.7.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.8.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
-Improvements with strong academic backing but larger implementation effort, planned independently for v1.7.0.
+Improvements with strong academic backing but larger implementation effort, planned independently for v1.8.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation / Universal-vs-Blueprint responsibility checks / `compliance_matrix.md` sync as PR gates (source: <https://github.com/nedcodes-ok/cursor-lint-action>)
 - **IFEval-style auto-regression suite** — Convert "task.md recording obligation" / "core/010 crystallization threshold" to verifiable instructions in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 / arXiv:2512.14754)
