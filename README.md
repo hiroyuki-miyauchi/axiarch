@@ -253,7 +253,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 3 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write)）の強制執行設定。`init.sh` で自動コピー / Three-hook enforcement config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher). Auto-copied by `init.sh` |
-| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を **14 段階診断**（v1.7.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.7.0+、task.md / implementation_plan.md / walkthrough.md の 3 ファイル scan で confirmation-bias loophole 解消）、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts (`check-axiarch-health.sh` 14-stage compliance with `--quiet`, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection across 3 process docs (v1.7.0+), `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
+| `axiarch-scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を **14 段階診断**（v1.7.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.7.0+、task.md / implementation_plan.md / walkthrough.md の 3 ファイル scan で confirmation-bias loophole 解消）、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts (`check-axiarch-health.sh` 14-stage compliance with `--quiet`, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection across 3 process docs (v1.7.0+), `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -281,9 +281,9 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `scripts/axiarch-init-task-md.sh` |
-| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 A/B/C + **v1.6.0+ TTL 短縮版** + **v1.7.0+ Check D Task Boundary Detection**）注入 / Inject factual reminder + dynamic violations A/B/C + v1.6.0+ TTL short-circuit + **v1.7.0+ Check D task-boundary detection** | `scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `scripts/axiarch-protect-antifull.sh` |
+| `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 A/B/C + **v1.6.0+ TTL 短縮版** + **v1.7.0+ Check D Task Boundary Detection**）注入 / Inject factual reminder + dynamic violations A/B/C + v1.6.0+ TTL short-circuit + **v1.7.0+ Check D task-boundary detection** | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `axiarch-scripts/axiarch-protect-antifull.sh` |
 
 | ファイル / File | 役割 / Role | コミット / Commit |
 |:----------------|:------------|:------------------|
@@ -299,14 +299,14 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 #### 🔍 トラブルシュート / Troubleshooting
 
-> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**14 段階の axiarch 標準診断**（v1.7.0+）で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ **Check 14（Task Boundary Detection wiring 確認、v1.7.0+）** + AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
+> **JA**: 「フックが動いていない気がする」場合、`bash axiarch-scripts/check-axiarch-health.sh` を実行してください。**14 段階の axiarch 標準診断**（v1.7.0+）で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ **Check 14（Task Boundary Detection wiring 確認、v1.7.0+）** + AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
 >
-> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **14-stage axiarch diagnostic** (v1.7.0+) verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + **Check 14 (Task Boundary Detection wiring, v1.7.0+)** + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
+> **EN**: When you suspect "the hook isn't firing", run `bash axiarch-scripts/check-axiarch-health.sh`. **14-stage axiarch diagnostic** (v1.7.0+) verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + **Check 14 (Task Boundary Detection wiring, v1.7.0+)** + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
 
 ```bash
-bash scripts/check-axiarch-health.sh
+bash axiarch-scripts/check-axiarch-health.sh
 # Or from another directory:
-bash /path/to/project/scripts/check-axiarch-health.sh /path/to/project
+bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 ```
 
 > [!NOTE]

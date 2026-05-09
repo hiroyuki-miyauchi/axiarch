@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-init-task-md.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-init-task-md.sh\""
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh\""
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-protect-antifull.sh\""
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-protect-antifull.sh\""
           }
         ]
       }

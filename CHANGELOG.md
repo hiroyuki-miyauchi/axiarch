@@ -7,7 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.7.0] — 2026-05-08
+## [2.0.0] — 2026-05-10
+
+### 🚨 BREAKING: `scripts/` → `axiarch-scripts/` rename + v1.7.0 features bundled
+
+採用先プロジェクトとの**名前空間衝突回避**のため、配布ディレクトリを rename（pure rename、機能変更ゼロ）。同時に v1.7.0 で予定していた Check D Task Boundary Detection / Claude Code Verified 昇格等の全 features を統合 release。
+
+**Pure rename to avoid namespace collision** with adopter-project `scripts/` (critical risk: adopter `scripts/README.md` would be overwritten). All v1.7.0 features bundled.
+
+### BREAKING
+
+- **配布ディレクトリ**: `scripts/` → `axiarch-scripts/` rename（機能変更ゼロ）
+- **Hook command paths**: `.claude/settings.json` の `command` を新 path に更新
+- **採用先 migration 手順**:
+  1. `git pull` で v2.0.0 取得
+  2. `bash init.sh` 再実行 → `axiarch-scripts/` 配布
+  3. `.claude/settings.json` を再コピー
+  4. 採用先で旧 `scripts/` 配下の axiarch ファイル（`axiarch-*.sh` / `check-axiarch-health.sh` / `check-git-config-clean.sh` / `README.md`）を手動削除推奨
+- **後方互換 path 提供なし** — clean cut（symlink 互換実装は v3.0.0 で再検討候補）
+
+### Why BREAKING?
+
+採用先プロジェクトは独自の `scripts/` ディレクトリを持つことが多く、特に **`scripts/README.md` 衝突**が致命的。OSS のベストプラクティス（`vendor/` / `node_modules/` 等の名前空間 prefix）に従い `axiarch-scripts/` で完全分離。
+
+### Added (v1.7.0 features bundled)
+
+- **Check D — Task Boundary Detection** (axiarch-scripts/axiarch-boot-reminder.sh): UserPromptSubmit hook の stdin から現プロンプト JSON を読み、whole-word match で domain keyword を抽出。**AGENTS §8.4 必須トリオ全 3 ファイル**（task.md / implementation_plan.md / walkthrough.md）を full-text grep して比較。新 keyword 検出時に `🚨 [VIOLATION-D]` flag + TTL 強制 bypass。AI の confirmation bias loophole を機械的に閉鎖
+- **Check 14** (axiarch-scripts/check-axiarch-health.sh): Check D wiring 確認（13-stage → 14-stage）
+- **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT` / `AXIARCH_TASK_DOMAIN_KEYWORDS`
+- **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — v1.4.0+ ネイティブ hook 統合 + axiarch 自身の開発で実運用検証完了。Antigravity の次の位置に配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序、合計 8+ surfaces 更新）
+
+### Changed (v1.7.0 features bundled)
+
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria に Check D 補足、「v1.7.0 改善」セクションで confirmation bias loophole 解消メカニズム明文化
+- **`axiarch-rules/{ja,en}/INDEX.md` directory tree** — `scripts/` → `axiarch-scripts/`
+- **README.md / axiarch-scripts/README.md** — 14-stage / Check D / 新 env vars / Verified 表 / 必須ファイル表 / Enforcement section を全更新
+- **ROADMAP.md** — v1.7.0 forecast を v2.0.0 として delivered 化、Tier 2 forecast を v1.9.0 に整理
+- **init.sh** — `AXIARCH_VERSION` 1.7.0 → 2.0.0、配布ロジック `scripts/` → `axiarch-scripts/`
+- **llms-full.txt / llms.txt** — Version 2.0.0、Verified 表で Claude Code を Antigravity の次に昇格
+
+### Compatibility
+
+- 🚨 **BREAKING (major bump)**: 採用先で `bash scripts/check-axiarch-health.sh` 等を実行する CI / pre-commit hook / ドキュメント参照は `bash axiarch-scripts/check-axiarch-health.sh` に更新が必要
+- ✅ **機能的後方互換**: 機能・env vars・hook 動作は v1.7.0 と同等（pure rename）
+- ✅ **Universal Rules 不変**: `axiarch-rules/{ja,en}/universal/` 内の `scripts/` 言及は agent-agnostic 汎用例文として残す
+- 📌 **アップグレード手順**: `git pull && bash init.sh` で `axiarch-scripts/` が自動配布
+
+### Diagnostic Outcome
+
+- **Mock test verification**: Check D の 3 process docs scan + whole-word match で全動作確認 ✅
+- **rename 後の `bash axiarch-scripts/check-axiarch-health.sh`**: 全 14 段階 PASS ✅
+- **採用先衝突回避**: 採用先独自の `scripts/` には影響なし（全 axiarch ファイル名は axiarch- prefix もしくは check-axiarch- / check-git-config- で衝突しない）
+
+### References
+
+- 採用先実運用フィードバック「同 session 内 task 切替で AI が rule 再 load を省略する」（v1.7.0 由来 Check D）
+- 採用先設計レビュー「scripts/ → axiarch-scripts/ で名前空間衝突回避」（v2.0.0 BREAKING の動機）
+- AGENTS.md §8.4 (Documentation Requirements) と Check D の整合
+- Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
+
+### Out of Scope（v2.x.x / v3.0.0 に deferred — see ROADMAP）
+
+- **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache / shellcheck CI / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
+- **v1.8.0 (Tier 3)**: axiarch-doctor CI lint / IFEval-style auto-regression / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v3.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation / `scripts/` ↔ `axiarch-scripts/` symlink 互換実装の再検討
+
+---
+
+## [1.7.0] — 2026-05-08 (内部開発のみ、独立 release はせず v2.0.0 に統合)
+
+> **NOTE**: v1.7.0 was prepared but NOT released as a separate version; all v1.7.0 features were bundled into v2.0.0 along with the BREAKING `scripts/` → `axiarch-scripts/` rename. The original v1.7.0 development history is preserved in the git log (commits 770150b / f60ced8 / c6aee62 / eddeb01 / 69c44b8 / 8d94938).
 
 ### 🎯 Check D — Task Boundary Detection（タスク境界の物理検出）/ Closes the "AI judges same-session, no re-load needed" Loophole
 
@@ -17,14 +86,14 @@ This release patches a critical structural flaw discovered via adopter feedback:
 
 ### Added
 
-- **`scripts/axiarch-boot-reminder.sh` Check D — Task Boundary Detection**（v1.7.0+）— UserPromptSubmit hook の stdin から現プロンプト JSON を読み、domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を **whole-word match** (`grep -oiwE`) で抽出。**AGENTS §8.4 必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出（プラン側 / walkthrough 側に書かれた domain context も漏れなく捕捉）。現プロンプトに**新しい keyword が出現**したら `🚨 [VIOLATION-D]` flag + **TTL 強制 bypass**（短縮版抑制 + full reminder 強制再発火）。AI の「タスクタイプ不変」自己判断を機械的にバックアップする / Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords via whole-word match; full-text greps the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md / walkthrough.md) — not just task.md — for previously-known keywords; on new-keyword detection, emits `🚨 [VIOLATION-D]` and forces TTL bypass
-- **`scripts/check-axiarch-health.sh` Check 14 — Task Boundary Detection wiring 確認** — `axiarch-boot-reminder.sh` に Check D logic（VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT env var）が含まれることを確認 / Verifies the reminder script contains the Check D logic
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Check D — Task Boundary Detection**（v1.7.0+）— UserPromptSubmit hook の stdin から現プロンプト JSON を読み、domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を **whole-word match** (`grep -oiwE`) で抽出。**AGENTS §8.4 必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出（プラン側 / walkthrough 側に書かれた domain context も漏れなく捕捉）。現プロンプトに**新しい keyword が出現**したら `🚨 [VIOLATION-D]` flag + **TTL 強制 bypass**（短縮版抑制 + full reminder 強制再発火）。AI の「タスクタイプ不変」自己判断を機械的にバックアップする / Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords via whole-word match; full-text greps the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md / walkthrough.md) — not just task.md — for previously-known keywords; on new-keyword detection, emits `🚨 [VIOLATION-D]` and forces TTL bypass
+- **`axiarch-scripts/check-axiarch-health.sh` Check 14 — Task Boundary Detection wiring 確認** — `axiarch-boot-reminder.sh` に Check D logic（VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT env var）が含まれることを確認 / Verifies the reminder script contains the Check D logic
 - **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT`（default `1`、`0` で disable）/ `AXIARCH_TASK_DOMAIN_KEYWORDS`（domain keyword 集合のオーバーライド）
 
 ### Changed
 
 - **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria の「同一 session 内タスク継続」行に Check D 補足追加。「v1.7.0 改善 — Check D Task Boundary Detection」セクションで confirmation bias loophole の解消メカニズムを明文化 / Step 4 updated: "task continues" row now references Check D as the mechanical backstop; new "v1.7.0 improvement" section documents the loophole closure
-- **`scripts/check-axiarch-health.sh` ヘッダー** — 13-stage → 14-stage に拡張、Summary 出力に "Task Boundary" を追加
+- **`axiarch-scripts/check-axiarch-health.sh` ヘッダー** — 13-stage → 14-stage に拡張、Summary 出力に "Task Boundary" を追加
 - **`init.sh`** — `AXIARCH_VERSION` 1.6.0 → 1.7.0
 - **`llms-full.txt`** — Version 1.6.0 → 1.7.0
 - **🎉 Claude Code: ⚠️ Untested → ✅ Verified に昇格** — v1.4.0+ の `UserPromptSubmit` hook 導入 + v1.5.5+ `PreToolUse` 物理遮断 + v1.6.0+ Reminder TTL + v1.7.0+ Check D Task Boundary Detection をネイティブ統合し、本リポジトリで axiarch 開発自体に実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序）/ Claude Code promoted from ⚠️ Untested to ✅ Verified, placed immediately after Antigravity. Claude Code received first-class hook integration in v1.4.0+ and was production-validated through axiarch's own development cycles. Updated across README.md (badge, intro, compatibility table, IMPORTANT block), llms-full.txt (summary, agent table), and init.sh (agent selection order)
@@ -68,11 +137,11 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ### Added
 
-- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)**（v1.6.0+）— First fire (or after TTL expires) returns the **full reminder** + writes timestamp; subsequent fires within TTL with no violations return a short-circuit `[AXIARCH OK]` reminder. State file: `${TMPDIR}/axiarch-reminder-{project_hash}.timestamp`. TTL configurable via `AXIARCH_REMINDER_TTL_SECONDS` (default 1800 = 30 min; `0` disables). Token impact: ~24k cumulative → ~3k (87% reduction in long sessions) / TTL 二段階出力により長時間 session で token 約 87% 削減
-- **`scripts/axiarch-boot-reminder.sh` Check C — Stale Lesson Detection** — Any `core/010` lesson dated `>180 days` (configurable via `AXIARCH_LESSON_STALE_DAYS`) appends a `🚨 [VIOLATION-C]` flag, ensuring single-domain lessons do not get neglected indefinitely / 180 日以上経過の lesson 検出
-- **`scripts/check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) now joined by **time-axis trigger (b)** detecting `[YYYY-MM-DD]` dated lessons older than threshold days. Surfaces stale-lesson backlog
-- **`scripts/check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI can prefer **APPEND to existing files** over new `core/010` entries (per CRYSTAL §3 SEARCH). Addresses inucomi-style "12 consecutive N/A" feedback where lessons fit existing file scope but get added to `core/010`
-- **`scripts/check-axiarch-health.sh --quiet` flag** — Silent mode for pre-commit / CI usage; suppresses verbose output, only error to stderr + exit code conveys result
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)**（v1.6.0+）— First fire (or after TTL expires) returns the **full reminder** + writes timestamp; subsequent fires within TTL with no violations return a short-circuit `[AXIARCH OK]` reminder. State file: `${TMPDIR}/axiarch-reminder-{project_hash}.timestamp`. TTL configurable via `AXIARCH_REMINDER_TTL_SECONDS` (default 1800 = 30 min; `0` disables). Token impact: ~24k cumulative → ~3k (87% reduction in long sessions) / TTL 二段階出力により長時間 session で token 約 87% 削減
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Check C — Stale Lesson Detection** — Any `core/010` lesson dated `>180 days` (configurable via `AXIARCH_LESSON_STALE_DAYS`) appends a `🚨 [VIOLATION-C]` flag, ensuring single-domain lessons do not get neglected indefinitely / 180 日以上経過の lesson 検出
+- **`axiarch-scripts/check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) now joined by **time-axis trigger (b)** detecting `[YYYY-MM-DD]` dated lessons older than threshold days. Surfaces stale-lesson backlog
+- **`axiarch-scripts/check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI can prefer **APPEND to existing files** over new `core/010` entries (per CRYSTAL §3 SEARCH). Addresses inucomi-style "12 consecutive N/A" feedback where lessons fit existing file scope but get added to `core/010`
+- **`axiarch-scripts/check-axiarch-health.sh --quiet` flag** — Silent mode for pre-commit / CI usage; suppresses verbose output, only error to stderr + exit code conveys result
 - **`init.sh` Pre-commit Hook Installer (opt-in)** — New STEP 3.5 prompts `Install pre-commit hook? [y/N]`. When enabled: (a) detects existing lefthook / pre-commit-framework / husky and warns instead of overwriting, (b) appends axiarch block to existing `.git/hooks/pre-commit` or creates new file, (c) marker-based idempotency. Bypass per-commit via `AXIARCH_PRECOMMIT_SKIP=1`
 
 ### Changed
@@ -124,14 +193,14 @@ Based on a 4-agent parallel market study (AI compliance frameworks / competitor 
 
 ### Added
 
-- **`scripts/axiarch-protect-antifull.sh`**（新規）— PreToolUse hook の外出しスクリプト。`Write` tool 呼び出しを傍受し、対象が既存ファイルの場合 `decision: "block"` JSON + exit 2 で物理遮断。`.claude/axiarch-overwrite-allow.txt` で whitelist サポート / NEW: PreToolUse hook script that intercepts `Write` calls; blocks (decision:"block" JSON + exit 2) when the target file already exists. Whitelist via `.claude/axiarch-overwrite-allow.txt`
-- **`scripts/axiarch-init-task-md.sh`**（新規）— SessionStart hook の外出しスクリプト。会話開始時に task.md の存在を確認、無ければ load-history scaffold で自動生成。常に reminder を `additionalContext` で注入 / NEW: SessionStart hook script that checks for task.md, scaffolds it if missing (with load-history table stub), and always injects a reminder via `additionalContext`
-- **`scripts/check-axiarch-health.sh` Check 11 / Check 12 追加** — 12 段階診断に拡張。Check 11 = PreToolUse hook の配線確認、Check 12 = SessionStart hook の配線確認 / Diagnostic extended to 12 stages: Check 11 = PreToolUse wiring, Check 12 = SessionStart wiring
+- **`axiarch-scripts/axiarch-protect-antifull.sh`**（新規）— PreToolUse hook の外出しスクリプト。`Write` tool 呼び出しを傍受し、対象が既存ファイルの場合 `decision: "block"` JSON + exit 2 で物理遮断。`.claude/axiarch-overwrite-allow.txt` で whitelist サポート / NEW: PreToolUse hook script that intercepts `Write` calls; blocks (decision:"block" JSON + exit 2) when the target file already exists. Whitelist via `.claude/axiarch-overwrite-allow.txt`
+- **`axiarch-scripts/axiarch-init-task-md.sh`**（新規）— SessionStart hook の外出しスクリプト。会話開始時に task.md の存在を確認、無ければ load-history scaffold で自動生成。常に reminder を `additionalContext` で注入 / NEW: SessionStart hook script that checks for task.md, scaffolds it if missing (with load-history table stub), and always injects a reminder via `additionalContext`
+- **`axiarch-scripts/check-axiarch-health.sh` Check 11 / Check 12 追加** — 12 段階診断に拡張。Check 11 = PreToolUse hook の配線確認、Check 12 = SessionStart hook の配線確認 / Diagnostic extended to 12 stages: Check 11 = PreToolUse wiring, Check 12 = SessionStart wiring
 
 ### Changed
 
 - **`.claude/settings.json`** — 3 hook 配線（SessionStart / UserPromptSubmit / PreToolUse(Write matcher)）。SessionStart と PreToolUse が新規追加 / Three-hook wiring: SessionStart, UserPromptSubmit, PreToolUse with `Write` matcher
-- **`scripts/axiarch-boot-reminder.sh` reminder 文の事実陳述化リファクタ** — CAPS / `🚨【厳守命令】` / `No skipping` 等の強圧表現を排除し、`This project enforces axiarch governance` のような事実陳述に統一。Anthropic 公式ガイドおよび Robert Glaser 「Prompts as Programs in GPT-5」に基づく科学的最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持 / Reminder tone refactored from CAPS/imperative to factual statement per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". Repetition structure preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
+- **`axiarch-scripts/axiarch-boot-reminder.sh` reminder 文の事実陳述化リファクタ** — CAPS / `🚨【厳守命令】` / `No skipping` 等の強圧表現を排除し、`This project enforces axiarch governance` のような事実陳述に統一。Anthropic 公式ガイドおよび Robert Glaser 「Prompts as Programs in GPT-5」に基づく科学的最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持 / Reminder tone refactored from CAPS/imperative to factual statement per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". Repetition structure preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
 - **`init.sh`** — `AXIARCH_VERSION` 1.5.4 → 1.5.5
 - **`llms-full.txt`** — Version 1.5.4 → 1.5.5
 
@@ -141,7 +210,7 @@ Based on a 4-agent parallel market study (AI compliance frameworks / competitor 
 - ✅ **依存追加なし** — pure bash 実装、`jq` は optional（grep + sed フォールバック完備）
 - ✅ **`.claude/axiarch-overwrite-allow.txt` で whitelist 拡張** — 自動生成 build artefact 等で正当な full-overwrite が必要な場合の escape hatch
 - ⚠️ **採用先で `init.sh` 再実行が必要** — `chmod +x` で新 hook scripts に実行権限が付与される
-- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行 OR 手動で `.claude/settings.json` + `scripts/axiarch-{protect-antifull,init-task-md}.sh` をコピー + `chmod +x`
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行 OR 手動で `.claude/settings.json` + `axiarch-scripts/axiarch-{protect-antifull,init-task-md}.sh` をコピー + `chmod +x`
 
 ### Diagnostic Outcome
 
@@ -173,18 +242,18 @@ Based on a 4-agent parallel market study (AI compliance frameworks / competitor 
 
 ### 🩹 健全性診断スクリプトの v1.5.3 互換性 patch / Health-Diagnostic Compatibility Patch for v1.5.3
 
-v1.5.3 で `.claude/settings.json` の hook command を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に**外出し化**したことで、`scripts/check-axiarch-health.sh` の Check 3 (`AXIARCH BOOT` marker grep) と Check 4 (`UserPromptSubmit hook success` grep) が**誤検出**を起こす状態になっていた。本 patch は両 check を v1.5.2/v1.5.3 双方の format に対応させる pure 互換性修正。
+v1.5.3 で `.claude/settings.json` の hook command を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh"` に**外出し化**したことで、`axiarch-scripts/check-axiarch-health.sh` の Check 3 (`AXIARCH BOOT` marker grep) と Check 4 (`UserPromptSubmit hook success` grep) が**誤検出**を起こす状態になっていた。本 patch は両 check を v1.5.2/v1.5.3 双方の format に対応させる pure 互換性修正。
 
-After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Check 3 (inline marker grep) and Check 4 (legacy `success` log grep) produced **false negatives** on freshly-installed v1.5.3 projects. This patch makes both checks compatible with both v1.5.2 (inline) and v1.5.3+ (externalized) formats.
+After v1.5.3 externalized the hook command, `axiarch-scripts/check-axiarch-health.sh` Check 3 (inline marker grep) and Check 4 (legacy `success` log grep) produced **false negatives** on freshly-installed v1.5.3 projects. This patch makes both checks compatible with both v1.5.2 (inline) and v1.5.3+ (externalized) formats.
 
 ### Fixed
 
-- **Check 3 — `AXIARCH BOOT` marker detection** — Hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` が含まれることを確認するフォールバック分岐を追加。inline 形式 (v1.4.0–v1.5.2) と externalized 形式 (v1.5.3+) の両方をパスできるようになった / Added fallback branch that inspects the externalized script for the `AXIARCH BOOT` literal when the hook command delegates to `scripts/axiarch-boot-reminder.sh`
+- **Check 3 — `AXIARCH BOOT` marker detection** — Hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` が含まれることを確認するフォールバック分岐を追加。inline 形式 (v1.4.0–v1.5.2) と externalized 形式 (v1.5.3+) の両方をパスできるようになった / Added fallback branch that inspects the externalized script for the `AXIARCH BOOT` literal when the hook command delegates to `axiarch-scripts/axiarch-boot-reminder.sh`
 - **Check 4 — Session firing history grep pattern** — v1.5.2+ の transcript JSONL では hook 出力ラベルが `UserPromptSubmit hook success` から `UserPromptSubmit hook additional context` に変わっていたため、grep を `grep -cE "UserPromptSubmit hook (success|additional context)"` に拡張 / Expanded grep to match both legacy and current transcript labels (`success` ⇄ `additional context`)
-- **`scripts/axiarch-boot-reminder.sh` のコメントから version literal 除去** — `# Static base reminder (..., identical content to v1.5.1/v1.5.2)` は汎用ファイルへのバージョン記述ポリシー違反だったため version-free に書き換え / Removed `v1.5.1/v1.5.2` literal from the externalized reminder script's header comment to comply with the version-string-policy
-- **`scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から version literal 除去** — Check 3 fail-path の helper メッセージから `(v1.5.3+ uses ...)` を削除（採用先のランタイム出力は version-free を厳守） / Removed `(v1.5.3+ ...)` literal from a runtime-visible `print_info` line in the diagnostic
+- **`axiarch-scripts/axiarch-boot-reminder.sh` のコメントから version literal 除去** — `# Static base reminder (..., identical content to v1.5.1/v1.5.2)` は汎用ファイルへのバージョン記述ポリシー違反だったため version-free に書き換え / Removed `v1.5.1/v1.5.2` literal from the externalized reminder script's header comment to comply with the version-string-policy
+- **`axiarch-scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から version literal 除去** — Check 3 fail-path の helper メッセージから `(v1.5.3+ uses ...)` を削除（採用先のランタイム出力は version-free を厳守） / Removed `(v1.5.3+ ...)` literal from a runtime-visible `print_info` line in the diagnostic
 - **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` 言及追加** — v1.5.3 で新規追加されたが必須ファイル表で言及漏れだった件を訂正 / Added the missing reference to `axiarch-boot-reminder.sh` in the required-files table
-- **`scripts/check-axiarch-health.sh` Check 3 の else 分岐に `EXIT_CODE=1` 追加（false-negative 修正）** — v1.5.1 で導入された Check 3 の else 分岐（hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない hook 完全破損状態）で `print_warn` だけ出力して `EXIT_CODE=1` を設定していなかった bug。CI 連携で false negative（hook 壊れているのに exit 0）になる致命的問題。18 ラウンド調査で発見・修正 / Critical false-negative fix: Check 3's else branch (hook command lacks both `AXIARCH BOOT` and `axiarch-boot-reminder.sh` literals — i.e. completely broken hook) was emitting `print_warn` without setting `EXIT_CODE=1`, causing CI integrations to falsely report success on a broken hook. Discovered in the 18th-round audit
+- **`axiarch-scripts/check-axiarch-health.sh` Check 3 の else 分岐に `EXIT_CODE=1` 追加（false-negative 修正）** — v1.5.1 で導入された Check 3 の else 分岐（hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない hook 完全破損状態）で `print_warn` だけ出力して `EXIT_CODE=1` を設定していなかった bug。CI 連携で false negative（hook 壊れているのに exit 0）になる致命的問題。18 ラウンド調査で発見・修正 / Critical false-negative fix: Check 3's else branch (hook command lacks both `AXIARCH BOOT` and `axiarch-boot-reminder.sh` literals — i.e. completely broken hook) was emitting `print_warn` without setting `EXIT_CODE=1`, causing CI integrations to falsely report success on a broken hook. Discovered in the 18th-round audit
 
 ### Changed
 
@@ -196,16 +265,16 @@ After v1.5.3 externalized the hook command, `scripts/check-axiarch-health.sh` Ch
 
 - ✅ **後方互換性 100%** — v1.4.0〜v1.5.2 の inline format も依然 PASS。配布済みスクリプトは `git pull && bash init.sh` で再配布可能
 - ✅ **依存追加なし** — pure bash 修正のみ
-- 📌 **アップグレード手順** — 採用先で `bash scripts/check-axiarch-health.sh` を再実行し、Check 3/4 が PASS することを確認
+- 📌 **アップグレード手順** — 採用先で `bash axiarch-scripts/check-axiarch-health.sh` を再実行し、Check 3/4 が PASS することを確認
 
 ### Diagnostic Outcome
 
-- **v1.5.3 リグレッションの確認**: 本 axiarch リポジトリで Check 3 が「Hook command does not contain AXIARCH BOOT」、Check 4 が「Hook never fired」を誤検出。`bash scripts/check-axiarch-health.sh` を実行し両 PASS 化を実証
+- **v1.5.3 リグレッションの確認**: 本 axiarch リポジトリで Check 3 が「Hook command does not contain AXIARCH BOOT」、Check 4 が「Hook never fired」を誤検出。`bash axiarch-scripts/check-axiarch-health.sh` を実行し両 PASS 化を実証
 - **設計反省**: hook command を externalize する変更時、診断スクリプトの grep 対象も同時更新する責務を見落としていた。今後は format 変更を伴う patch と diagnostic update をセットでリリースする運用に切り替え
 
 ### References
 
-- v1.5.3 で外出し化した script: `scripts/axiarch-boot-reminder.sh`
+- v1.5.3 で外出し化した script: `axiarch-scripts/axiarch-boot-reminder.sh`
 - v1.5.2 で format 変更された hook 出力ラベル: `additionalContext` (cf. <https://code.claude.com/docs/en/hooks#hookspecificoutput>)
 
 ---
@@ -222,7 +291,7 @@ After v1.5.2, the author pointed out that (1) UI pollution was not actually elim
 
 ### Added
 
-- **`scripts/axiarch-boot-reminder.sh`**（新規）— UserPromptSubmit hook の外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に 🚨 フラグを追記:
+- **`axiarch-scripts/axiarch-boot-reminder.sh`**（新規）— UserPromptSubmit hook の外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に 🚨 フラグを追記:
   - **Check A**: `task.md` にロード履歴（AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 参照）が未記録
   - **Check B**: `axiarch-rules/{ja,en}/blueprint/core/010_project_lessons_log.md` で 3 件以上溜まったドメイン（CRYSTALLIZATION §5 違反）
   - JSON 出力は pure bash で `jq` 依存なし
@@ -230,7 +299,7 @@ After v1.5.2, the author pointed out that (1) UI pollution was not actually elim
 
 ### Changed
 
-- **`.claude/settings.json`** — `command` を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に簡素化。settings.json 自体がスリムに / Hook command externalized; settings.json itself becomes much slimmer
+- **`.claude/settings.json`** — `command` を inline `printf JSON` から `bash "${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh"` に簡素化。settings.json 自体がスリムに / Hook command externalized; settings.json itself becomes much slimmer
 - **`ROADMAP.md` v1.5.2 記述を honest 化** — 「Plan mode 表示汚染を解消」「`<system-reminder>` でラップされない」が誤りだったため修正。実態は「format クリーン化（system-reminder ラップ自体は残る）」 / Honesty fix: removed overstated claims, clarified that `<system-reminder>` wrap remains
 - **`init.sh`** — `AXIARCH_VERSION` 1.5.2 → 1.5.3
 - **`llms-full.txt`** — Version 1.5.2 → 1.5.3
@@ -241,7 +310,7 @@ After v1.5.2, the author pointed out that (1) UI pollution was not actually elim
 - ✅ **依存追加なし** — pure bash で JSON 構築、`jq` 不要
 - ✅ **物理 block 不採用** — `decision: "block"` で prompt 遮断する選択肢もあったが、副作用が大きいため警告強化に留めた
 - ⚠️ **採用先で `axiarch-boot-reminder.sh` の実行権限が必要** — `init.sh` の `chmod +x` ロジックで自動付与される
-- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行、または手動で `.claude/settings.json` と `scripts/axiarch-boot-reminder.sh` をコピー
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行、または手動で `.claude/settings.json` と `axiarch-scripts/axiarch-boot-reminder.sh` をコピー
 
 ### Diagnostic Outcome
 
@@ -291,26 +360,26 @@ After v1.5.1, the author reported "Plan display becomes ugly" and "loaded-rules 
 
 v1.5.0 リリース後、作者から「フックが毎回動いていない気がする」「結晶化プロトコルも守られていない（3件以上溜まっても `core/010` に蓄積し続ける）」という 2 つの懸念。共通の真因は **AI 遵守ギャップ** — フックは技術的に発火し、プロトコルもテキストとして存在しているのに、AI が `task.md` 記録を怠り、「`core/010` に追記したから完了」と誤認して Step 5 (THRESHOLD CHECK) をスキップする。
 
-本 patch は **「ドキュメント丸投げではなくツールで遵守を強制する」** 設計に転換：診断スクリプト `scripts/check-axiarch-health.sh` を新規配布し、フック発火 / `task.md` 記録 / 結晶化閾値の 3 軸を一発検証可能に。フックメッセージ・CRYSTALLIZATION_PROTOCOL §5 自体も「追記 = 完了は誤認」を明示する形で強化。
+本 patch は **「ドキュメント丸投げではなくツールで遵守を強制する」** 設計に転換：診断スクリプト `axiarch-scripts/check-axiarch-health.sh` を新規配布し、フック発火 / `task.md` 記録 / 結晶化閾値の 3 軸を一発検証可能に。フックメッセージ・CRYSTALLIZATION_PROTOCOL §5 自体も「追記 = 完了は誤認」を明示する形で強化。
 
 After v1.5.0, the author raised two concerns: "the hook seems not to fire every time" and "the Crystallization Protocol is not enforced — lessons keep accumulating in `core/010` past the 3-lesson threshold". The common root cause is the **AI adherence gap** — the hook fires technically and the protocols exist as text, but the AI skips `task.md` logging and mistakes "appended to `core/010`" for completion, never executing Step 5 (THRESHOLD CHECK).
 
-This patch shifts from "documentation hand-off" to **"tool-enforced adherence"**: a new diagnostic script `scripts/check-axiarch-health.sh` provides one-shot verification across hook firing, `task.md` adherence, and crystallization threshold. The hook reminder and `CRYSTALLIZATION_PROTOCOL §5` itself are also strengthened to explicitly state "just appending is NOT completion".
+This patch shifts from "documentation hand-off" to **"tool-enforced adherence"**: a new diagnostic script `axiarch-scripts/check-axiarch-health.sh` provides one-shot verification across hook firing, `task.md` adherence, and crystallization threshold. The hook reminder and `CRYSTALLIZATION_PROTOCOL §5` itself are also strengthened to explicitly state "just appending is NOT completion".
 
 ### Added
 
-- **`scripts/check-axiarch-health.sh`**（新規）— **Axiarch 公式健全性診断ツール（全プロトコル監視）**。`bash scripts/check-axiarch-health.sh` で **10 段階の遵守チェック** を一発実行：（1-4）Hook 関連（`.claude/settings.json` 存在・JSON 構文・hook 構造・発火履歴）/ （5）LOADING_PROTOCOL Step 4 遵守（`task.md` ロード履歴）/ （6）CRYSTALLIZATION_PROTOCOL §5 遵守（3件以上のドメイン検出）/ **（7）AGENTS.md §8 Process & Documentation（task.md / implementation_plan.md / walkthrough.md 存在）** / **（8）§1 Deployment Ban（force-push / 直 main commit 検出）** / **（9）§4 SSOT Sync（main 同期状態）** / **（10）§2 Language First（Project Native Language 整合性）**。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示。`init.sh` で自動配布 / NEW: Official Axiarch health diagnostic with **10-stage protocol-wide compliance check**. Covers hook firing, AI adherence, crystallization threshold, AGENTS §1/§2/§4/§8/§9 + LOADING_PROTOCOL. Surfaces "where the AI is slacking" at a glance. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review. Auto-distributed by `init.sh`
-- **`scripts/README.md`**（新規）— scripts/ ディレクトリの索引兼ガイド。各診断ツール（`check-axiarch-health.sh` / `check-git-config-clean.sh`）の目的・使い方・診断項目・推奨ワークフローをバイリンガルで記載。採用者が `scripts/` 配下の存在意義を一発で把握できるようにする / NEW: `scripts/` index & guide. Bilingual documentation of each diagnostic tool's purpose, usage, check items, and recommended workflow
+- **`axiarch-scripts/check-axiarch-health.sh`**（新規）— **Axiarch 公式健全性診断ツール（全プロトコル監視）**。`bash axiarch-scripts/check-axiarch-health.sh` で **10 段階の遵守チェック** を一発実行：（1-4）Hook 関連（`.claude/settings.json` 存在・JSON 構文・hook 構造・発火履歴）/ （5）LOADING_PROTOCOL Step 4 遵守（`task.md` ロード履歴）/ （6）CRYSTALLIZATION_PROTOCOL §5 遵守（3件以上のドメイン検出）/ **（7）AGENTS.md §8 Process & Documentation（task.md / implementation_plan.md / walkthrough.md 存在）** / **（8）§1 Deployment Ban（force-push / 直 main commit 検出）** / **（9）§4 SSOT Sync（main 同期状態）** / **（10）§2 Language First（Project Native Language 整合性）**。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示。`init.sh` で自動配布 / NEW: Official Axiarch health diagnostic with **10-stage protocol-wide compliance check**. Covers hook firing, AI adherence, crystallization threshold, AGENTS §1/§2/§4/§8/§9 + LOADING_PROTOCOL. Surfaces "where the AI is slacking" at a glance. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review. Auto-distributed by `init.sh`
+- **`axiarch-scripts/README.md`**（新規）— scripts/ ディレクトリの索引兼ガイド。各診断ツール（`check-axiarch-health.sh` / `check-git-config-clean.sh`）の目的・使い方・診断項目・推奨ワークフローをバイリンガルで記載。採用者が `axiarch-scripts/` 配下の存在意義を一発で把握できるようにする / NEW: `axiarch-scripts/` index & guide. Bilingual documentation of each diagnostic tool's purpose, usage, check items, and recommended workflow
 
 ### Changed
 
 - **`.claude/settings.json`** — `UserPromptSubmit` フックの reminder 文言を強化:
   - **`task.md` 記録義務（AGENTS.md §8.4 準拠）** を追加 / `Record all loaded rule files in task.md per AGENTS.md §8.4`
   - **CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK の遵守義務** を追加。「追記 = 完了は誤認」を明示し、3件以上のドメインがあれば Blueprint 専用ファイルへの昇華まで完了させてからタスク完了を宣言する義務を AI に課す / Added mandatory `CRYSTALLIZATION_PROTOCOL §5 THRESHOLD CHECK` execution on task completion; "just appending to `core/010` is NOT completion"
-- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5** — 強い CAUTION ブロックを追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行せよ」「違反は `scripts/check-axiarch-health.sh` Check 6 で検出可能」を明記 / Added a strong CAUTION block to §5 stating that Step 4 alone is not completion and that Step 5 MUST run before task completion; violations are externally detectable
-- **`README.md`** — 「Enforcement Mechanism」サブセクション直下に **トラブルシュート章**（縮小版・約 10 行）を新設。`bash scripts/check-axiarch-health.sh` への誘導、誤情報訂正（`permissions.allow Bash(echo *)` 不要）、公式 docs リンク / Added concise "Troubleshooting" subsection directing users to `scripts/check-axiarch-health.sh`
-- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — 「強制執行機構」セクションに **診断ツール参照（v1.5.1+）** を追記（`scripts/check-axiarch-health.sh` 案内、1 段落）/ Added one-paragraph reference to the diagnostic script
-- **`init.sh`** — `AXIARCH_VERSION` 1.5.0 → 1.5.1。`.claude/settings.json` 配布直後に **`jq` による JSON 構文検証**（`jq` 不在時はスキップ、依存追加なし）。`scripts/` 既存配布で `check-axiarch-health.sh` も自動配布対象 / Bumped version; added optional `jq` JSON validation post-copy; existing `scripts/` distribution covers the new diagnostic
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5** — 強い CAUTION ブロックを追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行せよ」「違反は `axiarch-scripts/check-axiarch-health.sh` Check 6 で検出可能」を明記 / Added a strong CAUTION block to §5 stating that Step 4 alone is not completion and that Step 5 MUST run before task completion; violations are externally detectable
+- **`README.md`** — 「Enforcement Mechanism」サブセクション直下に **トラブルシュート章**（縮小版・約 10 行）を新設。`bash axiarch-scripts/check-axiarch-health.sh` への誘導、誤情報訂正（`permissions.allow Bash(echo *)` 不要）、公式 docs リンク / Added concise "Troubleshooting" subsection directing users to `axiarch-scripts/check-axiarch-health.sh`
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — 「強制執行機構」セクションに **診断ツール参照（v1.5.1+）** を追記（`axiarch-scripts/check-axiarch-health.sh` 案内、1 段落）/ Added one-paragraph reference to the diagnostic script
+- **`init.sh`** — `AXIARCH_VERSION` 1.5.0 → 1.5.1。`.claude/settings.json` 配布直後に **`jq` による JSON 構文検証**（`jq` 不在時はスキップ、依存追加なし）。`axiarch-scripts/` 既存配布で `check-axiarch-health.sh` も自動配布対象 / Bumped version; added optional `jq` JSON validation post-copy; existing `axiarch-scripts/` distribution covers the new diagnostic
 - **`llms-full.txt`** — Version 1.5.0 → 1.5.1
 
 ### Compatibility
@@ -425,15 +494,15 @@ Adds a standard `UserPromptSubmit` hook to Claude Code projects, physically enfo
 
 ### 🆕 Universal Engineering 600 新設 + Git Workflow Refactor + Worktree Hygiene Protocol / Universal Engineering 600 + Git Workflow Refactor + Worktree Hygiene Protocol
 
-axiarch を採用する全プロジェクトに Git Workflow と `.git/config` 健全性管理を恒常的に提供する Universal ルールを追加。`scripts/check-git-config-clean.sh` を OSS 採用者全員へ配布。`engineering/000` Part X の pure-git workflow を新ファイル `engineering/600_git_workflow.md` に集約（YAGNI 原則に基づく構造正規化）。
+axiarch を採用する全プロジェクトに Git Workflow と `.git/config` 健全性管理を恒常的に提供する Universal ルールを追加。`axiarch-scripts/check-git-config-clean.sh` を OSS 採用者全員へ配布。`engineering/000` Part X の pure-git workflow を新ファイル `engineering/600_git_workflow.md` に集約（YAGNI 原則に基づく構造正規化）。
 
-Adds a Universal rule providing Git Workflow and `.git/config` integrity management to all axiarch-adopting projects. Distributes `scripts/check-git-config-clean.sh` to OSS adopters. Consolidates pure-git workflow from `engineering/000` Part X into the new `engineering/600_git_workflow.md` file (YAGNI-based structural normalization).
+Adds a Universal rule providing Git Workflow and `.git/config` integrity management to all axiarch-adopting projects. Distributes `axiarch-scripts/check-git-config-clean.sh` to OSS adopters. Consolidates pure-git workflow from `engineering/000` Part X into the new `engineering/600_git_workflow.md` file (YAGNI-based structural normalization).
 
 ### Added
 
 - **`axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md`**（新規 Universal Rule）— **5パート・18ルール**: Trunk-Based Development (§1) / Commit & PR Standards (§2) / Branch Hygiene Mandate (§3) / **Worktree Hygiene Protocol (§4)** — `[extensions] worktreeConfig = true` 残留問題（Antigravity の Go ベース language server クラッシュ・`ECONNREFUSED 127.0.0.1:50347`）の検出・修復・予防 / Repository Hygiene & Config Integrity (§5)。クロスリファレンス（security/operations/quality 等）・逆引き索引付き / **NEW Universal Rule** with 5 parts, 18 rules covering daily Git workflow including the **Worktree Hygiene Protocol** that documents the `worktreeConfig` residue problem (Antigravity Go-based language server crash) detection/repair/prevention
-- **`scripts/check-git-config-clean.sh`** — `.git/config` の自動検出・修復スクリプト（`--fix` / `--quiet` / `--full-clean` モード対応、現在ブランチ自動除外）/ Auto-detection & repair script for `.git/config` with `--fix`, `--quiet`, `--full-clean` modes (auto-excludes current branch)
-- **`init.sh`** に `scripts/` ディレクトリ配布ロジック追加 — axiarch 採用と同時に `check-git-config-clean.sh` が自動配布される / Added `scripts/` distribution logic so adopters automatically receive `check-git-config-clean.sh`
+- **`axiarch-scripts/check-git-config-clean.sh`** — `.git/config` の自動検出・修復スクリプト（`--fix` / `--quiet` / `--full-clean` モード対応、現在ブランチ自動除外）/ Auto-detection & repair script for `.git/config` with `--fix`, `--quiet`, `--full-clean` modes (auto-excludes current branch)
+- **`init.sh`** に `axiarch-scripts/` ディレクトリ配布ロジック追加 — axiarch 採用と同時に `check-git-config-clean.sh` が自動配布される / Added `axiarch-scripts/` distribution logic so adopters automatically receive `check-git-config-clean.sh`
 
 ### Changed — Universal Engineering Restructure
 

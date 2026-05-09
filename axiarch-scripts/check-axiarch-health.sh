@@ -4,7 +4,7 @@
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
 # Usage:
-#   bash scripts/check-axiarch-health.sh [PROJECT_DIR] [--quiet|-q]
+#   bash axiarch-scripts/check-axiarch-health.sh [PROJECT_DIR] [--quiet|-q]
 #
 # --quiet : suppress all output except errors (for pre-commit hook usage)
 #
@@ -127,22 +127,22 @@ elif command -v jq &>/dev/null; then
       "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
     # AXIARCH BOOT marker can live in two places:
     #   (1) directly in the inline command (v1.4.0–v1.5.2)
-    #   (2) in scripts/axiarch-boot-reminder.sh referenced by the command (v1.5.3+)
+    #   (2) in axiarch-scripts/axiarch-boot-reminder.sh referenced by the command (v1.5.3+)
     if [[ "${HOOK_CMD}" == *"AXIARCH BOOT"* ]]; then
       print_pass "Axiarch BOOT marker present (inline)"
     elif [[ "${HOOK_CMD}" == *"axiarch-boot-reminder.sh"* ]]; then
       # v1.5.3+ externalized form: check the referenced script
-      REMINDER_SCRIPT="${PROJECT_DIR}/scripts/axiarch-boot-reminder.sh"
+      REMINDER_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-boot-reminder.sh"
       if [[ -f "${REMINDER_SCRIPT}" ]] && grep -q "AXIARCH BOOT" "${REMINDER_SCRIPT}" 2>/dev/null; then
-        print_pass "Axiarch BOOT marker present (via scripts/axiarch-boot-reminder.sh)"
+        print_pass "Axiarch BOOT marker present (via axiarch-scripts/axiarch-boot-reminder.sh)"
       else
         print_warn "Hook references axiarch-boot-reminder.sh but the script is missing or lacks the marker"
-        print_info "Re-run init.sh or copy scripts/axiarch-boot-reminder.sh from axiarch repo"
+        print_info "Re-run init.sh or copy axiarch-scripts/axiarch-boot-reminder.sh from axiarch repo"
         EXIT_CODE=1
       fi
     else
       print_warn "Hook command does not contain '[AXIARCH BOOT]' marker (inline or via reminder script)"
-      print_info "Replace with the official axiarch settings.json (delegates to scripts/axiarch-boot-reminder.sh)"
+      print_info "Replace with the official axiarch settings.json (delegates to axiarch-scripts/axiarch-boot-reminder.sh)"
       EXIT_CODE=1
     fi
   else
@@ -434,12 +434,12 @@ elif command -v jq &>/dev/null; then
     "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
   if [[ -z "${PRE_HOOK_CMD}" ]]; then
     print_warn "PreToolUse hook not configured — §6 violations cannot be physically blocked"
-    print_info "Add a PreToolUse hook calling scripts/axiarch-protect-antifull.sh (Write matcher)"
+    print_info "Add a PreToolUse hook calling axiarch-scripts/axiarch-protect-antifull.sh (Write matcher)"
     print_info "(reminder-only enforcement is insufficient per Control Illusion arXiv:2502.15851)"
   elif [[ "${PRE_HOOK_CMD}" == *"axiarch-protect-antifull.sh"* ]]; then
-    PROTECT_SCRIPT="${PROJECT_DIR}/scripts/axiarch-protect-antifull.sh"
+    PROTECT_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-protect-antifull.sh"
     if [[ -f "${PROTECT_SCRIPT}" ]] && [[ -x "${PROTECT_SCRIPT}" ]]; then
-      print_pass "PreToolUse hook wired to scripts/axiarch-protect-antifull.sh"
+      print_pass "PreToolUse hook wired to axiarch-scripts/axiarch-protect-antifull.sh"
     else
       print_warn "PreToolUse hook references the script but it is missing or not executable"
       print_info "Re-run init.sh to redistribute and chmod +x"
@@ -464,11 +464,11 @@ elif command -v jq &>/dev/null; then
     "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
   if [[ -z "${SS_HOOK_CMD}" ]]; then
     print_warn "SessionStart hook not configured — task.md will not be auto-initialised"
-    print_info "Add a SessionStart hook calling scripts/axiarch-init-task-md.sh"
+    print_info "Add a SessionStart hook calling axiarch-scripts/axiarch-init-task-md.sh"
   elif [[ "${SS_HOOK_CMD}" == *"axiarch-init-task-md.sh"* ]]; then
-    INIT_SCRIPT="${PROJECT_DIR}/scripts/axiarch-init-task-md.sh"
+    INIT_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-init-task-md.sh"
     if [[ -f "${INIT_SCRIPT}" ]] && [[ -x "${INIT_SCRIPT}" ]]; then
-      print_pass "SessionStart hook wired to scripts/axiarch-init-task-md.sh"
+      print_pass "SessionStart hook wired to axiarch-scripts/axiarch-init-task-md.sh"
     else
       print_warn "SessionStart hook references the script but it is missing or not executable"
       print_info "Re-run init.sh to redistribute and chmod +x"
@@ -520,15 +520,15 @@ fi
 
 # =============================================================================
 # Check 14: Task Boundary Detection — Check D wiring (v1.7.0+)
-# Verifies that scripts/axiarch-boot-reminder.sh contains the Check D logic
+# Verifies that axiarch-scripts/axiarch-boot-reminder.sh contains the Check D logic
 # (VIOLATION-D + TTL bypass on domain-keyword shift). This closes the AI's
 # "same session, no re-load needed" self-judgment loophole identified by
 # adopter feedback.
 # =============================================================================
 print_section "Check 14: Task boundary detection (Check D wiring)"
-REMINDER_SCRIPT_PATH="${PROJECT_DIR}/scripts/axiarch-boot-reminder.sh"
+REMINDER_SCRIPT_PATH="${PROJECT_DIR}/axiarch-scripts/axiarch-boot-reminder.sh"
 if [[ ! -f "${REMINDER_SCRIPT_PATH}" ]]; then
-  print_warn "scripts/axiarch-boot-reminder.sh not found — Check D unavailable"
+  print_warn "axiarch-scripts/axiarch-boot-reminder.sh not found — Check D unavailable"
   print_info "Re-run init.sh to redistribute the v1.7.0+ reminder script"
 elif grep -q "VIOLATION-D" "${REMINDER_SCRIPT_PATH}" 2>/dev/null \
    && grep -q "AXIARCH_TASK_BOUNDARY_DETECT" "${REMINDER_SCRIPT_PATH}" 2>/dev/null; then
@@ -537,7 +537,7 @@ elif grep -q "VIOLATION-D" "${REMINDER_SCRIPT_PATH}" 2>/dev/null \
     print_info "Note: AXIARCH_TASK_BOUNDARY_DETECT=0 disables Check D at runtime"
   fi
 else
-  print_warn "scripts/axiarch-boot-reminder.sh missing Check D logic (VIOLATION-D / task boundary detection)"
+  print_warn "axiarch-scripts/axiarch-boot-reminder.sh missing Check D logic (VIOLATION-D / task boundary detection)"
   print_info "This is a v1.7.0+ feature. Re-run init.sh to update."
   print_info "Without Check D, AI may slack on rule re-load when it judges 'session continues' — see LOADING_PROTOCOL §4 v1.7.0 note"
 fi

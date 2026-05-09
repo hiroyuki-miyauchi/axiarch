@@ -59,7 +59,7 @@ if [[ ! -t 0 ]]; then
 fi
 
 # Resolve project directory: prefer Claude Code's CLAUDE_PROJECT_DIR if exported,
-# otherwise fall back to two levels up from this script (axiarch/scripts/<this>).
+# otherwise fall back to two levels up from this script (axiarch/axiarch-scripts/<this>).
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [[ -z "${PROJECT_DIR}" || ! -d "${PROJECT_DIR}" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

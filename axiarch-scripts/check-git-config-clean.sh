@@ -23,10 +23,10 @@
 #   axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md §4
 #
 # Usage / 使用方法:
-#   ./scripts/check-git-config-clean.sh             # Detection only (exit 1 if dirty)
-#   ./scripts/check-git-config-clean.sh --fix       # Detection + auto-repair
-#   ./scripts/check-git-config-clean.sh --quiet     # CI silent mode (no output if clean)
-#   ./scripts/check-git-config-clean.sh --full-clean # --fix + delete stale claude/* branches
+#   ./axiarch-scripts/check-git-config-clean.sh             # Detection only (exit 1 if dirty)
+#   ./axiarch-scripts/check-git-config-clean.sh --fix       # Detection + auto-repair
+#   ./axiarch-scripts/check-git-config-clean.sh --quiet     # CI silent mode (no output if clean)
+#   ./axiarch-scripts/check-git-config-clean.sh --full-clean # --fix + delete stale claude/* branches
 # ----------------------------------------------------------------------------
 
 set -euo pipefail

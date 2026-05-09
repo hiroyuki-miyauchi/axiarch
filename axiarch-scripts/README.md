@@ -30,10 +30,10 @@ The official Axiarch health diagnostic. One-shot 13-stage check covering hook fi
 
 ```bash
 # カレントディレクトリを診断 / Diagnose current directory
-bash scripts/check-axiarch-health.sh
+bash axiarch-scripts/check-axiarch-health.sh
 
 # 特定パスを診断 / Diagnose a specific path
-bash scripts/check-axiarch-health.sh /path/to/project
+bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 ```
 
 ### 診断項目 / Check Items
@@ -93,7 +93,7 @@ JSON 出力は pure bash（`jq` 依存なし）。物理 block ではなく **�
 直接実行する用途は通常なし（hook 経由で自動呼出）。デバッグ時のみ：
 
 ```bash
-bash scripts/axiarch-boot-reminder.sh | jq .
+bash axiarch-scripts/axiarch-boot-reminder.sh | jq .
 # → hookSpecificOutput.additionalContext に reminder + 違反フラグ
 ```
 
@@ -127,7 +127,7 @@ Externalized PreToolUse hook script invoked from `.claude/settings.json`. Interc
 
 ```bash
 echo '{"tool_name":"Write","tool_input":{"file_path":"/existing/file.md"}}' \
-  | bash scripts/axiarch-protect-antifull.sh
+  | bash axiarch-scripts/axiarch-protect-antifull.sh
 # → JSON `{"decision":"block",...}` + stderr message + exit 2
 ```
 
@@ -151,7 +151,7 @@ Externalized SessionStart hook script invoked from `.claude/settings.json`. On s
 直接実行する用途は通常なし（hook 経由で自動呼出）。デバッグ時のみ：
 
 ```bash
-bash scripts/axiarch-init-task-md.sh | jq .
+bash axiarch-scripts/axiarch-init-task-md.sh | jq .
 # → hookSpecificOutput.additionalContext に reminder + (必要なら scaffold note)
 ```
 
@@ -169,16 +169,16 @@ Detects and repairs residual `[extensions] worktreeConfig = true` in `.git/confi
 
 ```bash
 # 検出のみ（dry-run、デフォルト）/ Detection only (default)
-bash scripts/check-git-config-clean.sh
+bash axiarch-scripts/check-git-config-clean.sh
 
 # 自動修復 / Auto-fix
-bash scripts/check-git-config-clean.sh --fix
+bash axiarch-scripts/check-git-config-clean.sh --fix
 
 # サイレント実行（CI 用）/ Silent mode (for CI)
-bash scripts/check-git-config-clean.sh --quiet
+bash axiarch-scripts/check-git-config-clean.sh --quiet
 
 # 全 worktree 含めて完全クリーンアップ / Full cleanup including all worktrees
-bash scripts/check-git-config-clean.sh --full-clean
+bash axiarch-scripts/check-git-config-clean.sh --full-clean
 ```
 
 ### 推奨ワークフロー / Recommended Workflow
