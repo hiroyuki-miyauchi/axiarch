@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.6.0  
+> **現在の安定版 / Current Stable**: v1.7.0  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -179,7 +179,20 @@
 
 ---
 
-### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### ✅ v1.7.0 — Check D: Task Boundary Detection（confirmation bias loophole 解消）（2026-05-08）
+
+採用先実運用で判明した「同一 session 内でも実際タスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」confirmation bias loophole を hot-fix。
+
+- **`scripts/axiarch-boot-reminder.sh` Check D 追加** — UserPromptSubmit hook の stdin から現プロンプトを読み、domain keyword を抽出、task.md 履歴と比較。新 keyword 検出時に `🚨 [VIOLATION-D]` flag + TTL 強制 bypass で full reminder 再発火
+- **AI 自己判断ループホールを機械的にバックアップ** — v1.6.0 LOADING_PROTOCOL §4「タスクタイプ不変」条項の判定を AI に任せていた問題を、hook 側で物理検出する設計に転換
+- **`scripts/check-axiarch-health.sh` Check 14 追加** — Check D の wiring 確認（13 段階 → 14 段階）
+- **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable / `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.7.0 改善」セクションで loophole 解消メカニズム明文化
+- **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0 動作完全再現、stdin 不在時は自動 skip
+
+---
+
+### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
 26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装したため、本 Tier 2 群を v1.7.0 に整理。
 
@@ -409,7 +422,20 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ---
 
-### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### ✅ v1.7.0 — Check D: Task Boundary Detection (Confirmation-Bias Loophole Closure) (2026-05-08)
+
+Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks differ, yet the AI judges 'session is continuing → no rule re-load needed' and slacks" — a confirmation-bias loophole in v1.6.0's LOADING_PROTOCOL §4 self-judgment clause.
+
+- **NEW `scripts/axiarch-boot-reminder.sh` Check D** — Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords; compares against task.md load history; on new-keyword detection, emits `🚨 [VIOLATION-D]` + forces TTL bypass (suppresses short-circuit, re-injects full reminder)
+- **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged" decision was AI-self-judged (confirmation-bias prone). v1.7.0 detects boundaries at the hook layer
+- **`scripts/check-axiarch-health.sh` Check 14 added** — Verifies Check D wiring (13-stage → 14-stage)
+- **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable; `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.7.0 improvement" section documents the loophole closure mechanism
+- **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation outside hook context)
+
+---
+
+### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
 
 Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); these Tier-2 items are now organised under v1.7.0.
 

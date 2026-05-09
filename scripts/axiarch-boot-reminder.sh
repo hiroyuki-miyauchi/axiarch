@@ -11,18 +11,29 @@
 # project-state checks and APPENDS violation flags to the reminder when found,
 # enabling the AI to self-correct on the next turn (warning, not hard-block).
 #
-#   Check A  task.md missing load history                      → flag appended
-#   Check B  core/010_project_lessons_log.md domain ≥3 unsorted → flag appended
-#   Check C  core/010 lesson dated >180 days (stale)           → flag appended (v1.6.0+)
+#   Check A  task.md missing load history                       → flag appended
+#   Check B  core/010_project_lessons_log.md domain ≥3 unsorted  → flag appended
+#   Check C  core/010 lesson dated >180 days (stale)            → flag appended (v1.6.0+)
+#   Check D  Task boundary detection — current prompt domain    → flag + TTL bypass (v1.7.0+)
+#            ≠ previously loaded domain (per task.md)
 #
 # v1.6.0+ TWO-STAGE OUTPUT (token-cost optimisation):
 #   - First fire (or after TTL expires)            → FULL reminder + timestamp
 #   - Subsequent fires within TTL + no violations  → SHORT-CIRCUIT [AXIARCH OK]
-#   - Any violation detected (A/B/C)               → forced FULL reminder (TTL ignored)
+#   - Any violation detected (A/B/C/D)             → forced FULL reminder (TTL ignored)
+#
+# v1.7.0+ TASK BOUNDARY DETECTION (Check D):
+#   - Reads current user prompt from stdin (Claude Code passes JSON payload)
+#   - Extracts domain keywords (security/architecture/ui_design/api/performance/etc.)
+#   - Compares against task.md "Loaded sections" history
+#   - On mismatch: VIOLATION-D + force full reminder (override TTL short-circuit)
+#   - Addresses the "AI judges 'same session, no re-load needed' and slacks" issue
+#     identified by adopter feedback. Removes AI's self-judgment loophole.
 #
 #   TTL: ${AXIARCH_REMINDER_TTL_SECONDS:-1800}  (default 30 min, 0 disables short-circuit)
 #   State file: ${TMPDIR:-/tmp}/axiarch-reminder-{project_hash}.timestamp
 #   Stale lesson threshold: ${AXIARCH_LESSON_STALE_DAYS:-180}  (0 disables Check C)
+#   Task boundary detection: ${AXIARCH_TASK_BOUNDARY_DETECT:-1}  (0 disables Check D)
 #
 #   Token impact (observed in long sessions): ~24k cumulative → ~3k (87% reduction)
 #
@@ -31,6 +42,17 @@
 # =============================================================================
 
 set -uo pipefail
+
+# -----------------------------------------------------------------------------
+# Read hook input from stdin (Claude Code passes JSON payload for UserPromptSubmit)
+# Format (per https://code.claude.com/docs/en/hooks):
+#   {"prompt": "...", "session_id": "...", "transcript_path": "...", "cwd": "..."}
+# Read non-blocking: if no stdin available, INPUT stays empty.
+# -----------------------------------------------------------------------------
+INPUT=""
+if [[ ! -t 0 ]]; then
+  INPUT=$(cat 2>/dev/null || true)
+fi
 
 # Resolve project directory: prefer Claude Code's CLAUDE_PROJECT_DIR if exported,
 # otherwise fall back to two levels up from this script (axiarch/scripts/<this>).
@@ -117,6 +139,76 @@ if [[ -n "${LESSONS_LOG}" ]]; then
           break  # first offender only
         fi
       done < <(grep -E '^### \[[0-9]{4}-[0-9]{2}-[0-9]{2}\]' "${LESSONS_LOG}" 2>/dev/null)
+    fi
+  fi
+fi
+
+# -----------------------------------------------------------------------------
+# Check D (v1.7.0+): Task boundary detection
+# Detects mismatch between current prompt's domain keywords and task.md's recorded
+# load history. Forces full reminder (TTL bypass) when a new task type is detected,
+# closing the "AI judges 'same session, no re-load needed' and slacks" loophole.
+#
+# Domain keywords (extensible via AXIARCH_TASK_DOMAIN_KEYWORDS env var):
+#   security / rls / auth / authn / authz / encryption / vulnerability
+#   architecture / migration / schema / refactor / restructure
+#   performance / optimization / cache / latency
+#   ui_design / ux / accessibility / a11y / layout
+#   api / endpoint / rest / graphql / contract
+#   i18n / localization / translation
+#   finops / cost / billing
+#   testing / qa / e2e / unit
+#   deploy / release / push / pr / commit / merge / tag
+# -----------------------------------------------------------------------------
+TASK_BOUNDARY_DETECTED=false
+if [[ "${AXIARCH_TASK_BOUNDARY_DETECT:-1}" == "1" ]] && [[ -n "${INPUT}" ]]; then
+  # Extract current prompt text from JSON payload (jq optional, grep+sed fallback)
+  CURRENT_PROMPT=""
+  if command -v jq &>/dev/null; then
+    CURRENT_PROMPT=$(printf '%s' "${INPUT}" | jq -r '.prompt // empty' 2>/dev/null || true)
+  fi
+  if [[ -z "${CURRENT_PROMPT}" ]]; then
+    # Fallback: extract first 500 chars of "prompt" field
+    CURRENT_PROMPT=$(printf '%s' "${INPUT}" \
+      | grep -oE '"prompt"[[:space:]]*:[[:space:]]*"([^"\\]|\\.){0,500}"' \
+      | head -1 | sed -E 's/^"prompt"[[:space:]]*:[[:space:]]*"(.*)"$/\1/')
+  fi
+
+  if [[ -n "${CURRENT_PROMPT}" ]]; then
+    # Default domain keyword set (lowercased, regex-friendly)
+    DOMAIN_KEYWORDS_DEFAULT="security|rls|auth|authn|authz|encryption|vulnerability|architecture|migration|schema|refactor|restructure|performance|optimization|cache|latency|ui_design|ui|ux|accessibility|a11y|layout|api|endpoint|rest|graphql|contract|i18n|localization|translation|finops|cost|billing|testing|qa|e2e|unit|deploy|release|push|pr|commit|merge|tag"
+    DOMAIN_KEYWORDS="${AXIARCH_TASK_DOMAIN_KEYWORDS:-${DOMAIN_KEYWORDS_DEFAULT}}"
+
+    # Extract domains from current prompt (case-insensitive, dedupe, sort)
+    CURRENT_DOMAINS=$(printf '%s' "${CURRENT_PROMPT}" \
+      | grep -oiE "(${DOMAIN_KEYWORDS})" \
+      | tr '[:upper:]' '[:lower:]' \
+      | sort -u | tr '\n' ',' | sed 's/,$//')
+
+    # Extract previously-loaded domains from task.md (Loaded sections / ロードしたセクション)
+    PREV_DOMAINS=""
+    if [[ -f "${PROJECT_DIR}/task.md" ]]; then
+      PREV_DOMAINS=$(grep -iE "ロードしたセクション|Loaded sections|ロード済み憲法ファイル|Loaded Constitution Files" "${PROJECT_DIR}/task.md" 2>/dev/null \
+        | grep -oiE "(${DOMAIN_KEYWORDS})" \
+        | tr '[:upper:]' '[:lower:]' \
+        | sort -u | tr '\n' ',' | sed 's/,$//')
+    fi
+
+    # Compare: domain shift detected if current ∋ keyword AND keyword ∉ previous
+    if [[ -n "${CURRENT_DOMAINS}" ]]; then
+      NEW_DOMAINS=""
+      IFS=',' read -ra CUR_ARR <<< "${CURRENT_DOMAINS}"
+      for kw in "${CUR_ARR[@]}"; do
+        [[ -z "${kw}" ]] && continue
+        if [[ -z "${PREV_DOMAINS}" ]] || ! printf '%s' ",${PREV_DOMAINS}," | grep -qF ",${kw},"; then
+          NEW_DOMAINS+="${kw} "
+        fi
+      done
+      NEW_DOMAINS=$(printf '%s' "${NEW_DOMAINS}" | sed 's/[[:space:]]*$//')
+      if [[ -n "${NEW_DOMAINS}" ]]; then
+        VIOLATIONS="${VIOLATIONS} 🚨 [VIOLATION-D] task boundary detected — current prompt domain (${CURRENT_DOMAINS}) introduces new keyword(s) (${NEW_DOMAINS}) not in task.md load history. Per LOADING_PROTOCOL §4 'task type changed' rule, the AI MUST load the corresponding domain rule files BEFORE proceeding. / 現プロンプトに task.md ロード履歴に無い新しい domain keyword (${NEW_DOMAINS}) が含まれる。LOADING_PROTOCOL §4「タスクタイプ変更あり」ルールに従い、対応 domain rule ファイルをロードしてから作業せよ。"
+        TASK_BOUNDARY_DETECTED=true
+      fi
     fi
   fi
 fi

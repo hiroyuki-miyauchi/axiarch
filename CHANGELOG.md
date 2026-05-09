@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] — 2026-05-08
+
+### 🎯 Check D — Task Boundary Detection（タスク境界の物理検出）/ Closes the "AI judges same-session, no re-load needed" Loophole
+
+採用先実運用フィードバックで判明した重要な構造的欠陥を解消する hot-fix release：v1.6.0 で導入した「Cross-Session Re-load Criteria」の **「同一 session 内タスク継続（タスクタイプ不変）→ 追加 load 不要」** 条項が、**「タスクタイプ不変」の判定を AI 自己判断に任せている**ため、confirmation bias で AI が「session 継続中だから rule 再 load 不要」と判断してサボる loophole を生んでいた。
+
+This release patches a critical structural flaw discovered via adopter feedback: v1.6.0's Cross-Session Re-load Criteria included a **"same session, task continues (no type change) → no additional load required"** clause whose key — "task type unchanged" — was left to the AI's self-judgment. Confirmation bias led the AI to skip re-loading by judging "session is continuing." v1.7.0 closes this loophole by **mechanically detecting task boundaries at the hook layer**.
+
+### Added
+
+- **`scripts/axiarch-boot-reminder.sh` Check D — Task Boundary Detection**（v1.7.0+）— UserPromptSubmit hook の stdin から現プロンプト JSON を読み、domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を抽出。`task.md` の「ロードしたセクション」セクションに記録された domain keyword と比較し、現プロンプトに**新しい keyword が出現**したら `🚨 [VIOLATION-D]` flag + **TTL 強制 bypass**（短縮版抑制 + full reminder 強制再発火）。AI の「タスクタイプ不変」自己判断を機械的にバックアップする / Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords; compares against task.md load history; on new-keyword detection, emits `🚨 [VIOLATION-D]` and forces TTL bypass (suppresses short-circuit, re-injects full reminder). Mechanically backs up the AI's self-judgment
+- **`scripts/check-axiarch-health.sh` Check 14 — Task Boundary Detection wiring 確認** — `axiarch-boot-reminder.sh` に Check D logic（VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT env var）が含まれることを確認 / Verifies the reminder script contains the Check D logic
+- **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT`（default `1`、`0` で disable）/ `AXIARCH_TASK_DOMAIN_KEYWORDS`（domain keyword 集合のオーバーライド）
+
+### Changed
+
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria の「同一 session 内タスク継続」行に Check D 補足追加。「v1.7.0 改善 — Check D Task Boundary Detection」セクションで confirmation bias loophole の解消メカニズムを明文化 / Step 4 updated: "task continues" row now references Check D as the mechanical backstop; new "v1.7.0 improvement" section documents the loophole closure
+- **`scripts/check-axiarch-health.sh` ヘッダー** — 13-stage → 14-stage に拡張、Summary 出力に "Task Boundary" を追加
+- **`init.sh`** — `AXIARCH_VERSION` 1.6.0 → 1.7.0
+- **`llms-full.txt`** — Version 1.6.0 → 1.7.0
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — Check D は `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable 可（v1.6.0 挙動再現）。stdin が空（hook 経由でない直接実行等）の場合 Check D は自動 skip
+- ✅ **依存追加なし** — pure bash + grep + sed、`jq` は optional fallback あり
+- ✅ **Domain keyword 集合は extensible** — `AXIARCH_TASK_DOMAIN_KEYWORDS` で採用先カスタマイズ可能
+- 📌 **アップグレード手順** — `git pull && bash init.sh` 再実行で `axiarch-boot-reminder.sh` が更新される
+
+### Diagnostic Outcome
+
+- **Mock test verification**:
+  - stdin 不在 → legacy `[AXIARCH OK]` short / `[AXIARCH BOOT]` full 動作維持 ✅
+  - `{"prompt":"please review the security RLS policy and migration in supabase"}` → **VIOLATION-D 検出**（domains: migration, rls, security） ✅
+  - `{"prompt":"hello how are you today"}` → VIOLATION-D 検出なし（casual prompt = no domain keyword） ✅
+- **axiarch repo against itself**: 全 14 段階 PASS（Check 14 含む）
+
+### References
+
+- 採用先実運用フィードバック「同一 session 内でも実際タスクは異なるのに AI が rule 再 load を省略する」（v1.6.0 release 後の adopter report）
+- v1.6.0 commit body の `LOADING_PROTOCOL.md §4 Cross-Session Re-load Criteria` の confirmation bias loophole
+- Claude Code Hooks UserPromptSubmit input format: <https://code.claude.com/docs/en/hooks>
+
+### Out of Scope（v1.8.0 以降に deferred — see ROADMAP）
+
+- v1.8.0 (Tier 3): axiarch-doctor / IFEval / Deliberative Alignment / Compatibility Matrix
+- v2.0.0 (Strategic): AgentSpec DSL / Multi-Agent Verification / Axiarch CLI
+
+---
+
 ## [1.6.0] — 2026-05-08
 
 ### 🪶 Reminder TTL + Time-Axis Crystallization + Pre-commit Installer + Session Re-load Criteria + APPEND Guide / リマインダー TTL + 時間軸結晶化 + pre-commit installer + session 跨ぎ基準 + APPEND ガイド
