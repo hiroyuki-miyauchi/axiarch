@@ -83,9 +83,9 @@ select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
   echo "  1) Google Antigravity — Verified ✅"
-  echo "  2) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
-  echo "  3) Cursor — Expected to work ⚠️"
-  echo "  4) Claude Code — Expected to work ⚠️"
+  echo "  2) Claude Code — Verified ✅ (v1.4.0+ native hook integration)"
+  echo "  3) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
+  echo "  4) Cursor — Expected to work ⚠️"
   echo "  5) GitHub Copilot — Expected to work ⚠️"
   echo "  6) Windsurf — Expected to work ⚠️"
   echo "  7) Other / Universal (AGENTS.md only)"
@@ -102,9 +102,9 @@ select_agent() {
 
   case "$agent_choice" in
     1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    2) AGENT_LABEL="OpenAI Codex" ;;
-    3) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
-    4) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    3) AGENT_LABEL="OpenAI Codex" ;;
+    4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
     7) AGENT_LABEL="Other / Universal" ;;

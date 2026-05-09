@@ -189,6 +189,7 @@
 - **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable / `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.7.0 改善」セクションで loophole 解消メカニズム明文化
 - **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0 動作完全再現、stdin 不在時は自動 skip
+- **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
 
 ---
 
@@ -432,6 +433,7 @@ Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks di
 - **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable; `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.7.0 improvement" section documents the loophole closure mechanism
 - **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation outside hook context)
+- **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated through axiarch's own development cycles (since v1.4.0+ native hook integration). **Placed immediately after Antigravity** across README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh agent-selection order (4 files, 8 sites updated)
 
 ---
 

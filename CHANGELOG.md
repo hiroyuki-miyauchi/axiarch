@@ -27,6 +27,7 @@ This release patches a critical structural flaw discovered via adopter feedback:
 - **`scripts/check-axiarch-health.sh` ヘッダー** — 13-stage → 14-stage に拡張、Summary 出力に "Task Boundary" を追加
 - **`init.sh`** — `AXIARCH_VERSION` 1.6.0 → 1.7.0
 - **`llms-full.txt`** — Version 1.6.0 → 1.7.0
+- **🎉 Claude Code: ⚠️ Untested → ✅ Verified に昇格** — v1.4.0+ の `UserPromptSubmit` hook 導入 + v1.5.5+ `PreToolUse` 物理遮断 + v1.6.0+ Reminder TTL + v1.7.0+ Check D Task Boundary Detection をネイティブ統合し、本リポジトリで axiarch 開発自体に実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序）/ Claude Code promoted from ⚠️ Untested to ✅ Verified, placed immediately after Antigravity. Claude Code received first-class hook integration in v1.4.0+ and was production-validated through axiarch's own development cycles. Updated across README.md (badge, intro, compatibility table, IMPORTANT block), llms-full.txt (summary, agent table), and init.sh (agent selection order)
 
 ### Compatibility
 

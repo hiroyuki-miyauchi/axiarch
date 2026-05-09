@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-39_files-green.svg)](#-universal-rules-39-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Agents](https://img.shields.io/badge/Verified-Antigravity_|_Claude_Code-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Copilot_|_Windsurf-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
@@ -23,7 +23,7 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** こそが Axiarch の中核です。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存せず、プロジェクト全体の最低品質（Quality Floor）を力強く底上げします。
 
-[Google Antigravity](https://antigravity.google/) 上で設計・実戦検証済み。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（OpenAI Codex、Cursor、Claude Code、GitHub Copilot 等）とも互換性がある見込み**です — ただし動作は未検証です。
+[Google Antigravity](https://antigravity.google/) および [Claude Code](https://www.anthropic.com/claude-code) 上で設計・実戦検証済み（特に Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.7.0+ Check D Task Boundary Detection をネイティブ統合）。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（OpenAI Codex、Cursor、GitHub Copilot、Windsurf 等）とも互換性がある見込み**です — ただし動作は未検証です。
 
 ### 設計思想
 
@@ -70,7 +70,7 @@
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to strictly govern and mitigate quality drift, hallucinations, and uncontrolled AI behavior in production development through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
-Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (OpenAI Codex, Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
+Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/) and [Claude Code](https://www.anthropic.com/claude-code) (Claude Code in particular gets first-class hook integration: `UserPromptSubmit` reminder hook from v1.4.0+, `PreToolUse` physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, and Check D task-boundary detection from v1.7.0+). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (OpenAI Codex, Cursor, GitHub Copilot, Windsurf, etc.) — though this has not been verified.
 
 ### Core Design Philosophy
 
@@ -116,11 +116,11 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | 状態 / Status | Agent | Native Config | AGENTS.md |
 |:--------------|:------|:-------------|:----------|
-| ✅ **Verified** — 実務で実証済み | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ✅ **Verified** — 実務で実証済み / Production-validated | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ✅ **Verified** — 実務で実証済み（v1.4.0+ ネイティブ hook 統合） / Production-validated (v1.4.0+ native hook integration) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (3 hooks) | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **OpenAI Codex** | `AGENTS.md` (native) | ✅ Native |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
-| ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Windsurf** | `.windsurfrules` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Other** | Various | ✅ Reads |
 
@@ -130,9 +130,9 @@ Designed and validated through hundreds of real production sessions on [Google A
 > **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). `AGENTS.md` is a **shared constitution readable by major agents**, designed to complement each tool's native config (e.g., `.cursor/rules/`, `.github/copilot-instructions.md`). It is NOT a replacement for tool-specific setup. OpenAI Codex natively uses `AGENTS.md` as its configuration format, so no additional pointer file is needed.
 
 > [!IMPORTANT]
-> **JA**: 本ガバナンス・アーキテクチャは **[Google Antigravity](https://antigravity.google/)** 上で設計・実戦検証されたものです。ルール本体は純粋なMarkdownであり、AIモデルの概念的な仕組みはツール間で共通であるため他のエージェントでも動作する見込みですが、**他ツールでの動作は検証していません。ご利用は自己責任でお願いします。Antigravity以外の環境での動作保証はいたしません。**
+> **JA**: 本ガバナンス・アーキテクチャは **[Google Antigravity](https://antigravity.google/)** および **[Claude Code](https://www.anthropic.com/claude-code)** 上で設計・実戦検証されたものです（Claude Code は v1.4.0+ の `UserPromptSubmit` hook、v1.5.5+ `PreToolUse` 物理遮断、v1.6.0+ Reminder TTL、v1.7.0+ Check D Task Boundary Detection をネイティブ統合）。ルール本体は純粋な Markdown であり、AI モデルの概念的な仕組みはツール間で共通であるため他のエージェントでも動作する見込みですが、**Antigravity / Claude Code 以外での動作は検証していません。ご利用は自己責任でお願いします。**
 >
-> **EN**: This governance architecture was designed and validated through hundreds of real production sessions on **Google Antigravity**. Since all rules are pure Markdown and the underlying AI model concepts are fundamentally the same across tools, they are expected to work on other agents — but **this has not been verified. Use at your own risk. No guarantees are provided for non-Antigravity environments.**
+> **EN**: This governance architecture was designed and validated through hundreds of real production sessions on **Google Antigravity** and **Claude Code** (Claude Code receives first-class hook integration: `UserPromptSubmit` reminder hook from v1.4.0+, `PreToolUse` physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, and Check D task-boundary detection from v1.7.0+). Since all rules are pure Markdown and the underlying AI model concepts are fundamentally the same across tools, they are expected to work on other agents — but **this has not been verified outside Antigravity and Claude Code. Use at your own risk in other environments.**
 
 > [!TIP]
 > **JA**: フォルダ名 `axiarch-rules/` は出自を反映していますが、ルールファイル自体は純粋なMarkdownであり、ツール固有の依存はありません。
