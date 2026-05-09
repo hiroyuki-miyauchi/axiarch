@@ -50,10 +50,11 @@ This release patches a critical structural flaw discovered via adopter feedback:
 - v1.6.0 commit body の `LOADING_PROTOCOL.md §4 Cross-Session Re-load Criteria` の confirmation bias loophole
 - Claude Code Hooks UserPromptSubmit input format: <https://code.claude.com/docs/en/hooks>
 
-### Out of Scope（v1.8.0 以降に deferred — see ROADMAP）
+### Out of Scope（v1.7.x / v1.9.0 / v1.8.0 / v2.0.0 に deferred — see ROADMAP）
 
-- v1.8.0 (Tier 3): axiarch-doctor / IFEval / Deliberative Alignment / Compatibility Matrix
-- v2.0.0 (Strategic): AgentSpec DSL / Multi-Agent Verification / Axiarch CLI
+- **v1.7.x → v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI integration / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
+- **v1.8.0 (Tier 3)**: axiarch-doctor CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
 
 ---
 

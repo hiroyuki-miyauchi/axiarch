@@ -52,9 +52,9 @@ cp -r axiarch-rules /path/to/your/project/
 | Agent | Status |
 |:------|:-------|
 | Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
+| Claude Code | ✅ Verified — v1.4.0+ native hook integration (UserPromptSubmit / PreToolUse / SessionStart + v1.6.0 reminder TTL + v1.7.0 Check D task-boundary detection); production-validated through axiarch's own development cycles |
 | OpenAI Codex | ⚠️ Expected to work (AGENTS.md = native config) |
 | Cursor | ⚠️ Expected to work (reads AGENTS.md) |
-| Claude Code | ⚠️ Expected to work (reads CLAUDE.md pointer file) |
 | GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |
 | Windsurf / Aider / Zed | ⚠️ Expected to work |
 

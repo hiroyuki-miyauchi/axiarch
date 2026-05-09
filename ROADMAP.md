@@ -195,17 +195,17 @@
 
 ### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
-26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装したため、本 Tier 2 群を v1.7.0 に整理。
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.7.0 で confirmation-bias loophole の hot-fix を入れたため、本 Tier 2 群を v1.7.x patch / v1.9.0 にずらして整理。
 
-- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では Write のみ block、Edit による潜在的に大規模な変更は post-hoc で検出）
-- **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加し、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上（出典: Cursor Rules / `.claude/rules/` path-scoped）
+- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では `Write` のみ block、`Edit` による潜在的に大規模な変更は post-hoc で検出）
+- **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上
 - **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
 - **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
 - **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
 - **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
-- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 で確立した version-free 方針の完遂）
+- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
-- **Post-release README integration 自動検証** — v1.4.0+→v1.6.0 で繰り返し発生した「新リリース機能の README 反映漏れ」（24/27/28 ラウンド + v1.6.0 で `12 段階` 残留検出）を防ぐため、`scripts/check-axiarch-health.sh` に Check 14（README ↔ scripts/* の version-related term grep）を追加検討
+- **Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド + v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc 反映漏れ」を機械検出。`scripts/check-axiarch-health.sh` に README / scripts/README / INDEX の stale version-term grep を追加
 
 ---
 
