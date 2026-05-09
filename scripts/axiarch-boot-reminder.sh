@@ -15,7 +15,7 @@
 #   Check B  core/010_project_lessons_log.md domain ≥3 unsorted  → flag appended
 #   Check C  core/010 lesson dated >180 days (stale)            → flag appended (v1.6.0+)
 #   Check D  Task boundary detection — current prompt domain    → flag + TTL bypass (v1.7.0+)
-#            ≠ previously loaded domain (per task.md)
+#            ≠ domains in process docs (task.md / implementation_plan.md / walkthrough.md)
 #
 # v1.6.0+ TWO-STAGE OUTPUT (token-cost optimisation):
 #   - First fire (or after TTL expires)            → FULL reminder + timestamp
@@ -25,10 +25,14 @@
 # v1.7.0+ TASK BOUNDARY DETECTION (Check D):
 #   - Reads current user prompt from stdin (Claude Code passes JSON payload)
 #   - Extracts domain keywords (security/architecture/ui_design/api/performance/etc.)
-#   - Compares against task.md "Loaded sections" history
+#   - Compares against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md
+#     / walkthrough.md) — full-text grep, not just task.md's load-history table
 #   - On mismatch: VIOLATION-D + force full reminder (override TTL short-circuit)
 #   - Addresses the "AI judges 'same session, no re-load needed' and slacks" issue
 #     identified by adopter feedback. Removes AI's self-judgment loophole.
+#   - Reading all 3 process docs avoids false positives where the plan / walkthrough
+#     already contains the prompt's domain context (per §8.4 these files are kept
+#     up-to-date by the AI; trusting all 3 mirrors the AI's actual working state).
 #
 #   TTL: ${AXIARCH_REMINDER_TTL_SECONDS:-1800}  (default 30 min, 0 disables short-circuit)
 #   State file: ${TMPDIR:-/tmp}/axiarch-reminder-{project_hash}.timestamp
@@ -179,20 +183,36 @@ if [[ "${AXIARCH_TASK_BOUNDARY_DETECT:-1}" == "1" ]] && [[ -n "${INPUT}" ]]; the
     DOMAIN_KEYWORDS_DEFAULT="security|rls|auth|authn|authz|encryption|vulnerability|architecture|migration|schema|refactor|restructure|performance|optimization|cache|latency|ui_design|ui|ux|accessibility|a11y|layout|api|endpoint|rest|graphql|contract|i18n|localization|translation|finops|cost|billing|testing|qa|e2e|unit|deploy|release|push|pr|commit|merge|tag"
     DOMAIN_KEYWORDS="${AXIARCH_TASK_DOMAIN_KEYWORDS:-${DOMAIN_KEYWORDS_DEFAULT}}"
 
-    # Extract domains from current prompt (case-insensitive, dedupe, sort)
+    # Extract domains from current prompt (whole-word match, case-insensitive, dedupe, sort).
+    # -w (word match) prevents "ui_design" from greedily consuming "ui" — both
+    # are matched independently when present as whole words.
     CURRENT_DOMAINS=$(printf '%s' "${CURRENT_PROMPT}" \
-      | grep -oiE "(${DOMAIN_KEYWORDS})" \
+      | grep -oiwE "(${DOMAIN_KEYWORDS})" \
       | tr '[:upper:]' '[:lower:]' \
       | sort -u | tr '\n' ',' | sed 's/,$//')
 
-    # Extract previously-loaded domains from task.md (Loaded sections / ロードしたセクション)
+    # Extract previously-known domains from the AGENTS §8.4 mandatory trio:
+    #   task.md, implementation_plan.md, walkthrough.md
+    # Rationale: domain context often lives in implementation_plan.md (the plan
+    # written during task analysis) and walkthrough.md (the diff narrative),
+    # not just task.md's load-history table. Reading only task.md misses
+    # plan-side domains and produces false-positive VIOLATION-D for tasks
+    # whose plan is already consistent with the current prompt.
+    # Scan strategy: full-text grep over all 3 files (each is small per-task
+    # ephemeral doc), dedupe + sort.
     PREV_DOMAINS=""
-    if [[ -f "${PROJECT_DIR}/task.md" ]]; then
-      PREV_DOMAINS=$(grep -iE "ロードしたセクション|Loaded sections|ロード済み憲法ファイル|Loaded Constitution Files" "${PROJECT_DIR}/task.md" 2>/dev/null \
-        | grep -oiE "(${DOMAIN_KEYWORDS})" \
-        | tr '[:upper:]' '[:lower:]' \
-        | sort -u | tr '\n' ',' | sed 's/,$//')
-    fi
+    PREV_SOURCES=""
+    for fname in task.md implementation_plan.md walkthrough.md; do
+      fpath="${PROJECT_DIR}/${fname}"
+      [[ -f "${fpath}" ]] || continue
+      file_domains=$(grep -oiwE "(${DOMAIN_KEYWORDS})" "${fpath}" 2>/dev/null \
+        | tr '[:upper:]' '[:lower:]' | sort -u)
+      if [[ -n "${file_domains}" ]]; then
+        PREV_DOMAINS+="${file_domains}"$'\n'
+        PREV_SOURCES+="${fname} "
+      fi
+    done
+    PREV_DOMAINS=$(printf '%s' "${PREV_DOMAINS}" | sort -u | tr '\n' ',' | sed 's/,$//')
 
     # Compare: domain shift detected if current ∋ keyword AND keyword ∉ previous
     if [[ -n "${CURRENT_DOMAINS}" ]]; then
@@ -206,7 +226,9 @@ if [[ "${AXIARCH_TASK_BOUNDARY_DETECT:-1}" == "1" ]] && [[ -n "${INPUT}" ]]; the
       done
       NEW_DOMAINS=$(printf '%s' "${NEW_DOMAINS}" | sed 's/[[:space:]]*$//')
       if [[ -n "${NEW_DOMAINS}" ]]; then
-        VIOLATIONS="${VIOLATIONS} 🚨 [VIOLATION-D] task boundary detected — current prompt domain (${CURRENT_DOMAINS}) introduces new keyword(s) (${NEW_DOMAINS}) not in task.md load history. Per LOADING_PROTOCOL §4 'task type changed' rule, the AI MUST load the corresponding domain rule files BEFORE proceeding. / 現プロンプトに task.md ロード履歴に無い新しい domain keyword (${NEW_DOMAINS}) が含まれる。LOADING_PROTOCOL §4「タスクタイプ変更あり」ルールに従い、対応 domain rule ファイルをロードしてから作業せよ。"
+        SCANNED_SOURCES=$(printf '%s' "${PREV_SOURCES}" | sed 's/[[:space:]]*$//')
+        [[ -z "${SCANNED_SOURCES}" ]] && SCANNED_SOURCES="(none)"
+        VIOLATIONS="${VIOLATIONS} 🚨 [VIOLATION-D] task boundary detected — current prompt domain (${CURRENT_DOMAINS}) introduces new keyword(s) (${NEW_DOMAINS}) not found in scanned process docs (${SCANNED_SOURCES}). Per LOADING_PROTOCOL §4 'task type changed' rule, the AI MUST load the corresponding domain rule files AND update task.md / implementation_plan.md BEFORE proceeding. / 現プロンプトに process docs (${SCANNED_SOURCES}) に無い新しい domain keyword (${NEW_DOMAINS}) が含まれる。LOADING_PROTOCOL §4「タスクタイプ変更あり」ルールに従い、対応 domain rule ファイルをロードし task.md / implementation_plan.md を更新してから作業せよ。"
         TASK_BOUNDARY_DETECTED=true
       fi
     fi

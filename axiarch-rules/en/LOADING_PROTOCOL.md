@@ -160,11 +160,13 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 > Adopter feedback revealed a problem: "Even within the same session, actual tasks differ, yet the AI judges 'session is continuing, no re-load needed' and slacks" (confirmation bias). v1.7.0 adds Check D to `axiarch-boot-reminder.sh`:
 >
 > 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
-> 2. Extracts domain keywords from the prompt (security / architecture / ui_design / api / performance / push / commit / migration / etc.)
-> 3. Compares against task.md's load history (the "Loaded sections" section)
+> 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.
+> 3. **Full-text greps the AGENTS §8.4 mandatory trio** — `task.md` / `implementation_plan.md` / `walkthrough.md` — for previously-known domain keywords. Captures domain context from the plan and walkthrough, not just task.md's load-history table
 > 4. **On mismatch**: emits `🚨 [VIOLATION-D]` flag + **forces TTL bypass** (suppresses short-circuit, re-emits the full reminder)
 >
 > The result: the system no longer depends on the AI's "task type unchanged" self-judgment. Task boundaries are **physically detected at the hook layer**, requiring rule re-load. Disable via `AXIARCH_TASK_BOUNDARY_DETECT=0`; override the keyword set via `AXIARCH_TASK_DOMAIN_KEYWORDS`.
+>
+> **Why scan all 3 files**: domain context is recorded not only in `task.md`'s load-history table but also in `implementation_plan.md` (the strategy section) and `walkthrough.md` (the diff narrative). Reading only `task.md` causes frequent false positives because the plan often already covers the prompt's domain. Treating all 3 files as the Single Source of Truth mirrors the AI's actual working state.
 
 ---
 

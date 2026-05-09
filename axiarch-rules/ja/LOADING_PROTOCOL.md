@@ -160,11 +160,13 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 > 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」問題が判明（confirmation bias）。v1.7.0 で `axiarch-boot-reminder.sh` に Check D を追加：
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
-> 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を抽出
-> 3. `task.md` のロード履歴（「ロードしたセクション」セクション）にある domain keyword と比較
+> 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
+> 3. **AGENTS §8.4 必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
 > 4. **差異検出時**: `🚨 [VIOLATION-D]` flag + **TTL 強制 bypass**（短縮版を抑制し full reminder を強制再発火）
 >
 > これにより AI の「タスクタイプ不変」自己判断に依存せず、**hook 側で物理的に task boundary を検出**して rule 再 load を要求する構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。
+>
+> **3 ファイル全検査の意義**: domain context は `task.md` のロード履歴だけでなく、`implementation_plan.md` の方針記述や `walkthrough.md` の差分narratiave にも書かれる。task.md だけ参照すると、プラン側に明確に書かれた domain を見落として false positive が頻発する。3 ファイル全部を Single Source of Truth とすることで、AI が現実に管理しているタスク context をミラーリングする。
 
 ---
 
