@@ -193,7 +193,7 @@
 
 ---
 
-### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
 26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.8.0 で confirmation-bias loophole の hot-fix + BREAKING `scripts/` → `axiarch-scripts/` rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
@@ -437,7 +437,7 @@ Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks di
 
 ---
 
-### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
 
 Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); v1.8.0 delivered the confirmation-bias loophole hot-fix bundled with the BREAKING `scripts/` → `axiarch-scripts/` rename; these Tier-2 items are now organised under v1.9.0.
 
