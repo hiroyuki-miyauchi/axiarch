@@ -145,7 +145,7 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 |:--|:--|:--|
 | **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AGENTS §8 (4) obligation |
 | **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | INDEX.md → task type → folder mapping is stable |
-| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.7.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and forces a full reminder + 🚨 [VIOLATION-D] when a new keyword is detected | YAGNI + context-budget protection + Check D mitigates confirmation bias |
+| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.8.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and forces a full reminder + 🚨 [VIOLATION-D] when a new keyword is detected | YAGNI + context-budget protection + Check D mitigates confirmation bias |
 | **Long session resumed after pause (e.g. compaction trigger)** | Verify `task.md` load history; re-load only missing files. However, when the `[AXIARCH BOOT]` reminder TTL expires (v1.6.0+ default 30 min), perform full re-verification | `axiarch-boot-reminder.sh` TTL state; mitigates serial-position effects in LLM memory |
 
 > **Operational Principles**:
@@ -156,8 +156,8 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 > **Problem this addresses (v1.6.0 background)**:
 > The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this reduces token cost ~87% while maintaining adherence rate.
 
-> **v1.7.0 improvement — Check D Task Boundary Detection**:
-> Adopter feedback revealed a problem: "Even within the same session, actual tasks differ, yet the AI judges 'session is continuing, no re-load needed' and slacks" (confirmation bias). v1.7.0 adds Check D to `axiarch-boot-reminder.sh`:
+> **v1.8.0 improvement — Check D Task Boundary Detection**:
+> Adopter feedback revealed a problem: "Even within the same session, actual tasks differ, yet the AI judges 'session is continuing, no re-load needed' and slacks" (confirmation bias). v1.8.0 adds Check D to `axiarch-boot-reminder.sh`:
 >
 > 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
 > 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.

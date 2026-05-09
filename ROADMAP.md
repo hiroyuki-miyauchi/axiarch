@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v2.0.0 🚨 BREAKING (`scripts/` → `axiarch-scripts/` rename)  
+> **現在の安定版 / Current Stable**: v1.8.0 🚨 BREAKING (`scripts/` → `axiarch-scripts/` rename)  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -179,7 +179,7 @@
 
 ---
 
-### ✅ v1.7.0 — Check D: Task Boundary Detection（confirmation bias loophole 解消）（2026-05-08）
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified 昇格（2026-05-10）
 
 採用先実運用で判明した「同一 session 内でも実際タスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」confirmation bias loophole を hot-fix。
 
@@ -187,7 +187,7 @@
 - **AI 自己判断ループホールを機械的にバックアップ** — v1.6.0 LOADING_PROTOCOL §4「タスクタイプ不変」条項の判定を AI に任せていた問題を、hook 側で物理検出する設計に転換
 - **`axiarch-scripts/check-axiarch-health.sh` Check 14 追加** — Check D の wiring 確認（13 段階 → 14 段階）
 - **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable / `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
-- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.7.0 改善」セクションで loophole 解消メカニズム明文化
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.8.0 改善」セクションで loophole 解消メカニズム明文化
 - **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0 動作完全再現、stdin 不在時は自動 skip
 - **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
 
@@ -195,7 +195,7 @@
 
 ### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
-26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.7.0 で confirmation-bias loophole の hot-fix を入れたため、本 Tier 2 群を v1.7.x patch / v1.9.0 にずらして整理。
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.8.0 で confirmation-bias loophole の hot-fix + BREAKING `scripts/` → `axiarch-scripts/` rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
 - **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では `Write` のみ block、`Edit` による潜在的に大規模な変更は post-hoc で検出）
 - **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上
@@ -209,9 +209,9 @@
 
 ---
 
-### 🔮 v1.8.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.10.0 — Static Lint & Process Supervision（Tier 3、検討中）
 
-学術裏付けが強く工数も大きい改善案を v1.8.0 として独立計画。
+学術裏付けが強く工数も大きい改善案を v1.10.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` / `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反 / `compliance_matrix.md` 同期 を PR 時に強制チェック（出典: <https://github.com/nedcodes-ok/cursor-lint-action>）
 - **IFEval 風自動回帰スイート** — `tests/ifeval/` に「task.md 記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
@@ -423,15 +423,15 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ---
 
-### ✅ v1.7.0 — Check D: Task Boundary Detection (Confirmation-Bias Loophole Closure) (2026-05-08)
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified Promotion (2026-05-10)
 
 Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks differ, yet the AI judges 'session is continuing → no rule re-load needed' and slacks" — a confirmation-bias loophole in v1.6.0's LOADING_PROTOCOL §4 self-judgment clause.
 
 - **NEW `axiarch-scripts/axiarch-boot-reminder.sh` Check D** — Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords via **whole-word match** (`grep -oiwE`); full-text greps the **AGENTS §8.4 mandatory trio** (task.md / implementation_plan.md / walkthrough.md), capturing domain context from both the plan and the walkthrough rather than task.md alone. On new-keyword detection, emits `🚨 [VIOLATION-D]` + forces TTL bypass (suppresses short-circuit, re-injects full reminder)
-- **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged" decision was AI-self-judged (confirmation-bias prone). v1.7.0 detects boundaries at the hook layer
+- **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged" decision was AI-self-judged (confirmation-bias prone). v1.8.0 detects boundaries at the hook layer
 - **`axiarch-scripts/check-axiarch-health.sh` Check 14 added** — Verifies Check D wiring (13-stage → 14-stage)
 - **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable; `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
-- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.7.0 improvement" section documents the loophole closure mechanism
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.8.0 improvement" section documents the loophole closure mechanism
 - **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation outside hook context)
 - **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated through axiarch's own development cycles (since v1.4.0+ native hook integration). **Placed immediately after Antigravity** across README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh agent-selection order (4 files, 8 sites updated)
 
@@ -439,7 +439,7 @@ Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks di
 
 ### 🔮 v1.7.x → v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
 
-Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); these Tier-2 items are now organised under v1.7.0.
+Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); v1.8.0 delivered the confirmation-bias loophole hot-fix bundled with the BREAKING `scripts/` → `axiarch-scripts/` rename; these Tier-2 items are now organised under v1.9.0.
 
 - **`PostToolUse` hook + git diff verification** — Measure diff line count after Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only blocks `Write`; large Edit changes detected post-hoc)
 - **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per file type. Reduces tokens, improves relevance (sources: Cursor Rules / `.claude/rules/` path-scoped)
@@ -453,9 +453,9 @@ Tier-2 improvement candidates extracted from the 26-round market study (see v1.5
 
 ---
 
-### 🔮 v1.8.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.10.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
-Improvements with strong academic backing but larger implementation effort, planned independently for v1.8.0.
+Improvements with strong academic backing but larger implementation effort, planned independently for v1.10.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation / Universal-vs-Blueprint responsibility checks / `compliance_matrix.md` sync as PR gates (source: <https://github.com/nedcodes-ok/cursor-lint-action>)
 - **IFEval-style auto-regression suite** — Convert "task.md recording obligation" / "core/010 crystallization threshold" to verifiable instructions in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 / arXiv:2512.14754)

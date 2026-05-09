@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0] — 2026-05-10
+## [1.8.0] — 2026-05-10
 
 ### 🚨 BREAKING: `scripts/` → `axiarch-scripts/` rename + v1.7.0 features bundled
 
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **配布ディレクトリ**: `scripts/` → `axiarch-scripts/` rename（機能変更ゼロ）
 - **Hook command paths**: `.claude/settings.json` の `command` を新 path に更新
 - **採用先 migration 手順**:
-  1. `git pull` で v2.0.0 取得
+  1. `git pull` で v1.8.0 取得
   2. `bash init.sh` 再実行 → `axiarch-scripts/` 配布
   3. `.claude/settings.json` を再コピー
   4. 採用先で旧 `scripts/` 配下の axiarch ファイル（`axiarch-*.sh` / `check-axiarch-health.sh` / `check-git-config-clean.sh` / `README.md`）を手動削除推奨
@@ -39,12 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed (v1.7.0 features bundled)
 
-- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria に Check D 補足、「v1.7.0 改善」セクションで confirmation bias loophole 解消メカニズム明文化
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria に Check D 補足、「v1.8.0 改善」セクションで confirmation bias loophole 解消メカニズム明文化
 - **`axiarch-rules/{ja,en}/INDEX.md` directory tree** — `scripts/` → `axiarch-scripts/`
 - **README.md / axiarch-scripts/README.md** — 14-stage / Check D / 新 env vars / Verified 表 / 必須ファイル表 / Enforcement section を全更新
-- **ROADMAP.md** — v1.7.0 forecast を v2.0.0 として delivered 化、Tier 2 forecast を v1.9.0 に整理
-- **init.sh** — `AXIARCH_VERSION` 1.7.0 → 2.0.0、配布ロジック `scripts/` → `axiarch-scripts/`
-- **llms-full.txt / llms.txt** — Version 2.0.0、Verified 表で Claude Code を Antigravity の次に昇格
+- **ROADMAP.md** — v1.7.0 forecast を v1.8.0 として delivered 化、Tier 2 forecast を v1.9.0、Tier 3 を v1.10.0 に整理
+- **init.sh** — `AXIARCH_VERSION` 1.7.0 → 1.8.0、配布ロジック `scripts/` → `axiarch-scripts/`
+- **llms-full.txt / llms.txt** — Version 1.8.0、Verified 表で Claude Code を Antigravity の次に昇格
 
 ### Compatibility
 
@@ -62,21 +62,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### References
 
 - 採用先実運用フィードバック「同 session 内 task 切替で AI が rule 再 load を省略する」（v1.7.0 由来 Check D）
-- 採用先設計レビュー「scripts/ → axiarch-scripts/ で名前空間衝突回避」（v2.0.0 BREAKING の動機）
+- 採用先設計レビュー「scripts/ → axiarch-scripts/ で名前空間衝突回避」（v1.8.0 BREAKING の動機）
 - AGENTS.md §8.4 (Documentation Requirements) と Check D の整合
 - Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
 
-### Out of Scope（v2.x.x / v3.0.0 に deferred — see ROADMAP）
+### Out of Scope（v1.9.0 / v1.10.0 / v2.0.0 に deferred — see ROADMAP）
 
 - **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache / shellcheck CI / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
-- **v1.8.0 (Tier 3)**: axiarch-doctor CI lint / IFEval-style auto-regression / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
-- **v3.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation / `scripts/` ↔ `axiarch-scripts/` symlink 互換実装の再検討
+- **v1.10.0 (Tier 3)**: axiarch-doctor CI lint / IFEval-style auto-regression / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation / `scripts/` ↔ `axiarch-scripts/` symlink 互換実装の再検討
 
 ---
 
-## [1.7.0] — 2026-05-08 (内部開発のみ、独立 release はせず v2.0.0 に統合)
+## [1.7.0] — 2026-05-08 (内部開発のみ、独立 release はせず v1.8.0 に統合)
 
-> **NOTE**: v1.7.0 was prepared but NOT released as a separate version; all v1.7.0 features were bundled into v2.0.0 along with the BREAKING `scripts/` → `axiarch-scripts/` rename. The original v1.7.0 development history is preserved in the git log (commits 770150b / f60ced8 / c6aee62 / eddeb01 / 69c44b8 / 8d94938).
+> **NOTE**: v1.7.0 was prepared but NOT released as a separate version; all v1.7.0 features were bundled into v1.8.0 along with the BREAKING `scripts/` → `axiarch-scripts/` rename. The original v1.7.0 development history is preserved in the git log (commits 770150b / f60ced8 / c6aee62 / eddeb01 / 69c44b8 / 8d94938).
 
 ### 🎯 Check D — Task Boundary Detection（タスク境界の物理検出）/ Closes the "AI judges same-session, no re-load needed" Loophole
 
@@ -92,7 +92,7 @@ This release patches a critical structural flaw discovered via adopter feedback:
 
 ### Changed
 
-- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria の「同一 session 内タスク継続」行に Check D 補足追加。「v1.7.0 改善 — Check D Task Boundary Detection」セクションで confirmation bias loophole の解消メカニズムを明文化 / Step 4 updated: "task continues" row now references Check D as the mechanical backstop; new "v1.7.0 improvement" section documents the loophole closure
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` Step 4** — Cross-Session Re-load Criteria の「同一 session 内タスク継続」行に Check D 補足追加。「v1.8.0 改善 — Check D Task Boundary Detection」セクションで confirmation bias loophole の解消メカニズムを明文化（注: v1.7.0 で追加し v1.8.0 で release labelling に整合化）/ Step 4 updated: "task continues" row now references Check D as the mechanical backstop; new "v1.8.0 improvement" section documents the loophole closure (originally added in v1.7.0, label aligned in v1.8.0)
 - **`axiarch-scripts/check-axiarch-health.sh` ヘッダー** — 13-stage → 14-stage に拡張、Summary 出力に "Task Boundary" を追加
 - **`init.sh`** — `AXIARCH_VERSION` 1.6.0 → 1.7.0
 - **`llms-full.txt`** — Version 1.6.0 → 1.7.0
@@ -119,10 +119,10 @@ This release patches a critical structural flaw discovered via adopter feedback:
 - v1.6.0 commit body の `LOADING_PROTOCOL.md §4 Cross-Session Re-load Criteria` の confirmation bias loophole
 - Claude Code Hooks UserPromptSubmit input format: <https://code.claude.com/docs/en/hooks>
 
-### Out of Scope（v1.7.x / v1.9.0 / v1.8.0 / v2.0.0 に deferred — see ROADMAP）
+### Out of Scope（v1.9.0 / v1.10.0 / v2.0.0 に deferred — see ROADMAP）
 
-- **v1.7.x → v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI integration / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
-- **v1.8.0 (Tier 3)**: axiarch-doctor CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI integration / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
+- **v1.10.0 (Tier 3)**: axiarch-doctor CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
 - **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
 
 ---

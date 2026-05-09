@@ -145,7 +145,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 |:--|:--|:--|
 | **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AGENTS §8 (4) 義務 |
 | **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | INDEX.md → タスクタイプ → 対応フォルダ の関係は不変 |
-| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.7.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を強制発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias 回避 |
+| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を強制発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias 回避 |
 | **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴を確認、欠落 file のみ再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
 
 > **判定の運用原則**:
@@ -156,8 +156,8 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 > **本基準が解決する問題（v1.6.0 改善背景）**:
 > 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により解消。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、token cost を約 87% 削減しつつ遵守率を維持する。
 
-> **v1.7.0 改善 — Check D Task Boundary Detection**:
-> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」問題が判明（confirmation bias）。v1.7.0 で `axiarch-boot-reminder.sh` に Check D を追加：
+> **v1.8.0 改善 — Check D Task Boundary Detection**:
+> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」問題が判明（confirmation bias）。v1.8.0 で `axiarch-boot-reminder.sh` に Check D を追加：
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
 > 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
