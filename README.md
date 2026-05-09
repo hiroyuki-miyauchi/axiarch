@@ -147,7 +147,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | File | JA | EN |
 |:-----|:---|:---|
-| `AGENTS.md` | AI行動憲法（Google Antigravityで設計、他エージェントでも動作見込み） | AI Behavior Constitution (designed on Google Antigravity, compatible with other agents) |
+| `AGENTS.md` | AI行動憲法（Google Antigravity と Claude Code で実戦検証済み、他エージェントでも動作見込み） | AI Behavior Constitution (production-validated on Google Antigravity and Claude Code; expected to work on other agents) |
 
 ### 📚 Universal Rules (39 files × JA/EN)
 
@@ -266,12 +266,12 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 ### エージェント別セットアップ / Agent-Specific Setup
 
-| 手順 / Step | Antigravity | Codex | Cursor | Claude Code | Copilot | Windsurf |
-|:-----------|:------------|:------|:-------|:------------|:--------|:---------|
+| 手順 / Step | Antigravity ✅ | Claude Code ✅ | Codex ⚠️ | Cursor ⚠️ | Copilot ⚠️ | Windsurf ⚠️ |
+|:-----------|:------------|:--------------|:---------|:----------|:-----------|:------------|
 | 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
-| 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
+| 3. `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart/UserPromptSubmit/PreToolUse) 配置 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
+| 4. 追加設定 | — | — (3 hooks 自動配線済み) | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
 ### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.7.0+ — 3 hooks + TTL + Task Boundary)
 
@@ -382,9 +382,9 @@ cp .windsurfrules /path/to/your/project/
 ```
 
 > [!CAUTION]
-> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Codex、Cursor、Claude Code、GitHub Copilotでは不要です。特にCodexは `AGENTS.md` 自体がネイティブ設定なので、Step 1の2点コピーだけで動作します。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
+> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Claude Code、Codex、Cursor、GitHub Copilotでは不要です（Claude Code は別途 `CLAUDE.md` + `.claude/settings.json` で 3 hooks 自動配線、Codex は `AGENTS.md` 自体がネイティブ設定）。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
 >
-> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Codex, Cursor, Claude Code, or GitHub Copilot. Codex in particular uses `AGENTS.md` as its native config, so the 2-item copy in Step 1 is all you need. Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
+> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Claude Code, Codex, Cursor, or GitHub Copilot (Claude Code uses `CLAUDE.md` + `.claude/settings.json` with 3 auto-wired hooks; Codex uses `AGENTS.md` as its native config). Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
 
 ### 3. 初期化 / Initialize
 
