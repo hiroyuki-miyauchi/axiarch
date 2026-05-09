@@ -14,7 +14,7 @@
 #   Check A  task.md missing load history                       → flag appended
 #   Check B  core/010_project_lessons_log.md domain ≥3 unsorted  → flag appended
 #   Check C  core/010 lesson dated >180 days (stale)            → flag appended (v1.6.0+)
-#   Check D  Task boundary detection — current prompt domain    → flag + TTL bypass (v1.7.0+)
+#   Check D  Task boundary detection — current prompt domain    → flag + TTL bypass (v1.8.0+)
 #            ≠ domains in process docs (task.md / implementation_plan.md / walkthrough.md)
 #
 # v1.6.0+ TWO-STAGE OUTPUT (token-cost optimisation):
@@ -22,7 +22,7 @@
 #   - Subsequent fires within TTL + no violations  → SHORT-CIRCUIT [AXIARCH OK]
 #   - Any violation detected (A/B/C/D)             → forced FULL reminder (TTL ignored)
 #
-# v1.7.0+ TASK BOUNDARY DETECTION (Check D):
+# v1.8.0+ TASK BOUNDARY DETECTION (Check D):
 #   - Reads current user prompt from stdin (Claude Code passes JSON payload)
 #   - Extracts domain keywords (security/architecture/ui_design/api/performance/etc.)
 #   - Compares against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md
@@ -148,7 +148,7 @@ if [[ -n "${LESSONS_LOG}" ]]; then
 fi
 
 # -----------------------------------------------------------------------------
-# Check D (v1.7.0+): Task boundary detection
+# Check D (v1.8.0+): Task boundary detection
 # Detects mismatch between current prompt's domain keywords and task.md's recorded
 # load history. Forces full reminder (TTL bypass) when a new task type is detected,
 # closing the "AI judges 'same session, no re-load needed' and slacks" loophole.

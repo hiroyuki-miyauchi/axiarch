@@ -12,7 +12,7 @@
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
 # protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), the v1.5.5
 # physical-block / bootstrap hooks, the v1.6.0 sublimated-file guide, and the
-# v1.7.0 task-boundary detection:
+# v1.8.0 task-boundary detection:
 #
 #   Check 1-4  Hook layer (settings presence, JSON syntax, hook structure, firing log)
 #   Check 5    LOADING_PROTOCOL Step 4 — task.md adherence
@@ -24,7 +24,7 @@
 #   Check 11   AGENTS §6 ANTI-FULL-OVERWRITE — PreToolUse hook physical block (v1.5.5+)
 #   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
-#   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.7.0+)
+#   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
 #
 # Out of Scope (semantic judgment required, manual review):
 #   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
@@ -519,7 +519,7 @@ else
 fi
 
 # =============================================================================
-# Check 14: Task Boundary Detection — Check D wiring (v1.7.0+)
+# Check 14: Task Boundary Detection — Check D wiring (v1.8.0+)
 # Verifies that axiarch-scripts/axiarch-boot-reminder.sh contains the Check D logic
 # (VIOLATION-D + TTL bypass on domain-keyword shift). This closes the AI's
 # "same session, no re-load needed" self-judgment loophole identified by
@@ -529,7 +529,7 @@ print_section "Check 14: Task boundary detection (Check D wiring)"
 REMINDER_SCRIPT_PATH="${PROJECT_DIR}/axiarch-scripts/axiarch-boot-reminder.sh"
 if [[ ! -f "${REMINDER_SCRIPT_PATH}" ]]; then
   print_warn "axiarch-scripts/axiarch-boot-reminder.sh not found — Check D unavailable"
-  print_info "Re-run init.sh to redistribute the v1.7.0+ reminder script"
+  print_info "Re-run init.sh to redistribute the v1.8.0+ reminder script"
 elif grep -q "VIOLATION-D" "${REMINDER_SCRIPT_PATH}" 2>/dev/null \
    && grep -q "AXIARCH_TASK_BOUNDARY_DETECT" "${REMINDER_SCRIPT_PATH}" 2>/dev/null; then
   print_pass "Check D wired in axiarch-boot-reminder.sh (VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT env var)"
@@ -538,8 +538,8 @@ elif grep -q "VIOLATION-D" "${REMINDER_SCRIPT_PATH}" 2>/dev/null \
   fi
 else
   print_warn "axiarch-scripts/axiarch-boot-reminder.sh missing Check D logic (VIOLATION-D / task boundary detection)"
-  print_info "This is a v1.7.0+ feature. Re-run init.sh to update."
-  print_info "Without Check D, AI may slack on rule re-load when it judges 'session continues' — see LOADING_PROTOCOL §4 v1.7.0 note"
+  print_info "This is a v1.8.0+ feature. Re-run init.sh to update."
+  print_info "Without Check D, AI may slack on rule re-load when it judges 'session continues' — see LOADING_PROTOCOL §4 v1.8.0 note"
 fi
 
 # =============================================================================
@@ -561,7 +561,7 @@ if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_pass "All automated checks passed across hook + crystallization + AGENTS protocols"
   print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (3) + Bootstrap + Task Boundary"
   print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
-  print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.7.0 adds Check 14 task-boundary)"
+  print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary)"
 else
   print_warn "Some checks failed/warned — see above for which protocol the AI is slacking on"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"

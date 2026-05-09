@@ -52,7 +52,7 @@ cp -r axiarch-rules /path/to/your/project/
 | Agent | Status |
 |:------|:-------|
 | Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
-| Claude Code | ✅ Verified — v1.4.0+ native hook integration (UserPromptSubmit / PreToolUse / SessionStart + v1.6.0 reminder TTL + v1.7.0 Check D task-boundary detection); production-validated through axiarch's own development cycles |
+| Claude Code | ✅ Verified — v1.4.0+ native hook integration (UserPromptSubmit / PreToolUse / SessionStart + v1.6.0 reminder TTL + v1.8.0 Check D task-boundary detection); production-validated through axiarch's own development cycles |
 | OpenAI Codex | ⚠️ Expected to work (AGENTS.md = native config) |
 | Cursor | ⚠️ Expected to work (reads AGENTS.md) |
 | GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |

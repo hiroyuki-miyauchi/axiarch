@@ -10,7 +10,7 @@ It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
 or operator skill level.
 
-Designed and validated through hundreds of real production sessions on Google Antigravity and Claude Code (Claude Code receives first-class hook integration: UserPromptSubmit reminder from v1.4.0+, PreToolUse physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, Check D task-boundary detection from v1.7.0+). Expected to work with OpenAI Codex, Cursor, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified outside Antigravity and Claude Code.
+Designed and validated through hundreds of real production sessions on Google Antigravity and Claude Code (Claude Code receives first-class hook integration: UserPromptSubmit reminder from v1.4.0+, PreToolUse physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, Check D task-boundary detection from v1.8.0+). Expected to work with OpenAI Codex, Cursor, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified outside Antigravity and Claude Code.
 
 ## What Problem Does Axiarch Solve?
 
