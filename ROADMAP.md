@@ -183,7 +183,7 @@
 
 採用先実運用で判明した「同一 session 内でも実際タスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」confirmation bias loophole を hot-fix。
 
-- **`scripts/axiarch-boot-reminder.sh` Check D 追加** — UserPromptSubmit hook の stdin から現プロンプトを読み、domain keyword を抽出、task.md 履歴と比較。新 keyword 検出時に `🚨 [VIOLATION-D]` flag + TTL 強制 bypass で full reminder 再発火
+- **`scripts/axiarch-boot-reminder.sh` Check D 追加** — UserPromptSubmit hook の stdin から現プロンプトを読み、**whole-word match** (`grep -oiwE`) で domain keyword を抽出、**AGENTS §8.4 必須トリオ全 3 ファイル**（task.md / implementation_plan.md / walkthrough.md）を full-text grep して比較。プラン側 / walkthrough 側に書かれた domain context も漏れなく捕捉。新 keyword 検出時に `🚨 [VIOLATION-D]` flag + TTL 強制 bypass で full reminder 再発火
 - **AI 自己判断ループホールを機械的にバックアップ** — v1.6.0 LOADING_PROTOCOL §4「タスクタイプ不変」条項の判定を AI に任せていた問題を、hook 側で物理検出する設計に転換
 - **`scripts/check-axiarch-health.sh` Check 14 追加** — Check D の wiring 確認（13 段階 → 14 段階）
 - **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable / `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
@@ -426,7 +426,7 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks differ, yet the AI judges 'session is continuing → no rule re-load needed' and slacks" — a confirmation-bias loophole in v1.6.0's LOADING_PROTOCOL §4 self-judgment clause.
 
-- **NEW `scripts/axiarch-boot-reminder.sh` Check D** — Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords; compares against task.md load history; on new-keyword detection, emits `🚨 [VIOLATION-D]` + forces TTL bypass (suppresses short-circuit, re-injects full reminder)
+- **NEW `scripts/axiarch-boot-reminder.sh` Check D** — Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords via **whole-word match** (`grep -oiwE`); full-text greps the **AGENTS §8.4 mandatory trio** (task.md / implementation_plan.md / walkthrough.md), capturing domain context from both the plan and the walkthrough rather than task.md alone. On new-keyword detection, emits `🚨 [VIOLATION-D]` + forces TTL bypass (suppresses short-circuit, re-injects full reminder)
 - **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged" decision was AI-self-judged (confirmation-bias prone). v1.7.0 detects boundaries at the hook layer
 - **`scripts/check-axiarch-health.sh` Check 14 added** — Verifies Check D wiring (13-stage → 14-stage)
 - **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable; `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
