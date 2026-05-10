@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.6.0  
+> **現在の安定版 / Current Stable**: v1.8.0 🚨 BREAKING (`scripts/` → `axiarch-scripts/` rename)  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -68,7 +68,7 @@
 
 - **`engineering/600_git_workflow.md` 新設** — 日常的な Git 運用（Trunk-Based / Commit & PR / Branch Hygiene / **Worktree Hygiene Protocol** / Repository Hygiene）をドメイン非依存の Universal Rule として集約（5パート・18ルール）
 - **`.git/config` 汚染問題（Antigravity Go ベース language server クラッシュ）の恒久対策** — `[extensions] worktreeConfig = true` 残留検出・修復プロトコルを Universal に永続化
-- **`scripts/check-git-config-clean.sh` 新規配布** — 自動検出・修復スクリプト（`--fix` / `--quiet` / `--full-clean` モード対応）。`init.sh` 経由で全採用プロジェクトに自動配布
+- **`axiarch-scripts/check-git-config-clean.sh` 新規配布** — 自動検出・修復スクリプト（`--fix` / `--quiet` / `--full-clean` モード対応）。`init.sh` 経由で全採用プロジェクトに自動配布
 - **構造正規化** — `engineering/000` Part X から pure-git workflow を 600 へ抽出（§10.0 / §10.3 / §10.1 部分移動）
 - **後方互換性 100%** — 既存採用プロジェクトは `git pull` で新ルールと script を取得。3シナリオ（Claude Code 単体 / Antigravity 単体 / 並行使用）全てで Pareto-improvement
 
@@ -100,15 +100,15 @@
 
 ### ✅ v1.5.1 — Hook 効果最大化 + 結晶化プロトコル遵守強化（2026-05-06）
 
-- **`scripts/check-axiarch-health.sh` 新規配布（全プロトコル監視）** — Axiarch 公式健全性診断ツール。**10 段階の遵守チェック** を一発実行：Hook 関連 4 / `task.md` 遵守 / 結晶化閾値 / **§8 Process & Documentation** / **§1 Deployment Ban** / **§4 SSOT Sync** / **§2 Language First**。「どこサボってるか」が一発でわかる。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示
-- **`scripts/README.md` 新規** — scripts/ ディレクトリの索引兼ガイド（バイリンガル）。各診断ツールの目的・使い方・診断項目・推奨ワークフローを記載。採用先が `scripts/` 配下の存在意義を即座に把握できる
+- **`axiarch-scripts/check-axiarch-health.sh` 新規配布（全プロトコル監視）** — Axiarch 公式健全性診断ツール。**10 段階の遵守チェック** を一発実行：Hook 関連 4 / `task.md` 遵守 / 結晶化閾値 / **§8 Process & Documentation** / **§1 Deployment Ban** / **§4 SSOT Sync** / **§2 Language First**。「どこサボってるか」が一発でわかる。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示
+- **`axiarch-scripts/README.md` 新規** — scripts/ ディレクトリの索引兼ガイド（バイリンガル）。各診断ツールの目的・使い方・診断項目・推奨ワークフローを記載。採用先が `axiarch-scripts/` 配下の存在意義を即座に把握できる
 - **`.claude/settings.json` フックメッセージ二重強化** — （1）`task.md` 記録義務（AGENTS.md §8.4 準拠）追加、（2）**CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK 遵守義務追加**。「`core/010` への追記 = 完了は誤認」を明示し、3件以上のドメインがあれば Blueprint への昇華まで完了させる義務を AI に課す
-- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 強化** — 強い CAUTION ブロック追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行」「違反は `scripts/check-axiarch-health.sh` Check 6 で外部検証可能」
-- **`README.md` トラブルシュート章新設（縮小版）** — Enforcement Mechanism サブセクション直下に `bash scripts/check-axiarch-health.sh` への誘導 + 公式 docs 参照
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 強化** — 強い CAUTION ブロック追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step 5 を実行」「違反は `axiarch-scripts/check-axiarch-health.sh` Check 6 で外部検証可能」
+- **`README.md` トラブルシュート章新設（縮小版）** — Enforcement Mechanism サブセクション直下に `bash axiarch-scripts/check-axiarch-health.sh` への誘導 + 公式 docs 参照
 - **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — 「強制執行機構」セクションに診断スクリプト参照を追記
-- **`init.sh`** — `.claude/settings.json` 配布直後に `jq` JSON 構文検証を追加（jq 不在時はスキップ、依存追加なし）。`scripts/` 既存配布ロジックで診断スクリプトも自動配布対象
+- **`init.sh`** — `.claude/settings.json` 配布直後に `jq` JSON 構文検証を追加（jq 不在時はスキップ、依存追加なし）。`axiarch-scripts/` 既存配布ロジックで診断スクリプトも自動配布対象
 - **真因確定**: AI 遵守ギャップ（フック発火 ≠ AI 遵守、結晶化「追記 = 完了」誤認）。3 並列調査で「JSON 構造誤り説」「Bash permission 不足説」をともに反証
-- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書き + `scripts/check-axiarch-health.sh` をコピー
+- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で `.claude/settings.json` 上書き + `axiarch-scripts/check-axiarch-health.sh` をコピー
 
 ---
 
@@ -123,25 +123,25 @@
 
 ### ✅ v1.5.3 — 動的違反検出 reminder + ROADMAP 整合化（2026-05-06）
 
-- **`scripts/axiarch-boot-reminder.sh` 新規** — フック呼び出しを inline `printf` から専用スクリプトに切り出し。スクリプトはプロジェクト状態（`task.md` ロード履歴 / `core/010` 結晶化閾値）を毎ターン動的にチェックし、違反検出時に reminder に **🚨 [VIOLATION-A/B]** フラグを追記する仕組み。これで AI は静的命令だけでなく**現在の違反状況**を毎ターン自覚できる
-- **`.claude/settings.json` 簡素化** — `command` を `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"` に変更。長文インライン JSON が消え、settings.json 自体がスリム化
+- **`axiarch-scripts/axiarch-boot-reminder.sh` 新規** — フック呼び出しを inline `printf` から専用スクリプトに切り出し。スクリプトはプロジェクト状態（`task.md` ロード履歴 / `core/010` 結晶化閾値）を毎ターン動的にチェックし、違反検出時に reminder に **🚨 [VIOLATION-A/B]** フラグを追記する仕組み。これで AI は静的命令だけでなく**現在の違反状況**を毎ターン自覚できる
+- **`.claude/settings.json` 簡素化** — `command` を `bash "${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh"` に変更。長文インライン JSON が消え、settings.json 自体がスリム化
 - **依存追加なし** — JSON 出力は pure bash（`escape_json` 関数で実装、`jq` 不要）
 - **物理 block ではなく警告強化** — `decision: "block"` で prompt を遮断する選択肢もあったが副作用大のため採用せず、「violation を毎ターン認識させる」設計
 - **ROADMAP の v1.5.2 記述を honest 化** — 「Plan mode 表示汚染を解消」が過剰だったため「format クリーン化（system-reminder ラップ自体は残る）」に修正
-- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh` を手動コピー
+- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR `.claude/settings.json` + `axiarch-scripts/axiarch-boot-reminder.sh` を手動コピー
 
 ---
 
 ### ✅ v1.5.4 — 健全性診断スクリプトの v1.5.3 互換性 patch（2026-05-06）
 
-- **`scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
+- **`axiarch-scripts/check-axiarch-health.sh` の Check 3/4 リグレッション修正** — v1.5.3 で hook command を inline → 外出しスクリプト（`axiarch-boot-reminder.sh`）に切り出した結果、診断側の grep が `AXIARCH BOOT` marker を見失い、Check 3 が誤検出していた問題を解消
 - **Check 3 にフォールバック分岐追加** — hook command が `axiarch-boot-reminder.sh` を呼ぶ場合、スクリプト本体に `AXIARCH BOOT` リテラルが含まれることを確認することで、inline 形式（v1.4.0–v1.5.2）と externalized 形式（v1.5.3+）の双方で PASS する設計に
 - **Check 4 の grep pattern を拡張** — v1.5.2+ の transcript JSONL で hook 出力ラベルが `success` → `additional context` に変わっていたため、`grep -cE "UserPromptSubmit hook (success|additional context)"` で両方マッチするよう修正
-- **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `scripts/axiarch-boot-reminder.sh` のコメントと `scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
+- **バージョン記述ポリシー違反を 17 ラウンド調査で発見・訂正** — `axiarch-scripts/axiarch-boot-reminder.sh` のコメントと `axiarch-scripts/check-axiarch-health.sh` の `print_info` ランタイム出力から `v1.5.x` literal を除去（汎用ファイルは version-free 厳守）
 - **`README.md` 必須ファイル表に `axiarch-boot-reminder.sh` を追記** — v1.5.3 新規スクリプトの言及漏れ訂正
 - **`core/010_project_lessons_log.md` (ja/en) は Initial entry のみに restore** — axiarch は OSS template のため、axiarch 開発者側で得た lesson は本ファイルに残さず CHANGELOG / ROADMAP / commit body に記録する方針。v1.5.4 中間 commit で誤って開発側 lesson を結晶化した記述があったため訂正
 - **18 ラウンド調査で Check 3 else 分岐の false-negative bug 発見・修正** — hook command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh` 文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
-- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
+- **後方互換性 100%** — pure bash 修正のみ。依存追加なし。`bash axiarch-scripts/check-axiarch-health.sh` 再実行で Check 3/4 が PASS することを確認可能
 - **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep 対象も同時更新する責務を見落とした。今後は format 変更と diagnostic update をセットでリリースする運用に切り替え（→ axiarch 本体の `core/010` には残さず CHANGELOG / commit body に記録、CONTRIBUTING.md Maintainer Guide で再発防止）
 
 ---
@@ -150,10 +150,10 @@
 
 26 ラウンド徹底市場調査（4 並列 Agent: AI compliance frameworks / 競合 AI ツール / Claude Code 公式機能 / 学術 2024-2026）の統合分析を踏まえ、**「Reminder → Physical Block」パラダイムシフト**を実装。
 
-- **`scripts/axiarch-protect-antifull.sh` 新規** — PreToolUse hook で `Write` tool を傍受、既存ファイル対象なら `decision:"block"` JSON + exit 2 で**物理遮断**。§6 ANTI-FULL-OVERWRITE 違反を完全防止
-- **`scripts/axiarch-init-task-md.sh` 新規** — SessionStart hook で会話開始時に task.md 自動ブートストラップ（不在時は load-history scaffold 生成）
-- **`scripts/axiarch-boot-reminder.sh` トーンリファクタ** — `🚨【厳守命令】` `No skipping` 等の CAPS / 命令調を排し、`This project enforces axiarch governance` の事実陳述に統一。Anthropic 公式 + Robert Glaser「Prompts as Programs in GPT-5」に基づく最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持
-- **`scripts/check-axiarch-health.sh` Check 11/12 追加** — 12 段階診断に拡張（PreToolUse / SessionStart 配線確認）
+- **`axiarch-scripts/axiarch-protect-antifull.sh` 新規** — PreToolUse hook で `Write` tool を傍受、既存ファイル対象なら `decision:"block"` JSON + exit 2 で**物理遮断**。§6 ANTI-FULL-OVERWRITE 違反を完全防止
+- **`axiarch-scripts/axiarch-init-task-md.sh` 新規** — SessionStart hook で会話開始時に task.md 自動ブートストラップ（不在時は load-history scaffold 生成）
+- **`axiarch-scripts/axiarch-boot-reminder.sh` トーンリファクタ** — `🚨【厳守命令】` `No skipping` 等の CAPS / 命令調を排し、`This project enforces axiarch governance` の事実陳述に統一。Anthropic 公式 + Robert Glaser「Prompts as Programs in GPT-5」に基づく最適化。9 protocols 反復構造は arXiv:2512.14982 の根拠で維持
+- **`axiarch-scripts/check-axiarch-health.sh` Check 11/12 追加** — 12 段階診断に拡張（PreToolUse / SessionStart 配線確認）
 - **`.claude/settings.json` に 3 hook 配線** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
 - **`.claude/axiarch-overwrite-allow.txt` whitelist サポート** — 自動生成 artefact 等の正当な full-overwrite に escape hatch
 - **`CONTRIBUTING.md` に Maintainer Guide 追記** — 「lessons_log は Initial のみ保持」「採用先で削除推奨ファイル」「placeholder 形式を保つ template」を ja/en 対称的に明文化、再発防止
@@ -166,7 +166,7 @@
 
 採用先プロジェクトの実運用フィードバック「ガバナンス機能評価レポート」で抽出された 5 項目を minor release として bundling。「設計 vs 現実」の乖離（context budget / token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造的に解消。
 
-- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回 fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら `[AXIARCH OK]` short-circuit、違反検出時は強制 full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token 約 87% 削減**（24k → 3k）
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回 fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら `[AXIARCH OK]` short-circuit、違反検出時は強制 full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token 約 87% 削減**（24k → 3k）
 - **Check C — Stale Lesson Detection** — `core/010` の `[YYYY-MM-DD]` 日付が 180 日以上経過した lesson を `🚨 [VIOLATION-C]` として検出。`AXIARCH_LESSON_STALE_DAYS` で閾値調整可
 - **`check-axiarch-health.sh` Check 6 拡張 — CRYSTAL §5 Time-Axis Trigger** — 既存の count threshold (3+ per domain, trigger (a)) に **time-axis trigger (b)** 追加。stale lesson の長期放置を防止
 - **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — 既存の `blueprint/{domain}/{NNN}_{topic}.md` を一覧表示、AI が **APPEND** を選択しやすくする。「12 連続 N/A」フィードバックの根治
@@ -179,25 +179,39 @@
 
 ---
 
-### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified 昇格（2026-05-10）
 
-26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装したため、本 Tier 2 群を v1.7.0 に整理。
+採用先実運用で判明した「同一 session 内でも実際タスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」confirmation bias loophole を hot-fix。
 
-- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では Write のみ block、Edit による潜在的に大規模な変更は post-hoc で検出）
-- **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加し、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上（出典: Cursor Rules / `.claude/rules/` path-scoped）
-- **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
-- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
-- **shellcheck CI 統合** — `scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
-- **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
-- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去し、改訂日のみに統一（v1.5.4 で確立した version-free 方針の完遂）
-- **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
-- **Post-release README integration 自動検証** — v1.4.0+→v1.6.0 で繰り返し発生した「新リリース機能の README 反映漏れ」（24/27/28 ラウンド + v1.6.0 で `12 段階` 残留検出）を防ぐため、`scripts/check-axiarch-health.sh` に Check 14（README ↔ scripts/* の version-related term grep）を追加検討
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Check D 追加** — UserPromptSubmit hook の stdin から現プロンプトを読み、**whole-word match** (`grep -oiwE`) で domain keyword を抽出、**AGENTS §8.4 必須トリオ全 3 ファイル**（task.md / implementation_plan.md / walkthrough.md）を full-text grep して比較。プラン側 / walkthrough 側に書かれた domain context も漏れなく捕捉。新 keyword 検出時に `🚨 [VIOLATION-D]` flag + TTL 強制 bypass で full reminder 再発火
+- **AI 自己判断ループホールを機械的にバックアップ** — v1.6.0 LOADING_PROTOCOL §4「タスクタイプ不変」条項の判定を AI に任せていた問題を、hook 側で物理検出する設計に転換
+- **`axiarch-scripts/check-axiarch-health.sh` Check 14 追加** — Check D の wiring 確認（13 段階 → 14 段階）
+- **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable / `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.8.0 改善」セクションで loophole 解消メカニズム明文化
+- **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0 動作完全再現、stdin 不在時は自動 skip
+- **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
 
 ---
 
-### 🔮 v1.8.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
 
-学術裏付けが強く工数も大きい改善案を v1.8.0 として独立計画。
+26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.8.0 で confirmation-bias loophole の hot-fix + BREAKING `scripts/` → `axiarch-scripts/` rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
+
+- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では `Write` のみ block、`Edit` による潜在的に大規模な変更は post-hoc で検出）
+- **Cursor `globs:` パターン採用 + path-scoped rules** — `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter を追加、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上
+- **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories 相当の自動 memory 機構を `.claude/memory/MEMORY.md` ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
+- **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
+- **shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
+- **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
+- ~~**Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去~~ → **v1.8.0 で先行実施完了**（commit `08c6ecf`、8 files cleanup）
+- **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
+- **Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド + v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc 反映漏れ」を機械検出。`axiarch-scripts/check-axiarch-health.sh` に README / scripts/README / INDEX の stale version-term grep を追加
+
+---
+
+### 🔮 v1.10.0 — Static Lint & Process Supervision（Tier 3、検討中）
+
+学術裏付けが強く工数も大きい改善案を v1.10.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` / `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反 / `compliance_matrix.md` 同期 を PR 時に強制チェック（出典: <https://github.com/nedcodes-ok/cursor-lint-action>）
 - **IFEval 風自動回帰スイート** — `tests/ifeval/` に「task.md 記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
@@ -297,7 +311,7 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 - **NEW `engineering/600_git_workflow.md`** — Consolidates daily Git operations (Trunk-Based / Commit & PR / Branch Hygiene / **Worktree Hygiene Protocol** / Repository Hygiene) as a domain-agnostic Universal Rule (5 parts, 18 rules)
 - **Permanent fix for `.git/config` pollution problem (Antigravity Go-based language server crash)** — Detection and repair protocol for `[extensions] worktreeConfig = true` residue persisted to Universal level
-- **NEW `scripts/check-git-config-clean.sh` distribution** — Auto-detection and repair script (`--fix` / `--quiet` / `--full-clean` modes). Distributed automatically to all adopting projects via `init.sh`
+- **NEW `axiarch-scripts/check-git-config-clean.sh` distribution** — Auto-detection and repair script (`--fix` / `--quiet` / `--full-clean` modes). Distributed automatically to all adopting projects via `init.sh`
 - **Structural normalization** — Extracted pure-git workflow from `engineering/000` Part X into 600 (§10.0 / §10.3 / partial §10.1)
 - **100% Backwards Compatible** — Existing adopters obtain new rules and script via `git pull`. Pareto-improvement across all three scenarios (Claude Code only / Antigravity only / parallel use)
 
@@ -329,15 +343,15 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ### ✅ v1.5.1 — Hook Efficacy + Crystallization Adherence Strengthening (2026-05-06)
 
-- **NEW `scripts/check-axiarch-health.sh` (full-protocol monitoring)** — Official Axiarch health diagnostic with **10-stage compliance check**: Hook (4) + `task.md` adherence + crystallization threshold + **§8 Process & Documentation** + **§1 Deployment Ban** + **§4 SSOT Sync** + **§2 Language First**. Pinpoints exactly where the AI is slacking. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review
-- **NEW `scripts/README.md`** — Bilingual index & guide for the `scripts/` directory. Each diagnostic tool's purpose, usage, check items, and recommended workflow documented in one place
+- **NEW `axiarch-scripts/check-axiarch-health.sh` (full-protocol monitoring)** — Official Axiarch health diagnostic with **10-stage compliance check**: Hook (4) + `task.md` adherence + crystallization threshold + **§8 Process & Documentation** + **§1 Deployment Ban** + **§4 SSOT Sync** + **§2 Language First**. Pinpoints exactly where the AI is slacking. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review
+- **NEW `axiarch-scripts/README.md`** — Bilingual index & guide for the `axiarch-scripts/` directory. Each diagnostic tool's purpose, usage, check items, and recommended workflow documented in one place
 - **`.claude/settings.json` reminder doubly strengthened** — Added (1) `task.md` recording mandate (per AGENTS.md §8.4) and (2) **CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK execution mandate**. Explicitly states "appending to `core/010` is NOT completion" and forces AI to promote 3+ unsorted domains to Blueprint files before declaring task done
-- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 strengthened** — Added strong CAUTION block: "Step 4 (ACCUMULATE) alone is NOT completion", "Step 5 MUST run before task completion", "violations externally detectable via `scripts/check-axiarch-health.sh` Check 6"
-- **NEW concise Troubleshooting subsection in `README.md`** — Directs users to `bash scripts/check-axiarch-health.sh` plus official-docs links
+- **`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md` §5 strengthened** — Added strong CAUTION block: "Step 4 (ACCUMULATE) alone is NOT completion", "Step 5 MUST run before task completion", "violations externally detectable via `axiarch-scripts/check-axiarch-health.sh` Check 6"
+- **NEW concise Troubleshooting subsection in `README.md`** — Directs users to `bash axiarch-scripts/check-axiarch-health.sh` plus official-docs links
 - **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — Added one-paragraph reference to the diagnostic script
-- **`init.sh`** — Optional `jq` JSON syntax validation post-copy; existing `scripts/` distribution covers the new diagnostic
+- **`init.sh`** — Optional `jq` JSON syntax validation post-copy; existing `axiarch-scripts/` distribution covers the new diagnostic
 - **Root cause confirmed**: AI adherence gap (hook firing ≠ AI adherence, crystallization "appending = done" misconception). 3-parallel investigation refuted both "JSON structure error" and "Bash permission insufficient" hypotheses
-- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json` + copy `scripts/check-axiarch-health.sh`
+- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually overwrite `.claude/settings.json` + copy `axiarch-scripts/check-axiarch-health.sh`
 
 ---
 
@@ -353,25 +367,25 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 ### ✅ v1.5.3 — Dynamic Violation-Detection Reminder + ROADMAP Honesty Fix (2026-05-06)
 
-- **NEW `scripts/axiarch-boot-reminder.sh`** — Hook command is now externalized to a dedicated script. Each turn it dynamically inspects project state (`task.md` load history, `core/010` crystallization threshold) and **appends 🚨 [VIOLATION-A/B] flags to the reminder when violations are detected**. The AI thus receives not just static directives but **the current violation context** every turn
-- **`.claude/settings.json` simplified** — `command` is reduced to `bash "${CLAUDE_PROJECT_DIR:-.}/scripts/axiarch-boot-reminder.sh"`, removing the bulky inline JSON
+- **NEW `axiarch-scripts/axiarch-boot-reminder.sh`** — Hook command is now externalized to a dedicated script. Each turn it dynamically inspects project state (`task.md` load history, `core/010` crystallization threshold) and **appends 🚨 [VIOLATION-A/B] flags to the reminder when violations are detected**. The AI thus receives not just static directives but **the current violation context** every turn
+- **`.claude/settings.json` simplified** — `command` is reduced to `bash "${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh"`, removing the bulky inline JSON
 - **No new dependencies** — JSON output is built in pure bash (`escape_json` helper, no `jq`)
 - **Warning strengthening, not hard block** — `decision: "block"` was considered for prompt-level enforcement, but the side-effects are too large; instead we make the AI **aware of violations every turn**
 - **ROADMAP v1.5.2 entry honesty-corrected** — "Plan-mode pollution fixed" was overstated; replaced with "format cleanup (system-reminder wrap remains)"
-- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually copy `.claude/settings.json` + `scripts/axiarch-boot-reminder.sh`
+- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually copy `.claude/settings.json` + `axiarch-scripts/axiarch-boot-reminder.sh`
 
 ---
 
 ### ✅ v1.5.4 — Health-Diagnostic Compatibility Patch for v1.5.3 (2026-05-06)
 
-- **`scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
-- **Check 3 fallback branch** — When the hook command delegates to `scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
+- **`axiarch-scripts/check-axiarch-health.sh` Check 3/4 regression fix** — v1.5.3 externalized the hook command to `axiarch-scripts/axiarch-boot-reminder.sh`, which broke the diagnostic's grep for the `AXIARCH BOOT` marker (Check 3) and the legacy `success` log label (Check 4). Both produced false negatives on freshly-installed v1.5.3 projects
+- **Check 3 fallback branch** — When the hook command delegates to `axiarch-scripts/axiarch-boot-reminder.sh`, the diagnostic now inspects the externalized script for the `AXIARCH BOOT` literal, allowing both inline (v1.4.0–v1.5.2) and externalized (v1.5.3+) formats to PASS
 - **Check 4 grep pattern expanded** — v1.5.2+ transcripts log `UserPromptSubmit hook additional context` instead of the legacy `UserPromptSubmit hook success`. Pattern updated to `grep -cE "UserPromptSubmit hook (success|additional context)"` to match both
-- **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `scripts/axiarch-boot-reminder.sh` (header comment) and `scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
+- **17th-round audit: version-string-policy violations corrected** — Removed `v1.5.x` literals from `axiarch-scripts/axiarch-boot-reminder.sh` (header comment) and `axiarch-scripts/check-axiarch-health.sh` (a runtime-visible `print_info`). Generic files now stay version-free
 - **`README.md` required-files table updated** — Added the missing reference to `axiarch-boot-reminder.sh` (introduced in v1.5.3 but never listed)
 - **`core/010_project_lessons_log.md` (ja/en) restored to Initial entry only** — axiarch is an OSS template; lessons learned by axiarch maintainers belong in CHANGELOG / ROADMAP / commit bodies, not in this template file. An interim commit mistakenly crystallized a maintainer-side lesson here, and this release reverts it
 - **18th-round audit: Check 3 else-branch false-negative fix** — When the hook command contains neither `AXIARCH BOOT` literal nor `axiarch-boot-reminder.sh` reference (i.e. fully broken hook), the diagnostic was emitting `print_warn` without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI integrations would falsely report success. Now correctly fails the run
-- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
+- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run `bash axiarch-scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
 - **Design retrospective** — When changing hook output format, the diagnostic's grep targets must be updated in the same patch. Going forward, format changes and diagnostic updates ship together (recorded in CHANGELOG / commit bodies, not in axiarch core's `core/010` — see CONTRIBUTING.md Maintainer Guide for the policy)
 
 ---
@@ -380,10 +394,10 @@ Priorities and scope will be adjusted based on actual usage feedback and enterpr
 
 Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI compliance frameworks / competitor tools / Claude Code official / academic 2024-2026), v1.5.5 implements the **"reminder → physical block" paradigm shift**.
 
-- **NEW `scripts/axiarch-protect-antifull.sh`** — PreToolUse hook that intercepts `Write` calls and **physically blocks** (decision:"block" JSON + exit 2) when the target file already exists, preventing §6 ANTI-FULL-OVERWRITE violations
-- **NEW `scripts/axiarch-init-task-md.sh`** — SessionStart hook that auto-bootstraps task.md on session start (scaffolds with load-history table when missing)
-- **`scripts/axiarch-boot-reminder.sh` tone refactor** — Stripped CAPS / imperative markers (🚨/`No skipping`) and shifted to factual statements ("This project enforces axiarch governance"), per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". The 9-protocol repetition structure is preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
-- **`scripts/check-axiarch-health.sh` Check 11/12 added** — Diagnostic extended to 12 stages (PreToolUse / SessionStart wiring verification)
+- **NEW `axiarch-scripts/axiarch-protect-antifull.sh`** — PreToolUse hook that intercepts `Write` calls and **physically blocks** (decision:"block" JSON + exit 2) when the target file already exists, preventing §6 ANTI-FULL-OVERWRITE violations
+- **NEW `axiarch-scripts/axiarch-init-task-md.sh`** — SessionStart hook that auto-bootstraps task.md on session start (scaffolds with load-history table when missing)
+- **`axiarch-scripts/axiarch-boot-reminder.sh` tone refactor** — Stripped CAPS / imperative markers (🚨/`No skipping`) and shifted to factual statements ("This project enforces axiarch governance"), per Anthropic guidance and Robert Glaser's "Prompts as Programs in GPT-5". The 9-protocol repetition structure is preserved per arXiv:2512.14982 (Prompt Repetition Improves Non-Reasoning LLMs)
+- **`axiarch-scripts/check-axiarch-health.sh` Check 11/12 added** — Diagnostic extended to 12 stages (PreToolUse / SessionStart wiring verification)
 - **`.claude/settings.json` three-hook wiring** — SessionStart / UserPromptSubmit / PreToolUse(Write matcher)
 - **`.claude/axiarch-overwrite-allow.txt` whitelist support** — escape hatch for legitimate full-overwrite cases (autogenerated artefacts etc.)
 - **`CONTRIBUTING.md` Maintainer Guide added** — Documents "lessons_log keeps Initial only", "files recommended for deletion in adopters", and "templates kept in placeholder form" symmetrically in JA/EN to prevent regression
@@ -396,7 +410,7 @@ Based on 26 rounds of audit synthesised with a 4-agent parallel market study (AI
 
 Bundles five improvements driven by adopter-project feedback ("governance functional evaluation report"). Structurally resolves the design-vs-reality gap (context budget, token cost, sublimated-file recognition, stale-lesson neglect).
 
-- **`scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — First fire returns full reminder + writes timestamp; subsequent fires within TTL (default 30 min) with no violations return short-circuit `[AXIARCH OK]`; any violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables. **Token impact: ~24k → ~3k (87% reduction in long sessions)**
+- **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — First fire returns full reminder + writes timestamp; subsequent fires within TTL (default 30 min) with no violations return short-circuit `[AXIARCH OK]`; any violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables. **Token impact: ~24k → ~3k (87% reduction in long sessions)**
 - **Check C — Stale Lesson Detection** — Detects any `core/010` lesson dated `>180 days` ago as `🚨 [VIOLATION-C]`. Threshold tunable via `AXIARCH_LESSON_STALE_DAYS`
 - **`check-axiarch-health.sh` Check 6 expanded — CRYSTAL §5 Time-Axis Trigger** — Existing count threshold (3+ per domain, trigger (a)) joined by **time-axis trigger (b)**. Prevents long-term neglect of stale lessons
 - **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI prefers APPEND. Addresses "12 consecutive N/A" feedback at the root
@@ -409,25 +423,39 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ---
 
-### 🔮 v1.7.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified Promotion (2026-05-10)
 
-Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); these Tier-2 items are now organised under v1.7.0.
+Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks differ, yet the AI judges 'session is continuing → no rule re-load needed' and slacks" — a confirmation-bias loophole in v1.6.0's LOADING_PROTOCOL §4 self-judgment clause.
+
+- **NEW `axiarch-scripts/axiarch-boot-reminder.sh` Check D** — Reads current-prompt JSON from UserPromptSubmit hook stdin; extracts domain keywords via **whole-word match** (`grep -oiwE`); full-text greps the **AGENTS §8.4 mandatory trio** (task.md / implementation_plan.md / walkthrough.md), capturing domain context from both the plan and the walkthrough rather than task.md alone. On new-keyword detection, emits `🚨 [VIOLATION-D]` + forces TTL bypass (suppresses short-circuit, re-injects full reminder)
+- **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged" decision was AI-self-judged (confirmation-bias prone). v1.8.0 detects boundaries at the hook layer
+- **`axiarch-scripts/check-axiarch-health.sh` Check 14 added** — Verifies Check D wiring (13-stage → 14-stage)
+- **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable; `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
+- **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.8.0 improvement" section documents the loophole closure mechanism
+- **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation outside hook context)
+- **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated through axiarch's own development cycles (since v1.4.0+ native hook integration). **Placed immediately after Antigravity** across README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh agent-selection order (4 files, 8 sites updated)
+
+---
+
+### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+
+Tier-2 improvement candidates extracted from the 26-round market study (see v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from adopter-project feedback); v1.8.0 delivered the confirmation-bias loophole hot-fix bundled with the BREAKING `scripts/` → `axiarch-scripts/` rename; these Tier-2 items are now organised under v1.9.0.
 
 - **`PostToolUse` hook + git diff verification** — Measure diff line count after Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only blocks `Write`; large Edit changes detected post-hoc)
 - **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per file type. Reduces tokens, improves relevance (sources: Cursor Rules / `.claude/rules/` path-scoped)
 - **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf Cascade Memories / Codeium Memories, designed around `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation" problem via persistent context
 - **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue (complementary to v1.6.0 reminder TTL)
-- **shellcheck CI integration** — Add `scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
+- **shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
 - **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` after copy, mirroring the existing `jq` validation
-- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files
+- ~~**Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files~~ → **Completed in v1.8.0** (commit `08c6ecf`, 8 files cleanup)
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty Blueprint, accumulated Lessons-log overflow detection, etc.)
-- **Post-release README integration auto-verification** — Prevent the recurring "new release feature → README update missed" pattern (24/27/28th-round audits + v1.6.0 `12-stage` residue). Add Check 14 to `scripts/check-axiarch-health.sh` to grep for stale version-related terms across README ↔ scripts/*
+- **Post-release README integration auto-verification** — Prevent the recurring "new release feature → README update missed" pattern (24/27/28th-round audits + v1.6.0 `12-stage` residue). Add Check 14 to `axiarch-scripts/check-axiarch-health.sh` to grep for stale version-related terms across README ↔ scripts/*
 
 ---
 
-### 🔮 v1.8.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.10.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
-Improvements with strong academic backing but larger implementation effort, planned independently for v1.8.0.
+Improvements with strong academic backing but larger implementation effort, planned independently for v1.10.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation / Universal-vs-Blueprint responsibility checks / `compliance_matrix.md` sync as PR gates (source: <https://github.com/nedcodes-ok/cursor-lint-action>)
 - **IFEval-style auto-regression suite** — Convert "task.md recording obligation" / "core/010 crystallization threshold" to verifiable instructions in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 / arXiv:2512.14754)

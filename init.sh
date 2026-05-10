@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.6.0"
+AXIARCH_VERSION="1.8.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -83,9 +83,9 @@ select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
   echo "  1) Google Antigravity — Verified ✅"
-  echo "  2) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
-  echo "  3) Cursor — Expected to work ⚠️"
-  echo "  4) Claude Code — Expected to work ⚠️"
+  echo "  2) Claude Code — Verified ✅ (v1.4.0+ native hook integration)"
+  echo "  3) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
+  echo "  4) Cursor — Expected to work ⚠️"
   echo "  5) GitHub Copilot — Expected to work ⚠️"
   echo "  6) Windsurf — Expected to work ⚠️"
   echo "  7) Other / Universal (AGENTS.md only)"
@@ -102,9 +102,9 @@ select_agent() {
 
   case "$agent_choice" in
     1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    2) AGENT_LABEL="OpenAI Codex" ;;
-    3) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
-    4) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    3) AGENT_LABEL="OpenAI Codex" ;;
+    4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
     7) AGENT_LABEL="Other / Universal" ;;
@@ -134,14 +134,14 @@ select_prompts() {
 
 # =============================================================================
 # STEP 3.5 (v1.6.0+): Optional pre-commit hook installation
-# Installs `bash scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
+# Installs `bash axiarch-scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
 # so axiarch protocol violations (3 hooks wired, threshold breaches, etc.) are
 # caught before commits land.
 # =============================================================================
 select_precommit() {
   echo ""
   echo -e "${BOLD}Pre-commit hook 自動 install / Pre-commit hook auto-install (任意 / Optional):${RESET}"
-  echo "  Installs: bash scripts/check-axiarch-health.sh --quiet → .git/hooks/pre-commit"
+  echo "  Installs: bash axiarch-scripts/check-axiarch-health.sh --quiet → .git/hooks/pre-commit"
   echo "  Effect: blocks commits when axiarch protocol violations are detected"
   echo "  Existing pre-commit / lefthook / pre-commit-framework setups are detected & preserved"
   echo ""
@@ -171,7 +171,7 @@ install_precommit_hook() {
     print_info "  pre-commit:"
     print_info "    commands:"
     print_info "      axiarch:"
-    print_info "        run: bash scripts/check-axiarch-health.sh --quiet"
+    print_info "        run: bash axiarch-scripts/check-axiarch-health.sh --quiet"
     return 0
   fi
   if [[ -f "${TARGET_DIR}/.pre-commit-config.yaml" ]]; then
@@ -179,7 +179,7 @@ install_precommit_hook() {
     return 0
   fi
   if [[ -d "${TARGET_DIR}/.husky" ]]; then
-    print_warn ".husky/ detected — please add 'bash scripts/check-axiarch-health.sh --quiet' to .husky/pre-commit manually."
+    print_warn ".husky/ detected — please add 'bash axiarch-scripts/check-axiarch-health.sh --quiet' to .husky/pre-commit manually."
     return 0
   fi
 
@@ -191,11 +191,11 @@ install_precommit_hook() {
 # === axiarch pre-commit hook (auto-installed by init.sh) ===
 # Blocks commits when axiarch protocol violations are detected.
 # Set AXIARCH_PRECOMMIT_SKIP=1 to bypass for one commit.
-if [[ -z "${AXIARCH_PRECOMMIT_SKIP:-}" ]] && [[ -x "scripts/check-axiarch-health.sh" ]]; then
-  bash scripts/check-axiarch-health.sh --quiet || {
+if [[ -z "${AXIARCH_PRECOMMIT_SKIP:-}" ]] && [[ -x "axiarch-scripts/check-axiarch-health.sh" ]]; then
+  bash axiarch-scripts/check-axiarch-health.sh --quiet || {
     echo ""
     echo "❌ axiarch pre-commit hook blocked the commit."
-    echo "   Run: bash scripts/check-axiarch-health.sh   (full output)"
+    echo "   Run: bash axiarch-scripts/check-axiarch-health.sh   (full output)"
     echo "   Bypass once: AXIARCH_PRECOMMIT_SKIP=1 git commit ..."
     exit 1
   }
@@ -282,12 +282,12 @@ copy_files() {
     print_info "Copied: axiarch-prompts/${LANG_CODE}/"
   fi
 
-  # === Required: scripts/ (utility scripts incl. .git/config hygiene) ===
-  if [[ -d "$SOURCE_DIR/scripts" ]]; then
-    mkdir -p "$TARGET_DIR/scripts"
-    cp -R "$SOURCE_DIR/scripts/." "$TARGET_DIR/scripts/"
-    chmod +x "$TARGET_DIR/scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+  # === Required: axiarch-scripts/ (utility scripts incl. .git/config hygiene) ===
+  if [[ -d "$SOURCE_DIR/axiarch-scripts" ]]; then
+    mkdir -p "$TARGET_DIR/axiarch-scripts"
+    cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
+    chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -422,14 +422,14 @@ print_next_steps() {
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify enforcement (recommended):${RESET}"
-  echo -e "       → ${BOLD}bash scripts/check-axiarch-health.sh${RESET}"
+  echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
   echo -e "         (12-stage diagnostic: 3-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, more)"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."
   echo ""
   echo -e "  ${CYAN}Docs:${RESET}  ${REPO_URL}"
-  echo -e "  ${CYAN}Scripts:${RESET} See ${BOLD}scripts/README.md${RESET} for diagnostic tools"
+  echo -e "  ${CYAN}Scripts:${RESET} See ${BOLD}axiarch-scripts/README.md${RESET} for diagnostic tools"
   echo -e "  ${CYAN}Issues:${RESET} ${REPO_URL}/issues"
   echo ""
 }

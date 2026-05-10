@@ -42,7 +42,7 @@ body:
       label: "状況・コンテキスト / Context"
       description: "使用しているエージェント・OS・プロジェクトタイプ等 / Agent, OS, project type, etc."
       placeholder: |
-        - AI Agent: Google Antigravity / OpenAI Codex / Cursor / Claude Code / GitHub Copilot / Other
+        - AI Agent: Google Antigravity ✅ / Claude Code ✅ / OpenAI Codex / Cursor / GitHub Copilot / Windsurf / Other
         - OS: macOS / Windows / Linux
         - Project Type: Next.js / Flutter / Go / Python / Other
     validations:

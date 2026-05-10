@@ -24,9 +24,9 @@
 
 | フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 | `task.md` 自動ブートストラップ + AGENTS.md §8 (Documentation Requirements) reminder 注入 | `scripts/axiarch-init-task-md.sh` |
-| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続強制 | `scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 既存ファイルへの全面書き換えを **物理遮断**（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` で whitelist 可 | `scripts/axiarch-protect-antifull.sh` |
+| `SessionStart` | 会話開始時 | `task.md` 自動ブートストラップ + AGENTS.md §8 (Documentation Requirements) reminder 注入 | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続強制 | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 既存ファイルへの全面書き換えを **物理遮断**（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
 
 **この 3 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は v1.5.5 で追加された **Reminder ではなく Physical Block** のパラダイムシフト機構（学術裏付け: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防止不可能だった §6 違反を構造的に遮断する。
 
@@ -36,7 +36,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash scripts/check-axiarch-health.sh`** を実行せよ。3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）を含む 12 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Enforcement Mechanism トラブルシュート」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）を含む 12 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Enforcement Mechanism トラブルシュート」章を参照。
 
 ---
 
@@ -145,7 +145,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 |:--|:--|:--|
 | **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AGENTS §8 (4) 義務 |
 | **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | INDEX.md → タスクタイプ → 対応フォルダ の関係は不変 |
-| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用 | YAGNI 原則、context budget 保護 |
+| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を強制発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias 回避 |
 | **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴を確認、欠落 file のみ再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
 
 > **判定の運用原則**:
@@ -155,6 +155,18 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 > **本基準が解決する問題（v1.6.0 改善背景）**:
 > 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により解消。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、token cost を約 87% 削減しつつ遵守率を維持する。
+
+> **v1.8.0 改善 — Check D Task Boundary Detection**:
+> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」問題が判明（confirmation bias）。v1.8.0 で `axiarch-boot-reminder.sh` に Check D を追加：
+>
+> 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
+> 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
+> 3. **AGENTS §8.4 必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
+> 4. **差異検出時**: `🚨 [VIOLATION-D]` flag + **TTL 強制 bypass**（短縮版を抑制し full reminder を強制再発火）
+>
+> これにより AI の「タスクタイプ不変」自己判断に依存せず、**hook 側で物理的に task boundary を検出**して rule 再 load を要求する構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。
+>
+> **3 ファイル全検査の意義**: domain context は `task.md` のロード履歴だけでなく、`implementation_plan.md` の方針記述や `walkthrough.md` の差分narratiave にも書かれる。task.md だけ参照すると、プラン側に明確に書かれた domain を見落として false positive が頻発する。3 ファイル全部を Single Source of Truth とすることで、AI が現実に管理しているタスク context をミラーリングする。
 
 ---
 

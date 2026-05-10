@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-39_files-green.svg)](#-universal-rules-39-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Agents](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Claude_|_Copilot-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Agents](https://img.shields.io/badge/Verified-Antigravity_|_Claude_Code-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Expected](https://img.shields.io/badge/Expected-Codex_|_Cursor_|_Copilot_|_Windsurf-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
@@ -23,7 +23,7 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** こそが Axiarch の中核です。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存せず、プロジェクト全体の最低品質（Quality Floor）を力強く底上げします。
 
-[Google Antigravity](https://antigravity.google/) 上で設計・実戦検証済み。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（OpenAI Codex、Cursor、Claude Code、GitHub Copilot 等）とも互換性がある見込み**です — ただし動作は未検証です。
+[Google Antigravity](https://antigravity.google/) および [Claude Code](https://www.anthropic.com/claude-code) 上で設計・実戦検証済み（特に Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection をネイティブ統合）。ルール本体は純粋な Markdown であり、`AGENTS.md` は主要なコーディングエージェントが参照・対応するオープンフォーマットのため、**他の AI エージェント（OpenAI Codex、Cursor、GitHub Copilot、Windsurf 等）とも互換性がある見込み**です — ただし動作は未検証です。
 
 ### 設計思想
 
@@ -70,7 +70,7 @@
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to strictly govern and mitigate quality drift, hallucinations, and uncontrolled AI behavior in production development through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
-Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (OpenAI Codex, Cursor, Claude Code, GitHub Copilot, etc.) — though this has not been verified.
+Designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/) and [Claude Code](https://www.anthropic.com/claude-code) (Claude Code in particular gets first-class hook integration: `UserPromptSubmit` reminder hook from v1.4.0+, `PreToolUse` physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, and Check D task-boundary detection from v1.8.0+). Since all rules are pure Markdown and `AGENTS.md` is an open format referenced by major coding agents, **it is expected to be compatible with other AI agents** (OpenAI Codex, Cursor, GitHub Copilot, Windsurf, etc.) — though this has not been verified.
 
 ### Core Design Philosophy
 
@@ -116,11 +116,11 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | 状態 / Status | Agent | Native Config | AGENTS.md |
 |:--------------|:------|:-------------|:----------|
-| ✅ **Verified** — 実務で実証済み | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ✅ **Verified** — 実務で実証済み / Production-validated | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ✅ **Verified** — 実務で実証済み（v1.4.0+ ネイティブ hook 統合） / Production-validated (v1.4.0+ native hook integration) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (3 hooks) | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **OpenAI Codex** | `AGENTS.md` (native) | ✅ Native |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
-| ⚠️ **Untested** — 未検証（動作する見込み） | **Claude Code** | `CLAUDE.md` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Windsurf** | `.windsurfrules` | ✅ Reads |
 | ⚠️ **Untested** — 未検証（動作する見込み） | **Aider / Zed / Other** | Various | ✅ Reads |
 
@@ -130,9 +130,9 @@ Designed and validated through hundreds of real production sessions on [Google A
 > **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). `AGENTS.md` is a **shared constitution readable by major agents**, designed to complement each tool's native config (e.g., `.cursor/rules/`, `.github/copilot-instructions.md`). It is NOT a replacement for tool-specific setup. OpenAI Codex natively uses `AGENTS.md` as its configuration format, so no additional pointer file is needed.
 
 > [!IMPORTANT]
-> **JA**: 本ガバナンス・アーキテクチャは **[Google Antigravity](https://antigravity.google/)** 上で設計・実戦検証されたものです。ルール本体は純粋なMarkdownであり、AIモデルの概念的な仕組みはツール間で共通であるため他のエージェントでも動作する見込みですが、**他ツールでの動作は検証していません。ご利用は自己責任でお願いします。Antigravity以外の環境での動作保証はいたしません。**
+> **JA**: 本ガバナンス・アーキテクチャは **[Google Antigravity](https://antigravity.google/)** および **[Claude Code](https://www.anthropic.com/claude-code)** 上で設計・実戦検証されたものです（Claude Code は v1.4.0+ の `UserPromptSubmit` hook、v1.5.5+ `PreToolUse` 物理遮断、v1.6.0+ Reminder TTL、v1.8.0+ Check D Task Boundary Detection をネイティブ統合）。ルール本体は純粋な Markdown であり、AI モデルの概念的な仕組みはツール間で共通であるため他のエージェントでも動作する見込みですが、**Antigravity / Claude Code 以外での動作は検証していません。ご利用は自己責任でお願いします。**
 >
-> **EN**: This governance architecture was designed and validated through hundreds of real production sessions on **Google Antigravity**. Since all rules are pure Markdown and the underlying AI model concepts are fundamentally the same across tools, they are expected to work on other agents — but **this has not been verified. Use at your own risk. No guarantees are provided for non-Antigravity environments.**
+> **EN**: This governance architecture was designed and validated through hundreds of real production sessions on **Google Antigravity** and **Claude Code** (Claude Code receives first-class hook integration: `UserPromptSubmit` reminder hook from v1.4.0+, `PreToolUse` physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, and Check D task-boundary detection from v1.8.0+). Since all rules are pure Markdown and the underlying AI model concepts are fundamentally the same across tools, they are expected to work on other agents — but **this has not been verified outside Antigravity and Claude Code. Use at your own risk in other environments.**
 
 > [!TIP]
 > **JA**: フォルダ名 `axiarch-rules/` は出自を反映していますが、ルールファイル自体は純粋なMarkdownであり、ツール固有の依存はありません。
@@ -147,7 +147,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 | File | JA | EN |
 |:-----|:---|:---|
-| `AGENTS.md` | AI行動憲法（Google Antigravityで設計、他エージェントでも動作見込み） | AI Behavior Constitution (designed on Google Antigravity, compatible with other agents) |
+| `AGENTS.md` | AI行動憲法（Google Antigravity と Claude Code で実戦検証済み、他エージェントでも動作見込み） | AI Behavior Constitution (production-validated on Google Antigravity and Claude Code; expected to work on other agents) |
 
 ### 📚 Universal Rules (39 files × JA/EN)
 
@@ -253,7 +253,7 @@ Designed and validated through hundreds of real production sessions on [Google A
 | `.windsurfrules` | 🔶 **Windsurf のみ** / **Windsurf only** | Windsurf固有のポインター。`init.sh` で自動コピー / Windsurf-specific pointer. Auto-copied by `init.sh` |
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code のみ** / **Claude Code only** | 3 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write)）の強制執行設定。`init.sh` で自動コピー / Three-hook enforcement config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher). Auto-copied by `init.sh` |
-| `scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を **13 段階診断**（v1.6.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減）、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts (`check-axiarch-health.sh` 13-stage compliance with `--quiet` flag, `axiarch-boot-reminder.sh` dynamic violation reminder + two-stage TTL (87% token reduction), `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
+| `axiarch-scripts/` | 🔷 **推奨** / **Recommended** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / SessionStart hook 外出しスクリプト群（`check-axiarch-health.sh` で全プロトコル遵守を **14 段階診断**（v1.8.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.8.0+、task.md / implementation_plan.md / walkthrough.md の 3 ファイル scan で confirmation-bias loophole 解消）、`axiarch-protect-antifull.sh` で §6 物理遮断、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts (`check-axiarch-health.sh` 14-stage compliance with `--quiet`, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection across 3 process docs (v1.8.0+), `axiarch-protect-antifull.sh` §6 physical block, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -266,24 +266,24 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 ### エージェント別セットアップ / Agent-Specific Setup
 
-| 手順 / Step | Antigravity | Codex | Cursor | Claude Code | Copilot | Windsurf |
-|:-----------|:------------|:------|:-------|:------------|:--------|:---------|
+| 手順 / Step | Antigravity ✅ | Claude Code ✅ | Codex ⚠️ | Cursor ⚠️ | Copilot ⚠️ | Windsurf ⚠️ |
+|:-----------|:------------|:--------------|:---------|:----------|:-----------|:------------|
 | 1. `AGENTS.md` + `axiarch-rules/` をコピー（`axiarch-prompts/` は任意） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 2. `.agents/rules/prompt_pointer.md` を配置 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
-| 3. `CLAUDE.md` + `.claude/settings.json` 配置 | ❌ 不要 | ❌ 不要 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 |
-| 4. 追加設定 | — | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | — | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
+| 3. `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart/UserPromptSubmit/PreToolUse) 配置 | ❌ 不要 | ✅ `init.sh` 自動 / Auto via `init.sh` | ❌ 不要 | ❌ 不要 | ❌ 不要 | ❌ 不要 |
+| 4. 追加設定 | — | — (3 hooks 自動配線済み) | — (AGENTS.md = native) | 任意: `.cursor/rules/*.mdc` | 任意: `.github/copilot-instructions.md` | 任意: `.windsurfrules` |
 
-### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.6.0+ — 3 hooks + TTL)
+### 🛡️ Claude Code 強制執行機構 / Enforcement Mechanism (v1.8.0+ — 3 hooks + TTL + Task Boundary)
 
-> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**3 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap」三層強制**を実現します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却を構造的に防止します。**v1.6.0+ では `axiarch-boot-reminder.sh` に TTL 二段階出力（default 30 分）を導入し、長時間 session で token 約 87% 削減**（24k → 3k 累計）。
+> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**3 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap」三層強制**を実現します。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却を構造的に防止します。**v1.6.0+ では TTL 二段階出力（default 30 分）で token 約 87% 削減**（24k → 3k）。**v1.8.0+ では Check D Task Boundary Detection** を追加し、現プロンプトの domain keyword と AGENTS §8.4 必須トリオ（task.md / implementation_plan.md / walkthrough.md）を機械比較。AI が「同 session だから rule 再 load 不要」と判断するサボり（confirmation-bias loophole）を hook 層で物理検出します。
 >
-> **EN**: Claude Code projects ship with `.claude/settings.json` containing **three hooks** that implement a three-layer enforcement of the AGENTS.md protocol — **Reminder + Physical Block + Bootstrap**. This structurally prevents the AI from skipping LOADING_PROTOCOL on "casual" prompts, from §6 ANTI-FULL-OVERWRITE violations, and from forgetting task.md recording. **v1.6.0+ adds two-stage TTL output (default 30 min) to `axiarch-boot-reminder.sh`, reducing per-session reminder token cost ~87%** (24k → 3k cumulative).
+> **EN**: Claude Code projects ship with `.claude/settings.json` containing **three hooks** that implement a three-layer enforcement of the AGENTS.md protocol — **Reminder + Physical Block + Bootstrap**. This structurally prevents the AI from skipping LOADING_PROTOCOL on "casual" prompts, from §6 ANTI-FULL-OVERWRITE violations, and from forgetting task.md recording. **v1.6.0+ two-stage TTL** (default 30 min) reduces token cost ~87% (24k → 3k). **v1.8.0+ Check D Task Boundary Detection** mechanically compares current-prompt domain keywords against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md / walkthrough.md), closing the AI's "same session, no re-load needed" confirmation-bias loophole at the hook layer.
 
 | フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `scripts/axiarch-init-task-md.sh` |
-| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 + **v1.6.0+ TTL 短縮版 short-circuit**）注入 / Inject factual + dynamic-violation reminder + **v1.6.0+ TTL short-circuit `[AXIARCH OK]`** | `scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `scripts/axiarch-protect-antifull.sh` |
+| `SessionStart` | 会話開始時 / Conversation start | task.md 自動 bootstrap + AGENTS.md §8 reminder 注入 / Auto-bootstrap task.md + inject §8 reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 A/B/C + **v1.6.0+ TTL 短縮版** + **v1.8.0+ Check D Task Boundary Detection**）注入 / Inject factual reminder + dynamic violations A/B/C + v1.6.0+ TTL short-circuit + **v1.8.0+ Check D task-boundary detection** | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 既存ファイル全面書き換えを**物理遮断**（§6） / **Physical block** of overwrite on existing files (§6) | `axiarch-scripts/axiarch-protect-antifull.sh` |
 
 | ファイル / File | 役割 / Role | コミット / Commit |
 |:----------------|:------------|:------------------|
@@ -299,14 +299,14 @@ Designed and validated through hundreds of real production sessions on [Google A
 
 #### 🔍 トラブルシュート / Troubleshooting
 
-> **JA**: 「フックが動いていない気がする」場合、`bash scripts/check-axiarch-health.sh` を実行してください。**13 段階の axiarch 標準診断**（v1.6.0+）で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
+> **JA**: 「フックが動いていない気がする」場合、`bash axiarch-scripts/check-axiarch-health.sh` を実行してください。**14 段階の axiarch 標準診断**（v1.8.0+）で、3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ **Check 14（Task Boundary Detection wiring 確認、v1.8.0+）** + AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
 >
-> **EN**: When you suspect "the hook isn't firing", run `bash scripts/check-axiarch-health.sh`. **13-stage axiarch diagnostic** (v1.6.0+) verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
+> **EN**: When you suspect "the hook isn't firing", run `bash axiarch-scripts/check-axiarch-health.sh`. **14-stage axiarch diagnostic** (v1.8.0+) verifies all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + **Check 14 (Task Boundary Detection wiring, v1.8.0+)** + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
 
 ```bash
-bash scripts/check-axiarch-health.sh
+bash axiarch-scripts/check-axiarch-health.sh
 # Or from another directory:
-bash /path/to/project/scripts/check-axiarch-health.sh /path/to/project
+bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 ```
 
 > [!NOTE]
@@ -382,9 +382,9 @@ cp .windsurfrules /path/to/your/project/
 ```
 
 > [!CAUTION]
-> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Codex、Cursor、Claude Code、GitHub Copilotでは不要です。特にCodexは `AGENTS.md` 自体がネイティブ設定なので、Step 1の2点コピーだけで動作します。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
+> **JA**: `.agents/rules/` は **Antigravity固有**のディレクトリです。Claude Code、Codex、Cursor、GitHub Copilotでは不要です（Claude Code は別途 `CLAUDE.md` + `.claude/settings.json` で 3 hooks 自動配線、Codex は `AGENTS.md` 自体がネイティブ設定）。各ツールには固有の設定ディレクトリがあります（上表参照）。Antigravityの場合もポインターのみ配置し、ルール本体は `axiarch-rules/` に一元管理。
 >
-> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Codex, Cursor, Claude Code, or GitHub Copilot. Codex in particular uses `AGENTS.md` as its native config, so the 2-item copy in Step 1 is all you need. Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
+> **EN**: `.agents/rules/` is **Antigravity-specific**. It is NOT needed for Claude Code, Codex, Cursor, or GitHub Copilot (Claude Code uses `CLAUDE.md` + `.claude/settings.json` with 3 auto-wired hooks; Codex uses `AGENTS.md` as its native config). Each tool has its own native configuration directory (see table above). For Antigravity, only place the pointer here — rule definitions live in `axiarch-rules/`.
 
 ### 3. 初期化 / Initialize
 

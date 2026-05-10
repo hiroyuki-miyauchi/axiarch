@@ -10,8 +10,8 @@
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
-| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（13 段階、`--quiet` 対応） / Full-protocol compliance health diagnostic (13-stage, supports `--quiet`) | 「フックが動いていない気がする」「結晶化されていない」と感じた時 / When you suspect protocol violations |
-| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力）。毎ターン違反検出して reminder に 🚨 フラグを追記、TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL); appends violation flags + short-circuits within TTL | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
+| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（14 段階、`--quiet` 対応 v1.8.0+） / Full-protocol compliance health diagnostic (14-stage, `--quiet` support v1.8.0+) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
+| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターン違反検出 (A/B/C/D) + TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); dynamic violations A/B/C/D, short-circuits within TTL when no violation | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に task.md を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps task.md on session start | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
@@ -30,10 +30,10 @@ The official Axiarch health diagnostic. One-shot 13-stage check covering hook fi
 
 ```bash
 # カレントディレクトリを診断 / Diagnose current directory
-bash scripts/check-axiarch-health.sh
+bash axiarch-scripts/check-axiarch-health.sh
 
 # 特定パスを診断 / Diagnose a specific path
-bash scripts/check-axiarch-health.sh /path/to/project
+bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 ```
 
 ### 診断項目 / Check Items
@@ -53,14 +53,17 @@ bash scripts/check-axiarch-health.sh /path/to/project
 | 11 | AGENTS §6 | PreToolUse hook 配線確認（物理遮断） / PreToolUse hook wiring (physical block) — **v1.5.5+** |
 | 12 | Bootstrap | SessionStart hook 配線確認 / SessionStart hook wiring — **v1.5.5+** |
 | 13 | Sublimated Index | 既存の `blueprint/{domain}/{NNN}_*.md` を一覧表示し APPEND を促進 / Lists existing sublimated files to promote APPEND — **v1.6.0+** |
+| 14 | Task Boundary | Check D wiring 確認（`axiarch-boot-reminder.sh` に VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT 含有を確認） / Verifies Check D wiring in `axiarch-boot-reminder.sh` — **v1.8.0+** |
 
-### 環境変数 / Environment Variables（v1.6.0+）
+### 環境変数 / Environment Variables（v1.6.0+, extended in v1.8.0+）
 
 | 変数 / Variable | デフォルト / Default | 説明 / Description |
 |:--|:--:|:--|
 | `AXIARCH_REMINDER_TTL_SECONDS` | `1800` (30 分) | `axiarch-boot-reminder.sh` の short-circuit TTL。`0` で disable / Two-stage reminder TTL; `0` disables short-circuit |
 | `AXIARCH_LESSON_STALE_DAYS` | `180` | Check 6 (b) / Check C の time-axis trigger 閾値（日数）。`0` で disable / Time-axis trigger threshold; `0` disables Check C |
 | `AXIARCH_PRECOMMIT_SKIP` | unset | `1` をセットすると pre-commit hook を 1 回だけ bypass / Set to `1` to bypass the pre-commit hook for one commit |
+| **`AXIARCH_TASK_BOUNDARY_DETECT`** | **`1`** | **v1.8.0+: `0` で Check D Task Boundary Detection を完全 disable（v1.6.0 動作再現）/ Set to `0` to fully disable Check D task-boundary detection (reproduces v1.6.0 behaviour)** |
+| **`AXIARCH_TASK_DOMAIN_KEYWORDS`** | (組込 default 集合) | **v1.8.0+: Check D の domain keyword 集合をオーバーライド（pipe-separated regex, 採用先カスタマイズ用）/ Override Check D's domain keyword set (pipe-separated regex; for adopter customisation)** |
 
 ### Out of Scope（外部検証困難・人間レビュー必須） / Manual Review Required
 
@@ -90,7 +93,7 @@ JSON 出力は pure bash（`jq` 依存なし）。物理 block ではなく **�
 直接実行する用途は通常なし（hook 経由で自動呼出）。デバッグ時のみ：
 
 ```bash
-bash scripts/axiarch-boot-reminder.sh | jq .
+bash axiarch-scripts/axiarch-boot-reminder.sh | jq .
 # → hookSpecificOutput.additionalContext に reminder + 違反フラグ
 ```
 
@@ -124,7 +127,7 @@ Externalized PreToolUse hook script invoked from `.claude/settings.json`. Interc
 
 ```bash
 echo '{"tool_name":"Write","tool_input":{"file_path":"/existing/file.md"}}' \
-  | bash scripts/axiarch-protect-antifull.sh
+  | bash axiarch-scripts/axiarch-protect-antifull.sh
 # → JSON `{"decision":"block",...}` + stderr message + exit 2
 ```
 
@@ -148,7 +151,7 @@ Externalized SessionStart hook script invoked from `.claude/settings.json`. On s
 直接実行する用途は通常なし（hook 経由で自動呼出）。デバッグ時のみ：
 
 ```bash
-bash scripts/axiarch-init-task-md.sh | jq .
+bash axiarch-scripts/axiarch-init-task-md.sh | jq .
 # → hookSpecificOutput.additionalContext に reminder + (必要なら scaffold note)
 ```
 
@@ -166,16 +169,16 @@ Detects and repairs residual `[extensions] worktreeConfig = true` in `.git/confi
 
 ```bash
 # 検出のみ（dry-run、デフォルト）/ Detection only (default)
-bash scripts/check-git-config-clean.sh
+bash axiarch-scripts/check-git-config-clean.sh
 
 # 自動修復 / Auto-fix
-bash scripts/check-git-config-clean.sh --fix
+bash axiarch-scripts/check-git-config-clean.sh --fix
 
 # サイレント実行（CI 用）/ Silent mode (for CI)
-bash scripts/check-git-config-clean.sh --quiet
+bash axiarch-scripts/check-git-config-clean.sh --quiet
 
 # 全 worktree 含めて完全クリーンアップ / Full cleanup including all worktrees
-bash scripts/check-git-config-clean.sh --full-clean
+bash axiarch-scripts/check-git-config-clean.sh --full-clean
 ```
 
 ### 推奨ワークフロー / Recommended Workflow

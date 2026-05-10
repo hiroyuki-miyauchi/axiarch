@@ -49,6 +49,16 @@ axiarch-rules/en/blueprint/ @hiroyuki-miyauchi
 axiarch-prompts/ @hiroyuki-miyauchi
 
 # =============================================================================
+# Diagnostic & Hook Scripts — 配布スクリプト群 / Distributed Scripts (v1.8.0+)
+# =============================================================================
+# axiarch-scripts/ は採用先プロジェクトに配布される hook + diagnostic 一式。
+# 動作不良が採用先全体に伝播するため、特に厳格な review が必要。
+# axiarch-scripts/ ships the hook + diagnostic suite to adopter projects.
+# Defects propagate across all adopters — requires stricter review.
+
+axiarch-scripts/ @hiroyuki-miyauchi
+
+# =============================================================================
 # GitHub Config & Repository Health
 # =============================================================================
 

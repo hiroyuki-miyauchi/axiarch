@@ -1,7 +1,7 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Version: 1.6.0 | License: Apache 2.0
+> Version: 1.8.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that mitigates quality drift,
@@ -10,7 +10,7 @@ It enforces minimum engineering standards through a multi-layer constitutional
 architecture, ensuring consistent output quality regardless of the AI agent
 or operator skill level.
 
-Designed and validated through hundreds of real production sessions on Google Antigravity. Expected to work with OpenAI Codex, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified.
+Designed and validated through hundreds of real production sessions on Google Antigravity and Claude Code (Claude Code receives first-class hook integration: UserPromptSubmit reminder from v1.4.0+, PreToolUse physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, Check D task-boundary detection from v1.8.0+). Expected to work with OpenAI Codex, Cursor, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified outside Antigravity and Claude Code.
 
 ## What Problem Does Axiarch Solve?
 
@@ -336,9 +336,9 @@ Optional reusable prompt templates organized by role:
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
 | Google Antigravity | ✅ Verified | `.agents/rules/prompt_pointer.md` |
+| Claude Code | ✅ Verified (v1.4.0+ native hook integration) | `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart / UserPromptSubmit / PreToolUse) |
 | OpenAI Codex | ⚠️ Expected | `AGENTS.md` (native — no additional setup) |
 | Cursor | ⚠️ Expected | `.cursor/rules/axiarch.mdc` |
-| Claude Code | ⚠️ Expected | `CLAUDE.md` pointer file |
 | GitHub Copilot | ⚠️ Expected | `.github/copilot-instructions.md` |
 | Windsurf | ⚠️ Expected | `.windsurfrules` |
 | Aider / Zed | ⚠️ Expected | Reads `AGENTS.md` directly |

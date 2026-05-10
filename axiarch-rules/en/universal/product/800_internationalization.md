@@ -1581,6 +1581,6 @@ npx messageformat-validator locales/**/*.json
 
 ---
 
-**Last Updated**: 2026-05-06 (v1.5.0)
+**Last Updated**: 2026-05-06
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Product — Global Expansion & i18n

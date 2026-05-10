@@ -45,10 +45,10 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
- ├── scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
+ ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
  │    ├── README.md                    ← 索引・使い方ガイド
- │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（13 段階、`--quiet` 対応 v1.6.0+）
- │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 + TTL 二段階出力 v1.6.0+）
+ │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（14 段階、`--quiet` 対応 v1.8.0+）
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+）
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（task.md 自動初期化、v1.5.5+）
  │    └── check-git-config-clean.sh    ← .git/config 健全性チェック（worktree 残留）
@@ -126,7 +126,7 @@ your-project/
 |---|---|---|
 | 500 | [500_firebase_gcp.md](./universal/engineering/500_firebase_gcp.md) | バックエンドエンジニアリング（Firebase & GCP）。55パート・Rule 32.1〜32.169 + Appendix A〜D構成。Supreme Directives（補助エンジン原則・多層防御・冪等性・FinOps Guardian・Cloud Run統一）、Cloud Run Functions/Services/Jobs/GPU、Eventarc/Pub/Sub/Cloud Tasks、Firebase Auth（Passkeys/FIDO2）、App Check、Firestore（Enterprise Edition/Named Databases/MCP Server）、Data Connect、Cloud Storage、Firebase Hosting/App Hosting（GA）、FCM（HTTP v1 API）、Remote Config、Crashlytics、Performance Monitoring、Analytics、Firebase AI Logic/Genkit（Node.js GA/Go GA/Python Alpha）、Vertex AI/Agent Engine（A2A）、AI Agent セキュリティ & ガバナンス（MCP連携・EU AI Act）、BigQuery連携、セキュリティ多層防御（Zero Trust/OWASP 2025/Cloud Armor WAF）、IAM/WIF、Secret Manager（CMEK）、VPC（Direct VPC Egress/Private Service Connect）、FinOps & コスト最適化（AI FinOps・30%ルール）、予算アラート & 自動応答、Observability（OpenTelemetry）、エラーハンドリング（Circuit Breaker/DLQ）、Terraform/IaC、Firebase CLI、Emulator Suite、CI/CD（GitHub Actions/WIF）、環境管理、マルチリージョン & DR、API設計、Rate Limiting、キャッシング、バッチ処理 & データパイプライン、Google Maps最適化、Google Ecosystem統合、Firebase Studio、コンプライアンス（GDPR/CCPA等）、サプライチェーンセキュリティ（SBOM/Binary Authorization）、運用成熟度モデル（L1〜L5）、マイグレーション & 廃止、トラブルシューティング、言語固有セクション（Node.js TS/Go/Python）、アンチパターン30選、将来展望。 |
 | 510 | [510_aws_cloud.md](./universal/engineering/510_aws_cloud.md) | AWSクラウドアーキテクチャ戦略。163セクション・260+ルール・20コードスニペット。§0コア・フィロソフィー（Directive 0.1〜0.12）を2026-05-04拡充：Platform Engineering（Golden Path/IDP）・Cost機能要件化（PRコスト評価Gate）・Agentic AIガバナンス（Bedrock最小権限/HitL）・データ主権&PQC準備（ML-KEM/Crypto Agility）。**[2026-05-04追加]** Directive 0.9（Resilience & Chaos Engineering：FIS障害注入・Multi-AZ必須・Graceful Degradation・ゲームデー義務）・0.10（Observability-First：Three Pillars義務化・SLOベースアラート・Observability as Code）・0.11（Compliance-by-Design：責任共有モデル明文化・Compliance as Code・データ分類義務・常時監査可能状態）・0.12（Ops Excellence Culture：ランブック義務・Blameless Postmortem・DORA 4指標・自動化90%目標）を追加。哲学レベルアンチパターン11選。サービス別逆引き索引（Appendix A）付き。 |
-| 600 | [600_git_workflow.md](./universal/engineering/600_git_workflow.md) | **Git Workflow & Repository Hygiene**。日常的な開発・通常作業・upload で発生するドメイン非依存の Git 操作を集約。**10パート・45ルール構成**：Trunk-Based Development（短命ブランチ・命名規約）、Commit & PR Standards（Conventional Commits 11 types / Atomic / PR Template / 100行ルール / Pre-Push Branch Protection Hook / Pre-Commit Auto-Formatting Hook / **Merge Strategy / Force-Push Protocol / Commit Body & Trailer Standards / AI Co-Authored-By 義務 / Fixup・Autosquash / Conventional Commit Validation**）、Branch Hygiene（Garbage Collection / Stale tracking）、**Worktree Hygiene Protocol（worktreeConfig 残留問題・Antigravity Go ベース language server クラッシュ対策）**、Repository Hygiene & Config Integrity（`.git/config` Health Audit / AI Agent artifacts gitignore）、**Branch Protection & Code Review（Branch Protection Rules / CODEOWNERS / PR Review SLA / Conventional Comments / AI-Assisted PR Review）、Tags Releases & History Operations（SemVer Tag / Commit & Tag Signing / Release Automation / Revert over Force-Push / Bisect & Reflog / git filter-repo / git maintenance）、Repository Configuration & Assets（.gitattributes / Git LFS / .git-blame-ignore-revs / Submodule Policy）、Modern Tooling & Automation（Multi-Layer Secret Scanning / AI-Generated Commit Attribution / Renovate-Dependabot / lefthook / Shallow Clone & Sparse Checkout）、Anti-Pattern Catalog（統合禁則表）**。`scripts/check-git-config-clean.sh` と連動。クロスリファレンス（security/operations/quality 等の Git 利用）・逆引き索引付き。 |
+| 600 | [600_git_workflow.md](./universal/engineering/600_git_workflow.md) | **Git Workflow & Repository Hygiene**。日常的な開発・通常作業・upload で発生するドメイン非依存の Git 操作を集約。**10パート・45ルール構成**：Trunk-Based Development（短命ブランチ・命名規約）、Commit & PR Standards（Conventional Commits 11 types / Atomic / PR Template / 100行ルール / Pre-Push Branch Protection Hook / Pre-Commit Auto-Formatting Hook / **Merge Strategy / Force-Push Protocol / Commit Body & Trailer Standards / AI Co-Authored-By 義務 / Fixup・Autosquash / Conventional Commit Validation**）、Branch Hygiene（Garbage Collection / Stale tracking）、**Worktree Hygiene Protocol（worktreeConfig 残留問題・Antigravity Go ベース language server クラッシュ対策）**、Repository Hygiene & Config Integrity（`.git/config` Health Audit / AI Agent artifacts gitignore）、**Branch Protection & Code Review（Branch Protection Rules / CODEOWNERS / PR Review SLA / Conventional Comments / AI-Assisted PR Review）、Tags Releases & History Operations（SemVer Tag / Commit & Tag Signing / Release Automation / Revert over Force-Push / Bisect & Reflog / git filter-repo / git maintenance）、Repository Configuration & Assets（.gitattributes / Git LFS / .git-blame-ignore-revs / Submodule Policy）、Modern Tooling & Automation（Multi-Layer Secret Scanning / AI-Generated Commit Attribution / Renovate-Dependabot / lefthook / Shallow Clone & Sparse Checkout）、Anti-Pattern Catalog（統合禁則表）**。`axiarch-scripts/check-git-config-clean.sh` と連動。クロスリファレンス（security/operations/quality 等の Git 利用）・逆引き索引付き。 |
 
 #### ai/: AI・データ・分析
 
@@ -165,6 +165,7 @@ your-project/
 
 ---
 
+### 📐 Blueprint Rules（プロジェクト固有）
 
 > **Status: Mutable（可変）** — プロジェクトのコンテキストに応じて作成・編集可能。
 >

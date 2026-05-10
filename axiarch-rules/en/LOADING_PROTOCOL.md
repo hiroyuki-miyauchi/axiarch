@@ -24,9 +24,9 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 | Hook | Fires when | Role | Externalised script |
 |:--|:--|:--|:--|
-| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `scripts/axiarch-init-task-md.sh` |
-| `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | **Physically blocks** full-overwrite of existing files (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` | `scripts/axiarch-protect-antifull.sh` |
+| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | **Physically blocks** full-overwrite of existing files (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
 
 **Removing or disabling any of these three hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular is the v1.5.5 paradigm shift from **reminder to physical block** (academically backed by arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It structurally prevents §6 violations that reminder-only enforcement could not reliably stop.
 
@@ -36,7 +36,7 @@ When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 pri
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 12-stage diagnostic includes wiring verification for all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart). Distributed automatically by `init.sh`. See `README.md` "Enforcement Mechanism Troubleshooting" for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 12-stage diagnostic includes wiring verification for all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart). Distributed automatically by `init.sh`. See `README.md` "Enforcement Mechanism Troubleshooting" for details.
 
 ---
 
@@ -145,7 +145,7 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 |:--|:--|:--|
 | **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AGENTS §8 (4) obligation |
 | **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | INDEX.md → task type → folder mapping is stable |
-| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context | YAGNI principle, context-budget protection |
+| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.8.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and forces a full reminder + 🚨 [VIOLATION-D] when a new keyword is detected | YAGNI + context-budget protection + Check D mitigates confirmation bias |
 | **Long session resumed after pause (e.g. compaction trigger)** | Verify `task.md` load history; re-load only missing files. However, when the `[AXIARCH BOOT]` reminder TTL expires (v1.6.0+ default 30 min), perform full re-verification | `axiarch-boot-reminder.sh` TTL state; mitigates serial-position effects in LLM memory |
 
 > **Operational Principles**:
@@ -155,6 +155,18 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 
 > **Problem this addresses (v1.6.0 background)**:
 > The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this reduces token cost ~87% while maintaining adherence rate.
+
+> **v1.8.0 improvement — Check D Task Boundary Detection**:
+> Adopter feedback revealed a problem: "Even within the same session, actual tasks differ, yet the AI judges 'session is continuing, no re-load needed' and slacks" (confirmation bias). v1.8.0 adds Check D to `axiarch-boot-reminder.sh`:
+>
+> 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
+> 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.
+> 3. **Full-text greps the AGENTS §8.4 mandatory trio** — `task.md` / `implementation_plan.md` / `walkthrough.md` — for previously-known domain keywords. Captures domain context from the plan and walkthrough, not just task.md's load-history table
+> 4. **On mismatch**: emits `🚨 [VIOLATION-D]` flag + **forces TTL bypass** (suppresses short-circuit, re-emits the full reminder)
+>
+> The result: the system no longer depends on the AI's "task type unchanged" self-judgment. Task boundaries are **physically detected at the hook layer**, requiring rule re-load. Disable via `AXIARCH_TASK_BOUNDARY_DETECT=0`; override the keyword set via `AXIARCH_TASK_DOMAIN_KEYWORDS`.
+>
+> **Why scan all 3 files**: domain context is recorded not only in `task.md`'s load-history table but also in `implementation_plan.md` (the strategy section) and `walkthrough.md` (the diff narrative). Reading only `task.md` causes frequent false positives because the plan often already covers the prompt's domain. Treating all 3 files as the Single Source of Truth mirrors the AI's actual working state.
 
 ---
 
