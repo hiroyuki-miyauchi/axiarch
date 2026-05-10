@@ -1042,6 +1042,6 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 ---
 
-**Last Updated**: 2026-05-05 (v1.5.0-pending)
+**Last Updated**: 2026-05-05 (v1.5.0)
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Engineering — Git Workflow & Repository Hygiene

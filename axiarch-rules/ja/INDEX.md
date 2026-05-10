@@ -165,6 +165,7 @@ your-project/
 
 ---
 
+### 📐 Blueprint Rules（プロジェクト固有）
 
 > **Status: Mutable（可変）** — プロジェクトのコンテキストに応じて作成・編集可能。
 >
