@@ -24,7 +24,7 @@
 
 **Axiarch 公式健全性診断ツール**。Hook + LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AGENTS.md 全 9 プロトコルのうち**外部検証可能な 8 領域**を一発診断する（v1.5.5 で §6 ANTI-FULL-OVERWRITE が物理遮断対象に追加、v1.6.0 で sublimated files index 追加）。「どこサボってるか」が一発でわかる設計。
 
-The official Axiarch health diagnostic. One-shot 13-stage check covering hook firing, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AGENTS.md protocols, the v1.5.5 physical-block / bootstrap hooks, and the v1.6.0 sublimated-files index. `--quiet` flag for pre-commit usage.
+The official Axiarch health diagnostic. One-shot 14-stage check covering hook firing, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AGENTS.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, and the v1.8.0 task-boundary detection wiring. `--quiet` flag for pre-commit usage.
 
 ### 使い方 / Usage
 

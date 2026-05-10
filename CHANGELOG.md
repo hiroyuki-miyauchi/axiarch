@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.1] — 2026-05-11
+
+### 🩹 Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 / Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix
+
+41 ラウンド調査で発見した 2 件のバグ修正を patch release として bundling。いずれも `axiarch-scripts/check-axiarch-health.sh` の診断精度に影響する。
+
+Two bug fixes discovered in the 41st-round audit, bundled as a patch release. Both affect the diagnostic accuracy of `axiarch-scripts/check-axiarch-health.sh`.
+
+### Fixed
+
+- **Check 4 — Codex ランタイム検出の追加** — OpenAI Codex 環境（`CODEX_THREAD_ID` / `CODEX_CI` 環境変数、または `__CFBundleIdentifier == com.openai.codex`）では Claude Code セッションログ（`.claude/projects/*.jsonl`）が存在しないため、Check 4 が常に `[FAIL] Hook never fired` を返していた false-negative bug を修正。Codex 検出時は `[PASS] Codex runtime detected — Claude Code hook firing history is not applicable` を返す / Added Codex runtime detection to Check 4: in Codex environments the Claude Code session log (`.claude/projects/*.jsonl`) does not exist, causing a false `[FAIL] Hook never fired`. Now returns `[PASS] Codex runtime detected — not applicable` when Codex env vars are detected
+
+- **Check 13 — `--quiet` モード時の verbose 出力バグ修正** — `--quiet` / `-q` フラグを指定した場合でも、Check 13 の `printf '%b' "${SUBLIMATED_FOUND}"` と `print_info` 2行がターミナルに出力されていた bug を修正（`if ! "${QUIET_MODE}"; then ... fi` で正しく抑制）。CI / pre-commit 連携での不要出力を解消 / Fixed Check 13 verbose output in `--quiet` mode: `printf` and two `print_info` lines were executing unconditionally; now wrapped in `if ! "${QUIET_MODE}"; then` to correctly suppress output in silent mode
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — pure bug fix のみ、機能変更ゼロ。Codex 以外の環境（Antigravity / Claude Code / Cursor / Copilot / Windsurf）では挙動変化なし / Pure bug fixes only; no functional changes. No impact on non-Codex environments
+- ✅ **依存追加なし** — bash 環境変数参照のみ追加 / No new dependencies
+
+### Diagnostic Outcome
+
+- **Codex 環境 mock test**: `CODEX_THREAD_ID=test bash axiarch-scripts/check-axiarch-health.sh` → Check 4 が `[PASS] Codex runtime detected` を返すことを確認 ✅
+- **`--quiet` モード修正**: sublimated files 存在プロジェクトで `bash axiarch-scripts/check-axiarch-health.sh --quiet` 実行 → Check 13 の verbose 出力が完全抑制されることを確認 ✅
+- **axiarch repo against itself**: 全 14 段階 PASS（Check 4 は Codex 環境なしのため `.claude/projects/` 参照モードで PASS 維持）✅
+
+---
+
 ## [1.8.0] — 2026-05-10
 
 ### 🚨 BREAKING: `scripts/` → `axiarch-scripts/` rename + v1.7.0 features bundled
@@ -709,6 +736,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.8.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.6.0...v1.8.0
 [1.7.0]: https://github.com/hiroyuki-miyauchi/axiarch/blob/main/CHANGELOG.md#170--2026-05-08-内部開発のみ独立-release-はせず-v180-に統合
 [1.6.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.5...v1.6.0

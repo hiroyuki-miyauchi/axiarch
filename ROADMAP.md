@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.8.0 🚨 BREAKING (`scripts/` → `axiarch-scripts/` rename)  
+> **現在の安定版 / Current Stable**: v1.8.1 🩹 patch (Check 4 Codex 互換性 + Check 13 quiet mode バグ修正)  
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -190,6 +190,17 @@
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load Criteria に Check D 補足、「v1.8.0 改善」セクションで loophole 解消メカニズム明文化
 - **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0 動作完全再現、stdin 不在時は自動 skip
 - **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で実運用検証完了。**Antigravity の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
+
+---
+
+### ✅ v1.8.1 — Check 4 Codex 互換性 + Check 13 quiet mode バグ修正（2026-05-11）
+
+41 ラウンド調査で発見した 2 件のバグ修正 patch。
+
+- **`axiarch-scripts/check-axiarch-health.sh` Check 4 Codex ランタイム検出** — OpenAI Codex 環境（`CODEX_THREAD_ID` / `CODEX_CI` 環境変数）では Claude Code セッションログが存在しないため false-negative `[FAIL] Hook never fired` を返していた bug を修正。Codex 検出時は `[PASS] Codex runtime detected — not applicable` を返す
+- **Check 13 `--quiet` モード verbose 出力バグ修正** — `--quiet` / `-q` フラグ指定時も `printf` と `print_info` 2 行がターミナルに出力されていた bug を修正（`if ! "${QUIET_MODE}"; then` で正しく抑制）。CI / pre-commit 連携の不要出力を解消
+- **`axiarch-scripts/README.md` line 27 stage 数訂正** — 英語 overview 文の「One-shot 13-stage check」を「One-shot 14-stage check」に修正（v1.8.0 で Check 14 追加済みだったが更新漏れ）
+- **後方互換性 100%** — pure bug fix のみ、機能変更ゼロ。Codex 以外の環境では挙動変化なし
 
 ---
 
@@ -434,6 +445,17 @@ Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks di
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note to the "task continues" row; new "v1.8.0 improvement" section documents the loophole closure mechanism
 - **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation outside hook context)
 - **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated through axiarch's own development cycles (since v1.4.0+ native hook integration). **Placed immediately after Antigravity** across README badge / Compatibility table / IMPORTANT block / llms-full.txt / init.sh agent-selection order (4 files, 8 sites updated)
+
+---
+
+### ✅ v1.8.1 — Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix (2026-05-11)
+
+Patch release with 2 bug fixes discovered in the 41st-round audit.
+
+- **`axiarch-scripts/check-axiarch-health.sh` Check 4 Codex runtime detection** — In OpenAI Codex environments (`CODEX_THREAD_ID` / `CODEX_CI` env vars), Claude Code session logs do not exist, causing a false `[FAIL] Hook never fired`. Now returns `[PASS] Codex runtime detected — not applicable` when Codex is detected
+- **Check 13 `--quiet` mode verbose output fix** — Even with `--quiet` / `-q` flag, the `printf` and two `print_info` lines were executing unconditionally. Wrapped in `if ! "${QUIET_MODE}"; then` to correctly suppress output in CI / pre-commit usage
+- **`axiarch-scripts/README.md` stage count correction** — Fixed English overview text from "One-shot 13-stage check" to "One-shot 14-stage check" (Check 14 was added in v1.8.0 but the description was not updated)
+- **100% Backwards Compatible** — Pure bug fixes only, zero functional changes. No impact on non-Codex environments
 
 ---
 
