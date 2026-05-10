@@ -235,7 +235,7 @@ core/010 には参照リンクのみ残す:
 
 ## 教訓
 
-### [YYYY-MM-DD] Lesson Title
+### [YYYY-MM-DD] 教訓のタイトル
 **Domain:** {domain}
 **Context:** ...
 **Problem:** ...
