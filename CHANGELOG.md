@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1. `git pull` で v1.8.0 取得
   2. `bash init.sh` 再実行 → `axiarch-scripts/` 配布 + `.claude/settings.json` 自動再配布（採用先カスタマイズがある場合は事前バックアップ推奨）
   3. 採用先で旧 `scripts/` 配下の axiarch ファイル（`axiarch-boot-reminder.sh` / `axiarch-protect-antifull.sh` / `axiarch-init-task-md.sh` / `check-axiarch-health.sh` / `check-git-config-clean.sh` / `README.md`）を手動削除推奨
-- **後方互換 path 提供なし** — clean cut（symlink 互換実装は v3.0.0 で再検討候補）
+- **後方互換 path 提供なし** — clean cut（symlink 互換実装は v2.0.0 Strategic で再検討候補、§Out of Scope 参照）
 
 ### Why BREAKING?
 
