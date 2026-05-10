@@ -223,7 +223,7 @@ Update the "Separated Domain Files" table in `core/010_project_lessons_log.md`.
 
 ---
 
-## 📳 Table of Contents
+## 📒 Table of Contents
 
 | Section | Content | Count |
 |:---------|:-----|:--:|
