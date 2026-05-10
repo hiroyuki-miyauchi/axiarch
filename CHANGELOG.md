@@ -9,17 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.1] — 2026-05-11
 
-### 🩹 Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 / Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix
+### 🩹 Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 + docs 訂正 / Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix + Docs Corrections
 
-41 ラウンド調査で発見した 2 件のバグ修正を patch release として bundling。いずれも `axiarch-scripts/check-axiarch-health.sh` の診断精度に影響する。
+41–42 ラウンド調査で発見した診断バグ 2 件 + ドキュメント記述訂正 3 件を patch release として bundling。いずれも `axiarch-scripts/check-axiarch-health.sh` の診断精度またはドキュメント整合性に影響する。
 
-Two bug fixes discovered in the 41st-round audit, bundled as a patch release. Both affect the diagnostic accuracy of `axiarch-scripts/check-axiarch-health.sh`.
+Two diagnostic bug fixes + three documentation corrections discovered in the 41st–42nd-round audits, bundled as a patch release. Both affect the diagnostic accuracy of `axiarch-scripts/check-axiarch-health.sh`.
 
 ### Fixed
 
 - **Check 4 — Codex ランタイム検出の追加** — OpenAI Codex 環境（`CODEX_THREAD_ID` / `CODEX_CI` 環境変数、または `__CFBundleIdentifier == com.openai.codex`）では Claude Code セッションログ（`.claude/projects/*.jsonl`）が存在しないため、Check 4 が常に `[FAIL] Hook never fired` を返していた false-negative bug を修正。Codex 検出時は `[PASS] Codex runtime detected — Claude Code hook firing history is not applicable` を返す / Added Codex runtime detection to Check 4: in Codex environments the Claude Code session log (`.claude/projects/*.jsonl`) does not exist, causing a false `[FAIL] Hook never fired`. Now returns `[PASS] Codex runtime detected — not applicable` when Codex env vars are detected
 
 - **Check 13 — `--quiet` モード時の verbose 出力バグ修正** — `--quiet` / `-q` フラグを指定した場合でも、Check 13 の `printf '%b' "${SUBLIMATED_FOUND}"` と `print_info` 2行がターミナルに出力されていた bug を修正（`if ! "${QUIET_MODE}"; then ... fi` で正しく抑制）。CI / pre-commit 連携での不要出力を解消 / Fixed Check 13 verbose output in `--quiet` mode: `printf` and two `print_info` lines were executing unconditionally; now wrapped in `if ! "${QUIET_MODE}"; then` to correctly suppress output in silent mode
+
+### Documentation Corrections (42nd-round audit)
+
+- **`axiarch-scripts/README.md` JA概要 「外部検証可能な 8 領域」 → 「10 領域以上」** — v1.5.1 当時の 10-stage 計上時の列挙数がそのまま残存。v1.8.0 で 14-stage に展開されたため「10 領域以上」に訂正。v1.8.0 Check D Task Boundary Detection 追加の言及も併せ追記 / Fixed stale "8 領域" (8 verifiable areas) count from v1.5.1 era; updated to "10 領域以上" and added v1.8.0 Check D mention
+
+- **`CHANGELOG.md` v1.6.0 Out of Scope — `v1.7.0 (Tier 2)` 行の `(Check 14)` → `(Check 15)` + バージョン訁正** — Check 14 は v1.8.0 で実装済みのため次の未実装候補は Check 15。併せて履歴記録内の「v1.7.0 (Tier 2)」 → 「v1.9.0 (Tier 2)」、「v1.8.0 (Tier 3)」 → 「v1.10.0 (Tier 3)」に訂正（いずれも既リリース済み version を指它していた） / Fixed stale version labels in v1.6.0 Out of Scope: `(Check 14)` → `(Check 15)` (Check 14 shipped in v1.8.0); `v1.7.0` → `v1.9.0`; `v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)`
 
 ### Compatibility
 
