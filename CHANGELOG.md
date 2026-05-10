@@ -709,6 +709,18 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.8.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.6.0...v1.8.0
+[1.7.0]: https://github.com/hiroyuki-miyauchi/axiarch/blob/main/CHANGELOG.md#170--2026-05-08-内部開発のみ独立-release-はせず-v180-に統合
+[1.6.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.5...v1.6.0
+[1.5.5]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.4...v1.5.5
+[1.5.4]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.3.2...v1.4.0
+[1.3.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.0.0...v1.1.0
