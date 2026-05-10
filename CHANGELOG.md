@@ -203,8 +203,8 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 
 ### Out of Scope（次バージョン以降に deferred — see ROADMAP）
 
-- **v1.7.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 14)
-- **v1.8.0 (Tier 3)**: `axiarch-doctor` CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
+- **v1.10.0 (Tier 3)**: `axiarch-doctor` CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
 - **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
 
 ---
