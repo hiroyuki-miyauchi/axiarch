@@ -203,7 +203,7 @@
 - **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/` を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control` 対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL と相補）
 - **shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml` に追加（v1.5.4 deferred）
 - **`init.sh` 配布後の syntax 検証** — `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
-- **Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去
+- ~~**Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)` 形式から version literal を除去~~ → **v1.8.0 で先行実施完了**（commit `08c6ecf`、8 files cleanup）
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons log 蓄積超過等の検知）
 - **Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド + v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc 反映漏れ」を機械検出。`axiarch-scripts/check-axiarch-health.sh` に README / scripts/README / INDEX の stale version-term grep を追加
 
@@ -447,7 +447,7 @@ Tier-2 improvement candidates extracted from the 26-round market study (see v1.5
 - **Aider-style prompt-cache optimisation** — Declare `axiarch-rules/{lang}/universal/` as read-only and target Anthropic prompt-caching API `cache_control`. Solves the per-turn full-injection cost issue (complementary to v1.6.0 reminder TTL)
 - **shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to `lint.yml` (deferred from v1.5.4)
 - **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh` after copy, mirroring the existing `jq` validation
-- **Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files
+- ~~**Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from `**Last Updated**` footers; keep date only, completing the version-free policy for generic files~~ → **Completed in v1.8.0** (commit `08c6ecf`, 8 files cleanup)
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty Blueprint, accumulated Lessons-log overflow detection, etc.)
 - **Post-release README integration auto-verification** — Prevent the recurring "new release feature → README update missed" pattern (24/27/28th-round audits + v1.6.0 `12-stage` residue). Add Check 14 to `axiarch-scripts/check-axiarch-health.sh` to grep for stale version-related terms across README ↔ scripts/*
 
