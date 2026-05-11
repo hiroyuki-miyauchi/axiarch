@@ -160,7 +160,9 @@ print_section "Check 4: Recent session firing history"
 PROJECT_KEY=$(echo "${PROJECT_DIR}" | sed 's|/|-|g')
 SESSION_DIR="${HOME}/.claude/projects/${PROJECT_KEY}"
 
-if [[ -d "${SESSION_DIR}" ]]; then
+if [[ -n "${CODEX_THREAD_ID:-}" || -n "${CODEX_CI:-}" || "${__CFBundleIdentifier:-}" == "com.openai.codex" ]]; then
+  print_pass "Codex runtime detected — Claude Code hook firing history is not applicable"
+elif [[ -d "${SESSION_DIR}" ]]; then
   LATEST_JSONL=$(find "${SESSION_DIR}" -maxdepth 2 -name "*.jsonl" -type f 2>/dev/null \
     | xargs ls -t 2>/dev/null | head -1)
   if [[ -n "${LATEST_JSONL}" ]]; then
@@ -513,9 +515,11 @@ if [[ -z "${SUBLIMATED_FOUND}" ]]; then
   print_info "No sublimated files yet — new lessons will accumulate in core/010 until count/time triggers fire"
 else
   print_pass "Sublimated files exist — prefer APPEND over new core/010 entry when domain matches:"
-  printf '%b' "${SUBLIMATED_FOUND}" | awk 'NF {print "     - blueprint/" $0}'
-  print_info "(per CRYSTALLIZATION_PROTOCOL §3 SEARCH: AI should APPEND to existing"
-  print_info " domain files first, only adding to core/010 if no match found)"
+  if ! "${QUIET_MODE}"; then
+    printf '%b' "${SUBLIMATED_FOUND}" | awk 'NF {print "     - blueprint/" $0}'
+    print_info "(per CRYSTALLIZATION_PROTOCOL §3 SEARCH: AI should APPEND to existing"
+    print_info " domain files first, only adding to core/010 if no match found)"
+  fi
 fi
 
 # =============================================================================
