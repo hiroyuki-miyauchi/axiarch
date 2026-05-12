@@ -77,13 +77,22 @@ if ! "${QUIET_MODE}"; then
 fi
 
 # =============================================================================
-# Check 1: .claude/settings.json existence
 # =============================================================================
-print_section "Check 1: .claude/settings.json"
+# Check 1: Hook configuration existence
+# =============================================================================
+print_section "Check 1: Hook config (.claude/settings.json or .codex/hooks.json)"
+
+HOOK_FILE_PATH=""
 if [[ -f "${PROJECT_DIR}/.claude/settings.json" ]]; then
-  print_pass "File exists"
+  HOOK_FILE_PATH="${PROJECT_DIR}/.claude/settings.json"
+elif [[ -f "${PROJECT_DIR}/.codex/hooks.json" ]]; then
+  HOOK_FILE_PATH="${PROJECT_DIR}/.codex/hooks.json"
+fi
+
+if [[ -n "${HOOK_FILE_PATH}" ]]; then
+  print_pass "File exists: ${HOOK_FILE_PATH}"
 else
-  print_fail "Missing: ${PROJECT_DIR}/.claude/settings.json"
+  print_fail "Missing: hook configuration (.claude/settings.json or .codex/hooks.json)"
   print_info "Run \`bash init.sh\` again, or copy from axiarch repo:"
   print_info "  cp <axiarch>/.claude/settings.json ${PROJECT_DIR}/.claude/"
   print_info "(Continuing with remaining checks for full-protocol coverage)"
@@ -99,11 +108,11 @@ if ! "${HOOK_FILE_OK}"; then
   print_warn "Skipped — settings.json not present (see Check 1)"
   HOOK_JSON_OK=false
 elif command -v jq &>/dev/null; then
-  if jq . "${PROJECT_DIR}/.claude/settings.json" >/dev/null 2>&1; then
+  if jq . "${HOOK_FILE_PATH}" >/dev/null 2>&1; then
     print_pass "Valid JSON"
   else
     print_fail "JSON parse error"
-    print_info "Run: jq . ${PROJECT_DIR}/.claude/settings.json"
+    print_info "Run: jq . ${HOOK_FILE_PATH}"
     HOOK_JSON_OK=false
     EXIT_CODE=1
   fi
@@ -120,11 +129,11 @@ if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
   print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
 elif command -v jq &>/dev/null; then
   HOOK_COUNT=$(jq '[.hooks.UserPromptSubmit[]?.hooks[]?] | length' \
-    "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null || echo "0")
+    "${HOOK_FILE_PATH}" 2>/dev/null || echo "0")
   if [[ "${HOOK_COUNT}" -gt 0 ]]; then
     print_pass "UserPromptSubmit hook defined (${HOOK_COUNT} entries)"
     HOOK_CMD=$(jq -r '[.hooks.UserPromptSubmit[]?.hooks[]?.command // empty][0]' \
-      "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+      "${HOOK_FILE_PATH}" 2>/dev/null)
     # AXIARCH BOOT marker can live in two places:
     #   (1) directly in the inline command (v1.4.0–v1.5.2)
     #   (2) in axiarch-scripts/axiarch-boot-reminder.sh referenced by the command (v1.5.3+)
@@ -433,7 +442,7 @@ if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
   print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
 elif command -v jq &>/dev/null; then
   PRE_HOOK_CMD=$(jq -r '[.hooks.PreToolUse[]?.hooks[]?.command // empty][0] // empty' \
-    "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+    "${HOOK_FILE_PATH}" 2>/dev/null)
   if [[ -z "${PRE_HOOK_CMD}" ]]; then
     print_warn "PreToolUse hook not configured — §6 violations cannot be physically blocked"
     print_info "Add a PreToolUse hook calling axiarch-scripts/axiarch-protect-antifull.sh (Write matcher)"
@@ -463,7 +472,7 @@ if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
   print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
 elif command -v jq &>/dev/null; then
   SS_HOOK_CMD=$(jq -r '[.hooks.SessionStart[]?.hooks[]?.command // empty][0] // empty' \
-    "${PROJECT_DIR}/.claude/settings.json" 2>/dev/null)
+    "${HOOK_FILE_PATH}" 2>/dev/null)
   if [[ -z "${SS_HOOK_CMD}" ]]; then
     print_warn "SessionStart hook not configured — task.md will not be auto-initialised"
     print_info "Add a SessionStart hook calling axiarch-scripts/axiarch-init-task-md.sh"

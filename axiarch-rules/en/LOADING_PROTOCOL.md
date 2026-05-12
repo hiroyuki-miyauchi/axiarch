@@ -20,13 +20,13 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 ## 🛡️ ENFORCEMENT MECHANISM 🛡️
 
-**Projects adopting Claude Code ship with three hooks in `.claude/settings.json`** (v1.5.5+):
+**Projects adopting AI Agents like Claude Code ship with three hooks in `.claude/settings.json` or `.codex/hooks.json`** (v1.5.5+):
 
 | Hook | Fires when | Role | Externalised script |
 |:--|:--|:--|:--|
 | `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
 | `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | **Physically blocks** full-overwrite of existing files (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
+| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | **Physically blocks** full-overwrite of existing files (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
 
 **Removing or disabling any of these three hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular is the v1.5.5 paradigm shift from **reminder to physical block** (academically backed by arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It structurally prevents §6 violations that reminder-only enforcement could not reliably stop.
 

@@ -11,9 +11,9 @@
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
 | [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（14 段階、`--quiet` 対応 v1.8.0+） / Full-protocol compliance health diagnostic (14-stage, `--quiet` support v1.8.0+) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
-| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターン違反検出 (A/B/C/D) + TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); dynamic violations A/B/C/D, short-circuits within TTL when no violation | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
-| [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
-| [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に task.md を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps task.md on session start | `init.sh` 経由で `.claude/settings.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターン違反検出 (A/B/C/D) + TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); dynamic violations A/B/C/D, short-circuits within TTL when no violation | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に task.md を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps task.md on session start | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
 
 ---
@@ -40,7 +40,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 
 | # | カテゴリ / Category | 検証対象 / Target |
 |:--|:--|:--|
-| 1 | Hook | `.claude/settings.json` 存在 / File presence |
+| 1 | Hook | `.claude/settings.json` または `.codex/hooks.json` 存在 / File presence |
 | 2 | Hook | JSON 構文 / Syntax validation |
 | 3 | Hook | UserPromptSubmit hook 構造 + AXIARCH BOOT marker / Hook structure + marker |
 | 4 | Hook | セッションログ発火履歴 / Firing history (session JSONL grep) |
@@ -81,7 +81,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 
 ### 概要 / Overview
 
-`.claude/settings.json` の `UserPromptSubmit` hook から呼ばれる外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に **🚨 フラグ**を追記する：
+`.claude/settings.json` または `.codex/hooks.json` の `UserPromptSubmit` hook から呼ばれる外出しスクリプト。毎ターン以下を動的検出し、違反時は reminder に **🚨 フラグ**を追記する：
 
 - **Check A**: `task.md` にロード履歴（AGENTS.md / INDEX.md / LOADING_PROTOCOL.md）が未記録
 - **Check B**: `core/010_project_lessons_log.md` で 3 件以上溜まったドメイン（CRYSTALLIZATION §5 違反）
@@ -111,15 +111,15 @@ bash axiarch-scripts/axiarch-boot-reminder.sh | jq .
 
 ### 概要 / Overview
 
-`.claude/settings.json` の `PreToolUse` hook（`Write` matcher）から呼ばれる外出しスクリプト。`Write` tool 呼び出しを傍受し、対象ファイルが既存の場合は `decision:"block"` JSON + exit code 2 で**物理遮断**する。AGENTS.md §6 ANTI-FULL-OVERWRITE 違反を構造的に防止。
+`.claude/settings.json` または `.codex/hooks.json` の `PreToolUse` hook（`Write` matcher）から呼ばれる外出しスクリプト。`Write` tool 呼び出しを傍受し、対象ファイルが既存の場合は `decision:"block"` JSON + exit code 2 で**物理遮断**する。AGENTS.md §6 ANTI-FULL-OVERWRITE 違反を構造的に防止。
 
-Externalized PreToolUse hook script invoked from `.claude/settings.json`. Intercepts `Write` tool calls and physically blocks (decision:"block" JSON + exit 2) when the target file exists. Structurally prevents AGENTS.md §6 ANTI-FULL-OVERWRITE violations.
+Externalized PreToolUse hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. Intercepts `Write` tool calls and physically blocks (decision:"block" JSON + exit 2) when the target file exists. Structurally prevents AGENTS.md §6 ANTI-FULL-OVERWRITE violations.
 
 ### Whitelist サポート / Whitelist Support
 
-`.claude/axiarch-overwrite-allow.txt` で 1 行 1 path/glob 形式で whitelist を定義可能（自動生成 build artefact 等の正当な full-overwrite 用 escape hatch）。コメント (`#`) と空行はスキップ。
+`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で 1 行 1 path/glob 形式で whitelist を定義可能（自動生成 build artefact 等の正当な full-overwrite 用 escape hatch）。コメント (`#`) と空行はスキップ。
 
-`.claude/axiarch-overwrite-allow.txt` supports one-path-per-line glob whitelist (escape hatch for legitimate full-overwrite cases like autogenerated artefacts). Comments (`#`) and empty lines are skipped.
+`.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` supports one-path-per-line glob whitelist (escape hatch for legitimate full-overwrite cases like autogenerated artefacts). Comments (`#`) and empty lines are skipped.
 
 ### 使い方 / Usage
 
@@ -142,9 +142,9 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"/existing/file.md"}}' \
 
 ### 概要 / Overview
 
-`.claude/settings.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に project root の `task.md` 存在を確認し、**不在時は load-history table を含む scaffold で自動生成**する。常に AGENTS.md §8 (Documentation Requirements) の reminder を `additionalContext` で AI に注入。
+`.claude/settings.json` または `.codex/hooks.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に project root の `task.md` 存在を確認し、**不在時は load-history table を含む scaffold で自動生成**する。常に AGENTS.md §8 (Documentation Requirements) の reminder を `additionalContext` で AI に注入。
 
-Externalized SessionStart hook script invoked from `.claude/settings.json`. On session start, checks for `task.md` in the project root and **auto-bootstraps it with a load-history table scaffold when missing**. Always injects an AGENTS.md §8 (Documentation Requirements) reminder via `additionalContext`.
+Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, checks for `task.md` in the project root and **auto-bootstraps it with a load-history table scaffold when missing**. Always injects an AGENTS.md §8 (Documentation Requirements) reminder via `additionalContext`.
 
 ### 使い方 / Usage
 
