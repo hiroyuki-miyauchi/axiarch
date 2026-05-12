@@ -1,7 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.8.1 🩹 patch (Check 4 Codex 互換性 +
-> Check 13 quiet mode バグ修正)\
+> **現在の安定版 / Current Stable**: v1.8.2 ⚙️ Native Codex Environment Integration\
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -410,6 +409,12 @@ loophole を hot-fix。
   llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
 
 ---
+
+### ✅ v1.8.2 — Native Codex Environment Integration（2026-05-12）
+
+- **`init.sh`**: `.codex/hooks.json` の自動初期化・検証・クリーンアップ機構を追加
+- **Diagnostic / Script Support**: `check-axiarch-health.sh`, `check-git-config-clean.sh`, `axiarch-protect-antifull.sh` 等のインフラ全体で `.codex/hooks.json` と関連ホワイトリストを第一級サポート
+- **Documentation**: `LOADING_PROTOCOL.md` 等の憲法レベルのフック配線規定に Codex を明記
 
 ### ✅ v1.8.1 — Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 + ドキュメント訂正（2026-05-11）
 
@@ -954,6 +959,12 @@ self-judgment clause.
   agent-selection order (4 files, 8 sites updated)
 
 ---
+
+### ✅ v1.8.2 — Native Codex Environment Integration (2026-05-12)
+
+- **`init.sh`**: Added automatic initialization, validation, and cleanup mechanism for `.codex/hooks.json`
+- **Diagnostic / Script Support**: First-class support for `.codex/hooks.json` and related allow-lists across the entire infrastructure, including `check-axiarch-health.sh`, `check-git-config-clean.sh`, and `axiarch-protect-antifull.sh`
+- **Documentation**: Explicitly documented Codex hook mechanisms in constitutional rules like `LOADING_PROTOCOL.md`
 
 ### ✅ v1.8.1 — Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix + Docs Corrections (2026-05-11)
 

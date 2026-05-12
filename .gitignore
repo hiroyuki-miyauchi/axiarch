@@ -64,6 +64,11 @@ Desktop.ini
 .claude/projects/
 .claude/settings.local.json
 
+# Codex: ignore session data and personal settings; allow committed team config (hooks.json)
+.codex/worktrees/
+.codex/projects/
+.codex/hooks.local.json
+
 # Axiarch per-task working documents (regenerated per session, never committed)
 task.md
 implementation_plan.md

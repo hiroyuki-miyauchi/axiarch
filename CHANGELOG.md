@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.2] — 2026-05-12
+
+### ⚙️ Native Codex Environment Integration / Codex 環境ネイティブ対応
+
+Axiarchの強制執行機構（Enforcement Mechanism）全体を拡張し、Claude Code (`.claude/settings.json`) と同等に Codex (`.codex/hooks.json`) を第一級サポートとしてネイティブ統合。
+
+Expanded the entire Axiarch Enforcement Mechanism to natively integrate Codex (`.codex/hooks.json`) as a first-class citizen alongside Claude Code (`.claude/settings.json`).
+
+### Added
+
+- **`init.sh` — Codex setup support** — `SETUP_CODEX` フラグを追加し、`.codex/hooks.json` の自動初期化・検証・クリーンアップ機構を実装 / Added `SETUP_CODEX` flag to implement automatic initialization, validation, and cleanup for `.codex/hooks.json`
+- **`.gitignore` — Codex global ignore patterns** — `.codex/worktrees/`, `.codex/projects/`, `.codex/hooks.local.json` をグローバル無視リストに追加 / Added Codex-specific directories to the global ignore list
+
+### Changed
+
+- **`check-axiarch-health.sh` — Dynamic Hook Validation** — ハードコードされていた `.claude/settings.json` の参照を削除し、`.claude/settings.json` と `.codex/hooks.json` の両方を動的に検知してフックの検証を行えるように改修 / Refactored to dynamically detect and validate either `.claude/settings.json` or `.codex/hooks.json`
+- **`check-git-config-clean.sh` — Stale Branch Detection** — ゾンビブランチの検出ロジック（正規表現）を拡張し、`claude` だけでなく `codex` のステイルブランチも正しくクリーンアップできるように変更 / Expanded stale branch detection regex to clean up both `claude` and `codex` stale branches
+- **`axiarch-protect-antifull.sh` — Whitelist Support** — §6 全文上書き禁止ルールのホワイトリストとして、`.claude/axiarch-overwrite-allow.txt` と `.codex/axiarch-overwrite-allow.txt` の両方をサポート / Supported both `.claude` and `.codex` overwrite allow-lists for §6 Anti-Full-Overwrite rules
+- **`axiarch-rules/*/LOADING_PROTOCOL.md`** — 採用先プロジェクトに配置される標準フック定義ファイルとして `.codex/hooks.json` を追記 / Documented `.codex/hooks.json` as a standard hook configuration in the governance protocol
+
+### Compatibility
+
+- ✅ **後方互換性 100%** — 既存の Claude Code 環境に対する挙動変更は一切なし / 100% backward compatible, no changes to existing Claude Code behavior
+
+---
+
 ## [1.8.1] — 2026-05-11
 
 ### 🩹 Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 + docs 訂正 / Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix + Docs Corrections
@@ -742,6 +768,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.8.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.6.0...v1.8.0
 [1.7.0]: https://github.com/hiroyuki-miyauchi/axiarch/blob/main/CHANGELOG.md#170--2026-05-08-内部開発のみ独立-release-はせず-v180-に統合

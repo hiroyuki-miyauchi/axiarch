@@ -5,12 +5,12 @@
 # ----------------------------------------------------------------------------
 #
 # Purpose / 用途:
-#   AI agent (Claude Code, Cursor, etc.) や開発者が `git worktree add` を実行した後、
+#   AI agent (Claude Code, Cursor, Codex, etc.) や開発者が `git worktree add` を実行した後、
 #   `.git/config` に残留する `[extensions] worktreeConfig = true` および
-#   `[branch "claude/..."]` 等のステイルエントリを検出し、必要に応じて自動除去する。
+#   `[branch "claude/..."]` や `[branch "codex/..."]` 等のステイルエントリを検出し、必要に応じて自動除去する。
 #
 #   Detect and optionally remove `[extensions] worktreeConfig = true` and stale
-#   `[branch "claude/..."]` entries left in `.git/config` after worktree operations.
+#   `[branch "claude/..."]` or `[branch "codex/..."]` entries left in `.git/config` after worktree operations.
 #
 # Why / 理由:
 #   残留エントリは Antigravity 等の Go ベース language server をクラッシュさせ、
@@ -26,7 +26,7 @@
 #   ./axiarch-scripts/check-git-config-clean.sh             # Detection only (exit 1 if dirty)
 #   ./axiarch-scripts/check-git-config-clean.sh --fix       # Detection + auto-repair
 #   ./axiarch-scripts/check-git-config-clean.sh --quiet     # CI silent mode (no output if clean)
-#   ./axiarch-scripts/check-git-config-clean.sh --full-clean # --fix + delete stale claude/* branches
+#   ./axiarch-scripts/check-git-config-clean.sh --full-clean # --fix + delete stale claude/codex branches
 # ----------------------------------------------------------------------------
 
 set -euo pipefail
@@ -79,16 +79,16 @@ if git config --get extensions.worktreeConfig >/dev/null 2>&1; then
   fi
 fi
 
-# 2. ステイル claude/* ブランチ config エントリ検出 / Detect stale claude/* branch config
+# 2. ステイル claude/* や codex/* ブランチ config エントリ検出 / Detect stale claude/* or codex/* branch config
 # 現在チェックアウト中のブランチは除外 / Exclude currently checked-out branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
 STALE_BRANCHES=$(git config --list 2>/dev/null \
-  | grep -oE "branch\.claude/[^.]+" \
+  | grep -oE "branch\.(claude|codex)/[^.]+" \
   | sort -u \
   | awk -v cur="branch.${CURRENT_BRANCH}" '$0 != cur' || true)
 if [[ -n "$STALE_BRANCHES" ]]; then
   COUNT=$(echo "$STALE_BRANCHES" | wc -l | tr -d ' ')
-  log "❌ DIRTY: $COUNT 件のステイル claude/* ブランチ config / stale entries detected"
+  log "❌ DIRTY: $COUNT 件のステイル claude/codex ブランチ config / stale entries detected"
   if ! $QUIET_MODE; then
     echo "$STALE_BRANCHES" | sed 's/^/    - /'
   fi

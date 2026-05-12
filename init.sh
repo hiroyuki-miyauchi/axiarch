@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.8.1"
+AXIARCH_VERSION="1.8.2"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -96,6 +96,7 @@ select_agent() {
   SETUP_ANTIGRAVITY=false
   SETUP_CURSOR=false
   SETUP_CLAUDE=false
+  SETUP_CODEX=false
   SETUP_COPILOT=false
   SETUP_WINDSURF=false
   AGENT_LABEL="Universal"
@@ -103,7 +104,7 @@ select_agent() {
   case "$agent_choice" in
     1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
     2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
-    3) AGENT_LABEL="OpenAI Codex" ;;
+    3) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
     4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
@@ -331,6 +332,25 @@ copy_files() {
     fi
   fi
 
+  if $SETUP_CODEX; then
+    # === Codex: enforcement hook ===
+    if [[ -f "$SOURCE_DIR/.codex/hooks.json" ]]; then
+      mkdir -p "$TARGET_DIR/.codex"
+      cp "$SOURCE_DIR/.codex/hooks.json" \
+         "$TARGET_DIR/.codex/hooks.json"
+      print_info "Copied: .codex/hooks.json (UserPromptSubmit enforcement hook)"
+
+      # === Validate JSON syntax (best-effort, jq optional) ===
+      if command -v jq &>/dev/null; then
+        if jq . "$TARGET_DIR/.codex/hooks.json" >/dev/null 2>&1; then
+          print_info "Validated: .codex/hooks.json (valid JSON)"
+        else
+          print_warn ".codex/hooks.json — JSON parse failed; please verify before launching Codex"
+        fi
+      fi
+    fi
+  fi
+
   if $SETUP_COPILOT; then
     mkdir -p "$TARGET_DIR/.github"
     cp "$SOURCE_DIR/.github/copilot-instructions.md" \
@@ -365,6 +385,16 @@ copy_files() {
     if [[ -d "$TARGET_DIR/.claude" ]] && [ -z "$(ls -A "$TARGET_DIR/.claude" 2>/dev/null)" ]; then
       rmdir "$TARGET_DIR/.claude" 2>/dev/null && \
         print_info "Removed: empty .claude/ directory"
+    fi
+  fi
+  if ! $SETUP_CODEX; then
+    # Only remove the Axiarch-distributed enforcement hook config; preserve user session data
+    rm -f "$TARGET_DIR/.codex/hooks.json" 2>/dev/null && \
+      print_info "Removed: .codex/hooks.json (not needed for ${AGENT_LABEL})"
+    # Remove .codex/ directory only if now empty (preserves user data)
+    if [[ -d "$TARGET_DIR/.codex" ]] && [ -z "$(ls -A "$TARGET_DIR/.codex" 2>/dev/null)" ]; then
+      rmdir "$TARGET_DIR/.codex" 2>/dev/null && \
+        print_info "Removed: empty .codex/ directory"
     fi
   fi
   if ! $SETUP_COPILOT; then
