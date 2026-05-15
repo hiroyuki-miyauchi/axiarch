@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「APIは組織の最も価値ある資産であり、販売可能な商品として設計せよ。」
 > API設計において、**セキュリティ > 信頼性 > 互換性 > パフォーマンス > DX** の優先順位を厳守せよ。
 > この文書は API統合・マイクロサービスに関するすべての設計判断の最上位基準である。
@@ -15,7 +15,7 @@
 
 ## 目次
 
-- Part I: Supreme Directive & API哲学
+- Part I: Primary Directive & API哲学
 - Part II: API設計原則（API-First・Contract-First）
 - Part III: プロトコル選択戦略（REST/GraphQL/gRPC/AsyncAPI）
 - Part IV: RESTful API設計基準
@@ -90,7 +90,7 @@
 
 ---
 
-## Part I: Supreme Directive & API哲学
+## Part I: Primary Directive & API哲学
 
 ### 1.1. API実装の最高原則
 

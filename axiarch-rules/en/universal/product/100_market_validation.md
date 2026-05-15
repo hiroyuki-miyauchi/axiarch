@@ -5,7 +5,7 @@
 > Last amended: 2026-04-22
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "A hypothesis is not a fact. Conviction without data is an illusion."
 > **43% of startups fail because they never achieve Product-Market Fit (CB Insights, 2025/2026).**
 > Before you build, ask the market. Maximize learning. Evidence before code.
@@ -1612,8 +1612,8 @@ Localization PMF Validation Items (AND conditions):
 □ Local partner or Country Manager secured
 ```
 
-- **Rule 11.125**: Regional PMF success is judged using the same PMF Composite Score as the home market, but NPS thresholds are adjusted regionally to account for cultural bias (e.g., -10pt adjustment for Japan market)
-- **Anti-Pattern**: "It succeeded in English-speaking markets so translating it will work in Japan" ignores the cultural dimension of PMF
+- **Rule 11.125**: Regional PMF success is judged using the same PMF Composite Score as the home market, but NPS thresholds are adjusted regionally to account for cultural response bias when validated by local research.
+- **Anti-Pattern**: "It succeeded in one language market, so translation alone will work in another region" ignores the cultural dimension of PMF.
 
 ### 13.5. Second Product PMF Protocol
 

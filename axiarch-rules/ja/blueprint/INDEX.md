@@ -6,7 +6,7 @@
 > `universal/` のルールは **「憲法」** であり、すべてのプロジェクトに共通する不変の原則です。
 > `blueprint/` のルールは **「法律」** であり、憲法を具体化し、プロジェクト固有の事情に合わせてカスタマイズする場所です。
 > 間隔採番（Sparse Numbering）により、将来の拡張性を確保しています。
-> **`universal/` と完全同型（Isomorphic）のフォルダ構成を採用しています。**
+> **初期構成は `universal/` と同じ8フォルダに対応**しています。ただし、Blueprintはプロジェクト固有の可変層であり、既存フォルダに分類できない新ドメインはユーザー承認後に追加できます。
 
 ---
 
@@ -41,8 +41,8 @@ blueprint/
 └── INDEX.md         ← 本ファイル
 ```
 
-> **Universal との完全同型**: `universal/` の 8 フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）と 1:1 対応。
-> 「憲法（Universal）」を「法律（Blueprint）」が具体化する構造が、フォルダ名レベルで視覚的に明確になります。
+> **Universal との初期対応**: `universal/` の 8 フォルダ（`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`）と 1:1 対応。
+> 「憲法（Universal）」を「固有ルール（Blueprint）」が具体化する構造が、初期フォルダ名レベルで視覚的に明確になります。この対応は初期構成であり、Blueprint側はユーザー承認により拡張できます。
 
 ---
 
@@ -52,10 +52,10 @@ blueprint/
 
 | ファイル | 説明 |
 |:--------|:----|
-| [000_project_overview.md](core/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
+| [core/000_project_overview.md](core/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
-| [998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
-| [999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
+| [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
+| [core/999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
 
 ---
 
@@ -120,7 +120,7 @@ SRE、インシデント管理、運用要件。
 
 ### 初期セットアップ
 1. `AGENTS.md` の `Project Native Language` を設定する
-2. **使用しない方の言語フォルダ（`ja/` または `en/`）を削除する**
+2. 単一言語運用に固定する場合のみ、使用しない方の言語フォルダ（`ja/` または `en/`）を任意で削除する。両言語を保持する場合は、`Project Native Language` に対応する言語フォルダを優先ロードする
 3. `core/000_project_overview.md` をプロジェクトの内容に書き換える
 
 ### 機能仕様の追加（Blueprint First の実践）
@@ -138,7 +138,7 @@ SRE、インシデント管理、運用要件。
 
 ### 教訓の記録（Crystallization）
 - 作業完了時や重要な決定時に `core/010_project_lessons_log.md` に追記する
-- 同一ドメインの教訓が3件以上に達したら、AIが自律的にドメイン対応フォルダに正式プロジェクトルールファイル（`{NNN}_{topic}.md`）を作成し教訓を昇華・移動する
+- 同一ドメインの教訓が3件以上に達したら、AIが既存またはユーザー承認済みの対応フォルダに正式プロジェクトルールファイル（`{NNN}_{topic}.md`）を作成し教訓を昇華・移動する
 - 詳細手順は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を参照
 
 ---
@@ -161,7 +161,7 @@ SRE、インシデント管理、運用要件。
 | マネタイズ・グロース | `product/` |
 | AI戦略・CMS | `ai/` |
 
-### クロスリファレンス（Blueprint → Universal 1:1 対照表）
+### クロスリファレンス（Blueprint → Universal 初期対照表）
 
 | Blueprint | Universal |
 |:----------|:----------|
@@ -177,5 +177,5 @@ SRE、インシデント管理、運用要件。
 ---
 
 **Last Updated**: 2026-04-29
-**Version**: v1.3.0 — Universal と完全同型（Isomorphic）8フォルダ構成、YAGNI原則に基づく構造正規化
+**Version**: v1.3.0 — Universal と初期対応する8フォルダ構成、YAGNI原則に基づく構造正規化
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

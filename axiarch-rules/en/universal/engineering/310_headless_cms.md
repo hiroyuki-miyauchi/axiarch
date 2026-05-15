@@ -5,17 +5,17 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Content is data, not display. Structured content independent of delivery channels is the essence of digital assets."
 > In CMS implementation, strictly follow the priority order: **Content Structure > Delivery Flexibility > Operational Efficiency > Performance > DX**.
-> This document is the supreme standard for all CMS-related design decisions.
+> This document is the primary standard for all CMS-related design decisions.
 > **31 Parts, 80 Sections.**
 
 ---
 
 ## Table of Contents
 
-- Part I: Supreme Directive & CMS Philosophy
+- Part I: Primary Directive & CMS Philosophy
 - Part II: Headless Architecture Principles
 - Part III: CMS Selection Strategy & Composable DXP
 - Part IV: Content Modeling Fundamentals
@@ -100,9 +100,9 @@
 
 ---
 
-## Part I: Supreme Directive & CMS Philosophy
+## Part I: Primary Directive & CMS Philosophy
 
-### 1.1. CMS Implementation Supreme Principles
+### 1.1. CMS Implementation Core Principles
 
 - **Rule 34.1**: Content MUST be managed as "pure data" separated from "display". Mixing display logic into the content layer is prohibited
 - **Rule 34.2**: All content MUST be accessible via APIs (API-First Mandate)
@@ -185,7 +185,7 @@
 | Category | Examples | Recommended Use Case |
 |:---|:---|:---|
 | **SaaS Headless CMS** | Contentful, Sanity, Hygraph | Global delivery, enterprise |
-| **Japan-Specific SaaS** | MicroCMS, Newt | Japanese market, small-medium scale |
+| **Regional SaaS** | MicroCMS, Newt, region-focused CMS products | Region-specific markets, small-medium scale |
 | **OSS Headless CMS** | Strapi, Payload CMS, Directus | Self-hosted, customization-focused |
 | **Git-Based CMS** | Decap CMS, Tina CMS | Developer blogs, documentation |
 
@@ -2341,4 +2341,3 @@ monorepo/
 | [security/200_oss_compliance.md](../security/200_oss_compliance.md) | Dependency management |
 | [800_internationalization.md](../product/800_internationalization.md) | i18n, multilingual, global expansion, MTPE |
 | [core/200_language_protocol.md](../core/200_language_protocol.md) | CMS language governance |
-

@@ -5,17 +5,17 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "APIs are the most valuable assets of an organization; design them as salable products."
 > In API design, strictly follow this priority order: **Security > Reliability > Compatibility > Performance > DX**.
-> This document serves as the supreme standard for all design decisions related to API integration and microservices.
+> This document serves as the primary standard for all design decisions related to API integration and microservices.
 > **35 Parts, 70 Sections.**
 
 ---
 
 ## Table of Contents
 
-- Part I: Supreme Directive & API Philosophy
+- Part I: Primary Directive & API Philosophy
 - Part II: API Design Principles (API-First / Contract-First)
 - Part III: Protocol Selection Strategy (REST/GraphQL/gRPC/AsyncAPI)
 - Part IV: RESTful API Design Standards
@@ -90,9 +90,9 @@
 
 ---
 
-## Part I: Supreme Directive & API Philosophy
+## Part I: Primary Directive & API Philosophy
 
-### 1.1. Supreme Principles of API Implementation
+### 1.1. Core Principles of API Implementation
 
 - **Rule 35.1**: All APIs must be designed as "Salable Assets." Even internal-only APIs must not be developed carelessly, as that creates seeds of technical debt
 - **Rule 35.2**: Breaking changes to an API are equivalent to a "product recall." Design with compatibility as the top priority
@@ -2294,6 +2294,5 @@ rules:
 | `security/100_data_governance.md` | GDPR, cross-border data, regulatory compliance |
 | `security/200_oss_compliance.md` | SBOM, Supply Chain Security, dependency management |
 | `quality/000_qa_testing.md` | Test strategy, Contract Testing, Fuzz Testing |
-
 
 

@@ -5,10 +5,10 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Firebase is an 'Auxiliary Engine'; data sovereignty belongs to Supabase (PostgreSQL)."
 > In all Firebase/GCP implementations, strictly follow this priority order: **Security (App Check + Security Rules) > Reliability (Idempotency + Retry) > Cost Efficiency (FinOps) > Performance > Developer Productivity**.
-> This document is the supreme standard for all design decisions related to Firebase & GCP.
+> This document is the primary standard for all design decisions related to Firebase & GCP.
 > **55 Parts · Rule 32.1–32.200+ · Appendix A–D.**
 
 > [!WARNING]
@@ -22,7 +22,7 @@
 ## Table of Contents
 
 **I. Foundation & Philosophy**
-- §0. Supreme Directives
+- §0. Primary Directives
 - §1. Firebase Project Strategy & GCP Integration
 
 **II. Compute**
@@ -133,37 +133,37 @@
 
 ---
 
-## §0. Supreme Directives
+## §0. Primary Directives
 
-### Supreme Directive 0.1: Auxiliary Engine Principle
+### Primary Directive 0.1: Auxiliary Engine Principle
 -   **Law**: Firebase is an "Auxiliary Engine"; **data sovereignty belongs to Supabase (PostgreSQL)**. New data storage in Firestore is prohibited in principle.
 -   **Mandate**:
     1.  **Data Sovereignty**: All user and domain data must be stored in Supabase. Firestore is permitted only for legacy maintenance.
     2.  **Peripheral Services Only**: Firebase usage is limited to FCM, Analytics, Crashlytics, App Check, Remote Config, Performance Monitoring, etc.
     3.  **No New Firestore Collections**: Creating new collections is prohibited. Only maintenance of existing collections is permitted.
 
-### Supreme Directive 0.2: Defense in Depth
+### Primary Directive 0.2: Defense in Depth
 -   **Law**: Security must not depend on a single layer. Multi-layered defense with App Check + Security Rules + IAM + VPC is mandatory.
 -   **Mandate**:
     1.  **App Check Mandatory**: Enable App Check on all Firebase services and custom backends.
     2.  **Least Privilege**: All service accounts and IAM roles must follow the principle of least privilege. `roles/owner` in production is prohibited.
     3.  **Zero Trust Network**: Minimize trust boundaries using VPC Service Controls and Private Google Access.
 
-### Supreme Directive 0.3: Idempotency First
+### Primary Directive 0.3: Idempotency First
 -   **Law**: All Cloud Run Functions and Cloud Run Services must be designed to be idempotent.
 -   **Mandate**:
     1.  **Event ID Deduplication**: Event-triggered functions must implement deduplication using `eventId`.
     2.  **Transactional Writes**: Use transactions or batch writes for Firestore writes.
     3.  **Retry Safety**: Guarantee that retries do not cause duplicate side effects.
 
-### Supreme Directive 0.4: FinOps Guardian
+### Primary Directive 0.4: FinOps Guardian
 -   **Law**: Cloud costs are managed with the same rigor as technical debt. Budget overruns are treated as incidents.
 -   **Mandate**:
     1.  **Budget Alerts**: Set budget alerts at 50%/80%/100%/120% for all projects.
     2.  **Automated Response**: Automatically stop non-critical resources when exceeding 100% via Cloud Run Functions.
     3.  **Cost Tagging**: Apply `environment`/`service`/`owner` labels to all GCP resources.
 
-### Supreme Directive 0.5: Cloud Run Unified
+### Primary Directive 0.5: Cloud Run Unified
 -   **Law**: Since 2025, Cloud Functions (2nd Gen) has been renamed to **Cloud Run Functions**. All serverless compute is managed uniformly as the Cloud Run family.
 -   **Mandate**:
     1.  **Naming**: Use "Cloud Run Functions" in documentation, code, and IaC.
@@ -524,7 +524,7 @@ export const myFunction = onRequest(
 ## §7. Firestore Design & Security Rules
 
 ### Rule 32.30: Firestore Usage Restriction
--   **Mandate**: New data storage in Firestore is prohibited in principle (per Supreme Directive 0.1).
+-   **Mandate**: New data storage in Firestore is prohibited in principle (per Primary Directive 0.1).
 -   **Permitted Use Cases**:
     1.  Data requiring real-time listeners (presence, chat, etc.).
     2.  Maintenance of existing Firestore collections.

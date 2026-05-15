@@ -5,17 +5,17 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Data is the lifeblood of the enterprise. No compromise is permitted in its flow and protection."
 > In Supabase/PostgreSQL implementation, strictly observe the priority order: **Security (RLS) > Data Integrity > Performance > Developer Productivity > Cost Efficiency**.
-> This document is the supreme standard for all backend data strategy design decisions.
+> This document is the primary standard for all backend data strategy design decisions.
 > **60 sections, 200+ rules.**
 
 ---
 
 ## Table of Contents
 
-- §0. Data Sovereignty Law & Supreme Directives
+- §0. Data Sovereignty Law & Primary Directives
 - §1. Supabase Hybrid Stack Principle
 - §2. Database Design Standards
 - §3. Integrity & Logic Strategy
@@ -81,42 +81,42 @@
 
 ---
 
-## 0. Data Sovereignty Law & Supreme Directives
+## 0. Data Sovereignty Law & Primary Directives
 
-### Supreme Directive 0.1: The Zero Tolerance Linter Protocol
+### Primary Directive 0.1: The Zero Tolerance Linter Protocol
 -   **Law**: Database Linter (Supabase Security Advisor, etc.) warnings are NOT "suggestions" but **"vulnerability reports"**.
 -   **Mandate**:
     1.  **Zero Warnings**: Schemas deployed to production MUST **always have 0** Linter warnings. Any warnings block release.
     2.  **Universal Fix**: Warnings like "Search Path Mutable" or "Permissive Policy" MUST be **mechanically and immediately fixed**. No project-specific exceptions.
 
-### Supreme Directive 0.2: The Trinity DTO Mandate
--   **Purpose**: Obligation of trinity to guarantee data structure robustness and scalability.
-    -   **Security**: Physically prevent raw data leakage (White-list Output).
+### Primary Directive 0.2: The Trinity DTO Mandate
+-   **Purpose**: Trinity obligation that supports data structure robustness and scalability.
+    -   **Security**: Reduce raw data leakage risk through white-list output.
     -   **Stability**: Protect frontend from DB changes (Mapper Shield).
     -   **AI Economy**: Save AI tokens (Data Minimization).
-    -   **Universality**: An engineering **iron rule** regardless of language.
+    -   **Universality**: A baseline engineering standard regardless of language.
 
-### Supreme Directive 0.3: Omnichannel Data Principle (API First)
+### Primary Directive 0.3: Omnichannel Data Principle (API First)
 -   **Principle**: Data structures must be designed assuming consumption not only by a single Web app but also by native apps, external systems, and AI agents.
 -   **Mandate**:
     -   **Universal Types**: Do NOT store data types dependent on specific UI frameworks (React Node, etc.) in DB.
     -   **Neutral JSON**: Manage JSON data as "pure data" without display logic.
 
-### Supreme Directive 0.4: The Client DTO Barrier
+### Primary Directive 0.4: The Client DTO Barrier
 -   **Law**: Passing database row data (Raw Entity) directly as Props to client-side components (`use client`, etc.) is **prohibited**.
 -   **Mandate**:
     -   **Server-Side Transformation**: Always transform data into purpose-specific lightweight DTOs on the server side, sending only the minimum required fields to the client.
-    -   **PII Exclusion**: Physically prevent PII such as `admin_notes`, `phone_number`, `email` and internal management fields (`deleted_at`, `internal_memo`) from reaching the browser.
+    -   **PII Exclusion**: Reduce the risk that PII such as `admin_notes`, `phone_number`, `email` and internal management fields (`deleted_at`, `internal_memo`) reach the browser.
     -   **Payload Minimization**: Sending unnecessary fields causes the dual problem of wasted network bandwidth and increased future data leakage risk.
 -   **Rationale**: As the concrete boundary for the DTO obligation defined by SD 0.2 (Trinity DTO Mandate), this establishes data handoff to client components as a physical interception point. Direct transmission of Raw Entities is the greatest risk source for unintended PII leakage.
 
 ### Core Laws
 -   **SSOT (Single Source of Truth)**: Settings, user data, and content all have **PostgreSQL (`public` schema)** as the Single Source of Truth. "Dual management" in JSON files or external CMS is strictly prohibited.
-    -   **Prohibition**: "Holding temporarily in JSON" is data rebellion.
+    -   **Prohibition**: "Holding temporarily in JSON" is a data governance violation.
 -   **Migration Only**: DB schema changes must ALWAYS go through coded `supabase/migrations`. Manual changes via admin console (Supabase Dashboard SQL Editor, etc.) are considered "history destruction".
 -   **Migration Immutability Law (Sanctuary)**:
     -   **Law**: `supabase/migrations/*.sql` becomes a "sanctuary" the moment it's committed, **permanently prohibiting rename, edit, or delete**.
-    -   **Felony**: Post-remote-DB-apply fixes MUST be done via "new file". Past tampering is **instant death-level felony (Instant Felony)**.
+    -   **Violation**: Post-remote-DB-apply fixes MUST be done via a new file. Tampering with past migrations is a severe governance violation.
 
 ---
 
@@ -146,14 +146,14 @@
     3.  **Prohibition**: Properties used for calculations, searches, or conditional logic (e.g., `max_count`, `threshold`) MUST NOT be included in JSONB. These must always be promoted to normalized columns.
 
 ### Rule 2.1: Integrity & Ownership
--   **RLS Absolute**: Row Level Security (RLS) is absolute. `service_role` key usage is prohibited in principle; all queries must pass through RLS.
+-   **RLS Strict Default**: Treat Row Level Security (RLS) as the default access boundary. `service_role` key usage is prohibited in principle; all queries must pass through RLS.
 -   **Hierarchical Resource Ownership**:
     -   **Context**: Complex ownership structures like family sharing or team projects that cannot be expressed with single owner (`user_id`).
     -   **Law**: When multiple users access resources, define permissions (`role: 'viewer'|'admin'`) via intermediate tables (e.g., `resource_members`) and control access via RLS policies referencing this relationship table.
     -   **Action**:
         1.  **Owner ID**: Retain primary owner as `owner_id`.
         2.  **Role-Based**: Manage permissions via intermediate tables.
-        3.  **Inheritance**: Child resources inherit parent resource access via `EXISTS` clause, guaranteeing double security.
+        3.  **Inheritance**: Child resources inherit parent resource access via `EXISTS` clause, strengthening layered access control.
 -   **PII Encryption**: Recommend encrypting highly confidential personal info (accounts, document numbers, etc.) using Vault or pgcrypto.
 
 ### Rule 2.2: Schema & Type Standards
@@ -168,7 +168,7 @@
 -   **Automated Types**: Use `supabase gen types` generated `database.types.ts`.
 -   **The Mapped Type Bridge Mandate**:
     -   **Law**: When defining extended types (`DatabaseExtended`), intersection types (`&`) are prohibited (inference conflict risk).
-    -   **Action**: MUST use **Mapped Type** to iterate over `keyof Database` and physically override, ensuring 100% type safety.
+    -   **Action**: MUST use **Mapped Type** to iterate over `keyof Database` and explicitly override target types, strengthening type safety.
 
 ### Rule 2.4: The New Table Checklist (Creation Protocol)
 -   **Law**: The following items MUST ALL be satisfied as completion criteria for new table creation:
@@ -218,7 +218,7 @@
 
 ## 3. Integrity & Logic Strategy
 
-### Supreme Directive 3.0: The RLS Implementation Iron Rules
+### Primary Directive 3.0: The RLS Implementation Iron Rules
 -   **Law 1: Atomic Action Definition**
     -   Comma-separated definitions like `FOR INSERT, UPDATE` are prohibited. Unless `FOR ALL`, define **individual policies for each action**.
 -   **Law 2: INSERT Syntax Discipline**
@@ -294,9 +294,9 @@
 -   **Context**: CMS content (Store Name, Article Title) requires different formats for Display, Sort, and Search.
 -   **Law**: Critical text data MUST NOT be in one column, but atomically saved (Triple Write) into 3 distinct roles:
     1.  **`name_display`**: For Display (includes emojis, decorations).
-    2.  **`name_kana`**: For Sort and Phonics (Normalized to half-width keys etc.).
+    2.  **`name_reading_key`**: For sort, phonetic matching, and locale-specific collation keys.
     3.  **`name_search`**: For Full-Text Search (N-gram tokenized or search metadata).
--   **Automated Sync**: Synchronize these upon submission from frontend or via DB trigger to physically prevent inconsistencies ("changed name but can't search").
+-   **Automated Sync**: Synchronize these upon submission from frontend or via DB trigger to reduce inconsistency risk ("changed name but can't search").
 
 ### Rule 3.3.2: The Multiple Permissive Policies Conflict (Policy Hygiene)
 -   **Law**: Postgres joins multiple `PERMISSIVE` policies for the same action with `OR`. This creates unintended access holes.
@@ -343,8 +343,8 @@
 -   **Naming Convention**: `idx_<table_name>_<column_name>`.
 -   **Unused Purge**: Regularly check `unused_index` warnings. Delete dead indexes to improve write performance, but wait for data growth before judging.
 
-### Rule 4.2: Japanese Search Optimization
--   Use `pg_search` (tsvector) or `pgroonga` for Japanese full-text search.
+### Rule 4.2: Locale-Specific Search Optimization
+-   Use `pg_search` (tsvector) for standard full-text search, and use locale-specific extensions such as `pgroonga` when Japanese or CJK full-text search is in scope.
 
 ### Rule 4.3: Scalability Strategy
 -   **Infinite Scalability**: `select('*')` and unlimited queries banned. Pagination mandatory.
@@ -472,7 +472,7 @@
 -   **Law**: When performing destructive schema changes (column rename/type change/deletion, table reconstruction, etc.) on tables running in production, the **Expand-Contract pattern** MUST be used to execute changes in stages with zero downtime.
 -   **Action**:
     1.  **Phase 1 — Expand**: Create new columns or tables as **additions only**. At this stage, existing columns/tables MUST NOT be modified or deleted; the application continues operating on the old structure.
-    2.  **Phase 2 — Migrate**: Backfill (copy/transform) old data into new columns/tables. Perform bulk updates via batch processing and avoid single-transaction full-table `UPDATE`s. The application should implement "Dual Write" supporting both old and new structures to guarantee data consistency during the transition period.
+    2.  **Phase 2 — Migrate**: Backfill (copy/transform) old data into new columns/tables. Perform bulk updates via batch processing and avoid single-transaction full-table `UPDATE`s. The application should implement "Dual Write" supporting both old and new structures to help maintain data consistency during the transition period.
     3.  **Phase 3 — Contract**: After confirming that all applications reference only the new structure, delete old columns/tables only after **a minimum of one week of stable operation**.
 -   **Prohibition**:
     -   Executing `DROP COLUMN` or `ALTER COLUMN ... TYPE` during the Expand phase is prohibited.
@@ -485,7 +485,7 @@
     1.  **Assumed Conflict**: All `UPDATE` / `INSERT` statements must be written on the assumption that "target data already exists" and "duplicates are present." SQL written assuming a "clean DB" will explode in production.
     2.  **Defensive Logic**: Instead of simple SQL, use `DO $$ ... END $$` blocks or `ON CONFLICT` clauses to avoid exceptions at the code level.
     3.  **Cleanup Before Constraint**: Migrations that add unique constraints (`UNIQUE`) MUST include cleanup logic to delete or merge duplicate data **within the same migration file**. Adding only the constraint causes the migration to fail against production's duplicate data.
--   **Rationale**: Migrations that "succeed" in development and CI environments frequently fail against dirty production data. Defensive DML writing guarantees safe migrations across all environments.
+-   **Rationale**: Migrations that "succeed" in development and CI environments frequently fail against dirty production data. Defensive DML writing reduces migration failure risk caused by environment differences.
 
 ### Rule 7.9: The Migration Static Analysis Guard
 -   **Law**: A static analysis mechanism (Pre-push Hook + CI Check) MUST be implemented to **automatically detect dangerous SQL patterns in migration files and reject them before merge**. Operational rules that rely on "human attention" will inevitably be broken during emergencies or by new team members.
@@ -611,7 +611,7 @@
     3.  **Validation**: After defining an extended type, verify that `supabase.from('table').insert({...})` compiles successfully.
 
 ### Rule 11.5: The Idempotent Migration Protocol
--   **Context**: Migrations run in both "clean rooms" (CI's fresh DB) and "dirty rooms" (production DB with existing data). A design that guarantees success in both environments is required.
+-   **Context**: Migrations run in both "clean rooms" (CI's fresh DB) and "dirty rooms" (production DB with existing data). A design that lowers failure risk in both environments is required.
 -   **Law**: Migration files MUST have **idempotency**—producing the same result no matter how many times they are executed.
 -   **Action**:
     -   **Functions**: Use `CREATE OR REPLACE FUNCTION` instead of `CREATE FUNCTION`.
@@ -655,7 +655,7 @@
     2.  **No Dashboard Edits**: Direct schema changes via DB management consoles (Supabase Dashboard, pgAdmin, etc.) are prohibited as they make history tracking impossible. Even in emergencies, a migration file MUST be created after the fact and committed to Git.
     3.  **Schema Consistency Protocol**: When the local environment's schema diverges (becomes contaminated) from migration files, do NOT hesitate to rebuild the DB (`supabase db reset`, etc.). Always treat migration files as the Source of Truth, with the local DB as subordinate.
     4.  **Verification**: After applying migrations, verify that the diff between local and remote schemas is zero. If differences exist, suspect the presence of Ghost Migrations.
--   **Rationale**: Changes not recorded in migration files cause non-reproducibility across teams, CI/CD failures, and inconsistencies with the production environment. The principle that "all changes are recorded" is the only method that guarantees schema reliability.
+-   **Rationale**: Changes not recorded in migration files cause non-reproducibility across teams, CI/CD failures, and inconsistencies with the production environment. The principle that "all changes are recorded" is the foundation of schema reliability.
 
 ## 12. Migrations & Privileged Operations
 
@@ -1951,7 +1951,7 @@
         -- For frequently accessed keys
         CREATE INDEX idx_metadata_status ON products ((metadata->>'status'));
         ```
-    5.  **pg_jsonschema**: Implement JSONB data validation with the `pg_jsonschema` extension to guarantee data integrity.
+    5.  **pg_jsonschema**: Implement JSONB data validation with the `pg_jsonschema` extension to strengthen data integrity.
 
 ---
 
@@ -2261,7 +2261,7 @@
 -   **Action**:
     1.  **tsvector Column**: Add generated `tsvector` columns with GIN indexes for searchable tables.
     2.  **Weight System**: Use `setweight` for field prioritization (title > body: A > B > C > D).
-    3.  **Japanese Language Support**: Recommend `pgroonga` extension (§36) for Japanese full-text search.
+    3.  **Locale-Specific Language Support**: Recommend locale-appropriate extensions such as `pgroonga` (§36) when Japanese or CJK full-text search is in scope.
     4.  **pg_trgm for Fuzzy Search**: Use `pg_trgm` (trigram) extension for improved `LIKE '%keyword%'` performance.
     5.  **Hybrid Approach**: Combine `tsvector` (structured) + `pg_trgm` (fuzzy) + `pgvector` (semantic/§17) for multi-layered search.
 

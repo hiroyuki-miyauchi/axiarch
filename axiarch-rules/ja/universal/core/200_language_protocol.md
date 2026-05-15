@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > プロジェクト設定言語（Native Language）の絶対遵守。
 > - **基本原則**: ユーザー・開発者間のコミュニケーションは、`AGENTS.md` の `Project Native Language` で定められた言語で行わなければならない。文化的文脈・ニュアンスを含めた「高度な言語運用」を要求する。
 > - **適用範囲**: 思考・計画（`task.md`, `implementation_plan.md`）、報告・対話（`notify_user`）、成果物（UI・ドキュメント・エラーメッセージ）。

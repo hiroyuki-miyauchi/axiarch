@@ -48,7 +48,7 @@
 ## 1. Vision & Strategic Pillars
 
 ### 1.1. Why We Exist (The Why — Vision & Mission)
-*   **Supreme Law**: Define "Why we build it" before "What we build." Using **Simon Sinek's Golden Circle** as the foundation, explicitly document Mission, Vision, and Values first—making them the North Star for all decisions.
+*   **Top-Level Protocol**: Define "Why we build it" before "What we build." Using **Simon Sinek's Golden Circle** as the foundation, explicitly document Mission, Vision, and Values first—making them the North Star for all decisions.
 *   **Mandate**:
     *   **Mission (Purpose)**: Express in one sentence: "Whose problem do we exist to solve, and what problem is it?"
     *   **Vision (Destination)**: Paint the picture of "How we will change the world in 10 years."
@@ -278,7 +278,7 @@
     | **SOM (Serviceable Obtainable Market)** | The market you can realistically capture within 3–5 years | From SAM, apply your GTM capacity and competitive share assumptions |
 
 *   **Bottom-up Estimation Process (Mandatory)**:
-    1.  **Identify Target Company/User Count**: Estimate from LinkedIn, industry directories, annual reports (e.g., Japanese SaaS companies with 50–500 employees ≈ ~8,000 companies).
+    1.  **Identify Target Company/User Count**: Estimate from LinkedIn, industry directories, annual reports (e.g., regional SaaS companies with 50–500 employees ≈ target-company count).
     2.  **Set Penetration Rate**: Estimate "what % can we capture in 3 years" from competitive share and your GTM capacity (2–5% is realistic in the early phase).
     3.  **Calculate Average Contract Value (ACV)**: Derive from Design Partner WTP (Willingness to Pay) interviews (§2.5).
     4.  **SOM = Target Count × Penetration % × ACV** is the formula.
@@ -560,9 +560,9 @@
     *   [ ] Are implementation fees identified as a separate "performance obligation" from the main service?
     *   [ ] Is Variable Consideration estimated to reflect refund policy?
 *   **Cash Flow vs. Recognized Revenue (Series A Frequent Debate Points)**:
-    *   When annual-pay customers surge, cash surges but recognized revenue is amortized. Investors separately review **"Billings (invoiced amount)"**, **"ARR (annualized)"**, and **"Revenue (recognized)"**. Conflated reporting instantly destroys capital market trust.
-    *   **Dashboard Separation Requirement**: Finance dashboards MUST display "Billings / Revenue / Deferred Revenue" as **three separate columns always**, preventing conflation.
-*   **Anti-Pattern**: "We received $120K annual prepayment so we booked the full amount as current-month revenue — ARR looked great" constitutes Revenue Recognition Manipulation. Full restatement in audit and loss of board trust is the maximum risk.
+    *   When annual-pay customers surge, cash surges but recognized revenue is amortized. Investors separately review **"Billings (invoiced amount)"**, **"ARR (annualized)"**, and **"Revenue (recognized)"**. Conflated reporting damages capital market trust.
+    *   **Dashboard Separation Requirement**: Finance dashboards MUST display "Billings / Revenue / Deferred Revenue" as **three separate columns always** to reduce conflation risk.
+*   **Anti-Pattern**: "We received $120K annual prepayment so we booked the full amount as current-month revenue — ARR looked great" constitutes Revenue Recognition Manipulation. Audit adjustments and loss of board trust become major risks.
 
 ---
 
@@ -849,7 +849,7 @@
 *   **Anti-Pattern**: "Using GPT-4 for everything guarantees quality" is an architectural anti-pattern that leads to cost explosions and inability to scale. Routing the right model to the right task is the foundation of a sustainable AI product.
 
 ### 9.10. AI Reasoning & Test-Time Compute Scaling Protocol
-*   **Law**: "Reasoning Models" such as GPT-o1 / o3, Claude 3.7 Thinking, and Gemini Thinking implement a new paradigm called **Test-Time Compute Scaling** — improving answer quality by increasing the number of inference steps. These models operate on a fundamentally different design philosophy from standard LLMs. **Using them in the wrong context causes cost explosions and UX degradation**, making strict application criteria essential.
+*   **Law**: "Reasoning Models" such as GPT-o1 / o3, Claude 3.7 Thinking, and Gemini Thinking support a new paradigm called **Test-Time Compute Scaling** — improving answer quality by increasing the number of inference steps. These models operate on a fundamentally different design philosophy from standard LLMs. **Using them in the wrong context causes cost explosions and UX degradation**, making strict application criteria essential.
 *   **Reasoning Model Application Decision Matrix**:
 
     | Task Characteristic | Reasoning Model | Standard LLM | Rationale |
@@ -1208,7 +1208,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
 *   **Anti-Pattern**: Treating community solely as a "support cost reduction tool" is prohibited. Investment in community is a long-term asset for LTV improvement.
 
 ### 16.9. Referral \& Affiliate Program Design Protocol
-*   **Law**: As proven by Dropbox (500MB per referral) and Airbnb (travel credit per referral), referral programs are one of the **most capital-efficient acquisition channels**. When virality is inherent in the product, designing it intentionally enables compound growth without paid advertising.
+*   **Law**: As proven by Dropbox (500MB per referral) and Airbnb (travel credit per referral), referral programs are one of the **most capital-efficient acquisition channels**. When virality is inherent in the product, designing it intentionally can reduce paid-ad dependency and support compound growth.
 *   **Referral vs. Affiliate — Definitions and Use Cases**:
 
     | Type | Referrer | Incentive Structure | Optimal Use Case |
@@ -1700,7 +1700,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
 
 *   **Ring Expansion Strategy**:
     *   Enter new markets via "concentric circle expansion": `Adjacent country/culture (minimum GTM cost) → Similar regulatory zone → New regulatory zone`.
-    *   Example expansion order for a Japanese SaaS: `Japan → Taiwan (CJK characters, similar culture) → South Korea (similar East Asian regulatory landscape) → US`
+    *   Example expansion order for an East Asia-first SaaS: `home market → adjacent CJK market → similar regional regulatory zone → North America or EU`
 
 ### 21.2. Technical Localization Protocol
 *   **Law**: "Internationalization (i18n)" added as an afterthought incurs massive refactoring costs. **Embed i18n architecture from the initial design phase.**
@@ -1714,7 +1714,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
     *   **Cultural Fit**: Have market specialists review colors, icons, and images for cultural taboos (e.g., white symbolizes mourning in Japan).
 
 ### 21.3. Global Compliance Map
-*   **Law**: Rather than treating each country's regulatory requirements as a separate project, design a **common compliance framework** to enable scalable response across markets.
+*   **Law**: Rather than treating each country's regulatory requirements as a separate project, design a **common compliance framework** to make scalable response across markets easier.
 
     | Regulation | Region | Key Requirements | Reference |
     |:-----------|:-------|:----------------|:---------|
@@ -1828,7 +1828,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
     *   **Action Item Minutes**: Within 24 hours of the meeting, share "decisions made, owner, and deadline-stamped action items" with all Board Members.
 
 ### 22.5. SAFE \& Convertible Note Negotiation Protocol
-*   **Law**: At the angel-to-seed stage, SAFE (Simple Agreement for Future Equity) or a Convertible Note are the most common fundraising instruments. However, **poor term design leads to severe dilution and investor conflict at Series A and beyond**. Fully understand the implications of every term before negotiating.
+*   **Law**: At the angel-to-seed stage, SAFE (Simple Agreement for Future Equity) or a Convertible Note are the most common fundraising instruments. However, **poor term design leads to severe dilution and investor conflict at Series A and beyond**. Understand the implications and future impact of every term before negotiating.
 *   **Key SAFE Terms and Negotiation Benchmarks**:
 
     | Term | Description | Founder-Favorable Benchmark | Pitfall |
@@ -1841,7 +1841,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
 *   **Convertible Note-Specific Alerts**:
     *   **Maturity Date**: If conversion does not occur at maturity, a Repayment (cash) obligation arises. Set maturity at **minimum 18–24 months** and include an extension-option clause.
     *   **Interest Rate**: Base on the statutory minimum (IRS AFR reference: ~3–5% p.a.) and avoid high rates (>8%). Include Accrued Interest Equity conversion in the terms.
-    *   **Conversion Triggers**: Designate only a "Qualified Financing (round above a minimum raise amount XX)" as the Auto-Conversion trigger to prevent unintended conversions in small rounds.
+    *   **Conversion Triggers**: Designate only a "Qualified Financing (round above a minimum raise amount XX)" as the Auto-Conversion trigger to reduce unintended conversion risk in small rounds.
 *   **Cap Table Impact Simulation Obligation**:
     *   Before issuing any SAFE/CN, simulate the "founder and investor ownership percentages at the time of Series A."
     *   **Example Calculation**:
@@ -1954,7 +1954,7 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
     *   Measure the monthly gap rate between **“Theoretical ARR”** (sum of all active contracts) and **“Collected ARR”** (sum of actual invoiced and received amounts), targeting a **gap rate ≤ 0.5%**.
     *   A gap rate **exceeding 1%** in any month is treated as a P1 Incident, triggering an immediate Root Cause Analysis (RCA).
 *   **Deal Desk Design**:
-    *   Establish a `Deal Desk` (under RevOps authority) at ARR $2M+. The Deal Desk governs three functions: “discount authorization,” “custom contract term adjustments,” and “exceptional bundle design” — preventing sales reps from making unilateral condition changes.
+    *   Establish a `Deal Desk` (under RevOps authority) at ARR $2M+. The Deal Desk governs three functions: “discount authorization,” “custom contract term adjustments,” and “exceptional bundle design” — reducing the risk of unilateral condition changes by sales reps.
 
 ### 23.6. Sales Enablement & Revenue Readiness Protocol
 *   **Law**: If RevOps’ mandate is “measuring, forecasting, and sealing revenue,” Sales Enablement’s mandate is **“systematically building the capability of the teams that generate revenue.”** Rather than delivering one-time training sessions, it must be designed as a continuous, measurable, and ROI-linked system.

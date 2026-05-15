@@ -1,7 +1,8 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.8.2 ⚙️ Native Codex Environment Integration\
-> **ステータス / Status**: Actively Maintained ✅
+> **現在の安定版 / Current Stable**: v1.8.2 Native Codex Environment Integration\
+> **次期作業 / Next**: v1.9.0-dev Memory Persistence & Glob-Scoped Rules（初期実装中 / unreleased）\
+> **ステータス / Status**: Actively Maintained
 
 ---
 
@@ -9,6 +10,18 @@
 
 このロードマップはAxiarchの開発方向性を共有するための公開文書です。\
 優先度・スコープは実際の使用フィードバックと企業採用ニーズに基づいて調整されます。
+
+---
+
+### 🎯 戦略フォーカス — 主対象3系統への集中（2026-05-15）
+
+- **実務検証済み主対象**: Google Antigravity
+- **主対象**: OpenAI Codex / Claude Code / Google Antigravity
+- **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
+- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合と v1.9.0-dev の PostToolUse diff guard を起点に、期待互換ではなく主対象として検証蓄積を進める
+- **Claude Code**: hook 補強モデルの主対象として扱うが、現時点では実務検証済みとは表現せず、検証ログを蓄積する
+- **Antigravity**: agent-first IDE 時代の実運用検証対象として、長い自律タスクにおける品質床を訴求する
+- **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
 
 ---
 
@@ -22,8 +35,7 @@
 - **Prompt Library** — 16本 × 2言語（JA/EN）の再利用可能プロンプトテンプレート
   - 役割別4フォルダ構成（`develop/`, `audit/`, `govern/`, `operate/`）
 - **`init.sh`** —
-  インタラクティブセットアップスクリプト（Antigravity検証済み、Codex/Cursor/Claude
-  Code/Copilot/Windsurf対応見込み）
+  インタラクティブセットアップスクリプト（Antigravity検証済み、Codex/Claude Codeは主対象、Cursor/Copilot/Windsurfは未検証ポインター）
 - **`.github/CODEOWNERS`** — ガバナンス責任範囲の明確化
 - **`.github/workflows/lint.yml`** — Markdown + JA/EN対称性CI自動検証
 - **`llms.txt`** — AI検索エンジン最適化（GEO）
@@ -70,10 +82,10 @@
 ### ✅ v1.3.1 — Claude Code `@import` 統合（2026-05-03）
 
 - **`CLAUDE.md`** — `@AGENTS.md` import 構文追加により、Claude Code 起動時に
-  AGENTS.md（最高法規・9プロトコル）全文が自動 inline 注入される機構を実装
+  AGENTS.md（最上位プロトコル・9プロトコル）全文が自動 inline 注入される機構を実装
 - **物理的 BOOT SEQUENCE 強制** — AI
-  の自律ロード行動に依存せず、プロトコル遵守を初動から保証
-- **後方互換性 100%** — 他エージェント（Cursor / Copilot / Windsurf /
+  の自律ロード行動に依存せず、プロトコル遵守を初動から補強
+- **後方互換性を維持** — 他エージェント（Cursor / Copilot / Windsurf /
   Antigravity / Codex）には影響なし
 
 ---
@@ -91,13 +103,13 @@
   モード対応）。`init.sh` 経由で全採用プロジェクトに自動配布
 - **構造正規化** — `engineering/000` Part X から pure-git workflow を 600
   へ抽出（§10.0 / §10.3 / §10.1 部分移動）
-- **後方互換性 100%** — 既存採用プロジェクトは `git pull` で新ルールと script
+- **後方互換性を維持** — 既存採用プロジェクトは `git pull` で新ルールと script
   を取得。3シナリオ（Claude Code 単体 / Antigravity 単体 / 並行使用）全てで
   Pareto-improvement
 
 ---
 
-### ✅ v1.4.0 — Claude Code 強制執行機構（UserPromptSubmit Hook）（2026-05-04）
+### ✅ v1.4.0 — Claude Code Hook補強機構（UserPromptSubmit Hook）（2026-05-04）
 
 - **`.claude/settings.json` 新規同梱** — Claude Code 採用プロジェクトに
   `UserPromptSubmit`
@@ -105,7 +117,7 @@
   を注入し、AI に AGENTS.md プロトコルと LOADING_PROTOCOL の BOOT SEQUENCE
   実行を物理的に強制
 - **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`
-  に「強制執行機構」セクション追加** —
+  に「Hook補強機構」セクション追加** —
   フック削除を「憲法改正」レベルの破壊的変更と明記
 - **`CLAUDE.md` の `@AGENTS.md` import 削除** — フック経由の Read
   ロード（`view_file` 履歴付与・`task.md` 記録発火）に統一し、Anti-Laziness Rule
@@ -115,7 +127,7 @@
   をコミット可能に
 - **`init.sh` 拡張** — `SETUP_CLAUDE` 分岐で `.claude/settings.json` を配布、非
   Claude Code 選択時のみ `.claude/` 削除（既存採用者の `worktrees/` 温存）
-- **後方互換性 100%** — 既存 v1.3.x
+- **後方互換性を維持** — 既存 v1.3.x
   採用プロジェクトはフック不在でも従来通り動作（自律遵守モード）
 
 ---
@@ -131,7 +143,7 @@
   Opinions Weakly Held）+ §9.8-§9.11（Model Governance / Agentic Workflow
   Patterns / AI Cost Governance / Computer Use Agent Safety）を追加。総 46
   セクション
-- **`engineering/510_aws_cloud.md`** — Supreme Directives 0.9 Resilience & Chaos
+- **`engineering/510_aws_cloud.md`** — Primary Directives 0.9 Resilience & Chaos
   Engineering / 0.10 Observability-First / 0.11 Shared Responsibility &
   Compliance-by-Design / 0.12 Operational Excellence Culture を追加（合計
   0.1〜0.12）
@@ -161,7 +173,7 @@
   reminder に
   `Output language MUST follow Project Native Language in AGENTS.md（見出し・要約・ラベル・箇条書き・表すべて）`
   を追加。AI が日本語プロジェクトで英語見出し・要約を出すサボりを物理的に防止
-- **後方互換性 100%** — Universal Rules
+- **後方互換性を維持** — Universal Rules
   拡充は既存ルール非破壊・純粋追補。フックメッセージ強化は既存採用者にも
   `git pull` で自動適用
 
@@ -187,18 +199,18 @@
   ブロック追加。「Step 4 (ACCUMULATE) は完了ではない」「タスク完了前に必ず Step
   5 を実行」「違反は `axiarch-scripts/check-axiarch-health.sh` Check 6
   で外部検証可能」
-- **`README.md` トラブルシュート章新設（縮小版）** — Enforcement Mechanism
+- **`README.md` トラブルシュート章新設（縮小版）** — Hook Reinforcement Mechanism
   サブセクション直下に `bash axiarch-scripts/check-axiarch-health.sh` への誘導 +
   公式 docs 参照
 - **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** —
-  「強制執行機構」セクションに診断スクリプト参照を追記
+  「Hook補強機構」セクションに診断スクリプト参照を追記
 - **`init.sh`** — `.claude/settings.json` 配布直後に `jq` JSON
   構文検証を追加（jq 不在時はスキップ、依存追加なし）。`axiarch-scripts/`
   既存配布ロジックで診断スクリプトも自動配布対象
 - **真因確定**: AI 遵守ギャップ（フック発火 ≠ AI 遵守、結晶化「追記 =
   完了」誤認）。3 並列調査で「JSON 構造誤り説」「Bash permission
   不足説」をともに反証
-- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR 手動で
+- **後方互換性を維持** — `git pull` + `init.sh` 再実行 OR 手動で
   `.claude/settings.json` 上書き + `axiarch-scripts/check-axiarch-health.sh`
   をコピー
 
@@ -216,7 +228,7 @@
   discretely" は完全消去ではなく format 改善程度を意味する）
 - **AI への visibility 維持** — context 直接注入で遵守は確保（v1.5.1
   のメッセージ内容を完全保持）
-- **依存追加なし** — `printf` は POSIX 標準（jq 不要）。既存採用者の互換性 100%
+- **依存追加なし** — `printf` は POSIX 標準（jq 不要）。既存採用者の互換性を維持
 
 ---
 
@@ -238,7 +250,7 @@
 - **ROADMAP の v1.5.2 記述を honest 化** — 「Plan mode
   表示汚染を解消」が過剰だったため「format クリーン化（system-reminder
   ラップ自体は残る）」に修正
-- **後方互換性 100%** — `git pull` + `init.sh` 再実行 OR
+- **後方互換性を維持** — `git pull` + `init.sh` 再実行 OR
   `.claude/settings.json` + `axiarch-scripts/axiarch-boot-reminder.sh`
   を手動コピー
 
@@ -272,7 +284,7 @@
   command が `AXIARCH BOOT` literal も `axiarch-boot-reminder.sh`
   文字列も含まない（hook 完全破損）状態で `EXIT_CODE=1` 未設定だった致命的 bug
   を修正。CI 連携で「hook 壊れているのに exit 0」を返す問題を解消
-- **後方互換性 100%** — pure bash
+- **後方互換性を維持** — pure bash
   修正のみ。依存追加なし。`bash axiarch-scripts/check-axiarch-health.sh`
   再実行で Check 3/4 が PASS することを確認可能
 - **設計反省** — hook の format 変更を伴う patch では診断スクリプトの grep
@@ -290,7 +302,7 @@ Physical Block」パラダイムシフト**を実装。
 
 - **`axiarch-scripts/axiarch-protect-antifull.sh` 新規** — PreToolUse hook で
   `Write` tool を傍受、既存ファイル対象なら `decision:"block"` JSON + exit 2
-  で**物理遮断**。§6 ANTI-FULL-OVERWRITE 違反を完全防止
+  で**物理遮断**。§6 ANTI-FULL-OVERWRITE 違反リスクを低減
 - **`axiarch-scripts/axiarch-init-task-md.sh` 新規** — SessionStart hook
   で会話開始時に task.md 自動ブートストラップ（不在時は load-history scaffold
   生成）
@@ -312,7 +324,7 @@ Physical Block」パラダイムシフト**を実装。
   arXiv:2502.15851 (Control Illusion — instruction-hierarchy 失敗の構造的回避) /
   arXiv:2310.01798 (Huang — single-LLM self-correct 不可、external verifier
   必須)
-- **後方互換性 100%** — 既存 UserPromptSubmit hook 維持、新 hook
+- **後方互換性を維持** — 既存 UserPromptSubmit hook 維持、新 hook
   追加のみ、依存追加なし（pure bash）
 
 ---
@@ -325,7 +337,7 @@ token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造�
 
 - **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回
   fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら
-  `[AXIARCH OK]` short-circuit、違反検出時は強制
+  `[AXIARCH REMINDER]` short-circuit、違反検出時は強制
   full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token
   約 87% 削減**（24k → 3k）
 - **Check C — Stale Lesson Detection** — `core/010` の `[YYYY-MM-DD]` 日付が 180
@@ -350,12 +362,12 @@ token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造�
   として参照
 - **学術裏付け**: Memory in LLMs serial-position effects / Constitutional AI
   系譜 / Anthropic「reminder less is more」公式ガイダンス
-- **後方互換性 100%** — TTL/Check C/pre-commit installer すべて opt-in or env
+- **後方互換性を維持** — TTL/Check C/pre-commit installer すべて opt-in or env
   var 制御、既存環境破壊なし
 
 ---
 
-### ✅ v1.7.0 — Task Boundary Detection + Claude Code Verified 昇格（2026-05-08, **独立 release せず v1.8.0 に統合**）
+### ✅ v1.7.0 — Task Boundary Detection + Claude Code 検証ログ拡充（2026-05-08, **独立 release せず v1.8.0 に統合**）
 
 > **注記**: v1.7.0 は内部開発のみ。独立した Git tag は存在せず、全 feature は
 > v1.8.0 の BREAKING `scripts/` → `axiarch-scripts/` rename と同時に統合 release
@@ -373,17 +385,16 @@ token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造�
   14 段階）
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load
   Criteria に Check D 補足追加
-- **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch
-  自身の開発サイクルで実運用検証完了
-- **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable 可
+- **Claude Code 検証ログ拡充** — axiarch 自身の開発サイクルで hook 補強モデルの検証材料を蓄積
+- **後方互換性を維持** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable 可
 
 ---
 
-### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified 昇格（2026-05-10）
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code 検証ログ拡充（2026-05-10）
 
 採用先実運用で判明した「同一 session 内でも実際タスクは異なるのに、AI
 が『session 継続中だから rule 再 load 不要』と判断してサボる」confirmation bias
-loophole を hot-fix。
+loophole のリスクを下げるための hot-fix。
 
 - **`axiarch-scripts/axiarch-boot-reminder.sh` Check D 追加** — UserPromptSubmit
   hook の stdin から現プロンプトを読み、**whole-word match** (`grep -oiwE`) で
@@ -393,20 +404,17 @@ loophole を hot-fix。
   `🚨 [VIOLATION-D]` flag + TTL 強制 bypass で full reminder 再発火
 - **AI 自己判断ループホールを機械的にバックアップ** — v1.6.0 LOADING_PROTOCOL
   §4「タスクタイプ不変」条項の判定を AI に任せていた問題を、hook
-  側で物理検出する設計に転換
+  側で検出補助する設計に転換
 - **`axiarch-scripts/check-axiarch-health.sh` Check 14 追加** — Check D の
   wiring 確認（13 段階 → 14 段階）
 - **環境変数**: `AXIARCH_TASK_BOUNDARY_DETECT=0` で disable /
   `AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合 override
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Cross-Session Re-load
   Criteria に Check D 補足、「v1.8.0 改善」セクションで loophole
-  解消メカニズム明文化
-- **後方互換性 100%** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0
+  軽減メカニズム明文化
+- **後方互換性を維持** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0
   動作完全再現、stdin 不在時は自動 skip
-- **🎉 Claude Code: ⚠️ Untested → ✅ Verified 昇格** — axiarch
-  自身の開発サイクル（v1.4.0+ の hook 統合以降）で実運用検証完了。**Antigravity
-  の次の位置**に昇格配置（README badge / Compatibility table / IMPORTANT block /
-  llms-full.txt / init.sh 選択肢順序、合計 4 ファイル / 8 箇所更新）
+- **Claude Code 検証ログ拡充** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で hook 補強モデルの検証材料を蓄積。現時点の公開ステータスでは Antigravity のみを実務検証済みとし、Claude Code は主対象として扱う
 
 ---
 
@@ -437,34 +445,35 @@ loophole を hot-fix。
 - **`CHANGELOG.md` v1.6.0 Out of Scope バージョンラベル訂正 (42 ラウンド)** —
   `(Check 14)` → `(Check 15)`；`v1.7.0 (Tier 2)` →
   `v1.9.0 (Tier 2)`；`v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)` に修正
-- **後方互換性 100%** — pure bug fix のみ、機能変更ゼロ。Codex
+- **後方互換性を維持** — pure bug fix のみ、機能変更ゼロ。Codex
   以外の環境では挙動変化なし
 
 ---
 
-### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### 🚧 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、初期実装中）
 
 26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2
 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.8.0 で
 confirmation-bias loophole の hot-fix + BREAKING `scripts/` → `axiarch-scripts/`
 rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
-- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count
+- **実装済み: `PostToolUse` hook + git diff 検証** — Edit 後に diff line count
   を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では
   `Write` のみ block、`Edit` による潜在的に大規模な変更は post-hoc で検出）
-- **Cursor `globs:` パターン採用 + path-scoped rules** —
-  `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter
-  を追加、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上
-- **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories
-  相当の自動 memory 機構を `.claude/memory/MEMORY.md`
-  ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
+- **初期実装: Cursor `globs:` パターン採用 + path-scoped rules** —
+  `.cursor/rules/axiarch.mdc` に `globs: "**/*"` を明示し、
+  `axiarch-rules/{lang}/universal/{domain}/` の `paths:` frontmatter
+  仕様候補を README に追加。Universal本文への一括付与は検証後に実施
+- **初期実装: Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories
+  の考え方を参考に、`.claude/memory/MEMORY.md`
+  を任意テンプレートとして追加。会話全文や秘密情報は保存せず、実際に起きた再発防止事項だけを短く残す補助層として扱う
 - **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/`
   を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control`
   対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL
   と相補）
-- **shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml`
+- **実装済み: shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml`
   に追加（v1.5.4 deferred）
-- **`init.sh` 配布後の syntax 検証** —
+- **実装済み: `init.sh` 配布後の syntax 検証** —
   `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh`
   を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
 - ~~**Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)`
@@ -472,10 +481,10 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
   `08c6ecf`、8 files cleanup）
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons
   log 蓄積超過等の検知）
-- **Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド +
+- **初期実装: Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド +
   v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc
   反映漏れ」を機械検出。`axiarch-scripts/check-axiarch-health.sh` に README /
-  scripts/README / INDEX の stale version-term grep を追加
+  scripts/README の v1.9.0-dev diff guard / memory / 15-stage 反映確認を追加
 
 ---
 
@@ -495,9 +504,9 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
   実行前に「9 protocols のうち今回該当するものを列挙し、各々への適合理由を 1
   行ずつ書け」reasoning step を必須化。OpenAI o3 で safety 違反 13%→0.4%
   を達成（出典: arXiv:2412.16339）
-- **AI Agent Compatibility Matrix** — 各 AI エージェント（Claude Code / Cursor /
-  Windsurf / Cline / Antigravity / Codex /
-  Copilot）の動作確認状況を定期更新するメタ仕様
+- **AI Agent Compatibility Matrix** — 主対象（Codex / Claude Code /
+  Antigravity）と拡張互換（Cursor / GitHub Copilot / Windsurf /
+  Aider / Zed 等）を分け、検証日・検証範囲・hook 対応範囲を定期更新するメタ仕様
 
 ---
 
@@ -545,6 +554,18 @@ enterprise adoption needs.
 
 ---
 
+### 🎯 Strategic Focus — Concentrate on Three Primary Agents (2026-05-15)
+
+- **Production-validated primary target**: Google Antigravity
+- **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
+- **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
+- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration and v1.9.0-dev PostToolUse diff guard, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
+- **Claude Code**: Primary target for the hook-reinforcement model; validation logs will be accumulated without calling it production-validated at this stage
+- **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
+- **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
+
+---
+
 ### ✅ v1.0.0 — Initial Public Release (2026-04-10)
 
 - **AGENTS.md** — AI Behavior Constitution (9 protocols)
@@ -558,7 +579,7 @@ enterprise adoption needs.
   library
   - Role-based 4-folder structure (`develop/`, `audit/`, `govern/`, `operate/`)
 - **`init.sh`** — Interactive setup script (Antigravity verified,
-  Codex/Cursor/Claude Code/Copilot/Windsurf expected)
+  Codex/Claude Code primary targets, Cursor/Copilot/Windsurf unverified pointers)
 - **`.github/CODEOWNERS`** — Clear governance responsibility boundaries
 - **`.github/workflows/lint.yml`** — Automated Markdown + JA/EN symmetry CI
 - **`llms.txt`** — AI search engine optimization (GEO)
@@ -608,11 +629,11 @@ enterprise adoption needs.
 ### ✅ v1.3.1 — Claude Code `@import` Integration (2026-05-03)
 
 - **`CLAUDE.md`** — Added `@AGENTS.md` import syntax to auto-inline AGENTS.md
-  (Supreme Law / 9 protocols) into the system prompt at Claude Code session
+  (Top-Level Protocol / 9 protocols) into the system prompt at Claude Code session
   start
-- **Physical BOOT SEQUENCE Enforcement** — Protocol compliance guaranteed from
+- **Physical BOOT SEQUENCE Enforcement** — Protocol compliance reinforced from
   the first turn, no longer depending on AI's autonomous file-loading behavior
-- **100% Backwards Compatible** — No effect on other agents (Cursor / Copilot /
+- **Backwards compatibility maintained** — No effect on other agents (Cursor / Copilot /
   Windsurf / Antigravity / Codex)
 
 ---
@@ -630,19 +651,19 @@ enterprise adoption needs.
   Distributed automatically to all adopting projects via `init.sh`
 - **Structural normalization** — Extracted pure-git workflow from
   `engineering/000` Part X into 600 (§10.0 / §10.3 / partial §10.1)
-- **100% Backwards Compatible** — Existing adopters obtain new rules and script
+- **Backwards compatibility maintained** — Existing adopters obtain new rules and script
   via `git pull`. Pareto-improvement across all three scenarios (Claude Code
   only / Antigravity only / parallel use)
 
 ---
 
-### ✅ v1.4.0 — Claude Code Enforcement Mechanism (UserPromptSubmit Hook) (2026-05-04)
+### ✅ v1.4.0 — Claude Code Hook Reinforcement Mechanism (UserPromptSubmit Hook) (2026-05-04)
 
 - **NEW `.claude/settings.json`** — Claude Code projects ship with a standard
   `UserPromptSubmit` hook that injects a bilingual system reminder **on every
   user prompt submission**, physically compelling the AI to execute the
   AGENTS.md protocol and LOADING_PROTOCOL BOOT SEQUENCE
-- **NEW "Enforcement Mechanism" section in
+- **NEW "Hook Reinforcement Mechanism" section in
   `axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — Declares hook removal as a
   constitution-amending destructive change
 - **Removed `@AGENTS.md` import from `CLAUDE.md`** — Unified loading via the
@@ -654,7 +675,7 @@ enterprise adoption needs.
 - **Extended `init.sh`** — `SETUP_CLAUDE` branch now distributes
   `.claude/settings.json`; `.claude/` cleanup runs only for non-Claude-Code
   agents (preserves existing adopters' `worktrees/`)
-- **100% Backwards Compatible** — Existing v1.3.x adopters work without the hook
+- **Backwards compatibility maintained** — Existing v1.3.x adopters work without the hook
   (autonomous-enforcement mode)
 
 ---
@@ -669,7 +690,7 @@ enterprise adoption needs.
   Safety / Compositional Architecture / Inversion Thinking / YAGNI / Strong
   Opinions Weakly Held) + §9.8-§9.11 (Model Governance / Agentic Workflow
   Patterns / AI Cost Governance / Computer Use Agent Safety). Total 46 sections
-- **`engineering/510_aws_cloud.md`** — Added Supreme Directives 0.9 Resilience &
+- **`engineering/510_aws_cloud.md`** — Added Primary Directives 0.9 Resilience &
   Chaos Engineering / 0.10 Observability-First / 0.11 Shared Responsibility &
   Compliance-by-Design / 0.12 Operational Excellence Culture (now 0.1–0.12)
 - **`engineering/600_git_workflow.md`** — Expanded from 18 rules / 5 Parts to
@@ -696,9 +717,9 @@ enterprise adoption needs.
   Safety Classifiers), Part XXIX Crisis Response & Resilience
 - **`.claude/settings.json` hook message enhanced** — Added
   `Output language MUST follow Project Native Language in AGENTS.md (headings, summaries, labels, lists, tables — all)`
-  to the `UserPromptSubmit` system reminder. Physically prevents AI from
-  emitting English headings/summaries in Japanese-native projects
-- **100% Backwards Compatible** — Universal Rules expansions are non-breaking
+  to the `UserPromptSubmit` system reminder. Reduces the risk of English
+  headings/summaries in Japanese-native projects
+- **Backwards compatibility maintained** — Universal Rules expansions are non-breaking
   and purely additive. Hook message enhancement applies automatically to
   existing adopters via `git pull`
 
@@ -734,7 +755,7 @@ enterprise adoption needs.
   crystallization "appending = done" misconception). 3-parallel investigation
   refuted both "JSON structure error" and "Bash permission insufficient"
   hypotheses
-- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually
+- **Backwards compatibility maintained** — `git pull` + re-run `init.sh`, or manually
   overwrite `.claude/settings.json` + copy
   `axiarch-scripts/check-axiarch-health.sh`
 
@@ -754,7 +775,7 @@ enterprise adoption needs.
 - **AI visibility preserved** — direct context injection retains adherence (the
   v1.5.1 reminder content is preserved verbatim)
 - **No new dependencies** — `printf` is POSIX-standard (no `jq` required)
-- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually
+- **Backwards compatibility maintained** — `git pull` + re-run `init.sh`, or manually
   overwrite `.claude/settings.json`
 
 ---
@@ -777,7 +798,7 @@ enterprise adoption needs.
   make the AI **aware of violations every turn**
 - **ROADMAP v1.5.2 entry honesty-corrected** — "Plan-mode pollution fixed" was
   overstated; replaced with "format cleanup (system-reminder wrap remains)"
-- **100% Backwards Compatible** — `git pull` + re-run `init.sh`, or manually
+- **Backwards compatibility maintained** — `git pull` + re-run `init.sh`, or manually
   copy `.claude/settings.json` + `axiarch-scripts/axiarch-boot-reminder.sh`
 
 ---
@@ -813,7 +834,7 @@ enterprise adoption needs.
   reference (i.e. fully broken hook), the diagnostic was emitting `print_warn`
   without setting `EXIT_CODE=1`, returning exit 0 on a broken state. CI
   integrations would falsely report success. Now correctly fails the run
-- **100% Backwards Compatible** — pure bash fix, no new dependencies. Re-run
+- **Backwards compatibility maintained** — pure bash fix, no new dependencies. Re-run
   `bash axiarch-scripts/check-axiarch-health.sh` to verify Check 3/4 PASS
 - **Design retrospective** — When changing hook output format, the diagnostic's
   grep targets must be updated in the same patch. Going forward, format changes
@@ -856,7 +877,7 @@ shift**.
   arXiv:2502.15851 (Control Illusion — structural workaround for
   instruction-hierarchy failure) / arXiv:2310.01798 (Huang — single-LLM
   self-correction insufficient, external verifier required)
-- **100% Backwards Compatible** — existing UserPromptSubmit hook preserved, new
+- **Backwards compatibility maintained** — existing UserPromptSubmit hook preserved, new
   hooks added only, no new dependencies (pure bash)
 
 ---
@@ -869,7 +890,7 @@ functional evaluation report"). Structurally resolves the design-vs-reality gap
 
 - **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — First
   fire returns full reminder + writes timestamp; subsequent fires within TTL
-  (default 30 min) with no violations return short-circuit `[AXIARCH OK]`; any
+  (default 30 min) with no violations return short-circuit `[AXIARCH REMINDER]`; any
   violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables.
   **Token impact: ~24k → ~3k (87% reduction in long sessions)**
 - **Check C — Stale Lesson Detection** — Detects any `core/010` lesson dated
@@ -877,7 +898,7 @@ functional evaluation report"). Structurally resolves the design-vs-reality gap
   `AXIARCH_LESSON_STALE_DAYS`
 - **`check-axiarch-health.sh` Check 6 expanded — CRYSTAL §5 Time-Axis Trigger**
   — Existing count threshold (3+ per domain, trigger (a)) joined by **time-axis
-  trigger (b)**. Prevents long-term neglect of stale lessons
+  trigger (b)**. Reduces the risk of long-term neglect of stale lessons
 - **`check-axiarch-health.sh` Check 13 — Sublimated Files Index** — Lists
   existing `blueprint/{domain}/{NNN}_{topic}.md` files so the AI prefers APPEND.
   Addresses "12 consecutive N/A" feedback at the root
@@ -895,12 +916,12 @@ functional evaluation report"). Structurally resolves the design-vs-reality gap
   the Single Source of Truth
 - **Academic backing**: Memory-in-LLMs serial-position effects / Constitutional
   AI lineage / Anthropic "reminder less is more" official guidance
-- **100% Backwards Compatible** — TTL / Check C / pre-commit installer all
+- **Backwards compatibility maintained** — TTL / Check C / pre-commit installer all
   opt-in or env-var controlled; existing setups untouched
 
 ---
 
-### ✅ v1.7.0 — Task Boundary Detection + Claude Code Verified Promotion (2026-05-08, **not independently released; bundled into v1.8.0**)
+### ✅ v1.7.0 — Task Boundary Detection + Claude Code Validation-Log Expansion (2026-05-08, **not independently released; bundled into v1.8.0**)
 
 > **Note**: v1.7.0 was an internal development milestone only. No independent
 > Git tag was created; all features were bundled into the v1.8.0 release
@@ -919,17 +940,16 @@ functional evaluation report"). Structurally resolves the design-vs-reality gap
   (13-stage → 14-stage)
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note
   to Cross-Session Re-load Criteria
-- **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated
-  through axiarch’s own development cycles
-- **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` disables
+- **Claude Code validation-log expansion** — Evidence for the hook-reinforcement model accumulated through axiarch's own development cycles
+- **Backwards compatibility maintained** — `AXIARCH_TASK_BOUNDARY_DETECT=0` disables
 
 ---
 
-### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Verified Promotion (2026-05-10)
+### ✅ v1.8.0 — BREAKING `scripts/` → `axiarch-scripts/` rename + Check D Task Boundary Detection + Claude Code Validation-Log Expansion (2026-05-10)
 
 Hot-fix for an adopter-feedback issue: "Within the same session, actual tasks
 differ, yet the AI judges 'session is continuing → no rule re-load needed' and
-slacks" — a confirmation-bias loophole in v1.6.0's LOADING_PROTOCOL §4
+slacks" — a confirmation-bias risk in v1.6.0's LOADING_PROTOCOL §4
 self-judgment clause.
 
 - **NEW `axiarch-scripts/axiarch-boot-reminder.sh` Check D** — Reads
@@ -941,22 +961,18 @@ self-judgment clause.
   bypass (suppresses short-circuit, re-injects full reminder)
 - **Mechanically backs up AI self-judgment** — v1.6.0's "task type unchanged"
   decision was AI-self-judged (confirmation-bias prone). v1.8.0 detects
-  boundaries at the hook layer
+  task-boundary candidates at the hook layer
 - **`axiarch-scripts/check-axiarch-health.sh` Check 14 added** — Verifies Check
   D wiring (13-stage → 14-stage)
 - **Env vars**: `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable;
   `AXIARCH_TASK_DOMAIN_KEYWORDS` to override the keyword set
 - **`LOADING_PROTOCOL.md` (ja/en) Step 4 update** — Added Check D backstop note
   to the "task continues" row; new "v1.8.0 improvement" section documents the
-  loophole closure mechanism
-- **100% Backwards Compatible** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces
+  risk-reduction mechanism
+- **Backwards compatibility maintained** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces
   v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation
   outside hook context)
-- **🎉 Claude Code promoted: ⚠️ Untested → ✅ Verified** — Production-validated
-  through axiarch's own development cycles (since v1.4.0+ native hook
-  integration). **Placed immediately after Antigravity** across README badge /
-  Compatibility table / IMPORTANT block / llms-full.txt / init.sh
-  agent-selection order (4 files, 8 sites updated)
+- **Claude Code validation-log expansion** — Evidence for the hook-reinforcement model accumulated through axiarch's own development cycles (since v1.4.0+ native hook integration). Current public status treats Antigravity as the only production-validated agent and Claude Code as a primary target
 
 ---
 
@@ -987,12 +1003,12 @@ Patch release with 2 bug fixes + 3 documentation corrections discovered in the
 - **`CHANGELOG.md` v1.6.0 Out of Scope version label corrections (42nd-round)**
   — `(Check 14)` → `(Check 15)`; `v1.7.0 (Tier 2)` → `v1.9.0 (Tier 2)`;
   `v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)`
-- **100% Backwards Compatible** — Pure bug fixes only, zero functional changes.
+- **Backwards compatibility maintained** — Pure bug fixes only, zero functional changes.
   No impact on non-Codex environments
 
 ---
 
-### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### 🚧 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Initial Implementation)
 
 Tier-2 improvement candidates extracted from the 26-round market study (see
 v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from
@@ -1000,24 +1016,25 @@ adopter-project feedback); v1.8.0 delivered the confirmation-bias loophole
 hot-fix bundled with the BREAKING `scripts/` → `axiarch-scripts/` rename; these
 Tier-2 items are now organised under v1.9.0.
 
-- **`PostToolUse` hook + git diff verification** — Measure diff line count after
+- **Implemented: `PostToolUse` hook + git diff verification** — Measure diff line count after
   Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only
   blocks `Write`; large Edit changes detected post-hoc)
-- **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to
-  `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per
-  file type. Reduces tokens, improves relevance (sources: Cursor Rules /
-  `.claude/rules/` path-scoped)
-- **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf
-  Cascade Memories / Codeium Memories, designed around
-  `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation"
-  problem via persistent context
+- **Initial implementation: Cursor `globs:` adoption + path-scoped rules** —
+  Declare `globs: "**/*"` in `.cursor/rules/axiarch.mdc` and document the
+  future `paths:` frontmatter schema for `axiarch-rules/{lang}/universal/{domain}/`.
+  Bulk frontmatter insertion into Universal files remains deferred until validation.
+- **Initial implementation: Memory Persistence enhancement** — Adds
+  `.claude/memory/MEMORY.md` as an optional template inspired by the operating
+  model of Windsurf Cascade Memories / Codeium Memories. It does not store full
+  conversations or secrets; it is only a short auxiliary layer for recurrence
+  prevention notes from events that actually happened
 - **Aider-style prompt-cache optimisation** — Declare
   `axiarch-rules/{lang}/universal/` as read-only and target Anthropic
   prompt-caching API `cache_control`. Solves the per-turn full-injection cost
   issue (complementary to v1.6.0 reminder TTL)
-- **shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to
+- **Implemented: shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to
   `lint.yml` (deferred from v1.5.4)
-- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on
+- **Implemented: Post-distribution syntax validation in `init.sh`** — Run `bash -n` on
   `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh`
   after copy, mirroring the existing `jq` validation
 - ~~**Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from
@@ -1026,11 +1043,11 @@ Tier-2 items are now organised under v1.9.0.
   cleanup)
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty
   Blueprint, accumulated Lessons-log overflow detection, etc.)
-- **Post-release README integration auto-verification** — Prevent the recurring
+- **Initial implementation: Post-release README integration auto-verification** — Prevent the recurring
   "new release feature → README update missed" pattern (24/27/28th-round
-  audits + v1.6.0 `12-stage` residue). Add Check 14 to
-  `axiarch-scripts/check-axiarch-health.sh` to grep for stale version-related
-  terms across README ↔ scripts/*
+  audits + v1.6.0 `12-stage` residue). Check 15 now verifies README /
+  scripts README references for v1.9.0-dev diff guard, memory, and 15-stage
+  diagnostics
 
 ---
 
@@ -1052,9 +1069,10 @@ planned independently for v1.10.0.
   high-risk tool calls, require a reasoning step: "list which of the 9 protocols
   apply now and write one-line justification per match". OpenAI o3 reduced
   safety violations 13%→0.4% with this approach (source: arXiv:2412.16339)
-- **AI Agent Compatibility Matrix** — Meta-spec for periodic verification status
-  of each AI agent (Claude Code / Cursor / Windsurf / Cline / Antigravity /
-  Codex / Copilot)
+- **AI Agent Compatibility Matrix** — Meta-spec that separates primary targets
+  (Codex / Claude Code / Antigravity) from extended compatibility targets
+  (Cursor / GitHub Copilot / Windsurf / Aider / Zed, etc.) and periodically
+  records verification date, scope, and hook coverage
 
 ---
 

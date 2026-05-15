@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-15
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "A players hire A players. B players hire C players."
 > An organization is **"the accumulation of the people it has hired,"** and hiring quality determines the organization's long-term capability.
 > "Maximize hiring, don't minimize it. The cost of a bad hire far exceeds the cost of a rigorous hiring process."

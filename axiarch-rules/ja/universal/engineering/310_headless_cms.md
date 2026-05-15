@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「コンテンツはデータであり、表示ではない。配信チャネルから独立した構造化コンテンツこそがデジタル資産の本質である。」
 > CMS実装において、**コンテンツ構造 > 配信柔軟性 > 運用効率 > パフォーマンス > DX** の優先順位を厳守せよ。
 > この文書はCMS関連のすべての設計判断の最上位基準である。
@@ -15,7 +15,7 @@
 
 ## 目次
 
-- Part I: Supreme Directive & CMS哲学
+- Part I: Primary Directive & CMS哲学
 - Part II: ヘッドレスアーキテクチャ原則
 - Part III: CMS選定戦略 & Composable DXP
 - Part IV: コンテンツモデリング基礎
@@ -100,7 +100,7 @@
 
 ---
 
-## Part I: Supreme Directive & CMS哲学
+## Part I: Primary Directive & CMS哲学
 
 ### 1.1. CMS実装の最高原則
 

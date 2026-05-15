@@ -5,7 +5,7 @@
 > 改定日: 2026-04-15
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「単独では到達できない市場に、パートナーシップで到達せよ。単独では創造できない価値を、エコシステムで創造せよ。」
 > エコシステムは「競合を排除する戦略」ではなく **「価値の創造範囲を指数関数的に拡大する戦略」** である。
 > Salesforce AppExchange・Stripe Connect・Shopify App Store・AWS Marketplace に見るように、
@@ -51,7 +51,7 @@
 
 ## Part I. パートナーシップの哲学と目的
 
-### 1.1. Supreme Directive（最高指令）
+### 1.1. Primary Directive（主要方針）
 
 - **Rule 53.001**: パートナーシップとエコシステムに関する全ての意思決定は、以下の優先順位に従う
 
@@ -338,7 +338,7 @@ Ecosystem Flywheel（拡張モデル）:
          └──────────────────────────────┘
 
 Flywheel 加速の3つのレバー:
-1. Developer Experience の極限的改善（統合の容易さ）
+1. Developer Experience の継続的改善（統合の容易さ）
 2. Go-to-Market 支援の充実（パートナーの成功確率を高める）
 3. Revenue Sharing の魅力的設計（パートナーの経済的インセンティブ）
 

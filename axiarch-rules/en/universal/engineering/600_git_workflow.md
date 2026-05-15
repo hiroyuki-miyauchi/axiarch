@@ -1,6 +1,6 @@
 # 600. Git Workflow & Repository Hygiene
 
-> **Supreme Directive**: "Git is history, and history is an asset. Daily operational hygiene neglect leads to asset degradation."
+> **Primary Directive**: "Git is history, and history is an asset. Daily operational hygiene neglect leads to asset degradation."
 >
 > **Priority Order**: Repository Integrity > Daily Workflow Velocity > Tool Compatibility > Convenience
 
@@ -162,7 +162,7 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
 - **Forbidden: Rebase Merge to main**:
     - Rebase Merge to `main` is **forbidden**. Stacking individual commits onto `main` makes back-compat checks, revert, and bisect harder.
 - **Linear History on main**:
-    - Enable "Require linear history" in GitHub Branch Protection. Combined with the merge-commit ban, this guarantees history simplicity.
+    - Enable "Require linear history" in GitHub Branch Protection. Combined with the merge-commit ban, this keeps history easier to understand and audit.
 - **Local Rebase Discipline**:
     - `git rebase main` on your own working branch is **recommended** (sync before opening a PR). Rebasing **shared** branches is **strictly forbidden**.
 

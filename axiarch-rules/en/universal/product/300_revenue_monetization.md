@@ -5,11 +5,11 @@
 > explicit "Amend Constitution" instruction is given.** Last Updated: 2026-04-23
 
 > [!IMPORTANT]
-> **Supreme Directive** "Revenue is not a feature — it is the lifeblood of
+> **Primary Directive** "Revenue is not a feature — it is the lifeblood of
 > sustainable product development." All monetization decisions must be
 > data-driven, ethically sound, and architecturally resilient. Strictly follow
 > the priority order: **User Trust > Revenue Sustainability > Growth Speed >
-> Short-Term Profit**. This document is the supreme standard for all design
+> Short-Term Profit**. This document is the primary standard for all design
 > decisions regarding business, finance, and monetization strategies.
 > **Comprises 12 parts, 90+ sections, and 77 anti-patterns.**
 
@@ -97,7 +97,7 @@
     | **Expansion MRR Ratio**           | ≥ 30% of New MRR | < 10%                | Expansion MRR ÷ Total New MRR                                   |
     | **Revenue per Account Growth**    | YoY ≥ 10%        | Negative growth      | Average revenue per account trend                               |
 
-  - **Action**: If NRR drops below 100%, prioritize churn prevention over new
+  - **Action**: If NRR drops below 100%, prioritize churn-risk reduction over new
     acquisition. See §11 for details.
 - **The AI Cost Unit Economics Protocol**:
   - **Context**: AI features have a fundamentally different infrastructure cost
@@ -723,8 +723,8 @@
   - **NO RAW CARD DATA (PCI-DSS Avoidance)**: Raw credit card data (PAN/CVV)
     must NEVER be stored or passed through our servers. Strictly enforce
     tokenization via Stripe.js/Checkout.
-  - **Idempotency & State Consistency**: Prevent double payments via
-    `Idempotency-Key` and ensure state consistency via Webhooks.
+  - **Idempotency & State Consistency**: Reduce double-payment risk via
+    `Idempotency-Key` and support state consistency via Webhooks.
   - **Anti-Fraud**: Utilize Stripe Radar to automatically block fraudulent usage
     (Credit Master Attacks).
   - **Auditability**: Completely record logs of operations like amount changes
@@ -2506,7 +2506,7 @@
     existing revenue is retained without Expansion" and must be monitored
     alongside NRR.
   - **Law**: Monitor GRR monthly and maintain **GRR ≥ 90%**. When GRR falls
-    below 80%, prioritize churn prevention over Expansion strategy.
+    below 80%, prioritize churn-risk reduction over Expansion strategy.
   - **GRR Diagnostic Framework**:
     ```
     GRR = (Starting MRR - Contraction MRR - Churned MRR) ÷ Starting MRR

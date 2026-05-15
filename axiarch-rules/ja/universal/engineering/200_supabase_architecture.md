@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「データは企業の血液である。その流れと保護に一切の妥協は許されない。」
 > Supabase/PostgreSQLの実装において、**セキュリティ(RLS) > データ整合性 > パフォーマンス > 開発生産性 > コスト効率** の優先順位を厳守せよ。
 > この文書はバックエンド・データ戦略に関するすべての設計判断の最上位基準である。
@@ -15,7 +15,7 @@
 
 ## 目次
 
-- §0. データ主権法と至高の命令 (Supreme Directives)
+- §0. データ主権法と主要方針 (Primary Directives)
 - §1. Supabase ハイブリッドスタック原則
 - §2. Database Design Standards (DB設計基準)
 - §3. Integrity & Logic Strategy (整合性・ロジック戦略)
@@ -81,32 +81,32 @@
 
 ---
 
-## 0. データ主権法と至高の命令 (Data Sovereignty Law & Supreme Directives)
+## 0. データ主権法と主要方針 (Data Sovereignty Law & Primary Directives)
 
-### Supreme Directive 0.1: The Zero Tolerance Linter Protocol
+### Primary Directive 0.1: The Zero Tolerance Linter Protocol
 -   **Law**: Database Linter（Supabase Security Advisor等）の警告は、「提案」ではなく**「脆弱性報告」**です。
 -   **Mandate**:
     1.  **Zero Warnings**: 本番環境へデプロイされるスキーマは、Linter警告が **常に 0件** でなければなりません。1件でもあればリリース不可とします。
     2.  **Universal Fix**: "Search Path Mutable" や "Permissive Policy" などの警告は、議論の余地なく**機械的に即修正**してください。プロジェクト固有の事情による例外は認められません。
 
-### Supreme Directive 0.2: The Trinity DTO Mandate
--   **Purpose**: データ構造の堅牢性とスケーラビリティを保証するための三位一体の義務。
-    -   **Security**: 生データの流出を物理的に防ぐ (White-list Output)。
+### Primary Directive 0.2: The Trinity DTO Mandate
+-   **Purpose**: データ構造の堅牢性とスケーラビリティを支えるための三位一体の義務。
+    -   **Security**: ホワイトリスト出力により、生データ流出リスクを低減する。
     -   **Stability**: DB変更からフロントエンドを守る (Mapper Shield)。
     -   **AI Economy**: AIトークンを節約する (Data Minimization)。
-    -   **Universality**: 言語を問わないエンジニアリングの**鉄則**です。
+    -   **Universality**: 言語を問わないエンジニアリングの基盤標準です。
 
-### Supreme Directive 0.3: Omnichannel Data Principle (API First)
+### Primary Directive 0.3: Omnichannel Data Principle (API First)
 -   **Principle**: データ構造は、単一のWebアプリだけでなく、ネイティブアプリ、外部システム、AIエージェントからも消費されることを前提に設計しなければなりません。
 -   **Mandate**:
     -   **Universal Types**: 特定のUIフレームワークに依存したデータ型（React Nodeなど）をDBに保存してはなりません。
     -   **Neutral JSON**: JSONデータは、表示ロジックを含まない「純粋なデータ」として管理してください。
 
-### Supreme Directive 0.4: The Client DTO Barrier（クライアントDTO障壁）
+### Primary Directive 0.4: The Client DTO Barrier（クライアントDTO障壁）
 -   **Law**: データベースの行データ（Raw Entity）を、クライアントサイドコンポーネント（`use client` 等）のPropsとして**直接渡すことを禁止**します。
 -   **Mandate**:
     -   **Server-Side Transformation**: 必ずサーバー側で目的に応じた軽量なDTOへ変換し、必要最小限のフィールドのみをクライアントへ送信してください。
-    -   **PII Exclusion**: `admin_notes`, `phone_number`, `email` 等のPIIや内部管理フィールド（`deleted_at`, `internal_memo`）がブラウザへ到達することを物理的に防いでください。
+    -   **PII Exclusion**: `admin_notes`, `phone_number`, `email` 等のPIIや内部管理フィールド（`deleted_at`, `internal_memo`）がブラウザへ到達するリスクを設計上低減してください。
     -   **Payload Minimization**: 不要なフィールドの送信は、ネットワーク帯域の浪費と、将来のデータ漏洩リスクの二重の問題を引き起こします。
 -   **Rationale**: SD 0.2（Trinity DTO Mandate）が定義するDTO化義務の具体的な境界線として、クライアントコンポーネントへのデータ受け渡しを物理的な遮断点として確立します。Raw Entityの直接送信は、意図しないPII漏洩の最大のリスク源です。
 
@@ -116,7 +116,7 @@
 -   **Migration Only**: DBスキーマ変更は、必ずコード化された `supabase/migrations` 経由で行います。管理画面（Supabase Dashboardの SQL Editor 等）での手動変更は「履歴の破壊行為」とみなします。
 -   **Migration Immutability Law (Sanctuary)**:
     -   **Law**: `supabase/migrations/*.sql` は、一度コミットされた瞬間から「聖域」となり、**リネーム・編集・削除を永久に禁止**します。
-    -   **Felony**: リモートDB適用後の修正は、必ず「新規ファイル」で行うこと。過去の改竄は**即死級の重罪 (Instant Felony)** とみなします。
+    -   **Violation**: リモートDB適用後の修正は、必ず「新規ファイル」で行うこと。過去マイグレーションの改変は重大なガバナンス違反とみなします。
 
 ---
 
@@ -148,14 +148,14 @@
     3.  **禁止**: `max_count`, `threshold` 等の計算・検索・条件分岐に使用されるプロパティをJSONBに含めることは禁止です。これらは必ず正規化カラムに昇格させてください。
 
 ### Rule 2.1: Integrity & Ownership
--   **RLS Absolute**: 行レベルセキュリティ (RLS) は絶対です。`service_role` キーの使用は原則禁止とし、全てのクエリはRLSを経由させます。
+-   **RLS Strict Default**: 行レベルセキュリティ (RLS) を標準境界として扱います。`service_role` キーの使用は原則禁止とし、全てのクエリはRLSを経由させます。
 -   **Hierarchical Resource Ownership (階層的リソース所有権)**:
     -   **Context**: 家族共有、チームプロジェクトなど、単一所有者（`user_id`）では表現できない複雑な所有権構造。
     -   **Law**: 複数ユーザーがリソースへアクセスする場合、中間テーブル（例: `resource_members`）を通じて権限（`role: 'viewer'|'admin'`）を定義し、RLSポリシーでこの関係テーブルを参照してアクセス制御を行います。
     -   **Action**:
         1.  **Owner ID**: 主たる所有者は `owner_id` として保持。
         2.  **Role-Based**: 中間テーブルで権限を管理。
-        3.  **Inheritance**: 子リソースは親リソースへのアクセス権を `EXISTS` 句で継承し、二重のセキュリティを保証。
+        3.  **Inheritance**: 子リソースは親リソースへのアクセス権を `EXISTS` 句で継承し、アクセス制御の多層性を高める。
 -   **PII Encryption**: 極めて機密性の高い個人情報（口座、書類番号等）は、Vaultやpgcryptoを用いて暗号化保存することを推奨します。
 
 ### Rule 2.2: Schema & Type Standards
@@ -170,7 +170,7 @@
 -   **Automated Types**: `supabase gen types` で生成された `database.types.ts` を使用します。
 -   **The Mapped Type Bridge Mandate**:
     -   **Law**: 拡張型 (`DatabaseExtended`) を定義する際、交差型 (`&`) は禁止です（推論競合リスク）。
-    -   **Action**: 必ず **Mapped Type (写像型)** を使用し、`keyof Database` を反復しながら物理的に上書き (Override) する形で定義し、100%の型安全性を確保してください。
+    -   **Action**: 必ず **Mapped Type (写像型)** を使用し、`keyof Database` を反復しながら明示的に上書き (Override) する形で定義し、型安全性を高めてください。
 
 ### Rule 2.4: The New Table Checklist (Creation Protocol)
 -   **Law**: 新規テーブル作成時は、以下の項目を全て満たすことを完了条件とします。
@@ -222,7 +222,7 @@
 
 ## 3. インテグリティとロジック戦略 (Integrity & Logic Strategy)
 
-### Supreme Directive 3.0: The RLS Implementation Iron Rules
+### Primary Directive 3.0: The RLS Implementation Iron Rules
 -   **Law 1: Atomic Action Definition**
     -   `FOR INSERT, UPDATE` のようなカンマ区切り定義は禁止。`FOR ALL` 以外は、必ず**アクションごとに個別のポリシー**として定義してください。
 -   **Law 2: INSERT Syntax Discipline**
@@ -313,7 +313,7 @@
     1.  **`name_display`**: 表示用（絵文字、装飾を含む）。
     2.  **`name_kana`**: ソートおよび読み仮名用（半角カナ等で正規化）。
     3.  **`name_search`**: 全文検索用（n-gramトークン化、または検索用メタデータ）。
--   **Automated Sync**: これらはフロントエンドからの送信時に同期させるか、可能であればDBトリガーで自動生成し、不整合（名前を変えたのに検索できない等）を物理的に防いでください。
+-   **Automated Sync**: これらはフロントエンドからの送信時に同期させるか、可能であればDBトリガーで自動生成し、不整合（名前を変えたのに検索できない等）の発生リスクを低減してください。
 
 ### Rule 3.3.2: The Multiple Permissive Policies Conflict (Policy Hygiene)
 -   **Law**: 同一テーブル、同一アクション（例: `SELECT`）に対して、複数の `PERMISSIVE` ポリシーが存在する場合、Postgres はそれらを `OR` で結合します。これは意図しないアクセス許可（穴）を生む原因となります。
@@ -405,7 +405,7 @@
 -   **Law**: 2025年のSupabaseアップデートにより、新規テーブルには**RLSがデフォルトで有効**となります。この挙動を前提に、テーブル作成直後にポリシーを定義する運用を徹底しなければなりません。
 -   **Action**:
     1.  **Immediate Policy**: テーブル作成後、ポリシー未定義の状態で放置しないでください。RLS有効 + ポリシーなし = **全アクセス拒否**です。開発中であっても最低限 `TO authenticated` のポリシーを設定してください。
-    2.  **Event Triggers**: Supabaseの **Event Triggers** 機能を活用し、新規テーブル作成時に自動的にRLSを有効化するトリガーを設定してください。人為的な設定漏れを物理的に抑制します。
+    2.  **Event Triggers**: Supabaseの **Event Triggers** 機能を活用し、新規テーブル作成時に自動的にRLSを有効化するトリガーを設定してください。人為的な設定漏れリスクを低減します。
     3.  **Dashboard Alerts**: ダッシュボードの **Security Alerts** で「RLSが無効なテーブル」の警告が表示された場合、即座に対処してください。これは §0.1（Zero Tolerance Linter Protocol）の適用対象です。
     4.  **Exposed Tables**: RLSが有効でもポリシーが `USING (true)` のテーブルは実質的に全公開です。ダッシュボードの **Exposed Tables** ラベルを定期的に確認し、意図しない公開がないか監査してください。
 
@@ -470,7 +470,7 @@
 -   **GitHub Actions**: ランナー環境でのIPv6接続エラーを防ぐため、`supabase link` (Connection Pooler) または `SUPABASE_DB_URL` 直接接続 (Plan C) を適切に使い分け、安定したデプロイ経路を確保してください。
 
 ### Rule 7.3: Data Seeding & Caching Determinism
--   **Seed Determinism**: 初期データ (`seed.sql`) は **固定ID・固定値** を使用し、決定論的なテスト状態を保証します。
+-   **Seed Determinism**: 初期データ (`seed.sql`) は **固定ID・固定値** を使用し、決定論的なテスト状態を維持しやすくします。
 -   **Cache Versioning**: マスターデータ等を `unstable_cache`等でキャッシュする場合、データの増減やスキーマ変更時に古いキャッシュが残る「Cache Rot」を防ぐため、キャッシュキーには必ずバージョンサフィックス（例: `master_data_v2`）を付与し、物理的に無効化する仕組みを設けてください。
 -   **Verification**: シード実行後は、必ずアプリケーション経由またはクエリで実データ件数が期待通りか確認してください。CLIの「Up to date」はデータの存在を保証しません。
 
@@ -512,7 +512,7 @@
     1.  **Assumed Conflict**: 全ての `UPDATE` / `INSERT` は、「対象データが既に存在する」「重複している」前提で書いてください。楽観的な「きれいなDB」を前提にしたSQLは本番で爆発します。
     2.  **Defensive Logic**: 単純なSQLではなく、`DO $$ ... END $$` ブロックや `ON CONFLICT` 句を用い、例外発生をコードレベルで回避してください。
     3.  **Cleanup Before Constraint**: 一意制約（`UNIQUE`）を追加するマイグレーションでは、事前に重複データを削除・統合するクリーンアップロジックを**同一マイグレーションファイル内に**必ず含めてください。制約追加だけでは、本番の重複データがマイグレーションを失敗させます。
--   **Rationale**: 開発環境とCIでは「成功したマイグレーション」が、本番環境の汚れたデータで失敗するケースは非常に多いです。防衛的なDML記述により、全環境での安全なマイグレーションを保証します。
+-   **Rationale**: 開発環境とCIでは「成功したマイグレーション」が、本番環境の汚れたデータで失敗するケースは非常に多いです。防衛的なDML記述により、環境差によるマイグレーション失敗リスクを低減します。
 
 ### Rule 7.9: The Migration Static Analysis Guard（マイグレーション静的解析ガード）
 -   **Law**: マイグレーションファイルに含まれる危険なSQLパターンを**自動検出し、マージ前に拒否**する静的解析の仕組み（Pre-push Hook + CI Check）を導入しなければなりません。「人間の注意力」に依存する運用ルールは、緊急時や新任者によって必ず破られます。
@@ -524,7 +524,7 @@
         -   `INSERT` without `ON CONFLICT` → 一意制約違反リスクとして拒否
         -   `ADD CONSTRAINT ... UNIQUE` without prior cleanup → 既存データ不整合リスクとして拒否
     4.  **No Bypass**: `--no-verify` 等のフック回避オプションの使用は、プロジェクトのスキーマ信頼性を破壊する行為として禁止します。
--   **Rationale**: マイグレーションの安全性を人間の注意力に依存させることは、インシデントの「いつ起こるか」の問題に過ぎません。静的解析による物理的な防御壁を設けることで、危険なSQLが本番環境に到達することを構造的に不可能にします。
+-   **Rationale**: マイグレーションの安全性を人間の注意力に依存させることは、インシデントの「いつ起こるか」の問題に過ぎません。静的解析による防御壁を設けることで、危険なSQLが本番環境に到達するリスクを下げます。
 
 ---
 
@@ -637,7 +637,7 @@
 -   **Law**: クライアントサイドからの直接書き込みは、サーバーサイドの監査ログ（Audit Logs）や複雑なバリデーションをバイパスする「ガバナンスの穴」となります。
 -   **Action**: 
     1. **Surgical Write**: 原則として書き込みは **Server Actions** に集約し、その内部で `recordAuditLog` を呼び出すことを義務付けます。
-    2. **Exception Recognition**: 現実的な制約でクライアントから INSERT する場合は、DBトリガー (`AFTER INSERT`) に `recordAuditLog` 相当のロジックを実装し、物理的にバイパスを不可能にしてください。
+    2. **Exception Recognition**: 現実的な制約でクライアントから INSERT する場合は、DBトリガー (`AFTER INSERT`) に `recordAuditLog` 相当のロジックを実装し、監査バイパスのリスクを低減してください。
 
 ### Rule 11.3: The RLS Best Practices Protocol (ポリシー衛生)
 -   **Law 1: No Redundant Admin Policy**: `service_role` キーはRLSを完全にバイパスします。したがって、`TO service_role` のポリシーは**意味がなく冗長**です。管理者アクセスはアプリケーション層（`is_admin()` ヘルパー）で制御してください。
@@ -653,7 +653,7 @@
     3.  **Validation**: 拡張型を定義した後、必ず `supabase.from('table').insert({...})` がコンパイルを通ることを確認してください。
 
 ### Rule 11.5: The Idempotent Migration Protocol (冪等マイグレーション)
--   **Context**: マイグレーションは「クリーンルーム」（CIの新規DB）と「ダーティルーム」（既にデータが存在する本番DB）の両方で実行されます。両環境で成功することを保証する設計が必要です。
+-   **Context**: マイグレーションは「クリーンルーム」（CIの新規DB）と「ダーティルーム」（既にデータが存在する本番DB）の両方で実行されます。両環境での失敗リスクを下げる設計が必要です。
 -   **Law**: マイグレーションファイルは、何度実行しても同じ結果になる**冪等性（Idempotency）**を持たなければなりません。
 -   **Action**:
     -   **Functions**: `CREATE FUNCTION` ではなく `CREATE OR REPLACE FUNCTION` を使用してください。
@@ -697,7 +697,7 @@
     2.  **No Dashboard Edits**: DB管理画面（Supabase Dashboard、pgAdmin等）での直接的なスキーマ変更は、履歴追跡が不可能となるため禁止します。緊急対応であっても、事後に必ずマイグレーションファイルを作成してGitに反映してください。
     3.  **Schema Consistency Protocol**: ローカル環境のスキーマがマイグレーションファイルと乖離（汚染）した場合は、DB再構築（`supabase db reset` 等）を躊躇してはなりません。常にマイグレーションファイルをSource of Truth（正）として扱い、ローカルDBを従とします。
     4.  **Verification**: マイグレーション適用後は、ローカルスキーマとリモートスキーマの差分がゼロであることを確認してください。差分がある場合はゴーストマイグレーションの存在を疑います。
--   **Rationale**: マイグレーションファイルに記録されない変更は、チーム間での再現不能、CI/CD障害、本番環境との不整合を引き起こします。「全ての変更は記録される」という原則こそが、スキーマの信頼性を担保する唯一の方法です。
+-   **Rationale**: マイグレーションファイルに記録されない変更は、チーム間での再現不能、CI/CD障害、本番環境との不整合を引き起こします。「全ての変更は記録される」という原則は、スキーマの信頼性を支える基盤です。
 
 ## 12. マイグレーションと特権操作 (Migrations & Privileged Operations)
 
@@ -1993,7 +1993,7 @@
         -- 頻繁にアクセスするキー用
         CREATE INDEX idx_metadata_status ON products ((metadata->>'status'));
         ```
-    5.  **pg_jsonschema**: `pg_jsonschema`拡張でJSONBデータのバリデーションを実装してください。データ整合性を保証します。
+    5.  **pg_jsonschema**: `pg_jsonschema`拡張でJSONBデータのバリデーションを実装してください。データ整合性を高めます。
 
 ---
 
@@ -2359,7 +2359,7 @@
 ## 53. Webhook Signature & イベント駆動統合戦略 (Webhook Signature & Event-Driven Integration Strategy)
 
 ### Rule 53.1: The Webhook Security Protocol
--   **Law**: 外部サービスとのWebhook連携においては、**署名検証（Signature Verification）**を必須とし、偽装リクエストを物理的に遮断しなければなりません。
+-   **Law**: 外部サービスとのWebhook連携においては、**署名検証（Signature Verification）**を必須とし、偽装リクエストを拒否できる設計にしなければなりません。
 -   **Action**:
     1.  **HMAC Verification**: Webhook受信側（Edge Functions等）では、リクエストヘッダーに含まれる署名を**HMAC-SHA256**で検証してください:
         ```typescript
@@ -2374,7 +2374,7 @@
     3.  **Idempotency Key**: Webhook処理には**冪等性キー**（`idempotency_key`）を使用し、同一イベントの二重処理を防止してください。受信済みキーをDBに記録し、重複をチェックします。
     4.  **Dead Letter Queue**: 処理失敗したWebhookイベントは**Dead Letter Queue**（pgmq等）に保存し、手動またはバッチで再処理可能にしてください。イベントの消失は許容しません。
     5.  **Schema Versioning**: Webhookペイロードにはバージョン番号（`v1`, `v2`等）を含め、スキーマ変更時の後方互換性を保証してください。
--   **Rationale**: 署名なしのWebhookは「誰でも偽リクエストを送信可能」な攻撃面です。署名検証により認証されたリクエストのみを処理し、データの整合性とセキュリティを保証します。
+-   **Rationale**: 署名なしのWebhookは「誰でも偽リクエストを送信可能」な攻撃面です。署名検証により認証されたリクエストのみを処理しやすくし、データの整合性とセキュリティを高めます。
 
 ---
 
@@ -2468,9 +2468,9 @@
         type CreatePostInput = z.infer<typeof CreatePostSchema>;
         ```
     3.  **Layer 3 — DTO Mapping**: §0.2（Trinity DTO Mandate）に従い、DB型→DTO→コンポーネントPropsの変換チェーンを明示的に定義してください。各変換はMapped Typeで型安全に実装します。
-    4.  **Layer 4 — Type Synchronization**: CI/CDパイプライン（§51参照）に型生成ステップを組み込み、スキーマ変更時に型定義が自動更新されることを保証してください。
-    5.  **Type Gap Detection**: `tsc --noEmit`をCIに必須チェックとして組み込み、型エラーがマージされることを物理的に防止してください。
--   **Rationale**: 型安全チェーンの途切れ（Any型の乱用、手動型定義のドリフト）は、ランタイムエラーの最大の原因です。DBからUIまでの完全な型安全により、コンパイル時にバグを検出します。
+    4.  **Layer 4 — Type Synchronization**: CI/CDパイプライン（§51参照）に型生成ステップを組み込み、スキーマ変更時に型定義が更新・検証される状態を維持してください。
+    5.  **Type Gap Detection**: `tsc --noEmit`をCIに必須チェックとして組み込み、型エラーのマージリスクを低減してください。
+-   **Rationale**: 型安全チェーンの途切れ（Any型の乱用、手動型定義のドリフト）は、ランタイムエラーの大きな原因です。DBからUIまでの型安全チェーンにより、コンパイル時に検出できるバグを増やします。
 
 ---
 

@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-22
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Even a great product doesn't exist if it isn't delivered correctly."
 > **GTM is a design act equal to product development.** Eliminate the illusion that "if you build it, they will come."
 > Launch is not "a one-day event" but "a continuous process."

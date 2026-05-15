@@ -3,9 +3,10 @@
 # Axiarch §6 ANTI-FULL-OVERWRITE Enforcement (PreToolUse hook)
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
-# Physically blocks Write tool calls that target existing files, forcing the
-# AI to use Edit (diff-based) instead. This prevents the §6 ANTI-FULL-OVERWRITE
-# violation pattern that reminder-only enforcement cannot reliably stop.
+# Physically blocks Write tool calls that target existing files, directing the
+# AI to use Edit (diff-based) instead. This reduces the known §6
+# ANTI-FULL-OVERWRITE violation pattern that reminder-only enforcement cannot
+# reliably stop.
 #
 # Hook contract (PreToolUse):
 #   - stdin: JSON with `tool_name`, `tool_input.file_path`, etc.

@@ -82,7 +82,7 @@
 ### Blueprint Folder & File Naming Guide
 
 > [!IMPORTANT]
-> **Reserved numbers**: `998` and `999` are reserved for templates (`core/998_feature_spec_template.md`, `core/999_project_specific_template.md`).
+> **Numbers already used in core/**: `998` and `999` are already used by template files (`core/998_feature_spec_template.md`, `core/999_project_specific_template.md`). Other folders may use any available number from `000` to `999`.
 > All other numbers (`010`–`997`) are **freely available regardless of purpose**. Both project-specific rules and feature specs use the same sequential numbering within each folder.
 
 | Folder | Available Numbers | Examples |
@@ -97,4 +97,3 @@
 | `ai/` | 010–997 | AI strategy overrides, AI feature specs |
 
 > **Numbering rule**: Within each folder, use `010_`, `020_`, `030_`... in **10-unit increments** (to reserve insertion gaps for future files). Do NOT use global numbering across folders.
-

@@ -19,7 +19,7 @@
 #
 # v1.6.0+ TWO-STAGE OUTPUT (token-cost optimisation):
 #   - First fire (or after TTL expires)            → FULL reminder + timestamp
-#   - Subsequent fires within TTL + no violations  → SHORT-CIRCUIT [AXIARCH OK]
+#   - Subsequent fires within TTL + no violations  → SHORT-CIRCUIT [AXIARCH REMINDER]
 #   - Any violation detected (A/B/C/D)             → forced FULL reminder (TTL ignored)
 #
 # v1.8.0+ TASK BOUNDARY DETECTION (Check D):
@@ -71,12 +71,12 @@ fi
 # distributed via .claude/settings.json or .codex/hooks.json before externalization)
 # -----------------------------------------------------------------------------
 read -r -d '' CORE_REMINDER <<'EOF' || true
-[AXIARCH BOOT] This project enforces axiarch governance. Before responding, the AI applies AGENTS.md (supreme law — Project Configuration + 9 protocols) and LOADING_PROTOCOL.md BOOT SEQUENCE. Output language follows the Project Native Language declared in AGENTS.md and is applied to every heading, summary, label, list, and table. Loaded rule files (AGENTS.md, INDEX.md, LOADING_PROTOCOL.md, etc.) are recorded in task.md per AGENTS.md §8 (Process & Documentation, item 4 — Documentation Requirements); a missing record is treated as a protocol violation. On task completion, the AI runs CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK and, when any domain in core/010_project_lessons_log.md holds 3+ unsorted lessons, promotes them into a dedicated Blueprint file before declaring the task done — appending to core/010 alone is not completion. / 本プロジェクトは axiarch ガバナンスを採用しています。応答前に AGENTS.md（最高法規・Project Configuration + 9 プロトコル）と LOADING_PROTOCOL.md の BOOT SEQUENCE を適用します。応答言語は AGENTS.md で宣言された Project Native Language に従い、見出し・要約・ラベル・箇条書き・表すべてに適用されます。ロードしたルールファイル (AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 等) は AGENTS.md §8 (Process & Documentation 第 4 項 — ドキュメント生成要件) に基づき task.md に記録されます。記録欠落はプロトコル違反として扱われます。タスク完了時は CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK を実行し、core/010_project_lessons_log.md のドメインに 3 件以上の未整理教訓がある場合は Blueprint 専用ファイルへ昇華してから完了を宣言します。core/010 への追記だけでは完了とみなされません。
+[AXIARCH BOOT] This project enforces axiarch governance. Before responding, the AI applies AGENTS.md (top-level protocol — Project Configuration + 9 protocols) and LOADING_PROTOCOL.md BOOT SEQUENCE. Output language follows the Project Native Language declared in AGENTS.md and is applied to every heading, summary, label, list, and table. Rule files actually opened and read by the AI (AGENTS.md, INDEX.md, LOADING_PROTOCOL.md, etc.) must be recorded in task.md per AGENTS.md §8 (Process & Documentation, item 4 — Documentation Requirements); missing or stale load records are treated as protocol violations. On task completion, the AI runs CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK and, when any domain in core/010_project_lessons_log.md holds 3+ unsorted lessons, promotes them into a dedicated Blueprint file before declaring the task done — appending to core/010 alone is not completion. / 本プロジェクトは axiarch ガバナンスを採用しています。応答前に AGENTS.md（最上位プロトコル・Project Configuration + 9 プロトコル）と LOADING_PROTOCOL.md の BOOT SEQUENCE を適用します。応答言語は AGENTS.md で宣言された Project Native Language に従い、見出し・要約・ラベル・箇条書き・表すべてに適用されます。AI が実際に開いて読んだルールファイル (AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 等) は AGENTS.md §8 (Process & Documentation 第 4 項 — ドキュメント生成要件) に基づき task.md に記録する必要があります。未記録または実態と一致しないロード記録はプロトコル違反として扱われます。タスク完了時は CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK を実行し、core/010_project_lessons_log.md のドメインに 3 件以上の未整理教訓がある場合は Blueprint 専用ファイルへ昇華してから完了を宣言します。core/010 への追記だけでは完了とみなされません。
 EOF
 
 # v1.6.0+ short-circuit reminder (used after TTL window when no violations)
 read -r -d '' SHORT_REMINDER <<'EOF' || true
-[AXIARCH OK] axiarch governance is active and recently confirmed. Continue applying AGENTS.md / LOADING_PROTOCOL / Project Native Language. Full reminder reappears on TTL expiry, violation detection, or new session. / axiarch ガバナンス継続中（直近で確認済）。AGENTS.md / LOADING_PROTOCOL / Project Native Language の適用を継続。TTL 期限切れ・違反検出・新規 session 時に full reminder が再表示されます。
+[AXIARCH REMINDER] axiarch governance applies to this project. Continue applying AGENTS.md / LOADING_PROTOCOL / Project Native Language. Full reminder reappears on TTL expiry, violation detection, or new session. / axiarch ガバナンスは本プロジェクトに適用されます。AGENTS.md / LOADING_PROTOCOL / Project Native Language の適用を継続。TTL 期限切れ・違反検出・新規 session 時に full reminder が再表示されます。
 EOF
 
 VIOLATIONS=""

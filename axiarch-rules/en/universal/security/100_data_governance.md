@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > This document provides integrated rules for "Legal Obligations, Governance Frameworks & Data Strategy."
 > For security technical implementation, see `security/000_security_privacy.md`. For license management, see `security/200_oss_compliance.md`. For IP strategy, see `security/300_ip_due_diligence.md`.
 > **45 Sections.**
@@ -19,7 +19,7 @@
 
 ## Table of Contents
 
-- §1. Supreme Directive & Scope
+- §1. Primary Directive & Scope
 - §2. Global Privacy Regulation Map
 - §3. Data Sovereignty & Cross-Border Transfer
 - §4. Consent Management & CMP
@@ -68,7 +68,7 @@
 
 ---
 
-## §1. Supreme Directive & Scope
+## §1. Primary Directive & Scope
 
 ### 1.1. Core Principles
 -   **Privacy by Default**: All personal data processing must adhere to **purpose specification, minimization, and storage limitation**.
@@ -1460,7 +1460,7 @@ jobs:
 | **Differential Privacy** | Apply noise injection to output to mathematically limit individual identifiability |
 | **Contractual Constraints** | Execute DCR agreements specifying data use purpose, scope, and duration among participants |
 | **Third-Party Audit** | Annual third-party audit verifying Clean Room operations comply with privacy regulations |
-| **Log Retention** | Maintain complete audit logs of all queries and outputs |
+| **Log Retention** | Maintain traceable audit logs of all queries and outputs |
 
 ### 21.3. Use Cases
 -   Advertising effectiveness measurement (post-cookie solution as cookie alternative)

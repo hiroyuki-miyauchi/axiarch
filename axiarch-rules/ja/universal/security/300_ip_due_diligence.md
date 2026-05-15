@@ -5,7 +5,7 @@
 > 改定日: 2026-04-19
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「知的財産は見えない堀 — 保護されていないIPは競合への招待状である。」
 > すべてのIP決定は保護・所有権の明確化・デューデリジェンスを交渉不可とする。
 > **IP保護 > 法的準拠 > ビジネス戦略 > スピード** の優先順位を厳守せよ。
@@ -1979,7 +1979,7 @@ def attach_c2pa_manifest(
 ### 著作権遵守ポリシー
 - TDM Opt-outモニタリング: 月次自動スキャン
 - 問題データの削除対応SLA: 48時間以内
-- 参照: [Training Data IP Clearance Report](./reports/license_clearance_latest.json)
+- 参照: `reports/license_clearance_latest.json`
 
 ### IP帰属（§23 Rule 63.171参照）
 - 人間著作部分: {list}

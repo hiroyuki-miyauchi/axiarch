@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-28
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Brand seeps from the inside of a company outward, not from an ad agency."
 > A brand is **"the accumulation of promises"** to users. Every touchpoint with the user forms the brand.
 > A brand without consistency destroys trust. Brand building is the source of the most durable competitive advantage.
@@ -524,7 +524,7 @@ Bad example:
 
 ## Part V. AI-Native Brand Governance
 
-> **Supreme Directive**: In an era where AI "acts on behalf of" the brand, all AI utterances and generated content are official brand expressions. AI output quality management is a core brand governance responsibility.
+> **Primary Directive**: In an era where AI "acts on behalf of" the brand, all AI utterances and generated content are official brand expressions. AI output quality management is a core brand governance responsibility.
 
 ### 5.1. AI-Generated Content Brand Compliance Gate
 
@@ -728,7 +728,7 @@ Expansion: Referral program, upgrade flow, events
 
 ## Part VII. Global Brand Localization
 
-> **Supreme Directive**: A global brand aims for "cultural resonance," not "uniform translation." Maintain a Global Core (immutable nucleus) while designing room for Local Flex (regional adaptation).
+> **Primary Directive**: A global brand aims for "cultural resonance," not "uniform translation." Maintain a Global Core (immutable nucleus) while designing room for Local Flex (regional adaptation).
 
 ### 7.1. Localization vs Transcreation Protocol
 
@@ -786,7 +786,7 @@ Local Flex (adaptable):
 
 ## Part VIII. Brand Architecture & Portfolio
 
-> **Supreme Directive**: As product lines expand, prevent brand structure from becoming "accidentally" complex. Brand architecture is an intentionally designed and managed structure.
+> **Primary Directive**: As product lines expand, prevent brand structure from becoming "accidentally" complex. Brand architecture is an intentionally designed and managed structure.
 
 ### 8.1. Brand Architecture Model
 
@@ -914,7 +914,7 @@ Naming Process:
 
 ## Part X. Employer Brand & Internal Culture
 
-> **Supreme Directive**: Brand is not an external marketing tool—it is "culture" emanating from inside the organization. If employees cannot embody the brand, users will see through the contradiction.
+> **Primary Directive**: Brand is not an external marketing tool—it is "culture" emanating from inside the organization. If employees cannot embody the brand, users will see through the contradiction.
 
 ### 10.1. Employer Value Proposition (EVP)
 
@@ -951,7 +951,7 @@ Naming Process:
 
 ## Part XI. Brand & Sustainability / Ethics
 
-> **Supreme Directive**: Brand social responsibility is not "decoration"—it is part of the Brand Promise. Sustainability claims must always be accompanied by verifiable evidence.
+> **Primary Directive**: Brand social responsibility is not "decoration"—it is part of the Brand Promise. Sustainability claims must always be accompanied by verifiable evidence.
 
 ### 11.1. Brand Purpose & ESG Alignment
 
@@ -1099,7 +1099,7 @@ Update: Weekly (dashboard) / Quarterly (exec report)
 
 ## Part XIII. GEO & E-E-A-T Brand Trust Strategy
 
-> **Supreme Directive**: In the Generative Engine age, brand trustworthiness is determined by "whether AI search results cite you." E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) is not an SEO metric—it is a brand strategy foundation.
+> **Primary Directive**: In the Generative Engine age, brand trustworthiness is determined by "whether AI search results cite you." E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) is not an SEO metric—it is a brand strategy foundation.
 
 ### 13.1. GEO (Generative Engine Optimization) Protocol
 
@@ -1149,7 +1149,7 @@ Update: Weekly (dashboard) / Quarterly (exec report)
 
 ## Part XIV. Brand Evolution & Rebrand Management
 
-> **Supreme Directive**: Brands are living organisms. They must "evolve" in response to market conditions, competitive landscape, and organizational growth. However, evolution must be "planned."
+> **Primary Directive**: Brands are living organisms. They must "evolve" in response to market conditions, competitive landscape, and organizational growth. However, evolution must be "planned."
 
 ### 14.1. Brand Evolution vs Rebrand
 
@@ -1212,7 +1212,7 @@ Phase 3: AI-Native (Long-term: 3-5 years)
 
 ## Part XV. Sonic & Sensory Branding
 
-> **Supreme Directive**: In a multi-modal world, brands that exist only in the visual realm are incomplete. Sonic identity (brand sounds), voice UI, and multi-sensory brand experiences must be designed and managed with the same rigor as visual identity.
+> **Primary Directive**: In a multi-modal world, brands that exist only in the visual realm are incomplete. Sonic identity (brand sounds), voice UI, and multi-sensory brand experiences must be designed and managed with the same rigor as visual identity.
 
 ### 15.1. Sonic Identity Architecture
 
@@ -1266,7 +1266,7 @@ Phase 3: AI-Native (Long-term: 3-5 years)
 
 ## Part XVI. Spatial Computing & Immersive Brand
 
-> **Supreme Directive**: Brand governance for spatial computing environments (AR/VR/MR) cannot be adequately addressed by extending existing 2D brand guidelines. A native spatial brand governance framework is required.
+> **Primary Directive**: Brand governance for spatial computing environments (AR/VR/MR) cannot be adequately addressed by extending existing 2D brand guidelines. A native spatial brand governance framework is required.
 
 ### 16.1. Spatial Brand Design Principles
 
@@ -1305,7 +1305,7 @@ Phase 3: AI-Native (Long-term: 3-5 years)
 
 ## Part XVII. Community-Led Brand & Web3
 
-> **Supreme Directive**: Brand is evolving from something companies "broadcast" to something co-created with communities. The power of community must be strategically designed and managed as a brand asset.
+> **Primary Directive**: Brand is evolving from something companies "broadcast" to something co-created with communities. The power of community must be strategically designed and managed as a brand asset.
 
 ### 17.1. Community Flywheel Design
 
@@ -1368,7 +1368,7 @@ Stages:
 
 ## Part XVIII. Share of Model & AI Discoverability
 
-> **Supreme Directive**: In the AI era, "how LLMs perceive a brand" is equally or more important than search engine rankings. Share of Model (brand share within AI models) is a new brand strategy KPI.
+> **Primary Directive**: In the AI era, "how LLMs perceive a brand" is equally or more important than search engine rankings. Share of Model (brand share within AI models) is a new brand strategy KPI.
 
 ### 18.1. Share of Model Audit Framework (SoM)
 
@@ -1427,7 +1427,7 @@ Share of Model (SoM) Audit Process:
 
 ## Part XIX. Data-Driven Brand Intelligence 2.0
 
-> **Supreme Directive**: Traditional quarterly survey-based brand measurement is "too slow." Transition to "always-on" brand intelligence leveraging AI and real-time data, optimizing brand at the same velocity as product.
+> **Primary Directive**: Traditional quarterly survey-based brand measurement is "too slow." Transition to "always-on" brand intelligence leveraging AI and real-time data, optimizing brand at the same velocity as product.
 
 ### 19.1. Continuous Brand Tracking
 
@@ -1503,7 +1503,7 @@ Share of Model (SoM) Audit Process:
 
 ## Part XX. Brand Compliance Automation & CI/CD
 
-> **Supreme Directive**: Relying solely on human review for brand compliance has limitations in both scalability and speed. Integrate brand governance into the CI/CD pipeline and automate it.
+> **Primary Directive**: Relying solely on human review for brand compliance has limitations in both scalability and speed. Integrate brand governance into the CI/CD pipeline and automate it.
 
 ### 20.1. Brand Linting Pipeline
 
@@ -1561,7 +1561,7 @@ Brand Review Bot Scope:
 
 ## Part XXI. Brand & Platform Economy
 
-> **Supreme Directive**: When brand is experienced through APIs, SDKs, and marketplaces, traditional UI/UX guidelines alone cannot protect the brand. Extended brand governance including Developer Brand Experience (DevBX) is required.
+> **Primary Directive**: When brand is experienced through APIs, SDKs, and marketplaces, traditional UI/UX guidelines alone cannot protect the brand. Extended brand governance including Developer Brand Experience (DevBX) is required.
 
 ### 21.1. API-First Brand Experience
 

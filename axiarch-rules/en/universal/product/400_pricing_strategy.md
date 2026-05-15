@@ -5,7 +5,7 @@
 > Revision Date: 2026-04-27 | v5.1
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Price is the most important marketing message. Getting pricing wrong is equivalent to getting positioning wrong."
 > Price is the **"value exchange"**, not a "cost markup". Discounting is the last resort and signals a failure in value communication.
 > **17 Parts | 180+ Sections | 350+ Rules | 95 Anti-Patterns.**
@@ -1624,7 +1624,7 @@ Recommended Layout:
 | KPI | Definition | Healthy Benchmark |
 |:----|:----------|:-----------------|
 | **ARPA** | Average Revenue Per Account | MoM ≥ 0% (flat or growing) |
-| **NRR** | Net Revenue Retention | ≥ 110% (SaaS best-in-class) |
+| **NRR** | Net Revenue Retention | ≥ 110% (strong SaaS benchmark) |
 | **Gross Margin** | Gross profit margin | ≥ 70% (SaaS benchmark) |
 | **Price Realization** | Realized price / List price | ≥ 85% |
 | **Discount Rate** | Average discount rate | ≤ 15% |

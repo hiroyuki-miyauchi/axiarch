@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > - **"Hope is not a strategy."** — Reliability must be engineered, not assumed.
 > - All production reliability decisions MUST be based on **quantitative SLO evidence**.
 > - Systems without monitoring are not "running" — they are "broken without anyone noticing."
@@ -1017,7 +1017,7 @@
 
 ### §68. Schema-Code Synchronization
 
--   **Law**: Even Zero Defect code doesn't work if **DB schema is not applied**.
+-   **Law**: Even verified code doesn't work if **DB schema is not applied**.
 -   **Action**: Migration Status Check, Schema Drift Detection, Deploy Pipeline integration.
 -   **Ghost Column Prevention**: Using column names in queries before migration is applied is prohibited.
 

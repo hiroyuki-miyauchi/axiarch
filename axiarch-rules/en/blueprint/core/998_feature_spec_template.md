@@ -6,7 +6,7 @@
 > Following the Blueprint First principle, **complete this template before writing code.**
 
 > [!IMPORTANT]
-> **Blueprint First Core**: This template realizes Axiarch's "Blueprint First" at the feature level.
+> **Blueprint First Core**: This template supports Axiarch's "Blueprint First" at the feature level.
 > Features without defined Acceptance Criteria **must not begin implementation.**
 
 ---
@@ -107,7 +107,7 @@
 
 ### Constraints
 
-*   **Technical**: [e.g., Supabase RLS prevents direct client access]
+*   **Technical**: [e.g., Supabase RLS restricts direct client access]
 *   **Business**: [e.g., Free plan users limited to 5 per month]
 *   **Regulatory**: [e.g., GDPR requires data deletion within 30 days]
 

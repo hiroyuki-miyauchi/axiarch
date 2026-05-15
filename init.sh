@@ -7,9 +7,19 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.8.2"
+AXIARCH_VERSION="1.9.0-dev"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
-TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
+if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
+  DEFAULT_AXIARCH_REF="heads/main"
+else
+  DEFAULT_AXIARCH_REF="tags/v${AXIARCH_VERSION}"
+fi
+AXIARCH_REF="${AXIARCH_REF:-$DEFAULT_AXIARCH_REF}"
+INSTALL_LABEL="$AXIARCH_VERSION"
+if [[ "$AXIARCH_REF" =~ ^tags/v(.+)$ ]]; then
+  INSTALL_LABEL="${BASH_REMATCH[1]}"
+fi
+TARBALL_URL="${REPO_URL}/archive/refs/${AXIARCH_REF}.tar.gz"
 
 # --- Color helpers ---
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -17,7 +27,8 @@ BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 
 print_header() {
   echo ""
-  echo -e "${BOLD}${CYAN}🏰 Axiarch v${AXIARCH_VERSION} — Quick Setup${RESET}"
+  echo -e "${BOLD}${CYAN}🏰 Axiarch installer v${AXIARCH_VERSION} — Quick Setup${RESET}"
+  echo -e "${CYAN}   Installing: Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}${RESET}"
   echo -e "${CYAN}   Constitution-Driven AI Agent Governance Framework${RESET}"
   echo -e "${CYAN}   ${REPO_URL}${RESET}"
   echo ""
@@ -35,6 +46,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo
 IS_REMOTE=false
 if [[ "$SCRIPT_DIR" == "REMOTE" ]] || [[ ! -f "$SCRIPT_DIR/AGENTS.md" ]]; then
   IS_REMOTE=true
+else
+  SOURCE_DIR="$SCRIPT_DIR"
 fi
 
 # --- Require a target directory argument when running remotely ---
@@ -77,17 +90,36 @@ select_language() {
 }
 
 # =============================================================================
+# STEP 1.5: Optional language directory cleanup
+# =============================================================================
+select_language_dirs() {
+  echo ""
+  echo -e "${BOLD}言語ディレクトリ / Language directories:${RESET}"
+  echo "  1) 両方保持 / Keep both ja and en — デフォルト / Default"
+  echo "  2) 選択した言語だけ残す / Keep selected language only"
+  echo ""
+  read -rp "選択してください / Enter choice [1]: " lang_dir_choice
+  lang_dir_choice="${lang_dir_choice:-1}"
+  KEEP_BOTH_LANGS=true
+  case "$lang_dir_choice" in
+    1) KEEP_BOTH_LANGS=true; print_success "Keeping both language directories." ;;
+    2) KEEP_BOTH_LANGS=false; print_success "Single-language cleanup will be applied." ;;
+    *) print_warn "無効な選択。両言語を保持します。"; KEEP_BOTH_LANGS=true ;;
+  esac
+}
+
+# =============================================================================
 # STEP 2: AI Agent selection
 # =============================================================================
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) Google Antigravity — Verified ✅"
-  echo "  2) Claude Code — Verified ✅ (v1.4.0+ native hook integration)"
-  echo "  3) OpenAI Codex — Expected to work ⚠️ (AGENTS.md = native)"
-  echo "  4) Cursor — Expected to work ⚠️"
-  echo "  5) GitHub Copilot — Expected to work ⚠️"
-  echo "  6) Windsurf — Expected to work ⚠️"
+  echo "  1) Google Antigravity — Verified primary ✅"
+  echo "  2) OpenAI Codex — Primary target ⚙️ (AGENTS.md + .codex/hooks.json)"
+  echo "  3) Claude Code — Primary target ⚙️ (native hook integration)"
+  echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee)"
+  echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee)"
+  echo "  6) Windsurf — Extended pointer only ⚠️ (unverified, no guarantee)"
   echo "  7) Other / Universal (AGENTS.md only)"
   echo ""
   read -rp "選択してください / Enter choice [1]: " agent_choice
@@ -103,8 +135,8 @@ select_agent() {
 
   case "$agent_choice" in
     1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
-    3) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
+    2) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
+    3) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
     4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
@@ -136,7 +168,7 @@ select_prompts() {
 # =============================================================================
 # STEP 3.5 (v1.6.0+): Optional pre-commit hook installation
 # Installs `bash axiarch-scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
-# so axiarch protocol violations (3 hooks wired, threshold breaches, etc.) are
+# so axiarch protocol violations (4 hooks wired, threshold breaches, etc.) are
 # caught before commits land.
 # =============================================================================
 select_precommit() {
@@ -231,7 +263,7 @@ NEWHOOK
 # =============================================================================
 prepare_source() {
   if $IS_REMOTE; then
-    print_step "4" "Downloading Axiarch ${AXIARCH_VERSION}..."
+    print_step "4" "Downloading Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}..."
     TMP_DIR="$(mktemp -d)"
     trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -260,35 +292,43 @@ copy_files() {
   cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
   print_info "Copied: AGENTS.md"
 
-  # === Required: axiarch-rules/ (language-filtered) ===
+  # === Required: axiarch-rules/ ===
   local UNUSED_LANG
   if [[ "$LANG_CODE" == "ja" ]]; then UNUSED_LANG="en"; else UNUSED_LANG="ja"; fi
 
   cp -r "$SOURCE_DIR/axiarch-rules" "$TARGET_DIR/axiarch-rules"
 
-  # Remove unused language directory (new structure: axiarch-rules/{lang}/)
-  local UNUSED_LANG_DIR="$TARGET_DIR/axiarch-rules/${UNUSED_LANG}"
-  if [[ -d "$UNUSED_LANG_DIR" ]]; then
-    rm -rf "$UNUSED_LANG_DIR"
-    print_info "Removed unused: axiarch-rules/${UNUSED_LANG}/"
+  if ! $KEEP_BOTH_LANGS; then
+    # Optional single-language cleanup (new structure: axiarch-rules/{lang}/)
+    local UNUSED_LANG_DIR="$TARGET_DIR/axiarch-rules/${UNUSED_LANG}"
+    if [[ -d "$UNUSED_LANG_DIR" ]]; then
+      rm -rf "$UNUSED_LANG_DIR"
+      print_info "Removed unused: axiarch-rules/${UNUSED_LANG}/"
+    fi
+    print_info "Copied: axiarch-rules/ (${LANG_LABEL} only)"
+  else
+    print_info "Copied: axiarch-rules/ (ja + en; ${LANG_LABEL} selected as Project Native Language)"
   fi
-  print_info "Copied: axiarch-rules/ (${LANG_LABEL} only)"
 
   # === Optional: axiarch-prompts/ ===
   if $COPY_PROMPTS; then
     cp -r "$SOURCE_DIR/axiarch-prompts" "$TARGET_DIR/axiarch-prompts"
-    local UNUSED_PROMPT_DIR="$TARGET_DIR/axiarch-prompts/${UNUSED_LANG}"
-    [[ -d "$UNUSED_PROMPT_DIR" ]] && rm -rf "$UNUSED_PROMPT_DIR" && \
-      print_info "Removed unused: axiarch-prompts/${UNUSED_LANG}"
-    print_info "Copied: axiarch-prompts/${LANG_CODE}/"
+    if ! $KEEP_BOTH_LANGS; then
+      local UNUSED_PROMPT_DIR="$TARGET_DIR/axiarch-prompts/${UNUSED_LANG}"
+      [[ -d "$UNUSED_PROMPT_DIR" ]] && rm -rf "$UNUSED_PROMPT_DIR" && \
+        print_info "Removed unused: axiarch-prompts/${UNUSED_LANG}"
+      print_info "Copied: axiarch-prompts/${LANG_CODE}/"
+    else
+      print_info "Copied: axiarch-prompts/ (ja + en)"
+    fi
   fi
 
-  # === Required: axiarch-scripts/ (utility scripts incl. .git/config hygiene) ===
+  # === Utility scripts (recommended; required when hook configs are installed) ===
   if [[ -d "$SOURCE_DIR/axiarch-scripts" ]]; then
     mkdir -p "$TARGET_DIR/axiarch-scripts"
     cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-diff-guard.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -314,12 +354,12 @@ copy_files() {
       print_warn "CLAUDE.md not found — skipping."
     print_info "Copied: CLAUDE.md (Claude Code)"
 
-    # === Claude Code: enforcement hook ===
+    # === Claude Code: hook reinforcement ===
     if [[ -f "$SOURCE_DIR/.claude/settings.json" ]]; then
       mkdir -p "$TARGET_DIR/.claude"
       cp "$SOURCE_DIR/.claude/settings.json" \
          "$TARGET_DIR/.claude/settings.json"
-      print_info "Copied: .claude/settings.json (UserPromptSubmit enforcement hook)"
+      print_info "Copied: .claude/settings.json (hook reinforcement)"
 
       # === Validate JSON syntax (best-effort, jq optional) ===
       if command -v jq &>/dev/null; then
@@ -330,15 +370,27 @@ copy_files() {
         fi
       fi
     fi
+
+    # === Claude Code: optional memory persistence template ===
+    if [[ -f "$SOURCE_DIR/.claude/memory/MEMORY.md" ]]; then
+      mkdir -p "$TARGET_DIR/.claude/memory"
+      if [[ -f "$TARGET_DIR/.claude/memory/MEMORY.md" ]]; then
+        print_info "Preserved: .claude/memory/MEMORY.md (existing memory)"
+      else
+        cp "$SOURCE_DIR/.claude/memory/MEMORY.md" \
+           "$TARGET_DIR/.claude/memory/MEMORY.md"
+        print_info "Copied: .claude/memory/MEMORY.md (optional memory template)"
+      fi
+    fi
   fi
 
   if $SETUP_CODEX; then
-    # === Codex: enforcement hook ===
+    # === Codex: hook reinforcement ===
     if [[ -f "$SOURCE_DIR/.codex/hooks.json" ]]; then
       mkdir -p "$TARGET_DIR/.codex"
       cp "$SOURCE_DIR/.codex/hooks.json" \
          "$TARGET_DIR/.codex/hooks.json"
-      print_info "Copied: .codex/hooks.json (UserPromptSubmit enforcement hook)"
+      print_info "Copied: .codex/hooks.json (hook reinforcement)"
 
       # === Validate JSON syntax (best-effort, jq optional) ===
       if command -v jq &>/dev/null; then
@@ -378,7 +430,7 @@ copy_files() {
   if ! $SETUP_CLAUDE; then
     rm -f "$TARGET_DIR/CLAUDE.md" 2>/dev/null && \
       print_info "Removed: CLAUDE.md (not needed for ${AGENT_LABEL})"
-    # Only remove the Axiarch-distributed enforcement hook config; preserve user session data (worktrees/, projects/, settings.local.json)
+    # Only remove the Axiarch-distributed hook config; preserve user session data (worktrees/, projects/, settings.local.json)
     rm -f "$TARGET_DIR/.claude/settings.json" 2>/dev/null && \
       print_info "Removed: .claude/settings.json (not needed for ${AGENT_LABEL})"
     # Remove .claude/ directory only if now empty (preserves user data)
@@ -388,7 +440,7 @@ copy_files() {
     fi
   fi
   if ! $SETUP_CODEX; then
-    # Only remove the Axiarch-distributed enforcement hook config; preserve user session data
+    # Only remove the Axiarch-distributed hook config; preserve user session data
     rm -f "$TARGET_DIR/.codex/hooks.json" 2>/dev/null && \
       print_info "Removed: .codex/hooks.json (not needed for ${AGENT_LABEL})"
     # Remove .codex/ directory only if now empty (preserves user data)
@@ -413,6 +465,35 @@ copy_files() {
 }
 
 # =============================================================================
+# STEP 5.5: Post-copy script syntax validation
+# =============================================================================
+validate_distributed_scripts() {
+  [[ -d "$TARGET_DIR/axiarch-scripts" ]] || return 0
+
+  print_step "5.5" "Validating distributed shell scripts..."
+
+  local scripts=(
+    "axiarch-boot-reminder.sh"
+    "axiarch-protect-antifull.sh"
+    "axiarch-init-task-md.sh"
+    "axiarch-diff-guard.sh"
+    "check-axiarch-health.sh"
+    "check-git-config-clean.sh"
+  )
+
+  local script_path
+  for script_name in "${scripts[@]}"; do
+    script_path="$TARGET_DIR/axiarch-scripts/${script_name}"
+    [[ -f "${script_path}" ]] || continue
+    if bash -n "${script_path}" >/dev/null 2>&1; then
+      print_info "Validated: axiarch-scripts/${script_name}"
+    else
+      print_warn "Syntax validation failed: axiarch-scripts/${script_name}"
+    fi
+  done
+}
+
+# =============================================================================
 # STEP 6: Post-setup instructions
 # =============================================================================
 print_next_steps() {
@@ -431,7 +512,7 @@ print_next_steps() {
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "OpenAI Codex" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} is Codex's native config — no additional setup needed"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Cursor" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc${RESET} — auto-configured"
@@ -451,9 +532,9 @@ print_next_steps() {
   echo -e "       → Fill in your project's tech stack, architecture, and goals"
   step=$((step + 1))
   echo ""
-  echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify enforcement (recommended):${RESET}"
+  echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended):${RESET}"
   echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-  echo -e "         (12-stage diagnostic: 3-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, more)"
+  echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, diff guard, more)"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."
@@ -471,11 +552,13 @@ main() {
   print_header
   check_prerequisites
   select_language
+  select_language_dirs
   select_agent
   select_prompts
   select_precommit
   prepare_source
   copy_files
+  validate_distributed_scripts
   install_precommit_hook
   print_next_steps
 }

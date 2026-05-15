@@ -5,7 +5,7 @@
 > 改定日: 2026-03-30 | 対象: Flutter 3.41+ / Dart 3.7+ / Riverpod 3.0+ / Impeller GA（iOS唯一・Androidデフォルト）
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「Flutterはワンコードベース — だがワン妥協ではない。プラットフォーム忠実度は交渉不可。」
 > すべてのFlutter実装は各プラットフォームでネイティブ品質のUXを提供しなければならない。
 > **UX忠実度 > パフォーマンス > セキュリティ > コード再利用 > 開発速度** の優先順位を厳守せよ。
@@ -17,7 +17,7 @@
 
 | Part | トピック | セクション |
 |------|---------|-----------|
-| I | 哲学・Supreme Directive | §1–§4 |
+| I | 哲学・Primary Directive | §1–§4 |
 | II | テクノロジースタック標準 | §5–§8 |
 | III | アーキテクチャ原則 | §9–§14 |
 | IV | Dart 3.7+ 言語規約 | §15–§21 |
@@ -78,9 +78,9 @@
 
 # Part A: 哲学・アーキテクチャ基盤
 
-## I. 哲学・Supreme Directive
+## I. 哲学・Primary Directive
 
-### §1. Supreme Directive — Flutter Excellence
+### §1. Primary Directive — Flutter Excellence
 
 - **原則**: Flutterは「妥協のないクロスプラットフォーム」を実現する唯一のフレームワークである
 - **優先順位**: UX忠実度 > パフォーマンス > セキュリティ > コード再利用 > 開発速度
@@ -1198,7 +1198,7 @@ class AppDatabase extends _$AppDatabase {
 ### §100. API認証 — VIP Lane戦略
 
 - **Law**: ログインユーザーのリクエストでは**API Key (`x-api-key`) を送信せず、`Authorization: Bearer <token>`のみ**を送信
-- **理由**: アプリバイナリ内へのAPI Key埋め込みリスクを物理的にゼロにする
+- **理由**: アプリバイナリ内へのAPI Key埋め込みリスクを低減する
 - トークンのリフレッシュはDioインターセプターで自動処理
 
 ### §101. Error Handling & Retry
@@ -2566,7 +2566,7 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 
 | キーワード | 対応セクション |
 |---|---|
-| Supreme Directive・哲学・品質ゲート | §1–§4 |
+| Primary Directive・哲学・品質ゲート | §1–§4 |
 | パッケージスタック・analysis_options | §5–§8 |
 | Clean Architecture・レイヤー・DI・SSOT | §9–§14 |
 | Dart 3.7・Wildcard・フォーマッター・型注釈 | §15–§21 |
@@ -2663,5 +2663,4 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 | LIII データプライバシー | `security/000_security_privacy`, `security/100_data_governance` |
 | LIV DevOps・DX | `operations/400_site_reliability`, `engineering/000_engineering_standards` |
 | LV 言語固有補遺 | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
-
 

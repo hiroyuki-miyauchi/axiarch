@@ -25,5 +25,5 @@
 ## Operating Guide
 
 - Follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for the lesson crystallization process
-- File numbering uses 3-digit Sparse Numbering (increments of 10, `000_` is reserved)
-- Creating new domain folders is prohibited (use ONLY existing folders mirroring Universal)
+- File numbering uses 3-digit numbers with any available value from `000` to `999`. Incrementing by 10 is a recommended convention, not a reserved band; `000` may be used when appropriate.
+- AI must not autonomously create new domain folders. Prefer existing folders; if a new domain cannot be classified, propose an extension and create it only after user approval.

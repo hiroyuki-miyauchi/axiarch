@@ -5,7 +5,7 @@
 > 改定日: 2026-05-04
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「AWSは"手段"であり、アーキテクチャの"目的"ではない。」
 > クラウドインフラの全設計判断は **Well-Architected Framework の6ピラー** と **IaC Only 原則** に基づいて行わなければならない。
 > コンソール手動操作（ClickOps）は本憲法において **重大な違反** である。
@@ -25,7 +25,7 @@
 
 ## 目次
 
-- [§0. AWSクラウド至高の命令](#0-awsクラウド至高の命令-aws-cloud-supreme-directives)
+- [§0. AWSクラウド主要方針](#0-awsクラウド主要方針-aws-cloud-primary-directives)
 - [§1. IAMセキュリティ戦略](#1-iamセキュリティ戦略-iam-security-strategy)
 - [§2. ネットワーク設計基準](#2-ネットワーク設計基準-network-design-standards)
 - [§3. コンピューティング戦略](#3-コンピューティング戦略-compute-strategy)
@@ -84,7 +84,7 @@
 
 ---
 
-## 0. AWSクラウド至高の命令 (AWS Cloud Supreme Directives)
+## 0. AWSクラウド主要方針 (AWS Cloud Primary Directives)
 
 > [!NOTE]
 > **§0 コア・フィロソフィー概要**
@@ -122,7 +122,7 @@
 
 ---
 
-### Supreme Directive 0.1: The Well-Architected Compliance Mandate
+### Primary Directive 0.1: The Well-Architected Compliance Mandate
 -   **Law**: AWSインフラの設計・構築・運用において、**AWS Well-Architected Framework の6ピラー**への準拠を義務付けます。
     1.  **運用効率 (Operational Excellence)**: 自動化、IaC、ランブック整備。
     2.  **セキュリティ (Security)**: 最小権限、多層防御、暗号化。
@@ -140,7 +140,7 @@
     -   **Machine Learning Lens**: ML パイプライン（データ収集→学習→推論→監視）のアーキテクチャ設計指針。
 -   **Action**: 四半期ごとに AWS Well-Architected Tool でレビューを実施し、全ピラーで「高リスク項目ゼロ」を維持してください。AI/MLワークロードには必ず該当レンズのレビューも実施。
 
-### Supreme Directive 0.2: The IaC-Only Mandate (Infrastructure as Code 絶対原則)
+### Primary Directive 0.2: The IaC-Only Mandate (Infrastructure as Code 絶対原則)
 -   **Law**: AWS上の全リソースは、**Infrastructure as Code (IaC)** で定義・管理されなければなりません。AWSマネジメントコンソールやCLIでの手動作成・変更は「履歴の破壊行為」とみなします。
 -   **Mandate**:
     1.  **Code First**: 全インフラ変更はコード（CloudFormation / CDK / Terraform）で定義し、Gitでバージョン管理してください。
@@ -179,14 +179,14 @@
     }
     ```
 
-### Supreme Directive 0.3: The Trinity DTO Mandate (データ構造三位一体)
+### Primary Directive 0.3: The Trinity DTO Mandate (データ構造三位一体)
 -   **Purpose**: Supabase憲法（37番）と同一の原則。AWSサービス間のデータ受け渡しにおいても、生データの直接露出を禁止し、目的別DTOへの変換を義務付けます。
 -   **Mandate**:
     -   **Security**: API Gateway → Lambda → クライアント間で、不必要なフィールド（内部ID、PII）の露出を物理的に防止。
     -   **Stability**: DBスキーマ変更がフロントエンドに直接影響しないマッパー層の実装。
     -   **AI Economy**: LLM/AIサービスへのペイロード最小化によるトークンコスト削減。
 
-### Supreme Directive 0.4: The Multi-Account Strategy Mandate
+### Primary Directive 0.4: The Multi-Account Strategy Mandate
 -   **Law**: 本番ワークロードは**単一AWSアカウント**で運用してはなりません。AWS Organizationsを用いたマルチアカウント戦略を採用し、環境・責務ごとにアカウントを分離してください。
 -   **Action**:
     1.  **Management Account**: 請求統合、Organizations管理専用。ワークロードを配置しない。
@@ -220,7 +220,7 @@
     }
     ```
 
-### Supreme Directive 0.5: The Platform Engineering Mandate（内部開発者プラットフォーム原則）
+### Primary Directive 0.5: The Platform Engineering Mandate（内部開発者プラットフォーム原則）
 -   **Law**: インフラチームは「リクエストを受けて手動でリソースを作成するチーム」ではなく、**開発チームがセルフサービスでインフラをプロビジョニングできるプラットフォームを構築・提供するチーム**でなければならない。
 -   **Philosophy**: "You build it, you run it" を実現するには、開発者がインフラの複雑さを意識せずに、承認された構成のみをデプロイできる**Golden Path（黄金の道）**が必要である。
 -   **Mandate**:
@@ -230,7 +230,7 @@
     4.  **Backstage / Port Integration**: 開発者ポータル（Backstage等）との統合により、サービスカタログ・ドキュメント・オンコール情報を一元化する。
 -   **Anti-pattern**: インフラチームがTicket-Driven（チケット起票→手動対応）で運用し続けること。これはスケールの天井であり、開発速度のボトルネックである。
 
-### Supreme Directive 0.6: The Cost-as-a-Feature Mandate（コスト機能要件化原則）
+### Primary Directive 0.6: The Cost-as-a-Feature Mandate（コスト機能要件化原則）
 -   **Law**: クラウドコストは「インフラの付随コスト」ではなく、**プロダクトの機能要件**として設計段階から定義・管理しなければならない。
 -   **Philosophy**: 「動くコードを書く」だけでは不十分。「利益を生むコードを書く」ことが真のエンジニアリングである。コストを意識しないコードは、ビジネスを殺す時限爆弾である。
 -   **Mandate**:
@@ -249,7 +249,7 @@
     ```
 -   **Anti-pattern**: コスト試算なしに `db.t3.medium` → `db.r6g.2xlarge` へのアップグレードをマージすること。月数十万円の差異が「気づかないうちに」発生する。
 
-### Supreme Directive 0.7: The Agentic AI Governance Mandate（AIエージェントガバナンス原則）
+### Primary Directive 0.7: The Agentic AI Governance Mandate（AIエージェントガバナンス原則）
 -   **Law**: Amazon Bedrock Agents / LangChain / AutoGen等のAIエージェントがAWS APIを呼び出す場合、**人間のオペレーターと同等のIAM最小権限原則を適用しなければならない**。「AIだから」「自動化だから」という理由での権限の過剰付与は厳禁とする。
 -   **Philosophy**: AIエージェントは強力だが、悪用されれば（Prompt Injection等）最大の攻撃経路になり得る。エージェントを「信頼できる人間の代理」ではなく「検証が必要な外部システム」として扱え。
 -   **Mandate**:
@@ -277,7 +277,7 @@
     ```
     > **🚫 禁止**: `"Action": "*", "Resource": "*"` — AIエージェントへのAdmin権限付与はゼロデイ攻撃と同等のリスクを生む。
 
-### Supreme Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate（データ主権・量子耐性原則）
+### Primary Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate（データ主権・量子耐性原則）
 -   **Law**: データは「どのリージョンに存在するか」を常に意識し、法的・規制的要件に基づいたデータ主権を設計段階から保証しなければならない。同時に、量子コンピューターによる暗号解読に備えた**Post-Quantum Cryptography（PQC）**への移行計画を今から策定しなければならない。
 -   **Philosophy**: 「現在の暗号は安全」という前提は、5〜10年のスパンで崩壊しつつある。「Harvest Now, Decrypt Later（HNDL）」攻撃はすでに現実の脅威である。長期保存データの暗号化は今日の問題である。
 
@@ -296,7 +296,7 @@
     4.  **Crypto Agility**: 暗号アルゴリズムをハードコードせず、設定として外部化する（Crypto Agility）。将来のアルゴリズム変更をコード修正なしに実施できる設計を義務化する。
 -   **Anti-pattern**: 「量子コンピューターはまだ実用化されていない」を理由に対応を先送りすること。HNDL攻撃は今すぐ実行可能であり、長期保存データはすでにリスク下にある。
 
-### Supreme Directive 0.9: The Resilience & Chaos Engineering Mandate（失敗前提設計原則）
+### Primary Directive 0.9: The Resilience & Chaos Engineering Mandate（失敗前提設計原則）
 -   **Law**: AWSインフラの全設計において、**「障害は発生する」を不変の前提とし、障害を予防するのではなく、障害から自動的に回復できるシステムを設計しなければならない**。
 -   **Philosophy**: 「可用性99.99%」は目標ではなく、設計の出発点である。クラウドの本質的価値は「壊れないこと」ではなく「壊れても気づかれないこと」にある。カオスエンジニアリングは本番障害を防ぐ唯一の実証的手段である。
 -   **Mandate**:
@@ -334,7 +334,7 @@
     > **目標**: ECSタスクの30%を停止しても、ALBのヘルスチェックが2分以内に全タスクをHealthyに復旧させること。
 -   **Anti-pattern**: 「本番でゲームデーはリスクが高い」を理由に実施しないこと。ゲームデーなしでの障害は「演習なしの本番戦争」と同義である。Staginで定期実施し、本番への拡張を段階的に行え。
 
-### Supreme Directive 0.10: The Observability-First Mandate（可観測性ファースト原則）
+### Primary Directive 0.10: The Observability-First Mandate（可観測性ファースト原則）
 -   **Law**: 可観測性（Observability）はシステムが稼働してから「追加する」ものではなく、**Day 0から設計に組み込まれなければならない**。ログ・メトリクス・トレースの三本柱は、コードと同等の「ファーストクラス市民」として扱う。
 -   **Philosophy**: 「ログが出ていれば観測できている」は幻想である。本当の可観測性とは「未知の障害の原因を、外部から質問だけで特定できる状態」である。
 -   **Mandate**:
@@ -370,7 +370,7 @@
     ```
 -   **Anti-pattern**: メトリクスは「後でダッシュボードを作る」。本番障害時に初めてX-Rayを有効化する。これらは「設計の失敗」であり、障害のたびに繰り返される。
 
-### Supreme Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate（責任共有・コンプライアンス内在化原則）
+### Primary Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate（責任共有・コンプライアンス内在化原則）
 -   **Law**: AWSの**責任共有モデル（Shared Responsibility Model）**を深く理解し、「AWSが担保する範囲」と「我々が担保しなければならない範囲」を全エンジニアが認識しなければならない。また、コンプライアンス要件（GDPR・APPI・SOC2・PCI-DSS等）は「リリース前にチェックするもの」ではなく、**設計とコードに最初から埋め込むもの**である。
 -   **Philosophy**: AWSは「物理的なインフラの安全性」を担保する。しかし「そのインフラ上で何を動かし、どのデータを持ち、誰にアクセスさせるか」の責任は100%我々にある。「AWSだから安全」は責任の放棄である。
 -   **Mandate**:
@@ -405,7 +405,7 @@
     ```
 -   **Anti-pattern**: コンプライアンス担当者が「リリース1週間前にセキュリティレビュー」を実施する組織体制。これは問題の先送りであり、発見されたリスクの修正コストが指数関数的に高くなる。
 
-### Supreme Directive 0.12: The Operational Excellence Culture Mandate（運用文化原則）
+### Primary Directive 0.12: The Operational Excellence Culture Mandate（運用文化原則）
 -   **Law**: 運用はエンジニアリングの「後始末」ではなく、**プロダクトの品質と信頼性を構成する中核的エンジニアリング活動**である。「動けばよい」から「持続的に安定稼働できる」への文化転換を、具体的なプロセスと計測によって実現しなければならない。
 -   **Philosophy**: 「英雄的な障害対応（Heroic Ops）」に依存する組織は、スケールするにつれて崩壊する。障害は個人の英雄心で解決するものではなく、チームのシステムと文化で予防・自動回復するものである。
 -   **Mandate**:
@@ -3813,5 +3813,4 @@
 - **API Integration**: `engineering/100_api_integration.md` — REST/GraphQL設計、Rate Limiting
 - **Engineering General**: `engineering/000_engineering_standards.md` — コードレビュー、テスト戦略
 - **AI Implementation**: `ai/000_ai_engineering.md` — ストリーミングファースト、RAG設計、トークンコスト管理
-
 
