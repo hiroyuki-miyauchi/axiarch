@@ -37,7 +37,7 @@ When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 pri
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration). This is v1.9.0-dev work distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration). This is v1.9.0 functionality distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
 
 ---
 

@@ -569,7 +569,7 @@ print_section "Check 15: v1.9 integration (diff guard + docs)"
 DIFF_GUARD_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-diff-guard.sh"
 if [[ ! -f "${DIFF_GUARD_SCRIPT}" ]]; then
   print_warn "axiarch-scripts/axiarch-diff-guard.sh not found — PostToolUse diff guard unavailable"
-  print_info "Re-run init.sh to redistribute the v1.9.0+ hook script"
+  print_info "Re-run init.sh to redistribute the v1.9.0 hook script"
   EXIT_CODE=1
 elif [[ ! -x "${DIFF_GUARD_SCRIPT}" ]]; then
   print_warn "axiarch-scripts/axiarch-diff-guard.sh exists but is not executable"
@@ -648,6 +648,23 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     fi
   else
     print_warn "Axiarch source axiarch-scripts/README.md not found — cannot verify script README integration"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/CHANGELOG.md" ]]; then
+    has_unreleased_heading=0
+    has_unreleased_reference=0
+    grep -q '^## \[Unreleased\]' "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null && has_unreleased_heading=1
+    grep -q '^\[Unreleased\]:' "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null && has_unreleased_reference=1
+    if [[ "${has_unreleased_heading}" -eq "${has_unreleased_reference}" ]]; then
+      print_pass "Axiarch source CHANGELOG.md keeps Unreleased heading/reference parity"
+    else
+      print_warn "Axiarch source CHANGELOG.md has mismatched Unreleased heading/reference"
+      print_info "Avoid stale [Unreleased]: definitions when the top release is finalized"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source CHANGELOG.md not found — cannot verify release reference parity"
     DOCS_MISSING=1
   fi
 
