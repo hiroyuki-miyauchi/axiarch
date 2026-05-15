@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-15
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > - **"Every dollar spent on cloud must be intentional, visible, and accountable."**
 > - Cloud cost optimization is not a one-time project but a **continuous operational discipline**.
 > - FinOps integrates engineering, finance, and business to maximize technology value.

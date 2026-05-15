@@ -5,11 +5,11 @@
 > Revision date: 2026-04-20 (Rev.8)
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Code is a liability, not an asset — every line must justify its existence."
 > All engineering decisions must prioritize correctness, security, and maintainability over speed.
 > Strictly follow the priority: **Security > Correctness > Maintainability > Performance > Development Speed**.
-> This document is the supreme standard for all design decisions regarding engineering quality and standards.
+> This document is the primary standard for all design decisions regarding engineering quality and standards.
 > **22-part, 160-section architecture.**
 
 ---
@@ -24,7 +24,7 @@
 | IV | Technical Debt & Cleanup | §4.0 – §4.4 | 5 |
 | V | AI-First Engineering | §5.0 – §5.4 | 5 |
 | VI | Green Coding & Sustainability | §6.0 – §6.3 | 4 |
-| VII | Zero Bug Policy | §7.0 – §7.3 | 4 |
+| VII | Bug Risk Reduction Policy | §7.0 – §7.3 | 4 |
 | VIII | Continuous Learning & Verification | §8.0 – §8.2 | 3 |
 | IX | Compatibility & Testing | §9.0 – §9.5 | 6 |
 | X | CI/Deploy & Auxiliary Standards (※ pure git moved to `600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
@@ -381,7 +381,7 @@
 
 ---
 
-## Part VII: Zero Bug Policy
+## Part VII: Bug Risk Reduction Policy
 
 ### 7.0. Fix First
 *   Never develop new features while known bugs exist. Bug fixes are the top priority.
@@ -537,7 +537,7 @@
 *   **The Red Button Checklist**: Before production deployment, mandatory verification of Legal, Security (RLS), FinOps (Spend Cap), and Data.
 *   **Omnichannel Check**: During review, prioritize checking "Is this also usable outside Web?"
 *   **Deployment Safety Protocol**:
-    *   **Supreme Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
+    *   **Primary Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
     *   **The Automated Deployment Mandate (CD First)**: Manual deployment to production is **completely prohibited**. CI/CD pipeline only.
     *   **The Architectural Preservation Protocol**: Mark core feature files with `@preservation_level CRITICAL` to prevent AI-initiated destructive changes.
 *   **Security**: Never commit secrets. Mandate CI secret scanning (TruffleHog).
@@ -657,7 +657,7 @@
 *   **Branch Cleanup**: Delete merged branches immediately.
 
 ### 12.12. The SSOT Sync Protocol
-*   **Law**: After merging work branches, local `main` must be **100% synchronized** with remote.
+*   **Law**: After merging work branches, local `main` must be synchronized with the latest remote SSOT state.
 *   **Action**:
     1.  `git checkout main` → `git pull origin main` → delete merged branches.
     2.  Verify local `main` is current before starting new tasks.
@@ -719,7 +719,7 @@
 *   **Type Bridge Mandate**: For auto-generated type gaps, define extension types in `database-extensions.ts` using Mapped Types to prevent type collisions.
 *   **Linter Suppression Prohibition**: `eslint-disable` / `@ts-ignore` usage is prohibited in principle. If unavoidable, always include reason comment and Issue number.
 *   **Generic Type Inference Safety**: Prohibit `Record<string, any>`. Use `Record<string, unknown>` or constrained generics.
-*   **Zero Defect Sovereignty**: Committing code that doesn't pass type checking (`tsc --noEmit`) and linting with **zero warnings** is prohibited.
+*   **Verification Gate**: Committing code that doesn't pass type checking (`tsc --noEmit`) and linting with **zero warnings** is prohibited.
 
 ### 13.7. The Error Handling Contract
 *   **Structured Error Return**: Server Actions are **prohibited** from using `throw new Error()` for business logic failures. Return `{ success: false, error: '...' }` structured responses instead.
@@ -1316,7 +1316,7 @@
 | Technical Debt | §4.0 – §4.4 | `operations/600_cloud_finops.md` |
 | AI-First / Code Review | §5.0 – §5.4 | `ai/000_ai_engineering.md` |
 | Green Coding / SCI | §6.0 – §6.3 | `operations/600_cloud_finops.md` |
-| Zero Bug Policy | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
+| Bug Risk Reduction Policy | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
 | Testing Trophy / Test Strategy | §9.3 | `quality/000_qa_testing.md` |
 | Mutation Testing / Stryker | §9.3 | `quality/000_qa_testing.md` |
 | Property-Based Testing / Chaos / Litmus | §9.4 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |

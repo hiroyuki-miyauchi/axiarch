@@ -5,7 +5,7 @@
 > Revision Date: 2026-05-06 | Version 6.1 — Regulatory Frontier / Emerging UX / Translation Quality / Crisis Response Expansion
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Internationalization is not translation — it is architectural respect for every user's culture."
 > All i18n decisions MUST prioritize cultural accuracy, architectural extensibility, and user trust.
 > **Cultural Accuracy > Functional Parity > Performance > Speed** — Enforce this priority hierarchy strictly.
@@ -475,7 +475,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 
 - **Locale Priority Chain**: User setting > Accept-Language > Geo-IP > Default (en)
 - **Locale Persistence**: Server-side storage (Cookie + DB)
-- **Locale Switcher UI**: Accessible from all pages. Language names in native script (日本語, English, العربية)
+- **Locale Switcher UI**: Accessible from all pages. Language names in native script (English, Español, العربية)
 - **BCP 47 Compliance**: `ja-JP`, `en-US`, `ar-SA` format
 - **Unicode Locale Extension**: `-u-` subtag (RFC 6067) for locale-specific settings (calendar, numbering system, currency, etc.)
 
@@ -885,7 +885,7 @@ npx messageformat-validator locales/**/*.json
 ### Section 79: Microcopy Translation Strategy
 
 - **Microcopy Definition**: Short UI text — button labels, tooltips, error messages, empty states, confirmation dialogs
-- **Context-Dependent Translation**: Same word translates differently by location (e.g., "Save" → button: 保存 vs menu: 保存する)
+- **Context-Dependent Translation**: Same word translates differently by location (e.g., "Save" → button: "Guardar" vs menu: "Guardar cambios")
 - **Character Constraints**: Microcopy has strict space constraints. Specify per-language max character counts in metadata
 - **Tone & Voice**: Establish per-language brand tone guidelines. Formality levels (Japanese honorifics, German Sie/Du, etc.)
 
@@ -954,16 +954,17 @@ npx messageformat-validator locales/**/*.json
 
 ## Part XIX: Language-Specific — CJK
 
-### Section 88: Japanese-Specific Implementation Requirements
+### Section 88: Japanese Locale Implementation Considerations
 
-- **Honorific Level Management**: Unify UI honorific levels (teineigo, sonkeigo, kenjougo). Define in style guide
-- **Japanese Era Support**: Systematically handle era changes (`Reiwa`, `Heisei`). Leverage `Intl.DateTimeFormat` `era` option
-- **Fullwidth/Halfwidth Normalization**: Normalize fullwidth alphanumeric and halfwidth katakana input. Use `String.prototype.normalize('NFKC')`
-- **Furigana (Reading)**: Standard furigana field in name input forms
-- **Japanese Search**: Morphological analysis (MeCab/Kuromoji) for accurate tokenization. Okurigana variation handling
-- **Address Format**: 〒Postal code → Prefecture → City → Street → Building (reverse international format also supported)
-- **Invoice System**: Qualified Invoice Issuer Registration Number (T+13 digits) display and validation
-- **Phone Numbers**: 0AB-J format (landline), 090/080/070 (mobile) validation. `+81` prefix conversion
+- Apply these items when Japanese users, Japanese-language UI, or Japan-market compliance are in scope.
+- **Honorific Level Management**: Unify UI honorific levels (teineigo, sonkeigo, kenjougo). Define in the style guide.
+- **Japanese Era Support**: Systematically handle era changes (`Reiwa`, `Heisei`) when local date display requires it. Leverage `Intl.DateTimeFormat` `era` option.
+- **Fullwidth/Halfwidth Normalization**: Normalize fullwidth alphanumeric and halfwidth katakana input where relevant. Use `String.prototype.normalize('NFKC')` carefully.
+- **Furigana (Reading)**: Add furigana fields in name input forms where local UX or business operations need reading support.
+- **Japanese-Language Search**: Use morphological analysis (for example, MeCab/Kuromoji) for accurate tokenization where Japanese-language search is required. Handle okurigana variation when it affects search quality.
+- **Address Format**: Support local address order such as postal code → prefecture → city → street → building, while preserving international-format compatibility.
+- **Invoice System**: Display and validate Qualified Invoice Issuer Registration Numbers when Japan invoice compliance applies.
+- **Phone Numbers**: Validate domestic formats and support `+81` prefix conversion when Japan phone numbers are in scope.
 
 ### Section 89: Chinese (Simplified & Traditional) Specific Requirements
 
@@ -1416,7 +1417,7 @@ npx messageformat-validator locales/**/*.json
 - **Email Multilingual MIME**: `Content-Type: text/html; charset=utf-8`; RFC 2047 encoding for From name
 - **Emergency Notification Templates**: Pre-approved multilingual templates for disasters, outages, security events
 - **Dialect & Honorifics**: Standard language and polite-form base for emergencies; avoid regional dialects
-- **Geofencing × Multilingual**: Region-specific language auto-selection (Tokyo → Japanese, San Francisco → English)
+- **Geofencing × Multilingual**: Region-specific language auto-selection based on configured locale or user preference, with regional defaults used only when they are explicit product requirements
 - **Accessibility × Emergency**: WCAG-compliant multilingual screen-reader support for emergency information
 - → See `engineering/300_web_frontend.md` Push / Notification
 

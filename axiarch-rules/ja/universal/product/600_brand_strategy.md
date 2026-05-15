@@ -5,7 +5,7 @@
 > 改定日: 2026-04-28
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「ブランドは会社の内側から外側に滲み出るものであり、広告代理店が制作するものではない」
 > ブランドは **「約束の集積」** である。ユーザーとのすべての接点がブランドを形成する。
 > 一貫性なきブランドは信頼を破壊する。ブランドの構築は最も長期的な競争優位性の源泉である。
@@ -534,7 +534,7 @@ Brand Tone（状況による）:
 
 ## Part V. AI-Native ブランドガバナンス
 
-> **Supreme Directive**: AIがブランドを「代行」する時代において、AIの発言・生成物はすべてブランドの公式表現である。AI出力の品質管理はブランドガバナンスの中核責務となる。
+> **Primary Directive**: AIがブランドを「代行」する時代において、AIの発言・生成物はすべてブランドの公式表現である。AI出力の品質管理はブランドガバナンスの中核責務となる。
 
 ### 5.1. AI生成コンテンツのブランド準拠ゲート
 
@@ -740,7 +740,7 @@ Touchpoint の例:
 
 ## Part VII. グローバルブランド・ローカライゼーション
 
-> **Supreme Directive**: グローバルブランドは「画一的な翻訳」ではなく、「文化的な共鳴」を目指す。Global Core（不変の核）を保ちながら、Local Flex（地域適応）の余地を設計する。
+> **Primary Directive**: グローバルブランドは「画一的な翻訳」ではなく、「文化的な共鳴」を目指す。Global Core（不変の核）を保ちながら、Local Flex（地域適応）の余地を設計する。
 
 ### 7.1. Localization vs Transcreation Protocol
 
@@ -798,7 +798,7 @@ Local Flex（地域適応可）:
 
 ## Part VIII. ブランドアーキテクチャ & ポートフォリオ
 
-> **Supreme Directive**: プロダクトラインの拡大に伴い、ブランド構造が「偶発的に」複雑化することを防止する。ブランドアーキテクチャは意図的に設計・管理される構造物である。
+> **Primary Directive**: プロダクトラインの拡大に伴い、ブランド構造が「偶発的に」複雑化することを防止する。ブランドアーキテクチャは意図的に設計・管理される構造物である。
 
 ### 8.1. Brand Architecture Model（ブランド構造モデル）
 
@@ -938,7 +938,7 @@ Local Flex（地域適応可）:
 
 ## Part X. エンプロイヤーブランド & 社内文化
 
-> **Supreme Directive**: ブランドは外部向けのマーケティングツールではなく、組織の内側から発する「文化」である。社員がブランドを体現できなければ、ユーザーは矛盾を見抜く。
+> **Primary Directive**: ブランドは外部向けのマーケティングツールではなく、組織の内側から発する「文化」である。社員がブランドを体現できなければ、ユーザーは矛盾を見抜く。
 
 ### 10.1. Employer Value Proposition (EVP)
 
@@ -975,7 +975,7 @@ Local Flex（地域適応可）:
 
 ## Part XI. ブランドとサステナビリティ / 倫理
 
-> **Supreme Directive**: ブランドの社会的責任は「飾り」ではなく、Brand Promiseの一部である。サステナビリティの主張には、必ず検証可能な根拠を伴わせること。
+> **Primary Directive**: ブランドの社会的責任は「飾り」ではなく、Brand Promiseの一部である。サステナビリティの主張には、必ず検証可能な根拠を伴わせること。
 
 ### 11.1. Brand Purpose & ESG Alignment
 
@@ -1124,7 +1124,7 @@ Brand Health Dashboard:
 
 ## Part XIII. GEO & E-E-A-T ブランド信頼戦略
 
-> **Supreme Directive**: AI検索エンジン（Generative Engine）時代において、ブランドの信頼性は「検索結果に引用されるか」で決まる。E-E-A-T（Experience, Expertise, Authoritativeness, Trustworthiness）はSEOの指標ではなく、ブランド戦略の基盤である。
+> **Primary Directive**: AI検索エンジン（Generative Engine）時代において、ブランドの信頼性は「検索結果に引用されるか」で決まる。E-E-A-T（Experience, Expertise, Authoritativeness, Trustworthiness）はSEOの指標ではなく、ブランド戦略の基盤である。
 
 ### 13.1. GEO (Generative Engine Optimization) Protocol
 
@@ -1174,7 +1174,7 @@ Brand Health Dashboard:
 
 ## Part XIV. ブランドの進化 & リブランド管理
 
-> **Supreme Directive**: ブランドは生き物である。市場環境・競合状況・自社の成長に応じて「進化」する必要がある。ただし進化は「計画的」でなければならない。
+> **Primary Directive**: ブランドは生き物である。市場環境・競合状況・自社の成長に応じて「進化」する必要がある。ただし進化は「計画的」でなければならない。
 
 ### 14.1. Brand Evolution vs Rebrand
 
@@ -1237,7 +1237,7 @@ Phase 3: AI-Native（長期: 3-5年）
 
 ## Part XV. Sonic & Sensory Branding（ソニック・感覚ブランディング）
 
-> **Supreme Directive**: 視覚偏重のブランド設計はもはや不完全である。音声AI・ポッドキャスト・空間オーディオの普及により、ブランドは「聴覚」を含む多感覚で設計されなければならない。
+> **Primary Directive**: 視覚偏重のブランド設計はもはや不完全である。音声AI・ポッドキャスト・空間オーディオの普及により、ブランドは「聴覚」を含む多感覚で設計されなければならない。
 
 ### 15.1. Sonic Identity Architecture（ソニックアイデンティティ設計）
 
@@ -1298,7 +1298,7 @@ TTS Brand Validation:
 
 ## Part XVI. Spatial Computing & Immersive Brand（空間コンピューティング・没入型ブランド）
 
-> **Supreme Directive**: AR/VR/MR空間において、ブランドは「画面」から「空間」へ拡張される。2Dのガイドラインだけではブランドを保護できない。
+> **Primary Directive**: AR/VR/MR空間において、ブランドは「画面」から「空間」へ拡張される。2Dのガイドラインだけではブランドを保護できない。
 
 ### 16.1. Spatial Brand Architecture（空間ブランド設計）
 
@@ -1343,7 +1343,7 @@ Context Signal → Brand Adaptation:
 
 ## Part XVII. Community-Led Brand & Web3（コミュニティ駆動型ブランド & Web3）
 
-> **Supreme Directive**: ブランドは企業が「発信」するものから、コミュニティと「共創」するものへと進化している。コミュニティの力をブランド資産として戦略的に設計・管理する。
+> **Primary Directive**: ブランドは企業が「発信」するものから、コミュニティと「共創」するものへと進化している。コミュニティの力をブランド資産として戦略的に設計・管理する。
 
 ### 17.1. Community Flywheel Design（コミュニティフライホイール設計）
 
@@ -1406,7 +1406,7 @@ Community Flywheel:
 
 ## Part XVIII. Share of Model & AI Discoverability（AIモデル内ブランド認知戦略）
 
-> **Supreme Directive**: AI時代において「LLMがブランドをどう認識しているか」は、検索エンジンでの順位と同等以上に重要である。Share of Model（AIモデル内でのブランドシェア）は新たなブランド戦略KPIである。
+> **Primary Directive**: AI時代において「LLMがブランドをどう認識しているか」は、検索エンジンでの順位と同等以上に重要である。Share of Model（AIモデル内でのブランドシェア）は新たなブランド戦略KPIである。
 
 ### 18.1. Share of Model Audit Framework（SoM監査フレームワーク）
 
@@ -1465,7 +1465,7 @@ Share of Model (SoM) 監査プロセス:
 
 ## Part XIX. Data-Driven Brand Intelligence 2.0（データ駆動型ブランドインテリジェンス 2.0）
 
-> **Supreme Directive**: 従来の四半期サーベイによるブランド測定は「遅すぎる」。AIとリアルタイムデータを活用した「常時接続型」ブランドインテリジェンスへ移行し、ブランドをプロダクトと同じ速度で最適化する。
+> **Primary Directive**: 従来の四半期サーベイによるブランド測定は「遅すぎる」。AIとリアルタイムデータを活用した「常時接続型」ブランドインテリジェンスへ移行し、ブランドをプロダクトと同じ速度で最適化する。
 
 ### 19.1. Continuous Brand Tracking（連続ブランド追跡）
 
@@ -1541,7 +1541,7 @@ Share of Model (SoM) 監査プロセス:
 
 ## Part XX. Brand Compliance Automation & CI/CD（ブランド準拠の自動化）
 
-> **Supreme Directive**: ブランド準拠チェックを人的レビューのみに依存することは、スケーラビリティとスピードの両面で限界がある。CI/CDパイプラインにブランドガバナンスを組み込み、自動化する。
+> **Primary Directive**: ブランド準拠チェックを人的レビューのみに依存することは、スケーラビリティとスピードの両面で限界がある。CI/CDパイプラインにブランドガバナンスを組み込み、自動化する。
 
 ### 20.1. Brand Linting Pipeline（ブランドリンティングパイプライン）
 
@@ -1599,7 +1599,7 @@ Brand Review Bot のスコープ:
 
 ## Part XXI. Brand & Platform Economy（ブランドとプラットフォームエコノミー）
 
-> **Supreme Directive**: API・SDK・マーケットプレイスを通じてブランドが体験される場合、従来のUI/UXガイドラインだけではブランドを保護できない。開発者体験（DevBX）を含む拡張されたブランドガバナンスが必要である。
+> **Primary Directive**: API・SDK・マーケットプレイスを通じてブランドが体験される場合、従来のUI/UXガイドラインだけではブランドを保護できない。開発者体験（DevBX）を含む拡張されたブランドガバナンスが必要である。
 
 ### 21.1. API-First Brand Experience（API駆動型ブランド体験）
 

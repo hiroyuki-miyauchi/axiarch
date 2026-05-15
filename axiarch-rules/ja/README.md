@@ -3,8 +3,8 @@
 > [!IMPORTANT]
 > **Axiarchの3層ガバナンス・アーキテクチャ**
 > 本フォルダ（`axiarch-rules/`）は、Axiarch（アクシアーク）フレームワークの統治ルールを格納する。
-> この「普遍憲法（Layer 1）」「固有ルール（Layer 2）」「任意プロンプト（Layer 3）」による明確な責務分離こそが、ハルシネーションや品質ドリフトを抑制し、長期間にわたる自律駆動の品質ベースラインを維持するAxiarchの心臓部である。
-> Axiarchの最低実行条件は Layer 1 と Layer 2 の遵守であり、それ以外の拡張領域である Layer 3 (Prompts) などは完全に任意（オプショナル）である。
+> この「普遍憲法（Layer 1）」「固有ルール（Layer 2）」「任意プロンプト（Layer 3）」による明確な責務分離こそが、ハルシネーションや品質ドリフトのリスクを軽減し、長期間にわたる自律駆動の品質ベースライン維持を支えるAxiarchの心臓部である。
+> Axiarchの最低実行条件は Layer 1 と Layer 2 の遵守であり、それ以外の拡張領域である Layer 3 (Prompts) などは任意（オプショナル）である。
 >
 > **責務分離（AIエージェント指示）**:
 >
@@ -99,7 +99,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で設計・実戦検証されたものです。**他のAIエージェント**（OpenAI Codex, Cursor, Claude Code, GitHub Copilot等）でも `AGENTS.md` をそのまま使用できる見込みですが、ルール本体はMarkdownであり理論上は稼働するものの、**Antigravity以外での動作保証は一切いたしません。自己責任でご利用ください。**
+> 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で実務検証された知見を土台にしています。OpenAI Codex と Claude Code は主対象としてネイティブ統合・hook補強導線を整備していますが、実務検証は継続中です。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
 
 1.  **コピー (Copy)**: 以下のファイル/フォルダをプロジェクトのルートにコピーします。（`axiarch-prompts/` は任意です）
     ```bash
@@ -125,7 +125,7 @@
 
 3.  **初期化 (Initialize)**:
     *   **`AGENTS.md` の編集**: `Project Native Language` を `Japanese` に設定します。
-    *   **クリーンアップ (Cleanup)**: 使用しない英語ルールのディレクトリを削除します。（プロンプトライブラリを含めた場合も同様です）
+    *   **クリーンアップ (Cleanup)**: 単一言語運用に固定する場合のみ、使用しない英語ルールのディレクトリを任意で削除できます。（プロンプトライブラリを含めた場合も同様です）
         ```bash
         rm -rf axiarch-rules/en
         # プロンプトライブラリがある場合: rm -rf axiarch-prompts/en
@@ -141,7 +141,7 @@
 
 ```
 your-project/
- ├── AGENTS.md                    ← 最高法規
+ ├── AGENTS.md                    ← 最上位プロトコル
  ├── .agents/
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター（目次）

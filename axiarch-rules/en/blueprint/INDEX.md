@@ -5,8 +5,8 @@
 > This directory is your project's "brain" (specifications and lessons learned).
 > `universal/` rules are the **"Constitution"** — immutable principles common to all projects.
 > `blueprint/` rules are the **"Laws"** — concrete implementations that customize the Constitution for your project's specific needs.
-> Sparse Numbering ensures future extensibility.
-> **Adopts a fully Isomorphic folder structure with `universal/`.**
+> Sparse Numbering preserves room for future extension.
+> **The initial structure maps to the same 8 folders as `universal/`**. However, Blueprint is the mutable project-specific layer; when a new domain cannot reasonably fit existing folders, a user-approved new folder may be added.
 
 ---
 
@@ -41,8 +41,8 @@ blueprint/
 └── INDEX.md         ← This file
 ```
 
-> **Full Isomorphism with Universal**: 1:1 mapping with the 8 folders in `universal/` (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`).
-> The "Constitution (Universal)" is concretized by "Laws (Blueprint)" — visually clear at the folder-name level.
+> **Initial Mapping with Universal**: 1:1 mapping with the 8 folders in `universal/` (`core/`, `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`).
+> The "Constitution (Universal)" is concretized by "Project-Specific Rules (Blueprint)" at the initial folder-name level. This is the starting structure, and Blueprint may be extended with user approval.
 
 ---
 
@@ -52,10 +52,10 @@ Project overview, lessons index, and templates.
 
 | File | Description |
 |:-----|:------------|
-| [000_project_overview.md](core/000_project_overview.md) | Project vision, tech stack, and immutable principles |
+| [core/000_project_overview.md](core/000_project_overview.md) | Project vision, tech stack, and immutable principles |
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | Lessons index + unsorted lesson accumulation. Origin point for Crystallization. |
-| [998_feature_spec_template.md](core/998_feature_spec_template.md) | **Feature spec template (Blueprint First core)**. Copy to the relevant domain folder to use. |
-| [999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
+| [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **Feature spec template (Blueprint First core)**. Copy to the relevant domain folder to use. |
+| [core/999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
 
 ---
 
@@ -119,7 +119,7 @@ Strategies for generating next-generation "value".
 
 ### Initial Setup
 1. Set `Project Native Language` in `AGENTS.md`
-2. **Delete the unused language folder (`ja/` or `en/`)**
+2. Optionally delete the unused language folder (`ja/` or `en/`) only when fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`
 3. Rewrite `core/000_project_overview.md` with your project's content
 
 ### Adding Feature Specs (Blueprint First)
@@ -137,7 +137,7 @@ Strategies for generating next-generation "value".
 
 ### Recording Lessons (Crystallization)
 - Append to `core/010_project_lessons_log.md` at task completion or when key decisions are made
-- When 3+ lessons of the same domain accumulate, the AI autonomously creates a proper rule file in the corresponding domain folder
+- When 3+ lessons of the same domain accumulate, the AI creates a proper rule file in the corresponding existing or user-approved domain folder
 - See `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for detailed procedures
 
 ---
@@ -160,7 +160,7 @@ Strategies for generating next-generation "value".
 | Monetization, growth | `product/` |
 | AI strategy, CMS | `ai/` |
 
-### Cross-References (Blueprint → Universal 1:1 Mapping)
+### Cross-References (Blueprint → Universal Initial Mapping)
 
 | Blueprint | Universal |
 |:----------|:----------|
@@ -176,5 +176,5 @@ Strategies for generating next-generation "value".
 ---
 
 **Last Updated**: 2026-04-29
-**Version**: v1.3.0 — Fully Isomorphic 8-folder structure with Universal, YAGNI-based structural normalization
-**Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)
+**Version**: v1.3.0 — Initial 8-folder structure mapped to Universal, YAGNI-based structural normalization
+**Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

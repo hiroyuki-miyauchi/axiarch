@@ -6,7 +6,7 @@
 > 2026-04-23
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）** 「収益は機能ではない —
+> **Primary Directive（主要方針）** 「収益は機能ではない —
 > 持続可能なプロダクト開発の生命線である。」
 > すべての収益化判断はデータ駆動・倫理的健全性・アーキテクチャ的堅牢性を備えなければならない。
 > **ユーザー信頼 > 収益持続性 > 成長速度 > 短期利益** の優先順位を厳守せよ。
@@ -429,7 +429,7 @@
 - **Eコマース (E-Commerce)**:
   - **カゴ落ち対策**: ゲスト購入を許可し、強制的な会員登録を抑制します。
   - **1クリック決済**: Apple Pay / Google Pay
-    を導入し、入力の手間を極限まで減らします。
+    を導入し、入力の手間を可能な限り減らします。
 - **Feature Gating Strategy (Tier Restrictions)**:
   - **Quota Enforcement**: 「登録数上限（Max N）」や「機能制限（Vision
     AI回数）」は、フロントエンドだけでなく、サーバーサイド（Guard/Policies）で厳格に強制します。
@@ -631,7 +631,7 @@
     クレジットカード情報（PAN/CVV）は自社サーバーで一切保存・通過させてはなりません。Stripe.js/Checkoutによるトークン化を徹底します。
   - **Idempotency & State Consistency**:
     ネットワークエラーや連打による「二重決済」を `Idempotency-Key`
-    で防ぎ、Webhookによる結果整合性を保証します。
+    で二重決済リスクを下げ、Webhookによる結果整合性を支えます。
   - **Anti-Fraud**: Stripe
     Radarを活用し、不正利用（クレジットマスター）を自動ブロックします。
   - **Auditability**:
@@ -2178,7 +2178,7 @@
     Revenue
     Retention）は「Expansionなしで既存収益をどれだけ保持できているか」を示す純粋な保持指標であり、NRRと並行して監視する必要があります。
   - **Law**: GRRを月次で監視し、**GRR ≥
-    90%**を維持してください。GRRが80%を下回った場合、Expansion戦略よりもチャーン防止を最優先してください。
+    90%**を維持してください。GRRが80%を下回った場合、Expansion戦略よりもチャーンリスク低減を最優先してください。
   - **GRR Diagnostic Framework**:
     ```
     GRR = (Starting MRR - Contraction MRR - Churned MRR) ÷ Starting MRR

@@ -41,7 +41,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 | — | *(No separated domain files yet)* | — | — |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
-<!-- Example: | 1 | DB & Auth | [engineering/010_database_auth.md](../engineering/200_supabase_architecture.md) | 3 | -->
+<!-- Example: | 1 | DB & Auth | `engineering/010_database_auth.md` | 3 | -->
 
 ---
 
@@ -56,7 +56,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 > **Domain:** DB & Auth / Security / Architecture / Quality / Design / Operations / Governance / Performance / Other
 > **Context:** The situation or background where the problem occurred
 > **Problem:** The specific issue or failure
-> **Solution/Rule:** The solution, or the rule established to prevent recurrence
+> **Solution/Rule:** The solution, or the rule established to reduce recurrence risk
 > **Reference:** Related files or commits (if any)
 
 ---
@@ -64,7 +64,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 ### [Initial] Project Initialization Lesson
 **Domain:** Governance
 **Context:** New project or rule system refresh.
-**Rule:** Comply with `AGENTS.md` and `axiarch-rules` protocols as the absolute source of truth.
+**Rule:** Treat `AGENTS.md` and `axiarch-rules` protocols as the highest-priority source of truth.
 
 ---
 

@@ -582,7 +582,7 @@ else
 fi
 echo ""
 print_info "Docs: https://code.claude.com/docs/en/hooks"
-print_info "AGENTS.md (supreme law): root of project"
+print_info "AGENTS.md (top-level protocol): root of project"
 print_info "Crystallization Protocol: axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md"
 print_info "axiarch: https://github.com/hiroyuki-miyauchi/axiarch"
 echo ""

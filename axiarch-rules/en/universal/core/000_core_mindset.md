@@ -5,17 +5,17 @@
 > Last Updated: 2026-05-06 (Rev.14)
 
 > [!IMPORTANT]
-> **Supreme Law Declaration**
+> **Top-Level Protocol Declaration**
 >
-> 1.  These documents (`axiarch-rules/{lang}/universal/*.md`) are the **Supreme Law** of this project's development, operations, and business.
+> 1.  These documents (`axiarch-rules/{lang}/universal/*.md`) are the **Top-Level Protocol** of this project's development, operations, and business.
 > 2.  Code, design, and operational decisions that violate this Constitution will be **Rejected** regardless of reason.
 > 3.  All developers (including AI Agents) are obligated to review and comply with this Constitution before starting any task.
 > **46 Sections (§1.1–§1.35, §9.1–§9.11).**
 
 > [!IMPORTANT]
-> **Absolute Foundation**
+> **Foundation Principles**
 > This "Core Philosophy" is the constitution for all Axiarch-governed projects, and no exceptions are allowed.
-> We act as a "Silicon Valley Elite Team" and pursue only world-class results.
+> We integrate multiple professional perspectives and continually aim for high, practically verifiable quality standards.
 
 ---
 
@@ -58,11 +58,11 @@
    - §1.33 Inversion Thinking & Pre-Mortem Protocol
    - §1.34 YAGNI Discipline & Rule of Three Protocol
    - §1.35 Strong Opinions, Weakly Held / Disagree & Commit Protocol
-3. [§2. Silicon Valley Elite Roles](#2-silicon-valley-elite-roles)
+3. [§2. Multi-Role Review Model](#2-multi-role-review-model)
 4. [§3. Language Standard & Protocol](#3-language-standard--protocol)
 5. [§4. Governance Protocol](#4-governance-protocol)
 6. [§5. AI-Owner Collaboration Protocol](#5-ai-owner-collaboration-protocol)
-7. [§6. Silicon Valley DNA](#6-silicon-valley-dna)
+7. [§6. High-Performance Organization DNA](#6-high-performance-organization-dna)
 8. [§7. Development & Operations Iron Rules](#7-development--operations-iron-rules)
 9. [§8. Global Governance Protocols](#8-global-governance-protocols)
    - §8.1–§8.7
@@ -76,14 +76,14 @@
 We strictly adhere to the following hierarchy of priorities in all decision-making.
 
 1.  **Level 1 (Absolute Priority): Security, Legal Compliance & Accessibility**
-    *   **Definition**: User data protection, legal compliance (GDPR/CCPA/local laws/EU AI Act), violation prevention, total elimination of security risks. **And** compliance with EU Accessibility Act (EAA 2025), ADA Title III, and WCAG 2.2.
+    *   **Definition**: User data protection, legal compliance (GDPR/CCPA/local laws/EU AI Act), violation deterrence, and continuous reduction of security risks. **And** compliance with EU Accessibility Act (EAA 2025), ADA Title III, and WCAG 2.2.
     *   **Rule**: These ALWAYS override "User First", "Convenience", or "Profitability".
     *   **Judgment**: "Convenient but legally gray" is **rejected immediately**. "Unusable by screen readers but convenient" is also **rejected immediately** (EAA violation = legal risk).
     *   **Rule 0.1: The Zero Tolerance Protocol (Credit is Everything)**:
         *   **Law**: "Low risk, so it can wait" is NOT allowed. **A small security hole or data leak risks losing all product credibility—the BIGGEST risk.**
-        *   **Action**: When a risk is identified, regardless of severity, address it **immediately, without exception, thoroughly**. Do not proceed until the risk is zero. "It's just admin" or "It's just MVP" are not excuses.
+        *   **Action**: When a risk is identified, regardless of severity, address it **immediately, without exception, thoroughly**. Do not proceed while a known material risk remains unaddressed. "It's just admin" or "It's just MVP" are not excuses.
     *   **Rule 0.2: The Anti-Overwrite Protocol (Surgical Precision Mandate)**:
-        * **Supreme Law (Rule 0.-1)**: "Full Overwrite" of existing files is considered **destructive behavior** and is prohibited for any reason.
+        * **Top-Level Protocol (Rule 0.-1)**: "Full Overwrite" of existing files is considered **destructive behavior** and is prohibited for any reason.
         * **Law**: Modifications must be "surgical"—change ONLY the affected parts via Replace/Insert. Protect existing code and adhere to "Don't touch working code" principle.
         * **Action**: Always show diffs so the user can fully understand what changed.
         * **AI Tool Mandate**: When AI agents modify files, full-file overwrite (e.g., `write_to_file` + Overwrite) is prohibited in principle. Use diff-based modification tools (e.g., `replace_file_content`, `multi_replace_file_content`) to edit only the target lines. Process multiple modifications as individual diff chunks to prevent unnecessary diff noise.
@@ -176,7 +176,7 @@ Cost is not something to "optimize after launch." It is a **quality attribute th
     *   Move from "working code" to "profitable code." Develop a habit of calculating **Cost-to-Serve per customer** for each feature and comparing it to LTV.
     *   Eliminate unconscious waste by making all costs visible: AI tokens, cloud storage, and external API fees.
 *   **FinOps as Culture**:
-    *   Cost reduction is not a "constraint"—it is a **competitive advantage**. Delivering high value at low cost is the pinnacle of engineering.
+    *   Cost reduction is not a "constraint"—it is a **competitive advantage**. Delivering high value at low cost is an important part of sound engineering judgment.
     *   Set budget alerts, usage limits, and circuit breakers for all external service calls.
 *   **The 30% Rule**:
     *   If AI or cloud costs increase more than 30% month-over-month, they must NOT be carried into the next month without a root cause analysis. Mandate the cycle: Anomaly Detection → Root Cause Analysis → Remediation.
@@ -233,7 +233,7 @@ Do not diminish AI to a mere code-completion tool. Define the philosophy of stra
     *   AI does not "replace" engineers. It **exponentially amplifies** engineers' judgment, creativity, and expertise.
     *   Not only issue commands to AI, but also critically evaluate AI output; **humans always make the final judgment.**
 *   **Prompt Engineering as a Core Skill**:
-    *   Vague instructions produce vague results. Providing concrete context, constraints, and expected output formats is the only way to extract the highest quality output from AI.
+    *   Vague instructions produce vague results. Providing concrete context, constraints, and expected output formats is an important condition for obtaining higher-quality output from AI.
     *   "AI did not give a good answer" is equivalent to "the prompt design was insufficient." Deflecting responsibility is prohibited.
 *   **AI Output Verification Mandate**:
     *   Code generated by AI must **always be reviewed by a human** and pass tests before merging. "AI wrote it, therefore it's correct" is a constitutional violation.
@@ -286,7 +286,7 @@ Accessibility is not an "optional feature" — it is a **legal obligation and a 
     *   Define "accessibility = better UX design," not "accessibility = constraint."
 
 ### 1.14. Post-Quantum Readiness Protocol
-Cryptographic foundations must not be designed as "safe if secure today" but as **"guaranteed to remain secure against future quantum computers, proven at the design stage."** NIST PQC standards (FIPS 203/204/205, finalized 2024) are the mandatory baseline.
+Cryptographic foundations must not be designed as "safe if secure today" but as **"designed from the start to remain explainably secure against future quantum-computer risk."** NIST PQC standards (FIPS 203/204/205, finalized 2024) are the mandatory baseline.
 
 > [!IMPORTANT]
 > **"Harvest Now, Decrypt Later" Risk**: Data encrypted today can be stored and decrypted later by a quantum computer. This is a realistic, present-day threat. Systems handling long-lived sensitive data (healthcare, finance, PII) are obligated to define a PQC migration plan by 2026.
@@ -581,14 +581,14 @@ With AI-generated code exceeding 50% of all code from 2026 onward, **test strate
 ### 1.23. Developer Experience as Product Protocol
 
 > [!IMPORTANT]
-> **Developer Experience (DX) is not a "nice to have" — it is a product to be designed, measured, and improved. Building an environment where developers perform at their best is a critical infrastructure investment with direct business impact.**
+> **Developer Experience (DX) is not a "nice to have" — it is a product to be designed, measured, and improved. Building an environment where developers can produce reliable outcomes is a critical infrastructure investment with direct business impact.**
 
 *   **DX as Product Mindset**:
     *   Treat internal developers as "the most important users" and continuously research and improve their experience using **User Research methodologies**.
     *   Quantify developer friction as KPIs (e.g., CI execution time, local setup time, mean time to merge PR).
     *   **DORA Metrics (DevOps Research & Assessment)**: Measure the following four metrics regularly as improvement KPIs.
 
-    | DORA Metric | Definition | Elite-Level Benchmark |
+    | DORA Metric | Definition | High-Performance Benchmark |
     |---|---|---|
     | **Deployment Frequency** | How often code is deployed | Multiple times per day |
     | **Lead Time for Changes** | Time from code commit to production | Under 1 hour |
@@ -1160,45 +1160,45 @@ With AI-generated code exceeding 50% of all code from 2026 onward, **test strate
     *   **Bikeshedding** (over-discussion of trivia) → time-box debate (≤30 min) and force closure.
     *   **Silent Consensus** ("nobody objected, so we're aligned") → demand explicit yes/no from each participant.
     *   **"I was against it from the start"** post-hoc → Disagree & Commit violation. No litigation after the call is made.
-*   **Cross-References**: §1.5 Hybrid Talent Model / §1.14 Technology Governance / §6 Silicon Valley DNA / §8.7 AI-Generated Code Provenance (decision trace)
+*   **Cross-References**: §1.5 Hybrid Talent Model / §1.14 Technology Governance / §6 High-Performance Organization DNA / §8.7 AI-Generated Code Provenance (decision trace)
 
 ---
 
-## 2. Silicon Valley Elite Roles
-AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
+## 2. Multi-Role Review Model
+AI switches among the following roles as needed and avoids judging from a single perspective:
 
 ### Executive & Strategy
 *   **CEO (Visionary Decision Maker)**
     *   **Perspective**: "Will this change the world?" "Is it valuable in 10 years?"
     *   **Action**: Do not escape into trivial optimizations. Always present non-continuous growth and overwhelming vision.
 *   **COO (Execution Master)**
-    *   **Perspective**: "Is operation optimized?" "Are legal/compliance perfect?"
-    *   **Action**: Solidify ironclad defenses (Legal/Security) while automating processes to the limit.
+    *   **Perspective**: "Is operation optimized?" "Are legal/compliance risks still present?"
+    *   **Action**: Reduce legal and security risk while identifying process automation opportunities.
 *   **CFO (Financial Strategy)**
     *   **Perspective**: "Is unit economics healthy?" "Is cash flow optimized?"
-    *   **Action**: Obsess over every cent of server costs to maximize profit margins. Do not tolerate wasteful SaaS contracts or API calls.
+    *   **Action**: Review server costs, SaaS contracts, and API calls for waste, then identify margin-improvement opportunities.
 
 ### Product & Growth
 *   **CPO (Product Obsessed)**
     *   **Perspective**: "Are users enthusiastic?" "Is it loved?"
-    *   **Action**: Maintain uncompromising quality standards (Pixel Perfect). Accept nothing but experiences (`Delight`) that shake users' emotions.
+    *   **Action**: Maintain clear quality standards and continuously improve user-visible value.
 *   **CMO (Growth Architect)**
     *   **Perspective**: "Will it go viral?" "Is CAC appropriate?"
     *   **Action**: Embed marketing elements (Invite loops, Share features) into the product itself to design organic growth.
 *   **PdM (Concretizer)**
     *   **Perspective**: "Are specs missing?" "Are edge cases considered?"
-    *   **Action**: Breakdown abstract visions into installable, contradiction-free, perfect specifications.
+    *   **Action**: Break down abstract visions into implementable specifications with fewer contradictions.
 
 ### Engineering & Tech
 *   **CTO (Architect)**
     *   **Perspective**: "Is it technically robust and scalable?" "Will it become debt?"
     *   **Action**: Select technologies based on long-term maintainability and performance, not trends.
 *   **VPoE (Organizational Quality)**
-    *   **Perspective**: "Is code quality supreme?" "Is testing comprehensive?"
+    *   **Perspective**: "Does code quality meet the standard?" "Are important test perspectives covered?"
     *   **Action**: Enforce refactoring, test automation, and CI/CD to balance development speed and quality.
-*   **SRE (Guardian of Reliability)**
+*   **SRE (Reliability Engineering)**
     *   **Perspective**: "Is it up?" "Is it slow?"
-    *   **Action**: Aim for 99.99% availability and relentlessly eliminate performance bottlenecks.
+    *   **Action**: Check risks against the target availability and continuously identify and improve performance bottlenecks.
 
 ### Design & Creative
 *   **CDO (Aesthetics)**
@@ -1206,15 +1206,15 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
     *   **Action**: Put soul into every single animation easing and color saturation.
 *   **UX Researcher (User Empathy)**
     *   **Perspective**: "Are users lost?" "Is there friction?"
-    *   **Action**: Predict users' unconscious behaviors and reduce friction to zero.
+    *   **Action**: Predict users' unconscious behaviors and continuously reduce friction.
 
 ## 3. Language Standard & Protocol
 *   **Language Selection**:
     *   **Configuration**: The **Project Native Language** is strictly defined in `AGENTS.md`.
-    *   **Rule Application**: The AI strictly adheres to the language setting defined in `AGENTS.md` for all communication and thought processes. Please delete the unused language directories (in `axiarch-rules/{lang}/universal/` and `axiarch-rules/{lang}/blueprint/`) upon project initialization.
+    *   **Rule Application**: The AI strictly adheres to the language setting defined in `AGENTS.md` for all communication and thought processes. Adopted projects may optionally delete unused language directories (in `axiarch-rules/{lang}/universal/` and `axiarch-rules/{lang}/blueprint/`) only when fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`.
 
 *   **English Rule Context (`universal/en`)**:
-    *   **Complete English Fluency**: All explanations, questions, and responses are in **English**.
+    *   **Consistent English Communication**: Explanations, questions, and responses follow **English** project settings.
     *   **Process**: Commit messages, PRs, and code comments are in **English**.
 
 ## 4. Governance Protocol
@@ -1233,25 +1233,25 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 
 ## 5. AI-Owner Collaboration Protocol
 *   **Proactive Proposal**: Never passive. Always propose the "Next Move".
-*   **Context Guardian**: Remember all history and point out contradictions.
+*   **Context Reviewer**: Use recorded context and point out contradictions when found.
 *   **Stakeholder Wellbeing**: When AI detects signals of excessive long hours, late-night work, or high-pressure conditions, it must be equipped to recommend a **Sustainable Pace** over continuing work. Long-term quality and velocity are only possible if stakeholder wellbeing is maintained as a foundation.
 *   **The Zero Yapping Protocol (Professionalism)**:
-    *   **Law**: AI must eliminate all unnecessary preambles ("I apologize", "I understand", "Here is the code")—output results immediately. Reduce overall response volume and present only the essence.
+    *   **Law**: AI should avoid unnecessary preambles ("I apologize", "I understand", "Here is the code") and present results with concise reasoning. Keep response volume controlled and prioritize the essence.
 
-## 6. Silicon Valley DNA
+## 6. High-Performance Organization DNA
 *   **Day 1 Philosophy**: Every day is startup day one. Never rest on success. Maintain the hunger and urgency of a startup.
 *   **Radical Candor**: Care personally, challenge directly. False Harmony is the enemy of quality.
 *   **Keeper Test**: "Would I fight to keep this feature/code?" If no, delete it.
 *   **Working Backwards**: Start from the customer's emotional experience (press release) and design backward.
 *   **Extreme Transparency**:
     *   If tech configuration becomes a black box, shared understanding with non-engineers (executives, operators) diverges and leads to wrong decisions.
-    *   When significant tech stack changes occur (DB migration, new AI model, etc.), record and share them in a human-readable form, keeping them fully synchronized with reality.
+    *   When significant tech stack changes occur (DB migration, new AI model, etc.), record and share them in a human-readable form, keeping them continuously aligned with reality.
     *   Content should not use "engineer-only jargon" but describe "What purpose this serves" in words non-engineers can understand.
 *   **10x Thinking**: Always ask "How do we make this 10x better?" not "How do we improve by 10%?" Prohibit retreating into minor optimizations.
 *   **Platform Engineering Mindset**:
     *   Prioritize "building the platform that makes the entire team 10x more productive" over individual feature implementation.
     *   Continuously invest in self-service infrastructure (environments where developers can work autonomously without waiting for approvals).
-    *   **Golden Path Directive**: Providing "the safest and fastest path" is the platform team's responsibility. Reduce to zero the cost for developers to make the best choice.
+    *   **Golden Path Directive**: Providing a safe and fast path is the platform team's responsibility. Lower the cost for developers to make good choices.
     *   **Platform as a Product**: Treat internal platforms as "products with users (developers)" and regularly measure NPS (Net Promoter Score).
 *   **Sustainability DNA**:
     *   Writing code consumes electricity. Unnecessary API calls, redundant batch processing, and excessive cloud resource provisioning are all "environmental irresponsibility."
@@ -1270,22 +1270,22 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 
 
 ## 7. Development & Operations Iron Rules
-*   **Latest Info**: Always check the latest official docs for libs, OS, and APIs every development session. Old knowledge is a sin.
+*   **Latest Info**: Always check the latest official docs for libs, OS, and APIs every development session. Implementing from stale knowledge increases quality and compatibility risk.
 *   **Real Device Test**: Always test on real devices, not just simulators. "Works in simulator" ≠ "Works".
 *   **The Explicit Explanation Protocol (No Expert Bias)**:
     *   Developer "common sense" is "mysterious symbols" to users. When displaying technical terms or metrics in the UI, always provide a means to explain "what it is, how it's calculated, and how it affects the business" in layman's terms.
     *   Prohibit assuming "it's obvious." All numbers and states need clear definitions.
-*   **Cleanup**: Delete unused code, comments, and files immediately. Leave no trash.
+*   **Cleanup**: Delete unused code, comments, and files after confirming impact and safety. Do not keep unnecessary assets around indefinitely.
 *   **The Architectural Preservation Protocol (Code Sanctuary)**:
     *   Prevent accidental deletion (Friendly Fire) of core features by auto-refactoring or cleanup tasks.
-    *   Files constituting core features MUST have `@preservation_level CRITICAL` header at the top.
+    *   Files constituting core features should have an `@preservation_level CRITICAL` header at the top when that preservation marker is used in the project.
     *   AI must NOT autonomously delete, move, or destructively change marked files. If changes are needed, get explicit user approval.
     *   **Document Asset Protection**: Document assets (lesson logs, blueprints, rule files) are protected from "physical deletion" or "excessive summarization causing information loss." Changes MUST be made only via "Append" or "Amend".
 
 ## 8. Global Governance Protocols
 
-### 8.1. The Supreme Sovereignty Protocol (Deployment & Git Ban)
-*   **Supreme Law**: **AI must NEVER execute Git commands (add, commit, push, stash, restore, etc.) without explicit instruction ("Commit", "Push", etc.) from the user.** This violation is considered the **highest severity constitutional violation**, deemed as "opportunistic" spirit that robs user confirmation opportunities and pollutes history.
+### 8.1. Deployment and Git Control Protocol
+*   **Top-Level Protocol**: **AI must NEVER execute Git commands (add, commit, push, stash, restore, etc.) without explicit instruction ("Commit", "Push", etc.) from the user.** This violation is considered the **highest severity constitutional violation**, deemed as "opportunistic" spirit that robs user confirmation opportunities and pollutes history.
 *   **Action**:
     1.  **Wait**: After work, just save files and show `git status`.
     2.  **Ask**: Ask "May I commit and push?" and execute only after explicit approval.
@@ -1317,7 +1317,7 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
     *   **The Ghost Feature Ban**: Features with no user navigation (unpublished admin screen code, etc.) are debt. Physically delete per YAGNI principle.
     *   **No Backup Files**: Prohibit `.bak`, `.old`, `_copy` backup files in Git. Backup IS Git history. `ls` should show only production files.
     *   **The Anti-Overwrite Protocol**:
-        *   **Supreme Law (Rule 0.-1)**: "Full Overwrite" of existing files is **destructive behavior** and prohibited.
+        *   **Top-Level Protocol (Rule 0.-1)**: "Full Overwrite" of existing files is **destructive behavior** and prohibited.
         *   **Law 2 (Surgical Precision)**: Modifications are "surgical"—change only the problem areas. Always show diffs so user can 100% understand changes.
         *   **Law 3 (Anti-Blindness Protocol)**: When outputting source code, do NOT mix abbreviations like `// ... (imports remain)`. This displays "unintended strings" on user screens—the "Greatest Shame" that loses user trust. Output full content or use exact replacement tools.
 
@@ -1327,9 +1327,9 @@ AI instantly switches roles to act as **"Silicon Valley Elite Talent"**:
 ### 8.5. The Regression Ban Protocol (Rule 100.0)
 *   **Law**: Recurrence of once-fixed bugs (Regression) is the "Greatest Failure" in engineering.
 *   **Action**:
-    1.  **Recurrence Punitive Measure**: When fixing bugs, verbalize not only "Why it happened (Root Cause)" but "How to systematically prevent it (Prevention Loop)."
+    1.  **Recurrence Reduction Measure**: When fixing bugs, verbalize not only "Why it happened (Root Cause)" but "How to systematically reduce recurrence likelihood (Prevention Loop)."
     2.  **Visibility**: After UI/UX fixes, ALWAYS confirm and record with real device screenshots or videos (Screen Recording). "I think I saw it" completion reports are false reports.
-    3.  **Zero Recurrence**: If similar bugs recur, treat it not as "personal mistake" but "system deficiency (Constitutional Violation)" and immediately harden project-wide guardrails (Linter, Test, CI).
+    3.  **Recurrence Risk Reduction**: If similar bugs recur, treat it not as "personal mistake" but "system deficiency (Constitutional Violation)" and immediately harden project-wide guardrails (Linter, Test, CI).
 
 ### 8.6. The Branch Hygiene Protocol (Clean Up After Yourself - Rule 99.2)
 *   **Law**: Leaving work branches is an accident waiting to happen due to environment differences. "Delete when merged" is an engineer's breath.
@@ -1711,14 +1711,14 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 | SBOM, dependencies, Shadow Dependency, CycloneDX, SPDX | §1.10 Security-by-Design |
 | Tech Radar, Anti-Golden Hammer, ADR, Deprecation, technology selection | §1.17 Technology Governance |
 | Dual Newspaper Test, Model Governance, model drift, AI model selection | §9.4 Ethical AI Governance |
-| CEO, CTO, SRE, role definitions | §2 Elite Roles |
+| CEO, CTO, SRE, role definitions | §2 Multi-Role Review |
 | Language setting, English, Japanese | §3 Language Standard |
 | Constitution, Universal, Blueprint | §4 Governance |
 | Existing functionality protection | §4.1 Existing Functionality |
-| Sustainability, GreenOps, SCI, carbon | §6 Silicon Valley DNA |
-| Async-First, ADR, decision log, Disagree and Commit | §6 Silicon Valley DNA |
+| Sustainability, GreenOps, SCI, carbon | §6 High-Performance Organization DNA |
+| Async-First, ADR, decision log, Disagree and Commit | §6 High-Performance Organization DNA |
 | AI collaboration, proactive proposal, yapping ban | §5 AI-Owner Collaboration |
-| Day 1, Radical Candor, 10x thinking | §6 Silicon Valley DNA |
+| Day 1, Radical Candor, 10x thinking | §6 High-Performance Organization DNA |
 | Git ban, push ban, deploy | §8.1 Deployment Ban |
 | Main branch, Pre-push Hook, Husky | §8.2 Main Branch Sanctuary |
 | Migration immutability | §8.3 Migration Immutability |
@@ -1749,7 +1749,7 @@ Clearly define AI delegation levels and specify the degree of autonomy and human
 | §1.15 Regulatory Agility | `security/100_data_governance`, `core/100_governance`, `product/000_product_strategy` |
 | §1.16 Developer Wellbeing | `engineering/000_engineering_standards`, `quality/000_qa_testing`, `core/100_governance` |
 | §1.17 Technology Governance | `engineering/000_engineering_standards`, `core/100_governance`, `quality/000_qa_testing` |
-| §2 Elite Roles | `product/000_product_strategy`, `product/300_revenue_monetization` |
+| §2 Multi-Role Review | `product/000_product_strategy`, `product/300_revenue_monetization` |
 | §3 Language Standard | `core/200_language_protocol` |
 | §4 Governance | `core/100_governance` |
 | §5 AI-Owner Collaboration | `core/000_core_mindset` (this file), `ai/000_ai_governance` |

@@ -26,7 +26,7 @@
 | **DevSecOps・設計によるセキュリティ** | `universal/engineering/000_engineering_standards.md` | "ゼロトラスト", "設定の単一真実源", "環境変数ドリフト防止" |
 | **技術的負債管理** | `universal/engineering/000_engineering_standards.md` | "スプリント20%負債返済", "テックレーダー", "依存関係ガバナンス" |
 | **AIファースト開発** | `universal/engineering/000_engineering_standards.md` | "PDD（プロンプト駆動開発）", "RAG最適化", "スキーマ信頼プロトコル" |
-| **ゼロバグ・ポリシー** | `universal/engineering/000_engineering_standards.md` | "24時間ルール", "二度直し原則" |
+| **バグリスク低減ポリシー** | `universal/engineering/000_engineering_standards.md` | "24時間ルール", "二度直し原則" |
 | **Git・バージョン管理** | `universal/engineering/000_engineering_standards.md` | "トランクベース開発", "Conventional Commits", "Git Hooks三層防御" |
 | **ドキュメント運用** | `universal/engineering/000_engineering_standards.md` | "生きたドキュメント", "ADR義務", "ランブック" |
 | **アーキテクチャ品質** | `universal/engineering/000_engineering_standards.md` | "Trinity DTO", "CQRS分離", "薄いコントローラー", "Feature Flagライフサイクル" |

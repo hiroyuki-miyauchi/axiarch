@@ -56,7 +56,7 @@
     *   Interaction Latency: < 100ms
     *   LCP: < 1.2s
 *   **Code Quality**:
-    *   **Strict Type**: `noImplicitAny` is absolute.
+    *   **Strict Type**: `noImplicitAny` is required.
     *   **Test Coverage**: Core Logic > 90%.
 
 ## 5. Standard Feature Modules (Reference Specs)

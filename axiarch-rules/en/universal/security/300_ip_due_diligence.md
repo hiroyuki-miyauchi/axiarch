@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-19
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Intellectual property is the invisible moat — unprotected IP is an invitation to competitors."
 > All IP decisions must treat protection, ownership clarity, and due diligence as non-negotiable.
 > Strictly follow: **IP Protection > Legal Compliance > Business Strategy > Speed**.
@@ -1951,7 +1951,7 @@ def attach_c2pa_manifest(
 ### Copyright Compliance Policy
 - TDM opt-out monitoring: Monthly automated scan
 - Issue data removal SLA: Within 48 hours
-- Reference: [Training Data IP Clearance Report](./reports/license_clearance_latest.json)
+- Reference: `reports/license_clearance_latest.json`
 
 ### IP Attribution (→ §23 Rule 63.171)
 - Human-authored components: {list}

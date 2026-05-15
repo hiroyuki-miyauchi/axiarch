@@ -5,17 +5,17 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "AI is a tool; operational responsibility always rests with humans."
 > In AI feature implementation, strictly adhere to the priority order: **Safety > Reliability > UX > Cost Efficiency > DX**.
-> This document is the supreme standard for all AI-related design decisions.
+> This document is the primary standard for all AI-related design decisions.
 > **48 Parts, 60 Sections.**
 
 ---
 
 ## Table of Contents
 
-- Part I: Supreme Directive & AI Philosophy
+- Part I: Primary Directive & AI Philosophy
 - Part II: AI UX Principles
 - Part III: AI UX Pattern Catalog
 - Part IV: AI Ethics Framework
@@ -80,9 +80,9 @@
 
 ---
 
-## Part I: Supreme Directive & AI Philosophy
+## Part I: Primary Directive & AI Philosophy
 
-### 1.1. Supreme Principles of AI Implementation
+### 1.1. Core Principles of AI Implementation
 
 - **Rule 40.1**: AI features **assist** user decision-making; they do not **replace** it
 - **Rule 40.2**: AI outputs are always "suggestions"; designs must ensure final judgment rests with humans
@@ -316,7 +316,7 @@
 
 | Source Type | Label Example | Application Condition |
 |:---|:---|:---|
-| **RAG Citation** | `📎 Reference: [Source Name](URL)` | Responses based on externally retrieved RAG information |
+| **RAG Citation** | `📎 Reference: [Source Name](https://example.com/source)` | Responses based on externally retrieved RAG information |
 | **DB Confirmed Data** | `✅ Verified Information` | Responses based on confirmed DB data |
 | **AI Inference** | `💡 AI Reference Response` | Responses based on AI reasoning/general knowledge |
 
@@ -635,7 +635,7 @@ RAG Pipeline:
 
 | Criteria | Considerations |
 |:---|:---|
-| **Multilingual Support** | Must generate high-quality embeddings for both Japanese and English |
+| **Multilingual Support** | Must generate suitable embeddings for the target languages and locales |
 | **Dimensions** | Higher dimensions (1536+) improve accuracy; lower dimensions favor cost/speed |
 | **Cost** | Consider costs when indexing large document volumes |
 | **Update Frequency** | Evaluate re-indexing costs when model updates occur |

@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Admin Tools Are NOT Second-Class Citizens."
 > The quality of admin panels and internal tools directly impacts product quality.
 > Minimize operator cognitive load and structurally prevent operational errors.
@@ -1476,12 +1476,12 @@ async function handleUserAction(action: string, userId: string) {
 ```typescript
 // Label mapping definition example
 const fieldLabels: Record<string, Record<string, string>> = {
-  ja: {
-    'is_active': 'アカウント状態',
-    'created_at': '登録日時',
-    'last_login_at': '最終ログイン',
-    'email_verified': 'メール認証状態',
-    'subscription_tier': 'プラン',
+  es: {
+    'is_active': 'Estado de la cuenta',
+    'created_at': 'Fecha de registro',
+    'last_login_at': 'Último inicio de sesión',
+    'email_verified': 'Estado de verificación de correo',
+    'subscription_tier': 'Plan',
   },
   en: {
     'is_active': 'Account Status',

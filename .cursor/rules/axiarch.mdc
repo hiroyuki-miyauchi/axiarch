@@ -23,8 +23,8 @@ alwaysApply: true
 
 **すべてのタスクを開始する前に、以下の手順でファイルを読み込み、内容を遵守せよ。**
 
-#### Step 1: 最上位憲法 & 全体地図の把握（必ず最初に読む）
-- **`AGENTS.md`**（プロジェクトルート） — Axiarch System Protocol の最高法規。全ルールに優先する。
+#### Step 1: 最上位プロトコル & 全体地図の把握（必ず最初に読む）
+- **`AGENTS.md`**（プロジェクトルート） — Axiarch System Protocol の最上位プロトコル。全ルールに優先する。
 - **`axiarch-rules/{lang}/INDEX.md`** — 全ルールの詳細索引。以降のStepで**どのファイルを読むべきか判断する地図**として使用する。
 
 #### Step 2: ルールロード手順に従う
@@ -58,8 +58,8 @@ alwaysApply: true
 
 **Before starting any task, load the following files in order and comply with their contents.**
 
-#### Step 1: Supreme Constitution & Master Map (Always Read First)
-- **`AGENTS.md`** (project root) — The supreme law of the Axiarch System Protocol. Takes precedence over all other rules.
+#### Step 1: Top-Level Protocol & Master Map (Always Read First)
+- **`AGENTS.md`** (project root) — The top-level protocol of the Axiarch System Protocol. Takes precedence over all other rules.
 - **`axiarch-rules/{lang}/INDEX.md`** — Detailed index of all rules. Use as a **map to decide which files to read** in the following steps.
 
 #### Step 2: Follow the Rule Loading Protocol

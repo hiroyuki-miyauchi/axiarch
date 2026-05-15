@@ -5,7 +5,7 @@
 > 改定日: 2026-05-06
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「資金調達は手段であり目的ではない。希薄化と引き換えに得るリソースを、最も高い確率で価値に転換する責任がある」
 > 投資家との関係は短期的な契約ではなく **長期的なパートナーシップ** である。**信頼は取り戻せない。**
 > **15 Part / 約 80+ ルール構成。**
@@ -16,7 +16,7 @@
 
 | # | Part | 主要トピック |
 |---|---|---|
-| 0 | Supreme Directive & Scope Manifesto | 守備範囲・優先順位 |
+| 0 | Primary Directive & Scope Manifesto | 守備範囲・優先順位 |
 | I | 資金調達の哲学 | Default Alive / Ramen Profitability / 3 Errors |
 | II | ステージとタイミング | Pre-seed → Series C+ / Runway 12ヶ月則 |
 | III | Cap Table & ESOP 設計 | Vesting / Cliff / Option Pool / Dilution Math |
@@ -37,7 +37,7 @@
 
 ---
 
-## Part 0: Supreme Directive & Scope Manifesto
+## Part 0: Primary Directive & Scope Manifesto
 
 ### 0.1. 守備範囲
 

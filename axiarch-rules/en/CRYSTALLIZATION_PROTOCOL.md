@@ -16,7 +16,7 @@
 
 ---
 
-## 🚨 SUPREME RULE: Practical Experience Only
+## 🚨 HIGHEST-PRIORITY RULE: Practical Experience Only
 
 > [!CAUTION]
 > Crystallization is **strictly limited to problems, decisions, and discoveries encountered during actual task execution**.
@@ -43,11 +43,11 @@
 ## Overview
 
 Accumulating all lessons in a single file causes unbounded growth and context window pressure.
-This protocol ensures lessons are automatically separated into the appropriate Blueprint domain folder.
+This protocol defines the procedure for separating lessons into the appropriate Blueprint domain folder and keeping them easier to reference without relying too heavily on operator skill.
 
 **Design Philosophy: Co-location Principle**
 Lessons are placed in the **same folder** as the rule files they relate to.
-When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks, `security/` for Security tasks), it finds both rules AND historical lessons there — maximizing context efficiency.
+When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks, `security/` for Security tasks), it finds both rules AND historical lessons there — improving context efficiency.
 
 ---
 
@@ -112,7 +112,7 @@ Determine the lesson's domain and identify the corresponding Blueprint folder.
 > **How to determine `{NNN}` (Contextual Numbering)**: The AI MUST check existing files in the target folder and assign a number close to related topics (default to increments of 10 to leave room, but use interstitial numbers like `011` or `015` if space is tight). Do not strictly force increments of 10.
 > All files including crystallized files may use any available number from `000`–`999`. **Do not include `lessons_` in the file name**. Use only topic names describing the content.
 
-> **Folder Extensibility**: The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first.
+> **Folder Extensibility**: The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first, and proposals must clearly distinguish actual folder names from examples.
 
 ---
 
@@ -175,7 +175,7 @@ Lessons in `core/010_project_lessons_log.md` (central index) MUST be promoted to
 > Violations are externally detectable via `bash axiarch-scripts/check-axiarch-health.sh` Check 6. Declaring task completion while either threshold is breached = **protocol violation**.
 
 > [!CAUTION]
-> **Autonomous New Domain Folder Creation Prohibited**: Blueprint domain folders (`ai/`, `design/`, `engineering/`, `operations/`, `product/`, `quality/`, `security/`) are **pre-provisioned** with the same structure as Universal (each containing a `README.md`). AI is **prohibited** from **autonomously** creating new domain folders. Lessons MUST be placed ONLY in existing folders defined in the Step 1 mapping table. However, if a completely new domain arises that cannot be classified into existing folders, the AI MAY **propose** creating a new folder to the user (see Step 1 "Folder Extensibility").
+> **Autonomous New Domain Folder Creation Prohibited**: Blueprint initial folders (`ai/`, `core/`, `design/`, `engineering/`, `operations/`, `product/`, `quality/`, `security/`) are **pre-provisioned** with the same structure as Universal (each containing a `README.md`). AI is **prohibited** from **autonomously** creating new domain folders. Lessons MUST normally be placed in existing folders defined in the Step 1 mapping table, or in a new folder explicitly approved by the user. If a completely new domain arises that cannot be classified into existing folders, the AI MAY **propose** creating a new folder to the user (see Step 1 "Folder Extensibility").
 
 **Numbering Rules:**
 - **🚨 No Blank Zones**: Use `000`-`999` independently per domain (no domain-specific reserved bands).
@@ -186,7 +186,7 @@ Lessons in `core/010_project_lessons_log.md` (central index) MUST be promoted to
 **Creation Example:**
 ```
 # When 3 DB lessons accumulate in core/010:
-Create: blueprint/engineering/010_database_auth.md  (Elevate lessons to proper rule)
+Create: axiarch-rules/{lang}/blueprint/engineering/010_database_auth.md  (Elevate lessons to proper rule)
 Leave only a reference link in core/010:
   "→ Elevated to engineering/010_database_auth.md"
 ```
@@ -298,9 +298,9 @@ Update the "Separated Domain Files" table in `core/010_project_lessons_log.md`.
 |:--|:-----------|:-----|:--------------|
 | 1 | **Title Line** `# {NNN}. {Name}` | H1 heading at file start. Number + Name | `# 74. Language Protocol`, `# 30. Engineering Standards`, `# 60. Security and Privacy` |
 | 2 | **CAUTION/NOTE Block** | File positioning declaration (Universal=CAUTION, Blueprint=NOTE/TIP) | `> [!CAUTION] This file is a Universal Rule (immutable rule).` |
-| 3 | **IMPORTANT Block** | Supreme Directive + structure summary (`{N} parts, {M} sections.`) | `> [!IMPORTANT] Supreme Directive...13 parts, 80 sections.` |
+| 3 | **IMPORTANT Block** | Primary Directive + structure summary (`{N} parts, {M} sections.`) | `> [!IMPORTANT] Primary Directive...13 parts, 80 sections.` |
 | 4 | **`## Table of Contents`** | Table format (Part/Section/Line count) or list format TOC | `## Table of Contents` + `| Part | Topic | Section | Count |` |
-| 5 | **Body Sections** `## Part {N}:` or `## §{N}.` | `##` for major sections, `###` for subsections | `## Part I: Code Quality and Clean Code`, `## §1. Supreme Directive & Priorities` |
+| 5 | **Body Sections** `## Part {N}:` or `## §{N}.` | `##` for major sections, `###` for subsections | `## Part I: Code Quality and Clean Code`, `## §1. Primary Directive & Priorities` |
 | 6 | **`## Appendix A: Quick Reference`** | Keyword → Section → Related Rule reverse lookup table | `| Keyword | Section | Related Rule |` |
 
 **Litmus Test**: "When placed alongside Universal files like `000_engineering_standards.md` or `200_language_protocol.md`, does this file look structurally consistent?" → If not, align it.

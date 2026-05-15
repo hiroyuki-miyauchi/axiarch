@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > Absolute Compliance with the Project Native Language.
 > - **Core Principle**: All communication between users and developers must be conducted in the language defined by `Project Native Language` in `AGENTS.md`. Advanced language proficiency including cultural context and nuance is required.
 > - **Scope**: Thinking & planning (`task.md`, `implementation_plan.md`), reporting & dialogue (`notify_user`), deliverables (UI, documentation, error messages).
@@ -477,9 +477,9 @@ const label = `${count} items available`;
 
 ```typescript
 // ✅ Intl.RelativeTimeFormat
-const rtf = new Intl.RelativeTimeFormat('ja', { numeric: 'auto' });
-rtf.format(-3, 'day'); // "3日前"
-rtf.format(1, 'hour'); // "1時間後"
+const rtf = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' });
+rtf.format(-3, 'day'); // "il y a 3 jours"
+rtf.format(1, 'hour'); // "dans 1 heure"
 
 // ❌ Prohibited: Manual construction
 const label = `${days} days ago`;
@@ -1562,15 +1562,16 @@ charset = utf-8-bom
 
 ```xml
 <!-- ✅ SSML language switching example -->
-<speak xml:lang="ja-JP">
-  こんにちは。
-  <lang xml:lang="en-US">Welcome to our service.</lang>
-  ご利用ありがとうございます。
+<speak xml:lang="en-US">
+  Welcome to our service.
+  <lang xml:lang="es-ES">Gracias por usar nuestro servicio.</lang>
+  Continue when you are ready.
 </speak>
 
 <!-- ✅ Foreign proper noun pronunciation control -->
-<speak xml:lang="ja-JP">
-  <phoneme alphabet="ipa" ph="ɡuːɡl">Google</phoneme>のサービスです。
+<speak xml:lang="en-US">
+  This service integrates with
+  <phoneme alphabet="ipa" ph="ˈɡuːɡəl">Google</phoneme>.
 </speak>
 ```
 
@@ -1771,7 +1772,7 @@ const LOCALE_CONFIG = {
 ### 43.3. Voice Command Language Design
 
 - **Rule 74.435**: Design voice commands (wake words, action commands) in the Project Native Language
-- **Rule 74.436**: Register pronunciation variations for technical terms in voice input (e.g., "ワイファイ" / "WiFi")
+- **Rule 74.436**: Register pronunciation variations for technical terms in voice input (e.g., "why-fy" / "WiFi")
 
 ---
 

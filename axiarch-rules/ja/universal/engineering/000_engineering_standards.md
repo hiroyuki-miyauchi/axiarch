@@ -5,7 +5,7 @@
 > 改定日: 2026-04-20（Rev.8）
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「コードは資産ではなく負債 — すべての行はその存在意義を証明しなければならない。」
 > すべてのエンジニアリング判断はスピードよりも正確性・セキュリティ・保守性を優先しなければならない。
 > **セキュリティ > 正確性 > 保守性 > パフォーマンス > 開発速度** の優先順位を厳守せよ。
@@ -24,7 +24,7 @@
 | IV | 技術的負債とクリーンアップ | §4.0 – §4.4 | 5 |
 | V | AIファースト開発 | §5.0 – §5.4 | 5 |
 | VI | グリーンコーディングとサステナビリティ | §6.0 – §6.3 | 4 |
-| VII | ゼロバグ・ポリシー | §7.0 – §7.3 | 4 |
+| VII | バグリスク低減ポリシー | §7.0 – §7.3 | 4 |
 | VIII | 継続的学習と検証 | §8.0 – §8.2 | 3 |
 | IX | 互換性とテスト | §9.0 – §9.5 | 6 |
 | X | CI/Deploy & 補助規約 (※ pure git は `600_git_workflow.md` へ移動) | §10.1, §10.2, §10.4 – §10.6 | 5 |
@@ -413,7 +413,7 @@
 
 ---
 
-## Part VII: ゼロバグ・ポリシー (The "Zero Bug Policy")
+## Part VII: バグリスク低減ポリシー (Bug Risk Reduction Policy)
 
 ### 7.0. 修正優先 (Fix First)
 *   既知のバグがある状態で新機能を開発しません。バグ修正は最優先事項です。
@@ -570,7 +570,7 @@
 *   **The Red Button Checklist**: 本番デプロイ直前には、Legal、Security（RLS）、FinOps（Spend Cap）、Dataの指差し確認を義務付けます。
 *   **Omnichannel Check**: レビュー時は「Web以外でも利用可能か？」を最優先で確認します。
 *   **Deployment Safety Protocol**:
-    *   **Supreme Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
+    *   **Primary Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
     *   **The Automated Deployment Mandate (CD First)**: 本番環境へのデプロイを手動コマンドで行うことは**完全禁止**。CI/CDパイプライン経由のみ。
     *   **The Architectural Preservation Protocol**: プロジェクトの中核機能ファイルには `@preservation_level CRITICAL` ヘッダーを付与し、AIの独断での破壊的変更を防止してください。
 *   **セキュリティ**: APIキー等の機密情報は厳正にコミットせず、CIでシークレットスキャン（TruffleHog）を義務付けます。
@@ -690,7 +690,7 @@
 *   **Branch Cleanup Protocol**: マージ済みブランチは即座に削除してください。
 
 ### 12.12. The SSOT Sync Protocol（SSOT同期プロトコル）
-*   **Law**: 作業ブランチのマージ完了後、必ずローカルの `main` ブランチをリモートの状態と**100%同期**させなければなりません。
+*   **Law**: 作業ブランチのマージ完了後、必ずローカルの `main` ブランチをリモートの最新状態（SSOT）と同期させなければなりません。
 *   **Action**:
     1.  `git checkout main` → `git pull origin main` → マージ済みブランチの削除
     2.  新規タスク開始前にローカルの `main` が最新であることを確認してください。
@@ -704,7 +704,7 @@
 *   **Law**: いかなる機能実装においても、以下の3原則を遵守しないコードは憲法違反となり、即時修正の対象です。
     1.  **Security (PII Defense)**: 生データ（Raw Row）の出力は禁止です。必ず **DTO (White-list)** を経由し、機密情報を物理的に遮断してください。
     2.  **Stability (Frontend Shield)**: DBスキーマとUIを直結させてはなりません。Mapper関数という「防波堤」を築き、変更の影響をサーバー内で吸収してください。
-    3.  **AI Economy (Token Optimization)**: AIに無駄なデータを読ませてはなりません。**AI-Optimized DTO** でトークンを極限まで節約し、推論精度を高めてください。
+    3.  **AI Economy (Token Optimization)**: AIに無駄なデータを読ませてはなりません。**AI-Optimized DTO** でトークンを可能な範囲で節約し、推論精度を高めてください。
 *   **DTO設計規約**:
     *   **Strict Segregation**: 機密性の高いフィールドを含むDTOは `AdminDTO` / `PublicDTO` のように型レベルで物理的に分離してください。
     *   **No Raw Return**: Server ActionsやAPIは生のDB型を返してはなりません。必ずDTO型を返してください。
@@ -752,7 +752,7 @@
 *   **Type Bridge Mandate**: 自動生成型に不足がある場合は、`database-extensions.ts` に拡張型を定義し、Mapped Typeで型衝突を防いでください。
 *   **Linter Suppression Prohibition**: `eslint-disable` / `@ts-ignore` 等の使用は原則禁止です。やむを得ず使用する場合は、理由を明記したコメントとIssue番号を必ず併記してください。
 *   **Generic Type Inference Safety**: `Record<string, any>` 等のanyインデックスシグネチャを禁止します。`Record<string, unknown>` または制約付きジェネリクスを使用してください。
-*   **Zero Defect Sovereignty**: 型チェック（`tsc --noEmit`）およびLinterが**警告ゼロ**で通過しないコードのコミットを禁止します。
+*   **Verification Gate**: 型チェック（`tsc --noEmit`）およびLinterが**警告ゼロ**で通過しないコードのコミットを禁止します。
 
 ### 13.7. The Error Handling Contract（エラーハンドリング契約）
 *   **Structured Error Return**: サーバーアクションは、業務ロジック上の失敗に対して `throw new Error()` を使用することを**原則禁止**します。代わりに `{ success: false, error: '...' }` 形式の構造化されたレスポンスを返してください。
@@ -826,7 +826,7 @@
 *   **Context**: WebAssembly (WASM) とエッジコンピューティング（Cloudflare Workers / Deno Deploy / Lambda@Edge等）は、2026年以降のシステムアーキテクチャにおいて不可欠な選択肢です。採用判断は明確な基準に基づかなければなりません。
 *   **WASM 3.0 機能の把握（2026年）**:
     *   **WebAssembly 3.0が2026年4月に正式標準化**されました。主な新機能: **WasmGC**（巨大なランタイムを同梱せずにJava・Kotlin・Dart等をターゲット化可能にするGC）、**Memory64**（4GBを超えたメモリアドレス対応—LLM推論・大規模動画処理向け）、**Exception Handling**（効率的なエラー伝達）、**Component Model**（Rust・Go・Pythonなど異なる言語のモジュールが標準化された型共有で連携できるポリグロット相互運用）。
-    *   **WASI 0.3 / 1.0**: WASI 0.3（ネイティブ非同期サポート）は2026年前半の重点事項。WASI 1.0は2026年末～2027年初頭の予定で、ファイル・ネットワーク・クロック等システムリソースへのアクセスを標準化し、サーバーサイドWASMのポータビリティを完全実現します。
+    *   **WASI 0.3 / 1.0**: WASI 0.3（ネイティブ非同期サポート）は2026年前半の重点事項。WASI 1.0は2026年末～2027年初頭の予定で、ファイル・ネットワーク・クロック等システムリソースへのアクセスを標準化し、サーバーサイドWASMのポータビリティを高めます。
 *   **WASM採用基準**:
     *   **適切なユースケース**: CPU負荷の高い計算（暗号処理・画像変換・音声コーデック・物理シミュレーション）、既存CLIツールのブラウザ移植、言語非依存の共有ロジック（核心ビジネスロジックのRustによる実装）。
     *   **不適切なユースケース**: DOM操作、シンプルなデータ変換、外部APIコール主体の処理 — これらはJavaScript/TypeScriptで十分です。WASMを安易に採用することで起きる複雑性増大は「エンジニアリングの自己満足」であり禁止します。
@@ -969,16 +969,16 @@
     | **Pool（プール）** | 低（DB・インフラ共有） | 低 | スタートアップ・コスト優先 |
 *   **必須設計原則**:
     *   **Tenant Context Propagation**: 全てのリクエスト処理において、テナントIDを認証トークンから抽出し、サービス層・DB層まで貫通させてください。`context.tenantId` の欠落は**システム最大の脆弱性**です。
-    *   **Row Level Security（RLS）**: Poolモデルを採用する場合、DBレイヤーでRLSを有効化し、テナント間のデータ漏洩を物理的に防止してください（詳細は `engineering/200_supabase_architecture.md` 参照）。
+    *   **Row Level Security（RLS）**: Poolモデルを採用する場合、DBレイヤーでRLSを有効化し、テナント間のデータ漏洩リスクを低減してください（詳細は `engineering/200_supabase_architecture.md` 参照）。
     *   **Cross-Tenant Leak Test**: テスト戦略に「クロステナントリーク検証」を必ず含めてください。テナントAの認証情報でテナントBのデータにアクセスできないことをE2Eテストで検証してください。
     *   **Noisy Neighbor Protection**: 特定テナントの高負荷が他テナントに影響しないよう、リクエスト/クエリレベルでのRate Limitをテナント単位で適用してください。
 
 ### 14.6. Contract Testing Protocol（コントラクトテスト基本原則）
-*   **Context**: マイクロサービスやフロントエンド/バックエンドの分離開発において、APIコントラクト（インターフェース仕様）の不整合は「本番環境でのみ発覚する結合エラー」の主因です。Consumer-Driven Contract Testing（CDCT）によりこれを事前に防ぎます。
+*   **Context**: マイクロサービスやフロントエンド/バックエンドの分離開発において、APIコントラクト（インターフェース仕様）の不整合は「本番環境でのみ発覚する結合エラー」の主因です。Consumer-Driven Contract Testing（CDCT）により、事前検出しやすくします。
 *   **CDCT Mandate**:
     *   **Consumer Defines the Contract**: APIを呼び出す側（Consumer）が「自分に必要なフィールドと型」をコントラクトファイルとして定義してください。Pact / Spring Cloud Contract等を使用します。
-    *   **Provider Must Verify**: APIを提供する側（Provider）は、全コンシューマーコントラクトに対するProviderテストをCIで実行し、**コントラクト違反のデプロイを物理的にブロック**してください。
-    *   **Schema-First for Internal APIs**: 内部API（BFF / マイクロサービス間）はOpenAPI 3.1スキーマから型を自動生成し、実装とスキーマの乖離をゼロにしてください。
+    *   **Provider Must Verify**: APIを提供する側（Provider）は、全コンシューマーコントラクトに対するProviderテストをCIで実行し、**コントラクト違反のデプロイリスクを低減**してください。
+    *   **Schema-First for Internal APIs**: 内部API（BFF / マイクロサービス間）はOpenAPI 3.1スキーマから型を自動生成し、実装とスキーマの乖離を継続的に検出してください。
 *   **Contract Versioning**: コントラクトに破壊的変更を加える場合、「Expand-Contract Pattern」（まず新フィールドを追加、全Consumerが移行後に旧フィールドを削除）を必ず採用してください。
 
 ---
@@ -1302,7 +1302,7 @@
 *   **色覚多様性対応**: 情報の伝達に色のみを使用することを禁止します（WCAG 1.4.1）。エラー状態はアイコン+テキスト+色の組み合わせで表現してください。
 
 ### 18.6. インタラクティブコンポーネントのARIA実装基準
-*   **ARIA Law（最優先原則）**: 適切なネイティブHTML要素が存在する場合、ARIAの使用より**ネイティブHTML**を優先してください。「ARIAなしで実装できる」ことが最高の実装です（ARIA in HTML仕様）。
+*   **ARIA Law（最優先原則）**: 適切なネイティブHTML要素が存在する場合、ARIAの使用より**ネイティブHTML**を優先してください。「ARIAなしで実装できる」ことは、より堅実な実装です（ARIA in HTML仕様）。
 *   **ARIA必須実装パターン**:
     | コンポーネント | 必須ARIA属性 |
     |:------------|:-----------|
@@ -1345,7 +1345,7 @@
 | 技術的負債 | §4.0 – §4.4 | `operations/600_cloud_finops.md` |
 | AIファースト / コードレビュー | §5.0 – §5.4 | `ai/000_ai_engineering.md` |
 | グリーンコーディング / SCI | §6.0 – §6.3 | `operations/600_cloud_finops.md` |
-| ゼロバグ・ポリシー | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
+| バグリスク低減ポリシー | §7.0 – §7.3 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
 | Testing Trophy / テスト戦略 | §9.3 | `quality/000_qa_testing.md` |
 | Property-Based Testing / Chaos / Litmus | §9.4 | `quality/000_qa_testing.md`, `operations/500_incident_response.md` |
 | Git Workflow（pure） | `engineering/600_git_workflow.md` 全パート | — |
@@ -2023,4 +2023,3 @@ type AgentAuditLog = {
     *   脅威モデリングの結果はADR（§16.3）に記録し、発見されたリスクは全てIssueで追跡してください。
 
 ---
-

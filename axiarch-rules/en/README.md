@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > **The Three-Layer Governance Architecture**
 > This folder (`axiarch-rules/`) contains the governance rules of the Axiarch framework.
-> The clear separation of concerns between "Immutable Constitution (Layer 1)", "Project-Specific Rules (Layer 2)", and "Optional Prompts (Layer 3)" is the heart of Axiarch — it suppresses hallucination and quality drift, maintaining a quality baseline for long-term autonomous operation.
+> The clear separation of concerns between "Immutable Constitution (Layer 1)", "Project-Specific Rules (Layer 2)", and "Optional Prompts (Layer 3)" is the heart of Axiarch — it helps reduce hallucination and quality-drift risk while supporting a quality baseline for long-term autonomous operation.
 > The minimum execution requirement for Axiarch is compliance with Layer 1 and Layer 2; all other extensions such as Layer 3 (Prompts) are entirely optional.
 >
 > **Separation of Concerns (AI Agent Instructions)**:
@@ -99,7 +99,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework was designed and validated through hundreds of real production sessions on [Google Antigravity](https://antigravity.google/). Through `AGENTS.md`, it is expected to work with **other AI agents** (OpenAI Codex, Cursor, Claude Code, GitHub Copilot, etc.); however, its operation outside Antigravity is **NOT guaranteed. Use at your own risk.**
+> This framework is grounded in production-validated experience on [Google Antigravity](https://antigravity.google/). OpenAI Codex and Claude Code are primary targets with native integration and hook-reinforcement paths, but practical validation is still ongoing. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
 
 1.  **Copy**: Copy the following files/folders to your project root. (`axiarch-prompts/` is optional)
     ```bash
@@ -125,7 +125,7 @@
 
 3.  **Initialize**:
     *   **Edit `AGENTS.md`**: Set `Project Native Language` to `English`.
-    *   **Cleanup**: Delete the unused Japanese language directory. (Do the same if you included the prompt library)
+    *   **Cleanup**: Optionally delete the unused Japanese language directory only when fixing the project to single-language operation. (Do the same if you included the prompt library)
         ```bash
         rm -rf axiarch-rules/ja
         # If you copied the prompt library: rm -rf axiarch-prompts/ja
@@ -141,7 +141,7 @@
 
 ```
 your-project/
- ├── AGENTS.md                    ← Supreme Law
+ ├── AGENTS.md                    ← Top-Level Protocol
  ├── .agents/
  │    └── rules/
  │         └── prompt_pointer.md  ← Pointer (TOC)

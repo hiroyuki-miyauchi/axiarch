@@ -5,11 +5,11 @@
 > Last Updated: 2026-03-24 | Target: Next.js 16+ / React 19.2+ / TypeScript 5.x
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "The frontend is the sole point of contact between the user and the product, and compromise is not allowed."
 > Achieve the trinity of Performance, Accessibility, and Security to guarantee the highest standard of user experience.
 > In all web frontend implementation, strictly adhere to the priority: **Security > Performance > Accessibility > UX > Maintainability > Development Speed**.
-> This document is the supreme standard for all frontend design decisions.
+> This document is the primary standard for all frontend design decisions.
 > **54 Parts · ~340 Sections.**
 
 > [!NOTE]
@@ -84,7 +84,7 @@
 
 ## Part I: Philosophy & Core Principles 🌐
 
-### §1. Supreme Directive — Web Frontend Excellence
+### §1. Primary Directive — Web Frontend Excellence
 
 - **Rule 33.1**: The frontend is the business frontline. Performance degradation, accessibility deficiency, and security flaws directly and immediately impact business
 - **Priority**: Security > Performance > Accessibility > UX > Maintainability > Development Speed

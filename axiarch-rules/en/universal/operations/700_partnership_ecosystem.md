@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-15
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Reach markets you cannot reach alone through partnerships. Create value you cannot create alone through ecosystems."
 > An ecosystem is NOT a strategy to "exclude competitors" — it is a strategy to **"exponentially expand the scope of value creation."**
 > As demonstrated by Salesforce AppExchange, Stripe Connect, Shopify App Store, and AWS Marketplace,
@@ -51,7 +51,7 @@
 
 ## Part I. Partnership Philosophy & Purpose
 
-### 1.1. Supreme Directive
+### 1.1. Primary Directive
 
 - **Rule 53.001**: All partnership and ecosystem decisions shall follow this priority hierarchy
 

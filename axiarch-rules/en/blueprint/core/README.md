@@ -25,4 +25,4 @@
 
 - Follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for the lesson crystallization process
 - Crystallized rule files within `core/` use numbering from `020_` onward
-- Creating new domain folders is prohibited (use ONLY existing folders mirroring Universal)
+- AI must not autonomously create new domain folders. Prefer existing folders; if a new domain cannot be classified, propose an extension and create it only after user approval.

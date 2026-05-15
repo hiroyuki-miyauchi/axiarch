@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "**The user's success IS the product's success.**" — Support is not a "cost center" but a "value driver."
 > Every support interaction exists to **minimize the user's Time-to-Value** and **minimize their Effort**.
 > Target **AI Autonomous Resolution Rate ≥ 80%** (2026 goal), freeing human agents to focus on high-value interactions.
@@ -309,7 +309,7 @@
 -   **Contextual Search**: Automatically suggest help articles related to the user's current screen.
 -   **Interactive Troubleshooter**: Implement Decision Tree-type interactive troubleshooters that progressively narrow down problem symptoms.
 -   **Smart Suggestions**: Directly link relevant help articles within error messages when errors occur.
--   **Cross-Reference**: `design/000_design_ux.md` — Omotenashi UX, Error message UX standards
+-   **Cross-Reference**: `design/000_design_ux.md` — Anticipatory Care UX, Error message UX standards
 
 ---
 
@@ -1121,7 +1121,7 @@
 | `product/000_product_strategy.md` | Review/trust systems |
 | `product/300_revenue_monetization.md` | AI Token Economics, FinOps |
 | `product/500_growth_marketing.md` | PLG, Onboarding, Retention |
-| `design/000_design_ux.md` | WCAG compliance, Omotenashi UX, Error messages |
+| `design/000_design_ux.md` | WCAG compliance, Anticipatory Care UX, Error messages |
 | `ai/000_ai_engineering.md` | Guardrails, RAG, PII Scrubbing |
 | `ai/100_data_analytics.md` | Analytics dashboard quality standards |
 | `operations/000_internal_tools.md` | Admin escalation standards |

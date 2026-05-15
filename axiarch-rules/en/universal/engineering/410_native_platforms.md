@@ -5,11 +5,11 @@
 > Last Updated: 2026-03-24 | Target: Kotlin 2.2+ / Swift 6.2+ / Android 16+ / iOS 26+
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Native is not a compromise — it is the shortest path to the best user experience."
 > Even in cross-platform-first environments, never compromise on native quality for deep OS integration, cutting-edge AI, and hardware access.
 > Strictly follow the priority order for native platform implementations: **Security > UX > Performance > Maintainability > Development Speed**.
-> This document is the supreme standard for all design decisions regarding native platform strategy.
+> This document is the primary standard for all design decisions regarding native platform strategy.
 > **40 Parts, 186 Sections.**
 
 ---
@@ -64,7 +64,7 @@
 
 ## Part I: Philosophy & Fundamentals
 
-### §1. Supreme Directive — Native Excellence
+### §1. Primary Directive — Native Excellence
 
 - **Principle**: Native development is the means to achieve the highest standard of user experience, not a supplement to cross-platform
 - **Priority**: Security > UX > Performance > Maintainability > Development Speed

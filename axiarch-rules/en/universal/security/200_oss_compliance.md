@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-19 → **2026-04-19 (v4: §59-§63 added + §29 structural bug fix + zero coverage gaps)**
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Every dependency is a trust decision — unmanaged licenses are legal time bombs."
 > All third-party dependencies must be audited, approved, and continuously monitored.
 > Strictly follow: **License Compliance > Security > Stability > Convenience**.

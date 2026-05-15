@@ -4,13 +4,14 @@
 > Version: 1.8.2 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
-Axiarch is an open-source governance framework that mitigates quality drift,
-hallucination, and uncontrolled behavior in AI-assisted software development.
-It enforces minimum engineering standards through a multi-layer constitutional
-architecture, ensuring consistent output quality regardless of the AI agent
-or operator skill level.
+Axiarch is an open-source governance framework that reduces the risk of quality
+drift, hallucination, and uncontrolled behavior in AI-assisted software
+development. It defines minimum quality standards across engineering, product,
+security, operations, business, AI, and governance work through a multi-layer
+constitutional architecture, making consistent output quality easier to maintain
+across agents and operator skill levels.
 
-Designed and validated through hundreds of real production sessions on Google Antigravity and Claude Code (Claude Code receives first-class hook integration: UserPromptSubmit reminder from v1.4.0+, PreToolUse physical block from v1.5.5+, two-stage reminder TTL from v1.6.0+, Check D task-boundary detection from v1.8.0+). Expected to work with OpenAI Codex, Cursor, GitHub Copilot, Windsurf, Aider, and other agents that read AGENTS.md or Markdown-based rule files — though not yet verified outside Antigravity and Claude Code.
+Axiarch is production-validated with Google Antigravity. OpenAI Codex and Claude Code are primary targets with native integration paths, but practical validation evidence is still being accumulated. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
 
 ## What Problem Does Axiarch Solve?
 
@@ -20,15 +21,15 @@ Without governance, AI agents suffer from:
 - **Vibe coding drift**: Code that looks correct but silently violates patterns
 - **Knowledge evaporation**: Hard-won lessons are lost and re-discovered repeatedly
 
-Axiarch mitigates these risks by enforcing a firm quality floor and autonomous context loading through constitutional architecture.
+Axiarch mitigates these risks by defining a quality floor and autonomous context loading through constitutional architecture.
 
 ## Core Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Layer 1: Universal (Immutable Constitution)                 │
-│ ├─ AGENTS.md (Supreme Law / Behavior Protocols)             │
-│ └─ Universal Rules (39 files / Immutable Eng. Standards)    │
+│ ├─ AGENTS.md (Top-Level Protocol / Behavior Protocols)             │
+│ └─ Universal Rules (39 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -48,18 +49,19 @@ Axiarch mitigates these risks by enforcing a firm quality floor and autonomous c
 
 ## AGENTS.md — The Constitution (9 Protocols)
 
-AGENTS.md is the supreme law governing AI agent behavior. It contains
+AGENTS.md is the top-level protocol governing AI agent behavior. It contains
 9 mandatory protocols that apply to every interaction:
 
-### Protocol 0: AI Self-Completion Mandate (Supreme Rule)
+### Protocol 0: AI Self-Completion Mandate (Highest-Priority Rule)
 The AI MUST NOT burden the user with verification tasks. All log checking,
 error analysis, build verification, environment variable inspection, and
 file content review must be performed by the AI using its own tools.
 
 ### Protocol 1: Deployment Ban
-No `git push` without explicit user permission. All changes must pass
-type checking (`tsc --noEmit`) and build verification (`npm run build`)
-locally before requesting push approval.
+No `git push` without explicit user permission. Before requesting push
+approval, run the appropriate local checks for the target stack; for
+TypeScript projects this includes type checking (`tsc --noEmit`) and build
+verification (`npm run build`).
 
 ### Protocol 2: Language First
 Project Native Language (Japanese or English) determines document language.
@@ -72,9 +74,10 @@ go through CI/CD pipelines via Git commits. Local changes must be
 formalized as migration files.
 
 ### Protocol 4: SSOT Sync
-After completing work, always sync with main branch (`git pull origin main`).
-Branches are created only when necessary. Verify local main is up-to-date
-before starting new tasks.
+After merging, leaving a working branch, or otherwise returning to the
+repository SSOT, sync with the main branch (`git pull origin main`). Branches
+are created only when necessary. Verify local main is up-to-date before
+starting new tasks.
 
 ### Protocol 5: Existing Functionality Protection
 Running features are "Stable Assets" — no unnecessary modification.
@@ -139,14 +142,16 @@ Only after Steps 1-4 are complete may code modifications begin.
 A 6-step process for converting lessons into persistent rules:
 
 1. **Classify**: Determine the lesson's domain (DB/Auth → engineering/,
-   Security → quality/, Design → design/, etc.)
-2. **Search**: Check if a domain file already exists in the Blueprint
+   Security → security/, Design → design/, etc.)
+2. **Dedup Check**: Check whether a similar rule already exists in Universal.
+   If covered there, do not duplicate it in Blueprint.
+3. **Search**: Check if a domain file already exists in the Blueprint
    folder. If yes, append to it.
-3. **Accumulate**: If no domain file exists, temporarily store in
+4. **Accumulate**: If no domain file exists, temporarily store in
    core/010_project_lessons_log.md with Domain/Target Folder tags.
-4. **Threshold Check**: When 3+ lessons of the same domain accumulate,
-   auto-create a proper domain file and move lessons there.
-5. **Update Index**: Maintain core/010 as an index of unsorted
+5. **Threshold Check**: When 3+ lessons of the same domain accumulate,
+   create a proper domain file and move lessons there.
+6. **Update Index**: Maintain core/010 as an index of unsorted
    lessons + links to separated domain files.
 
 Design philosophy: Co-location principle — lessons are placed in the
@@ -156,11 +161,11 @@ same folder as related rule files for maximum context efficiency.
 
 ## Layer 1: Universal Rules (Immutable Constitution)
 
-All rules are immutable ("Constitution"). 3,000+ engineering standards.
+All Universal rules are immutable ("Constitution"). 3,000+ standards spanning engineering, product, security, operations, AI, business, QA, FinOps, and governance.
 
 ### core/ — Foundation Philosophy (3 files)
-- **000_core_mindset.md**: Supreme behavioral principles. Priority hierarchy
-  (Security > UX > Profitability > DX), Zero Tolerance, Headless First,
+- **000_core_mindset.md**: Core behavioral principles. Priority hierarchy
+  (Security > UX > Profitability > DX), strict tolerance, Headless First,
   SSOT, band-aid ban, Git/deploy protocols, regression prevention.
 - **100_governance.md**: Constitutional authority, amendment protocol,
   AI agent authority control, multi-project federation.
@@ -199,16 +204,16 @@ All rules are immutable ("Constitution"). 3,000+ engineering standards.
   8 parts, 32 sections.
 
 ### design/ — Design & UX (1 file)
-- **000_design_ux.md**: 25-part complete edition (v3.0). Supreme Directive:
+- **000_design_ux.md**: 25-part expanded edition (v3.0). Primary Directive:
   Consistency > Accessibility > Delight > Aesthetics > Dev Speed. W3C DTCG
   2025.10 Design Tokens, WCAG 2.2 AA + WCAG 3.0 forward compatibility (APCA),
   Dark Pattern ban (FTC/DSA/EU DFA), Agentic AI UX patterns, Calm UI,
   Voice UI, Design System as a Product, Design FinOps, 35 anti-patterns.
 
 ### engineering/ — Technical Implementation (10 files)
-- **000_engineering_standards.md**: Engineering excellence. 13 parts,
+- **000_engineering_standards.md**: Engineering standards. 13 parts,
   80 sections. Code quality, infrastructure, DevSecOps, tech debt,
-  AI-first development, Green Coding, zero-bug policy, Git protocols,
+  AI-first development, Green Coding, bug-reduction policy, Git protocols,
   quality protocols, advanced architecture (Trinity DTO, CQRS, Feature
   Flag Lifecycle).
 - **100_api_integration.md**: RESTful design, versioning, rate limiting,
@@ -249,7 +254,7 @@ All rules are immutable ("Constitution"). 3,000+ engineering standards.
 - **200_hr_organization.md**: Talent Density, Bar Raiser, OKR, Team
   Topologies, Remote-First. 9 parts, 34 sections.
 - **300_customer_experience.md**: AI agent strategy, omnichannel,
-  Customer Health Score, churn prevention. 40 parts.
+  Customer Health Score, churn-risk reduction. 40 parts.
 - **400_site_reliability.md**: SLI/SLO/SLA, chaos engineering,
   Platform Engineering, AIOps. 55 parts, 166 sections.
 - **500_incident_response.md**: ISO 22301/NIST CSF 2.0, BIA, crisis
@@ -302,7 +307,7 @@ Optional reusable prompt templates organized by role:
   and rule feedback
 
 ### audit/ — Quality & Integrity Auditing (5 prompts)
-- **fullstack_qa_audit.md**: 6-Pillar Silicon Valley Standard audit
+- **fullstack_qa_audit.md**: 6-Pillar operational quality review
   with priority reporting and ROI proposals
 - **api_architecture_audit.md**: API design, DTO, Zero Trust,
   omnichannel readiness
@@ -320,14 +325,14 @@ Optional reusable prompt templates organized by role:
 - **governance_auditor.md**: 8-Pillar holistic governance audit
 - **blueprint_governance_audit.md**: Crystallize development insights
   into Blueprint rules
-- **localization_audit.md**: 100% native UI, LTV, AI/GEO, legal
+- **localization_audit.md**: native UI coverage review, LTV, AI/GEO, legal
   localization audit
 
 ### operate/ — Incident Response & Onboarding (2 prompts)
 - **onboarding_audit.md**: Codebase deep understanding, architecture,
   landmines, and first actions
 - **incident_response.md**: SRE-focused triage, 5 Whys RCA, emergency
-  fix, postmortem, recurrence prevention
+  fix, postmortem, recurrence-risk reduction
 
 ---
 
@@ -335,13 +340,13 @@ Optional reusable prompt templates organized by role:
 
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
-| Google Antigravity | ✅ Verified | `.agents/rules/prompt_pointer.md` |
-| Claude Code | ✅ Verified (v1.4.0+ native hook integration) | `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart / UserPromptSubmit / PreToolUse) |
-| OpenAI Codex | ⚠️ Expected | `AGENTS.md` (native — no additional setup) |
-| Cursor | ⚠️ Expected | `.cursor/rules/axiarch.mdc` |
-| GitHub Copilot | ⚠️ Expected | `.github/copilot-instructions.md` |
-| Windsurf | ⚠️ Expected | `.windsurfrules` |
-| Aider / Zed | ⚠️ Expected | Reads `AGENTS.md` directly |
+| Google Antigravity | ✅ Verified primary | `.agents/rules/prompt_pointer.md` |
+| OpenAI Codex | ⚙️ Primary target | `AGENTS.md` + `.codex/hooks.json` |
+| Claude Code | ⚙️ Primary target | `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart / UserPromptSubmit / PreToolUse) |
+| Cursor | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.cursor/rules/axiarch.mdc` |
+| GitHub Copilot | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.github/copilot-instructions.md` |
+| Windsurf | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.windsurfrules` |
+| Aider / Zed | ⚠️ Unverified; no operation guarantee | Reads `AGENTS.md` directly |
 
 ---
 
@@ -359,10 +364,11 @@ cp -r axiarch-rules /path/to/your/project/
 
 ## Language Support
 
-Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
-All 39 Universal Rules, 4 Blueprint templates, and 16 prompt templates are
-available in both languages. The init.sh setup script handles language
-selection and removes unused language directories automatically.
+Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
+All 39 Universal Rules and core Blueprint starter files are available in both languages.
+The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
+The init.sh setup script handles language and agent selection; deleting unused
+language directories is optional when a project is fixed to one language.
 
 ## Links
 

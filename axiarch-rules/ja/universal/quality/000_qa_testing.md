@@ -5,7 +5,7 @@
 > 改定日: 2026-04-16
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「テストされていないコードは壊れたコード — 品質はフェーズではなく**フロー**である。」
 > すべてのリリースはデプロイ前に包括的な品質ゲートを通過しなければならない。
 > **テストカバレッジ > コード品質 > 機能ベロシティ > デリバリー速度** の優先順位を厳守せよ。
@@ -362,7 +362,7 @@
 
 -   **定義と位置づけ**:
     -   ユニットテストとE2Eテストの**中間層**。ブラウザ環境で個々のコンポーネントを分離してテストする。ページ全体のレンダリングは不要。
-    -   **Testing Trophyの「Integration」層の中核**: コンポーネントを実ブラウザ環境で、かつ依存関係を制御してテストすることで、最高のROIを実現。
+    -   **Testing Trophyの「Integration」層の中核**: コンポーネントを実ブラウザ環境で、かつ依存関係を制御してテストすることで、高いROIを得やすくする。
 -   **Vitest Browser Mode標準化**:
     -   **Law**: コンポーネントテストには **Vitest Browser Mode (Playwright provider)** を標準とする。jsdom/happy-domの限界（CSSレイアウト未サポート、Web API不完全実装）を物理的に排除。
     -   **Hybrid Config**: ロジックのみのユニットテストは`node`環境（高速）、コンポーネントテストは`browser`環境（正確性）と使い分ける。
@@ -955,7 +955,7 @@
 ## §25. スキーマ同期と垂直検証
 
 -   **全層スキーマ同期義務（Full-Stack Schema Synchronicity Protocol）**:
-    -   **Law**: データモデル変更時は **Migration → Schema/型定義 → DTO → Action/Service → UI** の全レイヤーを **一括で修正** し、1回のコミットで Zero Defect 状態を維持する。「部分更新コミット」は禁止。
+    -   **Law**: データモデル変更時は **Migration → Schema/型定義 → DTO → Action/Service → UI** の全レイヤーを **一括で修正** し、1回のコミットで検証済み状態を維持する。「部分更新コミット」は禁止。
     -   **Vertical Slice**: スキーマ変更は「縦に切る」アプローチで全レイヤーを一度に変更する。「まずDBだけ」「次にAPIだけ」という水平分割は中間状態を生み、型エラーやランタイムクラッシュを招く。
     -   **Type-Driven Discovery**: 型定義を最初に変更し、コンパイラで「古い参照」を全て自動検出する。型エラーがゼロになるまで修正を続けよ。
     -   **Search & Destroy**: 型システムでは検出できない参照（動的キー、JSONパス、テスト内フィクスチャ等）はプロジェクト全体でGrepし手動修正する。
@@ -2690,4 +2690,3 @@
 | データガバナンス | `governance/100_data_governance.md` | §35, §65, §66 |
 | プラットフォームエンジニアリング | `engineering/000_engineering_standards.md` | §47, §48 |
 | Cloud FinOps | `operations/600_cloud_finops.md` | §49, §50 |
-

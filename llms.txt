@@ -2,11 +2,12 @@
 
 > Constitution-Driven AI Agent Governance Framework
 
-Axiarch is an open-source governance framework that mitigates quality drift,
-hallucination, and uncontrolled behavior in AI-assisted software development.
-It enforces minimum engineering standards through a multi-layer constitutional
-architecture, ensuring consistent output quality regardless of the AI agent
-or operator skill level.
+Axiarch is an open-source governance framework that reduces the risk of quality
+drift, hallucination, and uncontrolled behavior in AI-assisted software
+development. It defines minimum quality standards across engineering, product,
+security, operations, and business work through a multi-layer constitutional
+architecture, making consistent output quality easier to maintain across agents
+and operator skill levels.
 
 ## What Problem Does Axiarch Solve?
 
@@ -16,17 +17,17 @@ Without governance, AI agents suffer from:
 - **Vibe coding drift**: Code that looks correct but silently violates patterns
 - **Knowledge evaporation**: Hard-won lessons are lost and re-discovered repeatedly
 
-Axiarch mitigates these risks by enforcing a firm quality floor and autonomous context loading through constitutional architecture.
+Axiarch mitigates these risks by defining a quality floor and autonomous context loading through constitutional architecture.
 
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AGENTS.md` — Supreme law (AI Behavior Protocols). Read by: Google Antigravity, OpenAI Codex, Cursor, Claude Code, etc.
-  - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ engineering standards across Security, API, SRE, FinOps...).
+  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Production-validated with Google Antigravity; primary targets: OpenAI Codex and Claude Code. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
+  - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
-  - `axiarch-prompts/` — Reusable audit/QA prompt templates to forcefully apply Layer 1/2 rules into action.
+  - `axiarch-prompts/` — Optional reusable audit/QA prompt templates that make Layer 1/2 rules easier to apply to specific tasks.
 
 ## Key Protocols
 
@@ -51,18 +52,18 @@ cp -r axiarch-rules /path/to/your/project/
 
 | Agent | Status |
 |:------|:-------|
-| Google Antigravity | ✅ Verified — validated through hundreds of real production sessions |
-| Claude Code | ✅ Verified — v1.4.0+ native hook integration (UserPromptSubmit / PreToolUse / SessionStart + v1.6.0 reminder TTL + v1.8.0 Check D task-boundary detection); production-validated through axiarch's own development cycles |
-| OpenAI Codex | ⚠️ Expected to work (AGENTS.md = native config) |
-| Cursor | ⚠️ Expected to work (reads AGENTS.md) |
-| GitHub Copilot | ⚠️ Expected to work (reads AGENTS.md) |
-| Windsurf / Aider / Zed | ⚠️ Expected to work |
+| Google Antigravity | ✅ Verified primary — validated through real production sessions |
+| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration; validation evidence being accumulated |
+| Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / SessionStart + reminder TTL + Check D task-boundary detection); validation evidence being accumulated |
+| Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
+| GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |
+| Windsurf / Aider / Zed | ⚠️ Extended or unverified candidates; not operation-guaranteed |
 
 ## Language Support
 
-Fully bilingual: Japanese (authoritative) and English (symmetric counterpart).
-All 39 universal rules and 4 blueprint templates are available in both languages.
-The optional prompt library (`axiarch-prompts/`) is also fully bilingual (JA/EN).
+Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
+All 39 universal rules and core blueprint starter files are available in both languages.
+The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 
 ## License
 

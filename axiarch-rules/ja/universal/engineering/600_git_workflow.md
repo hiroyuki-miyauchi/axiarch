@@ -1,6 +1,6 @@
 # 600. Git Workflow & Repository Hygiene（Git ワークフローとリポジトリ衛生）
 
-> **Supreme Directive**: 「Git は履歴であり、履歴は資産である。日常運用の不衛生は資産毀損につながる」
+> **Primary Directive**: 「Git は履歴であり、履歴は資産である。日常運用の不衛生は資産毀損につながる」
 >
 > **優先順位**: Repository Integrity > Daily Workflow Velocity > Tool Compatibility > Convenience
 

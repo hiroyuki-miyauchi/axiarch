@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > - During a crisis, **business continuity and human safety** take absolute priority over all other concerns (cost, schedule, feature development).
 > - "Delayed reporting" is synonymous with "delayed response." Upon detecting an incident, **escalate immediately** regardless of its perceived severity.
 > - Ignoring or bypassing the protocols defined in this document constitutes a **serious constitutional violation** under any circumstances.

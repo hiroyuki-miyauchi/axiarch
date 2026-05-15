@@ -56,7 +56,7 @@
     *   Interaction Latency: < 100ms
     *   LCP: < 1.2s
 *   **Code Quality**:
-    *   **Strict Type**: `noImplicitAny` は絶対です。
+    *   **Strict Type**: `noImplicitAny` は必須です。
     *   **Test Coverage**: コアロジック > 90%.
 
 ## 5. Standard Feature Modules (Reference Specs)

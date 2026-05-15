@@ -5,7 +5,7 @@
 > Revision date: 2026-03-30 | Target: Flutter 3.41+ / Dart 3.7+ / Riverpod 3.0+ / Impeller GA (iOS sole renderer, Android default)
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Flutter is one codebase — but never one compromise. Platform fidelity is non-negotiable."
 > All Flutter implementations must deliver native-quality UX on each platform.
 > Strictly adhere to the priority: **UX Fidelity > Performance > Security > Code Reuse > Dev Speed**.
@@ -17,7 +17,7 @@
 
 | Part | Topic | Sections |
 |------|-------|----------|
-| I | Philosophy & Supreme Directive | §1–§4 |
+| I | Philosophy & Primary Directive | §1–§4 |
 | II | Technology Stack Standards | §5–§8 |
 | III | Architecture Principles | §9–§14 |
 | IV | Dart 3.7+ Language Conventions | §15–§21 |
@@ -78,9 +78,9 @@
 
 # Part A: Philosophy & Architecture Foundation
 
-## I. Philosophy & Supreme Directive
+## I. Philosophy & Primary Directive
 
-### §1. Supreme Directive — Flutter Excellence
+### §1. Primary Directive — Flutter Excellence
 
 - **Principle**: Flutter is the sole framework achieving "uncompromising cross-platform" quality
 - **Priority**: UX Fidelity > Performance > Security > Code Reuse > Dev Speed
@@ -1104,7 +1104,7 @@ class AppDatabase extends _$AppDatabase {
 ### §100. API Authentication — VIP Lane Strategy
 
 - **Law**: For authenticated user requests, **do not send API Key (`x-api-key`); send only `Authorization: Bearer <token>`**
-- **Rationale**: Physically eliminates API Key embedding risk in app binary
+- **Rationale**: Reduces the risk of embedding API Keys in the app binary
 - Token refresh handled automatically by Dio interceptor
 
 ### §101. Error Handling & Retry
@@ -2466,7 +2466,7 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 
 | Keyword | Sections |
 |---|---|
-| Supreme Directive, Philosophy, Quality Gates | §1–§4 |
+| Primary Directive, Philosophy, Quality Gates | §1–§4 |
 | Package Stack, analysis_options | §5–§8 |
 | Clean Architecture, Layers, DI, SSOT | §9–§14 |
 | Dart 3.7, Wildcard, Formatter, Type Annotations | §15–§21 |
@@ -2563,4 +2563,3 @@ Push/PR → Format Check → Lint → Test → Build → Distribute
 | LIII Data Privacy | `security/000_security_privacy`, `security/100_data_governance` |
 | LIV DevOps & DX | `operations/400_site_reliability`, `engineering/000_engineering_standards` |
 | LV Language-Specific Addendum | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
-

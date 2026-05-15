@@ -68,7 +68,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 ### Out of Scope（外部検証困難・人間レビュー必須） / Manual Review Required
 
 `§0 AI Self-Completion` / `§3 Database Integrity` / `§5 Existing Functionality Protection` / `§7 Role & Behavior` は意味的判断が必要なため自動化対象外。
-**v1.5.5 で `§6 Anti-Full-Overwrite` は PreToolUse hook の物理遮断（Check 11）で構造的に防止可能になった**。
+**v1.5.5 で `§6 Anti-Full-Overwrite` は PreToolUse hook の物理遮断（Check 11）により、既存ファイルへの `Write` 上書きリスクを構造的に下げられるようになった**。
 
 ### Exit Code
 
@@ -111,9 +111,9 @@ bash axiarch-scripts/axiarch-boot-reminder.sh | jq .
 
 ### 概要 / Overview
 
-`.claude/settings.json` または `.codex/hooks.json` の `PreToolUse` hook（`Write` matcher）から呼ばれる外出しスクリプト。`Write` tool 呼び出しを傍受し、対象ファイルが既存の場合は `decision:"block"` JSON + exit code 2 で**物理遮断**する。AGENTS.md §6 ANTI-FULL-OVERWRITE 違反を構造的に防止。
+`.claude/settings.json` または `.codex/hooks.json` の `PreToolUse` hook（`Write` matcher）から呼ばれる外出しスクリプト。`Write` tool 呼び出しを傍受し、対象ファイルが既存の場合は `decision:"block"` JSON + exit code 2 で**物理遮断**する。AGENTS.md §6 ANTI-FULL-OVERWRITE 違反のうち、既存ファイルへの `Write` 全文上書きパターンを構造的に抑止する。
 
-Externalized PreToolUse hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. Intercepts `Write` tool calls and physically blocks (decision:"block" JSON + exit 2) when the target file exists. Structurally prevents AGENTS.md §6 ANTI-FULL-OVERWRITE violations.
+Externalized PreToolUse hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. Intercepts `Write` tool calls and physically blocks (decision:"block" JSON + exit 2) when the target file exists. This structurally reduces the known AGENTS.md §6 ANTI-FULL-OVERWRITE risk pattern of using `Write` to overwrite existing files.
 
 ### Whitelist サポート / Whitelist Support
 
@@ -161,9 +161,9 @@ bash axiarch-scripts/axiarch-init-task-md.sh | jq .
 
 ### 概要 / Overview
 
-`.git/config` 内の `[extensions] worktreeConfig = true` 残留を検出・修復する。Antigravity の Go ベース language server クラッシュ（`ECONNREFUSED 127.0.0.1:50347`）の恒久対策。`engineering/600_git_workflow.md` Worktree Hygiene Protocol と連動。
+`.git/config` 内の `[extensions] worktreeConfig = true` 残留を検出・修復する。Antigravity の Go ベース language server クラッシュ（`ECONNREFUSED 127.0.0.1:50347`）の再発リスク低減策。`engineering/600_git_workflow.md` Worktree Hygiene Protocol と連動。
 
-Detects and repairs residual `[extensions] worktreeConfig = true` in `.git/config` to prevent Antigravity Go-based language server crashes. Linked with `engineering/600_git_workflow.md` Worktree Hygiene Protocol.
+Detects and repairs residual `[extensions] worktreeConfig = true` in `.git/config` to reduce the risk of Antigravity Go-based language server crashes. Linked with `engineering/600_git_workflow.md` Worktree Hygiene Protocol.
 
 ### 使い方 / Usage
 
@@ -199,7 +199,7 @@ bash axiarch-scripts/check-git-config-clean.sh --full-clean
 
 ## 関連ドキュメント / Related Documentation
 
-- [`README.md`](../README.md) — `Enforcement Mechanism` トラブルシュート章
+- [`README.md`](../README.md) — `Hook Reinforcement Mechanism` トラブルシュート章
 - [`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`](../axiarch-rules/) — フック診断手順
 - [`axiarch-rules/{ja,en}/CRYSTALLIZATION_PROTOCOL.md`](../axiarch-rules/) — 結晶化遵守の §5 強化
 - [`axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md`](../axiarch-rules/) — Worktree Hygiene Protocol

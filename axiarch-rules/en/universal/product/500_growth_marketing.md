@@ -5,11 +5,11 @@
 > Last Updated: 2026-04-28 (v4.0) | Previous: v3.2 (2026-04-28)
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Growth without retention is a leaking bucket — fix the bucket before pouring more water. And before you pour, confirm the bucket is in the right market (PMF)."
 > All growth strategies must be data-driven, privacy-compliant, and architecturally sustainable.
 > Strictly follow the priority order: **PMF Validation > Retention > Organic Growth > Paid Acquisition > Viral Loops**.
-> This document is the supreme standard for all growth and marketing strategy decisions.
+> This document is the primary standard for all growth and marketing strategy decisions.
 > **30 Parts, 200+ Sections. 2026 CMO Standard (AI-Native, Privacy-First, Brand-Led, Global-Ready).**
 
 ---
@@ -759,7 +759,7 @@
 
 ## 13. AI-Native Growth Protocol
 
-> **Supreme Directive**: AI is the "automation engine" of growth. However, autonomous AI initiatives must explicitly define measurement, control, and accountability.
+> **Primary Directive**: AI is the "automation engine" of growth. However, autonomous AI initiatives must explicitly define measurement, control, and accountability.
 
 ### 13.1. Agentic Growth Automation
 
@@ -913,7 +913,7 @@
 
 ## 14. Community-Led Growth (CLG) & Creator Economy
 
-> **Supreme Directive**: Community is the "external growth engine" of the product, with trust as capital. CLG prioritizes long-term brand equity over short-term growth metrics.
+> **Primary Directive**: Community is the "external growth engine" of the product, with trust as capital. CLG prioritizes long-term brand equity over short-term growth metrics.
 
 ### 14.1. Community Infrastructure
 
@@ -964,7 +964,7 @@
 
         | Region | Required Disclosure | Format |
         |:-------|:-------------------|:-------|
-        | **Japan** | "広告" / "PR" / "提供" clearly stated | At the beginning of the post (hashtags only is insufficient) |
+        | **Japan** | Clear advertising disclosure in the local language | At the beginning of the post (hashtags only is insufficient) |
         | **US** | `#ad` or `#sponsored` + FTC-compliant disclosure | Placed in the first line of the post |
         | **EU** | Disclosure compliant with country-specific regulations | Prioritize platform's Paid Partnership feature |
 
@@ -989,7 +989,7 @@
 
 ## 15. Paid Acquisition Governance
 
-> **Supreme Directive**: Paid acquisition is "water poured into a bucket." Even with ROAS > 1, poor retention turns it to scorched earth. Scale paid acquisition only after the retention foundation is established.
+> **Primary Directive**: Paid acquisition is "water poured into a bucket." Even with ROAS > 1, poor retention turns it to scorched earth. Scale paid acquisition only after the retention foundation is established.
 
 ### 15.1. Paid Channel Governance
 
@@ -1074,7 +1074,7 @@
 
 ## 16. Growth FinOps
 
-> **Supreme Directive**: Marketing budget is an "investment" — always evaluate it by the LTV:CAC ratio. Make decisions based on Unit Economics, not intuition.
+> **Primary Directive**: Marketing budget is an "investment" — always evaluate it by the LTV:CAC ratio. Make decisions based on Unit Economics, not intuition.
 
 ### 16.1. Unit Economics Governance
 
@@ -1167,7 +1167,7 @@
 
 ## 17. Anti-Pattern Catalog
 
-> **Supreme Directive**: Great engineers anticipate anti-patterns and avoid them at the design stage. All staff must master the following failure patterns and absolutely prevent recurrence.
+> **Directive**: Strong teams anticipate anti-patterns and avoid them at the design stage. All staff must understand the following failure patterns and reduce recurrence risk.
 
 ### 17.1. Growth Anti-Patterns
 
@@ -1261,7 +1261,7 @@
 
 ## 18. Brand Equity & Positioning
 
-> **Supreme Directive**: Brand is the invisible growth engine. A strong brand structurally lowers CAC, generates price premiums, and creates competitive moats. CMOs must measure and manage brand equity with the same rigor as performance marketing.
+> **Primary Directive**: Brand is the invisible growth engine. A strong brand structurally lowers CAC, generates price premiums, and creates competitive moats. CMOs must measure and manage brand equity with the same rigor as performance marketing.
 
 ### 18.1. Brand Health Measurement (Brand Health Index)
 
@@ -1316,7 +1316,7 @@
 
 ## 19. Product-Market Fit (PMF) Measurement Protocol
 
-> **Supreme Directive**: Scaling is an action taken AFTER PMF. Acquisition initiatives without PMF are a scorched-earth tactic. Paid acquisition, community scaling, and international expansion are permitted only after passing the PMF Gate.
+> **Primary Directive**: Scaling is an action taken AFTER PMF. Acquisition initiatives without PMF are a scorched-earth tactic. Paid acquisition, community scaling, and international expansion are permitted only after passing the PMF Gate.
 
 ### 19.1. PMF Gate Protocol
 
@@ -1346,7 +1346,7 @@
 
 ## 20. Email Marketing Lifecycle Architecture
 
-> **Supreme Directive**: Email is the highest-ROI owned media channel (average ROI: 3,600%). However, poor delivery infrastructure leads to "sender reputation collapse" where all emails land in spam folders. Infrastructure first, strategy second.
+> **Primary Directive**: Email is the highest-ROI owned media channel (average ROI: 3,600%). However, poor delivery infrastructure leads to "sender reputation collapse" where all emails land in spam folders. Infrastructure first, strategy second.
 
 ### 20.1. Email Deliverability Foundation
 
@@ -1407,7 +1407,7 @@
 
 ## 21. Growth Loops & Flywheel Architecture
 
-> **Supreme Directive**: Growth loops are "structure," not "tactics." When loops exist, growth compounds. Growth without loops is linear and will inevitably plateau. Every growth initiative must explicitly state which loop it accelerates.
+> **Primary Directive**: Growth loops are "structure," not "tactics." When loops exist, growth compounds. Growth without loops is linear and will inevitably plateau. Every growth initiative must explicitly state which loop it accelerates.
 
 ### 21.1. Growth Loop Taxonomy
 
@@ -1440,7 +1440,7 @@
 
 ## 22. Revenue Operations (RevOps) Alignment
 
-> **Supreme Directive**: Siloed Marketing, Sales, and Customer Success teams inhibit revenue maximization. RevOps is the governance framework for achieving a state where "all revenue-related teams operate on the same data, processes, and tools."
+> **Primary Directive**: Siloed Marketing, Sales, and Customer Success teams inhibit revenue maximization. RevOps is the governance framework for achieving a state where "all revenue-related teams operate on the same data, processes, and tools."
 
 ### 22.1. Lead Management & Funnel Definition
 
@@ -1476,7 +1476,7 @@
 
 ## 23. Content Marketing Architecture
 
-> **Supreme Directive**: Content is an "asset"; advertising is an "expense." Content compounds over time once created; advertising stops immediately when paused. Evaluate content investment from an LTV perspective.
+> **Primary Directive**: Content is an "asset"; advertising is an "expense." Content compounds over time once created; advertising stops immediately when paused. Evaluate content investment from an LTV perspective.
 
 ### 23.1. Content Architecture by Funnel Stage
 
@@ -1517,7 +1517,7 @@
 
 ## 24. Internationalization & Localization Growth Strategy (i18n Growth)
 
-> **Supreme Directive**: Global expansion is "market adaptation," not "translation." Without understanding culture, regulations, and payment customs, international launch leads to brand damage and resource waste.
+> **Primary Directive**: Global expansion is "market adaptation," not "translation." Without understanding culture, regulations, and payment customs, international launch leads to brand damage and resource waste.
 
 ### 24.1. Market Entry Framework
 
@@ -1585,7 +1585,7 @@
 
 ## 25. Video & Short-Form Content Growth
 
-> **Supreme Directive**: Video dominates the discovery layer. Short-form video (under 60 seconds) in particular benefits from algorithm preference and represents the last frontier of organic reach.
+> **Primary Directive**: Video dominates the discovery layer. Short-form video (under 60 seconds) in particular benefits from algorithm preference and represents the last frontier of organic reach.
 
 ### 25.1. Short-Form Content Strategy
 
@@ -1642,7 +1642,7 @@
 
 ## 26. Conversational Marketing
 
-> **Supreme Directive**: 1-to-1 conversations with customers are the highest ROI marketing channel. However, if bot experience falls below human quality, it becomes counterproductive. Scaling at the expense of conversation quality is prohibited.
+> **Primary Directive**: 1-to-1 conversations with customers are the highest ROI marketing channel. However, if bot experience falls below human quality, it becomes counterproductive. Scaling at the expense of conversation quality is prohibited.
 
 ### 26.1. Channel Integration Protocol
 
@@ -1708,7 +1708,7 @@
 
 ## 27. Partner & Ecosystem Growth
 
-> **Supreme Directive**: Partnerships leverage others' distribution channels and brand assets. However, without accurate contribution measurement and contract management, partner relationships create dependency risks.
+> **Primary Directive**: Partnerships leverage others' distribution channels and brand assets. However, without accurate contribution measurement and contract management, partner relationships create dependency risks.
 
 ### 27.1. Partnership Tier Model
 
@@ -1770,7 +1770,7 @@
 
 ## 28. Growth Security & Anti-Fraud
 
-> **Supreme Directive**: Growth with security holes generates "fake metrics." Bot registrations, click fraud, and promotion abuse waste marketing budget and mislead KPIs.
+> **Primary Directive**: Growth with security holes generates "fake metrics." Bot registrations, click fraud, and promotion abuse waste marketing budget and mislead KPIs.
 
 ### 28.1. Bot Detection & Prevention Protocol
 
@@ -1825,7 +1825,7 @@
 
 ## 29. Sustainable & Ethical Growth
 
-> **Supreme Directive**: Unsustainable growth creates long-term brand damage and regulatory risk. Ethical growth maximizes long-term shareholder value.
+> **Primary Directive**: Unsustainable growth creates long-term brand damage and regulatory risk. Ethical growth maximizes long-term shareholder value.
 
 ### 29.1. ESG-Aligned Marketing Protocol
 
@@ -1882,7 +1882,7 @@
 
 ## 30. Growth Team Operating Model
 
-> **Supreme Directive**: The speed and quality of a growth team determine a product's growth trajectory. Maximizing experimentation velocity while maintaining quality is the structural challenge.
+> **Primary Directive**: The speed and quality of a growth team determine a product's growth trajectory. Maximizing experimentation velocity while maintaining quality is the structural challenge.
 
 ### 30.1. Growth Squad Structure
 

@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「Firebaseは"補助エンジン"であり、データの主権はSupabase (PostgreSQL)にある。」
 > Firebase/GCPの実装において、**セキュリティ(App Check + Security Rules) > 信頼性(冪等性 + リトライ) > コスト効率(FinOps) > パフォーマンス > 開発生産性** の優先順位を厳守せよ。
 > この文書はFirebase & GCPに関するすべての設計判断の最上位基準である。
@@ -22,7 +22,7 @@
 ## 目次
 
 **I. 基盤・哲学**
-- §0. 至高の命令 (Supreme Directives)
+- §0. 主要方針 (Primary Directives)
 - §1. Firebase プロジェクト戦略 & GCP 統合
 
 **II. コンピュート**
@@ -133,37 +133,37 @@
 
 ---
 
-## §0. 至高の命令 (Supreme Directives)
+## §0. 主要方針 (Primary Directives)
 
-### Supreme Directive 0.1: Auxiliary Engine Principle（補助エンジン原則）
+### Primary Directive 0.1: Auxiliary Engine Principle（補助エンジン原則）
 -   **Law**: Firebaseは「補助エンジン」であり、**データの主権はSupabase (PostgreSQL)** に存在する。Firestoreへの新規データ保存は原則禁止。
 -   **Mandate**:
     1.  **Data Sovereignty**: ユーザーデータ・ドメインデータは全てSupabaseに保存する。Firestoreはレガシー保守のみ許可。
     2.  **Peripheral Services Only**: Firebase利用はFCM、Analytics、Crashlytics、App Check、Remote Config、Performance Monitoring等の周辺機能に限定する。
     3.  **No New Firestore Collections**: 新規コレクションの作成は禁止。既存コレクションの保守のみ許可。
 
-### Supreme Directive 0.2: Defense in Depth（多層防御原則）
+### Primary Directive 0.2: Defense in Depth（多層防御原則）
 -   **Law**: セキュリティは単一レイヤーに依存してはならない。App Check + Security Rules + IAM + VPCの多層防御を必須とする。
 -   **Mandate**:
     1.  **App Check Mandatory**: 全てのFirebaseサービスおよびカスタムバックエンドでApp Checkを有効化する。
     2.  **Least Privilege**: 全てのサービスアカウントとIAMロールは最小権限の原則に従う。`roles/owner`の本番使用は禁止。
     3.  **Zero Trust Network**: VPC Service ControlsとPrivate Google Accessを活用し、信頼境界を最小化する。
 
-### Supreme Directive 0.3: Idempotency First（冪等性最優先原則）
+### Primary Directive 0.3: Idempotency First（冪等性最優先原則）
 -   **Law**: 全てのCloud Run FunctionsおよびCloud Runサービスは冪等に設計しなければならない。
 -   **Mandate**:
     1.  **Event ID Deduplication**: イベントトリガー関数は`eventId`による重複排除を実装する。
     2.  **Transactional Writes**: Firestoreへの書き込みはトランザクションまたはバッチ書き込みを使用する。
     3.  **Retry Safety**: リトライにより副作用が重複しないことを保証する。
 
-### Supreme Directive 0.4: FinOps Guardian（コスト監視原則）
+### Primary Directive 0.4: FinOps Guardian（コスト監視原則）
 -   **Law**: クラウドコストは「技術的負債」と同等の管理対象である。予算超過は障害と同等に扱う。
 -   **Mandate**:
     1.  **Budget Alerts**: 全プロジェクトに50%/80%/100%/120%の予算アラートを設定する。
     2.  **Automated Response**: 100%超過時はCloud Run Functionsで自動的に非クリティカルリソースを停止する。
     3.  **Cost Tagging**: 全GCPリソースに`environment`/`service`/`owner`ラベルを付与する。
 
-### Supreme Directive 0.5: Cloud Run Unified（Cloud Run統一原則）
+### Primary Directive 0.5: Cloud Run Unified（Cloud Run統一原則）
 -   **Law**: 2025年以降、Cloud Functions (2nd Gen) は**Cloud Run Functions**に名称変更された。全てのサーバーレスコンピュートはCloud Runファミリーとして統一的に管理する。
 -   **Mandate**:
     1.  **Naming**: ドキュメント・コード・IaCにおいて「Cloud Run Functions」の名称を使用する。
@@ -525,7 +525,7 @@ export const myFunction = onRequest(
 ## §7. Firestore 設計 & Security Rules
 
 ### Rule 32.30: Firestore 利用制限
--   **Mandate**: Firestoreへの新規データ保存は原則禁止（Supreme Directive 0.1準拠）。
+-   **Mandate**: Firestoreへの新規データ保存は原則禁止（Primary Directive 0.1準拠）。
 -   **Permitted Use Cases**:
     1.  リアルタイムリスナーが必須のデータ（プレゼンス、チャット等）。
     2.  既存Firestoreコレクションの保守・運用。

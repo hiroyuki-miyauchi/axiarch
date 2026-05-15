@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > - **「Hope is not a strategy」** — 信頼性は希望ではなくエンジニアリングで達成する。
 > - 本番環境の信頼性に影響する全ての判断は、**SLO（Service Level Objective）に基づく定量的根拠**によって行われなければならない。
 > - 監視なきシステムは「動いている」のではなく「壊れていることに気づいていない」だけである。
@@ -1129,7 +1129,7 @@
 
 ### §75. Schema-Code同期
 
--   **Law**: コードがZero Defectsでも**DBスキーマ未適用**ならシステムは動作しない。
+-   **Law**: コードが検証済みでも**DBスキーマ未適用**ならシステムは動作しない。
 -   **Action**: Migration Status Check、Schema Drift Detection、Deploy Pipeline統合。
 -   **Ghost Column Prevention**: マイグレーション未適用のカラム名をクエリで使用することは禁止。
 
@@ -2456,4 +2456,3 @@
 | **security/200_oss_compliance.md** | ライセンス管理、SBOM/SCA詳細、SLSA |
 | **quality/000_qa_testing.md** | テスト戦略、Contract Testing |
 | **core/100_governance.md** | ガバナンス、権限設計 |
-

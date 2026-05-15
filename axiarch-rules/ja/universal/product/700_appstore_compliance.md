@@ -5,7 +5,7 @@
 > 改定日: 2026-05-06
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「ストアコンプライアンスはオプションではない — ゲートでの拒否はユーザーゼロを意味する」
 > すべてのアプリストア提出は最新のプラットフォームガイドラインに準拠しなければならない。
 > **プラットフォーム規約 > ユーザー信頼 > 機能ベロシティ** の優先順位を厳守せよ。
@@ -17,7 +17,7 @@
 
 | # | Part | 主要トピック |
 |---|---|---|
-| 0 | Supreme Directive & Scope Manifesto | 守備範囲・優先順位・除外ドメイン |
+| 0 | Primary Directive & Scope Manifesto | 守備範囲・優先順位・除外ドメイン |
 | 1 | Apple App Store — HIG & Design Compliance | HIG 準拠・Dark Mode・Dynamic Type |
 | 2 | Apple Privacy Stack | ATT / Privacy Manifests / Required Reason API / Privacy Nutrition Labels |
 | 3 | Apple In-App Purchase & Subscriptions | IAP 義務・Auto-Renewable・Win-back・StoreKit 2 |
@@ -42,7 +42,7 @@
 
 ---
 
-## Part 0: Supreme Directive & Scope Manifesto（守備範囲）
+## Part 0: Primary Directive & Scope Manifesto（守備範囲）
 
 ### 0.1. このファイルの守備範囲
 

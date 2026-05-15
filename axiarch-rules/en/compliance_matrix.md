@@ -26,7 +26,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **Security by Design (DevSecOps)** | `universal/engineering/000_engineering_standards.md` | "Zero Trust", "Single Source of Config", "Env Drift Prevention" |
 | **Technical Debt Management** | `universal/engineering/000_engineering_standards.md` | "Sprint 20% Debt Paydown", "Tech Radar", "Dependency Governance" |
 | **AI-First Engineering** | `universal/engineering/000_engineering_standards.md` | "PDD", "RAG Optimization", "Schema Trust Protocol" |
-| **Zero Bug Policy** | `universal/engineering/000_engineering_standards.md` | "24-Hour Rule", "Fix Twice Principle" |
+| **Bug Risk Reduction Policy** | `universal/engineering/000_engineering_standards.md` | "24-Hour Rule", "Fix Twice Principle" |
 | **Git & Version Control** | `universal/engineering/000_engineering_standards.md` | "Trunk Based Development", "Conventional Commits", "Git Hooks 3-Layer Defense" |
 | **Documentation Ops** | `universal/engineering/000_engineering_standards.md` | "Living Documentation", "ADR Mandate", "Runbook" |
 | **Architecture Quality** | `universal/engineering/000_engineering_standards.md` | "Trinity DTO", "CQRS Separation", "Thin Controller", "Feature Flag Lifecycle" |

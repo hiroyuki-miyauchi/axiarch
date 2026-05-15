@@ -6,7 +6,7 @@
 > Blueprint First の原則に従い、**コードを書く前に**このテンプレートを完成させてください。
 
 > [!IMPORTANT]
-> **Blueprint Firstの核**: このテンプレートは Axiarch の「Blueprint First」を機能単位で実現するものです。
+> **Blueprint Firstの核**: このテンプレートは Axiarch の「Blueprint First」を機能単位で支えるものです。
 > 受け入れ条件（Acceptance Criteria）が定義されていない機能は、**実装を開始してはなりません**。
 
 ---

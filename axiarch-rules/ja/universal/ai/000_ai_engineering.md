@@ -5,7 +5,7 @@
 > 改定日: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive（最高指令）**
+> **Primary Directive（主要方針）**
 > 「AIは道具であり、操縦責任は常に人間にある。」
 > AI機能の実装において、**安全性 > 信頼性 > UX > コスト効率 > DX** の優先順位を厳守せよ。
 > この文書は AI 実装に関するすべての設計判断の最上位基準である。
@@ -15,7 +15,7 @@
 
 ## 目次
 
-- Part I: Supreme Directive & AI哲学
+- Part I: Primary Directive & AI哲学
 - Part II: AI UX原則
 - Part III: AI UXパターンカタログ
 - Part IV: AI倫理フレームワーク
@@ -80,7 +80,7 @@
 
 ---
 
-## Part I: Supreme Directive & AI哲学
+## Part I: Primary Directive & AI哲学
 
 ### 1.1. AI実装の最高原則
 
@@ -335,7 +335,7 @@
 
 | ソース種別 | ラベル例 | 適用条件 |
 |:---|:---|:---|
-| **RAG引用** | `📎 参考情報: [ソース名](URL)` | RAGで取得した外部情報に基づく回答 |
+| **RAG引用** | `📎 参考情報: [ソース名](https://example.com/source)` | RAGで取得した外部情報に基づく回答 |
 | **DB確定データ** | `✅ 確認済み情報` | DB内の確定データに基づく回答 |
 | **AI推論** | `💡 AI参考回答` | AIの推論・一般知識に基づく回答 |
 

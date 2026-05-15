@@ -11,7 +11,7 @@
 > **40 Parts / 170+ Sections architecture. Revision date: 2026-04-19**
 
 > [!CAUTION]
-> **Supreme Directive**
+> **Primary Directive**
 > Privacy and security always take priority over feature requirements, deadlines, and costs.
 > Code violating this document MUST NOT be deployed to production under any circumstances.
 >
@@ -22,7 +22,7 @@
 
 ## Table of Contents
 
-- §1. Supreme Directive & Golden Rule
+- §1. Primary Directive & Golden Rule
 - §2. Zero Trust Architecture
 - §3. Identity-First Security & ITDR
 - §4. Authentication & Authorization Architecture
@@ -81,7 +81,7 @@
 
 ---
 
-## §1. Supreme Directive & Golden Rule
+## §1. Primary Directive & Golden Rule
 
 ### 1.1. Priority Hierarchy
 
@@ -1538,7 +1538,7 @@ element.innerHTML = rawLLMOutput; // XSS vulnerability
 > **Reference**: OWASP LLM Top 10:2025 (LLM01/LLM02), Microsoft Responsible AI, Azure AI Content Safety, AWS Bedrock Guardrails
 
 -   **Law**: Route **all** LLM/AI requests through a centralized **LLM Gateway** to enforce unified security policy, observability, and cost controls. Deploy a **Prompt Shield** layer at the gateway to detect and block adversarial inputs before they reach the model.
--   **Rationale**: Direct application-to-LLM connections create invisible security blind spots. A dedicated gateway is the only architectural pattern that guarantees consistent guardrail enforcement across all LLM consumers in an organization.
+-   **Rationale**: Direct application-to-LLM connections create invisible security blind spots. A dedicated gateway is the preferred architectural pattern for making guardrail enforcement consistent across LLM consumers in an organization.
 
 #### 17.14.1. LLM Gateway Architecture
 
@@ -3554,4 +3554,3 @@ interface AISystemRecord {
 | §12–§13 (Infrastructure/SASE) | `operations/400_site_reliability`, `engineering/510_aws_cloud` |
 | §17–§18 (AI/LLM) | `ai/000_ai_engineering` |
 | §28 (Regulatory Compliance) | `security/100_data_governance`, `800_internationalization` |
-

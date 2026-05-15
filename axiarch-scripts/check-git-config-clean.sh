@@ -14,10 +14,10 @@
 #
 # Why / 理由:
 #   残留エントリは Antigravity 等の Go ベース language server をクラッシュさせ、
-#   該当プロジェクトのチャット機能を完全停止させる。
+#   該当プロジェクトのチャット機能を停止させる可能性がある。
 #
-#   Residual entries crash Go-based language servers (e.g., Antigravity), causing
-#   complete chat function failure for the affected project.
+#   Residual entries can crash Go-based language servers (e.g., Antigravity), causing
+#   chat function failure for the affected project.
 #
 # Reference / 詳細:
 #   axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md §4

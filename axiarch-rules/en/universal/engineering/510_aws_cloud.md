@@ -5,7 +5,7 @@
 > Last Updated: 2026-05-04
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "AWS is a *means*, not the *purpose* of architecture."
 > All cloud infrastructure design decisions MUST be based on the **Well-Architected Framework's 6 pillars** and the **IaC Only principle**.
 > Console manual operations (ClickOps) constitute a **serious violation** under this constitution.
@@ -25,7 +25,7 @@
 
 ## Table of Contents
 
-- [§0. AWS Cloud Supreme Directives](#0-aws-cloud-supreme-directives)
+- [§0. AWS Cloud Primary Directives](#0-aws-cloud-primary-directives)
 - [§1. IAM Security Strategy](#1-iam-security-strategy)
 - [§2. Network Design Standards](#2-network-design-standards)
 - [§3. Compute Strategy](#3-compute-strategy)
@@ -84,7 +84,7 @@
 
 ---
 
-## 0. AWS Cloud Supreme Directives
+## 0. AWS Cloud Primary Directives
 
 > [!NOTE]
 > **§0 Core Philosophy Overview**
@@ -122,7 +122,7 @@ Three foundational vows govern all design decisions:
 
 ---
 
-### Supreme Directive 0.1: The Well-Architected Compliance Mandate
+### Primary Directive 0.1: The Well-Architected Compliance Mandate
 -   **Law**: Compliance with the **AWS Well-Architected Framework's 6 pillars** is mandatory for all AWS infrastructure design, construction, and operations.
     1.  **Operational Excellence**: Automation, IaC, runbook maintenance.
     2.  **Security**: Least privilege, defense in depth, encryption.
@@ -140,7 +140,7 @@ Three foundational vows govern all design decisions:
     -   **Machine Learning Lens**: Architecture design guidance for ML pipelines (data collection → training → inference → monitoring).
 -   **Action**: Conduct quarterly reviews using the AWS Well-Architected Tool and maintain "zero high-risk items" across all pillars. Always include applicable lens reviews for AI/ML workloads.
 
-### Supreme Directive 0.2: The IaC-Only Mandate
+### Primary Directive 0.2: The IaC-Only Mandate
 -   **Law**: All AWS resources MUST be defined and managed through **Infrastructure as Code (IaC)**. Manual creation or modification via the AWS Management Console or CLI is considered "destruction of history."
 -   **Mandate**:
     1.  **Code First**: Define all infrastructure changes in code (CloudFormation / CDK / Terraform) and version-control with Git.
@@ -179,14 +179,14 @@ Three foundational vows govern all design decisions:
     }
     ```
 
-### Supreme Directive 0.3: The Trinity DTO Mandate
+### Primary Directive 0.3: The Trinity DTO Mandate
 -   **Purpose**: Same principle as the Supabase constitution (Rule 37). For data passing between AWS services, direct exposure of raw data is prohibited; transformation to purpose-specific DTOs is mandatory.
 -   **Mandate**:
     -   **Security**: Physically prevent exposure of unnecessary fields (internal IDs, PII) between API Gateway → Lambda → Client.
     -   **Stability**: Implement a mapper layer so DB schema changes don't directly impact the frontend.
     -   **AI Economy**: Minimize payload to LLM/AI services to reduce token costs.
 
-### Supreme Directive 0.4: The Multi-Account Strategy Mandate
+### Primary Directive 0.4: The Multi-Account Strategy Mandate
 -   **Law**: Production workloads MUST NOT operate in a **single AWS account**. Adopt a multi-account strategy using AWS Organizations, separating accounts by environment and responsibility.
 -   **Action**:
     1.  **Management Account**: Billing consolidation and Organizations management only. No workloads.
@@ -220,7 +220,7 @@ Three foundational vows govern all design decisions:
     }
     ```
 
-### Supreme Directive 0.5: The Platform Engineering Mandate
+### Primary Directive 0.5: The Platform Engineering Mandate
 -   **Law**: Infrastructure teams must not be "teams that manually create resources upon request." They must be **teams that build and provide a platform enabling development teams to self-service provision infrastructure**.
 -   **Philosophy**: To achieve "You build it, you run it," developers need a **Golden Path** — a set of approved, opinionated infrastructure blueprints they can deploy without worrying about infrastructure complexity.
 -   **Mandate**:
@@ -230,7 +230,7 @@ Three foundational vows govern all design decisions:
     4.  **Backstage / Port Integration**: Integrate with developer portals (Backstage, etc.) to centralize the service catalog, documentation, and on-call information.
 -   **Anti-pattern**: Infrastructure teams continuing to operate Ticket-Driven (ticket → manual response). This is a hard ceiling on scale and a bottleneck for development velocity.
 
-### Supreme Directive 0.6: The Cost-as-a-Feature Mandate
+### Primary Directive 0.6: The Cost-as-a-Feature Mandate
 -   **Law**: Cloud costs are not "incidental infrastructure overhead." They must be defined and managed as **product requirements** from the design phase.
 -   **Philosophy**: Writing "code that works" is insufficient. Writing "code that generates profit" is true engineering. Code written without cost awareness is a time bomb that kills the business.
 -   **Mandate**:
@@ -249,7 +249,7 @@ Three foundational vows govern all design decisions:
     ```
 -   **Anti-pattern**: Merging a `db.t3.medium` → `db.r6g.2xlarge` upgrade without a cost estimate. Differences of tens of thousands of dollars per month appear "without anyone noticing."
 
-### Supreme Directive 0.7: The Agentic AI Governance Mandate
+### Primary Directive 0.7: The Agentic AI Governance Mandate
 -   **Law**: When AI agents (Amazon Bedrock Agents / LangChain / AutoGen, etc.) invoke AWS APIs, **the same IAM least-privilege principle as human operators MUST be applied**. Excessive permission grants justified by "it's AI" or "it's automation" are strictly prohibited.
 -   **Philosophy**: AI agents are powerful, but if abused (e.g., via Prompt Injection), they can become the most dangerous attack vector. Treat agents as "external systems requiring verification," not "trusted human proxies."
 -   **Mandate**:
@@ -277,7 +277,7 @@ Three foundational vows govern all design decisions:
     ```
     > **🚫 Prohibited**: `"Action": "*", "Resource": "*"` — Granting Admin permissions to an AI agent creates a zero-day equivalent risk.
 
-### Supreme Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate
+### Primary Directive 0.8: The Data Sovereignty & Post-Quantum Readiness Mandate
 -   **Law**: Always be aware of "which region your data resides in." Data sovereignty based on legal and regulatory requirements must be guaranteed from the design phase. Simultaneously, migration plans toward **Post-Quantum Cryptography (PQC)** in preparation for quantum computer-based decryption must be established now.
 -   **Philosophy**: The assumption that "current encryption is secure" is collapsing on a 5–10 year horizon. "Harvest Now, Decrypt Later (HNDL)" attacks are already a present-day threat. Encryption of long-term retention data is a problem of today.
 
@@ -296,7 +296,7 @@ Three foundational vows govern all design decisions:
     4.  **Crypto Agility**: Never hardcode cryptographic algorithms. Externalize them as configuration (Crypto Agility). Mandate designs where future algorithm changes can be implemented without code modifications.
 -   **Anti-pattern**: Deferring action because "quantum computers are not yet practical." HNDL attacks are executable today, and long-term retention data is already at risk.
 
-### Supreme Directive 0.9: The Resilience & Chaos Engineering Mandate
+### Primary Directive 0.9: The Resilience & Chaos Engineering Mandate
 -   **Law**: In all AWS infrastructure design, **treat "failures will happen" as an immutable premise. Design systems that recover automatically from failure, rather than systems that attempt to prevent failure**.
 -   **Philosophy**: "99.99% availability" is not a target — it is the starting point of design. The essential value of cloud is not "never breaking" but "breaking without being noticed." Chaos engineering is the only empirical method to prevent production incidents.
 -   **Mandate**:
@@ -334,7 +334,7 @@ Three foundational vows govern all design decisions:
     > **Target**: Stopping 30% of ECS tasks must result in ALB health checks returning all tasks to Healthy within 2 minutes.
 -   **Anti-pattern**: Not conducting game days because "it's too risky in production." An incident without a game day is equivalent to combat without any training. Conduct regularly in Staging and expand to production incrementally.
 
-### Supreme Directive 0.10: The Observability-First Mandate
+### Primary Directive 0.10: The Observability-First Mandate
 -   **Law**: Observability is not something "added after the system is running." It must be **built into the design from Day 0**. The three pillars — logs, metrics, and traces — are treated as first-class citizens on par with code.
 -   **Philosophy**: "We have logs, so we can observe" is an illusion. True observability is "the ability to identify the cause of an unknown failure by asking questions from the outside alone."
 -   **Mandate**:
@@ -370,7 +370,7 @@ Three foundational vows govern all design decisions:
     ```
 -   **Anti-pattern**: "We'll build dashboards later." Enabling X-Ray for the first time during a production incident. These are design failures that repeat with every outage.
 
-### Supreme Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate
+### Primary Directive 0.11: The Shared Responsibility & Compliance-by-Design Mandate
 -   **Law**: Deeply understand AWS's **Shared Responsibility Model** so that every engineer recognizes "what AWS guarantees" vs. "what we must guarantee." Compliance requirements (GDPR, SOC2, PCI-DSS, etc.) are not "things checked before release" — they are **embedded in the design and code from the start**.
 -   **Philosophy**: AWS guarantees the security "of" the cloud (physical infrastructure). However, the security "in" the cloud — what runs on that infrastructure, what data it holds, who can access it — is 100% our responsibility. "It's AWS, so it's secure" is an abdication of responsibility.
 -   **Mandate**:
@@ -405,7 +405,7 @@ Three foundational vows govern all design decisions:
     ```
 -   **Anti-pattern**: An organizational structure where compliance teams conduct "security reviews one week before release." This defers problems and causes the cost of fixing discovered risks to grow exponentially.
 
-### Supreme Directive 0.12: The Operational Excellence Culture Mandate
+### Primary Directive 0.12: The Operational Excellence Culture Mandate
 -   **Law**: Operations are not the "cleanup" of engineering — they are a **core engineering activity that constitutes product quality and reliability**. The cultural shift from "it just needs to work" to "it must sustainably operate at scale" must be achieved through concrete processes and measurement.
 -   **Philosophy**: Organizations that depend on "heroic incident response" collapse as they scale. Incidents are not solved by individual heroism — they are prevented and auto-recovered by team systems and culture.
 -   **Mandate**:
@@ -3791,4 +3791,3 @@ Three foundational vows govern all design decisions:
 - **API Integration**: `engineering/100_api_integration.md` — REST/GraphQL design, Rate Limiting
 - **Engineering General**: `engineering/000_engineering_standards.md` — Code review, testing strategy
 - **AI Implementation**: `ai/000_ai_engineering.md` — Streaming-first, RAG design, token cost management
-

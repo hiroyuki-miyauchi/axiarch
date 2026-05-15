@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-16
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Untested code is broken code — Quality is not a phase but a **flow**."
 > All releases must pass comprehensive quality gates before deployment.
 > Strictly observe the priority order: **Test Coverage > Code Quality > Feature Velocity > Delivery Speed**.
@@ -221,7 +221,7 @@
     -   **Required Verifications**: Status codes, response body structure, error response format, authentication/authorization boundaries.
 -   **DB Integration Tests**:
     -   Execute actual queries against a test DB to verify ORM/query builder behavior.
-    -   **Testcontainers**: Launch test DBs in Docker containers and destroy after test completion. Eliminates environment differences and guarantees reproducibility.
+    -   **Testcontainers**: Launch test DBs in Docker containers and destroy after test completion. Reduces environment differences and improves reproducibility.
     -   **Testcontainers Cloud**: When CI runners lack nested virtualization, offload container orchestration to Testcontainers Cloud for improved speed and reliability.
     -   **Transaction Rollback**: Execute each test within a transaction and rollback after test to prevent DB state contamination.
 
@@ -714,7 +714,7 @@
     -   **AI-Assisted Synthetic Data**: Leveraging LLMs to generate domain-specific realistic test data (addresses, product names, review text, etc.) is also effective.
 -   **Synthetic Data Platform**:
     -   For large-scale projects, recommend building a **synthetic data platform** that centralizes test data generation, management, and distribution.
-    -   Integrate differential privacy techniques that automatically guarantee privacy compliance (GDPR, APPI, etc.).
+    -   Integrate differential privacy techniques to reduce privacy-compliance risk (GDPR, APPI, etc.); legal compliance still requires explicit validation.
 -   **Data Masking**:
     -   When production data must be used in staging, fully mask/anonymize PII (Personally Identifiable Information).
 -   **Test Data Lifecycle**:
@@ -996,7 +996,7 @@
 ## §25. Schema Synchronization & Vertical Verification
 
 -   **Full-Stack Schema Synchronicity Protocol**:
-    -   **Law**: On data model changes, modify **all layers — Migration → Schema/Type Definition → DTO → Action/Service → UI — in a single batch**, maintaining Zero Defect state in one commit. "Partial update commits" are prohibited.
+    -   **Law**: On data model changes, modify **all layers — Migration → Schema/Type Definition → DTO → Action/Service → UI — in a single batch**, maintaining a verified state in one commit. "Partial update commits" are prohibited.
     -   **Vertical Slice**: Schema changes use a "cut vertically" approach to change all layers at once. Horizontal splitting like "just the DB first" then "just the API" creates intermediate states leading to type errors and runtime crashes.
     -   **Type-Driven Discovery**: Change type definitions first and use the compiler to auto-detect all "stale references." Continue fixing until type errors reach zero.
     -   **Search & Destroy**: References undetectable by the type system (dynamic keys, JSON paths, test fixtures, etc.) must be grepped across the entire project and manually fixed.
@@ -1432,7 +1432,7 @@
 
 -   **Test ROI Definition**:
     -   **ROI = (Loss Avoidance from Bug Detection - Test Creation & Maintenance Cost) / Test Creation & Maintenance Cost**
-    -   **Law**: Measure full test suite ROI **semi-annually** and execute deletion of low-ROI tests (zero bug detection track record, high maintenance cost).
+    -   **Law**: Measure full test suite ROI **semi-annually** and execute deletion of low-ROI tests (no bug-detection track record, high maintenance cost).
 -   **Cost Measurement Indicators**:
 
     | Indicator | Measurement Method |
@@ -1551,7 +1551,7 @@
     -   **Law**: Reserve **at least 10%** of sprint capacity for test refactoring. Accumulated test debt eventually collapses test suite trust, causing developers to ignore tests.
 -   **Test Inventory**:
     -   Semi-annually inventory the entire test suite and execute:
-    -   Delete low-ROI tests (zero bug detection track record, high maintenance cost).
+    -   Delete low-ROI tests (no bug-detection track record, high maintenance cost).
     -   Evaluate flaky tests' investment-to-return and decide on fix/delete.
     -   Detect test coverage duplication and optimize.
 

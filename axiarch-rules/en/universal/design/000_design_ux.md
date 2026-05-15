@@ -5,11 +5,11 @@
 > Last Updated: 2026-04-19 (Rev 4)
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Design is not decoration — it is the user's first and last impression of quality."
 > All design decisions must prioritize consistency, accessibility, and delight.
 > Strictly follow the priority order: **Consistency > Accessibility > Delight > Aesthetics > Development Speed**.
-> This document is the supreme standard for all design and UX strategy decisions.
+> This document is the primary standard for all design and UX strategy decisions.
 > **37 Parts (§1–§37).**
 
 ---
@@ -94,7 +94,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 ## 2. Design Engineering
 
 ### 2.1. Design Tokens
--   **Single Source of Truth**: Define all values (color, spacing, typography, shadow, radius, motion, etc.) in Figma Variables and sync 100% with code (CSS Variables / Design Token JSON).
+-   **Single Source of Truth**: Define all values (color, spacing, typography, shadow, radius, motion, etc.) in Figma Variables and continuously verify synchronization with code (CSS Variables / Design Token JSON).
 -   **No Hardcoding**: Writing `px` or `#hex` directly is **strictly prohibited**. Use tokens.
 -   **W3C DTCG Compliance (W3C Design Tokens Community Group)**:
     -   **Standard**: Comply with **W3C DTCG Specification 2025.10 (Stable)** and follow these principles.
@@ -458,12 +458,12 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Standard**: Use **Selectable Card Grid** as the standard—featuring large hit areas, clear borders, color changes on selection (background/border color changes), and icon-based visual aids.
     -   **Implementation**: Hide native radio/checkbox elements with `sr-only` for screen readers, and style adjacent label elements using `peer-data-[state=checked]:` or equivalent techniques.
 
-## 12. Hospitality UX (Omotenashi - Japanese Hospitality)
--   **Kigakiku (Anticipatory)**: Anticipate needs before users struggle. (e.g., Offer "Convert to Half-width?" button on Full-width error).
+## 12. Hospitality UX (Anticipatory Care)
+-   **Anticipatory Assistance**: Anticipate needs before users struggle. (e.g., Offer "Convert format?" button when locale-specific input normalization is available).
     -   **Input Normalization (Tolerant Input Principle)**: When users enter data in an imprecise format (full-width numbers, full-width spaces, etc.), do NOT reject with validation errors. Instead, **silently auto-convert (Normalize)** on `onChange` or `onBlur`. Use `String.normalize('NFKC')` etc. to minimize user input burden.
     -   **Locale-Specific Input Assistance**: For locale-specific data entry (address, name, etc.), implement **locale-tailored input assistance features** (e.g., postal code to address auto-complete, phonetic reading auto-generation, phone number formatting, etc.) to reduce user input burden. Always allow manual correction after auto-completion to preserve user control.
--   **Ma (Negative Space)**: White space is for "Thinking Time", not just empty space. Merge Silicon Valley density with Japanese Ma.
--   **Aizuchi (Reassuring Feedback)**: Give reassuring feedback (Visual/Haptic) to every action. "Your operation is conveyed."
+-   **Pacing and Negative Space**: White space is for thinking time, not just empty space. Balance information density with cognitive breathing room for the target audience.
+-   **Reassuring Feedback**: Give reassuring feedback (visual or haptic) to every meaningful action so users can tell their operation was received.
 -   **The Graceful Error Recovery Protocol**:
     -   **Law**: When unexpected errors occur, do not merely state the facts—express empathy to the user, and **always provide action buttons for the user's next step** (reload, return home, contact support, etc.).
     -   **Action**: Error pages and error modals MUST include a concise explanation of the cause along with at least one recovery action button. A "Dead End" error screen that offers no escape accelerates user churn and constitutes a UX failure.
@@ -766,7 +766,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 | 11 | Focus ring removal | Keyboard user inability. Legal risk. |
 | 12 | Modal Escape unhandled | A11y bug. User trapped. |
 | 13 | Placeholder-only label | Purpose lost during input. A11y violation. |
-| 14 | Dead-end error screen | 100% churn. Trust destruction. |
+| 14 | Dead-end error screen | High churn risk and likely trust damage. |
 | 15 | Dark pattern usage | Legal risk (FTC/DSA/CPRA fines). Brand damage. |
 | 16 | Fixed font size (px) | User settings ignored. A11y violation. |
 | 17 | No double-submit prevention | Data duplication. Race Condition. |
@@ -1342,7 +1342,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 ## 33. Design QA & Visual Regression
 
 > [!NOTE]
-> Visual regression prevention is the "guardian of quality." This section defines the framework for continuously and automatically guaranteeing that design system changes do not introduce unintended destructive effects on UI.
+> Visual regression testing is a quality guardrail. This section defines the framework for continuously checking design system changes and reducing the risk of unintended destructive effects on UI.
 
 ### 33.1. Visual Regression Testing Framework
 
@@ -1598,7 +1598,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         │ [Manual merge...]                        │
         └─────────────────────────────────────────┘
         ```
-    -   Always provide users with **3 choices (my version / their version / manual merge)** to guarantee zero data loss.
+    -   Always provide users with **3 choices (my version / their version / manual merge)** to reduce the risk of unintended data loss.
 -   **Optimistic Updates and Rollback**: Reflect user actions to the local state immediately (Optimistic UI), and automatically restore operations from the **Undo queue** when server sync fails.
 
 ### 36.3. Version History UX

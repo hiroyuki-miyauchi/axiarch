@@ -84,7 +84,7 @@ operate/onboarding_audit（現状把握） → develop/refactoring_audit（実�
 
 **本番障害時:**
 ```
-operate/incident_response → develop/ci_fix（CI修正が必要な場合）→ govern/blueprint_governance_audit（再発防止ルール化）
+operate/incident_response → develop/ci_fix（CI修正が必要な場合）→ govern/blueprint_governance_audit（再発リスク低減ルール化）
 ```
 
 **リリース前チェック:**
@@ -101,7 +101,7 @@ audit/system_integrity_audit → develop/push_execute
 | ファイル | 用途 |
 |:--------|:-----|
 | `feature_development.md` | 新機能実装・既存改修・バグ修正・憲法監査を網羅的に実行するプロンプト |
-| `refactoring_audit.md` | 既存コードの動作を保ったまま構造・型安全・DRY原則を極限まで改善する非破壊的リファクタリング監査プロンプト |
+| `refactoring_audit.md` | 既存コードの動作を保ったまま構造・型安全・DRY原則を高い水準まで改善する非破壊的リファクタリング監査プロンプト |
 | `push_execute.md` | 品質ゲート・DB整合性確認・ブランチ戦略遵守を経たGit Push実行プロンプト |
 | `ci_fix.md` | CI/CD失敗時のエラー再現・根本原因分析・修正・ルール還元を一貫実行するプロンプト |
 
@@ -109,7 +109,7 @@ audit/system_integrity_audit → develop/push_execute
 
 | ファイル | 用途 |
 |:--------|:-----|
-| `fullstack_qa_audit.md` | セキュリティ・プライバシー最大化を筆頭にシリコンバレー基準6柱・優先度付き報告（Critical/High/Medium）・ROI提案・Domain Distributionによる知見還元を含む統合監査プロンプト |
+| `fullstack_qa_audit.md` | セキュリティ・プライバシーの継続改善を筆頭に実務で検証可能な高い品質基準6柱・優先度付き報告（Critical/High/Medium）・ROI提案・Domain Distributionによる知見還元を含む統合監査プロンプト |
 | `api_architecture_audit.md` | API設計・DTO義務・ゼロトラスト・オムニチャネル対応を軸とした全方位構造監査プロンプト |
 | `data_integrity_audit.md` | JSON逃がし・Hybrid Sync・Split Brain・ハリボテ実装を検知するデータ整合性監査プロンプト |
 | `system_integrity_audit.md` | 型安全性・API/DB同期・ハリボテ検知・データマネタイズ戦略を軸としたシステム全体整合性監査プロンプト |
@@ -119,18 +119,18 @@ audit/system_integrity_audit → develop/push_execute
 
 | ファイル | 用途 |
 |:--------|:-----|
-| `compliance_inspector_audit.md` | Universal/Blueprint法への完全準拠を強制する8つの重大憲法違反フレームワークに基づく深層コンプライアンス監査プロンプト |
+| `compliance_inspector_audit.md` | Universal/Blueprint法への準拠状況を深く点検する8つの重大憲法違反フレームワークに基づくコンプライアンス監査プロンプト |
 | `constitution_compliance_audit.md` | 7つの重大憲法違反（アーキテクチャ・収益化統合・型安全・最適化・ハリボテ・根本原因）を軸とした深層憲法遵守スキャンプロンプト |
 | `governance_auditor.md` | 8つの柱（Security/Business/Legal/AI/Architecture/保守性/UX/Performance）で行う全方位ガバナンス監査・専用レポートフォーマット付きプロンプト |
 | `blueprint_governance_audit.md` | 開発知見をBlueprintルールに結晶化する網羅的監査プロンプト |
-| `localization_audit.md` | Lazy English排除・UI日本語化率100%・LTV・AI/GEO・法務の全方位ローカリゼーション監査プロンプト |
+| `localization_audit.md` | Lazy English検出・一貫した日本語UI・LTV・AI/GEO・法務の全方位ローカリゼーション監査プロンプト |
 
 #### 🛡️ operate/ — インシデント・参入
 
 | ファイル | 用途 |
 |:--------|:-----|
 | `onboarding_audit.md` | 新セッション/メンバー参加時にコードベースを深く理解しアーキテクチャ・地雷・最初のアクションを把握する参入監査プロンプト |
-| `incident_response.md` | 本番障害のトリアージ・5 Whys根本原因分析・緊急修正・ポストモーテム・再発防止ルール還元まで一貫実行するSRE専用プロンプト |
+| `incident_response.md` | 本番障害のトリアージ・5 Whys根本原因分析・緊急修正・ポストモーテム・再発リスク低減のためのルール還元まで扱うSRE専用プロンプト |
 
 ---
 
@@ -218,7 +218,7 @@ operate/onboarding_audit (assess current state) → develop/refactoring_audit (e
 
 **During a production incident:**
 ```
-operate/incident_response → develop/ci_fix (if CI fix needed) → govern/blueprint_governance_audit (prevent recurrence)
+operate/incident_response → develop/ci_fix (if CI fix needed) → govern/blueprint_governance_audit (reduce recurrence risk)
 ```
 
 **Pre-release check:**
@@ -243,7 +243,7 @@ audit/system_integrity_audit → develop/push_execute
 
 | File | Purpose |
 |:-----|:--------|
-| `fullstack_qa_audit.md` | Full-Stack QA & Strategic audit — 6-Pillar Silicon Valley Standard with priority reporting (Critical/High/Medium), ROI proposals, Domain Distribution knowledge feedback |
+| `fullstack_qa_audit.md` | Full-Stack QA & Strategic audit — 6-Pillar practice-proven quality standard with priority reporting (Critical/High/Medium), ROI proposals, Domain Distribution knowledge feedback |
 | `api_architecture_audit.md` | Omni-directional structural audit — API design, DTO obligations, Zero Trust, and omnichannel readiness |
 | `data_integrity_audit.md` | Data integrity audit — JSON dump detection, Hybrid Sync / Split Brain elimination, and lazy redirect (haribote) detection |
 | `system_integrity_audit.md` | System integrity audit — type safety, API/DB sync, facade detection, and data monetization readiness |
@@ -253,15 +253,15 @@ audit/system_integrity_audit → develop/push_execute
 
 | File | Purpose |
 |:-----|:--------|
-| `compliance_inspector_audit.md` | Deep constitutional compliance audit — 8 Major Constitutional Violations framework enforcing full adherence to Universal/Blueprint laws |
+| `compliance_inspector_audit.md` | Deep constitutional compliance audit — 8 Major Constitutional Violations framework for assessing adherence to Universal/Blueprint laws |
 | `constitution_compliance_audit.md` | Constitutional compliance scan — 7 Major Violations (architecture & monetization combined, type safety, optimization, facade, root cause) |
 | `governance_auditor.md` | Holistic governance audit — 8-Pillar framework (Security/Business/Legal/AI/Architecture/Maintainability/UX/Performance) with structured report format |
 | `blueprint_governance_audit.md` | Comprehensive audit prompt to crystallize development insights into Blueprint rules |
-| `localization_audit.md` | Localization audit — eliminating untranslated/non-localized UI text, achieving 100% localized UI with LTV/AI/GEO/Legal multi-dimensional optimization |
+| `localization_audit.md` | Localization audit — detecting untranslated/non-localized UI text and improving localized UI consistency with LTV/AI/GEO/Legal multi-dimensional optimization |
 
 #### 🛡️ operate/ — Incident Response & Onboarding
 
 | File | Purpose |
 |:-----|:--------|
 | `onboarding_audit.md` | Codebase onboarding audit — deeply understand architecture, landmines, and first actions when joining a new session or project |
-| `incident_response.md` | SRE-focused prompt — triage, 5 Whys RCA, emergency fix, post-mortem, and recurrence-prevention rule crystallization for production incidents |
+| `incident_response.md` | SRE-focused prompt — triage, 5 Whys RCA, emergency fix, post-mortem, and recurrence-risk-reduction rule crystallization for production incidents |

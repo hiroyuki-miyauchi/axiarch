@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "A product without measurement is a car driving in the dark."
 > Analytics and observability must be **designed from Day 1**, not bolted on later.
 > Privacy takes absolute precedence; measurement must never compromise user trust.
@@ -82,7 +82,7 @@
 
 ## Part I: Analytics Philosophy & Core Principles
 
-### 1.1. Supreme Directive
+### 1.1. Primary Directive
 
 - **Day 1 Design**: Instrumenting analytics and observability after release is prohibited. Embed telemetry from the design phase
 - **Privacy > Measurement**: User privacy takes precedence over any analytics requirement

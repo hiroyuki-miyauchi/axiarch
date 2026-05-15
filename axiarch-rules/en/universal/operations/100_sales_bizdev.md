@@ -5,7 +5,7 @@
 > Last Updated: 2026-04-15
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Sales is not about deceiving customers — it's about helping them make the right decision."
 > The sales process is designed as **"a system to accelerate and optimize the customer's learning and decision-making."**
 > Design for pull, not push.

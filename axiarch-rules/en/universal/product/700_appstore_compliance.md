@@ -5,7 +5,7 @@
 > Last Updated: 2026-05-06
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Store compliance is not optional — rejection at the gate means zero users."
 > All app store submissions MUST comply with the latest platform guidelines.
 > **Platform Terms > User Trust > Feature Velocity** is the strict priority order.
@@ -17,7 +17,7 @@
 
 | # | Part | Key Topics |
 |---|---|---|
-| 0 | Supreme Directive & Scope Manifesto | Scope, priorities, excluded domains |
+| 0 | Primary Directive & Scope Manifesto | Scope, priorities, excluded domains |
 | 1 | Apple App Store — HIG & Design Compliance | HIG, Dark Mode, Dynamic Type |
 | 2 | Apple Privacy Stack | ATT / Privacy Manifests / Required Reason API / Privacy Nutrition Labels |
 | 3 | Apple In-App Purchase & Subscriptions | IAP mandate, Auto-Renewable, Win-back, StoreKit 2 |
@@ -42,7 +42,7 @@
 
 ---
 
-## Part 0: Supreme Directive & Scope Manifesto
+## Part 0: Primary Directive & Scope Manifesto
 
 ### 0.1. Scope
 

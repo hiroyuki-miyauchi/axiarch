@@ -5,7 +5,7 @@
 > Last Updated: 2026-05-06
 
 > [!IMPORTANT]
-> **Supreme Directive**
+> **Primary Directive**
 > "Fundraising is a means, not an end. We are responsible for converting resources obtained through dilution into value at the highest possible probability."
 > Investor relationships are not short-term contracts but **long-term partnerships**. **Trust, once lost, cannot be regained.**
 > **15 Parts / ~80+ rules.**
@@ -16,7 +16,7 @@
 
 | # | Part | Key Topics |
 |---|---|---|
-| 0 | Supreme Directive & Scope Manifesto | Scope, priorities |
+| 0 | Primary Directive & Scope Manifesto | Scope, priorities |
 | I | Philosophy of Fundraising | Default Alive / Ramen Profitability / 3 Errors |
 | II | Stages & Timing | Pre-seed → Series C+ / Runway 12-month rule |
 | III | Cap Table & ESOP Design | Vesting / Cliff / Option Pool / Dilution Math |
@@ -37,7 +37,7 @@
 
 ---
 
-## Part 0: Supreme Directive & Scope Manifesto
+## Part 0: Primary Directive & Scope Manifesto
 
 ### 0.1. Scope
 
@@ -120,7 +120,7 @@ Rationale: VCs are **permanent shareholders**. Damaging the relationship in one 
 
 ### 2.1. Stage-Specific Characteristics & Benchmarks
 
-- **Rule 15.010**: Stages with achievement standards (2026 SF Bay Area / Tokyo)
+- **Rule 15.010**: Stages with achievement standards (2026 major startup hubs)
 
   | Stage | Raise Size | Benchmark | Investors | Pre-money Valuation |
   |:--|:--|:--|:--|:--|

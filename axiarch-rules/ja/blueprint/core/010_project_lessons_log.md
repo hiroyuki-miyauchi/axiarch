@@ -41,7 +41,7 @@
 | — | *(まだ分離されたドメインファイルはありません)* | — | — |
 
 <!-- AUTO-CRYSTALLIZATION: ドメインファイル作成時、上の表に行を追加してください -->
-<!-- 例: | 1 | DB・認証 | [engineering/010_database_auth.md](../engineering/200_supabase_architecture.md) | 3 | -->
+<!-- 例: | 1 | DB・認証 | `engineering/010_database_auth.md` | 3 | -->
 
 ---
 
@@ -56,7 +56,7 @@
 > **Domain:** DB・認証 / セキュリティ / アーキテクチャ / 品質 / デザイン / 運用 / ガバナンス / パフォーマンス / その他
 > **Context:** 問題が発生した状況や背景
 > **Problem:** 具体的な問題点や失敗内容
-> **Solution/Rule:** 解決策、または再発防止のために制定されたルール
+> **Solution/Rule:** 解決策、または再発リスク低減のために制定されたルール
 > **Reference:** 関連するファイルやコミット（あれば）
 
 ---

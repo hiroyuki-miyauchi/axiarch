@@ -5,7 +5,7 @@
 > Last Updated: 2026-03-24
 
 > [!IMPORTANT]
-> **Supreme Law Declaration**
+> **Top-Level Protocol Declaration**
 > - This document serves as the "Meta-Constitution" for the entire Axiarch rule system.
 > - It defines the **fundamental norms** governing the enactment, amendment, repeal, interpretation, dispute resolution, and operation of all rule files (Universal / Blueprint).
 > - Violations of this document are treated as **maximum severity violations** that undermine the legitimacy and trustworthiness of the entire rule system.
@@ -54,7 +54,7 @@
 ### 1.1. Definition of Constitution
 
 -   **Definition**: All rule files under `axiarch-rules/{lang}/universal/` are collectively referred to as the "**Constitution**".
--   **Nature**: The Constitution is a **universal, immutable supreme law** that transcends individual projects and takes precedence over all project-specific rules (Blueprints).
+-   **Nature**: The Constitution is a **universal, immutable top-level protocol** that transcends individual projects and takes precedence over all project-specific rules (Blueprints).
 -   **Metaphor**: The Constitution is analogous to a nation's constitution, while Blueprints are analogous to laws. When a law conflicts with the constitution, the law is invalid.
 -   **Scope**: This Constitution applies to **all actors** who interact with the rule system, including human developers, AI agents, CI/CD pipelines, and automation tools.
 
@@ -110,7 +110,7 @@ The rule system is composed of the following five tiers, with higher tiers havin
 
 | Tier | Name | Location | Nature | Examples |
 |---|---|---|---|---|
-| **L0** | **Supreme Law** | `AGENTS.md` | AI agent behavioral directives. Overrides all rules | Deployment ban, language enforcement, AI self-completion |
+| **L0** | **Top-Level Protocol** | `AGENTS.md` | AI agent behavioral directives. Overrides all rules | Deployment ban, language enforcement, AI self-completion |
 | **L1** | **Meta-Constitution** | `universal/core/100_governance.md` | Operational norms for the rule system itself | This document |
 | **L2** | **Constitution** | `universal/*.md` (except 72) | Cross-project immutable rules | Security, engineering, UX |
 | **L3** | **Law (Blueprint)** | `blueprint/*.md` | Project-specific provisions | Project overview, lessons log |
@@ -406,40 +406,36 @@ When contradictions arise, resolve in the following priority order:
 
 ### 8.1. Sparse Numbering Protocol
 
--   **Law**: File numbers for rule files and Blueprint specifications must be assigned with **gaps of approximately 5–10** to accommodate future expansion.
--   **Anti-Pattern**: Sequential numbering (1, 2, 3...) is **prohibited** as it eliminates room for new rule insertion.
--   **Recommended Pattern**: `00, 10, 20, 30...` or `00, 05, 10, 15...` to maintain sufficient gaps between categories.
+-   **Law**: File numbers for rule files and Blueprint specifications use **3-digit prefixes (`000`–`999`) scoped to each containing folder**.
+-   **Recommendation**: Leave **gaps of approximately 5–10** for future insertion. This is a convention, not a reserved band; any unused number from `000` to `999` may be used within the target folder.
+-   **Anti-Pattern**: Treating a number range (e.g., `100`–`599`) as an intentional blank zone. Use available numbers based on folder context, collision checks, and readability.
+-   **Recommended Pattern**: `000, 010, 020, 030...` or `000, 005, 010, 015...` within the target folder.
 
 ### 8.2. Unique Numbering Protocol
 
--   **Law**: File prefix numbers (e.g., `10_`, `30_`) must be **completely unique across the project**.
--   **Prohibition**: Multiple files with the same number (e.g., `50_business.md` and `50_strategy.md`) are **strictly prohibited** due to reference ambiguity.
+-   **Law**: The full file path must be unique. File prefix numbers (e.g., `000_`, `010_`) only need to be **unique within the same folder**.
+-   **Allowed**: Reusing the same number in different folders is allowed, such as `engineering/000_engineering_standards.md` and `security/000_security_privacy.md`. References must include the directory.
+-   **Prohibition**: Multiple files with the same number in the same folder (e.g., `engineering/050_api.md` and `engineering/050_database.md`) are prohibited due to reference ambiguity.
 -   **Verification Procedure**: When creating a new file:
-    1.  Check existing file list using `ls` or `find`
-    2.  Guarantee no number conflicts
-    3.  If conflicts exist, merge with the older file or assign a new number
+    1.  Check the existing file list in the target folder using `ls` or `find`
+    2.  Confirm no number conflict exists in the target folder
+    3.  If conflicts exist, append/merge into the existing file or assign a different number
 
-### 8.3. Number Band Reservation
+### 8.3. Number Band Usage
 
-| Number Band | Purpose | Notes |
+| Target | Treatment | Notes |
 |---|---|---|
-| 00-09 | Core mindset | Top-level behavioral principles |
-| 10-19 | Business & growth strategy | Product, finance, marketing |
-| 20-29 | Design & UX | UI/UX rules |
-| 30-39 | Engineering core | Languages, frameworks, infrastructure |
-| 40-49 | AI & data | AI implementation, analytics |
-| 50-59 | Operations & management | Admin, SRE, crisis management |
-| 60-69 | Security & legal | Security, legal, licensing, IP |
-| 70-79 | QA, global & governance | Testing, i18n, constitution, language |
-| 80-89 | Reserved (future expansion) | — |
-| 90-99 | Templates & meta | Templates, project-specific indexes |
+| Universal | Respect the existing numbering system and INDEX categories | Prioritize compatibility with existing files. For additions, check unused `000`–`999` values within the target folder |
+| Blueprint | Operate `000`–`999` independently per folder | `000` is not reserved. Avoid only collisions with existing files such as `core/000_project_overview.md` |
+| `core/` | Existing `000`, `010`, `998`, and `999` numbers have fixed purposes | Other numbers may be used after checking availability in the target folder |
+| New domain folders | Add only after user approval, then apply the same 3-digit rule | Initial folders are not a closed taxonomy, but autonomous folder creation by AI is prohibited |
 
 ### 8.4. Naming Convention
 
--   **Format**: `{number}_{english_snake_case_name}.md`
+-   **Format**: `{3-digit-number}_{english_snake_case_name}.md`
 -   **Example**: `core/100_governance.md`, `security/000_security_privacy.md`
 -   **Constraints**:
-    - Numbers are zero-padded 2-digit (`00`–`99`)
+    - Numbers are zero-padded 3-digit (`000`–`999`)
     - Names use English, lowercase, snake_case
     - Extension is `.md` (Markdown) only
     - Japanese filenames are **prohibited**
@@ -448,7 +444,8 @@ When contradictions arise, resolve in the following priority order:
 
 -   **Format**: `Rule {file_number}.{section_number}`
 -   **Example**: `Rule 72.1` (Duty of Reference in §3.1 of this document), `Rule 0.1` (Zero Tolerance Protocol)
--   **Uniqueness**: Rule IDs are unique across the project. Assigning the same ID to different rules is **prohibited**.
+-   **Uniqueness**: Rule IDs are interpreted uniquely together with the file path or filename. When the number alone may be ambiguous, include the directory, e.g., `engineering/000_engineering_standards.md Rule 33.1`.
+-   **Prohibition**: Do not use filename-only or number-only references when multiple targets are possible.
 -   **Usage**: Used for precise referencing in commit messages, PR review comments, and lessons logs.
 
 ---
@@ -746,7 +743,7 @@ AI Agent → Project Owner
 ### 14.4. Chain of Custody
 
 -   **Definition**: The chain of all amendments from rule enactment to its current state is called the "**Chain of Custody**".
--   **Guarantee**: Git history guarantees that the time, author, content, and reason for each amendment are fully traceable.
+-   **Traceability**: Git history records the time, author, content, and reason for each amendment so that the amendment chain remains auditable.
 -   **Audit Response**: When external auditors verify the legitimacy of rules, present the complete chain of custody via `git log` and `git blame`.
 
 ### 14.5. Supply Chain Security for Rules
@@ -1086,7 +1083,7 @@ When interpretation is required, apply the following methods in order:
     3.  After repository recovery, review work performed during the provisional period from a rule compliance perspective
 -   **RTO/RPO**:
     - **RTO (Recovery Time Objective)**: Within 4 hours
-    - **RPO (Recovery Point Objective)**: Most recent commit (target zero data loss)
+    - **RPO (Recovery Point Objective)**: Most recent commit (target minimizing data loss)
 
 ### 20.5. Split-Brain Prevention
 
@@ -1110,7 +1107,7 @@ When interpretation is required, apply the following methods in order:
 | **L3** | Conditional Autonomy | Autonomously judges and executes within defined conditions | Autonomous execution of low-risk operations (see §10.5) |
 | **L4** | Full Autonomy | Autonomously judges and executes without constraints | **L4 is always prohibited for rule operations** |
 
--   **Maximum Permitted Level**: The maximum autonomy level for AI agents in rule system operations is **L3**. L4 completely eliminates human oversight and is prohibited under all circumstances.
+-   **Maximum Permitted Level**: The maximum autonomy level for AI agents in rule system operations is **L3**. L4 removes effective human oversight and is prohibited under all circumstances.
 
 ### 21.2. Delegation Chain Safety
 
@@ -1236,17 +1233,17 @@ When interpretation is required, apply the following methods in order:
 -   **Consistency**: Use **consistent translations** for terms referring to the same concept across all rule files.
 -   **Reference Terminology Correspondence Table**:
 
-| Japanese | English | Notes |
+| English Term | Meaning | Scope |
 |---|---|---|
-| 憲法 | Constitution | Under `universal/` |
-| 法律 / Blueprint | Law / Blueprint | Under `blueprint/` |
-| 改正 | Amendment | Formal modification through change procedures |
-| 廃止 | Deprecation / Repeal | Phased invalidation |
-| 適用除外 | Waiver / Exemption | Temporary exception |
-| 判例 | Precedent | Prior example from dispute resolution |
-| 乖離 | Drift | Mismatch between documentation and implementation |
-| 破損 | Broken | Artifacts produced without rule reference |
-| 昇格 | Promotion | Blueprint → Constitution |
+| Constitution | Immutable universal rule set | Under `universal/` |
+| Blueprint | Project-specific mutable rule set | Under `blueprint/` |
+| Amendment | Formal modification through change procedures | Constitution or governance documents |
+| Deprecation / Repeal | Phased invalidation | Obsolete rules or artifacts |
+| Waiver / Exemption | Temporary exception | Approved deviation from a rule |
+| Precedent | Prior example from dispute resolution | Governance decision history |
+| Drift | Mismatch between documentation and implementation | Rules, specs, code, or operations |
+| Broken Artifact | Artifact produced without rule reference | Code, docs, or process outputs |
+| Promotion | Blueprint rule elevated to a Universal rule | Blueprint → Constitution |
 
 ### 22.6. Untranslatable Terms Handling
 
@@ -1435,7 +1432,7 @@ When interpretation is required, apply the following methods in order:
 
 -   **Purpose**: Define the standard procedure for when a new AI agent (or new context) accesses the rule system for the first time.
 -   **Initialization Flow**:
-    1.  Read `AGENTS.md` to understand Project Native Language and supreme law
+    1.  Read `AGENTS.md` to understand Project Native Language and top-level protocol
     2.  Read `axiarch-rules/{lang}/INDEX.md` to understand the overall structure
     3.  Follow `prompt_pointer.md` instructions to autonomously select task-relevant rules
     4.  Read L2 summaries of selected rules, referencing L3 full text only when detail is needed
@@ -1814,17 +1811,17 @@ When interpretation is required, apply the following methods in order:
 
 ## Cross-References
 
-- [AGENTS.md](file:///AGENTS.md) — Supreme Law (L0). Superior to this document.
+- [AGENTS.md](../../../../AGENTS.md) — Top-Level Protocol (L0). Superior to this document.
 - [000_core_mindset.md](../core/000_core_mindset.md) — Core Mindset. §4 Governance Protocol is a summary version of this document.
 - [core/200_language_protocol.md](../core/200_language_protocol.md) — Language Protocol. Detailed provisions for bilingual sync obligations. Closely related to Part XXII.
 - [security/000_security_privacy.md](../security/000_security_privacy.md) — Security. Technical details for cryptographic integrity. Related to Part XIV.
 - [quality/000_qa_testing.md](../quality/000_qa_testing.md) — QA & Testing. Related provisions for Policy-as-Code testing. Related to Part XV.
 - [ai/000_ai_engineering.md](../ai/000_ai_engineering.md) — AI Implementation. Technical foundation for Advanced Agentic AI Governance (Part XXI).
 - [engineering/000_engineering_standards.md](../engineering/000_engineering_standards.md) — Engineering. Technical foundation for Feature Flag Pattern (Part XXV).
-- [INDEX.md](../../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
-- [compliance_matrix.md](../../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
-- [core/010_project_lessons_log.md](../../../blueprint/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
-- [999_project_specific_template.md](../../../blueprint/core/999_project_specific_template.md) — Template for new Blueprint creation.
+- [INDEX.md](../../INDEX.md) — Master index of all rules. Requires sync updates when files are added or changed.
+- [compliance_matrix.md](../../compliance_matrix.md) — Compliance matrix. Management location for regulation-rule mapping.
+- [core/010_project_lessons_log.md](../../blueprint/core/010_project_lessons_log.md) — Lessons Log. Output destination for precedent accumulation, crystallization, waiver records, interpretation precedents, and technical debt.
+- [core/999_project_specific_template.md](../../blueprint/core/999_project_specific_template.md) — Template for new Blueprint creation.
 
 ### Cross-References
 
