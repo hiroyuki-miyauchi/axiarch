@@ -39,6 +39,8 @@ Axiarch mitigates these risks by defining a quality floor and autonomous context
 
 ## Quick Start
 
+Note: the main-branch installer follows the current source snapshot. v1.9.0 work is `1.9.0-dev`; for pinned stable installs, set `AXIARCH_REF=tags/vX.Y.Z` to the intended release tag.
+
 ```bash
 # Option 1: Interactive setup script (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
@@ -53,7 +55,7 @@ cp -r axiarch-rules /path/to/your/project/
 | Agent | Status |
 |:------|:-------|
 | Google Antigravity | ✅ Verified primary — validated through real production sessions |
-| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration, including v1.9.0+ PostToolUse diff guard; validation evidence being accumulated |
+| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration; v1.9.0-dev adds initial PostToolUse diff guard work while validation evidence is being accumulated |
 | Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); validation evidence being accumulated |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |

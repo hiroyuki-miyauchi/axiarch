@@ -18,7 +18,7 @@
 - **実務検証済み主対象**: Google Antigravity
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合と v1.9.0 の PostToolUse diff guard を起点に、期待互換ではなく主対象として検証蓄積を進める
+- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合と v1.9.0-dev の PostToolUse diff guard を起点に、期待互換ではなく主対象として検証蓄積を進める
 - **Claude Code**: hook 補強モデルの主対象として扱うが、現時点では実務検証済みとは表現せず、検証ログを蓄積する
 - **Antigravity**: agent-first IDE 時代の実運用検証対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
@@ -484,7 +484,7 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 - **初期実装: Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド +
   v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc
   反映漏れ」を機械検出。`axiarch-scripts/check-axiarch-health.sh` に README /
-  scripts/README の v1.9.0 diff guard / memory / 15-stage 反映確認を追加
+  scripts/README の v1.9.0-dev diff guard / memory / 15-stage 反映確認を追加
 
 ---
 
@@ -559,7 +559,7 @@ enterprise adoption needs.
 - **Production-validated primary target**: Google Antigravity
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration and v1.9.0 PostToolUse diff guard, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
+- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration and v1.9.0-dev PostToolUse diff guard, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
 - **Claude Code**: Primary target for the hook-reinforcement model; validation logs will be accumulated without calling it production-validated at this stage
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
@@ -1046,7 +1046,7 @@ Tier-2 items are now organised under v1.9.0.
 - **Initial implementation: Post-release README integration auto-verification** — Prevent the recurring
   "new release feature → README update missed" pattern (24/27/28th-round
   audits + v1.6.0 `12-stage` residue). Check 15 now verifies README /
-  scripts README references for v1.9.0 diff guard, memory, and 15-stage
+  scripts README references for v1.9.0-dev diff guard, memory, and 15-stage
   diagnostics
 
 ---

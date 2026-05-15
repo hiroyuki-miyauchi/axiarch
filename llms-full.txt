@@ -352,6 +352,8 @@ Optional reusable prompt templates organized by role:
 
 ## Quick Start
 
+Note: the main-branch installer follows the current source snapshot. v1.9.0 work is `1.9.0-dev`; for pinned stable installs, set `AXIARCH_REF=tags/vX.Y.Z` to the intended release tag.
+
 ```bash
 # Option 1: Interactive setup (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash

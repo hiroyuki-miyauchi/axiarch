@@ -23,7 +23,7 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** が Axiarch の中核です。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存しすぎない形で、プロジェクト全体の最低品質（Quality Floor）を底上げすることを狙います。
 
-Axiarch は [Google Antigravity](https://antigravity.google/) で実務検証済みの運用知見を土台に、[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md) と [Claude Code](https://www.anthropic.com/claude-code) を主対象に据えた AIエージェントガバナンス層です。Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection / v1.9.0+ `PostToolUse` diff guard、Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合と v1.9.0+ diff guard 配線を備えます。ただし、Google Antigravity 以外の実務検証は継続中であり、Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱います。いずれもエージェント実装と利用環境に依存するため、動作保証ではありません。
+Axiarch は [Google Antigravity](https://antigravity.google/) で実務検証済みの運用知見を土台に、[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md) と [Claude Code](https://www.anthropic.com/claude-code) を主対象に据えた AIエージェントガバナンス層です。Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection、Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合を備えます。v1.9.0-dev では `PostToolUse` diff guard の初期実装を追加していますが、正式リリース前の作業ブランチ上の内容です。ただし、Google Antigravity 以外の実務検証は継続中であり、Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱います。いずれもエージェント実装と利用環境に依存するため、動作保証ではありません。
 
 ### 設計思想
 
@@ -117,8 +117,8 @@ Axiarch now focuses its first-class support strategy on [Google Antigravity](htt
 | 位置づけ / Role | Agent | Native Config | AGENTS.md |
 |:----------------|:------|:--------------|:----------|
 | ✅ **Primary Verified** — 実務で実証済み / Production-validated | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
-| ⚙️ **Primary Target** — 主対象（v1.8.2+ ネイティブ統合、v1.9.0+ diff guard） / Primary target (v1.8.2+ native integration, v1.9.0+ diff guard) | **OpenAI Codex** | `AGENTS.md` + `.codex/hooks.json` | ✅ Native |
-| ⚙️ **Primary Target** — 主対象（v1.4.0+ ネイティブ hook 統合、v1.9.0+ diff guard） / Primary target (v1.4.0+ native hook integration, v1.9.0+ diff guard) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (4 hooks) | ✅ Reads |
+| ⚙️ **Primary Target** — 主対象（v1.8.2+ ネイティブ統合、v1.9.0-dev diff guard 初期実装中） / Primary target (v1.8.2+ native integration, v1.9.0-dev diff guard in initial implementation) | **OpenAI Codex** | `AGENTS.md` + `.codex/hooks.json` | ✅ Native |
+| ⚙️ **Primary Target** — 主対象（v1.4.0+ ネイティブ hook 統合、v1.9.0-dev diff guard 初期実装中） / Primary target (v1.4.0+ native hook integration, v1.9.0-dev diff guard in initial implementation) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (4 hooks) | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Windsurf** | `.windsurfrules` | ✅ Reads |
@@ -139,7 +139,7 @@ Axiarch now focuses its first-class support strategy on [Google Antigravity](htt
 >
 > **EN**: The folder name `axiarch-rules/` reflects its origin, but the rule files themselves are pure Markdown with no tool-specific runtime dependency.
 
-### 🧭 Glob-Scoped Rules / パススコープ付きルール（v1.9.0+）
+### 🧭 Glob-Scoped Rules / パススコープ付きルール（v1.9.0-dev / planned v1.9.0）
 
 Cursor など `globs:` を解釈する環境向けに、`.cursor/rules/axiarch.mdc` は `globs: "**/*"` を明示したリポジトリ全体の入口として扱います。Axiarch本体のルールは引き続き `axiarch-rules/` を正とし、`.cursor/rules/` に個別ルールを増やしません。
 
@@ -255,6 +255,11 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 
 ## ⚡ クイックスタート / Quick Start
 
+> [!IMPORTANT]
+> **JA**: `main` ブランチの `init.sh` は現在のソーススナップショットを導入します。このブランチ上の v1.9.0 作業は `1.9.0-dev` であり、正式安定版として扱いません。タグ固定の導入が必要な場合は、該当リリースタグを指す `AXIARCH_REF=tags/vX.Y.Z` を使ってください。
+>
+> **EN**: The `main`-branch `init.sh` installs the current source snapshot. v1.9.0 work on this branch is `1.9.0-dev`, not a stable release. For pinned stable installs, point `AXIARCH_REF=tags/vX.Y.Z` at the intended release tag.
+
 ### 必須ファイル一覧 / Required Files
 
 > [!TIP]
@@ -274,7 +279,7 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code hook利用時のみ** / **Claude Code hook use only** | 4 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write) / PostToolUse(Edit, MultiEdit, Write)）のhook設定。`init.sh` で自動コピー / Four-hook config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher / PostToolUse for Edit, MultiEdit, Write). Auto-copied by `init.sh` |
 | `.claude/memory/MEMORY.md` | 🔷 **Claude Code memory利用時のみ** / **Claude Code memory use only** | 任意のMemory Persistenceテンプレート。上位ルールを置換せず、実際に起きた再発防止事項だけを短く記録 / Optional Memory Persistence template. It never replaces higher-priority rules and stores only short notes from actual repeated issues |
-| `axiarch-scripts/` | 🔶 **Hook利用時のみ必要** / **Required only for hook use** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / PostToolUse / SessionStart hook 外出しスクリプト群。Hookを有効にする場合は必要、診断だけに使う場合は任意です（`check-axiarch-health.sh` で全プロトコル遵守を **15 段階診断**（v1.9.0+、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.8.0+）、`axiarch-protect-antifull.sh` で §6 hook遮断、`axiarch-diff-guard.sh` で大きな差分の事後検出、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts. Required when hooks are enabled; optional when used only for diagnostics (`check-axiarch-health.sh` 15-stage compliance with `--quiet`, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection, `axiarch-protect-antifull.sh` §6 hook block, `axiarch-diff-guard.sh` large-diff post-use detection, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
+| `axiarch-scripts/` | 🔶 **Hook利用時のみ必要** / **Required only for hook use** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / PostToolUse / SessionStart hook 外出しスクリプト群。Hookを有効にする場合は必要、診断だけに使う場合は任意です（`check-axiarch-health.sh` で全プロトコル遵守を **15 段階診断**（v1.9.0-dev、`--quiet` flag 対応）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.8.0+）、`axiarch-protect-antifull.sh` で §6 hook遮断、`axiarch-diff-guard.sh` で大きな差分の事後検出、`axiarch-init-task-md.sh` で task.md 自動 bootstrap、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic & hook scripts. Required when hooks are enabled; optional when used only for diagnostics (`check-axiarch-health.sh` 15-stage compliance with `--quiet`, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection, `axiarch-protect-antifull.sh` §6 hook block, `axiarch-diff-guard.sh` large-diff post-use detection, `axiarch-init-task-md.sh` task.md auto-bootstrap, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -295,11 +300,11 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 | 4. `.agents/rules/prompt_pointer.md` を配置 | ❌ 不要 | ❌ 不要 | ✅ **必須** | ❌ 不要 | ❌ 不要 | ❌ 不要 |
 | 5. 追加設定 | — (AGENTS.md + hooks native) | — (4 hooks 自動配線済み) | — | 任意・未検証: `.cursor/rules/*.mdc` | 任意・未検証: `.github/copilot-instructions.md` | 任意・未検証: `.windsurfrules` |
 
-### 🛡️ Claude Code Hook補強機構 / Hook Reinforcement Mechanism (v1.9.0+ — 4 hooks + TTL + Task Boundary + Diff Guard)
+### 🛡️ Claude Code Hook補強機構 / Hook Reinforcement Mechanism (v1.9.0-dev — 4 hooks + TTL + Task Boundary + Diff Guard)
 
-> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**4 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap + Diff Guard」補強**を担います。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却、大きくなりすぎた差分の見落としを、対応環境では検出しやすくします。**v1.6.0+ では TTL 二段階出力（default 30 分）で token 約 87% 削減**（24k → 3k）。**v1.8.0+ では Check D Task Boundary Detection** を追加し、現プロンプトの domain keyword と AGENTS §8.4 必須トリオ（task.md / implementation_plan.md / walkthrough.md）を機械比較。**v1.9.0+ では PostToolUse diff guard** により、Edit / MultiEdit / Write 後の差分規模を warn / block できます。
+> **JA**: Claude Code 採用プロジェクトには `.claude/settings.json` が同梱され、**4 種類のフック**が AGENTS.md プロトコルの**「Reminder + Physical Block + Bootstrap + Diff Guard」補強**を担います。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、§6 ANTI-FULL-OVERWRITE 違反、`task.md` 記録忘却、大きくなりすぎた差分の見落としを、対応環境では検出しやすくします。**v1.6.0+ では TTL 二段階出力（default 30 分）で token 約 87% 削減**（24k → 3k）。**v1.8.0+ では Check D Task Boundary Detection** を追加し、現プロンプトの domain keyword と AGENTS §8.4 必須トリオ（task.md / implementation_plan.md / walkthrough.md）を機械比較。**v1.9.0-dev では PostToolUse diff guard** により、Edit / MultiEdit / Write 後の差分規模を warn / block できます。
 >
-> **EN**: Claude Code projects ship with `.claude/settings.json` containing **four hooks** that reinforce the AGENTS.md protocol through **Reminder + Physical Block + Bootstrap + Diff Guard**. In supported environments, this makes it easier to detect skipped LOADING_PROTOCOL steps on "casual" prompts, §6 ANTI-FULL-OVERWRITE violations, missing task.md recording, and large diff growth. **v1.6.0+ two-stage TTL** (default 30 min) reduces token cost ~87% (24k → 3k). **v1.8.0+ Check D Task Boundary Detection** mechanically compares current-prompt domain keywords against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md / walkthrough.md). **v1.9.0+ PostToolUse diff guard** can warn or block after Edit / MultiEdit / Write when the diff exceeds configured thresholds.
+> **EN**: Claude Code projects ship with `.claude/settings.json` containing **four hooks** that reinforce the AGENTS.md protocol through **Reminder + Physical Block + Bootstrap + Diff Guard**. In supported environments, this makes it easier to detect skipped LOADING_PROTOCOL steps on "casual" prompts, §6 ANTI-FULL-OVERWRITE violations, missing task.md recording, and large diff growth. **v1.6.0+ two-stage TTL** (default 30 min) reduces token cost ~87% (24k → 3k). **v1.8.0+ Check D Task Boundary Detection** mechanically compares current-prompt domain keywords against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md / walkthrough.md). **v1.9.0-dev PostToolUse diff guard** can warn or block after Edit / MultiEdit / Write when the diff exceeds configured thresholds.
 
 | フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
 |:--|:--|:--|:--|
@@ -323,9 +328,9 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 
 #### 🔍 トラブルシュート / Troubleshooting
 
-> **JA**: 「フックが動いていない気がする」場合、`bash axiarch-scripts/check-axiarch-health.sh` を実行してください。**15 段階の axiarch 標準診断**（v1.9.0+）で、4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ **Check 14（Task Boundary Detection wiring 確認、v1.8.0+）** + AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
+> **JA**: 「フックが動いていない気がする」場合、`bash axiarch-scripts/check-axiarch-health.sh` を実行してください。**15 段階の axiarch 標準診断**（v1.9.0-dev）で、4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）+ Check 6（CRYSTAL §5 count + time-axis trigger）+ Check 13（既存 sublimated file APPEND ガイド）+ **Check 14（Task Boundary Detection wiring 確認、v1.8.0+）** + AI 遵守（task.md ロード履歴 / 結晶化閾値）を一発診断します。pre-commit / CI 用 `--quiet` flag 対応。`init.sh` 経由で自動配布。
 >
-> **EN**: When you suspect "the hook isn't firing", run `bash axiarch-scripts/check-axiarch-health.sh`. **15-stage axiarch diagnostic** (v1.9.0+) verifies all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + **Check 14 (Task Boundary Detection wiring, v1.8.0+)** + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
+> **EN**: When you suspect "the hook isn't firing", run `bash axiarch-scripts/check-axiarch-health.sh`. **15-stage axiarch diagnostic** (v1.9.0-dev) verifies all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration) + Check 6 (CRYSTAL §5 count + time-axis trigger) + Check 13 (sublimated files APPEND guide) + **Check 14 (Task Boundary Detection wiring, v1.8.0+)** + AI adherence (task.md load logs / crystallization threshold). `--quiet` flag for pre-commit / CI usage. Distributed automatically via `init.sh`.
 
 ```bash
 bash axiarch-scripts/check-axiarch-health.sh

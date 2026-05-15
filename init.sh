@@ -9,7 +9,13 @@ set -euo pipefail
 
 AXIARCH_VERSION="1.9.0-dev"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
-TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
+if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
+  DEFAULT_AXIARCH_REF="heads/main"
+else
+  DEFAULT_AXIARCH_REF="tags/v${AXIARCH_VERSION}"
+fi
+AXIARCH_REF="${AXIARCH_REF:-$DEFAULT_AXIARCH_REF}"
+TARBALL_URL="${REPO_URL}/archive/refs/${AXIARCH_REF}.tar.gz"
 
 # --- Color helpers ---
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -252,7 +258,7 @@ NEWHOOK
 # =============================================================================
 prepare_source() {
   if $IS_REMOTE; then
-    print_step "4" "Downloading Axiarch ${AXIARCH_VERSION}..."
+    print_step "4" "Downloading Axiarch ${AXIARCH_VERSION} from ${AXIARCH_REF}..."
     TMP_DIR="$(mktemp -d)"
     trap 'rm -rf "$TMP_DIR"' EXIT
 

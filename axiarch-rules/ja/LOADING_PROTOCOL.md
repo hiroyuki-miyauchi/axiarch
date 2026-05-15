@@ -37,7 +37,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）を含む 15 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）を含む 15 段階の axiarch 標準診断ツール（v1.9.0-dev、`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
