@@ -20,8 +20,15 @@ jobs:
       - name: Extract latest version from CHANGELOG.md
         id: version
         run: |
-          # CHANGELOG.md から最新の ## [x.y.z] を抽出
-          VERSION=$(grep -oP '(?<=^## \[)\d+\.\d+\.\d+' CHANGELOG.md | head -1)
+          # CHANGELOG.md の最初のリリース見出しだけを正とする。
+          # 先頭が [Unreleased] の場合、下位の既存versionを誤って再タグ化しない。
+          FIRST_HEADING=$(grep -m1 -E '^## \[(Unreleased|[0-9]+\.[0-9]+\.[0-9]+)\]' CHANGELOG.md || true)
+          if echo "$FIRST_HEADING" | grep -q '^## \[Unreleased\]'; then
+            echo "Top changelog section is Unreleased. Skipping tag creation."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          VERSION=$(echo "$FIRST_HEADING" | sed -E 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/')
           if [ -z "$VERSION" ]; then
             echo "No version found in CHANGELOG.md"
             echo "skip=true" >> $GITHUB_OUTPUT

@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
 > **現在の安定版 / Current Stable**: v1.8.2 Native Codex Environment Integration\
-> **次期作業 / Next**: v1.9.0 Memory Persistence & Glob-Scoped Rules（初期実装中 / unreleased）\
+> **次期作業 / Next**: v1.9.0-dev Memory Persistence & Glob-Scoped Rules（初期実装中 / unreleased）\
 > **ステータス / Status**: Actively Maintained
 
 ---
