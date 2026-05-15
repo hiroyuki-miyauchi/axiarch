@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] — 2026-05-15
+
+### 🧠 Memory Persistence & Glob-Scoped Rules / Memory Persistence と Glob-Scoped Rules 初期実装
+
+v1.9.0前の価値最大化コミット（`0489174`）と分離し、Tier 2候補のうち運用検証しやすい初期実装を追加。Hook補強を4層化し、Memoryテンプレート、Cursor globs導線、shellcheck CI、配布後構文検証、Check 15を導入。
+
+Separated from the pre-v1.9 value-maximization commit (`0489174`) and added the initial Tier-2 implementation that can be validated in real workflows: four-layer hook reinforcement, memory template, Cursor globs entrypoint, shellcheck CI, post-copy syntax validation, and Check 15.
+
+### Added
+
+- **`axiarch-scripts/axiarch-diff-guard.sh`** — `PostToolUse` hook用の差分ガードを追加。`Edit` / `MultiEdit` / `Write` 後にgit diffの変更行数と変更ファイル数を測定し、閾値超過時に `warn` / `block` / `off` を選択可能 / Added a PostToolUse diff guard that measures changed lines/files after Edit, MultiEdit, and Write; supports warn, block, and off modes
+- **`.claude/settings.json` / `.codex/hooks.json`** — `PostToolUse` hookを追加し、`axiarch-diff-guard.sh` を Edit / MultiEdit / Write に配線 / Added PostToolUse hook wiring for `axiarch-diff-guard.sh`
+- **`.claude/memory/MEMORY.md`** — Claude Code向けの任意Memory Persistenceテンプレートを追加。上位ルールを置換せず、実際に発生した再発防止事項だけを短く記録する設計 / Added an optional Claude Code memory template that does not replace higher-priority rules and stores only short notes from actual recurring issues
+- **`.cursor/rules/axiarch.mdc`** — `globs: "**/*"` を明示し、path-scoped rules の将来仕様として `paths:` frontmatter導線を追加 / Declared `globs: "**/*"` and documented future `paths:` frontmatter for path-scoped rules
+- **`.github/workflows/lint.yml`** — ShellCheck jobを追加し、`init.sh` と `axiarch-scripts/*.sh` をCIで静的解析 / Added ShellCheck CI for `init.sh` and `axiarch-scripts/*.sh`
+
+### Changed
+
+- **`axiarch-scripts/check-axiarch-health.sh`** — 14段階診断から15段階診断へ拡張。Check 15でv1.9.0 diff guard配線とREADME系反映を検査 / Extended health diagnostics from 14 to 15 stages; Check 15 verifies v1.9.0 diff guard wiring and README integration
+- **`init.sh`** — `AXIARCH_VERSION` を1.9.0へ更新し、配布後 `bash -n` 検証とClaude memoryテンプレートの非破壊コピーを追加 / Bumped to 1.9.0, added post-copy `bash -n` validation and non-destructive Claude memory template copy
+- **`README.md` / `axiarch-scripts/README.md` / `llms.txt` / `llms-full.txt` / `ROADMAP.md`** — 4 hooks、15-stage診断、Memory Persistence、Glob-Scoped Rules、diff guardの説明へ更新 / Updated docs for four hooks, 15-stage diagnostics, Memory Persistence, Glob-Scoped Rules, and diff guard
+
+### Compatibility
+
+- **後方互換性を維持** — hooks、scripts、memory、prompts、agent pointerは引き続き任意または条件付き。必須構成は `AGENTS.md` と `axiarch-rules/` のまま / Backward compatibility maintained. Hooks, scripts, memory, prompts, and agent pointers remain optional or conditional; the required minimal setup is still `AGENTS.md` plus `axiarch-rules/`
+- **動作保証なしの範囲を維持** — Google Antigravity以外の実務検証は継続中。Codex / Claude Codeは主対象、Cursor / Copilot / Windsurfは拡張ポインター候補 / Practical validation remains ongoing outside Google Antigravity; Codex and Claude Code are primary targets, while Cursor, Copilot, and Windsurf remain extended pointer candidates
+
+---
+
 ## [1.8.2] — 2026-05-12
 
 ### ⚙️ Native Codex Environment Integration / Codex 環境ネイティブ対応
@@ -768,6 +797,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.9.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...v1.9.0
 [1.8.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.6.0...v1.8.0

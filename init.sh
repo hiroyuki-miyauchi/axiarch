@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.8.2"
+AXIARCH_VERSION="1.9.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 TARBALL_URL="https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/heads/main.tar.gz"
 
@@ -35,6 +35,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo
 IS_REMOTE=false
 if [[ "$SCRIPT_DIR" == "REMOTE" ]] || [[ ! -f "$SCRIPT_DIR/AGENTS.md" ]]; then
   IS_REMOTE=true
+else
+  SOURCE_DIR="$SCRIPT_DIR"
 fi
 
 # --- Require a target directory argument when running remotely ---
@@ -155,7 +157,7 @@ select_prompts() {
 # =============================================================================
 # STEP 3.5 (v1.6.0+): Optional pre-commit hook installation
 # Installs `bash axiarch-scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
-# so axiarch protocol violations (3 hooks wired, threshold breaches, etc.) are
+# so axiarch protocol violations (4 hooks wired, threshold breaches, etc.) are
 # caught before commits land.
 # =============================================================================
 select_precommit() {
@@ -315,7 +317,7 @@ copy_files() {
     mkdir -p "$TARGET_DIR/axiarch-scripts"
     cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-diff-guard.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -355,6 +357,18 @@ copy_files() {
         else
           print_warn ".claude/settings.json — JSON parse failed; please verify before launching Claude Code"
         fi
+      fi
+    fi
+
+    # === Claude Code: optional memory persistence template ===
+    if [[ -f "$SOURCE_DIR/.claude/memory/MEMORY.md" ]]; then
+      mkdir -p "$TARGET_DIR/.claude/memory"
+      if [[ -f "$TARGET_DIR/.claude/memory/MEMORY.md" ]]; then
+        print_info "Preserved: .claude/memory/MEMORY.md (existing memory)"
+      else
+        cp "$SOURCE_DIR/.claude/memory/MEMORY.md" \
+           "$TARGET_DIR/.claude/memory/MEMORY.md"
+        print_info "Copied: .claude/memory/MEMORY.md (optional memory template)"
       fi
     fi
   fi
@@ -440,6 +454,35 @@ copy_files() {
 }
 
 # =============================================================================
+# STEP 5.5: Post-copy script syntax validation
+# =============================================================================
+validate_distributed_scripts() {
+  [[ -d "$TARGET_DIR/axiarch-scripts" ]] || return 0
+
+  print_step "5.5" "Validating distributed shell scripts..."
+
+  local scripts=(
+    "axiarch-boot-reminder.sh"
+    "axiarch-protect-antifull.sh"
+    "axiarch-init-task-md.sh"
+    "axiarch-diff-guard.sh"
+    "check-axiarch-health.sh"
+    "check-git-config-clean.sh"
+  )
+
+  local script_path
+  for script_name in "${scripts[@]}"; do
+    script_path="$TARGET_DIR/axiarch-scripts/${script_name}"
+    [[ -f "${script_path}" ]] || continue
+    if bash -n "${script_path}" >/dev/null 2>&1; then
+      print_info "Validated: axiarch-scripts/${script_name}"
+    else
+      print_warn "Syntax validation failed: axiarch-scripts/${script_name}"
+    fi
+  done
+}
+
+# =============================================================================
 # STEP 6: Post-setup instructions
 # =============================================================================
 print_next_steps() {
@@ -480,7 +523,7 @@ print_next_steps() {
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended):${RESET}"
   echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-  echo -e "         (12-stage diagnostic: 3-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, more)"
+  echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, diff guard, more)"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."
@@ -504,6 +547,7 @@ main() {
   select_precommit
   prepare_source
   copy_files
+  validate_distributed_scripts
   install_precommit_hook
   print_next_steps
 }

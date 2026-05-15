@@ -1,7 +1,7 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Version: 1.8.2 | License: Apache 2.0
+> Version: 1.9.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that reduces the risk of quality
@@ -341,8 +341,8 @@ Optional reusable prompt templates organized by role:
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
 | Google Antigravity | ✅ Verified primary | `.agents/rules/prompt_pointer.md` |
-| OpenAI Codex | ⚙️ Primary target | `AGENTS.md` + `.codex/hooks.json` |
-| Claude Code | ⚙️ Primary target | `CLAUDE.md` + `.claude/settings.json` (3 hooks: SessionStart / UserPromptSubmit / PreToolUse) |
+| OpenAI Codex | ⚙️ Primary target | `AGENTS.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard) |
+| Claude Code | ⚙️ Primary target | `CLAUDE.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse) |
 | Cursor | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.cursor/rules/axiarch.mdc` |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.github/copilot-instructions.md` |
 | Windsurf | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.windsurfrules` |

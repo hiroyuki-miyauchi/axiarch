@@ -26,7 +26,30 @@ jobs:
             !.git/**
 
   # ===========================================================================
-  # Job 2: Bilingual Symmetry Check
+  # Job 2: ShellCheck
+  # ===========================================================================
+  shellcheck:
+    name: "ShellCheck"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install ShellCheck if missing
+        run: |
+          set -euo pipefail
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y shellcheck
+          fi
+
+      - name: Lint shell scripts
+        run: |
+          set -euo pipefail
+          shellcheck --severity=error init.sh axiarch-scripts/*.sh
+
+  # ===========================================================================
+  # Job 3: Bilingual Symmetry Check
   # Ensures JA/EN file counts are always in sync
   # ===========================================================================
   bilingual-symmetry:

@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.8.2 ⚙️ Native Codex Environment Integration\
+> **現在の安定版 / Current Stable**: v1.9.0 🧠 Memory Persistence & Glob-Scoped Rules\
 > **ステータス / Status**: Actively Maintained ✅
 
 ---
@@ -17,7 +17,7 @@
 - **実務検証済み主対象**: Google Antigravity
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合を起点に、期待互換ではなく主対象として検証蓄積を進める
+- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合と v1.9.0 の PostToolUse diff guard を起点に、期待互換ではなく主対象として検証蓄積を進める
 - **Claude Code**: hook 補強モデルの主対象として扱うが、現時点では実務検証済みとは表現せず、検証ログを蓄積する
 - **Antigravity**: agent-first IDE 時代の実運用検証対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
@@ -449,29 +449,30 @@ loophole のリスクを下げるための hot-fix。
 
 ---
 
-### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、検討中）
+### 🚧 v1.9.0 — Memory Persistence & Glob-Scoped Rules（Tier 2、初期実装中）
 
 26 ラウンド市場調査（v1.5.5 release notes 参照）で抽出された Tier 2
 改善案。v1.6.0 で別軸（採用先フィードバックの 5 項目）を先行実装、v1.8.0 で
 confirmation-bias loophole の hot-fix + BREAKING `scripts/` → `axiarch-scripts/`
 rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
-- **`PostToolUse` hook + git diff 検証** — Edit 後に diff line count
+- **実装済み: `PostToolUse` hook + git diff 検証** — Edit 後に diff line count
   を測定、閾値超過時に warn / block。PreToolUse の safety net（v1.5.5 では
   `Write` のみ block、`Edit` による潜在的に大規模な変更は post-hoc で検出）
-- **Cursor `globs:` パターン採用 + path-scoped rules** —
-  `axiarch-rules/{lang}/universal/{domain}/` に `paths:` frontmatter
-  を追加、対象ファイル種別ごとに rule を動的活性化。トークン削減 + 関連性向上
-- **Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories
+- **初期実装: Cursor `globs:` パターン採用 + path-scoped rules** —
+  `.cursor/rules/axiarch.mdc` に `globs: "**/*"` を明示し、
+  `axiarch-rules/{lang}/universal/{domain}/` の `paths:` frontmatter
+  仕様候補を README に追加。Universal本文への一括付与は検証後に実施
+- **初期実装: Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories
   相当の自動 memory 機構を `.claude/memory/MEMORY.md`
   ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
 - **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/`
   を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control`
   対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL
   と相補）
-- **shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml`
+- **実装済み: shellcheck CI 統合** — `axiarch-scripts/*.sh` の静的解析を `lint.yml`
   に追加（v1.5.4 deferred）
-- **`init.sh` 配布後の syntax 検証** —
+- **実装済み: `init.sh` 配布後の syntax 検証** —
   `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh`
   を `bash -n` で配布後検証（`.claude/settings.json` の `jq` 検証と対称化）
 - ~~**Universal Rules フッター整理** — `**Last Updated**: 2026-05-06 (v1.5.0)`
@@ -479,10 +480,10 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
   `08c6ecf`、8 files cleanup）
 - **HealthCheck Workflow** — リポジトリ状態自動診断（Blueprint未入力、Lessons
   log 蓄積超過等の検知）
-- **Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド +
+- **初期実装: Post-release README integration 自動検証 (Check 15)** — 24/27/28 ラウンド +
   v1.6.0/v1.7.0 で繰り返し発生した「新リリース feature → ancillary doc
   反映漏れ」を機械検出。`axiarch-scripts/check-axiarch-health.sh` に README /
-  scripts/README / INDEX の stale version-term grep を追加
+  scripts/README の v1.9.0 diff guard / memory / 15-stage 反映確認を追加
 
 ---
 
@@ -557,7 +558,7 @@ enterprise adoption needs.
 - **Production-validated primary target**: Google Antigravity
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
+- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration and v1.9.0 PostToolUse diff guard, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
 - **Claude Code**: Primary target for the hook-reinforcement model; validation logs will be accumulated without calling it production-validated at this stage
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
@@ -1006,7 +1007,7 @@ Patch release with 2 bug fixes + 3 documentation corrections discovered in the
 
 ---
 
-### 🔮 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Under Consideration)
+### 🚧 v1.9.0 — Memory Persistence & Glob-Scoped Rules (Tier 2, Initial Implementation)
 
 Tier-2 improvement candidates extracted from the 26-round market study (see
 v1.5.5 release notes). v1.6.0 delivered a different axis (5 items from
@@ -1014,14 +1015,14 @@ adopter-project feedback); v1.8.0 delivered the confirmation-bias loophole
 hot-fix bundled with the BREAKING `scripts/` → `axiarch-scripts/` rename; these
 Tier-2 items are now organised under v1.9.0.
 
-- **`PostToolUse` hook + git diff verification** — Measure diff line count after
+- **Implemented: `PostToolUse` hook + git diff verification** — Measure diff line count after
   Edit, warn/block above threshold. Safety net for PreToolUse (v1.5.5 only
   blocks `Write`; large Edit changes detected post-hoc)
-- **Cursor `globs:` adoption + path-scoped rules** — Add `paths:` frontmatter to
-  `axiarch-rules/{lang}/universal/{domain}/` for dynamic rule activation per
-  file type. Reduces tokens, improves relevance (sources: Cursor Rules /
-  `.claude/rules/` path-scoped)
-- **Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf
+- **Initial implementation: Cursor `globs:` adoption + path-scoped rules** —
+  Declare `globs: "**/*"` in `.cursor/rules/axiarch.mdc` and document the
+  future `paths:` frontmatter schema for `axiarch-rules/{lang}/universal/{domain}/`.
+  Bulk frontmatter insertion into Universal files remains deferred until validation.
+- **Initial implementation: Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf
   Cascade Memories / Codeium Memories, designed around
   `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation"
   problem via persistent context
@@ -1029,9 +1030,9 @@ Tier-2 items are now organised under v1.9.0.
   `axiarch-rules/{lang}/universal/` as read-only and target Anthropic
   prompt-caching API `cache_control`. Solves the per-turn full-injection cost
   issue (complementary to v1.6.0 reminder TTL)
-- **shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to
+- **Implemented: shellcheck CI integration** — Add `axiarch-scripts/*.sh` static analysis to
   `lint.yml` (deferred from v1.5.4)
-- **Post-distribution syntax validation in `init.sh`** — Run `bash -n` on
+- **Implemented: Post-distribution syntax validation in `init.sh`** — Run `bash -n` on
   `axiarch-{boot-reminder,protect-antifull,init-task-md,check-axiarch-health}.sh`
   after copy, mirroring the existing `jq` validation
 - ~~**Universal Rules footer cleanup** — Remove `(v1.5.0)` version literals from
@@ -1040,11 +1041,11 @@ Tier-2 items are now organised under v1.9.0.
   cleanup)
 - **HealthCheck Workflow** — Automated repository health diagnostics (empty
   Blueprint, accumulated Lessons-log overflow detection, etc.)
-- **Post-release README integration auto-verification** — Prevent the recurring
+- **Initial implementation: Post-release README integration auto-verification** — Prevent the recurring
   "new release feature → README update missed" pattern (24/27/28th-round
-  audits + v1.6.0 `12-stage` residue). Add Check 14 to
-  `axiarch-scripts/check-axiarch-health.sh` to grep for stale version-related
-  terms across README ↔ scripts/*
+  audits + v1.6.0 `12-stage` residue). Check 15 now verifies README /
+  scripts README references for v1.9.0 diff guard, memory, and 15-stage
+  diagnostics
 
 ---
 

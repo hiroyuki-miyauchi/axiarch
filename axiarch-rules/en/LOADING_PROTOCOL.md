@@ -20,15 +20,16 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 ## 🛡️ HOOK REINFORCEMENT MECHANISM 🛡️
 
-**Projects adopting Claude Code or Codex hook configurations ship with three hooks in `.claude/settings.json` or `.codex/hooks.json`**:
+**Projects adopting Claude Code or Codex hook configurations ship with four hooks in `.claude/settings.json` or `.codex/hooks.json`**:
 
 | Hook | Fires when | Role | Externalised script |
 |:--|:--|:--|:--|
 | `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
 | `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | Blocks full-overwrite of existing files in supported environments (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
+| `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | After file-editing tools | Measures git diff changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
 
-**Removing or disabling any of these three hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular adds a physical-block layer in addition to reminders (references: arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It reduces the risk of §6 violations that reminder-only enforcement may miss.
+**Removing or disabling any of these four hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular adds a physical-block layer in addition to reminders (references: arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It reduces the risk of §6 violations that reminder-only enforcement may miss.
 
 When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
 
@@ -36,7 +37,7 @@ When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 pri
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 14-stage diagnostic includes wiring verification for all three hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart). Distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration). Distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
 
 ---
 

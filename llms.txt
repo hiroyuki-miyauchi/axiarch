@@ -53,8 +53,8 @@ cp -r axiarch-rules /path/to/your/project/
 | Agent | Status |
 |:------|:-------|
 | Google Antigravity | ✅ Verified primary — validated through real production sessions |
-| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration; validation evidence being accumulated |
-| Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / SessionStart + reminder TTL + Check D task-boundary detection); validation evidence being accumulated |
+| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration, including v1.9.0+ PostToolUse diff guard; validation evidence being accumulated |
+| Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); validation evidence being accumulated |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |
 | Windsurf / Aider / Zed | ⚠️ Extended or unverified candidates; not operation-guaranteed |

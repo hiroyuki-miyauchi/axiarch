@@ -1,9 +1,15 @@
 ---
 description: "Axiarch — Constitution-Driven AI Agent Governance Framework"
+globs: "**/*"
 alwaysApply: true
 ---
 
 # Axiarch Rules — 目次 / Pointer
+
+> [!NOTE]
+> v1.9.0+: このポインターはリポジトリ全体に適用される入口として `globs: "**/*"` を明示する。個別ルールの実体は引き続き `axiarch-rules/` に集約し、将来の path-scoped rules は `axiarch-rules/{lang}/universal/{domain}/` 側の `paths:` frontmatter で表現する。
+>
+> v1.9.0+: This pointer explicitly declares `globs: "**/*"` as the repository-wide entrypoint. Rule definitions still live in `axiarch-rules/`; future path-scoped rules should be expressed through `paths:` frontmatter under `axiarch-rules/{lang}/universal/{domain}/`.
 
 > [!CAUTION]
 > 🇯🇵 **このファイルは「目次（ポインター）」であり、ルール本体ではない。**

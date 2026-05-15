@@ -10,9 +10,10 @@
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
-| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（14 段階、`--quiet` 対応 v1.8.0+） / Full-protocol compliance health diagnostic (14-stage, `--quiet` support v1.8.0+) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
+| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（15 段階、`--quiet` 対応 v1.9.0+） / Full-protocol compliance health diagnostic (15-stage, `--quiet` support v1.9.0+) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
 | [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターン違反検出 (A/B/C/D) + TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); dynamic violations A/B/C/D, short-circuits within TTL when no violation | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-diff-guard.sh`](#axiarch-diff-guardsh) | **PostToolUse hook の外出しスクリプト**。Edit / MultiEdit / Write 後のgit diff規模を測定し、閾値超過時に warn / block / Externalized PostToolUse hook; measures git diff size after Edit / MultiEdit / Write and warns or blocks above thresholds | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に task.md を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps task.md on session start | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
 
@@ -22,9 +23,9 @@
 
 ### 概要 / Overview
 
-**Axiarch 公式健全性診断ツール**。Hook + LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AGENTS.md 全 9 プロトコルのうち**外部検証可能な 10 領域以上**を一発診断する（v1.5.5 で §6 ANTI-FULL-OVERWRITE が物理遮断対象に追加、v1.6.0 で sublimated files index 追加、v1.8.0 で Check D Task Boundary Detection 追加）。「どこサボってるか」が一発でわかる設計。
+**Axiarch 公式健全性診断ツール**。Hook + LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AGENTS.md 全 9 プロトコルのうち**外部検証可能な 10 領域以上**を一発診断する（v1.5.5 で §6 ANTI-FULL-OVERWRITE が物理遮断対象に追加、v1.6.0 で sublimated files index 追加、v1.8.0 で Check D Task Boundary Detection 追加、v1.9.0 で PostToolUse diff guard 追加）。「どこサボってるか」が一発でわかる設計。
 
-The official Axiarch health diagnostic. One-shot 14-stage check covering hook firing, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AGENTS.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, and the v1.8.0 task-boundary detection wiring. `--quiet` flag for pre-commit usage.
+The official Axiarch health diagnostic. One-shot 15-stage check covering hook firing, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AGENTS.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, the v1.8.0 task-boundary detection wiring, and the v1.9.0 PostToolUse diff guard. `--quiet` flag for pre-commit usage.
 
 ### 使い方 / Usage
 
@@ -54,6 +55,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 | 12 | Bootstrap | SessionStart hook 配線確認 / SessionStart hook wiring — **v1.5.5+** |
 | 13 | Sublimated Index | 既存の `blueprint/{domain}/{NNN}_*.md` を一覧表示し APPEND を促進 / Lists existing sublimated files to promote APPEND — **v1.6.0+** |
 | 14 | Task Boundary | Check D wiring 確認（`axiarch-boot-reminder.sh` に VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT 含有を確認） / Verifies Check D wiring in `axiarch-boot-reminder.sh` — **v1.8.0+** |
+| 15 | v1.9 Integration | PostToolUse diff guard 配線確認（`axiarch-diff-guard.sh` + Edit / MultiEdit / Write matcher）+ README系反映確認 / Verifies PostToolUse diff guard wiring plus README integration — **v1.9.0+** |
 
 ### 環境変数 / Environment Variables（v1.6.0+, extended in v1.8.0+）
 
@@ -64,6 +66,11 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 | `AXIARCH_PRECOMMIT_SKIP` | unset | `1` をセットすると pre-commit hook を 1 回だけ bypass / Set to `1` to bypass the pre-commit hook for one commit |
 | **`AXIARCH_TASK_BOUNDARY_DETECT`** | **`1`** | **v1.8.0+: `0` で Check D Task Boundary Detection を完全 disable（v1.6.0 動作再現）/ Set to `0` to fully disable Check D task-boundary detection (reproduces v1.6.0 behaviour)** |
 | **`AXIARCH_TASK_DOMAIN_KEYWORDS`** | (組込 default 集合) | **v1.8.0+: Check D の domain keyword 集合をオーバーライド（pipe-separated regex, 採用先カスタマイズ用）/ Override Check D's domain keyword set (pipe-separated regex; for adopter customisation)** |
+| `AXIARCH_DIFF_GUARD_MODE` | `warn` | v1.9.0+: diff guard の動作。`warn` / `block` / `off` / Diff guard mode |
+| `AXIARCH_DIFF_GUARD_MAX_LINES` | `400` | v1.9.0+: 追加+削除行数の閾値 / Added plus deleted line threshold |
+| `AXIARCH_DIFF_GUARD_MAX_FILES` | `20` | v1.9.0+: 変更ファイル数の閾値 / Changed file threshold |
+| `AXIARCH_DIFF_GUARD_INCLUDE_UNTRACKED` | `1` | v1.9.0+: untracked files を閾値計算に含める / Include untracked files in threshold calculation |
+| `AXIARCH_DIFF_GUARD_ALLOW` | unset | v1.9.0+: `1` で一時的にdiff guardをbypass / Set to `1` to bypass diff guard for one run |
 
 ### Out of Scope（外部検証困難・人間レビュー必須） / Manual Review Required
 
@@ -135,6 +142,36 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"/existing/file.md"}}' \
 
 - arXiv:2503.18666 — AgentSpec: Customizable Runtime Enforcement for AI Agents (ICSE'26) で 90%+ 阻止実証
 - arXiv:2502.15851 — Control Illusion: reminder-only enforcement の構造的限界
+
+---
+
+## `axiarch-diff-guard.sh`
+
+### 概要 / Overview
+
+`.claude/settings.json` または `.codex/hooks.json` の `PostToolUse` hook から呼ばれる外出しスクリプト。`Edit` / `MultiEdit` / `Write` 後に `git diff HEAD --numstat` と untracked files を測定し、変更行数または変更ファイル数が閾値を超えた場合に警告または block を返す。PreToolUse の Write遮断では拾いにくい「差分編集だが範囲が大きすぎる」ケースを検出しやすくする。
+
+Externalized PostToolUse hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. After `Edit`, `MultiEdit`, or `Write`, it measures `git diff HEAD --numstat` plus untracked files and warns or blocks when line/file thresholds are exceeded. This complements the Write-only PreToolUse guard by surfacing overly broad diff-based edits.
+
+### 使い方 / Usage
+
+通常はhook経由で自動実行される。単体確認では閾値を低くして実行する。
+
+```bash
+AXIARCH_DIFF_GUARD_MAX_LINES=1 \
+AXIARCH_DIFF_GUARD_MAX_FILES=1 \
+bash axiarch-scripts/axiarch-diff-guard.sh
+```
+
+### 環境変数 / Environment Variables
+
+| 変数 / Variable | デフォルト / Default | 説明 / Description |
+|:--|:--:|:--|
+| `AXIARCH_DIFF_GUARD_MODE` | `warn` | `warn`、`block`、`off` を選択 / Select warn, block, or off |
+| `AXIARCH_DIFF_GUARD_MAX_LINES` | `400` | 追加+削除行数の閾値 / Added plus deleted line threshold |
+| `AXIARCH_DIFF_GUARD_MAX_FILES` | `20` | 変更ファイル数の閾値 / Changed file threshold |
+| `AXIARCH_DIFF_GUARD_INCLUDE_UNTRACKED` | `1` | untracked files を含める / Include untracked files |
+| `AXIARCH_DIFF_GUARD_ALLOW` | unset | `1` で一回だけbypass / Set to `1` to bypass once |
 
 ---
 

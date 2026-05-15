@@ -8,7 +8,7 @@
 #
 # --quiet : suppress all output except errors (for pre-commit hook usage)
 #
-# Diagnoses Axiarch enforcement health across 14 verifiable stages spanning
+# Diagnoses Axiarch enforcement health across 15 verifiable stages spanning
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
 # protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), the v1.5.5
 # physical-block / bootstrap hooks, the v1.6.0 sublimated-file guide, and the
@@ -25,6 +25,7 @@
 #   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
+#   Check 15   v1.9 integration — PostToolUse diff guard + ancillary docs wiring
 #
 # Out of Scope (semantic judgment required, manual review):
 #   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
@@ -556,6 +557,92 @@ else
 fi
 
 # =============================================================================
+# Check 15: v1.9 Integration — PostToolUse Diff Guard + ancillary docs
+# Verifies that supported hook configs call axiarch-diff-guard.sh after Edit,
+# MultiEdit, and Write. This complements the PreToolUse Write-only block by
+# making large diff growth easier to detect after diff-based edits. It also
+# checks the common "new release feature, README not updated" integration gap.
+# =============================================================================
+print_section "Check 15: v1.9 integration (diff guard + docs)"
+DIFF_GUARD_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-diff-guard.sh"
+if [[ ! -f "${DIFF_GUARD_SCRIPT}" ]]; then
+  print_warn "axiarch-scripts/axiarch-diff-guard.sh not found — PostToolUse diff guard unavailable"
+  print_info "Re-run init.sh to redistribute the v1.9.0+ hook script"
+  EXIT_CODE=1
+elif [[ ! -x "${DIFF_GUARD_SCRIPT}" ]]; then
+  print_warn "axiarch-scripts/axiarch-diff-guard.sh exists but is not executable"
+  print_info "Run: chmod +x axiarch-scripts/axiarch-diff-guard.sh"
+  EXIT_CODE=1
+elif command -v jq &>/dev/null; then
+  DIFF_GUARD_CONFIGS=0
+  DIFF_GUARD_WIRED=0
+  for candidate in "${PROJECT_DIR}/.claude/settings.json" "${PROJECT_DIR}/.codex/hooks.json"; do
+    [[ -f "${candidate}" ]] || continue
+    DIFF_GUARD_CONFIGS=$((DIFF_GUARD_CONFIGS + 1))
+    if jq . "${candidate}" >/dev/null 2>&1; then
+      guard_count=$(jq '[.hooks.PostToolUse[]?.hooks[]?.command // empty | select(contains("axiarch-diff-guard.sh"))] | length' \
+        "${candidate}" 2>/dev/null || echo "0")
+      edit_count=$(jq '[.hooks.PostToolUse[]? | select((.matcher // "") == "Edit")] | length' \
+        "${candidate}" 2>/dev/null || echo "0")
+      multi_count=$(jq '[.hooks.PostToolUse[]? | select((.matcher // "") == "MultiEdit")] | length' \
+        "${candidate}" 2>/dev/null || echo "0")
+      write_count=$(jq '[.hooks.PostToolUse[]? | select((.matcher // "") == "Write")] | length' \
+        "${candidate}" 2>/dev/null || echo "0")
+      if [[ "${guard_count}" -gt 0 && "${edit_count}" -gt 0 && "${multi_count}" -gt 0 && "${write_count}" -gt 0 ]]; then
+        DIFF_GUARD_WIRED=$((DIFF_GUARD_WIRED + 1))
+        print_pass "PostToolUse diff guard wired in ${candidate}"
+      else
+        print_warn "PostToolUse diff guard incomplete in ${candidate}"
+        print_info "Expected Edit / MultiEdit / Write matchers calling axiarch-diff-guard.sh"
+        EXIT_CODE=1
+      fi
+    else
+      print_warn "Skipped invalid JSON: ${candidate}"
+      EXIT_CODE=1
+    fi
+  done
+  if [[ "${DIFF_GUARD_CONFIGS}" -eq 0 ]]; then
+    print_warn "No hook config found for PostToolUse diff guard"
+    EXIT_CODE=1
+  elif [[ "${DIFF_GUARD_WIRED}" -gt 0 ]]; then
+    print_info "Runtime mode: AXIARCH_DIFF_GUARD_MODE=${AXIARCH_DIFF_GUARD_MODE:-warn}, max lines=${AXIARCH_DIFF_GUARD_MAX_LINES:-400}, max files=${AXIARCH_DIFF_GUARD_MAX_FILES:-20}"
+  fi
+else
+  print_warn "jq not installed — cannot inspect PostToolUse wiring"
+  print_info "Script exists and is executable; install jq for full Check 15 diagnostics"
+fi
+
+DOCS_MISSING=0
+if [[ -f "${PROJECT_DIR}/README.md" ]]; then
+  if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+    print_pass "README.md includes v1.9 diff guard, memory, and 15-stage diagnostic references"
+  else
+    print_warn "README.md may be missing v1.9 integration references"
+    DOCS_MISSING=1
+  fi
+else
+  print_warn "README.md not found — skipping v1.9 README integration check"
+fi
+
+if [[ -f "${PROJECT_DIR}/axiarch-scripts/README.md" ]]; then
+  if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+    && grep -q "15-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
+    print_pass "axiarch-scripts/README.md includes v1.9 diff guard and 15-stage diagnostic references"
+  else
+    print_warn "axiarch-scripts/README.md may be missing v1.9 integration references"
+    DOCS_MISSING=1
+  fi
+else
+  print_warn "axiarch-scripts/README.md not found — skipping script README integration check"
+fi
+
+if [[ "${DOCS_MISSING}" -ne 0 ]]; then
+  EXIT_CODE=1
+fi
+
+# =============================================================================
 # Out-of-Scope Notice
 # =============================================================================
 print_section "Out of Scope (Manual Review Required)"
@@ -572,9 +659,9 @@ print_info "(§6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Che
 print_section "Summary"
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_pass "All automated checks passed across hook + crystallization + AGENTS protocols"
-  print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (3) + Bootstrap + Task Boundary"
+  print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (4) + Bootstrap + Task Boundary + Diff Guard + Docs Integration"
   print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
-  print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary)"
+  print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard)"
 else
   print_warn "Some checks failed/warned — see above for which protocol the AI is slacking on"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"

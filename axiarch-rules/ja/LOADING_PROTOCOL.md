@@ -20,15 +20,16 @@
 
 ## 🛡️ Hook補強機構（HOOK REINFORCEMENT MECHANISM）🛡️
 
-**Claude Code または Codex の hook 構成を採用するプロジェクトには、`.claude/settings.json` または `.codex/hooks.json` に 3 種類のフックが配置される**：
+**Claude Code または Codex の hook 構成を採用するプロジェクトには、`.claude/settings.json` または `.codex/hooks.json` に 4 種類のフックが配置される**：
 
 | フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
 |:--|:--|:--|:--|
 | `SessionStart` | 会話開始時 | `task.md` 自動ブートストラップ + AGENTS.md §8 (Documentation Requirements) reminder 注入 | `axiarch-scripts/axiarch-init-task-md.sh` |
 | `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
+| `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
 
-**この 3 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は **Reminder に加えて Physical Block も使う** 補強機構（参考: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防ぎきれない §6 違反のリスクを下げる。
+**この 4 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は **Reminder に加えて Physical Block も使う** 補強機構（参考: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防ぎきれない §6 違反のリスクを下げる。
 
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
@@ -36,7 +37,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。3 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart）を含む 14 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）を含む 15 段階の axiarch 標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
