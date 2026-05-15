@@ -256,9 +256,9 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は現在のソーススナップショットを導入します。このブランチ上の v1.9.0 作業は `1.9.0-dev` であり、正式安定版として扱いません。タグ固定の導入が必要な場合は、該当リリースタグを指す `AXIARCH_REF=tags/vX.Y.Z` を使ってください。
+> **JA**: `main` ブランチの `init.sh` は現在のソーススナップショットを導入します。このブランチ上の v1.9.0 作業は `1.9.0-dev` であり、正式安定版として扱いません。タグ固定の導入が必要な場合は、該当リリースタグを指す `AXIARCH_REF=tags/vX.Y.Z` を右辺の `bash` に渡してください。
 >
-> **EN**: The `main`-branch `init.sh` installs the current source snapshot. v1.9.0 work on this branch is `1.9.0-dev`, not a stable release. For pinned stable installs, point `AXIARCH_REF=tags/vX.Y.Z` at the intended release tag.
+> **EN**: The `main`-branch `init.sh` installs the current source snapshot. v1.9.0 work on this branch is `1.9.0-dev`, not a stable release. For pinned stable installs, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
 
 ### 必須ファイル一覧 / Required Files
 
@@ -353,6 +353,9 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 ```bash
 # 推奨: init.sh で自動セットアップ / Recommended: Auto-setup with init.sh
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
+
+# 安定版タグ固定 / Pinned stable tag
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.8.2 bash
 
 # または手動でコピー / Or copy manually:
 # 必須の2つだけコピー / Copy only the 2 required items

@@ -15,6 +15,10 @@ else
   DEFAULT_AXIARCH_REF="tags/v${AXIARCH_VERSION}"
 fi
 AXIARCH_REF="${AXIARCH_REF:-$DEFAULT_AXIARCH_REF}"
+INSTALL_LABEL="$AXIARCH_VERSION"
+if [[ "$AXIARCH_REF" =~ ^tags/v(.+)$ ]]; then
+  INSTALL_LABEL="${BASH_REMATCH[1]}"
+fi
 TARBALL_URL="${REPO_URL}/archive/refs/${AXIARCH_REF}.tar.gz"
 
 # --- Color helpers ---
@@ -23,7 +27,8 @@ BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 
 print_header() {
   echo ""
-  echo -e "${BOLD}${CYAN}🏰 Axiarch v${AXIARCH_VERSION} — Quick Setup${RESET}"
+  echo -e "${BOLD}${CYAN}🏰 Axiarch installer v${AXIARCH_VERSION} — Quick Setup${RESET}"
+  echo -e "${CYAN}   Installing: Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}${RESET}"
   echo -e "${CYAN}   Constitution-Driven AI Agent Governance Framework${RESET}"
   echo -e "${CYAN}   ${REPO_URL}${RESET}"
   echo ""
@@ -258,7 +263,7 @@ NEWHOOK
 # =============================================================================
 prepare_source() {
   if $IS_REMOTE; then
-    print_step "4" "Downloading Axiarch ${AXIARCH_VERSION} from ${AXIARCH_REF}..."
+    print_step "4" "Downloading Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}..."
     TMP_DIR="$(mktemp -d)"
     trap 'rm -rf "$TMP_DIR"' EXIT
 
