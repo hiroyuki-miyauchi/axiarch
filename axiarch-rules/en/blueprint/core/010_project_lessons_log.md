@@ -68,6 +68,16 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 ---
 
+### [2026-05-15] Keep CHANGELOG reference definitions in sync with headings
+**Domain:** Operations
+**Target Folder:** blueprint/operations/
+**Context:** The v1.9.0 release finalization changed the top `CHANGELOG.md` section from `[Unreleased]` to `[1.9.0]`.
+**Problem:** The `[Unreleased]` heading was removed, but the trailing `[Unreleased]: ...` reference definition remained, causing Markdown Lint MD053 to fail in CI.
+**Solution/Rule:** Keep CHANGELOG link reference definitions synchronized with actual headings. When finalizing a release and removing the `[Unreleased]` heading, also remove the `[Unreleased]: ...` definition. `check-axiarch-health.sh` Check 15 verifies parity between the Unreleased heading and reference definition.
+**Reference:** `CHANGELOG.md`, `axiarch-scripts/check-axiarch-health.sh`, GitHub Actions run `25918646516`
+
+---
+
 ## Appendix A: Reverse Index & Cross-Reference
 
 ### Recommended Domain Categories

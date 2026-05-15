@@ -68,6 +68,16 @@
 
 ---
 
+### [2026-05-15] CHANGELOGの参照定義は見出しと同期する
+**Domain:** 運用
+**Target Folder:** blueprint/operations/
+**Context:** v1.9.0正式化で `CHANGELOG.md` の先頭を `[Unreleased]` から `[1.9.0]` に変更した。
+**Problem:** `[Unreleased]` 見出しを削除した一方、末尾の `[Unreleased]: ...` 参照定義が残り、Markdown Lintの MD053 がCIで失敗した。
+**Solution/Rule:** `CHANGELOG.md` のリンク参照定義は実際の見出しと同期させる。正式リリース化で `[Unreleased]` 見出しを外す場合は `[Unreleased]: ...` 定義も削除する。`check-axiarch-health.sh` Check 15 で Unreleased 見出しと参照定義の一致を検査する。
+**Reference:** `CHANGELOG.md`, `axiarch-scripts/check-axiarch-health.sh`, GitHub Actions run `25918646516`
+
+---
+
 ## Appendix A: 逆引き索引 & クロスリファレンス
 
 ### 推奨ドメインカテゴリ
