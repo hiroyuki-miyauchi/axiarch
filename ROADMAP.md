@@ -1,7 +1,8 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.9.0 🧠 Memory Persistence & Glob-Scoped Rules\
-> **ステータス / Status**: Actively Maintained ✅
+> **現在の安定版 / Current Stable**: v1.8.2 Native Codex Environment Integration\
+> **次期作業 / Next**: v1.9.0 Memory Persistence & Glob-Scoped Rules（初期実装中 / unreleased）\
+> **ステータス / Status**: Actively Maintained
 
 ---
 
@@ -464,8 +465,8 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
   `axiarch-rules/{lang}/universal/{domain}/` の `paths:` frontmatter
   仕様候補を README に追加。Universal本文への一括付与は検証後に実施
 - **初期実装: Memory Persistence 強化** — Windsurf Cascade Memories / Codeium Memories
-  相当の自動 memory 機構を `.claude/memory/MEMORY.md`
-  ベースで設計。過去会話との連動で「同じ違反を繰り返す」問題に対処
+  の考え方を参考に、`.claude/memory/MEMORY.md`
+  を任意テンプレートとして追加。会話全文や秘密情報は保存せず、実際に起きた再発防止事項だけを短く残す補助層として扱う
 - **Aider 流 prompt cache 最適化** — `axiarch-rules/{lang}/universal/`
   を「読み取り専用」として宣言し Anthropic prompt caching API の `cache_control`
   対象とする hook 改修。毎ターン全文注入のコスト課題解決（v1.6.0 reminder TTL
@@ -1022,10 +1023,11 @@ Tier-2 items are now organised under v1.9.0.
   Declare `globs: "**/*"` in `.cursor/rules/axiarch.mdc` and document the
   future `paths:` frontmatter schema for `axiarch-rules/{lang}/universal/{domain}/`.
   Bulk frontmatter insertion into Universal files remains deferred until validation.
-- **Initial implementation: Memory Persistence enhancement** — Auto-memory mechanism mirroring Windsurf
-  Cascade Memories / Codeium Memories, designed around
-  `.claude/memory/MEMORY.md`. Addresses the "AI repeats the same violation"
-  problem via persistent context
+- **Initial implementation: Memory Persistence enhancement** — Adds
+  `.claude/memory/MEMORY.md` as an optional template inspired by the operating
+  model of Windsurf Cascade Memories / Codeium Memories. It does not store full
+  conversations or secrets; it is only a short auxiliary layer for recurrence
+  prevention notes from events that actually happened
 - **Aider-style prompt-cache optimisation** — Declare
   `axiarch-rules/{lang}/universal/` as read-only and target Anthropic
   prompt-caching API `cache_control`. Solves the per-turn full-injection cost

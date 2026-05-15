@@ -557,11 +557,13 @@ else
 fi
 
 # =============================================================================
-# Check 15: v1.9 Integration — PostToolUse Diff Guard + ancillary docs
+# Check 15: v1.9 Integration — PostToolUse Diff Guard + source docs
 # Verifies that supported hook configs call axiarch-diff-guard.sh after Edit,
 # MultiEdit, and Write. This complements the PreToolUse Write-only block by
-# making large diff growth easier to detect after diff-based edits. It also
-# checks the common "new release feature, README not updated" integration gap.
+# making large diff growth easier to detect after diff-based edits. In the
+# Axiarch source repository only, it also checks the common "new release
+# feature, README not updated" integration gap. Adopter project README files
+# are intentionally not treated as Axiarch release documentation.
 # =============================================================================
 print_section "Check 15: v1.9 integration (diff guard + docs)"
 DIFF_GUARD_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-diff-guard.sh"
@@ -612,34 +614,48 @@ else
   print_info "Script exists and is executable; install jq for full Check 15 diagnostics"
 fi
 
-DOCS_MISSING=0
-if [[ -f "${PROJECT_DIR}/README.md" ]]; then
-  if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
-    && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
-    && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null; then
-    print_pass "README.md includes v1.9 diff guard, memory, and 15-stage diagnostic references"
-  else
-    print_warn "README.md may be missing v1.9 integration references"
-    DOCS_MISSING=1
-  fi
-else
-  print_warn "README.md not found — skipping v1.9 README integration check"
+IS_AXIARCH_SOURCE_REPO=0
+if [[ -f "${PROJECT_DIR}/MARKET_STRATEGY.md" \
+   && -f "${PROJECT_DIR}/ROADMAP.md" \
+   && -f "${PROJECT_DIR}/CHANGELOG.md" \
+   && -f "${PROJECT_DIR}/llms-full.txt" ]]; then
+  IS_AXIARCH_SOURCE_REPO=1
 fi
 
-if [[ -f "${PROJECT_DIR}/axiarch-scripts/README.md" ]]; then
-  if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
-    && grep -q "15-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
-    print_pass "axiarch-scripts/README.md includes v1.9 diff guard and 15-stage diagnostic references"
+if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
+  DOCS_MISSING=0
+  if [[ -f "${PROJECT_DIR}/README.md" ]]; then
+    if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      print_pass "Axiarch source README.md includes v1.9 diff guard, memory, and 15-stage diagnostic references"
+    else
+      print_warn "Axiarch source README.md may be missing v1.9 integration references"
+      DOCS_MISSING=1
+    fi
   else
-    print_warn "axiarch-scripts/README.md may be missing v1.9 integration references"
+    print_warn "Axiarch source README.md not found — cannot verify v1.9 README integration"
     DOCS_MISSING=1
   fi
-else
-  print_warn "axiarch-scripts/README.md not found — skipping script README integration check"
-fi
 
-if [[ "${DOCS_MISSING}" -ne 0 ]]; then
-  EXIT_CODE=1
+  if [[ -f "${PROJECT_DIR}/axiarch-scripts/README.md" ]]; then
+    if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "15-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
+      print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard and 15-stage diagnostic references"
+    else
+      print_warn "Axiarch source axiarch-scripts/README.md may be missing v1.9 integration references"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source axiarch-scripts/README.md not found — cannot verify script README integration"
+    DOCS_MISSING=1
+  fi
+
+  if [[ "${DOCS_MISSING}" -ne 0 ]]; then
+    EXIT_CODE=1
+  fi
+else
+  print_info "Adopter project detected — skipping Axiarch source README integration checks"
 fi
 
 # =============================================================================
@@ -658,7 +674,8 @@ print_info "(§6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Che
 # =============================================================================
 print_section "Summary"
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
-  print_pass "All automated checks passed across hook + crystallization + AGENTS protocols"
+  print_pass "No blocking automated check failures across hook + crystallization + AGENTS protocols"
+  print_info "If warnings appeared above, review them before treating the project state as fully clean"
   print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (4) + Bootstrap + Task Boundary + Diff Guard + Docs Integration"
   print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
   print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard)"

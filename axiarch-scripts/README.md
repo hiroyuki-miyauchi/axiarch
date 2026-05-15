@@ -55,7 +55,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 | 12 | Bootstrap | SessionStart hook 配線確認 / SessionStart hook wiring — **v1.5.5+** |
 | 13 | Sublimated Index | 既存の `blueprint/{domain}/{NNN}_*.md` を一覧表示し APPEND を促進 / Lists existing sublimated files to promote APPEND — **v1.6.0+** |
 | 14 | Task Boundary | Check D wiring 確認（`axiarch-boot-reminder.sh` に VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT 含有を確認） / Verifies Check D wiring in `axiarch-boot-reminder.sh` — **v1.8.0+** |
-| 15 | v1.9 Integration | PostToolUse diff guard 配線確認（`axiarch-diff-guard.sh` + Edit / MultiEdit / Write matcher）+ README系反映確認 / Verifies PostToolUse diff guard wiring plus README integration — **v1.9.0+** |
+| 15 | v1.9 Integration | PostToolUse diff guard 配線確認（`axiarch-diff-guard.sh` + Edit / MultiEdit / Write matcher）+ Axiarch本体リポジトリでのみREADME系反映確認 / Verifies PostToolUse diff guard wiring, plus README integration only in the Axiarch source repository — **v1.9.0+** |
 
 ### 環境変数 / Environment Variables（v1.6.0+, extended in v1.8.0+）
 
@@ -79,7 +79,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 
 ### Exit Code
 
-- `0` — 全自動チェック通過 / All automated checks passed
+- `0` — ブロッキング失敗なし。警告が出た場合は人間レビュー対象 / No blocking automated failures. Review any warnings manually
 - `1` — 1 件以上の violation / At least one violation detected
 
 ---

@@ -7,13 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.9.0] — 2026-05-15
+## [Unreleased] — v1.9.0 Initial Implementation
 
 ### 🧠 Memory Persistence & Glob-Scoped Rules / Memory Persistence と Glob-Scoped Rules 初期実装
 
-v1.9.0前の価値最大化コミット（`0489174`）と分離し、Tier 2候補のうち運用検証しやすい初期実装を追加。Hook補強を4層化し、Memoryテンプレート、Cursor globs導線、shellcheck CI、配布後構文検証、Check 15を導入。
+v1.9.0前の価値最大化コミット（`0489174`）と分離し、Tier 2候補のうち運用検証しやすい初期実装を追加。現時点では未リリースの作業ブランチ上の変更として扱い、Hook補強の4層化、Memoryテンプレート、Cursor globs導線、shellcheck CI、配布後構文検証、Check 15を導入。
 
-Separated from the pre-v1.9 value-maximization commit (`0489174`) and added the initial Tier-2 implementation that can be validated in real workflows: four-layer hook reinforcement, memory template, Cursor globs entrypoint, shellcheck CI, post-copy syntax validation, and Check 15.
+Separated from the pre-v1.9 value-maximization commit (`0489174`) and added the initial Tier-2 implementation that can be validated in real workflows. This is currently treated as unreleased branch work and introduces four-layer hook reinforcement, memory template, Cursor globs entrypoint, shellcheck CI, post-copy syntax validation, and Check 15.
 
 ### Added
 
@@ -25,7 +25,7 @@ Separated from the pre-v1.9 value-maximization commit (`0489174`) and added the 
 
 ### Changed
 
-- **`axiarch-scripts/check-axiarch-health.sh`** — 14段階診断から15段階診断へ拡張。Check 15でv1.9.0 diff guard配線とREADME系反映を検査 / Extended health diagnostics from 14 to 15 stages; Check 15 verifies v1.9.0 diff guard wiring and README integration
+- **`axiarch-scripts/check-axiarch-health.sh`** — 14段階診断から15段階診断へ拡張。Check 15でv1.9.0 diff guard配線を検査し、Axiarch本体リポジトリでのみREADME系反映も検査 / Extended health diagnostics from 14 to 15 stages; Check 15 verifies v1.9.0 diff guard wiring and checks README integration only in the Axiarch source repository
 - **`init.sh`** — `AXIARCH_VERSION` を1.9.0へ更新し、配布後 `bash -n` 検証とClaude memoryテンプレートの非破壊コピーを追加 / Bumped to 1.9.0, added post-copy `bash -n` validation and non-destructive Claude memory template copy
 - **`README.md` / `axiarch-scripts/README.md` / `llms.txt` / `llms-full.txt` / `ROADMAP.md`** — 4 hooks、15-stage診断、Memory Persistence、Glob-Scoped Rules、diff guardの説明へ更新 / Updated docs for four hooks, 15-stage diagnostics, Memory Persistence, Glob-Scoped Rules, and diff guard
 
@@ -797,7 +797,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
-[1.9.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...v1.9.0
+[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...HEAD
 [1.8.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.6.0...v1.8.0
