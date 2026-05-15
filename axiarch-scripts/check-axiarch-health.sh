@@ -569,7 +569,7 @@ print_section "Check 15: v1.9 integration (diff guard + docs)"
 DIFF_GUARD_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-diff-guard.sh"
 if [[ ! -f "${DIFF_GUARD_SCRIPT}" ]]; then
   print_warn "axiarch-scripts/axiarch-diff-guard.sh not found — PostToolUse diff guard unavailable"
-  print_info "Re-run init.sh to redistribute the v1.9.0+ hook script"
+  print_info "Re-run init.sh to redistribute the v1.9.0 hook script"
   EXIT_CODE=1
 elif [[ ! -x "${DIFF_GUARD_SCRIPT}" ]]; then
   print_warn "axiarch-scripts/axiarch-diff-guard.sh exists but is not executable"

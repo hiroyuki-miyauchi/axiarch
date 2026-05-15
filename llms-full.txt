@@ -1,7 +1,7 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Stable Version: 1.8.2 | Draft Version: 1.9.0-dev initial implementation | License: Apache 2.0
+> Stable Version: 1.9.0 | License: Apache 2.0
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that reduces the risk of quality
@@ -352,14 +352,14 @@ Optional reusable prompt templates organized by role:
 
 ## Quick Start
 
-Note: the main-branch installer follows the current source snapshot. v1.9.0 work is `1.9.0-dev`; for pinned stable installs, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
+Note: the main-branch installer installs Axiarch v1.9.0 by default from `tags/v1.9.0`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
 
 ```bash
 # Option 1: Interactive setup (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # Option 1b: Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.8.2 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.9.0 bash
 
 # Option 2: Manual copy
 cp AGENTS.md /path/to/your/project/
