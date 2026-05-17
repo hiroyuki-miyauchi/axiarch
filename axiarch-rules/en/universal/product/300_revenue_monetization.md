@@ -1200,7 +1200,7 @@
     including Digital Services Tax (DST), US State Sales Tax (Economic Nexus),
     and EU VAT Reverse Charge.
   - **Law**: Build a global tax engine to automate multi-jurisdictional taxation
-    and completely eliminate manual calculations.
+    and reduce reliance on manual calculations.
   - **Tax Automation Requirements**:
 
     | Tax Requirement                | Target Region              | Automation Content                                                               |

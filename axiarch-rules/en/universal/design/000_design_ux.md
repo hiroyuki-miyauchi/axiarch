@@ -241,7 +241,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: "Works on PC so OK" is an excuse hiding responsive design flaws; unverified changes are "incomplete".
     -   **Action**: For ALL feature additions/UI implementations, verify and guarantee "beauty" and "functionality" across these 3 environments as **top priority**:
         1. **SP (Mobile)**: Portrait (Width < 640px)
-        2. **Tablet**: Portrait/Landscape (Width 768px ～ 1280px) ※Watch for iPad portrait breakage.
+        2. **Tablet**: Portrait/Landscape (Width 768px - 1280px) Note: Watch for iPad portrait breakage.
         3. **PC (Desktop)**: Full size (Width > 1280px)
     -   **Checklist**:
         -   No element overlap?
@@ -1410,7 +1410,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         ↓
     Implementation (Code)
         ↓
-    【Design QA】← Required step
+    [Design QA]← Required step
       ├── Visual comparison with Figma design (using Dev Mode)
       ├── Visual regression test approval (Chromatic, etc.)
       ├── A11y automated check (axe-core CI)

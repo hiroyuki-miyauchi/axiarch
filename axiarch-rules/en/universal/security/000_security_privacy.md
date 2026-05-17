@@ -1335,7 +1335,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 | **Crypto-Agility Design** | End of 2026 | Introduce architecture enabling easy algorithm replacement |
 | **Hybrid TLS** | 2026-2027 | Prioritize `X25519MLKEM768` (RFC 9258). Phased rollout monitoring browser/CDN support |
 | **RSA/ECC Deprecation** | 2030 | Phase out existing crypto per NIST recommendations |
-| **Full PQC Migration** | 2035 | Complete elimination of quantum-vulnerable algorithms |
+| **Full PQC Migration** | 2035 | Complete phased migration away from quantum-vulnerable algorithms |
 
 -   **Harvest Now, Decrypt Later (HNDL)**: Risk of currently captured encrypted data being decrypted by future quantum computers. Consider PQC hybrid encryption **immediately** for long-term confidential data.
 -   **TLS Post-Quantum Extension (RFC 9258)**:

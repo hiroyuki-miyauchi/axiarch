@@ -831,7 +831,7 @@ class SearchViewModel @Inject constructor(
 
 ### §58. Swift Concurrency Best Practices
 
-- **`async/await`**: Completely eliminate callbacks. Enforce Structured Concurrency
+- **`async/await`**: Replace callback-heavy flows with structured `async/await` where practical. Enforce Structured Concurrency
 - **`TaskGroup`**: Parallel execution and result aggregation of multiple tasks
 - **Actor**: Thread-safe access to shared mutable state. Avoid excessive isolation
 - **Task Cancellation**: Cooperative cancellation via `Task.checkCancellation()`

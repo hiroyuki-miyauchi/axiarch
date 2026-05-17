@@ -404,7 +404,7 @@ sbom:
 ### 9.2 OIDC Trusted Publishing
 
 - **ルール**: パッケージ公開は **OIDC Trusted Publishing** を唯一の方法とする（§31参照）
-- **ルール**: 長期アクセストークンの使用を**完全禁止**する（npm/PyPI/GitHub Packages共通）
+- **ルール**: 長期アクセストークンの使用を原則禁止する（npm/PyPI/GitHub Packages共通）
 
 ### 9.3 GitHub Artifact Attestation
 
@@ -863,7 +863,7 @@ flowchart TD
 - **ルール**: SBOMを使用してリリース済みビルドへの影響範囲を特定する
 - **ルール**: `npm token revoke` 等で漏洩した可能性のある認証情報を即座に無効化する
 - **ルール**: ポストモーテムの結果を教訓ログ（`core/010_project_lessons_log.md`）に記録する
-- **ルール**: publishing tokenを長期トークンからOIDC Trusted Publishingへ移行し、窃取リスクを排除する
+- **ルール**: publishing tokenを長期トークンからOIDC Trusted Publishingへ移行し、窃取リスクを低減する
 - **ルール**: メンテナアカウントの2FA/WebAuthnを必須化し、phishing攻撃によるアカウント乗っ取りを防止する
 - **ルール**: 自己複製型マルウェア（Shai-Hulud型）への対策として、CIでネットワーク隔離ビルドを検討する
 
@@ -1077,7 +1077,7 @@ phases:
     actions:
       - 暗号資産インベントリ（CBOM生成）完了
       - TLS 1.3への全面移行完了
-      - SHA-1 / MD5の完全排除確認
+      - SHA-1 / MD5の廃止状況確認
   - phase: 2  # 2027 Q1-Q2
     actions:
       - ハイブリッドモード導入（X25519MLKEM768等）
@@ -1146,7 +1146,7 @@ cyclonedx merge \
 | 対策 | 必須/推奨 | 詳細 |
 |:----|:---------|:-----|
 | 2FA（WebAuthn/TOTP） | **必須** | 全メンテナアカウントで有効化。WebAuthn優先（phishing耐性） |
-| OIDC Trusted Publishing | **必須** | npm GA (2025-07)。長期トークンを完全排除 |
+| OIDC Trusted Publishing | **必須** | npm GA (2025-07)。対応環境では長期トークンをOIDCへ置換 |
 | `npm access` 最小権限 | **必須** | 公開権限を最小限のメンテナに限定 |
 | Granular Access Token | 廃止移行中 | OIDC TP完全移行までの暫定措置。90日ローテーション |
 
@@ -2758,7 +2758,7 @@ jobs:
 ### 61.5 ルール
 
 - **ルール**: 全リリースSBOMを **OCI Artifact形式** でContainer Registry（GHCR/ECR/GCR等）に格納し、コンテナイメージと同一リポジトリで管理する
-- **ルール**: SBOMに `cosign attest` で署名し、消費者が `cosign verify-attestation` で真正性を検証できる状態を保証する
+- **ルール**: SBOMに `cosign attest` で署名し、消費者が `cosign verify-attestation` で真正性を確認できる検証可能な証跡を提供する
 - **ルール**: **Dependency-Track**または同等のSBOM管理プラットフォームに全プロジェクトのSBOMを自動アップロードし、横断的な脆弱性照合を実現する
 - **ルール**: SBOM Federationの参照アーキテクチャとして、ORAS（OCI Registry as Storage）CLI を標準ツールとして採用する
 - **ルール**: 外部パートナー・顧客向けにSBOMを提供する場合、OCI Artifact URL（+ 署名検証手順）を納品物に含める
@@ -2982,4 +2982,3 @@ def compute_slo_report(metrics: dict) -> dict:
 | §29 | 構造バグ修正: `29.3 暗号アジリティチェックリスト` の二重定義を解消 |
 | 目次 | §59-§63エントリを追加 |
 | Appendix A | §59-§63の逆引きキーワードを追記要 |
-

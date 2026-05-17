@@ -328,13 +328,13 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ### 4.2. Automated Detection Script（推奨）
 
 - **Law**: 大規模プロジェクトでは手動確認は形骸化する。**自動検出スクリプト** を CI / pre-commit に組み込むこと。
-- **Reference Implementation**: `scripts/check-git-config-clean.sh` — axiarch 標準配布の自動検出/修復スクリプト
+- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — axiarch 標準配布の自動検出/修復スクリプト
 - **使用例**:
 
 ```bash
-./scripts/check-git-config-clean.sh         # 検出のみ（exit 1 if dirty）
-./scripts/check-git-config-clean.sh --fix   # 検出 + 自動修復
-./scripts/check-git-config-clean.sh --quiet # CI 用サイレントモード（汚染なら exit 1）
+./axiarch-scripts/check-git-config-clean.sh         # 検出のみ（exit 1 if dirty）
+./axiarch-scripts/check-git-config-clean.sh --fix   # 検出 + 自動修復
+./axiarch-scripts/check-git-config-clean.sh --quiet # CI 用サイレントモード（汚染なら exit 1）
 ```
 
 ### 4.3. AI Agent 並行使用時の追加注意
@@ -342,7 +342,7 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 - **Context**: Claude Code と Antigravity を並行使用する場合、Claude Code の worktree 操作が Antigravity を破綻させる。
 - **Mitigation**:
     1. 単一 AI Agent 運用に集約（推奨）
-    2. 並行運用時は `scripts/check-git-config-clean.sh --fix` を頻繁に実行
+    2. 並行運用時は `axiarch-scripts/check-git-config-clean.sh --fix` を頻繁に実行
     3. AI Agent 終了時 / 切替時に必ずクリーンアップ実行
 
 ### 4.4. Recurrence Documentation（再発履歴・観測例）

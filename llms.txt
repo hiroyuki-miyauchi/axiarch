@@ -22,44 +22,50 @@ Axiarch mitigates these risks by defining a quality floor and autonomous context
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Production-validated with Google Antigravity; primary targets: OpenAI Codex and Claude Code. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
+  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Primary targets: OpenAI Codex, Claude Code, and Google Antigravity; Google Antigravity is production-validated. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
   - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
-  - `axiarch-prompts/` — Optional reusable audit/QA prompt templates that make Layer 1/2 rules easier to apply to specific tasks.
+  - `axiarch-prompts/` — Optional reusable audit/QA/upgrade execution prompt templates that make Layer 1/2 rules easier to apply to specific tasks.
 
 ## Key Protocols
 
-- **LOADING_PROTOCOL.md**: 5-step rule hierarchy loading sequence
-- **CRYSTALLIZATION_PROTOCOL.md**: Automatic lesson-to-rule conversion
+- **axiarch-rules/{lang}/LOADING_PROTOCOL.md**: 5-step rule hierarchy loading sequence
+- **axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md**: Automatic lesson-to-rule conversion
 - **Boot Sequence Protocol**: Mitigates hallucination risk by enforcing rules-first behavior
 - **Blueprint First**: Specs required before code for major changes
 - **Deployment Ban Protocol**: No `git push` without explicit user approval
 
 ## Quick Start
 
-Note: the main-branch installer installs Axiarch v1.9.0 by default from `tags/v1.9.0`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
+Note: the main-branch installer installs Axiarch v1.10.0 by default from `tags/v1.10.0`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
 
 ```bash
 # Option 1: Interactive setup script (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # Option 1b: Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.9.0 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.10.0 bash
 
 # Option 2: Manual copy
 cp AGENTS.md /path/to/your/project/
 cp -r axiarch-rules /path/to/your/project/
+
+# Optional: safe-upgrade metadata and scripts
+cp axiarch-manifest.json /path/to/your/project/
+cp -r axiarch-scripts /path/to/your/project/
 ```
+
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.10.0 --dry-run`. Older adopters that do not yet have the helper can bootstrap it temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.10.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.10.0 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies source release-file Git tracking for v1.10.0 core release files; adopter projects skip that source-only tracking check.
 
 ## Compatibility
 
 | Agent | Status |
 |:------|:-------|
-| Google Antigravity | ✅ Verified primary — validated through real production sessions |
 | OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard while validation evidence is being accumulated |
 | Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); validation evidence being accumulated |
+| Google Antigravity | ✅ Verified primary — validated through real production sessions |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |
 | Windsurf / Aider / Zed | ⚠️ Extended or unverified candidates; not operation-guaranteed |

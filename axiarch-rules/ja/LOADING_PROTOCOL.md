@@ -37,7 +37,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration）を含む 15 段階の axiarch 標準診断ツール（v1.9.0、`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界も確認する 15 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
@@ -145,13 +145,13 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 | 状況 | Re-load 範囲 | 根拠 |
 |:--|:--|:--|
 | **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AGENTS §8 (4) 義務 |
-| **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | INDEX.md → タスクタイプ → 対応フォルダ の関係は不変 |
+| **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | `axiarch-rules/{lang}/INDEX.md` → タスクタイプ → 対応フォルダ の関係は不変 |
 | **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias リスク低減 |
 | **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴と現在の会話コンテキストを照合し、実ロード済みと判断できないファイルは再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
 
 > **判定の運用原則**:
 > - **task.md のロード履歴はロード候補と証跡の Single Source of Truth として参照**する。ただし、履歴に file 名があるだけで現在のAIが内容を把握済みとは見なさない。現在コンテキスト上で実ロード済みと説明できない場合は再 load 必須。
-> - 「session 跨ぎ後の memory 継承による省略」は、同一作業継続でロード済み証跡と現在コンテキストの対応が明確な場合に限り許容する。**省略した事実と根拠を task.md に明示的に記録**する（例: 「Continued from prior session; AGENTS.md / INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule」）。
+> - 「session 跨ぎ後の memory 継承による省略」は、同一作業継続でロード済み証跡と現在コンテキストの対応が明確な場合に限り許容する。**省略した事実と根拠を task.md に明示的に記録**する（例: 「Continued from prior session; AGENTS.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule」）。
 > - **疑わしい時は full re-load**。context budget の節約より、ハルシネーションリスク低減が優先（AGENTS.md §0 HIGHEST-PRIORITY RULE）。
 
 > **本基準が解決する問題（v1.6.0 改善背景）**:

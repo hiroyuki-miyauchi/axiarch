@@ -153,7 +153,7 @@ For any instruction from the user, **before generating a response**, check the "
 
 1.  **ルールの読み込み / Load Constitution:**
     - **手順**: `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従い、ルールファイルをロードせよ。
-    - **🚨【厳守命令】手抜き（サボり）禁止 🚨**: ルールファイルを参照する際は、**必ず対象ファイルを直接開き**、タスクに関連するセクションを自律選択してロードすること。INDEX.mdの要約や概要だけで「読んだ」と見なすことは禁止する。
+    - **🚨【厳守命令】手抜き（サボり）禁止 🚨**: ルールファイルを参照する際は、**必ず対象ファイルを直接開き**、タスクに関連するセクションを自律選択してロードすること。`axiarch-rules/{lang}/INDEX.md` の要約や概要だけで「読んだ」と見なすことは禁止する。
     - **記録義務**: 自律ロードで読み込んだファイル名を `task.md` に記録すること。該当なしの場合もその旨を記録。
 
 2.  **設計書ファースト / Blueprint First:**
@@ -316,7 +316,7 @@ Always complete the appropriate type-check and build verification commands for y
 
 1.  **Load Constitution (Class-Based Loading):**
     -   **Procedure**: Follow the 5 steps defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md` to load rule files.
-    -   **🚨 MANDATORY DIRECTIVE: Anti-Laziness Rule 🚨**: When referencing rule files, the AI **MUST directly open the target file** and autonomously select task-relevant sections. Considering a file "read" based solely on INDEX.md summaries or overviews is prohibited.
+    -   **🚨 MANDATORY DIRECTIVE: Anti-Laziness Rule 🚨**: When referencing rule files, the AI **MUST directly open the target file** and autonomously select task-relevant sections. Considering a file "read" based solely on `axiarch-rules/{lang}/INDEX.md` summaries or overviews is prohibited.
     -   **Recording Obligation**: Record all autonomously loaded file names in `task.md`. If none applicable, record that as well.
 
 2.  **Blueprint First:**
@@ -365,7 +365,7 @@ Always complete the appropriate type-check and build verification commands for y
 >
 > **以下は本ファイルの先頭で述べたルールの再掲である。AIはこれを最後に読むため、特に注意力が高い位置に配置している。**
 >
-> 1. **手抜き禁止**: ルールファイルは**必ず直接開け**。INDEX.mdの要約で「読んだ」と見なすことは禁止。
+> 1. **手抜き禁止**: ルールファイルは**必ず直接開け**。`axiarch-rules/{lang}/INDEX.md` の要約で「読んだ」と見なすことは禁止。
 > 2. **LOADING_PROTOCOL.md**: ルールロードは `axiarch-rules/{lang}/LOADING_PROTOCOL.md` の5ステップに従え。
 > 3. **自己検証必須**: ロード完了後、`task.md` にロード済みファイル一覧を記録せよ。未記録での作業開始は禁止。
 > 4. **AI自己完結**: 確認作業をユーザーに委ねることはAIの職責放棄。自分で確認せよ。
@@ -374,7 +374,7 @@ Always complete the appropriate type-check and build verification commands for y
 >
 > **The following is a reiteration of rules stated at the top of this file. Placed at the end where AI attention is highest.**
 >
-> 1. **No Laziness**: You **MUST directly open** rule files. Considering INDEX.md summaries as "read" is prohibited.
+> 1. **No Laziness**: You **MUST directly open** rule files. Considering `axiarch-rules/{lang}/INDEX.md` summaries as "read" is prohibited.
 > 2. **LOADING_PROTOCOL.md**: Follow the 5 steps in `axiarch-rules/{lang}/LOADING_PROTOCOL.md` for rule loading.
 > 3. **Self-Verification Required**: After loading, record all loaded file names in `task.md`. Starting work without recording is prohibited.
 > 4. **AI Self-Completion**: Delegating verification tasks to the user is an abdication of AI responsibility. Verify yourself.

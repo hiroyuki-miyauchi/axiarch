@@ -98,6 +98,10 @@ SRE、インシデント管理、運用要件。
 
 > 対応 Universal: `operations/`
 
+| ファイル | 説明 |
+|:--|:--|
+| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | リリース・アップグレード運用におけるCHANGELOG整合、dry-run副作用禁止、interactive入力、local-onlyファイルレビュー、source-only既定skip・明示選択・本体リポジトリ専用ファイル分類、EOF時の確認入力default N、本体リリース中核ファイルのGit追跡確認、対話選択肢重複排除 |
+
 ---
 
 ## 📂 product/: ビジネス & 要件
@@ -176,6 +180,6 @@ SRE、インシデント管理、運用要件。
 
 ---
 
-**Last Updated**: 2026-04-29
-**Version**: v1.3.0 — Universal と初期対応する8フォルダ構成、YAGNI原則に基づく構造正規化
+**Last Updated**: 2026-05-17
+**Version**: v1.10.0 — Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録と共有Blueprint/Project State境界整理
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

@@ -662,7 +662,7 @@
     | **Blue/Green** | Parallel old/new environments, instant traffic switch | Zero downtime | Infrastructure changes |
     | **Canary** | Deploy to 1-5% of users first | Incremental risk detection | Feature releases |
     | **Feature Flag** | Decouple code deploy from release | Instant disable | All features |
-    | **Shadow Traffic** | Mirror production traffic to new service | Zero-risk validation | Backend overhaul |
+    | **Shadow Traffic** | Mirror production traffic to new service | Lower-risk validation | Backend overhaul |
     | **Dark Launch** | Deploy feature invisibly, collect metrics | Performance validation | Major changes |
 
 -   **SLO-Linked Rollback**: Auto-rollback if SLO violation detected during canary.

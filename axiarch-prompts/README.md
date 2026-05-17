@@ -39,6 +39,7 @@ ja/  (または en/)
 | 既存コードを整理・改善したい（動作は変えない） | `develop/` | `refactoring_audit.md` |
 | Git Push を実行したい | `develop/` | `push_execute.md` |
 | CI/CD が失敗した | `develop/` | `ci_fix.md` |
+| 既存Axiarch採用プロジェクトを必要分だけアップグレードしたい | `develop/` | `safe_upgrade_execute.md` |
 | コード全体を総合的に品質監査したい | `audit/` | `fullstack_qa_audit.md` |
 | API設計・DTO・ゼロトラストを監査したい | `audit/` | `api_architecture_audit.md` |
 | データ整合性（JSON逃がし・Split Brain）を検査したい | `audit/` | `data_integrity_audit.md` |
@@ -92,6 +93,11 @@ operate/incident_response → develop/ci_fix（CI修正が必要な場合）→ 
 audit/system_integrity_audit → develop/push_execute
 ```
 
+**既存Axiarch採用プロジェクトのアップグレード:**
+```
+develop/safe_upgrade_execute → develop/push_execute（pushが必要な場合）
+```
+
 ---
 
 ### プロンプト一覧
@@ -104,6 +110,7 @@ audit/system_integrity_audit → develop/push_execute
 | `refactoring_audit.md` | 既存コードの動作を保ったまま構造・型安全・DRY原則を高い水準まで改善する非破壊的リファクタリング監査プロンプト |
 | `push_execute.md` | 品質ゲート・DB整合性確認・ブランチ戦略遵守を経たGit Push実行プロンプト |
 | `ci_fix.md` | CI/CD失敗時のエラー再現・根本原因分析・修正・ルール還元を一貫実行するプロンプト |
+| `safe_upgrade_execute.md` (`axiarch-prompts/ja/develop/safe_upgrade_execute.md`) | Safe Upgrade Wizardを使い、manifestに基づくAxiarch Core更新・Project State保持・source-only既定skip・明示選択・対話選択肢重複排除・任意prompt選択・dry-run/apply検証を実行するプロンプト |
 
 #### 🔍 audit/ — 品質・整合性監査
 
@@ -173,6 +180,7 @@ ja/  (or en/)
 | Cleaning up / improving existing code (without changing behavior) | `develop/` | `refactoring_audit.md` |
 | Executing a Git Push | `develop/` | `push_execute.md` |
 | CI/CD pipeline has failed | `develop/` | `ci_fix.md` |
+| Selectively upgrading an existing Axiarch adopter project | `develop/` | `safe_upgrade_execute.md` — source-only default skip with explicit selection, deduplicated interactive choices, optional prompts, and dry-run/apply verification |
 | Comprehensive quality audit of the entire codebase | `audit/` | `fullstack_qa_audit.md` |
 | Audit API design, DTO obligations, and Zero Trust | `audit/` | `api_architecture_audit.md` |
 | Inspect data integrity (JSON dump, Split Brain) | `audit/` | `data_integrity_audit.md` |
@@ -226,6 +234,11 @@ operate/incident_response → develop/ci_fix (if CI fix needed) → govern/bluep
 audit/system_integrity_audit → develop/push_execute
 ```
 
+**Existing Axiarch adopter upgrade:**
+```
+develop/safe_upgrade_execute → develop/push_execute (when push is required)
+```
+
 ---
 
 ### Prompt Library
@@ -238,6 +251,7 @@ audit/system_integrity_audit → develop/push_execute
 | `refactoring_audit.md` | Non-destructive refactoring audit — elevate structure, type safety, and DRY principles to the maximum without changing existing behavior |
 | `push_execute.md` | Quality gate, DB integrity check, branch strategy compliance, and Atomic Push execution |
 | `ci_fix.md` | CI/CD failure error reproduction, root cause analysis, fix, and rule feedback |
+| `safe_upgrade_execute.md` (`axiarch-prompts/en/develop/safe_upgrade_execute.md`) | Safe Upgrade Wizard execution prompt for manifest-based Axiarch Core updates, Project State preservation, source-only default skip with explicit selection, deduplicated interactive choices, optional prompt selection, and dry-run/apply verification |
 
 #### 🔍 audit/ — Quality & Integrity Auditing
 

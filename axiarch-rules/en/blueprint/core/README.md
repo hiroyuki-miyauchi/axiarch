@@ -24,5 +24,5 @@
 ## Operating Guide
 
 - Follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for the lesson crystallization process
-- Crystallized rule files within `core/` use numbering from `020_` onward
+- Crystallized rule files within `core/` avoid collisions with existing numbers such as `000`, `010`, `998`, and `999`, then choose any available number from `000` to `999` (`020_` is only a first-candidate example, not a reserved band)
 - AI must not autonomously create new domain folders. Prefer existing folders; if a new domain cannot be classified, propose an extension and create it only after user approval.

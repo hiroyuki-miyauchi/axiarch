@@ -4,9 +4,14 @@
 > crystallized from `core/010_project_lessons_log.md` for the **Operations domain**.
 
 > [!NOTE]
-> **An empty folder is the correct initial state by design.**
 > Files are automatically generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `CRYSTALLIZATION_PROTOCOL.md`.
-> Pre-populating seed files is prohibited as it violates the YAGNI principle.
+> Pre-populating seed files is prohibited as it violates the YAGNI principle. The current file exists because real operations lessons reached the crystallization threshold.
+
+## Crystallized Rules
+
+| File | Description |
+|:--|:--|
+| [010_release_upgrade_operations.md](010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, and deduplicated interactive choices |
 
 ## Corresponding Universal Rules
 

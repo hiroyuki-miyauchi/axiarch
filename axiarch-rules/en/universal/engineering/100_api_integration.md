@@ -833,7 +833,7 @@ const delay = Math.min(
 ### 22.1. Idempotency-Key
 
 - **Rule 35.37**: Mandate `Idempotency-Key` header implementation for all requests with side effects (POST/PUT/PATCH) such as payments, creation, and updates
-- Even when retries occur due to network errors, requests with the same key are processed "only once" server-side, reliably preventing double charges
+- Even when retries occur due to network errors, design the server-side flow so requests with the same key are handled as "only once" and the risk of double charges is reduced
 
 ### 22.2. Idempotency Implementation Pattern
 
@@ -2088,7 +2088,7 @@ rules:
 ### 66.3. Data Residency Compliance
 
 - Determine request origin region at the API Gateway layer and route to appropriate backends based on data residency requirements
-- Physically guarantee that GDPR region (EU) data does not leave the EU
+- Enforce network, storage, replication, and observability controls so GDPR-region (EU) data is not routed or replicated outside the EU without explicit legal and contractual approval
 
 ---
 
@@ -2294,5 +2294,3 @@ rules:
 | `security/100_data_governance.md` | GDPR, cross-border data, regulatory compliance |
 | `security/200_oss_compliance.md` | SBOM, Supply Chain Security, dependency management |
 | `quality/000_qa_testing.md` | Test strategy, Contract Testing, Fuzz Testing |
-
-

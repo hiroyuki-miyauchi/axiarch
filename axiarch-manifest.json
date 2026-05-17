@@ -1,0 +1,384 @@
+{
+  "manifestVersion": 1,
+  "axiarchVersion": "1.10.0",
+  "description": "Axiarch upgrade ownership manifest. Axiarch Core can be updated; Project State must be preserved unless the operator explicitly reviews and accepts a change.",
+  "groups": [
+    {
+      "id": "core_protocol",
+      "label": "Core Protocol",
+      "labelJa": "中核プロトコル",
+      "defaultAction": "review-each",
+      "risk": "medium"
+    },
+    {
+      "id": "universal_rules",
+      "label": "Universal Rules",
+      "labelJa": "普遍憲法",
+      "defaultAction": "update-all",
+      "risk": "low"
+    },
+    {
+      "id": "scripts",
+      "label": "Scripts",
+      "labelJa": "診断・フックスクリプト",
+      "defaultAction": "update-all",
+      "risk": "low"
+    },
+    {
+      "id": "agent_hooks",
+      "label": "Agent Hooks",
+      "labelJa": "エージェントフック",
+      "defaultAction": "review-each",
+      "risk": "medium"
+    },
+    {
+      "id": "blueprint_templates",
+      "label": "Blueprint Templates & Shared Rules",
+      "labelJa": "Blueprintテンプレート・共有ルール",
+      "defaultAction": "review-each",
+      "risk": "medium"
+    },
+    {
+      "id": "blueprint_index",
+      "label": "Blueprint Index",
+      "labelJa": "Blueprint索引",
+      "defaultAction": "review-each",
+      "risk": "medium"
+    },
+    {
+      "id": "blueprint_project_state",
+      "label": "Blueprint Project State",
+      "labelJa": "プロジェクト固有Blueprint",
+      "defaultAction": "preserve",
+      "risk": "high"
+    },
+    {
+      "id": "prompts",
+      "label": "Prompts",
+      "labelJa": "任意プロンプト集",
+      "defaultAction": "skip",
+      "risk": "low"
+    },
+    {
+      "id": "pointer_files",
+      "label": "Pointer Files",
+      "labelJa": "エージェント別ポインター",
+      "defaultAction": "review-each",
+      "risk": "medium"
+    },
+    {
+      "id": "source_docs",
+      "label": "Axiarch Source Repository Files",
+      "labelJa": "Axiarch本体リポジトリ専用ファイル",
+      "defaultAction": "skip",
+      "risk": "high"
+    }
+  ],
+  "policies": {
+    "replace": "Replace or copy from the selected Axiarch source when selected.",
+    "replace-if-local-unchanged": "Update automatically only when local ownership is not ambiguous; otherwise review.",
+    "review": "Ask the operator before changing.",
+    "preserve": "Never overwrite automatically.",
+    "optional": "Install only when selected.",
+    "skip": "Do not copy into adopter projects by default."
+  },
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "group": "core_protocol",
+      "owner": "mixed",
+      "policy": "review"
+    },
+    {
+      "path": "axiarch-manifest.json",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/LOADING_PROTOCOL.md",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/INDEX.md",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/README.md",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/compliance_matrix.md",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-rules/{lang}/universal",
+      "group": "universal_rules",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-scripts",
+      "group": "scripts",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": ".codex/hooks.json",
+      "group": "agent_hooks",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["codex"]
+    },
+    {
+      "path": "CLAUDE.md",
+      "group": "agent_hooks",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["claude"]
+    },
+    {
+      "path": ".claude/settings.json",
+      "group": "agent_hooks",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["claude"]
+    },
+    {
+      "path": ".claude/memory/MEMORY.md",
+      "group": "agent_hooks",
+      "owner": "project",
+      "policy": "optional",
+      "agents": ["claude"]
+    },
+    {
+      "path": ".agents/rules/prompt_pointer.md",
+      "group": "pointer_files",
+      "owner": "axiarch",
+      "policy": "review",
+      "agents": ["antigravity"]
+    },
+    {
+      "path": ".cursor/rules/axiarch.mdc",
+      "group": "pointer_files",
+      "owner": "axiarch",
+      "policy": "review",
+      "agents": ["cursor"]
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "group": "pointer_files",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["copilot"]
+    },
+    {
+      "path": ".windsurfrules",
+      "group": "pointer_files",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["windsurf"]
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md",
+      "group": "blueprint_templates",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md",
+      "group": "blueprint_templates",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/*/README.md",
+      "group": "blueprint_templates",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/operations/010_release_upgrade_operations.md",
+      "group": "blueprint_templates",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/INDEX.md",
+      "group": "blueprint_index",
+      "owner": "mixed",
+      "policy": "review"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/core/000_project_overview.md",
+      "group": "blueprint_project_state",
+      "owner": "project",
+      "policy": "preserve"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md",
+      "group": "blueprint_project_state",
+      "owner": "project",
+      "policy": "preserve"
+    },
+    {
+      "path": "axiarch-rules/{lang}/blueprint/*/[0-9][0-9][0-9]_*.md",
+      "group": "blueprint_project_state",
+      "owner": "project",
+      "policy": "preserve",
+      "exclude": [
+        "axiarch-rules/{lang}/blueprint/core/000_project_overview.md",
+        "axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md",
+        "axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md",
+        "axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md",
+        "axiarch-rules/{lang}/blueprint/operations/010_release_upgrade_operations.md"
+      ]
+    },
+    {
+      "path": "axiarch-prompts",
+      "group": "prompts",
+      "owner": "axiarch",
+      "policy": "optional"
+    },
+    {
+      "path": "README.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "init.sh",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "ROADMAP.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "SECURITY.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "LICENSE",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "NOTICE",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "MARKET_STRATEGY.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "llms.txt",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "llms-full.txt",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "social-preview.png",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".gitignore",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".markdownlint-cli2.jsonc",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".github/dependabot.yml",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    }
+  ]
+}

@@ -1335,7 +1335,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 | **Crypto-Agility設計** | 2026年末 | アルゴリズム容易交換可能なアーキテクチャ導入 |
 | **ハイブリッドTLS** | 2026〜2027年 | `X25519MLKEM768`（RFC 9258準拠）を優先。ブラウザ・CDNの対応状況を確認しつつ段階導入 |
 | **RSA/ECC非推奨** | 2030年 | NIST推奨に従い既存暗号の段階的廃止 |
-| **PQC完全移行** | 2035年 | 量子脆弱アルゴリズムの完全排除 |
+| **PQC完全移行** | 2035年 | 量子脆弱アルゴリズムからの段階的移行完了 |
 
 -   **Harvest Now, Decrypt Later (HNDL) 対策**: 現在捕獲された暗号化データが将来の量子コンピュータで復号されるリスク。長期秘匿データは**今すぐ**PQCハイブリッド暗号化を検討。
 -   **TLS Post-Quantum Extension (RFC 9258)**:
@@ -3555,4 +3555,3 @@ interface AISystemRecord {
 | §12–§13 (インフラ・SASE) | `operations/400_site_reliability`, `engineering/510_aws_cloud` |
 | §17–§18 (AI/LLM) | `ai/000_ai_engineering` |
 | §28 (規制コンプライアンス) | `security/100_data_governance`, `800_internationalization` |
-

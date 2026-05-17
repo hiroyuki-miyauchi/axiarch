@@ -16,7 +16,7 @@
 > 3. このファイルにドメインファイルへの参照リンクを追記
 >
 > **設計哲学**: 教訓はルールと同じフォルダに Co-locate する。このファイルへの集約は行わない。
-> **操縦者（ユーザー）は何もする必要がありません。** AIが自動的にドメイン別構造を構築します。
+> AIは作業時にこのプロトコルを適用し、ドメイン別構造へ整理する。必要な場合は操縦者（ユーザー）の判断を仰ぐ。
 > 詳細は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を参照。
 
 ---
@@ -38,7 +38,7 @@
 
 | # | ドメイン | ファイル | 教訓数 |
 |:--|:--------|:--------|:-------|
-| — | *(まだ分離されたドメインファイルはありません)* | — | — |
+| 1 | 運用 | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 12 |
 
 <!-- AUTO-CRYSTALLIZATION: ドメインファイル作成時、上の表に行を追加してください -->
 <!-- 例: | 1 | DB・認証 | `engineering/010_database_auth.md` | 3 | -->
@@ -65,16 +65,6 @@
 **Domain:** ガバナンス
 **Context:** 新規プロジェクトまたはルールの刷新時。
 **Rule:** `AGENTS.md` および `axiarch-rules` のプロトコルを基準として遵守すること。
-
----
-
-### [2026-05-15] CHANGELOGの参照定義は見出しと同期する
-**Domain:** 運用
-**Target Folder:** blueprint/operations/
-**Context:** v1.9.0正式化で `CHANGELOG.md` の先頭を `[Unreleased]` から `[1.9.0]` に変更した。
-**Problem:** `[Unreleased]` 見出しを削除した一方、末尾の `[Unreleased]: ...` 参照定義が残り、Markdown Lintの MD053 がCIで失敗した。
-**Solution/Rule:** `CHANGELOG.md` のリンク参照定義は実際の見出しと同期させる。正式リリース化で `[Unreleased]` 見出しを外す場合は `[Unreleased]: ...` 定義も削除する。`check-axiarch-health.sh` Check 15 で Unreleased 見出しと参照定義の一致を検査する。
-**Reference:** `CHANGELOG.md`, `axiarch-scripts/check-axiarch-health.sh`, GitHub Actions run `25918646516`
 
 ---
 
