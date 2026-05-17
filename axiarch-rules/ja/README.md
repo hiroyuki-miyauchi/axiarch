@@ -99,13 +99,19 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークは [Google Antigravity](https://antigravity.google/) 上で実務検証された知見を土台にしています。OpenAI Codex と Claude Code は主対象としてネイティブ統合・hook補強導線を整備していますが、実務検証は継続中です。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
+> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。このうち実務検証済みとして明示できるのは [Google Antigravity](https://antigravity.google/) です。OpenAI Codex と Claude Code は主対象としてネイティブ統合・hook補強導線を整備していますが、実務検証は継続中です。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
 
-1.  **コピー (Copy)**: 以下のファイル/フォルダをプロジェクトのルートにコピーします。（`axiarch-prompts/` は任意です）
+1.  **コピー (Copy)**: 最小必須は `AGENTS.md` と `axiarch-rules/` です。安全アップグレードを使う場合のみ `axiarch-manifest.json` と `axiarch-scripts/` を追加でコピーします。`axiarch-prompts/` は任意です。
     ```bash
     cp -r axiarch-rules AGENTS.md /path/to/your/project/
+
+    # 推奨: 安全アップグレードを使う場合
+    cp axiarch-manifest.json /path/to/your/project/
+    cp -r axiarch-scripts /path/to/your/project/
+
     # 任意: cp -r axiarch-prompts /path/to/your/project/
     ```
+    既存プロジェクトの更新では `axiarch-scripts/axiarch-upgrade.sh` を使うと、Universal / scripts などのAxiarch本体寄りファイルだけを更新候補にし、プロジェクト固有Blueprintを既定で保持できます。
 
 2.  **AIエージェント用ポインター設定 (Agent Rules Pointer)**:
     AIエージェントツール（Antigravity等）が`.agents/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`axiarch-rules/`を参照させます。

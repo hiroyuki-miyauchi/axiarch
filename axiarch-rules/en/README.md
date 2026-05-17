@@ -99,13 +99,19 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework is grounded in production-validated experience on [Google Antigravity](https://antigravity.google/). OpenAI Codex and Claude Code are primary targets with native integration and hook-reinforcement paths, but practical validation is still ongoing. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
+> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. Among them, [Google Antigravity](https://antigravity.google/) is the only explicitly production-validated target. OpenAI Codex and Claude Code have native integration and hook-reinforcement paths, but practical validation is still ongoing. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
 
-1.  **Copy**: Copy the following files/folders to your project root. (`axiarch-prompts/` is optional)
+1.  **Copy**: The minimal required setup is `AGENTS.md` plus `axiarch-rules/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` only when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash
     cp -r axiarch-rules AGENTS.md /path/to/your/project/
+
+    # Recommended when using safe upgrades
+    cp axiarch-manifest.json /path/to/your/project/
+    cp -r axiarch-scripts /path/to/your/project/
+
     # Optional: cp -r axiarch-prompts /path/to/your/project/
     ```
+    For existing adopter projects, use `axiarch-scripts/axiarch-upgrade.sh` to update Axiarch-owned files such as Universal rules and scripts while preserving project-owned Blueprint state by default.
 
 2.  **Agent Rules Pointer Setup**:
     If your AI agent tool (e.g., Antigravity) auto-loads `.agents/rules/`, place a **pointer file** to reference `axiarch-rules/`.

@@ -831,7 +831,7 @@ class SearchViewModel @Inject constructor(
 
 ### §58. Swift Concurrency ベストプラクティス
 
-- **`async/await`**: コールバックを完全排除。Structured Concurrencyを徹底
+- **`async/await`**: コールバック依存の強い処理を実務上可能な範囲で `async/await` に置換。Structured Concurrencyを徹底
 - **`TaskGroup`**: 複数タスクの並列実行と結果集約
 - **Actor**: 共有可変状態のスレッドセーフアクセス。過度なisolationを避ける
 - **タスクキャンセル**: `Task.checkCancellation()`で協調的キャンセル

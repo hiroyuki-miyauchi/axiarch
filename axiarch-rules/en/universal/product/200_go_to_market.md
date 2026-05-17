@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > **Primary Directive**
 > "Even a great product doesn't exist if it isn't delivered correctly."
-> **GTM is a design act equal to product development.** Eliminate the illusion that "if you build it, they will come."
+> **GTM is a design act equal to product development.** Do not rely on the illusion that "if you build it, they will come"; design market entry as a testable system.
 > Launch is not "a one-day event" but "a continuous process."
 > The buyer journey is not a "funnel" but a "non-linear intelligence network."
 > **15 Parts · 120+ Sections · 148 Rules.**

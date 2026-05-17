@@ -107,7 +107,7 @@ Determine the lesson's domain and identify the corresponding Blueprint folder.
 | AI & Content | `ai/` | `ai/{NNN}_ai_content_rules.md` |
 | Business & Growth | `product/` | `product/{NNN}_business_policy.md` |
 | Operations | `operations/` | `operations/{NNN}_operations_rules.md` |
-| Core & Governance | `core/` | `core/{NNN}_governance_rules.md` (010 is fixed as index, use 020+) |
+| Core & Governance | `core/` | `core/{NNN}_governance_rules.md` (`010` is fixed as the index. `020_` is only a first-candidate example; choose after checking unused numbers in the target folder.) |
 
 > **How to determine `{NNN}` (Contextual Numbering)**: The AI MUST check existing files in the target folder and assign a number close to related topics (default to increments of 10 to leave room, but use interstitial numbers like `011` or `015` if space is tight). Do not strictly force increments of 10.
 > All files including crystallized files may use any available number from `000`–`999`. **Do not include `lessons_` in the file name**. Use only topic names describing the content.
@@ -180,7 +180,7 @@ Lessons in `core/010_project_lessons_log.md` (central index) MUST be promoted to
 **Numbering Rules:**
 - **🚨 No Blank Zones**: Use `000`-`999` independently per domain (no domain-specific reserved bands).
 - **Contextual Numbering**: Check existing files in the target folder and assign a number close to related topics (default to increments of 10, but use interstitial numbers like `011` or `015` if space is tight). Do not strictly force increments of 10.
-- `core/010_project_lessons_log.md` (central index) is fixed. Crystallized files in `core/` start from `020_`.
+- `core/010_project_lessons_log.md` (central index) is fixed. Crystallized files in `core/` must avoid collisions with existing numbers such as `000`, `010`, `998`, and `999`, then choose any available number from `000` to `999` in that folder. `020_` is a first-candidate example, not a reserved band.
 - **Do not include `lessons_` in the file name**. Use only topic names describing the content (e.g., `database_auth`, `security_policy`, `api_design`).
 
 **Creation Example:**
@@ -339,7 +339,7 @@ blueprint/
 └── engineering/
     └── 300_database_auth.md  ← 3 DB lessons moved here (auto-created)
 
-※ security/ folder has no lessons file yet (only 1 security lesson)
+Note: security/ folder has no lessons file yet (only 1 security lesson)
 
 core/010 "Separated Domain Files" table updated:
   | DB & Auth | engineering/300_database_auth.md | 3 entries |

@@ -657,7 +657,7 @@ const getProduct = cache(async (id: string) => {
 ## Part XI: Hydration & SSR Stability ⚛️
 
 ### §49. The Hydration Stability Protocol
-- **Rule 33.51**: Completely eliminate output mismatches between SSR and client rendering (Hydration Mismatch)
+- **Rule 33.51**: Minimize the risk of output mismatches between SSR and client rendering (Hydration Mismatch)
 - **Root Cause**: Using `Date.now()`, `Math.random()`, browser-specific globals (`window.innerWidth`, etc.) during SSR causes mismatches
 - **Suppress**: `suppressHydrationWarning` is **only permitted for date/time display**. Usage for anything else is prohibited
 
@@ -2324,4 +2324,3 @@ function ProductList({ response }: { response: ApiResponse }) {
 | `security/200_oss_compliance.md` | §5, §205, §282 |
 | `product/500_growth_marketing.md` | §116 (GEO Strategy), §151–§155 |
 | `engineering/100_api_integration.md` | §140–§146, §250, §321–§324 |
-

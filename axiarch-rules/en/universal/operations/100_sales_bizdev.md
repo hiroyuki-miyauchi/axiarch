@@ -57,7 +57,7 @@
 
 ### 1.1. Modern Sales Philosophy
 
-- **Rule 51.001**: Completely eliminate any culture that equates "sales" with "manipulation or hard-sell"
+- **Rule 51.001**: Reject any culture that equates "sales" with "manipulation or hard-sell"
 - **Rule 51.002**: The best sales activity is **"helping the customer find the reason to buy"**
 - **The Challenger Sale Principles (Matthew Dixon & Brent Adamson)**:
 

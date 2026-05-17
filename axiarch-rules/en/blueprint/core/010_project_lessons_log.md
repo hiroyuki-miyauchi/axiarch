@@ -16,7 +16,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 > 3. Adds a reference link to this index
 >
 > **Design Philosophy**: Lessons are Co-located with rules in the same folder. Consolidating everything here is NOT the intent.
-> **The operator (user) needs to do nothing.** The AI automatically builds a domain-organized structure.
+> The AI applies this protocol during task work and organizes lessons into domain-specific structures. When judgment is required, the operator decides.
 > See `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for details.
 
 ---
@@ -38,7 +38,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 | # | Domain | File | Count |
 |:--|:-------|:-----|:------|
-| — | *(No separated domain files yet)* | — | — |
+| 1 | Operations | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 12 |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
 <!-- Example: | 1 | DB & Auth | `engineering/010_database_auth.md` | 3 | -->
@@ -65,16 +65,6 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 **Domain:** Governance
 **Context:** New project or rule system refresh.
 **Rule:** Treat `AGENTS.md` and `axiarch-rules` protocols as the highest-priority source of truth.
-
----
-
-### [2026-05-15] Keep CHANGELOG reference definitions in sync with headings
-**Domain:** Operations
-**Target Folder:** blueprint/operations/
-**Context:** The v1.9.0 release finalization changed the top `CHANGELOG.md` section from `[Unreleased]` to `[1.9.0]`.
-**Problem:** The `[Unreleased]` heading was removed, but the trailing `[Unreleased]: ...` reference definition remained, causing Markdown Lint MD053 to fail in CI.
-**Solution/Rule:** Keep CHANGELOG link reference definitions synchronized with actual headings. When finalizing a release and removing the `[Unreleased]` heading, also remove the `[Unreleased]: ...` definition. `check-axiarch-health.sh` Check 15 verifies parity between the Unreleased heading and reference definition.
-**Reference:** `CHANGELOG.md`, `axiarch-scripts/check-axiarch-health.sh`, GitHub Actions run `25918646516`
 
 ---
 

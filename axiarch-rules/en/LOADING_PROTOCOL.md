@@ -37,7 +37,7 @@ When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 pri
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9 integration). This is v1.9.0 functionality distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration) and, in the Axiarch source repository, v1.10.0+ release metadata parity, Safe Upgrade Wizard manifest wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, and the `axiarch-scripts/` required/optional boundary in README, llms, and scripts README. It is distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
 
 ---
 
@@ -145,14 +145,14 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 | Situation | Re-load Scope | Rationale |
 |:--|:--|:--|
 | **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AGENTS §8 (4) obligation |
-| **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | INDEX.md → task type → folder mapping is stable |
+| **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | `axiarch-rules/{lang}/INDEX.md` → task type → folder mapping is stable |
 | **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.8.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and emits a full reminder + 🚨 [VIOLATION-D] when a new keyword is detected | YAGNI + context-budget protection + Check D reduces confirmation-bias risk |
 | **Long session resumed after pause (e.g. compaction trigger)** | Compare `task.md` load history with the current conversation context; re-load any file that cannot be treated as actually loaded in the current context. However, when the `[AXIARCH BOOT]` reminder TTL expires (v1.6.0+ default 30 min), perform full re-verification | `axiarch-boot-reminder.sh` TTL state; mitigates serial-position effects in LLM memory |
 
 > **Operational Principles**:
 > - **Treat the `task.md` load history as the Single Source of Truth for load candidates and evidence**. However, a filename in history does not by itself mean the current AI has the content available. If the current context cannot justify that the file is actually loaded, re-load it.
-> - **Memory-inherited skipping across sessions is permitted only for the same continuing task when load evidence and current context clearly match; the AI MUST explicitly record what was skipped and why in task.md** (e.g., "Continued from prior session; AGENTS.md / INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule").
-> - **When in doubt, full re-load**. Hallucination prevention (AGENTS.md §0 HIGHEST-PRIORITY RULE) outweighs context-budget savings.
+> - **Memory-inherited skipping across sessions is permitted only for the same continuing task when load evidence and current context clearly match; the AI MUST explicitly record what was skipped and why in task.md** (e.g., "Continued from prior session; AGENTS.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule").
+> - **When in doubt, full re-load**. Hallucination risk reduction (AGENTS.md §0 HIGHEST-PRIORITY RULE) outweighs context-budget savings.
 
 > **Problem this addresses (v1.6.0 background)**:
 > The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this reduces token cost ~87% while making adherence easier to maintain.

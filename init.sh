@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.9.0"
+AXIARCH_VERSION="1.10.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -19,6 +19,13 @@ INSTALL_LABEL="$AXIARCH_VERSION"
 if [[ "$AXIARCH_REF" =~ ^tags/v(.+)$ ]]; then
   INSTALL_LABEL="${BASH_REMATCH[1]}"
 fi
+RAW_REF="$AXIARCH_REF"
+if [[ "$RAW_REF" =~ ^tags/(.+)$ ]]; then
+  RAW_REF="${BASH_REMATCH[1]}"
+elif [[ "$RAW_REF" =~ ^heads/(.+)$ ]]; then
+  RAW_REF="${BASH_REMATCH[1]}"
+fi
+RAW_BASE_URL="https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/${RAW_REF}"
 TARBALL_URL="${REPO_URL}/archive/refs/${AXIARCH_REF}.tar.gz"
 
 # --- Color helpers ---
@@ -72,6 +79,41 @@ check_prerequisites() {
 }
 
 # =============================================================================
+# STEP 0.5: Existing installation guard
+# =============================================================================
+check_existing_install() {
+  local existing_markers=()
+  local reinstall_choice
+
+  [[ -e "$TARGET_DIR/axiarch-rules" ]] && existing_markers+=("axiarch-rules/")
+  [[ -e "$TARGET_DIR/axiarch-manifest.json" ]] && existing_markers+=("axiarch-manifest.json")
+  [[ -e "$TARGET_DIR/.axiarch/version.json" ]] && existing_markers+=(".axiarch/version.json")
+
+  [[ ${#existing_markers[@]} -eq 0 ]] && return 0
+
+  print_warn "Existing Axiarch files detected in ${TARGET_DIR}: ${existing_markers[*]}"
+  print_info "For existing projects, use Safe Upgrade Wizard instead of full install."
+  print_info "If the helper already exists in the project, preview with:"
+  print_info "  bash axiarch-scripts/axiarch-upgrade.sh --to v${AXIARCH_VERSION} --dry-run"
+  print_info "If the helper is not installed yet, bootstrap it temporarily with:"
+  print_info "  curl -sSL ${RAW_BASE_URL}/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh"
+  print_info "  bash /tmp/axiarch-upgrade.sh --target \"${TARGET_DIR}\" --to v${AXIARCH_VERSION} --dry-run"
+  print_info "The installer is for fresh setup and may overwrite shared Axiarch Core files."
+  echo ""
+  read -rp "Continue full installer anyway? / それでも通常インストールを続行しますか？ [y/N]: " reinstall_choice || reinstall_choice=""
+  reinstall_choice="${reinstall_choice:-N}"
+  case "$reinstall_choice" in
+    y|Y|yes|YES)
+      print_warn "Continuing full installer by explicit operator choice."
+      ;;
+    *)
+      print_info "Stopped before file copy. Use Safe Upgrade Wizard from the project root."
+      exit 0
+      ;;
+  esac
+}
+
+# =============================================================================
 # STEP 1: Language selection
 # =============================================================================
 select_language() {
@@ -114,9 +156,9 @@ select_language_dirs() {
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) Google Antigravity — Verified primary ✅"
-  echo "  2) OpenAI Codex — Primary target ⚙️ (AGENTS.md + .codex/hooks.json)"
-  echo "  3) Claude Code — Primary target ⚙️ (native hook integration)"
+  echo "  1) OpenAI Codex — Primary target ⚙️ (AGENTS.md + .codex/hooks.json)"
+  echo "  2) Claude Code — Primary target ⚙️ (CLAUDE.md + .claude/settings.json)"
+  echo "  3) Google Antigravity — Verified primary ✅"
   echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee)"
   echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee)"
   echo "  6) Windsurf — Extended pointer only ⚠️ (unverified, no guarantee)"
@@ -134,9 +176,9 @@ select_agent() {
   AGENT_LABEL="Universal"
 
   case "$agent_choice" in
-    1) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    2) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
-    3) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    1) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
+    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
+    3) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
     4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
@@ -152,7 +194,7 @@ select_agent() {
 select_prompts() {
   echo ""
   echo -e "${BOLD}プロンプトライブラリ / Prompt Library (任意 / Optional):${RESET}"
-  echo "  axiarch-prompts/ — reusable audit prompt templates (JA/EN)"
+  echo "  axiarch-prompts/ — reusable audit / QA / upgrade execution prompt templates (JA/EN)"
   echo ""
   read -rp "コピーしますか？ / Copy prompt library? [y/N]: " prompt_choice
   prompt_choice="${prompt_choice:-N}"
@@ -292,11 +334,18 @@ copy_files() {
   cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
   print_info "Copied: AGENTS.md"
 
+  # === Recommended: upgrade ownership manifest ===
+  if [[ -f "$SOURCE_DIR/axiarch-manifest.json" ]]; then
+    cp "$SOURCE_DIR/axiarch-manifest.json" "$TARGET_DIR/axiarch-manifest.json"
+    print_info "Copied: axiarch-manifest.json"
+  fi
+
   # === Required: axiarch-rules/ ===
   local UNUSED_LANG
   if [[ "$LANG_CODE" == "ja" ]]; then UNUSED_LANG="en"; else UNUSED_LANG="ja"; fi
 
-  cp -r "$SOURCE_DIR/axiarch-rules" "$TARGET_DIR/axiarch-rules"
+  mkdir -p "$TARGET_DIR/axiarch-rules"
+  cp -R "$SOURCE_DIR/axiarch-rules/." "$TARGET_DIR/axiarch-rules/"
 
   if ! $KEEP_BOTH_LANGS; then
     # Optional single-language cleanup (new structure: axiarch-rules/{lang}/)
@@ -312,7 +361,8 @@ copy_files() {
 
   # === Optional: axiarch-prompts/ ===
   if $COPY_PROMPTS; then
-    cp -r "$SOURCE_DIR/axiarch-prompts" "$TARGET_DIR/axiarch-prompts"
+    mkdir -p "$TARGET_DIR/axiarch-prompts"
+    cp -R "$SOURCE_DIR/axiarch-prompts/." "$TARGET_DIR/axiarch-prompts/"
     if ! $KEEP_BOTH_LANGS; then
       local UNUSED_PROMPT_DIR="$TARGET_DIR/axiarch-prompts/${UNUSED_LANG}"
       [[ -d "$UNUSED_PROMPT_DIR" ]] && rm -rf "$UNUSED_PROMPT_DIR" && \
@@ -328,7 +378,7 @@ copy_files() {
     mkdir -p "$TARGET_DIR/axiarch-scripts"
     cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-diff-guard.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -477,6 +527,7 @@ validate_distributed_scripts() {
     "axiarch-protect-antifull.sh"
     "axiarch-init-task-md.sh"
     "axiarch-diff-guard.sh"
+    "axiarch-upgrade.sh"
     "check-axiarch-health.sh"
     "check-git-config-clean.sh"
   )
@@ -491,6 +542,28 @@ validate_distributed_scripts() {
       print_warn "Syntax validation failed: axiarch-scripts/${script_name}"
     fi
   done
+}
+
+# =============================================================================
+# STEP 5.6: Install metadata
+# =============================================================================
+write_install_metadata() {
+  local meta_dir="${TARGET_DIR}/.axiarch"
+  local installed_at
+
+  mkdir -p "${meta_dir}"
+  installed_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  cat > "${meta_dir}/version.json" <<EOF
+{
+  "version": "${INSTALL_LABEL}",
+  "installerVersion": "${AXIARCH_VERSION}",
+  "sourceRef": "${AXIARCH_REF}",
+  "installedAt": "${installed_at}",
+  "agent": "${AGENT_LABEL}",
+  "language": "${LANG_CODE}"
+}
+EOF
+  print_info "Wrote: .axiarch/version.json"
 }
 
 # =============================================================================
@@ -518,7 +591,7 @@ print_next_steps() {
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Claude Code" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "GitHub Copilot" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md${RESET} — auto-configured"
@@ -532,12 +605,23 @@ print_next_steps() {
   echo -e "       → Fill in your project's tech stack, architecture, and goals"
   step=$((step + 1))
   echo ""
-  echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended):${RESET}"
-  echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-  echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, diff guard, more)"
+  if [[ "$SETUP_CODEX" == "true" || "$SETUP_CLAUDE" == "true" ]]; then
+    echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended for Codex / Claude Code):${RESET}"
+    echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
+    echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, diff guard, more)"
+  else
+    echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Optional diagnostic:${RESET}"
+    echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
+    echo -e "         (hook checks become strict only when .codex/hooks.json or .claude/settings.json is installed)"
+  fi
   step=$((step + 1))
   echo ""
-  echo -e "  ${CYAN}${step}.${RESET} Start developing — your AI agent will now follow the Constitution."
+  echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Plan future upgrades safely (optional):${RESET}"
+  echo -e "       → ${BOLD}bash axiarch-scripts/axiarch-upgrade.sh --safe-only --dry-run${RESET}"
+  echo -e "         (manifest-based upgrade preview: safe groups selected, project Blueprint state preserved)"
+  step=$((step + 1))
+  echo ""
+  echo -e "  ${CYAN}${step}.${RESET} Start developing — the Constitution is now available to your AI agent."
   echo ""
   echo -e "  ${CYAN}Docs:${RESET}  ${REPO_URL}"
   echo -e "  ${CYAN}Scripts:${RESET} See ${BOLD}axiarch-scripts/README.md${RESET} for diagnostic tools"
@@ -551,6 +635,7 @@ print_next_steps() {
 main() {
   print_header
   check_prerequisites
+  check_existing_install
   select_language
   select_language_dirs
   select_agent
@@ -559,6 +644,7 @@ main() {
   prepare_source
   copy_files
   validate_distributed_scripts
+  write_install_metadata
   install_precommit_hook
   print_next_steps
 }

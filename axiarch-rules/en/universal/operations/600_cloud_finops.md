@@ -1636,10 +1636,10 @@
     | **Request pattern** | Spiky/irregular | Medium/predictable | Large/stable | Stable/stateful |
     | **Execution time** | < 15min | < 60min | Unlimited | Unlimited |
     | **Cold start tolerance** | ○ | △ | ✕ | ✕ |
-    | **Monthly cost (equivalent load)** | Lowest to highest※ | Medium | Medium-low | Low-medium |
+    | **Monthly cost (equivalent load)** | Lowest to highest (see note) | Medium | Medium-low | Low-medium |
     | **Operations overhead** | Minimal | Low | High | Highest |
 
-    ※ Serverless can be cheapest or most expensive depending on traffic. Threshold analysis mandatory.
+    Note: Serverless can be cheapest or most expensive depending on traffic. Threshold analysis mandatory.
 
 -   **Serverless Economic Breakpoints**:
     - **< 1M requests/month**: Serverless is most cost efficient

@@ -1780,7 +1780,7 @@ Three foundational vows govern all design decisions:
         -   **Code Separation**: Pair with CloudFront Functions (JavaScript Runtime 2.0 required) for independent deployment of function code and configuration data. Data updates without code changes.
         -   **Limits**: Max 5MB per KV store, 512-byte keys, 1KB values. Consider DynamoDB + Lambda@Edge for larger datasets.
         -   **Security**: Automatic at-rest and in-transit encryption. In-memory decryption at edge.
-    7.  **VPC Origins (2024 GA)**: Use ALB/NLB/EC2 instances in private subnets directly as CloudFront origins. Completely eliminate backend exposure to the public internet for zero-trust content delivery.
+    7.  **VPC Origins (2024 GA)**: Use ALB/NLB/EC2 instances in private subnets directly as CloudFront origins. Avoid direct public exposure of backends and move zero-trust content delivery toward private-origin architecture.
         -   **Security Group**: Allow inbound traffic only from the CloudFront managed prefix list (`CloudFront-VPCOrigins-Service-SG`) in origin resource security groups.
         -   **HTTPS**: Always configure HTTPS communication between CloudFront and VPC origins.
         -   **Cross-Account VPC Origins (2025+)**: Connect to VPC origins in other accounts via AWS Resource Access Manager (RAM). Enhanced security for multi-account environments.
@@ -2829,7 +2829,7 @@ Three foundational vows govern all design decisions:
 ## 110. CloudFront VPC Origins (Private Origin Delivery)
 
 ### Rule 110.1: The CloudFront VPC Origins Protocol
--   **Law**: Use **CloudFront VPC Origins** to eliminate backend exposure to the public internet, building a zero-trust delivery architecture with ALB/NLB/EC2 in private subnets as origins (2024 GA).
+-   **Law**: Use **CloudFront VPC Origins** to avoid direct backend exposure to the public internet, building a zero-trust delivery architecture with ALB/NLB/EC2 in private subnets as origins (2024 GA).
 -   **Action**:
     1.  **Private Subnet Deployment**: Always place origin resources (ALB/NLB/EC2) in private subnets. CloudFront becomes the sole entry point, dramatically reducing the attack surface.
     2.  **Security Group Lock**: Allow only inbound traffic from the CloudFront managed security group (`CloudFront-VPCOrigins-Service-SG`) in origin security groups. Zero-trust perimeter with no public DNS/endpoints.

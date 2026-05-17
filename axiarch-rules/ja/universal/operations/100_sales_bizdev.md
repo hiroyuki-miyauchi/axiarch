@@ -57,7 +57,7 @@
 
 ### 1.1. Modern Sales Philosophy（現代の営業哲学）
 
-- **Rule 51.001**: 「営業」を「欺き・押し売り」とする文化を完全排除する
+- **Rule 51.001**: 「営業」を「欺き・押し売り」とする文化を許容しない
 - **Rule 51.002**: 良い営業活動とは **「顧客が買う理由を見つけるのを手伝うこと」** と定義する
 - **The Challenger Sale 原則（Matthew Dixon & Brent Adamson）**:
 

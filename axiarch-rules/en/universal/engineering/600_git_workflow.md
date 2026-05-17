@@ -328,13 +328,13 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ### 4.2. Automated Detection Script (Recommended)
 
 - **Law**: Manual verification becomes ritualistic in large projects. Integrate **automated detection scripts** into CI / pre-commit hooks.
-- **Reference Implementation**: `scripts/check-git-config-clean.sh` — axiarch's standard distributed detection/repair script.
+- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — axiarch's standard distributed detection/repair script.
 - **Usage**:
 
 ```bash
-./scripts/check-git-config-clean.sh         # Detection only (exit 1 if dirty)
-./scripts/check-git-config-clean.sh --fix   # Detection + auto-repair
-./scripts/check-git-config-clean.sh --quiet # CI silent mode (exit 1 if dirty)
+./axiarch-scripts/check-git-config-clean.sh         # Detection only (exit 1 if dirty)
+./axiarch-scripts/check-git-config-clean.sh --fix   # Detection + auto-repair
+./axiarch-scripts/check-git-config-clean.sh --quiet # CI silent mode (exit 1 if dirty)
 ```
 
 ### 4.3. Additional Caution for Parallel AI Agent Use
@@ -342,7 +342,7 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 - **Context**: When using Claude Code and Antigravity in parallel, Claude Code's worktree operations break Antigravity.
 - **Mitigation**:
     1. Consolidate to a single AI agent (recommended)
-    2. When running in parallel, frequently execute `scripts/check-git-config-clean.sh --fix`
+    2. When running in parallel, frequently execute `axiarch-scripts/check-git-config-clean.sh --fix`
     3. Always run cleanup at AI agent termination / switching
 
 ### 4.4. Recurrence Documentation (Observed Cases)

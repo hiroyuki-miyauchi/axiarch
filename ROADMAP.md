@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.9.0 Memory Persistence & Glob-Scoped Rules\
-> **次期作業 / Next**: v1.10.0 Static Lint & Process Supervision（検討中 / under consideration）\
+> **現在の安定版 / Current Stable**: v1.10.0 Safe Upgrade Wizard & Manifest-Based Upgrades\
+> **次期作業 / Next**: v1.11.0 Static Lint & Process Supervision（検討中 / under consideration）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -444,7 +444,9 @@ loophole のリスクを下げるための hot-fix。
   追加済みだったが更新漏れ）；v1.8.0 Check D の言及を追加
 - **`CHANGELOG.md` v1.6.0 Out of Scope バージョンラベル訂正 (42 ラウンド)** —
   `(Check 14)` → `(Check 15)`；`v1.7.0 (Tier 2)` →
-  `v1.9.0 (Tier 2)`；`v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)` に修正
+  `v1.9.0 (Tier 2)`；当時の暫定整理として古い Tier 3 ラベルを次期候補枠へ修正。
+  後続の採用先アップグレード課題により、現在の v1.10.0 は Safe Upgrade Wizard
+  に再配分し、Static Lint は v1.11.0 へ移動
 - **後方互換性を維持** — pure bug fix のみ、機能変更ゼロ。Codex
   以外の環境では挙動変化なし
 
@@ -488,9 +490,22 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
 ---
 
-### 🔮 v1.10.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### ✅ v1.10.0 — Safe Upgrade Wizard & Manifest-Based Upgrades（2026-05-17）
 
-学術裏付けが強く工数も大きい改善案を v1.10.0 として独立計画。
+既存採用プロジェクトで「必要なAxiarch更新だけを取り込む」ための安全アップグレード導線。Universal、protocol、scriptsは更新しやすくしつつ、プロジェクト固有Blueprintは既定保持し、怪しい差分は人間が選択できる状態にする。
+
+- **`axiarch-manifest.json`** — Axiarch所有ファイル、Axiarch共有Blueprint、プロジェクト固有Blueprint、任意ファイル、本体リポジトリ専用ファイルを分別する所有境界マニフェスト
+- **`axiarch-scripts/axiarch-upgrade.sh`** — `--dry-run` / `--safe-only` / `--interactive` / `--apply` に対応したローカルファーストなアップグレード補助
+- **グループ単位の対話選択** — `preserve（保持・上書きしない）`、`show-diff（差分だけ表示）`、`update-all（すべて更新）`、`review-each（ファイルごとに確認）`、`skip（今回はスキップ）`。本体リポジトリ専用ファイルは既定skipのまま、明示選択時のみ確認・適用候補にする
+- **プロジェクト固有状態の既定保持** — `blueprint/core/000_project_overview.md`、`blueprint/core/010_project_lessons_log.md`、`blueprint/*/[0-9][0-9][0-9]_*.md` は既定で上書きしない
+- **アップグレード証跡** — 反映時に `.axiarch/version.json`、`.axiarch/upgrade-report.md`、`.axiarch/files.sha256` を作成
+- **`axiarch-prompts/{ja,en}/develop/safe_upgrade_execute.md`** — AIエージェントにSafe Upgrade Wizardを実行させ、source-only既定skipと明示選択まで扱うための専用promptを追加
+
+---
+
+### 🔮 v1.11.0 — Static Lint & Process Supervision（Tier 3、検討中）
+
+学術裏付けが強く工数も大きい改善案を v1.11.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` /
   `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反
@@ -661,8 +676,8 @@ enterprise adoption needs.
 
 - **NEW `.claude/settings.json`** — Claude Code projects ship with a standard
   `UserPromptSubmit` hook that injects a bilingual system reminder **on every
-  user prompt submission**, physically compelling the AI to execute the
-  AGENTS.md protocol and LOADING_PROTOCOL BOOT SEQUENCE
+  user prompt submission**, making skipped AGENTS.md protocol and
+  LOADING_PROTOCOL BOOT SEQUENCE steps easier to surface and correct
 - **NEW "Hook Reinforcement Mechanism" section in
   `axiarch-rules/{ja,en}/LOADING_PROTOCOL.md`** — Declares hook removal as a
   constitution-amending destructive change
@@ -731,7 +746,7 @@ enterprise adoption needs.
   Official Axiarch health diagnostic with **10-stage compliance check**: Hook
   (4) + `task.md` adherence + crystallization threshold + **§8 Process &
   Documentation** + **§1 Deployment Ban** + **§4 SSOT Sync** + **§2 Language
-  First**. Pinpoints exactly where the AI is slacking. Out-of-scope protocols
+  First**. Pinpoints exactly which protocol needs attention. Out-of-scope protocols
   (§0/§3/§5/§6/§7) explicitly marked for manual review
 - **NEW `axiarch-scripts/README.md`** — Bilingual index & guide for the
   `axiarch-scripts/` directory. Each diagnostic tool's purpose, usage, check
@@ -1002,7 +1017,10 @@ Patch release with 2 bug fixes + 3 documentation corrections discovered in the
   added v1.8.0 Check D mention
 - **`CHANGELOG.md` v1.6.0 Out of Scope version label corrections (42nd-round)**
   — `(Check 14)` → `(Check 15)`; `v1.7.0 (Tier 2)` → `v1.9.0 (Tier 2)`;
-  `v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)`
+  the stale Tier-3 label was moved to the then-next candidate slot as the
+  provisional organisation at that time. The current roadmap reallocates v1.10.0
+  to Safe Upgrade Wizard and moves Static Lint to v1.11.0 after adopter-upgrade
+  needs were prioritised
 - **Backwards compatibility maintained** — Pure bug fixes only, zero functional changes.
   No impact on non-Codex environments
 
@@ -1051,10 +1069,23 @@ Tier-2 items are now organised under v1.9.0.
 
 ---
 
-### 🔮 v1.10.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### ✅ v1.10.0 — Safe Upgrade Wizard & Manifest-Based Upgrades (2026-05-17)
+
+Safe-upgrade path for existing adopter projects that need to merge only the necessary Axiarch changes. Universal rules, protocols, and scripts become easier to update, while project-owned Blueprint state is preserved by default and ambiguous differences remain selectable by the operator.
+
+- **`axiarch-manifest.json`** — Ownership-boundary manifest separating Axiarch-owned files, Axiarch-shared Blueprint rules, project-owned Blueprint state, optional files, and source-repository-only files
+- **`axiarch-scripts/axiarch-upgrade.sh`** — Local-first upgrade helper supporting `--dry-run`, `--safe-only`, `--interactive`, and `--apply`
+- **Group-level interactive choices** — `preserve`, `show-diff`, `update-all`, `review-each`, and `skip`; source-repository-only files stay skipped by default and move into review/application only when explicitly selected
+- **Project-owned state preserved by default** — `blueprint/core/000_project_overview.md`, `blueprint/core/010_project_lessons_log.md`, and `blueprint/*/[0-9][0-9][0-9]_*.md` are not overwritten by default
+- **Upgrade evidence** — Applied upgrades write `.axiarch/version.json`, `.axiarch/upgrade-report.md`, and `.axiarch/files.sha256`
+- **`axiarch-prompts/{ja,en}/develop/safe_upgrade_execute.md`** — Dedicated prompts for having AI agents execute the Safe Upgrade Wizard, including source-only default skip with explicit selection
+
+---
+
+### 🔮 v1.11.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
 Improvements with strong academic backing but larger implementation effort,
-planned independently for v1.10.0.
+planned independently for v1.11.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor
   `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation /

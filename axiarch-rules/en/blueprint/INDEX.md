@@ -97,6 +97,10 @@ SRE, incident management, operational requirements.
 
 > Related Universal: `operations/`
 
+| File | Description |
+|:--|:--|
+| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, and deduplicated interactive choices |
+
 ---
 
 ## 📂 product/: Business & Requirements
@@ -175,6 +179,6 @@ Strategies for generating next-generation "value".
 
 ---
 
-**Last Updated**: 2026-04-29
-**Version**: v1.3.0 — Initial 8-folder structure mapped to Universal, YAGNI-based structural normalization
+**Last Updated**: 2026-05-17
+**Version**: v1.10.0 — Release-upgrade Operations Blueprint registration and shared Blueprint / Project State boundary alignment for the Safe Upgrade Wizard
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

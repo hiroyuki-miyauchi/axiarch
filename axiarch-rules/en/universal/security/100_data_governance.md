@@ -133,7 +133,7 @@
 | **2026.4** | EU: Cross-border GDPR enforcement regulation enters into force (EU 2025/2518) |
 | **2026.6** | Colorado AI Act (CAIA): High-risk AI system regulation effective |
 | **2026.7** | Connecticut: Neural Data added to sensitive data categories |
-| **2026.8** | EU AI Act: High-risk AI (Annex III) obligations, transparency obligations (Art.50), AI sandbox establishment obligations take effect ※**Deferral proposal pending** (see note below) |
+| **2026.8** | EU AI Act: High-risk AI (Annex III) obligations, transparency obligations (Art.50), AI sandbox establishment obligations take effect. **Note: Deferral proposal pending** (see note below) |
 | **2026.8** | California AI Transparency Act (CAITA): AI-generated content transparency obligations effective |
 | **2026.8** | California Delete Act/DROP: Data broker bulk deletion functionality operational |
 | **2026 H2** | HIPAA Security Rule major amendment: MFA mandatory, all ePHI encryption (expected effective) |
@@ -795,7 +795,7 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 |:--------------|:------------------|
 | **2025.2.2** | Prohibition provisions (Unacceptable Risk), AI literacy obligations (Art.4) |
 | **2025.8.2** | GPAI obligations, governance bodies (AI Board/Scientific Panel), member state authority designation & penalty legislation |
-| **2026.8.2** | High-risk AI obligations (Annex III), transparency obligations (Art.50), AI sandbox establishment mandate ※**Deferral proposal pending** (see below) |
+| **2026.8.2** | High-risk AI obligations (Annex III), transparency obligations (Art.50), AI sandbox establishment mandate. **Note: Deferral proposal pending** (see below) |
 | **2027.8.2** | High-risk AI (product safety legislation: medical devices, aviation, etc.) |
 
 > [!WARNING]

@@ -13,6 +13,7 @@
 ```
 your-project/
  ├── AGENTS.md                 ← 最上位プロトコル（行動指針）
+ ├── axiarch-manifest.json      ← 任意：安全アップグレード用の所有境界マニフェスト
  ├── .agents/
  │    └── rules/
  │         └── prompt_pointer.md  ← ポインター（目次・参照先はaxiarch-rules/）
@@ -47,11 +48,12 @@ your-project/
  │         └── operate/
  ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
  │    ├── README.md                    ← 索引・使い方ガイド
- │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（15 段階、`--quiet` 対応 v1.9.0）
+ │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（15 段階、`--quiet` 対応、v1.9+ diff guard、v1.10.0本体リリース整合・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査）
  │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+）
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（task.md 自動初期化、v1.5.5+）
  │    ├── axiarch-diff-guard.sh        ← PostToolUse hook の外出しスクリプト（diff guard、v1.9.0）
+ │    ├── axiarch-upgrade.sh           ← Safe Upgrade Wizard（対話式・グループ別アップグレード）
  │    └── check-git-config-clean.sh    ← .git/config 健全性チェック（worktree 残留）
  └── src/                       ← プロジェクトコード
 ```
@@ -184,9 +186,9 @@ your-project/
 
 | ディレクトリ | 概要 |
 |---|---|
-| `../axiarch-prompts/ja/develop/` | 開発・実行系プロンプト（`feature_development.md`、`refactoring_audit.md`、`push_execute.md`、`ci_fix.md`）。AIエージェントのチャットに直接貼り付けて使用する。 |
-| `../axiarch-prompts/ja/audit/` | 品質・整合性監査系プロンプト（`fullstack_qa_audit.md`、`api_architecture_audit.md`、`data_integrity_audit.md`、`system_integrity_audit.md`、`deep_optimization_audit.md`）。 |
-| `../axiarch-prompts/ja/govern/` | コンプライアンス・ガバナンス系プロンプト（`governance_auditor.md`、`constitution_compliance_audit.md`、`compliance_inspector_audit.md`、`blueprint_governance_audit.md`、`localization_audit.md`）。 |
-| `../axiarch-prompts/ja/operate/` | インシデント・参入系プロンプト（`onboarding_audit.md`、`incident_response.md`）。 |
+| `../../axiarch-prompts/ja/develop/` | 開発・実行系プロンプト（`feature_development.md`、`refactoring_audit.md`、`push_execute.md`、`ci_fix.md`、`safe_upgrade_execute.md`）。AIエージェントのチャットに直接貼り付けて使用する。 |
+| `../../axiarch-prompts/ja/audit/` | 品質・整合性監査系プロンプト（`fullstack_qa_audit.md`、`api_architecture_audit.md`、`data_integrity_audit.md`、`system_integrity_audit.md`、`deep_optimization_audit.md`）。 |
+| `../../axiarch-prompts/ja/govern/` | コンプライアンス・ガバナンス系プロンプト（`governance_auditor.md`、`constitution_compliance_audit.md`、`compliance_inspector_audit.md`、`blueprint_governance_audit.md`、`localization_audit.md`）。 |
+| `../../axiarch-prompts/ja/operate/` | インシデント・参入系プロンプト（`onboarding_audit.md`、`incident_response.md`）。 |
 
 ---

@@ -860,7 +860,7 @@ Naming Process:
 ### 9.3. Third-Party Brand Usage Policy
 
 - **Rule 14.052**: Publish a public policy governing brand usage by partners and users
-  - **Permitted**: Non-commercial logo use ("Powered by ○○") is welcomed
+  - **Permitted**: Non-commercial logo use ("Powered by [Brand/Product]") is welcomed
   - **Prohibited**: Usage creating confusion with official channels / trademark infringement
 
 ### 9.4. IP & Trademark Protection Protocol
@@ -1665,5 +1665,4 @@ Brand Review Bot Scope:
 | §19 Brand Intelligence 2.0 | `300_customer_experience` (CX Analytics), `500_growth_marketing` (Analytics) |
 | §20 Compliance Automation | `000_design_ux` (Design System CI), `ai/000_ai_engineering` |
 | §21 Platform Economy | `400_pricing_strategy` (Platform Pricing), `300_ip_due_diligence` |
-
 

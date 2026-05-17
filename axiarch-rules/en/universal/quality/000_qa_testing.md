@@ -1508,7 +1508,7 @@
     |:---|:---|
     | **S**atisfaction | Developer satisfaction with test culture |
     | **P**erformance | Team-wide quality outcomes (DDR, change failure rate) |
-    | **A**ctivity | Test creation/modification activity (※ Don't use as KPI) |
+    | **A**ctivity | Test creation/modification activity (Note: Don't use as KPI) |
     | **C**ommunication | Quality of QA-Dev collaboration |
     | **E**fficiency | Flow efficiency from test creation to result retrieval |
 

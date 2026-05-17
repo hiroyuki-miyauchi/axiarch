@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.0] — 2026-05-17
+
+### Safe Upgrade Wizard / 安全アップグレード導線
+
+既存プロジェクトにAxiarchの必要部分だけを移植できるように、Axiarch本体ファイル、Axiarch共有Blueprint、プロジェクト固有Blueprint、任意ファイルを分別するマニフェストと対話式アップグレード補助スクリプトを追加。
+
+Added a manifest and interactive upgrade helper so adopter projects can merge only the needed Axiarch changes while separating Axiarch-shared Blueprint rules from project-owned Blueprint state.
+
+### Added
+
+- **`axiarch-manifest.json`** — Axiarch所有ファイル、Axiarch共有Blueprint、プロジェクト固有Blueprint、任意ファイル、本体リポジトリ専用ファイルの所有境界と既定更新方針を定義。Project Stateの広域globには `exclude` を持たせ、明示管理済みテンプレートや共有Blueprintを二重分類しない。READMEで採用先不要と説明するリポジトリ管理用ファイルとセットアップ用 `init.sh` も `source_docs` / `skip` として分類 / Defines ownership boundaries and default update policies for Axiarch-owned files, Axiarch-shared Blueprint rules, project-owned Blueprint state, optional files, and source-repository-only files. The broad Project State glob carries `exclude` entries so explicitly managed templates and shared Blueprint rules are not double-classified. Repository-management files described as not needed by adopter projects in the README and the setup installer `init.sh` are also classified as `source_docs` / `skip`
+- **`axiarch-scripts/axiarch-upgrade.sh`** — `--dry-run` / `--safe-only` / `--interactive` / `--apply` に対応した Safe Upgrade Wizard。`axiarch-manifest.json` の `files` / `groups` / `exclude` を読み、グループごとに `preserve（保持・上書きしない）`、`show-diff（差分だけ表示）`、`update-all（すべて更新）`、`review-each（ファイルごとに確認）`、`skip（今回はスキップ）` を選択可能。default actionと固定候補が重複しないよう、対話選択肢は動的に表示。`jq` がない環境では内蔵既定リストへフォールバック / Adds a Safe Upgrade Wizard with dry-run, safe-only, interactive, and apply modes. It reads `files`, `groups`, and `exclude` from `axiarch-manifest.json`, supports bilingual group-level choices with deduplicated interactive action options, and falls back to embedded defaults when `jq` is unavailable
+- **`axiarch-prompts/{ja,en}/develop/safe_upgrade_execute.md`** — 既存Axiarch採用プロジェクトでSafe Upgrade WizardをAIエージェントに実行させるための専用プロンプトを追加。直接ロード、dry-run first、Project State保持、source-only既定skipと明示選択、mixed ownershipレビュー、検証、報告を標準化 / Adds dedicated prompts for having AI agents execute the Safe Upgrade Wizard in existing Axiarch adopter projects, standardizing direct loading, dry-run first execution, Project State preservation, source-only default skip with explicit selection, mixed-ownership review, verification, and reporting
+- **`axiarch-rules/{ja,en}/blueprint/operations/010_release_upgrade_operations.md`** — v1.9.0以降の実運用で発生したCHANGELOG整合、Safe Upgrade dry-run、interactive入力、local-onlyファイルレビュー、source-only既定skipと明示選択、対話選択肢重複排除の教訓を運用Blueprintへ昇華 / Crystallizes real v1.9.0+ operations lessons into the Operations Blueprint: CHANGELOG parity, Safe Upgrade dry-runs, interactive input, local-only file review, source-only default skip with explicit selection, and deduplicated interactive choices
+
+### Changed
+
+- **`init.sh`** — `AXIARCH_VERSION` を正式リリース用の `1.10.0` へ更新し、既定refを `tags/v1.10.0` に設定。`axiarch-manifest.json` と `axiarch-upgrade.sh` を配布対象および構文検証対象に追加し、導入メタデータとして `.axiarch/version.json` を作成。既存Axiarch導入先を検出した場合は通常インストール前にSafe Upgrade Wizardのdry-runへ誘導し、明示続行しない限りコピー前に停止する。古い採用先に `axiarch-upgrade.sh` が未導入の場合はタグ固定の一時ヘルパー取得手順を提示し、非対話EOF時も既定 `N` として安全に停止する。明示続行時も `axiarch-rules/` と `axiarch-prompts/` は内容コピーにし、同名ディレクトリの入れ子化を避ける。エージェント選択順を主対象の Codex / Claude Code / Antigravity に揃え、hook診断案内を Codex / Claude Code のhook導入時とその他の任意診断で分ける / Sets `AXIARCH_VERSION` to stable release version `1.10.0`, defaults the install ref to `tags/v1.10.0`, distributes the manifest and upgrade helper, validates the new script, writes `.axiarch/version.json`, detects existing Axiarch installations before full install, points operators to the Safe Upgrade Wizard dry-run, stops before copying unless explicitly continued, prints a tag-pinned temporary-helper bootstrap path when older adopters do not have `axiarch-upgrade.sh`, treats non-interactive EOF as safe default `N`, copies `axiarch-rules/` and `axiarch-prompts/` contents to avoid nested same-name directories, aligns the agent choice order to Codex / Claude Code / Antigravity, and separates hook diagnostics from optional diagnostics for non-hook setups
+- **`axiarch-scripts/check-axiarch-health.sh`** — Axiarch本体リポジトリで `init.sh` / `axiarch-manifest.json` / `CHANGELOG.md` / README / llms のv1.10.0整合、Safe Upgrade Wizardのmanifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護とreasonラベル・ファイル/ディレクトリ型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、safe upgrade実行promptのREADME/llms/rules索引、Blueprint INDEXのリリース・アップグレード運用Blueprint登録と版数、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、v1.10.0中核ファイルのGit追跡状態を検査するリリース版メタデータチェックを追加。Claude Code / Codex hook設定が未導入のプロジェクトでは任意hook層として扱い、hook未導入のみで失敗にしない / Adds release metadata parity checks for v1.10.0 across `init.sh`, `axiarch-manifest.json`, `CHANGELOG.md`, README, and llms, plus Safe Upgrade Wizard manifest-wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection with reason labels, file/directory type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, safe-upgrade execution prompt indexing checks across README, llms, and rules indexes, Blueprint INDEX release-upgrade operations registration and version metadata, required/optional boundary checks for `axiarch-scripts/` in README, llms, and scripts README, and source release-file Git tracking in the Axiarch source repository; hook absence is treated as an optional hook layer when Claude Code / Codex hook settings are not installed
+- **`axiarch-scripts/axiarch-upgrade.sh`** — 不正な `--agent` 値をエラー化し、dry-run中の3-way merge競合では `.axiarch/conflicts/` へ書き込まないよう修正。`--source` 指定時のupgrade metadataはsource manifestの `axiarchVersion` を採用し、`--to vX.Y.Z` や `--ref tags/vX.Y.Z` 由来のタグ接頭辞 `v` はmetadata上で正規化。`--interactive` のグループ選択で内部のグループ一覧とユーザー入力が同じstdinを奪い合わないよう、ループ入力を別FDへ分離し、default actionと固定候補が重複しないよう対話選択肢を動的に組み立てる。確認入力がEOFになった場合はdefault Nとしてdry-runへ戻す。source-onlyファイルは既定skipを維持しつつ、interactiveで明示的に `show-diff` / `review-each` / `update-all` を選んだ場合だけ選択を尊重する。ディレクトリ更新時はsource側に存在しないlocal-onlyファイルを自動削除せず、`STALE-LOCAL` として表示し、sourceとtargetのファイル/ディレクトリ型が異なる場合は自動削除・置換せず `TYPE-CONFLICT` としてreviewへ倒し、`--apply` 時のみupgrade reportへ永続化する。`replace-if-local-unchanged` はtarget欠落時またはbase一致時のみ自動更新し、baseなし差分、base欠落、base不一致はreason付きでreviewへ倒す。metadata JSON値をエスケープ。manifestが読めない場合のfallbackでも、Axiarch共有BlueprintをProject State preserveに飲ませずレビュー対象に含め、将来の `core/{NNN}_*.md` をProject Stateとして保持し、`--with-prompts` 適用時は `axiarch-prompts/` をhash証跡に含める / Rejects invalid `--agent` values, avoids writing `.axiarch/conflicts/` during dry-run merge conflicts, uses the source manifest `axiarchVersion` for upgrade metadata when `--source` is used, normalizes tag-style `v` prefixes from `--to vX.Y.Z` or `--ref tags/vX.Y.Z` in metadata, separates group-list iteration from user stdin so `--interactive` group choices can read operator input correctly, builds deduplicated interactive action options so the default action is not repeated in the fixed candidate list, treats EOF confirmations as default N and returns to dry-run behavior, keeps source-only files skipped by default while respecting explicit `show-diff`, `review-each`, or `update-all` selections in interactive mode, reports source-missing local-only files as `STALE-LOCAL` instead of deleting them automatically, routes file/directory type mismatches to `TYPE-CONFLICT` review instead of automatic deletion or replacement, persists review evidence to the upgrade report only in `--apply` mode, applies `replace-if-local-unchanged` automatically only when the target is missing or matches the base and otherwise falls back to review with a reason label, escapes metadata JSON values, keeps Axiarch-shared Blueprint rules reviewable even in manifest fallback mode, preserves future `core/{NNN}_*.md` files as Project State, and hashes `axiarch-prompts/` when prompts are applied
+- **`README.md` / `axiarch-scripts/README.md` / `llms.txt` / `llms-full.txt` / `ROADMAP.md` / `axiarch-rules/{ja,en}/INDEX.md` / `axiarch-rules/{ja,en}/README.md` / `axiarch-rules/{ja,en}/blueprint/core/README.md`** — 既存プロジェクト向けの安全アップグレード導線、必須/任意の所有境界、v1.10.0タグ固定の導入・更新手順を明記。READMEのHook補強説明をCodex / Claude Code両対応へ揃え、Google Antigravityのみ実務検証済みとして扱う表記へ補正 / Documents the safe-upgrade path for adopter projects, required/optional ownership boundaries, and the v1.10.0 tag-pinned install and upgrade flow. Aligns the README hook-reinforcement explanation with both Codex and Claude Code, while keeping Google Antigravity as the only production-validated target
+- **`axiarch-rules/{ja,en}/LOADING_PROTOCOL.md` / `CRYSTALLIZATION_PROTOCOL.md`** — `INDEX.md` 参照の曖昧さと `core/020_` 固定に見える採番説明を補正し、ロード証跡・昇華採番の整合を明確化 / Clarifies INDEX path references and numbering guidance so load evidence and crystallized-rule numbering do not imply ambiguous paths or reserved blank bands
+- **`axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md`** — 旧 `scripts/check-git-config-clean.sh` 参照を配布実態の `axiarch-scripts/check-git-config-clean.sh` へ修正 / Updates legacy `scripts/check-git-config-clean.sh` references to the distributed `axiarch-scripts/check-git-config-clean.sh` path
+
+### Compatibility
+
+- **プロジェクト固有Blueprintを既定保持** — `blueprint/core/000_project_overview.md`、`blueprint/core/010_project_lessons_log.md`、`blueprint/*/[0-9][0-9][0-9]_*.md` は既定で上書きしない / Project-owned Blueprint files are preserved by default
+- **必須構成は維持** — 実行時の最小必須構成は引き続き `AGENTS.md` + `axiarch-rules/`。`axiarch-manifest.json` と `axiarch-upgrade.sh` は安全アップグレード用途の推奨ファイル / Minimal runtime setup remains `AGENTS.md` plus `axiarch-rules/`; the manifest and upgrade script are recommended for safe upgrades
+
 ## [1.9.0] — 2026-05-15
 
 ### 🧠 Memory Persistence & Glob-Scoped Rules / Memory Persistence と Glob-Scoped Rules 初期実装
@@ -80,7 +109,7 @@ Two diagnostic bug fixes + three documentation corrections discovered in the 41s
 
 - **`axiarch-scripts/README.md` JA概要 「外部検証可能な 8 領域」 → 「10 領域以上」** — v1.5.1 当時の 10-stage 計上時の列挙数がそのまま残存。v1.8.0 で 14-stage に展開されたため「10 領域以上」に訂正。v1.8.0 Check D Task Boundary Detection 追加の言及も併せ追記 / Fixed stale "8 領域" (8 verifiable areas) count from v1.5.1 era; updated to "10 領域以上" and added v1.8.0 Check D mention
 
-- **`CHANGELOG.md` v1.6.0 Out of Scope — `v1.7.0 (Tier 2)` 行の `(Check 14)` → `(Check 15)` + バージョン訁正** — Check 14 は v1.8.0 で実装済みのため次の未実装候補は Check 15。併せて履歴記録内の「v1.7.0 (Tier 2)」 → 「v1.9.0 (Tier 2)」、「v1.8.0 (Tier 3)」 → 「v1.10.0 (Tier 3)」に訂正（いずれも既リリース済み version を指它していた） / Fixed stale version labels in v1.6.0 Out of Scope: `(Check 14)` → `(Check 15)` (Check 14 shipped in v1.8.0); `v1.7.0` → `v1.9.0`; `v1.8.0 (Tier 3)` → `v1.10.0 (Tier 3)`
+- **`CHANGELOG.md` v1.6.0 Out of Scope — `v1.7.0 (Tier 2)` 行の `(Check 14)` → `(Check 15)` + バージョン訂正** — Check 14 は v1.8.0 で実装済みのため次の未実装候補は Check 15。併せて履歴記録内の古い Tier 2 / Tier 3 ラベルを当時の次期候補枠へ訂正。現在のロードマップでは採用先アップグレード課題を優先し、Safe Upgrade Wizard を v1.10.0、Static Lint を v1.11.0 に再配分 / Fixed stale version labels in v1.6.0 Out of Scope: `(Check 14)` → `(Check 15)` (Check 14 shipped in v1.8.0); old Tier-2 and Tier-3 labels were moved to the then-next candidate slots. The current roadmap prioritizes adopter-upgrade needs by assigning Safe Upgrade Wizard to v1.10.0 and Static Lint to v1.11.0
 
 ### Compatibility
 
@@ -153,10 +182,10 @@ Two diagnostic bug fixes + three documentation corrections discovered in the 41s
 - AGENTS.md §8.4 (Documentation Requirements) と Check D の整合
 - Anthropic Claude Code Hooks: <https://code.claude.com/docs/en/hooks>
 
-### Out of Scope（v1.9.0 / v1.10.0 / v2.0.0 に deferred — see ROADMAP）
+### Out of Scope（v1.9.0 / v1.11.0 / v2.0.0 に deferred — see ROADMAP）
 
 - **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache / shellcheck CI / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
-- **v1.10.0 (Tier 3)**: axiarch-doctor CI lint / IFEval-style auto-regression / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v1.11.0 (Tier 3)**: axiarch-doctor CI lint / IFEval-style auto-regression / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
 - **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation / `scripts/` ↔ `axiarch-scripts/` symlink 互換実装の再検討
 
 ---
@@ -206,10 +235,10 @@ This release mitigates a critical structural flaw discovered via adopter feedbac
 - v1.6.0 commit body の `LOADING_PROTOCOL.md §4 Cross-Session Re-load Criteria` の confirmation bias loophole
 - Claude Code Hooks UserPromptSubmit input format: <https://code.claude.com/docs/en/hooks>
 
-### Out of Scope（v1.9.0 / v1.10.0 / v2.0.0 に deferred — see ROADMAP）
+### Out of Scope（v1.9.0 / v1.11.0 / v2.0.0 に deferred — see ROADMAP）
 
 - **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI integration / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
-- **v1.10.0 (Tier 3)**: axiarch-doctor CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v1.11.0 (Tier 3)**: axiarch-doctor CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
 - **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
 
 ---
@@ -265,7 +294,7 @@ Bundles five improvements driven by adopter-project feedback ("governance functi
 ### Out of Scope（次バージョン以降に deferred — see ROADMAP）
 
 - **v1.9.0 (Tier 2)**: PostToolUse + git diff verification / Cursor `globs:` adoption / Memory Persistence enhancement / Aider-style prompt-cache optimisation / shellcheck CI / `init.sh` post-distribution syntax validation / Universal Rules footer cleanup / HealthCheck Workflow / Post-release README integration auto-verification (Check 15)
-- **v1.10.0 (Tier 3)**: `axiarch-doctor` CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
+- **v1.11.0 (Tier 3)**: `axiarch-doctor` CI lint mechanism / IFEval-style auto-regression suite / Deliberative-Alignment forced Protocol Recall / AI Agent Compatibility Matrix
 - **v2.0.0 (Strategic)**: AgentSpec-style DSL adoption / Multi-Agent Verification / Axiarch CLI / `decision: "block"` generalisation
 
 ---
@@ -455,7 +484,7 @@ This patch shifts from "documentation hand-off" to **"tool-enforced adherence"**
 
 ### Added
 
-- **`axiarch-scripts/check-axiarch-health.sh`**（新規）— **Axiarch 公式健全性診断ツール（全プロトコル監視）**。`bash axiarch-scripts/check-axiarch-health.sh` で **10 段階の遵守チェック** を一発実行：（1-4）Hook 関連（`.claude/settings.json` 存在・JSON 構文・hook 構造・発火履歴）/ （5）LOADING_PROTOCOL Step 4 遵守（`task.md` ロード履歴）/ （6）CRYSTALLIZATION_PROTOCOL §5 遵守（3件以上のドメイン検出）/ **（7）AGENTS.md §8 Process & Documentation（task.md / implementation_plan.md / walkthrough.md 存在）** / **（8）§1 Deployment Ban（force-push / 直 main commit 検出）** / **（9）§4 SSOT Sync（main 同期状態）** / **（10）§2 Language First（Project Native Language 整合性）**。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示。`init.sh` で自動配布 / NEW: Official Axiarch health diagnostic with **10-stage protocol-wide compliance check**. Covers hook firing, AI adherence, crystallization threshold, AGENTS §1/§2/§4/§8/§9 + LOADING_PROTOCOL. Surfaces "where the AI is slacking" at a glance. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review. Auto-distributed by `init.sh`
+- **`axiarch-scripts/check-axiarch-health.sh`**（新規）— **Axiarch 公式健全性診断ツール（全プロトコル監視）**。`bash axiarch-scripts/check-axiarch-health.sh` で **10 段階の遵守チェック** を一発実行：（1-4）Hook 関連（`.claude/settings.json` 存在・JSON 構文・hook 構造・発火履歴）/ （5）LOADING_PROTOCOL Step 4 遵守（`task.md` ロード履歴）/ （6）CRYSTALLIZATION_PROTOCOL §5 遵守（3件以上のドメイン検出）/ **（7）AGENTS.md §8 Process & Documentation（task.md / implementation_plan.md / walkthrough.md 存在）** / **（8）§1 Deployment Ban（force-push / 直 main commit 検出）** / **（9）§4 SSOT Sync（main 同期状態）** / **（10）§2 Language First（Project Native Language 整合性）**。検証困難な §0/§3/§5/§6/§7 は Out of Scope として明示。`init.sh` で自動配布 / NEW: Official Axiarch health diagnostic with **10-stage protocol-wide compliance check**. Covers hook firing, AI adherence, crystallization threshold, AGENTS §1/§2/§4/§8/§9 + LOADING_PROTOCOL. Surfaces which protocol needs attention at a glance. Out-of-scope protocols (§0/§3/§5/§6/§7) explicitly marked for manual review. Auto-distributed by `init.sh`
 - **`axiarch-scripts/README.md`**（新規）— scripts/ ディレクトリの索引兼ガイド。各診断ツール（`check-axiarch-health.sh` / `check-git-config-clean.sh`）の目的・使い方・診断項目・推奨ワークフローをバイリンガルで記載。採用者が `axiarch-scripts/` 配下の存在意義を一発で把握できるようにする / NEW: `axiarch-scripts/` index & guide. Bilingual documentation of each diagnostic tool's purpose, usage, check items, and recommended workflow
 
 ### Changed
@@ -797,6 +826,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.10.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...v1.9.0
 [1.8.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.0...v1.8.1

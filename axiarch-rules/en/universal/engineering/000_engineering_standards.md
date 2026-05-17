@@ -27,7 +27,7 @@
 | VII | Bug Risk Reduction Policy | §7.0 – §7.3 | 4 |
 | VIII | Continuous Learning & Verification | §8.0 – §8.2 | 3 |
 | IX | Compatibility & Testing | §9.0 – §9.5 | 6 |
-| X | CI/Deploy & Auxiliary Standards (※ pure git moved to `600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
+| X | CI/Deploy & Auxiliary Standards (Note: pure git moved to `600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
 | XI | Documentation Ops | §11.0 – §11.2 | 3 |
 | XII | Engineering Quality Protocols | §12.1 – §12.12 | 12 |
 | XIII | Advanced Architectural Mandates | §13.1 – §13.15 | 15 |

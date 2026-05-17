@@ -37,7 +37,7 @@
     *   [How does this feature solve the problem?]
 *   **Success Metrics**:
     *   [What metrics indicate this feature is successful after release?]
-    *   Example: "User completion rate for ○○ increases by X%"
+    *   Example: "User completion rate for [feature/action] increases by X%"
 
 ---
 

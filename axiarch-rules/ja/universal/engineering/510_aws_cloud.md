@@ -1802,7 +1802,7 @@
         -   **コード分離**: CloudFront Functions（JavaScript Runtime 2.0必須）と組み合わせ、関数コードと構成データを独立デプロイ。コード変更不要のデータ更新が可能。
         -   **制限**: KVストアあたり最大5MB、キー512バイト、値1KB。大規模データにはDynamoDB + Lambda@Edgeを検討。
         -   **セキュリティ**: 保存時・転送中の暗号化を自動適用。エッジでのメモリ内復号。
-    7.  **VPC Origins（2024年GA）**: プライベートサブネット内のALB/NLB/EC2インスタンスをCloudFrontオリジンとして直接使用。パブリックインターネットへのバックエンド露出を完全排除しゼロトラスト配信を実現。
+    7.  **VPC Origins（2024年GA）**: プライベートサブネット内のALB/NLB/EC2インスタンスをCloudFrontオリジンとして直接使用。バックエンドの直接公開を避け、ゼロトラスト配信をプライベートオリジン構成へ寄せる。
         -   **Security Group**: オリジンリソースのSGで、CloudFrontマネージドプレフィックスリスト（`CloudFront-VPCOrigins-Service-SG`）からのインバウンドのみ許可。
         -   **HTTPS**: CloudFrontとVPCオリジン間は常にHTTPS通信を設定。
         -   **Cross-Account VPC Origins（2025年〜）**: AWS Resource Access Manager（RAM）経由で、別アカウントのVPCオリジンにCloudFrontから接続。マルチアカウント環境のセキュリティ強化。
@@ -1853,7 +1853,7 @@
 ### Rule 42.1: The Secure Pipeline Protocol
 -   **Law**: CI/CDパイプラインをセキュリティ境界として設計し、サプライチェーン攻撃を防止してください。
 -   **Action**:
-    1.  **OIDC Federation**: GitHub Actions等の外部CI/CDにはOIDC連携を使用し、長期アクセスキーの保存を完全排除。Trust Policyでリポジトリ/環境を厳格に制限。
+    1.  **OIDC Federation**: GitHub Actions等の外部CI/CDにはOIDC連携を使用し、長期アクセスキーの保存を避ける。Trust Policyでリポジトリ/環境を厳格に制限。
     2.  **Artifact Signing**: ビルド成果物（コンテナイメージ、バイナリ）に暗号署名を実施。AWS Signerでテスト完了後・デプロイ前に署名。改竄検知を自動化。
     3.  **Cross-Account Deployment**: 環境別アカウント分離（dev/staging/prod）。共有サービスアカウントのCI/CDからクロスアカウントロールでデプロイ。最小権限のIAMポリシーを適用。
     4.  **Secrets in Pipeline**: パイプライン設定やIaCテンプレートにシークレットのハードコーディング禁止。Secrets Manager参照を義務化。
@@ -2851,7 +2851,7 @@
 ## 110. CloudFront VPC Origins（プライベートオリジン配信）
 
 ### Rule 110.1: The CloudFront VPC Origins Protocol
--   **Law**: パブリックインターネットへのバックエンド露出を排除するため、**CloudFront VPC Origins**を使用し、プライベートサブネット内のALB/NLB/EC2をオリジンとするゼロトラスト配信アーキテクチャを構築してください（2024年GA）。
+-   **Law**: パブリックインターネットへのバックエンド直接公開を避けるため、**CloudFront VPC Origins**を使用し、プライベートサブネット内のALB/NLB/EC2をオリジンとするゼロトラスト配信アーキテクチャを構築してください（2024年GA）。
 -   **Action**:
     1.  **Private Subnet Deployment**: オリジンリソース（ALB/NLB/EC2）を必ずプライベートサブネットに配置。CloudFrontが唯一のエントリポイントとなり、攻撃対象を大幅に縮小。
     2.  **Security Group Lock**: オリジンのセキュリティグループで、CloudFrontマネージドセキュリティグループ（`CloudFront-VPCOrigins-Service-SG`）からのインバウンドトラフィックのみを許可。パブリックDNS/エンドポイントが存在しないゼロトラストペリメータ。
@@ -3813,4 +3813,3 @@
 - **API Integration**: `engineering/100_api_integration.md` — REST/GraphQL設計、Rate Limiting
 - **Engineering General**: `engineering/000_engineering_standards.md` — コードレビュー、テスト戦略
 - **AI Implementation**: `ai/000_ai_engineering.md` — ストリーミングファースト、RAG設計、トークンコスト管理
-

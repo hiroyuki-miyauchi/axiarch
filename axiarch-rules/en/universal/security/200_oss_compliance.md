@@ -404,7 +404,7 @@ sbom:
 ### 9.2 OIDC Trusted Publishing
 
 - **Rule**: OIDC Trusted Publishing is the **sole method** for package publishing (see §31)
-- **Rule**: **Completely prohibit** long-lived access tokens (npm/PyPI/GitHub Packages universal)
+- **Rule**: Prohibit long-lived access tokens by default (npm/PyPI/GitHub Packages universal)
 
 ### 9.3 GitHub Artifact Attestation
 
@@ -833,7 +833,7 @@ flowchart TD
 - **Rule**: Use SBOM to identify impact scope across released builds
 - **Rule**: Immediately revoke potentially leaked credentials via `npm token revoke`
 - **Rule**: Record post-mortem results in lessons log (`core/010_project_lessons_log.md`)
-- **Rule**: Migrate publishing tokens from long-lived to OIDC Trusted Publishing to eliminate theft risk
+- **Rule**: Migrate publishing tokens from long-lived to OIDC Trusted Publishing to reduce token theft risk
 - **Rule**: Enforce 2FA/WebAuthn for maintainer accounts to prevent phishing-based account takeover
 - **Rule**: Consider network-isolated CI builds to counter self-replicating malware (Shai-Hulud type)
 
@@ -1074,7 +1074,7 @@ The "Diamond Dependency Problem" — where packages A and B require different ve
 | Measure | Required/Recommended | Details |
 |:--------|:--------------------|:--------|
 | 2FA (WebAuthn/TOTP) | **Required** | Enable on all maintainer accounts. Prefer WebAuthn (phishing-resistant) |
-| OIDC Trusted Publishing | **Required** | npm GA (2025-07). Completely eliminate long-lived tokens |
+| OIDC Trusted Publishing | **Required** | npm GA (2025-07). Replace long-lived tokens with OIDC where supported |
 | `npm access` least privilege | **Required** | Limit publish permissions to minimum maintainers |
 | Granular Access Token | Deprecation in progress | Interim measure until full OIDC TP migration. 90-day rotation |
 
@@ -2706,7 +2706,7 @@ jobs:
 ### 61.5 Rules
 
 - **Rule**: Store all release SBOMs in **OCI Artifact format** in a Container Registry (GHCR/ECR/GCR, etc.), managed in the same repository as container images
-- **Rule**: Sign SBOMs with `cosign attest` and guarantee that consumers can verify authenticity via `cosign verify-attestation`
+- **Rule**: Sign SBOMs with `cosign attest` and provide verifiable evidence so consumers can confirm authenticity via `cosign verify-attestation`
 - **Rule**: Auto-upload all project SBOMs to **Dependency-Track** or equivalent SBOM management platform for cross-project vulnerability correlation
 - **Rule**: Adopt ORAS (OCI Registry as Storage) CLI as the standard tool for SBOM Federation reference architecture
 - **Rule**: When providing SBOMs to external partners or customers, include the OCI Artifact URL (+ signature verification procedure) in the deliverables
