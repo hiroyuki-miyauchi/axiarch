@@ -25,7 +25,7 @@
 #   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
-#   Check 15   v1.9+ integration — PostToolUse diff guard + release/docs/prompt parity + source release-file tracking
+#   Check 15   v1.9+ / v1.11+ integration — PostToolUse diff guard + task-state lifecycle + release/docs/prompt parity + source release-file tracking
 #
 # Out of Scope (semantic judgment required, manual review):
 #   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
@@ -413,9 +413,22 @@ print_section "Check 10: §2 Language First (Project Native Language)"
 
 NATIVE_LANG=""
 if [[ -f "${PROJECT_DIR}/AGENTS.md" ]]; then
-  # Detect Project Native Language setting
-  NATIVE_LANG=$(grep -iE "Project Native Language.*:.*(Japanese|English)" "${PROJECT_DIR}/AGENTS.md" 2>/dev/null \
-    | head -1 | grep -oiE "Japanese|English" | head -1 | tr '[:upper:]' '[:lower:]')
+  NATIVE_LANG_LINE=$(grep -iE "Project Native Language" "${PROJECT_DIR}/AGENTS.md" 2>/dev/null | head -1 || true)
+  NATIVE_LANG_LOWER=$(printf '%s\n' "${NATIVE_LANG_LINE}" | tr '[:upper:]' '[:lower:]')
+  NATIVE_LANG_CONFIG="${NATIVE_LANG_LOWER%%default:*}"
+  NATIVE_LANG_DEFAULT=""
+  if [[ "${NATIVE_LANG_LOWER}" == *"default:"* ]]; then
+    NATIVE_LANG_DEFAULT="${NATIVE_LANG_LOWER#*default:}"
+  fi
+  if [[ "${NATIVE_LANG_CONFIG}" == *"english"* && "${NATIVE_LANG_CONFIG}" != *"japanese"* ]]; then
+    NATIVE_LANG="english"
+  elif [[ "${NATIVE_LANG_CONFIG}" == *"japanese"* && "${NATIVE_LANG_CONFIG}" != *"english"* ]]; then
+    NATIVE_LANG="japanese"
+  elif [[ "${NATIVE_LANG_DEFAULT}" == *"english"* && "${NATIVE_LANG_DEFAULT}" != *"japanese"* ]]; then
+    NATIVE_LANG="english"
+  elif [[ "${NATIVE_LANG_DEFAULT}" == *"japanese"* && "${NATIVE_LANG_DEFAULT}" != *"english"* ]]; then
+    NATIVE_LANG="japanese"
+  fi
 fi
 
 if [[ -z "${NATIVE_LANG}" ]]; then
@@ -423,18 +436,46 @@ if [[ -z "${NATIVE_LANG}" ]]; then
   print_info "→ Verify AGENTS.md Project Configuration section"
 else
   print_info "Project Native Language: ${NATIVE_LANG}"
-  if [[ -f "${PROJECT_DIR}/task.md" ]] && [[ "${NATIVE_LANG}" == "japanese" ]]; then
-    # Heuristic: count headings starting with ASCII alpha (may include acronyms like TODO/KPI)
-    ASCII_HEADINGS=$(grep -cE "^#+\s+[A-Za-z]" "${PROJECT_DIR}/task.md" 2>/dev/null || true)
-    ASCII_HEADINGS="${ASCII_HEADINGS:-0}"
-    if [[ "${ASCII_HEADINGS}" -gt 5 ]]; then
-      print_info "task.md contains ${ASCII_HEADINGS} ASCII-leading headings"
+  language_docs_found=0
+  process_docs=(task.md implementation_plan.md walkthrough.md)
+  if [[ "${NATIVE_LANG}" == "japanese" ]]; then
+    # Heuristic: count headings starting with ASCII alpha (may include acronyms like TODO/KPI).
+    ASCII_HEADINGS=0
+    for process_doc in "${process_docs[@]}"; do
+      process_doc_path="${PROJECT_DIR}/${process_doc}"
+      if [[ -f "${process_doc_path}" ]]; then
+        language_docs_found=1
+        doc_ascii_headings=$(grep -cE "^#+\s+[A-Za-z]" "${process_doc_path}" 2>/dev/null || true)
+        ASCII_HEADINGS=$((ASCII_HEADINGS + ${doc_ascii_headings:-0}))
+      fi
+    done
+    if [[ "${language_docs_found}" -eq 0 ]]; then
+      print_pass "Language consistency check skipped (no process docs)"
+    elif [[ "${ASCII_HEADINGS}" -gt 5 ]]; then
+      print_info "process docs contain ${ASCII_HEADINGS} ASCII-leading headings"
       print_info "(may be acronyms like TODO/KPI — manual review recommended)"
     else
-      print_pass "task.md headings appear consistent with Project Native Language"
+      print_pass "process doc headings appear consistent with Japanese Project Native Language"
     fi
-  else
-    print_pass "Language consistency check skipped (no task.md or English project)"
+  elif [[ "${NATIVE_LANG}" == "english" ]]; then
+    CJK_TEXT_COUNT=0
+    for process_doc in "${process_docs[@]}"; do
+      process_doc_path="${PROJECT_DIR}/${process_doc}"
+      if [[ -f "${process_doc_path}" ]]; then
+        language_docs_found=1
+        doc_cjk_count=$(grep -cE "[ぁ-んァ-ン一-龥]" "${process_doc_path}" 2>/dev/null || true)
+        CJK_TEXT_COUNT=$((CJK_TEXT_COUNT + ${doc_cjk_count:-0}))
+      fi
+    done
+    if [[ "${language_docs_found}" -eq 0 ]]; then
+      print_pass "Language consistency check skipped (no process docs)"
+    elif [[ "${CJK_TEXT_COUNT}" -gt 0 ]]; then
+      print_warn "process docs contain ${CJK_TEXT_COUNT} CJK text lines in an English project"
+      print_info "→ Verify task.md / implementation_plan.md / walkthrough.md are generated and maintained in Project Native Language"
+      EXIT_CODE=1
+    else
+      print_pass "process docs appear consistent with English Project Native Language"
+    fi
   fi
 fi
 
@@ -469,7 +510,7 @@ else
 fi
 
 # =============================================================================
-# Check 12: Bootstrap — SessionStart hook wiring (v1.5.5+)
+# Check 12: Bootstrap — SessionStart hook wiring (v1.5.5+ / v1.11.0+ task-state lifecycle)
 # =============================================================================
 print_section "Check 12: SessionStart hook (task.md auto-bootstrap)"
 if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
@@ -484,6 +525,24 @@ elif command -v jq &>/dev/null; then
     INIT_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-init-task-md.sh"
     if [[ -f "${INIT_SCRIPT}" ]] && [[ -x "${INIT_SCRIPT}" ]]; then
       print_pass "SessionStart hook wired to axiarch-scripts/axiarch-init-task-md.sh"
+      TASK_STATE_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-task-state.sh"
+      if [[ -f "${TASK_STATE_SCRIPT}" && -x "${TASK_STATE_SCRIPT}" ]] \
+        && grep -q "axiarch-task-state.sh" "${INIT_SCRIPT}" 2>/dev/null \
+        && grep -q "update_plan" "${INIT_SCRIPT}" 2>/dev/null \
+        && grep -q "TaskCreate" "${INIT_SCRIPT}" 2>/dev/null \
+        && grep -q "AXIARCH_PROCESS_DOC_LANG" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_task_md_ja" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_task_md_en" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_implementation_plan_md_ja" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_implementation_plan_md_en" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_walkthrough_md_ja" "${TASK_STATE_SCRIPT}" 2>/dev/null \
+        && grep -q "write_walkthrough_md_en" "${TASK_STATE_SCRIPT}" 2>/dev/null; then
+        print_pass "SessionStart task-state lifecycle wired (task.md / implementation_plan.md / walkthrough.md current-task refresh with Project Native Language templates)"
+      else
+        print_warn "SessionStart task-state lifecycle may be incomplete"
+        print_info "Expected axiarch-init-task-md.sh to call axiarch-task-state.sh, mention Codex update_plan plus Claude Code TaskCreate, and provide Project Native Language template selection"
+        EXIT_CODE=1
+      fi
     else
       print_warn "SessionStart hook references the script but it is missing or not executable"
       print_info "Re-run init.sh to redistribute and chmod +x"
@@ -560,7 +619,7 @@ else
 fi
 
 # =============================================================================
-# Check 15: v1.9+ Integration — PostToolUse Diff Guard + source repository integration
+# Check 15: v1.9+ / v1.11+ Integration — PostToolUse Diff Guard + task-state lifecycle + source repository integration
 # Verifies that supported hook configs call axiarch-diff-guard.sh after Edit,
 # MultiEdit, and Write. This complements the PreToolUse Write-only block by
 # making large diff growth easier to detect after diff-based edits. In the
@@ -635,10 +694,14 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   if [[ -f "${PROJECT_DIR}/README.md" ]]; then
     if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "update_plan" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "TaskCreate" "${PROJECT_DIR}/README.md" 2>/dev/null; then
       print_pass "Axiarch source README.md includes v1.9 diff guard, memory, and 15-stage diagnostic references"
     else
       print_warn "Axiarch source README.md may be missing source integration references"
+      print_info "Expected README to mention axiarch-task-state.sh, Codex update_plan, and Claude Code TaskCreate for v1.11.0"
       DOCS_MISSING=1
     fi
     if grep -q "Hook・診断・安全アップグレード利用時のみ必要" "${PROJECT_DIR}/README.md" 2>/dev/null \
@@ -676,11 +739,15 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "deduplicated action choices" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
       && grep -q "deduplicated action choices" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "/tmp/axiarch-upgrade.sh" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "/tmp/axiarch-upgrade.sh" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null; then
+      && grep -q "/tmp/axiarch-upgrade.sh" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "update_plan" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "TaskCreate" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null; then
       print_pass "Axiarch source llms files keep source-only upgrade boundary, deduplicated choices, and release-file tracking explicit"
     else
       print_warn "Axiarch source llms files may omit the source-only upgrade boundary, deduplicated choices, or release-file tracking"
-      print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, deduplicated action choices, temporary helper bootstrap for older adopters, and source release-file Git tracking in the Axiarch source repository"
+      print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
       DOCS_MISSING=1
     fi
   else
@@ -692,10 +759,14 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "15-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "対話選択肢重複排除" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
-      && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
+      && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "AXIARCH_PROCESS_DOC_MODE" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
       print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard, 15-stage diagnostics, and deduplicated-choice references"
     else
       print_warn "Axiarch source axiarch-scripts/README.md may be missing source integration references"
+      print_info "Expected scripts README to mention axiarch-task-state.sh, AXIARCH_PROCESS_DOC_MODE, and AXIARCH_PROCESS_DOC_LANG for v1.11.0"
       DOCS_MISSING=1
     fi
     if grep -q "最小構成の必須ファイルではありません" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
@@ -719,14 +790,22 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     && grep -q "source-only既定skipとinteractive明示override" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "対話選択肢重複排除" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "README/llms/scripts README" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "ネイティブタスク" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "update_plan" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "TaskCreate" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && [[ -f "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" ]] \
     && grep -q "source-only default skip with explicit interactive override" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "README, llms, and scripts README" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
+    && grep -q "README, llms, and scripts README" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Native Task" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "update_plan" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "TaskCreate" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
     print_pass "Axiarch source LOADING_PROTOCOL files keep Safe Upgrade health scope aligned"
   else
     print_warn "Axiarch source LOADING_PROTOCOL files may have stale Safe Upgrade health scope"
-    print_info "Expected ja/en LOADING_PROTOCOL to mention source-only explicit override, deduplicated interactive choices, and README/llms/scripts README boundary checks"
+    print_info "Expected ja/en LOADING_PROTOCOL to mention source-only explicit override, deduplicated interactive choices, README/llms/scripts README boundary checks, native task-state sync, Project Native Language template selection, update_plan, and TaskCreate"
     loading_protocol_boundary_missing=1
   fi
   if [[ "${loading_protocol_boundary_missing}" -ne 0 ]]; then
@@ -773,11 +852,12 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
 
   if [[ -f "${PROJECT_DIR}/init.sh" ]]; then
     if grep -q "axiarch-upgrade.sh --safe-only --dry-run" "${PROJECT_DIR}/init.sh" 2>/dev/null \
-      && grep -q "manifest-based upgrade preview" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
+      && grep -q "manifest-based upgrade preview" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
       print_pass "Axiarch source init.sh presents Safe Upgrade as a dry-run preview, not automatic mutation"
     else
-      print_warn "Axiarch source init.sh may blur Safe Upgrade dry-run preview semantics"
-      print_info "Expected next steps to recommend axiarch-upgrade.sh --safe-only --dry-run and describe it as an upgrade preview"
+      print_warn "Axiarch source init.sh may blur Safe Upgrade dry-run preview semantics or omit task-state script distribution"
+      print_info "Expected next steps to recommend axiarch-upgrade.sh --safe-only --dry-run, describe it as an upgrade preview, and distribute/validate axiarch-task-state.sh"
       DOCS_MISSING=1
     fi
     if grep -q "check_existing_install" "${PROJECT_DIR}/init.sh" 2>/dev/null \
@@ -944,6 +1024,7 @@ EOF
     release_tracking_paths=(
       "axiarch-manifest.json"
       "axiarch-scripts/axiarch-upgrade.sh"
+      "axiarch-scripts/axiarch-task-state.sh"
       "axiarch-prompts/ja/develop/safe_upgrade_execute.md"
       "axiarch-prompts/en/develop/safe_upgrade_execute.md"
       "axiarch-rules/ja/blueprint/operations/010_release_upgrade_operations.md"
@@ -959,9 +1040,9 @@ EOF
       fi
     done
     if [[ "${release_tracking_missing}" -eq 0 ]]; then
-      print_pass "Axiarch source release-critical v1.10.0 files are tracked by git"
+      print_pass "Axiarch source release-critical files for the current release are tracked by git"
     else
-      print_info "Expected v1.10.0 core release files to be tracked in the Git index before commit/release, not left only as untracked working-tree files"
+      print_info "Expected current core release files to be tracked in the Git index before commit/release, not left only as untracked working-tree files"
       DOCS_MISSING=1
     fi
   else
@@ -1042,7 +1123,7 @@ EOF
       print_pass "Axiarch source CHANGELOG.md records deduplicated interactive choices for the current release"
     else
       print_warn "Axiarch source CHANGELOG.md may omit deduplicated interactive choice release notes"
-      print_info "Expected v1.10.0 release notes to mention deduplicated interactive choices in Operations Blueprint, health checks, and Safe Upgrade Wizard behavior"
+      print_info "Expected release notes to retain deduplicated interactive choices in Operations Blueprint, health checks, and Safe Upgrade Wizard behavior"
       DOCS_MISSING=1
     fi
   else

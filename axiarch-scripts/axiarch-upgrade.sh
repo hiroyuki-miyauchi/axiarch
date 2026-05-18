@@ -74,8 +74,8 @@ Usage:
 Options:
   --target DIR        Adopter project directory. Default: current directory.
   --source DIR        Local Axiarch source directory to upgrade from.
-  --to VERSION        Target Axiarch version label, e.g. v1.10.0.
-  --ref REF           GitHub archive ref, e.g. tags/v1.10.0 or heads/main.
+  --to VERSION        Target Axiarch version label, e.g. v1.11.0.
+  --ref REF           GitHub archive ref, e.g. tags/v1.11.0 or heads/main.
   --from VERSION      Optional base version for replace-if checks and 3-way merge.
   --from-ref REF      Optional base archive ref for replace-if checks and 3-way merge.
   --base-source DIR   Optional local base Axiarch source for replace-if checks and 3-way merge.
@@ -90,8 +90,8 @@ Options:
   --help              Show this help.
 
 Examples:
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.10.0 --dry-run
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.10.0 --agent codex --safe-only --apply
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.0 --dry-run
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.0 --agent codex --safe-only --apply
   bash axiarch-scripts/axiarch-upgrade.sh --source /path/to/axiarch --interactive
 USAGE
 }

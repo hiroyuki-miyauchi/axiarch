@@ -40,10 +40,11 @@ your-project/
  │         └── operate/
  ├── axiarch-scripts/                  ← Recommended: diagnostic & hook externalized scripts
  │    ├── README.md                    ← Index & usage guide
- │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (15-stage, --quiet support, v1.9+ diff guard plus v1.10.0 source release parity, Safe Upgrade manifest/exclude checks, source-only default skip / explicit interactive override, deduplicated interactive choices, source-repository-only file classification, replace-if-local-unchanged protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX version metadata, prompt indexing, and README/llms/scripts README boundary checks)
- │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized (dynamic violations A/B/C + two-stage TTL v1.6.0+ + Check D Task Boundary Detection v1.8.0+)
+ │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (15-stage, --quiet support, v1.9+ diff guard plus v1.11.0 current-task document rotation, native task-state sync, v1.10.0+ source release parity, Safe Upgrade manifest/exclude checks, source-only default skip / explicit interactive override, deduplicated interactive choices, source-repository-only file classification, replace-if-local-unchanged protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX version metadata, prompt indexing, and README/llms/scripts README boundary checks)
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized (dynamic violations A/B/C + two-stage TTL v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + native task-state reminder v1.11.0+)
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook externalized script (§6 physical block, v1.5.5+)
- │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (task.md auto-bootstrap, v1.5.5+)
+ │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (current-task docs auto-bootstrap, v1.5.5+ / v1.11.0+)
+ │    ├── axiarch-task-state.sh        ← archive-before-refresh helper for task.md / implementation_plan.md / walkthrough.md (v1.11.0)
  │    ├── axiarch-diff-guard.sh        ← PostToolUse hook externalized script (diff guard, v1.9.0)
  │    ├── axiarch-upgrade.sh           ← Safe Upgrade Wizard (interactive group-based upgrades)
  │    └── check-git-config-clean.sh    ← .git/config integrity check (worktreeConfig residue)

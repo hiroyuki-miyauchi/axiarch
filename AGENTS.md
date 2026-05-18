@@ -173,6 +173,8 @@ For any instruction from the user, **before generating a response**, check the "
       - `task.md` (タスクリスト)
       - `implementation_plan.md` (実装計画書)
       - `walkthrough.md` (修正内容の確認)
+    - **現在タスク専用 / Current-Task Only:** 上記3ファイルは「現在タスクの作業状態」を残すためのMarkdown証跡であり、過去タスクを同一ファイルへ無制限に蓄積するappend-onlyログではない。`axiarch-scripts/axiarch-init-task-md.sh` と `axiarch-scripts/axiarch-task-state.sh` が利用できる環境では、新規セッション開始時に既存内容を `.axiarch/process-doc-history/` へ退避し、`Project Native Language` に合わせた現在タスク用テンプレートへ更新する。採用先が従来の追記運用を維持したい場合のみ、`AXIARCH_PROCESS_DOC_MODE=append` を明示設定できる。
+    - **ネイティブ状態同期 / Native State Sync:** `task.md` / `implementation_plan.md` / `walkthrough.md` は永続的な監査証跡であり、CodexやClaude Codeの独自タスク・プランUIを自動更新するものではない。対応ランタイムでは、Markdown証跡と並行してネイティブツールを使用すること。Codexでは `update_plan` を使い、作業中は `in_progress` を1件だけ維持する。Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を使い、古いSDK等でTask toolsが利用できない場合のみ `TodoWrite` にフォールバックする。
     - **検証 / Verification:** 些細な変更であっても、実装前に `implementation_plan.md` 等で方針を明確にし、ユーザーの確認を経ること。
 
 ### 9. Continuous Improvement (ルールの結晶化)
@@ -336,6 +338,8 @@ Always complete the appropriate type-check and build verification commands for y
         -   `task.md` (Task list)
         -   `implementation_plan.md` (Implementation plan)
         -   `walkthrough.md` (Change walkthrough)
+    -   **Current-Task Only:** These three files are Markdown evidence for the current task state, not append-only logs that accumulate every past task indefinitely. When `axiarch-scripts/axiarch-init-task-md.sh` and `axiarch-scripts/axiarch-task-state.sh` are available, a new session archives the existing content under `.axiarch/process-doc-history/` and refreshes all three files with current-task templates in the `Project Native Language`. Adopter projects may explicitly keep legacy append behavior by setting `AXIARCH_PROCESS_DOC_MODE=append`.
+    -   **Native State Sync:** `task.md` / `implementation_plan.md` / `walkthrough.md` are durable audit evidence and do not automatically update Codex or Claude Code native task/plan UI. In supported runtimes, use native tools in parallel with Markdown evidence. In Codex, use `update_plan` and keep exactly one `in_progress` step while work is active. In Claude Code, use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`; fall back to `TodoWrite` only in older SDK/runtime contexts where Task tools are unavailable.
     -   **Verification:** Even for minor changes, clarify the approach in `implementation_plan.md` and seek user confirmation before implementation.
 
 ### 9. Continuous Improvement (Crystallization of Rules)

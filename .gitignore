@@ -73,6 +73,8 @@ Desktop.ini
 task.md
 implementation_plan.md
 walkthrough.md
+.axiarch/process-doc-history/
+.axiarch/process-doc-state/
 
 # Social preview (uploaded via GitHub Settings, not committed)
 social-preview.png

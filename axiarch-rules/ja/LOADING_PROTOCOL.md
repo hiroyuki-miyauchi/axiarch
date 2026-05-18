@@ -24,7 +24,7 @@
 
 | フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 | `task.md` 自動ブートストラップ + AGENTS.md §8 (Documentation Requirements) reminder 注入 | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、AGENTS.md §8 reminder を注入。既存内容は `axiarch-task-state.sh` により `.axiarch/process-doc-history/` へ退避 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
 | `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
@@ -34,6 +34,22 @@
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
 > Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。なお、実務検証済みとして明示できるのは Google Antigravity であり、Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
+
+### 🧭 ネイティブタスク・プラン状態同期（v1.11.0+）
+
+`task.md` / `implementation_plan.md` / `walkthrough.md` は、現在タスクのMarkdown証跡であり、CodexやClaude Codeの独自タスク・プラン表示欄を自動更新するものではない。Axiarchはこの2つを分離して扱う。
+
+| 層 | 責務 |
+|:--|:--|
+| Markdown証跡 | ロード履歴、計画、変更確認を永続的に残す。新規セッション時は `axiarch-task-state.sh` が過去内容を `.axiarch/process-doc-history/` へ退避し、`Project Native Language` に合わせた現在タスク用テンプレートへ更新する |
+| ネイティブ状態 | エージェントUIのタスク・プラン表示。Codexでは `update_plan`、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を使って、作業中に逐次更新する |
+
+運用原則:
+
+1. Codexでは複数ステップの作業を開始した時点で `update_plan` を呼び、作業中は `in_progress` を1件だけ維持する。
+2. Claude CodeではTask toolsが使える場合、`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を優先する。古いSDKや非interactive実行でTask toolsがない場合のみ `TodoWrite` にフォールバックする。
+3. Markdownファイルを書いたことをもって、ネイティブUIが更新されたと表現してはならない。ネイティブUI更新は該当ツール呼び出しが行われた場合のみ完了とみなす。
+4. `AXIARCH_PROCESS_DOC_MODE=append` が明示されていない限り、3ファイルは現在タスク用として扱い、過去内容の無制限追記を避ける。テンプレート言語は既定で `AGENTS.md` の `Project Native Language` から判定し、必要な場合だけ `AXIARCH_PROCESS_DOC_LANG=ja|en` で明示する。
 
 ### 🔍 フック診断
 
