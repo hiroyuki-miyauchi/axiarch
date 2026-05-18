@@ -180,5 +180,5 @@ Strategies for generating next-generation "value".
 ---
 
 **Last Updated**: 2026-05-17
-**Version**: v1.10.0 — Release-upgrade Operations Blueprint registration and shared Blueprint / Project State boundary alignment for the Safe Upgrade Wizard
+**Version**: v1.11.0 — Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

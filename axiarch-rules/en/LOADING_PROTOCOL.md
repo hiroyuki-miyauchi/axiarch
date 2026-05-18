@@ -24,7 +24,7 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 | Hook | Fires when | Role | Externalised script |
 |:--|:--|:--|:--|
-| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` + injects AGENTS.md §8 (Documentation Requirements) reminder | `axiarch-scripts/axiarch-init-task-md.sh` |
+| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task files and injects AGENTS.md §8 reminder. Existing content is archived to `.axiarch/process-doc-history/` by `axiarch-task-state.sh` | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
 | `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | Blocks full-overwrite of existing files in supported environments (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | After file-editing tools | Measures git diff changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
@@ -34,6 +34,22 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
 
 > Antigravity / Cursor / Copilot / Windsurf have native loading or pointer mechanisms (e.g., Antigravity auto-loads `.agents/rules/`), so the Claude Code / Codex hook set is not a standard requirement for them. The only explicitly production-validated agent is Google Antigravity; Cursor / Copilot / Windsurf are extended pointer-only candidates and are not operation-guaranteed.
+
+### 🧭 Native Task & Plan State Sync (v1.11.0+)
+
+`task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence. They do not automatically update Codex or Claude Code native task/plan panels. Axiarch treats these as two separate layers.
+
+| Layer | Responsibility |
+|:--|:--|
+| Markdown evidence | Persist load history, plan, and walkthrough. On a new session, `axiarch-task-state.sh` archives previous content under `.axiarch/process-doc-history/` and refreshes current-task templates in the `Project Native Language` |
+| Native state | Agent UI task/plan state. Codex uses `update_plan`; Claude Code uses `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` and updates progress during the task |
+
+Operational principles:
+
+1. In Codex, call `update_plan` when multi-step work begins, and keep exactly one `in_progress` step while work is active.
+2. In Claude Code, prefer Task tools when available: `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. Use `TodoWrite` only as a fallback for older SDK or non-interactive runtimes without Task tools.
+3. Do not claim that native UI state has been updated merely because Markdown files were written. Native UI update is complete only when the relevant native tool has been called.
+4. Unless `AXIARCH_PROCESS_DOC_MODE=append` is explicitly set, treat the three files as current-task documents and avoid indefinite appending of past task content. Template language defaults to detection from `AGENTS.md` `Project Native Language`; set `AXIARCH_PROCESS_DOC_LANG=ja|en` only when an adopter needs an explicit override.
 
 ### 🔍 Hook Diagnostic
 

@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.0] — 2026-05-18
+
+### Native Task State Sync / ネイティブタスク状態同期
+
+`task.md` / `implementation_plan.md` / `walkthrough.md` が長期セッションで古い内容を無制限に蓄積する問題に対し、3ファイルを「現在タスクのMarkdown証跡」として扱い、過去内容はarchive-before-refreshで退避するライフサイクルを追加。さらに、Markdown証跡だけではCodexやClaude Codeのネイティブなタスク・プラン表示欄が更新されないため、各ランタイムのネイティブツールを併用する責務を明文化。
+
+Adds a lifecycle that treats `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task Markdown evidence and archives previous content before refresh, addressing indefinite accumulation in long agent sessions. It also clarifies that Markdown evidence does not update Codex or Claude Code native task/plan panels by itself, so agents must update native runtime state in parallel.
+
+### Added
+
+- **`axiarch-scripts/axiarch-task-state.sh`** — `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に生成し、変更済みの既存内容を `.axiarch/process-doc-history/` へ退避する補助スクリプトを追加。`AXIARCH_PROCESS_DOC_MODE=append` で従来追記運用を明示維持でき、`AXIARCH_PROCESS_DOC_ARCHIVE=0` と `AXIARCH_PROCESS_DOC_HISTORY_DIR` で退避挙動を調整可能。`AXIARCH_PROCESS_DOC_LANG=auto|ja|en` により、`AGENTS.md` の `Project Native Language` に合わせたテンプレート生成、または明示言語指定に対応 / Adds a helper that refreshes `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task documents and archives changed previous content under `.axiarch/process-doc-history/`. `AXIARCH_PROCESS_DOC_MODE=append` explicitly preserves legacy append behavior; `AXIARCH_PROCESS_DOC_ARCHIVE=0` and `AXIARCH_PROCESS_DOC_HISTORY_DIR` tune archive behavior. `AXIARCH_PROCESS_DOC_LANG=auto|ja|en` generates templates in the `Project Native Language` from `AGENTS.md` or an explicit override
+- **Native task-state contract** — Codexでは `update_plan` を併用し、作業中は `in_progress` を1件だけ維持する。Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を優先し、古いSDK等でTask toolsが使えない場合のみ `TodoWrite` にフォールバックする責務をAGENTS/LOADING/README/llmsへ追加 / Adds the native task-state contract across AGENTS, LOADING, README, and llms: Codex uses `update_plan` with exactly one active `in_progress` step, while Claude Code prefers `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` and falls back to `TodoWrite` only in older runtimes without Task tools
+
+### Changed
+
+- **`axiarch-scripts/axiarch-init-task-md.sh`** — `task.md`単体のmissing-only bootstrapから、`axiarch-task-state.sh` 経由で3つの現在タスク文書をrefresh/archiveするSessionStart hookへ拡張。`additionalContext` にMarkdown証跡とネイティブタスク状態の責務分離を追加 / Extends the SessionStart hook from missing-only `task.md` bootstrap to three-document refresh/archive via `axiarch-task-state.sh`, and adds Markdown-vs-native task-state separation to `additionalContext`
+- **`axiarch-scripts/axiarch-boot-reminder.sh`** — UserPromptSubmit reminderへ、Markdown証跡だけではネイティブUIが更新されないこと、Codex `update_plan` とClaude Code Task toolsを併用することを追加 / Adds reminder text clarifying that Markdown evidence alone does not update native UI, and that Codex `update_plan` plus Claude Code Task tools should be used when available
+- **`axiarch-scripts/check-axiarch-health.sh`** — Check 12/15で `axiarch-task-state.sh` の配線、Project Native Language別テンプレート、`update_plan` / `TaskCreate` 語彙、README/llms/scripts README/LOADINGへのv1.11.0説明同期、release-critical追跡対象を検査 / Extends Check 12/15 to verify task-state helper wiring, Project Native Language templates, `update_plan` / `TaskCreate` wording, v1.11.0 doc parity across README, llms, scripts README, and LOADING, plus release-critical tracking
+- **`init.sh` / `axiarch-manifest.json`** — 正式リリース版数を `1.11.0` へ更新し、`axiarch-task-state.sh` を配布後shell構文検証対象へ追加 / Updates release metadata to `1.11.0` and adds `axiarch-task-state.sh` to post-copy shell syntax validation
+- **`.gitignore`** — `.axiarch/process-doc-history/` と `.axiarch/process-doc-state/` を追加し、現在タスク文書の退避・状態ファイルがリポジトリ管理対象へ混入しないようにした / Adds `.axiarch/process-doc-history/` and `.axiarch/process-doc-state/` so current-task archives and state hashes do not enter repository management
+
+### Compatibility
+
+- **後方互換性を維持** — 既定は現在タスク文書ローテーションだが、採用先が従来の追記運用を必要とする場合は `AXIARCH_PROCESS_DOC_MODE=append` で維持可能 / Backward compatible: current-task rotation is the default, while adopter projects that need legacy append behavior can set `AXIARCH_PROCESS_DOC_MODE=append`
+- **ネイティブUI自動更新の誤認を回避** — AxiarchはMarkdown証跡を管理するが、Codex/Claude CodeのネイティブUIは各ランタイムのツール呼び出しがある場合のみ更新済みと扱う / Avoids overclaiming native UI automation: Axiarch manages Markdown evidence, but Codex/Claude Code native UI state is considered updated only when the relevant native tool has been called
+
 ## [1.10.0] — 2026-05-17
 
 ### Safe Upgrade Wizard / 安全アップグレード導線
@@ -826,6 +852,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.11.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...v1.9.0
 [1.8.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.1...v1.8.2

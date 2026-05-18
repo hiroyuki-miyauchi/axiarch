@@ -14,6 +14,8 @@
 
 > **注意**: 初期セットアップ時に使用しない方の言語ディレクトリを削除できます（`axiarch-rules/` と同様）。
 
+> **ネイティブタスク状態**: Codexでこれらのプロンプトを使う場合は `update_plan` も併用し、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を併用してください。`task.md` / `implementation_plan.md` / `walkthrough.md` は現在タスク用のMarkdown証跡であり、エージェント独自のタスク・プラン表示を自動更新するものではありません。
+
 ---
 
 ### フォルダ構成
@@ -154,6 +156,8 @@ This directory contains **reusable prompt templates** designed to elevate the qu
 5. The AI enters standby mode — then add your specific instructions
 
 > **Note**: During initial setup, you can delete the unused language directory, just like with `axiarch-rules/`.
+
+> **Native task state**: When using these prompts in Codex, also use `update_plan`. In Claude Code, also use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. `task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence and do not automatically update an agent's native task/plan panel.
 
 ---
 

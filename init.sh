@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.10.0"
+AXIARCH_VERSION="1.11.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -378,7 +378,7 @@ copy_files() {
     mkdir -p "$TARGET_DIR/axiarch-scripts"
     cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-task-state.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
@@ -526,6 +526,7 @@ validate_distributed_scripts() {
     "axiarch-boot-reminder.sh"
     "axiarch-protect-antifull.sh"
     "axiarch-init-task-md.sh"
+    "axiarch-task-state.sh"
     "axiarch-diff-guard.sh"
     "axiarch-upgrade.sh"
     "check-axiarch-health.sh"

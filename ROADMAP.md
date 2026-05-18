@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.10.0 Safe Upgrade Wizard & Manifest-Based Upgrades\
-> **次期作業 / Next**: v1.11.0 Static Lint & Process Supervision（検討中 / under consideration）\
+> **現在の安定版 / Current Stable**: v1.11.0 Native Task State Sync & Process Document Lifecycle\
+> **次期作業 / Next**: v1.12.0 Static Lint & Process Supervision（検討中 / under consideration）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -503,9 +503,22 @@ rename を統合したため、本 Tier 2 群を v1.9.0 にずらして整理。
 
 ---
 
-### 🔮 v1.11.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### ✅ v1.11.0 — Native Task State Sync & Process Document Lifecycle（2026-05-18）
 
-学術裏付けが強く工数も大きい改善案を v1.11.0 として独立計画。
+Claude Code / Codex の長期セッションで `task.md` / `implementation_plan.md` / `walkthrough.md` が古い内容を蓄積し続ける問題と、Markdown証跡がネイティブタスク・プランUIへ自動反映されるという誤認を分離して解消。
+
+- **`axiarch-scripts/axiarch-task-state.sh`** — 3つの現在タスク文書をarchive-before-refreshで管理し、過去内容を `.axiarch/process-doc-history/` へ退避
+- **Project Native Languageテンプレート** — `AXIARCH_PROCESS_DOC_LANG=auto|ja|en` により、`AGENTS.md` の `Project Native Language` に合わせて日本語/英語テンプレートを分離生成
+- **SessionStart強化** — `axiarch-init-task-md.sh` が `task.md` 単体ではなく、`task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用にbootstrap
+- **ネイティブ状態同期** — Codexでは `update_plan`、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を併用する責務を明文化。`TodoWrite` は古いランタイム向けfallbackとして扱う
+- **後方互換** — `AXIARCH_PROCESS_DOC_MODE=append` により、従来の追記運用を必要とする採用先も維持可能
+- **Health再発検知** — Check 12/15でtask-state script、native state wording、version metadata、docs parityを検査
+
+---
+
+### 🔮 v1.12.0 — Static Lint & Process Supervision（Tier 3、検討中）
+
+学術裏付けが強く工数も大きい改善案を v1.12.0 として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` /
   `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反
@@ -1082,10 +1095,35 @@ Safe-upgrade path for existing adopter projects that need to merge only the nece
 
 ---
 
-### 🔮 v1.11.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### ✅ v1.11.0 — Native Task State Sync & Process Document Lifecycle (2026-05-18)
+
+Separates and addresses two problems in long Claude Code / Codex sessions:
+`task.md` / `implementation_plan.md` / `walkthrough.md` accumulating old task
+content indefinitely, and the mistaken assumption that Markdown evidence
+automatically updates native task/plan panels.
+
+- **`axiarch-scripts/axiarch-task-state.sh`** — Manages the three current-task
+  documents with archive-before-refresh and stores previous content under
+  `.axiarch/process-doc-history/`
+- **Project Native Language templates** — `AXIARCH_PROCESS_DOC_LANG=auto|ja|en`
+  separates Japanese and English templates according to the `Project Native
+  Language` in `AGENTS.md`
+- **SessionStart reinforcement** — `axiarch-init-task-md.sh` bootstraps
+  `task.md` / `implementation_plan.md` / `walkthrough.md`, not only `task.md`
+- **Native state sync** — Codex uses `update_plan`; Claude Code uses
+  `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. `TodoWrite` is treated
+  as a fallback for older runtimes
+- **Backward compatibility** — `AXIARCH_PROCESS_DOC_MODE=append` preserves legacy
+  append behavior when adopter projects explicitly need it
+- **Health regression checks** — Check 12/15 verify the task-state script,
+  native state wording, version metadata, and documentation parity
+
+---
+
+### 🔮 v1.12.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
 Improvements with strong academic backing but larger implementation effort,
-planned independently for v1.11.0.
+planned independently for v1.12.0.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor
   `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation /
