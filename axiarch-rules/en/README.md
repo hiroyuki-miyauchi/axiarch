@@ -99,7 +99,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. Among them, [Google Antigravity](https://antigravity.google/) is the only explicitly production-validated target. OpenAI Codex and Claude Code have native integration and hook-reinforcement paths, but practical validation is still ongoing. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
+> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. All three are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
 
 1.  **Copy**: The minimal required setup is `AGENTS.md` plus `axiarch-rules/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` only when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash

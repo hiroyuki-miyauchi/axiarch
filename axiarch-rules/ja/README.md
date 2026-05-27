@@ -99,7 +99,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。このうち実務検証済みとして明示できるのは [Google Antigravity](https://antigravity.google/) です。OpenAI Codex と Claude Code は主対象としてネイティブ統合・hook補強導線を整備していますが、実務検証は継続中です。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
+> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。3つとも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
 
 1.  **コピー (Copy)**: 最小必須は `AGENTS.md` と `axiarch-rules/` です。安全アップグレードを使う場合のみ `axiarch-manifest.json` と `axiarch-scripts/` を追加でコピーします。`axiarch-prompts/` は任意です。
     ```bash

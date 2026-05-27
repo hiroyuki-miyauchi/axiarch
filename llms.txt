@@ -22,7 +22,7 @@ Axiarch mitigates these risks by defining a quality floor and autonomous context
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Primary targets: OpenAI Codex, Claude Code, and Google Antigravity; Google Antigravity is production-validated. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
+  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Validation describes the configurations and scope Axiarch has exercised, not an operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
   - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
@@ -65,9 +65,9 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 
 | Agent | Status |
 |:------|:-------|
-| OpenAI Codex | ⚙️ Primary target — native `AGENTS.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
-| Claude Code | ⚙️ Primary target — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
-| Google Antigravity | ✅ Verified primary — validated through real production sessions |
+| OpenAI Codex | ✅ Production-validated primary — native `AGENTS.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
+| Claude Code | ✅ Production-validated primary — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
+| Google Antigravity | ✅ Production-validated primary — validated through real operational usage |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |
 | Windsurf / Aider / Zed | ⚠️ Extended or unverified candidates; not operation-guaranteed |

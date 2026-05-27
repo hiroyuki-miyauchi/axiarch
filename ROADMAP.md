@@ -15,12 +15,12 @@
 
 ### 🎯 戦略フォーカス — 主対象3系統への集中（2026-05-15）
 
-- **実務検証済み主対象**: Google Antigravity
+- **実運用稼働確認済み主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合と v1.9.0 の PostToolUse diff guard を起点に、期待互換ではなく主対象として検証蓄積を進める
-- **Claude Code**: hook 補強モデルの主対象として扱うが、現時点では実務検証済みとは表現せず、検証ログを蓄積する
-- **Antigravity**: agent-first IDE 時代の実運用検証対象として、長い自律タスクにおける品質床を訴求する
+- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合、v1.9.0 の PostToolUse diff guard、v1.11.0 の `update_plan` ネイティブタスク状態同期、release gate の一連動作を Axiarch 本体リポジトリで検証済みとして扱う
+- **Claude Code**: hook 補強モデルとTask tools連携を実運用で稼働確認済みとして扱う
+- **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
 
 ---
@@ -414,7 +414,7 @@ loophole のリスクを下げるための hot-fix。
   軽減メカニズム明文化
 - **後方互換性を維持** — `AXIARCH_TASK_BOUNDARY_DETECT=0` で v1.6.0
   動作完全再現、stdin 不在時は自動 skip
-- **Claude Code 検証ログ拡充** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で hook 補強モデルの検証材料を蓄積。現時点の公開ステータスでは Antigravity のみを実務検証済みとし、Claude Code は主対象として扱う
+- **Claude Code 検証ログ拡充** — axiarch 自身の開発サイクル（v1.4.0+ の hook 統合以降）で hook 補強モデルの検証材料を蓄積。v1.8.0時点の公開ステータスでは Antigravity のみを実務検証済みとし、Claude Code は主対象として扱った
 
 ---
 
@@ -584,11 +584,11 @@ enterprise adoption needs.
 
 ### 🎯 Strategic Focus — Concentrate on Three Primary Agents (2026-05-15)
 
-- **Production-validated primary target**: Google Antigravity
+- **Production-validated primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: Starting from v1.8.2 `.codex/hooks.json` native integration and v1.9.0 PostToolUse diff guard, Codex is no longer positioned as merely expected compatibility; validation evidence will be accumulated as a primary target
-- **Claude Code**: Primary target for the hook-reinforcement model; validation logs will be accumulated without calling it production-validated at this stage
+- **Codex**: v1.8.2 `.codex/hooks.json` native integration, v1.9.0 PostToolUse diff guard, v1.11.0 `update_plan` native task-state sync, and the release-gate workflow are validated through real operational usage
+- **Claude Code**: The hook-reinforcement model and Task tools integration are validated through real operational usage
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
 
@@ -1000,7 +1000,7 @@ self-judgment clause.
 - **Backwards compatibility maintained** — `AXIARCH_TASK_BOUNDARY_DETECT=0` reproduces
   v1.6.0 behaviour; auto-skipped when stdin is unavailable (direct invocation
   outside hook context)
-- **Claude Code validation-log expansion** — Evidence for the hook-reinforcement model accumulated through axiarch's own development cycles (since v1.4.0+ native hook integration). Current public status treats Antigravity as the only production-validated agent and Claude Code as a primary target
+- **Claude Code validation-log expansion** — Evidence for the hook-reinforcement model accumulated through axiarch's own development cycles (since v1.4.0+ native hook integration). At the v1.8.0 release point, public status treated Antigravity as the only production-validated agent and Claude Code as a primary target
 
 ---
 

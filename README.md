@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-39_files-green.svg)](#-universal-rules-39-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Verified](https://img.shields.io/badge/Verified-Google_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Primary Targets](https://img.shields.io/badge/Primary_Targets-Codex_|_Claude_Code-blue.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Production Validated](https://img.shields.io/badge/Production_Validated-Codex_Claude_Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
@@ -23,7 +23,7 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** が Axiarch の中核です。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存しすぎない形で、プロジェクト全体の最低品質（Quality Floor）を底上げすることを狙います。
 
-Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。ただし、実務検証済みとして明示できるのは Google Antigravity であり、Codex / Claude Code の実務検証は継続中です。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱います。いずれもエージェント実装と利用環境に依存するため、動作保証ではありません。
+Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱い、検証済みまたは動作保証済みとは扱いません。
 
 ### 設計思想
 
@@ -70,7 +70,7 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to help govern AI-assisted work and reduce the risk of quality drift, hallucinations, and uncontrolled AI behavior through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
-Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. Google Antigravity is the only explicitly production-validated target. Codex and Claude Code are primary targets with native integration paths, but their practical validation remains environment-dependent. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as production-validated primary platforms.
+Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. Codex, Claude Code, and Google Antigravity are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as production-validated primary platforms.
 
 ### Core Design Philosophy
 
@@ -116,9 +116,9 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 
 | 位置づけ / Role | Agent | Native Config | AGENTS.md |
 |:----------------|:------|:--------------|:----------|
-| ⚙️ **Primary Target** — 主対象（v1.8.2+ ネイティブ統合、v1.9.0+ diff guard） / Primary target (v1.8.2+ native integration, v1.9.0+ diff guard) | **OpenAI Codex** | `AGENTS.md` + `.codex/hooks.json` | ✅ Native |
-| ⚙️ **Primary Target** — 主対象（v1.4.0+ ネイティブ hook 統合、v1.9.0+ diff guard） / Primary target (v1.4.0+ native hook integration, v1.9.0+ diff guard) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (4 hooks) | ✅ Reads |
-| ✅ **Primary Verified** — 実務で実証済み / Production-validated | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
+| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（v1.8.2+ ネイティブ統合、v1.9.0+ diff guard、v1.11.0+ `update_plan`） / Production-validated primary (v1.8.2+ native integration, v1.9.0+ diff guard, v1.11.0+ `update_plan`) | **OpenAI Codex** | `AGENTS.md` + `.codex/hooks.json` | ✅ Native |
+| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（v1.4.0+ ネイティブ hook 統合、v1.9.0+ diff guard、v1.11.0+ Task tools） / Production-validated primary (v1.4.0+ native hook integration, v1.9.0+ diff guard, v1.11.0+ Task tools) | **Claude Code** | `CLAUDE.md` + `.claude/settings.json` (4 hooks) | ✅ Reads |
+| ✅ **Production-Validated Primary** — 実運用で稼働確認済み / Production-validated primary | **Google Antigravity** | `.agents/rules/` | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Cursor** | `.cursor/rules/*.mdc` | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **GitHub Copilot** | `.github/copilot-instructions.md` | ✅ Reads |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Windsurf** | `.windsurfrules` | ✅ Reads |
@@ -130,9 +130,9 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 > **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). `AGENTS.md` is a **shared constitution readable by major agents**, designed to complement each tool's native config (e.g., `.cursor/rules/`, `.github/copilot-instructions.md`). It is NOT a replacement for tool-specific setup. OpenAI Codex natively uses `AGENTS.md` as its configuration format, so no additional pointer file is needed.
 
 > [!IMPORTANT]
-> **JA**: 主対象は **[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)** / **[Claude Code](https://www.anthropic.com/claude-code)** / **[Google Antigravity](https://antigravity.google/)** です。このうち実務検証済みとして明示できるのは Google Antigravity です。Codex と Claude Code は主対象としてネイティブ統合を整備していますが、実務検証は継続中です。Cursor / GitHub Copilot / Windsurf は拡張互換候補としてポインター設定を用意していますが、検証済みまたは動作保証済みとは扱いません。
+> **JA**: 主対象は **[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)** / **[Claude Code](https://www.anthropic.com/claude-code)** / **[Google Antigravity](https://antigravity.google/)** です。3つとも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor / GitHub Copilot / Windsurf は拡張互換候補としてポインター設定を用意していますが、検証済みまたは動作保証済みとは扱いません。
 >
-> **EN**: The primary targets are **OpenAI Codex**, **Claude Code**, and **Google Antigravity**. Among them, the only explicitly production-validated target is Google Antigravity. Codex and Claude Code have native integration paths, but practical validation is still ongoing. Cursor, GitHub Copilot, and Windsurf have pointer files as extended compatibility candidates, but they are not presented as verified or operation-guaranteed platforms.
+> **EN**: The primary targets are **OpenAI Codex**, **Claude Code**, and **Google Antigravity**. All three are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf have pointer files as extended compatibility candidates, but they are not presented as verified or operation-guaranteed platforms.
 
 > [!TIP]
 > **JA**: フォルダ名 `axiarch-rules/` は出自を反映していますが、ルールファイル自体は純粋なMarkdownであり、ツール固有の実行時依存はありません。
@@ -166,7 +166,7 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 
 | File | JA | EN |
 |:-----|:---|:---|
-| `AGENTS.md` | AI行動憲法（Codex / Claude Code / Antigravity が主対象。Antigravityは実務検証済み、Cursor / Copilot / Windsurf は拡張ポインターのみ） | AI Behavior Constitution (Codex / Claude Code / Antigravity are primary targets; Antigravity is production-validated; Cursor / Copilot / Windsurf are extended pointer-only candidates) |
+| `AGENTS.md` | AI行動憲法（Codex / Claude Code / Antigravity が実証済み主対象。Cursor / Copilot / Windsurf は拡張ポインターのみ） | AI Behavior Constitution (Codex / Claude Code / Antigravity are production-validated primary targets; Cursor / Copilot / Windsurf are extended pointer-only candidates) |
 
 ### 📚 Universal Rules (39 files × JA/EN)
 
