@@ -725,8 +725,36 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected Safe Upgrade docs and health summary to say source-only files stay skipped by default unless explicitly selected in interactive mode, and interactive choices are deduplicated"
       DOCS_MISSING=1
     fi
+    if grep -q "Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "全環境での動作保証ではありません" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      print_pass "Axiarch source README.md keeps production-validated primary status explicit for Codex, Claude Code, and Google Antigravity"
+    else
+      print_warn "Axiarch source README.md may have stale agent validation status wording"
+      print_info "Expected README to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+      DOCS_MISSING=1
+    fi
   else
     print_warn "Axiarch source README.md not found — cannot verify Axiarch source release integration"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/MARKET_STRATEGY.md" && -f "${PROJECT_DIR}/ROADMAP.md" ]]; then
+    if grep -q "OpenAI Codex、Claude Code、Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+      && grep -q "全環境での動作保証とは表現しない" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+      && grep -q "実運用稼働確認済み主対象" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "Production-validated primary targets" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "v1.8.0時点の公開ステータス" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "At the v1.8.0 release point" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null; then
+      print_pass "Axiarch source market strategy and roadmap keep production-validated primary status aligned while preserving historical release context"
+    else
+      print_warn "Axiarch source market strategy or roadmap may have stale agent validation status wording"
+      print_info "Expected MARKET_STRATEGY and ROADMAP to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving historical v1.8.0 status context"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source MARKET_STRATEGY.md or ROADMAP.md not found — cannot verify agent validation status parity"
     DOCS_MISSING=1
   fi
 
@@ -748,6 +776,19 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     else
       print_warn "Axiarch source llms files may omit the source-only upgrade boundary, deduplicated choices, or release-file tracking"
       print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
+      DOCS_MISSING=1
+    fi
+    if grep -q "Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "OpenAI Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "Production-validated primary" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "OpenAI Codex | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "Claude Code | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
+      print_pass "Axiarch source llms files keep agent validation status aligned"
+    else
+      print_warn "Axiarch source llms files may have stale agent validation status wording"
+      print_info "Expected llms files to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
       DOCS_MISSING=1
     fi
   else
@@ -812,6 +853,32 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     DOCS_MISSING=1
   fi
 
+  if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" ]] \
+    && grep -q "Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "全環境での動作保証ではない" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && [[ -f "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" ]] \
+    && grep -q "Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
+    print_pass "Axiarch source LOADING_PROTOCOL files keep agent validation status aligned"
+  else
+    print_warn "Axiarch source LOADING_PROTOCOL files may have stale agent validation status wording"
+    print_info "Expected ja/en LOADING_PROTOCOL to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/README.md" ]] \
+    && grep -q "3つとも実運用で稼働確認済み" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "全環境での動作保証ではありません" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && [[ -f "${PROJECT_DIR}/axiarch-rules/en/README.md" ]] \
+    && grep -q "All three are production-validated primary targets" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+    && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null; then
+    print_pass "Axiarch source rules README files keep agent validation status aligned"
+  else
+    print_warn "Axiarch source rules README files may have stale agent validation status wording"
+    print_info "Expected ja/en rules README files to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+    DOCS_MISSING=1
+  fi
+
   if [[ -f "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" ]]; then
     if grep -q "load_manifest_group_metadata" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q '^[[:space:]]*register_manifest_items$' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
@@ -872,6 +939,15 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     else
       print_warn "Axiarch source init.sh may not protect existing installations from full installer misuse"
       print_info "Expected existing-install detection, Safe Upgrade guidance, missing-helper bootstrap guidance, EOF-safe prompt handling, pre-copy stop, and contents-copy semantics for rules/prompts"
+      DOCS_MISSING=1
+    fi
+    if grep -q "OpenAI Codex — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Claude Code — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Google Antigravity — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
+      print_pass "Axiarch source init.sh presents current agent validation status in installer choices"
+    else
+      print_warn "Axiarch source init.sh may present stale agent validation status in installer choices"
+      print_info "Expected init.sh choices to mark Codex, Claude Code, and Google Antigravity as production-validated primary"
       DOCS_MISSING=1
     fi
   else

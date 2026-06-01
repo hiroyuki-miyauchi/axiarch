@@ -11,7 +11,7 @@ security, operations, business, AI, and governance work through a multi-layer
 constitutional architecture, making consistent output quality easier to maintain
 across agents and operator skill levels.
 
-OpenAI Codex, Claude Code, and Google Antigravity are the primary targets. v1.11.0 adds current-task Markdown evidence rotation plus native task-state sync rules for Codex and Claude Code. Google Antigravity is the only explicitly production-validated target. Codex and Claude Code have native integration paths, but practical validation evidence is still being accumulated. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
+OpenAI Codex, Claude Code, and Google Antigravity are production-validated primary targets. v1.11.0 adds current-task Markdown evidence rotation plus native task-state sync rules for Codex and Claude Code. Validation describes the configurations and scope Axiarch has exercised through real operational usage; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
 
 ## What Problem Does Axiarch Solve?
 
@@ -347,9 +347,9 @@ Optional reusable prompt templates organized by role:
 
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
-| OpenAI Codex | ⚙️ Primary target | `AGENTS.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
-| Claude Code | ⚙️ Primary target | `CLAUDE.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
-| Google Antigravity | ✅ Verified primary | `.agents/rules/prompt_pointer.md` |
+| OpenAI Codex | ✅ Production-validated primary | `AGENTS.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
+| Claude Code | ✅ Production-validated primary | `CLAUDE.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
+| Google Antigravity | ✅ Production-validated primary | `.agents/rules/prompt_pointer.md` |
 | Cursor | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.cursor/rules/axiarch.mdc` |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.github/copilot-instructions.md` |
 | Windsurf | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.windsurfrules` |
