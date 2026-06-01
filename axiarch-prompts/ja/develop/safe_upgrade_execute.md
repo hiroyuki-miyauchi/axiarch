@@ -219,25 +219,106 @@ bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja
 - `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` へ追記した場合も、Step 5のcount/time-axis thresholdを必ず確認する
 - 3件以上または期限超過があれば、対応Blueprintファイルへの昇華まで行う
 
-# Boot Sequence (起動時の必須挙動)
+# Boot Sequence (起動時の必須挙動 — Hybrid Autonomous Execution)
 
-このプロンプトを受け取った直後の最初の応答では、以下のみを行ってください。
+このプロンプトを受け取った直後の応答では、user が 5 項目を手動入力する旧式 Stop & Wait は廃止し、以下の **自律実行 + 安全フェンス** フローで進めてください。
 
-1. **Stop & Wait**: いきなりdry-run、差分確認、修正、推測を始めないこと。
-2. **Ack Only**: ロールの受諾と入力待機のみを行う。
-3. **Response Template**: 以下の形式でのみ応答する。
+## Step 1: Phase 0 即時自律実行（context load）
+
+待機せずに以下を直接ロードする。
+
+- `AGENTS.md`（最上位プロトコル）
+- `axiarch-rules/{lang}/LOADING_PROTOCOL.md`
+- `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
+- `axiarch-manifest.json`（所有境界）
+- `axiarch-scripts/axiarch-upgrade.sh`（実行仕様）
+- `.axiarch/version.json`（現バージョン推定用）
+- `.claude/settings.json` / `.codex/` / `.antigravity/`（agent 検出用）
+
+ロード済ファイルと該当セクションを `task.md` に記録する。実際に開いていないファイルをロード済として扱ってはいけない。
+
+## Step 2: Phase 1 自動推定（5 項目を context から導出）
+
+| 項目 | 推定ソース | フォールバック |
+|:--|:--|:--|
+| **現バージョン** | `.axiarch/version.json` の `version` フィールド | `axiarch-manifest.json` / `CHANGELOG.md` 推定、無理なら「不明」 |
+| **アップグレード先** | user が `--source /path/to/axiarch` 等を明示指定した場合は最優先 / 指定なければ `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` で最新タグ | 推定不能なら user に確認 |
+| **対象エージェント** | `.claude/settings.json` 存在 → `claude` / `.codex/` → `codex` / `.antigravity/` → `antigravity` | 複数検出時 or 不明時のみ user に確認 |
+| **対象言語** | `AGENTS.md` の `Project Native Language` を読み、`axiarch-rules/{ja,en}/` 実在状況と突合 | 単一言語のみ存在 → 自動採用 / 両方 → user に確認 |
+| **適用方針** | 既定で `--safe-only --dry-run`（最も保守的）| user 明示時のみ `--interactive` / `--with-prompts` |
+
+## Step 3: 推定結果の提示 + user 確認（安全フェンス 1）
+
+推定した 5 項目を以下のテーブル形式で user に提示し、**dry-run 実行の承認を得る**。
 
 ```text
-【入力待機: Lead Upgrade Integration Engineer & Constitutional Guardian】
-指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md、LOADING_PROTOCOL、CRYSTALLIZATION_PROTOCOL、axiarch-manifest.json、axiarch-upgrade.sh を直接ロードします。ロード前の推測・仮説の出力は行いません。
+【自律推定結果】
+- 現バージョン: <推定値 or 不明>
+- アップグレード先: <推定値>
+- 対象エージェント: <推定値>
+- 対象言語: <推定値>
+- 既定モード: --safe-only --dry-run
+- 任意層 (--with-prompts): なし（明示指定なし）
 
-現在、以下の入力を待機しています。
-- アップグレード先: `--to vX.Y.Z` / `--ref tags/vX.Y.Z` / `--source /path/to/axiarch`
-- 対象エージェント: `codex` / `claude` / `antigravity` / その他
-- 対象言語: `ja` / `en` / `both`
-- 適用方針: `dry-runのみ` / `safe-only適用` / `interactiveで選択`
-- 任意層: `axiarch-prompts/` を含めるか
-
-入力が揃い次第、Phase 0（直接ロード）から開始し、Project Stateを保持しながらmanifestに基づく選択アップグレードを実行します。
+この設定で dry-run を実行してよろしいですか？修正点があればご指示ください。
 ```
+
+user が「進めて」「OK」等で承認 → Step 4 へ。修正指示があれば該当項目だけ更新して Step 3 を再提示。
+
+## Step 4: Phase 3 dry-run 自律実行
+
+`bash axiarch-scripts/axiarch-upgrade.sh --dry-run --agent <推定値> --lang <推定値>` を実行し、変更計画を取得する。書き込みは一切発生しない（dry-run は安全）。
+
+## Step 5: dry-run 結果の提示 + user 確認（安全フェンス 2）
+
+Phase 3 で取得した差分を Phase 3 分類表（Axiarch Core / Mixed Ownership / Project State / etc.）で要約し、user に提示。**apply 実行の明示承認を得る**。
+
+```text
+【dry-run 結果サマリ】
+- Axiarch Core 更新候補: N files
+- Mixed Ownership (skip 対象): N files
+- Project State (preserve): N files
+- STALE-LOCAL: N files（あれば詳細列挙）
+- TYPE-CONFLICT: N files（あれば詳細列挙）
+
+safe-only モードで apply してよろしいですか？
+（mixed ownership ファイルは skip され、Project State は完全保持されます）
+```
+
+user が「apply して」「OK」等で承認 → Step 6 へ。
+
+## Step 6: Phase 5 apply 自律実行
+
+`bash axiarch-scripts/axiarch-upgrade.sh --safe-only --apply --agent <推定値> --lang <推定値>` を実行。
+
+その後 Phase 6（品質ゲート）と Phase 7（完了報告）を自動継続する。
+
+## 自律実行の安全境界
+
+以下は **必ず user 明示承認** を要求する（自動実行禁止）：
+- apply 最終実行（Step 6）
+- `--with-prompts`（任意層含める）
+- mixed ownership ファイルへの書き込み
+- `--interactive` モード（user 入力が前提）
+- `git push` / `git tag` / `gh pr create` / `gh pr merge`
+
+以下は **AI 自律実行 OK**（書き込みなし or 完全保守的）：
+- Phase 0 context load
+- Phase 1 自動推定
+- Phase 3 dry-run 実行（書き込みなし）
+- Phase 6 `check-axiarch-health.sh` 実行（read-only 診断）
+
+## エッジケース
+
+| ケース | 挙動 |
+|:--|:--|
+| **現バージョン == アップグレード先** | 「アップグレード不要」と提示して終了 |
+| **複数 major/minor 跨ぎ**（例 v1.6.0 → v1.11.0）| 中間版での段階適用も選択肢として提示 |
+| **`.axiarch/version.json` 不在**（初回更新）| baseline 不在で差分検出不可、初回適用として進める旨を明示 |
+| **複数 agent 検出**（`.claude/` + `.codex/` 両存在）| user に確認、自動選択しない |
+| **推定先 release 取得失敗**（network 不可 / repo 名間違い）| user に `--source` 指定を依頼 |
+
+## 旧 Stop & Wait モードへのフォールバック
+
+user が「自律推定せず、項目入力させて」と明示した場合のみ、旧 Stop & Wait モードに切り替える。それ以外は本 Hybrid モードを既定とする。
 ````

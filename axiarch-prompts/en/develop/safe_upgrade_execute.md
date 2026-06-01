@@ -220,25 +220,106 @@ Only if this upgrade produced actual task-specific problems, decisions, or disco
 - If appending to `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, also run the Step 5 count/time-axis threshold check
 - If the threshold is met or overdue, promote the lesson into the appropriate Blueprint domain file
 
-# Boot Sequence
+# Boot Sequence (Hybrid Autonomous Execution)
 
-In the first response immediately after receiving this prompt, do only the following.
+Replace the legacy Stop & Wait mode (which required users to manually input five items) with this **autonomous execution + safety fences** flow.
 
-1. **Stop & Wait**: Do not begin dry-run, diff inspection, fixes, or speculation.
-2. **Ack Only**: Accept the role and wait for input.
-3. **Response Template**: Respond only in this format.
+## Step 1: Phase 0 Immediate Autonomous Context Load
+
+Without waiting, directly load:
+
+- `AGENTS.md` (top-level protocol)
+- `axiarch-rules/{lang}/LOADING_PROTOCOL.md`
+- `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
+- `axiarch-manifest.json` (ownership boundaries)
+- `axiarch-scripts/axiarch-upgrade.sh` (execution spec)
+- `.axiarch/version.json` (current version inference)
+- `.claude/settings.json` / `.codex/` / `.antigravity/` (agent detection)
+
+Record loaded files and the actual sections in `task.md`. Do NOT mark a file as loaded unless you actually opened it.
+
+## Step 2: Phase 1 Auto-Detection (derive 5 items from context)
+
+| Item | Source | Fallback |
+|:--|:--|:--|
+| **Current version** | `version` field in `.axiarch/version.json` | Infer from `axiarch-manifest.json` / `CHANGELOG.md`; if impossible, mark "unknown" |
+| **Upgrade target** | If user supplied `--source /path/to/axiarch`, prioritise it / otherwise `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` for the latest tag | If inference fails, ask the user |
+| **Target agent** | `.claude/settings.json` exists → `claude` / `.codex/` → `codex` / `.antigravity/` → `antigravity` | If multiple or none detected, ask the user |
+| **Target language** | Read `Project Native Language` in `AGENTS.md` and cross-check `axiarch-rules/{ja,en}/` existence | Only one language present → auto-adopt / both present → ask the user |
+| **Application policy** | Default to `--safe-only --dry-run` (most conservative) | Use `--interactive` / `--with-prompts` only when explicitly requested |
+
+## Step 3: Present Auto-Detection + User Confirmation (Safety Fence 1)
+
+Present the five inferred items as a table to the user and **obtain approval to run dry-run**.
 
 ```text
-[Input Required: Lead Upgrade Integration Engineer & Constitutional Guardian]
-Once input is provided, I will first execute Phase 0 by directly loading AGENTS.md, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, axiarch-manifest.json, and axiarch-upgrade.sh. I will not output speculation or assumptions before loading.
+[Auto-detection results]
+- Current version: <inferred or unknown>
+- Upgrade target: <inferred>
+- Target agent: <inferred>
+- Target language: <inferred>
+- Default mode: --safe-only --dry-run
+- Optional layer (--with-prompts): not included (no explicit request)
 
-Currently awaiting the following input:
-- Upgrade target: `--to vX.Y.Z` / `--ref tags/vX.Y.Z` / `--source /path/to/axiarch`
-- Target agent: `codex` / `claude` / `antigravity` / other
-- Target language: `ja` / `en` / `both`
-- Application policy: `dry-run only` / `safe-only apply` / `interactive selection`
-- Optional layer: whether to include `axiarch-prompts/`
-
-Once the input is available, I will start from Phase 0 direct loading and execute the manifest-based selective upgrade while preserving Project State by default.
+May I proceed to dry-run with this configuration? Please correct any item if needed.
 ```
+
+When the user approves with "go" / "OK" / etc. → Step 4. If corrections are requested, update only the relevant items and present Step 3 again.
+
+## Step 4: Phase 3 Autonomous Dry-Run
+
+Execute `bash axiarch-scripts/axiarch-upgrade.sh --dry-run --agent <inferred> --lang <inferred>` to obtain the change plan. No writes occur (dry-run is safe).
+
+## Step 5: Present Dry-Run Results + User Confirmation (Safety Fence 2)
+
+Summarise the diff retrieved in Phase 3 using the classification table (Axiarch Core / Mixed Ownership / Project State / etc.) and **obtain explicit approval to apply**.
+
+```text
+[Dry-run summary]
+- Axiarch Core update candidates: N files
+- Mixed Ownership (skip targets): N files
+- Project State (preserve): N files
+- STALE-LOCAL: N files (list paths if any)
+- TYPE-CONFLICT: N files (list paths if any)
+
+May I apply in safe-only mode?
+(Mixed-ownership files are skipped; Project State is fully preserved.)
+```
+
+When the user approves with "apply" / "OK" / etc. → Step 6.
+
+## Step 6: Phase 5 Autonomous Apply
+
+Execute `bash axiarch-scripts/axiarch-upgrade.sh --safe-only --apply --agent <inferred> --lang <inferred>`.
+
+Then continue automatically through Phase 6 (Quality Gate) and Phase 7 (Final Report).
+
+## Autonomous Execution Safety Boundary
+
+The following **always require explicit user approval** (no auto-execution):
+- Final apply step (Step 6)
+- `--with-prompts` (include optional layer)
+- Writes to mixed-ownership files
+- `--interactive` mode (user input required)
+- `git push` / `git tag` / `gh pr create` / `gh pr merge`
+
+The following are **AI-autonomous OK** (no writes, or fully conservative):
+- Phase 0 context load
+- Phase 1 auto-detection
+- Phase 3 dry-run execution (no writes)
+- Phase 6 `check-axiarch-health.sh` execution (read-only diagnostic)
+
+## Edge Cases
+
+| Case | Behaviour |
+|:--|:--|
+| **Current version == upgrade target** | Report "no upgrade needed" and exit |
+| **Multi-major/minor jump** (e.g., v1.6.0 → v1.11.0) | Also present intermediate-step option |
+| **`.axiarch/version.json` missing** (first upgrade) | No baseline → explain that diff detection starts after this run |
+| **Multiple agents detected** (`.claude/` + `.codex/`) | Ask the user; do NOT auto-select |
+| **Release lookup fails** (network / wrong repo name) | Ask the user to provide `--source` |
+
+## Fallback to Legacy Stop & Wait
+
+Only when the user explicitly says "do not auto-detect; let me input items", switch to the legacy Stop & Wait mode. Otherwise, this Hybrid mode is the default.
 ````
