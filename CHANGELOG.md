@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.1] — 2026-06-02
+
+### Hybrid Autonomous Boot Sequence for Safe Upgrade / Safe Upgrade の自律実行ブート化
+
+`axiarch-prompts/{ja,en}/develop/safe_upgrade_execute.md` の Boot Sequence を、user が 5 項目（アップグレード先 / エージェント / 言語 / 適用方針 / 任意層）を手動入力する旧 **Stop & Wait** モードから、AI が context（`.axiarch/version.json` / `AGENTS.md` の `Project Native Language` / `.claude/settings.json` / `axiarch-manifest.json`）から自律推定して進める **Hybrid Autonomous Execution** モードへ変更。dry-run 結果確認と apply 明示承認の 2 段安全フェンスで誤選択リスクを削減する。実採用先（chronoviq）での自律実行成功事例を規格化したもの。
+
+Changes the `safe_upgrade_execute.md` Boot Sequence from the legacy **Stop & Wait** mode (which required users to manually input five items) to a **Hybrid Autonomous Execution** mode where the AI auto-detects context (`.axiarch/version.json`, `Project Native Language` in `AGENTS.md`, `.claude/settings.json`, `axiarch-manifest.json`). Two safety fences (dry-run review and explicit apply approval) reduce mis-selection risk. Standardizes the autonomous-execution success pattern observed in a real adopter project.
+
+### Changed
+
+- **`axiarch-prompts/{ja,en}/develop/safe_upgrade_execute.md` Boot Sequence** — 旧 Stop & Wait（5 項目手動入力）を廃止し、6 Step の Hybrid 構造（Step 1 Phase 0 即 context load → Step 2 Phase 1 自動推定 → Step 3 推定結果提示 + dry-run 承認 = 安全フェンス 1 → Step 4 dry-run 自律実行 → Step 5 dry-run 結果提示 + apply 承認 = 安全フェンス 2 → Step 6 apply 自律実行）へ書き換え。安全境界（apply / `--with-prompts` / mixed ownership 書込 / `git push` 等は明示承認必須、Phase 0/1/3 dry-run と health check は自律 OK）、Edge Cases（同 version スキップ / 複数版跨ぎ警告 / baseline 不在 / 複数 agent 検出 / release 取得失敗）、旧 Stop & Wait への明示 fallback を明文化 / Replaces the legacy Stop & Wait flow with a six-step Hybrid structure, documents the autonomous-execution safety boundary, edge cases, and an explicit fallback to the legacy mode (PR #43)
+
+### Compatibility
+
+- ✅ **後方互換 100%** — 旧 Stop & Wait モードは user 明示指示時の fallback として残存。Safe Upgrade Wizard 本体（`axiarch-scripts/axiarch-upgrade.sh`）のロジック・フラグは不変。prompt 文言のみの改善 / Fully backward compatible; legacy mode remains as an explicit fallback, and the Safe Upgrade Wizard logic is unchanged (prompt-text-only improvement)
+- ✅ **Universal Rules 不変** — 変更は `axiarch-prompts/develop/`（mutable layer）のみ。憲法改正なし / No constitution changes
+
+### References
+
+- 実証元 / Source pattern: 採用先プロジェクト chronoviq の Safe Upgrade Wizard 経由 v1.11.0 自律適用（manifest 駆動 owner 判定 + dry-run → apply 2 段 + Project State 非破壊保持 + CI 全 PASS）
+
+---
+
 ## [1.11.0] — 2026-05-18
 
 ### Native Task State Sync / ネイティブタスク状態同期
@@ -852,6 +875,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.11.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.8.2...v1.9.0

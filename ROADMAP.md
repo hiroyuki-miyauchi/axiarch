@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.11.0 Native Task State Sync & Process Document Lifecycle\
+> **現在の安定版 / Current Stable**: v1.11.1 Hybrid Autonomous Boot Sequence for Safe Upgrade\
 > **次期作業 / Next**: v1.12.0 Static Lint & Process Supervision（検討中 / under consideration）\
 > **ステータス / Status**: Actively Maintained
 
@@ -513,6 +513,18 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 - **ネイティブ状態同期** — Codexでは `update_plan`、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を併用する責務を明文化。`TodoWrite` は古いランタイム向けfallbackとして扱う
 - **後方互換** — `AXIARCH_PROCESS_DOC_MODE=append` により、従来の追記運用を必要とする採用先も維持可能
 - **Health再発検知** — Check 12/15でtask-state script、native state wording、version metadata、docs parityを検査
+
+---
+
+### ✅ v1.11.1 — Hybrid Autonomous Boot Sequence for Safe Upgrade（2026-06-02）
+
+`safe_upgrade_execute.md` のアップグレード実行プロンプトを、user が 5 項目を手動入力する旧 Stop & Wait から、AI が context から自律推定して進める Hybrid モードへ改善。
+
+- **Boot Sequence 6 Step 化** — Phase 0 即 context load → Phase 1 自動推定（version / agent / lang / mode）→ 推定結果提示 + dry-run 承認（安全フェンス 1）→ dry-run 自律実行 → 結果提示 + apply 承認（安全フェンス 2）→ apply 自律実行
+- **安全境界の明文化** — apply / `--with-prompts` / mixed ownership 書込 / `git push` 等は明示承認必須。Phase 0/1/3 dry-run と health check は自律 OK
+- **Edge Cases** — 同 version スキップ / 複数版跨ぎ警告 / baseline 不在 / 複数 agent 検出 / release 取得失敗
+- **後方互換** — 旧 Stop & Wait は user 明示時の fallback として残存。Wizard 本体ロジック不変、prompt 文言のみの改善
+- **実証元** — 採用先 chronoviq の Safe Upgrade Wizard 経由 v1.11.0 自律適用成功事例を規格化（PR #43）
 
 ---
 
@@ -1117,6 +1129,25 @@ automatically updates native task/plan panels.
   append behavior when adopter projects explicitly need it
 - **Health regression checks** — Check 12/15 verify the task-state script,
   native state wording, version metadata, and documentation parity
+
+---
+
+### ✅ v1.11.1 — Hybrid Autonomous Boot Sequence for Safe Upgrade (2026-06-02)
+
+Improves the `safe_upgrade_execute.md` upgrade prompt from the legacy Stop & Wait
+mode (five manual user inputs) to a Hybrid mode where the AI auto-detects context.
+
+- **Six-step Boot Sequence** — Phase 0 immediate context load → Phase 1 auto-detection
+  (version / agent / lang / mode) → present inference + dry-run approval (safety fence 1)
+  → autonomous dry-run → present results + apply approval (safety fence 2) → autonomous apply
+- **Documented safety boundary** — apply / `--with-prompts` / mixed-ownership writes /
+  `git push` etc. require explicit approval; Phase 0/1/3 dry-run and health check are autonomous-OK
+- **Edge cases** — same-version skip / multi-version jump warning / missing baseline /
+  multiple-agent detection / release lookup failure
+- **Backward compatibility** — legacy Stop & Wait remains as an explicit user fallback;
+  Wizard logic unchanged, prompt-text-only improvement
+- **Source pattern** — standardizes the autonomous-execution success observed in adopter
+  project chronoviq's Safe Upgrade Wizard v1.11.0 application (PR #43)
 
 ---
 
