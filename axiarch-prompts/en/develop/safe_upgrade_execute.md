@@ -65,6 +65,7 @@ First, inspect the local repository and ask the user only for information that c
 5. **Target agent**
    - Primary targets are `codex`, `claude`, and `antigravity`.
    - Treat Cursor, GitHub Copilot, and Windsurf only as pointer-compatibility candidates unless the project has separate validation evidence.
+   - **Projects that run multiple agents together (e.g. inucomi using codex+claude+antigravity) should use `--agent all`.** A single agent leaves the other agents' hooks out of the upgrade plan and lets them go stale. Under `--safe-only`, unused-agent pointers are never written, so `all` stays safe.
 6. **Optional layer**
    - `axiarch-prompts/` is optional. Add `--with-prompts` only when the user explicitly wants prompt templates included.
 
@@ -234,7 +235,7 @@ Without waiting, directly load:
 - `axiarch-manifest.json` (ownership boundaries)
 - `axiarch-scripts/axiarch-upgrade.sh` (execution spec)
 - `.axiarch/version.json` (current version inference)
-- `.claude/settings.json` / `.codex/` / `.antigravity/` (agent detection)
+- `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` (agent detection; each is the representative file `init.sh` writes for that agent's adopter project)
 
 Record loaded files and the actual sections in `task.md`. Do NOT mark a file as loaded unless you actually opened it.
 
@@ -244,7 +245,7 @@ Record loaded files and the actual sections in `task.md`. Do NOT mark a file as 
 |:--|:--|:--|
 | **Current version** | `version` field in `.axiarch/version.json` | Infer from `axiarch-manifest.json` / `CHANGELOG.md`; if impossible, mark "unknown" |
 | **Upgrade target** | If user supplied `--source /path/to/axiarch`, prioritise it / otherwise `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` for the latest tag | If inference fails, ask the user |
-| **Target agent** | `.claude/settings.json` exists → `claude` / `.codex/` → `codex` / `.antigravity/` → `antigravity` | If multiple or none detected, ask the user |
+| **Target agent** | **Check all three representative files and enumerate every agent present** (keyed on what `init.sh` generates): `.claude/settings.json`→`claude` / `.codex/hooks.json`→`codex` / `.agents/rules/prompt_pointer.md`→`antigravity`. **Exactly one detected** → that agent / **Two or more detected (multi-agent project, e.g. inucomi using codex+claude+antigravity)** → `all` (a single agent would hide the other agents' hooks from the plan and leave them stale; under `--safe-only`, unused-agent pointers are surfaced as REVIEW only and never written) | **Only when zero detected**, propose `universal` (agent-agnostic files only) and confirm with the user |
 | **Target language** | Read `Project Native Language` in `AGENTS.md` and cross-check `axiarch-rules/{ja,en}/` existence | Only one language present → auto-adopt / both present → ask the user |
 | **Application policy** | Default to `--safe-only --dry-run` (most conservative) | Use `--interactive` / `--with-prompts` only when explicitly requested |
 
@@ -316,7 +317,7 @@ The following are **AI-autonomous OK** (no writes, or fully conservative):
 | **Current version == upgrade target** | Report "no upgrade needed" and exit |
 | **Multi-major/minor jump** (e.g., v1.6.0 → v1.11.0) | Also present intermediate-step option |
 | **`.axiarch/version.json` missing** (first upgrade) | No baseline → explain that diff detection starts after this run |
-| **Multiple agents detected** (`.claude/` + `.codex/`) | Ask the user; do NOT auto-select |
+| **Multiple agents detected = multi-agent project** (2+ of `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` present; e.g. inucomi = codex+claude+antigravity) | Propose `--agent all` as the inferred value. **Do NOT make the user pick just one** (any unpicked agent's hooks drop out of the plan and go stale across the upgrade). `all` surfaces every agent's hooks as REVIEW, and unused-agent pointers (cursor/copilot/windsurf) are not written under `--safe-only`. Update the hook files (mixed/review) per agent via `--interactive` |
 | **Release lookup fails** (network / wrong repo name) | Ask the user to provide `--source` |
 
 ## Fallback to Legacy Stop & Wait

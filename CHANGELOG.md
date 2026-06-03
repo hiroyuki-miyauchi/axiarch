@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.2] — 2026-06-03
+
+### Multi-Agent Detection Fix for Safe Upgrade / Safe Upgrade のマルチエージェント検出修正
+
+`safe_upgrade_execute.md` の agent auto-detection が、Antigravity を **`.antigravity/`**（どの採用先にも生成されない誤った path）で検出しようとしていたため、Antigravity 採用先で永久に検出されず upgrade の選択肢に出ない不具合を修正。あわせて、複数 agent を併用するプロジェクト（例: codex+claude+antigravity の inucomi）で単一 agent を選ぶと他 agent の hook が更新計画から漏れて stale 化する構造的問題に対し、**併用検出時は `--agent all` を推奨**する設計へ改善した。
+
+Fixes a bug where `safe_upgrade_execute.md` tried to detect Antigravity via `.antigravity/` — a path no adopter ever generates — so Antigravity adopters were never detected and never appeared as an upgrade choice. Also addresses the structural problem where, for multi-agent projects (e.g. inucomi running codex+claude+antigravity), selecting a single agent drops the other agents' hooks from the upgrade plan and lets them go stale, by recommending **`--agent all` when multiple agents are detected**.
+
+### Fixed
+
+- **Antigravity 検出シグナルの誤り** — `safe_upgrade_execute.md`（ja/en）の auto-detection が `.antigravity/` を見ていたのを、`init.sh` が実際に生成する代表ファイル **`.agents/rules/prompt_pointer.md`** に修正。codex は `.codex/`（ディレクトリ）から `.codex/hooks.json`（代表ファイル）へ統一し、claude（`.claude/settings.json`）と粒度を揃えた / Corrects the Antigravity detection signal from the non-existent `.antigravity/` to the `init.sh`-generated `.agents/rules/prompt_pointer.md`, and unifies all three agents to their representative generated file
+
+### Changed
+
+- **マルチエージェント併用の設計** — auto-detection は 3 代表ファイルを全確認して存在 agent を全列挙。1 つ検出→その agent / 2 つ以上検出（併用）→`--agent all`（単一指定は他 agent の hook を計画から落として stale 化させるため禁止）。`--safe-only` 下では未使用 agent（cursor/copilot/windsurf）の pointer は `add` 状態でも REVIEW 可視化のみで書込されないことを `path_status` + `execute_item` の挙動から確認・明文化。Phase 1 / Step 2 / Edge Cases の 3 箇所に併用ガイダンスを追加（ja/en）/ Redesigns multi-agent handling: enumerate all present agents; one → that agent, two+ → `--agent all`. Documents that `--safe-only` never writes unused-agent pointers
+
+### Compatibility
+
+- ✅ **後方互換 100%** — 単一 agent 採用先の挙動は不変（検出シグナルが正確化されただけ）。Safe Upgrade Wizard 本体（`axiarch-scripts/axiarch-upgrade.sh`）のロジック・フラグは不変。prompt 文言のみの改善 / Fully backward compatible; single-agent behavior unchanged, wizard logic untouched (prompt-text-only)
+- ✅ **Universal Rules 不変** — 変更は `axiarch-prompts/develop/`（mutable layer）のみ。憲法改正なし / No constitution changes
+
+### References
+
+- 採用先実態: inucomi（codex + claude + antigravity 併用）での Antigravity 検出漏れ報告
+- 挙動実証: `axiarch-upgrade.sh` `path_status`（source 有・target 無 = `add`）+ `execute_item`（safe-only で owner=axiarch policy=review は `REVIEW safe-only excluded`、書込なし）
+
+---
+
 ## [1.11.1] — 2026-06-02
 
 ### Hybrid Autonomous Boot Sequence for Safe Upgrade / Safe Upgrade の自律実行ブート化
@@ -875,6 +903,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.11.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.9.0...v1.10.0

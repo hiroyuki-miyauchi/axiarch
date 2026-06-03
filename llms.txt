@@ -41,14 +41,14 @@ Axiarch mitigates these risks by defining a quality floor and autonomous context
 
 ## Quick Start
 
-Note: the main-branch installer installs Axiarch v1.11.1 by default from `tags/v1.11.1`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
+Note: the main-branch installer installs Axiarch v1.11.2 by default from `tags/v1.11.2`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
 
 ```bash
 # Option 1: Interactive setup script (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # Option 1b: Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.11.1 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.11.2 bash
 
 # Option 2: Manual copy
 cp AGENTS.md /path/to/your/project/
@@ -59,7 +59,7 @@ cp axiarch-manifest.json /path/to/your/project/
 cp -r axiarch-scripts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.1 --dry-run`. Older adopters that do not yet have the helper can bootstrap it temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.11.1 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies source release-file Git tracking for current core release files, including `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --dry-run`. Older adopters that do not yet have the helper can bootstrap it temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.11.2 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies source release-file Git tracking for current core release files, including `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Compatibility
 
