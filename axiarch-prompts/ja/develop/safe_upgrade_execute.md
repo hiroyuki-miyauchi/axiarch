@@ -64,6 +64,7 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
    - `--lang ja|en|both` を、プロジェクトの `Project Native Language` と保持言語に合わせて決める。
 5. **対象エージェント**
    - 主対象は `codex`, `claude`, `antigravity`。Cursor / Copilot / Windsurf はポインター互換候補であり、動作保証として扱わない。
+   - **複数 agent を併用するプロジェクト（例: codex+claude+antigravity の inucomi）は `--agent all` を使う。** 単一 agent を指定すると他 agent の hook が更新計画から漏れて stale 化する。`--safe-only` 下では未使用 agent の pointer は書込されないため `all` でも安全。
 6. **任意層**
    - `axiarch-prompts/` は任意。ユーザーが明示した場合のみ `--with-prompts` を付ける。
 
@@ -233,7 +234,7 @@ bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja
 - `axiarch-manifest.json`（所有境界）
 - `axiarch-scripts/axiarch-upgrade.sh`（実行仕様）
 - `.axiarch/version.json`（現バージョン推定用）
-- `.claude/settings.json` / `.codex/` / `.antigravity/`（agent 検出用）
+- `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md`（agent 検出用。いずれも `init.sh` が各エージェント採用先に生成する代表ファイル）
 
 ロード済ファイルと該当セクションを `task.md` に記録する。実際に開いていないファイルをロード済として扱ってはいけない。
 
@@ -243,7 +244,7 @@ bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja
 |:--|:--|:--|
 | **現バージョン** | `.axiarch/version.json` の `version` フィールド | `axiarch-manifest.json` / `CHANGELOG.md` 推定、無理なら「不明」 |
 | **アップグレード先** | user が `--source /path/to/axiarch` 等を明示指定した場合は最優先 / 指定なければ `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` で最新タグ | 推定不能なら user に確認 |
-| **対象エージェント** | `.claude/settings.json` 存在 → `claude` / `.codex/` → `codex` / `.antigravity/` → `antigravity` | 複数検出時 or 不明時のみ user に確認 |
+| **対象エージェント** | **3 つの代表ファイルを全て確認し、存在する agent を全列挙する**（`init.sh` 生成基準）: `.claude/settings.json`→`claude` / `.codex/hooks.json`→`codex` / `.agents/rules/prompt_pointer.md`→`antigravity`。**1 つだけ検出**→その agent / **2 つ以上検出（併用プロジェクト。例: codex+claude+antigravity の inucomi）**→`all`（単一指定だと他 agent の hook が計画に出ず取り残されるため。`--safe-only` では未使用 agent の pointer は REVIEW 可視化のみで書込されず安全） | **0 検出**時のみ `universal`（agent 非依存ファイルのみ）を提示し user に確認 |
 | **対象言語** | `AGENTS.md` の `Project Native Language` を読み、`axiarch-rules/{ja,en}/` 実在状況と突合 | 単一言語のみ存在 → 自動採用 / 両方 → user に確認 |
 | **適用方針** | 既定で `--safe-only --dry-run`（最も保守的）| user 明示時のみ `--interactive` / `--with-prompts` |
 
@@ -315,7 +316,7 @@ user が「apply して」「OK」等で承認 → Step 6 へ。
 | **現バージョン == アップグレード先** | 「アップグレード不要」と提示して終了 |
 | **複数 major/minor 跨ぎ**（例 v1.6.0 → v1.11.0）| 中間版での段階適用も選択肢として提示 |
 | **`.axiarch/version.json` 不在**（初回更新）| baseline 不在で差分検出不可、初回適用として進める旨を明示 |
-| **複数 agent 検出**（`.claude/` + `.codex/` 両存在）| user に確認、自動選択しない |
+| **複数 agent 検出 = 併用プロジェクト**（`.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` のうち 2 つ以上が存在。例: inucomi = codex+claude+antigravity）| `--agent all` を推定値として提示。**1 つだけ選ばせてはいけない**（選ばなかった agent の hook が計画から漏れ、アップグレードで stale 化するため）。`all` は全 agent の hook を REVIEW 可視化し、未使用 agent（cursor/copilot/windsurf）の pointer は `--safe-only` 下では書込されない。hook ファイル（mixed/review）の実更新は `--interactive` で各 agent 分をレビューする |
 | **推定先 release 取得失敗**（network 不可 / repo 名間違い）| user に `--source` 指定を依頼 |
 
 ## 旧 Stop & Wait モードへのフォールバック

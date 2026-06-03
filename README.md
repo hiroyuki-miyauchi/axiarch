@@ -257,9 +257,9 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は Axiarch v1.11.1 を導入します。既定では `tags/v1.11.1` を取得し、別バージョン固定が必要な場合は該当リリースタグを指す `AXIARCH_REF=tags/vX.Y.Z` を右辺の `bash` に渡してください。
+> **JA**: `main` ブランチの `init.sh` は Axiarch v1.11.2 を導入します。既定では `tags/v1.11.2` を取得し、別バージョン固定が必要な場合は該当リリースタグを指す `AXIARCH_REF=tags/vX.Y.Z` を右辺の `bash` に渡してください。
 >
-> **EN**: The `main`-branch `init.sh` installs Axiarch v1.11.1. By default it fetches `tags/v1.11.1`; to pin another release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
+> **EN**: The `main`-branch `init.sh` installs Axiarch v1.11.2. By default it fetches `tags/v1.11.2`; to pin another release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
 
 ### 必須ファイル一覧 / Required Files
 

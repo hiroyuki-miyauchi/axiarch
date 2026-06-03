@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.11.1 Hybrid Autonomous Boot Sequence for Safe Upgrade\
+> **現在の安定版 / Current Stable**: v1.11.2 Multi-Agent Detection Fix for Safe Upgrade\
 > **次期作業 / Next**: v1.12.0 Static Lint & Process Supervision（検討中 / under consideration）\
 > **ステータス / Status**: Actively Maintained
 
@@ -525,6 +525,18 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 - **Edge Cases** — 同 version スキップ / 複数版跨ぎ警告 / baseline 不在 / 複数 agent 検出 / release 取得失敗
 - **後方互換** — 旧 Stop & Wait は user 明示時の fallback として残存。Wizard 本体ロジック不変、prompt 文言のみの改善
 - **実証元** — 採用先 chronoviq の Safe Upgrade Wizard 経由 v1.11.0 自律適用成功事例を規格化（PR #43）
+
+---
+
+### ✅ v1.11.2 — Multi-Agent Detection Fix for Safe Upgrade（2026-06-03）
+
+`safe_upgrade_execute.md` の agent auto-detection が Antigravity を誤った path（`.antigravity/`）で検出していた不具合と、併用プロジェクトでの単一 agent 選択による hook 取り残しを修正。
+
+- **Antigravity 検出修正** — `.antigravity/`（非生成 path）→ `init.sh` 生成の `.agents/rules/prompt_pointer.md` に修正。codex も `.codex/`→`.codex/hooks.json` に統一し 3 agent の検出粒度を揃えた
+- **マルチエージェント設計** — 3 代表ファイルを全確認して存在 agent を全列挙。1 つ→その agent / 2 つ以上（併用、例: inucomi = codex+claude+antigravity）→`--agent all`（単一指定は他 agent の hook を計画から落として stale 化させるため）
+- **安全性実証** — `--safe-only` 下では未使用 agent（cursor/copilot/windsurf）の pointer は `add` 状態でも書込されない（`path_status` + `execute_item` で確認）
+- **後方互換** — 単一 agent 採用先は挙動不変、Wizard 本体ロジック不変、prompt 文言のみ
+- **実証元** — inucomi（codex+claude+antigravity 併用）での Antigravity 検出漏れ報告
 
 ---
 
@@ -1148,6 +1160,25 @@ mode (five manual user inputs) to a Hybrid mode where the AI auto-detects contex
   Wizard logic unchanged, prompt-text-only improvement
 - **Source pattern** — standardizes the autonomous-execution success observed in adopter
   project chronoviq's Safe Upgrade Wizard v1.11.0 application (PR #43)
+
+---
+
+### ✅ v1.11.2 — Multi-Agent Detection Fix for Safe Upgrade (2026-06-03)
+
+Fixes the `safe_upgrade_execute.md` agent auto-detection that looked for Antigravity at
+the wrong path (`.antigravity/`), plus the single-agent trap that left other agents' hooks
+stale in multi-agent projects.
+
+- **Antigravity detection fix** — `.antigravity/` (never generated) → `init.sh`-generated
+  `.agents/rules/prompt_pointer.md`; codex unified from `.codex/` to `.codex/hooks.json` so
+  all three agents key on their representative generated file
+- **Multi-agent design** — enumerate every present agent across the three representative
+  files; one → that agent, two+ (multi-agent, e.g. inucomi = codex+claude+antigravity) →
+  `--agent all` (a single agent drops the others' hooks from the plan and lets them go stale)
+- **Safety proof** — under `--safe-only`, unused-agent pointers (cursor/copilot/windsurf) are
+  never written even in `add` status (verified via `path_status` + `execute_item`)
+- **Backward compatibility** — single-agent adopters unaffected; Wizard logic unchanged, prompt-text-only
+- **Source pattern** — Antigravity detection gap reported in adopter project inucomi (codex+claude+antigravity)
 
 ---
 
