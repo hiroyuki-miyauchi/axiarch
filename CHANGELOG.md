@@ -16,7 +16,7 @@ release history, not current canonical numbering.
 
 ---
 
-## [Unreleased]
+## [1.12.0] — 2026-06-08
 
 ### AXIARCH Canonical Entrypoint / AXIARCH正本入口
 
@@ -43,7 +43,7 @@ Adds `AXIARCH.md` as the canonical Axiarch entrypoint and turns `AGENTS.md`, `CL
 - Safe Upgrade prompts now keep their top-level usage text, temporary-helper examples, and Hybrid Autonomous Boot Sequence aligned; they no longer describe the old standby-first flow while later requiring autonomous context loading.
 - Single-language setup guidance now includes `axiarch-harness/{unused-lang}/` alongside `axiarch-rules/{unused-lang}/` and optional `axiarch-prompts/{unused-lang}/` so the new harness layer is not forgotten during intentional language pruning.
 - `CRYSTALLIZATION_PROTOCOL.md`, Lessons Log cross-references, `INDEX.md` Antigravity pointer descriptions, and README pointer explanations now route through `AXIARCH.md` instead of treating `AGENTS.md` or direct `axiarch-rules/` links as the active entrypoint.
-- `init.sh` and `axiarch-manifest.json` now use `1.12.0-dev` for the unreleased AXIARCH.md / harness work, fetch `heads/main` by default, and gracefully fall back to the legacy AGENTS.md entrypoint when an older pinned tag does not contain `AXIARCH.md` or `axiarch-harness/`.
+- `init.sh` and `axiarch-manifest.json` now use `1.12.0` for the finalized AXIARCH.md / harness release, default stable installs to `tags/v1.12.0`, allow explicit `AXIARCH_REF=heads/main` mainline installs, and gracefully fall back to the legacy AGENTS.md entrypoint when an older pinned tag does not contain `AXIARCH.md` or `axiarch-harness/`.
 - `check-axiarch-health.sh` source release-file tracking now includes `AXIARCH.md` and the `axiarch-harness/` protocol files so new canonical-entry assets cannot be left as untracked working-tree files before commit or release.
 - `AXIARCH.md`, `llms.txt`, and `llms-full.txt` now explicitly preserve former AGENTS protocol boundaries for Project Native Language, DB integrity, SSOT and branch discipline, self-completion, existing behavior protection, diff-based editing, task evidence, human approval, and crystallization.
 - `init.sh` now preserves unselected native agent configs instead of deleting them during single-agent setup, so `.agents/`, `.cursor/`, `.claude/`, `.codex/`, `.github/copilot-instructions.md`, and `.windsurfrules` can safely coexist as adapter entrypoints unless the operator explicitly removes them.
@@ -56,29 +56,7 @@ Adds `AXIARCH.md` as the canonical Axiarch entrypoint and turns `AGENTS.md`, `CL
 
 - `AGENTS.md` remains present for Codex and AGENTS.md-compatible tools, but it is now a compatibility adapter.
 - Subagents are optional. If unavailable, the main agent performs the same role passes sequentially.
-- No push, deploy, tag, or release action is included in this change.
-
----
-
-## [1.11.2] — 2026-06-03
-
-### Multi-Agent Detection Fix for Safe Upgrade / Safe Upgrade のマルチエージェント検出修正
-
-`safe_upgrade_execute.md` の agent auto-detection が、Antigravity を `.antigravity/`（どの採用先にも生成されない誤ったpath）で検出しようとしていたため、Antigravity採用先で永久に検出されずupgradeの選択肢に出ない不具合を修正。あわせて、複数agentを併用するプロジェクトで単一agentを選ぶと他agentのhookが更新計画から漏れてstale化する構造的問題に対し、併用検出時は `--agent all` を推奨する設計へ改善した。
-
-Fixes a bug where `safe_upgrade_execute.md` tried to detect Antigravity via `.antigravity/`, a path no adopter generates, so Antigravity adopters were never detected as upgrade choices. It also addresses the structural stale-hook risk in multi-agent projects by recommending `--agent all` when multiple agents are detected.
-
-### Fixed
-
-- **Antigravity検出シグナルの誤り** — auto-detectionを `.antigravity/` から、`init.sh` が実際に生成する `.agents/rules/prompt_pointer.md` に修正。codexも `.codex/` ディレクトリではなく `.codex/hooks.json` の代表ファイル基準へ統一 / Corrects Antigravity detection from `.antigravity/` to `.agents/rules/prompt_pointer.md`, and aligns Codex detection to `.codex/hooks.json`
-
-### Changed
-
-- **マルチエージェント併用の設計** — 3代表ファイルを全確認し、1つ検出ならそのagent、2つ以上検出なら `--agent all` を推奨。`--safe-only` 下では未使用agentのpointerはREVIEW可視化のみで書込されないため、併用プロジェクトでも安全に全agentのhookを計画へ出せる / Enumerates all representative agent files and recommends `--agent all` for multi-agent projects while keeping unused-agent pointers review-only under `--safe-only`
-
-### Compatibility
-
-- 単一agent採用先の挙動は不変。Safe Upgrade Wizard本体ロジックとflagsは変更せず、prompt文言のみを修正 / Single-agent behavior is unchanged; the wizard implementation and flags remain unchanged
+- Release finalization changes only release metadata and the installer default distribution ref; adopter compatibility remains preserved through the `AGENTS.md` adapter and legacy pinned-tag fallback.
 
 ---
 
@@ -978,7 +956,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
-[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.2...HEAD
+[1.12.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.2...v1.12.0
 [1.11.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.10.0...v1.11.0

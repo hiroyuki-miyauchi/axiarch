@@ -179,6 +179,6 @@ Strategies for generating next-generation "value".
 
 ---
 
-**Last Updated**: 2026-06-07
-**Version**: v1.12.0-dev — AXIARCH.md canonical entrypoint and Execution Harness support (v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation)
+**Last Updated**: 2026-06-08
+**Version**: v1.12.0 — AXIARCH.md canonical entrypoint and Execution Harness support (v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation)
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

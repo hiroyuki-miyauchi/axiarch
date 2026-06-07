@@ -180,6 +180,6 @@ SRE、インシデント管理、運用要件。
 
 ---
 
-**Last Updated**: 2026-06-07
-**Version**: v1.12.0-dev — AXIARCH.md正本入口とExecution Harness対応（v1.11.2: Safe Upgrade実行プロンプトのmulti-agent検出修正、v1.11.0: Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録、共有Blueprint/Project State境界整理、現在タスク文書ローテーション導入）
+**Last Updated**: 2026-06-08
+**Version**: v1.12.0 — AXIARCH.md正本入口とExecution Harness対応（v1.11.2: Safe Upgrade実行プロンプトのmulti-agent検出修正、v1.11.0: Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録、共有Blueprint/Project State境界整理、現在タスク文書ローテーション導入）
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

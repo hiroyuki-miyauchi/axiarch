@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.12.0-dev"
+AXIARCH_VERSION="1.12.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"

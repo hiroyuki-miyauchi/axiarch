@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.11.2 Multi-Agent Detection Fix for Safe Upgrade\
-> **次期作業 / Next**: v1.12.0 AXIARCH Canonical Entrypoint & Execution Harness（実装中 / in progress）\
+> **現在の安定版 / Current Stable**: v1.12.0 AXIARCH Canonical Entrypoint & Execution Harness\
+> **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -22,15 +22,6 @@
 - **Claude Code**: hook 補強モデルとTask tools連携を実運用で稼働確認済みとして扱う
 - **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
-
----
-
-### 🚧 v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness（実装中）
-
-- **`AXIARCH.md` 正本化** — `AGENTS.md` をCodex専用でも単独正本でもなく、AGENTS標準を読む環境向けの薄いアダプターとして整理。Claude Code、Antigravity、Cursor、Copilot、Windsurfの各入口も `AXIARCH.md` だけを指す。
-- **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
-- **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
-- **保留候補** — Static Lint & Process Supervision は本正本化の後続候補として継続検討する。
 
 ---
 
@@ -431,12 +422,6 @@ loophole のリスクを下げるための hot-fix。
 
 ---
 
-### ✅ v1.8.2 — Native Codex Environment Integration（2026-05-12）
-
-- **`init.sh`**: `.codex/hooks.json` の自動初期化・検証・クリーンアップ機構を追加
-- **Diagnostic / Script Support**: `check-axiarch-health.sh`, `check-git-config-clean.sh`, `axiarch-protect-antifull.sh` 等のインフラ全体で `.codex/hooks.json` と関連ホワイトリストを第一級サポート
-- **Documentation**: `LOADING_PROTOCOL.md` 等の憲法レベルのフック配線規定に Codex を明記
-
 ### ✅ v1.8.1 — Check 4 Codex 互換性 + Check 13 quiet mode バグ修正 + ドキュメント訂正（2026-05-11）
 
 41〜42 ラウンド調査で発見した 2 件のバグ修正 + 3 件のドキュメント訂正 patch。
@@ -462,6 +447,14 @@ loophole のリスクを下げるための hot-fix。
   に再配分し、Static Lint は v1.11.0 へ移動
 - **後方互換性を維持** — pure bug fix のみ、機能変更ゼロ。Codex
   以外の環境では挙動変化なし
+
+---
+
+### ✅ v1.8.2 — Native Codex Environment Integration（2026-05-12）
+
+- **`init.sh`**: `.codex/hooks.json` の自動初期化・検証・クリーンアップ機構を追加
+- **Diagnostic / Script Support**: `check-axiarch-health.sh`, `check-git-config-clean.sh`, `axiarch-protect-antifull.sh` 等のインフラ全体で `.codex/hooks.json` と関連ホワイトリストを第一級サポート
+- **Documentation**: `LOADING_PROTOCOL.md` 等の憲法レベルのフック配線規定に Codex を明記
 
 ---
 
@@ -553,6 +546,15 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
+### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness（2026-06-08）
+
+- **`AXIARCH.md` 正本化** — `AGENTS.md` をCodex専用でも単独正本でもなく、AGENTS標準を読む環境向けの薄いアダプターとして整理。Claude Code、Antigravity、Cursor、Copilot、Windsurfの各入口も `AXIARCH.md` だけを指す。
+- **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
+- **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
+- **後続候補** — Static Lint & Process Supervision は本正本化後の候補として継続検討する。
+
+---
+
 ### 🔮 v1.13.0以降 — Static Lint & Process Supervision（Tier 3、検討中）
 
 学術裏付けが強く工数も大きい改善案を、AXIARCH正本入口とExecution Harnessの後続候補として独立計画。
@@ -628,15 +630,6 @@ enterprise adoption needs.
 - **Claude Code**: The hook-reinforcement model and Task tools integration are validated through real operational usage
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
-
----
-
-### 🚧 v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness (in progress)
-
-- **`AXIARCH.md` canonicalization** — Treat `AGENTS.md` as neither Codex-only nor the standalone source of truth. It is a thin adapter for environments that read the AGENTS standard. Claude Code, Antigravity, Cursor, Copilot, and Windsurf entrypoints also point only to `AXIARCH.md`.
-- **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
-- **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
-- **Deferred candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
 
 ---
 
@@ -1054,12 +1047,6 @@ self-judgment clause.
 
 ---
 
-### ✅ v1.8.2 — Native Codex Environment Integration (2026-05-12)
-
-- **`init.sh`**: Added automatic initialization, validation, and cleanup mechanism for `.codex/hooks.json`
-- **Diagnostic / Script Support**: First-class support for `.codex/hooks.json` and related allow-lists across the entire infrastructure, including `check-axiarch-health.sh`, `check-git-config-clean.sh`, and `axiarch-protect-antifull.sh`
-- **Documentation**: Explicitly documented Codex hook mechanisms in constitutional rules like `LOADING_PROTOCOL.md`
-
 ### ✅ v1.8.1 — Check 4 Codex Compatibility + Check 13 Quiet-Mode Fix + Docs Corrections (2026-05-11)
 
 Patch release with 2 bug fixes + 3 documentation corrections discovered in the
@@ -1086,6 +1073,14 @@ Patch release with 2 bug fixes + 3 documentation corrections discovered in the
   needs were prioritised
 - **Backwards compatibility maintained** — Pure bug fixes only, zero functional changes.
   No impact on non-Codex environments
+
+---
+
+### ✅ v1.8.2 — Native Codex Environment Integration (2026-05-12)
+
+- **`init.sh`**: Added automatic initialization, validation, and cleanup mechanism for `.codex/hooks.json`
+- **Diagnostic / Script Support**: First-class support for `.codex/hooks.json` and related allow-lists across the entire infrastructure, including `check-axiarch-health.sh`, `check-git-config-clean.sh`, and `axiarch-protect-antifull.sh`
+- **Documentation**: Explicitly documented Codex hook mechanisms in constitutional rules like `LOADING_PROTOCOL.md`
 
 ---
 
@@ -1205,6 +1200,15 @@ stale in multi-agent projects.
   never written even in `add` status (verified via `path_status` + `execute_item`)
 - **Backward compatibility** — single-agent adopters unaffected; Wizard logic unchanged, prompt-text-only
 - **Source pattern** — Antigravity detection gap reported in adopter project inucomi (codex+claude+antigravity)
+
+---
+
+### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness (2026-06-08)
+
+- **`AXIARCH.md` canonicalization** — Treat `AGENTS.md` as neither Codex-only nor the standalone source of truth. It is a thin adapter for environments that read the AGENTS standard. Claude Code, Antigravity, Cursor, Copilot, and Windsurf entrypoints also point only to `AXIARCH.md`.
+- **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
+- **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
+- **Follow-up candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
 
 ---
 
