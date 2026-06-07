@@ -1,6 +1,6 @@
 {
   "manifestVersion": 1,
-  "axiarchVersion": "1.12.0-dev",
+  "axiarchVersion": "1.12.0",
   "description": "Axiarch upgrade ownership manifest. Axiarch Core can be updated; Project State must be preserved unless the operator explicitly reviews and accepts a change.",
   "groups": [
     {

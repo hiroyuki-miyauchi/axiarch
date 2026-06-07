@@ -42,20 +42,20 @@ The file list, excludes, and group defaults are read from `axiarch-manifest.json
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.11.2 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --interactive
 ```
 
 ### 主な選択肢 / Main Choices
