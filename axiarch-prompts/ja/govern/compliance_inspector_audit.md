@@ -4,7 +4,7 @@
 >
 > **対象**: プロジェクト全体または指定Focus Area（全ファイル・全機能が対象。セキュア環境移行・アーキテクチャ・型安全・収益化戦略・パフォーマンスの考慮漏れを含む）
 >
-> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、重点監査領域（Focus Area）と監査対象のコードまたはファイルパスを指示する。
+> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIはPhase 0実行を前提とした入力待ち状態に入るので、重点監査領域（Focus Area）と監査対象のコードまたはファイルパスを指示する。
 
 ---
 
@@ -38,8 +38,8 @@
 # Phase 0: Rule Hierarchy (憲法階層のロードと自律展開)
 **いかなる監査や修正よりも先に、以下の順序で「裁きの基準となる法」を確立せよ。**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* ルートディレクトリに `AGENTS.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。（最上位プロトコル）**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* ルートディレクトリに `AXIARCH.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。（最上位プロトコル）**
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
@@ -55,7 +55,7 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AXIARCH.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応に従って整理される。初期フォルダは固定上限ではなく、ユーザー承認済みの拡張フォルダも同プロトコルに従って扱う。
 * **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
@@ -63,7 +63,7 @@
 指定された対応範囲（Focus Area）に対して、読み込んだルール（憲法）からの逸脱や考慮漏れがないか、以下の**8つの重大な憲法違反（The 8 Major Constitutional Violations）**を徹底的に調査してください。**実務で検証可能な高い市場基準から乖離していないか深く照らし合わせ**、残存リスクや検証ギャップを明示してください。
 
 ## 1. Baseline Directive Violation (最上位プロトコルおよび重要原則の違反)
-* **Target**: `AGENTS.md` および普遍的なルールへの抵触。
+* **Target**: `AXIARCH.md` および普遍的なルールへの抵触。
 * **Audit**:
     * プロジェクトの根本的な指示や、必ず守るべき普遍的なコーディング規約・禁止事項が破られていないか？
 
@@ -158,7 +158,7 @@
 
 ```text
 【入力待機: Lead Compliance Inspector & Lead Architect】
-指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md および axiarch-rules/ をロードします。ロード前の推測・仮説の出力は行いません。
+指示を受け取り次第、最初に Phase 0 の手順に従い AXIARCH.md、axiarch-rules/、および必要な axiarch-harness/ ファイルをロードします。ロード前の推測・仮説の出力は行いません。
 
 現在、以下の入力を待機しています：
 1. **今回の重点監査領域 (Focus Area)**: （例：特定のルールの遵守状況確認、セキュア環境移行箇所の特定、全ファイルの考慮漏れスキャン、など。指定がなければ全領域対象）

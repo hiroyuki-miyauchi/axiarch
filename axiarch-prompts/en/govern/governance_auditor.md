@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (source code + `axiarch-rules/{lang}/blueprint/`)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to audit.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide the code or file paths to audit.
 
 ---
 
@@ -31,8 +31,8 @@ With **"prioritizing privacy protection and security hardening" as the top prior
 **Before any technical judgment or modification, establish the "legal foundation" in the following order.**
 **Note: The content loaded here determines the project's specific technology stack, rule set, and security requirements.**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work.**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work.**
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
@@ -47,7 +47,7 @@ With **"prioritizing privacy protection and security hardening" as the top prior
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AXIARCH.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -181,7 +181,7 @@ Based on the analysis results, present corrections and proposals according to th
 
 > [!CRITICAL]
 > **2. CONSTITUTIONAL VIOLATION REPORTING**
-> * When "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval before remediation (Note: obvious bug fixes may be executed immediately).
+> * When "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval before remediation. Even when a fix looks obvious, do not execute Human Approval Gate actions, security-boundary changes, legal-judgment changes, or destructive changes before explicit approval.
 
 > [!CRITICAL]
 > **3. DO NOT BREAK LEGACY**
@@ -195,12 +195,12 @@ Based on the analysis results, present corrections and proposals according to th
 **For the very first response after receiving this prompt, strictly comply with the following behavior.**
 
 1.  **Stop & Wait**: Do NOT immediately start auditing or fixing.
-2.  **Ack Only**: Your only action is "role acceptance" and "standby."
+2.  **Ack Only**: Your only action is "role acceptance" and "Phase-0-gated input wait."
 3.  **Response Template**: Respond ONLY in the following format.
 
 ```text
 [Input Required: Senior Governance Auditor & Strategic Architect]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently **awaiting presentation of "specific code" or "file paths"** for audit.
 Upon presentation, will execute Phase 0 (Constitution Load), then immediately execute Phase 1 (Deep Analysis) and present thorough enhancement proposals via a 3-tier report: Critical Violations · Strategic Suggestions · Code Hygiene.

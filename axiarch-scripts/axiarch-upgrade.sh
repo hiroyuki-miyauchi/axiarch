@@ -74,8 +74,8 @@ Usage:
 Options:
   --target DIR        Adopter project directory. Default: current directory.
   --source DIR        Local Axiarch source directory to upgrade from.
-  --to VERSION        Target Axiarch version label, e.g. v1.11.0.
-  --ref REF           GitHub archive ref, e.g. tags/v1.11.0 or heads/main.
+  --to VERSION        Target Axiarch version label, e.g. v1.12.0-dev or v1.11.2.
+  --ref REF           GitHub archive ref, e.g. heads/main or tags/v1.11.2.
   --from VERSION      Optional base version for replace-if checks and 3-way merge.
   --from-ref REF      Optional base archive ref for replace-if checks and 3-way merge.
   --base-source DIR   Optional local base Axiarch source for replace-if checks and 3-way merge.
@@ -90,8 +90,8 @@ Options:
   --help              Show this help.
 
 Examples:
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.0 --dry-run
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.0 --agent codex --safe-only --apply
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0-dev --dry-run
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --agent codex --safe-only --apply
   bash axiarch-scripts/axiarch-upgrade.sh --source /path/to/axiarch --interactive
 USAGE
 }
@@ -492,8 +492,11 @@ register_manifest_items() {
 }
 
 register_manifest_defaults() {
-  add_item "core_protocol" "AGENTS.md" "mixed" "review" "all"
+  add_item "core_protocol" "AXIARCH.md" "mixed" "review" "all"
+  add_item "pointer_files" "AGENTS.md" "mixed" "review" "codex,agents-md,universal"
   add_item "core_protocol" "axiarch-manifest.json" "axiarch" "replace" "all"
+  add_item "execution_harness" "axiarch-harness/README.md" "axiarch" "replace" "all"
+  add_localized_item "execution_harness" "axiarch-harness/{lang}" "axiarch" "replace"
   add_localized_item "core_protocol" "axiarch-rules/{lang}/LOADING_PROTOCOL.md" "axiarch" "replace"
   add_localized_item "core_protocol" "axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md" "axiarch" "replace"
   add_localized_item "core_protocol" "axiarch-rules/{lang}/INDEX.md" "axiarch" "replace"
@@ -504,7 +507,7 @@ register_manifest_defaults() {
   add_item "scripts" "axiarch-scripts" "axiarch" "replace" "all"
 
   add_item "agent_hooks" ".codex/hooks.json" "mixed" "review" "codex"
-  add_item "agent_hooks" "CLAUDE.md" "mixed" "review" "claude"
+  add_item "pointer_files" "CLAUDE.md" "mixed" "review" "claude"
   add_item "agent_hooks" ".claude/settings.json" "mixed" "review" "claude"
   add_item "agent_hooks" ".claude/memory/MEMORY.md" "project" "optional" "claude"
   add_item "pointer_files" ".agents/rules/prompt_pointer.md" "axiarch" "review" "antigravity"
@@ -587,6 +590,7 @@ EOF
 default_group_ids() {
   printf '%s\n' \
     "core_protocol" \
+    "execution_harness" \
     "universal_rules" \
     "scripts" \
     "agent_hooks" \
@@ -719,9 +723,10 @@ group_label() {
   manifest_group_label "$1" && return 0
   case "$1" in
     core_protocol) printf '%s' "Core Protocol（中核プロトコル）" ;;
+    execution_harness) printf '%s' "Execution Harness（実行ハーネス）" ;;
     universal_rules) printf '%s' "Universal Rules（普遍憲法）" ;;
     scripts) printf '%s' "Scripts（診断・フックスクリプト）" ;;
-    agent_hooks) printf '%s' "Agent Hooks（エージェントフック）" ;;
+    agent_hooks) printf '%s' "Agent Hooks & Native Config（エージェントフック・ネイティブ設定）" ;;
     blueprint_templates) printf '%s' "Blueprint Templates & Shared Rules（Blueprintテンプレート・共有ルール）" ;;
     blueprint_index) printf '%s' "Blueprint Index（Blueprint索引）" ;;
     blueprint_project_state) printf '%s' "Blueprint Project State（プロジェクト固有Blueprint）" ;;
@@ -735,7 +740,7 @@ group_label() {
 group_default_action() {
   manifest_group_default_action "$1" && return 0
   case "$1" in
-    universal_rules|scripts) printf '%s' "update-all" ;;
+    universal_rules|execution_harness|scripts) printf '%s' "update-all" ;;
     blueprint_project_state) printf '%s' "preserve" ;;
     prompts|source_docs) printf '%s' "skip" ;;
     *) printf '%s' "review-each" ;;
@@ -745,7 +750,7 @@ group_default_action() {
 group_risk() {
   manifest_group_risk "$1" && return 0
   case "$1" in
-    universal_rules|scripts|prompts) printf '%s' "low" ;;
+    universal_rules|execution_harness|scripts|prompts) printf '%s' "low" ;;
     blueprint_project_state|source_docs) printf '%s' "high" ;;
     *) printf '%s' "medium" ;;
   esac
@@ -1347,7 +1352,7 @@ EOF
 
   sha_path="${meta_dir}/files.sha256"
   : > "${sha_path}"
-  for rel in AGENTS.md axiarch-manifest.json axiarch-scripts axiarch-rules axiarch-prompts; do
+  for rel in AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-harness axiarch-scripts axiarch-rules axiarch-prompts; do
     target="${PROJECT_DIR}/${rel}"
     [[ -e "${target}" ]] || continue
     if [[ -d "${target}" ]]; then

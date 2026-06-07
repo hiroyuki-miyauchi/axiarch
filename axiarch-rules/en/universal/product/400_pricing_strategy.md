@@ -769,6 +769,42 @@ Step 5: Customer ROI Calculator Implementation
 
 ---
 
+### 3.11. AI-Native Competitive Intelligence Protocol
+
+- **Rule 13.039f**: Bottom-Up Cost Intelligence — reverse-engineering competitor AI function costs
+
+```
+Competitor AI Price Intelligence Collection Framework:
+
+Step 1: Cost Estimation from Public Information
+  - Collect competitor public API docs and Pricing Pages
+  - Estimate COGS from published API rates (OpenAI / Anthropic / Gemini, etc.)
+  - Formula: Competitor COGS ≈ (API unit price × estimated consumption) / (1 - estimated gross margin)
+
+Step 2: Competitor Pricing Model Classification
+  - Identify billing units (Seat / Usage / Outcome)
+  - Detailed mapping of bundle structure and tier pricing
+  - Comparison of free-tier design (Freemium Limit, Trial period)
+
+Step 3: Gap Analysis and Self-Positioning
+  - Feature-per-Dollar comparison: own vs. competitor feature/price ratio
+  - AI Capability-per-Dollar: AI feature quality × cost efficiency
+  - Position classification: Premium / Parity / Value
+
+Step 4: Update & Monitoring System
+  - Auto-detect: competitor pricing page change detection (HTML diffing)
+  - Alert: analysis report within 72 hours of change detection
+  - Monthly: submit competitive price summary to Pricing Committee
+```
+
+- **Rule 13.039g**: Ethical Guidelines for Competitive Intelligence Collection
+  - Scraping that violates competitor ToS is **absolutely prohibited**
+  - Collection from public pricing pages, press releases, and SEC Filings is permitted
+  - Unauthorized acquisition of internal pricing via stealth accounts is prohibited (→ §15.3 Anti-Cartel)
+  - Legal approval required before disclosing competitor pricing to third parties
+
+---
+
 ### 3.12. Customer Health-Indexed Price Sensitivity Protocol
 
 - **Rule 13.039h**: Dynamically classify customer price sensitivity based on real-time Customer Health Score (CHS) to apply optimal pricing interventions
@@ -808,42 +844,6 @@ Segmentation by CHS:
   - Cross-reference CHS at join-time with 12-month LTV to identify "High-CHS cohorts" that are also high-LTV
   - These segments are candidates for **price increase testing** (§7 Experimentation) with minimal churn risk
   - Report CHS-LTV correlation matrix to Pricing Committee **quarterly** as input for tier redesign
-
----
-
-### 3.11. AI-Native Competitive Intelligence Protocol
-
-- **Rule 13.039f**: Bottom-Up Cost Intelligence — reverse-engineering competitor AI function costs
-
-```
-Competitor AI Price Intelligence Collection Framework:
-
-Step 1: Cost Estimation from Public Information
-  - Collect competitor public API docs and Pricing Pages
-  - Estimate COGS from published API rates (OpenAI / Anthropic / Gemini, etc.)
-  - Formula: Competitor COGS ≈ (API unit price × estimated consumption) / (1 - estimated gross margin)
-
-Step 2: Competitor Pricing Model Classification
-  - Identify billing units (Seat / Usage / Outcome)
-  - Detailed mapping of bundle structure and tier pricing
-  - Comparison of free-tier design (Freemium Limit, Trial period)
-
-Step 3: Gap Analysis and Self-Positioning
-  - Feature-per-Dollar comparison: own vs. competitor feature/price ratio
-  - AI Capability-per-Dollar: AI feature quality × cost efficiency
-  - Position classification: Premium / Parity / Value
-
-Step 4: Update & Monitoring System
-  - Auto-detect: competitor pricing page change detection (HTML diffing)
-  - Alert: analysis report within 72 hours of change detection
-  - Monthly: submit competitive price summary to Pricing Committee
-```
-
-- **Rule 13.039g**: Ethical Guidelines for Competitive Intelligence Collection
-  - Scraping that violates competitor ToS is **absolutely prohibited**
-  - Collection from public pricing pages, press releases, and SEC Filings is permitted
-  - Unauthorized acquisition of internal pricing via stealth accounts is prohibited (→ §15.3 Anti-Cartel)
-  - Legal approval required before disclosing competitor pricing to third parties
 
 ---
 

@@ -7,12 +7,26 @@
 * @hiroyuki-miyauchi
 
 # =============================================================================
-# AGENTS.md — 最上位プロトコル / Top-Level Protocol
+# AXIARCH.md — 正本入口 / Canonical Entrypoint
 # =============================================================================
 # 「憲法改正」として特に厳格なレビューが必要。
 # Requires "Constitutional Amendment" review — highest scrutiny.
 
+AXIARCH.md @hiroyuki-miyauchi
 AGENTS.md @hiroyuki-miyauchi
+CLAUDE.md @hiroyuki-miyauchi
+.agents/rules/prompt_pointer.md @hiroyuki-miyauchi
+.cursor/rules/axiarch.mdc @hiroyuki-miyauchi
+.github/copilot-instructions.md @hiroyuki-miyauchi
+.windsurfrules @hiroyuki-miyauchi
+
+# =============================================================================
+# Execution Harness — 実行ハーネス / Execution Harness
+# =============================================================================
+# 実行、監査、証跡、人間承認、委任境界に影響するため厳格なレビューが必要。
+# Requires strict review because it affects execution, audit, evidence, approval, and delegation boundaries.
+
+axiarch-harness/ @hiroyuki-miyauchi
 
 # =============================================================================
 # Universal Rules — 不変の憲法 / Immutable Constitution

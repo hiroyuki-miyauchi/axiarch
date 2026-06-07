@@ -1878,67 +1878,99 @@
 
     *   **Annual Audit**: Conduct annual UX Ethics Audit to check for unintentional dark pattern creep.
 
+### 29.5. Inclusive Marketing Standard
+
+*   **The Inclusive Marketing Protocol**:
+    *   **Law**: Marketing content must comply with the following inclusivity standards.
+        1.  **Accessibility**: Advertising creative must comply with WCAG 2.2 AA, including text contrast, alt attributes, and captions
+        2.  **Representation**: Creative must reflect people from diverse backgrounds
+        3.  **Language**: Gender-neutral language is recommended. Remove stereotypes
+        4.  **Cultural Sensitivity**: Ensure consistency with §24.3 Cultural Adaptation Protocol
+
 ---
 
 ## 30. Growth Team Operating Model
 
-> **Primary Directive**: The speed and quality of a growth team determine a product's growth trajectory. Maximizing experimentation velocity while maintaining quality is the structural challenge.
+> **Primary Directive**: Growth is not a collection of tactics; it is an organizational capability. Maximize experimentation speed, learning speed, and execution quality as an operating model.
 
-### 30.1. Growth Squad Structure
+### 30.1. Growth Sprint Methodology
 
-*   **The Growth Squad Standard**:
-    *   **Law**: Growth teams must be structured as follows.
+*   **The Growth Sprint Protocol**:
+    *   **Law**: Growth initiatives must run on the following 2-week sprint cycle.
 
-        | Role | Responsibility | Staffing |
-        |:-----|:-------------|:--------|
-        | **Growth Lead** | Overall strategy, OKR setting, cross-functional coordination | 1 person per squad |
-        | **Growth Engineer** | Experiment implementation, Feature Flag management, data pipeline | 1-2 people |
-        | **Growth Designer** | A/B test UI design, LP optimization | 1 person |
-        | **Growth Analyst** | Experiment analysis, KPI monitoring, insight discovery | 1 person |
-        | **Growth Marketer** | Channel strategy, content, campaign execution | 1-2 people |
+        | Phase | Duration | Activity |
+        |:------|:---------|:---------|
+        | **Ideation** | Day 1-2 | Generate hypotheses, score with ICE/RICE |
+        | **Prioritization** | Day 3 | Select top 3 hypotheses and define experiment plans |
+        | **Execution** | Day 4-10 | Implement, deploy, and collect data |
+        | **Analysis** | Day 11-12 | Analyze results and statistical significance |
+        | **Decision** | Day 13-14 | Ship/Kill/Iterate decision and next sprint planning |
 
-    *   **Minimum Viable Squad**: Growth Lead + Growth Engineer + Growth Analyst (minimum 3 people). Below this, allocate as part-time roles of existing team members.
+    *   **ICE Scoring**: `ICE Score = Impact (1-10) × Confidence (1-10) × Ease (1-10)`
+    *   **Backlog**: Maintain at least 30 experiment backlog items so sprint planning never starts from an empty queue.
 
-### 30.2. Growth Sprint Methodology
-
-*   **The Growth Sprint Standard**:
-    *   **Law**: Growth activities must run on the following 2-week sprint cycle.
-
-        | Day | Activity | Output |
-        |:----|:--------|:-------|
-        | **Mon W1** | Sprint Planning. Hypothesis prioritization (ICE Score) | Sprint Backlog |
-        | **Tue-Fri W1** | Experiment implementation & launch | Deployed experiments |
-        | **Mon W2** | Mid-sprint check. Early data review | Pivot/Continue decision |
-        | **Tue-Thu W2** | Data collection continuation + next sprint hypothesis development | Hypothesis pool |
-        | **Fri W2** | Sprint Review. Result analysis + learning sharing | Sprint Report |
-
-    *   **ICE Scoring**: `ICE = Impact (1-10) × Confidence (1-10) × Ease (1-10)`. Execute experiments in priority order.
-    *   **Experiment Velocity Target**: Minimum **4 experiments per squad per sprint** (8 experiments/month).
-
-### 30.3. Growth OKR Framework
+### 30.2. OKR Framework for Growth
 
 *   **The Growth OKR Standard**:
-    *   **Law**: Growth team OKRs must follow this structure.
+    *   **Law**: Growth team OKRs must use the following cascade structure.
 
         ```
-        Objective: [Qualitative growth goal]
-        KR1: [Quantitative acquisition metric] (e.g., Registration CVR: 5% → 8%)
-        KR2: [Quantitative retention metric] (e.g., D30 Retention: 25% → 35%)
-        KR3: [Quantitative efficiency metric] (e.g., CAC: ¥5,000 → ¥3,500)
-        KR4: [Quantitative experimentation metric] (e.g., Monthly experiments: 6 → 12)
+        OKR Cascade:
+        L1: Company North Star Metric
+        └── L2: Growth Team OKR (quarterly)
+            ├── L3: Acquisition OKR
+            ├── L3: Activation OKR
+            ├── L3: Retention OKR
+            └── L3: Revenue OKR
         ```
 
-    *   **Review Cadence**: OKR progress check weekly, formal review quarterly.
-    *   **Stretch Target**: Set KRs at 70% achievability level. 100% achievement of all KRs indicates insufficient ambition.
+    *   **Review Cadence**: Review OKRs quarterly. Key Result achievement of 60-70% is a healthy ambition indicator.
+    *   **OKR vs KPI**: OKRs are ambitious goals; KPIs are day-to-day health indicators. Do not confuse them.
 
-### 30.4. Knowledge Management Protocol
+### 30.3. Experimentation Velocity Metrics
 
-*   **The Growth Knowledge Base Standard**:
-    *   **Law**: Growth team learnings must be accumulated and shared in the following format.
-        1.  **Experiment Log**: Record all experiment hypotheses, results, and learnings (regardless of success/failure). Mandatory fields: hypothesis, metric, result, statistical significance, learning
-        2.  **Playbook Library**: Successful patterns are documented as playbooks. Regularly updated and version-managed
-        3.  **Failure Archive**: Failed experiments are logged with reasons. Preventing recurrence of the same failures is mandatory
-        4.  **Cross-Team Sharing**: Monthly Growth Review meetings to share learnings across the organization
+*   **The Experimentation Velocity Standard**:
+
+    | Metric | Definition | Target |
+    |:-------|:-----------|:-------|
+    | **Experiments / Month** | Number of experiments run per month | > 8 for growth-stage teams |
+    | **Hypothesis-to-Result Cycle** | Time from hypothesis to result | < 14 days |
+    | **Win Rate** | Share of experiments with statistically significant improvement | > 20% |
+    | **Learning Velocity** | Documented learnings per experiment | ≥ 2 learnings / experiment |
+
+### 30.4. Cross-Functional Team Structure
+
+*   **The Growth Squad Protocol**:
+    *   **Composition**: Growth squads should generally use the following structure.
+
+        | Role | Staffing | Responsibility |
+        |:-----|:---------|:---------------|
+        | **Growth PM** | 1 | Experiment prioritization and roadmap management |
+        | **Growth Engineer** | 1-2 | Experiment implementation and Feature Flag management |
+        | **Data Analyst** | 1 | A/B result analysis and insight discovery |
+        | **Designer** | 0.5-1 | Experiment UI/UX design |
+        | **Marketer** | 1 | Channel strategy, content, and advertising |
+
+    *   **RACI Matrix**: Each initiative must have one clearly defined Owner (Accountable). Initiatives without an owner are prohibited.
+
+### 30.5. Knowledge Management & Learning Loop
+
+*   **The Growth Knowledge Protocol**:
+    *   **Experiment Repository**: Record and store all experiment results, both successful and failed, in the following format.
+
+        ```
+        Experiment Log Format:
+        - ID: EXP-{YYYY}-{NNN}
+        - Hypothesis: [hypothesis]
+        - Metric: [primary KPI]
+        - Result: [Win / Lose / Inconclusive]
+        - Statistical Significance: [p-value]
+        - Key Learnings: [learnings]
+        - Next Action: [Ship / Kill / Iterate]
+        ```
+
+    *   **Failure Learning Protocol**: Failed experiments must analyze why the hypothesis did not hold and record learnings in the repository. Experiments without learning from failure are treated as wasted cost.
+    *   **Growth Playbook**: Codify successful patterns as playbooks and update them quarterly.
 
 ---
 

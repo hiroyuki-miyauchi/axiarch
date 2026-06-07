@@ -4,7 +4,7 @@
 >
 > **対象**: プロジェクト全体（バックエンド・DB・API・フロントエンド・認証・権限）
 >
-> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、監査対象のコードまたはファイルパスを指示する。
+> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIはPhase 0実行を前提とした入力待ち状態に入るので、監査対象のコードまたはファイルパスを指示する。
 
 ---
 
@@ -36,8 +36,8 @@
 **いかなる監査や修正よりも先に、以下の順序で「法の基盤」を確立せよ。**
 **※ここでのロード内容が、プロジェクト固有の技術選定（Next.js, Supabase, etc.）を決定する。**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* ルートディレクトリに `AGENTS.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* ルートディレクトリに `AXIARCH.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。**
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
@@ -52,7 +52,7 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AXIARCH.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応に従って整理される。初期フォルダは固定上限ではなく、ユーザー承認済みの拡張フォルダも同プロトコルに従って扱う。
 * **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 
@@ -142,7 +142,7 @@
 
 ```text
 【入力待機: Lead System Architect & Data Integrity Guardian】
-指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md および axiarch-rules/ をロードします。ロード前の推測・仮説の出力は行いません。
+指示を受け取り次第、最初に Phase 0 の手順に従い AXIARCH.md、axiarch-rules/、および必要な axiarch-harness/ ファイルをロードします。ロード前の推測・仮説の出力は行いません。
 
 現在、**監査対象となる「具体的なコード」または「ファイルパス」の提示**、もしくは**「全ファイルスキャン開始」の指示**を待機しています。
 指示があり次第、Phase 1 (Deep Integrity Scan) を執行し、システムの健全化と全体最適化を実行します。

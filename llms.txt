@@ -22,26 +22,33 @@ Axiarch mitigates these risks by defining a quality floor and autonomous context
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AGENTS.md` — Top-level protocol (AI Behavior Protocols). Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Validation describes the configurations and scope Axiarch has exercised, not an operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
+  - `AXIARCH.md` — Canonical Axiarch protocol. `AGENTS.md` and tool-native files are thin adapters that point to it. Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Validation describes the configurations and scope Axiarch has exercised, not an operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
   - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
   - `axiarch-prompts/` — Optional reusable audit/QA/upgrade execution prompt templates that make Layer 1/2 rules easier to apply to specific tasks.
+- **Execution Harness**
+  - `axiarch-harness/{lang}/` — Execution, audit, role pass, evidence, human approval, and optional subagent delegation protocols.
 
 ## Key Protocols
 
 - **axiarch-rules/{lang}/LOADING_PROTOCOL.md**: 5-step rule hierarchy loading sequence
 - **axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md**: Automatic lesson-to-rule conversion
 - **Boot Sequence Protocol**: Mitigates hallucination risk by enforcing rules-first behavior
+- **AI Self-Completion**: Agents inspect files, logs, diffs, command results, and verification outputs themselves when tool access exists
+- **Project Native Language**: `AXIARCH.md` controls owner-facing language for plans, evidence, specs, audits, walkthroughs, and approval requests unless the latest explicit user instruction overrides it
 - **Blueprint First**: Specs required before code for major changes
-- **Deployment Ban Protocol**: No `git push` without explicit user approval
+- **Database Integrity**: Routine DB schema or data changes are version-controlled as migrations or approved runbooks and applied through the agreed pipeline; manual console changes require explicit emergency approval and reconciliation
+- **SSOT and Branch Discipline**: Inspect branch and working tree before work; after merge, handoff, or branch exit, sync with the agreed mainline when workflow and permissions allow it, or record why not
+- **Human Approval Gate**: No `git add` / stage, `git commit`, `git push`, deploy, release, tag, DB apply, destructive operation, sensitive boundary change, or irreversible action without explicit action-specific human approval
+- **Existing Behavior Protection**: Preserve working behavior and unrelated user changes; prefer narrow diff-based edits over broad rewrites
 - **Current Task State**: `task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence. `axiarch-task-state.sh` archives changed previous copies before refresh and regenerates templates in the Project Native Language.
 - **Native Task State Sync**: Codex uses `update_plan`; Claude Code uses `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`, with `TodoWrite` only as an older-runtime fallback.
 
 ## Quick Start
 
-Note: the main-branch installer installs Axiarch v1.11.2 by default from `tags/v1.11.2`; for another pinned release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process.
+Note: the main-branch installer installs the current development build, Axiarch v1.12.0-dev, from `heads/main` by default. To pin a stable release, pass `AXIARCH_REF=tags/vX.Y.Z` to the right-hand `bash` process. Tags at v1.11.2 or earlier are treated as legacy installs because they do not contain `AXIARCH.md` or `axiarch-harness/`.
 
 ```bash
 # Option 1: Interactive setup script (recommended)
@@ -51,23 +58,25 @@ curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.11.2 bash
 
 # Option 2: Manual copy
+cp AXIARCH.md /path/to/your/project/
 cp AGENTS.md /path/to/your/project/
 cp -r axiarch-rules /path/to/your/project/
+cp -r axiarch-harness /path/to/your/project/
 
 # Optional: safe-upgrade metadata and scripts
 cp axiarch-manifest.json /path/to/your/project/
 cp -r axiarch-scripts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.11.2 --dry-run`. Older adopters that do not yet have the helper can bootstrap it temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.11.2 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies source release-file Git tracking for current core release files, including `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0-dev --dry-run` when following main, or `--to v1.11.2` when pinning the current stable release. Older adopters that do not yet have the helper can bootstrap a stable helper temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.11.2 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Compatibility
 
 | Agent | Status |
 |:------|:-------|
-| OpenAI Codex | ✅ Production-validated primary — native `AGENTS.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
-| Claude Code | ✅ Production-validated primary — native hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
-| Google Antigravity | ✅ Production-validated primary — validated through real operational usage |
+| OpenAI Codex | ✅ Production-validated primary — native `AGENTS.md` adapter pointing to `AXIARCH.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
+| Claude Code | ✅ Production-validated primary — native `CLAUDE.md` adapter pointing to `AXIARCH.md` + `.claude/settings.json` hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
+| Google Antigravity | ✅ Production-validated primary — native `.agents/rules/prompt_pointer.md` adapter pointing to `AXIARCH.md`; validated through real operational usage |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |
 | Windsurf / Aider / Zed | ⚠️ Extended or unverified candidates; not operation-guaranteed |

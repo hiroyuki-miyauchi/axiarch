@@ -532,10 +532,34 @@
 
 -   **Unsubscribe**: Always provide one-click unsubscribe for marketing notifications.
 
-### 14.3-14.5. Notification Standards
--   **In-App Types**: Toast (auto-dismiss), Bell (persistent with read management), Banner (fixed header, admin-controlled).
--   **Frequency Control**: Marketing notification cap **3/day**; Quiet Hours (21:00-8:00 marketing postponed to next morning; transactional exempt); One-Click Unsubscribe with legal compliance (CAN-SPAM, etc.); Preference Center with per-category ON/OFF control.
--   **Category Matrix**: Transaction (immediate email+push), Communication (immediate email+push), Marketing (batched push), System (immediate email), Reminder (scheduled push).
+### 14.3. The In-App Notification Classification Standard
+
+| Type | Use | Display Method |
+|:-----|:----|:---------------|
+| **Toast (temporary)** | Success and completion messages | Auto-dismiss after a few seconds |
+| **Bell (persistent)** | Unread notifications | Badge on the bell icon. Read state managed in DB |
+| **Banner (global)** | Maintenance notifications, etc. | Fixed at the top of the screen. Admin-controlled |
+
+-   **Locale Compliance**: All notification copy must read naturally in the target locale.
+
+### 14.4. The Notification Frequency Control Protocol
+
+-   **Daily Cap**: Marketing notifications capped at **3/day**.
+-   **Quiet Hours**: Marketing notifications during 21:00-8:00 are delayed until the next morning. Transactional notifications are exempt.
+-   **One-Click Unsubscribe**: Marketing notifications must include an unsubscribe link and support one-click opt-out in compliance with applicable laws such as CAN-SPAM.
+-   **Preference Center**: Provide ON/OFF controls per notification category: transactional, communication, marketing, and reminder.
+
+### 14.5. The Notification Category Matrix
+
+| Category | Examples | Channel | Immediacy |
+|:---------|:---------|:--------|:----------|
+| **Transactional** | Booking confirmation, payment completion | Email + Push | Immediate |
+| **Communication** | UGC replies, inquiry responses | Email + Push | Immediate |
+| **Marketing** | News, recommended content | Push | Batched daily |
+| **System** | Password changes, security notifications | Email | Immediate |
+| **Reminder** | Day-before booking reminders, action prompts | Push | Scheduled |
+
+-   **Mandate**: Notification copy and delivery timing for each category must be defined in the project-specific Blueprint.
 
 ---
 

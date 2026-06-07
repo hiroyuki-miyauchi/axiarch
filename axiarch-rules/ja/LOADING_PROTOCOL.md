@@ -1,6 +1,6 @@
 # LOADING_PROTOCOL.md — ルールロード手順書
 
-> **このファイルはルールロードの詳細手順を定義する。AGENTS.md §8 から参照される。**
+> **このファイルはルールロードの詳細手順を定義する。`AXIARCH.md` から参照される。**
 
 > Universal Rules はプロジェクトで使う可能性のある技術・運用領域を横断する基準ルール集です。AIは LOADING_PROTOCOL に従い、タスクに必要なファイルのみを選択的にロードします。使わない技術のルールは任意の参照対象であり、将来採用時や未知の技術に直面したときの品質底上げを支える補助資産として扱います。
 
@@ -24,8 +24,8 @@
 
 | フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、AGENTS.md §8 reminder を注入。既存内容は `axiarch-task-state.sh` により `.axiarch/process-doc-history/` へ退避 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
-| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で AGENTS.md / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、`AXIARCH.md` reminder を注入。既存内容は `axiarch-task-state.sh` により `.axiarch/process-doc-history/` へ退避 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
+| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で `AXIARCH.md` / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
 
@@ -49,11 +49,11 @@
 1. Codexでは複数ステップの作業を開始した時点で `update_plan` を呼び、作業中は `in_progress` を1件だけ維持する。
 2. Claude CodeではTask toolsが使える場合、`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を優先する。古いSDKや非interactive実行でTask toolsがない場合のみ `TodoWrite` にフォールバックする。
 3. Markdownファイルを書いたことをもって、ネイティブUIが更新されたと表現してはならない。ネイティブUI更新は該当ツール呼び出しが行われた場合のみ完了とみなす。
-4. `AXIARCH_PROCESS_DOC_MODE=append` が明示されていない限り、3ファイルは現在タスク用として扱い、過去内容の無制限追記を避ける。テンプレート言語は既定で `AGENTS.md` の `Project Native Language` から判定し、必要な場合だけ `AXIARCH_PROCESS_DOC_LANG=ja|en` で明示する。
+4. `AXIARCH_PROCESS_DOC_MODE=append` が明示されていない限り、3ファイルは現在タスク用として扱い、過去内容の無制限追記を避ける。テンプレート言語は既定で `AXIARCH.md` の `Project Native Language` から判定し、旧導入先では `AGENTS.md` をフォールバックとして参照する。必要な場合だけ `AXIARCH_PROCESS_DOC_LANG=ja|en` で明示する。
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界も確認する 15 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、Claude Memory正本境界も確認する 15 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
@@ -160,15 +160,15 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 | 状況 | Re-load 範囲 | 根拠 |
 |:--|:--|:--|
-| **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AGENTS §8 (4) 義務 |
+| **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AXIARCH.md / LOADING_PROTOCOL のロード履歴記録義務 |
 | **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | `axiarch-rules/{lang}/INDEX.md` → タスクタイプ → 対応フォルダ の関係は不変 |
 | **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias リスク低減 |
 | **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴と現在の会話コンテキストを照合し、実ロード済みと判断できないファイルは再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
 
 > **判定の運用原則**:
 > - **task.md のロード履歴はロード候補と証跡の Single Source of Truth として参照**する。ただし、履歴に file 名があるだけで現在のAIが内容を把握済みとは見なさない。現在コンテキスト上で実ロード済みと説明できない場合は再 load 必須。
-> - 「session 跨ぎ後の memory 継承による省略」は、同一作業継続でロード済み証跡と現在コンテキストの対応が明確な場合に限り許容する。**省略した事実と根拠を task.md に明示的に記録**する（例: 「Continued from prior session; AGENTS.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule」）。
-> - **疑わしい時は full re-load**。context budget の節約より、ハルシネーションリスク低減が優先（AGENTS.md §0 HIGHEST-PRIORITY RULE）。
+> - 「session 跨ぎ後の memory 継承による省略」は、同一作業継続でロード済み証跡と現在コンテキストの対応が明確な場合に限り許容する。**省略した事実と根拠を task.md に明示的に記録**する（例: 「Continued from prior session; AXIARCH.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule」）。
+> - **疑わしい時は full re-load**。context budget の節約より、ハルシネーションリスク低減が優先（AXIARCH.md / LOADING_PROTOCOL のBOOT SEQUENCE）。
 
 > **本基準が解決する問題（v1.6.0 改善背景）**:
 > 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により緩和する。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、token cost を約 87% 削減しつつ遵守率を維持しやすくする。
@@ -178,7 +178,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
 > 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
-> 3. **AGENTS §8.4 必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
+> 3. **AXIARCH現在タスク必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
 > 4. **差異検出時**: `🚨 [VIOLATION-D]` flag + **TTL bypass**（短縮版を抑制し full reminder を再発火）
 >
 > これにより AI の「タスクタイプ不変」自己判断だけに依存せず、**hook 側で task boundary 候補を検出**して rule 再 load を促す構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。

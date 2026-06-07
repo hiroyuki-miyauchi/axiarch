@@ -3,7 +3,7 @@
 > [!CAUTION]
 > **AI Agent Controls**
 >
-> *   **Layer 1: Universal Constitution**: The files listed in the `1. Layer 1: Universal Rules` section (under `universal/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution"). Replace `{lang}` with `ja` or `en` based on the `Project Native Language` setting in `AGENTS.md`.
+> *   **Layer 1: Universal Constitution**: The files listed in the `1. Layer 1: Universal Rules` section (under `universal/`) are **Read-only**. AI MUST NOT edit or modify these files under any circumstances without explicit user permission (instruction to "Amend Constitution"). Replace `{lang}` with `ja` or `en` based on the `Project Native Language` setting in `AXIARCH.md`. Legacy adopters may use `AGENTS.md` as a fallback.
 > *   **Layer 2: Blueprint Rules**: The files listed in the `2. Layer 2: Blueprint Rules` section (under `blueprint/`) are the area to be customized for each project. AI SHOULD proactively propose and update these files according to requirements and lessons.
 
 This matrix proves which rule files cover the user's comprehensive requests (prompts).

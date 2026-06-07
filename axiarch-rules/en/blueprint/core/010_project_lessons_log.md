@@ -1,7 +1,7 @@
 # Project Lessons Log
 
 This file aggregates critical lessons, anti-patterns, and newly established operational rules obtained through project development.
-Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGENTS.md`, the AI autonomously manages this file.
+Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomously manages this file.
 
 > [!IMPORTANT]
 > **Auto-Crystallization Protocol**
@@ -64,7 +64,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 ### [Initial] Project Initialization Lesson
 **Domain:** Governance
 **Context:** New project or rule system refresh.
-**Rule:** Treat `AGENTS.md` and `axiarch-rules` protocols as the highest-priority source of truth.
+**Rule:** Treat `AXIARCH.md` as the canonical Axiarch entrypoint and load the detailed protocol bodies from `axiarch-rules` through `AXIARCH.md`. Treat `AGENTS.md` as an adapter for compatible environments.
 
 ---
 
@@ -88,7 +88,7 @@ Based on the "Continuous Improvement — Auto-Crystallization Protocol" in `AGEN
 
 | Category | Related Universal Rule |
 |:---------|:---------------------|
-| Crystallization Process | `AGENTS.md` §9 Continuous Improvement — Auto-Crystallization Protocol |
+| Crystallization Process | `CRYSTALLIZATION_PROTOCOL.md` |
 | Core Principle Violations | `core/000_core_mindset` |
 | Security Lessons | `security/000_security_privacy` |
 | Performance Lessons | `engineering/000_engineering_standards`, `quality/000_qa_testing` |

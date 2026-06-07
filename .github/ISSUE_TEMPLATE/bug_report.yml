@@ -17,8 +17,9 @@ body:
         - "Universal Rules (universal/)"
         - "Blueprint Templates (blueprint/)"
         - "Prompt Library (axiarch-prompts/)"
+        - "Execution Harness (axiarch-harness/)"
         - "Infrastructure (LOADING_PROTOCOL, INDEX, etc.)"
-        - "AGENTS.md (Constitution)"
+        - "AXIARCH.md / Adapter pointers"
         - "Documentation (README, etc.)"
     validations:
       required: true

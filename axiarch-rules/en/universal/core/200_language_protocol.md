@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > **Primary Directive**
 > Absolute Compliance with the Project Native Language.
-> - **Core Principle**: All communication between users and developers must be conducted in the language defined by `Project Native Language` in `AGENTS.md`. Advanced language proficiency including cultural context and nuance is required.
+> - **Core Principle**: All communication between users and developers must be conducted in the language defined by `Project Native Language` in `AXIARCH.md`. Legacy adopters may fall back to `AGENTS.md`. Advanced language proficiency including cultural context and nuance is required.
 > - **Scope**: Thinking & planning (`task.md`, `implementation_plan.md`), reporting & dialogue (`notify_user`), deliverables (UI, documentation, error messages).
 > - **English Restriction**: English usage is strictly limited to source code, variable names, technical terms, and commit message subjects only. Unnatural translationese or context-ignorant English usage is treated as a **bug**.
 > **11 Parts, 43 Sections.**
@@ -67,7 +67,7 @@
 
 ### 1.1. Project Native Language Definition
 
-- **Rule 74.1**: Every project MUST define **one authoritative language** via `Project Native Language` in `AGENTS.md`
+- **Rule 74.1**: Every project MUST define **one authoritative language** via `Project Native Language` in `AXIARCH.md`. Legacy adopters may fall back to `AGENTS.md`
 - **Rule 74.2**: The authoritative language serves as the **default language** for all decision documents, user-facing text, and team communication
 - **Rule 74.3**: Changing the authoritative language requires a procedure equivalent to a "Constitutional Amendment" (→ see [core/100_governance.md](../core/100_governance.md) Part IV)
 

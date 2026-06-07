@@ -27,6 +27,8 @@ Axiarchは現在、個人プロジェクトとして管理されています。�
 |:-----|:-----|:-----|:---------|
 | **Universal Rules** | `axiarch-rules/{lang}/universal/` | 不変（Immutable） | 「憲法改正」として明示的な承認が必要 |
 | **Blueprint** | `axiarch-rules/{lang}/blueprint/` | 可変（Mutable） | テンプレートの改善・追加を歓迎 |
+| **Canonical Entrypoint & Adapters** | `AXIARCH.md`, adapter pointers | 準不変 | 正本入口変更として慎重なレビューが必要 |
+| **Execution Harness** | `axiarch-harness/{lang}/` | 準不変 | 実行、監査、証跡、承認境界として慎重なレビューが必要 |
 | **Infrastructure** | `LOADING_PROTOCOL.md` 等 | 準不変 | 機能改善の提案を歓迎 |
 | **Prompt Library** | `axiarch-prompts/` | 可変（Mutable） | プロンプトの改善・追加を歓迎 |
 
@@ -37,6 +39,9 @@ Axiarchは現在、個人プロジェクトとして管理されています。�
 
 Axiarchの全ドキュメントは日英バイリンガルです。ドキュメントの変更・追加時は：
 
+- `AXIARCH.md` は単一ファイル内の日英併記を維持
+- `AGENTS.md` / `CLAUDE.md` / 各ツール固有ファイルは `AXIARCH.md` だけを指す薄いポインターを維持
+- `axiarch-harness/ja/` と `axiarch-harness/en/` の両方を更新
 - `ja/universal/` と `en/universal/` の両方を更新
 - `ja/blueprint/` と `en/blueprint/` の両方を更新
 - `axiarch-prompts/` を導入している場合は、`ja/` と `en/` の対応するフォルダ（`develop/`, `audit/`, `govern/`, `operate/`）の両方を更新（任意導入の場合のみ）
@@ -65,7 +70,7 @@ Axiarchの全ドキュメントは日英バイリンガルです。ドキュメ�
 
 #### 採用先で書き換えられる template（axiarch 本体では placeholder 形式を保つ）
 
-- `AGENTS.md` の `Project Native Language: [Japanese | English]` placeholder
+- `AXIARCH.md` の Project Native Language 設定行
 - `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` の sample 値
 - `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
 
@@ -100,6 +105,8 @@ Axiarch is currently maintained as a personal project. Contributions are accepte
 |:---------|:-----|:-------|:------------------|
 | **Universal Rules** | `axiarch-rules/{lang}/universal/` | Immutable | Requires explicit "Amend Constitution" approval |
 | **Blueprint** | `axiarch-rules/{lang}/blueprint/` | Mutable | Template improvements and additions welcome |
+| **Canonical Entrypoint & Adapters** | `AXIARCH.md`, adapter pointers | Semi-immutable | Requires careful review as canonical-entrypoint change |
+| **Execution Harness** | `axiarch-harness/{lang}/` | Semi-immutable | Requires careful review as execution, audit, evidence, and approval boundary |
 | **Infrastructure** | `LOADING_PROTOCOL.md` etc. | Semi-immutable | Feature improvement proposals welcome |
 | **Prompt Library** | `axiarch-prompts/` | Mutable | Prompt improvements and additions welcome |
 
@@ -110,6 +117,9 @@ Axiarch is currently maintained as a personal project. Contributions are accepte
 
 All Axiarch documentation is bilingual (JA/EN). When modifying or adding documentation:
 
+- Keep the bilingual structure inside the single `AXIARCH.md` file
+- Keep `AGENTS.md`, `CLAUDE.md`, and tool-native files as thin pointers that only point to `AXIARCH.md`
+- Update both `axiarch-harness/ja/` and `axiarch-harness/en/`
 - Update both `ja/universal/` and `en/universal/`
 - Update both `ja/blueprint/` and `en/blueprint/`
 - If you have installed `axiarch-prompts/` (optional), update both `ja/` and `en/` in the corresponding subfolders (`develop/`, `audit/`, `govern/`, `operate/`)
@@ -138,7 +148,7 @@ Past incident (v1.5.4 interim commit): A maintainer-side lesson on "hook format 
 
 #### Templates rewritten in adopter projects (keep placeholder form in axiarch core)
 
-- `Project Native Language: [Japanese | English]` placeholder in `AGENTS.md`
+- Project Native Language setting line in `AXIARCH.md`
 - Sample values in `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`
 - `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
 

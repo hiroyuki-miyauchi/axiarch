@@ -123,8 +123,8 @@ SRE、インシデント管理、運用要件。
 ## 運用ガイド (Operational Guide)
 
 ### 初期セットアップ
-1. `AGENTS.md` の `Project Native Language` を設定する
-2. 単一言語運用に固定する場合のみ、使用しない方の言語フォルダ（`ja/` または `en/`）を任意で削除する。両言語を保持する場合は、`Project Native Language` に対応する言語フォルダを優先ロードする
+1. `AXIARCH.md` の `Project Native Language` を設定する。旧導入先では `AGENTS.md` をフォールバックとして参照する
+2. 既定では日本語・英語ディレクトリを両方保持する。単一言語運用に固定する場合のみ、`axiarch-rules/{unused-lang}/` と `axiarch-harness/{unused-lang}/`、プロンプト導入時は `axiarch-prompts/{unused-lang}/` をレビューして削除できる。両言語を保持する場合は、`Project Native Language` に対応する言語フォルダを優先ロードする
 3. `core/000_project_overview.md` をプロジェクトの内容に書き換える
 
 ### 機能仕様の追加（Blueprint First の実践）
@@ -180,6 +180,6 @@ SRE、インシデント管理、運用要件。
 
 ---
 
-**Last Updated**: 2026-05-17
-**Version**: v1.11.2 — Safe Upgrade のマルチエージェント検出修正（Antigravity 検出 path 修正 + 併用時 `--agent all` 推奨）（v1.11.1: Hybrid Autonomous Boot Sequence 化 / v1.11.0: Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録、共有Blueprint/Project State境界整理、現在タスク文書ローテーション導入）
+**Last Updated**: 2026-06-07
+**Version**: v1.12.0-dev — AXIARCH.md正本入口とExecution Harness対応（v1.11.2: Safe Upgrade実行プロンプトのmulti-agent検出修正、v1.11.0: Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録、共有Blueprint/Project State境界整理、現在タスク文書ローテーション導入）
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

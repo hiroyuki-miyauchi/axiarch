@@ -884,7 +884,17 @@ Naming Process:
 | 2. Display rules agreement | Written agreement on logo size, placement, colors | Brand Owner |
 | 3. Creative approval | Final visual approval of co-created materials | Design Review |
 
-### 9.6. Brand Audit Protocol
+### 9.6. Platform-Specific Brand Policy
+
+- **Rule 14.055**: Manage brand display standards separately for each platform
+
+| Platform | Specific Requirements |
+|:---------|:----------------------|
+| **App Store** | Comply with icon, screenshot, and app name guidelines |
+| **Google Play** | Keep Feature Graphic and short description brand-consistent |
+| **Social platforms** | Unify profile image, banner, and bio copy |
+
+### 9.7. Brand Audit Protocol
 
 - **Rule 14.056**: Conduct annual brand audits and calculate consistency scores
 
@@ -1665,4 +1675,3 @@ Brand Review Bot Scope:
 | §19 Brand Intelligence 2.0 | `300_customer_experience` (CX Analytics), `500_growth_marketing` (Analytics) |
 | §20 Compliance Automation | `000_design_ux` (Design System CI), `ai/000_ai_engineering` |
 | §21 Platform Economy | `400_pricing_strategy` (Platform Pricing), `300_ip_due_diligence` |
-

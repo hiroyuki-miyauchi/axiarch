@@ -448,7 +448,19 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 > [!NOTE]
 > Socket.dev acquired Coana in April 2025, integrating reachability analysis capabilities. Can reduce CVE false positives by up to 80%. Trusted Publishing support also completed July 2025.
 
-### 10.2 Rules
+### 10.2 Tool Selection Flowchart
+
+```mermaid
+flowchart TD
+    A[Dependency security requirement] --> B{Primary evaluation axis}
+    B -->|Vulnerability management| C[Snyk]
+    B -->|License compliance| D[FOSSA]
+    B -->|Supply-chain attack defense| E[Socket.dev]
+    B -->|Container security| F[Trivy / Grype]
+    B -->|Reachability analysis| G[Endor Labs / Socket.dev / Semgrep SC]
+```
+
+### 10.3 Rules
 
 - **Rule**: Integrate at least one SCA tool into CI (Snyk recommended)
 - **Rule**: Execute license checks and security scans as **separate jobs**
@@ -694,6 +706,19 @@ curl -s "$DTRACK_URL/api/v1/finding/project/$PROJECT_UUID" \
 - **Rule**: Manage all workspaces with a **single lockfile** (`pnpm-lock.yaml`)
 - **Rule**: Enable Merge Queue for safe post-CI merge guarantee
 
+### 17.2 Recommended Monorepo Structure
+
+```text
+monorepo-root/
+├── package.json           <- shared devDependencies
+├── pnpm-lock.yaml         <- single lockfile
+├── pnpm-workspace.yaml
+├── packages/
+│   ├── shared/            <- shared library
+│   ├── app-web/           <- web app with own dependencies
+│   └── app-mobile/        <- mobile app with own dependencies
+```
+
 ---
 
 ## §18. Private Registry / Artifactory
@@ -895,7 +920,11 @@ flowchart TD
 
 ## §26. OpenSSF Scorecard Integration
 
-### 26.1 Key Check Items
+### 26.1 Overview
+
+OpenSSF Scorecard is a tool that automatically evaluates OSS project security maturity. Use it for dependency selection and monitoring.
+
+### 26.2 Key Check Items
 
 | Check | Content | Importance |
 |:------|:--------|:----------|
@@ -908,7 +937,7 @@ flowchart TD
 | Vulnerabilities | Unresolved vulnerability presence | High |
 | SAST | Static analysis tool adoption | Medium |
 
-### 26.2 Rules
+### 26.3 Rules
 
 - **Rule**: Check OpenSSF Scorecard score when adding new dependencies
 - **Rule**: Packages with score **below 4.0** are prohibited by default. Exceptions must be documented
@@ -938,13 +967,26 @@ flowchart TD
 - **Rule**: Enable malware behavior analysis via Socket.dev or equivalent
 - **Rule**: Verify npm Provenance to confirm package publisher CI
 
+### 27.3 Registry Priority Configuration
+
+```ini
+# .npmrc — dependency confusion attack defense
+@mycompany:registry=https://npm.pkg.github.com
+registry=https://registry.npmjs.org/
+strict-ssl=true
+```
+
 → Cross-reference: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain
 
 ---
 
 ## §28. VEX (Vulnerability Exploitability eXchange)
 
-### 28.1 VEX Statuses
+### 28.1 Overview
+
+VEX is a machine-readable mechanism for communicating whether a vulnerability actually affects your product. It prevents blanket responses to every vulnerability in an SBOM and focuses remediation on genuinely risky vulnerabilities.
+
+### 28.2 VEX Statuses
 
 | Status | Meaning | Action |
 |:-------|:--------|:-------|
@@ -953,7 +995,7 @@ flowchart TD
 | fixed | Remediated | Update SBOM/VEX |
 | under_investigation | Under review | Complete determination within 72 hours |
 
-### 28.2 VEX Format Comparison
+### 28.3 VEX Format Comparison
 
 | Format | Standards Body | Primary Use |
 |:-------|:-------------|:-----------|
@@ -961,7 +1003,7 @@ flowchart TD
 | CSAF VEX | OASIS | Government/regulatory (EU CRA recommended) |
 | OpenVEX | OpenSSF | Cloud-native, CI/CD integration |
 
-### 28.3 Rules
+### 28.4 Rules
 
 - **Rule**: Determine VEX status for Critical/High vulnerabilities within 72 hours
 - **Rule**: Record reachability analysis evidence for `not_affected` determinations
@@ -991,14 +1033,18 @@ flowchart TD
 
 ## §29. CBOM (Cryptographic Bill of Materials)
 
-### 29.1 Rules
+### 29.1 Overview
+
+CBOM is a cryptographic asset inventory introduced in CycloneDX 1.6. It records cryptographic algorithms, protocols, and keys in use, supporting migration toward quantum-safe cryptography.
+
+### 29.2 Rules
 
 - **Rule**: Generate CBOM using CycloneDX 1.6+
 - **Rule**: Detect and eliminate deprecated cryptography (SHA-1, MD5, DES, 3DES, RSA-1024)
 - **Rule**: Establish Post-Quantum Cryptography Migration Plan
 - **Rule**: Document migration roadmap to NIST PQC standardized algorithms (ML-KEM, ML-DSA, SLH-DSA)
 
-### 29.2 Crypto Agility Checklist
+### 29.3 Crypto Agility Checklist
 
 | Item | Verification |
 |:----|:------------|
@@ -1006,6 +1052,7 @@ flowchart TD
 | Hash Algorithm | SHA-256+ mandatory. SHA-1 fully prohibited |
 | Key Exchange | ECDH (P-256+) or X25519. RSA-2048+ |
 | Quantum Readiness | Begin hybrid mode (classical + PQC) evaluation |
+| CBOM Generation | Inventory cryptographic assets for all projects using CycloneDX 1.6+ |
 
 → Cross-reference: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §Cryptographic Policy, [`security/100_data_governance.md`](../security/100_data_governance.md) §Quantum Crypto Agility
 
@@ -1128,7 +1175,11 @@ gh attestation verify $(npm pack --dry-run 2>&1 | tail -1) \
 
 ## §32. GitHub Dependency Review Integration
 
-### 32.1 Configuration Example
+### 32.1 Overview
+
+GitHub Dependency Review Action automatically checks license and vulnerability impact for dependencies added or updated in pull requests.
+
+### 32.2 Configuration Example
 
 ```yaml
 # .github/workflows/dependency-review.yml
@@ -1149,7 +1200,7 @@ jobs:
           comment-summary-in-pr: always
 ```
 
-### 32.2 Rules
+### 32.3 Rules
 
 - **Rule**: Enable Dependency Review Action on all repositories
 - **Rule**: Synchronize license deny list with §1 prohibited list

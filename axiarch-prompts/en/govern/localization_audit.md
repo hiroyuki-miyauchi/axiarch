@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (all files including UI text, validation, error messages, and admin panels)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to translate and optimize.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide the code or file paths to translate and optimize.
 
 ---
 
@@ -48,8 +48,8 @@ In the translation and improvement process, think deeply and comprehensively acr
 **Before any translation work, load the following "dual constitution" as highest-priority rules.**
 **Note: The content loaded here determines the project's specific technology stack, rule set, and security requirements.**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work.**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work.**
 * **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
@@ -63,7 +63,7 @@ In the translation and improvement process, think deeply and comprehensively acr
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AXIARCH.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -196,12 +196,12 @@ Not just translating to English — deeply consider **from AI, security, legal, 
 **For the very first response after receiving this prompt, strictly comply with the following behavior.**
 
 1.  **Stop & Wait**: Do NOT immediately start work.
-2.  **Ack Only**: Your only action is "role acceptance" and "standby."
+2.  **Ack Only**: Your only action is "role acceptance" and "Phase-0-gated input wait."
 3.  **Response Template**: Respond ONLY in the following format.
 
 ```text
 [Input Required: Lead Localization Architect & English UX Guardian]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently **awaiting presentation of "specific code" or "file paths"** for translation and optimization.
 Upon presentation, will execute Phase 0 (Constitution Load), then immediately execute Phase 1 (Deep Investigation) to improve English UI consistency and business value.

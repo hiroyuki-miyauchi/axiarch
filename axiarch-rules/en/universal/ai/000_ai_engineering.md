@@ -255,18 +255,39 @@
 - **GPAI Code of Practice**: Compliance with guidelines on transparency, copyright, and safety
 - **Effective Date**: August 2025~
 
-### 6.3. AI Literacy Requirement
+### 6.3. GPAI Code of Practice
 
-- **Rule 40.7**: Address the EU AI Act "AI Literacy" requirement (effective Feb 2025) by confirming all team members developing/operating AI features have foundational AI knowledge
+- **Definition**: A voluntary framework developed through an independent expert-led multi-stakeholder process and published on July 10, 2025
+- **Purpose**: Help GPAI model providers meet AI Act obligations for safety, transparency, and copyright
+- **Legal Positioning**: Compliance can support a presumption of conformity and improve legal certainty
+- **Rule 40.7a**: Projects using GPAI models must assess and record GPAI Code of Practice compliance status quarterly
+
+### 6.4. AI Literacy Requirement
+
+- **Rule 40.7b**: Address the EU AI Act "AI Literacy" requirement (effective Feb 2025) by confirming all team members developing/operating AI features have foundational AI knowledge
 - Recommend implementing training programs with documentation
 
-### 6.4. Digital Omnibus Package (Proposed November 2025)
+### 6.5. Regulatory Timeline (2025-2030)
 
-- Compliance deadlines for high-risk AI systems may be extended to December 2027 or August 2028
-- **Caution**: Proceed with current timelines until formal adoption
-- European Parliament plenary vote: scheduled March 26, 2026
+| Date | Milestone |
+|:---|:---|
+| **February 2, 2025** | Prohibited AI systems and AI literacy obligations in force |
+| **July 10, 2025** | GPAI Code of Practice published |
+| **August 2, 2025** | GPAI model obligations, national authority designation, and penalty framework in force |
+| **March 26, 2026** | European Parliament adopted its negotiating position on the Digital Omnibus on AI |
+| **May 7, 2026** | Council presidency and European Parliament negotiators reached a provisional agreement |
+| **June 2, 2026** | IMCO/LIBE committees approved the provisional agreement; plenary and formal Council adoption still pending |
+| **December 2, 2027** | Proposed postponed application date for stand-alone high-risk AI systems under Annex III |
+| **August 2, 2028** | Proposed postponed application date for product-embedded high-risk AI systems under Annex I |
+| **August 2, 2030** | Public-authority legacy high-risk AI compliance deadline |
 
-### 6.5. Penalties
+### 6.6. Digital Omnibus Package (Proposed November 2025)
+
+- Compliance deadlines for high-risk AI systems may be extended to December 2, 2027 or August 2, 2028
+- **Caution**: Track the formal adoption state and keep project-level release plans conservative until the amended timeline is legally final
+- Status as of June 7, 2026: provisional agreement reached on May 7 and approved by IMCO/LIBE committees on June 2; European Parliament plenary approval and formal Council adoption are still required
+
+### 6.7. Penalties
 
 - Up to **€35 million** or **7% of global annual turnover**, whichever is higher
 

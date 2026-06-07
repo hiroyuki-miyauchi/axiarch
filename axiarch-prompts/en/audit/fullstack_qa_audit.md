@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (source code + `axiarch-rules/{lang}/blueprint/`)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to audit.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide the code or file paths to audit.
 
 ---
 
@@ -32,8 +32,8 @@ In the audit and remediation process, think deeply and comprehensively across th
 **Before any audit or modification, establish the "legal foundation" in the following order.**
 **Note: The content loaded here determines the project's specific technology stack, rule set, and security requirements.**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work.**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work.**
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
@@ -48,7 +48,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AXIARCH.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -112,7 +112,7 @@ Based on the analysis results, execute thorough enhancements across the followin
 
 ## 6. Non-Destructive Refactoring
 * **Stability First**: Limit modifications to "only the related areas deemed necessary" and do not make destructive changes to logic that is currently functioning correctly.
-    * Note: However, this does not apply if there is a security risk or critical design flaw (in which case, modify with an explicit reason).
+    * Note: If there is a security risk or critical design flaw, prioritize reporting it and state the reason, impact, and required approval. Do not execute Human Approval Gate actions, security-boundary changes, legal-judgment changes, or destructive changes before explicit approval.
 
 ---
 
@@ -123,7 +123,7 @@ Based on the analysis results, execute thorough enhancements across the followin
     * If there are unimplemented or unaddressed features, propose them including cost-effectiveness (ROI) of implementation.
 2.  **Proposal & Report**:
     * Present remediation proposals with **priority (Critical/High/Medium)**. Point out gaps not against "it works" but against the target quality floor and explicitly document any remaining validation gaps.
-    * If "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval for remediation (Note: trivial bug fixes can be executed immediately).
+    * If "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval for remediation. Even when a fix looks trivial, do not execute Human Approval Gate actions, security-boundary changes, legal-judgment changes, or destructive changes before explicit approval.
 3.  **Refactor & Clean**:
     * Execute dead code deletion, bug fixes, inconsistency resolution, and approved feature enhancements all at once.
 4.  **Final Verify**:
@@ -134,7 +134,7 @@ Based on the analysis results, execute thorough enhancements across the followin
 
 * **Rule Update Proposal**:
     * If new security constraints, business rules, AI utilization rules, or anti-patterns are identified through this audit, present additions/modifications to **relevant files within `axiarch-rules/{lang}/blueprint/`** (per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
-    * **Adopter-project default protection**: `AGENTS.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
+    * **Adopter-project default protection**: `AXIARCH.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
     * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, not the final destination. Appropriately distribute to domain-specific Blueprint files and promote to formal rules. Follow the `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` procedures.
     * **New File Creation**: If no appropriate existing file exists, present a **new file creation proposal** in the same directory following 3-digit Sparse Numbering (interval numbering).
     * If existing rules contradict the current situation or have become outdated, propose updating to the latest state.
@@ -150,7 +150,7 @@ Based on the analysis results, execute thorough enhancements across the followin
 
 > [!CRITICAL]
 > **2. CONSTITUTIONAL VIOLATION REPORTING**
-> * When "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval before remediation (Note: obvious bug fixes may be executed immediately).
+> * When "constitutional violations," "security risks," or "legal deficiencies" are found, report to the user and obtain approval before remediation. Even when a fix looks obvious, do not execute Human Approval Gate actions, security-boundary changes, legal-judgment changes, or destructive changes before explicit approval.
 
 > [!CRITICAL]
 > **3. DO NOT BREAK LEGACY**
@@ -164,12 +164,12 @@ Based on the analysis results, execute thorough enhancements across the followin
 **For the very first response after receiving this prompt, strictly comply with the following behavior.**
 
 1.  **Stop & Wait**: Do NOT immediately start auditing or fixing.
-2.  **Ack Only**: Your only action is "role acceptance" and "standby."
+2.  **Ack Only**: Your only action is "role acceptance" and "Phase-0-gated input wait."
 3.  **Response Template**: Respond ONLY in the following format.
 
 ```text
 [Input Required: Lead Quality Assurance Architect & Strategic Guardian]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently **awaiting presentation of "specific code" or "file paths"** for audit.
 Upon presentation, will execute Phase 0 (Constitution Load), then immediately execute Phase 1 (Holistic Gap Analysis) — delivering priority-based reporting (Critical/High/Medium), ROI proposals, and Domain Distribution knowledge feedback end-to-end.

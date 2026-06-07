@@ -3,7 +3,7 @@
 # Axiarch Task State Lifecycle Helper
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
-# Keeps the AGENTS.md §8 process documents as "current task" working files
+# Keeps the AXIARCH.md process documents as "current task" working files
 # instead of ever-growing append-only logs.
 #
 # Responsibilities:
@@ -50,7 +50,7 @@ Environment:
     Relative or absolute archive root.
 
   AXIARCH_PROCESS_DOC_LANG=auto|ja|en
-    auto (default): detect Project Native Language from AGENTS.md.
+    auto (default): detect Project Native Language from AXIARCH.md, then AGENTS.md fallback.
     ja/en: force Japanese or English current-task templates.
 USAGE
 }
@@ -152,10 +152,10 @@ detect_project_native_language() {
     return 0
   fi
 
-  local agents_file lang_line
-  agents_file="${PROJECT_DIR}/AGENTS.md"
-  if [[ -f "${agents_file}" ]]; then
-    lang_line="$(grep -iE "Project Native Language" "${agents_file}" 2>/dev/null | head -1 || true)"
+  local protocol_file lang_line
+  for protocol_file in "${PROJECT_DIR}/AXIARCH.md" "${PROJECT_DIR}/AGENTS.md"; do
+    [[ -f "${protocol_file}" ]] || continue
+    lang_line="$(grep -iE "Project Native Language" "${protocol_file}" 2>/dev/null | head -1 || true)"
     if [[ -n "${lang_line}" ]]; then
       local line_lower config_part default_part
       line_lower="$(printf '%s\n' "${lang_line}" | tr '[:upper:]' '[:lower:]')"
@@ -182,7 +182,7 @@ detect_project_native_language() {
         return 0
       fi
     fi
-  fi
+  done
 
   if [[ -d "${PROJECT_DIR}/axiarch-rules/en" && ! -d "${PROJECT_DIR}/axiarch-rules/ja" ]]; then
     printf 'en'

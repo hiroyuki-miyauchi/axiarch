@@ -1,7 +1,7 @@
 # Crystallization Protocol
 
 > [!IMPORTANT]
-> This protocol is the detailed procedure for `AGENTS.md` §9 "Continuous Improvement".
+> This protocol is the detailed lesson-crystallization procedure loaded from `AXIARCH.md`.
 > The AI MUST execute this autonomously when recording lessons.
 
 ---

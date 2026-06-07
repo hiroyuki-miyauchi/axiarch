@@ -5,16 +5,16 @@
 > 改定日: 2026-05-06 (Rev.14)
 
 > [!IMPORTANT]
-> **Top-Level Protocol Declaration (最上位プロトコル宣言)**
+> **Universal Constitution Declaration (Universal憲法宣言)**
 >
-> 1.  本ドキュメント群 (`axiarch-rules/{lang}/universal/*.md`) は、本プロジェクトの開発・運用・ビジネスにおける**最上位プロトコル**です。
+> 1.  本ドキュメント群 (`axiarch-rules/{lang}/universal/*.md`) は、`AXIARCH.md` 配下でロードされる、本プロジェクトの開発・運用・ビジネスにおける**中核Universal憲法**です。
 > 2.  本憲法に違反するコード、設計、運用判断は、いかなる理由があっても**却下（Reject）**されます。
-> 3.  全開発者（AI Agentを含む）は、タスク開始前に本憲法を確認し、遵守する義務を負います。
+> 3.  全開発者（AI Agentを含む）は、タスク開始前に `AXIARCH.md` と必要な本憲法を確認し、遵守する義務を負います。
 > **46セクション構成（§1.1〜§1.35, §9.1〜§9.11）。**
 
 > [!IMPORTANT]
 > **基盤原則 (Foundation Principles)**
-> この「Core Philosophy」は、Axiarchが統治する全プロジェクトの活動における憲法であり、例外は認められません。
+> この「Core Philosophy」は、Axiarchが統治する全プロジェクトの活動におけるUniversal憲法の一部であり、例外は認められません。
 > 我々は多面的な専門観点を統合し、実務で検証可能な高い品質基準を継続的に目指します。
 
 ---
@@ -1209,8 +1209,8 @@ AIは以下の役割を状況に応じて切り替え、単一観点に偏らず
 
 ## 3. 言語基準とプロトコル (Language Standard & Protocol)
 *   **言語選択 (Language Selection)**:
-    *   **設定 (Configuration)**: プロジェクトの母国語（Project Native Language）は `AGENTS.md` 内で定義されます。
-    *   **ルール適用**: AIは `AGENTS.md` の設定に従い、対話言語と言語ルールを適用します。採用先プロジェクトで単一言語運用に固定する場合のみ、不要な方の言語ディレクトリ（`axiarch-rules/{lang}/universal/` および `axiarch-rules/{lang}/blueprint/` 内）を任意で削除できます。両言語を保持する場合は、`Project Native Language` に対応する言語フォルダを優先してロードします。
+    *   **設定 (Configuration)**: プロジェクトの母国語（Project Native Language）は `AXIARCH.md` 内で定義されます。旧導入先では `AGENTS.md` をフォールバックとして参照します。
+    *   **ルール適用**: AIは `AXIARCH.md` の設定に従い、対話言語と言語ルールを適用します。採用先プロジェクトでは既定で日本語・英語ディレクトリを両方保持します。単一言語運用に固定する場合のみ、不要な方のローカライズ済みディレクトリ（例: `axiarch-rules/{lang}/`、`axiarch-harness/{lang}/`、プロンプト導入時の `axiarch-prompts/{lang}/`）をレビューして削除できます。両言語を保持する場合は、`Project Native Language` に対応する言語フォルダを優先してロードします。
 
 *   **日本語ガバナンス環境の文脈 (`universal/ja`)**:
     *   このガバナンスルールが適用される場合、**一貫した日本語運用 (Consistent Japanese Communication)** が義務付けられます。

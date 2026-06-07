@@ -534,6 +534,30 @@
 | **P2 (Medium)** | Warning channel | **4 hours** | Non-critical feature issues |
 | **P3 (Low)** | Email + Issue Tracker | **Next business day** | Minor bugs |
 
+### §25-b. Actionable Alert Template
+
+-   **Law**: Every alert MUST follow a template that minimizes the receiver's cognitive load.
+
+    ```text
+    [P0] API Availability SLO Violation — Burn Rate 15.2x
+
+    What is happening:
+      The 5xx error rate for the primary API (/api/v1/*) has risen to 8.3%.
+      The burn rate over the past hour exceeded 14.4.
+
+    Impact:
+      Estimated affected users: 12,000
+      Error budget remaining: 23% -> 15% (8% consumed in the last hour)
+
+    Recommended action:
+      1. Check the most recent deployment -> [deployment history link]
+      2. Roll back immediately if rollback criteria are met
+      3. Runbook: [runbook link]
+
+    Dashboard: [Grafana link]
+    Trace: [Jaeger link]
+    ```
+
 ---
 
 ## Part XI: On-Call Design
@@ -557,6 +581,19 @@
     2.  **Post-incident rest**: Guarantee minimum half-day recovery after SEV-1 response
     3.  **Page frequency tracking**: Monthly measurement of on-call "happiness" (night pages, response time)
     4.  **Shadow On-Call**: New members must shadow for minimum 2 weeks
+    5.  **Wheel of Misfortune**: Use past incidents as role-play drills to strengthen response capability
+
+### §27-b. On-Call Cognitive Load Model
+
+-   **Law**: Quantify the cognitive load of engineers during on-call duty and detect unsustainable states early.
+-   **Cognitive Load Score (monthly measurement)**:
+
+    | Metric | Weight | Healthy | Needs Improvement | Danger |
+    |:-------|:------:|:--------|:------------------|:-------|
+    | **Night pages** (0-7) | x3 | 0-1/month | 2-4/month | 5+/month |
+    | **Daytime pages** | x1 | 0-5/month | 6-15/month | 16+/month |
+    | **Average response time** | x2 | < 30 min | 30-60 min | > 60 min |
+    | **Self-reported burnout** | x5 | None | Mild | Severe |
 
 ---
 
@@ -598,6 +635,16 @@
 
 -   **8-Measure Framework (2025)**: In addition to traditional 4 metrics, multi-dimensional evaluation including Reliability, AI Adoption Level, Team Culture Score, and Operational Load is recommended.
 
+### §29-b. Incident Communication
+
+-   **Law**: Stakeholder communication during incidents is a core mechanism for preserving trust.
+-   **Principles**:
+    1.  **Immediate status page update**: Update the external status page within 15 minutes of incident detection
+    2.  **Internal communication**: Create a dedicated Slack channel such as `#incident-YYYYMMDD-XXX` immediately
+    3.  **Regular updates**: Update status every 30 minutes while recovery is in progress
+    4.  **Closure report**: Share a summary with all stakeholders within 24 hours after recovery
+-   **Cross-Reference**: `operations/500_incident_response.md` for detailed crisis communication
+
 ---
 
 ## Part XIII: Blameless Culture & Learning from Incidents
@@ -620,6 +667,14 @@
     3.  **Pattern Analysis**: Extract common patterns from multiple incidents for systemic improvement
     4.  **Action Item Tracking**: Track post-mortem action item completion rate. Target: 80% completed within 30 days
     5.  **Near-Miss Reporting**: Include near-misses (non-incidents) in reporting and analysis
+
+### §31-b. Adaptive Capacity and Resilience Foundations
+
+-   **Law**: System reliability depends not only on static design, but also on **adaptive capacity**.
+-   **Theoretical Foundations**:
+    1.  **David Woods' 4 capabilities**: Anticipate, Monitor, Respond, and Learn
+    2.  **Safety-II paradigm**: Understanding why things go right is as important as understanding why they fail
+    3.  **Rasmussen's Drift Model**: Systems gradually drift toward safety boundaries; design mechanisms to detect and prevent that drift
 
 ### §32. Decomposition-Based Triage
 
@@ -787,6 +842,16 @@
     3.  **Netflix Concurrency Limiter**: Reference implementation from Netflix OSS `concurrency-limits` library
 -   **Use Cases**: API Gateways, inter-service communication, DB connection pools
 -   **Benefits**: No manual tuning required. Auto-adapts to traffic pattern changes. Prevents cascade failures during overload.
+
+### §45-c. Gray Failure Handling
+
+-   **Law**: A **gray failure** is a partially degraded state where a system is not fully down. Traditional binary UP/DOWN monitoring cannot detect it reliably.
+-   **Gray Failure Characteristics**:
+    1.  Some requests succeed while others fail
+    2.  Average latency appears normal while tail latency degrades
+    3.  Specific tenants, regions, devices, or dependency paths are affected
+    4.  Health checks remain green while user-perceived quality is degraded
+-   **Required Response**: Combine multi-perspective monitoring, synthetic checks, anomaly detection, and user-experience SLIs to detect partial degradation before it becomes a major incident.
 
 ---
 
@@ -2134,6 +2199,84 @@
 
 ---
 
+## Numbering Compatibility Aliases
+
+These aliases preserve cross-reference compatibility with the Japanese numbering stream. The normative body remains in the referenced section.
+
+### §50-b. Adaptive Concurrency Limits
+
+- **Compatibility Alias**: Normative body remains in §45-b.
+
+### §97-b. Platform SLO
+
+- **Compatibility Alias**: Normative body remains in §85-b.
+
+### §97-c. Backstage Plugin Reliability
+
+- **Compatibility Alias**: Normative body remains in §85-c.
+
+### §101-b. MCP/A2A/ACP Integration Protocol
+
+- **Compatibility Alias**: Normative body remains in §87-b.
+
+### §145. Evidence Package Auto-Generation
+
+- **Compatibility Alias**: Normative body remains in §133.
+
+### §146. Compliance-as-Code
+
+- **Compatibility Alias**: Normative body remains in §134.
+
+### §147. Audit Readiness Dashboard
+
+- **Compatibility Alias**: Normative body remains in §135.
+
+### §148. Runbook Design Principles
+
+- **Compatibility Alias**: Normative body remains in §136.
+
+### §149. Runbook Automation Engine
+
+- **Compatibility Alias**: Normative body remains in §137.
+
+### §150. Self-Service Remediation
+
+- **Compatibility Alias**: Normative body remains in §138.
+
+### §151. ChatOps Integration
+
+- **Compatibility Alias**: Normative body remains in §139.
+
+### §152. WebAssembly (Wasm) Runtime Reliability
+
+- **Compatibility Alias**: Normative body remains in §140.
+
+### §152-b. Ambient Mesh (Sidecar-less Service Mesh)
+
+- **Compatibility Alias**: Normative body remains in §140-b.
+
+### §152-c. Confidential Computing SRE
+
+- **Compatibility Alias**: Normative body remains in §140-c.
+
+### §153. Quantum-Safe Cryptography Migration
+
+- **Compatibility Alias**: Normative body remains in §141.
+
+### §154. Sovereign Cloud SRE
+
+- **Compatibility Alias**: Normative body remains in §142.
+
+### §155. Digital Twin for Infrastructure
+
+- **Compatibility Alias**: Normative body remains in §143.
+
+### §156. Edge Computing / Satellite Communication SRE
+
+- **Compatibility Alias**: Normative body remains in §144.
+
+---
+
 ## Appendix A: Quick Reference Index
 
 | Keyword | Section |
@@ -2163,14 +2306,15 @@
 | **SLO-Based Alerting** | §22 |
 | **Alert Thresholds** | §23 |
 | **Alert Fatigue Prevention** | §24 |
-| **Actionable Alert** | §25 |
-| **On-Call Design** | §26-§27 |
+| **Actionable Alert** | §25-b |
+| **On-Call Design** | §26-§27-b |
+| **Cognitive Load Model** | §27-b |
 | **Incident Metrics / DORA** | §29 |
-| **Incident Communication** | §28 |
+| **Incident Communication** | §29-b |
 | **Blameless Post-mortem** | §30 |
 | **Learning from Incidents** | §31 |
-| **Adaptive Capacity** | §32, §45 |
-| **Gray Failure** | §45 |
+| **Adaptive Capacity** | §31-b, §45 |
+| **Gray Failure** | §45-c |
 | **Deployment** | §33-§34 |
 | **Progressive Delivery** | §35 |
 | **Feature Flag** | §36, §47 |

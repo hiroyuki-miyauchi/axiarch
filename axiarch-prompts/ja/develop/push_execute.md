@@ -4,7 +4,7 @@
 >
 > **対象**: プロジェクト全体（ソースコード + `axiarch-rules/`）
 >
-> **使い方**: 作業が完了しプッシュ準備が整った段階でこのプロンプトをAIエージェントのチャットに貼り付けて実行する
+> **使い方**: 作業が完了し、ユーザーがstage、commit、`git push` の実行まで明示承認する段階でこのプロンプトをAIエージェントのチャットに貼り付けて実行する
 
 ---
 
@@ -22,13 +22,14 @@
 **重要: 全ての思考プロセス、コメント、および出力は「日本語」で行うことを徹底してください。**
 
 現在の作業内容をGitHubへプッシュし、作業を完了させてください。
+ただし、このプロンプトが直近のユーザー指示として `git add` によるstage、`git commit`、`git push` の明示承認を含む場合のみstage、commit、pushを実行してください。実装承認、検証承認、修正承認をstage、commit、push、deploy、release、tag、DB適用、production data変更の承認に読み替えてはいけません。不明な場合は `axiarch-harness/{lang}/HUMAN_APPROVAL_GATE.md` に従い、stage、commit、push前に停止して承認を求めてください。
 実行にあたっては、以下の手順で**重要ファイルを動的に特定してコンテキストとして読み込み**、記載されたルール体系を厳守してください。
 
 # Phase 0: Dynamic Context Loading (参照ファイルの動的特定)
 プロジェクト内のルール格納ディレクトリをスキャンし、**ファイル名ではなく「役割」に基づいて**以下の重要ファイルを特定・ロードしてください。
 ※ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
 
-1.  **Core Protocol**: `AGENTS.md`（または最上位の行動指針ファイル）。
+1.  **Core Protocol**: `AXIARCH.md`（または最上位の行動指針ファイル）。
     * **役割**: アーキテクトとしての行動指針、品質基準、デプロイ禁止プロトコル。
 2.  **Target 1: The Constitution (最高憲法)**
     * **役割**: セキュリティ・FinOps・プライバシーの3原則が書かれた最高位ルール。
@@ -55,6 +56,7 @@
 
 1.  **Migration Check**: 特定した **Target 4 (Backend Data Strategy)** の戦略に基づき、マイグレーションファイルが正しく作成・適用されているか確認する。
     * マイグレーションが必要な場合は、`supabase migration new`（またはプロジェクト規定のコマンド）でファイルを作成し、**ユーザーの承認を得てから**進む。
+    * DB migrationの適用、production data変更、手動SQLはpush承認とは別の明示承認が必要。未承認なら実行せず、必要な承認を分けて提示する。
 2.  **Seed Data Check**: `seed.sql`（初期データ）のメンテナンスが必要な変更ではないか確認する。`db reset` 後のデータ消失を防ぐため、必要であれば更新する。
 
 # Phase 2: 品質・憲法チェック (Final Quality Gate)
@@ -63,7 +65,7 @@
 1.  **Build Safety**:
     * プロジェクトの技術スタックに応じた型・Lint・ビルド検証を実行する
     * TypeScriptプロジェクトでは `tsc --noEmit` (型チェック) と `npm run build` (ビルドチェック)
-2.  **Security/FinOps Check**: **AGENTS.md** および **Target 1 (Constitution)** に照らし、以下が混入していないか最終スキャンする。
+2.  **Security/FinOps Check**: **AXIARCH.md** および **Target 1 (Constitution)** に照らし、以下が混入していないか最終スキャンする。
     * APIキーやシークレットの露出
     * 無駄なループ処理やN+1問題（FinOps違反）
     * PIIのログ出力（プライバシー違反）
@@ -77,7 +79,7 @@
     * **Case B — 既にFeature/Fixブランチにいる場合**:
         * そのまま現在のブランチにコミットを追加（Append）する。
     * **禁止**: いずれの場合も**孫ブランチ（ネストしたブランチ）**の作成は厳禁。フラットな構成を維持する。
-2.  **Atomic Commit**: 変更内容が一粒度（Atomic）であることを確認し、コミット・プッシュする。
+2.  **Atomic Commit**: 変更内容が一粒度（Atomic）であることを確認する。stageとcommitは直近のユーザー指示に `git add` によるstageと `git commit` の明示承認がある場合のみ実行する。pushは直近のユーザー指示に明示的な `git push` 承認がある場合のみ実行する。承認が曖昧な場合はstage、commit、pushを実行せず、承認依頼、対象ブランチ、検証結果、残リスクを提示して停止する。
 
 # Phase 4: 完了報告
 プッシュ完了後、ターミナルに表示される **「Pull Request作成用のURL」** を提示してください。

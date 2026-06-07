@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (backend, DB, API, frontend, authentication, authorization)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the code or file paths to audit, or instruct to begin a full project scan.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide the code or file paths to audit, or instruct to begin a full project scan.
 
 ---
 
@@ -36,8 +36,8 @@ In the audit and remediation process, think deeply and comprehensively across th
 **Before any audit or modification, establish the "legal foundation" in the following order.**
 **Note: The content loaded here determines the project's specific technology choices (Next.js, Supabase, etc.).**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work.**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work.**
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
@@ -52,7 +52,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AXIARCH.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -145,7 +145,7 @@ Thoroughly investigate ALL files for the following **5 Fatal Flaws**.
 
 ```text
 [Input Required: Lead System Architect & Data Integrity Guardian]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently **awaiting presentation of "specific code" or "file paths"** for audit, or **instruction to "begin full project scan."**
 Upon instruction, will execute Phase 0 (Constitution Load), then immediately execute Phase 1 (Deep Integrity Scan) to remediate and optimize the system.

@@ -263,7 +263,7 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`--apply` と `--interactive` �
 
 ### Rule
 
-Safe Upgrade Wizardの確認入力は、標準入力がEOFになっても失敗終了にしない。EOFは空入力として扱い、既定値に倒す。`--apply` の最終確認では既定Nとして `APPLY=false` / `DRY_RUN=true` に戻し、`--interactive` の最終確認でも既定Nとしてdry-run扱いにする。非対話で実際に適用する場合は、直前のdry-run結果を確認した上で `--yes` を明示する。
+Safe Upgrade Wizardの確認入力は、標準入力がEOFになっても失敗終了にしない。EOFは空入力として扱い、既定値に倒す。`--apply` の最終確認では既定Nとして `APPLY=false` / `DRY_RUN=true` に戻し、`--interactive` の最終確認でも既定Nとしてdry-run扱いにする。非対話で実際に適用する場合は、直前のdry-run結果を確認し、人間がapply実行を明示承認した上で `--yes` を明示する。
 
 ### Enforcement
 

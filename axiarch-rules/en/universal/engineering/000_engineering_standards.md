@@ -345,7 +345,7 @@
     1.  **File Size Budget**: Target **≤300 lines** per file for AI context window compatibility.
     2.  **Self-Documenting Types**: Use branded types instead of raw `string` to enable AI intent inference.
     3.  **Contextual Comments**: Document "why" not "what." AI can infer "what" from code but not "why."
-    4.  **llms.txt / AGENTS.md**: Place project overview and constraints for AI agents at the project root.
+    4.  **llms.txt / AXIARCH.md / thin adapters**: Place AI-facing project overview and constraints at the project root through `llms.txt` and the canonical `AXIARCH.md`. Keep `AGENTS.md` and tool-native files as thin pointers to `AXIARCH.md`, not duplicated rule bodies.
 
 ---
 
