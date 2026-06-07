@@ -17,7 +17,7 @@ body:
         - "Universal Rules (universal/)"
         - "Blueprint Templates (blueprint/)"
         - "Prompt Library (axiarch-prompts/)"
-        - "Execution Harness (axiarch-harness/)"
+        - "Execution Harness / Harness Engineering (axiarch-harness/)"
         - "Infrastructure (LOADING_PROTOCOL, INDEX, etc.)"
         - "AXIARCH.md / Adapter pointers"
         - "Documentation (README, etc.)"

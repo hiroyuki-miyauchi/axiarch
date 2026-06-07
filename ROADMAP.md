@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.12.0 AXIARCH Canonical Entrypoint & Execution Harness\
+> **現在の安定版 / Current Stable**: v1.12.1 Harness Engineering Release Parity Patch\
 > **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
@@ -546,12 +546,23 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
-### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness（2026-06-08）
+### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness / Harness Engineering（2026-06-08）
 
 - **`AXIARCH.md` 正本化** — `AGENTS.md` をCodex専用でも単独正本でもなく、AGENTS標準を読む環境向けの薄いアダプターとして整理。Claude Code、Antigravity、Cursor、Copilot、Windsurfの各入口も `AXIARCH.md` だけを指す。
+- **ハーネスエンジニアリング導入** — Execution Harnessを第4ルール層ではなく、Universal / Blueprint / Promptsの3層を実行順序、監査Verdict、役割パス、証跡、人間承認、サブエージェント委任へ接続する運用工学として明文化。
 - **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
 - **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
 - **後続候補** — Static Lint & Process Supervision は本正本化後の候補として継続検討する。
+
+---
+
+### ✅ v1.12.1 — Harness Engineering Release Parity Patch（2026-06-08）
+
+- **版数保護** — 既存の `v1.12.0` タグを上書きせず、タグ後のHarness Engineering追修をパッチ版として整理。
+- **実行プロトコル補強** — `EXECUTION_HARNESS_PROTOCOL.md` のja/en本文に、ハーネスエンジニアリングが第4層ではなく3層モデルを実行順序、監査、証跡、人間承認へ接続する手順であることを明記。
+- **Safe Upgrade整合** — manifestを読めないfallbackでも `Execution Harness / Harness Engineering` のグループ表示を維持し、一時helper取得例とupgrade helper usage例も `v1.12.1` へ揃える。
+- **再発検知** — `check-axiarch-health.sh` が実行プロトコル本文、Safe Upgrade fallback label、current release helper pin、upgrade helper usage例を検査。
+- **配布メタデータ整合** — installer、manifest、README、llms、Safe Upgrade prompts、Blueprint INDEXの現在安定版を `v1.12.1` へ更新。
 
 ---
 
@@ -1203,12 +1214,23 @@ stale in multi-agent projects.
 
 ---
 
-### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness (2026-06-08)
+### ✅ v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness / Harness Engineering (2026-06-08)
 
 - **`AXIARCH.md` canonicalization** — Treat `AGENTS.md` as neither Codex-only nor the standalone source of truth. It is a thin adapter for environments that read the AGENTS standard. Claude Code, Antigravity, Cursor, Copilot, and Windsurf entrypoints also point only to `AXIARCH.md`.
+- **Harness Engineering introduced** — Defines the Execution Harness not as a fourth rule layer, but as operational engineering that connects Universal / Blueprint / Prompts to execution order, audit verdicts, role passes, evidence, human approval, and subagent delegation.
 - **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
 - **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
 - **Follow-up candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
+
+---
+
+### ✅ v1.12.1 — Harness Engineering Release Parity Patch (2026-06-08)
+
+- **Version protection** — Keep the existing `v1.12.0` tag immutable and express the post-tag Harness Engineering follow-up as a patch release.
+- **Execution protocol reinforcement** — Clarify in ja/en `EXECUTION_HARNESS_PROTOCOL.md` that Harness Engineering is not a fourth layer; it connects the three-layer model to execution order, audit, evidence, and human approval.
+- **Safe Upgrade parity** — Keep the fallback `execution_harness` group label aligned with `Execution Harness / Harness Engineering` even when manifest metadata is unavailable, and align temporary-helper and upgrade-helper usage examples with `v1.12.1`.
+- **Regression detection** — Extend `check-axiarch-health.sh` to verify the execution protocol wording, Safe Upgrade fallback label, current-release helper pins, and upgrade helper usage examples.
+- **Distribution metadata parity** — Update installer, manifest, README, llms, Safe Upgrade prompts, and Blueprint INDEX current-stable metadata to `v1.12.1`.
 
 ---
 

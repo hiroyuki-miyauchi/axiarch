@@ -120,6 +120,10 @@ Execution Harness is not a fourth rule layer. It is the operational procedure th
 
 Execution Harnessは第4のルール層ではない。3層モデルを保ったまま、エージェントがどう実行し、監査し、証跡を作り、作業を委任し、承認を求めるかを定める運用手順である。
 
+This operational discipline is Harness Engineering: binding Universal, Blueprint, and optional Prompts to task levels, execution order, audit verdicts, role passes, evidence packets, human approval boundaries, and optional delegation.
+
+この運用規律をハーネスエンジニアリングと呼ぶ。Universal、Blueprint、任意のPromptsを、タスクレベル、実行順序、監査Verdict、役割パス、証跡パケット、人間承認境界、任意の委任へ結び付ける実務上の工学である。
+
 ---
 
 ## 4. Boot Sequence and Direct Loading / 初動と直接ロード
@@ -371,9 +375,11 @@ Claude Codeでは利用可能なネイティブタスクツールを使い、利
 
 The harness is mandatory procedure for non-trivial work.
 It converts the rules into a concrete work cycle: plan, execute, inspect, audit, verify, record evidence, and ask for approval.
+This is the Harness Engineering cycle that keeps rule compliance executable instead of merely descriptive.
 
 ハーネスは非自明な作業における必須手順である。
 ルールを、計画、実行、調査、監査、検証、証跡記録、承認依頼の具体的な作業サイクルへ変換する。
+これは、ルール遵守を単なる説明ではなく実行可能な手順へ変えるハーネスエンジニアリングのサイクルである。
 
 Required harness checks:
 

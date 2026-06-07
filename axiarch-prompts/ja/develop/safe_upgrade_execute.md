@@ -37,7 +37,7 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
 4. **Upgrade Engine**
    - 役割: dry-run / safe-only / interactive / apply / merge / metadata生成の実行仕様
    - 候補: `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/README.md`
-   - `axiarch-scripts/axiarch-upgrade.sh` が未導入の場合は、既存ファイルを上書きせず、タグ固定の一時helperを `/tmp/axiarch-upgrade.sh` に取得してdry-runする。例: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
+   - `axiarch-scripts/axiarch-upgrade.sh` が未導入の場合は、既存ファイルを上書きせず、タグ固定の一時helperを `/tmp/axiarch-upgrade.sh` に取得してdry-runする。例: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
 5. **Project State**
    - 役割: 既存プロジェクト固有の概要・教訓・Blueprint状態
    - 候補: `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`

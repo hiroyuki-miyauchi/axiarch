@@ -7,6 +7,10 @@
 > `axiarch-scripts/` は最小構成の必須ファイルではありません。`init.sh` は診断・hook補強・安全アップグレードをすぐ使える推奨ツールとして同梱コピーしますが、`AXIARCH.md`、`AGENTS.md` adapter、`axiarch-rules/`、`axiarch-harness/` の最小運用では任意です。
 >
 > `axiarch-scripts/` is not required for the minimal Axiarch setup. `init.sh` copies it as recommended tooling for diagnostics, hook reinforcement, and safe upgrades, but it remains optional when a project only needs the minimal `AXIARCH.md`, `AGENTS.md` adapter, `axiarch-rules/`, and `axiarch-harness/` setup.
+>
+> v1.12.0以降の本体リポジトリ診断では、ハーネスエンジニアリングの説明が正本、公開入口、rules索引、harness README、AI向け要約に残っているかも確認します。
+>
+> In v1.12.0 and later, source-repository diagnostics also check that Harness Engineering remains explicit across the canonical protocol, public entrypoints, rules indexes, harness README, and AI-facing summaries.
 
 ---
 
@@ -14,7 +18,7 @@
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
-| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（15 段階、`--quiet` 対応、v1.11.0で現在タスク文書ローテーション、ネイティブタスク状態同期、v1.10.0+由来のリリース整合、Blueprint INDEX版数、safe upgrade実行promptのREADME/llms/rules索引、source-only既定skipとinteractive明示override、対話選択肢重複排除、本体リポジトリ専用ファイル分類、README/llms/scripts READMEの必須/任意境界、ja/en番号見出しparity、Claude Memory正本境界、AXIARCH.md・axiarch-harness・中核ファイルのGit追跡状態、AXIARCH.md mixed/review所有境界、fallback core Blueprint検出、任意prompt証跡、`replace-if-local-unchanged` 実行時保護、型不一致review検査を追加） / Full-protocol compliance health diagnostic (15-stage, `--quiet` support; v1.11.0 adds current-task document rotation, native task-state sync, v1.10.0+ release parity, Blueprint INDEX version metadata, safe-upgrade execution prompt indexing across README, llms, and rules indexes, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, required/optional boundary checks for README, llms, and scripts README, ja/en numbered-heading parity, Claude Memory canonical boundary, source release-file Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, fallback core Blueprint discovery, optional prompt evidence checks, `replace-if-local-unchanged` runtime protection, and type-conflict review checks) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
+| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarch 全プロトコル遵守の健全性診断**（15 段階、`--quiet` 対応、v1.11.0で現在タスク文書ローテーション、ネイティブタスク状態同期、v1.10.0+由来のリリース整合、Blueprint INDEX版数、safe upgrade実行promptのREADME/llms/rules索引、source-only既定skipとinteractive明示override、対話選択肢重複排除、本体リポジトリ専用ファイル分類、README/llms/scripts READMEの必須/任意境界、ハーネスエンジニアリング入口保持、ja/en番号見出しparity、Claude Memory正本境界、AXIARCH.md・axiarch-harness・中核ファイルのGit追跡状態、AXIARCH.md mixed/review所有境界、fallback core Blueprint検出、任意prompt証跡、`replace-if-local-unchanged` 実行時保護、型不一致review検査を追加） / Full-protocol compliance health diagnostic (15-stage, `--quiet` support; v1.11.0 adds current-task document rotation, native state sync, v1.10.0+ release parity, Blueprint INDEX version metadata, safe-upgrade execution prompt indexing across README, llms, and rules indexes, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, required/optional boundary checks for README, llms, and scripts README, Harness Engineering entrypoint retention, ja/en numbered-heading parity, Claude Memory canonical boundary, source release-file Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, fallback core Blueprint discovery, optional prompt evidence checks, `replace-if-local-unchanged` runtime protection, and type-conflict review checks) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
 | [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターン違反検出 (A/B/C/D) + TTL 内 + 違反なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); dynamic violations A/B/C/D, short-circuits within TTL when no violation | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-diff-guard.sh`](#axiarch-diff-guardsh) | **PostToolUse hook の外出しスクリプト**。Edit / MultiEdit / Write 後のgit diff規模を測定し、閾値超過時に warn / block / Externalized PostToolUse hook; measures git diff size after Edit / MultiEdit / Write and warns or blocks above thresholds | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
@@ -42,20 +46,20 @@ The file list, excludes, and group defaults are read from `axiarch-manifest.json
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.0 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.1 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --interactive
 ```
 
 ### 主な選択肢 / Main Choices
@@ -124,7 +128,7 @@ bash axiarch-scripts/check-axiarch-health.sh /path/to/project
 | 12 | Bootstrap | SessionStart hook 配線確認 / SessionStart hook wiring — **v1.5.5+** |
 | 13 | Sublimated Index | 既存の `blueprint/{domain}/{NNN}_*.md` を一覧表示し APPEND を促進 / Lists existing sublimated files to promote APPEND — **v1.6.0+** |
 | 14 | Task Boundary | Check D wiring 確認（`axiarch-boot-reminder.sh` に VIOLATION-D + AXIARCH_TASK_BOUNDARY_DETECT 含有を確認） / Verifies Check D wiring in `axiarch-boot-reminder.sh` — **v1.8.0+** |
-| 15 | v1.9+ / v1.11+ Integration | hook層導入時のPostToolUse diff guard 配線確認（`axiarch-diff-guard.sh` + Edit / MultiEdit / Write matcher）+ 現在タスク文書ローテーション（`axiarch-task-state.sh`）+ Codex `update_plan` / Claude Code Task tools のネイティブ状態同期説明 + Axiarch本体リポジトリでのみsource repository docs / indexes反映確認 + ja/en番号見出しparity確認 + Claude Memory正本境界確認 + AXIARCH.md・axiarch-harness・中核ファイルのGit追跡確認 + AXIARCH.md mixed/review所有境界確認 + CHANGELOGのUnreleased参照整合 + リリース版メタデータ整合 + Safe Upgrade Wizard検査 / Verifies PostToolUse diff guard wiring, current-task document rotation (`axiarch-task-state.sh`), native state-sync wording for Codex `update_plan` and Claude Code Task tools, source repository docs/index integration, ja/en numbered-heading parity, Claude Memory canonical boundary, Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, CHANGELOG reference parity, release metadata parity, and Safe Upgrade Wizard checks — **v1.9.0+ / v1.11.0** |
+| 15 | v1.9+ / v1.11+ Integration | hook層導入時のPostToolUse diff guard 配線確認（`axiarch-diff-guard.sh` + Edit / MultiEdit / Write matcher）+ 現在タスク文書ローテーション（`axiarch-task-state.sh`）+ Codex `update_plan` / Claude Code Task tools のネイティブ状態同期説明 + Axiarch本体リポジトリでのみsource repository docs / indexes反映確認 + ハーネスエンジニアリング入口保持確認 + ja/en番号見出しparity確認 + Claude Memory正本境界確認 + AXIARCH.md・axiarch-harness・中核ファイルのGit追跡確認 + AXIARCH.md mixed/review所有境界確認 + CHANGELOGのUnreleased参照整合 + リリース版メタデータ整合 + Safe Upgrade Wizard検査 / Verifies PostToolUse diff guard wiring, current-task document rotation (`axiarch-task-state.sh`), native state-sync wording for Codex `update_plan` and Claude Code Task tools, source repository docs/index integration, Harness Engineering entrypoint retention, ja/en numbered-heading parity, Claude Memory canonical boundary, Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, CHANGELOG reference parity, release metadata parity, and Safe Upgrade Wizard checks — **v1.9.0+ / v1.11.0** |
 
 ### 環境変数 / Environment Variables（v1.6.0+, extended in v1.8.0+）
 

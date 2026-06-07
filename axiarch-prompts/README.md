@@ -16,7 +16,7 @@
 
 > **ネイティブタスク状態**: Codexでこれらのプロンプトを使う場合は `update_plan` も併用し、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を併用してください。`task.md` / `implementation_plan.md` / `walkthrough.md` は現在タスク用のMarkdown証跡であり、エージェント独自のタスク・プラン表示を自動更新するものではありません。
 
-> **実行ハーネスとの関係**: これらのプロンプトは `AXIARCH.md` と `axiarch-harness/` の代替ではありません。実行、監査、証跡、人間承認、サブエージェント委任の境界は、常に `AXIARCH.md` と関連する harness protocol を正本として確認してください。
+> **実行ハーネスとの関係**: これらのプロンプトは `AXIARCH.md` と `axiarch-harness/` の代替ではありません。ハーネスエンジニアリングとして扱う実行、監査、証跡、人間承認、サブエージェント委任の境界は、常に `AXIARCH.md` と関連する harness protocol を正本として確認してください。
 
 ---
 
@@ -161,7 +161,7 @@ This directory contains **reusable prompt templates** designed to elevate the qu
 
 > **Native task state**: When using these prompts in Codex, also use `update_plan`. In Claude Code, also use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. `task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence and do not automatically update an agent's native task/plan panel.
 
-> **Execution harness relationship**: These prompts do not replace `AXIARCH.md` or `axiarch-harness/`. Execution, audit, evidence, human approval, and subagent-delegation boundaries must always be checked against `AXIARCH.md` and the relevant harness protocol as the source of truth.
+> **Execution harness relationship**: These prompts do not replace `AXIARCH.md` or `axiarch-harness/`. Harness Engineering boundaries for execution, audit, evidence, human approval, and subagent delegation must always be checked against `AXIARCH.md` and the relevant harness protocol as the source of truth.
 
 ---
 

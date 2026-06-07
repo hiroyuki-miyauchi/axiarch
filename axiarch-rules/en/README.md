@@ -5,6 +5,7 @@
 > This folder (`axiarch-rules/`) contains the governance rules of the Axiarch framework.
 > The clear separation of concerns between "Immutable Constitution (Layer 1)", "Project-Specific Rules (Layer 2)", and "Optional Prompts (Layer 3)" is the heart of Axiarch — it helps reduce hallucination and quality-drift risk while supporting a quality baseline for long-term autonomous operation.
 > The minimum execution requirement for Axiarch is compliance with Layer 1 and Layer 2; all other extensions such as Layer 3 (Prompts) are entirely optional.
+> From v1.12.0 onward, `axiarch-harness/` is not a fourth rule layer. It is the implementation unit for Harness Engineering: connecting the three-layer model to execution order, audit verdicts, role passes, evidence, and human approval boundaries.
 >
 > **Separation of Concerns (AI Agent Instructions)**:
 >
@@ -164,7 +165,7 @@ your-project/
  │    │    └── blueprint/     ← Layer 2: Mutable State
  │    │         └── core/
  │    └── ja/                 ← Japanese rules (kept by default)
- ├── axiarch-harness/         ← Execution, audit, evidence, and approval workflow
+ ├── axiarch-harness/         ← Harness Engineering: execution, audit, evidence, and approval workflow
  │    ├── en/
  │    └── ja/                 ← Kept by default
  ├── axiarch-prompts/         ← Layer 3: Optional Execution Engine

@@ -48,7 +48,7 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
- ├── axiarch-harness/           ← 実行・監査・証跡・承認・サブエージェント委任の手順
+ ├── axiarch-harness/           ← ハーネスエンジニアリング: 実行・監査・証跡・承認・サブエージェント委任の手順
  │    ├── ja/
  │    └── en/
  ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群

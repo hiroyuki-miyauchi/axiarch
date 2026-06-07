@@ -16,6 +16,22 @@ release history, not current canonical numbering.
 
 ---
 
+## [1.12.1] — 2026-06-08
+
+### Fixed
+
+- Treats Harness Engineering follow-up work as a patch release after the existing `v1.12.0` tag instead of overwriting the release tag.
+- `axiarch-harness/{ja,en}/EXECUTION_HARNESS_PROTOCOL.md` now explicitly states that Harness Engineering applies the three-layer model to task execution and is not a fourth rule layer.
+- `axiarch-scripts/axiarch-upgrade.sh` now keeps the `execution_harness` fallback group label aligned with `Execution Harness / Harness Engineering` when manifest metadata is unavailable.
+- Safe Upgrade temporary helper examples and `axiarch-upgrade.sh` usage examples now point to `v1.12.1`, preventing users from following a stale `v1.12.0` execution path.
+- `check-axiarch-health.sh` now verifies Harness Engineering wording, the Safe Upgrade fallback label, current-release Safe Upgrade helper pins, and upgrade helper usage examples, preventing the same documentation drift from returning.
+
+### Changed
+
+- `init.sh`, `axiarch-manifest.json`, README, llms files, scripts README, Safe Upgrade prompts, Blueprint indexes, and roadmap metadata now point the current stable release to `v1.12.1`, while preserving `v1.12.0` as the historical AXIARCH canonical entrypoint and Harness Engineering introduction release.
+
+---
+
 ## [1.12.0] — 2026-06-08
 
 ### AXIARCH Canonical Entrypoint / AXIARCH正本入口
@@ -24,10 +40,17 @@ release history, not current canonical numbering.
 
 Adds `AXIARCH.md` as the canonical Axiarch entrypoint and turns `AGENTS.md`, `CLAUDE.md`, `.agents/rules/prompt_pointer.md`, Cursor, Copilot, and Windsurf files into thin adapters that point only to `AXIARCH.md`.
 
+### Harness Engineering / ハーネスエンジニアリング
+
+v1.12.0は、単なる `axiarch-harness/` ディレクトリ追加ではなく、Axiarchにハーネスエンジニアリングを導入するリリースです。Execution Harnessは第4のルール層ではありません。Universal / Blueprint / Prompts の3層を、実行順序、監査Verdict、役割パス、証跡パケット、人間承認境界、任意のサブエージェント委任へ接続する運用工学として位置づけます。
+
+v1.12.0 is not just the addition of an `axiarch-harness/` directory. It introduces Harness Engineering into Axiarch. The Execution Harness is not a fourth rule layer; it is the operational engineering that connects Universal / Blueprint / Prompts to execution order, audit verdicts, role passes, evidence packets, human approval boundaries, and optional subagent delegation.
+
 ### Added
 
 - `AXIARCH.md` — 正本入口、優先順位、Native Language / bilingual governance、実行ライフサイクル、人間承認境界、サブエージェント任意利用を定義
 - `axiarch-harness/{ja,en}/` — Execution Harness、Audit Gate、Role Pass、Evidence Packet、Human Approval Gate、Subagent Delegationの6プロトコルを追加
+- Harness Engineering concept — 3層ガバナンスを実務タスクの実行・監査・証跡・承認フローへ変換する概念として明文化
 
 ### Changed
 
@@ -956,6 +979,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.12.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.2...v1.12.0
 [1.11.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.0...v1.11.1
