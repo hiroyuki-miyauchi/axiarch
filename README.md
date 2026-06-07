@@ -23,6 +23,8 @@
 **Axiarch（アクシアーク）** は、**憲法駆動型の AIエージェントガバナンスフレームワーク（Constitution-Driven AI Agent Governance Framework）**です。
 「普遍憲法（Universal・不変）」と「固有ルール（Blueprint・可変）」の明確な責務分離、さらにそれを実行駆動する「プロンプト（Prompts・任意層）」という **3層統合ガバナンス・アーキテクチャ** が Axiarch の中核です。v1.12.0系では `AXIARCH.md` を正本入口にし、`AGENTS.md` や各ツール固有ファイルは `AXIARCH.md` を読むための薄いアダプターとして扱います。AI支援開発におけるハルシネーションや品質ドリフト（退行）のリスクをこの構造によって軽減し、操縦者のスキルレベルに依存しすぎない形で、プロジェクト全体の最低品質（Quality Floor）を底上げすることを狙います。
 
+v1.12.0では、これに加えて **ハーネスエンジニアリング（Harness Engineering）** を明示的に導入しました。これは第4のルール層ではなく、Universal / Blueprint / Prompts の3層を、実行、監査、役割パス、証跡、人間承認、サブエージェント委任まで落とし込むための運用工学です。つまり「何を守るべきか」だけでなく、「AIエージェントがどの順番で実行し、どこで止まり、何を証跡として残すか」まで標準化します。
+
 Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱い、検証済みまたは動作保証済みとは扱いません。
 
 ### 設計思想
@@ -30,6 +32,7 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 - **プロンプト集ではありません。** **操縦者が変わっても最低品質の床（Quality Floor）を保ちやすくする**、多層ガバナンス設計です。
 - **操縦者に依存しすぎない品質ベースライン。** シニアエンジニアが使っても初心者が使っても、同一の憲法基準を参照できる状態を作ります。
 - **3層ガバナンス分離。** 「不変の憲法基準（Universal）」と「プロジェクトで成長する動的仕様（Blueprint）」の責務を分離し、AIの「コンテキスト忘却」や「ルール形骸化」のリスクを構造的に下げます。
+- **ハーネスエンジニアリング。** ルールを読むだけで終わらせず、実行手順、監査ゲート、証跡、承認境界へ接続し、非対応ツールでもメインエージェントが同じパスを順番に実行できる状態にします。
 
 ### なぜ必要か
 
@@ -57,7 +60,7 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 │ └─ 監査・品質担保タスク用の任意プロンプト・フレームワーク            │
 ├─────────────────────────────────────────────────────────────┤
 │ Execution Harness (実行ハーネス)                              │
-│ └─ 実行、監査、証跡、人間承認、サブエージェント委任               │
+│ └─ ハーネスエンジニアリング: 実行、監査、証跡、人間承認、委任       │
 ├─────────────────────────────────────────────────────────────┤
 │ 実行ドキュメント — タスク単位                           ← 生成   │
 │ task.md, implementation_plan.md, walkthrough.md             │
@@ -74,6 +77,8 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 **Axiarch** is a **Constitution-Driven AI Agent Governance Framework**.
 It is designed to help govern AI-assisted work and reduce the risk of quality drift, hallucinations, and uncontrolled AI behavior through a **Three-Layer Governance Architecture**: Layer 1 **Universal** (Immutable Constitution), Layer 2 **Blueprint** (Mutable Project State), and Layer 3 **Prompts** (Optional Execution Triggers).
 
+v1.12.0 also introduces explicit **Harness Engineering**. This is not a fourth rule layer; it is the operational engineering that turns the three-layer model into execution, audit gates, role passes, evidence packets, human approval boundaries, and optional subagent delegation. In practice, it standardizes not only what agents must obey, but also the order of execution, where they must stop, and what evidence they must leave behind.
+
 Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). In the v1.12.0 line, `AXIARCH.md` becomes the canonical entrypoint, while `AGENTS.md` and tool-native files are thin adapters that point to it. v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. Codex, Claude Code, and Google Antigravity are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as production-validated primary platforms.
 
 ### Core Design Philosophy
@@ -81,6 +86,7 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 - **Not a prompt collection.** It is a **multi-layered governance architecture** that makes minimum quality standards easier to maintain with less dependence on operator skill.
 - **Less operator-dependent quality baseline.** Whether a senior engineer or a beginner uses the AI, the constitution keeps the same standards visible and actionable.
 - **Three-layer separation.** By decoupling "Immutable Universal standards" from "Mutable Blueprint states", Axiarch reduces the risk of context amnesia and rule atrophy.
+- **Harness Engineering.** Axiarch connects rules to execution procedures, audit gates, evidence, and approval boundaries so the same path can be followed sequentially by the main agent even when subagents are unavailable.
 
 ### The Problem
 
@@ -108,7 +114,7 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 │ └─ Task-specific prompts for audit, QA, and upgrade execution │
 ├───────────────────────────────────────────────────────────────┤
 │ Execution Harness                                             │
-│ └─ Execution, audit, evidence, human approval, delegation      │
+│ └─ Harness Engineering: execution, audit, evidence, approval  │
 ├───────────────────────────────────────────────────────────────┤
 │ Execution Documents — Per-Task                       ← Gen.   │
 │ task.md, implementation_plan.md, walkthrough.md               │
@@ -178,6 +184,10 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 | `AGENTS.md` | AGENTS標準を読む環境向けの薄いアダプター | Thin adapter for AGENTS.md readers |
 
 ### 🧩 Execution Harness / 実行ハーネス
+
+Execution Harness は、v1.12.0で明示化したハーネスエンジニアリングの実装単位です。Universal / Blueprint / Prompts の3層を置き換えるものではなく、3層で定義した判断基準を、タスクレベル、実行順序、監査Verdict、証跡パケット、人間承認境界、任意のサブエージェント委任へ接続します。
+
+The Execution Harness is the implementation unit for the Harness Engineering concept introduced in v1.12.0. It does not replace Universal, Blueprint, or Prompts; it connects those three layers to task levels, execution order, audit verdicts, evidence packets, human approval boundaries, and optional subagent delegation.
 
 | File | JA | EN |
 |:-----|:---|:---|
@@ -277,9 +287,9 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は Axiarch v1.12.0 の安定版を既定で導入し、配布refは `tags/v1.12.0` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
+> **JA**: `main` ブランチの `init.sh` は Axiarch v1.12.1 の安定版を既定で導入し、配布refは `tags/v1.12.1` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
 >
-> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.12.0 release by default and pins the distribution ref to `tags/v1.12.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
+> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.12.1 release by default and pins the distribution ref to `tags/v1.12.1`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
 
 ### 必須ファイル一覧 / Required Files
 
@@ -297,7 +307,7 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 | `AXIARCH.md` | ✅ **必須** / **Required** | Axiarch正本入口 / Canonical Axiarch entrypoint |
 | `AGENTS.md` | ✅ **必須** / **Required** | AGENTS標準を読む環境向けの薄いアダプター / Thin adapter for AGENTS.md readers |
 | `axiarch-rules/` | ✅ **必須** / **Required** | ルール本体（Universal + Blueprint） / Rule definitions |
-| `axiarch-harness/` | ✅ **必須** / **Required** | 実行、監査、証跡、人間承認、サブエージェント委任の手順 / Execution, audit, evidence, human approval, and delegation protocols |
+| `axiarch-harness/` | ✅ **必須** / **Required** | ハーネスエンジニアリングの実装。実行、監査、証跡、人間承認、サブエージェント委任の手順 / Harness Engineering implementation for execution, audit, evidence, human approval, and delegation protocols |
 | `axiarch-manifest.json` | 🔷 **任意（安全アップグレード推奨）** / **Optional (recommended for safe upgrades)** | Axiarch本体ファイル、Axiarch共有Blueprint、プロジェクト固有Blueprint、任意ファイル、本体リポジトリ専用ファイルの所有境界を定義するアップグレード用マニフェスト / Upgrade ownership manifest separating Axiarch-owned files, Axiarch-shared Blueprint rules, project-owned Blueprint state, optional files, and source-repository-only files |
 | `.codex/hooks.json` | 🔶 **Codex hook利用時のみ** / **Codex hook use only** | Codex固有のhook設定。`init.sh` で自動コピー / Codex-specific hook config. Auto-copied by `init.sh` |
 | `.agents/rules/prompt_pointer.md` | 🔶 **Antigravity のみ** / **Antigravity only** | Antigravity固有のポインター / Antigravity-specific pointer |
@@ -331,23 +341,23 @@ Future path-scoped rules may use `paths:` frontmatter on Universal rule files. T
 
 ```bash
 # 変更計画だけ確認 / Preview the plan only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.0 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.1 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --agent codex --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --agent codex --safe-only --apply
 
 # 非対話CI等で人間承認済みの計画を反映 / Apply a human-approved reviewed plan non-interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --safe-only --apply --yes
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --apply --yes
 
 # 任意プロンプトも明示的に含めて確認 / Preview with optional prompts explicitly included
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --safe-only --with-prompts --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --with-prompts --dry-run
 
 # グループごとに対話選択 / Choose each group interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --interactive
 ```
 
 | 選択肢 / Choice | 意味 / Meaning |
@@ -425,7 +435,7 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # 安定版タグ固定 / Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.12.0 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.12.1 bash
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness
@@ -550,7 +560,7 @@ your-project/
  │         ├── CRYSTALLIZATION_PROTOCOL.md
  │         ├── universal/          ← 不変 / Immutable
  │         └── blueprint/          ← プロジェクト固有 / Project-Specific
- ├── axiarch-harness/             ← 必須：実行ハーネス / Required: Execution Harness
+ ├── axiarch-harness/             ← 必須：ハーネスエンジニアリング実装 / Required: Harness Engineering implementation
  │    └── ja/ (or en/)
  │         ├── EXECUTION_HARNESS_PROTOCOL.md
  │         ├── AUDIT_GATE_PROTOCOL.md

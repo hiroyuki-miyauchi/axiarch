@@ -40,7 +40,7 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
- ├── axiarch-harness/           ← Execution, audit, evidence, approval, and delegation workflow
+ ├── axiarch-harness/           ← Harness Engineering: execution, audit, evidence, approval, and delegation workflow
  │    ├── ja/
  │    └── en/
  ├── axiarch-scripts/                  ← Recommended: diagnostic & hook externalized scripts

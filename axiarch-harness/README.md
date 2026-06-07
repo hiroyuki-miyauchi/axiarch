@@ -4,6 +4,10 @@
 
 `axiarch-harness/` は、エージェントが `AXIARCH.md` の正本プロトコルをロードした後、Axiarch作業をどう実行するかを定義する。
 
+This directory is the implementation unit for Harness Engineering. It turns Axiarch's rule model into concrete task levels, execution order, audit verdicts, role passes, evidence packets, human approval boundaries, and optional delegation.
+
+このディレクトリはハーネスエンジニアリングの実装単位である。Axiarchのルールモデルを、具体的なタスクレベル、実行順序、監査Verdict、役割パス、証跡パケット、人間承認境界、任意の委任へ変換する。
+
 This directory does not replace `axiarch-rules/`.
 Universal and Blueprint remain the rule source of truth.
 The harness is the operational workflow for planning, implementation, audit, evidence, approval, and optional subagent delegation.

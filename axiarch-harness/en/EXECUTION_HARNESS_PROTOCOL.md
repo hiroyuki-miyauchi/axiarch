@@ -4,6 +4,7 @@
 
 This document defines the operational workflow that turns Axiarch rules into task execution.
 After reading `AXIARCH.md` and `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, apply this protocol according to task level.
+This protocol is the core task-execution application of Harness Engineering as defined in `AXIARCH.md`. It is not a fourth rule layer; it connects the three-layer model to execution order, audit, evidence, and human approval.
 
 ## Task Levels
 

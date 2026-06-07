@@ -74,8 +74,8 @@ Usage:
 Options:
   --target DIR        Adopter project directory. Default: current directory.
   --source DIR        Local Axiarch source directory to upgrade from.
-  --to VERSION        Target Axiarch version label, e.g. v1.12.0 or main.
-  --ref REF           GitHub archive ref, e.g. tags/v1.12.0 or heads/main.
+  --to VERSION        Target Axiarch version label, e.g. v1.12.1 or main.
+  --ref REF           GitHub archive ref, e.g. tags/v1.12.1 or heads/main.
   --from VERSION      Optional base version for replace-if checks and 3-way merge.
   --from-ref REF      Optional base archive ref for replace-if checks and 3-way merge.
   --base-source DIR   Optional local base Axiarch source for replace-if checks and 3-way merge.
@@ -90,8 +90,8 @@ Options:
   --help              Show this help.
 
 Examples:
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --dry-run
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.0 --agent codex --safe-only --apply
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --agent codex --safe-only --apply
   bash axiarch-scripts/axiarch-upgrade.sh --source /path/to/axiarch --interactive
 USAGE
 }
@@ -723,7 +723,7 @@ group_label() {
   manifest_group_label "$1" && return 0
   case "$1" in
     core_protocol) printf '%s' "Core Protocol（中核プロトコル）" ;;
-    execution_harness) printf '%s' "Execution Harness（実行ハーネス）" ;;
+    execution_harness) printf '%s' "Execution Harness / Harness Engineering（実行ハーネス / ハーネスエンジニアリング）" ;;
     universal_rules) printf '%s' "Universal Rules（普遍憲法）" ;;
     scripts) printf '%s' "Scripts（診断・フックスクリプト）" ;;
     agent_hooks) printf '%s' "Agent Hooks & Native Config（エージェントフック・ネイティブ設定）" ;;

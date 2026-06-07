@@ -28,7 +28,7 @@ Axiarchは現在、個人プロジェクトとして管理されています。�
 | **Universal Rules** | `axiarch-rules/{lang}/universal/` | 不変（Immutable） | 「憲法改正」として明示的な承認が必要 |
 | **Blueprint** | `axiarch-rules/{lang}/blueprint/` | 可変（Mutable） | テンプレートの改善・追加を歓迎 |
 | **Canonical Entrypoint & Adapters** | `AXIARCH.md`, adapter pointers | 準不変 | 正本入口変更として慎重なレビューが必要 |
-| **Execution Harness** | `axiarch-harness/{lang}/` | 準不変 | 実行、監査、証跡、承認境界として慎重なレビューが必要 |
+| **Execution Harness** | `axiarch-harness/{lang}/` | 準不変 | ハーネスエンジニアリングの実行、監査、証跡、承認境界として慎重なレビューが必要 |
 | **Infrastructure** | `LOADING_PROTOCOL.md` 等 | 準不変 | 機能改善の提案を歓迎 |
 | **Prompt Library** | `axiarch-prompts/` | 可変（Mutable） | プロンプトの改善・追加を歓迎 |
 
@@ -106,7 +106,7 @@ Axiarch is currently maintained as a personal project. Contributions are accepte
 | **Universal Rules** | `axiarch-rules/{lang}/universal/` | Immutable | Requires explicit "Amend Constitution" approval |
 | **Blueprint** | `axiarch-rules/{lang}/blueprint/` | Mutable | Template improvements and additions welcome |
 | **Canonical Entrypoint & Adapters** | `AXIARCH.md`, adapter pointers | Semi-immutable | Requires careful review as canonical-entrypoint change |
-| **Execution Harness** | `axiarch-harness/{lang}/` | Semi-immutable | Requires careful review as execution, audit, evidence, and approval boundary |
+| **Execution Harness** | `axiarch-harness/{lang}/` | Semi-immutable | Requires careful review as the Harness Engineering boundary for execution, audit, evidence, and approval |
 | **Infrastructure** | `LOADING_PROTOCOL.md` etc. | Semi-immutable | Feature improvement proposals welcome |
 | **Prompt Library** | `axiarch-prompts/` | Mutable | Prompt improvements and additions welcome |
 

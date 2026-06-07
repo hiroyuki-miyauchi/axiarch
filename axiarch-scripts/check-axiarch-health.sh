@@ -843,16 +843,93 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     if grep -q "Axiarch実行ハーネス" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
       && grep -q "Usage / 使い方" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
       && grep -q "Protocol Map / プロトコル対応表" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
       && grep -q "メインエージェントが同じ役割パスを順番に実行する" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
       && grep -q "main agent performs the same role passes sequentially" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null; then
       print_pass "Axiarch source axiarch-harness/README.md keeps bilingual harness guidance explicit"
     else
       print_warn "Axiarch source axiarch-harness/README.md may not be bilingual enough for the canonical harness layer"
-      print_info "Expected the harness README to explain purpose, usage, protocol map, and main-agent fallback in both Japanese and English"
+      print_info "Expected the harness README to explain Harness Engineering, purpose, usage, protocol map, and main-agent fallback in both Japanese and English"
       DOCS_MISSING=1
     fi
   else
     print_warn "Axiarch source axiarch-harness/README.md not found — cannot verify harness README bilingual guidance"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md" \
+     && -f "${PROJECT_DIR}/axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md" ]]; then
+    if grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null \
+      && grep -q "3層モデル" "${PROJECT_DIR}/axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null \
+      && grep -q "three-layer model" "${PROJECT_DIR}/axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null; then
+      print_pass "Axiarch source execution harness protocols bind Harness Engineering to task execution in both Japanese and English"
+    else
+      print_warn "Axiarch source execution harness protocols may omit the Harness Engineering task-execution boundary"
+      print_info "Expected ja/en EXECUTION_HARNESS_PROTOCOL.md to state that Harness Engineering applies the three-layer model to task execution rather than adding a fourth rule layer"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source execution harness protocols missing — cannot verify Harness Engineering task-execution boundary"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/AXIARCH.md" \
+     && -f "${PROJECT_DIR}/README.md" \
+     && -f "${PROJECT_DIR}/CHANGELOG.md" \
+     && -f "${PROJECT_DIR}/CONTRIBUTING.md" \
+     && -f "${PROJECT_DIR}/ROADMAP.md" \
+     && -f "${PROJECT_DIR}/llms.txt" \
+     && -f "${PROJECT_DIR}/llms-full.txt" \
+     && -f "${PROJECT_DIR}/axiarch-manifest.json" \
+     && -f "${PROJECT_DIR}/axiarch-harness/README.md" \
+     && -f "${PROJECT_DIR}/axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md" \
+     && -f "${PROJECT_DIR}/axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/ja/README.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/en/README.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/ja/INDEX.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/en/INDEX.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/ja/blueprint/INDEX.md" \
+     && -f "${PROJECT_DIR}/axiarch-rules/en/blueprint/INDEX.md" \
+     && -f "${PROJECT_DIR}/axiarch-prompts/README.md" \
+     && -f "${PROJECT_DIR}/axiarch-scripts/README.md" ]]; then
+    if grep -q "Harness Engineering" "${PROJECT_DIR}/AXIARCH.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/AXIARCH.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/CONTRIBUTING.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/CONTRIBUTING.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-manifest.json" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-manifest.json" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-rules/ja/INDEX.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-rules/en/INDEX.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-rules/ja/blueprint/INDEX.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-rules/en/blueprint/INDEX.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-prompts/README.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-prompts/README.md" 2>/dev/null \
+      && grep -q "ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "Harness Engineering" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
+      print_pass "Axiarch source docs keep Harness Engineering explicit across canonical, public, manifest, harness protocol, rules, prompt, script, and AI-facing entrypoints"
+    else
+      print_warn "Axiarch source docs may omit Harness Engineering concept wording across one or more entrypoints"
+      print_info "Expected AXIARCH.md, README, CHANGELOG, CONTRIBUTING, ROADMAP, manifest, harness README/protocol files, llms files, rules README/INDEX files, prompt README, and scripts README to keep Harness Engineering explicit"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source docs missing one or more files needed for Harness Engineering entrypoint parity check"
     DOCS_MISSING=1
   fi
 
@@ -954,6 +1031,8 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "for action in update-all review-each show-diff skip" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "resolve_upgrade_version_label" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "normalize_axiarch_version_label" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
+      && grep -q "Execution Harness / Harness Engineering" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
+      && grep -q "実行ハーネス / ハーネスエンジニアリング" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "for domain in core ai design engineering operations product quality security" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "for rel in AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-harness axiarch-scripts axiarch-rules axiarch-prompts" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "copy_replace_if_local_unchanged" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
@@ -969,10 +1048,10 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q 'INTERACTIVE}" == "true"' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q 'read -r answer || answer=""' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q 'read -r choice || choice=""' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null; then
-      print_pass "Axiarch source upgrade wizard reads axiarch-manifest.json, honors manifest excludes, preserves source-only CI boundaries by default while allowing explicit interactive override, displays deduplicated effective group actions, normalizes upgrade metadata versions, discovers core Blueprint project state in fallback mode, hashes optional prompts when applied, enforces replace-if-local-unchanged review fallback with reason labels and base option guidance, records file/directory type conflicts for review, and handles EOF on interactive confirmations safely"
+      print_pass "Axiarch source upgrade wizard reads axiarch-manifest.json, honors manifest excludes, preserves source-only CI boundaries by default while allowing explicit interactive override, displays deduplicated effective group actions, normalizes upgrade metadata versions, keeps the fallback execution-harness group label aligned with Harness Engineering, discovers core Blueprint project state in fallback mode, hashes optional prompts when applied, enforces replace-if-local-unchanged review fallback with reason labels and base option guidance, records file/directory type conflicts for review, and handles EOF on interactive confirmations safely"
     else
       print_warn "Axiarch source upgrade wizard may not be fully wired to axiarch-manifest.json"
-      print_info "Expected manifest file parsing, manifest-driven group iteration, manifest exclude handling, source-only CI fallback classification with explicit interactive override, deduplicated effective action display, metadata version normalization, core Blueprint fallback discovery, optional prompt hashing, replace-if-local-unchanged enforcement with reason labels and base option guidance, type-conflict review logging, and EOF-safe interactive confirmation defaults"
+      print_info "Expected manifest file parsing, manifest-driven group iteration, manifest exclude handling, source-only CI fallback classification with explicit interactive override, deduplicated effective action display, metadata version normalization, Harness Engineering fallback group labeling, core Blueprint fallback discovery, optional prompt hashing, replace-if-local-unchanged enforcement with reason labels and base option guidance, type-conflict review logging, and EOF-safe interactive confirmation defaults"
       DOCS_MISSING=1
     fi
   else
@@ -1266,6 +1345,10 @@ EOF
   fi
 
   safe_prompt_missing=0
+  safe_prompt_current_version=""
+  if [[ -f "${PROJECT_DIR}/init.sh" ]]; then
+    safe_prompt_current_version=$(sed -n 's/^AXIARCH_VERSION="\([^"]*\)".*/\1/p' "${PROJECT_DIR}/init.sh" | head -n 1)
+  fi
   for lang in ja en; do
     if [[ ! -f "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" ]]; then
       print_warn "Axiarch source safe_upgrade_execute.md missing for ${lang}"
@@ -1281,6 +1364,10 @@ EOF
       safe_prompt_missing=1
     elif ! grep -q "axiarch-harness/{ja,en}" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
       print_warn "Axiarch source safe_upgrade_execute.md may be missing axiarch-harness language-existence cross-check for ${lang}"
+      safe_prompt_missing=1
+    elif [[ -n "${safe_prompt_current_version}" && "${safe_prompt_current_version}" != *"-dev" ]] \
+      && ! grep -q "raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v${safe_prompt_current_version}/axiarch-scripts/axiarch-upgrade.sh" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md temporary helper example may not point to current release v${safe_prompt_current_version} for ${lang}"
       safe_prompt_missing=1
     elif ! grep -q ".agents/rules/prompt_pointer.md" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
       print_warn "Axiarch source safe_upgrade_execute.md may be missing Antigravity detection via .agents/rules/prompt_pointer.md for ${lang}"
@@ -1446,8 +1533,16 @@ EOF
       docs_release_mismatch=1
     fi
 
+    if [[ "${is_dev_release}" -eq 0 && -f "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" ]]; then
+      if ! grep -q -- "--to v${init_version}" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
+        || ! grep -q -- "tags/v${init_version}" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null; then
+        print_warn "Axiarch source axiarch-upgrade.sh usage examples may not mention current release v${init_version}"
+        docs_release_mismatch=1
+      fi
+    fi
+
     if [[ "${docs_release_mismatch}" -eq 0 ]]; then
-      print_pass "Axiarch source repository docs mention the current release/build v${init_version}"
+      print_pass "Axiarch source repository docs and upgrade helper examples mention the current release/build v${init_version}"
     else
       release_version_mismatch=1
     fi

@@ -21,10 +21,10 @@ CLAUDE.md @hiroyuki-miyauchi
 .windsurfrules @hiroyuki-miyauchi
 
 # =============================================================================
-# Execution Harness — 実行ハーネス / Execution Harness
+# Execution Harness — 実行ハーネス / Harness Engineering
 # =============================================================================
-# 実行、監査、証跡、人間承認、委任境界に影響するため厳格なレビューが必要。
-# Requires strict review because it affects execution, audit, evidence, approval, and delegation boundaries.
+# ハーネスエンジニアリングの実行、監査、証跡、人間承認、委任境界に影響するため厳格なレビューが必要。
+# Requires strict review because it affects Harness Engineering execution, audit, evidence, approval, and delegation boundaries.
 
 axiarch-harness/ @hiroyuki-miyauchi
 
