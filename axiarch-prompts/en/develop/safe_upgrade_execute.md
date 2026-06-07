@@ -2,9 +2,9 @@
 
 > **Purpose**: Execute a selective, manifest-based Axiarch Core upgrade for an existing Axiarch adopter project
 >
-> **Target**: Existing Axiarch adopter projects (`AGENTS.md` + `axiarch-rules/` + optional `axiarch-scripts/` / `axiarch-prompts/`)
+> **Target**: Existing Axiarch adopter projects (current setup: `AXIARCH.md` + `AGENTS.md` adapter + `axiarch-rules/` + `axiarch-harness/`; legacy setup: `AGENTS.md` + `axiarch-rules/`; optional: `axiarch-scripts/` / `axiarch-prompts/`)
 >
-> **Usage**: Paste this prompt into an AI agent chat when you want to upgrade an existing project to a newer Axiarch release. The AI will enter standby mode; then provide the target version, target agent, language, and application policy.
+> **Usage**: Paste this prompt into an AI agent chat when you want to upgrade an existing project to a newer Axiarch release. The AI immediately runs Phase 0 context loading and Phase 1 auto-detection, then presents the inferred dry-run configuration for confirmation before running it.
 
 ---
 
@@ -27,7 +27,7 @@ Before executing any upgrade action, identify and directly load the following fi
 
 1. **Core Protocol**
    - Role: Top-level behavioral rules, deployment ban, existing asset protection, anti-full-overwrite, documentation requirements
-   - Candidate: `AGENTS.md`
+   - Candidate: `AXIARCH.md` (legacy fallback: `AGENTS.md`)
 2. **Loading / Crystallization Protocol**
    - Role: Rule loading procedure, `task.md` evidence recording, lesson crystallization, threshold checks
    - Candidates: `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
@@ -37,7 +37,7 @@ Before executing any upgrade action, identify and directly load the following fi
 4. **Upgrade Engine**
    - Role: Execution behavior for dry-run, safe-only, interactive, apply, merge, and metadata generation
    - Candidates: `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/README.md`
-   - If `axiarch-scripts/axiarch-upgrade.sh` is not installed yet, do not overwrite existing files. Fetch a tag-pinned temporary helper to `/tmp/axiarch-upgrade.sh` and run dry-run first. Example: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.10.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
+   - If `axiarch-scripts/axiarch-upgrade.sh` is not installed yet, do not overwrite existing files. Fetch a tag-pinned temporary helper to `/tmp/axiarch-upgrade.sh` and run dry-run first. Example: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
 5. **Project State**
    - Role: Existing project overview, project lessons, and Blueprint state
    - Candidates: `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`
@@ -59,13 +59,13 @@ First, inspect the local repository and ask the user only for information that c
    - If it cannot be inferred, mark it as unknown and continue with dry-run evidence.
 3. **Target version or source**
    - Prefer user-provided `--to vX.Y.Z`, `--ref tags/vX.Y.Z`, or `--source /path/to/axiarch`.
-   - If no target is provided, do not silently upgrade to the latest version; ask for the intended version or source.
+   - If no target is provided, present the latest release tag as an inferred candidate. If inference fails or the evidence is weak, ask for the intended version or source.
 4. **Target language**
    - Choose `--lang ja|en|both` according to `Project Native Language` and retained language folders.
 5. **Target agent**
    - Primary targets are `codex`, `claude`, and `antigravity`.
    - Treat Cursor, GitHub Copilot, and Windsurf only as pointer-compatibility candidates unless the project has separate validation evidence.
-   - **Projects that run multiple agents together (e.g. inucomi using codex+claude+antigravity) should use `--agent all`.** A single agent leaves the other agents' hooks out of the upgrade plan and lets them go stale. Under `--safe-only`, unused-agent pointers are never written, so `all` stays safe.
+   - Projects that run multiple agents together (for example, inucomi using codex+claude+antigravity) should use `--agent all`. A single agent leaves the other agents' hooks out of the upgrade plan and lets them go stale. Under `--safe-only`, unused-agent pointers are never written, so `all` stays safe.
 6. **Optional layer**
    - `axiarch-prompts/` is optional. Add `--with-prompts` only when the user explicitly wants prompt templates included.
 
@@ -75,7 +75,7 @@ First, inspect the local repository and ask the user only for information that c
 2. If currently on `main` or `master`, do not commit directly there. Create a branch that describes the upgrade work, while avoiding unnecessary nested branch topology.
 3. If already on a working branch, append changes to that branch. Never revert user or other-agent changes without explicit instruction.
 4. Classify uncommitted changes as related or unrelated to this upgrade. Do not touch unrelated work.
-5. Never run `git push` without explicit user permission.
+5. Never run `git add`, `git commit`, or `git push` without explicit user permission for that specific action.
 
 # Phase 3: Dry-Run First
 
@@ -105,14 +105,14 @@ Add these options as needed:
 --yes
 ```
 
-Use `--yes` only after reviewing the dry-run output. If confirmation input reaches EOF during `--apply` or `--interactive`, treat the wizard as defaulting to N and returning to dry-run behavior.
+Use `--yes` only after reviewing the dry-run output and receiving explicit human approval for apply. If confirmation input reaches EOF during `--apply` or `--interactive`, treat the wizard as defaulting to N and returning to dry-run behavior.
 
 Summarize dry-run results using this classification:
 
 | Class | Decision |
 |:--|:--|
-| Axiarch Core | `universal/`, protocols, scripts, manifest, and similar core files. Candidate for update |
-| Mixed Ownership | `AGENTS.md`, hook settings, Blueprint index, and similar files. Review required |
+| Axiarch Core | `universal/`, protocols, `axiarch-harness/`, scripts, manifest, and similar core files. Candidate for update |
+| Mixed Ownership | `AXIARCH.md` (contains Project Native Language), `AGENTS.md`, hook settings, Blueprint index, and similar files. Review required |
 | Project State | `blueprint/core/000_project_overview.md`, `blueprint/core/010_project_lessons_log.md`, `blueprint/*/{NNN}_*.md`. Preserve by default |
 | Axiarch-Shared Blueprint | Numbered Blueprint files explicitly listed in the manifest as Axiarch-owned rules. Review separately from Project State to keep README/INDEX links coherent |
 | Optional | `axiarch-prompts/` and similar optional files. Include only when explicitly selected |
@@ -128,12 +128,12 @@ After dry-run, decide execution policy using these criteria:
 
 1. **Safe-only candidates**
    - Axiarch-owned files/directories with `policy=replace`
-   - Examples: `axiarch-manifest.json`, `axiarch-rules/{lang}/universal`, `axiarch-scripts`
+   - Examples: `axiarch-manifest.json`, `axiarch-harness/{lang}`, `axiarch-rules/{lang}/universal`, `axiarch-scripts`
 2. **Explicit opt-in only**
    - `axiarch-prompts/`
    - Include only when the user selected `--with-prompts`
 3. **Review required**
-   - `AGENTS.md`, `.codex/hooks.json`, `.claude/settings.json`, `CLAUDE.md`, Blueprint indexes, and similar mixed-ownership files
+   - `AXIARCH.md` (contains Project Native Language), `AGENTS.md`, `.codex/hooks.json`, `.claude/settings.json`, `CLAUDE.md`, Blueprint indexes, and similar mixed-ownership files
    - Axiarch-shared Blueprint rules explicitly listed in the manifest
    - Files with `replace-if-local-unchanged` when no base is available, the base path is missing, or the target differs from the base
    - Exceptional cases where Source Repository Files need to be brought into an adopter project
@@ -229,7 +229,7 @@ Replace the legacy Stop & Wait mode (which required users to manually input five
 
 Without waiting, directly load:
 
-- `AGENTS.md` (top-level protocol)
+- `AXIARCH.md` (top-level protocol; legacy fallback: `AGENTS.md`)
 - `axiarch-rules/{lang}/LOADING_PROTOCOL.md`
 - `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
 - `axiarch-manifest.json` (ownership boundaries)
@@ -245,8 +245,8 @@ Record loaded files and the actual sections in `task.md`. Do NOT mark a file as 
 |:--|:--|:--|
 | **Current version** | `version` field in `.axiarch/version.json` | Infer from `axiarch-manifest.json` / `CHANGELOG.md`; if impossible, mark "unknown" |
 | **Upgrade target** | If user supplied `--source /path/to/axiarch`, prioritise it / otherwise `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` for the latest tag | If inference fails, ask the user |
-| **Target agent** | **Check all three representative files and enumerate every agent present** (keyed on what `init.sh` generates): `.claude/settings.json`→`claude` / `.codex/hooks.json`→`codex` / `.agents/rules/prompt_pointer.md`→`antigravity`. **Exactly one detected** → that agent / **Two or more detected (multi-agent project, e.g. inucomi using codex+claude+antigravity)** → `all` (a single agent would hide the other agents' hooks from the plan and leave them stale; under `--safe-only`, unused-agent pointers are surfaced as REVIEW only and never written) | **Only when zero detected**, propose `universal` (agent-agnostic files only) and confirm with the user |
-| **Target language** | Read `Project Native Language` in `AGENTS.md` and cross-check `axiarch-rules/{ja,en}/` existence | Only one language present → auto-adopt / both present → ask the user |
+| **Target agent** | Check all three representative files and enumerate every agent present (keyed on what `init.sh` generates): `.claude/settings.json` → `claude` / `.codex/hooks.json` → `codex` / `.agents/rules/prompt_pointer.md` → `antigravity`. Exactly one detected → that agent / Two or more detected (multi-agent project, for example inucomi using codex+claude+antigravity) → `all` (a single agent would hide the other agents' hooks from the plan and leave them stale; under `--safe-only`, unused-agent pointers are surfaced as REVIEW only and never written) | Only when zero detected, propose `universal` (agent-agnostic files only) and confirm with the user |
+| **Target language** | Read `Project Native Language` in `AXIARCH.md`; for legacy adopters, fall back to `AGENTS.md`, then cross-check `axiarch-rules/{ja,en}/` and `axiarch-harness/{ja,en}/` existence | Only one language present → auto-adopt / both present → ask the user |
 | **Application policy** | Default to `--safe-only --dry-run` (most conservative) | Use `--interactive` / `--with-prompts` only when explicitly requested |
 
 ## Step 3: Present Auto-Detection + User Confirmation (Safety Fence 1)
@@ -302,7 +302,7 @@ The following **always require explicit user approval** (no auto-execution):
 - `--with-prompts` (include optional layer)
 - Writes to mixed-ownership files
 - `--interactive` mode (user input required)
-- `git push` / `git tag` / `gh pr create` / `gh pr merge`
+- `git add` / `git commit` / `git push` / `git tag` / `gh pr create` / `gh pr merge`
 
 The following are **AI-autonomous OK** (no writes, or fully conservative):
 - Phase 0 context load
@@ -317,7 +317,7 @@ The following are **AI-autonomous OK** (no writes, or fully conservative):
 | **Current version == upgrade target** | Report "no upgrade needed" and exit |
 | **Multi-major/minor jump** (e.g., v1.6.0 → v1.11.0) | Also present intermediate-step option |
 | **`.axiarch/version.json` missing** (first upgrade) | No baseline → explain that diff detection starts after this run |
-| **Multiple agents detected = multi-agent project** (2+ of `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` present; e.g. inucomi = codex+claude+antigravity) | Propose `--agent all` as the inferred value. **Do NOT make the user pick just one** (any unpicked agent's hooks drop out of the plan and go stale across the upgrade). `all` surfaces every agent's hooks as REVIEW, and unused-agent pointers (cursor/copilot/windsurf) are not written under `--safe-only`. Update the hook files (mixed/review) per agent via `--interactive` |
+| **Multiple agents detected = multi-agent project** (two or more of `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` exist; for example inucomi = codex+claude+antigravity) | Present `--agent all` as the inferred value. Do not let the flow pick only one agent, because the unselected agents' hooks would disappear from the upgrade plan and go stale. `all` surfaces every agent's hooks for REVIEW, and unused-agent pointers (cursor/copilot/windsurf) are not written under `--safe-only`. Update mixed/review hook files per agent via `--interactive` when applying actual changes |
 | **Release lookup fails** (network / wrong repo name) | Ask the user to provide `--source` |
 
 ## Fallback to Legacy Stop & Wait

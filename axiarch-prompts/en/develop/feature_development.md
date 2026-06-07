@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (source code + `axiarch-rules/{lang}/blueprint/`)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide specific implementation requirements.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide specific implementation requirements.
 
 ---
 
@@ -73,9 +73,9 @@ Reduce material risks and raise the quality floor across the following universal
 # Phase 0: Rule Hierarchy (Complete Governance Framework Loading)
 **Before any technical judgment or modification, identify and load the "project constitution" and apply upper-layer rules as highest-priority.**
 
-1.  **Load Core Protocol (`AGENTS.md`) — Highest Priority / Critical Compliance**:
-    * **Mandatory Full Scan**: If `AGENTS.md` (or equivalent top-level directive) exists in the root directory, **read this file in its entirety before anything else, missing not a single word.**
-    * **Override Power**: Contents of `AGENTS.md` take precedence over ALL other instructions including this prompt, treated as the **"highest-priority protocol."** In case of conflict, follow `AGENTS.md`.
+1.  **Load Core Protocol (`AXIARCH.md`) — Highest Priority / Critical Compliance**:
+    * **Mandatory Full Scan**: If `AXIARCH.md` (or equivalent top-level directive) exists in the root directory, **read this file in its entirety before anything else, missing not a single word.**
+    * **Override Power**: Contents of `AXIARCH.md` take precedence over ALL other instructions including this prompt, treated as the **"highest-priority protocol."** In case of conflict, follow `AXIARCH.md`.
 2.  **Dynamic Rule Discovery (Complete Rule Hierarchy Mastery)**:
     * Scan all files under `axiarch-rules/` directory and strictly distinguish between the following **2 Classes.**
     * **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
@@ -100,11 +100,11 @@ Reduce material risks and raise the quality floor across the following universal
         * Simulate related features and table designs, identifying **"debt presence," "security risks (vulnerabilities)," "cost impact," and "processing load."**
         * **Strategic Proposal Scan**: Simultaneously, based on **Execution Standards' 20 dimensions (GEO, AI, LTV, operability, extensibility, legal, etc.)**, deeply think about **"unaddressed opportunity losses" and "room for improvement"**, and **list improvement proposals even without explicit instructions.**
     * **For Debugging / Audit**:
-        * **Identify error root causes and deviations from the constitution (AGENTS.md), analyzing side effects of fixes.**
+        * **Identify error root causes and deviations from the constitution (AXIARCH.md), analyzing side effects of fixes.**
     * **Request Specifics**: Only ask the user to provide file contents when specific code details are needed: "Please provide the contents of `XXX.tsx`."
 3.  **Comprehensive Gap Analysis (Enhanced)**:
     * Cross-reference against the **Mission's 17 domains** and strictly check for **"unimplemented/unaddressed features (e.g., GEO optimization, legal compliance, load distribution)."**
-    * **Compliance Audit**: **If current code violates the "constitution (AGENTS.md)" or "security standards," list these as "critical defects requiring remediation."**
+    * **Compliance Audit**: **If current code violates the "constitution (AXIARCH.md)" or "security standards," list these as "critical defects requiring remediation."**
     * For risk areas or areas where higher cost-performance is achievable, create a **proactive "improvement/enhancement proposal"** list.
 
 # Phase 2: Architecture & Strategy Planning
@@ -150,7 +150,7 @@ Reduce material risks and raise the quality floor across the following universal
 
 * **Rule Update Proposal**:
     * If "anti-patterns (things NOT to do)" or "best practices (things TO do)" were newly discovered, present proposals for additions/modifications to **relevant files in `axiarch-rules/{lang}/blueprint/`** (per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping) mapped to **Targets 1–5.**
-    * **Adopter-project default protection**: `AGENTS.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
+    * **Adopter-project default protection**: `AXIARCH.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
     * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary accumulation point, NOT the final destination. Distribute to relevant domain-specific Blueprint files and promote to rules. Follow the procedure in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
     * **New File Creation**: If no suitable existing file exists, present a **new file creation proposal** following 3-digit Sparse Numbering conventions within the same directory.
     * This ensures that in the next development cycle, the AI (you) can **start in a smarter state.**
@@ -177,12 +177,12 @@ Reduce material risks and raise the quality floor across the following universal
 **For the very first response after receiving this prompt, strictly comply with the following behavior.**
 
 1.  **Stop & Wait**: **Do NOT generate any code, proposals, investigations, or hypotheses.**
-2.  **Ack Only**: Your only action is "role acceptance" and "standby."
+2.  **Ack Only**: Your only action is "role acceptance" and "Phase-0-gated input wait."
 3.  **Response Template**: Respond ONLY in the following format. Extraneous greetings or proposals are noise and prohibited.
 
 ```text
 [Input Required: Lead Full-Stack Architect & Strategic Growth Engineer]
-Upon receiving your instruction, Phase 0 will be the first action — loading AGENTS.md and axiarch-rules/ per the defined protocol. No guesses or hypotheses will be output before loading is complete.
+Upon receiving your instruction, Phase 0 will be the first action — loading AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files per the defined protocol. No guesses or hypotheses will be output before loading is complete.
 
 Currently **awaiting your "specific implementation requirements (Context)" input.**
 Upon instruction, will execute Phase 0 (Constitution Load), then initiate Phase 1 (Analysis),

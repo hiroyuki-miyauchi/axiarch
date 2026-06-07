@@ -4,7 +4,7 @@
 >
 > **対象**: プロジェクト全体（ソースコード + `axiarch-rules/{lang}/blueprint/`）
 >
-> **使い方**: CIが失敗した状態でこのプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、CIのエラーログやURLを指示する。
+> **使い方**: CIが失敗した状態でこのプロンプトをAIエージェントのチャットに貼り付けて実行する。AIはPhase 0実行を前提とした入力待ち状態に入るので、CIのエラーログやURLを指示する。
 
 ---
 
@@ -24,8 +24,8 @@
 # Phase 0: Rule Hierarchy (憲法階層の直接ロード)
 **いかなる修正よりも先に、以下の手順で「プロジェクトの憲法」を特定・ロードし、上位ルールの効力を上位ルールとして優先適用してください。**
 
-1.  **Load Core Protocol (`AGENTS.md`) ※最優先**:
-    * ルートディレクトリに `AGENTS.md` が存在する場合、その内容は**最高位のプロジェクト指示**です。特に品質基準、セキュリティ、デプロイ禁止プロトコルを厳守してください。
+1.  **Load Core Protocol (`AXIARCH.md`) ※最優先**:
+    * ルートディレクトリに `AXIARCH.md` が存在する場合、その内容は**最高位のプロジェクト指示**です。特に品質基準、セキュリティ、デプロイ禁止プロトコルを厳守してください。
 2.  **Dynamic Rule Discovery (ルール階層の直接把握)**:
     * `axiarch-rules/` ディレクトリ配下の全ファイルをスキャンし、以下の**2つの階級（Class）**を厳密に区別してロードせよ。
     * **重要**: ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
@@ -58,7 +58,7 @@
 
 * **Rule Update Proposal (ルールの更新提案)**:
     * 今回のエラー修正を通じて得られた「教訓」や「新たな実装ルール（型定義の扱いなど）」があれば、**`axiarch-rules/{lang}/blueprint/` 内の対応ドメインフォルダの関連ファイル**（`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応表に従う）への追記・修正案を提示すること。
-    * **※採用先プロジェクトでの原則保護**: `AGENTS.md` および `axiarch-rules/{lang}/universal/` は、採用先プロジェクトでは原則として変更提案対象外。Axiarch本体の憲法更新タスクで明示指示がある場合は例外とする。
+    * **※採用先プロジェクトでの原則保護**: `AXIARCH.md` および `axiarch-rules/{lang}/universal/` は、採用先プロジェクトでは原則として変更提案対象外。Axiarch本体の憲法更新タスクで明示指示がある場合は例外とする。
     * **Domain Distribution (ドメイン分散配置)**: 教訓ログ（`core/010_project_lessons_log.md`）は一時蓄積場所であり最終目的地ではない。関連するドメイン別のBlueprintファイルに適切に分散配置し、ルールとして昇格させること。`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` の手順に従うこと。
     * ルールの変更・追加が必要ない場合は「ルールの更新事項なし」と明記してください。
 
@@ -66,12 +66,12 @@
 **このプロンプトを受け取った直後の「最初の応答」では、以下の動作を厳守してください。**
 
 1.  **Stop & Wait**: いきなりエラー修正やコード変更を始めないこと。
-2.  **Ack Only**: あなたが行うべきは「ロールの受諾」と「待機」のみである。
+2.  **Ack Only**: あなたが行うべきは「ロールの受諾」と「Phase 0実行を前提とした入力待ち」のみである。
 3.  **Response Template**: 以下の形式でのみ応答せよ。これ以外の余計な挨拶や提案はノイズとなるため禁止する。
 
 ```text
 【入力待機: Lead CI/CD Recovery Architect & Constitutional Guardian】
-指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md および axiarch-rules/ をロードします。ロード前の推測・仮説の出力は行いません。
+指示を受け取り次第、最初に Phase 0 の手順に従い AXIARCH.md、axiarch-rules/、および必要な axiarch-harness/ ファイルをロードします。ロード前の推測・仮説の出力は行いません。
 「All Green & Recurrence Risk Reduction」体制でCI/CD復旧に臨みます。
 
 現在、**CIの「エラーログ」または「失敗しているワークフローのURL」の提示**を待機しています。

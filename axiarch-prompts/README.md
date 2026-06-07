@@ -10,11 +10,13 @@
 2. 用途に合うフォルダを開く（`develop/`, `audit/`, `govern/`, `operate/`）
 3. プロンプトファイルを開く
 4. 内容をコピーしてAIエージェントのチャットに貼り付ける
-5. AIが待機状態に入るので、具体的な指示を追加する
+5. AIがPhase 0実行を前提とした入力待ち状態に入ったら、具体的な指示を追加する
 
-> **注意**: 初期セットアップ時に使用しない方の言語ディレクトリを削除できます（`axiarch-rules/` と同様）。
+> **注意**: 既定では日本語・英語ディレクトリを両方保持します。単一言語運用に明示的に固定する場合だけ、`axiarch-rules/` と同様に、使用しない方の言語ディレクトリをレビューして削除できます。
 
 > **ネイティブタスク状態**: Codexでこれらのプロンプトを使う場合は `update_plan` も併用し、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を併用してください。`task.md` / `implementation_plan.md` / `walkthrough.md` は現在タスク用のMarkdown証跡であり、エージェント独自のタスク・プラン表示を自動更新するものではありません。
+
+> **実行ハーネスとの関係**: これらのプロンプトは `AXIARCH.md` と `axiarch-harness/` の代替ではありません。実行、監査、証跡、人間承認、サブエージェント委任の境界は、常に `AXIARCH.md` と関連する harness protocol を正本として確認してください。
 
 ---
 
@@ -47,7 +49,7 @@ ja/  (または en/)
 | データ整合性（JSON逃がし・Split Brain）を検査したい | `audit/` | `data_integrity_audit.md` |
 | 型安全性・API/DB同期・ハリボテを検出したい | `audit/` | `system_integrity_audit.md` |
 | パフォーマンス・メディア最適化の漏れを検出したい | `audit/` | `deep_optimization_audit.md` |
-| 憲法（AGENTS.md / Universal Rules）への準拠を監査したい | `govern/` | `constitution_compliance_audit.md` または `compliance_inspector_audit.md` |
+| 憲法（AXIARCH.md / Universal Rules）への準拠を監査したい | `govern/` | `constitution_compliance_audit.md` または `compliance_inspector_audit.md` |
 | セキュリティ・法務・AI・アーキテクチャの全方位ガバナンス監査 | `govern/` | `governance_auditor.md` |
 | 開発知見をBlueprintルールに結晶化したい | `govern/` | `blueprint_governance_audit.md` |
 | ローカリゼーション品質を監査したい | `govern/` | `localization_audit.md` |
@@ -63,7 +65,7 @@ ja/  (または en/)
 | プロンプト | 焦点 | 使い分け |
 |:---------|:----|:--------|
 | `governance_auditor.md` | 8柱（Security/Business/Legal/AI/Architecture等）の**全方位ガバナンス**。ビジネス・法務・ROIまで含む広範な監査 | プロジェクト全体の健全性を定期的に評価したいとき |
-| `constitution_compliance_audit.md` | **憲法（AGENTS.md / Universal Rules）への準拠**に特化。7つの重大違反フレームワーク | ルール違反が疑われるとき・憲法との乖離を検証したいとき |
+| `constitution_compliance_audit.md` | **憲法（AXIARCH.md / Universal Rules）への準拠**に特化。7つの重大違反フレームワーク | ルール違反が疑われるとき・憲法との乖離を検証したいとき |
 | `compliance_inspector_audit.md` | **8つの重大憲法違反**フレームワーク。より詳細かつ厳格な違反検出 | 深層レベルのコンプライアンス徹底調査をしたいとき |
 
 ---
@@ -153,11 +155,13 @@ This directory contains **reusable prompt templates** designed to elevate the qu
 2. Open the folder matching your goal (`develop/`, `audit/`, `govern/`, `operate/`)
 3. Open a prompt file
 4. Copy the content and paste it into your AI agent's chat
-5. The AI enters standby mode — then add your specific instructions
+5. The AI enters a Phase-0-gated input-waiting state — then add your specific instructions
 
-> **Note**: During initial setup, you can delete the unused language directory, just like with `axiarch-rules/`.
+> **Note**: Keep both Japanese and English directories by default. Only when intentionally fixing the project to single-language operation, review and remove the unused language directory, as with `axiarch-rules/`.
 
 > **Native task state**: When using these prompts in Codex, also use `update_plan`. In Claude Code, also use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. `task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence and do not automatically update an agent's native task/plan panel.
+
+> **Execution harness relationship**: These prompts do not replace `AXIARCH.md` or `axiarch-harness/`. Execution, audit, evidence, human approval, and subagent-delegation boundaries must always be checked against `AXIARCH.md` and the relevant harness protocol as the source of truth.
 
 ---
 
@@ -190,7 +194,7 @@ ja/  (or en/)
 | Inspect data integrity (JSON dump, Split Brain) | `audit/` | `data_integrity_audit.md` |
 | Detect type safety issues, API/DB sync, and facade patterns | `audit/` | `system_integrity_audit.md` |
 | Detect performance and media optimization gaps | `audit/` | `deep_optimization_audit.md` |
-| Audit compliance with the Constitution (AGENTS.md / Universal Rules) | `govern/` | `constitution_compliance_audit.md` or `compliance_inspector_audit.md` |
+| Audit compliance with the Constitution (AXIARCH.md / Universal Rules) | `govern/` | `constitution_compliance_audit.md` or `compliance_inspector_audit.md` |
 | Full-spectrum governance audit (Security/Legal/AI/Architecture) | `govern/` | `governance_auditor.md` |
 | Crystallize development insights into Blueprint rules | `govern/` | `blueprint_governance_audit.md` |
 | Audit localization quality | `govern/` | `localization_audit.md` |
@@ -206,7 +210,7 @@ These three prompts have similar names but distinct roles:
 | Prompt | Focus | When to Use |
 |:-------|:------|:------------|
 | `governance_auditor.md` | **Full-spectrum governance** across 8 pillars (Security/Business/Legal/AI/Architecture, etc.). Covers business, legal, and ROI. | Periodic overall health evaluation of the project |
-| `constitution_compliance_audit.md` | **Constitutional compliance** (AGENTS.md / Universal Rules). 7 major violation framework. | When rule violations are suspected or you want to verify alignment |
+| `constitution_compliance_audit.md` | **Constitutional compliance** (AXIARCH.md / Universal Rules). 7 major violation framework. | When rule violations are suspected or you want to verify alignment |
 | `compliance_inspector_audit.md` | **8 major constitutional violations** framework — deeper and more rigorous. | Deep-dive constitutional compliance investigation |
 
 ---

@@ -1,7 +1,7 @@
 # Project Lessons Log (プロジェクト教訓ログ)
 
 このファイルは、プロジェクト開発を通じて得られた重要な教訓、アンチパターン、および新たに確立された運用ルールを集約するためのログです。
-`AGENTS.md` の "Continuous Improvement — Auto-Crystallization Protocol" に基づき、AIが自律的にこのファイルを管理します。
+`AXIARCH.md` からロードされる `CRYSTALLIZATION_PROTOCOL.md` に基づき、AIが自律的にこのファイルを管理します。
 
 > [!IMPORTANT]
 > **Auto-Crystallization Protocol（自動結晶化プロトコル）**
@@ -64,7 +64,7 @@
 ### [Initial] プロジェクト開始時の教訓
 **Domain:** ガバナンス
 **Context:** 新規プロジェクトまたはルールの刷新時。
-**Rule:** `AGENTS.md` および `axiarch-rules` のプロトコルを基準として遵守すること。
+**Rule:** `AXIARCH.md` をAxiarchの入口正本として扱い、詳細なプロトコル本体は `AXIARCH.md` から `axiarch-rules` をロードして参照すること。`AGENTS.md` は対応環境向けアダプターとして扱うこと。
 
 ---
 
@@ -88,7 +88,7 @@
 
 | カテゴリ | 関連 Universal ルール |
 |---|---|
-| 教訓の結晶化プロセス | `AGENTS.md` §9 Continuous Improvement — Auto-Crystallization Protocol |
+| 教訓の結晶化プロセス | `CRYSTALLIZATION_PROTOCOL.md` |
 | コア原則違反の教訓 | `core/000_core_mindset` |
 | セキュリティ教訓 | `security/000_security_privacy` |
 | パフォーマンス教訓 | `engineering/000_engineering_standards`, `quality/000_qa_testing` |

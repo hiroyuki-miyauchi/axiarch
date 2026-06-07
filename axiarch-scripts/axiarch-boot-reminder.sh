@@ -25,13 +25,13 @@
 # v1.8.0+ TASK BOUNDARY DETECTION (Check D):
 #   - Reads current user prompt from stdin (Claude Code passes JSON payload)
 #   - Extracts domain keywords (security/architecture/ui_design/api/performance/etc.)
-#   - Compares against the AGENTS §8.4 mandatory trio (task.md / implementation_plan.md
+#   - Compares against the AXIARCH current-task mandatory trio (task.md / implementation_plan.md
 #     / walkthrough.md) — full-text grep, not just task.md's load-history table
 #   - On mismatch: VIOLATION-D + force full reminder (override TTL short-circuit)
 #   - Addresses the "AI judges 'same session, no re-load needed' and slacks" issue
 #     identified by adopter feedback. Removes AI's self-judgment loophole.
 #   - Reading all 3 process docs avoids false positives where the plan / walkthrough
-#     already contains the prompt's domain context (per §8.4 these files are kept
+#     already contains the prompt's domain context (these files are kept
 #     up-to-date by the AI; trusting all 3 mirrors the AI's actual working state).
 #
 #   TTL: ${AXIARCH_REMINDER_TTL_SECONDS:-1800}  (default 30 min, 0 disables short-circuit)
@@ -71,12 +71,12 @@ fi
 # distributed via .claude/settings.json or .codex/hooks.json before externalization)
 # -----------------------------------------------------------------------------
 read -r -d '' CORE_REMINDER <<'EOF' || true
-[AXIARCH BOOT] This project enforces axiarch governance. Before responding, the AI applies AGENTS.md (top-level protocol — Project Configuration + 9 protocols) and LOADING_PROTOCOL.md BOOT SEQUENCE. Output language follows the Project Native Language declared in AGENTS.md and is applied to every heading, summary, label, list, and table. Rule files actually opened and read by the AI (AGENTS.md, INDEX.md, LOADING_PROTOCOL.md, etc.) must be recorded in task.md per AGENTS.md §8 (Process & Documentation, item 4 — Documentation Requirements); missing or stale load records are treated as protocol violations. task.md / implementation_plan.md / walkthrough.md are current-task Markdown evidence, not native task/plan UI state. When available, Codex must also update_plan, and Claude Code must also use TaskCreate / TaskUpdate / TaskList / TaskGet, with TodoWrite only as an older-runtime fallback. On task completion, the AI runs CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK and, when any domain in core/010_project_lessons_log.md holds 3+ unsorted lessons, promotes them into a dedicated Blueprint file before declaring the task done — appending to core/010 alone is not completion. / 本プロジェクトは axiarch ガバナンスを採用しています。応答前に AGENTS.md（最上位プロトコル・Project Configuration + 9 プロトコル）と LOADING_PROTOCOL.md の BOOT SEQUENCE を適用します。応答言語は AGENTS.md で宣言された Project Native Language に従い、見出し・要約・ラベル・箇条書き・表すべてに適用されます。AI が実際に開いて読んだルールファイル (AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 等) は AGENTS.md §8 (Process & Documentation 第 4 項 — ドキュメント生成要件) に基づき task.md に記録する必要があります。未記録または実態と一致しないロード記録はプロトコル違反として扱われます。task.md / implementation_plan.md / walkthrough.md は現在タスク用のMarkdown証跡であり、ネイティブなタスク・プランUI状態ではありません。対応ランタイムでは Codex は update_plan、Claude Code は TaskCreate / TaskUpdate / TaskList / TaskGet も併用し、TodoWrite は古いランタイム向けのフォールバックに限定します。タスク完了時は CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK を実行し、core/010_project_lessons_log.md のドメインに 3 件以上の未整理教訓がある場合は Blueprint 専用ファイルへ昇華してから完了を宣言します。core/010 への追記だけでは完了とみなされません。
+[AXIARCH BOOT] This project enforces axiarch governance. Before responding, the AI applies AXIARCH.md (canonical protocol) and LOADING_PROTOCOL.md BOOT SEQUENCE. Tool adapters such as AGENTS.md point to AXIARCH.md and are not separate rule sources. Output language follows the Project Native Language declared in AXIARCH.md and is applied to every heading, summary, label, list, and table. Rule files actually opened and read by the AI (AXIARCH.md, INDEX.md, LOADING_PROTOCOL.md, etc.) must be recorded in task.md; missing or stale load records are treated as protocol violations. task.md / implementation_plan.md / walkthrough.md are current-task Markdown evidence, not native task/plan UI state. When available, Codex must also update_plan, and Claude Code must also use TaskCreate / TaskUpdate / TaskList / TaskGet, with TodoWrite only as an older-runtime fallback. On task completion, the AI runs CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK and, when any domain in core/010_project_lessons_log.md holds 3+ unsorted lessons, promotes them into a dedicated Blueprint file before declaring the task done — appending to core/010 alone is not completion. / 本プロジェクトは axiarch ガバナンスを採用しています。応答前に AXIARCH.md（正本プロトコル）と LOADING_PROTOCOL.md の BOOT SEQUENCE を適用します。AGENTS.md などのツールアダプターは AXIARCH.md への入口であり、別のルール正本ではありません。応答言語は AXIARCH.md で宣言された Project Native Language に従い、見出し・要約・ラベル・箇条書き・表すべてに適用されます。AI が実際に開いて読んだルールファイル (AXIARCH.md / INDEX.md / LOADING_PROTOCOL.md 等) は task.md に記録する必要があります。未記録または実態と一致しないロード記録はプロトコル違反として扱われます。task.md / implementation_plan.md / walkthrough.md は現在タスク用のMarkdown証跡であり、ネイティブなタスク・プランUI状態ではありません。対応ランタイムでは Codex は update_plan、Claude Code は TaskCreate / TaskUpdate / TaskList / TaskGet も併用し、TodoWrite は古いランタイム向けのフォールバックに限定します。タスク完了時は CRYSTALLIZATION_PROTOCOL Step 5 THRESHOLD CHECK を実行し、core/010_project_lessons_log.md のドメインに 3 件以上の未整理教訓がある場合は Blueprint 専用ファイルへ昇華してから完了を宣言します。core/010 への追記だけでは完了とみなされません。
 EOF
 
 # v1.6.0+ short-circuit reminder (used after TTL window when no violations)
 read -r -d '' SHORT_REMINDER <<'EOF' || true
-[AXIARCH REMINDER] axiarch governance applies to this project. Continue applying AGENTS.md / LOADING_PROTOCOL / Project Native Language, and keep native task/plan state in sync when available. Full reminder reappears on TTL expiry, violation detection, or new session. / axiarch ガバナンスは本プロジェクトに適用されます。AGENTS.md / LOADING_PROTOCOL / Project Native Language の適用を継続し、利用可能な場合はネイティブなタスク・プラン状態も同期してください。TTL 期限切れ・違反検出・新規 session 時に full reminder が再表示されます。
+[AXIARCH REMINDER] axiarch governance applies to this project. Continue applying AXIARCH.md / LOADING_PROTOCOL / Project Native Language, and keep native task/plan state in sync when available. Full reminder reappears on TTL expiry, violation detection, or new session. / axiarch ガバナンスは本プロジェクトに適用されます。AXIARCH.md / LOADING_PROTOCOL / Project Native Language の適用を継続し、利用可能な場合はネイティブなタスク・プラン状態も同期してください。TTL 期限切れ・違反検出・新規 session 時に full reminder が再表示されます。
 EOF
 
 VIOLATIONS=""
@@ -85,11 +85,11 @@ VIOLATIONS=""
 # Check A: task.md missing load history
 # -----------------------------------------------------------------------------
 if [[ -f "${PROJECT_DIR}/task.md" ]]; then
-  if ! grep -qE "AGENTS\.md|INDEX\.md|LOADING_PROTOCOL\.md" "${PROJECT_DIR}/task.md" 2>/dev/null; then
-    VIOLATIONS="${VIOLATIONS} 🚨 [VIOLATION-A] task.md にロード履歴 (AGENTS.md/INDEX.md/LOADING_PROTOCOL.md) が未記録。即座に記録せよ。/ task.md missing load history — record immediately."
+  if ! grep -qE "AXIARCH\.md|AGENTS\.md|INDEX\.md|LOADING_PROTOCOL\.md" "${PROJECT_DIR}/task.md" 2>/dev/null; then
+    VIOLATIONS="${VIOLATIONS} 🚨 [VIOLATION-A] task.md にロード履歴 (AXIARCH.md/INDEX.md/LOADING_PROTOCOL.md) が未記録。即座に記録せよ。/ task.md missing load history — record immediately."
   fi
 fi
-# Note: task.md absence is allowed (created on first task per AGENTS §8.4).
+# Note: task.md absence is allowed (created on first task per AXIARCH current-task protocol).
 
 # -----------------------------------------------------------------------------
 # Check B: Crystallization threshold breach (3+ unsorted per domain)
@@ -191,7 +191,7 @@ if [[ "${AXIARCH_TASK_BOUNDARY_DETECT:-1}" == "1" ]] && [[ -n "${INPUT}" ]]; the
       | tr '[:upper:]' '[:lower:]' \
       | sort -u | tr '\n' ',' | sed 's/,$//')
 
-    # Extract previously-known domains from the AGENTS §8.4 mandatory trio:
+    # Extract previously-known domains from the AXIARCH current-task mandatory trio:
     #   task.md, implementation_plan.md, walkthrough.md
     # Rationale: domain context often lives in implementation_plan.md (the plan
     # written during task analysis) and walkthrough.md (the diff narrative),

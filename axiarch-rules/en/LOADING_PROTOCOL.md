@@ -1,6 +1,6 @@
 # LOADING_PROTOCOL.md — Rule Loading Protocol
 
-> **This file defines the detailed rule loading procedure. Referenced from AGENTS.md §8.**
+> **This file defines the detailed rule loading procedure. Referenced from `AXIARCH.md`.**
 
 > Universal Rules is a baseline governance rule library across technology and operational domains. The AI selectively loads only what each task requires, following LOADING_PROTOCOL. Rules for technologies your project does not currently use are optional reference assets that help raise the quality floor when those technologies become relevant.
 
@@ -24,8 +24,8 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 | Hook | Fires when | Role | Externalised script |
 |:--|:--|:--|:--|
-| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task files and injects AGENTS.md §8 reminder. Existing content is archived to `.axiarch/process-doc-history/` by `axiarch-task-state.sh` | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
-| `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps AGENTS.md / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `SessionStart` | Conversation begins | Auto-bootstraps `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task files and injects an `AXIARCH.md` reminder. Existing content is archived to `.axiarch/process-doc-history/` by `axiarch-task-state.sh` | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
+| `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (factual + dynamic violation detection) that keeps `AXIARCH.md` / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | Blocks full-overwrite of existing files in supported environments (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | After file-editing tools | Measures git diff changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
 
@@ -49,11 +49,11 @@ Operational principles:
 1. In Codex, call `update_plan` when multi-step work begins, and keep exactly one `in_progress` step while work is active.
 2. In Claude Code, prefer Task tools when available: `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`. Use `TodoWrite` only as a fallback for older SDK or non-interactive runtimes without Task tools.
 3. Do not claim that native UI state has been updated merely because Markdown files were written. Native UI update is complete only when the relevant native tool has been called.
-4. Unless `AXIARCH_PROCESS_DOC_MODE=append` is explicitly set, treat the three files as current-task documents and avoid indefinite appending of past task content. Template language defaults to detection from `AGENTS.md` `Project Native Language`; set `AXIARCH_PROCESS_DOC_LANG=ja|en` only when an adopter needs an explicit override.
+4. Unless `AXIARCH_PROCESS_DOC_MODE=append` is explicitly set, treat the three files as current-task documents and avoid indefinite appending of past task content. Template language defaults to detection from `AXIARCH.md` `Project Native Language`, with `AGENTS.md` as a legacy fallback; set `AXIARCH_PROCESS_DOC_LANG=ja|en` only when an adopter needs an explicit override.
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration) and, in the Axiarch source repository, v1.10.0+ release metadata parity, Safe Upgrade Wizard manifest wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, and the `axiarch-scripts/` required/optional boundary in README, llms, and scripts README. It is distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration) and, in the Axiarch source repository, v1.10.0+ release metadata parity, Safe Upgrade Wizard manifest wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, the `axiarch-scripts/` required/optional boundary in README, llms, and scripts README, and the Claude Memory canonical boundary. It is distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
 
 ---
 
@@ -160,15 +160,15 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 
 | Situation | Re-load Scope | Rationale |
 |:--|:--|:--|
-| **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AGENTS §8 (4) obligation |
+| **New session (new chat / post context reset)** | Full BOOT SEQUENCE required (Steps 1-4) + verify `task.md` load history | Memory not inherited; AXIARCH.md / LOADING_PROTOCOL load-history obligation |
 | **Same session, task type changed** | Load only additional domain files for the new task type. Already-loaded Universal Rules / Blueprint files do not need re-loading | `axiarch-rules/{lang}/INDEX.md` → task type → folder mapping is stable |
 | **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.8.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and emits a full reminder + 🚨 [VIOLATION-D] when a new keyword is detected | YAGNI + context-budget protection + Check D reduces confirmation-bias risk |
 | **Long session resumed after pause (e.g. compaction trigger)** | Compare `task.md` load history with the current conversation context; re-load any file that cannot be treated as actually loaded in the current context. However, when the `[AXIARCH BOOT]` reminder TTL expires (v1.6.0+ default 30 min), perform full re-verification | `axiarch-boot-reminder.sh` TTL state; mitigates serial-position effects in LLM memory |
 
 > **Operational Principles**:
 > - **Treat the `task.md` load history as the Single Source of Truth for load candidates and evidence**. However, a filename in history does not by itself mean the current AI has the content available. If the current context cannot justify that the file is actually loaded, re-load it.
-> - **Memory-inherited skipping across sessions is permitted only for the same continuing task when load evidence and current context clearly match; the AI MUST explicitly record what was skipped and why in task.md** (e.g., "Continued from prior session; AGENTS.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule").
-> - **When in doubt, full re-load**. Hallucination risk reduction (AGENTS.md §0 HIGHEST-PRIORITY RULE) outweighs context-budget savings.
+> - **Memory-inherited skipping across sessions is permitted only for the same continuing task when load evidence and current context clearly match; the AI MUST explicitly record what was skipped and why in task.md** (e.g., "Continued from prior session; AXIARCH.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule").
+> - **When in doubt, full re-load**. Hallucination risk reduction (AXIARCH.md / LOADING_PROTOCOL BOOT SEQUENCE) outweighs context-budget savings.
 
 > **Problem this addresses (v1.6.0 background)**:
 > The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this reduces token cost ~87% while making adherence easier to maintain.
@@ -178,7 +178,7 @@ Explicit resolution of the trade-off between "full load = no laziness" and "cont
 >
 > 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
 > 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.
-> 3. **Full-text greps the AGENTS §8.4 mandatory trio** — `task.md` / `implementation_plan.md` / `walkthrough.md` — for previously-known domain keywords. Captures domain context from the plan and walkthrough, not just task.md's load-history table
+> 3. **Full-text greps the AXIARCH current-task mandatory trio** — `task.md` / `implementation_plan.md` / `walkthrough.md` — for previously-known domain keywords. Captures domain context from the plan and walkthrough, not just task.md's load-history table
 > 4. **On mismatch**: emits `🚨 [VIOLATION-D]` flag + **TTL bypass** (suppresses short-circuit, re-emits the full reminder)
 >
 > The result: the system no longer depends only on the AI's "task type unchanged" self-judgment. Task-boundary candidates are detected at the hook layer and can require rule re-load. Disable via `AXIARCH_TASK_BOUNDARY_DETECT=0`; override the keyword set via `AXIARCH_TASK_DOMAIN_KEYWORDS`.

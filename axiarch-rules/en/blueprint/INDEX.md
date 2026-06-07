@@ -122,8 +122,8 @@ Strategies for generating next-generation "value".
 ## Operational Guide
 
 ### Initial Setup
-1. Set `Project Native Language` in `AGENTS.md`
-2. Optionally delete the unused language folder (`ja/` or `en/`) only when fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`
+1. Set `Project Native Language` in `AXIARCH.md`. Legacy adopters may use `AGENTS.md` as a fallback
+2. Keep both Japanese and English directories by default. Review and remove `axiarch-rules/{unused-lang}/` and `axiarch-harness/{unused-lang}/`, plus `axiarch-prompts/{unused-lang}/` when prompts are installed, only when intentionally fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`
 3. Rewrite `core/000_project_overview.md` with your project's content
 
 ### Adding Feature Specs (Blueprint First)
@@ -179,6 +179,6 @@ Strategies for generating next-generation "value".
 
 ---
 
-**Last Updated**: 2026-05-17
-**Version**: v1.11.2 — Multi-agent detection fix for Safe Upgrade (Antigravity detection path fix + `--agent all` recommendation for multi-agent projects) (v1.11.1: Hybrid Autonomous Boot Sequence / v1.11.0: Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation)
+**Last Updated**: 2026-06-07
+**Version**: v1.12.0-dev — AXIARCH.md canonical entrypoint and Execution Harness support (v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation)
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

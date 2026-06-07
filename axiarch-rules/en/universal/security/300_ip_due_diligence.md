@@ -1357,181 +1357,6 @@ jobs:
 
 ---
 
-# XIII. IP Monetization Strategy (§53)
-
----
-
-## §53. IP as a Standalone Revenue Stream
-
-### Rule 63.390: IP Licensing Monetization Framework
-- **Monetization Model Types**:
-
-| Model | Overview | Best Fit | Revenue Scale |
-|---|---|---|---|
-| **Licensing (Non-exclusive)** | Grant same IP license to multiple licensees | Widely adopted tech (incl. SEPs) | Medium–Large |
-| **Licensing (Exclusive)** | Exclusive license to single licensee | Strong synergy in specific market | Large |
-| **Cross-licensing** | Mutual IP exchange, effectively royalty-free | Litigation avoidance, R&D acceleration with competitors | Cash-neutral |
-| **Patent Pool Participation** | Contribute patents to MPEG-LA / Via / Avanci etc. | SEP holders, standards technology | Medium–Large (stable) |
-| **IP Holding Company (IPCo)** | Establish dedicated IP holding/licensing entity | Large portfolios, business separation | Large |
-| **Outright Assignment** | Transfer full IP ownership to third party | Strategically non-core IP, fundraising | Lump sum |
-| **IP Tokenization / Fractional** | Fractional ownership sold on blockchain | Liquidity creation, multi-investor participation | Emerging / uncertain |
-
-### Rule 63.391: Licensing Program Design
-- **Royalty Rate-Setting Principles**:
-  - Use **industry benchmark rates (§28 Rule 63.202)** as reference
-  - **Comparable License Agreements (CLAs)**: Collect and database past comparable licensing precedents as negotiation basis
-  - **Nash Bargaining Solution**: Economic framework for rate-setting (SSPPU: Smallest Saleable Patent Practicing Unit as calculation basis)
-  - **Royalty Stacking**: Evaluate the reasonableness of total stacked royalties when multiple IPs overlap (especially critical in FRAND context)
-
-- **Licensing Agreement Mandatory Clauses**:
-  - [ ] Explicit licensed IP identification (patent numbers, version-controlled IP list as attachment)
-  - [ ] Scope of license (geography, field, purpose, sublicense rights)
-  - [ ] Royalty basis (SSPPU / end-product price / fixed fee)
-  - [ ] Reporting & Audit Rights (annual, cost allocation, trigger conditions)
-  - [ ] Most Favored Licensee (MFN) clause consideration (exercise caution for SEP/FRAND)
-  - [ ] Grantback clause for improvement inventions (non-exclusive strongly recommended; exclusive creates antitrust risk)
-  - [ ] Termination conditions (patent invalidation, payment default, bankruptcy)
-  - [ ] Arbitration & governing law (recommend WIPO/ICC arbitration for licensing disputes)
-
-### Rule 63.392: IPCo (IP Holding Company) Strategy
-- **IPCo Design Objectives**:
-  - Ring-fence IP from operating company risks (litigation, insolvency)
-  - Tax efficiency optimization (IP-favorable jurisdictions: Netherlands "Innovation Box", Ireland "Knowledge Development Box", Luxembourg "IP Box")
-  - Centralized licensing program management
-
-- **Tax Considerations for IPCo Establishment**:
-  - **BEPS (Base Erosion and Profit Shifting)**: Comply with OECD BEPS Action 13 (transfer pricing, country-by-country reporting)
-  - **Pillar Two (Global Minimum Tax 15%)**: Confirm effective tax rate in IPCo jurisdiction (calculate top-up tax for erosion prevention)
-  - **Transfer pricing documentation**: Prepare ALP (Arm's Length Principle)-based valuation at IP transfer (country-by-country reporting obligation)
-
-### Rule 63.393: Patent Pools and Licensing Consortia
-- **Participation Decision Criteria**:
-  - Whether company patents are recognized as essential technology within the pool (Essentiality evaluation)
-  - Whether the pool's royalty rate meets FRAND conditions accepted in the market
-  - Impact on competitor relationships through pool participation (shared licensing → licenses granted to competitors)
-
-- **Major Patent Pools (as of 2025)**:
-
-| Pool | Technology Area | Notes |
-|---|---|---|
-| **MPEG-LA** | HEVC / VVC / H.264 / AVC | Encoders and decoders covered |
-| **Via Licensing (under Sisvel)** | Wi-Fi / Bluetooth / 4G / 5G | Pool for standardized SEPs |
-| **Avanci** | IoT / Automotive (4G/5G) | FRAND consolidated licensing model |
-| **Access Advance** | VVC / H.266 / HEVC Plus | Next-gen video compression standard |
-| **Open Patent Alliance (OPA)** | Wi-Fi / Bluetooth | Low-cost access for SMEs |
-
-### Rule 63.394: PAE (Patent Assertion Entity) vs. Operating Company — Attack & Defense
-- **Defensive Strategy (when attacked by PAE)**:
-  - File IPR (Inter Partes Review) at PTAB (Patent Trial and Appeal Board) for invalidation
-  - Prioritize negotiated settlement (weigh against total litigation cost)
-  - Join LOT Network / OIN if not already a member
-  - Leverage anti-PAE defense services (RPX / Unified Patents)
-
-- **Offensive Strategy (active enforcement of own IP)**:
-  - Always conduct FTO analysis before enforcement actions (pre-assess retaliatory litigation risk)
-  - Consider ITC Section 337 (import exclusion orders — fast and powerful but strict requirements)
-  - Utilize litigation cost insurance and contingency fee law firms
-
-### Rule 63.395: IP Licensing KPIs and Financial Management
-- **Mandatory KPIs**:
-  - License revenue (absolute + as percentage of total business revenue)
-  - Active licensee count (by region and field)
-  - Reporting/audit cycle compliance rate (count of delinquent licensees)
-  - Unpaid/delayed royalty incidents and collection rate
-  - Average negotiation duration for new license acquisitions
-
-- **Financial Management of License Revenue**:
-  - Visualize license revenue as **an independent line item on the P&L** (directly impacts IPO and investor valuations)
-  - Separate management of guaranteed fees (fixed) and running royalties (variable) (per ASC 606 / IFRS 15)
-  - Map to intangible asset amortization (GAAP/IFRS in-progress intangible asset accounting)
-
----
-
-# XIV. Antitrust & IP (§54)
-
----
-
-## §54. IP × Competition Law in the GenAI Era
-
-### Rule 63.400: Overview of Antitrust-IP Intersection
-- **Core Tension**: IP grants temporary monopoly rights (patents: 20 years, copyright: 70+ years) — competition law regulates market monopolies
-- **IP Exemption Principle**: IP enforcement is generally not anticompetitive, but the following acts are regulated:
-  - IP sheltering with intent to monopolize entire markets
-  - SEP license refusals in violation of FRAND terms
-  - Patent evergreening (artificially extending market monopolies to block competitor entry)
-  - Price coordination through anticompetitive patent pools or cross-licensing
-
-### Rule 63.401: GenAI Monopoly Risk (2025-2026 Latest Developments)
-- **Global AI Monopoly Investigations**:
-  - **EU**: European Commission investigating competitive concerns from OpenAI / Microsoft / Google / AWS / NVIDIA in AI markets (2025–)
-  - **US**: DOJ/FTC investigating FANG/Big Tech enclosure of base models (API access restriction, data monopolization)
-  - **UK**: CMA identified AI supply chain competition risks in "AI Foundation Models: Initial Report" (2024)
-  - **Japan**: Japan Fair Trade Commission investigating dominance abuse risks by AI system providers (2024 report)
-
-- **Specific Antitrust Risk Scenarios**:
-  - Exclusive API access restriction → downstream startup market exclusion
-  - Training data monopolization (e.g., full internet snapshot → insurmountable entry barrier for later entrants)
-  - GPU-AI software bundling (tying arrangement)
-  - Patent/model monopolization via acqui-hires of competing startups by AI-capable incumbents
-
-### Rule 63.402: FRAND Principle Extension to GenAI
-- **Academic and Regulatory Trends (2025-2026)**:
-  - Some regulators and academics advocate FRAND-like access obligations for AI foundation model training data and inference APIs
-  - EU AI Act Article 53: GPAI providers must disclose technical documentation and training data summaries → FRAND-like transparency requirements
-  - **Key watch point**: Mandatory compulsory access (Compulsory Access) to foundation model APIs is emerging on the regulatory agenda
-- **Strategic Implications**:
-  - As market share grows, exclusionary IP exercise faces stricter regulation
-  - Pre-assess risk that your AI technology/data will face FRAND-like disclosure demands
-
-### Rule 63.403: Global Antitrust Compliance for IP
-- **US (DOJ/FTC)**:
-  - **IP Licensing Antitrust Guidelines (2017 version)**: DOJ/FTC guidance on IP licensing (currently under revision for AI/digital markets)
-  - **Single Entity Doctrine**: Cross-licensing among affiliated entities is generally lawful; price coordination among unrelated competitors is illegal
-  - **Market Definition**: Define AI/IP markets (patent class, technology market, innovation market)
-
-- **EU (European Commission / DG COMP)**:
-  - **TTBER (Technology Transfer Block Exemption Regulation) 2014/316/EU**: Block exemption for patent and know-how licensing in EU (safe harbor from competition law)
-  - TTBER market share thresholds: **20%** or below for competing undertakings; **30%** or below for non-competing undertakings = safe harbor
-  - **Hardcore restrictions**: Price-fixing, market partitioning, and output limitations fall outside TTBER safe harbor
-
-- **Japan (Japan Fair Trade Commission)**:
-  - **Guidelines for the Use of Intellectual Property under the Antimonopoly Act (2023 revision)**: Criteria for IP licensing restriction assessment
-  - **Dominance abuse**: Large platforms refusing IP licenses to startups
-
-- **China (SAMR — State Administration for Market Regulation)**:
-  - Comply with provisions prohibiting exclusion of competition through IP abuse (effective 2023)
-  - Risk of administrative sanctions for FRAND violations on SEPs (strengthened post-Qualcomm case)
-
-### Rule 63.404: Patent Evergreening vs. Legitimate Continuation Strategy
-- **Illegitimate Evergreening (Regulated)**:
-  - Artificially extending market monopoly through patent renewal based solely on minor formulation/process changes
-  - Mass filing of improvement patents without novelty/inventive step to create blocking positions (especially pharma and AI)
-  - Pay-for-Delay (Reverse Payment Settlements): Paying generic companies to delay market entry
-
-- **Distinction from Legitimate Continuation Strategies (→§8 Rule 63.072)**:
-  - Filings containing substantive technical improvements are justified
-  - Document internal review procedures for assessing the presence of improvement to reduce evergreening classification risk
-
-### Rule 63.405: Digital Markets Act (DMA) & IP Intersection
-- **EU Digital Markets Act (DMA) — Effective 2023**:
-  - **Gatekeeper designation**: Google / Apple / Meta / Amazon / Microsoft / ByteDance are designated "gatekeepers" — subject to additional obligations
-  - **IP Intersection Points**:
-    - **Interoperability obligation**: Messaging service interoperability mandate → Protocol patents may effectively require FRAND-like disclosure
-    - **Data portability obligation**: User data transfer → Reconcile with database rights and trade secrets
-    - **App store reform**: Third-party app distribution obligation → Mandated access to platform IP
-  - **Response strategy**: Even non-gatekeepers should assess indirect DMA compliance exposure from transactions with gatekeeper entities
-
-### Rule 63.406: Antitrust Compliance Program for IP
-- **Mandatory Elements of IP Licensing Antitrust Compliance**:
-  - [ ] Annual antitrust law training for IP licensing staff
-  - [ ] "Do's and Don'ts" guide for information exchange and license negotiations with competitors
-  - [ ] Antitrust law review (external counsel) before entering cross-licenses or patent pools
-  - [ ] Regular verification of TTBER market share thresholds (EU) — establish response flow for threshold breach
-  - [ ] Pre-assess competition authority notification obligations for IP-related M&A and JVs
-
----
-
-
 # XI. Geopolitical Risk & Export Controls (§51)
 
 ---
@@ -1731,6 +1556,181 @@ steps:
 
 
 ---
+
+# XIII. IP Monetization Strategy (§53)
+
+---
+
+## §53. IP as a Standalone Revenue Stream
+
+### Rule 63.390: IP Licensing Monetization Framework
+- **Monetization Model Types**:
+
+| Model | Overview | Best Fit | Revenue Scale |
+|---|---|---|---|
+| **Licensing (Non-exclusive)** | Grant same IP license to multiple licensees | Widely adopted tech (incl. SEPs) | Medium–Large |
+| **Licensing (Exclusive)** | Exclusive license to single licensee | Strong synergy in specific market | Large |
+| **Cross-licensing** | Mutual IP exchange, effectively royalty-free | Litigation avoidance, R&D acceleration with competitors | Cash-neutral |
+| **Patent Pool Participation** | Contribute patents to MPEG-LA / Via / Avanci etc. | SEP holders, standards technology | Medium–Large (stable) |
+| **IP Holding Company (IPCo)** | Establish dedicated IP holding/licensing entity | Large portfolios, business separation | Large |
+| **Outright Assignment** | Transfer full IP ownership to third party | Strategically non-core IP, fundraising | Lump sum |
+| **IP Tokenization / Fractional** | Fractional ownership sold on blockchain | Liquidity creation, multi-investor participation | Emerging / uncertain |
+
+### Rule 63.391: Licensing Program Design
+- **Royalty Rate-Setting Principles**:
+  - Use **industry benchmark rates (§28 Rule 63.202)** as reference
+  - **Comparable License Agreements (CLAs)**: Collect and database past comparable licensing precedents as negotiation basis
+  - **Nash Bargaining Solution**: Economic framework for rate-setting (SSPPU: Smallest Saleable Patent Practicing Unit as calculation basis)
+  - **Royalty Stacking**: Evaluate the reasonableness of total stacked royalties when multiple IPs overlap (especially critical in FRAND context)
+
+- **Licensing Agreement Mandatory Clauses**:
+  - [ ] Explicit licensed IP identification (patent numbers, version-controlled IP list as attachment)
+  - [ ] Scope of license (geography, field, purpose, sublicense rights)
+  - [ ] Royalty basis (SSPPU / end-product price / fixed fee)
+  - [ ] Reporting & Audit Rights (annual, cost allocation, trigger conditions)
+  - [ ] Most Favored Licensee (MFN) clause consideration (exercise caution for SEP/FRAND)
+  - [ ] Grantback clause for improvement inventions (non-exclusive strongly recommended; exclusive creates antitrust risk)
+  - [ ] Termination conditions (patent invalidation, payment default, bankruptcy)
+  - [ ] Arbitration & governing law (recommend WIPO/ICC arbitration for licensing disputes)
+
+### Rule 63.392: IPCo (IP Holding Company) Strategy
+- **IPCo Design Objectives**:
+  - Ring-fence IP from operating company risks (litigation, insolvency)
+  - Tax efficiency optimization (IP-favorable jurisdictions: Netherlands "Innovation Box", Ireland "Knowledge Development Box", Luxembourg "IP Box")
+  - Centralized licensing program management
+
+- **Tax Considerations for IPCo Establishment**:
+  - **BEPS (Base Erosion and Profit Shifting)**: Comply with OECD BEPS Action 13 (transfer pricing, country-by-country reporting)
+  - **Pillar Two (Global Minimum Tax 15%)**: Confirm effective tax rate in IPCo jurisdiction (calculate top-up tax for erosion prevention)
+  - **Transfer pricing documentation**: Prepare ALP (Arm's Length Principle)-based valuation at IP transfer (country-by-country reporting obligation)
+
+### Rule 63.393: Patent Pools and Licensing Consortia
+- **Participation Decision Criteria**:
+  - Whether company patents are recognized as essential technology within the pool (Essentiality evaluation)
+  - Whether the pool's royalty rate meets FRAND conditions accepted in the market
+  - Impact on competitor relationships through pool participation (shared licensing → licenses granted to competitors)
+
+- **Major Patent Pools (as of 2025)**:
+
+| Pool | Technology Area | Notes |
+|---|---|---|
+| **MPEG-LA** | HEVC / VVC / H.264 / AVC | Encoders and decoders covered |
+| **Via Licensing (under Sisvel)** | Wi-Fi / Bluetooth / 4G / 5G | Pool for standardized SEPs |
+| **Avanci** | IoT / Automotive (4G/5G) | FRAND consolidated licensing model |
+| **Access Advance** | VVC / H.266 / HEVC Plus | Next-gen video compression standard |
+| **Open Patent Alliance (OPA)** | Wi-Fi / Bluetooth | Low-cost access for SMEs |
+
+### Rule 63.394: PAE (Patent Assertion Entity) vs. Operating Company — Attack & Defense
+- **Defensive Strategy (when attacked by PAE)**:
+  - File IPR (Inter Partes Review) at PTAB (Patent Trial and Appeal Board) for invalidation
+  - Prioritize negotiated settlement (weigh against total litigation cost)
+  - Join LOT Network / OIN if not already a member
+  - Leverage anti-PAE defense services (RPX / Unified Patents)
+
+- **Offensive Strategy (active enforcement of own IP)**:
+  - Always conduct FTO analysis before enforcement actions (pre-assess retaliatory litigation risk)
+  - Consider ITC Section 337 (import exclusion orders — fast and powerful but strict requirements)
+  - Utilize litigation cost insurance and contingency fee law firms
+
+### Rule 63.395: IP Licensing KPIs and Financial Management
+- **Mandatory KPIs**:
+  - License revenue (absolute + as percentage of total business revenue)
+  - Active licensee count (by region and field)
+  - Reporting/audit cycle compliance rate (count of delinquent licensees)
+  - Unpaid/delayed royalty incidents and collection rate
+  - Average negotiation duration for new license acquisitions
+
+- **Financial Management of License Revenue**:
+  - Visualize license revenue as **an independent line item on the P&L** (directly impacts IPO and investor valuations)
+  - Separate management of guaranteed fees (fixed) and running royalties (variable) (per ASC 606 / IFRS 15)
+  - Map to intangible asset amortization (GAAP/IFRS in-progress intangible asset accounting)
+
+---
+
+# XIV. Antitrust & IP (§54)
+
+---
+
+## §54. IP × Competition Law in the GenAI Era
+
+### Rule 63.400: Overview of Antitrust-IP Intersection
+- **Core Tension**: IP grants temporary monopoly rights (patents: 20 years, copyright: 70+ years) — competition law regulates market monopolies
+- **IP Exemption Principle**: IP enforcement is generally not anticompetitive, but the following acts are regulated:
+  - IP sheltering with intent to monopolize entire markets
+  - SEP license refusals in violation of FRAND terms
+  - Patent evergreening (artificially extending market monopolies to block competitor entry)
+  - Price coordination through anticompetitive patent pools or cross-licensing
+
+### Rule 63.401: GenAI Monopoly Risk (2025-2026 Latest Developments)
+- **Global AI Monopoly Investigations**:
+  - **EU**: European Commission investigating competitive concerns from OpenAI / Microsoft / Google / AWS / NVIDIA in AI markets (2025–)
+  - **US**: DOJ/FTC investigating FANG/Big Tech enclosure of base models (API access restriction, data monopolization)
+  - **UK**: CMA identified AI supply chain competition risks in "AI Foundation Models: Initial Report" (2024)
+  - **Japan**: Japan Fair Trade Commission investigating dominance abuse risks by AI system providers (2024 report)
+
+- **Specific Antitrust Risk Scenarios**:
+  - Exclusive API access restriction → downstream startup market exclusion
+  - Training data monopolization (e.g., full internet snapshot → insurmountable entry barrier for later entrants)
+  - GPU-AI software bundling (tying arrangement)
+  - Patent/model monopolization via acqui-hires of competing startups by AI-capable incumbents
+
+### Rule 63.402: FRAND Principle Extension to GenAI
+- **Academic and Regulatory Trends (2025-2026)**:
+  - Some regulators and academics advocate FRAND-like access obligations for AI foundation model training data and inference APIs
+  - EU AI Act Article 53: GPAI providers must disclose technical documentation and training data summaries → FRAND-like transparency requirements
+  - **Key watch point**: Mandatory compulsory access (Compulsory Access) to foundation model APIs is emerging on the regulatory agenda
+- **Strategic Implications**:
+  - As market share grows, exclusionary IP exercise faces stricter regulation
+  - Pre-assess risk that your AI technology/data will face FRAND-like disclosure demands
+
+### Rule 63.403: Global Antitrust Compliance for IP
+- **US (DOJ/FTC)**:
+  - **IP Licensing Antitrust Guidelines (2017 version)**: DOJ/FTC guidance on IP licensing (currently under revision for AI/digital markets)
+  - **Single Entity Doctrine**: Cross-licensing among affiliated entities is generally lawful; price coordination among unrelated competitors is illegal
+  - **Market Definition**: Define AI/IP markets (patent class, technology market, innovation market)
+
+- **EU (European Commission / DG COMP)**:
+  - **TTBER (Technology Transfer Block Exemption Regulation) 2014/316/EU**: Block exemption for patent and know-how licensing in EU (safe harbor from competition law)
+  - TTBER market share thresholds: **20%** or below for competing undertakings; **30%** or below for non-competing undertakings = safe harbor
+  - **Hardcore restrictions**: Price-fixing, market partitioning, and output limitations fall outside TTBER safe harbor
+
+- **Japan (Japan Fair Trade Commission)**:
+  - **Guidelines for the Use of Intellectual Property under the Antimonopoly Act (2023 revision)**: Criteria for IP licensing restriction assessment
+  - **Dominance abuse**: Large platforms refusing IP licenses to startups
+
+- **China (SAMR — State Administration for Market Regulation)**:
+  - Comply with provisions prohibiting exclusion of competition through IP abuse (effective 2023)
+  - Risk of administrative sanctions for FRAND violations on SEPs (strengthened post-Qualcomm case)
+
+### Rule 63.404: Patent Evergreening vs. Legitimate Continuation Strategy
+- **Illegitimate Evergreening (Regulated)**:
+  - Artificially extending market monopoly through patent renewal based solely on minor formulation/process changes
+  - Mass filing of improvement patents without novelty/inventive step to create blocking positions (especially pharma and AI)
+  - Pay-for-Delay (Reverse Payment Settlements): Paying generic companies to delay market entry
+
+- **Distinction from Legitimate Continuation Strategies (→§8 Rule 63.072)**:
+  - Filings containing substantive technical improvements are justified
+  - Document internal review procedures for assessing the presence of improvement to reduce evergreening classification risk
+
+### Rule 63.405: Digital Markets Act (DMA) & IP Intersection
+- **EU Digital Markets Act (DMA) — Effective 2023**:
+  - **Gatekeeper designation**: Google / Apple / Meta / Amazon / Microsoft / ByteDance are designated "gatekeepers" — subject to additional obligations
+  - **IP Intersection Points**:
+    - **Interoperability obligation**: Messaging service interoperability mandate → Protocol patents may effectively require FRAND-like disclosure
+    - **Data portability obligation**: User data transfer → Reconcile with database rights and trade secrets
+    - **App store reform**: Third-party app distribution obligation → Mandated access to platform IP
+  - **Response strategy**: Even non-gatekeepers should assess indirect DMA compliance exposure from transactions with gatekeeper entities
+
+### Rule 63.406: Antitrust Compliance Program for IP
+- **Mandatory Elements of IP Licensing Antitrust Compliance**:
+  - [ ] Annual antitrust law training for IP licensing staff
+  - [ ] "Do's and Don'ts" guide for information exchange and license negotiations with competitors
+  - [ ] Antitrust law review (external counsel) before entering cross-licenses or patent pools
+  - [ ] Regular verification of TTBER market share thresholds (EU) — establish response flow for threshold breach
+  - [ ] Pre-assess competition authority notification obligations for IP-related M&A and JVs
+
+---
+
 
 # XV. VC Fundraising & IP Milestones (§55)
 

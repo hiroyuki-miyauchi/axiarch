@@ -1,6 +1,6 @@
 {
   "manifestVersion": 1,
-  "axiarchVersion": "1.11.2",
+  "axiarchVersion": "1.12.0-dev",
   "description": "Axiarch upgrade ownership manifest. Axiarch Core can be updated; Project State must be preserved unless the operator explicitly reviews and accepts a change.",
   "groups": [
     {
@@ -9,6 +9,13 @@
       "labelJa": "中核プロトコル",
       "defaultAction": "review-each",
       "risk": "medium"
+    },
+    {
+      "id": "execution_harness",
+      "label": "Execution Harness",
+      "labelJa": "実行ハーネス",
+      "defaultAction": "update-all",
+      "risk": "low"
     },
     {
       "id": "universal_rules",
@@ -26,8 +33,8 @@
     },
     {
       "id": "agent_hooks",
-      "label": "Agent Hooks",
-      "labelJa": "エージェントフック",
+      "label": "Agent Hooks & Native Config",
+      "labelJa": "エージェントフック・ネイティブ設定",
       "defaultAction": "review-each",
       "risk": "medium"
     },
@@ -84,14 +91,33 @@
   },
   "files": [
     {
-      "path": "AGENTS.md",
+      "path": "AXIARCH.md",
       "group": "core_protocol",
       "owner": "mixed",
       "policy": "review"
     },
     {
+      "path": "AGENTS.md",
+      "group": "pointer_files",
+      "owner": "mixed",
+      "policy": "review",
+      "agents": ["codex", "agents-md", "universal"]
+    },
+    {
       "path": "axiarch-manifest.json",
       "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-harness/README.md",
+      "group": "execution_harness",
+      "owner": "axiarch",
+      "policy": "replace"
+    },
+    {
+      "path": "axiarch-harness/{lang}",
+      "group": "execution_harness",
       "owner": "axiarch",
       "policy": "replace"
     },
@@ -146,7 +172,7 @@
     },
     {
       "path": "CLAUDE.md",
-      "group": "agent_hooks",
+      "group": "pointer_files",
       "owner": "mixed",
       "policy": "review",
       "agents": ["claude"]

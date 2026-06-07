@@ -101,9 +101,10 @@
 > [!NOTE]
 > This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. All three are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
 
-1.  **Copy**: The minimal required setup is `AGENTS.md` plus `axiarch-rules/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` only when you want safe-upgrade support. `axiarch-prompts/` is optional.
+1.  **Copy**: The minimal required setup is `AXIARCH.md`, the `AGENTS.md` adapter, `axiarch-rules/`, and `axiarch-harness/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash
-    cp -r axiarch-rules AGENTS.md /path/to/your/project/
+    cp AXIARCH.md AGENTS.md /path/to/your/project/
+    cp -r axiarch-rules axiarch-harness /path/to/your/project/
 
     # Recommended when using safe upgrades
     cp axiarch-manifest.json /path/to/your/project/
@@ -114,28 +115,25 @@
     For existing adopter projects, use `axiarch-scripts/axiarch-upgrade.sh` to update Axiarch-owned files such as Universal rules and scripts while preserving project-owned Blueprint state by default.
 
 2.  **Agent Rules Pointer Setup**:
-    If your AI agent tool (e.g., Antigravity) auto-loads `.agents/rules/`, place a **pointer file** to reference `axiarch-rules/`.
+    If your AI agent tool (e.g., Antigravity) auto-loads `.agents/rules/`, place a **pointer file** to reference `AXIARCH.md`.
     ```bash
     # Create .agents/rules/ directory
     mkdir -p /path/to/your/project/.agents/rules
 
     # Place prompt_pointer.md as a pointer (copy from this repo's .agents/rules/)
-    # NOTE: Rule definitions live in axiarch-rules/. Only pointers go in .agents/rules/.
+    # NOTE: AXIARCH.md is the canonical entrypoint. Only pointers go in .agents/rules/.
     cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/prompt_pointer.md
     ```
 
     > [!CAUTION]
     > **DO NOT create new rule files in `.agents/rules/`.**
-    > All rule additions/edits MUST be made in `axiarch-rules/`.
-    > `.agents/rules/` is strictly a **pointer (table of contents)**, NOT the rules themselves.
+    > Rule body additions/edits MUST be made in `axiarch-rules/`, loaded through `AXIARCH.md`.
+    > `.agents/rules/` is strictly a **pointer to AXIARCH.md**, NOT the rules themselves.
 
 3.  **Initialize**:
-    *   **Edit `AGENTS.md`**: Set `Project Native Language` to `English`.
-    *   **Cleanup**: Optionally delete the unused Japanese language directory only when fixing the project to single-language operation. (Do the same if you included the prompt library)
-        ```bash
-        rm -rf axiarch-rules/ja
-        # If you copied the prompt library: rm -rf axiarch-prompts/ja
-        ```
+    *   **Project Native Language**: When using `init.sh`, the selected language is written into `AXIARCH.md` automatically. For manual copy, set `Project Native Language` in `AXIARCH.md` to `English`. Legacy adopters may use `AGENTS.md` as a fallback.
+    *   **Cleanup**: Keep both Japanese and English directories by default. Review and remove unused language directories only when intentionally fixing the project to single-language operation. (Do the same if you included the prompt library)
+        Examples to review for an English-only project: `axiarch-rules/ja` and `axiarch-harness/ja`, plus `axiarch-prompts/ja` if you copied the prompt library.
 
 4.  **Configure**: Edit `axiarch-rules/en/blueprint/core/000_project_overview.md` to define your project overview, and prepare `axiarch-rules/en/blueprint/core/010_project_lessons_log.md` as the starting point for lesson recording.
 
@@ -147,29 +145,34 @@
 
 ```
 your-project/
- ├── AGENTS.md                    ← Top-Level Protocol
+ ├── AXIARCH.md                   ← Canonical entrypoint
+ ├── AGENTS.md                    ← Adapter for AGENTS.md readers
  ├── .agents/
  │    └── rules/
- │         └── prompt_pointer.md  ← Pointer (TOC)
+ │         └── prompt_pointer.md  ← Pointer to AXIARCH.md
  ├── axiarch-rules/           ← Rule Definitions
- │    └── en/ (or ja/)        ← Language selected
- │         ├── INDEX.md
- │         ├── README.md
- │         ├── LOADING_PROTOCOL.md
- │         ├── CRYSTALLIZATION_PROTOCOL.md
- │         ├── universal/     ← Layer 1: Immutable
- │         │    ├── core/
- │         │    ├── product/
- │         │    ├── engineering/
- │         │    └── ...
- │         └── blueprint/     ← Layer 2: Mutable State
- │              └── core/
+ │    ├── en/                 ← English rules
+ │    │    ├── INDEX.md
+ │    │    ├── README.md
+ │    │    ├── LOADING_PROTOCOL.md
+ │    │    ├── CRYSTALLIZATION_PROTOCOL.md
+ │    │    ├── universal/     ← Layer 1: Immutable
+ │    │    │    ├── core/
+ │    │    │    ├── product/
+ │    │    │    ├── engineering/
+ │    │    │    └── ...
+ │    │    └── blueprint/     ← Layer 2: Mutable State
+ │    │         └── core/
+ │    └── ja/                 ← Japanese rules (kept by default)
+ ├── axiarch-harness/         ← Execution, audit, evidence, and approval workflow
+ │    ├── en/
+ │    └── ja/                 ← Kept by default
  ├── axiarch-prompts/         ← Layer 3: Optional Execution Engine
  │    ├── ja/ (or en/)
  │    │    ├── develop/      ← Development & Execution
  │    │    ├── audit/        ← Quality Auditing
  │    │    ├── govern/       ← Governance
  │    │    └── operate/      ← Incidents & Onboarding
- │    └── (en or ja)/        ← Delete unused language
+ │    └── en/ (or ja/)        ← Optional; kept by default
  └── src/                         ← Your Code
 ```

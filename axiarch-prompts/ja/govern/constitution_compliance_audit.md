@@ -4,7 +4,7 @@
 >
 > **対象**: プロジェクト全体または指定Focus Area（全ファイル・全機能が対象）
 >
-> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、重点監査領域（Focus Area）と監査対象のコードまたはファイルパスを指示する。
+> **使い方**: このプロンプトをAIエージェントのチャットに貼り付けて実行する。AIはPhase 0実行を前提とした入力待ち状態に入るので、重点監査領域（Focus Area）と監査対象のコードまたはファイルパスを指示する。
 
 ---
 
@@ -30,8 +30,8 @@
 **いかなる監査や修正よりも先に、以下の順序で「裁きの基準となる法」を確立せよ。**
 **※このPhase 0でロードした内容が、プロジェクト固有の技術スタック・ルールセット・セキュリティ要件を決定する。**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* ルートディレクトリに `AGENTS.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。（最上位プロトコル）**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* ルートディレクトリに `AXIARCH.md` が存在する場合、**監査や修正より先にこのファイルを直接読み込むこと。（最上位プロトコル）**
 
 ## Step 2: Load Structure-Based Rules (階級別ロード)
 * `axiarch-rules/` 等のルール格納ディレクトリをスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
@@ -46,7 +46,7 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有の法律)
 > [!NOTE]
 > **監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AXIARCH.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応に従って整理される。初期フォルダは固定上限ではなく、ユーザー承認済みの拡張フォルダも同プロトコルに従って扱う。
 * **Functional Tagging: ロードしたClass S/Aの全ファイルを、**ファイル名ではなく「内容・役割」に基づいて**以下の役割にマッピングし、整理せよ。
     * **Target 1: Security**: セキュリティ・プライバシー原則
@@ -60,7 +60,7 @@
 全ファイル・全機能を対象に、読み込んだ「法」に照らし合わせ、以下の**7つの重大な憲法違反（The 7 Major Constitutional Violations）**がないかを徹底的に調査してください。残存リスクや検証ギャップを明示してください。
 
 ## 1. Baseline Directive Violation (最上位プロトコルおよび重要原則の違反)
-* **Target**: `AGENTS.md` および Class S 規約への抵触。
+* **Target**: `AXIARCH.md` および Class S 規約への抵触。
 * **Audit**:
     * プロジェクトの根本的な指示や、必ず守るべき普遍的なコーディング規約・禁止事項が破られていないか？
 
@@ -152,7 +152,7 @@
 
 > [!CRITICAL]
 > **2. CONSTITUTIONAL VIOLATION REPORTING（憲法違反の報告義務）**
-> * 「憲法違反」「セキュリティリスク」「法的不備」が見つかった場合は、ユーザーに報告し修正の承認を得る（※自明なバグ修正は即時実行可）。
+> * 「憲法違反」「セキュリティリスク」「法的不備」が見つかった場合は、ユーザーに報告し修正の承認を得る。自明に見える修正であっても、Human Approval Gate対象の操作、セキュリティ境界、法務判断、破壊的変更は明示承認前に実行しない。
 
 > [!CRITICAL]
 > **3. DO NOT BREAK LEGACY（既存保護）**
@@ -172,7 +172,7 @@
 
 ```text
 【入力待機: Lead Compliance Inspector & Lead Architect】
-指示を受け取り次第、最初に Phase 0 の手順に従い AGENTS.md および axiarch-rules/ をロードします。ロード前の推測・仮説の出力は行いません。
+指示を受け取り次第、最初に Phase 0 の手順に従い AXIARCH.md、axiarch-rules/、および必要な axiarch-harness/ ファイルをロードします。ロード前の推測・仮説の出力は行いません。
 
 現在、以下の入力を待機しています：
 1. **今回の重点監査領域 (Focus Area)**: （例：特定のルールの遵守状況確認、全ファイル一斉の憲法違反スキャン、など。指定がなければ全ファイル・全ルール対象）

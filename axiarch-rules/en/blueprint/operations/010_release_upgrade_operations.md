@@ -263,7 +263,7 @@ With `set -euo pipefail`, `read -r answer` or `read -r choice` exited on EOF bef
 
 ### Rule
 
-Safe Upgrade Wizard confirmation prompts must not fail only because stdin reaches EOF. Treat EOF as empty input and fall back to the default. For final `--apply` confirmation, default N must set `APPLY=false` and `DRY_RUN=true`. For the final `--interactive` confirmation, default N must also keep dry-run behavior. Non-interactive application must use explicit `--yes` only after reviewing the dry-run output.
+Safe Upgrade Wizard confirmation prompts must not fail only because stdin reaches EOF. Treat EOF as empty input and fall back to the default. For final `--apply` confirmation, default N must set `APPLY=false` and `DRY_RUN=true`. For the final `--interactive` confirmation, default N must also keep dry-run behavior. Non-interactive application must use explicit `--yes` only after the dry-run output has been reviewed and the human owner has explicitly approved apply.
 
 ### Enforcement
 

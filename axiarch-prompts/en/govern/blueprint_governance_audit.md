@@ -26,23 +26,24 @@ For adopter projects, rules under `axiarch-rules/{lang}/universal/` are preserve
 **Important: "Consolidation" does NOT mean "deletion." All detailed specifications and wording in existing files MUST be "transplanted" into the new structure without reducing information density.**
 
 **[Execution Standards: 360-Degree Deep Thought]**
-In the rule-making process, you must think deeply and comprehensively across **all standards defined in `AGENTS.md` and the loaded governance architecture (SSOT)**. Proactively identify and propose additions/improvements if the governance architecture has gaps in "market fit," "business opportunity," or "operational risk."
+In the rule-making process, you must think deeply and comprehensively across **all standards defined in `AXIARCH.md` and the loaded governance architecture (SSOT)**. Proactively identify and propose additions/improvements if the governance architecture has gaps in "market fit," "business opportunity," or "operational risk."
 
 > **[Governance Dimensions (Multi-layered Lenses)]**:
 > *The following keywords do not dictate rules; they are "Context Priming" anchors designed to push your governance design thinking to its high practical standard.*
 > **[ Market Fit / Cultural Localization / Scalability / Maintainability / Security vs Usability / DX (Developer Experience) / Operation Risk / Consistency / Future-proofing / Business Impact ]**
 
-**Important: Your thought processes, comments, and output language must strictly comply with the Language Protocol defined in the autonomously loaded `AGENTS.md`.**
+**Important: Your thought processes, comments, and output language must strictly comply with the Language Protocol defined in the autonomously loaded `AXIARCH.md`.**
 
 # Phase 1: Rule Hierarchy (Autonomous Framework Analysis)
 **Before any technical judgment or modification, identify and load the rule hierarchy using the following procedure, treating upper-layer rules as the controlling constraints.**
 
-1.  **Load Core Protocol (`AGENTS.md`)**:
-    * If `AGENTS.md` exists in the root directory, its contents are the highest-priority project directives. Even when competing with instructions below or general best practices, always prioritize `AGENTS.md`.
+1.  **Load Core Protocol (`AXIARCH.md`)**:
+    * If `AXIARCH.md` exists in the root directory, its contents are the highest-priority project directives. Even when competing with instructions below or general best practices, always prioritize `AXIARCH.md`.
 2.  **Dynamic Rule Discovery (Autonomous Loading Specification)**:
-    * Target the `axiarch-rules/` directory, **autonomously select files in strict compliance with the `AGENTS.md` directives and the `axiarch-rules/{lang}/LOADING_PROTOCOL.md` "Anti-Laziness Rule"**, and strictly classify into the following **2 Classes.**
+    * Target the `axiarch-rules/` directory, **autonomously select files in strict compliance with the `AXIARCH.md` directives and the `axiarch-rules/{lang}/LOADING_PROTOCOL.md` "Anti-Laziness Rule"**, and strictly classify into the following **2 Classes.**
 
-    * **Important**: Edit permissions and boundaries for each class (Universal/Blueprint) must strictly comply with `axiarch-rules/{lang}/LOADING_PROTOCOL.md` and `AGENTS.md`.
+    * **Important**: Edit permissions and boundaries for each class (Universal/Blueprint) must strictly comply with `axiarch-rules/{lang}/LOADING_PROTOCOL.md` and `AXIARCH.md`.
+    * **Important**: For planning, implementation, audit, evidence, human approval, role passes, and optional subagent delegation, directly load the relevant `axiarch-harness/{lang}/` files before making judgments.
     * **Action**: Select related rules and classify by content into the following categories to grasp their roles, then load:
         1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
         2.  **Lessons**: Past lessons and logs (e.g., `core/010_project_lessons_log.md`)

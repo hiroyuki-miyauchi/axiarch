@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project or specified Focus Area (all files and features — including secure environment migration, architecture, type safety, monetization, and optimization gaps)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then provide the Focus Area and the specific code or file paths to audit.
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then provide the Focus Area and the specific code or file paths to audit.
 
 ---
 
@@ -38,8 +38,8 @@ In the audit and remediation process, think deeply and comprehensively across th
 # Phase 0: Rule Hierarchy (Rule Loading & Autonomous Planning)
 **Before any audit or modification, establish the "law that serves as the standard of judgment" in the following order.**
 
-## Step 1: Load Core Protocol (`AGENTS.md`)
-* If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work. (Highest-priority directive)**
+## Step 1: Load Core Protocol (`AXIARCH.md`)
+* If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work. (Highest-priority directive)**
 
 ## Step 2: Load Structure-Based Rules (Class-Based Loading)
 * Scan rule storage directories such as `axiarch-rules/` and strictly classify into the following **2 Classes** before loading.
@@ -55,7 +55,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 ### Class A: Project Mutable Bylaws
 > [!NOTE]
 > **Target for cultivation and updating based on audit results (Write-Allowed).**
-* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AGENTS.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
+* **Target Path**: All files under `axiarch-rules/{lang}/blueprint/` (`{lang}` is `ja/` or `en/` per the `Project Native Language` in `AXIARCH.md`). Blueprint is organized according to the domain-to-folder mapping in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; treat listed initial folders as an initial map, not a closed taxonomy, and include user-approved extension folders when applicable.
 * **Action**: Classify based on content and load accordingly.
     1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
     2.  **Lessons**: Past lesson logs (e.g., `core/010_project_lessons_log.md`)
@@ -66,7 +66,7 @@ In the audit and remediation process, think deeply and comprehensively across th
 Thoroughly investigate the specified Focus Area for deviations and oversights from loaded rules (constitution) across the following **8 Major Constitutional Violations**. **Cross-reference deeply against established enterprise-market expectations** and document any remaining uncertainty or validation gaps explicitly.
 
 ## 1. Baseline Directive Violation
-* **Target**: Violations of `AGENTS.md` and universal rules.
+* **Target**: Violations of `AXIARCH.md` and universal rules.
 * **Audit**:
     * Are the project's fundamental directives and universally inviolable coding conventions / prohibitions being broken?
 
@@ -161,7 +161,7 @@ Thoroughly investigate the specified Focus Area for deviations and oversights fr
 
 ```text
 [Input Required: Lead Compliance Inspector & Lead Architect]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently awaiting the following inputs:
 1. **Focus Area for this audit**: (e.g., verification of specific rule compliance status, identification of secure environment migration targets, oversight scan of all files, etc. If not specified, all areas are targeted.)

@@ -111,8 +111,8 @@ fi
 # -----------------------------------------------------------------------------
 # Deny: existing file + Write tool = potential §6 ANTI-FULL-OVERWRITE violation
 # -----------------------------------------------------------------------------
-REASON_JA="AGENTS.md §6 ANTI-FULL-OVERWRITE: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的に全面書き換えが必要な場合はユーザー明示承認のうえで .claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt にパスを追加してください。"
-REASON_EN="AGENTS.md §6 ANTI-FULL-OVERWRITE: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). If full overwrite is genuinely needed, ask the user for explicit approval and add the path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
+REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的に全面書き換えが必要な場合はユーザー明示承認のうえで .claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt にパスを追加してください。"
+REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). If full overwrite is genuinely needed, ask the user for explicit approval and add the path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
 
 # Emit JSON output for hook contract (decision: block + reason)
 escape_json_value() {

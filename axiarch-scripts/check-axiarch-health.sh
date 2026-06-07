@@ -9,27 +9,27 @@
 # --quiet : suppress all output except errors (for pre-commit hook usage)
 #
 # Diagnoses Axiarch enforcement health across 15 verifiable stages spanning
-# the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AGENTS.md
-# protocols (§1, §2, §4, §6, §8, §9 — verifiable subset), the v1.5.5
+# the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AXIARCH.md
+# protocols (Project Configuration, §6.2, §6.4, §6.6, §7, §9 — verifiable subset), the v1.5.5
 # physical-block / bootstrap hooks, the v1.6.0 sublimated-file guide, and the
 # v1.8.0 task-boundary detection:
 #
 #   Check 1-4  Hook layer when installed (settings detection, JSON syntax, hook structure, firing log)
 #   Check 5    LOADING_PROTOCOL Step 4 — task.md adherence
 #   Check 6    CRYSTALLIZATION_PROTOCOL §5 — count threshold (3+) + time-axis (>180d, v1.6.0+)
-#   Check 7    AGENTS §8 Process & Documentation — task docs presence
-#   Check 8    AGENTS §1 Deployment Ban — push hygiene
-#   Check 9    AGENTS §4 SSOT Sync — main parity
-#   Check 10   AGENTS §2 Language First — Project Native Language consistency
-#   Check 11   AGENTS §6 ANTI-FULL-OVERWRITE — PreToolUse hook physical block (v1.5.5+)
+#   Check 7    AXIARCH process documentation — task docs presence
+#   Check 8    AXIARCH §6.2 Human Approval and Deployment Ban — push hygiene
+#   Check 9    AXIARCH §6.4 SSOT Sync and Branch Discipline — main parity
+#   Check 10   AXIARCH §0 Project Configuration — Project Native Language consistency
+#   Check 11   AXIARCH §6.6 Diff-Based Editing and Anti-Full-Overwrite — PreToolUse hook physical block (v1.5.5+)
 #   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
-#   Check 15   v1.9+ / v1.11+ integration — PostToolUse diff guard + task-state lifecycle + release/docs/prompt parity + source release-file tracking
+#   Check 15   v1.9+ / v1.11+ integration — PostToolUse diff guard + task-state lifecycle + release/docs/prompt parity + ja/en heading-number parity + Claude Memory canonical boundary + source release-file tracking
 #
 # Out of Scope (semantic judgment required, manual review):
-#   §0 AI Self-Completion / §3 DB Integrity / §5 Existing Functionality Protection
-#   §7 Role & Behavior
+#   AXIARCH §6.1 AI Self-Completion / §6.3 Database Integrity / §6.5 Existing Functionality Protection
+#   AXIARCH §6.9 Role and Behavior
 #
 # Designed to detect the "AI adherence gap" early and force tool-based remediation
 # instead of leaving users to manually debug.
@@ -209,7 +209,7 @@ fi
 # =============================================================================
 print_section "Check 5: AI adherence (task.md load history)"
 if [[ -f "${PROJECT_DIR}/task.md" ]]; then
-  RULE_REFS=$(grep -cE "AGENTS\.md|INDEX\.md|LOADING_PROTOCOL\.md" \
+  RULE_REFS=$(grep -cE "AXIARCH\.md|AGENTS\.md|INDEX\.md|LOADING_PROTOCOL\.md" \
     "${PROJECT_DIR}/task.md" 2>/dev/null || true)
   RULE_REFS="${RULE_REFS:-0}"
   if [[ "${RULE_REFS}" -gt 0 ]]; then
@@ -221,7 +221,7 @@ if [[ -f "${PROJECT_DIR}/task.md" ]]; then
   fi
 else
   print_warn "task.md not found"
-  print_info "→ Created on first task per AGENTS.md §8.4. Send a prompt to trigger creation."
+  print_info "→ Created on first task per AXIARCH.md process documentation. Send a prompt to trigger creation."
 fi
 
 # =============================================================================
@@ -316,9 +316,9 @@ else
 fi
 
 # =============================================================================
-# Check 7: AGENTS.md §8 Process & Documentation (task docs)
+# Check 7: AXIARCH.md Process Documentation (task docs)
 # =============================================================================
-print_section "Check 7: §8 Process & Documentation (task docs)"
+print_section "Check 7: AXIARCH §7 Documentation and Native Task State (task docs)"
 
 DOCS_OK=0
 DOCS_MISSING=()
@@ -342,17 +342,17 @@ elif [[ "${DOCS_OK}" -gt 0 ]]; then
   for missing in "${DOCS_MISSING[@]}"; do
     print_info "Missing/empty: ${missing}"
   done
-  print_info "→ Per AGENTS.md §8.4, all three are 'always create' — generate before any task"
+  print_info "→ Per AXIARCH.md, all three are required current-task evidence — generate before any task"
   EXIT_CODE=1
 else
   print_warn "None of task.md / implementation_plan.md / walkthrough.md exist"
-  print_info "→ AGENTS.md §8.4 mandates 'always create' — these are gitignored per-session docs"
+  print_info "→ AXIARCH.md requires current-task evidence — these are gitignored per-session docs"
 fi
 
 # =============================================================================
-# Check 8: AGENTS.md §1 Deployment Ban (force-push / direct main commits)
+# Check 8: AXIARCH.md Deployment Ban (force-push / direct main commits)
 # =============================================================================
-print_section "Check 8: §1 Deployment Ban (recent push hygiene)"
+print_section "Check 8: AXIARCH §6.2 Human Approval and Deployment Ban (recent push hygiene)"
 
 if [[ -d "${PROJECT_DIR}/.git" ]] || git -C "${PROJECT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
   # Look for recent reflog entries indicating force-push
@@ -363,7 +363,7 @@ if [[ -d "${PROJECT_DIR}/.git" ]] || git -C "${PROJECT_DIR}" rev-parse --git-dir
   CURRENT_BRANCH=$(git -C "${PROJECT_DIR}" branch --show-current 2>/dev/null || echo "")
   if [[ "${CURRENT_BRANCH}" == "main" || "${CURRENT_BRANCH}" == "master" ]]; then
     print_warn "On ${CURRENT_BRANCH} branch directly"
-    print_info "→ §1 Deployment Ban: avoid working on main/master, use feature branches"
+    print_info "→ AXIARCH §6.2 requires explicit approval for release/push/deploy boundaries; avoid working on main/master"
   else
     print_pass "On feature branch: ${CURRENT_BRANCH}"
   fi
@@ -378,9 +378,9 @@ else
 fi
 
 # =============================================================================
-# Check 9: AGENTS.md §4 SSOT Sync (main parity)
+# Check 9: AXIARCH.md SSOT Sync (main parity)
 # =============================================================================
-print_section "Check 9: §4 SSOT Sync (main parity)"
+print_section "Check 9: AXIARCH §6.4 SSOT Sync and Branch Discipline (main parity)"
 
 if git -C "${PROJECT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
   CURRENT_BRANCH=$(git -C "${PROJECT_DIR}" branch --show-current 2>/dev/null || echo "")
@@ -392,10 +392,10 @@ if git -C "${PROJECT_DIR}" rev-parse --git-dir >/dev/null 2>&1; then
         print_pass "Up-to-date with origin/main (ahead: ${AHEAD:-0})"
       elif [[ "${BEHIND:-0}" -lt 5 ]]; then
         print_warn "Behind origin/main by ${BEHIND} commits"
-        print_info "→ Run \`git pull origin main\` to sync (per §4 SSOT Sync)"
+        print_info "→ Run \`git pull origin main\` to sync when that workflow is approved (per AXIARCH §6.4)"
       else
         print_fail "Significantly behind origin/main by ${BEHIND} commits"
-        print_info "→ §4 mandates main sync — pull before continuing work"
+        print_info "→ AXIARCH §6.4 requires agreed SSOT sync before continuing branch-sensitive work"
         EXIT_CODE=1
       fi
     else
@@ -407,13 +407,15 @@ else
 fi
 
 # =============================================================================
-# Check 10: AGENTS.md §2 Language First (Project Native Language consistency)
+# Check 10: AXIARCH.md Language First (Project Native Language consistency)
 # =============================================================================
-print_section "Check 10: §2 Language First (Project Native Language)"
+print_section "Check 10: AXIARCH §0 Project Configuration (Project Native Language)"
 
 NATIVE_LANG=""
-if [[ -f "${PROJECT_DIR}/AGENTS.md" ]]; then
-  NATIVE_LANG_LINE=$(grep -iE "Project Native Language" "${PROJECT_DIR}/AGENTS.md" 2>/dev/null | head -1 || true)
+for protocol_file in "${PROJECT_DIR}/AXIARCH.md" "${PROJECT_DIR}/AGENTS.md"; do
+  [[ -f "${protocol_file}" ]] || continue
+  NATIVE_LANG_LINE=$(grep -iE "Project Native Language" "${protocol_file}" 2>/dev/null | head -1 || true)
+  [[ -n "${NATIVE_LANG_LINE}" ]] || continue
   NATIVE_LANG_LOWER=$(printf '%s\n' "${NATIVE_LANG_LINE}" | tr '[:upper:]' '[:lower:]')
   NATIVE_LANG_CONFIG="${NATIVE_LANG_LOWER%%default:*}"
   NATIVE_LANG_DEFAULT=""
@@ -429,11 +431,12 @@ if [[ -f "${PROJECT_DIR}/AGENTS.md" ]]; then
   elif [[ "${NATIVE_LANG_DEFAULT}" == *"japanese"* && "${NATIVE_LANG_DEFAULT}" != *"english"* ]]; then
     NATIVE_LANG="japanese"
   fi
-fi
+  [[ -n "${NATIVE_LANG}" ]] && break
+done
 
 if [[ -z "${NATIVE_LANG}" ]]; then
-  print_warn "Could not detect Project Native Language in AGENTS.md"
-  print_info "→ Verify AGENTS.md Project Configuration section"
+  print_warn "Could not detect Project Native Language in AXIARCH.md or AGENTS.md"
+  print_info "→ Verify AXIARCH.md Language Configuration section"
 else
   print_info "Project Native Language: ${NATIVE_LANG}"
   language_docs_found=0
@@ -482,14 +485,14 @@ fi
 # =============================================================================
 # Check 11: Physical Block — PreToolUse hook wiring (v1.5.5+)
 # =============================================================================
-print_section "Check 11: PreToolUse hook (§6 ANTI-FULL-OVERWRITE physical block)"
+print_section "Check 11: AXIARCH §6.6 Diff-Based Editing and Anti-Full-Overwrite physical block"
 if ! "${HOOK_FILE_OK}" || ! "${HOOK_JSON_OK}"; then
   print_warn "Skipped — settings.json missing or invalid (see Check 1/2)"
 elif command -v jq &>/dev/null; then
   PRE_HOOK_CMD=$(jq -r '[.hooks.PreToolUse[]?.hooks[]?.command // empty][0] // empty' \
     "${HOOK_FILE_PATH}" 2>/dev/null)
   if [[ -z "${PRE_HOOK_CMD}" ]]; then
-    print_warn "PreToolUse hook not configured — §6 violations cannot be physically blocked"
+    print_warn "PreToolUse hook not configured — AXIARCH §6.6 violations cannot be physically blocked"
     print_info "Add a PreToolUse hook calling axiarch-scripts/axiarch-protect-antifull.sh (Write matcher)"
     print_info "(reminder-only enforcement is insufficient per Control Illusion arXiv:2502.15851)"
   elif [[ "${PRE_HOOK_CMD}" == *"axiarch-protect-antifull.sh"* ]]; then
@@ -696,21 +699,24 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Claude Memory正本境界" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "update_plan" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "TaskCreate" "${PROJECT_DIR}/README.md" 2>/dev/null; then
-      print_pass "Axiarch source README.md includes v1.9 diff guard, memory, and 15-stage diagnostic references"
+      print_pass "Axiarch source README.md includes v1.9 diff guard, Claude Memory canonical boundary, and 15-stage diagnostic references"
     else
       print_warn "Axiarch source README.md may be missing source integration references"
-      print_info "Expected README to mention axiarch-task-state.sh, Codex update_plan, and Claude Code TaskCreate for v1.11.0"
+      print_info "Expected README to mention axiarch-task-state.sh, Claude Memory canonical boundary, Codex update_plan, and Claude Code TaskCreate for v1.11.0"
       DOCS_MISSING=1
     fi
     if grep -q "Hook・診断・安全アップグレード利用時のみ必要" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "Required only for hooks, diagnostics, or safe upgrades" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "Optional for minimal operation otherwise" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      && grep -q "Optional for minimal operation otherwise" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "axiarch-harness/" "${PROJECT_DIR}/README.md" 2>/dev/null; then
       print_pass "Axiarch source README.md keeps axiarch-scripts required/optional boundary explicit"
     else
       print_warn "Axiarch source README.md may blur the axiarch-scripts required/optional boundary"
-      print_info "Expected axiarch-scripts/ to be conditional, not part of the two required minimal files"
+      print_info "Expected axiarch-scripts/ to be conditional, not part of the required minimal AXIARCH.md + AGENTS.md adapter + axiarch-rules/ + axiarch-harness/ setup"
       DOCS_MISSING=1
     fi
     if grep -q "Axiarch本体リポジトリ専用ファイルは既定skip" "${PROJECT_DIR}/README.md" 2>/dev/null \
@@ -762,6 +768,8 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     if grep -q "source-repository-only files skipped by default unless explicitly selected" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
       && grep -q "source-repository-only files skipped by default unless explicitly selected" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "source-only default skip" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "source release-file Git tracking" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
       && grep -q "source release-file Git tracking" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "deduplicated action choices" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
@@ -772,10 +780,10 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "update_plan" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
       && grep -q "TaskCreate" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null; then
-      print_pass "Axiarch source llms files keep source-only upgrade boundary, deduplicated choices, and release-file tracking explicit"
+      print_pass "Axiarch source llms files keep source-only upgrade boundary, Claude Memory canonical boundary, deduplicated choices, and release-file tracking explicit"
     else
-      print_warn "Axiarch source llms files may omit the source-only upgrade boundary, deduplicated choices, or release-file tracking"
-      print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
+      print_warn "Axiarch source llms files may omit the source-only upgrade boundary, Claude Memory canonical boundary, deduplicated choices, or release-file tracking"
+      print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, Claude Memory canonical boundary, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
       DOCS_MISSING=1
     fi
     if grep -q "Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
@@ -802,27 +810,65 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "対話選択肢重複排除" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "Claude Memory正本境界" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "AXIARCH_PROCESS_DOC_MODE" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
-      print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard, 15-stage diagnostics, and deduplicated-choice references"
+      print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard, 15-stage diagnostics, Claude Memory canonical boundary, and deduplicated-choice references"
     else
       print_warn "Axiarch source axiarch-scripts/README.md may be missing source integration references"
-      print_info "Expected scripts README to mention axiarch-task-state.sh, AXIARCH_PROCESS_DOC_MODE, and AXIARCH_PROCESS_DOC_LANG for v1.11.0"
+      print_info "Expected scripts README to mention axiarch-task-state.sh, Claude Memory canonical boundary, AXIARCH_PROCESS_DOC_MODE, and AXIARCH_PROCESS_DOC_LANG for v1.11.0"
       DOCS_MISSING=1
     fi
     if grep -q "最小構成の必須ファイルではありません" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "not required for the minimal Axiarch setup" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "axiarch-harness/" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "recommended tooling for diagnostics, hook reinforcement, and safe upgrades" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "/tmp/axiarch-upgrade.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
-      && grep -q -- "--yes" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
+      && grep -q -- "--yes" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "人間がapply実行を明示承認済み" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "human owner has explicitly approved apply" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
       print_pass "Axiarch source axiarch-scripts/README.md keeps minimal/optional script boundary explicit"
     else
       print_warn "Axiarch source axiarch-scripts/README.md may blur the minimal/optional script boundary"
-      print_info "Expected script README to say scripts are optional for minimal AGENTS.md plus axiarch-rules/ operation, show temporary helper bootstrap for older adopters, and document --yes for reviewed non-interactive apply"
+      print_info "Expected script README to say scripts are optional for minimal AXIARCH.md + AGENTS.md adapter + axiarch-rules/ + axiarch-harness/ setup, show temporary helper bootstrap for older adopters, and document --yes only for reviewed and human-approved non-interactive apply"
       DOCS_MISSING=1
     fi
   else
     print_warn "Axiarch source axiarch-scripts/README.md not found — cannot verify script README integration"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/axiarch-harness/README.md" ]]; then
+    if grep -q "Axiarch実行ハーネス" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "Usage / 使い方" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "Protocol Map / プロトコル対応表" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "メインエージェントが同じ役割パスを順番に実行する" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null \
+      && grep -q "main agent performs the same role passes sequentially" "${PROJECT_DIR}/axiarch-harness/README.md" 2>/dev/null; then
+      print_pass "Axiarch source axiarch-harness/README.md keeps bilingual harness guidance explicit"
+    else
+      print_warn "Axiarch source axiarch-harness/README.md may not be bilingual enough for the canonical harness layer"
+      print_info "Expected the harness README to explain purpose, usage, protocol map, and main-agent fallback in both Japanese and English"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source axiarch-harness/README.md not found — cannot verify harness README bilingual guidance"
+    DOCS_MISSING=1
+  fi
+
+  if [[ -f "${PROJECT_DIR}/.claude/memory/MEMORY.md" ]]; then
+    if grep -q "正本境界 / Canonical Boundary" "${PROJECT_DIR}/.claude/memory/MEMORY.md" 2>/dev/null \
+      && grep -q "プロトコル、ロード順、承認境界、実行手順はこのファイルに複製せず" "${PROJECT_DIR}/.claude/memory/MEMORY.md" 2>/dev/null \
+      && grep -q "Do not duplicate protocols, loading order, approval boundaries, or execution steps here" "${PROJECT_DIR}/.claude/memory/MEMORY.md" 2>/dev/null \
+      && ! grep -Eq "axiarch-rules/|axiarch-harness/|axiarch-prompts/|TaskCreate|Human Approval|Deployment Ban|SSOT Sync" "${PROJECT_DIR}/.claude/memory/MEMORY.md" 2>/dev/null; then
+      print_pass "Axiarch source Claude Memory template keeps AXIARCH.md as canonical boundary without duplicating protocols"
+    else
+      print_warn "Axiarch source Claude Memory template may duplicate Axiarch protocol details"
+      print_info "Expected .claude/memory/MEMORY.md to keep only short operational memory and point canonical governance back to AXIARCH.md"
+      DOCS_MISSING=1
+    fi
+  else
+    print_warn "Axiarch source .claude/memory/MEMORY.md not found — cannot verify Claude Memory canonical boundary"
     DOCS_MISSING=1
   fi
 
@@ -831,6 +877,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     && grep -q "source-only既定skipとinteractive明示override" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "対話選択肢重複排除" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "README/llms/scripts README" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Claude Memory正本境界" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "ネイティブタスク" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "update_plan" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
@@ -839,6 +886,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     && grep -q "source-only default skip with explicit interactive override" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "README, llms, and scripts README" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "Native Task" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "update_plan" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
@@ -846,10 +894,25 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     print_pass "Axiarch source LOADING_PROTOCOL files keep Safe Upgrade health scope aligned"
   else
     print_warn "Axiarch source LOADING_PROTOCOL files may have stale Safe Upgrade health scope"
-    print_info "Expected ja/en LOADING_PROTOCOL to mention source-only explicit override, deduplicated interactive choices, README/llms/scripts README boundary checks, native task-state sync, Project Native Language template selection, update_plan, and TaskCreate"
+    print_info "Expected ja/en LOADING_PROTOCOL to mention source-only explicit override, deduplicated interactive choices, README/llms/scripts README boundary checks, Claude Memory canonical boundary, native task-state sync, Project Native Language template selection, update_plan, and TaskCreate"
     loading_protocol_boundary_missing=1
   fi
   if [[ "${loading_protocol_boundary_missing}" -ne 0 ]]; then
+    DOCS_MISSING=1
+  fi
+
+  index_health_scope_missing=0
+  if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/INDEX.md" ]] \
+    && grep -q "Claude Memory正本境界検査" "${PROJECT_DIR}/axiarch-rules/ja/INDEX.md" 2>/dev/null \
+    && [[ -f "${PROJECT_DIR}/axiarch-rules/en/INDEX.md" ]] \
+    && grep -q "Claude Memory canonical-boundary checks" "${PROJECT_DIR}/axiarch-rules/en/INDEX.md" 2>/dev/null; then
+    print_pass "Axiarch source INDEX files keep Claude Memory health scope aligned"
+  else
+    print_warn "Axiarch source INDEX files may have stale Claude Memory health scope"
+    print_info "Expected ja/en INDEX files to mention the Claude Memory canonical-boundary health check in the check-axiarch-health.sh summary"
+    index_health_scope_missing=1
+  fi
+  if [[ "${index_health_scope_missing}" -ne 0 ]]; then
     DOCS_MISSING=1
   fi
 
@@ -892,7 +955,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "resolve_upgrade_version_label" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "normalize_axiarch_version_label" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "for domain in core ai design engineering operations product quality security" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
-      && grep -q "for rel in AGENTS.md axiarch-manifest.json axiarch-scripts axiarch-rules axiarch-prompts" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
+      && grep -q "for rel in AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-harness axiarch-scripts axiarch-rules axiarch-prompts" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "copy_replace_if_local_unchanged" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q "replace-if checks and 3-way merge" "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
       && grep -q 'policy}" == "replace-if-local-unchanged"' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null \
@@ -950,6 +1013,18 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected init.sh choices to mark Codex, Claude Code, and Google Antigravity as production-validated primary"
       DOCS_MISSING=1
     fi
+    if grep -q "set_project_native_language" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "command -v grep" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "command -v mv" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Configured: AXIARCH.md Project Native Language" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Project Native Language is set to" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "legacy pinned release" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
+      print_pass "Axiarch source init.sh writes selected Project Native Language into AXIARCH.md with checked command prerequisites and legacy fallback"
+    else
+      print_warn "Axiarch source init.sh may not apply the selected Project Native Language to the copied canonical entrypoint"
+      print_info "Expected init.sh to check command prerequisites used for language rewriting, configure AXIARCH.md Project Native Language after copy, keep AGENTS.md as legacy fallback only, and report the configured language in next steps"
+      DOCS_MISSING=1
+    fi
   else
     print_warn "Axiarch source init.sh not found — cannot verify Safe Upgrade next-step guidance"
     DOCS_MISSING=1
@@ -982,6 +1057,18 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
     else
       print_warn "Axiarch source manifest may omit source-only lint workflow classification"
       print_info "Expected .github/workflows/lint.yml to be source_docs / axiarch-source / skip"
+      DOCS_MISSING=1
+    fi
+
+    if jq -e '
+      any(.files[]; .path == "AXIARCH.md" and .group == "core_protocol" and .owner == "mixed" and .policy == "review")
+    ' "${PROJECT_DIR}/axiarch-manifest.json" >/dev/null 2>&1 \
+      && [[ -f "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" ]] \
+      && grep -q 'add_item "core_protocol" "AXIARCH.md" "mixed" "review" "all"' "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" 2>/dev/null; then
+      print_pass "Axiarch source manifest and fallback protect AXIARCH.md as mixed/review"
+    else
+      print_warn "Axiarch source manifest or fallback may treat AXIARCH.md as safe-only replaceable"
+      print_info "Expected AXIARCH.md to remain core_protocol / mixed / review because it contains adopter-owned Project Native Language"
       DOCS_MISSING=1
     fi
 
@@ -1094,11 +1181,64 @@ EOF
     rm -f "${manifest_expanded_paths}" "${manifest_duplicate_paths}" "${manifest_match_list}"
   fi
 
+  heading_parity_missing=0
+  heading_pair_roots=(
+    "axiarch-rules"
+    "axiarch-harness"
+    "axiarch-prompts"
+  )
+  heading_ja_numbers="$(mktemp)"
+  heading_en_numbers="$(mktemp)"
+  for heading_root in "${heading_pair_roots[@]}"; do
+    heading_ja_dir="${PROJECT_DIR}/${heading_root}/ja"
+    heading_en_dir="${PROJECT_DIR}/${heading_root}/en"
+    [[ -d "${heading_ja_dir}" && -d "${heading_en_dir}" ]] || continue
+
+    while IFS= read -r heading_ja_file; do
+      heading_rel_path="${heading_ja_file#"${heading_ja_dir}/"}"
+      heading_en_file="${heading_en_dir}/${heading_rel_path}"
+      [[ -f "${heading_en_file}" ]] || continue
+
+      sed -nE 's/^#{2,4}[[:space:]]+(§[[:space:]]*)?([0-9]+([-.][0-9A-Za-z]+)*)([.[:space:]]|$).*/\2/p' "${heading_ja_file}" | sort -u > "${heading_ja_numbers}"
+      sed -nE 's/^#{2,4}[[:space:]]+(§[[:space:]]*)?([0-9]+([-.][0-9A-Za-z]+)*)([.[:space:]]|$).*/\2/p' "${heading_en_file}" | sort -u > "${heading_en_numbers}"
+
+      heading_missing_en="$(comm -23 "${heading_ja_numbers}" "${heading_en_numbers}" | tr '\n' ' ')"
+      heading_missing_ja="$(comm -13 "${heading_ja_numbers}" "${heading_en_numbers}" | tr '\n' ' ')"
+      if [[ -n "${heading_missing_en}" || -n "${heading_missing_ja}" ]]; then
+        print_warn "Axiarch source ja/en heading-number drift: ${heading_root}/${heading_rel_path}"
+        [[ -n "${heading_missing_en}" ]] && print_info "Missing in en: ${heading_missing_en}"
+        [[ -n "${heading_missing_ja}" ]] && print_info "Missing in ja: ${heading_missing_ja}"
+        heading_parity_missing=1
+      fi
+    done < <(find "${heading_ja_dir}" -name "*.md" -type f 2>/dev/null | sort)
+  done
+  rm -f "${heading_ja_numbers}" "${heading_en_numbers}"
+  if [[ "${heading_parity_missing}" -eq 0 ]]; then
+    print_pass "Axiarch source ja/en numbered headings are aligned across rules, harness, and prompts"
+  else
+    print_info "Expected ja/en numbered headings to remain aligned across rules, harness, and prompts; add translated sections or explicit numbering aliases instead of silently compressing one language"
+    DOCS_MISSING=1
+  fi
+
   if command -v git >/dev/null 2>&1 \
     && git -C "${PROJECT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     release_tracking_missing=0
     release_tracking_paths=(
+      "AXIARCH.md"
       "axiarch-manifest.json"
+      "axiarch-harness/README.md"
+      "axiarch-harness/ja/EXECUTION_HARNESS_PROTOCOL.md"
+      "axiarch-harness/ja/AUDIT_GATE_PROTOCOL.md"
+      "axiarch-harness/ja/ROLE_PASS_PROTOCOL.md"
+      "axiarch-harness/ja/EVIDENCE_PACKET_PROTOCOL.md"
+      "axiarch-harness/ja/HUMAN_APPROVAL_GATE.md"
+      "axiarch-harness/ja/SUBAGENT_DELEGATION_PROTOCOL.md"
+      "axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md"
+      "axiarch-harness/en/AUDIT_GATE_PROTOCOL.md"
+      "axiarch-harness/en/ROLE_PASS_PROTOCOL.md"
+      "axiarch-harness/en/EVIDENCE_PACKET_PROTOCOL.md"
+      "axiarch-harness/en/HUMAN_APPROVAL_GATE.md"
+      "axiarch-harness/en/SUBAGENT_DELEGATION_PROTOCOL.md"
       "axiarch-scripts/axiarch-upgrade.sh"
       "axiarch-scripts/axiarch-task-state.sh"
       "axiarch-prompts/ja/develop/safe_upgrade_execute.md"
@@ -1118,7 +1258,7 @@ EOF
     if [[ "${release_tracking_missing}" -eq 0 ]]; then
       print_pass "Axiarch source release-critical files for the current release are tracked by git"
     else
-      print_info "Expected current core release files to be tracked in the Git index before commit/release, not left only as untracked working-tree files"
+      print_info "Expected current core release files, including AXIARCH.md and axiarch-harness files, to be tracked in the Git index before commit/release, not left only as untracked working-tree files"
       DOCS_MISSING=1
     fi
   else
@@ -1132,6 +1272,37 @@ EOF
       safe_prompt_missing=1
     elif ! grep -q -- "--yes" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
       print_warn "Axiarch source safe_upgrade_execute.md may be missing non-interactive --yes option guidance for ${lang}"
+      safe_prompt_missing=1
+    elif [[ "${lang}" == "ja" ]] && ! grep -q "人間に明示承認済み" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing explicit human approval guidance for ${lang}"
+      safe_prompt_missing=1
+    elif [[ "${lang}" == "en" ]] && ! grep -q "explicit human approval" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing explicit human approval guidance for ${lang}"
+      safe_prompt_missing=1
+    elif ! grep -q "axiarch-harness/{ja,en}" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing axiarch-harness language-existence cross-check for ${lang}"
+      safe_prompt_missing=1
+    elif ! grep -q ".agents/rules/prompt_pointer.md" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing Antigravity detection via .agents/rules/prompt_pointer.md for ${lang}"
+      safe_prompt_missing=1
+    elif ! grep -q ".codex/hooks.json" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may still use directory-level Codex detection instead of .codex/hooks.json for ${lang}"
+      safe_prompt_missing=1
+    elif grep -q ".codex/.*→.*codex" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null \
+      && ! grep -q ".codex/hooks.json.*→.*codex" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may not map .codex/hooks.json directly to codex in auto-detection for ${lang}"
+      safe_prompt_missing=1
+    elif grep -q ".antigravity/" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md still refers to nonstandard .antigravity/ detection for ${lang}"
+      safe_prompt_missing=1
+    elif ! grep -q -- "--agent all" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing multi-agent --agent all guidance for ${lang}"
+      safe_prompt_missing=1
+    elif [[ "${lang}" == "ja" ]] && ! grep -q "2 つ以上検出" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing multi-agent auto-detection semantics for ${lang}"
+      safe_prompt_missing=1
+    elif [[ "${lang}" == "en" ]] && ! grep -q "Two or more detected" "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" 2>/dev/null; then
+      print_warn "Axiarch source safe_upgrade_execute.md may be missing multi-agent auto-detection semantics for ${lang}"
       safe_prompt_missing=1
     fi
     if [[ -f "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" ]]; then
@@ -1211,6 +1382,7 @@ EOF
   init_version=""
   manifest_version=""
   changelog_version=""
+  is_dev_release=0
 
   if [[ -f "${PROJECT_DIR}/init.sh" ]]; then
     init_version=$(sed -n 's/^AXIARCH_VERSION="\([^"]*\)".*/\1/p' "${PROJECT_DIR}/init.sh" | head -n 1)
@@ -1234,9 +1406,17 @@ EOF
     changelog_version=$(sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' "${PROJECT_DIR}/CHANGELOG.md" | head -n 1)
   fi
 
+  if [[ "${init_version}" == *"-dev" ]]; then
+    is_dev_release=1
+    if [[ -f "${PROJECT_DIR}/CHANGELOG.md" ]] \
+      && grep -q "^## \\[Unreleased\\]" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null; then
+      changelog_version="${init_version}"
+    fi
+  fi
+
   if [[ -z "${init_version}" || -z "${manifest_version}" || -z "${changelog_version}" ]]; then
     print_warn "Axiarch source release metadata is incomplete"
-    print_info "Expected init.sh AXIARCH_VERSION, axiarch-manifest.json axiarchVersion, and top CHANGELOG release heading"
+    print_info "Expected init.sh AXIARCH_VERSION, axiarch-manifest.json axiarchVersion, and top CHANGELOG release heading or Unreleased heading for -dev builds"
     release_version_mismatch=1
   elif [[ "${init_version}" == "${manifest_version}" && "${init_version}" == "${changelog_version}" ]]; then
     print_pass "Axiarch source release version parity: ${init_version}"
@@ -1251,7 +1431,7 @@ EOF
     for doc in README.md llms.txt llms-full.txt; do
       if [[ -f "${PROJECT_DIR}/${doc}" ]]; then
         if ! grep -q "v${init_version}" "${PROJECT_DIR}/${doc}" 2>/dev/null; then
-          print_warn "Axiarch source ${doc} does not mention current release v${init_version}"
+          print_warn "Axiarch source ${doc} does not mention current release/build v${init_version}"
           docs_release_mismatch=1
         fi
       else
@@ -1260,14 +1440,14 @@ EOF
       fi
     done
 
-    if [[ -f "${PROJECT_DIR}/CHANGELOG.md" ]] \
+    if [[ "${is_dev_release}" -eq 0 && -f "${PROJECT_DIR}/CHANGELOG.md" ]] \
       && ! grep -q "^\[${init_version}\]:" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null; then
       print_warn "Axiarch source CHANGELOG.md lacks compare reference for ${init_version}"
       docs_release_mismatch=1
     fi
 
     if [[ "${docs_release_mismatch}" -eq 0 ]]; then
-      print_pass "Axiarch source repository docs mention the current release v${init_version}"
+      print_pass "Axiarch source repository docs mention the current release/build v${init_version}"
     else
       release_version_mismatch=1
     fi
@@ -1284,7 +1464,8 @@ EOF
         print_warn "Axiarch source axiarch-rules/${lang}/blueprint/INDEX.md lacks release-upgrade operations Blueprint entry"
         blueprint_index_mismatch=1
       fi
-      if ! grep -q "Version.*v${init_version}" "${blueprint_index}" 2>/dev/null; then
+      if [[ "${is_dev_release}" -eq 0 ]] \
+        && ! grep -q "Version.*v${init_version}" "${blueprint_index}" 2>/dev/null; then
         print_warn "Axiarch source axiarch-rules/${lang}/blueprint/INDEX.md release metadata does not mention v${init_version}"
         blueprint_index_mismatch=1
       fi
@@ -1344,22 +1525,22 @@ fi
 # =============================================================================
 print_section "Out of Scope (Manual Review Required)"
 print_info "These protocols are not externally verifiable and require human review:"
-print_info "  - §0 AI Self-Completion Mandate"
-print_info "  - §3 Database Integrity (manual SQL detection)"
-print_info "  - §5 Existing Functionality Protection"
-print_info "  - §7 Role & Behavior"
-print_info "(§6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Check 11)"
+print_info "  - AXIARCH §6.1 AI Self-Completion Mandate"
+print_info "  - AXIARCH §6.3 Database Integrity (manual SQL detection)"
+print_info "  - AXIARCH §6.5 Existing Functionality Protection"
+print_info "  - AXIARCH §6.9 Role and Behavior"
+print_info "(AXIARCH §6.6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Check 11)"
 
 # =============================================================================
 # Summary
 # =============================================================================
 print_section "Summary"
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
-  print_pass "No blocking automated check failures across hook + crystallization + AGENTS protocols"
+  print_pass "No blocking automated check failures across hook + crystallization + AXIARCH protocols"
   print_info "If warnings appeared above, review them before treating the project state as fully clean"
-  print_info "Verifiable: §1, §2, §4, §6, §8, §9 + LOADING_PROTOCOL + Hooks (4) + Bootstrap + Task Boundary + Diff Guard + Docs Integration"
-  print_info "Manual review needed: §0, §3, §5, §7 (see Out of Scope above)"
-  print_info "(§6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard)"
+  print_info "Verifiable: AXIARCH §0, §6.2, §6.4, §6.6, §7, §9 + LOADING_PROTOCOL + Hooks (4) + Bootstrap + Task Boundary + Diff Guard + Docs Integration"
+  print_info "Manual review needed: AXIARCH §6.1, §6.3, §6.5, §6.9 (see Out of Scope above)"
+  print_info "(AXIARCH §6.6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard)"
 else
   print_warn "Some checks failed/warned — see above for which protocol needs attention"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"
@@ -1367,7 +1548,7 @@ else
 fi
 echo ""
 print_info "Docs: https://code.claude.com/docs/en/hooks"
-print_info "AGENTS.md (top-level protocol): root of project"
+print_info "AXIARCH.md (canonical protocol): root of project"
 print_info "Crystallization Protocol: axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md"
 print_info "axiarch: https://github.com/hiroyuki-miyauchi/axiarch"
 echo ""

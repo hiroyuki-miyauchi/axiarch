@@ -519,29 +519,41 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 | **Browsewrap** | ❌ Weak | Do not use |
 
 ### 5.6. Dispute Resolution & Arbitration Clauses
+
 -   **Arbitration**: Arbitration clauses recommended for B2B contracts. Specify governing law, arbitration institution, and language.
 -   **Class Action Waiver**: Class action waivers in B2C terms are invalid in the EU. US also has state-level restrictions.
--   **ADR**: Services targeting EU users must### 6.1. Global Consumer Protection & E-Commerce Laws
+-   **ADR**: Services targeting EU users must provide a link to the ODR (Online Dispute Resolution) platform where applicable.
+
+---
+
+## §6. Regional Compliance
+
+### 6.1. Global Consumer Protection & E-Commerce Laws
 
 #### 6.1.1. Clear Commercial Disclosures
+
 -   When offering paid services, mandatory display of required disclosures within the app is broadly required by international e-commerce laws.
 -   **Disclosure Items**: Business name, address, phone, representative, pricing, payment timing/method, delivery timing, cancellation policy.
 -   **Final Confirmation Screen**: Display **contract period**, **billing timing**, and **cancellation conditions** clearly on the pre-payment screen.
 
 #### 6.1.2. Virtual Currency and Prepaid Instruments Regulation
+
 -   **Deposit Avoidance**: Issuing proprietary prepaid payment instruments often carries heavy deposit and reporting obligations depending on local regulations. Prefer established third-party payment gateways (e.g., Apple/Google IAP, Stripe) to mitigate risk.
 
 #### 6.1.3. Advertising Disclosure (Anti-Stealth Marketing)
+
 -   **Law**: Content with monetary consideration from advertisers must transparently display "PR", "Ad", or "Sponsored" labeling to comply with global advertising standards (e.g., FTC guidelines).
 -   **System Guard**: System-level automatic ad labeling on posts with `is_sponsored` flag.
 
 #### 6.1.4. Email Compliance
+
 -   **Opt-In**: Explicit prior consent required for promotional emails; record consent timestamp.
 -   **Sender Disclosure**: Display sender name, contact information, and unsubscribe method on all emails.
 -   **Unsubscribe**: One-click unsubscribe link required (e.g., CAN-SPAM, GDPR).
 -   **Audit Trail**: Log all system email transmissions. Store email addresses masked.
 
 #### 6.1.5. Subscription Auto-Renewal Transparency
+
 -   Clearly disclose auto-renewal facts and conditions **before** contract.
 -   Require explicit confirmation step **before** transitioning from free trial to paid.
 -   Provide cancellation method at **equal or lesser difficulty** than sign-up.
@@ -549,6 +561,7 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **Click-to-Cancel Rule**: Obligation to enable cancellation via the same channel as registration is increasingly enforced globally.
 
 #### 6.1.6. Emerging Global Privacy Modernization Trends (Expected 2026-2027)
+
 -   **Legislative Progress**: Many jurisdictions are reviewing their primary privacy laws for modernization (e.g., introducing administrative monetary penalties for large-scale data trading).
 -   **AI Development Data Use Relaxation**: Some regions plan to clarify conditions to **permit use without consent** for AI training purposes of certain data. This is strictly limited to statistical processing and model training without re-identification.
 -   **Anti-Pattern**: "AI development relaxation is confirmed so we can freely use special care-required personal information for training data" is WRONG. **Purpose limitation violations, re-identification, and third-party provision remain strictly prohibited.**

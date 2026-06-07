@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
 > **現在の安定版 / Current Stable**: v1.11.2 Multi-Agent Detection Fix for Safe Upgrade\
-> **次期作業 / Next**: v1.12.0 Static Lint & Process Supervision（検討中 / under consideration）\
+> **次期作業 / Next**: v1.12.0 AXIARCH Canonical Entrypoint & Execution Harness（実装中 / in progress）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -22,6 +22,19 @@
 - **Claude Code**: hook 補強モデルとTask tools連携を実運用で稼働確認済みとして扱う
 - **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
+
+---
+
+### 🚧 v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness（実装中）
+
+- **`AXIARCH.md` 正本化** — `AGENTS.md` をCodex専用でも単独正本でもなく、AGENTS標準を読む環境向けの薄いアダプターとして整理。Claude Code、Antigravity、Cursor、Copilot、Windsurfの各入口も `AXIARCH.md` だけを指す。
+- **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
+- **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
+- **保留候補** — Static Lint & Process Supervision は本正本化の後続候補として継続検討する。
+
+---
+
+> **履歴注記**: v1.11.2以前の完了済みリリース項目には、当時の正本であった `AGENTS.md` や Protocol 0-9 の表記が残っています。v1.12.0以降の現行正本は `AXIARCH.md` であり、過去項目はリリース履歴として扱います。
 
 ---
 
@@ -540,9 +553,9 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
-### 🔮 v1.12.0 — Static Lint & Process Supervision（Tier 3、検討中）
+### 🔮 v1.13.0以降 — Static Lint & Process Supervision（Tier 3、検討中）
 
-学術裏付けが強く工数も大きい改善案を v1.12.0 として独立計画。
+学術裏付けが強く工数も大きい改善案を、AXIARCH正本入口とExecution Harnessの後続候補として独立計画。
 
 - **`axiarch-doctor` CI lint 機構（npx 配布）** — Cursor の `cursor-doctor` /
   `cursor-lint-action` 模倣。frontmatter 検証 / Universal vs Blueprint 責務違反
@@ -552,8 +565,8 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
   記録義務」「core/010 結晶化閾値」を verifiable instruction 化、PR ごとに
   Claude API で実走 → pass/fail 判定。reliable@k 評価で「言い換えに弱い
   rule」を検出（出典: arXiv:2311.07911 / arXiv:2512.14754）
-- **Deliberative Alignment 模倣 — Protocol Recall 強制** — 高リスク tool
-  実行前に「9 protocols のうち今回該当するものを列挙し、各々への適合理由を 1
+- **Deliberative Alignment 模倣 — Harness Gate Recall 強制** — 高リスク tool
+  実行前に「AXIARCH.md と該当 harness gate のうち今回関係するものを列挙し、各々への適合理由を 1
   行ずつ書け」reasoning step を必須化。OpenAI o3 で safety 違反 13%→0.4%
   を達成（出典: arXiv:2412.16339）
 - **AI Agent Compatibility Matrix** — 主対象（Codex / Claude Code /
@@ -615,6 +628,19 @@ enterprise adoption needs.
 - **Claude Code**: The hook-reinforcement model and Task tools integration are validated through real operational usage
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
+
+---
+
+### 🚧 v1.12.0 — AXIARCH Canonical Entrypoint & Execution Harness (in progress)
+
+- **`AXIARCH.md` canonicalization** — Treat `AGENTS.md` as neither Codex-only nor the standalone source of truth. It is a thin adapter for environments that read the AGENTS standard. Claude Code, Antigravity, Cursor, Copilot, and Windsurf entrypoints also point only to `AXIARCH.md`.
+- **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
+- **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
+- **Deferred candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
+
+---
+
+> **Historical note**: Completed release entries for v1.11.2 and earlier may still mention `AGENTS.md` and Protocol 0-9 because those were the canonical labels at the time. From v1.12.0 onward, the active source of truth is `AXIARCH.md`; older entries are release history.
 
 ---
 
@@ -1182,10 +1208,10 @@ stale in multi-agent projects.
 
 ---
 
-### 🔮 v1.12.0 — Static Lint & Process Supervision (Tier 3, Under Consideration)
+### 🔮 v1.13.0 or later — Static Lint & Process Supervision (Tier 3, Under Consideration)
 
 Improvements with strong academic backing but larger implementation effort,
-planned independently for v1.12.0.
+planned independently after the AXIARCH canonical entrypoint and Execution Harness work.
 
 - **`axiarch-doctor` CI lint mechanism (npx-distributed)** — Mirror Cursor
   `cursor-doctor` / `cursor-lint-action`. Forces frontmatter validation /
@@ -1196,10 +1222,11 @@ planned independently for v1.12.0.
   in `tests/ifeval/`, run via Claude API per PR for pass/fail. Detect rules
   brittle to paraphrase via reliable@k evaluation (sources: arXiv:2311.07911 /
   arXiv:2512.14754)
-- **Deliberative-Alignment imitation — forced Protocol Recall** — Before
-  high-risk tool calls, require a reasoning step: "list which of the 9 protocols
-  apply now and write one-line justification per match". OpenAI o3 reduced
-  safety violations 13%→0.4% with this approach (source: arXiv:2412.16339)
+- **Deliberative-Alignment imitation — forced Harness Gate Recall** — Before
+  high-risk tool calls, require a reasoning step: "list which AXIARCH.md and
+  relevant harness gates apply now and write one-line justification per match".
+  OpenAI o3 reduced safety violations 13%→0.4% with this approach (source:
+  arXiv:2412.16339)
 - **AI Agent Compatibility Matrix** — Meta-spec that separates primary targets
   (Codex / Claude Code / Antigravity) from extended compatibility targets
   (Cursor / GitHub Copilot / Windsurf / Aider / Zed, etc.) and periodically

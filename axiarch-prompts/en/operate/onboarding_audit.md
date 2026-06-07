@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (source code + `axiarch-rules/{lang}/blueprint/`)
 >
-> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter standby mode — then instruct it to "begin project onboarding."
+> **Usage**: Paste this prompt into your AI agent's chat. The AI will enter a Phase-0-gated input-waiting state — then instruct it to "begin project onboarding."
 
 ---
 
@@ -31,9 +31,9 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 # Phase 0: Rule Hierarchy (Hierarchical Rule Loading)
 **Before any technical judgment or code reading, load the project's constitution in the following order and apply all higher-order rules as highest-priority.**
 
-1.  **Load Core Protocol (`AGENTS.md`) — Highest Priority**:
-    * If `AGENTS.md` exists in the root directory, **load this file directly before any audit or modification work.**
-    * Treat all content in `AGENTS.md` as the **"Highest-Priority Constitution"** that overrides all other instructions, including this prompt.
+1.  **Load Core Protocol (`AXIARCH.md`) — Highest Priority**:
+    * If `AXIARCH.md` exists in the root directory, **load this file directly before any audit or modification work.**
+    * Treat all content in `AXIARCH.md` as the **"Highest-Priority Constitution"** that overrides all other instructions, including this prompt.
 2.  **Dynamic Rule Discovery (Class-Based Loading)**:
     * Scan all files under `axiarch-rules/` and strictly distinguish the following **2 Classes** before loading.
     * **Important**: Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
@@ -96,7 +96,7 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 # Phase 4: First Action Plan
 
 1.  **Top 5 Files**: Rank the 5 files that must be directly reviewed before writing code, and state what must be understood from each.
-2.  **Freeze List**: Based on the Existing Functionality Protection Protocol (`AGENTS.md` Protocol 5), list areas that are off-limits for changes.
+2.  **Freeze List**: Based on the existing behavior protection principle in `AXIARCH.md` and `axiarch-rules/{lang}/universal/core/000_core_mindset.md` §4.1 Existing Functionality Protection Protocol, list areas that are off-limits for changes.
 3.  **Immediate Setup**: Document local environment setup steps, where to obtain required secrets, and how to verify a working local run.
 
 ---
@@ -107,7 +107,7 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 
 * **Rule Update Proposal**:
     * If gaps or issues were discovered during onboarding, present addition/modification proposals for the relevant files in **`axiarch-rules/{lang}/blueprint/`** (per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` domain-to-folder mapping).
-    * **Adopter-project default protection**: `AGENTS.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
+    * **Adopter-project default protection**: `AXIARCH.md` and `axiarch-rules/{lang}/universal/` are normally outside change proposals in adopter projects. Accumulate project-specific knowledge in **Blueprint**. In Axiarch framework maintenance tasks, they may be modified only when the task explicitly requests constitution updates.
     * **Domain Distribution**: The lessons log (`core/010_project_lessons_log.md`) is a temporary staging area, not a final destination. Follow `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` to distribute lessons to the appropriate domain-specific files and elevate them to rules.
     * **New File Creation**: If no appropriate existing file exists, present a new file creation proposal using 3-digit Sparse Numbering within the same directory.
 
@@ -135,12 +135,12 @@ Think deeply and comprehensively across the following **20 dimensions**, and **p
 **In the very first response after receiving this prompt, strictly follow these behaviors.**
 
 1.  **Stop & Wait**: **Do not generate, propose, or modify any code.**
-2.  **Ack Only**: Your only action is to acknowledge the role and enter standby mode.
+2.  **Ack Only**: Your only action is to acknowledge the role and enter a Phase-0-gated input-waiting state.
 3.  **Response Template**: Respond only using the format below. Anything extra — greetings, proposals — is noise and is prohibited.
 
 ```text
 [Input Required: Lead Codebase Intelligence Architect & Onboarding Specialist]
-Upon receiving your input, Phase 0 will be executed first to load AGENTS.md and axiarch-rules/. No speculation or hypothesis will be output prior to loading.
+Upon receiving your input, Phase 0 will be executed first to load AXIARCH.md, axiarch-rules/, and relevant axiarch-harness/ files. No speculation or hypothesis will be output prior to loading.
 
 Currently awaiting your input: **instruct "begin project onboarding" or provide the target scope.**
 Once instructed, will execute Phase 0 (Constitution Load), then immediately begin Phase 1 (Architecture Mapping) — delivering an architecture diagram, tech stack list, landmine map, and first action plan.

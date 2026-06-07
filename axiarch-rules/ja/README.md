@@ -101,9 +101,10 @@
 > [!NOTE]
 > 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。3つとも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
 
-1.  **コピー (Copy)**: 最小必須は `AGENTS.md` と `axiarch-rules/` です。安全アップグレードを使う場合のみ `axiarch-manifest.json` と `axiarch-scripts/` を追加でコピーします。`axiarch-prompts/` は任意です。
+1.  **コピー (Copy)**: 最小必須は `AXIARCH.md`、`AGENTS.md` アダプター、`axiarch-rules/`、`axiarch-harness/` です。安全アップグレードを使う場合は `axiarch-manifest.json` と `axiarch-scripts/` もコピーします。`axiarch-prompts/` は任意です。
     ```bash
-    cp -r axiarch-rules AGENTS.md /path/to/your/project/
+    cp AXIARCH.md AGENTS.md /path/to/your/project/
+    cp -r axiarch-rules axiarch-harness /path/to/your/project/
 
     # 推奨: 安全アップグレードを使う場合
     cp axiarch-manifest.json /path/to/your/project/
@@ -114,28 +115,25 @@
     既存プロジェクトの更新では `axiarch-scripts/axiarch-upgrade.sh` を使うと、Universal / scripts などのAxiarch本体寄りファイルだけを更新候補にし、プロジェクト固有Blueprintを既定で保持できます。
 
 2.  **AIエージェント用ポインター設定 (Agent Rules Pointer)**:
-    AIエージェントツール（Antigravity等）が`.agents/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`axiarch-rules/`を参照させます。
+    AIエージェントツール（Antigravity等）が`.agents/rules/`を自動読み込みする場合、**ポインターファイル**を配置して`AXIARCH.md`を参照させます。
     ```bash
     # .agents/rules/ ディレクトリを作成
     mkdir -p /path/to/your/project/.agents/rules
 
     # prompt_pointer.md をポインターとして配置（本リポジトリの .agents/rules/ からコピー）
-    # ※ ルール本体はaxiarch-rules/に一元管理。.agents/rules/にはポインターのみ配置。
+    # ※ 正本入口はAXIARCH.md。.agents/rules/にはポインターのみ配置。
     cp .agents/rules/prompt_pointer.md /path/to/your/project/.agents/rules/prompt_pointer.md
     ```
 
     > [!CAUTION]
     > **`.agents/rules/` にルール本体を新規作成してはならない。**
-    > ルールの追加・編集は必ず `axiarch-rules/` 内で行うこと。
-    > `.agents/rules/` はあくまで **ポインター（目次）** であり、ルール本体ではない。
+    > ルール本体の追加・編集は `AXIARCH.md` からロードされる `axiarch-rules/` 内で行うこと。
+    > `.agents/rules/` はあくまで **AXIARCH.mdへのポインター** であり、ルール本体ではない。
 
 3.  **初期化 (Initialize)**:
-    *   **`AGENTS.md` の編集**: `Project Native Language` を `Japanese` に設定します。
-    *   **クリーンアップ (Cleanup)**: 単一言語運用に固定する場合のみ、使用しない英語ルールのディレクトリを任意で削除できます。（プロンプトライブラリを含めた場合も同様です）
-        ```bash
-        rm -rf axiarch-rules/en
-        # プロンプトライブラリがある場合: rm -rf axiarch-prompts/en
-        ```
+    *   **Project Native Language**: `init.sh` 利用時は選択言語が `AXIARCH.md` へ自動設定されます。手動コピー時は `AXIARCH.md` の `Project Native Language` を `Japanese` に設定します。旧導入先では `AGENTS.md` をフォールバックとして参照します。
+    *   **クリーンアップ (Cleanup)**: 既定では日本語・英語ディレクトリを両方保持します。単一言語運用に固定する場合だけ、不要な言語ディレクトリをレビューして削除できます。（プロンプトライブラリを含めた場合も同様です）
+        対象例: 日本語専用プロジェクトでは `axiarch-rules/en` と `axiarch-harness/en`、プロンプトライブラリを含めた場合は `axiarch-prompts/en`。
 
 4.  **設定 (Configure)**: `axiarch-rules/ja/blueprint/core/000_project_overview.md` を編集してプロジェクト概要を定義し、`axiarch-rules/ja/blueprint/core/010_project_lessons_log.md` を教訓記録の起点として準備します。
 
@@ -147,29 +145,34 @@
 
 ```
 your-project/
- ├── AGENTS.md                    ← 最上位プロトコル
+ ├── AXIARCH.md                   ← 正本入口
+ ├── AGENTS.md                    ← AGENTS標準向けアダプター
  ├── .agents/
  │    └── rules/
- │         └── prompt_pointer.md  ← ポインター（目次）
+ │         └── prompt_pointer.md  ← AXIARCH.mdへのポインター
  ├── axiarch-rules/           ← ルール本体
- │    └── ja/ (or en/)        ← 言語選択
- │         ├── INDEX.md
- │         ├── README.md
- │         ├── LOADING_PROTOCOL.md
- │         ├── CRYSTALLIZATION_PROTOCOL.md
- │         ├── universal/     ← Layer 1: 不変憲法
- │         │    ├── core/
- │         │    ├── product/
- │         │    ├── engineering/
- │         │    └── ...
- │         └── blueprint/     ← Layer 2: 固有ルール
- │              └── core/
+ │    ├── ja/                 ← 日本語ルール
+ │    │    ├── INDEX.md
+ │    │    ├── README.md
+ │    │    ├── LOADING_PROTOCOL.md
+ │    │    ├── CRYSTALLIZATION_PROTOCOL.md
+ │    │    ├── universal/     ← Layer 1: 不変憲法
+ │    │    │    ├── core/
+ │    │    │    ├── product/
+ │    │    │    ├── engineering/
+ │    │    │    └── ...
+ │    │    └── blueprint/     ← Layer 2: 固有ルール
+ │    │         └── core/
+ │    └── en/                 ← 英語ルール（既定では保持）
+ ├── axiarch-harness/         ← 実行・監査・証跡・承認手順
+ │    ├── ja/
+ │    └── en/                 ← 既定では保持
  ├── axiarch-prompts/         ← Layer 3: 任意実行エンジン
  │    ├── ja/ (or en/)
  │    │    ├── develop/      ← 開発・実行
  │    │    ├── audit/        ← 品質監査
  │    │    ├── govern/       ← ガバナンス
  │    │    └── operate/      ← インシデント・参入
- │    └── (en or ja)/        ← 削除可：未使用言語
+ │    └── en/ (or ja/)        ← 任意。既定では保持
  └── src/                         ← プロジェクトコード
 ```

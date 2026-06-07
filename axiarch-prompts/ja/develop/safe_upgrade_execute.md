@@ -2,9 +2,9 @@
 
 > **用途**: 既存Axiarch採用プロジェクトへ、Axiarch Coreの必要な更新だけをmanifestに基づいて選択適用するプロンプト
 >
-> **対象**: 既存Axiarch採用プロジェクト（`AGENTS.md` + `axiarch-rules/` + 任意の `axiarch-scripts/` / `axiarch-prompts/`）
+> **対象**: 既存Axiarch採用プロジェクト（現行構成: `AXIARCH.md` + `AGENTS.md` adapter + `axiarch-rules/` + `axiarch-harness/`、旧導入先: `AGENTS.md` + `axiarch-rules/`、任意: `axiarch-scripts/` / `axiarch-prompts/`）
 >
-> **使い方**: 既存プロジェクトをAxiarchの新しいリリースへアップデートしたい段階でこのプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは待機状態に入るので、対象バージョン、対象エージェント、言語、適用方針を指示する。
+> **使い方**: 既存プロジェクトをAxiarchの新しいリリースへアップデートしたい段階でこのプロンプトをAIエージェントのチャットに貼り付けて実行する。AIは直ちにPhase 0のcontext loadとPhase 1の自律推定を行い、dry-run前に推定結果を提示して確認を取る。
 
 ---
 
@@ -27,7 +27,7 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
 
 1. **Core Protocol**
    - 役割: 最上位行動指針、デプロイ禁止、既存保護、全文上書き禁止、Documentation Requirements
-   - 候補: `AGENTS.md`
+   - 候補: `AXIARCH.md`（旧導入先では `AGENTS.md` をフォールバック）
 2. **Loading / Crystallization Protocol**
    - 役割: ルールロード手順、task.md記録、教訓の結晶化、閾値チェック
    - 候補: `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
@@ -37,7 +37,7 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
 4. **Upgrade Engine**
    - 役割: dry-run / safe-only / interactive / apply / merge / metadata生成の実行仕様
    - 候補: `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/README.md`
-   - `axiarch-scripts/axiarch-upgrade.sh` が未導入の場合は、既存ファイルを上書きせず、タグ固定の一時helperを `/tmp/axiarch-upgrade.sh` に取得してdry-runする。例: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.10.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
+   - `axiarch-scripts/axiarch-upgrade.sh` が未導入の場合は、既存ファイルを上書きせず、タグ固定の一時helperを `/tmp/axiarch-upgrade.sh` に取得してdry-runする。例: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.11.2/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
 5. **Project State**
    - 役割: 既存プロジェクト固有の概要・教訓・Blueprint状態
    - 候補: `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`
@@ -59,12 +59,12 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
    - 推定できない場合は「不明」と明記し、dry-runで確認する。
 3. **アップグレード先**
    - ユーザーが指定した `--to vX.Y.Z`, `--ref tags/vX.Y.Z`, `--source /path/to/axiarch` を優先する。
-   - 指定がない場合は、勝手に最新版へ進めず、対象バージョンまたはsourceを確認する。
+   - 指定がない場合は最新リリースタグを推定候補として提示する。推定できない場合、またはそのまま進める根拠が弱い場合は、対象バージョンまたはsourceを確認する。
 4. **対象言語**
    - `--lang ja|en|both` を、プロジェクトの `Project Native Language` と保持言語に合わせて決める。
 5. **対象エージェント**
    - 主対象は `codex`, `claude`, `antigravity`。Cursor / Copilot / Windsurf はポインター互換候補であり、動作保証として扱わない。
-   - **複数 agent を併用するプロジェクト（例: codex+claude+antigravity の inucomi）は `--agent all` を使う。** 単一 agent を指定すると他 agent の hook が更新計画から漏れて stale 化する。`--safe-only` 下では未使用 agent の pointer は書込されないため `all` でも安全。
+   - 複数 agent を併用するプロジェクト（例: codex+claude+antigravity の inucomi）は `--agent all` を使う。単一 agent を指定すると他 agent の hook が更新計画から漏れて stale 化する。`--safe-only` 下では未使用 agent の pointer は書込されないため、`all` でも安全。
 6. **任意層**
    - `axiarch-prompts/` は任意。ユーザーが明示した場合のみ `--with-prompts` を付ける。
 
@@ -74,7 +74,7 @@ Axiarchの更新は「最新版を丸ごと上書きする」作業ではあり�
 2. 現在 `main` / `master` にいる場合は、直接変更せず、作業内容を表すブランチを作成する。ただし孫ブランチや無意味なブランチ乱立は禁止。
 3. 既に作業ブランチにいる場合は、そのブランチへ追加する。ユーザーや他エージェントの差分を勝手に戻してはいけない。
 4. 未コミット差分がある場合は、今回のアップグレードと関係するかを分類する。関係ない差分は触らない。
-5. `git push` はユーザーの明示許可がある場合のみ実行する。
+5. `git add`、`git commit`、`git push` は、それぞれ対象操作を明示したユーザー許可がある場合のみ実行する。
 
 # Phase 3: Dry-Run First (必ず計画を先に出す)
 
@@ -104,14 +104,14 @@ bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to vX.Y.Z --dry-run --agent <ag
 --yes
 ```
 
-`--yes` はdry-run結果を確認済みの場合だけ使います。`--apply` または `--interactive` の確認入力で標準入力がEOFになった場合、Wizardは既定Nとしてdry-runへ戻る前提で扱ってください。
+`--yes` はdry-run結果を確認し、apply実行が人間に明示承認済みの場合だけ使います。`--apply` または `--interactive` の確認入力で標準入力がEOFになった場合、Wizardは既定Nとしてdry-runへ戻る前提で扱ってください。
 
 dry-run結果を、以下の分類で要約してください。
 
 | 分類 | 判断 |
 |:--|:--|
-| Axiarch Core | `universal/`, protocol, scripts, manifestなど。更新候補 |
-| Mixed Ownership | `AGENTS.md`, hook設定, Blueprint indexなど。差分確認・レビュー対象 |
+| Axiarch Core | `universal/`, protocol, `axiarch-harness/`, scripts, manifestなど。更新候補 |
+| Mixed Ownership | `AXIARCH.md`（Project Native Languageを含む）, `AGENTS.md`, hook設定, Blueprint indexなど。差分確認・レビュー対象 |
 | Project State | `blueprint/core/000_project_overview.md`, `blueprint/core/010_project_lessons_log.md`, `blueprint/*/{NNN}_*.md`。既定保持 |
 | Axiarch共有Blueprint | 番号付きBlueprintでもmanifestに明示されたAxiarch所有ルール。README/INDEXとのリンク整合を保つため、Project Stateとは分けてレビュー |
 | Optional | `axiarch-prompts/` など。明示指定時のみ対象 |
@@ -127,12 +127,12 @@ dry-run後、以下の基準で実行方針を決めてください。
 
 1. **safe-only適用候補**
    - Axiarch所有かつ `policy=replace` のファイル・ディレクトリ
-   - 例: `axiarch-manifest.json`, `axiarch-rules/{lang}/universal`, `axiarch-scripts`
+   - 例: `axiarch-manifest.json`, `axiarch-harness/{lang}`, `axiarch-rules/{lang}/universal`, `axiarch-scripts`
 2. **明示指定時のみ適用**
    - `axiarch-prompts/`
    - ユーザーが `--with-prompts` を指定した場合のみ対象
 3. **レビュー必須**
-   - `AGENTS.md`, `.codex/hooks.json`, `.claude/settings.json`, `CLAUDE.md`, Blueprint indexなど
+   - `AXIARCH.md`（Project Native Languageを含む）, `AGENTS.md`, `.codex/hooks.json`, `.claude/settings.json`, `CLAUDE.md`, Blueprint indexなど
    - manifestに明示されたAxiarch共有Blueprintルール
    - `replace-if-local-unchanged` でbaseなし差分、base欠落、base不一致になったファイル
    - Source Repository Filesを採用先へ持ち込む必要がある例外ケース
@@ -228,7 +228,7 @@ bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja
 
 待機せずに以下を直接ロードする。
 
-- `AGENTS.md`（最上位プロトコル）
+- `AXIARCH.md`（最上位プロトコル。旧導入先では `AGENTS.md` をフォールバック）
 - `axiarch-rules/{lang}/LOADING_PROTOCOL.md`
 - `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
 - `axiarch-manifest.json`（所有境界）
@@ -244,8 +244,8 @@ bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja
 |:--|:--|:--|
 | **現バージョン** | `.axiarch/version.json` の `version` フィールド | `axiarch-manifest.json` / `CHANGELOG.md` 推定、無理なら「不明」 |
 | **アップグレード先** | user が `--source /path/to/axiarch` 等を明示指定した場合は最優先 / 指定なければ `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` で最新タグ | 推定不能なら user に確認 |
-| **対象エージェント** | **3 つの代表ファイルを全て確認し、存在する agent を全列挙する**（`init.sh` 生成基準）: `.claude/settings.json`→`claude` / `.codex/hooks.json`→`codex` / `.agents/rules/prompt_pointer.md`→`antigravity`。**1 つだけ検出**→その agent / **2 つ以上検出（併用プロジェクト。例: codex+claude+antigravity の inucomi）**→`all`（単一指定だと他 agent の hook が計画に出ず取り残されるため。`--safe-only` では未使用 agent の pointer は REVIEW 可視化のみで書込されず安全） | **0 検出**時のみ `universal`（agent 非依存ファイルのみ）を提示し user に確認 |
-| **対象言語** | `AGENTS.md` の `Project Native Language` を読み、`axiarch-rules/{ja,en}/` 実在状況と突合 | 単一言語のみ存在 → 自動採用 / 両方 → user に確認 |
+| **対象エージェント** | 3 つの代表ファイルを全確認して存在 agent を列挙する（`init.sh` 生成基準）: `.claude/settings.json` → `claude` / `.codex/hooks.json` → `codex` / `.agents/rules/prompt_pointer.md` → `antigravity`。1 つだけ検出 → その agent / 2 つ以上検出（併用プロジェクト。例: codex+claude+antigravity の inucomi）→ `all`（単一指定だと他 agent の hook が計画に出ず stale 化するため。`--safe-only` では未使用 agent の pointer は REVIEW 可視化のみで書込されない） | 0 検出時のみ `universal`（agent 非依存ファイルのみ）を提示し user に確認 |
+| **対象言語** | `AXIARCH.md` の `Project Native Language` を読み、旧導入先では `AGENTS.md` をフォールバックとして `axiarch-rules/{ja,en}/` と `axiarch-harness/{ja,en}/` の実在状況を突合 | 単一言語のみ存在 → 自動採用 / 両方 → user に確認 |
 | **適用方針** | 既定で `--safe-only --dry-run`（最も保守的）| user 明示時のみ `--interactive` / `--with-prompts` |
 
 ## Step 3: 推定結果の提示 + user 確認（安全フェンス 1）
@@ -301,7 +301,7 @@ user が「apply して」「OK」等で承認 → Step 6 へ。
 - `--with-prompts`（任意層含める）
 - mixed ownership ファイルへの書き込み
 - `--interactive` モード（user 入力が前提）
-- `git push` / `git tag` / `gh pr create` / `gh pr merge`
+- `git add` / `git commit` / `git push` / `git tag` / `gh pr create` / `gh pr merge`
 
 以下は **AI 自律実行 OK**（書き込みなし or 完全保守的）：
 - Phase 0 context load
@@ -316,7 +316,7 @@ user が「apply して」「OK」等で承認 → Step 6 へ。
 | **現バージョン == アップグレード先** | 「アップグレード不要」と提示して終了 |
 | **複数 major/minor 跨ぎ**（例 v1.6.0 → v1.11.0）| 中間版での段階適用も選択肢として提示 |
 | **`.axiarch/version.json` 不在**（初回更新）| baseline 不在で差分検出不可、初回適用として進める旨を明示 |
-| **複数 agent 検出 = 併用プロジェクト**（`.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` のうち 2 つ以上が存在。例: inucomi = codex+claude+antigravity）| `--agent all` を推定値として提示。**1 つだけ選ばせてはいけない**（選ばなかった agent の hook が計画から漏れ、アップグレードで stale 化するため）。`all` は全 agent の hook を REVIEW 可視化し、未使用 agent（cursor/copilot/windsurf）の pointer は `--safe-only` 下では書込されない。hook ファイル（mixed/review）の実更新は `--interactive` で各 agent 分をレビューする |
+| **複数 agent 検出 = 併用プロジェクト**（`.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` のうち 2 つ以上が存在。例: inucomi = codex+claude+antigravity）| `--agent all` を推定値として提示する。1 つだけ選ばせてはいけない（選ばなかった agent の hook が計画から漏れ、アップグレードで stale 化するため）。`all` は全 agent の hook を REVIEW 可視化し、未使用 agent（cursor/copilot/windsurf）の pointer は `--safe-only` 下では書込されない。hook ファイル（mixed/review）の実更新は `--interactive` で各 agent 分をレビューする |
 | **推定先 release 取得失敗**（network 不可 / repo 名間違い）| user に `--source` 指定を依頼 |
 
 ## 旧 Stop & Wait モードへのフォールバック

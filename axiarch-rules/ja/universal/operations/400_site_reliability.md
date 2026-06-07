@@ -2289,6 +2289,56 @@
 
 ---
 
+## 番号互換エイリアス
+
+以下の項目は、英語版の既存番号との相互参照互換性を保つためのエイリアスである。本文の正規内容は参照先セクションに置く。
+
+### §25-b. Actionable Alert Template
+
+- **Compatibility Alias**: 正規本文は §26 を参照。
+
+### §27-b. On-Call Cognitive Load Model
+
+- **Compatibility Alias**: 正規本文は §29 を参照。
+
+### §29-b. Incident Communication
+
+- **Compatibility Alias**: 正規本文は §32 を参照。
+
+### §31-b. Adaptive Capacity and Resilience Foundations
+
+- **Compatibility Alias**: 正規本文は §35 を参照。
+
+### §45-b. Adaptive Concurrency Limits
+
+- **Compatibility Alias**: 正規本文は §50-b を参照。
+
+### §45-c. Gray Failure Handling
+
+- **Compatibility Alias**: 正規本文は §50 を参照。
+
+### §85-b. Platform SLO
+
+- **Compatibility Alias**: 正規本文は §97-b を参照。
+
+### §85-c. Backstage Plugin信頼性
+
+- **Compatibility Alias**: 正規本文は §97-c を参照。
+
+### §87-b. MCP/A2A/ACP統合プロトコル
+
+- **Compatibility Alias**: 正規本文は §101-b を参照。
+
+### §140-b. Ambient Mesh（Sidecar-less Service Mesh）
+
+- **Compatibility Alias**: 正規本文は §152-b を参照。
+
+### §140-c. Confidential Computing SRE
+
+- **Compatibility Alias**: 正規本文は §152-c を参照。
+
+---
+
 ## Appendix A: 逆引き索引
 
 | キーワード | 参照セクション |

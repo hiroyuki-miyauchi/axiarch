@@ -3,7 +3,7 @@
 > [!CAUTION]
 > **AIへの重要指示**
 >
-> *   **Layer 1: Universal Constitution (不変憲法)**: `1. Layer 1: Universal Rules` セクションに記載されているファイル（`universal/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja` または `en` に置換してください。
+> *   **Layer 1: Universal Constitution (不変憲法)**: `1. Layer 1: Universal Rules` セクションに記載されているファイル（`universal/` 配下）は、**読み取り専用（Read-only）** です。AIはこれらのファイルを、いかなる場合もユーザーの明示的な許可（「憲法改正」の指示）なしに編集・変更してはなりません。`{lang}` は `AXIARCH.md` の `Project Native Language` に従い `ja` または `en` に置換してください。旧導入先では `AGENTS.md` をフォールバックとして参照します。
 > *   **Layer 2: Blueprint (固有ルール/可変仕様)**: `2. Layer 2: Blueprint Rules` セクションに記載されているファイル（`blueprint/` 配下）は、プロジェクトごとにカスタマイズされるべき領域です。AIは要件と教訓に応じてこれらを積極的に提案・更新してください。
 
 ユーザーの網羅的な要望（プロンプト）が、どのルールファイルでカバーされているかを証明する対照表です。

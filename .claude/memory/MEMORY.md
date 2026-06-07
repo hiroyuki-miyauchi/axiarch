@@ -1,8 +1,8 @@
 # Axiarch Memory Persistence Template
 
-このファイルは Claude Code 採用時の任意テンプレートです。Axiarch の正式な仕様、憲法、プロジェクト固有ルールは `AGENTS.md` と `axiarch-rules/` を正とします。Memory はそれらを置き換えず、同じ失敗や判断漏れを繰り返しにくくするための短い補助記録として扱います。
+このファイルは Claude Code 採用時の任意テンプレートです。Axiarch の正式な入口正本は `AXIARCH.md` です。Memory は `AXIARCH.md` を置き換えず、同じ失敗や判断漏れを繰り返しにくくするための短い補助記録として扱います。
 
-This file is an optional template for Claude Code adopters. `AGENTS.md` and `axiarch-rules/` remain the source of truth for Axiarch protocols and project rules. Memory does not replace them; it only stores short operational notes that reduce repeated mistakes or repeated decision gaps.
+This file is an optional template for Claude Code adopters. `AXIARCH.md` is the canonical Axiarch entrypoint. Memory does not replace `AXIARCH.md`; it only stores short operational notes that reduce repeated mistakes or repeated decision gaps.
 
 ## 記録してよいもの / Allowed Entries
 
@@ -18,17 +18,20 @@ This file is an optional template for Claude Code adopters. `AGENTS.md` and `axi
 - 会話ログ全文や長い引用
 - 推測だけのベストプラクティス
 - その場限りの一時的な作業メモ
-- `AGENTS.md` や `axiarch-rules/` と矛盾する指示
+- `AXIARCH.md` と矛盾する指示
 
-## 優先順位 / Priority
+## 正本境界 / Canonical Boundary
 
-1. `AGENTS.md`
-2. `axiarch-rules/{lang}/universal/`
-3. `axiarch-rules/{lang}/blueprint/`
-4. `axiarch-prompts/` when installed and explicitly used
-5. `.claude/memory/MEMORY.md`
+`AXIARCH.md` が常にAxiarchの正本です。
+このMemoryには、実際に起きた再発リスク低減のための短い事実だけを記録します。
+プロトコル、ロード順、承認境界、実行手順はこのファイルに複製せず、必ず `AXIARCH.md` を参照してください。
 
-Memory が上位ルールと矛盾する場合は、上位ルールを優先し、Memory側を更新または削除します。
+`AXIARCH.md` always remains the canonical Axiarch source.
+Use this Memory only for short facts that reduce repeated operational mistakes.
+Do not duplicate protocols, loading order, approval boundaries, or execution steps here; always refer to `AXIARCH.md`.
+
+Memory が `AXIARCH.md` と矛盾する場合は、`AXIARCH.md` を優先し、Memory側を更新または削除します。
+If Memory conflicts with `AXIARCH.md`, follow `AXIARCH.md` and update or delete the Memory entry.
 
 ## Entry Format
 

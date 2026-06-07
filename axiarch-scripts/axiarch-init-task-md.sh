@@ -4,7 +4,7 @@
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
 # At the start of each Claude Code / Codex session, this hook ensures the
-# AGENTS.md §8 process documents exist and, by default, refreshes them as
+# AXIARCH.md process documents exist and, by default, refreshes them as
 # current-task working files:
 #   - task.md
 #   - implementation_plan.md
@@ -45,7 +45,7 @@ TASK_STATE_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-task-state.sh"
 # Compose context message
 # -----------------------------------------------------------------------------
 read -r -d '' BASE_MESSAGE <<'EOF' || true
-[AXIARCH SESSION START] This project enforces axiarch's BOOT SEQUENCE protocol on session start. Per AGENTS.md §8 (Process & Documentation, item 4 — Documentation Requirements), the AI must record loaded rule files (AGENTS.md, INDEX.md, LOADING_PROTOCOL.md, etc.) in task.md before beginning work. task.md / implementation_plan.md / walkthrough.md are current-task Markdown evidence, not the native task/plan UI state. In Codex, also call update_plan and keep exactly one in_progress step while work is active. In Claude Code, also use TaskCreate / TaskUpdate / TaskList / TaskGet when available; fall back to TodoWrite only in older runtimes without Task tools. / 本プロジェクトはセッション開始時に axiarch BOOT SEQUENCE を強制します。AGENTS.md §8 (Process & Documentation 第 4 項 — ドキュメント生成要件) に基づき、ロードしたルールファイル (AGENTS.md / INDEX.md / LOADING_PROTOCOL.md 等) を task.md に記録してから作業を開始してください。task.md / implementation_plan.md / walkthrough.md は現在タスク用のMarkdown証跡であり、ネイティブなタスク・プランUI状態ではありません。Codexでは update_plan も併用し、作業中は in_progress を1件だけ維持してください。Claude Codeでは利用可能な場合 TaskCreate / TaskUpdate / TaskList / TaskGet を併用し、Task tools がない古いランタイムでのみ TodoWrite にフォールバックしてください。
+[AXIARCH SESSION START] This project enforces axiarch's BOOT SEQUENCE protocol on session start. Per AXIARCH.md, the AI must record loaded rule files (AXIARCH.md, INDEX.md, LOADING_PROTOCOL.md, etc.) in task.md before beginning work. task.md / implementation_plan.md / walkthrough.md are current-task Markdown evidence, not the native task/plan UI state. In Codex, also call update_plan and keep exactly one in_progress step while work is active. In Claude Code, also use TaskCreate / TaskUpdate / TaskList / TaskGet when available; fall back to TodoWrite only in older runtimes without Task tools. / 本プロジェクトはセッション開始時に axiarch BOOT SEQUENCE を強制します。AXIARCH.md に基づき、ロードしたルールファイル (AXIARCH.md / INDEX.md / LOADING_PROTOCOL.md 等) を task.md に記録してから作業を開始してください。task.md / implementation_plan.md / walkthrough.md は現在タスク用のMarkdown証跡であり、ネイティブなタスク・プランUI状態ではありません。Codexでは update_plan も併用し、作業中は in_progress を1件だけ維持してください。Claude Codeでは利用可能な場合 TaskCreate / TaskUpdate / TaskList / TaskGet を併用し、Task tools がない古いランタイムでのみ TodoWrite にフォールバックしてください。
 EOF
 
 # -----------------------------------------------------------------------------
@@ -63,8 +63,8 @@ elif [[ ! -f "${TASK_MD}" ]]; then
 
 ## ロード済み憲法ファイル / Loaded Constitution Files
 
-> **このテーブルは AGENTS.md §8 (Process & Documentation) 第 4 項に基づく必須記録です。**
-> **This table is mandatory per AGENTS.md §8 (Process & Documentation), item 4 (Documentation Requirements).**
+> **このテーブルは AXIARCH.md に基づく必須記録です。**
+> **This table is mandatory per AXIARCH.md.**
 >
 > セッション開始時、または新たにルールファイルを参照したとき、ここにファイル名とロード理由を追記してください。
 > Append filename + load reason whenever a session starts or a rule file is consulted.

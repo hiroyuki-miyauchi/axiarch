@@ -1,7 +1,7 @@
 # Crystallization Protocol (教訓の結晶化プロトコル)
 
 > [!IMPORTANT]
-> このプロトコルは `AGENTS.md` §9「Continuous Improvement」の詳細手順書です。
+> このプロトコルは `AXIARCH.md` からロードされる教訓結晶化の詳細手順書です。
 > AIが教訓を記録する際に自律的に実行する必要があります。
 
 ---

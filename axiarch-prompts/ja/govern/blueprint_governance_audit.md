@@ -35,11 +35,12 @@
 # Phase 1: Rule Hierarchy (憲法階層の直接ロード)
 **いかなる技術的判断や修正よりも先に、以下の手順で「ルールの階層」を特定・ロードし、上位ルールの効力を上位ルールとして優先適用してください。**
 
-1.  **Load Core Protocol (`AGENTS.md`)**:
-    * ルートディレクトリに `AGENTS.md` が存在する場合、その内容は**最高位のプロジェクト指示**です。
+1.  **Load Core Protocol (`AXIARCH.md`)**:
+    * ルートディレクトリに `AXIARCH.md` が存在する場合、その内容は**最高位のプロジェクト指示**です。
 2.  **Dynamic Rule Discovery (階級別ロード)**:
     * `axiarch-rules/` ディレクトリ配下をスキャンし、以下の**2階級（Class）**に厳密に分類してロードせよ。
     * **重要**: ルールのロード順序は `axiarch-rules/{lang}/LOADING_PROTOCOL.md` に定義された5ステップに従うこと。
+    * **重要**: 計画、実装、監査、証跡、人間承認、役割パス、任意のサブエージェント委任は、`AXIARCH.md` に従って関連する `axiarch-harness/{lang}/` ファイルを直接ロードしてから判断すること。
 
 ### Class S: Universal Immutable Laws (普遍・編集不可)
 > [!IMPORTANT]
@@ -50,7 +51,7 @@
 ### Class A: Project Mutable Bylaws (プロジェクト固有・更新対象)
 > [!NOTE]
 > **今回の監査結果に基づき、育成・更新すべき対象（Write-Allowed）。**
-* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AGENTS.md` の `Project Native Language` に従い `ja/` または `en/`）。
+* **Target Path**: `axiarch-rules/{lang}/blueprint/` 内の全ファイル（`{lang}` は `AXIARCH.md` の `Project Native Language` に従い `ja/` または `en/`）。
 * **ディレクトリ構造**: Blueprint は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のドメイン→フォルダ対応に従って整理される。初期フォルダは固定上限ではなく、ユーザー承認済みの拡張フォルダも同プロトコルに従って扱う。
 * **Action**: 各フォルダ内のファイルをロードし、内容・役割に基づいて整理せよ。
 

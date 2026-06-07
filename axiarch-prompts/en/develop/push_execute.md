@@ -4,7 +4,7 @@
 >
 > **Target**: Entire project (source code + `axiarch-rules/`)
 >
-> **Usage**: Paste this prompt into your AI agent's chat when work is complete and ready to push
+> **Usage**: Paste this prompt into your AI agent's chat only when work is complete and the user explicitly approves staging, committing, and executing `git push`
 
 ---
 
@@ -22,13 +22,14 @@ Even in the routine act of "pushing code," you are responsible for **checking qu
 **Important: All thought processes, comments, and outputs must be in clear, professional English.**
 
 Please push the current work to GitHub and finalize.
+However, stage, commit, and push only when this prompt is the latest user instruction and contains explicit approval for `git add` / staging, `git commit`, and `git push`. Do not interpret implementation approval, verification approval, or fix approval as approval for stage, commit, push, deploy, release, tag, DB apply, or production data changes. If approval is unclear, follow `axiarch-harness/{lang}/HUMAN_APPROVAL_GATE.md`, stop before stage, commit, or push, and ask for approval.
 In execution, **dynamically identify and load critical files as context** using the procedure below, and strictly comply with the documented rule framework.
 
 # Phase 0: Dynamic Context Loading
 Scan the project's rule directories and identify the following critical files **based on "role" rather than filename.**
 Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
-1.  **Core Protocol**: `AGENTS.md` (or the top-level behavioral guidelines file).
+1.  **Core Protocol**: `AXIARCH.md` (or the top-level behavioral guidelines file).
     * **Role**: Behavioral guidelines, quality standards, and deployment ban protocol as an architect.
 2.  **Target 1: The Constitution (Top-Level Protocol)**
     * **Role**: The highest-level rule documenting the 3 principles of Security, FinOps, and Privacy.
@@ -55,6 +56,7 @@ Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCO
 
 1.  **Migration Check**: Based on the identified **Target 4 (Backend Data Strategy)**, verify migration files are correctly created and applied.
     * If migration is required, create files using `supabase migration new` (or the project's designated command) and **obtain user approval before proceeding.**
+    * Applying DB migrations, changing production data, or running manual SQL requires separate explicit approval from push approval. If not approved, do not execute it; present the required approval separately.
 2.  **Seed Data Check**: Verify whether `seed.sql` (initial data) maintenance is needed. Update if necessary to reduce data-loss risk after `db reset`.
 
 # Phase 2: Final Quality Gate
@@ -63,7 +65,7 @@ Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCO
 1.  **Build Safety**:
     * Run project-appropriate type/lint/build checks
     * For TypeScript projects: `tsc --noEmit` (type check) and `npm run build` (build check)
-2.  **Security/FinOps Check**: Perform a final scan against **AGENTS.md** and **Target 1 (Constitution)** to ensure none of the following were introduced:
+2.  **Security/FinOps Check**: Perform a final scan against **AXIARCH.md** and **Target 1 (Constitution)** to ensure none of the following were introduced:
     * API key or secret exposure
     * Wasteful loop processing or N+1 problems (FinOps violation)
     * PII in log output (privacy violation)
@@ -77,7 +79,7 @@ Comply with Atomic Commits defined in **Target 3 (Development Workflow)** and fo
     * **Case B — Already on a Feature/Fix branch**:
         * Append commits to the current branch as-is.
     * **Prohibition**: In either case, creating **grandchild branches (nested branches)** is strictly forbidden. Maintain a flat structure.
-2.  **Atomic Commit**: Confirm the changes are atomic (single unit of work), then commit and push.
+2.  **Atomic Commit**: Confirm the changes are atomic (single unit of work). Stage and commit only when the latest user instruction explicitly approves `git add` / staging and `git commit`. Execute push only when the latest user instruction explicitly approves `git push`. If approval is ambiguous, do not stage, commit, or push; present the approval request, target branch, verification results, and residual risks, then stop.
 
 # Phase 4: Completion Report
 After push completion, present the **"Pull Request creation URL"** displayed in the terminal.

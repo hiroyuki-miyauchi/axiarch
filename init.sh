@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.11.2"
+AXIARCH_VERSION="1.12.0-dev"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -51,7 +51,7 @@ print_info()    { echo -e "   ${CYAN}→${RESET} $1"; }
 # When piped via curl, the script dir is /tmp; local usage sets SOURCE_DIR.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo "REMOTE")"
 IS_REMOTE=false
-if [[ "$SCRIPT_DIR" == "REMOTE" ]] || [[ ! -f "$SCRIPT_DIR/AGENTS.md" ]]; then
+if [[ "$SCRIPT_DIR" == "REMOTE" ]] || [[ ! -f "$SCRIPT_DIR/AXIARCH.md" ]]; then
   IS_REMOTE=true
 else
   SOURCE_DIR="$SCRIPT_DIR"
@@ -65,11 +65,17 @@ TARGET_DIR="${1:-$(pwd)}"
 # =============================================================================
 check_prerequisites() {
   local missing=()
+  command -v awk   &>/dev/null || missing+=("awk")
+  command -v chmod &>/dev/null || missing+=("chmod")
   command -v cp    &>/dev/null || missing+=("cp")
+  command -v date  &>/dev/null || missing+=("date")
+  command -v grep  &>/dev/null || missing+=("grep")
   command -v rm    &>/dev/null || missing+=("rm")
   command -v mkdir &>/dev/null || missing+=("mkdir")
+  command -v mv    &>/dev/null || missing+=("mv")
   if $IS_REMOTE; then
     command -v curl &>/dev/null || command -v wget &>/dev/null || missing+=("curl or wget")
+    command -v mktemp &>/dev/null || missing+=("mktemp")
     command -v tar  &>/dev/null || missing+=("tar")
   fi
   if [[ ${#missing[@]} -gt 0 ]]; then
@@ -124,9 +130,9 @@ select_language() {
   read -rp "選択してください / Enter choice [1]: " lang_choice
   lang_choice="${lang_choice:-1}"
   case "$lang_choice" in
-    1) LANG_CODE="ja"; LANG_LABEL="Japanese (日本語)" ;;
-    2) LANG_CODE="en"; LANG_LABEL="English" ;;
-    *) print_warn "無効な選択。日本語を使用します。"; LANG_CODE="ja"; LANG_LABEL="Japanese (日本語)" ;;
+    1) LANG_CODE="ja"; LANG_LABEL="Japanese (日本語)"; PROJECT_NATIVE_LANGUAGE="Japanese" ;;
+    2) LANG_CODE="en"; LANG_LABEL="English"; PROJECT_NATIVE_LANGUAGE="English" ;;
+    *) print_warn "無効な選択。日本語を使用します。"; LANG_CODE="ja"; LANG_LABEL="Japanese (日本語)"; PROJECT_NATIVE_LANGUAGE="Japanese" ;;
   esac
   print_success "Language: ${LANG_LABEL}"
 }
@@ -156,13 +162,13 @@ select_language_dirs() {
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) OpenAI Codex — Production-validated primary ✅ (AGENTS.md + .codex/hooks.json)"
-  echo "  2) Claude Code — Production-validated primary ✅ (CLAUDE.md + .claude/settings.json)"
-  echo "  3) Google Antigravity — Production-validated primary ✅"
-  echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee)"
-  echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee)"
-  echo "  6) Windsurf — Extended pointer only ⚠️ (unverified, no guarantee)"
-  echo "  7) Other / Universal (AGENTS.md only)"
+  echo "  1) OpenAI Codex — Production-validated primary ✅ (AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
+  echo "  2) Claude Code — Production-validated primary ✅ (CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
+  echo "  3) Google Antigravity — Production-validated primary ✅ (.agents/rules/prompt_pointer.md adapter → AXIARCH.md)"
+  echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee; .cursor/rules/axiarch.mdc adapter → AXIARCH.md)"
+  echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee; .github/copilot-instructions.md adapter → AXIARCH.md)"
+  echo "  6) Windsurf — Extended pointer only ⚠️ (unverified, no guarantee; .windsurfrules adapter → AXIARCH.md)"
+  echo "  7) Other / Universal (AXIARCH.md + AGENTS.md adapter)"
   echo ""
   read -rp "選択してください / Enter choice [1]: " agent_choice
   agent_choice="${agent_choice:-1}"
@@ -321,6 +327,26 @@ prepare_source() {
   fi
 }
 
+set_project_native_language() {
+  local protocol_file="$1"
+  local language="$2"
+  local tmp_file="${protocol_file}.tmp.$$"
+
+  [[ -f "$protocol_file" ]] || return 1
+  grep -qE "^Project Native Language:" "$protocol_file" 2>/dev/null || return 2
+
+  awk -v language="$language" '
+    BEGIN { updated = 0 }
+    /^Project Native Language:/ && updated == 0 {
+      print "Project Native Language: " language
+      updated = 1
+      next
+    }
+    { print }
+  ' "$protocol_file" > "$tmp_file"
+  mv "$tmp_file" "$protocol_file"
+}
+
 # =============================================================================
 # STEP 5: Copy files
 # =============================================================================
@@ -330,9 +356,34 @@ copy_files() {
   # Ensure target exists
   mkdir -p "$TARGET_DIR"
 
-  # === Required: AGENTS.md ===
-  cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
-  print_info "Copied: AGENTS.md"
+  # === Required for current releases: AXIARCH.md canonical protocol ===
+  if [[ -f "$SOURCE_DIR/AXIARCH.md" ]]; then
+    cp "$SOURCE_DIR/AXIARCH.md" "$TARGET_DIR/AXIARCH.md"
+    print_info "Copied: AXIARCH.md"
+  else
+    print_warn "AXIARCH.md not found in source ref ${AXIARCH_REF}; using legacy AGENTS.md entrypoint for this pinned release."
+  fi
+
+  # === Required: AGENTS.md adapter or legacy entrypoint ===
+  if [[ -f "$SOURCE_DIR/AGENTS.md" ]]; then
+    cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
+    print_info "Copied: AGENTS.md"
+  else
+    print_error "AGENTS.md not found in source ref ${AXIARCH_REF}; cannot continue."
+    exit 1
+  fi
+
+  if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
+    if set_project_native_language "$TARGET_DIR/AXIARCH.md" "$PROJECT_NATIVE_LANGUAGE"; then
+      print_info "Configured: AXIARCH.md Project Native Language = ${PROJECT_NATIVE_LANGUAGE}"
+    else
+      print_warn "Could not configure Project Native Language in AXIARCH.md; please verify manually."
+    fi
+  elif set_project_native_language "$TARGET_DIR/AGENTS.md" "$PROJECT_NATIVE_LANGUAGE"; then
+    print_info "Configured: AGENTS.md Project Native Language = ${PROJECT_NATIVE_LANGUAGE} (legacy pinned release)"
+  else
+    print_warn "Could not configure Project Native Language in AGENTS.md; please verify manually."
+  fi
 
   # === Recommended: upgrade ownership manifest ===
   if [[ -f "$SOURCE_DIR/axiarch-manifest.json" ]]; then
@@ -348,7 +399,7 @@ copy_files() {
   cp -R "$SOURCE_DIR/axiarch-rules/." "$TARGET_DIR/axiarch-rules/"
 
   if ! $KEEP_BOTH_LANGS; then
-    # Optional single-language cleanup (new structure: axiarch-rules/{lang}/)
+    # Optional single-language cleanup (rules; harness cleanup follows below)
     local UNUSED_LANG_DIR="$TARGET_DIR/axiarch-rules/${UNUSED_LANG}"
     if [[ -d "$UNUSED_LANG_DIR" ]]; then
       rm -rf "$UNUSED_LANG_DIR"
@@ -357,6 +408,24 @@ copy_files() {
     print_info "Copied: axiarch-rules/ (${LANG_LABEL} only)"
   else
     print_info "Copied: axiarch-rules/ (ja + en; ${LANG_LABEL} selected as Project Native Language)"
+  fi
+
+  # === Required for current releases: axiarch-harness/ ===
+  if [[ -d "$SOURCE_DIR/axiarch-harness" ]]; then
+    mkdir -p "$TARGET_DIR/axiarch-harness"
+    cp -R "$SOURCE_DIR/axiarch-harness/." "$TARGET_DIR/axiarch-harness/"
+    if ! $KEEP_BOTH_LANGS; then
+      local UNUSED_HARNESS_DIR="$TARGET_DIR/axiarch-harness/${UNUSED_LANG}"
+      if [[ -d "$UNUSED_HARNESS_DIR" ]]; then
+        rm -rf "$UNUSED_HARNESS_DIR"
+        print_info "Removed unused: axiarch-harness/${UNUSED_LANG}/"
+      fi
+      print_info "Copied: axiarch-harness/ (${LANG_LABEL} only)"
+    else
+      print_info "Copied: axiarch-harness/ (ja + en)"
+    fi
+  else
+    print_warn "axiarch-harness/ not found in source ref ${AXIARCH_REF}; skipping for this legacy pinned release."
   fi
 
   # === Optional: axiarch-prompts/ ===
@@ -468,49 +537,27 @@ copy_files() {
     print_info "Copied: .windsurfrules (Windsurf)"
   fi
 
-  # === Cleanup: remove other agents' native configs not needed ===
-  if ! $SETUP_ANTIGRAVITY; then
-    rm -rf "$TARGET_DIR/.agents" 2>/dev/null && \
-      print_info "Removed: .agents/ (not needed for ${AGENT_LABEL})"
+  # Preserve unselected native configs. They may contain adopter-owned rules,
+  # sessions, or non-Axiarch settings, and AXIARCH.md treats adapters as
+  # coexistable pointers rather than mutually exclusive choices.
+  if ! $SETUP_ANTIGRAVITY && [[ -d "$TARGET_DIR/.agents" ]]; then
+    print_info "Preserved: .agents/ (unselected native config)"
   fi
-  if ! $SETUP_CURSOR; then
-    rm -rf "$TARGET_DIR/.cursor" 2>/dev/null && \
-      print_info "Removed: .cursor/ (not needed for ${AGENT_LABEL})"
+  if ! $SETUP_CURSOR && [[ -d "$TARGET_DIR/.cursor" ]]; then
+    print_info "Preserved: .cursor/ (unselected native config)"
   fi
   if ! $SETUP_CLAUDE; then
-    rm -f "$TARGET_DIR/CLAUDE.md" 2>/dev/null && \
-      print_info "Removed: CLAUDE.md (not needed for ${AGENT_LABEL})"
-    # Only remove the Axiarch-distributed hook config; preserve user session data (worktrees/, projects/, settings.local.json)
-    rm -f "$TARGET_DIR/.claude/settings.json" 2>/dev/null && \
-      print_info "Removed: .claude/settings.json (not needed for ${AGENT_LABEL})"
-    # Remove .claude/ directory only if now empty (preserves user data)
-    if [[ -d "$TARGET_DIR/.claude" ]] && [ -z "$(ls -A "$TARGET_DIR/.claude" 2>/dev/null)" ]; then
-      rmdir "$TARGET_DIR/.claude" 2>/dev/null && \
-        print_info "Removed: empty .claude/ directory"
-    fi
+    [[ -f "$TARGET_DIR/CLAUDE.md" ]] && print_info "Preserved: CLAUDE.md (unselected native config)"
+    [[ -d "$TARGET_DIR/.claude" ]] && print_info "Preserved: .claude/ (unselected native config)"
   fi
-  if ! $SETUP_CODEX; then
-    # Only remove the Axiarch-distributed hook config; preserve user session data
-    rm -f "$TARGET_DIR/.codex/hooks.json" 2>/dev/null && \
-      print_info "Removed: .codex/hooks.json (not needed for ${AGENT_LABEL})"
-    # Remove .codex/ directory only if now empty (preserves user data)
-    if [[ -d "$TARGET_DIR/.codex" ]] && [ -z "$(ls -A "$TARGET_DIR/.codex" 2>/dev/null)" ]; then
-      rmdir "$TARGET_DIR/.codex" 2>/dev/null && \
-        print_info "Removed: empty .codex/ directory"
-    fi
+  if ! $SETUP_CODEX && [[ -d "$TARGET_DIR/.codex" ]]; then
+    print_info "Preserved: .codex/ (unselected native config)"
   fi
-  if ! $SETUP_COPILOT; then
-    rm -f "$TARGET_DIR/.github/copilot-instructions.md" 2>/dev/null && \
-      print_info "Removed: .github/copilot-instructions.md (not needed for ${AGENT_LABEL})"
-    # Clean up empty .github/ directory if nothing else remains
-    if [[ -d "$TARGET_DIR/.github" ]] && [ -z "$(ls -A "$TARGET_DIR/.github" 2>/dev/null)" ]; then
-      rmdir "$TARGET_DIR/.github" 2>/dev/null && \
-        print_info "Removed: empty .github/ directory"
-    fi
+  if ! $SETUP_COPILOT && [[ -f "$TARGET_DIR/.github/copilot-instructions.md" ]]; then
+    print_info "Preserved: .github/copilot-instructions.md (unselected native config)"
   fi
-  if ! $SETUP_WINDSURF; then
-    rm -f "$TARGET_DIR/.windsurfrules" 2>/dev/null && \
-      print_info "Removed: .windsurfrules (not needed for ${AGENT_LABEL})"
+  if ! $SETUP_WINDSURF && [[ -f "$TARGET_DIR/.windsurfrules" ]]; then
+    print_info "Preserved: .windsurfrules (unselected native config)"
   fi
 }
 
@@ -579,26 +626,38 @@ print_next_steps() {
   echo ""
   echo -e "${BOLD}Next Steps:${RESET}"
   echo ""
-  echo -e "  ${CYAN}1.${RESET} Open ${BOLD}AGENTS.md${RESET} and set ${BOLD}Project Native Language${RESET} to ${BOLD}${LANG_LABEL}${RESET}"
+  if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
+    echo -e "  ${CYAN}1.${RESET} ${BOLD}AXIARCH.md${RESET} Project Native Language is set to ${BOLD}${PROJECT_NATIVE_LANGUAGE}${RESET}"
+  else
+    echo -e "  ${CYAN}1.${RESET} ${BOLD}AGENTS.md${RESET} Project Native Language is set to ${BOLD}${PROJECT_NATIVE_LANGUAGE}${RESET} (legacy pinned release)"
+  fi
 
   local step=2
   if [[ "$AGENT_LABEL" == "Google Antigravity" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md → AXIARCH.md${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "OpenAI Codex" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured"
+    if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md → AXIARCH.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured"
+    else
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured (legacy pinned release)"
+    fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Cursor" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc → AXIARCH.md${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Claude Code" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured"
+    if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md → AXIARCH.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured"
+    else
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured (legacy pinned release)"
+    fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "GitHub Copilot" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md → AXIARCH.md${RESET} — auto-configured"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Windsurf" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.windsurfrules${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.windsurfrules → AXIARCH.md${RESET} — auto-configured"
     step=$((step + 1))
   fi
 
@@ -609,7 +668,7 @@ print_next_steps() {
   if [[ "$SETUP_CODEX" == "true" || "$SETUP_CLAUDE" == "true" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended for Codex / Claude Code):${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-    echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AGENTS §6 physical-block, diff guard, more)"
+    echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AXIARCH physical-block, diff guard, more)"
   else
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Optional diagnostic:${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"

@@ -12,11 +12,13 @@
 
 ```
 your-project/
- ├── AGENTS.md                 ← Top-Level Protocol (behavioral guidelines)
+ ├── AXIARCH.md                ← Canonical Axiarch Protocol
+ ├── AGENTS.md                 ← Thin adapter for AGENTS.md readers
+ ├── CLAUDE.md                 ← Thin adapter for Claude Code
  ├── axiarch-manifest.json      ← Optional: safe-upgrade ownership manifest
  ├── .agents/
  │    └── rules/
- │         └── prompt_pointer.md  ← Pointer (TOC — references axiarch-rules/)
+ │         └── prompt_pointer.md  ← Thin pointer to AXIARCH.md
  ├── axiarch-rules/
  │    ├── ja/                  ← Japanese version
  │    └── en/                  ← English version
@@ -38,9 +40,12 @@ your-project/
  │         ├── audit/
  │         ├── govern/
  │         └── operate/
+ ├── axiarch-harness/           ← Execution, audit, evidence, approval, and delegation workflow
+ │    ├── ja/
+ │    └── en/
  ├── axiarch-scripts/                  ← Recommended: diagnostic & hook externalized scripts
  │    ├── README.md                    ← Index & usage guide
- │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (15-stage, --quiet support, v1.9+ diff guard plus v1.11.0 current-task document rotation, native task-state sync, v1.10.0+ source release parity, Safe Upgrade manifest/exclude checks, source-only default skip / explicit interactive override, deduplicated interactive choices, source-repository-only file classification, replace-if-local-unchanged protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX version metadata, prompt indexing, and README/llms/scripts README boundary checks)
+ │    ├── check-axiarch-health.sh      ← Axiarch full-protocol health diagnostic (15-stage, --quiet support, v1.9+ diff guard plus v1.11.0 current-task document rotation, native task-state sync, v1.10.0+ source release parity, Safe Upgrade manifest/exclude checks, source-only default skip / explicit interactive override, deduplicated interactive choices, source-repository-only file classification, replace-if-local-unchanged protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX version metadata, prompt indexing, README/llms/scripts README boundary checks, and Claude Memory canonical-boundary checks)
  │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized (dynamic violations A/B/C + two-stage TTL v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + native task-state reminder v1.11.0+)
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook externalized script (§6 physical block, v1.5.5+)
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (current-task docs auto-bootstrap, v1.5.5+ / v1.11.0+)

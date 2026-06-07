@@ -5,16 +5,16 @@
 > Last Updated: 2026-05-06 (Rev.14)
 
 > [!IMPORTANT]
-> **Top-Level Protocol Declaration**
+> **Universal Constitution Declaration**
 >
-> 1.  These documents (`axiarch-rules/{lang}/universal/*.md`) are the **Top-Level Protocol** of this project's development, operations, and business.
+> 1.  These documents (`axiarch-rules/{lang}/universal/*.md`) are the **core Universal Constitution** for this project's development, operations, and business, loaded under `AXIARCH.md`.
 > 2.  Code, design, and operational decisions that violate this Constitution will be **Rejected** regardless of reason.
-> 3.  All developers (including AI Agents) are obligated to review and comply with this Constitution before starting any task.
+> 3.  All developers (including AI Agents) are obligated to review `AXIARCH.md` and the relevant Constitution files before starting any task.
 > **46 Sections (§1.1–§1.35, §9.1–§9.11).**
 
 > [!IMPORTANT]
 > **Foundation Principles**
-> This "Core Philosophy" is the constitution for all Axiarch-governed projects, and no exceptions are allowed.
+> This "Core Philosophy" is part of the Universal Constitution for all Axiarch-governed projects, and no exceptions are allowed.
 > We integrate multiple professional perspectives and continually aim for high, practically verifiable quality standards.
 
 ---
@@ -1210,8 +1210,8 @@ AI switches among the following roles as needed and avoids judging from a single
 
 ## 3. Language Standard & Protocol
 *   **Language Selection**:
-    *   **Configuration**: The **Project Native Language** is strictly defined in `AGENTS.md`.
-    *   **Rule Application**: The AI strictly adheres to the language setting defined in `AGENTS.md` for all communication and thought processes. Adopted projects may optionally delete unused language directories (in `axiarch-rules/{lang}/universal/` and `axiarch-rules/{lang}/blueprint/`) only when fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`.
+    *   **Configuration**: The **Project Native Language** is strictly defined in `AXIARCH.md`. Legacy adopters may use `AGENTS.md` as a fallback.
+    *   **Rule Application**: The AI strictly adheres to the language setting defined in `AXIARCH.md` for all communication and thought processes. Adopter projects keep both Japanese and English directories by default. Review and remove unused localized directories (for example `axiarch-rules/{lang}/`, `axiarch-harness/{lang}/`, and `axiarch-prompts/{lang}/` when prompts are installed) only when intentionally fixing the project to single-language operation. If both languages are kept, prioritize the folder matching `Project Native Language`.
 
 *   **English Rule Context (`universal/en`)**:
     *   **Consistent English Communication**: Explanations, questions, and responses follow **English** project settings.
