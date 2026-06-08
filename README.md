@@ -291,9 +291,9 @@ The Execution Harness is the implementation unit for the Harness Engineering con
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は Axiarch v1.12.1 の安定版を既定で導入し、配布refは `tags/v1.12.1` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
+> **JA**: `main` ブランチの `init.sh` は Axiarch v1.13.0 の安定版を既定で導入し、配布refは `tags/v1.13.0` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
 >
-> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.12.1 release by default and pins the distribution ref to `tags/v1.12.1`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
+> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.13.0 release by default and pins the distribution ref to `tags/v1.13.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
 
 ### 必須ファイル一覧 / Required Files
 
@@ -345,23 +345,23 @@ The Execution Harness is the implementation unit for the Harness Engineering con
 
 ```bash
 # 変更計画だけ確認 / Preview the plan only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.1 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.13.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.13.0 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --agent codex --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --agent codex --safe-only --apply
 
 # 非対話CI等で人間承認済みの計画を反映 / Apply a human-approved reviewed plan non-interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --apply --yes
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --safe-only --apply --yes
 
 # 任意プロンプトも明示的に含めて確認 / Preview with optional prompts explicitly included
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --with-prompts --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --safe-only --with-prompts --dry-run
 
 # グループごとに対話選択 / Choose each group interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --interactive
 ```
 
 | 選択肢 / Choice | 意味 / Meaning |
@@ -439,7 +439,7 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # 安定版タグ固定 / Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.12.1 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.13.0 bash
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness

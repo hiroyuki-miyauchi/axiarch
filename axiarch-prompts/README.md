@@ -6,11 +6,23 @@
 
 ### 使い方
 
+**方法 A — Claude Code スラッシュコマンド（v1.13.0+、推奨）**
+
+1. 一度だけ生成: `bash axiarch-scripts/axiarch-prompts-install.sh`（`init.sh` で Claude Code を選びプロンプトをコピーした場合は opt-in で生成済み）
+2. Claude Code で `/axiarch-<name>` を入力（例: `/axiarch-feature-development`、`/axiarch-fullstack-qa-audit`）
+3. 必要なら同じ行に追加指示を書く（`$ARGUMENTS` として渡る）
+
+生成コマンドは「正本プロンプトを Read+実行する thin pointer」なので、プロンプト本体を編集すれば即座に最新版が使われる（再生成不要）。プロンプトを追加・削除した時だけ `axiarch-prompts-install.sh` を再実行する。生成物は build artifact のため git 管理対象外。
+
+**方法 B — コピペ運用（全エージェント共通）**
+
 1. プロジェクトの言語に合わせて `ja/` または `en/` を選択
 2. 用途に合うフォルダを開く（`develop/`, `audit/`, `govern/`, `operate/`）
 3. プロンプトファイルを開く
 4. 内容をコピーしてAIエージェントのチャットに貼り付ける
 5. AIがPhase 0実行を前提とした入力待ち状態に入ったら、具体的な指示を追加する
+
+> **エージェント別 slash command 対応**: project-level の native slash command が確実に動くのは **Claude Code のみ**（`.claude/commands/`）。**OpenAI Codex** の custom prompts は global-only かつ deprecated、**Google Antigravity** の workflow は project-file 規約が未文書化のため、これらは方法 B（コピペ）または `AGENTS.md` 経由で利用する。
 
 > **注意**: 既定では日本語・英語ディレクトリを両方保持します。単一言語運用に明示的に固定する場合だけ、`axiarch-rules/` と同様に、使用しない方の言語ディレクトリをレビューして削除できます。
 
@@ -151,11 +163,23 @@ This directory contains **reusable prompt templates** designed to elevate the qu
 
 ### Usage
 
+**Option A — Claude Code slash commands (v1.13.0+, recommended)**
+
+1. Generate once: `bash axiarch-scripts/axiarch-prompts-install.sh` (already generated opt-in if you chose Claude Code and copied prompts during `init.sh`)
+2. In Claude Code, type `/axiarch-<name>` (e.g. `/axiarch-feature-development`, `/axiarch-fullstack-qa-audit`)
+3. Optionally add instructions on the same line (passed as `$ARGUMENTS`)
+
+Generated commands are thin pointers that Read and execute the canonical prompt file, so editing a prompt takes effect immediately (no regeneration needed). Re-run the installer only when you add or remove prompts. Generated files are build artifacts and are git-ignored.
+
+**Option B — Copy-paste (all agents)**
+
 1. Select `ja/` or `en/` based on your project's language
 2. Open the folder matching your goal (`develop/`, `audit/`, `govern/`, `operate/`)
 3. Open a prompt file
 4. Copy the content and paste it into your AI agent's chat
 5. The AI enters a Phase-0-gated input-waiting state — then add your specific instructions
+
+> **Per-agent slash command support**: A reliable project-level native slash-command mechanism exists only for **Claude Code** (`.claude/commands/`). **OpenAI Codex** custom prompts are global-only and deprecated, and **Google Antigravity** workflow project-file conventions are undocumented, so use Option B (copy-paste) or `AGENTS.md` for those.
 
 > **Note**: Keep both Japanese and English directories by default. Only when intentionally fixing the project to single-language operation, review and remove the unused language directory, as with `axiarch-rules/`.
 
