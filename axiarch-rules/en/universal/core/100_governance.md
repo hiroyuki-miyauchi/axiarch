@@ -1441,7 +1441,7 @@ When interpretation is required, apply the following methods in order:
 
 -   **Plain Language Requirement**: Write rules in language as plain as possible. Avoid unnecessary use of technical jargon.
 -   **Technical Glossary Obligation**: When using technical terms, provide definitions in parentheses at first occurrence, or define in the terminology correspondence table (see §22.5).
--   **Sentence Length**: Keep each sentence short. As a guideline, roughly 25 words for Latin-script (default-language) text and roughly 60 characters for CJK-script text (English=25 words, Japanese=60 characters are illustrative examples only). Break complex constraints into bullet points.
+-   **Sentence Length**: Keep each sentence short, at most about 25 words for Latin-script (default-language) text and about 60 characters for CJK-script text (English=25 words, Japanese=60 characters are illustrative examples). Break complex constraints into bullet points.
 -   **Affirmative Form Preferred**: Use "must" as the default; avoid double negatives ("not prohibited from not doing").
 
 ---
