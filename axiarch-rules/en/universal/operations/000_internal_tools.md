@@ -755,7 +755,7 @@ const impersonationLog: AuditLogEntry = {
 ### 12.1. No Raw HTML Principle
 
 - **Rule 50.110**: Do not allow raw HTML input in admin panels
-- Use rich text editors (TipTap, Lexical, etc.) ensuring XSS-safe output
+- Use rich text editors (TipTap, Lexical, etc.); XSS-safe output is required
 - Configure HTML element whitelists and sanitize server-side
 
 ### 12.2. Versioning & Change History

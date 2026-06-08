@@ -406,10 +406,9 @@ When contradictions arise, resolve in the following priority order:
 
 ### 8.1. Sparse Numbering Protocol
 
--   **Law**: File numbers for rule files and Blueprint specifications use **3-digit prefixes (`000`–`999`) scoped to each containing folder**.
--   **Recommendation**: Leave **gaps of approximately 5–10** for future insertion. This is a convention, not a reserved band; any unused number from `000` to `999` may be used within the target folder.
--   **Anti-Pattern**: Treating a number range (e.g., `100`–`599`) as an intentional blank zone. Use available numbers based on folder context, collision checks, and readability.
--   **Recommended Pattern**: `000, 010, 020, 030...` or `000, 005, 010, 015...` within the target folder.
+-   **Law**: File numbers for rule files and Blueprint specifications are assigned **independently per containing folder using 3-digit prefixes (`000`–`999`)**. Any number from `000` to `999` may be used within a folder; the only thing to avoid is a **collision with an existing filename in that same folder**. There is no reserved band such as `100`–`599`, and no mandatory number such as a required `000`.
+-   **Numbering Independence**: Universal file numbering and Blueprint folder numbering are independent of each other. Universal numbers respect the existing numbering system and INDEX categories (§8.3), while Blueprint numbers are assigned independently within each domain folder using `000`–`999`. Neither side's numbers constrain the other.
+-   **Gaps of 10 (Style Recommendation)**: Leaving **gaps of approximately 5–10** for future insertion improves readability (e.g., `000, 010, 020, 030...` or `000, 005, 010, 015...`). This is a **style recommendation, not a reserved band**; if no gap is available, interstitial numbers (e.g., `011`, `015`) are acceptable. Choose available numbers based on folder context, collision checks, and readability.
 
 ### 8.2. Unique Numbering Protocol
 
@@ -426,7 +425,7 @@ When contradictions arise, resolve in the following priority order:
 | Target | Treatment | Notes |
 |---|---|---|
 | Universal | Respect the existing numbering system and INDEX categories | Prioritize compatibility with existing files. For additions, check unused `000`–`999` values within the target folder |
-| Blueprint | Operate `000`–`999` independently per folder | `000` is not reserved. Avoid only collisions with existing files such as `core/000_project_overview.md` |
+| Blueprint | Operate `000`–`999` independently per folder | Freely choose any available number from `000`–`999` in each folder. Avoid only collisions with existing filenames such as `core/000_project_overview.md` |
 | `core/` | Existing `000`, `010`, `998`, and `999` numbers have fixed purposes | Other numbers may be used after checking availability in the target folder |
 | New domain folders | Add only after user approval, then apply the same 3-digit rule | Initial folders are not a closed taxonomy, but autonomous folder creation by AI is prohibited |
 
@@ -436,9 +435,9 @@ When contradictions arise, resolve in the following priority order:
 -   **Example**: `core/100_governance.md`, `security/000_security_privacy.md`
 -   **Constraints**:
     - Numbers are zero-padded 3-digit (`000`–`999`)
-    - Names use English, lowercase, snake_case
+    - Names use ASCII Latin letters, lowercase, snake_case
     - Extension is `.md` (Markdown) only
-    - Japanese filenames are **prohibited**
+    - Non-ASCII filenames (including CJK such as Japanese) are **prohibited** (to ensure cross-platform referencing and tooling compatibility)
 
 ### 8.5. Rule ID Convention
 
@@ -1442,7 +1441,7 @@ When interpretation is required, apply the following methods in order:
 
 -   **Plain Language Requirement**: Write rules in language as plain as possible. Avoid unnecessary use of technical jargon.
 -   **Technical Glossary Obligation**: When using technical terms, provide definitions in parentheses at first occurrence, or define in the terminology correspondence table (see §22.5).
--   **Sentence Length**: One sentence should be maximum 25 words (English) / 60 characters (Japanese). Break complex constraints into bullet points.
+-   **Sentence Length**: Keep each sentence short, at most about 25 words for Latin-script (default-language) text and about 60 characters for CJK-script text (English=25 words, Japanese=60 characters are illustrative examples). Break complex constraints into bullet points.
 -   **Affirmative Form Preferred**: Use "must" as the default; avoid double negatives ("not prohibited from not doing").
 
 ---

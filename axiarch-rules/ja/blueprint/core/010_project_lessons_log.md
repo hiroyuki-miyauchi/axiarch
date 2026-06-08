@@ -1,6 +1,6 @@
 # Project Lessons Log (プロジェクト教訓ログ)
 
-このファイルは、プロジェクト開発を通じて得られた重要な教訓、アンチパターン、および新たに確立された運用ルールを集約するためのログです。
+このファイルは、プロジェクト開発を通じて得られた重要な教訓、アンチパターン、および新たに確立された運用ルールの **索引兼・未分類の一時蓄積所** です。全教訓をここに蓄積し続ける場所ではありません。同一ドメインの教訓が3件以上に達した時点で、対応する Blueprint フォルダへ正式ルールファイルとして昇華し、本ファイルには参照リンクのみを残します。
 `AXIARCH.md` からロードされる `CRYSTALLIZATION_PROTOCOL.md` に基づき、AIが自律的にこのファイルを管理します。
 
 > [!IMPORTANT]
@@ -92,6 +92,9 @@
 | ガバナンス | ルール運用、プロトコル改善、教訓管理 | `core/100_governance` |
 | パフォーマンス | 速度改善、メモリ、コスト最適化 | `engineering/000_engineering_standards`, `operations/600_cloud_finops` |
 | FinOps | クラウドコスト、リソース効率 | `operations/600_cloud_finops` |
+
+> [!NOTE]
+> 「関連 Universal ルール」列の番号（例: `engineering/200_...`）は参照先 Universal ルールの番号です。教訓を昇華して作成する Blueprint ファイルの採番は `CRYSTALLIZATION_PROTOCOL.md` に従って文脈で決定し、この番号には拘束されません（フォルダ内 000〜999 の空き番号を使用）。
 
 ### クロスリファレンス（関連 Universal ルール）
 

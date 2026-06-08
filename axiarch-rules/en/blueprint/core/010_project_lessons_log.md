@@ -1,6 +1,6 @@
 # Project Lessons Log
 
-This file aggregates critical lessons, anti-patterns, and newly established operational rules obtained through project development.
+This file is an **index plus a temporary accumulation point for unsorted** critical lessons, anti-patterns, and newly established operational rules obtained through project development. It is NOT a place to accumulate all lessons forever. Once 3 or more lessons of the same domain accumulate, they are crystallized into a proper rule file in the corresponding Blueprint folder, and only a reference link remains here.
 Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomously manages this file.
 
 > [!IMPORTANT]
@@ -92,6 +92,9 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 | Governance | Rule operations, protocol improvements | `core/100_governance` |
 | Performance | Speed optimization, memory, cost | `engineering/000_engineering_standards`, `operations/600_cloud_finops` |
 | FinOps | Cloud costs, resource efficiency | `operations/600_cloud_finops` |
+
+> [!NOTE]
+> The numbers in the "Related Universal Rules" column (e.g., `engineering/200_...`) are the numbers of the referenced Universal rules. The numbering of the Blueprint file created when crystallizing a lesson is decided by context per `CRYSTALLIZATION_PROTOCOL.md` and is NOT bound to these numbers (use any available 000–999 within the folder).
 
 ### Cross-Reference (Related Universal Rules)
 

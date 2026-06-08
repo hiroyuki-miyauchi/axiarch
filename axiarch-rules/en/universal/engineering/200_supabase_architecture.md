@@ -344,7 +344,7 @@
 -   **Unused Purge**: Regularly check `unused_index` warnings. Delete dead indexes to improve write performance, but wait for data growth before judging.
 
 ### Rule 4.2: Locale-Specific Search Optimization
--   Use `pg_search` (tsvector) for standard full-text search, and use locale-specific extensions such as `pgroonga` when Japanese or CJK full-text search is in scope.
+-   Use `pg_search` (tsvector) for standard full-text search, and use locale-specific extensions such as `pgroonga` when CJK-language full-text search (Japanese, Chinese, Korean) is in scope.
 
 ### Rule 4.3: Scalability Strategy
 -   **Infinite Scalability**: `select('*')` and unlimited queries banned. Pagination mandatory.
@@ -2261,7 +2261,7 @@
 -   **Action**:
     1.  **tsvector Column**: Add generated `tsvector` columns with GIN indexes for searchable tables.
     2.  **Weight System**: Use `setweight` for field prioritization (title > body: A > B > C > D).
-    3.  **Locale-Specific Language Support**: Recommend locale-appropriate extensions such as `pgroonga` (§36) when Japanese or CJK full-text search is in scope.
+    3.  **Locale-Specific Language Support**: Recommend locale-appropriate extensions such as `pgroonga` (§36) when CJK-language full-text search (Japanese, Chinese, Korean) is in scope.
     4.  **pg_trgm for Fuzzy Search**: Use `pg_trgm` (trigram) extension for improved `LIKE '%keyword%'` performance.
     5.  **Hybrid Approach**: Combine `tsvector` (structured) + `pg_trgm` (fuzzy) + `pgvector` (semantic/§17) for multi-layered search.
 

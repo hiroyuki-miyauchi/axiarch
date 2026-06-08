@@ -1,7 +1,7 @@
 # 998. Feature Specification Template
 
 > [!TIP]
-> **Usage**: Copy this file and rename it using the next available number in the target domain folder (e.g., `product/010_feature_payment.md`).
+> **Usage**: Copy this file and rename it using any available number in the target domain folder (e.g., `product/010_feature_payment.md`). The number only avoids collisions within the folder's 000–999 range; there are no reserved numbering bands, and using `000` is not required.
 > Completing each section **explicitly defines "what constitutes done."**
 > Following the Blueprint First principle, **complete this template before writing code.**
 

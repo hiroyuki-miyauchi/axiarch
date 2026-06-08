@@ -1233,7 +1233,7 @@
     -   リスクベース（例: Health Score低下）
 
 ### 30.3. The Moment of Truth Design（真実の瞬間設計基準）
--   **Law**: 顧客ロイヤルティに決定的な影響を与える「真実の瞬間（Moment of Truth）」を特定し、卓越した体験を設計すること。
+-   **Law**: 顧客ロイヤルティに決定的な影響を与える「真実の瞬間（Moment of Truth）」を特定し、期待を超える体験を設計すること。
 -   **Critical Moments**:
     -   **初回値体験**: 最初の「Aha! Moment」
     -   **初回問い合わせ**: サポートの初回体験
@@ -1302,7 +1302,7 @@
 ### 32.3. The Cultural Sensitivity Standard（文化的配慮基準）
 -   **Law**: 地域ごとの文化的差異に配慮したコミュニケーションを行うこと。
 -   **Considerations**:
-    -   敬語レベルの調整（日本語のフォーマリティ）
+    -   言語固有の敬称・フォーマリティレベルの調整（例: 日本語の敬語、ドイツ語の Sie/du）
     -   時間帯・祝日の考慮
     -   通貨・日付フォーマットのローカライズ
     -   色やアイコンの文化的解釈差異への配慮
@@ -1531,7 +1531,7 @@
 | **L2: Defined** | 定義済み | SLA定義済み。基本的なFAQ/ナレッジベース。チケット分類の手動運用。 |
 | **L3: Managed** | 管理的 | オムニチャネル統合。AIトリアージ導入。QAプログラム運用。VoC収集の体系化。 |
 | **L4: Proactive** | 予見的 | Customer Health Score運用。予兆検知とプロアクティブ介入。Agentic AIサポート。コミュニティ自走。Digital CS運用。 |
-| **L5: Optimized** | 最適化 | 予測的分析による完全自動化。Support-Influenced ARRの可視化。NRR ≥ 110%。AI Autonomous Resolution ≥ 80%。継続的な実験と最適化。 |
+| **L5: Optimized** | 最適化 | 予測的分析による高度な自動化。Support-Influenced ARRの可視化。NRR ≥ 110%。AI Autonomous Resolution ≥ 80%。継続的な実験と最適化。 |
 
 -   **Assessment**: 四半期ごとに成熟度レベルを自己評価し、次のレベルへのロードマップを策定すること。
 

@@ -671,7 +671,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 
 ```
 System: You MUST respond in the same language as the user's query.
-If the user writes in Japanese, respond in Japanese.
+If the user writes in the Project Native Language, respond in that language.
 Never switch languages mid-response.
 ```
 
@@ -1438,7 +1438,7 @@ npx messageformat-validator locales/**/*.json
 - **PGP/GPG Keys Multilingual**: Provide encryption key information for security reporting in multiple languages
 - **Multilingual Bug Bounty Platforms**: Multilingual support for HackerOne / Bugcrowd / Intigriti
 - **Report Triage Language**: Auto-detect language of incoming reports → route to appropriate-language responder
-- **CVE / CVSS Multilingual Descriptions**: Multilingual versions of public advisories (at minimum English + Japanese + Chinese)
+- **CVE / CVSS Multilingual Descriptions**: Multilingual versions of public advisories (at minimum English + the Project Native Language; e.g., English + Japanese + Chinese for CJK markets)
 - **Responsible Disclosure Timeline**: Region-specific holiday consideration (Lunar New Year, Ramadan, etc.)
 - **Multilingual Incident Announcements**: Instant translation protocol for major vulnerability disclosure
 - → See `security/000_security_privacy.md` VDP / Responsible Disclosure

@@ -311,7 +311,7 @@ export async function POST(request: Request) {
 
 - **Rich Selection Protocol**: Conventional Radio/Checkbox is prohibited in principle. **"Intuitively clickable rich card-style UI"** is the standard
 - **Responsive Combobox Protocol**: Desktop: `Popover` / Mobile: **Drawer (Vaul)**
-- **Stable IDs**: `CommandItem` `value` must be a unique, consistent **ASCII string**. Using Japanese in `value` breaks selection logic
+- **Stable IDs**: `CommandItem` `value` must be a unique, consistent **ASCII string**. Using Non-ASCII scripts (CJK characters, etc.) in `value` breaks selection logic
 
 ### §21. The Design Consistency Protocol
 
@@ -746,7 +746,7 @@ type ActionResult<T> =
     - URL → `inputMode="url"`
 
 ### §68. The Input Normalization Protocol (NFKC)
-- **Rule 33.70**: Convert full-width alphanumeric user input to half-width (NFKC normalization) before server submission. Japanese characters (Hiragana, Katakana, Kanji) are excluded from NFKC conversion
+- **Rule 33.70**: Convert full-width alphanumeric user input to half-width (NFKC normalization) before server submission. CJK characters (e.g., Japanese Hiragana, Katakana, Kanji) are excluded from NFKC conversion
 
 ### §69. The IME Composition Guard
 - **Rule 33.71**: Prevent form submission from firing on Enter key press before IME input is confirmed (during composition). Guard with `compositionstart` / `compositionend` events

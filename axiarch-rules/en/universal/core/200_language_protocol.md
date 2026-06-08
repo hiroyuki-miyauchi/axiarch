@@ -114,7 +114,7 @@ All text is classified into the following three layers, with language policies a
 ```
 
 - **Rule 74.8**: For single-language projects (only one `Project Native Language`), negotiation is unnecessary. The Project Native Language is always applied
-- **Rule 74.9**: Guarantee UI state preservation during language switching (form input values, scroll position, modal state)
+- **Rule 74.9**: Ensure UI state preservation during language switching (form input values, scroll position, modal state)
 - **Rule 74.9A**: Recommend a Service Worker language interceptor strategy. Detect language at the request level and prefetch/cache appropriate locale resources
 - **Rule 74.9B**: When using Temporal API (TC39 Stage 3), set `calendar` and `timeZone` of `Temporal.Now.zonedDateTimeISO()` based on the user's locale
 

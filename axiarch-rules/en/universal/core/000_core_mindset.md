@@ -114,7 +114,7 @@ We strictly adhere to the following hierarchy of priorities in all decision-maki
 *   **Prohibition**: Logic encapsulation within UI-framework-specific components or channel-dependent data structures (Channel-Only design) is **strictly prohibited as an architectural violation**.
 
 ### 1.3. The Single Source of Truth Mandate (Database Supremacy)
-*   **Law**: The "truth" in the project exists ONLY in the primary database (persistent store). Regardless of RDBMS, NoSQL, or vector DB, every project MUST designate one canonical data store and treat it as the single source of truth.
+*   **Law**: The primary database (persistent store) is the source of truth in the project. Regardless of RDBMS, NoSQL, or vector DB, every project MUST designate one canonical data store and treat it as the single source of truth.
 *   **Definition**: Third-party DBs, client-side JSON files, in-memory State (Redux, etc.) are all just "cache" or "projections." Treating them as canonical data and creating UI-DB duplication (Data Duplication) is considered "Data Rebellion."
 *   **Principle**: Always target a state where "all clients see the same data" and eliminate data divergence (Drift) at the design stage.
 

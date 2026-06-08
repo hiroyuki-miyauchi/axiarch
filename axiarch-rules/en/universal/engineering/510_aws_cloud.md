@@ -285,7 +285,7 @@ Three foundational vows govern all design decisions:
 -   **Mandate**:
     1.  **Data Residency Map**: For every data category (PII, healthcare, financial, logs, etc.), maintain an explicit data residency map showing "storage region," "processing region," and "backup region."
     2.  **AWS Region Restriction SCP**: Physically prohibit data storage/transfer to unauthorized regions via SCP (see Directive 0.4 SCP example).
-    3.  **GDPR / APPI Alignment**: For EU resident user data transfers outside the EU, and Japanese user data transfers abroad, document appropriate legal bases (SCCs, adequacy decisions, etc.).
+    3.  **Cross-Border Transfer Alignment**: For EU resident user data transfers outside the EU, and for Project Native Language region user data transfers abroad (e.g., Japan under APPI), document appropriate legal bases (SCCs, adequacy decisions, etc.).
     4.  **Data Perimeter Enforcement**: Use AWS Organizations Data Perimeter (`aws:SourceAccount`/`aws:PrincipalOrgID` condition keys) to enforce boundaries preventing data exfiltration outside the organization. See §147 for details.
 
 #### 8-B. Post-Quantum Readiness

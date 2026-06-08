@@ -2201,7 +2201,7 @@
 
 ## Numbering Compatibility Aliases
 
-These aliases preserve cross-reference compatibility with the Japanese numbering stream. The normative body remains in the referenced section.
+These aliases preserve cross-reference compatibility with the localized (ja) numbering stream. The normative body remains in the referenced section.
 
 ### §50-b. Adaptive Concurrency Limits
 

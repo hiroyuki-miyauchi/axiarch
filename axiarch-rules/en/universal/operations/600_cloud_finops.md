@@ -1289,7 +1289,7 @@
     | **L2: Walk** | Standard | Budget & alerts set. Rightsizing started. Monthly reporting automated | Budget variance < 20% |
     | **L3: Run** | Optimized | Commitment optimization. Unit economics tracking. Policy-as-Code | Commitment utilization > 80% |
     | **L4: Sprint** | Advanced | AI-driven optimization. Real-time cost management. GreenOps integrated | Waste Rate < 5% |
-    | **L5: Fly** | Excellent | Fully automated FinOps. Business value aligned. ±5% forecast accuracy | Unit Cost decreasing > 10%/yr |
+    | **L5: Fly** | Highest tier | Highly automated FinOps. Business value aligned. ±5% forecast accuracy | Unit Cost decreasing > 10%/yr |
 
 -   **L1→L2 Transition Checklist**:
     - [ ] All resources have mandatory tags (95%+)

@@ -1,7 +1,7 @@
 # 999. Project Specific Rules Template
 
 > [!TIP]
-> Copy this file to the corresponding domain folder in `axiarch-rules/{lang}/blueprint/`. Rename the file according to the folder's internal sequence (e.g., `security/010_security_policy.md`).
+> Copy this file to the corresponding domain folder in `axiarch-rules/{lang}/blueprint/`. Rename the file using any available number from 000 to 999 within the folder (e.g., `security/010_security_policy.md`). The number only avoids collisions; there are no reserved numbering bands, and using `000` is not required.
 > Rules in `universal/` are the "Constitution," while `blueprint/` is the "Laws" — the place to concretize (or exceptionally override) the Constitution for project-specific context.
 
 ---
@@ -82,18 +82,18 @@
 ### Blueprint Folder & File Naming Guide
 
 > [!IMPORTANT]
-> **Numbers already used in core/**: `998` and `999` are already used by template files (`core/998_feature_spec_template.md`, `core/999_project_specific_template.md`). Other folders may use any available number from `000` to `999`.
-> All other numbers (`010`–`997`) are **freely available regardless of purpose**. Both project-specific rules and feature specs use the same sequential numbering within each folder.
+> **Numbering only avoids collisions — no reserved bands**: The number merely avoids collisions among available numbers from 000 to 999 within a folder. There are no reserved numbering bands, and using `000` is not required. Both project-specific rules and feature specs use the same available-number scheme within each folder.
+> **Numbers already used in core/**: In `core/`, `000_project_overview.md`, `010_project_lessons_log.md`, `998_feature_spec_template.md`, and `999_project_specific_template.md` are already used, so avoid those. This is specific to `core/` and does not apply to other folders (their `000` is also free and may be used when needed).
 
 | Folder | Available Numbers | Examples |
 |:--------|:------------|:------|
-| `core/` | 010–997 | Lessons log (`010_`), crystallized rules, project-specific settings |
-| `security/` | 010–997 | Security policies, security feature specs |
-| `engineering/` | 010–997 | System-specific rules, engineering feature specs |
-| `design/` | 010–997 | Design system overrides, design feature specs |
-| `quality/` | 010–997 | Test strategy overrides, QA feature specs |
-| `operations/` | 010–997 | SRE, CI/CD overrides, operations feature specs |
-| `product/` | 010–997 | Business rules, feature specs (most common placement) |
-| `ai/` | 010–997 | AI strategy overrides, AI feature specs |
+| `core/` | Any available 000–999 (excluding the already-used ones) | Lessons log (`010_`), crystallized rules, project-specific settings |
+| `security/` | Any available 000–999 | Security policies, security feature specs |
+| `engineering/` | Any available 000–999 | System-specific rules, engineering feature specs |
+| `design/` | Any available 000–999 | Design system overrides, design feature specs |
+| `quality/` | Any available 000–999 | Test strategy overrides, QA feature specs |
+| `operations/` | Any available 000–999 | SRE, CI/CD overrides, operations feature specs |
+| `product/` | Any available 000–999 | Business rules, feature specs (most common placement) |
+| `ai/` | Any available 000–999 | AI strategy overrides, AI feature specs |
 
-> **Numbering rule**: Within each folder, use `010_`, `020_`, `030_`... in **10-unit increments** (to reserve insertion gaps for future files). Do NOT use global numbering across folders.
+> **Numbering rule**: Within each folder, using `010_`, `020_`, `030_`... in **10-unit increments** is a recommended convention (to reserve insertion gaps for future files). The 10-unit increment is a recommendation, not a reserved band — any available number, including `000`, may be used freely. Do NOT use global numbering across folders.

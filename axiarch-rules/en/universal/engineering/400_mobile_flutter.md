@@ -1355,7 +1355,7 @@ MaterialApp(
 
 ### §133. IME & Internationalization Support
 
-- **NFKC normalization**: Normalize full-width alphanumerics to half-width (Japanese input support)
+- **NFKC normalization**: Normalize full-width alphanumerics to half-width (CJK / Non-ASCII input support; e.g., Japanese)
 - **maxLength**: Limit by character count, not byte count, with `LengthLimitingTextInputFormatter`
 - **IME guard**: Suppress validation during `composing` state
 

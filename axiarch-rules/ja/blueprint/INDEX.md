@@ -6,7 +6,7 @@
 > `universal/` のルールは **「憲法」** であり、すべてのプロジェクトに共通する不変の原則です。
 > `blueprint/` のルールは **「法律」** であり、憲法を具体化し、プロジェクト固有の事情に合わせてカスタマイズする場所です。
 > 間隔採番（Sparse Numbering）により、将来の拡張性を確保しています。
-> **初期構成は `universal/` と同じ8フォルダに対応**しています。ただし、Blueprintはプロジェクト固有の可変層であり、既存フォルダに分類できない新ドメインはユーザー承認後に追加できます。
+> **初期フォルダは `universal/` と同じ8つ**に対応しています。ただしこれは初期フォルダであり、閉じた集合ではありません。Blueprintはプロジェクト固有の可変層であり、既存フォルダに分類できない新ドメインはユーザー承認後に追加できます。
 
 ---
 
@@ -56,6 +56,9 @@ blueprint/
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
 | [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
+
+> [!NOTE]
+> `000_project_overview.md` と `010_project_lessons_log.md` は `core/` 専用です。他フォルダの `000` ファイルは初期状態では存在せず、必要時にユーザーが追加します（`000` は必須ではありません）。
 
 ---
 

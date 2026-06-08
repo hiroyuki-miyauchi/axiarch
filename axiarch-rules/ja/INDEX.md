@@ -20,7 +20,7 @@ your-project/
  │    └── rules/
  │         └── prompt_pointer.md  ← AXIARCH.mdへの薄いポインター
  ├── axiarch-rules/
- │    ├── ja/                  ← 日本語版
+ │    ├── ja/                  ← Project Native Language（例: 日本語）
  │    │    ├── INDEX.md        ← 本ファイル（全体索引）
  │    │    ├── README.md       ← クイックリファレンス
  │    │    ├── compliance_matrix.md
@@ -36,7 +36,7 @@ your-project/
  │    │    │    ├── security/  ← セキュリティ・法務・コンプライアンス
  │    │    │    └── quality/   ← テスト・QA
  │    │    └── blueprint/      ← プロジェクト固有ルール（法律）
- │    └── en/                  ← 英語版（同構造）
+ │    └── en/                  ← secondary language（例: 英語、同構造）
  ├── axiarch-prompts/           ← 任意：プロンプト集
  │    ├── ja/
  │    │    ├── develop/         ← 開発・実行

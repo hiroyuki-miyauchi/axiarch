@@ -1452,7 +1452,7 @@ MaterialApp(
 
 ### §133. IME・国際化対応
 
-- **NFKC正規化**: 全角英数を半角に正規化（日本語入力対応）
+- **NFKC正規化**: 全角英数を半角に正規化（CJK／非ASCII入力対応。例: 日本語）
 - **maxLength**: `LengthLimitingTextInputFormatter`でバイト数ではなく文字数で制限
 - **IMEガード**: `composing`中のバリデーション実行を抑止
 

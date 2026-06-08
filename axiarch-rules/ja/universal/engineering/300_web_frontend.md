@@ -311,7 +311,7 @@ export async function POST(request: Request) {
 
 - **Rich Selection Protocol**: 従来のRadio/Checkboxは原則禁止。**「直感的にクリック可能なリッチカード型UI」**を標準とする
 - **Responsive Combobox Protocol**: Desktop: `Popover` / Mobile: **Drawer (Vaul)**
-- **Stable IDs**: `CommandItem` の `value` は一意で整合性のある**ASCIIの文字列**であること。日本語を `value` に使うと選択ロジックが壊れる
+- **Stable IDs**: `CommandItem` の `value` は一意で整合性のある**ASCIIの文字列**であること。非ASCII文字（CJK文字等）を `value` に使うと選択ロジックが壊れる
 
 ### §21. The Design Consistency Protocol
 
@@ -766,7 +766,7 @@ type ActionResult<T> =
 
 ### §68. The Input Normalization Protocol (NFKC)
 
-- **Rule 33.70**: ユーザー入力の全角英数字はサーバー送信前に半角（NFKC正規化）に変換する。日本語文字（ひらがな・カタカナ・漢字）はNFKC変換の対象外とする
+- **Rule 33.70**: ユーザー入力の全角英数字はサーバー送信前に半角（NFKC正規化）に変換する。CJK文字（例: 日本語のひらがな・カタカナ・漢字）はNFKC変換の対象外とする
 
 ### §69. The IME Composition Guard
 

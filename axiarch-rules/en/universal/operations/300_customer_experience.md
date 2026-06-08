@@ -883,7 +883,7 @@
 -   **Automation Triggers**: Phase transition; time-based; behavior-based; risk-based.
 
 ### 30.3. The Moment of Truth Design
--   **Law**: Identify and design exceptional experiences for "Moments of Truth" that decisively impact customer loyalty.
+-   **Law**: Identify "Moments of Truth" that decisively impact customer loyalty and design experiences that exceed expectations.
 -   **Critical Moments**: First value experience ("Aha! Moment"); first support inquiry; major outage response; contract renewal; cancellation consideration.
 
 ---
@@ -929,7 +929,7 @@
 
 ### 32.3. The Cultural Sensitivity Standard
 -   **Law**: Communicate with consideration for regional cultural differences.
--   **Considerations**: Formality level adjustment (Japanese keigo); timezone/holiday consideration; currency/date format localization; cultural interpretation differences in colors and icons.
+-   **Considerations**: Language-specific honorific/formality level adjustment (e.g., Japanese keigo, German Sie/du); timezone/holiday consideration; currency/date format localization; cultural interpretation differences in colors and icons.
 
 ---
 
@@ -1057,7 +1057,7 @@
 | **L2: Defined** | Defined | SLA defined. Basic FAQ/KB. Manual ticket classification. |
 | **L3: Managed** | Managed | Omnichannel integration. AI triage. QA program. Systematic VoC. |
 | **L4: Proactive** | Proactive | Health Score operations. Predictive detection with proactive intervention. Agentic AI. Community self-running. Digital CS. |
-| **L5: Optimized** | Optimized | Predictive analytics-driven full automation. Support-Influenced ARR visibility. NRR ≥ 110%. AI Autonomous Resolution ≥ 80%. Continuous experimentation. |
+| **L5: Optimized** | Optimized | Predictive analytics-driven high automation. Support-Influenced ARR visibility. NRR ≥ 110%. AI Autonomous Resolution ≥ 80%. Continuous experimentation. |
 
 -   **Assessment**: Quarterly self-assessment of maturity level with roadmap to next level.
 

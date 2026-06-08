@@ -6,7 +6,7 @@
 > `universal/` rules are the **"Constitution"** — immutable principles common to all projects.
 > `blueprint/` rules are the **"Laws"** — concrete implementations that customize the Constitution for your project's specific needs.
 > Sparse Numbering preserves room for future extension.
-> **The initial structure maps to the same 8 folders as `universal/`**. However, Blueprint is the mutable project-specific layer; when a new domain cannot reasonably fit existing folders, a user-approved new folder may be added.
+> **The initial folders map to the same 8 as `universal/`**. These are initial folders, not a closed set. Blueprint is the mutable project-specific layer; when a new domain cannot reasonably fit existing folders, a user-approved new folder may be added.
 
 ---
 
@@ -56,6 +56,9 @@ Project overview, lessons index, and templates.
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | Lessons index + unsorted lesson accumulation. Origin point for Crystallization. |
 | [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **Feature spec template (Blueprint First core)**. Copy to the relevant domain folder to use. |
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
+
+> [!NOTE]
+> `000_project_overview.md` and `010_project_lessons_log.md` are `core/`-only. Other folders have no `000` file in the initial state; the user adds one when needed (`000` is not required).
 
 ---
 

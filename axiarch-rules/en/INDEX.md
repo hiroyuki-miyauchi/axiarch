@@ -20,8 +20,8 @@ your-project/
  │    └── rules/
  │         └── prompt_pointer.md  ← Thin pointer to AXIARCH.md
  ├── axiarch-rules/
- │    ├── ja/                  ← Japanese version
- │    └── en/                  ← English version
+ │    ├── ja/                  ← Project Native Language (e.g. Japanese)
+ │    └── en/                  ← secondary language (e.g. English)
  │         ├── INDEX.md        ← This file (master index)
  │         ├── README.md       ← Quick reference (links & setup guide)
  │         ├── compliance_matrix.md

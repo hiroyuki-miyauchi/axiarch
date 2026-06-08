@@ -104,3 +104,6 @@
 | §5 AI Module | `ai/000_ai_engineering` |
 | §5 Content Module | `engineering/310_headless_cms` |
 | §6 Operations | `operations/400_site_reliability`, `engineering/500_firebase_gcp` |
+
+> [!NOTE]
+> `engineering/200_...`, `engineering/300_...`, etc. above are **reference examples within the Universal rules**. Blueprint numbering is not bound by them: in Blueprint, use any available number from 000 to 999 independently within each folder — there are no reserved numbering bands.
