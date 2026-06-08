@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.12.1 Harness Engineering Release Parity Patch\
+> **現在の安定版 / Current Stable**: v1.13.0 Prompt Slash Commands for Claude Code\
 > **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
@@ -553,6 +553,17 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 - **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
 - **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
 - **後続候補** — Static Lint & Process Supervision は本正本化後の候補として継続検討する。
+
+---
+
+### ✅ v1.13.0 — Prompt Slash Commands for Claude Code（2026-06-08）
+
+`axiarch-prompts/` がコピペ運用のみで `/` に出ない摩擦を解消し、プロンプトを Claude Code native slash command として first-class 化。市場調査フォーキャスト賭け #2（AGENTS.md 標準との関係明文化）は #49 で実装済、本リリースで slash-command 基盤を提供し、賭け #1（SKILL.md 移行）の前提を整える。
+
+- **`axiarch-scripts/axiarch-prompts-install.sh`** — prompts から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を生成。正本プロンプトを Read+実行する thin pointer（single source of truth）。冪等・bilingual（`--lang ja|en|auto`）・`--clean`/`--dry-run`・pure bash
+- **init.sh opt-in** — プロンプトコピー かつ Claude Code 選択時のみ slash command 生成を質問・実行
+- **エージェント別の正直な対応** — Claude Code のみ native 生成。Codex（custom prompts は global-only・deprecated）/ Antigravity（workflow project-file 規約未文書化）はコピペ/AGENTS 運用
+- **生成物は artifact 扱い** — `.claude/commands/axiarch-*.md` を gitignore、generator を source of truth とする
 
 ---
 
@@ -1237,6 +1248,17 @@ stale in multi-agent projects.
 - **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
 - **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
 - **Follow-up candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
+
+---
+
+### ✅ v1.13.0 — Prompt Slash Commands for Claude Code (2026-06-08)
+
+Removes the copy-paste-only friction where `axiarch-prompts/` never appeared under `/`, making prompts first-class Claude Code native slash commands. Strategic-roadmap bet #2 (AGENTS.md standard relationship) shipped in #49; this release provides the slash-command foundation and sets up bet #1 (SKILL.md migration).
+
+- **`axiarch-scripts/axiarch-prompts-install.sh`** — Generates `.claude/commands/axiarch-<name>.md` (`/axiarch-<name>`) from the prompt library. Thin pointers that Read and execute the canonical prompt (single source of truth). Idempotent, bilingual (`--lang ja|en|auto`), `--clean`/`--dry-run`, pure bash
+- **init.sh opt-in** — Offers generation only when the prompt library is copied and Claude Code is selected
+- **Honest per-agent support** — Native generation for Claude Code only; Codex (custom prompts global-only/deprecated) and Antigravity (undocumented workflow project-file convention) use copy-paste / AGENTS
+- **Generated files as artifacts** — `.claude/commands/axiarch-*.md` is gitignored; the generator is the source of truth
 
 ---
 

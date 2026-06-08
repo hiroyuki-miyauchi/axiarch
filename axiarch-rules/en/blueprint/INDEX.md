@@ -180,5 +180,5 @@ Strategies for generating next-generation "value".
 ---
 
 **Last Updated**: 2026-06-08
-**Version**: v1.12.1 — Harness Engineering wording, diagnostics, and Safe Upgrade label parity patch (v1.12.0: AXIARCH.md canonical entrypoint and Execution Harness / Harness Engineering support, v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration, shared Blueprint / Project State boundary alignment, and current-task document rotation)
+**Version**: v1.13.0 — Claude Code slash commands from prompts (`axiarch-prompts-install.sh` generates `/axiarch-*`, init.sh opt-in, generated files gitignored as artifacts) (v1.12.1: Harness Engineering wording, diagnostics, and Safe Upgrade label parity, v1.12.0: AXIARCH.md canonical entrypoint and Execution Harness / Harness Engineering support, v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration and more)
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

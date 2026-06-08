@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.12.1"
+AXIARCH_VERSION="1.13.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -205,9 +205,27 @@ select_prompts() {
   read -rp "コピーしますか？ / Copy prompt library? [y/N]: " prompt_choice
   prompt_choice="${prompt_choice:-N}"
   COPY_PROMPTS=false
+  GEN_PROMPT_COMMANDS=false
   if [[ "$prompt_choice" =~ ^[Yy]$ ]]; then
     COPY_PROMPTS=true
     print_success "Prompt library will be copied."
+    # Offer Claude Code slash-command generation only when Claude Code is the agent.
+    # Project-level native slash commands are a verified Claude Code mechanism;
+    # Codex custom prompts are global-only/deprecated and Antigravity workflows are
+    # not authoritatively project-file based, so we do not generate for them.
+    if $SETUP_CLAUDE; then
+      echo ""
+      echo "  Claude Code 向けに /axiarch-* slash command を生成できます（コピペ不要で呼び出し可能）。"
+      echo "  Generate /axiarch-* slash commands for Claude Code (invoke prompts with / instead of copy-paste)."
+      read -rp "  生成しますか？ / Generate slash commands? [y/N]: " cmd_choice
+      cmd_choice="${cmd_choice:-N}"
+      if [[ "$cmd_choice" =~ ^[Yy]$ ]]; then
+        GEN_PROMPT_COMMANDS=true
+        print_success "Claude Code slash commands will be generated."
+      else
+        print_info "Skipping slash command generation (copy-paste運用)."
+      fi
+    fi
   else
     print_info "Skipping prompt library."
   fi
@@ -447,7 +465,14 @@ copy_files() {
     mkdir -p "$TARGET_DIR/axiarch-scripts"
     cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
-    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-task-state.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+    print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-task-state.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; prompts-install: axiarch-prompts-install.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
+  fi
+
+  # === Optional: generate Claude Code slash commands (/axiarch-*) ===
+  if ${GEN_PROMPT_COMMANDS:-false} && [[ -x "$TARGET_DIR/axiarch-scripts/axiarch-prompts-install.sh" ]]; then
+    ( cd "$TARGET_DIR" && bash axiarch-scripts/axiarch-prompts-install.sh --lang "${LANG_CODE}" ) \
+      && print_info "Generated: .claude/commands/axiarch-* (Claude Code slash commands)" \
+      || print_warn "Slash command generation reported an issue; run 'bash axiarch-scripts/axiarch-prompts-install.sh' manually to inspect."
   fi
 
   # === Agent-specific setup: install selected agent's native config ===

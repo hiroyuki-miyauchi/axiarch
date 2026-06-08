@@ -181,5 +181,5 @@ SRE、インシデント管理、運用要件。
 ---
 
 **Last Updated**: 2026-06-08
-**Version**: v1.12.1 — Harness Engineering説明・診断・Safe Upgradeラベル整合のパッチ（v1.12.0: AXIARCH.md正本入口とExecution Harness / ハーネスエンジニアリング対応、v1.11.2: Safe Upgrade実行プロンプトのmulti-agent検出修正、v1.11.0: Safe Upgrade Wizard向けのリリース・アップグレード運用Blueprint登録、共有Blueprint/Project State境界整理、現在タスク文書ローテーション導入）
+**Version**: v1.13.0 — プロンプトの Claude Code slash command 化（`axiarch-prompts-install.sh` で `/axiarch-*` 生成、init.sh opt-in、生成物は artifact として gitignore）（v1.12.1: Harness Engineering説明・診断・Safe Upgradeラベル整合、v1.12.0: AXIARCH.md正本入口とExecution Harness / ハーネスエンジニアリング対応、v1.11.2: Safe Upgrade実行プロンプトのmulti-agent検出修正、v1.11.0: リリース・アップグレード運用Blueprint登録ほか）
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

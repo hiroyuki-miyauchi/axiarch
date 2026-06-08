@@ -37,7 +37,7 @@ Before executing any upgrade action, identify and directly load the following fi
 4. **Upgrade Engine**
    - Role: Execution behavior for dry-run, safe-only, interactive, apply, merge, and metadata generation
    - Candidates: `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/README.md`
-   - If `axiarch-scripts/axiarch-upgrade.sh` is not installed yet, do not overwrite existing files. Fetch a tag-pinned temporary helper to `/tmp/axiarch-upgrade.sh` and run dry-run first. Example: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
+   - If `axiarch-scripts/axiarch-upgrade.sh` is not installed yet, do not overwrite existing files. Fetch a tag-pinned temporary helper to `/tmp/axiarch-upgrade.sh` and run dry-run first. Example: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.13.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
 5. **Project State**
    - Role: Existing project overview, project lessons, and Blueprint state
    - Candidates: `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`

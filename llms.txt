@@ -49,14 +49,14 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 
 ## Quick Start
 
-Note: the main-branch installer installs the stable Axiarch v1.12.1 release by default and pins the distribution ref to `tags/v1.12.1`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when intentionally following the latest `main`. Tags at v1.11.2 or earlier are treated as legacy installs because they do not contain `AXIARCH.md` or `axiarch-harness/`.
+Note: the main-branch installer installs the stable Axiarch v1.13.0 release by default and pins the distribution ref to `tags/v1.13.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when intentionally following the latest `main`. Tags at v1.11.2 or earlier are treated as legacy installs because they do not contain `AXIARCH.md` or `axiarch-harness/`.
 
 ```bash
 # Option 1: Interactive setup script (recommended)
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # Option 1b: Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.12.1 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.13.0 bash
 
 # Option 2: Manual copy
 cp AXIARCH.md /path/to/your/project/
@@ -69,7 +69,7 @@ cp axiarch-manifest.json /path/to/your/project/
 cp -r axiarch-scripts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters that do not yet have the helper can bootstrap a stable helper temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.1 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters that do not yet have the helper can bootstrap a stable helper temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.13.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.13.0 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Compatibility
 

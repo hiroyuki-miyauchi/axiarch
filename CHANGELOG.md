@@ -16,6 +16,31 @@ release history, not current canonical numbering.
 
 ---
 
+## [1.13.0] — 2026-06-08
+
+### Prompt Slash Commands for Claude Code / プロンプトの Claude Code スラッシュコマンド化
+
+`axiarch-prompts/` がコピペ運用のみで `/` から呼び出せなかった摩擦を解消し、プロンプトを Claude Code の native slash command（`/axiarch-*`）として生成する仕組みを追加。コマンド本体は正本プロンプトを Read して実行する thin pointer で、プロンプトを single source of truth として常に最新参照する。各エージェントの機構を authoritative に検証した結果、project-level の native slash command が確実に動くのは Claude Code のみ（Codex の custom prompts は global-only かつ deprecated、Antigravity の workflow は project-file 規約未文書化）であるため、Claude Code 向けのみ生成し、他はコピペ/AGENTS 運用を案内する。
+
+Adds generation of Claude Code native slash commands (`/axiarch-*`) from the prompt library, removing the copy-paste-only friction. Each command is a thin pointer that Reads and executes the canonical prompt file. Only Claude Code has a reliable project-level native slash-command mechanism (Codex custom prompts are global-only/deprecated; Antigravity workflow project-file conventions are undocumented), so commands are generated for Claude Code only.
+
+### Added
+
+- **`axiarch-scripts/axiarch-prompts-install.sh`** — `axiarch-prompts/{lang}/{category}/*.md` から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を生成する installer。冪等（マーカー付き生成物のみ再生成、採用先独自コマンド不可侵）、bilingual（`--lang ja|en|auto`）、`--clean`/`--dry-run`、pure bash / jq 非依存 / Generates Claude Code slash commands from the prompt library; idempotent, bilingual-aware, `--clean`/`--dry-run`, pure bash
+- **init.sh opt-in** — プロンプトライブラリをコピーし、かつ Claude Code を選択した場合のみ slash command 生成を質問・実行 / Offers generation only when the prompt library is copied and Claude Code is selected
+
+### Changed
+
+- **docs（README / blueprint INDEX ja+en / axiarch-prompts README / axiarch-scripts README）** — 呼び出し方法（slash command / コピペ）とエージェント別対応を明文化 / Documents invocation methods and per-agent support
+- **`.gitignore`** — `.claude/commands/axiarch-*.md` は v1.12.1 で既に追跡対象外（generator が source of truth）/ Already excluded since v1.12.1
+
+### References
+
+- 機構検証: Claude Code `.claude/commands/*.md`（公式・project-level）/ Codex custom prompts は global-only・deprecated / Antigravity workflow は project-file 規約未文書化
+- 次の発展（ROADMAP 戦略フォーキャスト #1）: Agent Skills (SKILL.md) 標準への移行で progressive disclosure + マルチツール移植性
+
+---
+
 ## [1.12.1] — 2026-06-08
 
 ### Fixed
@@ -979,6 +1004,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.13.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.1...v1.13.0
 [1.12.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.2...v1.12.0
 [1.11.2]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.1...v1.11.2

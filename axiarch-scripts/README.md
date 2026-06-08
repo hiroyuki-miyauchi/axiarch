@@ -25,6 +25,7 @@
 | [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に3つの現在タスク文書を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps the three current-task docs on session start | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-task-state.sh`](#axiarch-task-statesh) | **現在タスク文書ライフサイクル補助**。`task.md` / `implementation_plan.md` / `walkthrough.md` をarchive-before-refreshで更新 / Current-task document lifecycle helper; archive-before-refresh for `task.md` / `implementation_plan.md` / `walkthrough.md` | `axiarch-init-task-md.sh` から呼び出し / Called by `axiarch-init-task-md.sh` |
 | [`axiarch-upgrade.sh`](#axiarch-upgradesh) | **Safe Upgrade Wizard**。`axiarch-manifest.json` に基づき、Axiarch本体・プロジェクト固有Blueprint・任意ファイルをグループ単位で更新判断 / Manifest-based safe upgrade wizard; groups Axiarch-owned files, project Blueprint state, and optional files | 既存プロジェクトへ必要分だけアップグレードしたい時 / When upgrading only the needed parts of an existing adopter project |
+| [`axiarch-prompts-install.sh`](#axiarch-prompts-installsh) | **プロンプト → Claude Code slash command 生成**（v1.13.0+）。`axiarch-prompts/` から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を冪等生成。コマンドは正本プロンプトを Read+実行する thin pointer / Generates Claude Code slash commands (`/axiarch-<name>`) from `axiarch-prompts/`; thin pointers (idempotent, bilingual, `--clean`/`--dry-run`) | プロンプトを `/` から呼びたい時（Claude Code）。`init.sh` で opt-in 生成、または手動実行 / To invoke prompts via `/` in Claude Code |
 | [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
 
 ---
@@ -46,20 +47,20 @@ The file list, excludes, and group defaults are read from `axiarch-manifest.json
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.12.1/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.12.1 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.13.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.13.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.12.1 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --interactive
 ```
 
 ### 主な選択肢 / Main Choices
