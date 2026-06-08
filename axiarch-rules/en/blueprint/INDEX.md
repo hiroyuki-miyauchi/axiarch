@@ -180,5 +180,5 @@ Strategies for generating next-generation "value".
 ---
 
 **Last Updated**: 2026-06-08
-**Version**: v1.13.0 — Claude Code slash commands from prompts (`axiarch-prompts-install.sh` generates `/axiarch-*`, init.sh opt-in, generated files gitignored as artifacts) (v1.12.1: Harness Engineering wording, diagnostics, and Safe Upgrade label parity, v1.12.0: AXIARCH.md canonical entrypoint and Execution Harness / Harness Engineering support, v1.11.2: multi-agent detection fix for the Safe Upgrade execution prompt, v1.11.0: Release-upgrade Operations Blueprint registration and more)
+**Version**: v1.13.1 — Restore Language First (canonical §6.10 and boot-reminder now enforce Project Native Language across every heading, summary, label, list, and table in the agent response, and mark English mixing as a protocol violation; corrects the weakening introduced by the #46 canonicalization, honoring the §6.10 non-degradation principle) (v1.13.0: Claude Code slash commands from prompts, v1.12.1: Harness Engineering wording/diagnostics/Safe Upgrade label parity, v1.12.0: AXIARCH.md canonical entrypoint and Execution Harness / Harness Engineering support, v1.11.x: multi-agent detection and more)
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

@@ -68,6 +68,15 @@
 
 ---
 
+### [2026-06-08] 正本化リファクタによる厳格ルールの暗黙的劣化と多面的復元
+**Domain:** ガバナンス
+**Context:** #46 で AGENTS.md を AXIARCH.md へ正本化した際、旧 §2「Language First」が §6.10 の弱い1行（owner-facing 文書のみ列挙）に格下げされ、AI 応答面（見出し・要約・ラベル・箇条書き・表）への強制力と違反条項が消失していた（採用先から「指定言語対応が弱くなった」と報告）。
+**Problem:** 大規模な正本化・統合では、強い旧ルールが silent に劣化しても気づきにくい。さらに復元時、正本（AXIARCH.md）と reminder だけ直しても、AI 向けダイジェスト（llms.txt / llms-full.txt）や ROADMAP の ja/en ミラーなど周辺 surface に旧表現が取り残されやすい。
+**Solution/Rule:** (1) §6.10 非劣化原則に基づき、置換境界を明示しない限り旧来の厳しい解釈を保持する。(2) 復元は「正本 + reminder + AI 向けダイジェスト + ja/en ミラー」の全 surface で同期する。(3) 復元した不変条項は health-check の専用 Check（例: Check 16）で grep ガードし、将来の silent な削除/劣化を EXIT_CODE=1 で検出して再発を防ぐ。
+**Reference:** #46 / v1.13.1 / AXIARCH.md §6.10 / axiarch-scripts/check-axiarch-health.sh Check 16
+
+---
+
 ## Appendix A: 逆引き索引 & クロスリファレンス
 
 ### 推奨ドメインカテゴリ
