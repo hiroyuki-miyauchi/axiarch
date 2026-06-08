@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.13.0 Prompt Slash Commands for Claude Code\
+> **現在の安定版 / Current Stable**: v1.13.1 Restore Language First Enforcement\
 > **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
@@ -553,6 +553,20 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 - **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
 - **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
 - **後続候補** — Static Lint & Process Supervision は本正本化後の候補として継続検討する。
+
+---
+
+### ✅ v1.13.1 — Restore Language First Enforcement（2026-06-08）
+
+「指定言語（日本語）対応が弱くなった」という採用先報告を調査し、#46 正本化で旧 §2 Language First の AI 応答面への強制力が希薄化していた regression を修正。
+
+- **AXIARCH.md §6.10** — Language invariant を「応答 + 文書」へ強化。AI のユーザー応答の全見出し・要約・ラベル・箇条書き・表に Project Native Language を強制、日本語時の英語見出し等を違反と明記、code/API/log/path は例外
+- **boot-reminder（言語条項）** — 毎ターン発火の言語条項を同趣旨で強化し、正本と一致
+- **boot-reminder（Harness 喚起）** — reminder が §8 で「非自明な作業に必須」とされる Execution Harness を一度も言及していなかった gap を解消。CORE/SHORT 双方に L2+ でハーネス（ロールパス・監査判定・証跡パケット・人間承認ゲート）を適用するトリガーを追加（ja/en）
+- **EXECUTION_HARNESS_PROTOCOL（正本根拠）** — 「非自明（§8）= L2 以上」の対応をハーネス層に明記し、reminder の「L2+」表現に SSOT 根拠を付与
+- **health Check 16** — reminder が言語違反条項と Harness 喚起を ja/en 両方で含むことを検査し、将来の silent な削除/劣化を検出（#46 型 regression の再発防止）
+- **根拠** — §6.10 非劣化原則（旧来より厳しいルールは保持）に基づく復元
+- 独立 patch（v1.14.0 skills とは別ブランチ）
 
 ---
 
@@ -1248,6 +1262,20 @@ stale in multi-agent projects.
 - **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
 - **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
 - **Follow-up candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
+
+---
+
+### ✅ v1.13.1 — Restore Language First Enforcement (2026-06-08)
+
+Fixes the adopter-reported regression ("native-language adherence weakened") where the #46 canonicalization diluted the old §2 Language First binding on the agent response surface.
+
+- **AXIARCH.md §6.10** — Strengthens the Language invariant to "response + documents": Project Native Language binds every heading, summary, label, list, and table in the agent response; English mixing when Japanese is the native language is a protocol violation; code/API/log/path are exempt
+- **boot-reminder (language clause)** — Strengthens the per-turn language clause to match the canonical rule
+- **boot-reminder (Harness activation)** — Closes a gap where the reminder never referenced the Execution Harness despite §8 marking it mandatory for non-trivial work; adds a trigger to both CORE/SHORT to apply the L2+ harness (role passes, audit verdict, evidence packet, human approval gate) in ja/en
+- **EXECUTION_HARNESS_PROTOCOL (canonical basis)** — Anchors the "non-trivial (§8) = L2+" mapping in the harness layer so the reminder's "L2+" wording has an SSOT source
+- **health Check 16** — Verifies the reminder retains the language-violation clause and the Harness trigger in both ja and en, detecting future silent removal/degradation (prevents recurrence of the #46-style regression)
+- **Basis** — Restoration under §6.10's non-degradation principle (preserve the stricter older interpretation)
+- Independent patch (separate branch from v1.14.0 skills)
 
 ---
 

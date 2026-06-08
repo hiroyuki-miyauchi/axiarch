@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-AXIARCH_VERSION="1.13.0"
+AXIARCH_VERSION="1.13.1"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -693,7 +693,7 @@ print_next_steps() {
   if [[ "$SETUP_CODEX" == "true" || "$SETUP_CLAUDE" == "true" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended for Codex / Claude Code):${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-    echo -e "         (15-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AXIARCH physical-block, diff guard, more)"
+    echo -e "         (16-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AXIARCH physical-block, diff guard, more)"
   else
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Optional diagnostic:${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"

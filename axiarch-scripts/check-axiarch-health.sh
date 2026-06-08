@@ -8,7 +8,7 @@
 #
 # --quiet : suppress all output except errors (for pre-commit hook usage)
 #
-# Diagnoses Axiarch enforcement health across 15 verifiable stages spanning
+# Diagnoses Axiarch enforcement health across 16 verifiable stages spanning
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AXIARCH.md
 # protocols (Project Configuration, §6.2, §6.4, §6.6, §7, §9 — verifiable subset), the v1.5.5
 # physical-block / bootstrap hooks, the v1.6.0 sublimated-file guide, and the
@@ -26,6 +26,7 @@
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
 #   Check 15   v1.9+ / v1.11+ integration — PostToolUse diff guard + task-state lifecycle + release/docs/prompt parity + ja/en heading-number parity + Claude Memory canonical boundary + source release-file tracking
+#   Check 16   Reminder invariant clauses — Language First + Execution Harness retained in axiarch-boot-reminder.sh (ja/en, v1.13.1+)
 #
 # Out of Scope (semantic judgment required, manual review):
 #   AXIARCH §6.1 AI Self-Completion / §6.3 Database Integrity / §6.5 Existing Functionality Protection
@@ -697,13 +698,13 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   if [[ -f "${PROJECT_DIR}/README.md" ]]; then
     if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q ".claude/memory/MEMORY.md" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "15 段階" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "16 段階" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "Claude Memory正本境界" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "update_plan" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "TaskCreate" "${PROJECT_DIR}/README.md" 2>/dev/null; then
-      print_pass "Axiarch source README.md includes v1.9 diff guard, Claude Memory canonical boundary, and 15-stage diagnostic references"
+      print_pass "Axiarch source README.md includes v1.9 diff guard, Claude Memory canonical boundary, and 16-stage diagnostic references"
     else
       print_warn "Axiarch source README.md may be missing source integration references"
       print_info "Expected README to mention axiarch-task-state.sh, Claude Memory canonical boundary, Codex update_plan, and Claude Code TaskCreate for v1.11.0"
@@ -806,7 +807,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
 
   if [[ -f "${PROJECT_DIR}/axiarch-scripts/README.md" ]]; then
     if grep -q "axiarch-diff-guard.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
-      && grep -q "15-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
+      && grep -q "16-stage" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "対話選択肢重複排除" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "deduplicated interactive choices" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "axiarch-task-state.sh" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
@@ -814,7 +815,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       && grep -q "Claude Memory canonical boundary" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "AXIARCH_PROCESS_DOC_MODE" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null \
       && grep -q "AXIARCH_PROCESS_DOC_LANG" "${PROJECT_DIR}/axiarch-scripts/README.md" 2>/dev/null; then
-      print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard, 15-stage diagnostics, Claude Memory canonical boundary, and deduplicated-choice references"
+      print_pass "Axiarch source axiarch-scripts/README.md includes v1.9 diff guard, 16-stage diagnostics, Claude Memory canonical boundary, and deduplicated-choice references"
     else
       print_warn "Axiarch source axiarch-scripts/README.md may be missing source integration references"
       print_info "Expected scripts README to mention axiarch-task-state.sh, Claude Memory canonical boundary, AXIARCH_PROCESS_DOC_MODE, and AXIARCH_PROCESS_DOC_LANG for v1.11.0"
@@ -1616,6 +1617,70 @@ else
 fi
 
 # =============================================================================
+# Check 16 (v1.13.1+): Reminder invariant clauses — Language First + Execution Harness
+# The per-turn reminder is the runtime enforcement surface for two invariants
+# restored in v1.13.1:
+#   (A) Language First — Project Native Language across every heading/label, with
+#       English mixing marked a protocol violation
+#   (B) Execution Harness — mandatory for non-trivial (L2+) work, with role passes,
+#       audit verdict, evidence packet, and human approval gate
+# Both must persist in ja AND en. This guard detects silent removal/degradation
+# (the #46-style regression that dropped §2 Language First during canonicalization).
+# =============================================================================
+print_section "Check 16: Reminder invariant clauses (Language First + Execution Harness, ja/en)"
+
+REMINDER_INVARIANT_PATH="${PROJECT_DIR}/axiarch-scripts/axiarch-boot-reminder.sh"
+if [[ ! -f "${REMINDER_INVARIANT_PATH}" ]]; then
+  print_warn "axiarch-scripts/axiarch-boot-reminder.sh not found — invariant clause check unavailable (see Check 3 for existence wiring)"
+elif ! command -v grep &>/dev/null; then
+  print_warn "grep not available — skipping reminder invariant clause verification"
+else
+  # (A) Language First — bilingual presence of scope + violation wording.
+  # The violation anchors are clause-specific: "a protocol violation" / "プロトコル違反です"
+  # match the language clause but NOT the unrelated task.md sentence
+  # ("treated as protocol violations" / "プロトコル違反として扱われます"), avoiding a
+  # false-negative where the language clause is dropped while that sentence remains.
+  lang_scope_en=$(grep -c "every heading, summary, label, list, table" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  lang_violation_en=$(grep -c "a protocol violation" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  lang_scope_ja=$(grep -c "すべての見出し" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  lang_violation_ja=$(grep -c "プロトコル違反です" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+
+  # (B) Execution Harness — bilingual presence of harness + gate wording
+  harness_term=$(grep -c "Execution Harness" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  harness_path=$(grep -c "axiarch-harness/" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  harness_gate_en=$(grep -c "human approval gate" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  harness_gate_ja=$(grep -c "人間承認ゲート" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+
+  invariant_lang_ok=0
+  invariant_harness_ok=0
+  if [[ "${lang_scope_en:-0}" -gt 0 && "${lang_violation_en:-0}" -gt 0 \
+     && "${lang_scope_ja:-0}" -gt 0 && "${lang_violation_ja:-0}" -gt 0 ]]; then
+    invariant_lang_ok=1
+  fi
+  if [[ "${harness_term:-0}" -gt 0 && "${harness_path:-0}" -gt 0 \
+     && "${harness_gate_en:-0}" -gt 0 && "${harness_gate_ja:-0}" -gt 0 ]]; then
+    invariant_harness_ok=1
+  fi
+
+  if [[ "${invariant_lang_ok}" -eq 1 ]]; then
+    print_pass "Reminder retains Language First invariant (scope + violation wording, ja/en)"
+  else
+    print_warn "Reminder may have dropped/degraded the Language First invariant (ja/en scope + protocol-violation wording)"
+    print_info "Expected 'every heading, summary, label, list, table' + 'a protocol violation' (en) and 'すべての見出し' + 'プロトコル違反です' (ja) in CORE_REMINDER and SHORT_REMINDER"
+    print_info "Re-run init.sh to redistribute the current axiarch-scripts/axiarch-boot-reminder.sh, or restore the clause manually (v1.13.1+)"
+    EXIT_CODE=1
+  fi
+  if [[ "${invariant_harness_ok}" -eq 1 ]]; then
+    print_pass "Reminder retains Execution Harness invariant (harness reference + human approval gate, ja/en)"
+  else
+    print_warn "Reminder may have dropped/degraded the Execution Harness invariant (harness reference + human approval gate, ja/en)"
+    print_info "Expected 'Execution Harness' + 'axiarch-harness/' + 'human approval gate' (en) and '人間承認ゲート' (ja) in CORE_REMINDER and SHORT_REMINDER"
+    print_info "Re-run init.sh to redistribute the current axiarch-scripts/axiarch-boot-reminder.sh, or restore the clause manually (v1.13.1+)"
+    EXIT_CODE=1
+  fi
+fi
+
+# =============================================================================
 # Out-of-Scope Notice
 # =============================================================================
 print_section "Out of Scope (Manual Review Required)"
@@ -1635,7 +1700,7 @@ if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_info "If warnings appeared above, review them before treating the project state as fully clean"
   print_info "Verifiable: AXIARCH §0, §6.2, §6.4, §6.6, §7, §9 + LOADING_PROTOCOL + Hooks (4) + Bootstrap + Task Boundary + Diff Guard + Docs Integration"
   print_info "Manual review needed: AXIARCH §6.1, §6.3, §6.5, §6.9 (see Out of Scope above)"
-  print_info "(AXIARCH §6.6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard)"
+  print_info "(AXIARCH §6.6 became verifiable in v1.5.5 via PreToolUse — Check 11; v1.8.0 adds Check 14 task-boundary; v1.9.0 adds Check 15 diff guard; v1.13.1 adds Check 16 reminder invariants)"
 else
   print_warn "Some checks failed/warned — see above for which protocol needs attention"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"

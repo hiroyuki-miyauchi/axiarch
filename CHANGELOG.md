@@ -16,6 +16,31 @@ release history, not current canonical numbering.
 
 ---
 
+## [1.13.1] — 2026-06-08
+
+### Restore Language First Enforcement / Language First（指定言語遵守）の強制力を復元
+
+採用先からの「指定言語（日本語）対応が弱くなった」報告を調査した結果、#46 の正本化（AGENTS.md → AXIARCH.md）で、旧 AGENTS.md §2「Language First」の **AI 応答面への強制力と違反条項が希薄化**していたことを確認。AXIARCH.md では §6.10 Preserved Invariants の 1 行に格下げされ、しかも「owner-facing 計画・証跡・仕様・監査・walkthrough・承認依頼」という**文書種別の列挙**に留まり、**AI のユーザー応答（見出し・要約・ラベル・箇条書き・表）を明示的に強制していなかった**。これは §6.10 自身の非劣化原則（旧来より厳しいルールは置換境界を明示しない限り保持）に反する regression。本リリースで復元する。
+
+Fixes a regression found via adopter feedback ("native-language adherence weakened"): the #46 canonicalization (AGENTS.md → AXIARCH.md) diluted the old AGENTS.md §2 "Language First" enforcement. In AXIARCH.md it had been reduced to a single §6.10 Preserved-Invariants row that only listed owner-facing document types and did not explicitly bind the agent's user-facing response (headings, summaries, labels, lists, tables). This violated §6.10's own non-degradation principle, and is restored here.
+
+### Fixed
+
+- **AXIARCH.md §6.10 Preserved Invariants** — 「Language discipline」行を「**Language First（response + documents）**」に強化。Project Native Language が、AI のユーザー向け応答（**その中のすべての見出し・要約・ラベル・箇条書き・表を含む**）と各種文書の言語を決めること、日本語時に英語の見出し・要約・ラベル・節タイトルを出すのは**プロトコル違反**であること、code/API/log/path/外部ツール慣習は例外であることを明記（ja/en）/ Strengthens the Language invariant to bind the agent response surface and mark English mixing as a protocol violation
+- **`axiarch-scripts/axiarch-boot-reminder.sh`** — 毎ターン発火する UserPromptSubmit reminder の言語条項を同趣旨で強化（応答の全見出し・要約・ラベル・箇条書き・表 + 違反明記 + code/API/log/path 例外、ja/en）。正本 §6.10 と reminder の文言を一致させる / Strengthens the per-turn reminder's language clause to match the restored canonical rule
+- **`axiarch-scripts/axiarch-boot-reminder.sh`（Harness 喚起の復元）** — reminder が AXIARCH.md §8 で「非自明な作業に必須」とされる Execution Harness を **一度も言及していなかった**（`grep -ci "harness" = 0`）gap を修正。CORE_REMINDER / SHORT_REMINDER 双方に、L2 以上のタスクで axiarch-harness/ の Execution Harness（ロールパス・監査判定・証跡パケット・人間承認ゲート。サブエージェント委任は任意で最終判断はメインエージェント保持）を適用するトリガーを追加（ja/en）。実行ハーネス（hooks）自体は機能していたが、エンジニアリング層（axiarch-harness/）が reminder から喚起されず休眠していたギャップを解消 / Adds an Execution Harness trigger to both reminder bodies, closing a gap where the per-turn reminder never referenced the harness despite §8 marking it mandatory for non-trivial work
+- **`axiarch-harness/{ja,en}/EXECUTION_HARNESS_PROTOCOL.md`（正本根拠）** — 「§8 の『非自明な作業』= タスクレベル L2 以上」という対応をタスクレベル表直後に明記。reminder の「L2+」表現が reminder 単独の解釈ではなく、ハーネス層の SSOT に裏付けられるようにする（ja/en）/ Anchors the "non-trivial (§8) = L2+" mapping in the harness protocol so the reminder's "L2+" wording has a canonical source
+- **`axiarch-scripts/check-axiarch-health.sh`（Check 16 追加・15→16 段階）** — reminder が (A) Language First（応答全域の言語強制 + 違反条項）と (B) Execution Harness 喚起を **ja/en 両方で保持**しているかを検査する Check 16 を新設。将来の編集でこれらが silent に削除/劣化した場合に `EXIT_CODE=1` で検出し、#46 型 regression の再発を防ぐ（負のテストで劣化検出を確認済み）。診断段階数を 15→16 へ更新し、`init.sh` / `README.md` / `axiarch-scripts/README.md` の現行カウント表記と Check 15 の parity grep アンカー（`16 段階` / `16-stage`）も同期 / Adds Check 16 verifying the reminder retains the Language First and Execution Harness invariants in ja/en (EXIT_CODE=1 on silent removal), bumps the diagnostic from 15 to 16 stages, and syncs the count across init.sh, README files, and the Check 15 parity anchors
+- **`llms.txt` / `llms-full.txt`（Language First 取り残しの解消）** — AI 向け正本ダイジェストの「Project Native Language」記述が #46 由来の弱い表現（文書種別の列挙のみ）のまま残存していたため、§6.10 と同趣旨に強化（応答の全見出し・要約・ラベル・箇条書き・表への強制 + 日本語時の英語混入を違反と明記）。`llms.txt` の Execution Harness 項に「非自明 L2+ で必須」を追記 / Strengthens the Project Native Language entry in the AI-facing digests to match §6.10 (response-surface enforcement + violation), closing the same regression left behind in llms files; notes the harness is mandatory for non-trivial (L2+) work
+- **Check 16 アンカーの堅牢化** — 言語違反アンカーを節固有の `a protocol violation` / `プロトコル違反です` に絞り、task.md ロード記録文（`treated as protocol violations` / `プロトコル違反として扱われます`）への誤マッチによる偽陰性を排除。remediation に `init.sh` 再実行案内を追加 / Tightens the Check 16 language-violation anchors to clause-specific phrases to eliminate a false-negative against the unrelated task.md sentence, and adds init.sh remediation guidance
+
+### References
+
+- 旧 AGENTS.md §2 Japanese Language First Protocol（厳格）/ AXIARCH.md §6.10 非劣化互換（より厳しい解釈の保持）
+- regression 起点: #46 refactor(protocol): canonicalize axiarch entrypoint and harness
+
+---
+
 ## [1.13.0] — 2026-06-08
 
 ### Prompt Slash Commands for Claude Code / プロンプトの Claude Code スラッシュコマンド化
@@ -1004,6 +1029,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.13.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.1...v1.13.0
 [1.12.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.11.2...v1.12.0

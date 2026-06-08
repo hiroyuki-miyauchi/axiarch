@@ -68,6 +68,15 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 
 ---
 
+### [2026-06-08] Silent degradation of a strict rule during canonicalization, and multi-surface restoration
+**Domain:** Governance
+**Context:** When #46 canonicalized AGENTS.md into AXIARCH.md, the old §2 "Language First" was downgraded to a weak single §6.10 row (listing owner-facing documents only), losing its binding on the agent response surface (headings, summaries, labels, lists, tables) and its violation clause (an adopter reported "native-language adherence weakened").
+**Problem:** Large canonicalizations/merges can silently degrade a strong prior rule without anyone noticing. During restoration, fixing only the canonical file (AXIARCH.md) and the reminder leaves the old wording stranded in peripheral surfaces such as the AI-facing digests (llms.txt / llms-full.txt) and the ja/en mirrors in ROADMAP.
+**Solution/Rule:** (1) Under the §6.10 non-degradation principle, preserve the stricter older interpretation unless a replacement boundary is explicitly introduced. (2) Restore across ALL surfaces — canonical + reminder + AI-facing digests + ja/en mirrors. (3) Guard the restored invariant with a dedicated health-check (e.g., Check 16) that greps for it, so future silent removal/degradation is caught with EXIT_CODE=1.
+**Reference:** #46 / v1.13.1 / AXIARCH.md §6.10 / axiarch-scripts/check-axiarch-health.sh Check 16
+
+---
+
 ## Appendix A: Reverse Index & Cross-Reference
 
 ### Recommended Domain Categories

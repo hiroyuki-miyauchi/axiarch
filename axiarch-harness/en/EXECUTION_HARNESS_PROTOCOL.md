@@ -16,6 +16,8 @@ This protocol is the core task-execution application of Harness Engineering as d
 | L3 | Cross-domain design changes, rule changes, distribution script changes | Canonical plan or Blueprint, role passes, ja/en parity, health checks |
 | L4 | DB apply, stage, commit, push, deploy, release, tag, destructive operations, security boundary changes | Human approval before and after implementation; no autonomous execution |
 
+When `AXIARCH.md` §8 states that "the harness is mandatory procedure for non-trivial work," that "non-trivial" boundary begins at **L2**. L0/L1 (questions, read-only checks, minor documentation edits) do not require the full harness; L2 and above require plan, implementation, verification, and the audit gate (plus the additional L3/L4 requirements).
+
 ## Standard Lifecycle
 
 1. Check the latest user instruction and canonical plan.
