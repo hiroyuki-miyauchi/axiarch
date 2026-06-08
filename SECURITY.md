@@ -8,7 +8,7 @@
 > Axiarchは実行コードを含まないルール/ドキュメントのみのフレームワークです。
 > 一般的なソフトウェアのCVE（脆弱性識別子）とは**性質が根本的に異なります**。
 
-Axiarchは、AIエージェントの品質とセキュリティ水準を底上げし、逸脱行動を防止するための**「憲法駆動型のガバナンス・アーキテクチャ（ガードレール）」**です。AIの出力は基盤モデルの能力やコンテキストに依存するため、本作は**すべての脆弱性を完全に排除する魔法の盾（Silver
+Axiarchは、AIエージェントの品質とセキュリティ水準を底上げし、逸脱行動のリスクを低減するための**「憲法駆動型のガバナンス・アーキテクチャ（ガードレール）」**です。AIの出力は基盤モデルの能力やコンテキストに依存するため、本作は**すべての脆弱性を完全に排除する魔法の盾（Silver
 Bullet）ではありません**。その真の目的は、強固なルールアーキテクチャを適用することで、AIが生成するコードとセキュリティ意識の「床（最低基準）」を構造的・組織的に引き上げることです。
 
 ### 報告対象
@@ -49,8 +49,8 @@ Bullet）ではありません**。その真の目的は、強固なルールア
 > CVEs.
 
 Axiarch is a **constitution-driven governance architecture (guardrail
-framework)** designed to raise the floor of quality and prevent uncontrolled
-behavior in AI agents. Since AI output inherently depends on the underlying
+framework)** designed to raise the floor of quality and reduce the risk of
+uncontrolled behavior in AI agents. Since AI output inherently depends on the underlying
 model, context, and prompts, Axiarch **does not act as a silver bullet that
 completely guarantees security**. Its true purpose is to elevate the minimum
 baseline ("floor") of AI-generated code quality and security awareness by

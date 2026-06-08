@@ -63,6 +63,8 @@ Desktop.ini
 .claude/worktrees/
 .claude/projects/
 .claude/settings.local.json
+# Locally-generated artifacts (e.g. prompt-derived slash commands); not source-tracked
+.claude/commands/axiarch-*.md
 
 # Codex: ignore session data and personal settings; allow committed team config (hooks.json)
 .codex/worktrees/
