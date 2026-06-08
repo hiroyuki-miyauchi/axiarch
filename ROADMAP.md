@@ -566,6 +566,22 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
+### 🔬 市場調査ベース戦略ロードマップ（2025-2026 競合・標準調査由来、優先度順）
+
+シリコンバレー水準の市場調査（AGENTS.md 標準 / Claude Code Skills・Subagents / Cursor・Windsurf rules / spec-driven dev: Kiro・spec-kit・BMAD / context engineering: ACE arXiv 2510.04618 を一次情報で裏取り）に基づく戦略フォーキャスト。各賭けは**製品方向を変える憲法級変更**を含むため、慎重な独立リリースで段階実行する。
+
+| 優先 | 賭け | 狙い（業界整合） | リスク | 想定リリース |
+|:--|:--|:--|:--|:--|
+| 1 | **Agent Skills (SKILL.md) 標準移行** | prompts を `SKILL.md`（frontmatter + progressive disclosure）で再配布。手動 `/` 起動と文脈自動起動の両取り + Agent Skills 標準でマルチツール移植。Claude Code の command/Skill 統合（v2.1.3, 2026-01）に追従 | 中（v1.13.0 slash-command の発展形。先行マージ後に着手）| v1.13.0 マージ後 |
+| 2 | **AGENTS.md 標準との関係明文化** | AGENTS.md は Linux Foundation 傘下標準・60,000+ 採用・nearest-file override が中核。「なぜ AXIARCH.md 正本か」「標準とどう相互運用するか」を README で明示し新規採用摩擦を解消 | 低（doc 追記）| 即時〜近リリース |
+| 3 | **結晶化 v2（Reflector + 剪定/重要度）** | 採用前検証ループ・教訓の重要度付け・剪定・矛盾解消を CRYSTALLIZATION_PROTOCOL に追加。ACE 研究（Generator→Reflector→Curator）に準拠し Blueprint 劣化を防止 | 中（protocol 拡張）| 近-中期 |
+| 4 | **adapter 鮮度追従** | `.windsurfrules`（レガシー単一）→ `.windsurf/rules/*.md`（新標準）併存、Cline の AGENTS.md ネイティブ対応等。init.sh の adapter 保守方針を文書化 | 低-中（配布ロジック）| 近期 |
+| 5 | **AXIARCH.md progressive disclosure** | 516行の正本を「短いコア憲章 + オンデマンド詳細プロトコル」に分割し毎ターン全文ロードの文脈コストを削減。業界の最小ロード設計（Cursor globs / Claude progressive disclosure / AGENTS.md nearest-file）に整合 | **高**（正本大改修＝憲法改正級。health check・safe-upgrade・全アダプター・bilingual 整合を同時検証。十分な実機テスト必須）| 専用メジャー（v1.14/v2.0） |
+
+> **市場内の位置づけ（調査結論）**: Axiarch の「3層 + ハーネス + 人間承認ゲート + 教訓結晶化」という多層ガバナンス統合 OSS は調査範囲で他に存在せず、spec-driven dev（Kiro/spec-kit/BMAD）を内包し、結晶化は ACE 研究の Curator/playbook 概念をファイルベースで先取りしている。最大の構造的論点は「全文先読み vs 必要時注入」（賭け #5 で対処）と「単一正本 vs AGENTS.md ネスト標準」（賭け #2 で関係明文化）。
+
+---
+
 ### 🔮 v1.13.0以降 — Static Lint & Process Supervision（Tier 3、検討中）
 
 学術裏付けが強く工数も大きい改善案を、AXIARCH正本入口とExecution Harnessの後続候補として独立計画。
@@ -1231,6 +1247,22 @@ stale in multi-agent projects.
 - **Safe Upgrade parity** — Keep the fallback `execution_harness` group label aligned with `Execution Harness / Harness Engineering` even when manifest metadata is unavailable, and align temporary-helper and upgrade-helper usage examples with `v1.12.1`.
 - **Regression detection** — Extend `check-axiarch-health.sh` to verify the execution protocol wording, Safe Upgrade fallback label, current-release helper pins, and upgrade helper usage examples.
 - **Distribution metadata parity** — Update installer, manifest, README, llms, Safe Upgrade prompts, and Blueprint INDEX current-stable metadata to `v1.12.1`.
+
+---
+
+### 🔬 Market-Research-Driven Strategic Roadmap (from 2025-2026 competitive/standards study, priority order)
+
+Strategic forecast grounded in a Silicon-Valley-grade market study (primary-source verified across the AGENTS.md standard, Claude Code Skills/Subagents, Cursor/Windsurf rules, spec-driven dev — Kiro/spec-kit/BMAD, and context engineering — ACE arXiv 2510.04618). Each bet includes canonical-level change, so it is executed as a deliberate, separately-tested release.
+
+| Priority | Bet | Goal (industry alignment) | Risk | Target |
+|:--|:--|:--|:--|:--|
+| 1 | **Agent Skills (SKILL.md) migration** | Re-package prompts as `SKILL.md` (frontmatter + progressive disclosure): both manual `/` invocation and context-auto-trigger, plus multi-tool portability via the Agent Skills standard. Follows the Claude Code command/Skill unification (v2.1.3, 2026-01) | Medium (evolution of v1.13.0 slash commands; start after it merges) | after v1.13.0 |
+| 2 | **Clarify relationship to the AGENTS.md standard** | AGENTS.md is a Linux-Foundation-stewarded standard (60,000+ adopters, nearest-file override at its core). Document "why AXIARCH.md is canonical" and "how it interoperates with the standard" in README to reduce new-adopter friction | Low (doc) | immediate–near |
+| 3 | **Crystallization v2 (Reflector + pruning/importance)** | Add pre-promotion verification, lesson importance scoring, pruning, and conflict resolution to CRYSTALLIZATION_PROTOCOL. Aligns with ACE research (Generator→Reflector→Curator) and prevents Blueprint decay | Medium (protocol) | near–mid |
+| 4 | **Adapter freshness** | `.windsurfrules` (legacy single) → `.windsurf/rules/*.md` (new standard) coexistence; Cline AGENTS.md native support, etc. Document the init.sh adapter-maintenance policy | Low–Medium (distribution) | near |
+| 5 | **AXIARCH.md progressive disclosure** | Split the 516-line canonical file into a short core charter + on-demand detailed protocols to cut per-turn full-load context cost. Aligns with the industry minimal-load design (Cursor globs / Claude progressive disclosure / AGENTS.md nearest-file) | **High** (canonical surgery = constitution-amendment level; must jointly verify health check, safe-upgrade, all adapters, bilingual parity with real agent-load testing) | dedicated major (v1.14/v2.0) |
+
+> **Market positioning (study conclusion)**: Axiarch's multi-layer governance integration — three layers + harness + human-approval gate + lesson crystallization — was not found elsewhere as an OSS framework; it subsumes spec-driven dev (Kiro/spec-kit/BMAD), and its crystallization anticipates the ACE Curator/playbook concept in a file-based form. The two main structural tensions are "full pre-load vs context-aware load" (addressed by bet #5) and "single canonical vs AGENTS.md nested standard" (addressed by relationship clarification in bet #2).
 
 ---
 
