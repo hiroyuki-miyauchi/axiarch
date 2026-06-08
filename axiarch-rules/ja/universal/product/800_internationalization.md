@@ -671,7 +671,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 
 ```
 System: You MUST respond in the same language as the user's query.
-If the user writes in Japanese, respond in Japanese.
+If the user writes in the Project Native Language, respond in that language.
 Never switch languages mid-response.
 ```
 
@@ -1437,7 +1437,7 @@ npx messageformat-validator locales/**/*.json
 - **PGP/GPG キー多言語**: セキュリティ報告窓口の暗号鍵情報を多言語で提供
 - **Bug Bounty Platform 多言語**: HackerOne / Bugcrowd / Intigriti の多言語対応
 - **報告書 Triage 言語**: 受信報告の言語自動判定 → 適切な言語担当者にルーティング
-- **CVE / CVSS 説明多言語**: 公開アドバイザリの多言語版（少なくとも英語+日本語+中文）
+- **CVE / CVSS 説明多言語**: 公開アドバイザリの多言語版（少なくとも英語＋Project Native Language。例: CJK市場なら英語+日本語+中文）
 - **責任ある開示タイムライン**: 地域別休日考慮（中華圏春節・イスラム圏ラマダン等）
 - **インシデント発表多言語化**: 重大脆弱性公表時の即時翻訳プロトコル
 - → `security/000_security_privacy.md` VDP / Responsible Disclosure 参照

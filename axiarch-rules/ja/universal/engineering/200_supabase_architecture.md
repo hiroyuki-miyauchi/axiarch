@@ -365,7 +365,7 @@
     2. ただし、開発初期や小規模データ時に「現在未使用」という理由だけで削除しないこと。インデックスは「冬用の備え」であり、データ増加を待って判断せよ。
 
 ### Rule 4.2: Japanese Search Optimization
--   日本語全文検索には `pg_search` (tsvector) または `pgroonga` を使用します。
+-   CJK言語（日本語・中国語・韓国語）の全文検索には `pg_search` (tsvector) または `pgroonga` を使用します。
 
 ### Rule 4.3: Scalability Strategy
 -   **Infinite Scalability**: `select('*')` および上限なしクエリは禁止。必ずページネーションを実装。
@@ -2422,7 +2422,7 @@
         CREATE INDEX idx_articles_search ON public.articles USING gin(search_vector);
         ```
     2.  **Weight System**: `setweight`で検索フィールドに重み付けを行い、タイトルマッチを本文マッチより優先してください（A > B > C > D）。
-    3.  **Japanese Language Support**: 日本語全文検索には`pgroonga`拡張（§36参照）を推奨します。PostgreSQL標準の`japanese`辞書は形態素解析の精度が限定的です。
+    3.  **Locale-Specific Language Support**: CJK言語（日本語・中国語・韓国語）の全文検索には`pgroonga`拡張（§36参照）を推奨します。例: PostgreSQL標準の`japanese`辞書は形態素解析の精度が限定的です。
     4.  **pg_trgm for Fuzzy Search**: 部分一致・あいまい検索には`pg_trgm`（トライグラム）拡張を使用し、`LIKE '%keyword%'`のパフォーマンスを大幅に向上させてください:
         ```sql
         CREATE EXTENSION IF NOT EXISTS pg_trgm;

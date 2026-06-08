@@ -1351,9 +1351,9 @@ logger.info('External API call', {
 | **Multi-Language Code Examples** | cURL, JavaScript, Python, Go, etc. |
 | **Changelog** | Version-specific change history |
 
-### 40.3. Bilingual Support
+### 40.3. Multilingual Support
 
-- API documentation is primarily created in English, with Japanese version provided as needed
+- API documentation is primarily created in the default language version, with a secondary-language version provided as needed
 
 ---
 
@@ -1663,7 +1663,7 @@ CREATE TABLE outbox (
 
 ### 53.3. Cross-Border Data Transfer
 
-- Comply with data residency requirements (GDPR, Japan's Act on Protection of Personal Information, etc.) for API data transfers
+- Comply with data residency requirements (e.g., GDPR, Japan's Act on Protection of Personal Information, and similar jurisdictions' privacy laws) for API data transfers
 - Clearly state data storage/processing locations, implement appropriate safeguards for cross-border transfers
 
 ### 53.4. API Boundary

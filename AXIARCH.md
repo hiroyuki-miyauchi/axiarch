@@ -116,6 +116,10 @@ Axiarchは既存の3層モデルを維持する。
 | Blueprint | `axiarch-rules/{lang}/blueprint/` | Project-specific mutable facts, specs, decisions, and lessons | プロジェクト固有の可変事実、仕様、判断、教訓 |
 | Prompts | `axiarch-prompts/{lang}/` | Optional execution templates | 任意の実行テンプレート |
 
+Among Blueprint folders, only `core` is required as a starting point; the other category folders are task-type driven and created when the relevant work appears. The initial set of category folders is not a closed set, and the human owner may approve additional folders.
+
+Blueprintのフォルダのうち、起点的に必須なのは `core` のみであり、その他のカテゴリフォルダはタスクタイプ駆動で、該当する作業が発生したときに作成する。初期のカテゴリフォルダ群は閉じた集合ではなく、人間オーナーの承認で追加してよい。
+
 Execution Harness is not a fourth rule layer. It is the operational procedure that tells agents how to execute, audit, produce evidence, delegate work, and ask for approval while preserving the three-layer model.
 
 Execution Harnessは第4のルール層ではない。3層モデルを保ったまま、エージェントがどう実行し、監査し、証跡を作り、作業を委任し、承認を求めるかを定める運用手順である。
@@ -130,9 +134,11 @@ This operational discipline is Harness Engineering: binding Universal, Blueprint
 
 Before any non-trivial task, the agent must stop and load actual files.
 Reading an index summary or relying on memory is not enough.
+An INDEX summary is a routing aid, not loaded authority: rules, Blueprint, or harness files used as a basis must be opened directly, and the agent waits for the loading tool calls to complete before producing output, consistent with `LOADING_PROTOCOL.md`.
 
 非自明なタスクの前に、エージェントはいったん立ち止まり、実ファイルをロードしなければならない。
 INDEXの要約や記憶だけで済ませてはならない。
+INDEX要約はルーティング補助であってロード済みの根拠ではない。根拠にするルール、Blueprint、harnessは直接開き、ロードのツール呼び出しが完了するのを待ってから出力する（`LOADING_PROTOCOL.md` と整合）。
 
 Boot principles:
 
@@ -478,6 +484,7 @@ A task is complete only when:
 - Verification has been run or the reason it could not run is recorded
 - Audit verdict and residual risks are stated
 - Crystallization has been checked for lessons that actually occurred
+- The `CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK has been run; when three or more unorganized lessons share one domain, completion is not declared until they are sublimated into the Blueprint
 - No approval-bound action is silently taken
 
 タスクは次を満たした場合にのみ完了である:
@@ -487,6 +494,7 @@ A task is complete only when:
 - 検証が実行済み、または実行できなかった理由が記録されている
 - 監査判定と残リスクが明示されている
 - 実際に発生した教訓について結晶化チェックが済んでいる
+- `CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK を実行済みで、同一ドメインに未整理の教訓が3件以上あればBlueprintへ昇華するまで完了を宣言していない
 - 承認必須行為を黙って実行していない
 
 The final report should be concise, state what changed, name the verification results, call out remaining risks or approvals, and avoid overstating anything not verified.

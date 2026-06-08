@@ -11,7 +11,7 @@
 
 | File | Description |
 |:--|:--|
-| [010_release_upgrade_operations.md](010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, and deduplicated interactive choices |
+| [010_release_upgrade_operations.md](./010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, and deduplicated interactive choices |
 
 ## Corresponding Universal Rules
 

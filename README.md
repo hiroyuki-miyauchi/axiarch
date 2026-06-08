@@ -40,7 +40,7 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 
 | ガバナンスなし | Axiarchあり |
 |:-------------|:--------------------------|
-| AIが「それっぽいが壊れている」コードを生成 | Bug / Warning削減ポリシーを憲法で基準化 |
+| AIが「それっぽいが壊れている」コードを生成 | Bug / Warning低減ポリシーを憲法で基準化 |
 | 品質が操縦者のスキルに過度に依存 | Universal Rulesが最低品質の床を設定 |
 | 仕様なしの vibe coding | Blueprint First：コードより先に仕様を定義 |
 | セッション間で知見が消失 | 教訓ログが知見をルールに結晶化 |

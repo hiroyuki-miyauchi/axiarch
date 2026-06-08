@@ -104,3 +104,6 @@
 | §5 AI Module | `ai/000_ai_engineering` |
 | §5 Content Module | `engineering/310_headless_cms` |
 | §6 Operations | `operations/400_site_reliability`, `engineering/500_firebase_gcp` |
+
+> [!NOTE]
+> 上表の `engineering/200_...`・`engineering/300_...` 等は **Universal ルール内の参照例** です。Blueprint の採番はこれに拘束されません。Blueprint では各フォルダ内の 000〜999 の空き番号を独立して使用し、番号帯域の予約はありません。

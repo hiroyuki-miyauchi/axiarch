@@ -25,7 +25,7 @@ Approval to implement is separate from approval to publish, destroy, spend, or m
 
 Ask for one decision at a time.
 Write the request, reason, and residual risk in a language the user can judge.
-For Japanese users, ask in Japanese by default.
+For users of the Project Native Language, ask in that language by default.
 
 ```text
 This action requires human approval.

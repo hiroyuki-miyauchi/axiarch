@@ -75,7 +75,7 @@
 -   **差別化 (Differentiation)**: Googleのシステムを使用しつつ、**高精度のモーション**、**カスタムシェーダー**、**大胆なタイポグラフィ**によって差別化し、「シリコンバレーのプレミアム感」を演出します。
 -   **The Typography Localization Protocol (Readability First)**:
     -   **Font Fallback Stack**: Webフォント（例: Noto Sans JP, Inter）を使用する際は、必ずOS標準フォント（例: Hiragino Kaku Gothic, Meiryo, システムのsans-serif）をフォールバックとして指定してください。
-    -   **Line Height for CJK**: 日本語・中国語など文字密度が高い言語では、`line-height` を広め（`1.6 - 1.8`）に設定し、可読性を確保してください。
+    -   **Line Height for CJK**: CJK（中国語・日本語・韓国語）など文字密度が高い言語では、`line-height` を広め（`1.6 - 1.8`）に設定し、可読性を確保してください。
     -   **Letter Spacing**: 太字見出しには `letter-spacing: wider` を適用し、文字の詰まりを解消することを推奨します。
 
 ### 1.2. トレンドスカウティング・プロトコル (Trend Scouting Protocol)
@@ -535,8 +535,8 @@
 -   **Law**: モバイル上のPopover等は、フォーカス制御の競合によりタップイベントを拾えない場合があります。
 -   **Action**: インタラクティブ要素（リスト項目等）には `pointer-events-auto` を強制し、`onClick` / `onMouseDown` / `onPointerUp` などの多重バインディングでイベント発火の取りこぼしを低減します。
 -   **Combobox Interaction Protocol**:
-    -   **Stable IDs**: 仮想リスト（CMDK等）の `value` 属性には、必ず一意かつ不変な **ASCII文字列**（ID等）を使用してください。日本語を使用すると選択ロジック（フィルタリング）が誤動作します。
-    -   **Searchability**: 日本語での検索が必要な場合は、`keywords` プロパティ（配列）を明示的に指定して検索性を担保します。
+    -   **Stable IDs**: 仮想リスト（CMDK等）の `value` 属性には、必ず一意かつ不変な **ASCII文字列**（ID等）を使用してください。非ASCII文字（CJK等）を使用すると選択ロジック（フィルタリング）が誤動作します。
+    -   **Searchability**: 非ASCII文字（CJK等）での検索が必要な場合は、`keywords` プロパティ（配列）を明示的に指定して検索性を担保します。
 
 ### 14.3. The Z-Index Stratification Protocol
 -   **Law**: Z-Indexの戦いに終止符を打ちます。

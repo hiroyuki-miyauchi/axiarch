@@ -84,7 +84,7 @@
 | 階級 | 対象 | 性質 |
 |:------------|:-------------|:---------|
 | **Class S（Universal）** | `axiarch-rules/{lang}/universal/` | プロジェクトを超えた普遍的ルール。Read-Only。 |
-| **Class A（Blueprint）** | `axiarch-rules/{lang}/blueprint/` | プロジェクト固有の仕様・設計・教訓。更新可能。基本フォルダ構成: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。これらは初期フォルダであり、既存フォルダに分類できない新ドメインがある場合は、AIが新規フォルダ案をユーザーに提案してよい（独断作成は禁止）。内容に応じて以下の4カテゴリにロード分類される：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ファイル。初期フォルダ対応表を優先し、必要時はユーザー承認済みフォルダも含めて自律判断）、③ **Domain Rules**（各ドメインのルールファイル）、④ **Templates**（`core/` 等のテンプレートファイル） |
+| **Class A（Blueprint）** | `axiarch-rules/{lang}/blueprint/` | プロジェクト固有の仕様・設計・教訓。更新可能。**基本フォルダ構成は「初期フォルダ」であり、閉じた集合ではない。** 既存フォルダに分類できない新ドメインがある場合は、ユーザー承認のうえで新規フォルダを追加できる（AIは提案までで、独断作成は禁止）。その前提のうえで、初期フォルダは次の8つ: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリにロード分類される：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ファイル。初期フォルダ対応表を優先し、必要時はユーザー承認済みフォルダも含めて自律判断）、③ **Domain Rules**（各ドメインのルールファイル）、④ **Templates**（`core/` 等のテンプレートファイル） |
 
 Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリから、ロードすべきファイルを列挙せよ。
 

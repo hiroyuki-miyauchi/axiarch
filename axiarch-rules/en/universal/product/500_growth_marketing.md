@@ -957,7 +957,7 @@
 
 ### 14.4. Influencer Marketing Governance
 
-> **Context**: The 2023 Japanese Act against Unjustifiable Premiums and Misleading Representations (stealth marketing regulation) and FTC Endorsement Guides have tightened transparency requirements for influencer marketing. Violations are subject to administrative actions and brand damage.
+> **Context**: Regulations such as the 2023 Japanese Act against Unjustifiable Premiums and Misleading Representations (stealth marketing regulation), the US FTC Endorsement Guides, and similar jurisdictions' rules have tightened transparency requirements for influencer marketing. Violations are subject to administrative actions and brand damage.
 
 *   **The Influencer Governance Protocol**:
     *   **Mandatory Disclosure**: All influencer posts must include the following disclosures.
@@ -1018,7 +1018,7 @@
 
 *   **The Ad Creative Policy Protocol**:
     *   **Prohibition List**:
-        - Unsubstantiated superlatives ("#1 in Japan", "Industry's Best", etc. without third-party certification)
+        - Unsubstantiated superlatives (e.g., "#1 in [market]", "Industry's Best", etc. without third-party certification)
         - Before/After comparisons that are misleading
         - Fear-Based Marketing (exploiting user anxieties)
         - Stealth marketing (ad content without PR/Sponsored disclosure)

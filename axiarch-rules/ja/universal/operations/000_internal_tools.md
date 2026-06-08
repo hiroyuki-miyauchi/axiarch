@@ -756,7 +756,7 @@ const impersonationLog: AuditLogEntry = {
 ### 12.1. No Raw HTML原則
 
 - **Rule 50.110**: 管理画面でのコンテンツ入力にRaw HTMLを許可しない
-- リッチテキストエディタ（TipTap, Lexical等）を使用し、XSS安全な出力を保証する
+- リッチテキストエディタ（TipTap, Lexical等）を使用し、XSS安全な出力を確保する
 - 許可するHTML要素のホワイトリストを設定し、サーバーサイドでサニタイズする
 
 ### 12.2. バージョニング・変更履歴

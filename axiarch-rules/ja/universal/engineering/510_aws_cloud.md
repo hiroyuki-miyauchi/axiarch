@@ -285,7 +285,7 @@
 -   **Mandate**:
     1.  **Data Residency Map**: 全データカテゴリ（PII、医療、財務、ログ等）について「保存リージョン」「処理リージョン」「バックアップリージョン」を明示したデータ残留マップを整備・維持する。
     2.  **AWS Region Restriction SCP**: 許可リージョン外へのデータ保存・転送を、SCPで物理的に禁止する（Directive 0.4のSCP例を参照）。
-    3.  **GDPR / APPI Alignment**: EU在住ユーザーデータのEU外転送、日本国内ユーザーデータの国外転送には、適切な法的根拠（SCC、十分性決定等）を文書化する。
+    3.  **Cross-Border Transfer Alignment**: EU在住ユーザーデータのEU外転送、および Project Native Language リージョンのユーザーデータの国外転送（例: 日本のAPPI）には、適切な法的根拠（SCC、十分性決定等）を文書化する。
     4.  **Data Perimeter Enforcement**: AWS Organizations Data Perimeter（`aws:SourceAccount`/`aws:PrincipalOrgID`条件キー）でデータが組織外に流出しないよう境界を強制する。詳細は§147参照。
 
 #### 8-B. 量子耐性暗号準備（Post-Quantum Readiness）

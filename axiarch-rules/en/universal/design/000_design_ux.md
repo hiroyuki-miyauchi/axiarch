@@ -76,7 +76,7 @@
 -   **Differentiation**: While using Google's system, differentiate with **high-precision motion**, **custom shaders**, and **bold typography** to create "Silicon Valley Premium".
 -   **The Typography Localization Protocol (Readability First)**:
     -   **Font Fallback Stack**: When using Web Fonts (e.g., Noto Sans JP, Inter), always specify OS standard fonts (e.g., Hiragino Kaku Gothic, Meiryo, system sans-serif) as fallback.
-    -   **Line Height for CJK**: For languages with high character density (Japanese, Chinese), set `line-height` wider (`1.6 - 1.8`) to ensure readability.
+    -   **Line Height for CJK**: For CJK (Chinese, Japanese, Korean) and other dense-script languages, set `line-height` wider (`1.6 - 1.8`) to ensure readability.
     -   **Letter Spacing**: Recommend applying `letter-spacing: wider` to bold headings to eliminate character crowding.
 
 ### 1.2. Trend Scouting Protocol
@@ -505,8 +505,8 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Law**: Mobile Popovers may fail to capture tap events due to focus conflicts.
 -   **Action**: Force `pointer-events-auto` on interactive items and ensure event firing with multiple bindings (`onClick`, `onPointerUp`).
 -   **Combobox Interaction Protocol**:
-    -   **Stable IDs**: `value` attributes in virtual lists (CMDK) MUST use unique/immutable **ASCII Strings** (IDs). Usage of Japanese triggers selection logic bugs.
-    -   **Searchability**: If Japanese search is needed, explicitly specify `keywords` property (array) to guarantee searchability.
+    -   **Stable IDs**: `value` attributes in virtual lists (CMDK) MUST use unique/immutable **ASCII Strings** (IDs). Usage of Non-ASCII / CJK text triggers selection logic bugs.
+    -   **Searchability**: If Non-ASCII / CJK text search is needed, explicitly specify `keywords` property (array) to guarantee searchability.
 
 ### 14.3. The Z-Index Stratification Protocol
 -   **Law**: End the Z-Index war.
