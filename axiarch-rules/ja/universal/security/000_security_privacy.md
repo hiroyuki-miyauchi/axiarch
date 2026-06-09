@@ -249,6 +249,14 @@
 
 ## §4. 認証・認可アーキテクチャ (Authentication & Authorization)
 
+> [!NOTE]
+> 本節は認証・認可の**概要（overview）**である。深掘りの正本は以下に分離されている（二重定義を避け、ここでは要点のみ示す）:
+> - 認証クレデンシャル・パスキー・MFA・パスワードレス → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
+> - OAuth 2.1 / OIDC・外部アカウント連携・SSO・トークン管理 → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
+> - ステップアップ/再認証・OTP・重要操作保護・セッション → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+> - きめ細かい認可（RBAC/ABAC/ReBAC・ポリシーエンジン・PDP/PEP・マルチテナント） → [`430_authorization_and_access_control.md`](./430_authorization_and_access_control.md)
+> - 非人間ID・ワークロード（SPIFFE/SPIRE・M2M）・AIエージェント認証/委任（OBO・Token Exchange・MCP/XAA） → [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md)
+
 ### 4.1. Credential Hygiene
 
 -   APIキー・シークレット・DB接続文字列のソースコード記述を**物理的に禁止**。必ず `process.env` を使用。
@@ -1666,6 +1674,9 @@ async function llmGateway(req: GatewayRequest): Promise<string> {
 | **出力監査** | エージェントの全アクション（ツールコール、APIコール、生成コンテンツ）を監査ログに記録 |
 
 ### 18.3. MCP (Model Context Protocol) セキュリティ
+
+> [!NOTE]
+> 本項は MCP セキュリティの**概要**である。使う側（consumer/host/client）と作る側（server builder）両面の深掘り正本は [`450_mcp_security.md`](./450_mcp_security.md)（token passthrough 禁止・Origin/DNS リバインディング対策・rug pull/tool poisoning 検知・人間承認・実行隔離など）。MCP の認可は [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11。
 
 -   **Law**: MCPを通じたAIエージェントと外部ツール/データの連携に対し、以下のセキュリティ制御を適用する。
 -   **Action**:

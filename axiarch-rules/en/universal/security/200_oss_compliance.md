@@ -2517,40 +2517,6 @@ cargo auditable list --binary ./target/release/myapp --json | \
 
 ---
 
-## Appendix B: Change Summary (v2/v3/v4 Additions)
-
-> Reference for tracking changes in this file across versions.
-
-### §59-§63 Section Overview
-
-| § | Title | Gap Addressed |
-|---|-------|:--------------|
-| §59 | NIS2 Directive: Software Supplier Security Obligations | Unaddressed NIS2 (service/infrastructure) complementing CRA (product) |
-| §60 | AI IDE-Integrated Real-Time SCA | Missing real-time validation of AI-suggested packages in Copilot/Cursor |
-| §61 | SBOM Federation (OCI Artifact Distribution Standard) | Missing SBOM generation→distribution→cross-system query architecture |
-| §62 | ML BOM (Machine Learning Bill of Materials) | Missing full AI system materials inventory (models, data, prompts) |
-| §63 | Dependency SLO / Error Budget Management | Missing quantified SLO for dependency health with feature-freeze linkage |
-
-### §54-§58 Section Overview
-
-| § | Title | Gap Addressed |
-|---|-------|:--------------|
-| §54 | CISA KEV Integration & EPSS-Driven Vulnerability Prioritization | Transition from CVSS-only SLA to risk-driven prioritization |
-| §55 | EU AI Act Technical Documentation (Training Data License Tracking) | Unaddressed EU AI Act Art.53 GPAI obligations |
-| §56 | Reproducible Builds & Hermetic Repository Standard | Insufficient SLSA 3 implementation guidance |
-| §57 | SBOM Quality Maturity Model | Elevate SBOM from "generation" to "quality management" |
-| §58 | Next-Generation Package Manager Governance | Missing uv/Bun/cargo-auditable governance |
-
-### v4 Structural Improvements
-
-| Area | Improvement |
-|------|------------|
-| §29 | Structural bug fix: removed duplicate `§29.3 Crypto Agility Checklist` in ja version |
-| Table of Contents | §59-§63 entries added |
-| Appendix A | §59-§63 reverse-index keywords to be appended |
-
----
-
 ## §59. NIS2 Directive: Software Supplier Security Obligations
 
 ### 59.1 Overview
@@ -2947,3 +2913,37 @@ def compute_slo_report(metrics: dict) -> dict:
 - **Rule**: Treat Dependency SLOs as "development velocity indicators" and regularly measure and communicate the positive correlation between SLO improvement and deploy frequency/feature release cadence
 
 → Cross-reference: §16 Security Patch SLA, §24 Audit & Reporting, §39 Dependency Minimization Principle, §41 Dependency Governance Maturity Model, §57 SBOM Quality Maturity Model
+
+---
+
+## Appendix B: Change Summary (v2/v3/v4 Additions)
+
+> Reference for tracking changes in this file across versions.
+
+### §59-§63 Section Overview
+
+| § | Title | Gap Addressed |
+|---|-------|:--------------|
+| §59 | NIS2 Directive: Software Supplier Security Obligations | Unaddressed NIS2 (service/infrastructure) complementing CRA (product) |
+| §60 | AI IDE-Integrated Real-Time SCA | Missing real-time validation of AI-suggested packages in Copilot/Cursor |
+| §61 | SBOM Federation (OCI Artifact Distribution Standard) | Missing SBOM generation→distribution→cross-system query architecture |
+| §62 | ML BOM (Machine Learning Bill of Materials) | Missing full AI system materials inventory (models, data, prompts) |
+| §63 | Dependency SLO / Error Budget Management | Missing quantified SLO for dependency health with feature-freeze linkage |
+
+### §54-§58 Section Overview
+
+| § | Title | Gap Addressed |
+|---|-------|:--------------|
+| §54 | CISA KEV Integration & EPSS-Driven Vulnerability Prioritization | Transition from CVSS-only SLA to risk-driven prioritization |
+| §55 | EU AI Act Technical Documentation (Training Data License Tracking) | Unaddressed EU AI Act Art.53 GPAI obligations |
+| §56 | Reproducible Builds & Hermetic Repository Standard | Insufficient SLSA 3 implementation guidance |
+| §57 | SBOM Quality Maturity Model | Elevate SBOM from "generation" to "quality management" |
+| §58 | Next-Generation Package Manager Governance | Missing uv/Bun/cargo-auditable governance |
+
+### v4 Structural Improvements
+
+| Area | Improvement |
+|------|------------|
+| §29 | Structural bug fix: removed duplicate `§29.3 Crypto Agility Checklist` in ja version |
+| Table of Contents | §59-§63 entries added |
+| Appendix A | §59-§63 reverse-index keywords to be appended |

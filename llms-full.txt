@@ -31,7 +31,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (39 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (45 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -249,16 +249,42 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
 - **700_partnership_ecosystem.md**: Partnership Maturity Model,
   Ecosystem Flywheel, Developer Portal. 9 parts, 34 sections.
 
-### security/ — Security & Legal (4 files)
+### security/ — Security & Legal (10 files)
 - **000_security_privacy.md**: Zero Trust (NIST 800-207), FIDO2,
   OWASP Top 10 2025, AI/LLM security (OWASP LLM Top 10), supply
-  chain (SBOM/SLSA), PQC readiness. 22 sections.
+  chain (SBOM/SLSA), PQC readiness. 22 sections. (Authentication §4/§5/§6
+  are an overview; deep-dives are 400/410/420/430/440.)
 - **100_data_governance.md**: GDPR/Global Privacy Laws/CCPA/EU AI Act, consent
   management, RegTech, quantum crypto agility. 45 sections.
 - **200_oss_compliance.md**: License classification, SBOM (CycloneDX/
   SPDX), SLSA v1.1, SCA tools. 49 sections, 280+ rules.
 - **300_ip_due_diligence.md**: Patents, trade secrets, AI-generated IP,
   exit strategy, DD operations. 50 sections.
+- **400_authentication_and_passkeys.md**: Phishing-resistant-first,
+  passkeys/WebAuthn (L2 REC / L3 CR), FIDO2, MFA/2FA (TOTP, Number
+  Matching, hardware keys), NIST SP 800-63B/-4 password policy,
+  credential lifecycle, account recovery, CIAM vs Workforce. 13 sections.
+- **410_federated_identity_and_oauth.md**: OAuth 2.1 (IETF draft; baseline
+  RFC 9700), PKCE/PAR/RAR/DPoP, OIDC + ID-token validation, social login
+  (Google/Apple/MS/GitHub), SSO (SAML/OIDC), refresh rotation + reuse
+  detection, consent/device-code phishing, FedCM. 22 sections.
+- **420_step_up_auth_and_sensitive_operations.md**: Assurance (acr/amr,
+  AAL), step-up/re-auth, risk-based/adaptive (CAEP/SSF), OTP/magic links,
+  transaction signing (WYSIWYS), sensitive-op gating, sessions, breach
+  Kill Switch, enumeration prevention. 12 parts.
+- **430_authorization_and_access_control.md**: Fine-grained authZ — PDP/PEP,
+  deny-by-default, RBAC/ABAC/ReBAC, Google Zanzibar (OpenFGA/SpiceDB),
+  Policy as Code (Cedar/OPA), decision logs, multi-tenancy/RLS. 13 sections.
+- **440_workload_and_agent_identity.md**: Non-human/workload identity
+  (SPIFFE/SPIRE, WIF, M2M client credentials, Zero Standing Privilege)
+  and AI-agent auth/delegation (Tier-0, OBO via RFC 8693 Token Exchange,
+  delegation-chain limits, MCP/XAA — emerging). 18 sections.
+- **450_mcp_security.md**: MCP (Model Context Protocol) security, consumer
+  + builder sides (spec 2025-11-25). OAuth 2.1 Resource Server, RFC 9728
+  metadata, RFC 8707 audience binding, token-passthrough prohibition
+  (Confused Deputy), Origin/DNS-rebinding defense, tool-definition hash
+  pinning (rug-pull/tool-poisoning detection), human-in-the-loop approval,
+  execution isolation, untrusted-tool-output handling. 18 sections.
 
 ### quality/ — Testing & QA (1 file)
 - **000_qa_testing.md**: Test philosophy, 10+ test types, security
@@ -366,7 +392,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 39 Universal Rules and core Blueprint starter files are available in both languages.
+All 45 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.

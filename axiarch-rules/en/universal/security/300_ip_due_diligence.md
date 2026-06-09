@@ -273,11 +273,30 @@ jobs:
   - Computational resource efficiency gains (memory reduction, processing speed improvement)
   - Technical effects through specific hardware integration
   - Technical solutions to specific technical problems in prior art
+- **Judicial trends from 2025 onward**: Monitor PTAB (Patent Trial and Appeal Board) and Federal Circuit software-patent statistics quarterly
 
-### Rule 63.091: Software Patents in Europe & Global
-- **Global Considerations**: Ensure claims satisfy technical requirements of targeted jurisdictions (e.g., hardware resource utilization or natural law utilization)
+### Rule 63.091: Software Patents in Japan & Europe
+- **Japan**: Satisfy the "utilization of laws of nature" requirement (software information processing must use hardware resources)
+  - Conform to the JPO "Examination Guidelines for Computer Software-Related Inventions (2023 revised edition)"
+  - **AI-related inventions**: Inventions including trained models secure eligibility through coupling with hardware resources
+  - **Recommended strategy**: Make an apparatus claim such as "an XX server" the main claim, rather than "a method by which a computer executes XX processing"
 - **Europe (EPO)**: "Further Technical Effect" argument is critical — COMVIK approach applied
-- **UPC**: Launched June 2023 → consider leveraging Unitary Patent (→ §12 for details)
+  - AI/ML algorithms secure eligibility via concrete descriptions of Further Technical Effect (quantitative effects such as accuracy improvement or processing-time reduction)
+- **Unified Patent Court (UPC)**: Launched 2023 → consider leveraging the European Unitary Patent (→ §12 for details)
+- **China**: Design claims focused on technical solutions (conform to CNIPA Examination Guidelines 2023)
+
+### Rule 63.092: Cross-Licensing and Patent Pool Strategy
+- **Cross-License**:
+  - Mutual patent licensing with competitors reduces litigation risk and secures funding to accelerate R\&D
+  - **Decision criterion**: Quantitatively compare the "offensive value" of your own portfolio vs the "defensive value" of the counterparty's portfolio before negotiating
+  - **Typical terms**: Non-exclusive, royalty-free, bidirectional license covering future-acquired patents + an obligation to report improvement inventions
+  - **Caution**: Risk assessment from an antitrust (competition law) perspective (carefully design scope between horizontal competitors)
+- **Patent Pool**:
+  - Consider joining patent pools such as MPEG-LA / Via Licensing / Avanci (especially important when holding SEPs)
+  - Scrutinize the pool's licensing terms and running royalty rates before joining
+- **Patent Troll (PAE) countermeasures**:
+  - Recommend dual membership in LOT Network + OIN (→ see §7 Rule 63.061)
+  - Pre-establish a 72-hour response protocol for receiving a demand letter from a PAE (→ see §43)
 
 ---
 
@@ -293,7 +312,7 @@ jobs:
 
 ### Rule 63.096: GUI/UI Design Protection Best Practices
 - **Documentation habits**: Record creation date, creator, and version history of designs
-- **File before publication**: File UI design applications before public disclosure (novelty requirement — especially EU & China)
+- **File before publication**: File UI design applications before public disclosure (novelty requirement — especially Japan & EU)
 - **Partial designs**: File characteristic UI elements as partial designs to optimize claim scope
 - **Animation/transitions**: Consider dynamic designs and Animated Design Patents (US)
 
