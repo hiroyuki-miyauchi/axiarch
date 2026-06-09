@@ -1675,6 +1675,9 @@ async function llmGateway(req: GatewayRequest): Promise<string> {
 
 ### 18.3. MCP (Model Context Protocol) セキュリティ
 
+> [!NOTE]
+> 本項は MCP セキュリティの**概要**である。使う側（consumer/host/client）と作る側（server builder）両面の深掘り正本は [`450_mcp_security.md`](./450_mcp_security.md)（token passthrough 禁止・Origin/DNS リバインディング対策・rug pull/tool poisoning 検知・人間承認・実行隔離など）。MCP の認可は [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11。
+
 -   **Law**: MCPを通じたAIエージェントと外部ツール/データの連携に対し、以下のセキュリティ制御を適用する。
 -   **Action**:
     1.  **MCPサーバー承認制**: 新規MCPサーバーの導入には正式なセキュリティ評価・承認プロセスを義務付け。

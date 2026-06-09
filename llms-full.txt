@@ -31,7 +31,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (44 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (45 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -249,7 +249,7 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
 - **700_partnership_ecosystem.md**: Partnership Maturity Model,
   Ecosystem Flywheel, Developer Portal. 9 parts, 34 sections.
 
-### security/ — Security & Legal (9 files)
+### security/ — Security & Legal (10 files)
 - **000_security_privacy.md**: Zero Trust (NIST 800-207), FIDO2,
   OWASP Top 10 2025, AI/LLM security (OWASP LLM Top 10), supply
   chain (SBOM/SLSA), PQC readiness. 22 sections. (Authentication §4/§5/§6
@@ -279,6 +279,12 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   (SPIFFE/SPIRE, WIF, M2M client credentials, Zero Standing Privilege)
   and AI-agent auth/delegation (Tier-0, OBO via RFC 8693 Token Exchange,
   delegation-chain limits, MCP/XAA — emerging). 18 sections.
+- **450_mcp_security.md**: MCP (Model Context Protocol) security, consumer
+  + builder sides (spec 2025-11-25). OAuth 2.1 Resource Server, RFC 9728
+  metadata, RFC 8707 audience binding, token-passthrough prohibition
+  (Confused Deputy), Origin/DNS-rebinding defense, tool-definition hash
+  pinning (rug-pull/tool-poisoning detection), human-in-the-loop approval,
+  execution isolation, untrusted-tool-output handling. 18 sections.
 
 ### quality/ — Testing & QA (1 file)
 - **000_qa_testing.md**: Test philosophy, 10+ test types, security
@@ -386,7 +392,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 44 Universal Rules and core Blueprint starter files are available in both languages.
+All 45 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.

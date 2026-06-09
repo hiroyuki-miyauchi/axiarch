@@ -1674,6 +1674,9 @@ async function llmGateway(req: GatewayRequest): Promise<string> {
 
 ### 18.3. MCP (Model Context Protocol) Security
 
+> [!NOTE]
+> This subsection is an **overview** of MCP security. The authoritative deep-dive for both the consumer (host/client) and builder (server) sides is [`450_mcp_security.md`](./450_mcp_security.md) (token-passthrough prohibition, Origin/DNS-rebinding defense, rug-pull/tool-poisoning detection, human approval, execution isolation). MCP authorization lives in [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11.
+
 -   **Law**: Apply the following security controls to AI agent integration with external tools/data via MCP.
 -   **Action**:
     1.  **MCP Server Approval**: Mandate formal security evaluation/approval process for new MCP server adoption.
