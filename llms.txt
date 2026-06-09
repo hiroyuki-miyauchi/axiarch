@@ -24,7 +24,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 
 - **Layer 1: Universal (Immutable Constitution)**
   - `AXIARCH.md` — Canonical Axiarch protocol. `AGENTS.md` and tool-native files are thin adapters that point to it. Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Validation describes the configurations and scope Axiarch has exercised, not an operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
-  - `axiarch-rules/{lang}/universal/` — 39 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
+  - `axiarch-rules/{lang}/universal/` — 44 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
 - **Layer 3: Prompts (Optional Execution Framework)**
@@ -85,7 +85,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 39 universal rules and core blueprint starter files are available in both languages.
+All 44 universal rules and core blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 
 ## License
