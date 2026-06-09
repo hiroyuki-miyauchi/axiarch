@@ -249,6 +249,12 @@
 
 ## §4. 認証・認可アーキテクチャ (Authentication & Authorization)
 
+> [!NOTE]
+> 本節は認証・認可の**概要（overview）**である。深掘りの正本は以下に分離されている（二重定義を避け、ここでは要点のみ示す）:
+> - 認証クレデンシャル・パスキー・MFA・パスワードレス → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
+> - OAuth 2.1 / OIDC・外部アカウント連携・SSO・トークン管理 → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
+> - ステップアップ/再認証・OTP・重要操作保護・セッション → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+
 ### 4.1. Credential Hygiene
 
 -   APIキー・シークレット・DB接続文字列のソースコード記述を**物理的に禁止**。必ず `process.env` を使用。

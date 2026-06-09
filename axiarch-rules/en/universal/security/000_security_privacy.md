@@ -249,6 +249,12 @@
 
 ## §4. Authentication & Authorization Architecture
 
+> [!NOTE]
+> This section is an **overview** of authentication and authorization. The authoritative deep-dives are split out (to avoid duplicate definitions, only the essentials are kept here):
+> - Authentication credentials, passkeys, MFA, passwordless → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
+> - OAuth 2.1 / OIDC, external account federation, SSO, token management → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
+> - Step-up / re-authentication, OTP, sensitive-operation protection, sessions → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+
 ### 4.1. Credential Hygiene
 
 -   **Physically prohibit** writing API keys, secrets, and DB connection strings in source code. Always use `process.env`.
