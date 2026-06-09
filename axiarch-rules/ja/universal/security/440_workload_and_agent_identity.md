@@ -277,7 +277,7 @@
 
 ### 10.1. MCP 認可の基本
 
--   **Law**: MCP（Model Context Protocol）サーバーへのアクセス認可は、独自方式ではなく **OAuth 2.1 ベースのフロー**（Authorization Code + PKCE / 適切な場合は Client Credentials）に準拠する。
+-   **Law**: MCP（Model Context Protocol）サーバーへのアクセス認可は、独自方式を避ける。実装は**安定版の OAuth 2.0 フロー（Authorization Code + PKCE / 適切な場合は Client Credentials）で行い**、OAuth 2.1 の方向性（PKCE 必須・Implicit/ROPC 廃止）に追従する（OAuth 2.1 自体は IETF ドラフトであり、ドラフトへの直接準拠を実装条件にしない）。
 -   **Action**:
     1.  MCP クライアント（エージェント）は MCP サーバーを **Resource Server** として扱い、AS から取得したスコープ付き短命トークンで認可する。
     2.  **resource indicators（RFC 8707）**で対象 MCP サーバーを `audience` として明示し、トークンの転用（Confused Deputy）を防止する。

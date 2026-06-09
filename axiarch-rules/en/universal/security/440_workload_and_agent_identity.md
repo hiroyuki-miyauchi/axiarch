@@ -277,7 +277,7 @@
 
 ### 10.1. MCP Authorization Basics
 
--   **Law**: Authorization for access to MCP (Model Context Protocol) servers conforms to **OAuth 2.1-based flows** (Authorization Code + PKCE / Client Credentials where appropriate), not a bespoke scheme.
+-   **Law**: Authorization for access to MCP (Model Context Protocol) servers avoids bespoke schemes. **Implement with stable OAuth 2.0 flows (Authorization Code + PKCE / Client Credentials where appropriate)** and follow the OAuth 2.1 direction (mandatory PKCE, Implicit/ROPC removed); do not make conformance to the OAuth 2.1 draft itself an implementation prerequisite (it is still an IETF draft).
 -   **Action**:
     1.  The MCP client (agent) treats the MCP server as a **Resource Server** and authorizes with a scoped, short-lived token obtained from the AS.
     2.  Use **resource indicators (RFC 8707)** to name the target MCP server as the `audience`, preventing token misuse (Confused Deputy).
