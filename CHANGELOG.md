@@ -16,6 +16,37 @@ release history, not current canonical numbering.
 
 ---
 
+## [1.14.0] — 2026-06-09
+
+### セキュリティ認証スタックの新設とフレームワーク整合 / Security Authentication Stack & Framework Consistency
+
+高セキュリティ認証〜認可〜MCP セキュリティの Universal Rules を 6 ファイル新設し（Universal ルール 39→45）、併せてフレームワーク全体の文言・整合を是正した。市場調査（一次情報・最新標準）と敵対的レビューを反映。既存 `security/000_security_privacy.md` は概要を保持し、深掘りはクロスリファレンスで分離（二重定義回避）。Universal Rules 変更はユーザーの明示承認に基づく。/ Adds six new authentication→authorization→MCP security Universal Rules (39→45 files) and a framework-wide wording/consistency pass, informed by primary-source market research and adversarial review.
+
+### Added
+
+- **`security/400_authentication_and_passkeys.md`（ja/en）** — パスキー/WebAuthn(L2 REC/L3 CR)/FIDO2、MFA/2FA（TOTP・Number Matching・ハードウェアキー・SMS非推奨）、NIST SP 800-63B/-4 パスワードポリシー、パスワードレス移行、クレデンシャルライフサイクル、アカウントリカバリー、CIAM↔Workforce、CXP/CXF / Authentication credentials & passkeys deep-dive
+- **`security/410_federated_identity_and_oauth.md`（ja/en）** — OAuth 2.1（IETFドラフト、ベースライン RFC 9700）、PKCE/PAR/RAR/DPoP、OIDC・ID Token検証・JWKS、Google/Apple/Microsoft/GitHub 連携、SSO（SAML/OIDC）、リフレッシュローテーション+再利用検知、consent/device-code phishing、FedCM / Federated identity & OAuth/OIDC
+- **`security/420_step_up_auth_and_sensitive_operations.md`（ja/en）** — acr/amr・AAL、ステップアップ/再認証、リスクベース/CAEP/SSF、OTP/マジックリンク、トランザクション署名（WYSIWYS/PSD2 SCA）、重要操作ゲート、セッション管理、侵害時 Kill Switch、列挙防止 / Step-up authentication & sensitive operations
+- **`security/430_authorization_and_access_control.md`（ja/en）** — PDP/PEP・deny-by-default、RBAC/ABAC/ReBAC、Google Zanzibar（OpenFGA/SpiceDB）、Policy as Code（Cedar/OPA）、decision log、マルチテナント/RLS / Fine-grained authorization
+- **`security/440_workload_and_agent_identity.md`（ja/en）** — 非人間ID/ワークロード（SPIFFE/SPIRE・WIF・M2M・Zero Standing Privilege）、AIエージェント認証/委任（Tier-0・OBO via RFC 8693・委任チェーン制限・MCP/XAA） / Non-human, workload & AI-agent identity
+- **`security/450_mcp_security.md`（ja/en）** — MCP セキュリティ（使う側＋作る側、仕様 2025-11-25）。OAuth 2.1 Resource Server・RFC 9728/8707・token passthrough禁止（Confused Deputy）・Origin/DNSリバインディング対策・tool annotations・実行隔離・rug pull/tool poisoning検知・人間承認 / MCP security, consumer + builder sides
+
+### Changed
+
+- **フレームワーク全体の文言是正（#52）** — 断言・完璧防止・誇張表現を「リスク低減・最低品質の底上げ・多領域」に即した表現へ、en 側の日本語固有内容を Project Native Language / CJK へ一般化、採番（予約帯なし・000非必須・初期8フォルダは開いた集合）とロード/結晶化の仕様境界を明確化（AXIARCH §3/§4/§12）。XSS の MUST 強度回復・文の長さ上限の回復・採番表現統一を含む / Framework-wide wording & consistency pass
+- **`security/000_security_privacy.md`（ja/en）** — §4・§18.3 に深掘りファイル（400–450）へのクロスリファレンス NOTE を追加（要約は保持・de-dup）
+- **`axiarch-rules/{ja,en}/INDEX.md`** — security セクションに 400–450 の 6 行を追加
+- **`README.md` / `llms.txt` / `llms-full.txt`** — Universal 件数 39→45、README ドメイン表 Security 4→10、llms-full security 4→10 files に更新し 400–450 を列挙
+- **`axiarch-rules/{ja,en}/universal/security/200_oss_compliance.md` / `300_ip_due_diligence.md`** — ja/en 見出し対称を同期
+- **version 1.13.1 → 1.14.0** — init.sh / axiarch-manifest.json / llms / blueprint INDEX / upgrade 例示 / safe_upgrade prompt を同期
+
+### References
+
+- 一次情報: W3C WebAuthn L2/L3, FIDO CTAP 2.2 / CXP-CXF, RFC 9700 (OAuth Security BCP), RFC 9449 (DPoP), RFC 9126 (PAR), RFC 9396 (RAR), RFC 8693 (Token Exchange), RFC 8707 (Resource Indicators), NIST SP 800-63-4, OpenFGA/SpiceDB/AWS Cedar/OPA, SPIFFE/SPIRE, MCP Authorization 仕様 2025-11-25
+- PR #52（文言是正）/ #53（認証スタック）を本リリースに集約
+
+---
+
 ## [1.13.1] — 2026-06-08
 
 ### Restore Language First Enforcement / Language First（指定言語遵守）の強制力を復元
@@ -1029,6 +1060,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[1.14.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.1...v1.14.0
 [1.13.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.1...v1.13.0
 [1.12.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.0...v1.12.1

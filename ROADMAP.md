@@ -1,6 +1,6 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.13.1 Restore Language First Enforcement\
+> **現在の安定版 / Current Stable**: v1.14.0 Security Authentication Stack (security 400-450)\
 > **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
@@ -553,6 +553,19 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 - **Execution Harness** — 実行、監査、役割パス、証跡、人間承認、サブエージェント委任を `axiarch-harness/{ja,en}/` に分離。サブエージェントがない環境ではメインエージェントが順番に同じパスを実行する。
 - **既存価値の維持** — Universal / Blueprint / Prompts、Crystallization、Native Language、Safe Upgrade、Hook補強、現在タスク文書ローテーションを壊さず、正本入口だけを明確化する。
 - **後続候補** — Static Lint & Process Supervision は本正本化後の候補として継続検討する。
+
+---
+
+### ✅ v1.14.0 — Security Authentication Stack（2026-06-09）
+
+高セキュリティ認証〜認可〜MCP セキュリティの Universal Rules を 6 ファイル新設（Universal ルール 39→45）。市場調査（一次情報・最新標準）と敵対的レビューを反映。
+
+- **security/400** パスキー・MFA / **410** OAuth・OIDC連携・SSO / **420** ステップアップ・OTP・重要操作 / **430** 認可（ReBAC/Zanzibar・Cedar/OPA）/ **440** 非人間・ワークロード・AIエージェントID（SPIFFE・OBO・MCP/XAA）/ **450** MCPセキュリティ（使う側+作る側、token passthrough禁止・rug pull検知等）
+- **000 de-dup** — §4/§18.3 に深掘りファイルへのクロスリファレンス
+- **フレームワーク文言是正（#52）** — 断言/誇張の是正・en側の一般化・採番/ロード仕様の明確化
+- **整合** — INDEX(ja/en)・README ドメイン表・llms ダイジェスト・件数（39→45）を同期
+- **正確性** — OAuth 2.1=ドラフト・RFC 9700 基準、WebAuthn L3=CR、MCP=新興として正確表記
+- PR #52 / #53 を集約
 
 ---
 
@@ -1262,6 +1275,19 @@ stale in multi-agent projects.
 - **Execution Harness** — Split execution, audit, role passes, evidence, human approval, and subagent delegation into `axiarch-harness/{ja,en}/`. When subagents are unavailable, the main agent executes the same passes sequentially.
 - **Existing value preservation** — Keep Universal / Blueprint / Prompts, Crystallization, Native Language, Safe Upgrade, hook reinforcement, and current-task document rotation intact while clarifying only the canonical entrypoint.
 - **Follow-up candidate** — Keep Static Lint & Process Supervision as a follow-up candidate after canonicalization.
+
+---
+
+### ✅ v1.14.0 — Security Authentication Stack (2026-06-09)
+
+Adds six new authentication→authorization→MCP security Universal Rules (Universal rules 39→45), informed by primary-source market research and adversarial review.
+
+- **security/400** passkeys & MFA / **410** OAuth & OIDC federation & SSO / **420** step-up, OTP & sensitive operations / **430** authorization (ReBAC/Zanzibar, Cedar/OPA) / **440** non-human, workload & AI-agent identity (SPIFFE, OBO, MCP/XAA) / **450** MCP security (consumer + builder; token-passthrough prohibition, rug-pull detection, etc.)
+- **000 de-dup** — §4/§18.3 cross-reference the deep-dive files
+- **Framework wording pass (#52)** — de-overclaiming, language-neutral generalization, numbering/loading clarity
+- **Consistency** — INDEX (ja/en), README domain table, llms digests, counts (39→45) synced
+- **Accuracy** — OAuth 2.1 = draft with RFC 9700 baseline, WebAuthn L3 = CR, MCP = emerging, stated precisely
+- Consolidates PR #52 / #53
 
 ---
 
