@@ -216,7 +216,7 @@ The Execution Harness is the implementation unit for the Harness Engineering con
 | Engineering | 10 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS、**Git Workflow** | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS, **Git Workflow** |
 | AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
 | Operations | 7 | 内部ツール、営業・BizDev、HR、CX、SRE、インシデント、パートナーシップ | Internal tools, sales/BizDev, HR, CX, SRE, incident response, partnerships |
-| Security & Legal | 4 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産 | Security, data governance, OSS compliance, IP |
+| Security & Legal | 10 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産、認証・パスキー、OAuth/OIDC連携・SSO、ステップアップ・OTP、認可(ReBAC/Zanzibar)、非人間/ワークロード/AIエージェントID、MCPセキュリティ | Security, data governance, OSS compliance, IP, authentication & passkeys, OAuth/OIDC federation & SSO, step-up & OTP, authorization (ReBAC/Zanzibar), non-human/workload/AI-agent identity, MCP security |
 | QA & FinOps | 2 | テスト戦略、クラウドFinOps | Test strategy, Cloud FinOps |
 | Global & Governance | 3 | i18n、ガバナンス、言語プロトコル | i18n, governance, language protocol |
 
