@@ -254,6 +254,8 @@
 > - Authentication credentials, passkeys, MFA, passwordless → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
 > - OAuth 2.1 / OIDC, external account federation, SSO, token management → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
 > - Step-up / re-authentication, OTP, sensitive-operation protection, sessions → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+> - Fine-grained authorization (RBAC/ABAC/ReBAC, policy engines, PDP/PEP, multi-tenancy) → [`430_authorization_and_access_control.md`](./430_authorization_and_access_control.md)
+> - Non-human / workload identity (SPIFFE/SPIRE, M2M) and AI-agent authentication/delegation (OBO, Token Exchange, MCP/XAA) → [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md)
 
 ### 4.1. Credential Hygiene
 

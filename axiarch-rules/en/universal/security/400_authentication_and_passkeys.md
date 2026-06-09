@@ -77,6 +77,20 @@
 -   **Rule 64.1.3 (Defense in Depth)**: Design so that the breach of any single factor still leaves others functioning. Even after adopting passkeys, ensure passwords and recovery paths do not remain as weak points; design all paths to equal strength (see §9).
 -   **Rule 64.1.4 (No Overstatement)**: Do not claim "perfect" or "absolutely secure." This file aims to **raise the cost of attack and systematically reduce risk**; read each requirement as raising the quality floor. That said, requirements marked MUST are mandatory.
 
+### 1.3. CIAM vs Workforce IAM Design Divergence
+
+-   **Law**: Design decisions diverge depending on whether the audience is **consumers (CIAM: Customer Identity & Access Management)** or **employees/internal (Workforce IAM)**. Do not reuse one policy for both (MUST). Identify the use case first and apply this file's requirements per that class.
+
+| Aspect | CIAM (consumer) | Workforce IAM (employees/org) |
+|:-------|:----------------|:------------------------------|
+| **Recovery** | Self-service assumed (automated, low-friction). Weakest-link defense (§9) especially critical | Admin-driven recovery (help desk, identity proofing) possible. Stricter identity proofing (IAL) |
+| **MFA strictness** | Phased rollout, friction minimization (avoid drop-off). Gradual migration to phishing-resistant (§7) | Enforceable without exception. Admin/privileged require Device-Bound (§5.1) |
+| **Provisioning** | Self sign-up + registration-time fraud defense (§8.1b) | Centralized via SSO/JIT/SCIM (→`410` §10) |
+| **Audit retention** | Privacy law (data minimization, retention limits) takes priority (`100_data_governance.md`) | May require long-term retention for internal controls/compliance |
+| **Scale/anonymity** | Large-scale, anonymous traffic, bot intrusion assumed | Known, finite user set |
+
+-   Registration-time fraud / bot defense (§8.1b) is especially important for CIAM.
+
 ---
 
 ## §2. Credential Priority (Phishing-Resistance First)
@@ -105,7 +119,7 @@
 
 ## §3. Passkey / WebAuthn / FIDO2 Architecture
 
-> **Reference Standards**: W3C WebAuthn Level 2 (REC), WebAuthn Level 3 (Draft), FIDO2, CTAP2.1, FIDO Alliance Passkey Guidelines
+> **Reference Standards**: W3C WebAuthn **Level 2 (REC = Recommendation)**, WebAuthn **Level 3 (Candidate Recommendation; not a REC)**, FIDO2, CTAP2.1, FIDO Alliance Passkey Guidelines
 
 ### 3.1. Terminology & Components
 
@@ -130,6 +144,7 @@
 -   **Rule 64.3.2**: Record the response's **`backupEligible (BE)` / `backupState (BS)` flags** to distinguish synced from device-bound passkeys. Admin/privileged accounts MUST use Device-Bound (hardware key) passkeys (consistent with §3 admin requirements and 000 §5.5).
 -   **Rule 64.3.3**: Synced passkeys make the sync provider's account takeover an attack surface. For high-assurance use, choose device-bound credentials that do not depend on the sync provider's strength.
 -   For general users, default to synced passkeys, prioritizing convenience and recoverability (restore after device loss).
+-   **Rule 64.3.3b (Synced vs Device-Bound selection policy)**: Make the synced-vs-device-bound choice a **policy keyed to account class and operation tier**, not ad hoc (MUST). At minimum, document: (a) general users = synced by default, (b) admin/privileged/high-assurance = Device-Bound required (§3.2 Rule 64.3.2), (c) Device-Bound when compliance requires a single-device guarantee. **Enforce policy conformance server-side** using the received BE/BS flags, and reject registrations below requirements (e.g., an admin registering synced-only).
 
 ### 3.3. RP ID & Origin Verification
 
@@ -188,8 +203,22 @@
 
 ### 3.11. WebAuthn Level 3 Latest Developments
 
--   **Adoption Policy**: Implement on the **WebAuthn Level 2 (REC, stable) foundation**, and add Level 3 draft features (Related Origin Requests, Signal API, `getClientCapabilities()`, etc.) as **progressive enhancements** behind feature detection.
--   Because draft specs may change, do not error on lack of L3 support; design so that authentication always completes with L2 core features (MUST).
+-   **Adoption Policy**: Implement on the **WebAuthn Level 2 (REC, Recommendation, stable) foundation**, and add Level 3 features (Related Origin Requests, Signal API, `getClientCapabilities()`, etc.) as **progressive enhancements** behind feature detection.
+-   **Accurate spec status**: WebAuthn Level 3 is a **Candidate Recommendation (CR; not yet a REC/Recommendation)** and may still change. Do not error on lack of L3 support; design so that authentication always completes with the **L2 core features, which are a REC** (MUST).
+
+### 3.12. Passkey Provider Trust Model
+
+-   **Background**: A synced passkey's private key is replicated/synced under the control of the sync provider (password manager). Therefore the **provider's trustworthiness is a premise of authentication strength**. Providers differ in key protection, E2E encryption, recovery means, and audit.
+-   **Rule 64.3.13 (Assessing provider trust)**: Classify passkey providers by trust level and set the required bar per use.
+    -   **High trust (allowed by default)**: OS platform providers (Apple iCloud Keychain / Google Password Manager / Microsoft). Synced-key protection and E2E are built in, with ecosystem integration assumed.
+    -   **Requires assessment (case-by-case)**: third-party password managers (e.g., 1Password). Allow after assessing their key E2E encryption, recovery, and organizational-management specifics.
+    -   For high-assurance use, prefer Device-Bound (§3.2) that does not depend on the sync provider's strength.
+-   Where AAGUID can identify the authenticator/provider type, define an allowed-provider policy per use (avoid excessive lock-in; balance against user choice).
+
+### 3.13. Credential Portability (CXP / CXF — Future Support)
+
+-   **Background**: In 2025, the FIDO Alliance published the **Credential Exchange Protocol (CXP) / Credential Exchange Format (CXF)**, advancing standardization for **securely exporting/importing** passkeys across providers — moving away from prior provider lock-in (non-migratable).
+-   **Rule 64.3.14 (Recognize as future support)**: As CXP/CXF are still maturing in spec/implementation, they are **not a new mandatory requirement now**, but: (a) avoid designs that hinder users migrating providers, (b) ensure portability of credential metadata (consistent with §11.2), (c) recognize the trust-assessment policy for migrated (imported) passkeys as a future design extension point. Revisit as the standard matures.
 
 ---
 
@@ -369,6 +398,11 @@ function verifyTotp(token: string, secret: string, lastUsedStep: number) {
 ## §8. Credential Lifecycle
 
 -   **Rule 64.8.1 (Enrollment)**: Treat credential enrollment itself as a protected operation. Add a new passkey/MFA factor on top of a valid existing session plus, where possible, Step-Up authentication, and **notify** the user upon completion (interoperates with 000 §6.2 / 420).
+-   **Rule 64.8.1b (Registration-time bot / fraud defense)**: Especially in CIAM (§1.3) self sign-up, deter mass account creation, fake accounts, and registration-time fraud.
+    1.  **Client signals MUST be verified server-side (MUST)**: Device/app integrity signals (Android **Play Integrity**, Apple **App Attest**, web **Cloudflare Turnstile** / reCAPTCHA, etc.) are trusted only after the token is **verified server-side against the issuer**. Never trust the pass/fail or attributes the client returns as-is (tamperable/replayable).
+    2.  These are **auxiliary signals** and must not be a sole authentication factor (same as the fingerprint principle in 420 §9). Integrate them as input to a risk score (→`420` §8).
+    3.  Apply rate limiting and enumeration prevention to the registration (send) endpoint (§9.6). If SMS is involved, also mind Toll Fraud (§10.2).
+    4.  Do not hard-block on integrity-check failure; degrade to risk-based graduated friction (additional verification) to avoid false-positive drop-off of legitimate users.
 -   **Rule 64.8.2 (Multiple Credential Management)**: Provide a management UI where users can register, name, list, and delete multiple passkeys/factors. Show "last used time, device type, synced/device-bound" for each credential.
 -   **Rule 64.8.3 (Revocation)**: On credential deletion, invalidate server-side immediately and notify the authenticator side via the Signal API (§3.10). Record the revocation event in the audit log and notify the user.
 -   **Rule 64.8.4 (Rotation)**: Provide a path to regenerate shared secrets (TOTP seed, backup codes) and signing keys upon suspected compromise. **Prevent lockout** caused by deleting the last factor (only allow deletion after confirming an alternative factor exists).
@@ -467,6 +501,10 @@ function verifyTotp(token: string, secret: string, lastUsedStep: number) {
 | 20 | Building WebAuthn server verification from scratch | Use a maintained library / IDaaS (§1.2, §11) |
 | 21 | Building a custom QR flow for CDA that skips BLE proximity | Defer to the standard flow (§3.8) |
 | 22 | Allowing admin authentication with synced passkeys only | Admins must use Device-Bound (§3.2) |
+| 23 | Not policy-fying synced/device-bound and not enforcing server-side | Enforce policy conformance server-side via BE/BS (§3.2 64.3.3b) |
+| 24 | Trusting Play Integrity/App Attest/Turnstile pass/fail on the client | Verify the token server-side against the issuer (§8.1b) |
+| 25 | Making an integrity/bot signal a sole authentication factor | Limit to an auxiliary signal; integrate into a risk score (§8.1b) |
+| 26 | Reusing the same design for CIAM and Workforce IAM | Diverge design by use class (§1.3) |
 
 ---
 
@@ -491,7 +529,11 @@ function verifyTotp(token: string, secret: string, lastUsedStep: number) {
 | Keyword | Section |
 |:--------|:--------|
 | Passkey / WebAuthn / FIDO2 / CTAP2 | §3 |
-| Synced vs Device-Bound / backupEligible / BE/BS flags | §3.2 |
+| Synced vs Device-Bound / backupEligible / BE/BS flags / selection policy | §3.2 |
+| Passkey provider trust model / sync provider / AAGUID | §3.12 |
+| CXP / CXF / credential portability / provider migration | §3.13 |
+| CIAM / Workforce IAM / design divergence / recovery / audit retention | §1.3 |
+| Registration-time fraud / bot defense / Play Integrity / App Attest / Turnstile | §8.1b |
 | RP ID / origin verification / exact-match origin | §3.3, §4 |
 | Attestation / none / direct / enterprise / AAGUID / MDS | §3.4 |
 | User Verification / UV / userVerification | §3.5 |

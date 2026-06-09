@@ -254,6 +254,8 @@
 > - 認証クレデンシャル・パスキー・MFA・パスワードレス → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
 > - OAuth 2.1 / OIDC・外部アカウント連携・SSO・トークン管理 → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
 > - ステップアップ/再認証・OTP・重要操作保護・セッション → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+> - きめ細かい認可（RBAC/ABAC/ReBAC・ポリシーエンジン・PDP/PEP・マルチテナント） → [`430_authorization_and_access_control.md`](./430_authorization_and_access_control.md)
+> - 非人間ID・ワークロード（SPIFFE/SPIRE・M2M）・AIエージェント認証/委任（OBO・Token Exchange・MCP/XAA） → [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md)
 
 ### 4.1. Credential Hygiene
 

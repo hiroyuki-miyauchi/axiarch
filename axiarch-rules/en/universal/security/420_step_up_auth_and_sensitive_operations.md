@@ -364,6 +364,19 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
   - **Expiry**: email/SMS OTPs are short-lived (e.g., 5-10 min). Invalid after expiry.
   - **Single use**: invalidate immediately after successful verification (replay prevention).
 
+### Rule 66.122: Enumeration Prevention Checklist (Cross-cutting)
+- **Law**: Account enumeration can occur across recovery, OTP, and lockout paths. Beyond OTP (§13), make **non-observability of user existence** a cross-cutting requirement. Satisfy the following on every path.
+
+| Path | Response to unify | Notes |
+|:---|:---|:---|
+| **Password reset / magic link request** | Return "if a match exists, we sent it" **regardless of existence** | Send only to real users; keep wording, status, and timing uniform |
+| **OTP verification** | Unified error not distinguishing wrong code / not issued / no user (§13) | Combine attempt limiting + rate limiting |
+| **Account lockout** | Do not let the response reveal lock state | Do not distinguish "locked" vs "bad credentials" |
+| **Sign-up / email change** | Do not immediately reveal whether an email is registered | Confirm via notification to the registered email |
+
+- **Delay injection & uniformity**: per path, **keep response time uniform** (perform the heavy work present in the existence case — e.g., hash computation — equivalently in the non-existence case, or inject a fixed delay) to prevent timing-based enumeration. Also unify error code, HTTP status, and body.
+- **Cross-Reference**: `400_authentication_and_passkeys.md §9.6` (recovery enumeration prevention), `000_security_privacy.md §6.6` (brute force)
+
 ### Rule 66.121: Backup Codes
 - **Law**: Backup codes used to recover from MFA/OTP loss must be stored hashed (following the password-hashing discipline of `000_security_privacy.md §4.9`), single-use, displayed only once at generation, and old codes must be revoked en masse on regeneration.
 
@@ -510,7 +523,21 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
   - Account suspension/deletion → immediate global revocation.
   - Breach detection (ATO/ITDR) → global revocation + re-auth requirement.
 - **Implementation**: match at verification time via a Token Revocation List (or short-lived tokens + a revocation flag in a server-side session store). Push to distributed resources via CAEP (§10).
-- **Panic Button (Kill Switch)**: keep a global session-revocation procedure perpetually up to date (`000_security_privacy.md §6.7`).
+
+### Rule 66.231: Staged Revocation Strategy for Breach Response (Panic Button / Kill Switch)
+- **Law**: Keep a Kill Switch that can immediately execute **staged revocation** scaled to blast radius and recovery cost on breach/ATO detection (operational detail of `000_security_privacy.md §6.7`). Define stages rather than a single "wipe everything."
+- **Stages (broad → narrow blast radius; choose per situation)**:
+  1. **Global session revocation**: invalidate all active access/sessions (top priority, broadest).
+  2. **Refresh token family revocation**: revoke the rotation chain (→`410` §12.2) en masse to cut off re-issuance persistence.
+  3. **Forced rotation**: rotate signing keys, OAuth client secrets, and API keys (→`410` §11.4) to invalidate stolen credentials.
+- **Operational requirements (MUST)**:
+  - **Trigger authority**: limit Kill Switch activation to privileged roles and require Step-Up (§5) on the activation itself.
+  - **Audit**: record activation, scope, actor, and time in the immutable audit log (§20).
+  - **Recovery procedure**: pre-document the legitimate-user restoration procedure after revocation (re-auth, re-enrollment, notification) and rehearse it, including recovery from accidental activation.
+  - **Integration**: interoperate with ITDR / incident response (→`operations/500_incident_response.md`) and Push immediately to distributed resources via CAEP (§10).
+
+### Rule 66.232: DBSC (Device Bound Session Credentials — Future)
+- **Note**: **DBSC** is a browser proposal that cryptographically binds session cookies/credentials to a device key, mitigating post-theft session reuse (AiTM, cookie theft, →`410` §13.4). As the spec/implementation are still maturing, it is **not a mandatory requirement now**, but recognize it as a future option for session-layer sender-constraint and evaluate alongside DPoP/mTLS as the standard matures.
 
 ---
 
@@ -699,6 +726,8 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 | 20 | Uniform strong step-up on all operations | Excessive friction → users disable MFA | Adaptive per risk/tier (§35) |
 | 21 | Backup codes stored in plaintext, reusable | Permanent bypass on leak | Hashed storage, single-use, revoke on regenerate (§13.121) |
 | 22 | Letting admin operations pass on a trusted device | Privileged ops via device theft | Tier 4-5 require step-up every time (§7) |
+| 23 | Breach revocation is "wipe everything" only, with no stages or recovery procedure | Over-revocation harms legitimate users / hard recovery | Staged revocation + trigger authority + audit + recovery procedure (§24 66.231) |
+| 24 | Reset/lockout responses leak user existence | Account enumeration | Unify responses and timing across paths (§13 66.122) |
 
 ---
 
@@ -750,7 +779,9 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 | Operation notification / Idempotency | §21 |
 | Token expiry / refresh rotation | §22 |
 | Idle / absolute timeout | §23 |
-| Session invalidation / global revocation / Kill Switch | §24 |
+| Session invalidation / global revocation / Kill Switch / Panic Button / staged revocation | §24 |
+| DBSC / Device Bound Session Credentials | §24 (66.232) |
+| Enumeration prevention / reset & lockout response uniformity / delay injection | §13 (66.122) |
 | Session fixation / regenerate | §25 |
 | Cookie attributes / HttpOnly / Secure / SameSite | §26 |
 | Session management UI / trusted devices | §7, §27 |

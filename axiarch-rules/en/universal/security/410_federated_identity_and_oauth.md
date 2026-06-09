@@ -120,6 +120,24 @@
 -   **Law**: Limit requested `scope` to the minimum needed for the function (`000_security_privacy.md` §7.2 Data Minimization).
 -   **Action**: Start from `openid`, `email`, `profile`, etc., and obtain additional permissions via **Incremental Authorization** (request them when actually needed).
 
+### 2.5. OAuth Consent Phishing (Illicit Consent Grant)
+
+-   **Background**: An attacker registers a malicious OAuth app on a legitimate AS, lures the user to the genuine consent screen, and gets them to consent to scopes like "read email" or "file access" — **stealing legitimate tokens via a legitimate flow**. Because no phishing site is involved, this **cannot be prevented by passkeys / phishing-resistant factors** (the consent act itself is legitimate).
+-   **Law**: Govern OAuth app registration/consent for your tenant/organization.
+    1.  **App/scope review**: Restrict the scopes third-party apps may request against your tenant, and **disable user self-consent** for sensitive scopes (email/files/directory), requiring **admin consent**.
+    2.  **Publisher verification**: By default, deny consent for apps that are not from a verified publisher.
+    3.  **Consent observability**: Periodically inventory granted consents and revoke unused/over-scoped apps. Emit anomalous new consent grants to ITDR (`000_security_privacy.md` §3.3).
+-   When **your tenant is the side providing the AS** (multi-tenant SaaS), implement publisher verification, scope minimization, and consent logging for registered apps.
+
+### 2.6. Phishing Surface of the Device Authorization Grant (RFC 8628)
+
+-   **Background**: The Device Authorization Grant (allowed for TV/CLI in §2.2) can be a breeding ground for **Device Code Phishing**, where an attacker presents their own device code to the user with "enter this code," binding the victim's authentication to the attacker's session.
+-   **Law**: Use the Device Code Flow only when all of the following hold.
+    1.  **Enable only when needed**: limit to input-constrained devices (TV/CLI/IoT); do not enable it for ordinary browsers/mobile.
+    2.  **Short-lived & attempt-limited**: keep the `user_code` short-lived (a few minutes), avoid low entropy, and apply attempt limiting / rate limiting to the verification endpoint.
+    3.  **Explicit code-match confirmation**: have the user explicitly confirm that the code shown on the device matches the approval screen, and warn "do not enter a code presented to you by someone else."
+    4.  Do not grant high-risk scopes / admin operations via the Device Code Flow.
+
 ---
 
 ## §3. PKCE / state / nonce
@@ -427,6 +445,16 @@
 | Server-to-server / financial API | mTLS (FAPI 2.0) |
 | Legacy compatibility needed | Bearer (but short-lived + strict revocation) |
 
+### 13.4. Countering AiTM (Adversary-in-the-Middle) and Token Theft
+
+-   **Background**: AiTM phishing (reverse-proxy kits like Evilginx) relays login and MFA in real time to **steal issued session/refresh tokens**. Passkeys (phishing-resistant factors) can block the relay of the login itself, but **once a Bearer token issued afterward is stolen, it can be replayed**, so token-layer defense is separately required.
+-   **Law**: To counter AiTM and token theft, **mandate sender-constrained tokens (DPoP = RFC 9449 / mTLS = RFC 8705)** for high-risk uses and do not rely on Bearer-token-only operation. A stolen token cannot be replayed by an attacker without the bound key.
+-   **Action**:
+    1.  Make both access and refresh tokens sender-constrained (§12.3, §13.1).
+    2.  Detect signs of token theft (sudden IP/device change for the same token, Impossible Travel) and trigger immediate revocation/re-auth via CAEP (→`420_step_up_auth_and_sensitive_operations.md` §10).
+    3.  Revoke the token family en masse via refresh reuse detection (§12.2).
+-   **Cross-Reference**: `420_step_up_auth_and_sensitive_operations.md` §28 (ATO detection)
+
 ---
 
 ## §14. Token Storage & BFF Pattern (SPA/Mobile)
@@ -477,9 +505,11 @@
 
 -   Exchanges one token for another (different audience/permissions). Used for delegation/down-scoping between microservices. Narrow the audience/scope to avoid propagating excessive privilege.
 
-### 15.5. Step-Up Goes to §420
+### 15.5. Expressing Authentication Strength (acr / amr) and Step-Up Goes to §420
 
--   Re-authentication for high-risk operations (Step-Up Authentication), the `acr`/`amr` claims, and transaction authorization are covered in **`420_step_up_auth_and_sensitive_operations.md`** (not handled in this file).
+-   **Law**: Express the assurance level and factors used via the **`acr` (Authentication Context Class Reference) / `amr` (Authentication Methods References, RFC 8176)** claims, and have the RP (resource side) **validate them according to operation criticality**. Do not treat mere token possession as evidence of authentication strength (§19.5 Zero Trust).
+-   **AAL/IAL/FAL mapping**: Map the NIST SP 800-63 **AAL (authenticator assurance) / IAL (identity assurance) / FAL (federation assurance)** to `acr` values and define the required level per operation tier. The detailed mapping and Step-Up (re-authentication) implementation are consolidated in **`420_step_up_auth_and_sensitive_operations.md` §2 and §3** (not deep-dived here).
+-   Re-authentication for high-risk operations (Step-Up Authentication) and transaction authorization are covered in **`420_step_up_auth_and_sensitive_operations.md`**.
 
 ---
 
@@ -489,7 +519,8 @@
 
 ### 16.1. Background
 
--   **Law**: With browser third-party cookie deprecation/partitioning (Storage Partitioning), design on the assumption that federation relying on third-party cookies (implicit IdP session sharing, hidden iframes, silent auth) will break.
+-   **Note (accurate premise)**: The originally planned **blanket deprecation of third-party cookies in Chrome was withdrawn**, and third-party cookies are expected to **persist for the time being** (handling also differs across browsers). FedCM advances independently of this, so the design premise is: "third-party cookies persist for now, but the migration to FedCM moves forward." Do not assert that "third-party cookie deprecation is finalized."
+-   **Law**: Even so, design federation that is **fragile and prone to breaking** when it depends on third-party cookies / is affected by partitioning (Storage Partitioning) — implicit IdP session sharing, hidden iframes, silent auth. Regardless of whether deprecation happens, advance the migration to FedCM or a redirect-based approach.
 
 ### 16.2. FedCM Support
 
@@ -535,6 +566,7 @@
 ### 18.2. SD-JWT (Selective Disclosure JWT)
 
 -   **Overview**: A JWT that allows selective disclosure of claims. Presents only the attributes the verifier needs, avoiding over-disclosure (privacy minimization). E.g., presenting only "over 18" rather than "date of birth" for age verification.
+-   **Spec status**: The base **SD-JWT is RFC 9901** (finalized). However, **SD-JWT VC** (which expresses a Verifiable Credential on top of it) is still an **IETF I-D (Internet-Draft; not yet an RFC)**. Do not conflate the two; if adopting SD-JWT VC, pin the version on the assumption that the draft may change.
 
 ### 18.3. OID4VCI / OID4VP
 
@@ -721,6 +753,9 @@ export async function verifyGoogleIdToken(idToken: string) {
 | 22 | Logout by client-side token deletion only | Server-side session lingers | Server revocation + Back-Channel (§17) |
 | 23 | Requesting excessive scopes up front | Over-privilege, consent fatigue, privacy harm | Minimization + Incremental (§2.4) |
 | 24 | Not matching UserInfo `sub` against the ID Token | Token substitution | Validate sub match (§4.3) |
+| 25 | Leaving sensitive-scope consent to third-party OAuth apps as user self-consent | Consent phishing steals legitimate tokens | Require admin consent + publisher verification (§2.5) |
+| 26 | Device Code Flow always enabled, no code-match confirmation | Device Code Phishing | Enable only when needed + short-lived + attempt limit + match confirmation (§2.6) |
+| 27 | Bearer-token-only operation for high-risk uses | AiTM steals/replays session tokens | Mandate sender-constrained (DPoP/mTLS) (§13.4) |
 
 ---
 
@@ -746,6 +781,11 @@ export async function verifyGoogleIdToken(idToken: string) {
 |:--------|:--------|
 | OAuth 2.1, Authorization Code, Grant | §2 |
 | Implicit Flow, ROPC, prohibited flows | §2.2, §21 |
+| Consent Phishing, illicit consent, admin consent, publisher verification | §2.5 |
+| Device Code Phishing, Device Authorization Grant, RFC 8628 | §2.6 |
+| AiTM, Adversary-in-the-Middle, token theft, sender-constrained | §13.4 |
+| acr, amr, RFC 8176, AAL/IAL/FAL mapping | §15.5 (→420) |
+| SD-JWT, RFC 9901, SD-JWT VC, I-D | §18.2 |
 | PKCE, code_verifier, code_challenge, S256 | §3.1, §20.1 |
 | state, CSRF | §3.2, §21 |
 | nonce, replay prevention | §3.3, §5.1 |

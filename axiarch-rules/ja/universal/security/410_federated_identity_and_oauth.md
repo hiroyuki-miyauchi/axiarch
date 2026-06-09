@@ -120,6 +120,24 @@
 -   **Law**: 要求する `scope` は機能遂行に必要な最小限に限定する（`000_security_privacy.md` §7.2 データ最小化）。
 -   **Action**: `openid`, `email`, `profile` 等から開始し、追加権限は **Incremental Authorization**（必要になった時点で追加要求）で取得する。
 
+### 2.5. OAuth Consent Phishing（不正同意付与攻撃）
+
+-   **背景**: 攻撃者が正規の AS 上に悪意あるOAuthアプリを登録し、ユーザーを正規の同意画面に誘導して「メール読み取り」「ファイルアクセス」等のスコープへ同意させ、**正規のトークンを正規のフローで詐取**する攻撃。フィッシングサイトを使わないため、**パスキー／フィッシング耐性要素では防げない**（同意行為そのものが正規であるため）。
+-   **Law**: テナント／組織のOAuthアプリ登録・同意を統制する。
+    1.  **アプリ／スコープ審査**: 自テナントに対し第三者アプリが要求できるスコープを制限し、機微スコープ（メール・ファイル・ディレクトリ）への**ユーザー任意同意を無効化**して **admin consent（管理者承認）必須**とする。
+    2.  **publisher 検証**: 検証済み発行元（verified publisher）でないアプリの同意を既定で拒否する。
+    3.  **同意の可観測性**: 付与済み同意（consent grant）を定期棚卸しし、未使用・過剰スコープのアプリを失効する。異常な新規同意付与を ITDR（`000_security_privacy.md` §3.3）へ送出。
+-   **自テナントが AS を提供する側（マルチテナントSaaS）**の場合は、登録アプリの publisher 検証・スコープ最小化・同意ログ提供を実装する。
+
+### 2.6. Device Authorization Grant のフィッシング面（RFC 8628）
+
+-   **背景**: Device Authorization Grant（§2.2 で TV/CLI 用に許容）は、攻撃者が自分のデバイスコードをユーザーに提示し「このコードを入力して」と誘導することで、被害者の認証を攻撃者のセッションに紐付ける **Device Code Phishing** の温床になりうる。
+-   **Law**: Device Code Flow は以下を満たす場合のみ使用する。
+    1.  **必要時のみ有効化**: 入力制約デバイス（TV/CLI/IoT）に限定し、通常のブラウザ／モバイルでは有効化しない。
+    2.  **短命・試行制限**: `user_code` は短命（数分）かつ低エントロピーを避け、検証エンドポイントに試行回数制限・レート制限を課す。
+    3.  **コード一致確認の明示**: ユーザーが入力するデバイス側に表示されたコードと承認画面のコードの一致をユーザーに明示確認させ、「他者から提示されたコードを入力しない」旨を警告表示する。
+    4.  高リスクスコープ／管理者操作を Device Code Flow で付与しない。
+
 ---
 
 ## §3. PKCE / state / nonce
@@ -427,6 +445,16 @@
 | サーバー間/金融API | mTLS（FAPI 2.0） |
 | レガシー互換が必要 | Bearer（ただし短命 + 失効厳格化） |
 
+### 13.4. AiTM（Adversary-in-the-Middle）とトークン窃取への対抗
+
+-   **背景**: AiTM フィッシング（Evilginx 等のリバースプロキシキット）は、ログインとMFAをリアルタイムに中継して**発行済みセッショントークン／リフレッシュトークンを窃取**する。パスキー（フィッシング耐性要素）はログイン自体の中継を阻止できるが、**発行後の Bearer トークンが盗まれれば再利用される**ため、トークン層の防御が別途必要となる。
+-   **Law**: AiTM とトークン窃取への対抗として、高リスク用途では **sender-constrained token（DPoP=RFC 9449 / mTLS=RFC 8705）を必須**とし、Bearer トークン単独運用に依存しない。盗難トークンは束縛鍵を持たない攻撃者からは再利用できない。
+-   **Action**:
+    1.  アクセストークン・リフレッシュトークンの双方を sender-constrained 化（§12.3, §13.1）。
+    2.  トークン窃取の兆候（同一トークンの IP/デバイス急変、Impossible Travel）を検知し、CAEP（→`420_step_up_auth_and_sensitive_operations.md` §10）で即時失効・再認証を発火。
+    3.  リフレッシュ再利用検知（§12.2）でトークンファミリーを一括失効。
+-   **Cross-Reference**: `420_step_up_auth_and_sensitive_operations.md` §28（ATO 検知）
+
 ---
 
 ## §14. トークン保管・BFFパターン（SPA/モバイル）
@@ -477,9 +505,11 @@
 
 -   あるトークンを別のトークン（異なる audience/権限）に交換。マイクロサービス間の権限委譲・ダウンスコープに使用。過剰権限の伝播を避けるため audience/scope を絞る。
 
-### 15.5. Step-Up は §420 へ
+### 15.5. 認証強度の表現（acr / amr）と Step-Up は §420 へ
 
--   高リスク操作時の再認証（Step-Up Authentication）、`acr`/`amr` クレーム、トランザクション認証は **`420_step_up_auth_and_sensitive_operations.md`** を参照（本ファイルでは扱わない）。
+-   **Law**: 認証の保証レベルと使用要素は **`acr`（Authentication Context Class Reference）/ `amr`（Authentication Methods References, RFC 8176）** クレームで表現し、RP（リソース側）が**操作の重大性に応じて検証**する。トークンを保持していること自体を認証強度の根拠にしない（§19.5 Zero Trust）。
+-   **AAL/IAL/FAL マッピング**: NIST SP 800-63 の **AAL（認証器保証）/ IAL（身元確認保証）/ FAL（フェデレーション保証）** を `acr` 値にマッピングし、操作ティアごとに必要レベルを定義する。詳細なマッピングと Step-Up（再認証）の実装は **`420_step_up_auth_and_sensitive_operations.md` §2・§3** に集約する（本ファイルでは深掘りしない）。
+-   高リスク操作時の再認証（Step-Up Authentication）、トランザクション認証は **`420_step_up_auth_and_sensitive_operations.md`** を参照。
 
 ---
 
@@ -489,7 +519,8 @@
 
 ### 16.1. 背景
 
--   **Law**: ブラウザのサードパーティCookie廃止・分割（Storage Partitioning）に伴い、サードパーティCookieに依存したフェデレーション（暗黙のIdPセッション共有、隠しiframe、サイレント認証）は壊れる前提で設計する。
+-   **Note（前提の正確化）**: 当初予定されていた Chrome のサードパーティCookie**一律廃止は撤回**され、当面はサードパーティCookieが**残存**する見込みである（ブラウザ間でも扱いが分かれる）。FedCM はそれと独立に前進しているため、設計の前提は「サードパーティCookieは当面残存するが、FedCM への移行は前進させる」とする。「サードパーティCookie廃止が確定済み」という断定はしない。
+-   **Law**: それでもなお、サードパーティCookie依存・分割（Storage Partitioning）の影響を受けやすいフェデレーション（暗黙のIdPセッション共有、隠しiframe、サイレント認証）は**脆く壊れやすい**前提で設計する。廃止の有無に関わらず、FedCM またはリダイレクトベースへの移行を進める。
 
 ### 16.2. FedCM 対応
 
@@ -535,6 +566,7 @@
 ### 18.2. SD-JWT（Selective Disclosure JWT）
 
 -   **概要**: クレームを選択的に開示できる JWT。検証者に必要な属性のみ提示し、過剰開示を避ける（プライバシー最小化）。年齢確認で「生年月日」ではなく「18歳以上」のみ提示する用途等。
+-   **規格ステータス**: 基盤の **SD-JWT は RFC 9901**（確定）。一方、その上で VC（Verifiable Credential）を表現する **SD-JWT VC はまだ IETF I-D（Internet-Draft, RFC 未確定）**である。両者を混同せず、SD-JWT VC を採用する場合はドラフト変更リスクを前提にバージョンを固定する。
 
 ### 18.3. OID4VCI / OID4VP
 
@@ -721,6 +753,9 @@ export async function verifyGoogleIdToken(idToken: string) {
 | 22 | ログアウトをクライアント側トークン削除のみ | サーバー側セッション残存 | サーバー失効+Back-Channel（§17） |
 | 23 | 過剰スコープを一括要求 | 過剰権限・同意疲れ・プライバシー侵害 | 最小化+Incremental（§2.4） |
 | 24 | UserInfo の `sub` を ID Token と照合しない | トークン置換 | sub 一致検証（§4.3） |
+| 25 | 第三者OAuthアプリの機微スコープ同意をユーザー任意に放任 | Consent Phishing で正規トークン詐取 | admin consent 必須化＋publisher 検証（§2.5） |
+| 26 | Device Code Flow を常時有効・コード一致確認なし | Device Code Phishing | 必要時のみ有効化＋短命＋試行制限＋一致確認（§2.6） |
+| 27 | 高リスク用途で Bearer トークン単独運用 | AiTM でセッショントークン窃取・再利用 | sender-constrained（DPoP/mTLS）必須（§13.4） |
 
 ---
 
@@ -746,6 +781,11 @@ export async function verifyGoogleIdToken(idToken: string) {
 |:----------|:-------------|
 | OAuth 2.1, Authorization Code, Grant | §2 |
 | Implicit Flow, ROPC, 禁止フロー | §2.2, §21 |
+| Consent Phishing, 不正同意, admin consent, publisher 検証 | §2.5 |
+| Device Code Phishing, Device Authorization Grant, RFC 8628 | §2.6 |
+| AiTM, Adversary-in-the-Middle, トークン窃取, sender-constrained | §13.4 |
+| acr, amr, RFC 8176, AAL/IAL/FAL マッピング | §15.5（→420） |
+| SD-JWT, RFC 9901, SD-JWT VC, I-D | §18.2 |
 | PKCE, code_verifier, code_challenge, S256 | §3.1, §20.1 |
 | state, CSRF | §3.2, §21 |
 | nonce, リプレイ防止 | §3.3, §5.1 |
