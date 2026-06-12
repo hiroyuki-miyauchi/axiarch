@@ -47,20 +47,20 @@ The file list, excludes, and group defaults are read from `axiarch-manifest.json
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.13.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.13.0 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.14.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.14.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --interactive
 ```
 
 ### 主な選択肢 / Main Choices
@@ -99,7 +99,7 @@ bash axiarch-scripts/axiarch-upgrade.sh --to v1.13.0 --interactive
 
 **Axiarch 公式健全性診断ツール**。Hook（導入済みの場合）+ LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AXIARCH.mdプロトコルのうち**外部検証可能な 10 領域以上**を一発診断する（v1.5.5 で Anti-Full-Overwrite が物理遮断対象に追加、v1.6.0 で sublimated files index 追加、v1.8.0 で Check D Task Boundary Detection 追加、v1.9.0 で PostToolUse diff guard を追加、v1.10.0でAxiarch本体のリリース版メタデータ整合とSafe Upgrade Wizard検査を追加、v1.11.0で現在タスク文書ローテーション、ネイティブタスク状態同期検査、Claude Memory正本境界検査を追加）。Claude Code / Codex の hook 設定が存在しない場合は「任意 hook 層が未導入」として扱い、hook 未導入だけを理由に失敗させない。「どこに不整合があるか」を見つけやすくする設計。
 
-The official Axiarch health diagnostic. One-shot 16-stage check covering hook firing when the hook layer is installed, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AXIARCH.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, the v1.8.0 task-boundary detection wiring, the v1.9.0 PostToolUse diff guard, v1.10.0 release metadata parity and Safe Upgrade Wizard checks, and v1.11.0 current-task document rotation, native task-state sync, ja/en numbered-heading parity, and Claude Memory canonical-boundary checks. If Claude Code / Codex hook settings are absent, the diagnostic treats the hook layer as optional and not installed rather than failing only on hook absence. `--quiet` flag for pre-commit usage.
+The official Axiarch health diagnostic. One-shot 16-stage check covering hook firing when the hook layer is installed, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AXIARCH.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, the v1.8.0 task-boundary detection wiring, the v1.9.0 PostToolUse diff guard, v1.10.0 release metadata parity and Safe Upgrade Wizard checks, v1.11.0 current-task document rotation, native task-state sync, ja/en numbered-heading parity, Claude Memory canonical-boundary checks, and Check 16 reminder invariants including Language First, Execution Harness, and the read-only subagent/security-scan delegation boundary. If Claude Code / Codex hook settings are absent, the diagnostic treats the hook layer as optional and not installed rather than failing only on hook absence. `--quiet` flag for pre-commit usage.
 
 ### 使い方 / Usage
 

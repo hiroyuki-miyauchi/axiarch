@@ -54,6 +54,7 @@ blueprint/
 |:--------|:----|
 | [core/000_project_overview.md](core/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
+| [core/020_governance_rules.md](core/020_governance_rules.md) | ガバナンス教訓の昇華ルール。正本入口、Language First非劣化、読み取り専用subagent/security-scan委任境界。 |
 | [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
 
@@ -157,7 +158,7 @@ SRE、インシデント管理、運用要件。
 | キーワード | 対応ファイル/フォルダ |
 |:---------|:--------------------|
 | プロジェクト概要・ビジョン・技術スタック | `core/000_project_overview.md` |
-| 教訓・アンチパターン・振り返り | `core/010_project_lessons_log.md` |
+| 教訓・アンチパターン・振り返り | `core/010_project_lessons_log.md`, `core/020_governance_rules.md` |
 | 機能仕様テンプレート | `core/998_feature_spec_template.md` |
 | プロジェクト固有ルールテンプレート | `core/999_project_specific_template.md` |
 | セキュリティ・コンプライアンス | `security/` |

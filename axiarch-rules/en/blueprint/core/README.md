@@ -18,6 +18,7 @@
 |:-----|:-----|
 | `core/000_project_overview.md` | Project overview & tech stack definition |
 | `core/010_project_lessons_log.md` | Central lessons index (crystallization origin) |
+| `core/020_governance_rules.md` | Crystallized governance lessons (canonical entrypoint, Language First non-degradation, read-only subagent/security-scan delegation boundary) |
 | `core/998_feature_spec_template.md` | Feature specification template |
 | `core/999_project_specific_template.md` | Project-specific rules template |
 

@@ -1,14 +1,14 @@
 # Axiarch Market Strategy
 
 調査日: 2026-05-15
-更新日: 2026-05-27
+更新日: 2026-06-12
 
 この文書は Axiarch 本体の価値最大化と市場戦略を管理するための文書です。採用先プロジェクトへコピーされる `axiarch-rules/{lang}/blueprint/` には配置しません。Blueprint は採用先プロジェクトの固有仕様と教訓を蓄積する領域であり、Axiarch 本体の市場戦略を混入させると 3層ガバナンスの責務分離に反します。
 
 ## 結論
 
 Axiarch の主戦場は、Google Antigravity、OpenAI Codex、Claude Code の3系統に集中する。
-OpenAI Codex、Claude Code、Google Antigravity はいずれも実運用で稼働確認済みの実証済み主対象として扱う。ただし、実証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証とは表現しない。
+現時点で実運用稼働確認済みの実証済み主対象として公開表現するのは Google Antigravity のみとする。OpenAI Codex と Claude Code は主対象の統合対応だが実務検証中であり、全環境での動作保証または実証済みプラットフォームとは表現しない。
 
 Cursor、GitHub Copilot、Windsurf は、未検証の拡張ポインター候補として扱う。検証済みまたは主対象のように見える表現は避け、ポインター設定と Markdown 互換性に基づく補助対象として位置づける。動作保証はしない。
 
@@ -16,22 +16,36 @@ Cursor、GitHub Copilot、Windsurf は、未検証の拡張ポインター候補
 
 AI支援開発は、単発プロンプトの品質競争から、リポジトリに常駐する指示、セッション横断の記憶、ツール実行前後の hook、ブラウザやターミナルを含む自律検証へ移行している。
 
-Axiarch が勝つべき市場は「より賢いプロンプト」ではなく、「AIエージェントがプロジェクトを壊さないためのガバナンス層」である。特に以下の課題が強いチームほど導入価値が高い。
+Axiarch が注力すべき市場は「より賢いプロンプト」ではなく、「AIエージェントがプロジェクトを壊すリスクを下げるためのガバナンス層」である。特に以下の課題が強いチームほど導入価値が高い。
 
 - AIがルールを読まずに作業を始める
 - セッションをまたぐと仕様や教訓が消える
 - 操縦者のスキル差で品質が大きくぶれる
 - 仕様なしでコードが増え、レビュー不能になる
-- 全文上書き、勝手な push、手動DB変更などの破壊的操作を防ぎたい
-- 日本語プロジェクトで英語混入やニュアンスずれを防ぎたい
+- 全文上書き、勝手な push、手動DB変更などの破壊的操作リスクを下げたい
+- 日本語プロジェクトで英語混入やニュアンスずれを抑えたい
+
+## 2026-06-12 市場調査アップデート
+
+2026-06-12時点の一次情報・公式ドキュメント・研究動向を再確認した結果、Axiarch の価値は「特定エージェント向けの設定集」ではなく、agent指示ファイル、hooks、skills、subagents、spec-driven development、agentic securityをまたぐ横断ガバナンスとして説明するのが最も実態に合う。
+
+確認した市場シグナルは以下。
+
+- AGENTS.md は、複数 coding agent が読むオープンな指示ファイル形式として採用が広がっている。Axiarch は AGENTS.md を置き換えるのではなく、共通入口・薄い adapter として扱い、AXIARCH.md とルール体系へ誘導する。
+- OpenAI Codex は作業前に AGENTS.md を読む前提を公式に持ち、nested AGENTS.md によるスコープ差分も扱う。Axiarch はこの考え方を、Universal / Blueprint / optional Prompts の責務分離とロード証跡で補う。
+- Claude Code は hooks、skills、subagents を公式機能として持つ。Axiarch の Execution Harness は、これらの機能を必須前提にせず、使える場合だけ補強する任意実行層として位置づける。
+- GitHub Copilot / VS Code は repository instructions、path-specific instructions、custom agents、skills、prompt files を持つ。Axiarch は Copilot を検証済み主対象とは言わず、pointer-only 互換候補として扱う。
+- Kiro と GitHub Spec Kit は requirements / design / tasks、constitution / spec / plan / tasks のような spec-driven development を前面に出している。Axiarch は spec-driven development そのものではなく、その上位で「正本・証跡・承認境界・教訓昇華」を維持する。
+- MCP と OWASP の agentic security 動向は、authorization、least privilege、tool boundary、人間承認、PII/secret保護を agent基盤の前提にしている。Axiarch は Human Approval Gate、read-only delegation boundary、security/FinOps/privacyの責務を明確にすることで、この流れに接続する。
+- 2026年の agentic coding tool configuration 研究では、Context Files が広く使われ、AGENTS.md が相互運用標準として浮上する一方、Skills / Subagents はまだ浅い採用段階とされる。Axiarch は低摩擦なMarkdown正本を維持しつつ、Skills / Subagents を任意の補助導線として扱う方針が妥当。
 
 ## 公式情報から見た主対象3系統
 
 | 対象 | 市場上の意味 | Axiarch の接続点 | 戦略上の扱い |
 |:-----|:-------------|:-----------------|:-------------|
 | Google Antigravity | editor、terminal、browser に直接アクセスする agent-first IDE として、長い自律タスクの需要が強い | `.agents/rules/prompt_pointer.md`、Axiarchのルールロード、実運用知見 | 実運用で稼働確認済みの実証済み主対象。agent-first時代の品質床として訴求する |
-| OpenAI Codex | `AGENTS.md` をプロジェクト指示として扱い、hook も公式に持つエージェント環境 | `AGENTS.md`、`.codex/hooks.json`、Axiarch診断、作業文書3点セット、`update_plan` | 実運用で稼働確認済みの実証済み主対象。Native Codex Environment Integration と release gate の証跡を前面に出す |
-| Claude Code | `CLAUDE.md`、auto memory、hooks により、継続的な指示と物理制御を組み合わせられる環境 | `CLAUDE.md`、`.claude/settings.json`、UserPromptSubmit、PreToolUse、SessionStart、Task tools | 実運用で稼働確認済みの実証済み主対象。hook補強モデルの代表例として扱う |
+| OpenAI Codex | `AGENTS.md` をプロジェクト指示として扱い、hook も公式に持つエージェント環境 | `AGENTS.md`、`.codex/hooks.json`、Axiarch診断、作業文書3点セット、`update_plan` | 主対象の統合対応。実務検証中であり、動作保証や実証済み表現は避ける |
+| Claude Code | `CLAUDE.md`、memory、hooks、skills、subagents により、継続的な指示、支援ファイル、専門コンテキスト、実行前後の制御を組み合わせられる環境 | `CLAUDE.md`、`.claude/settings.json`、UserPromptSubmit、PreToolUse、SessionStart、Task tools、optional skills/subagents | 主対象の統合対応。実務検証中であり、動作保証や実証済み表現は避ける |
 
 ## 拡張互換の扱い
 
@@ -47,7 +61,7 @@ Axiarch が勝つべき市場は「より賢いプロンプト」ではなく、
 
 Axiarch は、AI coding agent のための Constitution-Driven Governance Layer である。
 
-市場にある多くの選択肢は、エージェント本体、IDE、チャット体験、補完体験、またはプロンプトテンプレートである。Axiarch はそれらと競合するより、上に載る横断ガバナンス層として勝つ。
+市場にある多くの選択肢は、エージェント本体、IDE、チャット体験、補完体験、またはプロンプトテンプレートである。Axiarch はそれらと競合するより、上に載る横断ガバナンス層として価値を出す。
 
 一言で言うなら、Axiarch は「AIに何を作らせるか」ではなく「AIがどう振る舞うべきか」をリポジトリに固定する仕組みである。
 
@@ -59,10 +73,13 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 | Blueprint First | コードより先に仕様を持たせ、vibe coding の暴走を抑える |
 | 作業文書3点セット | `task.md`、`implementation_plan.md`、`walkthrough.md` により、作業の意図、判断、確認を残す |
 | 結晶化プロトコル | 失敗や判断を一回限りの会話で終わらせず、再利用可能なルールへ変える |
-| hook による物理制御 | Claude Code と Codex では、読み忘れや全文上書きなどを hook 層で検出しやすくし、一部の危険操作を遮断できる |
+| hook による物理制御 | Claude Code と Codex では、読み忘れや全文上書きなどを hook 層で検出しやすくし、一部の危険操作をブロックしやすくする |
 | エージェント横断 | エージェントを乗り換えても、リポジトリ内の憲法とルールは残る |
-| 日本語実務適性 | 日本語プロジェクトで、英語混入や曖昧な指示を防ぐ運用規律を持つ |
+| 日本語実務適性 | 日本語プロジェクトで、英語混入や曖昧な指示を抑える運用規律を持つ |
 | 診断可能性 | `check-axiarch-health.sh` により、遵守状態を人間の感覚ではなくコマンドで確認できる |
+| 標準との相互運用 | AGENTS.md、repository instructions、skills、prompt files などの入口を置き換えず、Axiarch正本へつなぐ |
+| Spec-driven governance | Kiro / Spec Kit 型の仕様駆動開発を補完し、実装前後の証跡、承認境界、教訓昇華を保つ |
+| Agentic security alignment | MCP authorization、least privilege、OWASP agentic risk などを背景に、read-only delegation と高リスク操作承認を分ける |
 
 ## 顧客セグメント
 
@@ -78,9 +95,9 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 ## 戦略優先順位
 
 1. Google Antigravity、Codex、Claude Code の主対象3系統を README、ROADMAP、llms 系文書で一貫させる。
-2. Codex / Claude Code / Antigravity は「実運用で稼働確認済みの実証済み主対象」として扱う。ただし、全プロジェクト環境での動作保証とは表現しない。
-3. Codex は「ネイティブ統合済み、release gate確認済み、`update_plan` 連携確認済み」として扱う。
-4. Claude Code は「hook補強モデルとTask tools連携の実運用確認済み主対象」として扱う。
+2. 実運用で稼働確認済みの実証済み主対象として扱うのは Google Antigravity のみとする。ただし、全プロジェクト環境での動作保証とは表現しない。
+3. Codex は「主対象の統合対応、ネイティブ統合対応、release gate検証対象、`update_plan` 連携対象」として扱う。実務検証中であり、実証済みまたは動作保証済みとは表現しない。
+4. Claude Code は「主対象の統合対応、hook補強モデルとTask tools連携の検証対象」として扱う。実務検証中であり、実証済みまたは動作保証済みとは表現しない。
 5. Cursor、GitHub Copilot、Windsurf は「拡張ポインター候補」とし、過度に前面へ出さない。
 6. Compatibility Matrix では、検証済みの意味を「実運用稼働確認済み」と「全環境での動作保証ではない」に分け、検証日、検証項目、検証範囲を記録する。
 7. `axiarch-rules/{lang}/blueprint/` に Axiarch 本体の市場戦略を入れない責務分離を維持する。
@@ -90,9 +107,10 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 - README の互換性表を、主対象と拡張互換に分ける。
 - ROADMAP に主対象3系統への集中方針を追記する。
 - llms.txt と llms-full.txt を README と同じ市場表現へ同期する。
-- Codex / Claude Code / Antigravity の表現を「Production-validated primary / real operational usage / no operation guarantee」に統一する。
+- Antigravity の表現を「Production-validated primary / real operational usage / no operation guarantee」に統一し、Codex / Claude Code は「Primary integration target / practical validation / no operation guarantee」に統一する。
 - Cursor、GitHub Copilot、Windsurf の表現を「Extended pointer-only candidate / no operation guarantee」に統一する。
-- docs と script 表示で、主対象3系統の検証ステータスを production-validated primary にそろえる。
+- docs と script 表示で、Antigravity の実運用検証済みステータスと Codex / Claude Code の実務検証中ステータスを分けてそろえる。
+- ROADMAP と MARKET_STRATEGY の市場調査節は、一次情報で確認できた範囲と推測を分け、過度な「防止」「唯一」「実現」表現を避ける。
 
 ## 60日アクション
 
@@ -100,6 +118,7 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 - Claude Code と Codex の hook 差分表を追加し、どの制御がどちらで有効かを明確にする。
 - Antigravity の起動、ルールロード、ブラウザ検証導線を短いセットアップ例にまとめる。
 - `check-axiarch-health.sh` に、主対象3系統の設定検出結果をさらに読みやすく出す改善を検討する。
+- Claude Code Skills / subagents と Codex / Copilot 系 custom instruction の互換方針を、optional adapter としてCompatibility Matrixに分離する。
 
 ## 90日アクション
 
@@ -107,6 +126,7 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 - 主対象3系統ごとの最小サンプルリポジトリ、または導入済みサンプル手順を整備する。
 - GitHub Actions 上で Markdown、リンク、hook JSON、shell 構文、配布物整合性を継続検証する。
 - 市場説明を「エージェント別セットアップ」から「AI開発ガバナンスの品質床」へ寄せる。
+- 公開市場調査の更新日、参照URL、検証範囲、未検証範囲を1箇所で追跡する。
 
 ## リスクと抑止策
 
@@ -122,7 +142,7 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 ## 成功指標
 
 - README、ROADMAP、llms 系文書で主対象3系統の表現が一致している。
-- Codex、Claude Code、Antigravity が実運用で稼働確認済みの実証済み主対象として説明されている。
+- Google Antigravity のみが実運用で稼働確認済みの実証済み主対象として説明され、Codex と Claude Code は主対象の統合対応かつ実務検証中として説明されている。
 - Codex と Claude Code が「期待互換」ではなく、主対象として説明されている。
 - Cursor、GitHub Copilot、Windsurf が検証済みまたは動作保証済みのように見えない。
 - `init.sh` の選択肢と README の互換性表に矛盾がない。
@@ -131,17 +151,22 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 
 ## 参照した公式情報
 
-- OpenAI Codex: Custom instructions with AGENTS.md  
-  https://developers.openai.com/codex/guides/agents-md
-- OpenAI Codex: Customization  
-  https://developers.openai.com/codex/concepts/customization
-- OpenAI Codex: Hooks  
-  https://developers.openai.com/codex/hooks
-- Claude Code: Hooks  
-  https://code.claude.com/docs/en/hooks
-- Claude Code: Memory  
-  https://code.claude.com/docs/en/memory
-- Google: Gemini 3 and Google Antigravity  
-  https://blog.google/products-and-platforms/products/gemini/gemini-3/
-- Google Antigravity  
-  https://antigravity.google/
+- [AGENTS.md: Open format for coding agents](https://agents.md/)
+- [OpenAI Codex: Custom instructions with AGENTS.md](https://developers.openai.com/codex/guides/agents-md)
+- [OpenAI Codex: Customization](https://developers.openai.com/codex/concepts/customization)
+- [OpenAI Codex: Hooks](https://developers.openai.com/codex/hooks)
+- [Claude Code: Hooks](https://code.claude.com/docs/en/hooks)
+- [Claude Code: Memory](https://code.claude.com/docs/en/memory)
+- [Claude Code: Skills](https://code.claude.com/docs/en/skills)
+- [Claude Code: Subagents](https://code.claude.com/docs/en/sub-agents)
+- [GitHub Copilot: Repository custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions)
+- [VS Code: Customize AI responses](https://code.visualstudio.com/docs/copilot/customization/overview)
+- [Kiro: Specs](https://kiro.dev/docs/specs/)
+- [GitHub Spec Kit](https://github.com/github/spec-kit)
+- [Model Context Protocol: Authorization specification](https://modelcontextprotocol.io/specification/latest/basic/authorization)
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+- [arXiv: Configuring Agentic AI Coding Tools](https://arxiv.org/abs/2602.14690)
+- [Google: Gemini 3 and Google Antigravity](https://blog.google/products-and-platforms/products/gemini/gemini-3/)
+- [Google Antigravity](https://antigravity.google/)
+
+補助情報として、Google Antigravity の公開プレビューや agent-first IDE としての報道も確認した。ただし、Axiarchの「実運用稼働確認済み」表現は、外部報道ではなく本プロジェクトでの実務確認に基づいて扱う。

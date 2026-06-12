@@ -162,8 +162,8 @@ select_language_dirs() {
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) OpenAI Codex — Production-validated primary ✅ (AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
-  echo "  2) Claude Code — Production-validated primary ✅ (CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
+  echo "  1) OpenAI Codex — Primary integration target 🔶 (under practical validation, no guarantee; AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
+  echo "  2) Claude Code — Primary integration target 🔶 (under practical validation, no guarantee; CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
   echo "  3) Google Antigravity — Production-validated primary ✅ (.agents/rules/prompt_pointer.md adapter → AXIARCH.md)"
   echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee; .cursor/rules/axiarch.mdc adapter → AXIARCH.md)"
   echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee; .github/copilot-instructions.md adapter → AXIARCH.md)"

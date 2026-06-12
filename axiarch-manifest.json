@@ -244,6 +244,12 @@
       "policy": "replace-if-local-unchanged"
     },
     {
+      "path": "axiarch-rules/{lang}/blueprint/core/020_governance_rules.md",
+      "group": "blueprint_templates",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
       "path": "axiarch-rules/{lang}/blueprint/INDEX.md",
       "group": "blueprint_index",
       "owner": "mixed",
@@ -269,6 +275,7 @@
       "exclude": [
         "axiarch-rules/{lang}/blueprint/core/000_project_overview.md",
         "axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md",
+        "axiarch-rules/{lang}/blueprint/core/020_governance_rules.md",
         "axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md",
         "axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md",
         "axiarch-rules/{lang}/blueprint/operations/010_release_upgrade_operations.md"

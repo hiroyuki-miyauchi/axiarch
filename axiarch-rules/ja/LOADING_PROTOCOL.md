@@ -33,7 +33,7 @@
 
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
-> Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済みの実証済み主対象である。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではない。Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
+> Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。現時点で実運用稼働確認済みとして公開表現する対象は Google Antigravity のみである。Codex / Claude Code は主対象の統合対応だが実務検証中であり、全環境での動作保証や実証済みプラットフォームとしては扱わない。Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
 
 ### 🧭 ネイティブタスク・プラン状態同期（v1.11.0+）
 
@@ -53,7 +53,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、Claude Memory正本境界も確認する 15 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、Claude Memory正本境界、Check 16 の Language First / Execution Harness / 読み取り専用委任境界も確認する 16 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
@@ -114,7 +114,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 - INDEX.mdの要約や概要だけで「読んだ」と見なすことは**一切禁止**する。
 - 「ファイルを直接開く」とは、`view_file`等のツールでファイルの内容を**実際に取得完了すること**を意味する。
-- **🚨 出力・回答の完全禁止（ハルシネーション対策）**: ツールがファイル内容を返し、AIがそれを完全に読み終える**前**に、「〇〇をロードします」「把握しました」「読み込み完了しました」といったテキストをユーザーへ先行して出力することは**ハルシネーション（幻覚）であり、いかなる場合も絶対禁止**とする。AIはツールの実行結果を内部で取得した**後**に、初めて思考・回答を行わなければならない。
+- **🚨 ロード完了主張の禁止（ハルシネーション対策）**: ツールがファイル内容を返し、AIがそれを完全に読み終える**前**に、「把握しました」「読み込み完了しました」「ロード済みです」など、実ロード完了を示すテキストをユーザーへ先行して出力することは**ハルシネーション（幻覚）であり、いかなる場合も絶対禁止**とする。進行状況を述べる場合も、実際に読んだ内容と一致する範囲に限定し、ロード済み証跡として扱ってはならない。
 - 上記は自律ロード・ユーザー指示によるロードを問わず、**全てのルールファイル参照時に強制適用**される。
 
 ### 大規模ファイル対応

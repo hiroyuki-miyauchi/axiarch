@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
 > **現在の安定版 / Current Stable**: v1.14.0 Security Authentication Stack (security 400-450)\
-> **次期作業 / Next**: Static Lint & Process Supervision（候補 / candidate）\
+> **次期作業 / Next**: Read-only subagent / Deep Security Scan approval-boundary patch + Static Lint & Process Supervision（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -15,17 +15,26 @@
 
 ### 🎯 戦略フォーカス — 主対象3系統への集中（2026-05-15）
 
-- **実運用稼働確認済み主対象**: OpenAI Codex / Claude Code / Google Antigravity
+- **実運用稼働確認済み主対象**: Google Antigravity
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: v1.8.2 の `.codex/hooks.json` ネイティブ統合、v1.9.0 の PostToolUse diff guard、v1.11.0 の `update_plan` ネイティブタスク状態同期、release gate の一連動作を Axiarch 本体リポジトリで検証済みとして扱う
-- **Claude Code**: hook 補強モデルとTask tools連携を実運用で稼働確認済みとして扱う
+- **Codex**: `.codex/hooks.json`、PostToolUse diff guard、`update_plan` 連携を持つ主対象の統合対応。実務検証中であり、全環境での動作保証または実証済み対象とは扱わない
+- **Claude Code**: hook 補強モデルとTask tools連携を持つ主対象の統合対応。実務検証中であり、全環境での動作保証または実証済み対象とは扱わない
 - **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
 
 ---
 
 > **履歴注記**: v1.11.2以前の完了済みリリース項目には、当時の正本であった `AGENTS.md` や Protocol 0-9 の表記が残っています。v1.12.0以降の現行正本は `AXIARCH.md` であり、過去項目はリリース履歴として扱います。
+
+---
+
+### 🚧 v1.14.1 候補 — Read-only Subagent / Deep Security Scan 承認境界パッチ
+
+- **誤停止リスク低減** — Codex が「正式な Codex Security Deep Security Scan はサブエージェント明示許可が必要」と判断して止まる問題を起こしにくくする。ユーザーが deep audit / security scan / exhaustive review / Deep Security Scan を明示した場合、必要な読み取り専用 worker fanout はその要求に含まれる。
+- **Human Approval Gate の非劣化** — stage、commit、push、deploy、DB適用、本番データ変更、課金増、機微データ取得、外部 tool install / auth は引き続き明示承認対象。緩和するのは読み取り専用委任の誤ブロックだけ。
+- **Fallback の正直性** — runtime に委任機能がない場合は Deep Security Scan 実行済みと主張せず、通常 scan またはメインエージェント順次 role pass へ fallback する。
+- **再発検知** — boot reminder と health Check 16 で、この委任境界文言の削除・劣化を検出する。
 
 ---
 
@@ -556,16 +565,24 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
-### ✅ v1.14.0 — Security Authentication Stack（2026-06-09）
+### ✅ v1.12.1 — Harness Engineering Release Parity Patch（2026-06-08）
 
-高セキュリティ認証〜認可〜MCP セキュリティの Universal Rules を 6 ファイル新設（Universal ルール 39→45）。市場調査（一次情報・最新標準）と敵対的レビューを反映。
+- **版数保護** — 既存の `v1.12.0` タグを上書きせず、タグ後のHarness Engineering追修をパッチ版として整理。
+- **実行プロトコル補強** — `EXECUTION_HARNESS_PROTOCOL.md` のja/en本文に、ハーネスエンジニアリングが第4層ではなく3層モデルを実行順序、監査、証跡、人間承認へ接続する手順であることを明記。
+- **Safe Upgrade整合** — manifestを読めないfallbackでも `Execution Harness / Harness Engineering` のグループ表示を維持し、一時helper取得例とupgrade helper usage例も `v1.12.1` へ揃える。
+- **再発検知** — `check-axiarch-health.sh` が実行プロトコル本文、Safe Upgrade fallback label、current release helper pin、upgrade helper usage例を検査。
+- **配布メタデータ整合** — installer、manifest、README、llms、Safe Upgrade prompts、Blueprint INDEXの現在安定版を `v1.12.1` へ更新。
 
-- **security/400** パスキー・MFA / **410** OAuth・OIDC連携・SSO / **420** ステップアップ・OTP・重要操作 / **430** 認可（ReBAC/Zanzibar・Cedar/OPA）/ **440** 非人間・ワークロード・AIエージェントID（SPIFFE・OBO・MCP/XAA）/ **450** MCPセキュリティ（使う側+作る側、token passthrough禁止・rug pull検知等）
-- **000 de-dup** — §4/§18.3 に深掘りファイルへのクロスリファレンス
-- **フレームワーク文言是正（#52）** — 断言/誇張の是正・en側の一般化・採番/ロード仕様の明確化
-- **整合** — INDEX(ja/en)・README ドメイン表・llms ダイジェスト・件数（39→45）を同期
-- **正確性** — OAuth 2.1=ドラフト・RFC 9700 基準、WebAuthn L3=CR、MCP=新興として正確表記
-- PR #52 / #53 を集約
+---
+
+### ✅ v1.13.0 — Prompt Slash Commands for Claude Code（2026-06-08）
+
+`axiarch-prompts/` がコピペ運用のみで `/` に出ない摩擦を解消し、プロンプトを Claude Code native slash command として first-class 化。市場調査フォーキャスト賭け #2（AGENTS.md 標準との関係明文化）は #49 で実装済、本リリースで slash-command 基盤を提供し、賭け #1（SKILL.md 移行）の前提を整える。
+
+- **`axiarch-scripts/axiarch-prompts-install.sh`** — prompts から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を生成。正本プロンプトを Read+実行する thin pointer（single source of truth）。冪等・bilingual（`--lang ja|en|auto`）・`--clean`/`--dry-run`・pure bash
+- **init.sh opt-in** — プロンプトコピー かつ Claude Code 選択時のみ slash command 生成を質問・実行
+- **エージェント別の正直な対応** — Claude Code のみ native 生成。Codex（custom prompts は global-only・deprecated）/ Antigravity（workflow project-file 規約未文書化）はコピペ/AGENTS 運用
+- **生成物は artifact 扱い** — `.claude/commands/axiarch-*.md` を gitignore、generator を source of truth とする
 
 ---
 
@@ -583,40 +600,32 @@ Claude Code / Codex の長期セッションで `task.md` / `implementation_plan
 
 ---
 
-### ✅ v1.13.0 — Prompt Slash Commands for Claude Code（2026-06-08）
+### ✅ v1.14.0 — Security Authentication Stack（2026-06-09）
 
-`axiarch-prompts/` がコピペ運用のみで `/` に出ない摩擦を解消し、プロンプトを Claude Code native slash command として first-class 化。市場調査フォーキャスト賭け #2（AGENTS.md 標準との関係明文化）は #49 で実装済、本リリースで slash-command 基盤を提供し、賭け #1（SKILL.md 移行）の前提を整える。
+高セキュリティ認証〜認可〜MCP セキュリティの Universal Rules を 6 ファイル新設（Universal ルール 39→45）。市場調査（一次情報・最新標準）と敵対的レビューを反映。
 
-- **`axiarch-scripts/axiarch-prompts-install.sh`** — prompts から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を生成。正本プロンプトを Read+実行する thin pointer（single source of truth）。冪等・bilingual（`--lang ja|en|auto`）・`--clean`/`--dry-run`・pure bash
-- **init.sh opt-in** — プロンプトコピー かつ Claude Code 選択時のみ slash command 生成を質問・実行
-- **エージェント別の正直な対応** — Claude Code のみ native 生成。Codex（custom prompts は global-only・deprecated）/ Antigravity（workflow project-file 規約未文書化）はコピペ/AGENTS 運用
-- **生成物は artifact 扱い** — `.claude/commands/axiarch-*.md` を gitignore、generator を source of truth とする
-
----
-
-### ✅ v1.12.1 — Harness Engineering Release Parity Patch（2026-06-08）
-
-- **版数保護** — 既存の `v1.12.0` タグを上書きせず、タグ後のHarness Engineering追修をパッチ版として整理。
-- **実行プロトコル補強** — `EXECUTION_HARNESS_PROTOCOL.md` のja/en本文に、ハーネスエンジニアリングが第4層ではなく3層モデルを実行順序、監査、証跡、人間承認へ接続する手順であることを明記。
-- **Safe Upgrade整合** — manifestを読めないfallbackでも `Execution Harness / Harness Engineering` のグループ表示を維持し、一時helper取得例とupgrade helper usage例も `v1.12.1` へ揃える。
-- **再発検知** — `check-axiarch-health.sh` が実行プロトコル本文、Safe Upgrade fallback label、current release helper pin、upgrade helper usage例を検査。
-- **配布メタデータ整合** — installer、manifest、README、llms、Safe Upgrade prompts、Blueprint INDEXの現在安定版を `v1.12.1` へ更新。
+- **security/400** パスキー・MFA / **410** OAuth・OIDC連携・SSO / **420** ステップアップ・OTP・重要操作 / **430** 認可（ReBAC/Zanzibar・Cedar/OPA）/ **440** 非人間・ワークロード・AIエージェントID（SPIFFE・OBO・MCP/XAA）/ **450** MCPセキュリティ（使う側+作る側、token passthrough禁止・rug pull検知等）
+- **000 de-dup** — §4/§18.3 に深掘りファイルへのクロスリファレンス
+- **フレームワーク文言是正（#52）** — 断言/誇張の是正・en側の一般化・採番/ロード仕様の明確化
+- **整合** — INDEX(ja/en)・README ドメイン表・llms ダイジェスト・件数（39→45）を同期
+- **正確性** — OAuth 2.1=ドラフト・RFC 9700 基準、WebAuthn L3=CR、MCP=新興として正確表記
+- PR #52 / #53 を集約
 
 ---
 
-### 🔬 市場調査ベース戦略ロードマップ（2025-2026 競合・標準調査由来、優先度順）
+### 🔬 市場調査ベース戦略ロードマップ（2026-06-12追補、優先度順）
 
-シリコンバレー水準の市場調査（AGENTS.md 標準 / Claude Code Skills・Subagents / Cursor・Windsurf rules / spec-driven dev: Kiro・spec-kit・BMAD / context engineering: ACE arXiv 2510.04618 を一次情報で裏取り）に基づく戦略フォーキャスト。各賭けは**製品方向を変える憲法級変更**を含むため、慎重な独立リリースで段階実行する。
+AGENTS.md 標準、OpenAI Codex、Claude Code Skills・Subagents・Hooks、GitHub Copilot / VS Code custom instructions、Kiro / GitHub Spec Kit、MCP authorization、OWASP agentic security、agentic coding tool configuration研究を確認したうえでの戦略フォーキャスト。各賭けは**製品方向を変える憲法級変更**を含むため、確認済み事実と戦略仮説を分け、慎重な独立リリースで段階実行する。
 
 | 優先 | 賭け | 狙い（業界整合） | リスク | 想定リリース |
 |:--|:--|:--|:--|:--|
-| 1 | **Agent Skills (SKILL.md) 標準移行** | prompts を `SKILL.md`（frontmatter + progressive disclosure）で再配布。手動 `/` 起動と文脈自動起動の両取り + Agent Skills 標準でマルチツール移植。Claude Code の command/Skill 統合（v2.1.3, 2026-01）に追従 | 中（v1.13.0 slash-command の発展形。先行マージ後に着手）| v1.13.0 マージ後 |
+| 1 | **Agent Skills (SKILL.md) 任意パッケージ化** | prompts を `SKILL.md`（metadata + progressive disclosure + supporting files）でも配布できる形にする。Claude Codeではsupporting filesが必要な場合にSkillsが推奨されるため、slash-commandの置換ではなく任意の上位配布形として検討 | 中（v1.13.0 slash-command の発展形。先行マージ後に着手）| v1.13.0 マージ後 |
 | 2 | **AGENTS.md 標準との関係明文化** | AGENTS.md は Linux Foundation 傘下標準・60,000+ 採用・nearest-file override が中核。「なぜ AXIARCH.md 正本か」「標準とどう相互運用するか」を README で明示し新規採用摩擦を解消 | 低（doc 追記）| 即時〜近リリース |
-| 3 | **結晶化 v2（Reflector + 剪定/重要度）** | 採用前検証ループ・教訓の重要度付け・剪定・矛盾解消を CRYSTALLIZATION_PROTOCOL に追加。ACE 研究（Generator→Reflector→Curator）に準拠し Blueprint 劣化を防止 | 中（protocol 拡張）| 近-中期 |
+| 3 | **結晶化 v2（検証 + 剪定/重要度）** | 採用前検証ループ・教訓の重要度付け・剪定・矛盾解消を CRYSTALLIZATION_PROTOCOL に追加。Context Files が広く使われる一方でSkills/Subagents採用は浅いという研究動向を踏まえ、Blueprint が受動的な知識置き場に劣化するリスクを下げる | 中（protocol 拡張）| 近-中期 |
 | 4 | **adapter 鮮度追従** | `.windsurfrules`（レガシー単一）→ `.windsurf/rules/*.md`（新標準）併存、Cline の AGENTS.md ネイティブ対応等。init.sh の adapter 保守方針を文書化 | 低-中（配布ロジック）| 近期 |
-| 5 | **AXIARCH.md progressive disclosure** | 516行の正本を「短いコア憲章 + オンデマンド詳細プロトコル」に分割し毎ターン全文ロードの文脈コストを削減。業界の最小ロード設計（Cursor globs / Claude progressive disclosure / AGENTS.md nearest-file）に整合 | **高**（正本大改修＝憲法改正級。health check・safe-upgrade・全アダプター・bilingual 整合を同時検証。十分な実機テスト必須）| 専用メジャー（v1.14/v2.0） |
+| 5 | **AXIARCH.md progressive disclosure** | 516行の正本を「短いコア憲章 + オンデマンド詳細プロトコル」に分割し毎ターン全文ロードの文脈コストを削減。AGENTS.md nearest-file、Claude Skills progressive disclosure、VS Code path-specific instructionsなどの最小ロード設計と整合させる | **高**（正本大改修＝憲法改正級。health check・safe-upgrade・全アダプター・bilingual 整合を同時検証。十分な実機テスト必須）| 専用メジャー（v1.14/v2.0） |
 
-> **市場内の位置づけ（調査結論）**: Axiarch の「3層 + ハーネス + 人間承認ゲート + 教訓結晶化」という多層ガバナンス統合 OSS は調査範囲で他に存在せず、spec-driven dev（Kiro/spec-kit/BMAD）を内包し、結晶化は ACE 研究の Curator/playbook 概念をファイルベースで先取りしている。最大の構造的論点は「全文先読み vs 必要時注入」（賭け #5 で対処）と「単一正本 vs AGENTS.md ネスト標準」（賭け #2 で関係明文化）。
+> **市場内の位置づけ（調査結論）**: 調査範囲では、Axiarch の「3層 + ハーネス + 人間承認ゲート + 教訓結晶化」を同じ粒度で束ねるOSSは確認できていない。ただし、spec-driven dev（Kiro / Spec Kit）やAGENTS.md標準、Skills/Subagents、MCP securityとは重なる領域があるため、Axiarch はそれらを置き換えるのではなく、ファイルベースの正本、証跡、承認境界、教訓昇華で補完する位置づけにする。最大の構造的論点は「全文先読み vs 必要時注入」（賭け #5 で対処）と「単一正本 vs AGENTS.md ネスト標準」（賭け #2 で関係明文化）。
 
 ---
 
@@ -688,17 +697,26 @@ enterprise adoption needs.
 
 ### 🎯 Strategic Focus — Concentrate on Three Primary Agents (2026-05-15)
 
-- **Production-validated primary targets**: OpenAI Codex / Claude Code / Google Antigravity
+- **Production-validated primary target**: Google Antigravity
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: v1.8.2 `.codex/hooks.json` native integration, v1.9.0 PostToolUse diff guard, v1.11.0 `update_plan` native task-state sync, and the release-gate workflow are validated through real operational usage
-- **Claude Code**: The hook-reinforcement model and Task tools integration are validated through real operational usage
+- **Codex**: Primary integration target with `.codex/hooks.json`, PostToolUse diff guard, and `update_plan` integration; under practical validation, with no operation guarantee for every environment
+- **Claude Code**: Primary integration target with the hook-reinforcement model and Task tools integration; under practical validation, with no operation guarantee for every environment
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
 
 ---
 
 > **Historical note**: Completed release entries for v1.11.2 and earlier may still mention `AGENTS.md` and Protocol 0-9 because those were the canonical labels at the time. From v1.12.0 onward, the active source of truth is `AXIARCH.md`; older entries are release history.
+
+---
+
+### 🚧 v1.14.1 Candidate — Read-only Subagent / Deep Security Scan Approval-Boundary Patch
+
+- **False-block risk reduction** — Make it less likely that Codex stops with "formal Codex Security Deep Security Scan requires explicit subagent permission." When the user explicitly asks for deep audit, security scan, exhaustive review, or Deep Security Scan, the required read-only worker fanout is included in that request.
+- **No Human Approval Gate regression** — stage, commit, push, deploy, DB apply, production data mutation, increased billing, sensitive-data retrieval, and external tool install/auth remain approval-required. Only the false block on read-only delegation is relaxed.
+- **Honest fallback** — If the runtime lacks delegation capability, do not claim that Deep Security Scan ran; fall back to the ordinary scan or main-agent sequential role passes.
+- **Regression detection** — Keep the boundary in the boot reminder and health Check 16 so deletion or weakening is detected.
 
 ---
 
@@ -1278,30 +1296,13 @@ stale in multi-agent projects.
 
 ---
 
-### ✅ v1.14.0 — Security Authentication Stack (2026-06-09)
+### ✅ v1.12.1 — Harness Engineering Release Parity Patch (2026-06-08)
 
-Adds six new authentication→authorization→MCP security Universal Rules (Universal rules 39→45), informed by primary-source market research and adversarial review.
-
-- **security/400** passkeys & MFA / **410** OAuth & OIDC federation & SSO / **420** step-up, OTP & sensitive operations / **430** authorization (ReBAC/Zanzibar, Cedar/OPA) / **440** non-human, workload & AI-agent identity (SPIFFE, OBO, MCP/XAA) / **450** MCP security (consumer + builder; token-passthrough prohibition, rug-pull detection, etc.)
-- **000 de-dup** — §4/§18.3 cross-reference the deep-dive files
-- **Framework wording pass (#52)** — de-overclaiming, language-neutral generalization, numbering/loading clarity
-- **Consistency** — INDEX (ja/en), README domain table, llms digests, counts (39→45) synced
-- **Accuracy** — OAuth 2.1 = draft with RFC 9700 baseline, WebAuthn L3 = CR, MCP = emerging, stated precisely
-- Consolidates PR #52 / #53
-
----
-
-### ✅ v1.13.1 — Restore Language First Enforcement (2026-06-08)
-
-Fixes the adopter-reported regression ("native-language adherence weakened") where the #46 canonicalization diluted the old §2 Language First binding on the agent response surface.
-
-- **AXIARCH.md §6.10** — Strengthens the Language invariant to "response + documents": Project Native Language binds every heading, summary, label, list, and table in the agent response; English mixing when Japanese is the native language is a protocol violation; code/API/log/path are exempt
-- **boot-reminder (language clause)** — Strengthens the per-turn language clause to match the canonical rule
-- **boot-reminder (Harness activation)** — Closes a gap where the reminder never referenced the Execution Harness despite §8 marking it mandatory for non-trivial work; adds a trigger to both CORE/SHORT to apply the L2+ harness (role passes, audit verdict, evidence packet, human approval gate) in ja/en
-- **EXECUTION_HARNESS_PROTOCOL (canonical basis)** — Anchors the "non-trivial (§8) = L2+" mapping in the harness layer so the reminder's "L2+" wording has an SSOT source
-- **health Check 16** — Verifies the reminder retains the language-violation clause and the Harness trigger in both ja and en, detecting future silent removal/degradation (prevents recurrence of the #46-style regression)
-- **Basis** — Restoration under §6.10's non-degradation principle (preserve the stricter older interpretation)
-- Independent patch (separate branch from v1.14.0 skills)
+- **Version protection** — Keep the existing `v1.12.0` tag immutable and express the post-tag Harness Engineering follow-up as a patch release.
+- **Execution protocol reinforcement** — Clarify in ja/en `EXECUTION_HARNESS_PROTOCOL.md` that Harness Engineering is not a fourth layer; it connects the three-layer model to execution order, audit, evidence, and human approval.
+- **Safe Upgrade parity** — Keep the fallback `execution_harness` group label aligned with `Execution Harness / Harness Engineering` even when manifest metadata is unavailable, and align temporary-helper and upgrade-helper usage examples with `v1.12.1`.
+- **Regression detection** — Extend `check-axiarch-health.sh` to verify the execution protocol wording, Safe Upgrade fallback label, current-release helper pins, and upgrade helper usage examples.
+- **Distribution metadata parity** — Update installer, manifest, README, llms, Safe Upgrade prompts, and Blueprint INDEX current-stable metadata to `v1.12.1`.
 
 ---
 
@@ -1316,29 +1317,46 @@ Removes the copy-paste-only friction where `axiarch-prompts/` never appeared und
 
 ---
 
-### ✅ v1.12.1 — Harness Engineering Release Parity Patch (2026-06-08)
+### ✅ v1.13.1 — Restore Language First Enforcement (2026-06-08)
 
-- **Version protection** — Keep the existing `v1.12.0` tag immutable and express the post-tag Harness Engineering follow-up as a patch release.
-- **Execution protocol reinforcement** — Clarify in ja/en `EXECUTION_HARNESS_PROTOCOL.md` that Harness Engineering is not a fourth layer; it connects the three-layer model to execution order, audit, evidence, and human approval.
-- **Safe Upgrade parity** — Keep the fallback `execution_harness` group label aligned with `Execution Harness / Harness Engineering` even when manifest metadata is unavailable, and align temporary-helper and upgrade-helper usage examples with `v1.12.1`.
-- **Regression detection** — Extend `check-axiarch-health.sh` to verify the execution protocol wording, Safe Upgrade fallback label, current-release helper pins, and upgrade helper usage examples.
-- **Distribution metadata parity** — Update installer, manifest, README, llms, Safe Upgrade prompts, and Blueprint INDEX current-stable metadata to `v1.12.1`.
+Fixes the adopter-reported regression ("native-language adherence weakened") where the #46 canonicalization diluted the old §2 Language First binding on the agent response surface.
+
+- **AXIARCH.md §6.10** — Strengthens the Language invariant to "response + documents": Project Native Language binds every heading, summary, label, list, and table in the agent response; English mixing when Japanese is the native language is a protocol violation; code/API/log/path are exempt
+- **boot-reminder (language clause)** — Strengthens the per-turn language clause to match the canonical rule
+- **boot-reminder (Harness activation)** — Closes a gap where the reminder never referenced the Execution Harness despite §8 marking it mandatory for non-trivial work; adds a trigger to both CORE/SHORT to apply the L2+ harness (role passes, audit verdict, evidence packet, human approval gate) in ja/en
+- **EXECUTION_HARNESS_PROTOCOL (canonical basis)** — Anchors the "non-trivial (§8) = L2+" mapping in the harness layer so the reminder's "L2+" wording has an SSOT source
+- **health Check 16** — Verifies the reminder retains the language-violation clause and the Harness trigger in both ja and en, detecting future silent removal/degradation and reducing recurrence risk for the #46-style regression
+- **Basis** — Restoration under §6.10's non-degradation principle (preserve the stricter older interpretation)
+- Independent patch (separate branch from v1.14.0 skills)
 
 ---
 
-### 🔬 Market-Research-Driven Strategic Roadmap (from 2025-2026 competitive/standards study, priority order)
+### ✅ v1.14.0 — Security Authentication Stack (2026-06-09)
 
-Strategic forecast grounded in a Silicon-Valley-grade market study (primary-source verified across the AGENTS.md standard, Claude Code Skills/Subagents, Cursor/Windsurf rules, spec-driven dev — Kiro/spec-kit/BMAD, and context engineering — ACE arXiv 2510.04618). Each bet includes canonical-level change, so it is executed as a deliberate, separately-tested release.
+Adds six new authentication→authorization→MCP security Universal Rules (Universal rules 39→45), informed by primary-source market research and adversarial review.
+
+- **security/400** passkeys & MFA / **410** OAuth & OIDC federation & SSO / **420** step-up, OTP & sensitive operations / **430** authorization (ReBAC/Zanzibar, Cedar/OPA) / **440** non-human, workload & AI-agent identity (SPIFFE, OBO, MCP/XAA) / **450** MCP security (consumer + builder; token-passthrough prohibition, rug-pull detection, etc.)
+- **000 de-dup** — §4/§18.3 cross-reference the deep-dive files
+- **Framework wording pass (#52)** — de-overclaiming, language-neutral generalization, numbering/loading clarity
+- **Consistency** — INDEX (ja/en), README domain table, llms digests, counts (39→45) synced
+- **Accuracy** — OAuth 2.1 = draft with RFC 9700 baseline, WebAuthn L3 = CR, MCP = emerging, stated precisely
+- Consolidates PR #52 / #53
+
+---
+
+### 🔬 Market-Research-Driven Strategic Roadmap (2026-06-12 refresh, priority order)
+
+Strategic forecast based on current checks across the AGENTS.md standard, OpenAI Codex, Claude Code Skills/Subagents/Hooks, GitHub Copilot / VS Code custom instructions, Kiro / GitHub Spec Kit, MCP authorization, OWASP agentic security, and agentic coding tool configuration research. Each bet includes canonical-level change, so confirmed facts and strategic hypotheses are separated and executed as deliberate, separately-tested releases.
 
 | Priority | Bet | Goal (industry alignment) | Risk | Target |
 |:--|:--|:--|:--|:--|
-| 1 | **Agent Skills (SKILL.md) migration** | Re-package prompts as `SKILL.md` (frontmatter + progressive disclosure): both manual `/` invocation and context-auto-trigger, plus multi-tool portability via the Agent Skills standard. Follows the Claude Code command/Skill unification (v2.1.3, 2026-01) | Medium (evolution of v1.13.0 slash commands; start after it merges) | after v1.13.0 |
+| 1 | **Optional Agent Skills (SKILL.md) packaging** | Make prompts distributable as `SKILL.md` packages as well (metadata + progressive disclosure + supporting files). Claude Code recommends Skills when supporting files are needed, so this should be an optional higher-level packaging path rather than a replacement for slash commands | Medium (evolution of v1.13.0 slash commands; start after it merges) | after v1.13.0 |
 | 2 | **Clarify relationship to the AGENTS.md standard** | AGENTS.md is a Linux-Foundation-stewarded standard (60,000+ adopters, nearest-file override at its core). Document "why AXIARCH.md is canonical" and "how it interoperates with the standard" in README to reduce new-adopter friction | Low (doc) | immediate–near |
-| 3 | **Crystallization v2 (Reflector + pruning/importance)** | Add pre-promotion verification, lesson importance scoring, pruning, and conflict resolution to CRYSTALLIZATION_PROTOCOL. Aligns with ACE research (Generator→Reflector→Curator) and prevents Blueprint decay | Medium (protocol) | near–mid |
+| 3 | **Crystallization v2 (verification + pruning/importance)** | Add pre-promotion verification, lesson importance scoring, pruning, and conflict resolution to CRYSTALLIZATION_PROTOCOL. Configuration research shows Context Files are widely used while Skills/Subagents adoption is still shallow, so Blueprint needs active curation to reduce passive knowledge-dump decay | Medium (protocol) | near–mid |
 | 4 | **Adapter freshness** | `.windsurfrules` (legacy single) → `.windsurf/rules/*.md` (new standard) coexistence; Cline AGENTS.md native support, etc. Document the init.sh adapter-maintenance policy | Low–Medium (distribution) | near |
-| 5 | **AXIARCH.md progressive disclosure** | Split the 516-line canonical file into a short core charter + on-demand detailed protocols to cut per-turn full-load context cost. Aligns with the industry minimal-load design (Cursor globs / Claude progressive disclosure / AGENTS.md nearest-file) | **High** (canonical surgery = constitution-amendment level; must jointly verify health check, safe-upgrade, all adapters, bilingual parity with real agent-load testing) | dedicated major (v1.14/v2.0) |
+| 5 | **AXIARCH.md progressive disclosure** | Split the 516-line canonical file into a short core charter + on-demand detailed protocols to cut per-turn full-load context cost. Align with AGENTS.md nearest-file loading, Claude Skills progressive disclosure, and VS Code path-specific instructions | **High** (canonical surgery = constitution-amendment level; must jointly verify health check, safe-upgrade, all adapters, bilingual parity with real agent-load testing) | dedicated major (v1.14/v2.0) |
 
-> **Market positioning (study conclusion)**: Axiarch's multi-layer governance integration — three layers + harness + human-approval gate + lesson crystallization — was not found elsewhere as an OSS framework; it subsumes spec-driven dev (Kiro/spec-kit/BMAD), and its crystallization anticipates the ACE Curator/playbook concept in a file-based form. The two main structural tensions are "full pre-load vs context-aware load" (addressed by bet #5) and "single canonical vs AGENTS.md nested standard" (addressed by relationship clarification in bet #2).
+> **Market positioning (study conclusion)**: In the checked scope, no OSS framework was found that bundles Axiarch's three layers, harness, human-approval gate, and lesson crystallization at the same granularity. This is not a claim of uniqueness across the whole market: spec-driven dev (Kiro / Spec Kit), the AGENTS.md standard, Skills/Subagents, and MCP security overlap with parts of the problem. Axiarch should position itself as a file-based governance layer that complements those mechanisms with source-of-truth files, evidence, approval boundaries, and lesson crystallization. The two main structural tensions are "full pre-load vs context-aware load" (addressed by bet #5) and "single canonical vs AGENTS.md nested standard" (addressed by relationship clarification in bet #2).
 
 ---
 

@@ -21,6 +21,20 @@ Approval to implement is separate from approval to publish, destroy, spend, or m
 - Legal, license, contract, hiring, or market-public decisions
 - Non-interactive bulk apply such as `--apply --yes`
 
+## Read-Only Actions Not Requiring Explicit Approval
+
+The actions below are not Human Approval Gate blockers by themselves.
+If any action above becomes part of the workflow, stop at that point.
+
+- Read-only research over the repository, working tree, or already-provided context
+- Read-only role passes, audits, reviews, and verification
+- User-requested read-only security scans
+- Bounded read-only subagent delegation
+- Summaries of test output, logs, diffs, and documentation consistency
+
+Do not stop for additional human approval solely because a subagent or scan tool is used.
+Stop only when moving into approval-required actions such as file writes, stage, commit, push, deploy, DB apply, production data mutation, external service configuration, increased billing, or sensitive-data retrieval.
+
 ## How to Ask
 
 Ask for one decision at a time.

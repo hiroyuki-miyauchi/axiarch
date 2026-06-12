@@ -4,8 +4,8 @@
 > crystallized from `core/010_project_lessons_log.md` for the **AI & Data Analytics domain**.
 
 > [!NOTE]
-> **An empty folder is the correct initial state by design.**
-> Files are automatically generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `CRYSTALLIZATION_PROTOCOL.md`.
+> **The correct initial state is that no domain rule files exist here other than this README.**
+> Domain rule files are generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `CRYSTALLIZATION_PROTOCOL.md`.
 > Pre-populating seed files is prohibited as it violates the YAGNI principle.
 
 ## Corresponding Universal Rules

@@ -86,6 +86,7 @@
 
 *   **000. Project Overview** ([🇯🇵](./blueprint/core/000_project_overview.md) / [🇺🇸](../en/blueprint/core/000_project_overview.md))
 *   **010. Project Lessons Log** ([🇯🇵](./blueprint/core/010_project_lessons_log.md) / [🇺🇸](../en/blueprint/core/010_project_lessons_log.md))
+*   **020. Governance Rules** ([🇯🇵](./blueprint/core/020_governance_rules.md) / [🇺🇸](../en/blueprint/core/020_governance_rules.md))
 *   **998. Feature Specification Template** ([🇯🇵](./blueprint/core/998_feature_spec_template.md) / [🇺🇸](../en/blueprint/core/998_feature_spec_template.md))
 *   **999. Project Specific Template** ([🇯🇵](./blueprint/core/999_project_specific_template.md) / [🇺🇸](../en/blueprint/core/999_project_specific_template.md))
 
@@ -100,7 +101,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。3つとも実運用で稼働確認済みの実証済み主対象です。ただし、検証済みとはAxiarchが確認した構成と範囲を示すものであり、全環境での動作保証ではありません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
+> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。現時点で実運用稼働確認済みとして公開表現する対象は Google Antigravity のみです。Codex / Claude Code は主対象の統合対応ですが、実務検証中であり、全環境での動作保証または実証済みプラットフォームとしては扱いません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
 
 1.  **コピー (Copy)**: 最小必須は `AXIARCH.md`、`AGENTS.md` アダプター、`axiarch-rules/`、`axiarch-harness/` です。安全アップグレードを使う場合は `axiarch-manifest.json` と `axiarch-scripts/` もコピーします。`axiarch-prompts/` は任意です。
     ```bash

@@ -54,6 +54,7 @@ Project overview, lessons index, and templates.
 |:-----|:------------|
 | [core/000_project_overview.md](core/000_project_overview.md) | Project vision, tech stack, and immutable principles |
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | Lessons index + unsorted lesson accumulation. Origin point for Crystallization. |
+| [core/020_governance_rules.md](core/020_governance_rules.md) | Crystallized governance lessons for canonical entrypoint, Language First non-degradation, and read-only subagent/security-scan delegation boundaries. |
 | [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **Feature spec template (Blueprint First core)**. Copy to the relevant domain folder to use. |
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
 
@@ -156,7 +157,7 @@ Strategies for generating next-generation "value".
 | Keyword | File/Folder |
 |:--------|:-----------|
 | Project overview, vision, tech stack | `core/000_project_overview.md` |
-| Lessons, anti-patterns, retrospectives | `core/010_project_lessons_log.md` |
+| Lessons, anti-patterns, retrospectives | `core/010_project_lessons_log.md`, `core/020_governance_rules.md` |
 | Feature spec template | `core/998_feature_spec_template.md` |
 | Project-specific rule template | `core/999_project_specific_template.md` |
 | Security, compliance | `security/` |
