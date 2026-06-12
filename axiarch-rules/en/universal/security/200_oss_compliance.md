@@ -2903,6 +2903,12 @@ def compute_slo_report(metrics: dict) -> dict:
 | SBOM Quality Score Trend | Monthly average score | ≥ 80 (grade B+) | §57 script |
 | Unused Dependency Count | `depcheck` detection count | 0 (quarterly) | `depcheck` |
 
+**EOL (End of Life) Tracking**:
+
+- Beyond dependency "age" (libyear), track the **EOL dates** themselves for runtimes, frameworks, and major dependencies (SHOULD). Example: periodically ingest endoflife.date data/API into a dashboard
+- File a migration-plan ticket with lead time **N months before the EOL date (e.g., 6 months)** and complete the upgrade in a planned manner
+- **Continued use past EOL** is permitted only with an exception approval (explicit risk acceptance) **and a deadline**. Prohibit indefinite "freezing in place"
+
 ### 63.6 Rules
 
 - **Rule**: Formally adopt the Dependency SLOs defined in §63.2 and integrate them into the §24 KPI dashboard

@@ -1744,6 +1744,14 @@
     5.  **Verification Steps**: How to confirm the fix
     6.  **Escalation**: Contact information when resolution is not possible
 
+**Runbook Freshness SLA**
+
+-   **Law**: A Runbook cannot be trusted without a known "last verified" date. Manage freshness as an SLA (SHOULD).
+-   **Requirements**:
+    1.  **Mandatory post-incident update**: Runbooks used during incident response must be updated (reflecting procedure drift and gaps) as part of the post-mortem review
+    2.  **Record the last-verified date**: Record a "Last Verified" date as metadata on every Runbook
+    3.  **Stale detection**: Flag Runbooks unverified for more than **N months (e.g., 6)** as "stale" and feed them into the periodic review queue (a concrete countermeasure to the Zombie Runbooks anti-pattern)
+
 ### §137. Runbook Automation Engine
 
 -   **Law**: Automate high-frequency Runbooks via an Automation Engine.

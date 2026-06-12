@@ -179,6 +179,10 @@
 -   **Rule 3.3.2**: Only data with legal retention obligations may be isolated in Cold Storage. Hard delete after retention period.
 -   **Rule 3.3.3**: SARs must be completed within **30 days** of receipt.
 -   **Rule 3.3.4**: Cascade deletion order across related tables must be explicitly managed in the Service layer.
+-   **Rule 3.3.5**: Deletion requests must propagate beyond the primary store to **derived stores** (backups, search indexes, caches, analytics platforms, ML training data) (MUST).
+    -   **Verify completion** of propagation: confirm the target data no longer remains in derived stores, not just that the deletion job logged success. Meta's DELF (deletion correctness verification framework) is a precedent.
+    -   When immediate deletion is technically difficult (e.g., backups), provide a mechanism to re-apply deletion upon restore (such as retaining deletion tombstones).
+-   **Rule 3.3.6**: Maintain a **derived-store catalog** per deletable data type (an inventory of which stores and pipelines the data is replicated or derived into), and require catalog updates whenever a new derivation target is added (SHOULD).
 -   **Cross-Reference**: `security/000_security_privacy.md` §4.5 (Right to be Forgotten)
 
 ### 3.4. Cross-Border Transfer Framework

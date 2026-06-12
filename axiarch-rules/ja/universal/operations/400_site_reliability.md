@@ -1834,6 +1834,14 @@
     5.  **検証手順**: 修復後の確認方法
     6.  **エスカレーション**: 解決不能時の連絡先
 
+**Runbook鮮度SLA（Freshness SLA）**
+
+-   **Law**: Runbookは「最後に検証された日」が分からない限り信頼できない。鮮度をSLAとして管理する（SHOULD）。
+-   **要件**:
+    1.  **インシデント後更新の義務化**: インシデント対応で使用したRunbookは、Post-mortemレビューの一部として更新（手順の乖離・欠落の反映）を必須とする
+    2.  **最終検証日の記録**: 各Runbookに「最終検証日（Last Verified）」をメタデータとして記録する
+    3.  **Stale判定**: 最終検証日から**Nヶ月（例: 6ヶ月）**を超えた未検証Runbookを「stale」としてフラグし、定期レビュー対象に組み込む（Zombie Runbooksアンチパターン対策の具体化）
+
 ### §149. Runbook Automation Engine
 
 -   **Law**: 高頻度RunbookはAutomation Engineで自動実行。
