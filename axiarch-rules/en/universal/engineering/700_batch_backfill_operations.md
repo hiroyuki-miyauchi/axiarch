@@ -529,6 +529,8 @@ test "the job is idempotent (running twice leaves the result unchanged)":
 
 **Cross-Reference:**
 -   `quality/000_qa_testing.md` — §5 Unit Testing, §6 Integration Testing (canonical for test layer definitions; §4 of this file holds only job-specific obligations)
+-   `engineering/710_data_reconciliation.md` — canonical for **steady-state** consistency verification, invariants, and explainability SLOs (this file covers only migration-time comparison and per-job failure accounting)
+-   `engineering/740_data_contracts.md` — producer/consumer contracts for cross-boundary data (schema-validation failures land in the counting + DLQ discipline of §2.4 of this file)
 -   `ai/100_data_analytics.md` — Part XI–XV general observability, metrics, and structured logging infrastructure (§14.3 cardinality, §15.3 log PII)
 -   `operations/400_site_reliability.md` — §13 Canonical Log Lines, §22–§26 SLO-based alerting (collection and notification side of the summary line)
 -   `operations/500_incident_response.md` — response and rollback procedures when a job failure becomes an incident

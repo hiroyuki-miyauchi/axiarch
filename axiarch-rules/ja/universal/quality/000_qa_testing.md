@@ -473,7 +473,7 @@
     -   Testing Trophyのstatic層（→ §2, §4）に従い、静的解析をテスト戦略の**最下層**と位置づける。
     -   **Law**: 空`catch`（エラー握りつぶし）の検出をlint（`no-empty`等）で強制し、CIでブロックすること（MUST）。握りつぶされたエラーはどの動的テスト層でも観測できないため、静的層で物理的に排除する。
 -   **バッチ/バックフィルジョブのテスト**:
-    -   冪等性（同一ジョブの2回実行で結果不変）・チェックポイント再開・失敗計数の検証は `engineering/700_batch_backfill_operations.md` を正本とする。本節では重複規定しない。
+    -   冪等性（同一ジョブの2回実行で結果不変）・チェックポイント再開・失敗計数の検証は `engineering/700_batch_backfill_operations.md` を、不変量のプロパティテスト・差異注入テストは `engineering/710_data_reconciliation.md` を正本とする。本節では重複規定しない。
 -   **Cross-reference**: → §2, §4, §5, §6, §8.5
 
 ---

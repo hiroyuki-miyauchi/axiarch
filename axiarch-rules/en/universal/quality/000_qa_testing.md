@@ -482,7 +482,7 @@
     -   Following the Testing Trophy static layer (→ §2, §4), position static analysis as the **lowest layer** of the testing strategy.
     -   **Law**: Enforce detection of empty `catch` blocks (error swallowing) via lint (`no-empty` etc.) and block in CI (MUST). Swallowed errors are unobservable in any dynamic test layer, so physically eliminate them at the static layer.
 -   **Batch / Backfill Job Testing**:
-    -   For idempotency (running the same job twice yields identical results), checkpoint resume, and failure-count verification, `engineering/700_batch_backfill_operations.md` is the canonical source. This section does not duplicate those rules.
+    -   For idempotency (running the same job twice yields identical results), checkpoint resume, and failure-count verification, `engineering/700_batch_backfill_operations.md` is the canonical source; for invariant property tests and difference-injection tests, `engineering/710_data_reconciliation.md` is canonical. This section does not duplicate those rules.
 -   **Cross-reference**: → §2, §4, §5, §6, §8.5
 
 ---

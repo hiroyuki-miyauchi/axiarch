@@ -529,6 +529,8 @@ test "ジョブは冪等である（2回実行しても結果不変）":
 
 **Cross-Reference（関連ルール）:**
 -   `quality/000_qa_testing.md` — §5 ユニットテスト・§6 統合テスト（テスト層定義の正本。本ファイル §4 はジョブ固有義務のみ）
+-   `engineering/710_data_reconciliation.md` — **定常的な**整合検証・不変量・説明可能性 SLO の正本（本ファイルが扱うのは移行時の突合とジョブ単位の失敗計数まで）
+-   `engineering/740_data_contracts.md` — 境界越えデータの生産者/消費者契約（スキーマ検証失敗は本ファイル §2.4 の計数+DLQ 規律で受ける）
 -   `ai/100_data_analytics.md` — Part XI–XV 可観測性・メトリクス・構造化ログの基盤総論（§14.3 カーディナリティ・§15.3 ログ PII）
 -   `operations/400_site_reliability.md` — §13 Canonical Log Lines・§22–§26 SLO ベースアラート（サマリ行の収集・通知側）
 -   `operations/500_incident_response.md` — ジョブ失敗が事故化した際の対応・ロールバック手順
