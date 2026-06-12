@@ -22,7 +22,7 @@
 - **Part IV: Integration Testing** — §6
 - **Part V: Contract Testing** — §7
 - **Part VI: E2E Testing** — §8
-- **Part VII: Component Testing** — §8.5
+- **Part VII: Component Testing** — §8.5-§8.6
 - **Part VIII: Visual Regression Testing (VRT)** — §9
 - **Part IX: Performance Testing** — §10
 - **Part X: Property-Based Testing** — §11
@@ -420,6 +420,70 @@
     -   **Event Handler Verification**: Confirm callbacks like `onClick`, `onChange` fire correctly.
     -   **State Transition Testing**: Verify component internal state changes through user interactions.
     -   **Accessibility Verification**: Test that each component has appropriate ARIA roles and labels.
+
+---
+
+## §8.6. Layered Assertion Requirements
+
+-   **Purpose & Positioning**:
+    -   §5 (Unit), §6 (Integration), and §8.5 (Component) define test types and **techniques**. This section defines the minimum standard for **what each layer must assert (perspectives)**, preventing verification gaps and duplication between layers.
+    -   **Law**: The perspective table below is the **minimum sufficiency standard** for each test layer (MUST). A layer lacking these perspectives must not be declared "tested" (MUST NOT).
+-   **Mandatory Assertion Perspective Table (Unit / Component / Integration)**:
+
+    | Layer | Verification Target | Mandatory Assertion Perspectives (MUST) | Do Not Bring Into This Layer (MUST NOT) |
+    |:---|:---|:---|:---|
+    | **Unit (§5)** | Public API of a single unit | **Public API behavior** (not implementation details). Happy path + edge cases (0 / null / empty / boundary values) + **error conditions** (exception throwing, error return values, invalid input rejection) | Real dependencies (DB, network, file system). Collaboration of multiple units |
+    | **Component / Composite (§8.5)** | Combination of multiple units (parent-child components, coupling with state management) | **Collaboration of multiple units** — verify parent-child contracts (props passing, event propagation) and coupling with state management **in a form close to actual usage** (Testing Trophy confidence principle) | Real external dependencies (real APIs, real DBs). Logic branches coverable within a single unit |
+    | **Integration (§6)** | Coupling with real dependencies (API + DB + queues) | **Coupling and contracts with real dependencies** — persistence round-trips (write → read back), transaction boundaries, authentication/authorization boundaries, message send/receive | Logic verifiable in lower layers (Unit / Component) |
+
+    -   **Law**: What is testable in a lower layer must not be brought into a higher layer (MUST NOT). Catch each defect at the **lowest layer** capable of detecting it (applying the Google "Just Say No to More E2E Tests" principle to the integration layer and below).
+    -   **Component vs. Integration Boundary**: Distinguish by whether external dependencies are **real or not**. The component layer verifies collaboration of multiple units under mocked dependencies (MSW etc. → §6); the integration layer verifies coupling with real dependencies (Testcontainers etc. → §6).
+-   **Test Size Reference Standard (Google Test Sizes)**:
+    -   Discussions of test layers may additionally cite Google's Test Sizes — **small** (single process) / **medium** (single machine, localhost allowed) / **large** (multi-machine, distributed) — as the reference standard (MAY).
+    -   "Layer (what is verified)" and "size (what execution resources are allowed)" are orthogonal classifications and must not be conflated (MUST NOT).
+-   **Mandatory Failure-Path Testing**:
+    -   **Law**: A test suite covering only happy paths must not be considered "complete" (MUST NOT). Each layer must include the following failure paths as test targets (MUST):
+        -   **Error handling branches**: All paths that throw / reject / return error values.
+        -   **Non-2xx response handling**: Caller behavior and UI error display upon receiving 4xx / 5xx (→ §6 MSW handler override).
+        -   **Partial failure**: Continuation of remaining processing and aggregation correctness when 1 of N items fails.
+        -   **Retry behavior**: Retryable errors → verify they are retried / non-retryable errors → verify they fail immediately.
+    -   **Rationale**: Most production incidents stem from defects in error handling paths. Happy-path coverage guarantees nothing about behavior under failure.
+
+    ```typescript
+    // Retry behavior test example (Vitest + MSW v2)
+    test('retryable error (503) is retried until success', async () => {
+      let calls = 0;
+      server.use(
+        http.get('/api/orders', () => {
+          calls += 1;
+          return calls < 3
+            ? HttpResponse.json({ error: 'Service Unavailable' }, { status: 503 })
+            : HttpResponse.json([{ id: 1 }]);
+        }),
+      );
+      await expect(fetchOrdersWithRetry()).resolves.toHaveLength(1);
+      expect(calls).toBe(3); // 2 failures → success on 3rd attempt
+    });
+
+    test('non-retryable error (400) fails immediately without retry', async () => {
+      let calls = 0;
+      server.use(
+        http.get('/api/orders', () => {
+          calls += 1;
+          return HttpResponse.json({ error: 'Bad Request' }, { status: 400 });
+        }),
+      );
+      await expect(fetchOrdersWithRetry()).rejects.toThrow();
+      expect(calls).toBe(1); // verify no retry occurred
+    });
+    ```
+
+-   **Treat Static Analysis as the Lowest Layer**:
+    -   Following the Testing Trophy static layer (→ §2, §4), position static analysis as the **lowest layer** of the testing strategy.
+    -   **Law**: Enforce detection of empty `catch` blocks (error swallowing) via lint (`no-empty` etc.) and block in CI (MUST). Swallowed errors are unobservable in any dynamic test layer, so physically eliminate them at the static layer.
+-   **Batch / Backfill Job Testing**:
+    -   For idempotency (running the same job twice yields identical results), checkpoint resume, and failure-count verification, `engineering/700_batch_backfill_operations.md` is the canonical source. This section does not duplicate those rules.
+-   **Cross-reference**: → §2, §4, §5, §6, §8.5
 
 ---
 
