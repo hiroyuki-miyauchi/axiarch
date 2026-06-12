@@ -297,6 +297,11 @@ interface StoreResponse {
 4. **Notification Obligation**: Email API key holders 3 months, 1 month, and 1 week before
 5. **Documentation**: Post deprecation notice and migration guide in specification docs
 6. **Usage Monitoring**: Monitor old version usage and do not retire until usage reaches zero
+7. **Brownout Testing**: Run **at least one** scheduled temporary disablement before retirement to surface remaining consumers (SHOULD)
+   - Planned brownouts — e.g., returning `503` / `410` for minutes to a few hours — detect lingering clients through real traffic that monitoring alone misses
+   - Precedents: GitHub's SHA-1 signature deprecation brownouts (2026) and GitHub API authentication brownouts (2021)
+   - Keep emitting machine-readable signals (`Deprecation` / `Sunset` headers, RFC 8594) during the brownout so clients can identify the cause programmatically
+   - Apply the same procedure to internal APIs; prohibit the practice of "it's internal, so we can shut it down immediately"
 
 ### 6.4. Additive Change Strategy
 

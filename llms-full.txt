@@ -31,7 +31,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (45 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (50 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -202,7 +202,7 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   Dark Pattern ban (FTC/DSA/EU DFA), Agentic AI UX patterns, Calm UI,
   Voice UI, Design System as a Product, Design FinOps, 35 anti-patterns.
 
-### engineering/ — Technical Implementation (10 files)
+### engineering/ — Technical Implementation (14 files)
 - **000_engineering_standards.md**: Engineering standards. 13 parts,
   80 sections. Code quality, infrastructure, DevSecOps, tech debt,
   AI-first development, Green Coding, bug-reduction policy, Git protocols,
@@ -229,6 +229,32 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   Genkit, Vertex AI, Zero Trust, FinOps, Terraform, 30 anti-patterns.
 - **510_aws_cloud.md**: 155 sections, 240+ rules. Well-Architected
   Framework, all major AWS services, 20 anti-patterns.
+- **600_git_workflow.md**: 10 parts, 45 rules. Trunk-based development,
+  Conventional Commits, branch/worktree hygiene, branch protection,
+  tags/releases, secret scanning, anti-pattern catalog.
+- **700_batch_backfill_operations.md**: 8 sections, 57 rules. Job-summary
+  & failure-accounting contract (three-valued outcome, no silent skips,
+  per-item failure capture + DLQ, canonical summary line, OTel
+  error.type), backfill discipline (idempotency, checkpoint/resume,
+  chunking + backpressure, mandatory dry-run, four-phase migration,
+  shadow read, independent verification, kill switch), job-specific
+  test obligations, 20 anti-patterns.
+- **710_data_reconciliation.md**: 10 sections, 51 rules. Steady-state
+  consistency verification for conservation quantities (money, inventory,
+  points, usage billing): mandatory invariants + invariant catalog,
+  steady-state reconciliation jobs, Stripe-Ledger-style metrics
+  (Clearing/Timeliness/Completeness) + explainability % SLO, append-only
+  / reversing entries, drift detection, 15 anti-patterns.
+- **730_caching_discipline.md**: 11 sections, 46 rules. Language-agnostic
+  caching: staleness contracts, soft/hard dual TTL + fail-open/closed
+  choice, TTL jitter, single-flight stampede prevention, multi-layer
+  invalidation ordering, schema-versioned keys, RFC 5861 SWR/SIE,
+  total-loss resilience, authz/PII caching boundaries, 15 anti-patterns.
+- **740_data_contracts.md**: 11 sections, 42 rules. Producer/consumer
+  contracts for cross-boundary data (events, tables, topics, files):
+  contracts as code + CI, ODCS v3.1.0 (emerging), compatibility modes
+  (default BACKWARD), mandatory schema registry, three-phase breaking
+  changes, Tolerant Reader, PII classification tags, 15 anti-patterns.
 
 ### ai/ — AI & Data (2 files)
 - **000_ai_engineering.md**: 48 parts, 150+ sections. AI UX patterns,
@@ -238,7 +264,7 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   A/B testing, Privacy Sandbox, OpenTelemetry, AIOps 2.0, LLM
   observability, 25 anti-patterns.
 
-### operations/ — Operations & SRE (8 files)
+### operations/ — Operations & SRE (9 files)
 - **000_internal_tools.md**: 50 parts, 231 sections. Admin dashboard,
   RBAC/ABAC, audit logging, AI integration, FinOps, 20 anti-patterns.
 - **100_sales_bizdev.md**: Challenger Sale, MEDDIC, Sales Funnel,
@@ -253,6 +279,11 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   communication, BCP/DR, blameless postmortem. 31 parts.
 - **600_cloud_finops.md**: FinOps Foundation 2026, FOCUS v1.3, AI/ML
   FinOps, Agentic AI FinOps, K8s FinOps, GreenOps. 25 parts, 57 sections.
+- **650_capacity_planning.md**: 10 sections. Scale-cliff ledger (DB
+  connections, pools, hot partitions, API rate limits, cloud quotas),
+  measured capacity calibration / breaking-point tests, numeric headroom
+  (N+1/N+2), 4 load-test scenarios, autoscaling caps, demand forecasting,
+  graceful degradation, 15 anti-patterns.
 - **700_partnership_ecosystem.md**: Partnership Maturity Model,
   Ecosystem Flywheel, Developer Portal. 9 parts, 34 sections.
 
@@ -400,7 +431,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 45 Universal Rules and core Blueprint starter files are available in both languages.
+All 50 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.

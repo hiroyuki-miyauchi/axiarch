@@ -22,7 +22,7 @@
 - **Part IV: 統合テスト** — §6
 - **Part V: コントラクトテスト** — §7
 - **Part VI: E2Eテスト** — §8
-- **Part VII: コンポーネントテスト** — §8.5
+- **Part VII: コンポーネントテスト** — §8.5-§8.6
 - **Part VIII: ビジュアルリグレッションテスト（VRT）** — §9
 - **Part IX: パフォーマンステスト** — §10
 - **Part X: Property-Basedテスト** — §11
@@ -411,6 +411,70 @@
     -   既存のjsdomベーステストを段階的に移行する。完全な一括移行は不要。
     -   **優先移行対象**: CSS依存テスト（レイアウト検証）、Web API依存テスト（IntersectionObserver、ResizeObserver等）。
 -   **Cross-reference**: → §5, §6, §9
+
+---
+
+## §8.6. テスト層別の必須アサーション観点（Layered Assertion Requirements）
+
+-   **目的と位置づけ**:
+    -   §5（ユニット）・§6（統合）・§8.5（コンポーネント）はテスト種別の**定義と手法**を規定する。本節は各層が**何をアサートすべきか（観点）**の最低基準を規定し、層間の検証漏れと重複を防止する。
+    -   **Law**: 以下の観点表は各テスト層の**最低充足基準**である（MUST）。観点を欠いたままその層を「テスト済み」と申告してはならない（MUST NOT）。
+-   **必須アサーション観点表（Unit / Component / Integration）**:
+
+    | 層 | 検証対象 | 必須アサーション観点（MUST） | この層に持ち込まない（MUST NOT） |
+    |:---|:---|:---|:---|
+    | **Unit（§5）** | 単一ユニットの公開API | **公開APIの振る舞い**（実装詳細でなく）。正常系 + エッジケース（0 / null / 空 / 境界値）+ **エラー条件**（例外送出・エラー戻り値・不正入力の拒否） | 実依存（DB・ネットワーク・ファイルシステム）。複数ユニットの協調 |
+    | **Component / Composite（§8.5）** | 複数ユニットの組合せ（親子コンポーネント・状態管理との結合） | **複数ユニットの協調** — 親子の契約（propsの受け渡し・イベントの伝播）と状態管理との結合を、**ユーザーの使われ方に近い形**で検証する（Testing Trophyの確信度原則） | 実外部依存（実API・実DB）。単一ユニット内で網羅可能なロジック分岐 |
+    | **Integration（§6）** | 実依存（API + DB + キュー）との結合 | **実依存との結合と契約** — 永続化の往復（書き込み→読み戻し）、トランザクション境界、認証・認可境界、メッセージの送受信 | 下層（Unit / Component）で検証可能なロジック |
+
+    -   **Law**: 下層でテスト可能なものを上層に持ち込んではならない（MUST NOT）。各欠陥は検出可能な**最下層**で捕捉する（Google「Just Say No to More E2E Tests」の原則を統合層以下にも適用）。
+    -   **Component と Integration の境界**: 外部依存が**実物か否か**で区別する。Component層はモック化された依存（MSW等 → §6）の下で複数ユニットの協調を検証し、Integration層は実依存（Testcontainers等 → §6）との結合を検証する。
+-   **テストサイズの参照基準（Google Test Sizes）**:
+    -   テスト層の議論には、GoogleのTest Sizes — **small**（単一プロセス内）/ **medium**（単一マシン内・localhost可）/ **large**（複数マシン・分散）— を参照基準として併記してよい（MAY）。
+    -   「層（何を検証するか）」と「サイズ（どの実行リソースを許すか）」は直交する分類であり、混同してはならない（MUST NOT）。
+-   **失敗系パステストの義務化**:
+    -   **Law**: 正常系のみのテストスイートを「完了」と見なしてはならない（MUST NOT）。各層で以下の失敗系パスを必ずテスト対象に含めること（MUST）:
+        -   **エラーハンドリング分岐**: throw / reject / エラー戻り値を返す全パス。
+        -   **非2xx応答の処理**: 4xx / 5xx 受信時の呼び出し元の挙動とUIのエラー表示（→ §6 MSWハンドラーオーバーライド）。
+        -   **部分失敗**: N件中1件が失敗した場合の残り処理の継続と集計の正しさ。
+        -   **リトライ挙動**: retryableエラー → 再試行されることを検証 / non-retryableエラー → 即時失敗することを検証。
+    -   **Rationale**: 本番障害の多くはエラー処理パスの欠陥に起因する。正常系カバレッジは失敗時の挙動について何も保証しない。
+
+    ```typescript
+    // リトライ挙動テスト例（Vitest + MSW v2）
+    test('retryableエラー（503）は成功するまで再試行される', async () => {
+      let calls = 0;
+      server.use(
+        http.get('/api/orders', () => {
+          calls += 1;
+          return calls < 3
+            ? HttpResponse.json({ error: 'Service Unavailable' }, { status: 503 })
+            : HttpResponse.json([{ id: 1 }]);
+        }),
+      );
+      await expect(fetchOrdersWithRetry()).resolves.toHaveLength(1);
+      expect(calls).toBe(3); // 2回失敗 → 3回目で成功
+    });
+
+    test('non-retryableエラー（400）は再試行せず即時失敗する', async () => {
+      let calls = 0;
+      server.use(
+        http.get('/api/orders', () => {
+          calls += 1;
+          return HttpResponse.json({ error: 'Bad Request' }, { status: 400 });
+        }),
+      );
+      await expect(fetchOrdersWithRetry()).rejects.toThrow();
+      expect(calls).toBe(1); // 再試行されないことを検証
+    });
+    ```
+
+-   **静的解析を最下層として扱う**:
+    -   Testing Trophyのstatic層（→ §2, §4）に従い、静的解析をテスト戦略の**最下層**と位置づける。
+    -   **Law**: 空`catch`（エラー握りつぶし）の検出をlint（`no-empty`等）で強制し、CIでブロックすること（MUST）。握りつぶされたエラーはどの動的テスト層でも観測できないため、静的層で物理的に排除する。
+-   **バッチ/バックフィルジョブのテスト**:
+    -   冪等性（同一ジョブの2回実行で結果不変）・チェックポイント再開・失敗計数の検証は `engineering/700_batch_backfill_operations.md` を、不変量のプロパティテスト・差異注入テストは `engineering/710_data_reconciliation.md` を正本とする。本節では重複規定しない。
+-   **Cross-reference**: → §2, §4, §5, §6, §8.5
 
 ---
 
