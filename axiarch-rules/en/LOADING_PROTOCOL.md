@@ -33,7 +33,7 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
 
-> Antigravity / Cursor / Copilot / Windsurf have native loading or pointer mechanisms (e.g., Antigravity auto-loads `.agents/rules/`), so the Claude Code / Codex hook set is not a standard requirement for them. Codex, Claude Code, and Google Antigravity are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor / Copilot / Windsurf are extended pointer-only candidates and are not operation-guaranteed.
+> Antigravity / Cursor / Copilot / Windsurf have native loading or pointer mechanisms (e.g., Antigravity auto-loads `.agents/rules/`), so the Claude Code / Codex hook set is not a standard requirement for them. At this time, only Google Antigravity is presented as production-validated through real operational usage. Codex and Claude Code are first-class integration targets under practical validation, and are not presented as operation-guaranteed or production-validated platforms for every environment. Cursor / Copilot / Windsurf are extended pointer-only candidates and are not operation-guaranteed.
 
 ### 🧭 Native Task & Plan State Sync (v1.11.0+)
 
@@ -53,7 +53,7 @@ Operational principles:
 
 ### 🔍 Hook Diagnostic
 
-When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 15-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration) and, in the Axiarch source repository, v1.10.0+ release metadata parity, Safe Upgrade Wizard manifest wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, the `axiarch-scripts/` required/optional boundary in README, llms, and scripts README, and the Claude Memory canonical boundary. It is distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
+When you suspect "the hook is not working", run **`bash axiarch-scripts/check-axiarch-health.sh`** for one-shot diagnosis. The 16-stage diagnostic includes wiring verification for all four hooks (Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration) and, in the Axiarch source repository, v1.10.0+ release metadata parity, Safe Upgrade Wizard manifest wiring, exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, the `axiarch-scripts/` required/optional boundary in README, llms, and scripts README, the Claude Memory canonical boundary, and Check 16 Language First / Execution Harness / read-only delegation boundaries. It is distributed automatically by `init.sh`. See the `README.md` "Hook Reinforcement Mechanism" section for details.
 
 ---
 
@@ -114,7 +114,7 @@ From the INDEX.md categories that correspond to the task types identified in Ste
 
 - Considering a file "read" based solely on INDEX.md summaries is **strictly prohibited**.
 - "Directly open the file" means actually retrieving the file's content using tools like `view_file`.
-- **🚨 Absolute Output Ban (Anti-Hallucination)**: Outputting conversational text like "I am loading...", "Understood", or "Load complete" **before** the tool formally returns the file contents is **hallucination and strictly prohibited under any circumstances**. The AI MUST internalize the tool's execution result FIRST, and ONLY THEN generate thoughts or responses.
+- **🚨 No Premature Load-Completion Claims (Anti-Hallucination)**: Outputting conversational text such as "Understood", "Load complete", or "Loaded" **before** the tool formally returns the file contents and the AI has read them is **hallucination and strictly prohibited under any circumstances**. Any progress note must not claim that loading has completed, and must never be recorded as load evidence.
 - The above applies to **all rule file references**, regardless of whether loading is autonomous or user-directed.
 
 ### Large File Handling

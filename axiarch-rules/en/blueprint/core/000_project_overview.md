@@ -3,7 +3,7 @@
 > [!NOTE]
 > **Blueprint Structure**:
 > This document defines the **"Reference Product Specification"** assumed by this repository.
-> The AI Agent uses this fictional but rigorous product spec to simulate, validate, and evolve the Constitution rules.
+> The AI Agent uses this fictional reference spec to inspect how Universal, Blueprint, and optional Prompts separate responsibilities and how rules apply in practice. It is not a perfect answer key; adopters should replace it with their own project state.
 
 ---
 
@@ -21,15 +21,15 @@
 
 ## 1. Project Vision & Strategy
 *   **Mission (What & Why)**:
-    *   To serve as the **"Golden Standard" implementation** of the Axiarch Constitution.
-    *   By defining a "Universal Full-Stack SaaS" structure here, we enable the AI to understand "How these rules apply to real code".
+    *   To serve as an **implementation reference model** for adopters applying the Axiarch Constitution.
+    *   By defining a representative full-stack SaaS structure here, we make it easier for AI agents to inspect how rules apply to real code.
 *   **Target Audience**:
     *   **Primary**: AI Agents (Self-Learning).
     *   **Secondary**: Developers referencing the Constitution.
     *   **Reference Persona**: *Pro Developers building High-Scale SaaS.*
 *   **North Star Metric**:
-    *   **Constitution Coverage**: % of rules covered by active specifications.
-    *   **Simulation Accuracy**: Accuracy of AI code generation based on these blueprints.
+    *   **Constitution Coverage**: % of rules made referenceable by active specifications.
+    *   **Simulation Fit**: How closely AI code generation based on this Blueprint aligns with the reference spec.
 
 ## 2. Technology Stack Selection
 > ⚠️ This section is project-specific.

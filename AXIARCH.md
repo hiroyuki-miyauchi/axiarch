@@ -70,12 +70,12 @@ For Japanese-native projects, explanations, plans, task documents, specification
 ## 1. Purpose / 目的
 
 Axiarch is a constitution-driven governance layer for AI-assisted work.
-It preserves quality, project memory, language discipline, evidence, verification, and human approval boundaries across agents and sessions.
+It helps maintain a shared quality floor, project memory, language discipline, evidence, verification, and human approval boundaries across agents and sessions.
 It governs plan, implementation, verification, audit, evidence, crystallization, delegation, and approval.
 It is not merely a prompt collection, and tool-native adapter files must not become the governance source of truth.
 
 Axiarchは、AI支援作業のための憲法駆動型ガバナンス層である。
-品質、プロジェクト記憶、言語運用、証跡、検証、人間承認境界を、エージェントやセッションをまたいで維持する。
+品質の床、プロジェクト記憶、言語運用、証跡、検証、人間承認境界を、エージェントやセッションをまたいで維持しやすくする。
 計画、実装、検証、監査、証跡、結晶化、委任、承認を統治する。
 単なるプロンプト集ではなく、ツール固有アダプターをガバナンス正本にしてはならない。
 
@@ -110,6 +110,10 @@ Axiarch keeps the existing three-layer model.
 
 Axiarchは既存の3層モデルを維持する。
 
+The clear separation between Universal (stable constitution), Blueprint (mutable project state), and Prompts (optional execution templates) is the core mechanism that reduces hallucination and quality-drift risk by keeping universal constraints, project-specific facts, and task execution prompts from being mixed together.
+
+Universal（安定した憲法）、Blueprint（可変のプロジェクト状態）、Prompts（任意の実行テンプレート）の責務を明確に分けることが、普遍制約・プロジェクト固有事実・タスク実行プロンプトの混線を抑え、ハルシネーションと品質ドリフトのリスクを下げるAxiarchの中核である。
+
 | Layer | Directory or file | English responsibility | 日本語での責務 |
 |:--|:--|:--|:--|
 | Universal | `axiarch-rules/{lang}/universal/` | Stable and mostly immutable principles | 安定的で原則不変の判断基準 |
@@ -134,11 +138,11 @@ This operational discipline is Harness Engineering: binding Universal, Blueprint
 
 Before any non-trivial task, the agent must stop and load actual files.
 Reading an index summary or relying on memory is not enough.
-An INDEX summary is a routing aid, not loaded authority: rules, Blueprint, or harness files used as a basis must be opened directly, and the agent waits for the loading tool calls to complete before producing output, consistent with `LOADING_PROTOCOL.md`.
+An INDEX summary is a routing aid, not loaded authority: rules, Blueprint, or harness files used as a basis must be opened directly, and the agent waits for the loading tool calls to complete before claiming any file has been read, consistent with `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
 
 非自明なタスクの前に、エージェントはいったん立ち止まり、実ファイルをロードしなければならない。
 INDEXの要約や記憶だけで済ませてはならない。
-INDEX要約はルーティング補助であってロード済みの根拠ではない。根拠にするルール、Blueprint、harnessは直接開き、ロードのツール呼び出しが完了するのを待ってから出力する（`LOADING_PROTOCOL.md` と整合）。
+INDEX要約はルーティング補助であってロード済みの根拠ではない。根拠にするルール、Blueprint、harnessは直接開き、ロードのツール呼び出しが完了するまで「読んだ」「把握した」「ロード完了」と主張してはならない（`axiarch-rules/{lang}/LOADING_PROTOCOL.md` と整合）。
 
 Boot principles:
 
@@ -253,6 +257,10 @@ The approval request must include verification status, known failures, skipped c
 コマンドがremote状態、本番状態、課金、アクセス制御、プライバシー、セキュリティ、法務状態、公開配布を実質的に変える場合は、停止して確認する。
 stage、commit、push、deploy、release、tag、publish、配布、本番変更適用の承認を求める前に、技術スタックに応じた関連ローカル検証コマンドを実行するか、実行できなかった理由を記録する。
 承認依頼には、検証状態、既知の失敗、未実行チェック、残リスクを含めなければならない。
+
+Read-only role passes, read-only audits, and bounded subagent delegation are not approval-gated merely because they use a subagent or a scan tool. When the user asks for a deep audit, security scan, exhaustive review, or similar investigation, that request includes permission to use available read-only worker fanout required by the named workflow. Stop only if the workflow would mutate files or remote state, access production or sensitive data beyond the current approved context, install or authenticate external tooling, incur material cost, or perform another approval-required action.
+
+読み取り専用の役割パス、読み取り専用監査、範囲を限定したサブエージェント委任は、サブエージェントや scan tool を使うという理由だけでは承認ゲート対象にならない。ユーザーが deep audit、security scan、徹底レビュー等の調査を求めた場合、その要求には、名前付き workflow が必要とする利用可能な読み取り専用 worker fanout の利用が含まれる。停止するのは、その workflow がファイルや remote 状態を変更する、本番または機微データへ現在承認済み文脈を超えてアクセスする、外部 tool の install / auth を行う、実質的な費用を発生させる、または他の承認必須行為を行う場合だけである。
 
 ### 6.3 Database Integrity / DB整合性
 
@@ -412,6 +420,10 @@ If subagents are available, the main agent may delegate bounded research, audit,
 サブエージェントが使えない場合、メインエージェントが同じロールパスを順番に実行する。
 サブエージェントが使える場合、メインエージェントは範囲を限定した調査、監査、文書化、検証を委任してよい。ただし最終判断はメインエージェントに残る。
 
+Do not stop solely to ask for "explicit subagent permission" when the current user request already asks for the read-only investigation and the runtime provides the needed delegation capability. For Codex Security Deep Security Scan or equivalent named workflows, explicit invocation of the workflow is treated as the user's request for its read-only worker fanout. If delegation is unavailable, say that the named deep workflow cannot be claimed as run, then use the documented fallback path or the main-agent sequential role passes when that still satisfies the user's goal.
+
+現在のユーザー要求が読み取り専用調査を求めており、runtime が必要な委任機能を提供している場合、「サブエージェント明示許可」を求めるためだけに停止してはならない。Codex Security Deep Security Scan または同等の名前付き workflow では、その workflow の明示呼び出しを、読み取り専用 worker fanout へのユーザー要求として扱う。委任が利用できない場合は、名前付き deep workflow を実行済みと主張せず、文書化された fallback またはユーザー目的を満たすメインエージェント順次 role pass へ進む。
+
 Subagents must not make final release decisions, stage, commit, push, deploy, tag, delete, perform destructive rewrites, change Class S / Universal rules, or accept residual risk without explicit human approval and main-agent review.
 
 サブエージェントは、明示的な人間承認とメインエージェントレビューなしに、最終release判断、stage、commit、push、deploy、tag、削除、破壊的書き換え、Class S / Universal rules変更、残リスク受容を行ってはならない。
@@ -484,7 +496,7 @@ A task is complete only when:
 - Verification has been run or the reason it could not run is recorded
 - Audit verdict and residual risks are stated
 - Crystallization has been checked for lessons that actually occurred
-- The `CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK has been run; when three or more unorganized lessons share one domain, completion is not declared until they are sublimated into the Blueprint
+- The `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK has been run; when three or more unorganized lessons share one domain, completion is not declared until they are sublimated into the Blueprint
 - No approval-bound action is silently taken
 
 タスクは次を満たした場合にのみ完了である:
@@ -494,7 +506,7 @@ A task is complete only when:
 - 検証が実行済み、または実行できなかった理由が記録されている
 - 監査判定と残リスクが明示されている
 - 実際に発生した教訓について結晶化チェックが済んでいる
-- `CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK を実行済みで、同一ドメインに未整理の教訓が3件以上あればBlueprintへ昇華するまで完了を宣言していない
+- `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` Step 5 THRESHOLD CHECK を実行済みで、同一ドメインに未整理の教訓が3件以上あればBlueprintへ昇華するまで完了を宣言していない
 - 承認必須行為を黙って実行していない
 
 The final report should be concise, state what changed, name the verification results, call out remaining risks or approvals, and avoid overstating anything not verified.

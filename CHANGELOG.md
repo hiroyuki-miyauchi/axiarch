@@ -16,6 +16,28 @@ release history, not current canonical numbering.
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **読み取り専用 subagent / Deep Security Scan の誤停止リスク低減** — `AXIARCH.md` と `axiarch-harness/{ja,en}/` で、読み取り専用のサブエージェント委任はそれ自体では Human Approval Gate 対象ではないことを明文化。ユーザーが deep audit / security scan / exhaustive review / Codex Security Deep Security Scan などの名前付き読み取り専用 workflow を明示した場合、必要な read-only worker fanout はその要求に含まれるため、別途「サブエージェント明示許可」を求めて停止しない。委任機能が runtime にない場合は正式 Deep Security Scan 実行済みとは主張せず、通常 scan またはメインエージェント順次 role pass へ fallback する。
+- **Runtime reminder / health 再発検知** — `axiarch-boot-reminder.sh` に同趣旨の短い境界文を追加し、`check-axiarch-health.sh` Check 16 で Language First / Execution Harness に加えて read-only subagent/security-scan delegation boundary の保持を検査する。
+- **Public / AI-facing docs parity** — README、`llms.txt`、`llms-full.txt`、ROADMAP を同期し、Harness Engineering の承認境界が digest だけを読む AI にも伝わるようにした。
+- **Agent validation status parity** — README、`llms.txt`、`llms-full.txt`、ROADMAP、MARKET_STRATEGY、`axiarch-rules/{ja,en}/README.md`、`LOADING_PROTOCOL.md`、`init.sh`、`check-axiarch-health.sh` を同期し、実運用稼働確認済みとして公開表現する対象を Google Antigravity のみに限定。Codex / Claude Code は主対象の統合対応だが実務検証中であり、動作保証または実証済み対象として扱わない境界へそろえた。
+- **Loading / Blueprint wording parity** — `LOADING_PROTOCOL.md` / `INDEX.md` の 15→16 段階 stale 表記、ロード完了宣言の境界、Blueprint 事前フォルダ README の「空」表現、プロジェクト概要の過大評価表現を同期し、Universal / Blueprint / optional Prompts の3層責務と品質底上げの言い回しへ寄せた。
+- **Market research wording and deletion/addition audit** — `MARKET_STRATEGY.md` と ROADMAP の市場調査節を2026-06-12時点の一次情報ベースへ更新し、未確認のバージョン追従、唯一性、先取り、完全防止に見える表現を確認済み事実と戦略仮説へ分離。tracked削除なし、必要な未追跡追加は `axiarch-rules/{ja,en}/blueprint/core/020_governance_rules.md` の2件であることを監査した。
+
+### Fixed (English)
+
+- **Read-only subagent / Deep Security Scan false-block risk reduction** — Clarifies in `AXIARCH.md` and `axiarch-harness/{ja,en}/` that read-only subagent delegation is not a Human Approval Gate action by itself. When the user explicitly requests a named read-only workflow such as deep audit, security scan, exhaustive review, or Codex Security Deep Security Scan, the workflow's required read-only worker fanout is included in that request; agents must not stop for separate "explicit subagent permission." If delegation is unavailable, agents must not claim the formal Deep Security Scan ran, and should use the ordinary scan or main-agent sequential role-pass fallback.
+- **Runtime reminder / health regression detection** — Adds the same boundary to `axiarch-boot-reminder.sh` and extends `check-axiarch-health.sh` Check 16 to verify the read-only subagent/security-scan delegation boundary alongside Language First and Execution Harness.
+- **Public / AI-facing docs parity** — Syncs README, `llms.txt`, `llms-full.txt`, and ROADMAP so agents that load only the digest still receive the Harness Engineering approval boundary.
+- **Agent validation status parity** — Syncs README, `llms.txt`, `llms-full.txt`, ROADMAP, MARKET_STRATEGY, `axiarch-rules/{ja,en}/README.md`, `LOADING_PROTOCOL.md`, `init.sh`, and `check-axiarch-health.sh` so only Google Antigravity is presented as production-validated through real operational usage. Codex and Claude Code remain first-class integration targets under practical validation, not operation-guaranteed or production-validated platforms.
+- **Loading / Blueprint wording parity** — Syncs stale 15→16-stage references in `LOADING_PROTOCOL.md` / `INDEX.md`, the load-completion claim boundary, pre-provisioned Blueprint folder README wording, and project-overview overclaim wording around the three-layer Universal / Blueprint / optional Prompts responsibility model and quality-floor language.
+- **Market research wording and deletion/addition audit** — Refreshes `MARKET_STRATEGY.md` and the ROADMAP market-research section against 2026-06-12 primary-source checks, separating verified facts from strategic hypotheses and softening unverified version-following, uniqueness, anticipation, and absolute-prevention wording. Confirms no tracked deletions and identifies the only required untracked additions as `axiarch-rules/{ja,en}/blueprint/core/020_governance_rules.md`.
+
+---
+
 ## [1.14.0] — 2026-06-09
 
 ### セキュリティ認証スタックの新設とフレームワーク整合 / Security Authentication Stack & Framework Consistency
@@ -1060,6 +1082,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
+[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.14.0...HEAD
 [1.14.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.1...v1.14.0
 [1.13.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.12.1...v1.13.0

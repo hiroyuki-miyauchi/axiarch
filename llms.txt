@@ -19,14 +19,15 @@ Without governance, AI agents suffer from:
 
 Axiarch mitigates these risks by defining a quality floor and autonomous context loading through constitutional architecture.
 v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the operational engineering that turns the three-layer model into execution order, audit gates, role passes, evidence packets, human approval boundaries, and optional subagent delegation.
+Read-only subagent delegation is not a Human Approval Gate action by itself. When a user explicitly requests a deep audit, security scan, exhaustive review, Codex Security Deep Security Scan, or an equivalent named read-only workflow, that request includes the workflow's required read-only worker fanout. If delegation is unavailable, do not claim the formal deep workflow ran; use the documented ordinary scan or main-agent sequential role-pass fallback.
 
 ## Core Architecture (Three-Layer Governance)
 
 - **Layer 1: Universal (Immutable Constitution)**
-  - `AXIARCH.md` — Canonical Axiarch protocol. `AGENTS.md` and tool-native files are thin adapters that point to it. Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Validation describes the configurations and scope Axiarch has exercised, not an operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
+  - `AXIARCH.md` — Canonical Axiarch protocol. `AGENTS.md` and tool-native files are thin adapters that point to it. Primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Production-validated through real operational usage: Google Antigravity only. Codex and Claude Code are first-class integration targets under practical validation, not operation-guaranteed platforms for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
   - `axiarch-rules/{lang}/universal/` — 45 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance).
 - **Layer 2: Blueprint (Mutable Project State)**
-  - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, feature specs, and continuously accumulated lessons log.
+  - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, continuously accumulated lessons log, crystallized governance rules, and feature specs.
 - **Layer 3: Prompts (Optional Execution Framework)**
   - `axiarch-prompts/` — Optional reusable audit/QA/upgrade execution prompt templates that make Layer 1/2 rules easier to apply to specific tasks.
 - **Execution Harness**
@@ -43,6 +44,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 - **Database Integrity**: Routine DB schema or data changes are version-controlled as migrations or approved runbooks and applied through the agreed pipeline; manual console changes require explicit emergency approval and reconciliation
 - **SSOT and Branch Discipline**: Inspect branch and working tree before work; after merge, handoff, or branch exit, sync with the agreed mainline when workflow and permissions allow it, or record why not
 - **Human Approval Gate**: No `git add` / stage, `git commit`, `git push`, deploy, release, tag, DB apply, destructive operation, sensitive boundary change, or irreversible action without explicit action-specific human approval
+- **Read-Only Delegation Boundary**: Read-only subagent/security-scan fanout requested by the user is not blocked solely for separate subagent permission; stop only before state-changing, production, sensitive, cost, install/auth, or other approval-required actions
 - **Existing Behavior Protection**: Preserve working behavior and unrelated user changes; prefer narrow diff-based edits over broad rewrites
 - **Current Task State**: `task.md` / `implementation_plan.md` / `walkthrough.md` are current-task Markdown evidence. `axiarch-task-state.sh` archives changed previous copies before refresh and regenerates templates in the Project Native Language.
 - **Native Task State Sync**: Codex uses `update_plan`; Claude Code uses `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`, with `TodoWrite` only as an older-runtime fallback.
@@ -75,8 +77,8 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 
 | Agent | Status |
 |:------|:-------|
-| OpenAI Codex | ✅ Production-validated primary — native `AGENTS.md` adapter pointing to `AXIARCH.md` + `.codex/hooks.json` integration; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
-| Claude Code | ✅ Production-validated primary — native `CLAUDE.md` adapter pointing to `AXIARCH.md` + `.claude/settings.json` hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
+| OpenAI Codex | 🔶 Primary integration target — native `AGENTS.md` adapter pointing to `AXIARCH.md` + `.codex/hooks.json` integration; under practical validation, no operation guarantee; v1.9.0 adds PostToolUse diff guard, v1.11.0 requires `update_plan` native plan sync where available |
+| Claude Code | 🔶 Primary integration target — native `CLAUDE.md` adapter pointing to `AXIARCH.md` + `.claude/settings.json` hook integration (UserPromptSubmit / PreToolUse / PostToolUse / SessionStart + reminder TTL + Check D task-boundary detection + diff guard); under practical validation, no operation guarantee; v1.11.0 requires Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) where available |
 | Google Antigravity | ✅ Production-validated primary — native `.agents/rules/prompt_pointer.md` adapter pointing to `AXIARCH.md`; validated through real operational usage |
 | Cursor | ⚠️ Extended pointer-only candidate via `.cursor/rules/axiarch.mdc`; unverified and not operation-guaranteed |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate via `.github/copilot-instructions.md`; unverified and not operation-guaranteed |

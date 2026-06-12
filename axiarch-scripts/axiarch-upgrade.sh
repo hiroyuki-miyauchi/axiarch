@@ -517,6 +517,7 @@ register_manifest_defaults() {
 
   add_localized_item "blueprint_templates" "axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md" "axiarch" "replace-if-local-unchanged"
   add_localized_item "blueprint_templates" "axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md" "axiarch" "replace-if-local-unchanged"
+  add_localized_item "blueprint_templates" "axiarch-rules/{lang}/blueprint/core/020_governance_rules.md" "axiarch" "replace-if-local-unchanged"
   add_localized_item "blueprint_index" "axiarch-rules/{lang}/blueprint/INDEX.md" "mixed" "review"
   add_localized_item "blueprint_project_state" "axiarch-rules/{lang}/blueprint/core/000_project_overview.md" "project" "preserve"
   add_localized_item "blueprint_project_state" "axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md" "project" "preserve"

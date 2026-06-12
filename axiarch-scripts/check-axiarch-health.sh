@@ -26,7 +26,7 @@
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
 #   Check 15   v1.9+ / v1.11+ integration — PostToolUse diff guard + task-state lifecycle + release/docs/prompt parity + ja/en heading-number parity + Claude Memory canonical boundary + source release-file tracking
-#   Check 16   Reminder invariant clauses — Language First + Execution Harness retained in axiarch-boot-reminder.sh (ja/en, v1.13.1+)
+#   Check 16   Reminder invariant clauses — Language First + Execution Harness + read-only delegation retained in axiarch-boot-reminder.sh (ja/en, v1.13.1+)
 #
 # Out of Scope (semantic judgment required, manual review):
 #   AXIARCH §6.1 AI Self-Completion / §6.3 Database Integrity / §6.5 Existing Functionality Protection
@@ -243,7 +243,7 @@ if [[ -n "${LESSONS_LOG}" ]]; then
   print_info "Lessons log: ${LESSONS_LOG}"
   # Extract Domain tags from the "未分類" / "Unsorted" section onwards.
   # Pattern: "**Domain:** XXX" or "Domain: XXX"
-  DOMAIN_LIST=$(grep -E "^\*\*Domain:\*\*|^Domain:" "${LESSONS_LOG}" 2>/dev/null \
+  DOMAIN_LIST=$({ grep -E "^\*\*Domain:\*\*|^Domain:" "${LESSONS_LOG}" 2>/dev/null || true; } \
     | sed -E 's|^\*\*Domain:\*\*[[:space:]]*||; s|^Domain:[[:space:]]*||' \
     | awk -F'/' '{print $1}' | awk '{$1=$1; print}' | sort)
   if [[ -z "${DOMAIN_LIST}" ]]; then
@@ -732,14 +732,15 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected Safe Upgrade docs and health summary to say source-only files stay skipped by default unless explicitly selected in interactive mode, and interactive choices are deduplicated"
       DOCS_MISSING=1
     fi
-    if grep -q "Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "全環境での動作保証ではありません" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/README.md" 2>/dev/null; then
-      print_pass "Axiarch source README.md keeps production-validated primary status explicit for Codex, Claude Code, and Google Antigravity"
+    if grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Google Antigravity is the only agent presented as production-validated" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "operation guarantee for every environment" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      print_pass "Axiarch source README.md keeps Antigravity-only production validation and Codex/Claude validation boundary explicit"
     else
       print_warn "Axiarch source README.md may have stale agent validation status wording"
-      print_info "Expected README to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+      print_info "Expected README to mark only Google Antigravity as production-validated, while keeping Codex and Claude Code as primary integration targets under practical validation with no operation guarantee"
       DOCS_MISSING=1
     fi
   else
@@ -748,16 +749,17 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   fi
 
   if [[ -f "${PROJECT_DIR}/MARKET_STRATEGY.md" && -f "${PROJECT_DIR}/ROADMAP.md" ]]; then
-    if grep -q "OpenAI Codex、Claude Code、Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
-      && grep -q "全環境での動作保証とは表現しない" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+    if grep -q "実運用稼働確認済みの実証済み主対象として公開表現するのは Google Antigravity のみ" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+      && grep -q "Codex と Claude Code は主対象の統合対応" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
       && grep -q "実運用稼働確認済み主対象" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
-      && grep -q "Production-validated primary targets" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "Production-validated primary target" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "Primary integration target" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
       && grep -q "v1.8.0時点の公開ステータス" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
       && grep -q "At the v1.8.0 release point" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null; then
-      print_pass "Axiarch source market strategy and roadmap keep production-validated primary status aligned while preserving historical release context"
+      print_pass "Axiarch source market strategy and roadmap keep Antigravity-only production validation aligned while preserving historical release context"
     else
       print_warn "Axiarch source market strategy or roadmap may have stale agent validation status wording"
-      print_info "Expected MARKET_STRATEGY and ROADMAP to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving historical v1.8.0 status context"
+      print_info "Expected MARKET_STRATEGY and ROADMAP to mark only Google Antigravity as production-validated, keep Codex/Claude as primary integration targets under validation, and preserve historical v1.8.0 status context"
       DOCS_MISSING=1
     fi
   else
@@ -787,17 +789,16 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, Claude Memory canonical boundary, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
       DOCS_MISSING=1
     fi
-    if grep -q "Production-validated primary targets: OpenAI Codex, Claude Code, and Google Antigravity" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "OpenAI Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
-      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
-      && grep -q "Production-validated primary" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
-      && grep -q "OpenAI Codex | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "Claude Code | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
-      print_pass "Axiarch source llms files keep agent validation status aligned"
+    if grep -q "Production-validated through real operational usage: Google Antigravity only" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "no operation guarantee" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "no operation guarantee" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      && grep -q "OpenAI Codex | 🔶 Primary integration target" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "Claude Code | 🔶 Primary integration target" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
+      print_pass "Axiarch source llms files keep Antigravity-only production validation and Codex/Claude validation boundary aligned"
     else
       print_warn "Axiarch source llms files may have stale agent validation status wording"
-      print_info "Expected llms files to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+      print_info "Expected llms files to mark only Google Antigravity as production-validated, Codex/Claude as primary integration targets, and preserve the no-operation-guarantee boundary"
       DOCS_MISSING=1
     fi
   else
@@ -995,28 +996,32 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   fi
 
   if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" ]] \
-    && grep -q "Codex / Claude Code / Google Antigravity はいずれも実運用で稼働確認済み" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "全環境での動作保証ではない" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity のみ" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "全環境での動作保証" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && [[ -f "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" ]] \
-    && grep -q "Codex, Claude Code, and Google Antigravity are production-validated primary targets" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
-    print_pass "Axiarch source LOADING_PROTOCOL files keep agent validation status aligned"
+    && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "not operation-guaranteed" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
+    print_pass "Axiarch source LOADING_PROTOCOL files keep Antigravity-only production validation aligned"
   else
     print_warn "Axiarch source LOADING_PROTOCOL files may have stale agent validation status wording"
-    print_info "Expected ja/en LOADING_PROTOCOL to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+    print_info "Expected ja/en LOADING_PROTOCOL to mark only Google Antigravity as production-validated, keep Codex/Claude under practical validation, and preserve the no-operation-guarantee boundary"
     DOCS_MISSING=1
   fi
 
   if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/README.md" ]] \
-    && grep -q "3つとも実運用で稼働確認済み" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
-    && grep -q "全環境での動作保証ではありません" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity のみ" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "全環境での動作保証" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
     && [[ -f "${PROJECT_DIR}/axiarch-rules/en/README.md" ]] \
-    && grep -q "All three are production-validated primary targets" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
-    && grep -q "not an operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null; then
-    print_pass "Axiarch source rules README files keep agent validation status aligned"
+    && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+    && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+    && grep -q "no operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null; then
+    print_pass "Axiarch source rules README files keep Antigravity-only production validation aligned"
   else
     print_warn "Axiarch source rules README files may have stale agent validation status wording"
-    print_info "Expected ja/en rules README files to mark Codex, Claude Code, and Google Antigravity as production-validated primary targets while preserving the no-operation-guarantee boundary"
+    print_info "Expected ja/en rules README files to mark only Google Antigravity as production-validated, keep Codex/Claude under practical validation, and preserve the no-operation-guarantee boundary"
     DOCS_MISSING=1
   fi
 
@@ -1084,13 +1089,13 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected existing-install detection, Safe Upgrade guidance, missing-helper bootstrap guidance, EOF-safe prompt handling, pre-copy stop, and contents-copy semantics for rules/prompts"
       DOCS_MISSING=1
     fi
-    if grep -q "OpenAI Codex — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
-      && grep -q "Claude Code — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+    if grep -q "OpenAI Codex — Primary integration target" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Claude Code — Primary integration target" "${PROJECT_DIR}/init.sh" 2>/dev/null \
       && grep -q "Google Antigravity — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
       print_pass "Axiarch source init.sh presents current agent validation status in installer choices"
     else
       print_warn "Axiarch source init.sh may present stale agent validation status in installer choices"
-      print_info "Expected init.sh choices to mark Codex, Claude Code, and Google Antigravity as production-validated primary"
+      print_info "Expected init.sh choices to mark Codex and Claude Code as primary integration targets, and Google Antigravity as production-validated primary"
       DOCS_MISSING=1
     fi
     if grep -q "set_project_native_language" "${PROJECT_DIR}/init.sh" 2>/dev/null \
@@ -1617,17 +1622,20 @@ else
 fi
 
 # =============================================================================
-# Check 16 (v1.13.1+): Reminder invariant clauses — Language First + Execution Harness
-# The per-turn reminder is the runtime enforcement surface for two invariants
-# restored in v1.13.1:
+# Check 16 (v1.13.1+): Reminder invariant clauses — Language First + Execution Harness + Read-only Delegation
+# The per-turn reminder is the runtime enforcement surface for invariants
+# restored or reinforced in v1.13.1+:
 #   (A) Language First — Project Native Language across every heading/label, with
 #       English mixing marked a protocol violation
 #   (B) Execution Harness — mandatory for non-trivial (L2+) work, with role passes,
 #       audit verdict, evidence packet, and human approval gate
-# Both must persist in ja AND en. This guard detects silent removal/degradation
-# (the #46-style regression that dropped §2 Language First during canonicalization).
+#   (C) Read-only delegation boundary — subagent/security-scan fanout does not
+#       become approval-gated merely because it uses workers
+# All three must persist in ja AND en. This guard detects silent removal/degradation
+# across the #46-style Language First regression class and the read-only
+# delegation false-block boundary.
 # =============================================================================
-print_section "Check 16: Reminder invariant clauses (Language First + Execution Harness, ja/en)"
+print_section "Check 16: Reminder invariant clauses (Language First + Execution Harness + Read-only Delegation, ja/en)"
 
 REMINDER_INVARIANT_PATH="${PROJECT_DIR}/axiarch-scripts/axiarch-boot-reminder.sh"
 if [[ ! -f "${REMINDER_INVARIANT_PATH}" ]]; then
@@ -1651,8 +1659,17 @@ else
   harness_gate_en=$(grep -c "human approval gate" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
   harness_gate_ja=$(grep -c "人間承認ゲート" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
 
+  # (C) Read-only delegation boundary — reduces the chance Codex stops with
+  # "Deep Security Scan requires explicit subagent permission" after the user
+  # already requested the named read-only workflow.
+  delegation_boundary_en=$(grep -c "Read-only subagent delegation is not a human approval gate" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  delegation_fanout_en=$(grep -c "explicit Deep Security Scan requests include required read-only fanout" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  delegation_boundary_ja=$(grep -c "読み取り専用のサブエージェント委任は人間承認ゲートではありません" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+  delegation_fanout_ja=$(grep -c "明示された Deep Security Scan は必要な読み取り専用 fanout を含みます" "${REMINDER_INVARIANT_PATH}" 2>/dev/null || true)
+
   invariant_lang_ok=0
   invariant_harness_ok=0
+  invariant_delegation_ok=0
   if [[ "${lang_scope_en:-0}" -gt 0 && "${lang_violation_en:-0}" -gt 0 \
      && "${lang_scope_ja:-0}" -gt 0 && "${lang_violation_ja:-0}" -gt 0 ]]; then
     invariant_lang_ok=1
@@ -1660,6 +1677,10 @@ else
   if [[ "${harness_term:-0}" -gt 0 && "${harness_path:-0}" -gt 0 \
      && "${harness_gate_en:-0}" -gt 0 && "${harness_gate_ja:-0}" -gt 0 ]]; then
     invariant_harness_ok=1
+  fi
+  if [[ "${delegation_boundary_en:-0}" -gt 0 && "${delegation_fanout_en:-0}" -gt 0 \
+     && "${delegation_boundary_ja:-0}" -gt 0 && "${delegation_fanout_ja:-0}" -gt 0 ]]; then
+    invariant_delegation_ok=1
   fi
 
   if [[ "${invariant_lang_ok}" -eq 1 ]]; then
@@ -1676,6 +1697,14 @@ else
     print_warn "Reminder may have dropped/degraded the Execution Harness invariant (harness reference + human approval gate, ja/en)"
     print_info "Expected 'Execution Harness' + 'axiarch-harness/' + 'human approval gate' (en) and '人間承認ゲート' (ja) in CORE_REMINDER and SHORT_REMINDER"
     print_info "Re-run init.sh to redistribute the current axiarch-scripts/axiarch-boot-reminder.sh, or restore the clause manually (v1.13.1+)"
+    EXIT_CODE=1
+  fi
+  if [[ "${invariant_delegation_ok}" -eq 1 ]]; then
+    print_pass "Reminder retains read-only subagent/security-scan delegation boundary (ja/en)"
+  else
+    print_warn "Reminder may have dropped/degraded the read-only subagent/security-scan delegation boundary"
+    print_info "Expected read-only subagent delegation and explicit Deep Security Scan fanout wording in both CORE_REMINDER and SHORT_REMINDER"
+    print_info "Restore the clause so agents do not stop for separate subagent permission after a user-requested read-only scan"
     EXIT_CODE=1
   fi
 fi

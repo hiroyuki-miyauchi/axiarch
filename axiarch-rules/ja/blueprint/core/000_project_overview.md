@@ -3,7 +3,7 @@
 > [!NOTE]
 > **Blueprint Structure**:
 > このドキュメントは、本リポジトリが想定する **「リファレンス・プロダクト仕様」** を定義します。
-> AIエージェントは、この架空かつ厳格な製品仕様を用いて、憲法のルールをシミュレーション、検証、進化させます。
+> AIエージェントは、この架空の参照仕様を用いて、Universal / Blueprint / Prompts の責務分離とルール適用例を確認します。これは完全な回答例ではなく、採用先が自分のプロジェクト状態へ置き換えるための基準モデルです。
 
 ---
 
@@ -21,15 +21,15 @@
 
 ## 1. Project Vision & Strategy
 *   **Mission (What & Why)**:
-    *   Axiarch憲法の **「実装のゴールデンスタンダード（模範解答）」** となることを目指します。
-    *   ここで「普遍的なフルスタックSaaS」の構造を定義することで、AIが「ルールが具体的にどうコードに落ちるか」を理解可能にします。
+    *   Axiarch憲法を採用先が具体化するときの **実装参照モデル** として機能することを目指します。
+    *   ここで「代表的なフルスタックSaaS」の構造例を定義することで、AIが「ルールが具体的にどうコードに落ちるか」を確認しやすくします。
 *   **Target Audience**:
     *   **Primary**: AI Agents (自己学習用).
     *   **Secondary**: 憲法を参照する開発者.
     *   **Reference Persona**: *大規模SaaSを構築するプロフェッショナル開発者*
 *   **North Star Metric**:
-    *   **Constitution Coverage**: アクティブな仕様書によってカバーされているルールの割合（％）。
-    *   **Simulation Accuracy**: このBlueprintに基づくAIコード生成の正確性。
+    *   **Constitution Coverage**: アクティブな仕様書によって参照可能になっているルールの割合（％）。
+    *   **Simulation Fit**: このBlueprintに基づくAIコード生成が、参照仕様とどれだけ整合しているか。
 
 ## 2. Technology Stack Selection
 > ⚠️ このセクションはプロジェクト固有の設定です。

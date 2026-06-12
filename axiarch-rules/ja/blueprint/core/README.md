@@ -18,6 +18,7 @@
 |:--------|:-----|
 | `core/000_project_overview.md` | プロジェクト概要・技術スタック定義 |
 | `core/010_project_lessons_log.md` | 教訓の中央インデックス（結晶化の起点） |
+| `core/020_governance_rules.md` | ガバナンス教訓の昇華ルール（正本入口、Language First非劣化、読み取り専用subagent/security-scan委任境界） |
 | `core/998_feature_spec_template.md` | 機能仕様テンプレート |
 | `core/999_project_specific_template.md` | プロジェクト固有ルールテンプレート |
 

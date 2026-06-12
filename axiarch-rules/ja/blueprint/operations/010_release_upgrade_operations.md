@@ -165,7 +165,7 @@ manifest側の広域Project State globは `blueprint/*/[0-9][0-9][0-9]_*.md` に
 
 ### Rule
 
-manifestを読めないfallback経路でも、所有境界はmanifestと同等に近づける。`core/000`、`core/010`、テンプレートなど明示分類済みファイルは既存分類を維持し、追加の `core/{NNN}_*.md` はProject Stateとして保持対象にする。任意promptは必須ではないが、適用した場合は `.axiarch/files.sha256` にhashを残す。
+manifestを読めないfallback経路でも、所有境界はmanifestと同等に近づける。`core/000`、`core/010`、テンプレート、`core/020_governance_rules.md` のようなAxiarch共有Blueprintなど、明示分類済みファイルは既存分類を維持する。明示分類されていない追加の `core/{NNN}_*.md` はProject Stateとして保持対象にする。任意promptは必須ではないが、適用した場合は `.axiarch/files.sha256` にhashを残す。
 
 ### Enforcement
 

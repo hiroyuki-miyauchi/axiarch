@@ -39,6 +39,7 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 | # | Domain | File | Count |
 |:--|:-------|:-----|:------|
 | 1 | Operations | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 12 |
+| 2 | Governance | [core/020_governance_rules.md](./020_governance_rules.md) | 3 |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
 <!-- Example: | 1 | DB & Auth | `engineering/010_database_auth.md` | 3 | -->
@@ -61,19 +62,9 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 
 ---
 
-### [Initial] Project Initialization Lesson
-**Domain:** Governance
-**Context:** New project or rule system refresh.
-**Rule:** Treat `AXIARCH.md` as the canonical Axiarch entrypoint and load the detailed protocol bodies from `axiarch-rules` through `AXIARCH.md`. Treat `AGENTS.md` as an adapter for compatible environments.
-
----
-
-### [2026-06-08] Silent degradation of a strict rule during canonicalization, and multi-surface restoration
-**Domain:** Governance
-**Context:** When #46 canonicalized AGENTS.md into AXIARCH.md, the old §2 "Language First" was downgraded to a weak single §6.10 row (listing owner-facing documents only), losing its binding on the agent response surface (headings, summaries, labels, lists, tables) and its violation clause (an adopter reported "native-language adherence weakened").
-**Problem:** Large canonicalizations/merges can silently degrade a strong prior rule without anyone noticing. During restoration, fixing only the canonical file (AXIARCH.md) and the reminder leaves the old wording stranded in peripheral surfaces such as the AI-facing digests (llms.txt / llms-full.txt) and the ja/en mirrors in ROADMAP.
-**Solution/Rule:** (1) Under the §6.10 non-degradation principle, preserve the stricter older interpretation unless a replacement boundary is explicitly introduced. (2) Restore across ALL surfaces — canonical + reminder + AI-facing digests + ja/en mirrors. (3) Guard the restored invariant with a dedicated health-check (e.g., Check 16) that greps for it, so future silent removal/degradation is caught with EXIT_CODE=1.
-**Reference:** #46 / v1.13.1 / AXIARCH.md §6.10 / axiarch-scripts/check-axiarch-health.sh Check 16
+> [!NOTE]
+> Governance lessons reached the threshold and were elevated to [core/020_governance_rules.md](./020_governance_rules.md).
+> Keep this section empty as the temporary accumulation point for new unsorted lessons.
 
 ---
 
@@ -116,5 +107,5 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 > When creating a new domain lessons file, **MUST** follow the official template in the
 > "Crystallized Rule File Template" section of `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 >
-> The inline template previously listed here has been retired to eliminate structural drift risk.
+> The inline template previously listed here has been retired to reduce structural drift risk.
 > **Always treat `CRYSTALLIZATION_PROTOCOL.md` as the Single Source of Truth for templates.**

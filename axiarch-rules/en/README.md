@@ -17,7 +17,7 @@
 >     *   **Action**: AI SHOULD create and edit these files to accumulate project context and lessons.
 
 > **Language Standard**:
-> All rules are provided in **Japanese and English** to ensure global scalability and clear communication.
+> All rules are provided in **Japanese and English** to support global scalability and clear communication.
 
 ## 📂 Rule Modules
 
@@ -86,6 +86,7 @@
 
 *   **000. Project Overview** ([🇯🇵](../ja/blueprint/core/000_project_overview.md) / [🇺🇸](./blueprint/core/000_project_overview.md))
 *   **010. Project Lessons Log** ([🇯🇵](../ja/blueprint/core/010_project_lessons_log.md) / [🇺🇸](./blueprint/core/010_project_lessons_log.md))
+*   **020. Governance Rules** ([🇯🇵](../ja/blueprint/core/020_governance_rules.md) / [🇺🇸](./blueprint/core/020_governance_rules.md))
 *   **998. Feature Specification Template** ([🇯🇵](../ja/blueprint/core/998_feature_spec_template.md) / [🇺🇸](./blueprint/core/998_feature_spec_template.md))
 *   **999. Project Specific Template** ([🇯🇵](../ja/blueprint/core/999_project_specific_template.md) / [🇺🇸](./blueprint/core/999_project_specific_template.md))
 
@@ -100,7 +101,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. All three are production-validated primary targets through real operational usage. This validation describes the configurations and scope Axiarch has exercised; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
+> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. At this time, only Google Antigravity is presented as production-validated through real operational usage. Codex and Claude Code are first-class integration targets under practical validation, with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
 
 1.  **Copy**: The minimal required setup is `AXIARCH.md`, the `AGENTS.md` adapter, `axiarch-rules/`, and `axiarch-harness/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash

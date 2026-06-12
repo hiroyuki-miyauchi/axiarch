@@ -11,7 +11,7 @@ security, operations, business, AI, and governance work through a multi-layer
 constitutional architecture, making consistent output quality easier to maintain
 across agents and operator skill levels.
 
-OpenAI Codex, Claude Code, and Google Antigravity are production-validated primary targets. v1.11.0 adds current-task Markdown evidence rotation plus native task-state sync rules for Codex and Claude Code. Validation describes the configurations and scope Axiarch has exercised through real operational usage; it is not an operation guarantee for every environment. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
+OpenAI Codex, Claude Code, and Google Antigravity are primary targets. At this time, only Google Antigravity is presented as production-validated through real operational usage. v1.11.0 adds current-task Markdown evidence rotation plus native task-state sync rules for Codex and Claude Code, but those integrations remain under practical validation and are not operation guarantees for every environment. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
 
 ## What Problem Does Axiarch Solve?
 
@@ -61,6 +61,12 @@ The v1.12.0 harness work introduces Harness Engineering as the operational
 bridge from rules to task execution. It is not a fourth rule layer; it makes the
 three-layer model executable through lifecycle steps, audit verdicts, role
 passes, evidence packets, human approval boundaries, and optional delegation.
+Read-only subagent delegation is not a Human Approval Gate action by itself.
+When the user explicitly requests a deep audit, security scan, exhaustive
+review, Codex Security Deep Security Scan, or equivalent named read-only
+workflow, that request includes the workflow's required read-only worker fanout.
+If delegation is unavailable, do not claim the formal deep workflow ran; use the
+documented ordinary scan or main-agent sequential role-pass fallback.
 The active governance entrypoint is AXIARCH.md, with detailed rule bodies and
 execution procedures loaded from the files it references:
 
@@ -86,6 +92,7 @@ Non-negotiable boundaries retained from the former AGENTS protocol:
 - Working behavior and unrelated user changes are protected by default.
 - Existing files are changed with narrow diffs, not casual full rewrites.
 - `git add` / stage, `git commit`, `git push`, deploy, release, tag, DB apply, destructive operation, sensitive boundary change, and irreversible action require explicit action-specific human approval.
+- Read-only subagent/security-scan fanout requested by the user is not blocked solely for separate subagent permission; stop only before state-changing, production, sensitive, cost, install/auth, or other approval-required actions.
 - Lessons are crystallized only when they actually occurred in the task.
 
 Historical changelog or roadmap entries may mention the earlier AGENTS.md
@@ -297,6 +304,7 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
 Mutable templates for each project:
 - **core/000_project_overview.md**: Project tech stack, architecture, goals
 - **core/010_project_lessons_log.md**: Central lessons index with auto-separation
+- **core/020_governance_rules.md**: Crystallized governance lessons for canonical entrypoint, Language First non-degradation, and read-only delegation boundaries
 - **core/998_feature_spec_template.md**: Feature spec with Given/When/Then
   acceptance criteria (Blueprint First core)
 - **core/999_project_specific_template.md**: Custom project rules
@@ -354,8 +362,8 @@ Optional reusable prompt templates organized by role:
 
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
-| OpenAI Codex | ✅ Production-validated primary | `AGENTS.md` adapter → `AXIARCH.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
-| Claude Code | ✅ Production-validated primary | `CLAUDE.md` adapter → `AXIARCH.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
+| OpenAI Codex | 🔶 Primary integration target; under practical validation, no operation guarantee | `AGENTS.md` adapter → `AXIARCH.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
+| Claude Code | 🔶 Primary integration target; under practical validation, no operation guarantee | `CLAUDE.md` adapter → `AXIARCH.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
 | Google Antigravity | ✅ Production-validated primary | `.agents/rules/prompt_pointer.md` adapter → `AXIARCH.md` |
 | Cursor | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.cursor/rules/axiarch.mdc` adapter → `AXIARCH.md` |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.github/copilot-instructions.md` adapter → `AXIARCH.md` |

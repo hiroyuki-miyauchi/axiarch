@@ -165,7 +165,7 @@ The manifest's broad Project State glob covers additional numbered files under `
 
 ### Rule
 
-When the manifest cannot be read, fallback ownership boundaries should stay as close to the manifest as practical. Explicitly classified files such as `core/000`, `core/010`, and templates keep their existing classifications, while additional `core/{NNN}_*.md` files are treated as Project State. Optional prompts remain optional, but when they are applied, `.axiarch/files.sha256` must include their hashes.
+When the manifest cannot be read, fallback ownership boundaries should stay as close to the manifest as practical. Explicitly classified files such as `core/000`, `core/010`, templates, and Axiarch-shared Blueprint files like `core/020_governance_rules.md` keep their existing classifications, while additional `core/{NNN}_*.md` files that are not explicitly classified are treated as Project State. Optional prompts remain optional, but when they are applied, `.axiarch/files.sha256` must include their hashes.
 
 ### Enforcement
 
