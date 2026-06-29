@@ -732,15 +732,15 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected Safe Upgrade docs and health summary to say source-only files stay skipped by default unless explicitly selected in interactive mode, and interactive choices are deduplicated"
       DOCS_MISSING=1
     fi
-    if grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "Google Antigravity is the only agent presented as production-validated" "${PROJECT_DIR}/README.md" 2>/dev/null \
-      && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    if grep -q "いずれも実運用（ドッグフーディング）で稼働を確認済み" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "全環境での動作保証まではしません" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "are all validated through real operational use" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      && grep -q "Codex, and Claude Code are all validated through real operational use" "${PROJECT_DIR}/README.md" 2>/dev/null \
       && grep -q "operation guarantee for every environment" "${PROJECT_DIR}/README.md" 2>/dev/null; then
-      print_pass "Axiarch source README.md keeps Antigravity-only production validation and Codex/Claude validation boundary explicit"
+      print_pass "Axiarch source README.md keeps all-three (Antigravity/Codex/Claude Code) real-operational-use validation and no-full-guarantee boundary explicit"
     else
       print_warn "Axiarch source README.md may have stale agent validation status wording"
-      print_info "Expected README to mark only Google Antigravity as production-validated, while keeping Codex and Claude Code as primary integration targets under practical validation with no operation guarantee"
+      print_info "Expected README to mark Antigravity/Codex/Claude Code as all validated through real operational use (dogfooding), with no operation guarantee for every environment"
       DOCS_MISSING=1
     fi
   else
@@ -749,17 +749,17 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   fi
 
   if [[ -f "${PROJECT_DIR}/MARKET_STRATEGY.md" && -f "${PROJECT_DIR}/ROADMAP.md" ]]; then
-    if grep -q "実運用稼働確認済みの実証済み主対象として公開表現するのは Google Antigravity のみ" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
-      && grep -q "Codex と Claude Code は主対象の統合対応" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+    if grep -q "いずれも実運用（ドッグフーディング）で稼働を確認済みとする" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
+      && grep -q "全環境での動作保証まではしない" "${PROJECT_DIR}/MARKET_STRATEGY.md" 2>/dev/null \
       && grep -q "実運用稼働確認済み主対象" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
       && grep -q "Production-validated primary target" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
-      && grep -q "Primary integration target" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
+      && grep -q "real operational use" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
       && grep -q "v1.8.0時点の公開ステータス" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null \
       && grep -q "At the v1.8.0 release point" "${PROJECT_DIR}/ROADMAP.md" 2>/dev/null; then
-      print_pass "Axiarch source market strategy and roadmap keep Antigravity-only production validation aligned while preserving historical release context"
+      print_pass "Axiarch source market strategy and roadmap keep all-three real-operational-use validation aligned while preserving historical release context"
     else
       print_warn "Axiarch source market strategy or roadmap may have stale agent validation status wording"
-      print_info "Expected MARKET_STRATEGY and ROADMAP to mark only Google Antigravity as production-validated, keep Codex/Claude as primary integration targets under validation, and preserve historical v1.8.0 status context"
+      print_info "Expected MARKET_STRATEGY and ROADMAP to mark Antigravity/Codex/Claude Code as all validated through real operational use, preserve the no-full-guarantee boundary, and keep historical v1.8.0 status context"
       DOCS_MISSING=1
     fi
   else
@@ -789,16 +789,16 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected llms.txt and llms-full.txt to mention source-repository-only default skip, explicit interactive selection, Claude Memory canonical boundary, deduplicated action choices, temporary helper bootstrap for older adopters, source release-file Git tracking, axiarch-task-state.sh, update_plan, and TaskCreate"
       DOCS_MISSING=1
     fi
-    if grep -q "Production-validated through real operational usage: Google Antigravity only" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+    if grep -q "Production-validated through real operational use (dogfooding): Google Antigravity, OpenAI Codex, and Claude Code" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "are all validated through real operational use" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
       && grep -q "no operation guarantee" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
       && grep -q "no operation guarantee" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
-      && grep -q "OpenAI Codex | 🔶 Primary integration target" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
-      && grep -q "Claude Code | 🔶 Primary integration target" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
-      print_pass "Axiarch source llms files keep Antigravity-only production validation and Codex/Claude validation boundary aligned"
+      && grep -q "OpenAI Codex | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+      && grep -q "Claude Code | ✅ Production-validated primary" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
+      print_pass "Axiarch source llms files keep all-three real-operational-use validation aligned"
     else
       print_warn "Axiarch source llms files may have stale agent validation status wording"
-      print_info "Expected llms files to mark only Google Antigravity as production-validated, Codex/Claude as primary integration targets, and preserve the no-operation-guarantee boundary"
+      print_info "Expected llms files to mark Antigravity/Codex/Claude Code as all validated through real operational use, preserving the no-operation-guarantee boundary"
       DOCS_MISSING=1
     fi
   else
@@ -996,32 +996,32 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
   fi
 
   if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" ]] \
-    && grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity のみ" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "いずれも実運用（ドッグフーディング）で稼働を確認済み" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "全環境での動作保証まではしない" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && grep -q "全環境での動作保証" "${PROJECT_DIR}/axiarch-rules/ja/LOADING_PROTOCOL.md" 2>/dev/null \
     && [[ -f "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" ]] \
-    && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
-    && grep -q "not operation-guaranteed" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
-    print_pass "Axiarch source LOADING_PROTOCOL files keep Antigravity-only production validation aligned"
+    && grep -q "are all validated through real operational use" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "Codex and Claude Code are used continuously in real operation" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null \
+    && grep -q "no operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/LOADING_PROTOCOL.md" 2>/dev/null; then
+    print_pass "Axiarch source LOADING_PROTOCOL files keep all-three real-operational-use validation aligned"
   else
     print_warn "Axiarch source LOADING_PROTOCOL files may have stale agent validation status wording"
-    print_info "Expected ja/en LOADING_PROTOCOL to mark only Google Antigravity as production-validated, keep Codex/Claude under practical validation, and preserve the no-operation-guarantee boundary"
+    print_info "Expected ja/en LOADING_PROTOCOL to mark Antigravity/Codex/Claude Code as all validated through real operational use, preserving the no-operation-guarantee boundary"
     DOCS_MISSING=1
   fi
 
   if [[ -f "${PROJECT_DIR}/axiarch-rules/ja/README.md" ]] \
-    && grep -q "実運用稼働確認済みとして公開表現する対象は Google Antigravity のみ" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
-    && grep -q "Codex / Claude Code は主対象の統合対応" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "いずれも実運用（ドッグフーディング）で稼働を確認済み" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
+    && grep -q "全環境での動作保証まではしません" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
     && grep -q "全環境での動作保証" "${PROJECT_DIR}/axiarch-rules/ja/README.md" 2>/dev/null \
     && [[ -f "${PROJECT_DIR}/axiarch-rules/en/README.md" ]] \
-    && grep -q "only Google Antigravity is presented as production-validated" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
-    && grep -q "Codex and Claude Code are first-class integration targets" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+    && grep -q "are all validated through real operational use" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
+    && grep -q "Codex, and Claude Code are all validated through real operational use" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null \
     && grep -q "no operation guarantee for every environment" "${PROJECT_DIR}/axiarch-rules/en/README.md" 2>/dev/null; then
-    print_pass "Axiarch source rules README files keep Antigravity-only production validation aligned"
+    print_pass "Axiarch source rules README files keep all-three real-operational-use validation aligned"
   else
     print_warn "Axiarch source rules README files may have stale agent validation status wording"
-    print_info "Expected ja/en rules README files to mark only Google Antigravity as production-validated, keep Codex/Claude under practical validation, and preserve the no-operation-guarantee boundary"
+    print_info "Expected ja/en rules README files to mark Antigravity/Codex/Claude Code as all validated through real operational use, preserving the no-operation-guarantee boundary"
     DOCS_MISSING=1
   fi
 
@@ -1089,13 +1089,13 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected existing-install detection, Safe Upgrade guidance, missing-helper bootstrap guidance, EOF-safe prompt handling, pre-copy stop, and contents-copy semantics for rules/prompts"
       DOCS_MISSING=1
     fi
-    if grep -q "OpenAI Codex — Primary integration target" "${PROJECT_DIR}/init.sh" 2>/dev/null \
-      && grep -q "Claude Code — Primary integration target" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+    if grep -q "OpenAI Codex — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
+      && grep -q "Claude Code — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null \
       && grep -q "Google Antigravity — Production-validated primary" "${PROJECT_DIR}/init.sh" 2>/dev/null; then
       print_pass "Axiarch source init.sh presents current agent validation status in installer choices"
     else
       print_warn "Axiarch source init.sh may present stale agent validation status in installer choices"
-      print_info "Expected init.sh choices to mark Codex and Claude Code as primary integration targets, and Google Antigravity as production-validated primary"
+      print_info "Expected init.sh choices to mark Codex, Claude Code, and Google Antigravity all as production-validated primary (dogfooding), with no full-environment guarantee"
       DOCS_MISSING=1
     fi
     if grep -q "set_project_native_language" "${PROJECT_DIR}/init.sh" 2>/dev/null \

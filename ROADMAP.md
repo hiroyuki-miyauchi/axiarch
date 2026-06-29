@@ -15,11 +15,11 @@
 
 ### 🎯 戦略フォーカス — 主対象3系統への集中（2026-05-15）
 
-- **実運用稼働確認済み主対象**: Google Antigravity
+- **実運用稼働確認済み主対象**: Google Antigravity・OpenAI Codex・Claude Code（いずれもドッグフーディングで稼働確認済み・全環境保証なし）
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: `.codex/hooks.json`、PostToolUse diff guard、`update_plan` 連携を持つ主対象の統合対応。実務検証中であり、全環境での動作保証または実証済み対象とは扱わない
-- **Claude Code**: hook 補強モデルとTask tools連携を持つ主対象の統合対応。実務検証中であり、全環境での動作保証または実証済み対象とは扱わない
+- **Codex**: `.codex/hooks.json`、PostToolUse diff guard、`update_plan` 連携を持つ主対象。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証はしない
+- **Claude Code**: hook 補強モデルとTask tools連携を持つ主対象。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証はしない
 - **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
 
@@ -29,12 +29,13 @@
 
 ---
 
-### 🚧 v1.14.1 候補 — Read-only Subagent / Deep Security Scan 承認境界パッチ
+### ✅ v1.15.0 — Agent Validation Status Reversal & Wording Parity Wave（2026-06-30）
 
-- **誤停止リスク低減** — Codex が「正式な Codex Security Deep Security Scan はサブエージェント明示許可が必要」と判断して止まる問題を起こしにくくする。ユーザーが deep audit / security scan / exhaustive review / Deep Security Scan を明示した場合、必要な読み取り専用 worker fanout はその要求に含まれる。
-- **Human Approval Gate の非劣化** — stage、commit、push、deploy、DB適用、本番データ変更、課金増、機微データ取得、外部 tool install / auth は引き続き明示承認対象。緩和するのは読み取り専用委任の誤ブロックだけ。
-- **Fallback の正直性** — runtime に委任機能がない場合は Deep Security Scan 実行済みと主張せず、通常 scan またはメインエージェント順次 role pass へ fallback する。
-- **再発検知** — boot reminder と health Check 16 で、この委任境界文言の削除・劣化を検出する。
+- **検証ステータスの反転** — Antigravity・OpenAI Codex・Claude Code を、いずれも実運用（ドッグフーディング＝本リポジトリ自体の開発を含む）で稼働確認済みの主対象として公開表現。Antigravity を最初の実証対象、Codex・Claude Code 経由のコミット履歴を継続使用の証跡として扱う。全環境での動作保証はしない歯止めは維持。
+- **保護文言の lockstep 更新** — README 日英・MARKET_STRATEGY・ROADMAP・llms.txt・llms-full.txt・rules/{ja,en}/{LOADING_PROTOCOL,README}.md・init.sh と `check-axiarch-health.sh` Check 15 を同時更新し、docs↔チェックの整合を検証可能に維持。
+- **Read-only Subagent / Deep Security Scan 承認境界パッチ** — 誤停止リスク低減（Codex の「Codex Security Deep Security Scan はサブエージェント明示許可が必要」誤判定対策。ユーザーが deep audit / security scan / exhaustive review / Deep Security Scan を明示した場合、必要な読み取り専用 worker fanout はその要求に含まれる）。Human Approval Gate の非劣化（stage/commit/push/deploy/DB適用/本番変更/課金増/機微データ取得/外部 tool install/auth は明示承認対象のまま）。Fallback の正直性（委任不可時は Deep Security Scan 実行済みと主張せず通常 scan へ fallback）。再発検知（boot reminder と health Check 16 で文言劣化を検出）。
+- **Loading / Blueprint wording parity** — `LOADING_PROTOCOL.md` / `INDEX.md` の 15→16 段階 stale 表記、ロード完了宣言の境界、Blueprint 事前フォルダ README の「空」表現、プロジェクト概要の過大評価表現を同期。
+- **Market research wording and deletion/addition audit** — `MARKET_STRATEGY.md` と ROADMAP の市場調査節を2026-06-12時点の一次情報ベースへ更新。
 
 ---
 
@@ -697,11 +698,11 @@ enterprise adoption needs.
 
 ### 🎯 Strategic Focus — Concentrate on Three Primary Agents (2026-05-15)
 
-- **Production-validated primary target**: Google Antigravity
+- **Production-validated primary targets**: Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: Primary integration target with `.codex/hooks.json`, PostToolUse diff guard, and `update_plan` integration; under practical validation, with no operation guarantee for every environment
-- **Claude Code**: Primary integration target with the hook-reinforcement model and Task tools integration; under practical validation, with no operation guarantee for every environment
+- **Codex**: Primary target with `.codex/hooks.json`, PostToolUse diff guard, and `update_plan` integration; validated through real operational use (dogfooding), with no operation guarantee for every environment
+- **Claude Code**: Primary target with the hook-reinforcement model and Task tools integration; validated through real operational use (dogfooding), with no operation guarantee for every environment
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
 
