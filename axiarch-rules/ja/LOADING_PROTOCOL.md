@@ -33,7 +33,7 @@
 
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
-> Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。現時点で実運用稼働確認済みとして公開表現する対象は Google Antigravity のみである。Codex / Claude Code は主対象の統合対応だが実務検証中であり、全環境での動作保証や実証済みプラットフォームとしては扱わない。Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
+> Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みである。Antigravity を最初の実証対象とし、Codex・Claude Code も本リポジトリ自体の開発を含む実運用で継続使用している。ただし、全環境での動作保証まではしない。Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
 
 ### 🧭 ネイティブタスク・プラン状態同期（v1.11.0+）
 

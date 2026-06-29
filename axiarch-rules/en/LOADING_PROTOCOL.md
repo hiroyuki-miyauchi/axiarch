@@ -33,7 +33,7 @@ At the start of a conversation (new chat or after context reset), **you MUST fol
 
 When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
 
-> Antigravity / Cursor / Copilot / Windsurf have native loading or pointer mechanisms (e.g., Antigravity auto-loads `.agents/rules/`), so the Claude Code / Codex hook set is not a standard requirement for them. At this time, only Google Antigravity is presented as production-validated through real operational usage. Codex and Claude Code are first-class integration targets under practical validation, and are not presented as operation-guaranteed or production-validated platforms for every environment. Cursor / Copilot / Windsurf are extended pointer-only candidates and are not operation-guaranteed.
+> Antigravity / Cursor / Copilot / Windsurf have native loading or pointer mechanisms (e.g., Antigravity auto-loads `.agents/rules/`), so the Claude Code / Codex hook set is not a standard requirement for them. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding); Antigravity was validated first, and Codex and Claude Code are used continuously in real operation, including building this repository itself, with no operation guarantee for every environment. Cursor / Copilot / Windsurf are extended pointer-only candidates and are not operation-guaranteed.
 
 ### 🧭 Native Task & Plan State Sync (v1.11.0+)
 

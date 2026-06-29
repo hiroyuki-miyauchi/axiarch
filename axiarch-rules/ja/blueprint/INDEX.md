@@ -185,5 +185,5 @@ SRE、インシデント管理、運用要件。
 ---
 
 **Last Updated**: 2026-06-08
-**Version**: v1.14.0 — セキュリティ認証スタックの新設（security/400 パスキー・MFA、410 OAuth/OIDC連携・SSO、420 ステップアップ・OTP・重要操作、430 認可 ReBAC/Zanzibar、440 非人間/ワークロード/AIエージェントID、450 MCPセキュリティ＝使う側+作る側）＋フレームワーク全体の文言・整合是正。Universal ルール 39→45 ファイル（v1.13.1: Language First の復元と Check 16、v1.13.0: プロンプトの Claude Code slash command 化、v1.12.1: Harness Engineering説明・診断・Safe Upgradeラベル整合、v1.12.0: AXIARCH.md正本入口とExecution Harness / ハーネスエンジニアリング対応、v1.11.x: multi-agent検出ほか）
+**Version**: v1.15.0 — セキュリティ認証スタックの新設（security/400 パスキー・MFA、410 OAuth/OIDC連携・SSO、420 ステップアップ・OTP・重要操作、430 認可 ReBAC/Zanzibar、440 非人間/ワークロード/AIエージェントID、450 MCPセキュリティ＝使う側+作る側）＋フレームワーク全体の文言・整合是正。Universal ルール 39→45 ファイル（v1.13.1: Language First の復元と Check 16、v1.13.0: プロンプトの Claude Code slash command 化、v1.12.1: Harness Engineering説明・診断・Safe Upgradeラベル整合、v1.12.0: AXIARCH.md正本入口とExecution Harness / ハーネスエンジニアリング対応、v1.11.x: multi-agent検出ほか）
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

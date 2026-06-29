@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-50_files-green.svg)](#-universal-rules-50-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Production Validated](https://img.shields.io/badge/Production_Validated-Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Production Validated](https://img.shields.io/badge/Production_Validated-Antigravity_Codex_Claude_Code-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
@@ -27,7 +27,7 @@ v1.12.0では、これに加えて **ハーネスエンジニアリング（Harn
 
 > **AGENTS.md オープン標準との関係**: Axiarch は、広く普及した [`AGENTS.md`](https://agents.md/) 標準（多くのコーディングエージェントが読む共通フォーマット）と**競合せず共存**します。`AGENTS.md` / `CLAUDE.md` / `.cursor/rules` 等の各ツール固有ファイルは、いずれも正本 `AXIARCH.md` を指す**薄いアダプター**として配布されます。これは「同じルールを複数フォーマットで二重管理する」という採用先最大の摩擦を避けるための設計です。`AGENTS.md` を入口として読むエージェントは、そのアダプター経由で `AXIARCH.md`（3層 + ハーネス + 結晶化の正本）へ到達します。`AGENTS.md` 標準のディレクトリ階層オーバーライド（nearest-file）に相当するプロジェクト固有の差分は、Blueprint 層（可変）で表現します。
 
-Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。現時点で実運用稼働確認済みとして公開表現する対象は Google Antigravity です。Codex / Claude Code は主対象の統合対応エージェントですが、実務検証中であり、全環境での動作保証や実証済みプラットフォームとしては扱いません。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱い、検証済みまたは動作保証済みとは扱いません。
+Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。Antigravity を最初の実証対象として検証し、Codex・Claude Code も本リポジトリ自体の開発を含む実運用で継続使用しています。ただし、全環境での動作保証まではしません。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱い、検証済みまたは動作保証済みとは扱いません。
 
 ### 設計思想
 
@@ -83,7 +83,7 @@ v1.12.0 also introduces explicit **Harness Engineering**. This is not a fourth r
 
 > **Relationship to the AGENTS.md open standard**: Axiarch **coexists with, rather than competes against,** the widely adopted [`AGENTS.md`](https://agents.md/) standard (the common format many coding agents read). Tool-native files such as `AGENTS.md` / `CLAUDE.md` / `.cursor/rules` are all distributed as **thin adapters** that point to the canonical `AXIARCH.md`. This avoids the biggest adopter friction — maintaining the same rules duplicated across multiple formats. An agent that reads `AGENTS.md` as its entrypoint reaches `AXIARCH.md` (the canonical source for the three layers + harness + crystallization) through that adapter. Project-specific deltas — analogous to the `AGENTS.md` standard's nearest-file directory override — are expressed in the mutable Blueprint layer.
 
-Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). In the v1.12.0 line, `AXIARCH.md` becomes the canonical entrypoint, while `AGENTS.md` and tool-native files are thin adapters that point to it. v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. At this time, Google Antigravity is the only agent presented as production-validated through real operational usage. Codex and Claude Code are first-class integration targets, but they remain under practical validation and are not presented as operation-guaranteed or production-validated platforms for every environment. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as verified platforms.
+Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). In the v1.12.0 line, `AXIARCH.md` becomes the canonical entrypoint, while `AGENTS.md` and tool-native files are thin adapters that point to it. v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding): Antigravity was validated first, and Codex and Claude Code are used continuously in real operation, including building this repository itself, with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as verified platforms.
 
 ### Core Design Philosophy
 
@@ -134,8 +134,8 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 
 | 位置づけ / Role | Agent | Native Config | Canonical Entry |
 |:----------------|:------|:--------------|:----------|
-| 🔶 **Primary Integration Target** — 主対象の統合対応（実務検証中・動作保証なし） / Primary integration target (under practical validation, no operation guarantee) | **OpenAI Codex** | `AGENTS.md` adapter + `.codex/hooks.json` | `AXIARCH.md` |
-| 🔶 **Primary Integration Target** — 主対象の統合対応（実務検証中・動作保証なし） / Primary integration target (under practical validation, no operation guarantee) | **Claude Code** | `CLAUDE.md` adapter + `.claude/settings.json` (4 hooks) | `AXIARCH.md` |
+| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（全環境保証なし） / Production-validated primary (no operation guarantee for every environment) | **OpenAI Codex** | `AGENTS.md` adapter + `.codex/hooks.json` | `AXIARCH.md` |
+| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（全環境保証なし） / Production-validated primary (no operation guarantee for every environment) | **Claude Code** | `CLAUDE.md` adapter + `.claude/settings.json` (4 hooks) | `AXIARCH.md` |
 | ✅ **Production-Validated Primary** — 実運用で稼働確認済み / Production-validated primary | **Google Antigravity** | `.agents/rules/prompt_pointer.md` adapter | `AXIARCH.md` |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Cursor** | `.cursor/rules/*.mdc` adapter | `AXIARCH.md` |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **GitHub Copilot** | `.github/copilot-instructions.md` adapter | `AXIARCH.md` |
@@ -148,9 +148,9 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 > **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). The Axiarch source of truth is `AXIARCH.md`; `AGENTS.md` and tool-native files are thin adapters that point to it. They are NOT replacements for tool-specific setup.
 
 > [!IMPORTANT]
-> **JA**: 主対象は **[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)** / **[Claude Code](https://www.anthropic.com/claude-code)** / **[Google Antigravity](https://antigravity.google/)** です。現時点で実運用稼働確認済みとして公開表現する対象は **Google Antigravity** のみです。Codex / Claude Code は主対象の統合対応ですが、実務検証中であり、全環境での動作保証または実証済みプラットフォームとしては扱いません。Cursor / GitHub Copilot / Windsurf は拡張互換候補としてポインター設定を用意していますが、検証済みまたは動作保証済みとは扱いません。
+> **JA**: 主対象は **[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)** / **[Claude Code](https://www.anthropic.com/claude-code)** / **[Google Antigravity](https://antigravity.google/)** です。主対象の **Google Antigravity** / **OpenAI Codex** / **Claude Code** は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。ただし、全環境での動作保証まではしません。Cursor / GitHub Copilot / Windsurf は拡張互換候補としてポインター設定を用意していますが、検証済みまたは動作保証済みとは扱いません。
 >
-> **EN**: The primary targets are **OpenAI Codex**, **Claude Code**, and **Google Antigravity**. At this time, only **Google Antigravity** is presented as production-validated through real operational usage. Codex and Claude Code are first-class integration targets under practical validation, with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf have pointer files as extended compatibility candidates, but they are not presented as verified or operation-guaranteed platforms.
+> **EN**: The primary targets are **OpenAI Codex**, **Claude Code**, and **Google Antigravity**. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf have pointer files as extended compatibility candidates, but they are not presented as verified or operation-guaranteed platforms.
 
 > [!TIP]
 > **JA**: フォルダ名 `axiarch-rules/` は出自を反映していますが、ルールファイル自体は純粋なMarkdownであり、ツール固有の実行時依存はありません。
@@ -295,9 +295,9 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は Axiarch v1.14.0 の安定版を既定で導入し、配布refは `tags/v1.14.0` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
+> **JA**: `main` ブランチの `init.sh` は Axiarch v1.15.0 の安定版を既定で導入し、配布refは `tags/v1.15.0` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
 >
-> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.14.0 release by default and pins the distribution ref to `tags/v1.14.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
+> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.15.0 release by default and pins the distribution ref to `tags/v1.15.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
 
 ### 必須ファイル一覧 / Required Files
 
@@ -349,23 +349,23 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 
 ```bash
 # 変更計画だけ確認 / Preview the plan only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.14.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.14.0 --dry-run
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.15.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
+bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.15.0 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --agent codex --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --agent codex --safe-only --apply
 
 # 非対話CI等で人間承認済みの計画を反映 / Apply a human-approved reviewed plan non-interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --safe-only --apply --yes
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --safe-only --apply --yes
 
 # 任意プロンプトも明示的に含めて確認 / Preview with optional prompts explicitly included
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --safe-only --with-prompts --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --safe-only --with-prompts --dry-run
 
 # グループごとに対話選択 / Choose each group interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.14.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --interactive
 ```
 
 | 選択肢 / Choice | 意味 / Meaning |
@@ -443,7 +443,7 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
 
 # 安定版タグ固定 / Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.14.0 bash
+curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.15.0 bash
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness
