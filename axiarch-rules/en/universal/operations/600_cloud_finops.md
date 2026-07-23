@@ -10,6 +10,7 @@
 > - Cloud cost optimization is not a one-time project but a **continuous operational discipline**.
 > - FinOps integrates engineering, finance, and business to maximize technology value.
 > - **"Designing architecture without knowing its cost is like building a house without knowing its budget."**
+> - Universal application contract: Required outcomes are cost visibility, allocation, ownership, unit economics, forecasting, anomaly detection, safe controls, commitment, waste and egress management, value trade-offs, and audit evidence. Providers, services, role names, dedicated organization shapes, tag keys, tools, commands, discount rates, prices, budget ratios, thresholds, durations, and cadences are dated reference profiles or Blueprint parameters unless required by applicable law or contract, a current provider constraint, or a safety floor. Revalidate official pricing, plans, limits, and FOCUS or FinOps specifications at adoption and review time, and never prioritize cost reduction above security, privacy, reliability, or data integrity.
 > **35 Parts, 93 Sections (Revised 2026-04-15).**
 
 ---
@@ -67,7 +68,7 @@
     |:--|:---------|:-----------|
     | 1 | **Teams need to collaborate** | Engineering, finance, and business as a triad. Siloed cost management is prohibited |
     | 2 | **Everyone takes ownership for their technology usage** | Engineers own their costs. It's not "the infra team's problem" |
-    | 3 | **A centralized team drives FinOps** | FinOps CoE promotes best practices |
+    | 3 | **A centrally enabled team drives FinOps** | A central enablement function supports standards, data, and decisions; scale and complexity determine whether it is a dedicated CoE |
     | 4 | **FinOps data should be accessible, timely, and accurate** | Cost data must be accessible to everyone, immediately and accurately |
     | 5 | **Decisions are driven by the business value of technology** | Decisions based on ROI and unit economics |
     | 6 | **Take advantage of the variable cost model of technology** | Leverage the cloud's variable cost model as a weapon |
@@ -169,9 +170,9 @@
 
 ### §4. FinOps Organizational Model
 
--   **Law**: FinOps is not "extra work" but "the way we work." Establish a dedicated FinOps function (CoE) and permeate cost ownership across the entire organization.
+-   **Law**: FinOps is not "extra work" but "the way we work." Define a central enablement function and workload owners, and spread cost accountability across the organization. A small organization may use a part-time owner and existing engineering or finance cadences; establish a dedicated CoE only when spend, team count, contracts, regulation, or complexity justify it.
 
--   **FinOps CoE Responsibilities**:
+-   **Central Enablement Responsibilities (Dedicated CoE or Shared Role)**:
 
     | Responsibility | Description |
     |:-------------|:-----------|
@@ -185,7 +186,7 @@
 
 -   **Stakeholder RACI**:
 
-    | Activity | FinOps CoE | Engineers | EM/PM | Finance | CTO/CFO |
+    | Activity | Central Enablement | Engineers | EM/PM | Finance | CTO/CFO |
     |:---------|:---------:|:---------:|:-----:|:-------:|:-------:|
     | Tagging implementation | C | **R** | A | I | I |
     | Rightsizing | C | **R** | A | I | I |
@@ -1108,7 +1109,7 @@
 
 ### §45. Cost Integration into Developer Portals
 
--   **Law**: FinOps must be **built-in** to developer workflows. Integrate cost information into developer portals (Backstage, etc.) and link service catalogs with costs.
+-   **Law**: Deliver cost information in time to the developer workflow where a decision is made. A portal is an option when many services or teams have a common self-service need; PR comments, dashboards, CLIs, alerts, or recurring reviews may provide the same outcome.
 
 -   **Integration Points**:
 
@@ -1116,12 +1117,12 @@
     |:------------------|:-------------|:-------|
     | **Service catalog** | Monthly cost per service | Cost ownership visibility |
     | **Self-service portal** | Cost estimate at resource creation | Cost awareness cultivation |
-    | **Scorecards** | Team-level FinOps scores | Gamification |
-    | **Golden Path** | Cost-optimized templates | Best practice enforcement |
+    | **Scorecards** | Workload unit cost and improvement opportunities | Decision support |
+    | **Golden Path** | Validated templates | Safe defaults and optional reuse |
 
 ### §46. Golden Path Cost Optimization
 
--   **Law**: Build an environment where developers automatically achieve cost optimization by choosing the "Golden Path."
+-   **Law**: For recurring workloads, offer safe and cost-effective defaults through optional, composable Golden Paths. Do not prohibit exceptions; record the reason and trade-off for material deviations.
 -   **Golden Path Examples**:
     - Embed cost-optimized defaults in IaC templates
     - Built-in non-production auto-stop schedules in templates
@@ -1795,7 +1796,7 @@
 
 ### §81. IDE-Integrated Cost Feedback
 
--   **Law**: Engineers should be cost-aware **during coding**, not at "month-end reports." Integrate real-time cost feedback into IDEs/editors.
+-   **Law**: Surface material cost impact at the earliest high-leverage point among design, PR, provisioning, and operations. IDE integration is an option when IaC changes are frequent and immediate estimates are valuable, not a universal requirement.
 -   **Developer Cost Experience Tools**:
 
     | Tool/Method | Integration Point | Effect |
@@ -1829,7 +1830,7 @@
 
 ### §83. Engineering Cost Scorecard
 
--   **Law**: Introduce team-level **cost efficiency scorecards** and gamify cost awareness.
+-   **Law**: When scorecards are used, show business outcomes, demand, SLOs, security, and unit economics as context rather than comparing raw team spend. Do not default to competition or individual performance evaluation; use them for learning and joint improvement.
 -   **Scorecard Items**:
 
     | Metric | Calculation | Target | Weight |
@@ -1840,7 +1841,7 @@
     | **Unit Cost improvement** | MoM Unit Cost change rate | ↓ Improving | 20% |
     | **Budget compliance** | Actuals ÷ Budget | 90-110% | 20% |
 
--   **Scorecard Operations**: Publish monthly team rankings. Incentivize top teams with innovation budget additions.
+-   **Scorecard Operations**: Set audience, cadence, targets, and incentives from organizational culture and perverse-incentive risk. If publishing rankings or linking budgets, monitor metric gaming, suppression of necessary investment, and unequal team conditions.
 
 ---
 

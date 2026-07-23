@@ -2,22 +2,25 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-05-04
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
 > "AWS is a *means*, not the *purpose* of architecture."
-> All cloud infrastructure design decisions MUST be based on the **Well-Architected Framework's 6 pillars** and the **IaC Only principle**.
-> Console manual operations (ClickOps) constitute a **serious violation** under this constitution.
+> Workloads that adopt AWS use the **Well-Architected Framework's 6 pillars** as decision lenses and default to IaC that provides reproducibility, review, drift detection, and rollback.
+> Console or CLI mutations required for incidents, bootstrap, provider constraints, or diagnosis must use least privilege, retain audit evidence, and be followed by code reflection or reconciliation.
 > **"Security is not an afterthought. Build it in from Day 0."**
 > **"Cost is not a non-functional requirement. It is a business requirement."**
 > **"AI agents are subject to IAM. Apply the same least-privilege principle as humans."**
 > **"Failure is not something to avoid. It is something to design for."**
 > **"Observability is not a debug tool. It is the primary language of architecture."**
-> **164 Sections.**
+> **§0–§156 + Appendix A.**
 
 > [!NOTE]
-> **File Overview**: 163 sections, 260+ rules, 20 code snippets. Comprehensive coverage from AWS Well-Architected foundations to all major AWS services.
+> **Universal Applicability Contract**: This file is an AWS provider profile for systems that adopt AWS; it does not mandate AWS or any specific service for every project. Any "Law," "MUST," mandate, or prohibition in the body takes effect only after the applicable capability, service, scale, threat, regulation, and recovery conditions hold; it does not require selection of an example AWS product. Cross-platform selection, shared responsibility, environment isolation, release, FinOps, and exit strategy follow `engineering/520_cloud_application_platforms.md`. Service names, limits, prices, regions, CLI commands, and defaults must be revalidated against current official documentation and effective settings at implementation time; project-specific values belong in Blueprint. This contract prevails over a conflicting service-specific section.
+
+> [!NOTE]
+> **File Overview**: §0–§156, 260+ rules, 20 code snippets. Comprehensive coverage from AWS Well-Architected foundations to all major AWS services.
 > §0 Core Philosophy (Directive 0.1–0.12) expanded — Updated 2026-05-04. Directives 0.9–0.12 newly added (Resilience & Chaos, Observability-First, Compliance-by-Design, Ops Excellence Culture).
 > Includes Quick Reference Index (Appendix A).
 
@@ -80,6 +83,7 @@
 - [§153. Shield AI-Driven Protection](#153-aws-shield-ai-driven-threat-detection-ai-enhanced-ddos-protection)
 - [§154. Billing Custom Views & Split Cost](#154-billing-custom-views--split-cost-allocation-advanced-cost-governance)
 - [§155. Maturity Model & Anti-Patterns](#155-aws-cloud-maturity-model--anti-patterns-maturity-model--anti-patterns)
+- [§156. Lambda language and runtime support surface](#156-lambda-language-and-runtime-support-surface)
 - [Appendix A. Quick Reference Index](#appendix-a-quick-reference-index)
 
 ---
@@ -100,9 +104,9 @@ We choose it **"to follow the AWS Well-Architected Way and maximize the benefits
 
 Three foundational vows govern all design decisions:
 
-1. **Managed First**: Even when we *could* build and operate something ourselves, if an AWS managed service is a viable alternative, we **always** choose the managed service. "Pride in self-managed infrastructure" is the enemy of scale.
-2. **Event-Driven by Default**: Coupling between components is achieved through events (SQS/SNS/EventBridge), not synchronous API calls. This simultaneously delivers loose coupling, scalability, and fault tolerance.
-3. **Immutable Infrastructure**: The standard is to **replace** servers, not **reconfigure** them. Infrastructure is cattle, not pets.
+1. **Managed-Service Evaluation**: Compare managed and self-managed options by total cost of ownership, lock-in, SLOs, regulation, data portability, operational capability, and exit feasibility.
+2. **Coupling-Aware Communication**: Select synchronous, asynchronous, or event-driven communication from consistency, latency, delivery semantics, failure isolation, and debuggability. SQS, SNS, and EventBridge are candidates when AWS is adopted.
+3. **Reproducible Infrastructure**: Treat replacement as a default candidate while prioritizing reversibility, drift control, backup, and verifiable change procedures for stateful workloads or incremental changes.
 
 ### Core Anti-Patterns (Philosophy-Level Prohibitions)
 
@@ -3054,20 +3058,15 @@ Three foundational vows govern all design decisions:
 ## 123. AWS CI/CD Modernization
 
 ### Rule 123.1: The AWS CI/CD Pipeline Protocol
--   **Law**: Use **CodePipeline V2 + CodeBuild + CodeDeploy** or **Amazon CodeCatalyst** for CI/CD in AWS environments, building secure and fast deployment pipelines.
+-   **Law**: Select CI/CD for AWS environments by capabilities rather than a fixed product stack. The selected system must satisfy source integration, reproducible isolated builds, provenance, least-privilege federation, environment promotion, approval, progressive delivery, rollback, auditability, and cost controls. CodePipeline, CodeBuild, and CodeDeploy are candidates, not a universally mandatory combination.
 -   **Action**:
-    1.  **CodePipeline V2 (Recommended)**: Use pipeline type V2. Precisely control pipeline execution with trigger filters (branch/tag/file path). Pipeline variables for cross-stage data passing.
-    2.  **CodeBuild — Build Foundation**:
-        -   **Compute**: Cost optimization with ARM (Graviton) build instances. Further cost reduction with Lambda Compute mode for lightweight builds.
-        -   **Caching**: S3/local cache for build time reduction. Docker Layer Cache for image build acceleration.
-        -   **Security**: VPC builds for private resource access. Secrets Manager integration for credential management. Build logs to CloudWatch Logs.
-    3.  **CodeDeploy — Deployment Strategies**:
-        -   **ECS Blue/Green**: Instant rollback via ALB target group switching. Canary testing with test listeners.
-        -   **Lambda Canary/Linear**: Gradual traffic shift with `Canary10Percent5Minutes`, etc. Auto-rollback linked to CloudWatch alarms.
-        -   **EC2 Rolling**: Staged updates while maintaining minimum instance count.
-    4.  **CodeCatalyst (Unified Platform)**: IDE integration (VS Code/JetBrains). Unified build, test, and deploy management via workflow definitions. Multi-account support. Team collaboration features.
-    5.  **Pipeline Security**: KMS encryption for artifact buckets. IAM policies for stage-level permission control. Manual approval stages as human gates for production deploys.
-    6.  **IaC Pipeline Pattern**: Automate CDK/Terraform changes via CodePipeline. Review `cdk diff`/`terraform plan` results in approval stages before applying.
+    1.  **Pipeline Selection**: Compare CodePipeline V1/V2 and external CI/CD against required triggers, queued and parallel execution, stage rollback, source revision overrides, Region support, existing controls, and total cost. Do not mandate V2 merely because it is newer.
+    2.  **Reproducible Builds**: Treat CodeBuild and equivalent systems as candidates. Require pinned toolchains, isolated execution, dependency locks, cache-poisoning controls, SBOMs, provenance, signatures, and rerun reproducibility. Select ARM, Lambda Compute, VPC, and local or remote caches only from measured performance, cost, and security requirements.
+    3.  **Progressive Delivery and Recovery**: Use CodeDeploy or an equivalent only when the target runtime genuinely benefits from its Blue/Green, Canary, Linear, or Rolling strategy. Design application-artifact rollback separately from database, queue, state, and contract recovery.
+    4.  **CodeCatalyst Lifecycle**: Amazon CodeCatalyst has not accepted new customers since November 7, 2025. Existing tenants must inventory workflows, artifacts, connections, identity, and audit evidence, and maintain a support and exit plan. Do not adopt it as a new Golden Path.
+    5.  **Pipeline Security**: Require short-lived OIDC/STS credentials, job- and environment-scoped least privilege, immutable artifacts promoted by digest, secret isolation, protected environments, and auditable approvals. Select encryption keys, logs, and artifact stores from retention, access, recovery, and cost requirements.
+    6.  **IaC Pipelines**: Add policy, cost, destructive-change, and drift checks to CDK, Terraform, or equivalent plans and diffs. After approval, apply with credentials separated from planning, and require post-apply conformance plus audit evidence.
+-   **Current Sources (Revalidation Required)**: [CodePipeline V1/V2 planning](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-types-planning.html), [CodeBuild compute environments](https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html), and [CodeCatalyst availability](https://aws.amazon.com/codecatalyst/).
 -   **Cross-Ref**: CI/CD security in §42. IaC in §8/§90. ECR in §122.
 
 ---
@@ -3670,9 +3669,30 @@ Three foundational vows govern all design decisions:
 
 ---
 
+## 156. Lambda Language and Runtime Support Surface
+
+### Rule 156.1: The Lambda Language Support Classification
+-   **Law**: Do not reduce "Lambda supports language X" to a boolean. Bind the language version, runtime identifier, managed/OS-only/custom/container responsibility class, Amazon Linux generation, instruction architecture, deployment package, event integration, local toolchain, observability, release stage, and EOL in one support record.
+-   **Current Snapshot**: As of 2026-07-23, official runtime documentation shows managed language runtimes for Node.js, Python, Java, .NET, and Ruby. TypeScript is a source language transpiled to Node.js, not an independent Lambda runtime. Go, Rust, and other languages can run through an OS-only runtime, custom runtime, or container image, but that execution path is distinct from an AWS-managed language runtime. The presence of an official "Programming languages" guide, SDK, Powertools package, or event-type package does not by itself prove managed-runtime status or full feature parity.
+
+### Rule 156.2: The Runtime Lifecycle and Shared Responsibility Contract
+-   **Law**: For every function, pin and inventory the source language, compiler/runtime, runtime ID, base OS/image, SDK, dependencies, extensions/layers, and artifact digest. Track community support, Lambda deprecation, deployment blocks, and security-patch cessation. Disabling managed runtime updates or pinning a runtime version requires a reason, owner, expiry, compatibility test, and rollback/forward-fix path.
+-   **Shared Responsibility**: Application code and dependency maintenance remain customer responsibilities even with a managed runtime. For containers and custom runtimes, the customer owns the runtime binary, base image, bootstrap, packages, SBOM, provenance, signature, rebuild, security patches, health, telemetry, and rollback. A base-image update is not a released fix until the resulting digest has been rebuilt, scanned, tested, and deployed with evidence.
+
+### Rule 156.3: The Execution-Surface Conformance Matrix
+-   **Law**: For each combination of zip/layer, container image, OS-only/custom runtime, x86_64/arm64, and standard Lambda/Managed Instances, verify handler/Runtime API behavior, initialization, concurrency, serialization, streaming, signals, filesystem, network, extensions, event sources, retries, partial batch failures, and feature applicability such as SnapStart against official documentation and managed smoke tests. Different deployment modes, runtime generations, or hosting models are separate support tiers even when the source language is the same.
+-   **Interop**: Fix event payloads, generated event types, binary/text encoding, time, decimal, nullability, exceptions, and trace context in schemas or contract tests. Successful SDK deserialization does not prove authorization, idempotency, ordering, exactly-once behavior, or correctness of downstream side effects.
+
+### Rule 156.4: The Polyglot Ownership and Golden Path Contract
+-   **Law**: Assign an accountable owner, support level, EOL, advisory route, language-native CI, managed conformance, on-call capability, cost/performance budget, fallback, and decommission path to every production language/runtime/OS/architecture/deployment-mode combination. Platform teams may provide approved combinations as Golden Paths, but must not force one language on every team and must expose the additional responsibilities of custom runtimes and containers.
+-   **Cross-Ref**: Follow `engineering/320_programming_language_governance.md` for language selection and native gates, `engineering/520_cloud_application_platforms.md` for the cross-platform contract, and `security/200_oss_compliance.md` for the supply chain.
+-   **Official Primary Sources (revalidate at adoption)**: [Lambda runtimes](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html), [Lambda programming languages](https://docs.aws.amazon.com/lambda/latest/dg/lambda-programming-languages.html), [Custom runtimes](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html), and [Runtime updates](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html).
+
+---
+
 ## Appendix A: Quick Reference Index
 
-> **Purpose**: Reverse lookup index for instantly finding rules for target services across 155 sections and 240+ rules.
+> **Purpose**: Reverse lookup index for instantly finding rules across §0–§156.
 
 | AWS Service | Related Sections |
 |:------------|:-----------------|
@@ -3682,7 +3702,8 @@ Three foundational vows govern all design decisions:
 | **Transit Gateway** | §2, §130 |
 | **Direct Connect** | §32, §131 |
 | **EC2 / Auto Scaling / Graviton** | §3.1, §3.4, §69 |
-| **Lambda** | §3.2, §79, §108, §142 |
+| **Lambda** | §3.2, §79, §108, §142, §156 |
+| **Lambda language runtimes / OS-only / custom runtime / container** | §156 |
 | **Lambda Managed Instances** | §108 |
 | **ECS / EKS / Fargate / EKS Auto Mode** | §3.3, §13, §70, §105, §144 |
 | **App Runner** | §3.5 |
@@ -3706,7 +3727,7 @@ Three foundational vows govern all design decisions:
 | **CloudFront VPC Origins** | §110 |
 | **CloudFormation / CDK / Terraform / IaC Generator** | §0.2, §8, §8.5, §90 |
 | **CodePipeline / CodeBuild / CodeDeploy** | §42, §123 |
-| **CodeCatalyst** | §123 |
+| **CodeCatalyst (existing use and exit)** | §123 |
 | **Cost Explorer / Budgets / FinOps** | §9, §37, §56, §74, §112, §154 |
 | **Database Savings Plans** | §112 |
 | **Route 53** | §20 |

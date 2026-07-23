@@ -2,13 +2,13 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-04-19
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Level 1 Priority: Absolute Compliance**
 > セキュリティと法的コンプライアンスは**最上位の優先事項**です。
 > ユーザーの利便性、開発速度、収益性、これら全てよりも優先されます。
-> **40パート・170+セクション構成。改定日: 2026-04-19**
+> **40パート・170+セクション構成。改定日: 2026-07-23**
 
 > [!CAUTION]
 > **Primary Directive (主要方針)**
@@ -17,6 +17,9 @@
 >
 > **The Zero Tolerance Protocol**:
 > リスクに気づいた時点で、その大小や発生確率に関わらず、**例外なく・即座に・徹底的に** 対応してください。
+
+> [!IMPORTANT]
+> **Universal適用契約**: 本書の規範要件は、機密性、完全性、可用性、真正性、最小権限、privacy、検証可能性、回復可能性という成果である。vendor、cloud、VCS機能、tool、役職、team構造、人数、固定threshold、期間、cadence、SLA値は、適用法令・契約・official platform deadline、または不可逆なriskへの安全下限でない限りreference implementationまたはBlueprint parameterとして扱う。Project Blueprintはthreat model、exposure、data分類、規模、規制、利用者影響、過去incidentから具体値と同等統制を定める。「即座」は無期限に先送りしないtriageとrisk比例の封じ込めを意味し、根拠のない一律時間へ読み替えない。法令・規制値は適用法域と現行一次資料を確認する。個人・小規模teamは責務を兼務できるが、高保証変更では可能な限り独立reviewを置き、分離不能時はrisk acceptanceと独立したrelease統制を残す。
 
 ---
 
@@ -520,7 +523,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 
 ### 6.7. The Secret Rotation Lifecycle
 
--   IAMクレデンシャルやJWT署名鍵は **90日ごと** にローテーション。
+-   IAMクレデンシャルは、可能なら短命credentialまたはworkload identityへ置換する。置換できないcredentialとJWT署名鍵は、鍵種別、provider／CAの有効期限、暗号period、権限、exposure、配布・rollback能力、法令・契約からBlueprintでcadenceを定め、§21.5のeventでは期限を待たずrotateまたはrevokeする。
 -   **Panic Button（Kill Switch）**: 漏洩時の全セッション一括無効化手順を常に最新状態で維持。
 
 ### 6.8. The Physical Master Key (Bus Factor Defense)
@@ -583,9 +586,15 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 // ❌ PROHIBITED: PIIを含むログ出力
 console.log('User login:', { email: user.email, name: user.name });
 
-// ✅ CORRECT: PIIをマスキング
-console.log('User login:', { userId: user.id, role: user.role });
+// ✅ CORRECT: 一般ログは個人識別子を持たない
+console.log('User login:', {
+  event: 'auth.login',
+  correlationId: context.correlationId,
+  outcome: 'success',
+});
 ```
+
+本人識別が必要なsecurity auditは、一般application logへ生の`userId`を出さず、目的限定、最小権限、改ざん耐性、保持・削除、法的根拠を備えた保護audit sinkへ記録する。相関が必要な場合も、環境・目的ごとに分離した短期またはrotation可能なpseudonymous referenceを優先し、逆引き情報を別境界で保護する。
 
 ### 7.5. 暗号化要件
 
@@ -932,39 +941,40 @@ http {
 
 ## §11. サプライチェーンセキュリティ (Supply Chain Security)
 
-> **参考規格**: NIST SSDF (SP 800-218), SLSA v1.0, OWASP Top 10 2025 A03
+> **参考規格**: NIST SSDF (SP 800-218), SLSA v1.2, OWASP Top 10 2025 A03
 
 ### 11.1. SBOM (Software Bill of Materials)
 
--   **Law**: 全プロジェクトでSBOM（CycloneDX/SPDX）を自動生成・管理する。
--   **Action**: CI/CDパイプラインにSBOM生成ステップを組み込み、ビルドごとに署名付きSBOMを生成。
--   **Compliance**: EU CRAの2027年義務化に先行対応。
+-   **Law**: 配布、deploy、規制、顧客契約、または継続的な脆弱性影響分析の対象となるrelease artifactは、digestへ結び付くmachine-readable SBOMを生成・管理する。局所scriptや配布されないprototypeは、dependency inventoryとSCAで十分かをriskに基づき決める。
+-   **Action**: 対象artifactのCI/CDへSBOM生成とschema / completeness検証を組み込み、署名またはattestationはprovenance、改ざんrisk、consumer要件に応じて適用する。
+-   **Compliance**: EU CRAその他の法令は対象製品、役割、施行日、harmonised standardを法務確認し、全projectへ自動適用しない。
 
 ### 11.2. Dependency Scanning
 
 -   **Law**: 全ての依存関係（直接・間接）の脆弱性を継続的にスキャンする。
 -   **Action**:
-    1.  `npm audit` / `yarn audit` をCI/CDで強制実行。Critical/Highは**マージブロック**。
-    2.  Dependabot / Renovate / Snykによる自動アップデートPR。
-    3.  **lockfile整合性検証**: `package-lock.json` / `yarn.lock` の改ざん検出。
-    4.  **Phantom Dependency検出**: 直接宣言していない依存パッケージへの暗黙的依存を検出。
+    1.  `npm audit`、`govulncheck`、`uv audit`、`cargo audit`、`dotnet package list --vulnerable`等、採用ecosystemの標準SCAまたは組織承認済み同等手段をCI/CDで実行する。Critical/Highはrisk policyに従い**マージブロック**とする。
+    2.  Dependabot、Renovateまたはecosystem同等の自動更新を使い、owner、SLA、互換性testを持つ更新PRにする。
+    3.  **lockfile整合性検証**: 採用ecosystemのlockfile、checksum、artifact digestを検証し、CIではfrozen / locked解決を使用する。
+    4.  **未宣言・同梱依存検出**: 直接宣言していない依存、推移依存、native library、release artifactを対象にし、詳細matrixは`security/200_oss_compliance.md`に従う。
 
-### 11.3. SLSA (Supply-chain Levels for Software Artifacts)
+### 11.3. SLSA v1.2 (Supply-chain Levels for Software Artifacts)
 
--   **Target**: 最低SLSA Level 2を目標。Level 3を推奨。
+-   **Target**: 本番成果物はBuild L2、source管理はSource L2を最低基線とする。高保証領域はBuild L3とSource L4を目標とし、二者reviewはSource VSAの`SLSA_SOURCE_TWO_PARTY_REVIEWED`属性でも検証する。
 
-| SLSAレベル | 要件 | 実装 |
+| Track / Level | 要件 | 実装 |
 |:----------|:-----|:-----|
-| **Level 1** | ビルドプロセスの文書化 | ビルドスクリプトのバージョン管理 |
-| **Level 2** | ビルドの再現性 + 来歴(Provenance)生成 | CI/CDでの自動ビルド + 署名付きProvenance |
-| **Level 3** | 強化されたビルド環境 | エフェメラルランナー + ビルド隔離 |
+| **Build L1** | Build Provenanceが存在 | build手順とsource revisionを来歴へ記録 |
+| **Build L2** | ホスト型build platformによる署名付きProvenance | builder identityとartifact digestをpolicy gateで検証 |
+| **Build L3** | hardened build platform | platform適合性、隔離、ephemeral性、provenance発行境界を評価 |
+| **Source L2** | 変更履歴保持とSource Provenance | protected branchの履歴と統制証跡を検証 |
+| **Source L4** | 信頼された二者によるreview | 最終revisionへの二者reviewをbranch ruleで強制し、VSAでは対応する数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`で表現 |
 
 ### 11.4. ライセンスコンプライアンス
 
--   **禁止ライセンス**: AGPL, SSPL, 独自の制約ライセンス。
--   **要注意ライセンス**: GPL（伝染性に注意）、CC-BY-NC（商用利用不可）。
--   **許可ライセンス**: MIT, Apache 2.0, BSD, ISC, MPL 2.0。
--   **Action**: CIにライセンスチェッカーを導入し、禁止ライセンスの依存追加をブロック。
+-   **組織policy**: Universalは特定licenseを一律allow／denyしない。配布、network利用、link・derivative work、改変、顧客契約、公開義務、法域、知財方針に基づき、versionedなallow／review／deny policyを定める。
+-   **義務分類**: MIT、Apache-2.0、BSD、ISC等も帰属・NOTICE・特許条項を確認する。MPL、LGPL、GPL、AGPL等のcopyleftは適用範囲と利用形態を確認し、SSPLその他source-available licenseはOSSと同一視せず固有条件を確認する。
+-   **Action**: CIまたは同等のchange／release gateで組織policyを機械適用し、UNKNOWN、未分類、policy上denyのlicenseを分類または期限付き例外が完了するまでblockする。
 -   **Cross-Reference**: `security/200_oss_compliance.md`
 
 ### 11.5. Typosquatting & Dependency Confusion
@@ -973,11 +983,11 @@ http {
 -   **Action**:
     1.  パッケージ名の正確性を手動レビューで確認。
     2.  プライベートレジストリのスコープ設定でDependency Confusionを防止。
-    3.  `npm config set registry` で信頼するレジストリのみ使用。
+    3.  package manager、build tool、CIの全解決経路で承認済みregistry、namespace、source、digestを制約する。`npm config set registry`はNode.jsの参照例であり、Maven、NuGet、PyPI、RubyGems、Go、Cargo等ではecosystem固有の同等統制を使う。
 
 ### 11.6. OpenSSF Scorecard & セキュリティスコアリング
 
--   **Law**: 自社開発・採用する依存パッケージのサプライチェーン健全性を**OpenSSF Scorecard**でスコアリングし、信頼性を客観的に評価する。
+-   **Law**: 自社sourceと第三者componentの供給網riskを、維持状況、既知脆弱性、source変更統制、build、公開identity、provenance、利用文脈から評価する。OpenSSF ScorecardはOSS repository向けの有力なrisk signalであるが、単独の採用可否判定や全ecosystemの必須toolにしない。
 -   **評価指標**:
 
 | チェック項目 | スコア | 意味 |
@@ -991,9 +1001,9 @@ http {
 | **Vulnerabilities** | 0-10 | 既知脆弱性の未放置 |
 
 -   **Action**:
-    1.  **CI/CD統合**: `ossf/scorecard-action` をCI/CDに組み込み、スコアレポートをPullRequestのコメントに自動表示。
-    2.  **採用閾値**: 新規採用するOSSライブラリはOpenSSF Scorecardスコア **7.0以上** を目安とする。
-    3.  **自プロジェクトの改善**: 自社リポジトリのScorecardスコアを四半期ごとに測定し、継続的に改善。
+    1.  **証跡統合**: Scorecardまたは同等評価をchange／acquisition gateへ取り込み、aggregate scoreだけでなく個別check、取得時刻、対象revision、未評価理由を記録する。
+    2.  **採用判断**: 固定7.0等の総合scoreだけでblock／allowせず、重要check、component reachability、権限、配布経路、代替、補償統制を組織risk policyで評価する。
+    3.  **継続改善**: 採用後も重要eventとrisk-based cadenceで再評価し、score変動を目的化せず、root controlの改善と期限付き例外へつなげる。
 
 ```yaml
 # .github/workflows/scorecard.yml
@@ -1138,7 +1148,7 @@ CREATE POLICY "Admins can view all"
 -   **背景**: CTはCAが発行した全証明書を公開ログに記録する仕組み（RFC 9162）。攻撃者が不正証明書を発行した際にも検出可能。
 -   **Action**:
     1.  **CAA DNSレコード**: 許可するCAを `issue`/`issuewild`/`iodef` で厳格に限定（§12.6再掲・強調）。
-    2.  **CT監視自動化**: [crt.sh](https://crt.sh) API / [Cert Spotter](https://sslmate.com/certspotter) / [Facebook CT Monitor](https://developers.facebook.com/tools/ct/) 等でドメインに対する新規証明書発行をリアルタイム監視・アラート。
+    2.  **CT監視自動化**: [crt.sh](https://crt.sh) API / [Cert Spotter](https://sslmate.com/certspotter) 等でドメインに対する新規証明書発行をリアルタイム監視・アラート。
     3.  **SCT (Signed Certificate Timestamp) 検証**: TLS証明書にSCTが埋め込まれていることをデプロイ前テストで確認。
     4.  **予期しない証明書検出時の対応SLA**: 検出後 **4時間以内** に調査・失効申請。
 
@@ -1205,9 +1215,9 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 
 ### 14.1. Image Security
 
--   **最小ベースイメージ**: Distroless / Alpine等の最小イメージを使用。
--   **CIスキャン**: Trivy / Clair等でイメージスキャンをCI/CDに統合。Critical/Highはデプロイブロック。
--   **イメージ署名**: Cosign (Sigstore) でビルド成果物に署名。未署名イメージはAdmission Webhookで拒否。
+-   **最小ベースイメージ**: runtime要件、debug／incident対応、patch提供、CPU architecture、暗号要件を満たす最小の信頼済みbaseをdigest pinする。DistrolessやAlpineは候補であり、musl／glibc互換性を検証する。
+-   **CIスキャン**: image、OS package、application dependency、secret、misconfigurationを組織承認済みscannerで走査する。TrivyやClairは実装例であり、block条件はKEV、EPSS、reachability、exposure、利用中package、補償統制を含むrisk policyで定める。
+-   **イメージ署名**: artifact digestをbuilder identity、source revision、SBOM、provenanceへ結び付けて署名またはattestし、admission／deploy gateで検証する。CosignとAdmission Webhookは参照実装である。
 -   **Latestタグ禁止**: 本番環境での `latest` タグ使用を禁止。具体的バージョン/SHAを指定。
 
 ### 14.2. Pod Security Standards
@@ -1238,7 +1248,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 ### 14.6. サプライチェーン（Container固有）
 
 -   マルチステージDockerfileの各段階でハッシュを記録し、ビルドの再現性を確保。
--   ベースイメージのCVE監視を自動化。Critical CVE検出時は**72時間以内**に再ビルド。
+-   ベースイメージのCVE、EOL、署名、digest driftを継続監視する。悪用中または外部公開の重大riskは直ちに封じ込め、再build／緩和期限は法令、vendor deadline、exposure、rollback可能性からBlueprintで定める。72時間は参考初期値である。
 
 ---
 
@@ -1319,7 +1329,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 | **保管** | HSM / KMS / Vaultに保管。平文保管禁止 |
 | **配布** | 暗号化チャネル（TLS 1.2+）で配布。Slack貼り付け禁止 |
 | **使用** | 目的外利用禁止 |
-| **ローテーション** | 90日ごと。漏洩時は即時ローテーション |
+| **ローテーション** | 鍵種別、algorithm強度、cryptoperiod、provider／CAの有効期限、exposure、法令・契約からBlueprintでcadenceを定める。漏洩または危殆化の疑いがあれば即時rotateまたはrevoke |
 | **破棄** | セキュア破棄（ゼロフィル or 暗号化消去） |
 
 ### 16.4. ポスト量子暗号 (PQC) 対応
@@ -1805,8 +1815,8 @@ jobs:
 
 ### 19.4. Security Champion Program
 
--   **Law**: 開発チームごとに**Security Champion**を任命する。
--   **責任**: PRレビューでのセキュリティチェック、新ライブラリのリスク評価、四半期チームセキュリティセッション、インシデント初動対応。
+-   **Law**: secure developmentのaccountable owner、相談経路、escalation、継続経路を各productまたはserviceへ割り当てる。Security Championは分散型の参考modelであり、中央AppSec、platform security、managed service、兼務owner等の同等modelを許容する。
+-   **責任**: security review、第三者component risk、threat model、例外、education、incident初動を明確化する。cadenceと専任人数はrisk、規模、規制から定め、四半期sessionを一律要件にしない。
 
 ### 19.5. IaC (Infrastructure as Code) セキュリティスキャン ★NEW
 
@@ -1947,13 +1957,9 @@ const resolvers = {
 
 ### 21.5. 自動ローテーション
 
-| シークレット種別 | ローテーション頻度 |
-|:---------------|:-----------------|
-| **APIキー** | 90日ごと |
-| **DBパスワード** | 60日ごと |
-| **サービスアカウント** | 30日ごと |
-| **暗号鍵** | 90日ごと（§16.3） |
-| **高リスクシークレット** | 必要に応じてより頻繁に |
+長寿命secretは、可能なら短命credentialまたはworkload identityへ置換する。置換できないsecretのrotationは、provider／CAの有効期限、適用法令・契約、暗号period、exposure、権限、配布・rollback能力、過去incidentからBlueprintで定める。90日等の固定値はrisk評価前の参考上限にすぎず、Universal要件にしない。
+
+次のeventではcadenceを待たずrotateまたはrevokeする: 漏えいまたは疑い、権限・owner変更、退職・契約終了、利用終了、algorithm／providerの危殆化、policy違反、復旧exerciseの失敗。
 
 -   **Dual-Phase Rotation**: 新シークレット生成 → 配布 → 旧シークレットを有効なまま検証 → 検証後に旧シークレット無効化。
 
@@ -1963,7 +1969,7 @@ const resolvers = {
 -   **Action**:
     1.  全NHI IDの棚卸しと明確な所有者割り当て。
     2.  NHI IDにも最小権限を厳格適用。
-    3.  NHIシークレットにはより**短いローテーション周期**を適用。
+    3.  NHIは可能ならsecretlessなworkload identityと短命credentialへ移行し、残るstatic secretは権限、exposure、provider上限、eventに基づくrotationを適用。
     4.  未使用NHI IDの定期的な検出・無効化。
 -   **Cross-Reference**: §3.2 (NHI管理)
 
@@ -2181,7 +2187,7 @@ self.addEventListener('fetch', (event) => {
 | **Under Investigation** | 調査中 | 評価期限: YYYY-MM-DD |
 
 -   **Action**:
-    1.  **VEXツール導入**: [OpenVEX](https://github.com/openvex) / [CycloneDX VEX](https://cyclonedx.org/capabilities/vex/) / [CSAF 2.0](https://oasis-tcs.github.io/csaf/) を採用してVEXドキュメントを生成。
+    1.  **VEXツール導入**: [OpenVEX](https://github.com/openvex) / [CycloneDX VEX](https://cyclonedx.org/capabilities/vex/) / [CSAF 2.0](https://docs.oasis-open.org/csaf/csaf/v2.0/csaf-v2.0.html) を採用してVEXドキュメントを生成。
     2.  **CI/CD統合**: 脆弱性スキャン結果にVEXを重ね合わせて、悪用不可能なCVEの自動フィルタリングを実施（False Positive削減）。
     3.  **公開提供**: CRAの要件に従い、SBOMとVEXを製品リリースとともに顧客・規制機関に提供可能な状態に維持。
     4.  **Not Affected根拠の文書化**: `Not Affected` と判断した根拠（Impact Statement）を技術的に明記し、監査に耐えられる証跡を残す。
@@ -2567,21 +2573,22 @@ Content-Security-Policy: frame-ancestors 'self' https://trusted-parent.example.c
 
 ## §32. モバイル・ネイティブアプリセキュリティ (Mobile & Native App Security) ★NEW
 
-> **参考規格**: OWASP MASVS v2.0, OWASP Mobile Top 10 2024, Apple Platform Security Guide, Android Security Guide
+> **参考規格**: 現行OWASP MASVS / MASTG Testing Profiles, OWASP Mobile Top 10 2024, Apple Platform Security Guide, Android Security Guide
 
-### 32.1. OWASP MASVS v2.0 準拠
+### 32.1. OWASP MASVS適用
 
--   **Law**: モバイルアプリはOWASP Mobile Application Security Verification Standard (MASVS) v2.0のL1（最低必須）準拠を義務付ける。高リスクアプリ（金融、医療）はL2を推奨。
+-   **Law**: 現行OWASP MASVSのcontrol catalogをモバイルセキュリティ基線とし、MASTG Testing Profileをthreat model、データ感度、規制、利用者影響に応じて選定する。旧L1／L2／Rは現行の適合levelとして扱わず、profileの全部または一部を採用する判断と差分をbusiness ownerとsecurity ownerが文書化する。
 
 | カテゴリ | 主要制御 |
 |:--------|:--------|
 | **MASVS-STORAGE** | ハードコードシークレット禁止。機密データはKeychain/Keystoreに保存 |
 | **MASVS-CRYPTO** | 禁止アルゴリズム（MD5, DES等）未使用。プラットフォーム提供APIを優先 |
 | **MASVS-AUTH** | バイオメトリクス認証のローカル実装ではなく、サーバー確認を必須化 |
-| **MASVS-NETWORK** | Certificate Pinning実装または SCT検証。HTTP通信の禁止 |
+| **MASVS-NETWORK** | platform標準のTLS・certificate / hostname検証とcleartext禁止。identity pinningはthreat modelと更新能力に基づき選定 |
 | **MASVS-PLATFORM** | Deep Link検証。Intent sniffing対策。WebView設定の強化 |
 | **MASVS-CODE** | デバッグビルドを本番リリースに含めない。コード難読化 |
-| **MASVS-RESILIENCE** | Root/Jailbreak検出。エミュレーター検出。改ざん検出 |
+| **MASVS-RESILIENCE** | 高リスクprofileでRoot／Jailbreak、emulator、debugger、改ざん耐性をrisk-basedに選定 |
+| **MASVS-PRIVACY** | データ最小化、権限、同意、UI／log／backup／networkへのsensitive data漏えい防止 |
 
 ### 32.2. 機密データストレージ
 
@@ -2591,12 +2598,12 @@ Content-Security-Policy: frame-ancestors 'self' https://trusted-parent.example.c
     3.  **SQLiteのデータベース暗号化**: SQLCipherを使用してオフラインDBを暗号化。
     4.  **バックアップからの除外**: `android:allowBackup="false"` または backup rulesで機密データを除外。iOSは `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` で対応。
 
-### 32.3. Certificate Pinning
+### 32.3. TLS Identity Verification / Certificate Pinning
 
--   **Law**: 重要なAPI通信に対し、Certificate Pinningを実装してMitM（中間者）攻撃を防止する。
--   **推奨アプローチ**: 証明書のSPKI（Subject Public Key Info）フィンガープリントをピン留め（証明書全体のピン留めよりも更新が容易）。
--   **Backup Pins必須**: 1つのpiを失効した場合のバックアップとして、最低2つのpinを用意。
--   **失効時の更新機構**: ピン留め情報のOTA更新を可能にし、強制更新なしで対応できる設計を維持。
+-   **Law**: platform標準のTLS、certificate、hostname検証を全通信で必須とし、検証無効化を禁止する。Certificate Pinningは、高リスクAPI、endpointの管理可能性、証明書rotation、利用者をlockoutしない復旧経路をthreat modelで確認できる場合に限り追加防御として採用する。
+-   **選定**: 通常はplatform trust storeとCertificate Transparencyを優先する。pinningを採用する場合は証明書全体よりSPKIを優先し、採用理由と非採用時の補償統制をADRへ記録する。
+-   **Backup Pins必須**: pinning採用時は失効やrotationへ備え、独立したbackup pinを最低1つ用意する。
+-   **失効時の更新機構**: 署名済みpin set、段階配信、監視、kill switchまたはapp updateによる安全なrotationを用意し、検証を無効化するfail-open復旧は禁止する。
 
 ```kotlin
 // ✅ Android: OkHttp Certificate Pinning実装例
@@ -2999,8 +3006,8 @@ async function checkPaymentPageIntegrity(): Promise<void> {
 
 ### 37.1. eBPFベースのランタイムセキュリティ
 
--   **Law**: Kubernetes上のコンテナワークロードに対し、eBPF（extended Berkeley Packet Filter）技術を活用したランタイムセキュリティ監視を実装する。従来のサイドカー型エージェントよりも低オーバーヘッドかつ高可視性を実現する。
--   **背景**: Falco等の従来型ランタイムセキュリティはuprobes/kprobesベースで一部のカーネルイベントにしか対応できないが、eBPFはカーネルの全syscallをオーバーヘッド最小で観測可能。Tetragon（CNCFプロジェクト）はeBPFベースでセキュリティポリシーを**カーネルレベルで強制**できる。
+-   **Law**: Kubernetes workloadのthreat modelに応じ、audit、runtime behavior、process、file、network、identity signalを検出・対応できる統制を選ぶ。eBPFはLinux環境の有力な実装だが、kernel／managed platform／Windows node／performance／privacy制約を評価し、全clusterの必須技術にしない。
+-   **背景**: eBPF、audit log、seccomp、AppArmor／SELinux、runtime sandbox、EDR、service mesh telemetry等は観測範囲とenforcement能力が異なる。「全syscallを常に最小overheadで完全観測できる」と一般化せず、kernel version、hook、event loss、resource cost、attack surfaceを実測する。
 
 | eBPFセキュリティツール | 機能 | 用途 |
 |:-------------------|:-----|:-----|
@@ -3009,11 +3016,11 @@ async function checkPaymentPageIntegrity(): Promise<void> {
 | **Falco + eBPF probe** | マネージドeBPFプローブによるルール検出 | レガシー環境との互換性維持 |
 | **KubeArmor** | eBPFベースのコンテナ挙動制御 | LSM/eBPFによるシステム呼び出し制限 |
 
--   **Action**:
-    1.  **Tetragonインストール**: HelmでTetragonをデプロイし、ProcessExec・TCP・DNSの可観測性を有効化。
-    2.  **TracingPolicyの定義**: 不正syscall（`setuid`, `ptrace`, `bpf` 等）を検出・拒否するTracingPolicyを定義。
-    3.  **ネットワーク可観測性**: Ciliumの Hubble UIを有効化し、Pod間通信をL7レベルで可視化・監視。
-    4.  **アラート連携**: Tetragonのイベントをfalcosidekick経由でSIEM（§26）に転送。
+-   **Reference Implementation**:
+    1.  Tetragon等で必要なProcessExec、network、file signalを収集する。
+    2.  auditから始め、false positive、event loss、CPU／memory、kernel互換性を検証してからenforceへ進める。
+    3.  eventを採用SIEMまたはincident routeへ送り、owner、retention、PII削減、runbookを定義する。
+    4.  次のTracingPolicyは特定Linux／Tetragon環境の概念例であり、そのまま全workloadへ適用しない。
 
 ```yaml
 # ✅ CORRECT: Tetragon TracingPolicy例 (不正setuid実行をブロック)
@@ -3180,7 +3187,7 @@ spec:
 -   **Law**: AIシステムが保持する権限・データアクセス・外部接続を、ゼロトラスト原則（§2）に基づき定期的に審査する。
 -   **Action**:
     1.  **最小権限の強制**: AIシステム（特にAgentic AI）のツール・APIスコープを四半期ごとに棚卸し。不要な権限は即時削除（§18.2参照）。
-    2.  **APIキーのローテーション**: LLMプロバイダーAPIキーを90日以内にローテーション（§6.7参照）。
+    2.  **APIキーの削減とローテーション**: 可能ならLLM providerのAPIキーを短命credentialまたはworkload identityへ置換する。残る長寿命keyは§6.7と§21.5に従いrisk-based cadenceとevent-driven revokeを適用する。
     3.  **ネットワーク出口制御**: AIエージェントの外部通信先をホワイトリストで制限。未承認エンドポイントへのアクセスを自動ブロック。
     4.  **Human-in-the-Loopの再評価**: 高リスクAIシステムのHITL要件を四半期ごとにレビューし、自動化範囲の適切性を評価。
 
@@ -3335,9 +3342,9 @@ interface AISystemRecord {
 | 51 | テナントIDなしのキャッシュキー（クロステナントキャッシュ漏洩） | §35.4 |
 | 52 | PCI DSS対応決済ページでCVV/CVCを保存 | §36.3 |
 | 53 | 決済ページのスクリプトSRI未実装（Req 6.4.3違反） | §36.2, §22.2 |
-| 54 | OpenSSF Scorecardスコアを確認せずにOSSライブラリを採用 | §11.6 |
+| 54 | 第三者componentをrepository scoreだけでallow／denyし、個別controlと利用文脈を評価しない | §11.6 |
 | 55 | mTLS/DPoPなしでFAPI 2.0対象の金融APIを実装 | §36.5, §4.10 |
-| 56 | eBPF/Tetragonなしで本番KubernetesワークロードのRuntime監視を行う | §37.1 |
+| 56 | Kubernetes runtimeのthreat model、検出signal、対応routeを定義せず、特定tool導入だけで安全とみなす | §37.1 |
 | 57 | AI-SPMなしで組織内に多数のAIシステムを運用（Shadow AI・リスク不可視化） | §38.1, §38.2 |
 | 58 | LLMゲートウェイなしでアプリコードから直接LLM APIを呼び出す | §17.14 |
 | 59 | AIモデルカードを管理せずにLLM機能を本番デプロイ | §17.14.3 |
@@ -3349,13 +3356,23 @@ interface AISystemRecord {
 
 ## 言語固有セクション (Language-Specific Security)
 
+言語の採用、toolchain、品質ゲート、所有、廃止は `engineering/320_programming_language_governance.md` を正本とします。本節は、各言語で特に事故へ直結しやすいsecure coding差分を追加します。
+
 ### TypeScript / JavaScript
 
 -   `eval()`, `Function()`, `new Function()` の使用は**完全禁止**。
 -   `dangerouslySetInnerHTML` / `v-html` は**PRレビューでの特別承認**が必要。
 -   `any` 型の使用を最小限に。入力バリデーションでは `unknown` + Zodを使用。
--   `process.env` 経由のシークレット取得を強制。直値禁止。
+-   secretはserver-sideの検証済み設定層またはvaultから取得し、sourceとclient bundleへの埋込みを禁止。`process.env`は注入経路の一例であり、公開可能変数と分離する。
 -   `===` 厳密等価演算子の使用を強制（`==` 禁止）。
+
+### React Native framework
+
+-   JS bundle、source map、app config、native resourceへsecretを埋め込まない。環境別公開設定とserver-side secretを分離し、clientからsecret-bearing resourceへ直接接続しない。
+-   AsyncStorage等の暗号化されないstoreは非機密データに限定し、token、credential、暗号鍵、sensitive PIIはKeychain／Keystore-backed storageへ保存する。state tree全体の永続化で機密値を混入させない。
+-   Turbo Native Module、Fabric／JSI境界の入力を未信頼としてsize、type、depth、timeout、thread、lifecycleを検証し、Codegen specだけでruntime安全性が得られると仮定しない。
+-   custom URL schemeにtokenやPIIを含めず、Universal Links／App LinksとOAuth Authorization Code + PKCE、state、nonce、exact redirect validationを使用する。
+-   OTA updateはnative runtime compatibility、update署名、channel分離、段階配信、kill switch、rollback、store policy確認を必須とする。詳細は`engineering/420_react_native.md`を正本とする。
 
 ### Python
 
@@ -3363,7 +3380,7 @@ interface AISystemRecord {
 -   `subprocess.call(shell=True)` 禁止。`subprocess.run()` + リスト引数を使用。
 -   `os.system()` 禁止。
 -   `yaml.safe_load()` を使用。`yaml.load()` は**禁止**。
--   `format()` / f-string でのユーザー入力直接展開に注意。テンプレートインジェクション対策。
+-   `format()` / f-string自体を危険扱いせず、未信頼入力をSQL、shell command、template sourceへ埋め込まない。parameter binding、引数list、固定templateを使用。
 
 ### Go
 
@@ -3372,12 +3389,75 @@ interface AISystemRecord {
 -   SQLクエリは `database/sql` のプレースホルダーを使用（文字列結合禁止）。
 -   goroutineのリソースリーク防止（`context.WithTimeout` / `context.WithCancel` の活用）。
 
+### Java / Kotlin
+
+-   未信頼入力へのJava native serialization、`ObjectInputStream`、制限のないpolymorphic deserializationを禁止。明示schema、許可list、size / depth limitを使用。
+-   SQLは`PreparedStatement`、ORM parameter binding等を使用し、JPQL / SQL文字列結合を禁止。
+-   process起動は引数listで構築し、shell経由実行、LDAP / expression / templateへの未検証展開を禁止。
+-   TLS certificate / hostname検証を無効化するcustom TrustManager、全許可HostnameVerifierをproductionで禁止。
+
+### C# / .NET
+
+-   未信頼入力への`BinaryFormatter`、`NetDataContractSerializer`、型指定を許す無制限JSON deserializationを禁止。
+-   DB commandはparameter bindingを使用し、SQL、LINQ dynamic expression、templateへの文字列連結を禁止。
+-   process起動は`UseShellExecute = false`と`ArgumentList`を用い、user inputをcommand lineへ連結しない。
+-   ASP.NET Core Data Protection、Secret Managerまたは外部vaultを用途どおり使用し、独自暗号とsource内secretを禁止。
+
+### Rust
+
+-   `unsafe`とFFIを最小moduleへ隔離し、安全条件、不変条件、owner、test / fuzz証跡を台帳化。
+-   外部入力のlength、allocation、recursion depthを制限し、整数変換、panic、resource exhaustionを境界testする。
+-   command実行は`std::process::Command`の個別引数を使い、shell文字列へ未信頼入力を連結しない。
+-   `cargo audit`または`cargo deny`、Clippy、fuzz、必要時Miri / sanitizerをCIへ組み込む。
+
+### PHP
+
+-   未信頼入力への`unserialize()`、`eval()`、動的`include`を禁止。
+-   PDO prepared statementまたはframework parameter bindingを使い、SQL文字列連結を禁止。
+-   HTML、URL、JavaScript、SQL等の出力contextに応じてescapeし、globalな一律escapeへ依存しない。
+-   productionの`display_errors`を無効化し、session cookie、CSRF、uploadのtype / size / storage境界をframework標準で強制。
+
+### Ruby
+
+-   未信頼入力への`Marshal.load`、`YAML.load`、`eval`を禁止し、安全なparserと許可型を使用。
+-   Active Recordのparameter bindingを使用し、raw SQL、scope、order句への未検証文字列展開を禁止。
+-   shell commandは引数配列を使い、backtick、`system`、`Open3`へ未信頼文字列を渡さない。
+-   RailsではStrong Parameters、CSRF、secure cookieを強制し、Brakemanとdependency auditをCIで実行。
+
+### Lua / Perl
+
+-   Luaでは未信頼入力を`load`、`loadfile`、`dofile`へ渡さず、binary chunkを未信頼sourceから実行しない。埋め込み実行が必要な場合は限定した`_ENV`、module / FFI allowlist、命令・CPU・memory上限をhost側で強制する。
+-   Luaの`LUA_INIT`、`LUA_PATH`、`LUA_CPATH`と、Perlの`PERL5OPT`、`PERL5LIB`、module search pathをproductionで暗黙に信頼せず、起動環境をsanitizeまたは明示固定する。
+-   Perlでは未信頼入力へのstring `eval`、backtick、shell-form `system` / `exec`、2引数`open`を禁止し、list-form process起動、3引数`open`、DBI placeholderを使用する。
+-   privilegedまたはnetwork-facingなPerlではtaint modeとallowlist検証を防御層として併用し、Carton snapshot等の再現可能な依存解決と`cpan-audit`をCIで検証する。
+
+### VBA / Office業務自動化
+
+-   internetまたは未信頼zone由来のmacroをblockし、利用者による個別解除を標準配布経路にしない。例外はowner、業務理由、期限、配布元を台帳化する。
+-   production macroは組織管理のcode-signing certificateで署名し、trusted publisherを中央配布する。利用者が任意publisherを追加できる状態を避ける。
+-   Trusted Locationは最小範囲に限定し、書込権限を管理する。広いnetwork shareやdownload先を安易にtrusted扱いしない。
+-   `Shell`、COM、filesystem、network、Office object modelへ渡すworkbook・document・form入力を未信頼として検証し、secretをmacro、document、connection stringへ埋め込まない。
+
+### C / C++
+
+-   新規の外部入力parser、認証、network-facing機能はmemory-safe languageを第一候補とし、C / C++継続理由をADRへ記録。
+-   境界付きAPI、RAII、safe containerを使用し、未境界のcopy、format string、手動lifetime操作を禁止または隔離。
+-   compiler警告をerror化し、ASan / UBSan、必要時TSan / MSan、fuzzをrelease前gateへ含める。
+-   allocation size、integer overflow、use-after-free、double-free、ABI ownershipを脅威modelとtest対象にする。
+
+### Shell / PowerShell
+
+-   Shellは変数をquoteし、`eval`と未信頼文字列のcommand化を禁止。temporary fileは安全に作成し、`trap`でcleanupする。
+-   PowerShellは`Invoke-Expression`を禁止し、parameter binding、`ArgumentList`、PSScriptAnalyzer、Pesterを使用。
+-   secretをargument、process list、history、transcript、debug logへ出さず、OSまたはvaultのsecret storeを使う。
+-   privilege境界、remote execution、download後実行にはallowlist、digest / signature検証、timeout、監査logを必須とする。
+
 ### SQL
 
 -   `SELECT *` 禁止。必要カラムのみ明示的指定。
 -   動的SQLは禁止。パラメータ化クエリのみ使用。
 -   `GRANT ALL` 禁止。必要な権限のみ個別に付与。
--   `SECURITY DEFINER` 関数には `SET search_path = public` を必ず付与。
+-   `SECURITY DEFINER` 関数は、未信頼userが書込可能なschemaを`search_path`から除外し、信頼済みschemaの後ろに`pg_temp`を置くか空path + 完全修飾名を使用する。既定の`PUBLIC EXECUTE`を同一transactionでrevokeし、必要roleだけへgrantする。
 
 ---
 
@@ -3406,7 +3486,7 @@ interface AISystemRecord {
 | Break-Glass Protocol | §33.5 |
 | Browser Security | §31 |
 | CAPTCHA / Turnstile | §6.6, §23.2 |
-| Certificate Pinning (Mobile) | §32.3 |
+| TLS Identity Verification / Certificate Pinning (Mobile) | §32.3 |
 | Certificate Transparency (CT) | §12.9 |
 | Chain of Custody（証拠連鎖） | §25.4 |
 | Container | §14 |

@@ -2,22 +2,25 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-05-04
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
 > 「AWSは"手段"であり、アーキテクチャの"目的"ではない。」
-> クラウドインフラの全設計判断は **Well-Architected Framework の6ピラー** と **IaC Only 原則** に基づいて行わなければならない。
-> コンソール手動操作（ClickOps）は本憲法において **重大な違反** である。
+> AWSを採用したworkloadは、**Well-Architected Framework の6ピラー**を意思決定の観点として用い、再現性、review、drift検知、rollbackを満たすIaCを原則とする。
+> コンソールやCLIによる変更は、incident、bootstrap、provider制約、診断等の必要性がある場合に、最小権限、監査証跡、事後のコード反映またはreconciliationを伴わせる。
 > **「セキュリティは後付けではない。Day 0から組み込め。」**
 > **「コストは非機能要件ではない。ビジネス要件そのものである。」**
 > **「AIエージェントもIAMの支配下に置け。人間と同じ最小権限原則を適用せよ。」**
 > **「失敗は回避するものではなく、前提として設計するものである。」**
 > **「可観測性はデバッグツールではない。それはアーキテクチャの第一言語である。」**
-> **164セクション構成。**
+> **§0–§156 + Appendix A 構成。**
 
 > [!NOTE]
-> **ファイル概要**: 163セクション・260+ルール・20コードスニペット構成。AWS Well-Architected基盤から全主要AWSサービスまで網羅。
+> **Universal適用契約**: 本ファイルはAWSを採用したシステム向けのプロバイダープロファイルであり、AWS採用や特定サービスを全プロジェクトへ強制しない。本文の「Law」「MUST」「必須」「禁止」は、対象capability、service、規模、脅威、規制、復旧目標の適用条件を満たした後にだけ効力を持ち、例示されたAWS製品を選ぶ義務を意味しない。横断的な選定、共有責任、環境分離、リリース、FinOps、退出戦略は `engineering/520_cloud_application_platforms.md` に従う。サービス名、上限、料金、リージョン、CLI、既定値は実装時に公式文書と実効設定を再確認し、固有値はBlueprintへ配置する。本契約と個別節が競合する場合は本契約を優先する。
+
+> [!NOTE]
+> **ファイル概要**: §0–§156・260+ルール・20コードスニペット構成。AWS Well-Architected基盤から全主要AWSサービスまで網羅。
 > §0にコア・フィロソフィー（Directive 0.1〜0.12）を拡充（2026-05-04 改定）。Directive 0.9〜0.12を新規追加（Resilience・Observability-First・Compliance-by-Design・Ops Excellence Culture）。
 > サービス別逆引き索引（Appendix A）付き。
 
@@ -80,6 +83,7 @@
 - [§153. Shield AI駆動脅威検知](#153-aws-shield-ai駆動脅威検知-ai-enhanced-ddos-protection)
 - [§154. Billing Custom Views & Split Cost](#154-billing-custom-views--split-cost-allocation-高度コストガバナンス)
 - [§155. 成熟度モデル & アンチパターン集](#155-awsクラウド成熟度モデル--アンチパターン集-maturity-model--anti-patterns)
+- [§156. Lambda言語・runtime support surface](#156-lambda言語runtime-support-surface)
 - [Appendix A. サービス別逆引き索引](#appendix-a-サービス別逆引き索引)
 
 ---
@@ -100,9 +104,9 @@
 
 以下の3つの誓いを全設計判断の根拠とする：
 
-1. **Managed First（マネージドサービス優先の誓い）**: 自前で構築・運用できるものでも、AWSのマネージドサービスで代替できる場合は**必ず**マネージドサービスを選択する。「自前運用の誇り」はスケールの敵である。
-2. **Event-Driven by Default（イベント駆動設計の誓い）**: コンポーネント間の結合は、同期API呼び出しではなくイベント（SQS/SNS/EventBridge）を介して行う。これにより疎結合・スケーラビリティ・耐障害性を同時に実現する。
-3. **Immutable Infrastructure（イミュータブルインフラの誓い）**: サーバーの「設定変更」ではなく「置き換え」を標準とする。インフラはペットではなく家畜である。
+1. **Managed-Service Evaluation**: マネージドサービスとself-managedを、総保有コスト、lock-in、SLO、規制、data portability、運用能力、退出可能性で比較する。
+2. **Coupling-Aware Communication**: 同期、非同期、event-drivenを、整合性、latency、delivery semantics、障害分離、debuggabilityから選ぶ。SQS/SNS/EventBridgeはAWS採用時の候補である。
+3. **Reproducible Infrastructure**: 置換可能性を既定候補としつつ、stateful workloadや段階的変更では、可逆性、drift制御、backup、検証可能な変更手順を優先する。
 
 ### コアアンチパターン（哲学レベルの禁止事項）
 
@@ -3076,20 +3080,15 @@
 ## 123. AWS CI/CDモダナイゼーション (CI/CD Modernization)
 
 ### Rule 123.1: The AWS CI/CD Pipeline Protocol
--   **Law**: AWS環境のCI/CDには**CodePipeline V2 + CodeBuild + CodeDeploy**の組み合わせ、または**Amazon CodeCatalyst**を使用し、安全で高速なデプロイパイプラインを構築してください。
+-   **Law**: AWS環境のCI/CDは、特定製品の固定ではなく、ソース連携、再現可能な隔離ビルド、来歴、最小権限のフェデレーション、環境昇格、承認、段階的配信、ロールバック、監査、費用を満たす能力ベースで選定してください。CodePipeline、CodeBuild、CodeDeployは候補であり、全ワークロードへの一律必須構成ではありません。
 -   **Action**:
-    1.  **CodePipeline V2（推奨）**: パイプラインタイプV2を使用。トリガーフィルタ（ブランチ/タグ/ファイルパス）でパイプライン実行を精密制御。パイプライン変数でステージ間のデータ受け渡し。
-    2.  **CodeBuild — ビルド基盤**:
-        -   **Compute**: ARM（Graviton）ビルドインスタンスでコスト最適化。Lambda Computeモードで軽量ビルドのさらなるコスト削減。
-        -   **キャッシュ**: S3/ローカルキャッシュでビルド時間短縮。Docker Layer Cacheでイメージビルド高速化。
-        -   **セキュリティ**: VPC内ビルドでプライベートリソースアクセス。Secrets Manager統合で機密情報管理。ビルドログをCloudWatch Logsに出力。
-    3.  **CodeDeploy — デプロイ戦略**:
-        -   **ECS Blue/Green**: ALBターゲットグループ切替で瞬時ロールバック。テストリスナーによるカナリアテスト。
-        -   **Lambda Canary/Linear**: `Canary10Percent5Minutes`等の段階的トラフィックシフト。CloudWatchアラーム連動の自動ロールバック。
-        -   **EC2 Rolling**: 最小インスタンス数を維持しながらの段階的更新。
-    4.  **CodeCatalyst（統合プラットフォーム）**: IDE統合（VS Code/JetBrains）。ワークフロー定義でビルド・テスト・デプロイを一元管理。マルチアカウント対応。チーム協業機能。
-    5.  **パイプラインセキュリティ**: 成果物バケットのKMS暗号化。IAMポリシーでステージ別権限制御。手動承認ステージで本番デプロイの人的ゲート。
-    6.  **IaCパイプラインパターン**: CDK/Terraform変更をCodePipelineで自動化。`cdk diff`/`terraform plan`の結果を承認ステージで確認後に適用。
+    1.  **パイプライン選定**: CodePipeline V1/V2と外部CI/CDを、必要なトリガー、キュー・並列実行、ステージロールバック、ソースリビジョン上書き、対応リージョン、既存統制、総費用で比較してください。「新しい」という理由だけでV2を必須化してはなりません。
+    2.  **再現可能なビルド**: CodeBuild等を候補とし、固定されたツールチェーン、隔離された実行、依存関係ロック、キャッシュ汚染防止、SBOM・来歴・署名、再実行可能性を保証してください。ARM、Lambda Compute、VPC、ローカル・リモートキャッシュ等は、計測した性能、費用、セキュリティ要件に基づいて選択します。
+    3.  **段階的配信と復旧**: CodeDeploy等は、対象ランタイムが必要なBlue/Green、Canary、Linear、Rolling戦略を実際に支援する場合に使用してください。アプリケーション成果物のロールバックと、DB・キュー・状態・契約の復旧を分離して設計します。
+    4.  **CodeCatalystのライフサイクル**: Amazon CodeCatalystは2025年11月7日以降、新規顧客を受け付けていません。既存利用者に限り、ワークフロー、成果物、接続、ID、監査証跡の棚卸しと、サポート期間・退出計画を保有してください。新規Golden Pathには採用してはなりません。
+    5.  **パイプラインセキュリティ**: OIDC/STS等の短命認証、ジョブ・環境別最小権限、不変成果物とdigest昇格、シークレット分離、保護環境、監査可能な承認を必須化してください。暗号鍵、ログ、成果物ストアは、保持、アクセス、復旧、費用要件から選定します。
+    6.  **IaCパイプライン**: CDK、Terraform等の計画・差分に、ポリシー、費用、破壊的変更、ドリフトの検査を加え、承認後は計画時と分離した適用権限で実行してください。適用後の構成適合と監査証跡までを完了条件とします。
+-   **Current Sources（再検証必須）**: [CodePipeline V1/V2 planning](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-types-planning.html)、[CodeBuild compute environments](https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html)、[CodeCatalyst availability](https://aws.amazon.com/codecatalyst/)。
 -   **Cross-Ref**: CI/CDセキュリティは§42参照。IaCは§8/§90参照。ECRは§122参照。
 
 ---
@@ -3692,9 +3691,30 @@
 
 ---
 
+## 156. Lambda言語・runtime support surface
+
+### Rule 156.1: The Lambda Language Support Classification
+-   **Law**: 「Lambdaが言語Xをsupportする」を単一の真偽値にしません。言語version、runtime identifier、managed／OS-only／custom／containerの責任区分、Amazon Linux世代、instruction architecture、deployment package、event integration、local toolchain、observability、release stage、EOLを一つのsupport recordへ結び付けます。
+-   **Current Snapshot**: 2026-07-23時点の公式runtime資料では、Node.js、Python、Java、.NET、Rubyはmanaged language runtimeを持ちます。TypeScriptはNode.jsへ変換されるsource languageであり独立したLambda runtimeではありません。Go、Rustその他はOS-only runtime、custom runtime、またはcontainer imageで実行できる一方、AWSが対象言語runtimeを管理する保証とは分離します。公式の「Programming languages」導線、SDK、Powertools、event type packageの存在だけでmanaged runtimeまたは全機能parityを推定してはなりません。
+
+### Rule 156.2: The Runtime Lifecycle and Shared Responsibility Contract
+-   **Law**: functionごとにsource language、compiler／runtime、runtime ID、base OS／image、SDK、dependency、extension／layer、artifact digestをpinし、community support、Lambda deprecation、deployment停止、security patch停止を追跡します。managed runtimeの自動更新を無効化または特定版へ固定する場合は、理由、owner、期限、compatibility test、rollback／forward-fixを記録します。
+-   **Shared Responsibility**: managed runtimeでもapplication codeとdependencyの更新は利用者責任です。containerとcustom runtimeでは、runtime binary、base image、bootstrap、package、SBOM、provenance、署名、rebuild、security patch、health、telemetry、rollbackを利用者が所有します。base image更新だけでrelease artifactが更新されたとみなさず、再build・scan・test・deployしたdigestを証跡化します。
+
+### Rule 156.3: The Execution-Surface Conformance Matrix
+-   **Law**: zip／layer、container image、OS-only／custom runtime、x86_64／arm64、standard Lambda／Managed Instances等の組合せごとに、handler／Runtime API、initialization、concurrency、serialization、streaming、signal、filesystem、network、extension、event source、retry、partial batch failure、SnapStart等のfeature applicabilityを公式資料とmanaged smoke testで検証します。同じ言語でもdeployment mode、runtime generation、hosting modelが違えば別support tierとして扱います。
+-   **Interop**: event payload、generated event type、binary／text encoding、time、decimal、nullability、exception、trace contextはschemaまたはcontract testへ固定し、言語SDKが正常にdeserializeできることだけでauthorization、idempotency、ordering、exactly-once、downstream side effectを保証したと解釈しません。
+
+### Rule 156.4: The Polyglot Ownership and Golden Path Contract
+-   **Law**: productionで使用する各language／runtime／OS／architecture／deployment modeに、accountable owner、support level、EOL、advisory route、language-native CI、managed conformance、on-call能力、cost／performance budget、fallback、decommissionを割り当てます。platform teamは承認済み組合せをGolden Pathとして提供できますが、全teamへ一つの言語を強制せず、custom runtimeとcontainerの追加責任を可視化します。
+-   **Cross-Ref**: 言語選定とnative gateは `engineering/320_programming_language_governance.md`、platform共通契約は `engineering/520_cloud_application_platforms.md`、供給網は `security/200_oss_compliance.md` に従います。
+-   **公式一次資料（採用時に再検証）**: [Lambda runtimes](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)、[Lambda programming languages](https://docs.aws.amazon.com/lambda/latest/dg/lambda-programming-languages.html)、[Custom runtimes](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html)、[Runtime updates](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html)。
+
+---
+
 ## Appendix A: サービス別逆引き索引
 
-> **目的**: 155セクション・240ルール以上の中から対象サービスのルールを即時発見するための逆引き索引。
+> **目的**: §0–§156の中から対象サービスのルールを即時発見するための逆引き索引。
 
 | AWSサービス | 関連セクション |
 |:------------|:---------------|
@@ -3704,7 +3724,8 @@
 | **Transit Gateway** | §2, §130 |
 | **Direct Connect** | §32, §131 |
 | **EC2 / Auto Scaling / Graviton** | §3.1, §3.4, §69 |
-| **Lambda** | §3.2, §79, §108, §142 |
+| **Lambda** | §3.2, §79, §108, §142, §156 |
+| **Lambda言語runtime / OS-only / custom runtime / container** | §156 |
 | **Lambda Managed Instances** | §108 |
 | **ECS / EKS / Fargate / EKS Auto Mode** | §3.3, §13, §70, §105, §144 |
 | **App Runner** | §3.5 |
@@ -3728,7 +3749,7 @@
 | **CloudFront VPC Origins** | §110 |
 | **CloudFormation / CDK / Terraform / IaC Generator** | §0.2, §8, §8.5, §90 |
 | **CodePipeline / CodeBuild / CodeDeploy** | §42, §123 |
-| **CodeCatalyst** | §123 |
+| **CodeCatalyst（既存利用・退出）** | §123 |
 | **Cost Explorer / Budgets / FinOps** | §9, §37, §56, §74, §112, §154 |
 | **Database Savings Plans** | §112 |
 | **Route 53** | §20 |

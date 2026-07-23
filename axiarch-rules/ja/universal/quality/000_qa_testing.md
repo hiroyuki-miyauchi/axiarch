@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-04-16
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
@@ -10,6 +10,8 @@
 > すべてのリリースはデプロイ前に包括的な品質ゲートを通過しなければならない。
 > **テストカバレッジ > コード品質 > 機能ベロシティ > デリバリー速度** の優先順位を厳守せよ。
 > 品質は特定チームの責任ではなく、全エンジニアの**共有責任（Quality-as-a-Shared-Responsibility）**である。
+> 言語scope: TypeScript / JavaScriptのcommandとtoolはWebプロファイルの例である。全言語へは同じ検証カテゴリを適用し、具体的gateは `engineering/320_programming_language_governance.md` の言語ネイティブ規約に従う。
+> Universal適用契約: named tool、test比率、coverage閾値、実行時間、cadence、team構造は、公式platform制約または回復不能なriskへの安全下限でない限りreference profileまたはBlueprint parameterである。Project Blueprintはproduct risk、architecture、利用者、規制、変更頻度、過去defectから具体値を選ぶ。static、behavior、境界、失敗系、release artifactの検証成果自体は省略しない。
 > **42パート・130+セクション構成。**
 
 ---
@@ -91,7 +93,7 @@
     -   **Action**: 品質メトリクスをチーム全体のKPIに組み込み、「品質は全員の仕事」という文化を制度的に保証する。
 -   **QAOps — DevOps/プラットフォームエンジニアリングとの融合**:
     -   QAプロセスをパイプライン、インフラストラクチャ、可観測性と統合する「QAOps」を実践する。テストはDevOpsと不可分であり、テストゲートはPlatform Engineeringの「Golden Path」に埋め込まれる。
-    -   **Action**: テスト実行環境、テストデータ管理、テスト可観測性をPlatform Teamが提供する標準サービスとして構築する。
+    -   **Action**: 複数teamで反復利用する価値がある場合、テスト実行環境、テストデータ管理、テスト可観測性を共有capabilityとして提供する。小規模または単一projectでは、repository内automationと明確なownerで同じ品質成果を満たしてよい。
 
 ---
 
@@ -99,8 +101,8 @@
 
 -   **テストピラミッド（Testing Pyramid）**:
     -   Mike Cohn提唱の古典モデル。ユニットテスト（多）→ 統合テスト（中）→ E2Eテスト（少）の比率でテストを構成する。
-    -   **推奨比率**: Unit 70% / Integration 20% / E2E 10%
-    -   **適用場面**: バックエンドAPI、ライブラリ、ビジネスロジック重視のシステムに最適。
+    -   **参考比率**: Unit 70% / Integration 20% / E2E 10%。固定目標ではなく、欠陥履歴、実行cost、境界risk、feedback速度から調整する。
+    -   **適用場面**: バックエンドAPI、ライブラリ、ビジネスロジック重視のsystemで有効な候補。
 -   **テスティングトロフィー（Testing Trophy）**:
     -   Kent C. Dodds提唱のモダンモデル。統合テストを最も厚くし、ユーザー視点に近いテストを重視する。
     -   **構成**: Static（型+Lint）→ Unit（少）→ **Integration（最多）** → E2E（少）
@@ -110,7 +112,7 @@
     -   マイクロサービス環境で採用が増えているモデル。コントラクトテストと統合テストを中心に据え、E2EとUnit両端を薄くする。
     -   **構成**: Unit（少）→ **Contract + Integration（最多）** → E2E（少）
     -   **適用場面**: 分散システム、イベント駆動アーキテクチャ。
--   **プロジェクト特性による選択指針**:
+-   **system特性による選択指針**:
 
     | プロジェクト特性 | 推奨モデル | 根拠 |
     |:---|:---|:---|
@@ -122,8 +124,8 @@
     | イベント駆動システム | ダイヤモンド + メッセージ契約 | 非同期処理の一貫性保証 |
 
 -   **テスト優先順位（共通）**:
-    -   **Priority**: 1. 型チェック(`tsc`) > 2. Lint > 3. Integration > 4. E2E > 5. Unit
-    -   **Law**: 静的解析（`tsc --noEmit`）こそが最強のテストである。型エラーゼロは全テストの前提条件。
+    -   **Priority**: 1. 言語ネイティブなformatter / lint / type / compiler > 2. リスクに応じたUnit / Integration / Contract > 3. E2E / 非機能検証
+    -   **Law**: 静的解析は最初の高速ゲートだが、runtime挙動や言語間契約のtestを代替しません。TypeScriptの `tsc --noEmit` は一例であり、言語別ゲートは `engineering/320_programming_language_governance.md` を正本とします。
 
 ---
 
@@ -158,6 +160,8 @@
 ---
 
 ## §4. 静的テスト
+
+以下のTypeScript規則はWebプロファイルへの追加基準です。他言語は同等カテゴリの公式または事実上標準ツールを用います。
 
 -   **型チェック（Type Checking）**:
     -   `tsc --noEmit` はCIパイプラインの**最初のゲート**として必須。型エラーが1件でもある状態でのマージは禁止。
@@ -316,13 +320,14 @@
 
     | 条件 | コントラクトテスト | 統合テスト |
     |:---|:---|:---|
-    | サービス間の独立デプロイ | ✅ 必須 | 補助的 |
-    | モノリス内モジュール間 | 不要 | ✅ 優先 |
-    | 外部SaaS API | Provider側制御不可のため不要 | ✅ + モック |
-    | イベント駆動アーキテクチャ | ✅ メッセージ契約 (AsyncAPI) | 補助的 |
-    | gRPCサービス間 | ✅ Protobuf互換性テスト | 補助的 |
+    | independent／coordinated service | ✅ version compatibilityを検証 | 重要journeyとmanaged behaviorを補完 |
+    | aggregate deployment unit | ✅ unit境界を早期検証 | ✅ composition、route、partial deploymentを検証 |
+    | modular monolith内interface | riskに応じてinterface test | ✅ process内の統合を優先 |
+    | 外部SaaS API | ✅ 公開schema／version／fixtureとの差分 | ✅ sandbox／managed test + mock |
+    | event-driven architecture | ✅ message schema／delivery contract | replay、failure、broker統合を補完 |
+    | gRPC service間 | ✅ IDL／wire互換性 | runtime、network、policyを補完 |
 
--   **Rationale**: 統合テストでサービス間契約を検証するには両サービスの起動が必要であり、CIの速度と安定性を著しく低下させる。コントラクトテストは各サービスを独立して検証でき、高速かつ信頼性の高いフィードバックを実現する。
+-   **Rationale**: contract testは境界の互換性を高速に検証し、integration／E2E testは実routing、identity、runtime、provider behaviorを検証する。どちらか一方を一律に省略せず、release topology、risk、local／managed fidelityに応じて組み合わせる。
 
 ---
 
@@ -639,7 +644,7 @@
 ## §14. セキュリティテスト戦略（DevSecOps）
 
 -   **多層防御テスト**:
-    -   セキュリティテストは単一手法ではなく、**SAST + DAST + SCA + IAST + RASP** の多層構成で網羅する。
+    -   セキュリティテストは単一手法に依存せず、threat model、artifact、実行環境、攻撃面に応じてSAST、DAST、SCA、IAST、runtime protection、manual review等を組み合わせる。全手法の一律採用はUniversal要件ではない。
 
     | 手法 | 検出タイミング | 検出対象 | ツール例 |
     |:---|:---|:---|:---|
@@ -650,18 +655,18 @@
     | **RASP** | 本番ランタイム | リアルタイム攻撃検知・ブロック | Sqreen, Hdiv |
 
 -   **CI/CDパイプラインへの統合**:
-    -   **Pre-commit**: Semgrep + gitleaks によるシークレット検出、安全でないパターンのブロック。
-    -   **PR Check**: SAST + SCA スキャンを自動実行。Critical/High は自動ブロック。
-    -   **Staging**: DAST スキャンをステージング環境に対して自動実行。
+    -   **Early Feedback**: local hook、IDE、pre-commit等で高速なsecret／unsafe-pattern検査を提供できる。Semgrepとgitleaksは参考実装である。
+    -   **Change Gate**: 変更範囲に適合するSAST、SCA、policy scanをCIまたはserver-side gateで再実行し、reachability、exposure、KEV、例外期限を含むrisk policyでblockを判断する。
+    -   **Runtime Boundary**: deploy可能な環境がある場合、認証、network、configuration、外部境界へDASTまたは同等の動的検証を適用する。
 -   **OWASP Top 10 テスト**:
-    -   **Law**: OWASP Top 10（2025年版）のカテゴリについて、各項目に対応するテストケースを必ず保持する。
+    -   **Law**: 適用するOWASP Top 10の現行版をthreat modelとtest inventoryへmappingし、該当categoryは自動test、manual review、設計統制、または補償統制のevidenceを持つ。
 -   **SBOM & サプライチェーンセキュリティ**:
-    -   **Law**: **SBOM (Software Bill of Materials)** を **ビルドごとにCI/CDパイプラインで自動生成** する。手動生成は禁止。
-    -   **SBOM生成標準**: CycloneDX または SPDX 形式で生成。ツール: **Syft** (Anchore), **Trivy**, **cdxgen**。
-    -   **SLSA (Supply-chain Levels for Software Artifacts)**: ビルド成果物の完全性を暗号的に検証。最低 **SLSA Level 2**（ホストされたビルドサービスでのビルド）を目標とする。
+    -   **Law**: release可能なartifactごとに、そのdigestと一致するmachine-readableな**SBOM (Software Bill of Materials)**を生成し、dependency／build inputの変更時に更新する。CI/CDでの自動生成を優先し、緊急fallbackは同じ完全性検証と監査証跡を満たす。
+    -   **SBOM生成標準**: consumer、規制、toolchainが対応するCycloneDXまたはSPDX版を選び、schema、component coverage、artifact bindingをvalidateする。Syft、Trivy、cdxgenは参考実装である。
+    -   **SLSA v1.2**: threat、consumer、規制、builder trustから必要なBuild／Source trackのpropertyを選び、provenanceとpolicy evaluationをrelease evidenceへ結び付ける。Build L2／Source L2は一般的なreference profile、高保証領域のBuild L3と二者reviewを含むSource L4は強化profileであり、一律の最低値ではない。Source VSAでは数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`属性を混同しない。
     -   **VEX (Vulnerability Exploitability eXchange)**: SBOM内の脆弱性について、「このプロジェクトでは影響なし（not affected）」を宣言し、ノイズを低減する。
-    -   **Reachability Analysis**: 依存関係の脆弱性がアプリケーションコードから実際に**到達可能か（reachable）**を分析し、誤検知を排除。ツール: **Socket.dev**, **Snyk Code**。
-    -   **Dependency-Track**: SBOMをインポートし、継続的な脆弱性モニタリングとポリシー適用を自動化するプラットフォーム。
+    -   **Reachability Analysis**: 依存関係の脆弱性がapplication codeから到達可能かを分析し、triage精度を高める。解析不能、動的dispatch、native code等の不確実性を残し、誤検知や見逃しを完全に排除できるとは扱わない。Socket.dev、Snyk Code等は参考実装である。
+    -   **Portfolio Monitoring**: SBOMを検索可能なinventoryへ集約し、新規advisory、VEX、policy、再評価結果を継続照合する。Dependency-Trackは参考実装である。
 -   **クロスリファレンス**: → `security/000_security_privacy.md`, `security/200_oss_compliance.md`
 
 ---
@@ -669,20 +674,22 @@
 ## §15. ペネトレーションテストとバグバウンティ
 
 -   **定期診断**:
-    -   **Law**: 本番サービスは**年1回以上**の外部ペネトレーションテストを実施する。重大なアーキテクチャ変更時は追加実施。
-    -   テスト範囲: Webアプリケーション、API、モバイルアプリ、インフラストラクチャ。
+    -   **Law**: exposure、criticality、規制、契約、重大architecture変更、incident履歴、release modelから、独立penetration testまたは同等のadversarial assessmentを定める。年次外部testは継続運用される高risk serviceのreference profileであり、Universalの固定cadenceではない。
+    -   適用するWeb、API、mobile、identity、infrastructure、client、supply-chain境界をscopeに含め、除外と残存riskを記録する。
 -   **脆弱性評価プロセス**:
-    -   発見された脆弱性はCVSSスコアに基づいて優先度を分類し、SLAに従い修正する。
+    -   CVSSに加え、悪用状況、KEV等のcatalog、EPSS、reachability、exposure、data感度、事業影響、補償統制、適用期限から優先度を決め、owner、封じ込め判断、target date、検証証跡を記録する。
 
-    | CVSS | 重要度 | 修正SLA |
+    | CVSS参考帯 | 代表的severity | 初動目標例 |
     |:---|:---|:---|
-    | 9.0-10.0 | Critical | 24時間以内 |
-    | 7.0-8.9 | High | 7日以内 |
-    | 4.0-6.9 | Medium | 30日以内 |
-    | 0.1-3.9 | Low | 次回リリース |
+    | 9.0-10.0 | Critical | 直ちにtriageし、riskに応じて封じ込める |
+    | 7.0-8.9 | High | 優先修正または補償統制を決定する |
+    | 4.0-6.9 | Medium | Blueprint SLA内の計画修正へ入れる |
+    | 0.1-3.9 | Low | 期限・再確認付きbacklogまたはrisk acceptance |
+
+    この表はtriageの参考であり固定期限ではない。適用法令、契約、catalog due date、vendor deadline、Blueprint SLAのうち最も厳しい条件を優先する。
 
 -   **バグバウンティプログラム**:
-    -   プロダクトの成熟度に応じて、HackerOne/Bugcrowd等を通じたバグバウンティプログラムの導入を検討する。スコープ、報奨金体系、開示ポリシーを明確に定義。
+    -   vulnerability disclosureの受付・応答経路を維持する。exposure、成熟度、対応能力、経済性が適合する場合にmanaged bug bountyを追加する。HackerOne、Bugcrowdは参考実装であり、providerに依存せずscope、safe harbor、報奨、重複、開示policyを定義する。
 -   **クロスリファレンス**: → `security/000_security_privacy.md`, `operations/500_incident_response.md`
 
 
@@ -842,7 +849,7 @@
     -   **Law**: テストスイートの定義、設定、環境設定は**コードとして管理**し、バージョン管理システムで追跡する。手動設定やGUIツールのみに依存するテスト定義は禁止。
     -   **宣言的設定**: テスト実行の設定（対象ブラウザ、並列度、リトライ回数、タイムアウト等）を宣言的に定義し、環境間差異を排除。
     -   **テスト環境とテストケースの分離**: テスト環境定義（Docker Compose、Testcontainers設定）とテストケース定義（テストファイル）を明確に分離し、環境変更がテストロジックに影響しない構造を維持。
-    -   **Infrastructure-as-Test**: テスト環境のプロビジョニング自体をIaCで定義し、テスト環境の100%再現性を保証。
+    -   **Environment Reproducibility**: 再構築が必要なtest infrastructureは、IaC、container image、versioned API、fixtureまたは同等のmachine-readable定義で管理し、許容差分と外部依存を記録する。絶対的な100%再現性は保証しない。
 
 ---
 
@@ -853,16 +860,16 @@
 ## §19. CI/CDテストパイプライン
 
 -   **ステージゲート構成**:
-    -   **Law**: CI/CDパイプラインに以下の**7段階ゲート**を必須とする。いずれか1つでも失敗した場合、マージをブロック。
+    -   **Law**: 変更riskと成果物に応じ、static／policy、test、build、UI品質、security、supply chain、非機能品質の必要capabilityをchangeまたはrelease gateへ含める。次の7段階は順序固定の必須pipelineではなく、並列化・統合・分割できるreference profileである。
 
     | ステージ | 内容 | ブロック条件 |
     |:---|:---|:---|
-    | **1. 静的チェック** | `tsc --noEmit` + `eslint --max-warnings=0` | エラー or Warning 1件以上 |
-    | **2. ユニット/統合テスト** | Vitest / Jest 実行 | テスト失敗 1件以上 |
-    | **3. ビルド** | `npm run build` | ビルドエラー |
-    | **4. a11y / VRT** | axe-core スキャン + VRT | Critical/Serious 違反 |
-    | **5. セキュリティ** | SAST + SCA スキャン | Critical/High 脆弱性 |
-    | **6. SBOM / Supply Chain** | SBOM生成 + 脆弱性クロスリファレンス | SBOM生成失敗、Critical依存脆弱性 |
+    | **1. 静的チェック** | 言語ネイティブなformatter + lint + type/compiler + policy | 未承認error、policy違反、warning budget超過 |
+    | **2. ユニット/統合テスト** | 言語ネイティブtest runner + contract test | テスト失敗 1件以上 |
+    | **3. ビルド** | pinned toolchainによるlocked production build | ビルドエラー、lockfile再解決 |
+    | **4. a11y / VRT** | UI成果物ではa11y engine + VRT | 影響範囲と承認policyに反する違反 |
+    | **5. セキュリティ** | SAST + SCA スキャン | reachability、exposure、KEV等を含むrisk policy違反 |
+    | **6. SBOM / Supply Chain** | SBOM生成 + 脆弱性クロスリファレンス | SBOM／provenance欠落、supply-chain policy違反 |
     | **7. Carbon Budget** | パイプラインCO2推定 | カーボンバジェット超過（任意） |
 
 -   **Carbon Budget Gate**:
@@ -877,10 +884,10 @@
 -   **テスト分割（Sharding）**:
     -   テストスイートが大規模化した場合、`--shard=1/4` 等で分割し複数のCIランナーで並列実行する。
 -   **キャッシュ戦略**:
-    -   `node_modules`、ビルドキャッシュ、テストキャッシュをCI間で共有し、実行時間を短縮。
-    -   キャッシュ無効化条件: `package-lock.json` の変更時。
+    -   依存、build、test cacheをCI間で共有し、実行時間を短縮。
+    -   cache keyにはruntime / compiler、全lockfile、target、feature、environmentを含め、信頼境界を越えて未検証artifactを再利用しない。
 -   **Reusable Workflows**:
-    -   GitHub Actions Reusable Workflows / Composite Actions で共通テストパイプラインをモジュール化し、全リポジトリで統一的なQAゲートを適用する。
+    -   共通test capabilityをversioned workflow、template、package、container、policy bundle等として再利用し、repositoryごとのriskとartifactに合わせて構成する。GitHub Actions Reusable Workflows／Composite Actionsは参考実装である。
 
 ---
 
@@ -891,7 +898,7 @@
 ## §20. 本番ビルド検証
 
 -   **Production Build Verification Protocol（本番ビルド検証義務）**:
-    -   **Law**: 開発サーバー（`dev`モード）が正常動作することは、コードの正しさを**一切保証しない**。PR作成前に `npm run build` を **必ず通過** させよ。
+    -   **Law**: 開発server、interpreter、REPL、watch modeが正常でも、本番artifactの正しさは証明されない。影響するdeployable／distributable artifactは、mergeまたはreleaseを許可する前に、pinned toolchainとreproducible dependency resolutionでproduction build、package、image、firmware等を生成・検証する。Draft、docs-only、build非影響changeは、影響分析に基づき後段gateへ委ねてよい。`npm run build`はWeb profileの一例である。
 -   **Dev ≠ Prod の差異**:
 
     | 観点 | Dev | Prod |
@@ -903,8 +910,8 @@
 
     -   **Rationale**: 「dev環境では動いていました」は本番障害時の最も価値のない報告。Dev/Prodの挙動差異は構造的であり、ビルド検証省略は「障害の予約」と同義。
 -   **ビルド時間予算（Build Time Budget）**:
-    -   5分超過 → パフォーマンス調査開始
-    -   10分超過 → 速度改善を最優先タスク化
+    -   build timeのbaseline、P50／P95、queue時間、cache hit、変更規模を継続計測する。
+    -   regression budgetと改善優先度はteam feedback SLO、release frequency、runner costからBlueprintで定める。5分／10分は小規模serviceの参考初期値である。
 
 ---
 
@@ -918,7 +925,7 @@
     -   コード変更の影響範囲を分析し、**関連するテストのみ**を実行する。全テストの実行は全テスト通過を保証するが、CIの速度を著しく低下させる。
     -   ツール: `jest --changedSince=main`, `vitest --changed`, `nx affected:test`, Turborepo のタスクグラフ。
 -   **テスト実行時間の監視**:
-    -   テストスイート全体の実行時間を継続的に監視し、以下の閾値を超過した場合はアラートを発報。
+    -   テストスイート全体の実行時間を継続的に監視する。以下は小規模service向けのreference budgetであり、repositoryのbaseline、変更頻度、critical path、runner costからBlueprint値を定める。
 
     | テスト種別 | 目標時間 | アラート閾値 |
     |:---|:---|:---|
@@ -933,7 +940,7 @@
 -   **AI駆動テスト選択（Predictive Test Selection）**:
     -   MLモデルがコード変更の影響範囲を分析し、最もリスクの高いテストを優先実行する。フルテストスイート実行時間を大幅に削減。
     -   ツール: **Launchable**, **Codecov Test Analytics**, **Trunk Merge**。
-    -   **Law**: AI駆動テスト選択を導入する場合、選択エラーによるリグレッション見逃しを防止するため、**日次フルテストスイート実行**を維持すること。
+    -   **Law**: AIまたはimpact-based test選択を導入する場合、選択精度、false negative、対象外path、shared dependencyを測定し、risk-based cadenceと重要eventでfull suiteを実行する。日次は高頻度変更repositoryの参考既定である。
 
 ---
 
@@ -944,21 +951,21 @@
 ## §22. リリース判定基準
 
 -   **ブロッカー定義**:
-    -   **Law**: P0（Critical）およびP1（Major）のバグが残存する状態でのリリースは **絶対禁止**。
-    -   **0 Warnings**: コンソールやビルドログにWarningが残っている状態でのリリースも禁止。
+    -   **Law**: security、privacy、data integrity、safety、contract、SLOに受容不能なriskを残すchangeはreleaseしない。severity名だけでなくreachability、exposure、user harm、workaround、regulation、compensating control、risk acceptanceを証跡化する。
+    -   **Warning Budget**: 新規warning、既知baseline、false positive、deprecation deadlineを分類し、言語profileとBlueprintのwarning budgetを超えるreleaseをblockする。全toolの全warningを無条件に同一severityとして扱わない。
 -   **リリースチェックリスト**:
 
     | 項目 | 確認内容 | 合格基準 |
     |:---|:---|:---|
-    | 型チェック | `tsc --noEmit` | エラーゼロ |
-    | ビルド | `npm run build` | エラーゼロ |
-    | テスト | 全テストスイート | 全件パス |
-    | セキュリティ | SAST/SCA | Critical/High ゼロ |
-    | a11y | axe-core | Critical/Serious ゼロ |
-    | パフォーマンス | Lighthouse CI | スコア閾値達成 |
+    | 静的検証 | 採用言語のcompiler／type／lint／format | blocking errorなし、warning budget内 |
+    | artifact | pinned toolchainとlocked dependencyによるproduction build／package／image | 再現可能なartifactとdigest、provenance |
+    | テスト | 変更影響に対応するunit／integration／contract／E2E／device／infra | required suite pass、skip／flake／exception追跡 |
+    | セキュリティ | SAST／SCA／secret／IaC／artifact scan | risk policy違反なし、SBOM／VEX／exception整合 |
+    | UX／a11y | 対象surfaceのaccessibility／visual／interaction検証 | 適用基準とapproved baselineを満たす |
+    | 性能／信頼性 | workload-native benchmark、SLO／budget、migration／rollback test | Blueprint guardrailを満たす |
 
 -   **大規模変更検証（Large-Scale Change Verification）**:
-    -   **Law**: 100ファイル以上を変更する大規模リファクタリングは、通常のCIチェックだけでは不十分。以下の**5段階検証**を義務付ける。
+    -   **Law**: file数だけでなくsemantic scope、critical path、public contract、data／infra mutation、generated code、blast radiusでlarge changeを判定する。100ファイルはreference triggerであり、該当時は以下の検証をimpact mapへ適用する。
 
     | ステップ | 内容 | 合格基準 |
     |:---|:---|:---|
@@ -973,9 +980,9 @@
 ## §23. カナリアデプロイと段階的ロールアウト
 
 -   **段階的ロールアウト**:
-    -   全ユーザーに一度に公開せず、**1% → 5% → 20% → 100%** と段階的に拡大。
+    -   version skewとcohort isolationが安全なchangeは、代表性のあるsmall cohortからSLO／business guardrailを確認して段階的に拡大する。固定比率はreference profileである。
 -   **ステージゲート**:
-    -   **Law**: 各段階で最低**15分間の観測期間**を設け、次の段階へ進む前にメトリクスを確認する。
+    -   **Law**: traffic volume、seasonality、metric delay、error budget、riskに十分なsample／観測期間を各段階で確保する。15分は高traffic serviceの参考値にすぎない。
 -   **ロールバック基準**:
     -   以下のいずれかを検知した場合、**即座にロールバック**を実行する。
 
@@ -991,7 +998,7 @@
 -   **自動化**:
     -   ロールバック判定を可能な限り自動化（Feature Flagツール、CDプラットフォームのヘルスチェック等）し、人間の判断遅延によるダメージ拡大を防止。
 -   **Post-Deployment Verification**:
-    -   100%到達後も **24時間はロールバック可能な状態** を維持する。
+    -   full rollout後も、change classとfailure detection latencyに応じた期間、rollback、forward-fix、traffic isolationまたはrestoreを実行可能にする。24時間はreference profileである。
 
 ---
 
@@ -1001,7 +1008,7 @@
     -   本番環境のメトリクス・ログ・トレースを活用し、テストでは検出できなかった問題をリアルタイムで発見する。
     -   **Error Tracking**: Sentry / Datadog Error Tracking でランタイムエラーを自動収集・分類・アラート。
 -   **合成モニタリング（Synthetic Monitoring）**:
-    -   **Law**: クリティカルパス（ログイン、決済、主要API）に対して、**5分間隔の合成トランザクション**を本番環境で常時実行し、サービス正常性を監視する。
+    -   **Law**: クリティカルpathにsyntheticまたは同等のactive verificationを設け、interval、region、credential、test data、rate、costをSLOとabuse riskから定義する。5分はreference intervalである。
     -   ツール: Checkly, Datadog Synthetic Tests, AWS CloudWatch Synthetics。
 -   **RUM（Real User Monitoring）連携**:
     -   実際のユーザーのページロード時間、Core Web Vitals、エラー率をリアルタイムで監視する。
@@ -1061,12 +1068,17 @@
 
 ## §27. モバイルとクロスプラットフォームテスト
 
+-   **React Native多層gate**:
+    -   Node.js上のunit／component testはJS層だけを保証し、Swift／Kotlin、native module、OS API、release artifactを保証しない。
+    -   PRではTypeScript、Codegen差分、Android release build／test、iOS release build／testを独立gateとし、critical flowは両OSのdevice E2Eで検証する。
+    -   deep link、permission、background、offline queue、upgrade install、OTA runtime compatibilityとrollbackをrelease matrixへ含める。詳細は`engineering/420_react_native.md`を正本とする。
+
 -   **実機テスト義務**:
     -   シミュレーター/エミュレーターは完璧ではない。リリース前には物理デバイス（iOS/Android）での動作確認を必須とする。
     -   **TestFlight / Internal App Sharing**: 開発チーム全員が実機でドッグフーディングを行い、UXの違和感を検出。
 -   **フラグメンテーション対策**:
-    -   **Android**: 主要メーカー（Samsung, Pixel, Xiaomi）・異なるOSバージョンでの動作を BrowserStack / AWS Device Farm で確認。
-    -   **iOS**: 最新iOS + 1世代前のiOSでの動作確認を必須とする。
+    -   **Android**: 実ユーザー分布を基に、最低サポートOSと現行OS、主要メーカー、CPU／memory階層、画面形状を含む端末行列を定義し、実機または高忠実度device farmで確認する。
+    -   **iOS**: 実ユーザー分布を基に、少なくとも最低サポートOSと現行OSを端末行列へ含め、実機または高忠実度device farmで確認する。「最新版と1世代前」の固定条件だけで旧サポート範囲を省略しない。
 -   **ネットワークテスト**:
     -   オフライン、3G（低速）、機内モードからの復帰など、**不安定なネットワーク環境**での挙動をテスト。
     -   ネットワークスロットリング: Chrome DevTools / Playwright `route.abort()` を活用。
@@ -1112,7 +1124,7 @@
     | **ToxiProxy** | ネットワーク障害特化 | マイクロサービス間通信テスト |
 
 -   **GameDay（ゲームデイ）**:
-    -   **Law**: 四半期に1回以上、チーム全体で**GameDay**（模擬障害演習）を実施する。
+    -   **Law**: criticality、変更量、incident履歴、規制、復旧能力に応じたcadenceと参加者でGameDayまたは同等のresilience exerciseを実施する。四半期・全員参加は大規模高criticality serviceの参考profileである。
     -   シナリオ: DB障害、外部APIタイムアウト、CDN障害、急激なトラフィック増加。
     -   結果をポストモーテム形式で文書化し、改善アクションを起票する。
 -   **DORA規制対応**:
@@ -1378,18 +1390,18 @@
 ## §35. コンプライアンス駆動テスト
 
 -   **規制要件からのテスト逆算**:
-    -   **Law**: 規制要件を「テスト要件」に変換し、コンプライアンスの**自動検証**を実現する。手動監査の限界を技術で克服する。
+    -   **Law**: 適用対象と判定された規制要件を検証可能なtest、policy、evidence requirementへ変換し、機械検証できる部分を自動化する。自動testだけで法的適合を断定せず、対象entity／product、法域、適用日、除外、責任者、現行一次資料をcompliance matrixへ記録する。
 -   **主要規制とテスト要件マッピング**:
 
     | 規制 | テスト要件 | 実装例 |
     |:---|:---|:---|
-    | **DORA（EU）** | ICTリスクシナリオテスト、レジリエンステスト | カオスエンジニアリング実験の定期実施と文書化 |
+    | **DORA（EU）** | 対象金融entityのICT risk、resilience、第三者依存の検証 | riskと適用要件に基づくscenario test、復旧exercise、該当時のTLPTと証跡 |
     | **EAA（EU）** | アクセシビリティ適合テスト | axe-core CI自動スキャン、WCAG 2.2 AA準拠検証 |
     | **EU AI Act** | AIシステムのリスク分類と品質テスト | バイアス検証、説明可能性テスト、ログ保持 |
-    | **EU CRA** | ソフトウェア製品のサイバーセキュリティ要件 | SBOM自動生成、脆弱性自動報告、セキュリティアップデート5年保証 |
+    | **EU CRA** | 対象productのessential cybersecurity、component inventory、脆弱性処理、support periodの証拠 | artifactに結び付くSBOM等のcomponent証跡、脆弱性／update flow、想定利用期間と法定条件から決めたsupport期間、該当する報告trigger／期限のrunbook test |
     | **GDPR** | データ処理のプライバシーテスト | 同意管理フロー検証、データ削除E2Eテスト |
     | **改正APPI（日本）** | 個人情報保護のテスト | オプトアウトフロー検証、データ移転制限テスト |
-    | **SOC 2** | セキュリティ制御のテスト証跡 | テスト実行ログの監査用保持（最低1年） |
+    | **SOC 2** | 選定したTrust Services Criteriaに対するcontrol設計・運用証跡 | assessment period、監査人要求、契約、retention policyに沿うtest／approval／incident証跡 |
     | **PCI DSS** | 決済データ処理のセキュリティテスト | カード情報非保持の検証、暗号化テスト |
 
 -   **コンプライアンステスト自動化**:
@@ -1763,7 +1775,7 @@
 ## §47. 内部開発者プラットフォーム（IDP）品質保証
 
 -   **Golden Pathバリデーション**:
-    -   **Law**: Platform Teamが提供するGolden Path（推奨テンプレート/サービスカタログ）から生成されたプロジェクトが**自動的にすべての品質ゲートをパスする**ことを検証する。Golden Path品質はプラットフォーム信頼性そのもの。
+    -   **Law**: Golden Pathを提供する場合、生成物が宣言した対象profileの必須品質ゲートを通過し、利用者が外す機能を選べることを検証する。未使用service、credential、provider設定まで生成しない。
     -   **Scaffoldingテスト**: テンプレートから新規プロジェクト生成 → ビルド → テスト → デプロイの完全ライフサイクルを自動検証するCIジョブを構築する。
 
     ```bash
@@ -1860,9 +1872,9 @@
 ## §50. インフラストラクチャドリフト検出とコンプライアンス
 
 -   **構成ドリフト検出義務**:
-    -   **Law**: IaC管理されたインフラストラクチャの**実際の状態**がコード定義から乖離する「ドリフト」を**週次で自動検出**し、発見をインシデントとして扱う。
+    -   **Law**: IaC管理対象の実状態と宣言を、変更eventとBlueprintのrisk-based cadenceで自動照合する。週次は参考初期値であり、高権限／internet-facing変更はより短く、immutableな一時環境はrelease gateで代替できる。
     -   ツール: `terraform plan`（差分検出）、Driftctl（AWS特化）、CloudQuery（マルチクラウド）。
-    -   **ゼロドリフトポリシー**: ドリフト検出時は48時間以内にコード反映（Import）またはリソース修正で解決する。放置は禁止。
+    -   **Drift Response**: public exposure、権限拡大、暗号化解除等は直ちに封じ込める。その他はimpact、owner、期限、codeへの反映またはresource修正、例外と再確認日を記録する。48時間は参考初期値である。
 -   **CISベンチマーク自動検証**:
     -   **Action**: CIS（Center for Internet Security）ベンチマークに基づくクラウド構成セキュリティ検証を自動化する。
     -   ツール: Prowler（AWS）、ScoutSuite（マルチクラウド）、CSPM（Cloud Security Posture Management）。
@@ -2299,13 +2311,13 @@
     | フェーズ | テスト内容 |
     |:---|:---|
     | **作成** | フラグがデフォルトOFFで作成 → 全ユーザーでOFFを検証 |
-    | **段階的ロールアウト** | 1% → 5% → 20% → 100% 各段階でメトリクス検証 |
+    | **段階的ロールアウト** | Blueprintのcohortとguardrailに沿って各段階の割当・一貫性・メトリクスを検証 |
     | **フルロールアウト** | フラグが100%でON → ハードコードと挙動差なし |
     | **クリーンアップ** | フラグ削除 → コードパス簡略化 → デッドコードなし |
     | **緊急停止** | フラグ強制OFF → 全ユーザーで機能即時無効化 |
 
 -   **陳腐化フラグ検出**:
-    -   **Law**: 100%ロールアウト状態で**30日以上**クリーンアップされていないフィーチャーフラグを検出・アラートする。陳腐化フラグは技術的負債。
+    -   **Law**: full rollout後にowner、expiry、cleanup issue、参照状況を追跡し、Blueprintのrisk-based期限を超えたflagを検出・通知する。30日は高変更serviceの参考値である。
     -   **Action**: コード内のフラグ参照をスキャンし、フラグ管理プラットフォームのステータスと照合する自動ツールを構築する。
 -   **フラグ依存関係テスト**:
     -   依存するフラグ間のインタラクションをテストする。フラグAが有効でフラグBが無効の場合に正しい動作が生じ、未定義状態にならないことを検証する。
@@ -2340,11 +2352,11 @@
 
 ---
 
-## §63. 独立デプロイと統合テスト
+## §63. Micro Frontend release topologyと統合テスト
 
--   **独立デプロイ可能性の検証**:
-    -   **Law**: 各マイクロフロントエンドは独立してデプロイ・テスト可能でなければならない。1つのマイクロフロントエンドのデプロイが他を壊さないことを検証する。**デプロイ独立性は基盤的保証**である。
-    -   **Action**: 各マイクロフロントエンドを分離デプロイし、他の全マイクロフロントエンドが現行本番バージョンのシェルアプリケーションに対して統合テストを実行するCIパイプラインを構築する。
+-   **Release topologyの検証**:
+    -   **Law**: Micro Frontendのrelease topologyをindependent、coordinated、aggregateのいずれかとして宣言し、shell、remote、route、shared dependency、runtime、feature stateの互換範囲とpartial failureを検証する。独立deployは選択可能な分離成果であり、すべてのcomposition modelへ強制しない。
+    -   **Action**: independent型では変更remoteと現行shell／他remote、coordinated型では許容version windowと順序、aggregate型では全unitのbuild結果、route composition、欠落／stale remote、部分的activation、application単位のrollback／forward fixをCIとmanaged smokeで検証する。
 -   **Module Federationコントラクトテスト**:
     -   **Law**: Module Federationのexposed/consumedモジュールにコントラクトテスト原則を適用する。公開モジュールインターフェース（props、イベント、共有状態）の後方互換性を検証する。
 
@@ -2365,9 +2377,9 @@
     ```
 
 -   **シェルアプリケーション統合テスト**:
-    -   シェル（ホスト）アプリケーションが全リモートマイクロフロントエンドをロード、レンダリング、通信できることをテストする。ルーティング、レイアウト構成、エラーバウンダリを検証する。
+    -   シェル（host）applicationが全remoteをload、render、通信できることをtestする。routing、base path、layout composition、authentication／authorization context、error boundary、remote timeout／unavailable時のdegraded behaviorを検証する。
 -   **バージョンマトリクステスト**:
-    -   マイクロフロントエンドバージョンの互換性マトリクスを維持する。ローリングデプロイ中の後方互換性を保証するため、重要なバージョン組み合わせをテストする。
+    -   release topologyで同時に存在し得るshell／remote versionの互換性matrixを維持し、重要な組合せをtestする。一括deployという名称だけをversion skew不存在の証明にしない。
 
     | シェルバージョン | MFE-Aバージョン | MFE-Bバージョン | ステータス |
     |:---|:---|:---|:---|
@@ -2454,7 +2466,7 @@
     -   **Law**: 特定の同意カテゴリを必要とする機能が、対応する同意なしでは**アクセス不可**であることをテストする。アナリティクス、パーソナライゼーション、マーケティング機能は同意ゲート必須。
 -   **未成年ユーザー保護テスト**:
     -   年齢確認フローをテストし、該当年齢閾値（13歳 COPPA / 16歳 GDPR）未満のユーザーが適切な制限と保護者同意メカニズムを受けることを検証する。
--   **クロスリファレンス**: → `security/000_security_privacy.md`, `governance/100_data_governance.md`, §35
+-   **クロスリファレンス**: → `security/000_security_privacy.md`, `security/100_data_governance.md`, §35
 
 ---
 
@@ -2482,7 +2494,7 @@
     -   データ処理契約（DPA）が実際のデータフローに反映されていることを検証する。
 -   **データ保持と自動削除テスト**:
     -   **Law**: 自動データ保持ポリシーが正しく実行されることをテストする。定義された保持期間より古いデータが自動的にパージまたは匿名化されることを検証する。
--   **クロスリファレンス**: → `governance/100_data_governance.md`, §35, §53
+-   **クロスリファレンス**: → `security/100_data_governance.md`, §35, §53
 
 ---
 
@@ -2493,7 +2505,9 @@
 ## §67. デバイスマトリクスとブラウザ互換性テスト
 
 -   **デバイス・ブラウザカバレッジマトリクス**:
-    -   **Law**: 本番アナリティクスデータに基づく**最小デバイス/ブラウザカバレッジマトリクス**を定義・維持する。実際のユーザーデバイス/ブラウザ組み合わせの上位95%に対してテストする。
+    -   **Law**: product contract、利用者analytics、accessibility、地域、enterprise policy、OS／browser vendor support、Web Platform Baselineからdevice／browser matrixを定義し、未coverageの利用者影響を可視化する。上位95%はconsumer webの参考初期値であり、regulated、B2B、public serviceでは契約対象を優先する。
+
+    次表はreference matrixである。固定のLatest／N値や特定cloud device farmをUniversal要件にしない。
 
     | プラットフォーム | 最小カバレッジ | テスト方法 |
     |:---|:---|:---|
@@ -2506,7 +2520,7 @@
     | **Edge** | Latest | CI (Playwright Chromium) |
 
 -   **レスポンシブブレークポイントテスト**:
-    -   **Law**: デザインシステムで定義された全レスポンシブブレークポイントをテストする。各ブレークポイントでレイアウト、タイポグラフィ、インタラクティブ要素を検証する。
+    -   **Law**: design systemのcontract breakpointに加え、最小／最大supported viewport、content-driven境界、zoom、orientation、keyboard／safe areaでlayout、typography、interactionを検証する。次表の幅はreferenceであり、project固有tokenを優先する。
 
     | ブレークポイント | 幅 | 検証焦点 |
     |:---|:---|:---|
@@ -2749,8 +2763,8 @@
 | API統合 | `engineering/100_api_integration.md` | §7, §14, §33, §51, §52, §57, §58, §59, §60 |
 | エンジニアリング全般 | `engineering/000_engineering_standards.md` | §4, §19, §20, §55, §56, §61, §63, §64 |
 | 分析・インテリジェンス | `ai/100_data_analytics.md` | §24, §34, §37, §62 |
-| ライセンス・依存関係 | `security/100_oss_compliance.md` | §14 |
+| ライセンス・依存関係 | `security/200_oss_compliance.md` | §14 |
 | AI実装 | `ai/000_ai_engineering.md` | §30, §31, §32 |
-| データガバナンス | `governance/100_data_governance.md` | §35, §65, §66 |
+| データガバナンス | `security/100_data_governance.md` | §35, §65, §66 |
 | プラットフォームエンジニアリング | `engineering/000_engineering_standards.md` | §47, §48 |
 | Cloud FinOps | `operations/600_cloud_finops.md` | §49, §50 |

@@ -31,7 +31,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (50 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (54 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -202,9 +202,9 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   Dark Pattern ban (FTC/DSA/EU DFA), Agentic AI UX patterns, Calm UI,
   Voice UI, Design System as a Product, Design FinOps, 35 anti-patterns.
 
-### engineering/ — Technical Implementation (14 files)
-- **000_engineering_standards.md**: Engineering standards. 13 parts,
-  80 sections. Code quality, infrastructure, DevSecOps, tech debt,
+### engineering/ — Technical Implementation (18 files)
+- **000_engineering_standards.md**: Engineering standards. 22 parts,
+  141 sections. Code quality, infrastructure, DevSecOps, tech debt,
   AI-first development, Green Coding, bug-reduction policy, Git protocols,
   quality protocols, advanced architecture (Trinity DTO, CQRS, Feature
   Flag Lifecycle).
@@ -212,7 +212,9 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   error handling, CORS governance, API gateway metering.
 - **200_supabase_architecture.md**: 60 sections, 200+ rules. DB design,
   RLS, Auth, Storage, Migration, Edge Functions, Realtime, pgvector,
-  multi-tenancy, operational maturity model.
+  multi-tenancy, operational maturity model, and capability-specific
+  official/community client-library support surfaces distinct from execution
+  runtimes.
 - **300_web_frontend.md**: Next.js/React/TypeScript. 49 parts, 300
   sections. App Router, Server/Client boundary, CSS architecture,
   React 19, forms, state management, performance, SEO/GEO, accessibility,
@@ -220,15 +222,56 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
 - **310_headless_cms.md**: 80 parts, 160 sections, 131 rules. CMS
   philosophy, content modeling, rendering, CDN, publishing workflows,
   AI-Ready Content, Agentic CMS, multi-tenant, 40 anti-patterns.
+- **320_programming_language_governance.md**: 19 sections, 86 rules.
+  Language portfolio tiers and adoption contracts across frontend, backend,
+  mobile, desktop and framework lifecycles, enterprise platforms, long-lived
+  COBOL/PL/I and related assets, data/AI and scientific computing,
+  infrastructure, systems, accelerator/GPU,
+  shaders, eBPF, smart contracts, and hardware; native toolchains, Golden Paths,
+  polyglot CI, cross-language contracts, public library and SDK source, binary,
+  and behavioral compatibility, consumer matrices, immutable package
+  distribution, generated SDK coordination, organizational ownership,
+  SBOM/provenance, ownership, retirement; notebook and literate computational
+  artifact profiles, clean execution, rich-output trust boundaries, production
+  job operating contracts, and managed-workspace team handoff.
 - **400_mobile_flutter.md**: 55 parts, 265 sections. Flutter 3.41+,
   Riverpod 3.0+, Impeller, Clean Architecture, offline-first, security
   (OWASP MASVS), Passkeys/FIDO2, 50 anti-patterns.
-- **410_native_platforms.md**: Kotlin 2.x, Swift 6, KMP, Jetpack Compose,
-  SwiftUI, on-device AI, security, 20 anti-patterns.
-- **500_firebase_gcp.md**: 55 parts. Cloud Run, Firestore, Auth, FCM,
-  Genkit, Vertex AI, Zero Trust, FinOps, Terraform, 30 anti-patterns.
+- **410_native_platforms.md**: 40 parts and 186 sections covering Kotlin 2.4,
+  Swift 6.3, Android and Apple platforms, KMP, Compose, SwiftUI, typed
+  cross-platform boundaries, testing, release, and supply chain. Official
+  platform constraints stay normative; tools, thresholds, and team shapes are
+  replaceable examples or Blueprint parameters.
+- **420_react_native.md**: 17 sections, 52 rules. Framework-managed, bare,
+  and brownfield profiles; New Architecture, Hermes, Codegen, typed native
+  boundaries, both-OS tests, release performance, secure OTA, supply-chain
+  evidence, observability, a scale-appropriate Mobile Platform function, and
+  upgrade governance without mandating one vendor or organization chart.
+- **500_firebase_gcp.md**: 57 sections, 175 rules. Cloud Run, Firestore,
+  Auth, FCM, Genkit, Vertex AI, Zero Trust, FinOps, Terraform, 35
+  anti-patterns, and distinct client SDK, Admin SDK, framework binding,
+  managed runtime, buildpack, and container support surfaces.
 - **510_aws_cloud.md**: 155 sections, 240+ rules. Well-Architected
   Framework, all major AWS services, 20 anti-patterns.
+- **520_cloud_application_platforms.md**: 22 sections, 89 rules.
+  Capability-based selection and shared responsibility across Vercel,
+  Supabase, Firebase, Cloudflare, hyperscalers, enterprise, regional and
+  sovereign clouds, PaaS, and Kubernetes;
+  environment isolation, release/rollback, identity, data, SDK support tiers,
+  feature parity, generated clients, protocol fallbacks, security,
+  observability, FinOps, portability, exit, team platform engineering, and
+  vendor-neutral async-event delivery, idempotency, ordering, retry, DLQ,
+  quarantine, replay, local/emulator fidelity matrices, managed-environment
+  conformance, and provider-managed integration and extension lifecycle
+  contracts, plus multi-service service graphs, release topologies, aggregate
+  evidence, route-conflict checks, and partial-deployment recovery.
+- **530_azure_cloud.md**: 21 sections, 85 rules. Microsoft Azure provider
+  profile for landing zones, Microsoft Entra, RBAC and PIM, Azure Policy, IaC,
+  managed compute, language and SDK lifecycles, release slots and revisions,
+  Azure Functions managed, Preview, Custom Handler, worker-model, and
+  hosting-plan support surfaces, networking, Key Vault, data and migration, messaging, Azure Monitor,
+  reliability, FinOps, enterprise Platform Engineering, managed conformance,
+  supply-chain evidence, exit, and decommissioning.
 - **600_git_workflow.md**: 10 parts, 45 rules. Trunk-based development,
   Conventional Commits, branch/worktree hygiene, branch protection,
   tags/releases, secret scanning, anti-pattern catalog.
@@ -295,7 +338,7 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
 - **100_data_governance.md**: GDPR/Global Privacy Laws/CCPA/EU AI Act, consent
   management, RegTech, quantum crypto agility. 45 sections.
 - **200_oss_compliance.md**: License classification, SBOM (CycloneDX/
-  SPDX), SLSA v1.1, SCA tools. 49 sections, 280+ rules.
+  SPDX), SLSA v1.2 Build and Source Tracks, SCA tools. 63 sections, 299 rules.
 - **300_ip_due_diligence.md**: Patents, trade secrets, AI-generated IP,
   exit strategy, DD operations. 50 sections.
 - **400_authentication_and_passkeys.md**: Phishing-resistant-first,
@@ -431,7 +474,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 50 Universal Rules and core Blueprint starter files are available in both languages.
+All 54 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.

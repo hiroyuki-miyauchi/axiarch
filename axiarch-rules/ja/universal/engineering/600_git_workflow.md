@@ -7,6 +7,10 @@
 このファイルは、**日常的な開発・通常作業・upload で発生するドメイン非依存の Git 操作** を集約する Universal Rule である。
 ドメイン固有の Git 利用（セキュリティ署名・GitOps・QA hooks 等）は各ドメインファイルに残置し、本ファイルからクロスリファレンスする。
 
+## Universal適用契約
+
+本ファイルで不変なのは、履歴integrity、変更の追跡可能性、ownerと承認、再現可能な統合、復旧可能性、並行作業の隔離である。branch名、寿命、diff行数、commit形式、merge方式、承認人数、SLA、hook、hosting service、AI tool、通知先は、法令・契約・公式platform制約または明示した安全根拠がない限り参考実装またはBlueprint parameterとして扱う。Pull Request、GitHub、CODEOWNERS、merge queue等を使わない環境でも、同等の変更提案、独立承認、ownership、直列化、証跡、rollback能力を満たせば適合する。個人・小規模teamは役割を兼務できるが、高保証変更では可能な限り提案と承認を分離し、分離できない場合はrisk acceptanceと独立したrelease統制を置く。
+
 ---
 
 ## 目次 (Table of Contents)
@@ -52,25 +56,25 @@
 
 ### 1.0. トランクベース開発（Principle）
 
-- **原則**: 長寿命のブランチは廃止し、短命のブランチから `main` へ頻繁に（毎日）マージします。
-- **Stacked Diffs**: 巨大なPRを避け、依存関係のある小さなPRを積み重ねる手法を推奨します。
+- **原則**: 統合差分を小さく保ち、未統合期間と競合riskを測定する。trunk-based development、release branch、stacked diff等の方式は、製品のrelease model、規制、複数version保守、hardware／mobile審査、offline開発の制約からBlueprintで選ぶ。
+- **短期統合**: 短命branchと頻繁な統合は通常の既定だが、日次や固定寿命をUniversal要件にしない。長期branchが必要ならowner、同期方法、security fixのbackport、終了条件を持つ。
 
 ### 1.1. ブランチ命名規約
 
-- **Branch Naming Standard**: ブランチ名は `type/summary` 形式で統一します（例: `feat/user-profile`, `fix/login-bug`）。
+- **Branch Naming Standard**: repositoryまたは組織で機械検証可能な命名schemaを一つ定義し、purpose、work itemまたはrelease intentを追跡可能にする。`type/summary`は参照形式である。
 - **Types（§2.0 Conventional Commits と完全整合）**:
     - 開発系: `feat/`, `fix/`, `refactor/`, `perf/`
     - 補助系: `docs/`, `style/`, `test/`, `build/`, `ci/`, `chore/`
     - 履歴系: `revert/<reverted-sha>`
     - リリース系: `release/v1.4.0`（リリース凍結用）, `hotfix/critical-auth-bug`（本番緊急修正用）
-    - 探索系: `experiment/`, `spike/`（**寿命 1 週間以内**、§1.2 短命ブランチ強制と整合）
-- **Summary 規律**: kebab-case、英小文字のみ、3〜5 単語以内（例: `feat/oauth-google-login`、NG: `feat/test123`）。
-- **Anti-Pattern**: `wip/xxx`, `temp/xxx`, `mybranch/xxx`, `john-test` 等の **type 不在ブランチは禁止**。
+    - 探索系: `experiment/`, `spike/`
+- **Summary 規律**: 人名や秘密情報を含めず、利用中toolとUnicode方針に適合する短い識別子を使う。kebab-case、英小文字、3〜5語は参照既定である。
+- **Anti-Pattern**: owner、目的、終了条件を追跡できない一時branchと、保護対象を回避する命名は禁止する。
 
 ### 1.2. 短命ブランチの強制
 
-- **Law**: ブランチの寿命は原則として **数時間〜最大2日**。
-- **Action**: 巨大マージ困難ブランチが発生しそうな場合は、Feature Flag で本番非表示にして main に早期統合せよ。
+- **Law**: branchのage、base divergence、未解決競合、security patch遅延を可視化し、Blueprintのrisk budgetを超えたbranchへownerと解消計画を要求する。
+- **Action**: 大きな変更は互換性shim、branch by abstraction、feature flag、stacked diff、段階migration等から適切な手段を選び、未完成機能を安全に統合または隔離する。固定2日やfeature flagだけを唯一解にしない。
 
 ---
 
@@ -78,7 +82,7 @@
 
 ### 2.0. Conventional Commits
 
-- **Format**: `type(scope): subject` 形式を厳守します。本文にはプロジェクト設定言語で詳細を記述します。
+- **Format**: release note、automation、auditがchange intentを再現できるcommit schemaをrepositoryで定義する。Conventional Commitsの`type(scope): subject`はSemVer自動化に適した参照実装であり、他の検証可能なschemaも許容する。
 - **Standard Types（Conventional Commits 1.0.0 完全準拠）**:
 
     | Type | 用途 | SemVer 影響 |
@@ -103,7 +107,7 @@
 
 ### 2.2. Pull Request Template Protocol
 
-- **Law**: `.github/pull_request_template.md` を **必須配置**。以下 **8 項目** を必須テンプレとする：
+- **Law**: change proposalは、少なくとも目的、差分、検証証跡、risk、rollback、migration／互換性影響をreviewerが判断できる形で保持する。`.github/pull_request_template.md`と次の8項目はGitHub向け参照実装である：
 
     ```markdown
     ## Type of Change
@@ -134,37 +138,31 @@
     ## Screenshots / Recordings
     <!-- UI 変更時は必須。Before/After を並べる -->
     ```
-- **CI 連携**: PR description が空 / 必須セクション未記入の場合、**`actions/required-pr-fields-validator`** で fail させる。
-- **アンチパターン**: 「テンプレを残したまま空欄で submit」 → 自動 reject。
+- **CI 連携**: 採用したchange proposal schemaの必須fieldをVCS、review systemまたはCIで機械検証する。特定Actionを唯一の適合手段にしない。
+- **アンチパターン**: placeholder、空欄、検証不能な説明のまま承認へ進めることを禁止する。
 
-### 2.3. PR Size Mandate（100行ルール）
+### 2.3. Reviewable Change Size（レビュー可能な変更サイズ）
 
-- **Law**: PRは小さく保ちます。原則として変更行数 100行以内を目標に。`main` への直接プッシュは禁止し、CI通過とレビュー承認を必須とします。
+- **Law**: change proposalは、一つの意図、独立した検証、明確なrollbackをreviewerが理解できる大きさに保つ。行数だけでriskを判定せず、生成物、lockfile、schema、migration、binary差分を分類する。100行は分割を促す参考signalであり適合閾値ではない。保護対象への変更はserver-side policyまたは同等統制で必須検証と承認を強制する。
 
 ### 2.4. Pre-Push Branch Protection Hook（プッシュ前ブランチ保護フック）
 
-- **Law**: 全てのプロジェクトで、`pre-push` フックによる `main` 等の保護ブランチへの直接プッシュ禁止を義務とする。
-- **実装**: `pre-push` フックで `git symbolic-ref HEAD` をチェックし、`refs/heads/main` 等の保護ブランチへの直接 push を拒否する（実装例は §9.3 lefthook 設定を参照）。
+- **Law**: protected refへの未承認変更はserver-side policyまたは同等のauthoritative controlで拒否する。local `pre-push` hookは早期feedbackの一例であり、単独では迂回可能なため最終統制にしない。
+- **実装**: hookを使う場合はremote ref、複数worktree、detached HEAD、GUI／bot経路を考慮し、§9.3の配布契約へ従う。
 - **クロスリファレンス**: 具体的なフレームワーク（lefthook / Husky 等）の選定は §9.3 Hooks Distribution / §6.0 Branch Protection（サーバー側補完）
 
 ### 2.5. Pre-Commit Auto-Formatting Hook（コミット前自動整形フック）
 
-- **Law**: `pre-commit` フックでステージされたファイルに自動整形（`eslint --fix` / `prettier --write` 等）を適用することを義務付ける。実装には **staged ファイルのみ対象とするツール**（lint-staged / lefthook の `glob` + `staged_files` 等）を使用すること。
+- **Law**: formatterと軽量lintはlocalまたはCIで決定論的に再現し、CIをauthoritative gateとする。local hookで自動修正する場合はstaged範囲を逸脱せず、部分stageを壊さず、変更内容を利用者が確認できるようにする。hook自体は全projectの必須実装ではない。
 - **クロスリファレンス**: 具体的なフレームワーク選定は §9.3 Hooks Distribution / §2.10 commitlint（commit-msg フック）
 
 ### 2.6. Merge Strategy Mandate（マージ戦略義務）
 
-- **Default Strategy: Squash & Merge（既定: スカッシュマージ）**:
-    - 機能ブランチ → `main` への統合は **Squash & Merge** を既定とする。理由: `main` 履歴が「PR 単位の論理的変更」で線形化され、`git log --oneline` が読める。
-    - GitHub の `Settings > General > Pull Requests` で「Allow squash merging」のみ有効化、他は無効化（強制）。
-- **Exception: Merge Commit（例外: マージコミット）**:
-    - リリースブランチ統合・複数機能の協調マージなど、**個別コミット履歴を保持する正当な理由がある場合のみ** マージコミットを許可。
-- **Forbidden: Rebase Merge to main（禁止: main への Rebase Merge）**:
-    - `main` への Rebase Merge は **禁止**。複数コミットが個別に `main` に積まれると後方互換性確認・revert・bisect が困難になる。
-- **Linear History on main（main の線形履歴）**:
-    - GitHub Branch Protection で「Require linear history」を **有効化**。マージコミット禁止と組み合わせて履歴の単純性を担保。
+- **Strategy Contract**: squash、merge commit、rebase merge、fast-forwardのいずれを採用しても、change proposal、最終revision、承認、test、release artifact、revert単位を追跡できなければならない。
+- **Reference Default**: 一変更提案を一commitとして戻したいproduct repositoryではSquash & Mergeとlinear historyが有効である。複数version保守、upstream同期、署名済みcommit保存等ではmerge commitまたは別方式を選べる。
+- **Policy**: merge方式をrepository単位で明示し、同じ保護refへ無秩序に混在させない。hosting serviceの設定、server hook、merge bot等で強制する。
 - **Local Rebase Discipline（ローカル Rebase 規律）**:
-    - 自分の作業ブランチでの `git rebase main` は **推奨**（PR 出す前に最新化）。ただし **共有ブランチに対する rebase は厳禁**。
+    - 自分だけが所有するbranchではrebaseを使用できる。共有branchの履歴を書き換える場合は全collaboratorの明示合意と復旧点を必要とし、通常はmergeまたは新branchを選ぶ。
 
 ### 2.7. Force-Push Protocol（フォースプッシュ・プロトコル）
 
@@ -286,49 +284,40 @@
 
 ## Part 4: Worktree Hygiene Protocol（Worktree 衛生）
 
-> **Domain**: 通常作業 / 開発時 / 開発環境 / AI Agent ツール統合
+> **Domain**: 通常作業 / 開発時 / 開発環境 / 並行tool統合
 >
-> **Severity**: HIGH — 放置で他 AI Agent（Antigravity 等）が完全停止する
+> **Severity**: HIGH — stale管理情報やtool非互換はbranch誤認、作業損失、tool停止を起こし得る
 
-### 4.0. The Worktree Config Pollution Problem（worktree 残留問題）
+### 4.0. Worktree State and Compatibility（worktree状態と互換性）
 
-- **Context**: 任意の AI エージェント（Claude Code, Cursor 等）または `git worktree add` を実行する開発者が worktree を作成すると、Git は `.git/config` に `[extensions] worktreeConfig = true` を **自動追記** する。
-- **Critical Gap**: `git worktree remove` ではこのエントリは **削除されない**（Git の仕様: 他 worktree が依存している可能性を考慮した保守的挙動）。
-- **累積結果**: worktree の作成・削除を繰り返すたび、`.git/config` には：
-    1. `[extensions] worktreeConfig = true`（永続）
-    2. `[branch "<name>"]` ステイル設定（worktree 削除後も残る）
-- **症状**: 累積した汚染は以下を引き起こす:
-    - **Antigravity の Go ベース language server クラッシュ** — 起動時に "does not support extension: worktreeconfig" エラー、`ECONNREFUSED 127.0.0.1:50347`
-    - 該当プロジェクトの **チャット機能完全停止**
-    - 他のプロジェクトには影響しないため、原因特定が **著しく困難**
+- **公式境界**: `extensions.worktreeConfig`はworktree固有設定を読むGitの正式機能であり、sparse-checkout等が有効化する場合もある。存在だけを汚染と判定せず、active worktreeや`config.worktree`が依存する状態で無条件にunsetしない。
+- **stale状態**: worktree directoryを正規command外で削除した場合のprunable管理情報、実在しないlocal branchの`branch.<name>`設定、移動後のpath不整合を検出対象とする。
+- **tool互換性**: 古いGitまたは周辺toolが正式extensionを読めない場合は、Git version、error、再現手順、影響範囲を確認し、tool更新・隔離・serial execution・期限付き例外から選ぶ。正当なGit設定の削除を既定復旧にしない。
+- **正規操作**: 状態確認は`git worktree list --porcelain`、整理は`git worktree remove`または`git worktree prune`、移動不整合は`git worktree repair`を使用し、`.git/worktrees`を直接編集しない。
 
 ### 4.1. Mandatory Cleanup Protocol（毎回義務）
 
-- **Law**: `git worktree add` および `git worktree remove` を実行する毎に、`.git/config` の健全性を検証する。
+- **Law**: worktreeを追加・削除・移動する変更境界で、worktree一覧、prunable状態、branch config、未保存変更を検証する。毎command後の手動実行を固定せず、自動化またはtask終了gateで同じ成果を保証してよい。
 - **Required Checks**:
-    1. `git config --get extensions.worktreeConfig` の有無確認
-    2. `git config --list | grep "branch\."` でステイル `[branch "*"]` エントリ確認
-- **Cleanup Commands** (Copy-paste-ready):
+    1. `git worktree list --porcelain`で登録worktree、HEAD、branch、lock／prunable状態を確認
+    2. `git worktree prune --dry-run --verbose`でGitがprune可能と判定した管理情報を確認
+    3. `git config --local --name-only --get-regexp '^branch\.'`とlocal branch refを照合
+    4. `extensions.worktreeConfig`利用時は`git config --worktree`と対象Git／toolのsupportを確認
+- **Cleanup Commands**:
 
 ```bash
-# 1. worktree 拡張フラグを除去
-git config --unset extensions.worktreeConfig 2>/dev/null
-
-# 2. ステイル claude/* ブランチ config を一括除去
-for b in $(git branch | grep "claude/" | sed 's/^[ *]*//'); do
-  git config --unset "branch.$b.vscode-merge-base" 2>/dev/null
-  git config --unset "branch.$b.remote" 2>/dev/null
-  git config --unset "branch.$b.merge" 2>/dev/null
-done
-
-# 3. 不要な claude/* ブランチ自体を削除（Optional）
-git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
+git worktree list --porcelain
+git worktree prune --dry-run --verbose
+git worktree prune --verbose
+git worktree repair <moved-worktree-path>
 ```
+
+`git worktree prune`と`repair`はGitが管理するmetadataに限定する。branch refの削除、未保存変更の破棄、`extensions.worktreeConfig`の無効化は別の人間判断であり、本cleanupへ含めない。
 
 ### 4.2. Automated Detection Script（推奨）
 
-- **Law**: 大規模プロジェクトでは手動確認は形骸化する。**自動検出スクリプト** を CI / pre-commit に組み込むこと。
-- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — axiarch 標準配布の自動検出/修復スクリプト
+- **Law**: 複数worktreeや複数toolを使うrepositoryでは、Gitの正規commandに基づく検出をtask終了gate、CI、scheduled audit等へ組み込む。個人repositoryでは同じ確認を手動実行してよい。
+- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — prunable worktree metadataと実在しないlocal branchのconfigを検出・修復する参考script
 - **使用例**:
 
 ```bash
@@ -337,24 +326,26 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ./axiarch-scripts/check-git-config-clean.sh --quiet # CI 用サイレントモード（汚染なら exit 1）
 ```
 
-### 4.3. AI Agent 並行使用時の追加注意
+### 4.3. 複数tool・AI Agent並行使用時の追加注意
 
-- **Context**: Claude Code と Antigravity を並行使用する場合、Claude Code の worktree 操作が Antigravity を破綻させる。
+- **Context**: IDE、AI agent、automation、開発者が同じrepository metadata、branch、index、worktreeを並行変更すると、support差、lock、base誤認、未取得変更の上書きが起こり得る。
 - **Mitigation**:
-    1. 単一 AI Agent 運用に集約（推奨）
-    2. 並行運用時は `axiarch-scripts/check-git-config-clean.sh --fix` を頻繁に実行
-    3. AI Agent 終了時 / 切替時に必ずクリーンアップ実行
+    1. toolごとにworktree、branch、credential、write scope、ownerを分離する
+    2. 同じbranch／indexへ書く操作はlock、queue、handoff等で直列化する
+    3. task開始・handoff・終了時にstatus、worktree一覧、remote parity、未公開変更を確認する
+    4. 自動修復前にdry-runを確認し、active worktree、branch ref、未保存変更を削除しない
 
-### 4.4. Recurrence Documentation（再発履歴・観測例）
+### 4.4. Failure Pattern Documentation（失敗パターン）
 
-- **Law**: この問題は **構造的に再発する**（Git 本体の挙動が変わらない限り永続）。手動対応に頼らず自動化で受け流す戦略を堅持せよ。
-- **観測された再発例**:
+- **Law**: incidentや互換性問題は、特定project名、利用者名、実branch名をUniversalへ持ち込まず、再利用可能なcondition、signal、controlへ匿名化する。実観測の日時、project、機密logはBlueprintまたはincident recordに保持する。
+- **再利用可能な失敗パターン**:
 
-    | 発生日 | プロジェクト | 残留エントリ |
+    | 条件 | signal | control |
     |---|---|---|
-    | 2026-04-29 | inucomi（初回検出） | `[extensions] worktreeConfig = true` + `[branch "claude/agitated-rubin-1a895e"]` |
-    | 2026-05-03 | inucomi（再発） | `[extensions] worktreeConfig = true` + 5 件の `[branch "claude/*"]` |
-    | 2026-05-03 | axiarch（v1.3.2 リリース時に検出） | `[extensions] worktreeConfig = true` + `[branch "claude/nostalgic-moser-a1d7c8"]` |
+    | worktree pathをfile操作で削除 | `git worktree prune --dry-run --verbose`がprunable entryを表示 | clean確認後に`git worktree prune` |
+    | worktreeをfile操作で移動 | 登録pathと実pathが不一致 | `git worktree repair` |
+    | local branch削除後にconfig sectionが残る | local refなしで`branch.<name>` keyが存在 | 対象sectionだけをreview後に削除 |
+    | toolが正式Git extensionを未support | 再現可能なunsupported-extension error | tool／Git更新、隔離、serial execution、期限付き例外 |
 
 ---
 
@@ -363,11 +354,11 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ### 5.0. `.git/config` Health Audit
 
 - **Law**: `.git/config` は **リポジトリの神経系統**。汚染は様々なツール連携を断絶する。
-- **Action**: 定期的に `cat .git/config` を確認し、想定外のエントリ（特に `[extensions]` セクションや stale `[branch "*"]`）を検知せよ。
+- **Action**: `git config --show-origin --list`、`git worktree list --porcelain`、local branch refとの照合を、変更eventとBlueprintのrisk-based cadenceで実行する。正式extensionの存在だけを異常とせず、設定sourceと利用者を確認する。
 
 ### 5.1. `.gitignore` for AI Agent Artifacts
 
-- **Law**: AI Agent が生成するセッション固有ファイル（worktree、session log、plan files 等）は **絶対にコミットしない**。
+- **Law**: agent生成物をcanonicalなteam共有設定・task証跡と、credential、個人設定、cache、session log、temporary worktree等のephemeral／sensitive artifactへ分類する。前者はschema、review、retentionに従ってversion管理でき、後者だけをignoreする。`plan files`を名称だけで一律除外しない。
 - **Required `.gitignore` Entries**:
 
     ```gitignore
@@ -389,33 +380,31 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 >
 > **Severity**: HIGH — 不在は本番事故・誤マージ・履歴汚染を直接引き起こす
 
-### 6.0. Branch Protection Rules Mandate（ブランチ保護規則義務）
+### 6.0. Protected Reference Control（保護ref統制）
 
-- **Law**: `main` および全 release ブランチには **以下の Branch Protection** を必須適用：
+- **Law**: 本番、release、policy、CI、署名鍵、配布metadataへ到達するprotected refには、利用中VCSが提供するruleset、branch protection、server hook、ACLまたは同等統制を適用する。次表はGitHubの参考profileであり、列挙値を全repositoryへ一律要求しない：
 
     | 設定項目 | 値 | 理由 |
     |---|---|---|
     | Require a pull request before merging | ✅ ON | 直接 push 禁止 |
-    | Require approvals | **2 名以上**（最低 1 名） | レビューバイパス防止 |
+    | Require approvals | risk-based。高保証変更は二者review | レビューバイパス防止 |
     | Dismiss stale approvals when new commits are pushed | ✅ ON | 改変後の再レビュー強制 |
     | Require review from Code Owners | ✅ ON | §6.1 と連携 |
     | Require status checks to pass | ✅ ON（必須 check 列挙） | CI 緑のみマージ可 |
     | Require branches to be up to date before merging | ✅ ON | 古い base での merge 防止 |
-    | Require signed commits | ✅ ON（SemVer minor 以上のリポジトリ） | §7.1 と連携 |
-    | Require linear history | ✅ ON | §2.6 と連携 |
+    | Require signed commits | artifact／source identity要件に応じてON | §7.1 と連携 |
+    | Require linear history | 選択したmerge方式に応じてON | §2.6 と連携 |
     | Require deployments to succeed before merging | ✅ ON（preview deploy あり） | preview の動作確認強制 |
     | Lock branch | ⚠️ 一時的に ON（リリース凍結時） | 非常時のみ |
-    | Do not allow bypassing the above | ✅ ON（管理者含む） | 例外を作らない |
-    | Restrict who can push | ✅ ON（CI bot のみ） | 人間の直接 push を禁止 |
+    | Do not allow bypassing the above | 通常ON。緊急bypassはbreak-glass記録 | 無証跡例外を作らない |
+    | Restrict who can push | 承認済みactorとautomationだけ | 直接変更を最小化 |
     | Allow force pushes | ❌ OFF | §2.7 と連携 |
     | Allow deletions | ❌ OFF | 履歴消失防止 |
-- **アンチパターン禁止**:
-    - 「管理者は bypass 可」設定 → 緊急時の事故・内部脅威を招く
-    - approvals = 1 で運用 → 単一視点バイアス、レビュー疲労による rubber-stamp
+- **必須成果**: required check、最終revisionに対する承認、承認後変更時の再review、force push／削除の制御、bypassのowner・理由・期限・監査証跡を機械確認できること。承認人数はrisk、規制、team規模で定め、高保証領域ではSLSA Sourceの二者review要件を満たす。
 
-### 6.1. CODEOWNERS Discipline（CODEOWNERS 規律）
+### 6.1. Ownership Resolution（所有者解決）
 
-- **Law**: `.github/CODEOWNERS` を **必須配置**し、ディレクトリ単位で responsible engineers を明示する。
+- **Law**: 変更されたpath、component、schema、policyからaccountable ownerと必要reviewerを機械的に解決できること。`.github/CODEOWNERS`はGitHubの参考実装であり、GitLab Code Owners、Gerrit group、ownership registry等の同等手段を許容する。
 - **Format**:
 
     ```
@@ -429,18 +418,18 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     /security/             @security-team @cto
     ```
 - **Required Practice**:
-    - 全パスは少なくとも 1 つの owner に到達すること（fallback `*` を最終行に）
-    - 重要パス（`/security/`, `/infra/`, `*.sql`）は **2 名以上の owner** を指定
-- **連携**: §6.0「Require review from Code Owners」と組み合わせ、責任所在のあるパスは必ず owner レビューを通過させる。
+    - 全保護対象が少なくとも一つのaccountable ownerまたは継続経路へ解決される
+    - 重要pathはowner不在をblockし、riskに応じて専門reviewと独立承認を強制する
+    - ownership policy自体の変更にもowner、review、承認後変更時の再reviewを適用する
+- **連携**: §6.0のprotected reference controlと組み合わせ、owner解決を単なる通知先で終わらせない。
 
 ### 6.2. PR Review SLA & Stale PR Hygiene（PR レビュー SLA・停滞 PR 衛生）
 
-- **Review Response SLA（応答期限）**:
-    - PR が assigned reviewer に通知されてから **24 営業時間以内** に「Approve / Request Changes / Comment」のいずれかで応答する義務。
-    - SLA 違反時は Slack 通知 → エスカレーション。
-- **Stale PR Auto-Close（停滞 PR の自動クローズ）**:
-    - 7 日間活動のない PR は自動的に "stale" ラベル付与。さらに 7 日経過で auto-close。
-    - GitHub Actions: `actions/stale@v9` で実装。
+- **Review Response SLO（応答目標）**:
+    - change risk、team timezone、incident／release urgencyに応じた応答目標とescalation routeをBlueprintへ定義し、待ち時間とreview loadを測定する。24営業時間は参考初期値である。
+    - 通知先はSlackに固定せず、利用中のchat、email、ticket、pager等から選ぶ。
+- **Stale Change Hygiene（停滞変更の衛生）**:
+    - inactive changeにはowner確認、base更新、分割、supersede、closeの判断を行う。固定日数で無条件auto-closeせず、security fix、外部contributor、長期migration等を分類する。
 - **Draft PR の正しい使用**:
     - WIP は **Draft PR** として作成し、レビュー対象外であることを明示。Ready for review に変更したタイミングで SLA カウント開始。
 - **Re-Review Triggering**:
@@ -473,7 +462,7 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 ### 6.4. AI-Assisted PR Review（AI 補助コードレビュー）
 
-- **Law**: AI 補助レビューツールは **defense-in-depth** として導入し、**人間レビュアーの代替にはしない**。AI は approver にならない。
+- **Law**: AI補助reviewを使う場合はdefense-in-depthとし、責任ある承認主体、secure SDLC、SAST／SCA／testの代替にしない。AI導入自体を全projectの必須要件にしない。
 - **Recommended Tools（2026 stable）**:
 
     | Tool | 強み | 言語/エコシステム |
@@ -483,9 +472,9 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     | **Codium PR-Agent** | OSS、自前ホスト可能、カスタムプロンプト | 多言語 |
     | **GitHub Copilot Code Review** | GitHub 統合、IDE 連携 | 多言語 |
 - **Mandatory Boundaries（必須の境界）**:
-    - AI レビューは **必ず人間レビューと並行** で実行する（順次ではなく並列）。
-    - **AI コメントは "示唆" であり "決定" ではない**。CODEOWNERS で指定された人間 reviewer の approval が **唯一の merge ゲート**（§6.0 / §6.1 と整合）。
-    - AI が「LGTM」と返しても、人間 reviewer が deep review（≥10 分）したことを `praise:` / `issue:` 等の Conventional Comments（§6.3）で示すこと。
+    - AI出力にはmodel／service、対象revision、実行時刻、policy、resultを追跡できる証跡を残し、機密code、prompt injection、data retentionをthreat modelへ含める。
+    - **AIコメントは示唆であり決定ではない**。riskに基づく人間または明示的に承認されたgovernance主体が最終責任を持つ。AI結果が未完了でも無期限に人間reviewを停止しないfail-open／fail-closed方針を定める。
+    - review品質は経過分数やコメント数で証明せず、最終revision、重要risk、test evidence、未解決指摘への判断を記録する。
 - **Use Cases（補助範囲）**:
     - スタイル / 命名規約の自動検出
     - 明白なバグ・null チェック漏れ・エラーハンドリング不足
@@ -805,9 +794,9 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     - ローカル squash 時は手動で残すこと
 - **クロスリファレンス**: §8.7 AI-Generated Code Provenance Protocol（`@ai-coauthor` ヘッダー併用）
 
-### 9.2. Renovate / Dependabot Discipline（依存関係自動更新規律）
+### 9.2. Dependency Update Automation（依存関係更新自動化）
 
-- **Law**: 全プロジェクトに **Renovate または Dependabot** を導入し、依存関係更新を自動 PR 化する。
+- **Law**: 各ecosystemのsupport終了、脆弱性、version driftを継続検出し、owner、期限、compatibility testを持つ更新changeを生成または起票する。Renovate、Dependabot、registry bot、platform service、自社automationは交換可能な実装である。
 - **Required Configuration（推奨設定）**:
 
     ```json
@@ -828,27 +817,18 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     }
     ```
 - **Auto-Merge Policy**:
-    - **patch / minor**: CI 緑 → 自動マージ（人間レビュー不要）
-    - **major**: 人間レビュー必須（破壊的変更の可能性）
-    - **security alert**: 即時 PR、CI 緑なら自動マージ
+    - semantic versionのpatch／minor／majorだけでriskを決めない。runtime、lockfile、build plugin、native binary、container base、transitive dependency、maintainer／source変更を分類する
+    - auto-mergeは影響範囲test、provenance、license、reachability、rollback、変更後monitoringが十分なlow-risk updateに限定する
+    - 悪用中脆弱性は即時triageし、緩和、update、rollbackを選ぶ。CI greenだけで無条件mergeしない
 - **アンチパターン禁止**:
     - PR 数の爆発 → `prConcurrentLimit` で上限設定、batched updates 採用
     - 全自動マージ → major bump で破綻、レビューゲートを設けよ
 
 ### 9.3. Hooks Distribution & Framework Choice（フック配布・フレームワーク選定）
 
-- **Law**: Git Hook は **チームメンバー全員が同じ実装を使う** ことを担保する。「個人の `~/.gitconfig` に書く」は禁止。
-- **Framework Comparison（2026 stable）**:
-
-    | Framework | 言語 | 設定ファイル | パフォーマンス | 推奨度 |
-    |---|---|---|---|---|
-    | **lefthook** | Go バイナリ | `lefthook.yml`（単一）| ⚡ 並列実行・最速 | ✅ **第一選択（2026+）** |
-    | **Husky** | Node.js | `.husky/<hook-name>` シェルスクリプト | 🐢 直列、Node 起動オーバーヘッド | ⚠️ Node プロジェクトのみ |
-    | **pre-commit (Python)** | Python | `.pre-commit-config.yaml` | 🐢 中速、Python 環境必須 | ⚠️ Python/モノレポ向け |
-    | **Native `core.hooksPath`** | Shell | `.githooks/<hook-name>` | ⚡ 最速 | ⚠️ 共有設定の自動化が貧弱 |
-- **Recommended Default: lefthook**:
-    - 単一 YAML 定義で全 hook を宣言、並列実行、言語非依存、Windows/macOS/Linux 完全対応。
-    - 設定例 (`lefthook.yml`):
+- **Law**: local hookを採用する場合、version管理された設定と再現可能な導入経路を提供し、同じ検査をCIまたはserver-side gateでも強制する。個人の`~/.gitconfig`だけを組織統制にしない。
+- **選定契約**: lefthook、Husky、pre-commit、native `core.hooksPath` その他の採用は、対象言語、OS、IDE／GUI client、部分stage、導入失敗時の挙動、実測latency、保守責任者をBlueprintへ記録して決める。Universal層は特定frameworkを必須化しない。
+- **Reference Implementation**: 次はlefthookを使う一例であり、必須の製品、コマンド、ファイル構成ではない。
 
     ```yaml
     pre-commit:
@@ -874,35 +854,29 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
             [ "$branch" = "main" ] && echo "Direct push to main forbidden" && exit 1 || exit 0
     ```
 - **Mandatory Practices（必須事項）**:
-    - **設定ファイルは必ず checked-in**（`.husky/` / `lefthook.yml` / `.pre-commit-config.yaml`）
-    - `package.json` の `prepare` スクリプト（または README の Setup 節）で **clone 後に自動セットアップ** されること
-    - `--no-verify` 使用は **最終手段**、使用時は PR description に理由明記（§10.0 Anti-Pattern Catalog 参照）
-- **Migration Note（既存 Husky → lefthook）**:
-    - 大規模リポジトリでは `pre-commit` が 5 秒超になりがち。lefthook の並列実行で 3-5 倍高速化が一般的。
-    - 移行は段階的に: 既存 husky 設定を残しつつ lefthook 並走 → 1 週間動作確認 → husky 撤去。
+    - hookの定義、生成元、導入手順のいずれかをversion管理し、同じrevisionから再現できること。
+    - clone／workspace bootstrap後に、採用したruntimeとpackage managerへ適した一貫した導入経路を提供すること。
+    - local hookは高速なfeedbackであり、merge／releaseの最終根拠にしない。重要検査はCIまたはserver-side controlで再実行すること。
+    - bypassを許可する場合は、理由、補償検査、監査証跡をriskに応じて要求すること。
+- **Migration Note**: hook frameworkを変更する前に、OS／IDE／GUI clientの互換性、導入失敗、実測latency、部分stage、既存開発環境を比較し、観測期間とrollback条件をBlueprintへ定義する。
 - **クロスリファレンス**: §2.5 lint-staged / §2.10 commitlint / §9.0 Multi-Layer Secret Scanning
 
 ### 9.4. Shallow Clone & Sparse Checkout for CI（CI 最適化のための部分 clone）
 
 > **Note**: 本セクションは **Git 側の機能** の規律。CI/CD パイプライン全体の最適化は `engineering/000` および `operations/` ドメイン参照。
 
-- **Law**: CI（GitHub Actions / CircleCI / GitLab CI 等）では **必要最小限の履歴・ファイル** のみを clone し、無駄な転送・ストレージ・時間を排除する。
+- **Law**: CIでは、jobの正しさに必要な履歴、tag、submodule、LFS object、pathを宣言し、完全性を壊さない範囲で転送、storage、I/Oを最小化する。
+- **Depth Contract**: `fetch-depth`の数値は固定標準にしない。merge-base、変更範囲、versioning、changelog、provenance、bisectなど、jobが実際に参照する履歴から導く。
 - **Shallow Clone（履歴の浅化）**:
 
     ```bash
-    # 全 CI ジョブの既定（GitHub Actions actions/checkout@v4 では fetch-depth: 1 が既定）
+    # 現在のrevisionだけで完結するjobの例
     git clone --depth=1 <url>
 
-    # `git log` や bisect が必要なジョブのみ深く取得
+    # 履歴が必要なjobは必要量を取得し、不足時は明示的に拡張する例
     git clone --depth=50 <url>
-    git fetch --deepen=50              # 必要時に追加取得
+    git fetch --deepen=50
     ```
-
-    | fetch-depth | 用途 |
-    |---|---|
-    | `1` | 単純な lint / build / test ジョブ（既定） |
-    | `50` | conventional-commit 検証、changelog 生成 |
-    | `0`（full） | release-please / semantic-release 等の履歴解析が必要なジョブのみ |
 - **Sparse Checkout（ファイルの部分取得・モノレポ向け）**:
 
     ```bash
@@ -910,27 +884,13 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     cd repo
     git sparse-checkout init --cone
     git sparse-checkout set apps/web packages/shared    # 対象ディレクトリのみ
-    git checkout main
+    git checkout <revision>
     ```
-
-    効果: 100GB モノレポでも 1GB 以下に絞れる。
-- **GitHub Actions 例**:
-
-    ```yaml
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1                      # ほとんどのジョブはこれで十分
-        sparse-checkout: |                  # モノレポなら対象 workspace のみ
-          apps/web
-          packages/shared
-        sparse-checkout-cone-mode: true
-    ```
-- **Cost Impact**:
-    - shallow clone: 大規模リポジトリで CI 起動時間 **30-60% 削減**
-    - sparse checkout（モノレポ）: ストレージ・I/O **80-95% 削減**、affected workspaces のみビルド可能
+- **Verification**: 最適化前後でcheckout時間、転送量、cache hit、job結果を実測し、必要な生成物、policy、変更検出が欠落しないことをfixtureまたはrepresentative changeで検証する。
 - **Anti-Pattern**:
-    - `fetch-depth: 0`（full history）を **全ジョブで指定** → 無駄な転送、CI 課金爆増
-    - sparse-checkout 未採用のモノレポ → ジョブごとに全ファイル展開、I/O が支配的に
+    - 根拠なく全履歴または最小履歴を全jobへ一律適用する。
+    - sparse checkoutやpath filterにより、依存関係、policy file、generated artifact、security checkを取りこぼす。
+    - ベンダー既定値や未検証の削減率をUniversalな性能保証として扱う。
 - **クロスリファレンス**: §8.1 Git LFS（大ファイルの転送最適化）/ §9.2 Renovate（依存更新の batched 実行）
 
 ---
@@ -943,31 +903,28 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 | カテゴリ | アンチパターン | 検出手段 | 関連 |
 |---|---|---|---|
-| **Branch** | `master`/`main` への直接 push | Branch Protection | §6.0 |
-| **Branch** | Long-running branch（>2日） | Stale check / Slack alert | §1.2 |
-| **Branch** | マージ済みブランチ放置 | `git branch --merged` 自動チェック | §3.0 |
-| **Commit** | `"fix"` / `"wip"` のみのメッセージ | commitlint | §2.0, §2.8 |
-| **Commit** | Atomic でない（複数論理変更） | レビューで指摘 | §2.1 |
-| **Commit** | AI 生成だが `Co-Authored-By:` なし | commit-msg hook | §9.1 |
-| **Commit** | 100 行超 PR | PR template / lint | §2.3 |
-| **Push** | `git push --force` 全般（特に保護ブランチへの force push） | pre-push hook (`--force-with-lease` 必須) + Branch Protection | §2.7, §6.0 |
-| **Push** | `--no-verify` 濫用（hook bypass） | コードレビューで監視 | §9.3 |
-| **Tag** | 軽量タグのリリース | `git tag --list --format='%(taggerdate)'` チェック | §7.0 |
-| **Tag** | 既存タグの移動・削除 | Branch Protection (tag protection rules) | §7.0 |
-| **Merge** | `main` への Rebase Merge | GitHub merge button 設定 | §2.6 |
-| **Merge** | Conflict marker (`<<<<<<<`) を含むコミット | grep + CI gate | — |
-| **History** | secret コミット → 履歴から消すだけ | secret scanning | §7.5, §9.0 |
-| **History** | `git filter-branch` 使用（deprecated） | コードレビュー | §7.5 |
-| **Worktree** | worktreeConfig 残留 | `check-git-config-clean.sh` | §4.0–§4.4 |
-| **Repo** | `.gitattributes` なし → 改行揺れ | CI で検証 | §8.0 |
-| **Repo** | >10MB バイナリ非 LFS | pre-commit + CI | §8.1 |
-| **Repo** | 不要 submodule 採用 | アーキテクチャレビュー | §8.2 |
-| **Review** | rubber-stamp approval（数秒で承認） | 平均レビュー時間メトリクス監視 | §6.2 |
-| **Review** | 自分の PR を自分で merge | CODEOWNERS で防御 | §6.0, §6.1 |
-| **Tooling** | サーバー側 secret scan なし | GitHub Push Protection | §9.0 |
-| **Commit** | type 不在ブランチ・コミット（commitlint 不通過） | commitlint CI gate | §2.0, §2.10 |
-| **Review** | AI Rubber-Stamp（AI が OK → 人間が秒で approve） | レビュー時間メトリクス監視 | §6.4 |
-| **Tooling** | hook 設定が個人のみ・チーム共有なし | Repository review | §9.3 |
+| **Branch** | 保護対象referenceへpolicyを迂回して直接変更する | Protected Reference Control | §6.0 |
+| **Branch** | active owner、更新状態、統合計画なしにbranchを長期化する | inactivity／ownership check | §1.2 |
+| **Branch** | マージ済みbranchや追跡情報を無期限に放置する | repository hygiene check | §3.0, §3.1 |
+| **Commit** | 採用したmessage schemaで意図を識別できない | schema validation + review | §2.0, §2.8, §2.10 |
+| **Commit** | 独立に検証・revertできない複数論理変更を混在させる | review + change graph | §2.1 |
+| **Commit** | 組織が要求するAI利用・著作者・sign-off情報を欠く | policy validation | §2.8, §9.1 |
+| **Change** | riskに対するreview可能性のbudgetを超え、分割不能の根拠もない | measured size／complexity signal | §2.3 |
+| **Push** | 許可された復旧手順、lease、auditなしに共有履歴を上書きする | client feedback + server policy | §2.7, §6.0 |
+| **Push** | local controlを迂回し、補償検査や理由を残さない | CI evidence + audit log | §9.3 |
+| **Release** | 既存release referenceまたは公開済みartifactを追跡不能に差し替える | release integrity check | §7.0, §7.1 |
+| **Merge** | conflict markerまたは未解決の生成差分を統合する | content scan + CI gate | — |
+| **History** | credential失効・影響確認をせず、履歴削除だけでsecret incidentを閉じる | incident evidence + secret scan | §7.5, §9.0 |
+| **History** | backup、mapping、coordination、検証なしに共有履歴を書き換える | approved runbook | §7.5 |
+| **Worktree** | prunable metadata、stale branch config、tool互換性を放置する | `check-git-config-clean.sh` または同等検査 | §4.0–§4.4 |
+| **Repo** | 対象platform間で改行、encoding、binary判定が再現できない | cross-platform CI | §8.0 |
+| **Repo** | 大容量artifactを根拠なくGit objectへ格納する | repository size policy | §8.1 |
+| **Repo** | ownership、update、trust、recovery modelなしにsubmodule等の外部参照を採用する | architecture review | §8.2 |
+| **Review** | final revision、material risk、unresolved findingを確認した証拠がない承認 | approval evidence | §6.2, §6.3 |
+| **Review** | 独立承認が必要な変更を作成者だけで承認・統合する | ownership + approval policy | §6.0, §6.1 |
+| **Tooling** | local検査だけに依存し、server-sideまたはCIのsecret preventionがない | layered secret-control check | §9.0 |
+| **Review** | AIの結果を根拠、誤検知判断、final revision確認なしに承認へ置換する | finding disposition + human approval evidence | §6.4 |
+| **Tooling** | hook定義と導入経路が個人環境にしか存在しない | repository／bootstrap review | §9.3 |
 
 ---
 
@@ -999,24 +956,24 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 | Conventional Commits | §2.0 |
 | Atomic Commits | §2.1 |
 | PR Template | §2.2 |
-| 100行ルール / PR Size | §2.3 |
-| Pre-Push Branch Protection Hook（保護ブランチ直 push 禁止） | §2.4 |
+| Reviewable Change Size / risk budget | §2.3 |
+| Protected Reference Control / local pre-push feedback | §2.4 |
 | Pre-Commit Auto-Formatting Hook（lint-staged 等） | §2.5 |
 | マージ済みブランチ削除 | §3.0 |
 | Stale remote tracking | §3.1 |
-| Worktree pollution / `worktreeConfig` | §4.0 |
+| Worktree状態 / `worktreeConfig`互換性 | §4.0 |
 | Worktree cleanup commands | §4.1 |
 | `check-git-config-clean.sh` | §4.2 |
 | AI Agent 並行使用 | §4.3 |
 | `.git/config` 健全性 | §5.0 |
 | `.gitignore` AI artifacts | §5.1 |
-| Merge Strategy / Squash & Merge / Rebase 禁止 | §2.6 |
+| Merge Strategy Contract / history traceability | §2.6 |
 | Force-Push / `--force-with-lease` | §2.7 |
 | Commit Body / Trailers / `Co-Authored-By:` / Sign-off | §2.8 |
 | fixup / autosquash / WIP 整理 | §2.9 |
-| Branch Protection Rules / Required Reviews / Linear History | §6.0 |
-| CODEOWNERS | §6.1 |
-| PR Review SLA / Stale PR / Draft PR | §6.2 |
+| Protected Reference Control / Required Reviews / history policy | §6.0 |
+| Ownership Resolution / CODEOWNERS等 | §6.1 |
+| Review Response SLO / inactive change / Draft | §6.2 |
 | Conventional Comments | §6.3 |
 | SemVer Tag / annotated tag / pre-release | §7.0 |
 | Commit Signing / Tag Signing / SSH Signing | §7.1 |
@@ -1029,19 +986,29 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 | Submodule Policy / `git subtree` | §8.2 |
 | Multi-Layer Secret Scanning / GitHub Push Protection | §9.0 |
 | AI Co-Authored-By / AI Attribution | §9.1 |
-| Renovate / Dependabot / Auto-Merge Policy | §9.2 |
+| Dependency Update Automation / Renovate / Dependabot | §9.2 |
 | Anti-Pattern Catalog | §10.0 |
 | Conventional Commits Types (feat/fix/refactor/perf/docs/style/test/build/ci/chore/revert) | §2.0 |
 | commitlint / commitizen / commit-msg validation | §2.10 |
 | PR Required Fields (Risk / Rollback / Migration / ADR) | §2.2 |
-| AI-Assisted PR Review (CodeRabbit / Greptile / Codium) | §6.4 |
-| lefthook / Husky / pre-commit / Hooks Distribution | §9.3 |
+| AI-Assisted Review Governance / review assistant | §6.4 |
+| Hook Distribution and Tool Choice / lefthook / Husky / pre-commit | §9.3 |
 | `git maintenance` / 自動 GC / commit-graph / prefetch | §7.6 |
 | `.git-blame-ignore-revs` / mass-format / git blame 透明化 | §8.3 |
 | Shallow Clone / Sparse Checkout / CI 最適化 / fetch-depth | §9.4 |
 
 ---
 
-**Last Updated**: 2026-05-05
+## 一次資料
+
+- [git-worktree 公式ドキュメント](https://git-scm.com/docs/git-worktree.html) — worktree の一覧、削除、prune、repair、および worktree 固有設定
+- [git-config 公式ドキュメント](https://git-scm.com/docs/git-config.html) — `--worktree` と `extensions.worktreeConfig` の正式な挙動
+- [SLSA Source Track 要件](https://slsa.dev/spec/v1.2/source-requirements) — 高保証sourceにおけるreview、変更履歴、保護統制
+- [GitHub Rulesets 公式ドキュメント](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) — branch、tag、pushを対象にする保護規則の実装例
+- [GitLab Approval Rules 公式ドキュメント](https://docs.gitlab.com/user/project/merge_requests/approvals/rules/) — role、group、対象branchに応じたapproval ruleの実装例
+
+---
+
+**Last Updated**: 2026-07-23
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Engineering — Git Workflow & Repository Hygiene

@@ -2,14 +2,18 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
 > "Data is the lifeblood of the enterprise. No compromise is permitted in its flow and protection."
 > In Supabase/PostgreSQL implementation, strictly observe the priority order: **Security (RLS) > Data Integrity > Performance > Developer Productivity > Cost Efficiency**.
-> This document is the primary standard for all backend data strategy design decisions.
+> This document is the provider profile for backend and data strategy in systems that adopt Supabase/PostgreSQL.
 > **60 sections, 200+ rules.**
+
+> [!NOTE]
+> **Universal Applicability Contract**
+> This file does not mandate Supabase/PostgreSQL for every project. Adoption follows the capability, risk, cost, and portability evaluation in `engineering/520_cloud_application_platforms.md`; apply only rules relevant to adopted capabilities. Product names, limits, CLI commands, defaults, paths, framework helpers, and fixed thresholds are reference examples and must be revalidated against current official documentation and effective settings. Fixed topology, region, budget, and naming decisions belong in Blueprint. If a concrete recipe in this profile conflicts with least privilege, data integrity, migration immutability, or the cross-provider principles in 520, those principles take precedence and the recipe is not enforced verbatim.
 
 ---
 
@@ -66,7 +70,7 @@
 - §48. VPC & Private Link
 - §49. Read Replicas & Load Balancing
 - §50. Project-scoped Roles & Team Management
-- §51. GitHub Actions CI/CD
+- §51. Provider-neutral CI/CD
 - §52. Advisory Locks & Concurrency Control
 - §53. Webhook Signature & Event-Driven Integration
 - §54. Advanced Database Partitioning
@@ -84,10 +88,10 @@
 ## 0. Data Sovereignty Law & Primary Directives
 
 ### Primary Directive 0.1: The Zero Tolerance Linter Protocol
--   **Law**: Database Linter (Supabase Security Advisor, etc.) warnings are NOT "suggestions" but **"vulnerability reports"**.
+-   **Law**: Database Linter findings (Supabase Security Advisor, etc.) must not be ignored without review; triage them as security, integrity, or performance risks.
 -   **Mandate**:
-    1.  **Zero Warnings**: Schemas deployed to production MUST **always have 0** Linter warnings. Any warnings block release.
-    2.  **Universal Fix**: Warnings like "Search Path Mutable" or "Permissive Policy" MUST be **mechanically and immediately fixed**. No project-specific exceptions.
+    1.  **Risk-Based Gate**: Block release while an applicable Critical/High finding or an unexplained finding remains unresolved.
+    2.  **Documented Disposition**: A false positive, non-applicable finding, or time-bound acceptance requires rationale, impact, owner, approver, and expiry. Never suppress findings in bulk without individual review.
 
 ### Primary Directive 0.2: The Trinity DTO Mandate
 -   **Purpose**: Trinity obligation that supports data structure robustness and scalability.
@@ -111,72 +115,65 @@
 -   **Rationale**: As the concrete boundary for the DTO obligation defined by SD 0.2 (Trinity DTO Mandate), this establishes data handoff to client components as a physical interception point. Direct transmission of Raw Entities is the greatest risk source for unintended PII leakage.
 
 ### Core Laws
--   **SSOT (Single Source of Truth)**: Settings, user data, and content all have **PostgreSQL (`public` schema)** as the Single Source of Truth. "Dual management" in JSON files or external CMS is strictly prohibited.
-    -   **Prohibition**: "Holding temporarily in JSON" is a data governance violation.
--   **Migration Only**: DB schema changes must ALWAYS go through coded `supabase/migrations`. Manual changes via admin console (Supabase Dashboard SQL Editor, etc.) are considered "history destruction".
+-   **Explicit Authority (Single Source of Truth)**: Define one authoritative store and owner for each data domain. PostgreSQL, an external CMS, object storage, and configuration repositories may coexist when domain boundaries, synchronization direction, conflict resolution, and failure behavior are documented. Accidental dual authority is prohibited.
+-   **Migration Only**: DB schema changes must go through repository-managed, provider-native migrations. `supabase/migrations` is a conventional example. Emergency manual operations require prior approval or a break-glass procedure, audit evidence, and immediate codification and reconciliation.
 -   **Migration Immutability Law (Sanctuary)**:
-    -   **Law**: `supabase/migrations/*.sql` becomes a "sanctuary" the moment it's committed, **permanently prohibiting rename, edit, or delete**.
-    -   **Violation**: Post-remote-DB-apply fixes MUST be done via a new file. Tampering with past migrations is a severe governance violation.
+    -   **Law**: A migration applied to a shared environment, or depended on by another contributor, is immutable; corrections require a new migration.
+    -   **Private Draft**: An unapplied draft held only by its author may be amended before review while preserving an understandable history.
 
 ---
 
 ## 1. Hybrid Stack Responsibility
--   **The Hybrid Stack**:
-    -   **Edge (Cloudflare)**: **Shield & Optimize**. Handles DDoS protection, WAF, image resizing, and static asset caching. Contains no logic.
-    -   **Frontend (Vercel)**: **Router & Renderer**. Handles stateless UI rendering and API routing. High CPU load tasks (image processing, AI waiting) are prohibited.
-    -   **Backend (Supabase)**: **Source of Truth**. Handles DB, Auth, Storage (Origin), and Async Jobs (Edge Functions).
+-   **Capability-Based Stack**:
+    -   **Edge/CDN**: Place DDoS protection, WAF, cache, routing, and lightweight low-latency processing according to runtime limits and data boundaries. Cloudflare is one option.
+    -   **Frontend/Application Platform**: Place UI rendering, APIs, and background work according to latency, duration, state, observability, and cost. Vercel is one option.
+    -   **Data Platform**: Place database, auth, storage, realtime, and asynchronous work according to authoritative data and recovery requirements. Supabase is one option.
+    -   **Boundary Contract**: When composing platforms, explicitly define data ownership, identity principal, network path, retries, consistency, degraded behavior, and cost attribution.
 
 ## 2. Database Design (PostgreSQL)
 
 ### Rule 2.0: The Realism Mandate (Anti-Haribote Protocol)
--   **Prohibition**: Implementing UI that treats columns not in DB or ambiguously defined data in `jsonb` as if it were normalized data is prohibited.
--   **Requirement**: Attributes involved in important business logic (finance, permissions, state transitions) MUST be defined as normalized columns (`numeric`, `text`, `boolean`) with physical storage secured before UI implementation.
--   **Anti-Pattern**: "Build UI first, save later" is not permitted. UI and data must be released simultaneously as indivisible atoms (Atom).
+-   **Prohibition**: Do not present a value in UI or API as persisted, integrity-checked domain data when it has no persistence, integrity, queryability, or authoritative data source.
+-   **Requirement**: For important attributes such as finance, authorization, or state transitions, select a representation such as relational columns, versioned JSON schemas, or another authoritative store that fits query, constraint, concurrency, retention, and migration needs, and record its type, constraints, and owner in the data contract.
+-   **Delivery Contract**: Deliver UI, API, storage, and migrations in a backward-compatible order and test coexistence with old clients. Do not universally require one atomic release.
 
-### Rule 2.0.1: The Settings Column Architecture (No JSON Blob)
--   **Law**: Site settings and system settings MUST NOT be stuffed into a single JSON/JSONB column (`config: jsonb`); manage with **normalized columns**.
--   **Reason**:
-    1. **Query Performance**: Enables fast WHERE clauses and aggregation via SQL.
-    2. **Type Safety**: TypeScript/zod type inference becomes accurate, preventing "undefined key" errors.
-    3. **Integrity**: Foreign key constraints and CHECK constraints become applicable.
--   **Migration**: DB migration is mandatory when adding new settings items.
--   **Exception (Dynamic Label Isolation Protocol)**: JSONB columns are exceptionally permitted ONLY for the following cases. The responsibility of each JSONB column must be strictly limited, and mixing in data that should be normalized is prohibited.
-    1.  **Dynamic Labels/Translations**: UI display labels for multi-language support, custom evaluation criteria names, etc.—dynamic text whose item count is indeterminate at schema design time.
-    2.  **Non-Searchable Variable-Length Arrays**: Lists where only display order matters and that are never targets of SQL WHERE clauses or JOINs.
-    3.  **Prohibition**: Properties used for calculations, searches, or conditional logic (e.g., `max_count`, `threshold`) MUST NOT be included in JSONB. These must always be promoted to normalized columns.
+### Rule 2.0.1: The Settings Representation Architecture
+-   **Law**: Select a settings representation from access patterns, constraints, update units, search, history, and schema evolution. Prefer relational columns or tables for independently queried, joined, constrained, or authorized attributes; JSONB is valid for a variable structure read and written as one bounded aggregate.
+-   **JSONB Contract**: Define an owner, versioned schema, runtime validation, size limit, defaults, unknown-field policy, migration or backfill, and indexing policy. Prohibit untyped catch-all blobs, unbounded growth, and mixing secrets into general configuration.
+-   **Promotion Trigger**: Promote an attribute to a column or related table when it requires frequent filtering or joins, strong database constraints, field-level authorization, an independent lifecycle, or relief from hot-update contention.
+-   **Migration**: Version-control a breaking relational-schema or JSON-contract change and verify old and new reader compatibility, backfill, and rollback or forward-fix.
 
 ### Rule 2.1: Integrity & Ownership
--   **RLS Strict Default**: Treat Row Level Security (RLS) as the default access boundary. `service_role` key usage is prohibited in principle; all queries must pass through RLS.
+-   **RLS Strict Default**: Treat Row Level Security as the default boundary for exposed schemas and untrusted client access. Never give bypass credentials such as `service_role` to clients; allow them only to narrowly scoped server-side workloads with audit and rotation. Do not force maintenance, migrations, and system jobs through RLS indiscriminately; document the authorization boundary of each privileged path.
 -   **Hierarchical Resource Ownership**:
     -   **Context**: Complex ownership structures like family sharing or team projects that cannot be expressed with single owner (`user_id`).
-    -   **Law**: When multiple users access resources, define permissions (`role: 'viewer'|'admin'`) via intermediate tables (e.g., `resource_members`) and control access via RLS policies referencing this relationship table.
+    -   **Law**: When multiple principals access a resource, select an authoritative authorization model such as membership tables, relationship graphs, tenant claims, or a policy service according to update rate, consistency, revocation, and query cost, and enforce it through RLS or a server boundary.
     -   **Action**:
-        1.  **Owner ID**: Retain primary owner as `owner_id`.
-        2.  **Role-Based**: Manage permissions via intermediate tables.
-        3.  **Inheritance**: Child resources inherit parent resource access via `EXISTS` clause, strengthening layered access control.
--   **PII Encryption**: Recommend encrypting highly confidential personal info (accounts, document numbers, etc.) using Vault or pgcrypto.
+        1.  **Authority**: Identify the source of truth and updater for owner, member, role, tenant, and delegation.
+        2.  **Revocation**: Define the maximum propagation delay through caches, JWTs, and replicas.
+        3.  **Inheritance**: Where parent-child inheritance is used, negative-test cycles, cross-boundary access, confused deputies, and deletion behavior.
+-   **PII Encryption**: Select provider encryption, application or field-level encryption, tokenization, or another control from data classification and threat modeling, and design key ownership, rotation, searchability, and backup or restore. Vault and pgcrypto are candidates, not universal defaults.
 
 ### Rule 2.2: Schema & Type Standards
--   **Schema Separation**: Strictly separate `public` (App Data), `extensions` (PostGIS, etc.), `admin` (Audit Logs/Admin Views). Installing `extensions` into `public` is prohibited.
--   **System Schema Immunity**: DDL operations like `ALTER TABLE` on tables in system schemas (`storage`, `auth`, `graphql`) are prohibited in principle (causes permission error `42501`).
+-   **Schema Separation**: Separate exposed API, internal data, extension objects, and audit or administration trust boundaries with schemas and grants. Do not fix schema names to `public`, `extensions`, and `admin`; verify existing extension locations and provider support before migration.
+-   **Managed Schema Boundary**: Do not directly modify provider-managed schemas such as `storage`, `auth`, or `graphql` outside an official extension point or verified migration. Test upgrade compatibility and privileges even when references are required.
 -   **Constraints**:
-    -   **Identity**: Use `GENERATED BY DEFAULT AS IDENTITY` (Standard SQL) instead of `SERIAL` for auto-increment.
-    -   **Money**: Use `numeric`/`decimal` or `integer` (smallest unit) for monetary calculations. `float` is strictly prohibited.
-    -   **Boolean**: `boolean` columns must be `NOT NULL DEFAULT false` to prevent 3-valued logic (`null` contamination).
+    -   **Identity**: Select key type from global uniqueness, sortability, offline generation, replication, privacy, and storage cost. When a sequence fits, prefer `IDENTITY` to `SERIAL`.
+    -   **Money**: Use a smallest-unit integer or `numeric` or `decimal` with explicit precision and rounding for exact monetary and accounting calculations. Do not prohibit floats for measurements where approximation is part of the domain.
+    -   **Boolean**: Decide whether `NULL` represents an unknown or unevaluated domain state. For binary values, use `NOT NULL` and an intentional default; for three-state values, record semantics, queries, and migration in the data contract.
 
 ### Rule 2.3: Type Safety Protocol (The Bridge)
--   **Automated Types**: Use `supabase gen types` generated `database.types.ts`.
--   **The Mapped Type Bridge Mandate**:
-    -   **Law**: When defining extended types (`DatabaseExtended`), intersection types (`&`) are prohibited (inference conflict risk).
-    -   **Action**: MUST use **Mapped Type** to iterate over `keyof Database` and explicitly override target types, strengthening type safety.
+-   **Generated Contract**: Where official generation is available for the selected SDK or language, reproducibly generate types or client contracts from a schema revision and verify the source digest and drift in CI. TypeScript `database.types.ts` is one example.
+-   **Boundary Validation**: Do not depend on compile-time types alone; validate untrusted input, database results, events, and external APIs with a language-native or approved runtime validator.
+-   **Adapter Law**: An adapter from generated to domain types makes nullability, decimals, timestamps, unknown enum values, JSON, and 64-bit integers explicit. Do not universally prohibit or require mapped types, intersections, classes, or code generation; prove safety with type and runtime tests.
 
 ### Rule 2.4: The New Table Checklist (Creation Protocol)
--   **Law**: The following items MUST ALL be satisfied as completion criteria for new table creation:
-    - [ ] **RLS Enable**: Executed `alter table ... enable row level security;`?
-    - [ ] **Policy**: At least `TO service_role` policy exists? (Avoid default deny)
-    - [ ] **Index**: Added index to foreign keys (`*_id`)?
-    - [ ] **Type**: Regenerated `database.types.ts` and updated type definitions?
-    - [ ] **Audit**: Set trigger to `audit_logs`? (For important tables)
+-   **Law**: A new table satisfies applicable items and records why an item is non-applicable:
+    - [ ] **Exposure & Grants**: Is exposure explicit, with least table and column privileges per role?
+    - [ ] **RLS & Policy**: For an exposed schema or untrusted client path, is RLS enabled and are only required operations for roles such as `anon` and `authenticated` positive- and negative-tested? Do not create redundant policies for RLS-bypass roles.
+    - [ ] **Integrity & Index**: Are PK, FK, unique, check, and nullability constraints and indexes required by real query, join, and delete costs verified? Do not assume every FK requires an index mechanically.
+    - [ ] **Contract**: Are generated types, schema clients, or API contracts for adopted languages updated and checked for drift?
+    - [ ] **Lifecycle & Audit**: Are retention, deletion, backup, replication, PII, and audit requirements classified, with audit mechanisms applied only where required?
 
 ### Rule 2.17: The Schema-Reality Reconciliation Checklist
 -   **Law**: When creating or modifying data access code (Query/Mutation/DTO), all referenced columns MUST be verified to exist in the actual DB schema with matching types and constraints before implementation.
@@ -199,8 +196,8 @@
 ### Rule 2.18: The Automated Data Retention Protocol
 -   **Law**: Data that accumulates over time MUST have **category-based retention periods** defined, with mechanisms (Cron Job / Scheduled Task) to **automatically purge or anonymize** data after expiration.
 -   **Action**:
-    1.  **Retention Category Definition**: Classify all data tables into the following categories and explicitly define retention periods.
-        | Category | Example | Recommended Retention |
+    1.  **Retention Category Definition**: Classify every dataset by purpose, legal basis, data subject, sensitivity, and recovery need. Legal, privacy, security, and business owners approve retention and deletion conditions. Periods in the table illustrate structure and are not Universal defaults.
+        | Category | Example | Example condition to define in Blueprint |
         |---|---|---|
         | Active Data | Users, Content | Indefinite (until account deletion) |
         | Transaction Logs | Payment records | Legal retention period (e.g., 7 years) |
@@ -209,10 +206,7 @@
         | Temporary Data | OTP codes, Upload temp files | 24 hours |
         | Analytics Data | Analytics events | 2 years (aggregate to summary after) |
     2.  **Automated Purge**: Implement batch jobs using `pg_cron` or cloud schedulers to automatically delete/archive data that exceeds retention periods.
-    3.  **Account Deletion Lifecycle**: Implement staged data processing for user account deletion:
-        -   Immediate: De-publicize profile information
-        -   After 30 days: Logical deletion (`deleted_at` set)
-        -   After legal retention period: Physical deletion or complete PII anonymization
+    3.  **Account Deletion Lifecycle**: For account closure, legal hold, fraud prevention, contract termination, and DSAR, define de-publication, access revocation, grace periods, and physical deletion/anonymization with deadlines and exceptions.
     4.  **Purge Logging**: Record purge execution details (target tables, deletion count, execution timestamp) in audit logs.
 -   **Rationale**: Retaining data indefinitely leads to increased storage costs, expanded privacy risks, and violations of data minimization principles under GDPR/Global Privacy Laws. Automated retention management achieves a triple win of cost, compliance, and performance.
 
@@ -226,35 +220,37 @@
 -   **Law 3: Zero Guessing Protocol**
     -   Before creating SQL, MUST read the schema definition file and **point-and-call verify column names**. Implementation by guessing is strictly prohibited.
 -   **Law 4: Performance Safety (Scalar Subquery Mandate)**
-    -   **Law**: Function calls like `auth.uid()` or table references within policies MUST be wrapped in a scalar subquery **`(select auth.uid())`** to force Plan Dynamic InitPlan (fixed evaluation).
-    -   **Reason**: Without wrapping, Postgres re-evaluates the function for every row (N+1), becoming a "hidden bomb" causing CPU spikes and query delays as data grows.
+    -   **Law**: For stable helpers such as `auth.uid()`, use `(select auth.uid())` when official guidance and the execution plan show an InitPlan benefit. Do not wrap every other-table reference in a scalar subquery; preserve correlation, cardinality, indexes, and policy semantics.
+    -   **Evidence**: Compare `EXPLAIN`, policy tests, latency, and CPU under representative data and roles, and prove that optimization does not change authorization results.
 
 ### Rule 3.0.1: The RLS Helper Functions Registry (RLS Utility)
--   **Security Definer Isolation**: Referencing the table itself within an RLS policy causes infinite recursion (`42P17`). Complex checks like admin validation MUST be isolated in `SECURITY DEFINER` functions.
+-   **Helper Isolation**: Re-reading the protected table from its RLS policy can cause infinite recursion (`42P17`). Resolve complex authorization first with `SECURITY INVOKER`, a security-barrier view, claims, or a simpler policy; isolate only the smallest boundary that truly needs owner privileges in a `SECURITY DEFINER` function.
 -   **The Qualified Schema Mandate (RPC Security)**:
-    -   **Law**: When `SET search_path = ''` is applied in `SECURITY DEFINER`, all table references without `public` schema qualification will fail.
-    -   **Action**: Inside functions, referencing `public.profiles`, `public.reviews` is mandatory without single character compromise. Negligence here is "destruction of availability".
+    -   **Law**: Treat `SECURITY DEFINER` as a privilege boundary and require a safe `search_path`, fully qualified schemas, least `EXECUTE` grants, input validation, and negative tests. When selecting `SET search_path = ''`, fully qualify references including built-ins and test compatibility with adopted extensions.
     -   **Registry Standards**:
-        -   `public.is_admin()`: Admin check.
-        -   `public.is_owner(resource_id)`: Owner check.
-        -   **Requirement**: Helper functions MUST have **`SECURITY DEFINER`** attribute and physically cut off search path with **`SET search_path = ''`**. This obligates schema qualification (e.g., `public.table_name`) for all internal references, physically eliminating injection attacks via Search Path pollution.
+        -   Inventory helper name, arguments, return, owner, volatility, security mode, and consuming policies.
+        -   `is_admin()` and `is_owner(resource_id)` are examples; do not fix a schema, role, or function name in Universal.
+        -   **Requirement**: Helper functions default to `SECURITY INVOKER`. When `SECURITY DEFINER` is selected, review why elevation is required, information that can be returned, callable roles, and RLS bypass scope; require `SET search_path = ''`, fully qualified references, revocation of `EXECUTE` from `PUBLIC`, explicit grants to allowed roles, and negative authorization tests.
 
-### Rule 3.0.2: The Admin RLS Mandate (The "Locked Out" Lesson)
--   **Context**: Writing policies only for "General Users" (e.g., `user_id = auth.uid()`) locks out admins from operating the table, causing dead ends in data correction.
--   **Law**: All RLS policies MUST include an **"Admins are always allowed"** exception clause.
--   **Pattern**:
+### Rule 3.0.2: The Privileged Access RLS Protocol
+-   **Context**: Even where operators must correct data, adding a permanent admin bypass to every policy expands compromise and insider-risk blast radius across all data.
+-   **Law**: Separate privileged access from normal user paths and minimize resource, action, reason, duration, and environment. Add an admin exception only to policies with a demonstrated business requirement, with default deny, step-up authentication, audit, approval or break-glass, and expiry.
+-   **Illustrative Pattern**:
     ```sql
-    -- MUST include "OR is_admin()" (DRY Principle)
+    -- Add only when approved operator updates are required for this resource
     ON public.posts
     FOR UPDATE
+    TO authenticated
     USING (
-      (user_id = auth.uid() AND ...)  -- General User Condition
+      (user_id = (select auth.uid()) AND ...)  -- General User Condition
       OR
-      (SELECT is_admin()) -- Admin Bypass
+      (select private.can_operate_post((select auth.uid()), id))
     );
     ```
+    If the helper uses `SECURITY DEFINER`, apply Rule 3.0.1 and validate tenant, resource, action, and expiry rather than only a role name.
 
 ### Rule 3.0.3: The RLS Recipes (Implementation Standards)
+-   **Non-Normative Examples**: The following SQL illustrates policy syntax; it does not mandate `profiles`, role names, one hour, or a parent-child schema. Derive actor, tenant, resource, operation, time, revocation, and indexes from the data contract before implementation.
 -   **Admin Only Write (Strict Lock)**:
     ```sql
     FOR INSERT WITH CHECK (
@@ -275,103 +271,82 @@
 ### Rule 3.1: RLS Separation of Duties
 -   **Separation Protocol**:
     1.  **Select Policy**: Read permissions managed via `FOR SELECT` only.
-    2.  **Write Policy**: Write permissions managed via `FOR INSERT/UPDATE/DELETE` only. **NEVER include `SELECT`**.
--   **Admin Strictness**: `FOR ALL` ("Admin can do anything") is generally prohibited.
+    2.  **Write Policy**: Make `USING`/`WITH CHECK` semantics and read-back requirements explicit for `INSERT`, `UPDATE`, and `DELETE`. Use `FOR ALL` only when one condition truly fits every command and negative tests prove it.
+-   **Privileged Strictness**: Avoid permanent broad "admin can do anything" policies; scope resource, operation, tenant, and time.
 
 ### Rule 3.2: Permissive Policy Consolidation
--   **Consolidation**: Consolidate "Admin rights" and "General view rights" into a single policy using `OR` conditions where possible to reduce total policy count.
--   **Efficiency**: Duplicate policies (e.g., "Public View" and "Everyone View") must be deleted immediately.
+-   **Semantics First**: Given that multiple `PERMISSIVE` policies combine with `OR` and `RESTRICTIVE` policies add constraints, compare roles, commands, ownership, auditability, and plans. Remove logically duplicate policies, but do not universally merge policies intentionally separated for distinct roles or responsibilities.
+-   **Evidence**: Compare effective access with positive, negative, and cross-tenant tests before and after the change; confirm performance gains with representative plans.
 
 ### Rule 3.3: Data Integrity Patterns
--   **Soft Delete**: Primary data uses `deleted_at` logical deletion. Apply `WHERE deleted_at IS NULL` to unique constraints.
+-   **Lifecycle Choice**: Select hard delete, soft delete, tombstones, anonymization, or legal hold per data category, recovery, audit, privacy deletion, and uniqueness semantics. `deleted_at` plus a partial unique index is a candidate, not a mandate for all primary data.
 -   **The Right to be Forgotten (Soft Delete Exception)**:
     -   **Context**: While logical deletion is standard, "Account Deletion Requests" and GDPR/Apple requirements mandate physical deletion or complete anonymization (PII wipe).
     -   **Action**: In withdrawal processing, do not just set `deleted_at`; physically delete or irreversibly mask (`deleted_user_xyz`) PII.
--   **Atomic Update**: Rich text saved simultaneously to `_json`, `content`, `search_text`.
--   **No SQL Replace**: String replacement within JSON via SQL is prohibited.
+-   **Representation Update**: Where multiple representations exist, define the authoritative representation, derived forms, generation version, atomic update/rebuild, and drift detection.
+-   **Structured Migration**: Change JSON through versioned schemas and parsers/migrations; avoid structure-blind string replacement.
 
 ### Rule 3.3.1: The CMS Triple Write Protocol (Search Consistency)
--   **Context**: CMS content (Store Name, Article Title) requires different formats for Display, Sort, and Search.
--   **Law**: Critical text data MUST NOT be in one column, but atomically saved (Triple Write) into 3 distinct roles:
-    1.  **`name_display`**: For Display (includes emojis, decorations).
-    2.  **`name_reading_key`**: For sort, phonetic matching, and locale-specific collation keys.
-    3.  **`name_search`**: For Full-Text Search (N-gram tokenized or search metadata).
--   **Automated Sync**: Synchronize these upon submission from frontend or via DB trigger to reduce inconsistency risk ("changed name but can't search").
+-   **Context**: CMS and search may need different authoring, rendering, sorting, and search representations.
+-   **Law**: Define one authority and create additional representations as derived data only for measured query or locale needs. Do not force three columns, phonetic keys, or n-grams on every domain.
+-   **Synchronization**: Select generated columns, triggers, pipelines, or application transactions according to atomicity, rebuild, versioning, and failure recovery; detect drift.
 
 ### Rule 3.3.2: The Multiple Permissive Policies Conflict (Policy Hygiene)
--   **Law**: Postgres joins multiple `PERMISSIVE` policies for the same action with `OR`. This creates unintended access holes.
--   **Action**: When adding a new policy, MUST `DROP` existing policies or organize into "One Consolidated Policy". Adding policies ad-hoc is disqualification for a security engineer.
--   **Verification**: Mandatorily check with `select * from pg_policies` to confirm the intended number of policies.
+-   **Law**: Because `PERMISSIVE` policies for one command combine with `OR`, review combined effective access rather than each policy alone. Do not classify multiplicity itself as a vulnerability.
+-   **Action**: Inventory policies and dependent consumers, then fix only duplicate, shadowed, or over-broad access in the same migration. Never drop first and break legitimate access without proving safety.
+-   **Verification**: Use a machine-readable catalog inventory, per-role positive/negative tests, representative plans, and rollback evidence. Do not set a fixed target policy count.
 
 ### Rule 3.4: RLS Lifecycle Management Protocol
--   **Create-Verify-Drop Trinity**:
-    1.  **Before Create**: Check current status with `SELECT policyname FROM pg_policies WHERE tablename = '...'`.
-    2.  **After Apply**: Physically confirm `multiple_permissive_policies` is 0 in Dashboard Security Advisor.
-    3.  **Cleanup**: If duplicate policies found, keep standard naming and atomic delete others via **`DROP POLICY IF EXISTS "..." ON ...;`**.
--   **Naming Convention**: Ban natural language naming. Mandate **`tablename_action_policy`** format (e.g., `posts_select_policy`).
--   **Atomic Migration**: New policy creation and old policy deletion MUST be executed in **Same Migration File** atomically.
--   **Incident Prevention Checklist**:
-    - [ ] Checked existing policy list?
-    - [ ] Followed naming convention?
-    - [ ] Included legacy policy `DROP` in same migration?
-    - [ ] **The Copy-Paste Mandate**: Did you copy-paste the policy name? Typing is rejected. Exact match required.
--   **Strictification Drop Mandate**:
-    -   **Warning**: RLS policies are evaluated using an **additive (OR) model**. If existing Permissive policies (e.g., `USING (true)` "anyone OK" rules) remain, adding strict policies is **effectively meaningless** as the existing lenient policy takes precedence.
-    -   **Action**: In security hardening migrations, you MUST execute `DROP POLICY IF EXISTS "legacy_policy_name" ON ...;` **before** creating new strict policies to physically seal existing holes.
-    -   **Template**:
-        ```sql
-        -- Step 1: DROP existing lenient policy (MANDATORY)
-        DROP POLICY IF EXISTS "legacy_permissive_policy" ON public.target_table;
-        -- Step 2: Create new strict policy
-        CREATE POLICY "target_table_select_policy" ON public.target_table
-        FOR SELECT USING (strict_condition);
-        ```
+-   **Create-Verify-Retire**:
+    1.  **Before Change**: Inventory policies, roles, grants, bypass identities, and consumers; turn expected effective access into test cases.
+    2.  **Apply Safely**: Confirm transactional DDL and lock behavior, then select an expand/contract order that avoids both over-permission windows and legitimate-access outages.
+    3.  **After Change**: Check provider advisors, catalog diff, role tests, application flows, and query plans; retire old policies only with evidence that dependencies are gone.
+-   **Naming Convention**: Define a versioned Blueprint convention that identifies uniqueness, table, command, and intent. Universal neither bans natural-language names nor fixes one format.
+-   **Rollback**: Manage changes and rollback through immutable migrations and resolve policy names from the catalog to avoid changing unintended targets.
+-   **Change Checklist**: Record policy identifiers and definitions read from the catalog, expected effective access, dependent consumers, migration order, rollback, and advisor findings as machine-readable evidence. Gate on identifier accuracy and verification outcomes, not input method or policy count.
+-   **Strictification Guardrail**: A lenient `PERMISSIVE` policy can prevent a stricter addition from narrowing effective access. Evaluate transactions, locks, availability, and rollback, then replace/drop old policies and create new ones in an order that avoids an over-permission window.
 
 ### Rule 3.5: Public Read Protocol (Anti-Vault Paradox)
 -   **Principle**: "Security" does not mean dysfunction.
 -   **Law**:
-    1.  **Public Read**: Data with no reason to be private (Public Articles, Store Info) should be aggressively opened via `FOR SELECT USING (true)`.
+    1.  **Public Read**: Publish only explicitly public-classified data after evaluating field minimization, scraping/abuse, cache, rate, and future schema evolution. `USING (true)` is a candidate only with an intentional all-row public contract and negative tests.
     2.  **Strict Write**: Writes (`INSERT/UPDATE/DELETE`) remain strictly locked.
-    3.  **Separation**: Do not confuse Read and Write permissions; do not block Read just to protect Write.
+    3.  **Separation**: Test read and write actors, rows, columns, and rates as separate contracts.
 
 ---
 
 ## 4. Performance & Scalability
 
 ### Rule 4.1: Indexing Hygiene Protocol
--   **FK Indexing**: **Always** index Foreign Keys (FK). FK without index is "Performance Debt".
--   **Naming Convention**: `idx_<table_name>_<column_name>`.
--   **Unused Purge**: Regularly check `unused_index` warnings. Delete dead indexes to improve write performance, but wait for data growth before judging.
+-   **FK Indexing**: Decide FK indexes from joins, parent updates/deletes, cardinality, write amplification, table size, and query plans. Do not create one for every FK mechanically; design composite or partial indexes from actual queries.
+-   **Naming Convention**: Use a project convention that traces uniqueness, table, column/expression, and predicate. `idx_<table>_<column>` is an example.
+-   **Lifecycle**: Evaluate usage statistics, plans, write cost, constraint support, seasonal traffic, and standby/replica behavior over a representative window; create, reindex, or delete with online-impact and rollback plans.
 
 ### Rule 4.2: Locale-Specific Search Optimization
--   Use `pg_search` (tsvector) for standard full-text search, and use locale-specific extensions such as `pgroonga` when CJK-language full-text search (Japanese, Chinese, Korean) is in scope.
+-   Evaluate locale, tokenization, typo tolerance, ranking, highlighting, update latency, and extension support; select PostgreSQL native FTS, `pg_trgm`, PGroonga, or external search. Do not fix CJK support to one extension.
 
 ### Rule 4.3: Scalability Strategy
--   **Infinite Scalability**: `select('*')` and unlimited queries banned. Pagination mandatory.
--   **Post-Query Filter Prohibition**: Filtering paginated query results on the application side (JavaScript/TypeScript) is prohibited. All filter conditions MUST be included in SQL WHERE clauses. Applying JS-side filters causes inconsistent items-per-page counts and inaccurate total counts/page numbers in pagination.
--   **Partitioning**: Introduce `pg_partman` when table records exceed **10 Million (10M)**.
--   **Read Replica**: Offload analysis queries to Replica.
--   **Archival**: Evacuate cold data to Object Storage.
+-   **Bounded Query**: Bound fields, rows, time, scans, and cost for public, untrusted, and collection queries. `select('*')` can be valid for an explicit small contract; select pagination from consistency and consumer UX.
+-   **Filter Placement**: Push authoritative filters to the data source where possible. Contract-test that application-side presentation filters do not break page completeness or counts.
+-   **Scale Controls**: Select partitions, replicas, archives, caches, and materialization from table/index size, growth, vacuum, locks, plans, RPO/RTO, lag, and cost, not row count alone.
 -   **Connection Pooling**:
-    -   **Law**: Database connection count is constrained by PostgreSQL's maximum connections limit. Connection pooling tools (PgBouncer, etc.) MUST be utilized to optimize DB connection count.
+    -   **Law**: Select direct, transaction-pool, or session-pool connections from runtime concurrency, connection lifetime, prepared statements, transaction/session semantics, and database capacity.
     -   **Action**:
-        1.  **Pooler Mandatory**: DB connections from serverless environments (Edge Functions, Vercel Serverless, etc.) MUST go through a connection pooler. Creating new connections on every function cold start causes connection count to explode.
-        2.  **Transaction Mode**: Use `Transaction Mode` (release connection per request) for short-lived request processing. Limit `Session Mode` to cases where Prepared Statements are required.
-        3.  **Max Connections Guard**: Application-side connection pool size MUST be set to **70% or less** of the DB's `max_connections` to ensure connection headroom for management tools and background jobs.
-    -   **Rationale**: In serverless architectures, concurrent connection count spikes dramatically. Without a connection pooler, DB connection count reaches its limit, risking total service outage due to connection errors.
+        1.  **Elastic Runtime**: Capacity-test peak instances times per-instance pools and consider a pooler, Data API, or HTTP driver to prevent connection storms.
+        2.  **Mode Compatibility**: Test transaction mode against session features, prepared statements, advisory locks, and temporary objects.
+        3.  **Headroom**: Reserve capacity-model headroom for applications, migrations, observability, operators, and replication; do not use a fixed 70 percent Universal limit.
 
 ### Rule 4.4: The Optimistic Mutation Protocol
--   **Law**: For high-frequency actions (likes, status changes, reordering, etc.) where network latency causes 0.5+ seconds of lag between action and response, **Optimistic UI** MUST be implemented to update the UI immediately without waiting for server response.
+-   **Law**: Optimistic UI is a candidate for reversible, low-risk mutations with clear conflict semantics. Do not use a fixed 0.5-second threshold; select skeleton, progress, pessimistic, or optimistic feedback from user research, latency SLOs, failure rates, and accessibility.
 -   **Action**:
-    1.  **Instant Feedback**: Use local State or optimistic update hooks (e.g., React's `useOptimistic`) to update the UI immediately after user action. Waiting for server response before updating the UI gives users the impression that the app is "broken."
-    2.  **Rollback on Error**: On server error, immediately rollback to the original state and notify the user via toast or snackbar.
-    3.  **Scope**: Not all operations require this. Limit application to "repetitive and high-frequency operations" and do NOT use for irreversible operations such as payments or deletions.
--   **Rationale**: UI freezes exceeding 0.5 seconds give users the impression of a "broken" app and increase churn rates. Optimistic updates dramatically improve perceived speed and enhance overall app quality.
+    1.  **State Model**: Represent pending, confirmed, failed, conflicted, and offline states, preventing duplicate submission.
+    2.  **Recovery**: Design rollback, reconciliation, retry, and user-visible errors by domain risk without mandating a specific UI such as toast.
+    3.  **High-Risk Action**: Prefer server confirmation, step-up, undo, or compensation for money, deletion, and permission changes.
 
 ---
 
 ## 5. Auth & Security
--   **Gotrue Delegation**: Delegate auth completely to Supabase Auth.
+-   **Identity Boundary**: Even when Supabase Auth is adopted, define authority and exit for authentication, authorization, profiles, tenant membership, and session revocation.
 -   **Notification Architecture**:
     -   **Aggregation**: Aggregate duplicate actions (e.g., multiple likes) to prevent bombing.
     -   **Async Delivery**: Send emails via async job (`pgmq`).
@@ -391,29 +366,29 @@
 ### Rule 5.2: The Session & Token Management Protocol
 -   **Law**: Supabase Auth session and token management MUST be designed with appropriate consideration for security and UX balance.
 -   **Action**:
-    1.  **Token Refresh**: Always implement `supabase.auth.onAuthStateChange()` and auto-update sessions on `TOKEN_REFRESHED` events. Without this, users experience sudden logout UX failures.
-    2.  **JWT Expiry**: Default JWT expiry is 3600 seconds (1 hour). If shortening, recommend 15 minutes or more. Less than 5 minutes causes excessive refresh frequency and performance degradation.
-    3.  **Server-Side Validation**: For JWT verification in Server Components/Server Actions, use `supabase.auth.getUser()`. `supabase.auth.getSession()` only verifies JWT locally and does not guarantee sync with the Auth server. **Always use `getUser()` for operations requiring authentication.**
-    4.  **Cookie-Based Auth**: For SSR frameworks like Next.js, implement cookie-based session management using the `@supabase/ssr` package. LocalStorage-based token management does not work in SSR environments.
+    1.  **Lifecycle**: Use the platform SDK's current refresh contract and test sign-in, refresh, expiry, revocation, sign-out, multi-tab/device, offline, and clock skew.
+    2.  **TTL**: Derive access/refresh token lifetime from threat, revocation latency, request volume, and offline UX; revalidate provider defaults and current limits. Do not put fixed 15- or 5-minute values in Universal.
+    3.  **Server Validation**: Validate signature, issuer, audience, expiry, and required revocation/freshness at a trusted boundary. Select `getUser()`, verified claims, introspection, or an equivalent from the current SDK contract.
+    4.  **Storage**: Evaluate XSS, CSRF, process isolation, keychain/keystore, and rotation separately for browser, SSR, native, and server; use official helpers as candidates and set safe storage/cookie attributes.
 
 ---
 
 ## 6. Storage & Delivery
--   **Cloudflare Proxy Shield**: Image delivery must go through Cloudflare.
+-   **Delivery Boundary**: Select provider CDN, Cloudflare or another edge, or direct storage by authorization, cache keys, signed URLs, transformation, egress, purge, and residency.
 -   **Bucket Separation**:
     -   **Public**: Store photos, avatars. Maximize CDN cache.
     -   **Private**: Invoices, personal docs. **Signed URL** and strict RLS mandatory.
-    -   **Ads**: Separate banner ads (`bucket-ads`).
--   **User Upload Hygiene**: Resize on client, **Delete EXIF GPS** before upload.
+    -   **Content Classes**: Separate buckets/prefixes/policies by publicity, tenant, retention, malware, and billing; do not fix advertising as a Universal category.
+-   **User Upload Hygiene**: Inspect metadata, GPS/EXIF, malware, content type, dimensions, and size with server-trusted validation. Client-side processing alone is not a security boundary.
 -   **The Signed Upload URL Mandate (Direct-to-Storage Pattern)**:
-    -   **Law**: Prohibit uploading large files (images, videos) through application servers (Vercel/Cloud Functions).
+    -   **Law**: For large or untrusted uploads, consider direct-to-storage and compare it with an application proxy by authorization, inspection, transformation, egress, timeout, and streaming. Do not prohibit one path universally.
     -   **Flow**:
         1. **Server Action**: Verify auth/permissions, issue **Signed Upload URL**, return to client.
         2. **Client Direct Upload**: Client uploads directly to Storage.
     -   **Outcome**: Reduce app server load and avoid transfer costs/timeouts.
 
 ### Rule 6.1: The S3 Compatible Protocol
--   **Law**: Leverage Supabase Storage's S3 compatible protocol (2024 GA) to ensure interoperability with S3-compatible tools and libraries.
+-   **Law**: Evaluate Supabase Storage's S3-compatible protocol when existing tools, multipart uploads, backups, or portability benefit. Verify identity, RLS, feature, and cost differences from the standard Storage API.
 -   **Action**:
     1.  **S3 Client Access**: Access Supabase Storage using AWS SDK (`@aws-sdk/client-s3`) or other S3-compatible clients. Specify the Supabase Storage S3 URL as the `endpoint`.
     2.  **RLS with JWT**: When authenticating via the S3 protocol using a user's JWT token, Storage Schema RLS policies are **automatically applied**. User-scoped access control is possible.
@@ -421,12 +396,12 @@
     4.  **Use Case**: Use for multipart uploads (large files), migration from existing S3 tools (aws cli, rclone, etc.), backup scripts, and other cases where the standard Supabase API is insufficient.
 
 ### Rule 6.2: The Storage Image Transformations & CDN Protocol
--   **Law**: For image delivery, leverage Supabase Storage **Image Transformations** (server-side image conversion) and **CDN** to prevent unnecessary bandwidth consumption on the client side.
+-   **Law**: For image workloads, design responsive variants, modern formats, quality, metadata, cache, authorization, and origin cost; compare Supabase transformations/CDN, build-time processing, and other image services.
 -   **Action**:
     1.  **On-the-Fly Resize**: Use `supabase.storage.from('bucket').getPublicUrl('image.png', { transform: { width: 300, height: 200 } })` for server-side resizing. Deliver optimally-sized images for each device to save bandwidth.
-    2.  **Format Conversion**: Use `format: 'webp'` option for WebP conversion. Achieves 25-35% file size reduction compared to JPEG.
+    2.  **Format Conversion**: Negotiate WebP, AVIF, JPEG, or another format from content and client support; do not assume a fixed savings percentage.
     3.  **CDN Cache**: Files in Public buckets are automatically cached on the global CDN. Set `Cache-Control` headers appropriately to maximize cache hit rates. Private buckets have lower cache hit rates due to per-user permission checks.
-    4.  **File Size Limits**: Limit file sizes on upload (default max 50MB). Set limits using the bucket's `fileSizeLimit` option to prevent unauthorized large file uploads.
+    4.  **File Size Limits**: Set bucket/request limits from use case, plan, memory, inspection, and egress, checking current provider limits at implementation.
     5.  **MIME Type Validation**: Restrict allowed file types with `allowedMimeTypes`. Having `.exe` or `.js` files uploaded to an image bucket is a security incident.
 
 ---
@@ -434,149 +409,124 @@
 ## 7. Operations & Migration
 
 ### Rule 7.1: The Migration Protocol (Ghost Table Defense)
--   **Remote Execution**: Use Dashboard SQL Editor for schema changes, save log to `supabase/migrations` (Git).
+-   **Migration-first Execution**: Create an immutable migration first with `supabase migration new <name>` or an approved equivalent, then review it, run local reset, validate in preview or staging, and apply it in order from an approved pipeline or CLI. Changing remote state first and reconstructing history later is prohibited.
 -   **Migration Timestamp Hygiene**:
-    -   **Action**: Always check `ls supabase/migrations` for **latest timestamp** to ensure order integrity.
+    -   **Action**: Use the approved migration tool or ledger inspection to verify the latest version and dependency order, detecting collisions, duplicates, future timestamps, and clock skew. No single shell command is authoritative.
 -   **Atomic Migration**: `DROP` and `CREATE` policies in same file.
 -   **Ghost Table Defense**:
     -   **Law**: `ALTER` or `CREATE POLICY` on non-existent tables causes errors.
-    -   **Action (Table Existence Verification)**: Use `DO $$ ... IF EXISTS ...` block when referencing external/uncertain schemas. No assumptions.
-    -   **Column-Level Verification (Schema-Reality Reconciliation)**: Before creating migrations and designing DTOs, verify not just table existence but also **column existence, types, and constraints via `information_schema.columns`**. Implementing based on assumed column names (e.g., defining `dog_description_json` in DTO when it doesn't exist in DB) is the primary cause of Schema-Reality drift and is prohibited.
--   **Remote Schema Warning**: Always check current DB state (Dashboard/`pg_tables`) before writing SQL.
+    -   **Action (Schema Preconditions)**: Verify the source schema, dependencies, expected types, and constraints while creating the migration, and fail closed when they do not match. Limit `IF EXISTS` or `DO $$` conditional execution to deliberate compatibility migrations that accept multiple known schema versions; never hide unexpected drift.
+    -   **Column-Level Verification (Schema-Reality Reconciliation)**: Before creating migrations and designing DTOs, verify not just table existence but also **column existence, types, and constraints via `information_schema.columns`**. Defining an assumed `example_field` in a DTO when it does not exist is a primary cause of Schema-Reality drift and is prohibited.
+-   **Schema Source Reconciliation**: Treat the migration ledger and version-controlled schema as canonical, and use the remote catalog for drift detection and pre-apply verification. Stop on mismatch and resolve it through an approved reconciliation migration.
 
-### Rule 7.2: IPv6 & CI/CD Protocol
--   **GitHub Actions**: Use `supabase link` (Connection Pooler) or `SUPABASE_DB_URL` (Direct) appropriately to prevent IPv6 errors.
+### Rule 7.2: Connectivity & CI/CD Protocol
+-   **Runner Connectivity**: Do not depend on a named CI provider or fixed network assumptions. Verify effective DNS, IPv4 or IPv6, direct or pooler endpoint, transaction mode, TLS, and egress policy. For migrations, dumps, and long transactions that need session semantics, select an approved connection path compatible with current official documentation and effective settings.
 
 ### Rule 7.3: Data Seeding & Caching Determinism
--   **Seed Determinism**: Initial data (`seed.sql`) must use **Fixed IDs/Values**.
--   **Cache Versioning**: When caching master data (`unstable_cache`), always suffix cache keys (e.g., `master_data_v2`) to prevent Cache Rot during schema changes.
--   **Verification**: Verify actual data count after seeding. CLI "Up to date" is not proof.
+-   **Seed Determinism**: Make seeds/fixtures reproducible through business keys, stable generator seeds, or explicit references; define rerun insert/update/delete semantics and production eligibility. Do not require every ID/value to be fixed.
+-   **Cache Coherence**: Select cache keys, tags, event invalidation, TTL, version stamps, or bypass for schema/data changes; do not fix one framework helper or suffix.
+-   **Verification**: After seeding, verify expected entities, constraints, relationships, and authorization through queries/application contracts; CLI status alone is not evidence of data existence.
 
 ### Rule 7.4: Migration Idempotency Protocol
--   **Mandate**: Migrations must produce same result upon re-execution.
--   **Implementation**: Use `CREATE TABLE IF NOT EXISTS`, `DROP ... IF EXISTS`, etc.
+-   **Mandate**: Apply schema migrations exactly once in order using a ledger and checksums, and never edit applied files. Make only retryable seeds/backfills idempotent; do not hide unexpected drift with `IF NOT EXISTS`.
+-   **Implementation**: Verify expected source/target schemas, transaction boundaries, forward-fix after partial failure, clean rebuild, and supported upgrade paths.
 
 ### Rule 7.5: Cache Reload Protocol
--   **Mandate**: After major schema changes (column add/delete, type change):
-    1.  Regenerate `database.types.ts`.
-    2.  Restart Dev Server.
-    3.  Restart Production Service / Refresh Connection Pool.
+-   **Mandate**: Inventory schema consumers and verify refresh/compatibility for generated contracts, ORM metadata, PostgREST schema cache, prepared statements, connection pools, and running revisions. Regenerate, reload, or rolling-restart only affected consumers; never require a universal production restart.
 
-### Rule 7.6: The Zero SQL Editor Policy (History Protection)
--   **Law**: **Direct INSERT/UPDATE/DELETE** or **DDL** via Supabase Dashboard SQL Editor is **Strictly Prohibited** (No History).
--   **Action**:
-    1.  Create local migration `supabase migration new fix`, deploy via Git.
-    2.  Restrict SQL Editor to Read-only usage (Query Debugging).
+### Rule 7.6: Controlled Remote Change Policy (History Protection)
+-   **Law**: Do not use Dashboard SQL Editor or another remote console as the normal schema or data change path. The standard path is a version-controlled, reviewed, tested, approved, and audited migration or operation.
+-   **Break-glass**:
+    1. Allow the smallest remote change only during a production incident when the standard path cannot meet RTO, recording target, operator, approver, reason, query, timestamp, backup or rollback, and impact.
+    2. Within the same incident window, reconcile the migration ledger, schema, runbook, and evidence, then complete drift checks and post-incident review.
+    3. Even ad-hoc reads use a read-only role and safe query budget that satisfy PII, load, locking, and audit requirements.
 
 ### Rule 7.7: The Expand-Contract Migration Protocol (Zero Downtime Schema Changes)
--   **Law**: When performing destructive schema changes (column rename/type change/deletion, table reconstruction, etc.) on tables running in production, the **Expand-Contract pattern** MUST be used to execute changes in stages with zero downtime.
+-   **Law**: For destructive changes with live consumers and deploy skew, use expand-contract or an equivalent backward-compatible migration staged to the availability target, lock budget, data volume, and rollback.
 -   **Action**:
-    1.  **Phase 1 — Expand**: Create new columns or tables as **additions only**. At this stage, existing columns/tables MUST NOT be modified or deleted; the application continues operating on the old structure.
-    2.  **Phase 2 — Migrate**: Backfill (copy/transform) old data into new columns/tables. Perform bulk updates via batch processing and avoid single-transaction full-table `UPDATE`s. The application should implement "Dual Write" supporting both old and new structures to help maintain data consistency during the transition period.
-    3.  **Phase 3 — Contract**: After confirming that all applications reference only the new structure, delete old columns/tables only after **a minimum of one week of stable operation**.
--   **Prohibition**:
-    -   Executing `DROP COLUMN` or `ALTER COLUMN ... TYPE` during the Expand phase is prohibited.
-    -   Before executing the Contract phase, physically verify via `grep` that no references to the old structure exist anywhere in the codebase.
--   **Rationale**: Even seemingly simple operations like `ALTER TABLE ... RENAME COLUMN` can cause failures when old code accesses the new schema due to deployment timing differences. The Expand-Contract pattern temporally separates schema and application changes, achieving safe zero-downtime migrations.
+    1.  **Expand**: Add the new schema/index/compatibility layer while old consumers work; preflight locks, rewrites, and replication impact.
+    2.  **Migrate**: Run bounded checkpointed backfill and reconciliation. Prohibit best-effort dual writes; use them only when transactions, triggers, outbox, CDC, or an equivalent proves ordering, idempotency, and partial-failure recovery.
+    3.  **Contract**: Retire old structures only after telemetry, consumer inventory, query logs, generated contracts, and rollback windows meet exit criteria. Do not use a fixed one-week wait or one `grep` as evidence.
+-   **Exception**: An isolated or small system may use direct migration with approved downtime when backup, restore testing, and availability targets allow it.
 
 ### Rule 7.8: The Data-Aware Defense Protocol
--   **Law**: Production DBs contain "dirty data" (duplicate records, type mismatches, incomplete data) that does not exist in development environments. Since CI environments (clean DBs) cannot detect this contamination, all DML (data manipulation) MUST be written defensively with the **assumption that "data already exists."**
+-   **Law**: Preflight actual distributions, duplicates, NULLs, invalid values, volume, locks, and concurrent writes; test both clean rebuild and production-like upgrade. Do not force one conflict treatment on all DML.
 -   **Action**:
-    1.  **Assumed Conflict**: All `UPDATE` / `INSERT` statements must be written on the assumption that "target data already exists" and "duplicates are present." SQL written assuming a "clean DB" will explode in production.
-    2.  **Defensive Logic**: Instead of simple SQL, use `DO $$ ... END $$` blocks or `ON CONFLICT` clauses to avoid exceptions at the code level.
-    3.  **Cleanup Before Constraint**: Migrations that add unique constraints (`UNIQUE`) MUST include cleanup logic to delete or merge duplicate data **within the same migration file**. Adding only the constraint causes the migration to fail against production's duplicate data.
--   **Rationale**: Migrations that "succeed" in development and CI environments frequently fail against dirty production data. Defensive DML writing reduces migration failure risk caused by environment differences.
+    1.  **Precondition Query**: Measure counts, samples, and constraint candidates read-only and stop beyond approved thresholds.
+    2.  **Intentional Conflict Semantics**: Choose fail, ignore, merge, or upsert for each insert/update from the business contract; do not hide errors behind `ON CONFLICT`.
+    3.  **Constraint Rollout**: Select duplicate remediation, quarantine, `NOT VALID`/validate, or online indexes by data loss, locks, and rollback; do not universally embed cleanup in one file.
 
 ### Rule 7.9: The Migration Static Analysis Guard
--   **Law**: A static analysis mechanism (Pre-push Hook + CI Check) MUST be implemented to **automatically detect dangerous SQL patterns in migration files and reject them before merge**. Operational rules that rely on "human attention" will inevitably be broken during emergencies or by new team members.
+-   **Law**: Automatically analyze migration risk in CI and classify changes for blocking, manual review, or timed execution. A local hook is fast-feedback; the enforceable remote gate is authoritative.
 -   **Action**:
-    1.  **Pre-push Hook (Local Iron Dome)**: Use Git pre-push hooks to statically analyze new/modified files in `supabase/migrations/` and physically reject pushes containing dangerous patterns.
-    2.  **CI Check (Remote Concrete Wall)**: Run equivalent checks in CI pipelines (GitHub Actions, etc.) as a final defense line that blocks merges even when local hooks are bypassed.
-    3.  **Detection Patterns (The Forbidden Patterns)**:
-        -   `UPDATE` without `DO` block or `WHERE` with subquery → Reject as undefended update
-        -   `INSERT` without `ON CONFLICT` → Reject as unique constraint violation risk
-        -   `ADD CONSTRAINT ... UNIQUE` without prior cleanup → Reject as existing data inconsistency risk
-    4.  **No Bypass**: Using hook bypass options (`--no-verify`, etc.) is prohibited as an act that destroys the project's schema reliability.
--   **Rationale**: Depending on human attention for migration safety is merely a question of "when" an incident will occur, not "if." By establishing physical defense walls through static analysis, dangerous SQL is structurally prevented from reaching production.
+    1.  **Detection**: Detect destructive DDL, table rewrites, unbounded DML, long locks, non-concurrent indexes, volatile defaults, permission widening, and missing rollback/preconditions with an AST or reviewable heuristics.
+    2.  **False Positive Safety**: Do not reject `UPDATE`, `INSERT`, or constraints from syntax alone; evaluate expected rows, WHERE, conflict semantics, preflight, and maintenance windows.
+    3.  **Exception**: A bypass requires reason, approver, owner, expiry, execution window, and post-check; an implicit `--no-verify` never bypasses the remote gate.
 
 ---
 
 ## 8. Maintenance & Hardening
 
 ### Rule 8.1: Security Hardening (The Fortress)
--   **Public Schema Guard**: `REVOKE CREATE ON SCHEMA public FROM PUBLIC;`.
--   **View Security**: `security_invoker = true`.
--   **Search Path Defense**: `SECURITY DEFINER` functions MUST use `SET search_path = ''` and schema-qualified references (`public.users`).
+-   **Public Schema Guard**: Minimize schema `CREATE`/`USAGE`/object privileges from a role matrix and test provider-managed defaults plus migration roles. `REVOKE CREATE ON SCHEMA public FROM PUBLIC` is a candidate.
+-   **View Security**: Make invoker/definer semantics, underlying RLS, column exposure, and owner explicit per view.
+-   **Search Path Defense**: Give `SECURITY DEFINER` a safe `search_path`, fully qualified references, least grants, owner, and negative tests. An empty path is a candidate whose built-in and extension resolution must be tested.
 
 ### Rule 8.2: The Audit Log Mandate / WORM
--   Record DB changes in `audit_logs`. Table must be **Append-Only** (RLS protected).
+-   Record privileged data/schema changes with actor, reason, before/after reference, result, and trace in tamper-evident audit. Select a DB table, external immutable sink, ledger, or equivalent from threat and retention; neither a fixed table name nor RLS alone proves WORM.
 
 ### Rule 8.3: The Comprehensive RLS Audit
--   **Cascading Verification**: Verify RLS changes with **Anonymous User**.
--   **Monthly Audit Mandate**: Checklist:
+-   **Cascading Verification**: Test actual actors, anonymous, authenticated, cross-tenant, and privileged paths from the capability matrix.
+-   **Risk-Based Audit**: Audit on change and at a cadence based on data sensitivity, team, and incidents. Monthly is a candidate:
     - [ ] Policy exists for all actions?
-    - [ ] Admin access guaranteed?
+    - [ ] Required privileged access works at minimum scope without widening normal-user access?
     - [ ] General users restricted to own data?
-    - [ ] Scalar subquery wrapping applied?
+    - [ ] Plan warnings for row-invariant helpers triaged with identical authorization results before and after optimization?
 
 ### Rule 8.4: RLS Post-Change Verification Protocol
 -   **Verification Scope**:
-    1.  **Security Advisor**: Zero warnings.
-    2.  **Functional Test**: Admin/User/Anon.
-    3.  **Performance**: No unintended sequential scans.
--   **Emergency Recovery**: Immediate `FOR SELECT USING (true)` for affected tables if incident occurs.
+    1.  **Security Advisor**: Resolve or time-bound every finding by risk; a zero count alone does not prove safety.
+    2.  **Functional Test**: Verify capability-matrix actors, operations, tenants, and row/column scopes.
+    3.  **Performance**: Inspect plans safely and assess data volume plus latency/cost rather than treating a sequential scan itself as failure.
+-   **Emergency Recovery**: Use a tested rollback or narrow break-glass policy; never recover availability by opening an affected table with `USING (true)`.
 
 ---
 
 ## 9. Domain Data Modeling
 
 ### Rule 9.1: Universal Settings & Tenant-Aware Naming
--   **Strict Column Enforced**: App settings in normalized columns. No `jsonb` config.
--   **Tenant-Aware Naming (SaaS Readiness)**:
-    -   **Law**: Distinguish internal resource names for Multi-tenant/Whitelabel.
-    -   **Action**: Use `site_` or `account_` for tenant-specifics. Use `system_` only for immutable platform settings.
+-   **Representation**: Select normalized columns, typed JSON, related tables, or a configuration service from queries, constraints, partial updates, schema evolution, tenant overrides, and audit. Do not universally prohibit typed JSONB.
+-   **Tenant-Aware Boundary**:
+    -   **Law**: Where multi-tenancy is required, contract tenant identity, scope, inheritance, overrides, uniqueness, RLS, billing, and deletion. Do not tenant-enable every schema for a speculative future.
+    -   **Naming**: `site_`, `account_`, and `system_` are examples; define a Blueprint convention that identifies resource type, scope, and owner.
 
 ### Rule 9.2: Static Page Ban (CMS Sovereignty)
--   ToS/Privacy Policy managed in **Headless CMS**. No hardcoded static files.
+-   Select legal/policy content management that satisfies owner, review, version, effective date, locale, approval, retention, rollback, and availability. Versioned static content, CMS, and document systems are candidates; do not mandate runtime CMS dependency.
 
 ### Rule 9.3: Structural Integrity Protocols
--   **Structured Tagging**: `tags` table for centralized management.
--   **Business Hours**: Structured JSONB, prioritizing `holidays` logic.
--   **Reputation System**: **Bayesian Average** for reliable scoring.
--   **Geo-Centric**: Physical locations MUST have `latitude`/`longitude` and support location-based search.
+-   **Classification**: Select tags, enums, relations, or taxonomies from cardinality, governance, localization, and queries.
+-   **Temporal Rules**: Only domains needing business hours or similar schedules contract time zones, holidays, exceptions, recurrence, and source authority.
+-   **Scoring**: Where reputation/ranking exists, assess sample bias, gaming, uncertainty, and explainability; select simple mean, Bayesian, Wilson, or another method from data.
+-   **Geospatial**: Add coordinates/geometry, precision, source, consent, and retention only to entities that require location functionality.
 
 ### Rule 9.5: The Geolocation Data Strategy
--   **Law**: When assigning coordinate information to entities with physical locations, dependency on external Geocoding APIs (pay-per-use) MUST be minimized, and **API-free methods MUST be prioritized**.
+-   **Law**: Select geocoding sources by accuracy, license, privacy, freshness, coverage, latency, cost, rate, and exit. Compare manual entry, trusted sources, provider APIs, and batch datasets; do not always prioritize free methods over quality or terms.
 -   **Action**:
-    1.  **API-Free First (Recommended Priority Order)**:
-        -   **Pattern 1 (URL Parse)**: Extract coordinates embedded in map service URLs (e.g., Google Maps URL) using regular expressions. No API call required — completely free.
-        -   **Pattern 2 (Manual Input)**: Copy coordinates from the map service and enter them directly in the admin panel.
-        -   **Pattern 3 (Geocoding API / Fallback)**: Only when the above methods cannot obtain coordinates, use address-to-coordinate conversion APIs with caching. **Results MUST be saved to DB** to prevent re-conversion of the same address (one-time API call only).
-    2.  **Distance Calculation**: Use the **Haversine formula** (accounting for Earth's curvature) for calculating distances between two points.
-    3.  **Distance Display Format**:
-
-        | Distance | Display Format | Example |
-        |:---------|:---------------|:--------|
-        | < 1km | Meters (100m increments) | `300m` |
-        | 1-50km | Kilometers (0.1km increments) | `1.2km` |
-        | > 50km | Kilometers (integer) | `52km` |
-
-    4.  **Spatial Index**: In anticipation of distance-based search ("within N km from current location"), adoption of **GIN indexes** or **PostGIS extensions** for `latitude` / `longitude` is recommended.
--   **Rationale**: Geocoding APIs incur pay-per-use charges of several dollars per 1,000 calls. By designing with an "API-Free First" approach rather than API-First, operational costs are dramatically reduced while also minimizing the impact of external service outages.
+    1.  **Source Provenance**: Record coordinate, precision, source, acquisition time, license, confidence, and manual override; verify URL scraping against provider terms and format stability.
+    2.  **Caching**: Cache/persist only where address normalization, retention, provider terms, freshness, and correction are defined.
+    3.  **Distance & Display**: Select geography/PostGIS, Haversine, provider search, or another method by required accuracy; decide units and rounding by locale/UX.
+    4.  **Spatial Index**: Select GiST, SP-GiST, or another index appropriate to geometry and query operators by plan. Do not universally recommend GIN on latitude/longitude.
 
 ### Rule 9.4: The Time-Gated Content Schema Standard
--   **Law**: Content tables with scheduled publishing capabilities MUST implement a **time-gated schema** using the combination of `published_at` and `status`.
+-   **Law**: A scheduled-publication domain contracts its state machine, effective interval, time zone, embargo, unpublish, preview, clock, and authorization. Do not fix column names or NULL meaning in Universal.
 -   **Action**:
-    1.  **Schema Standard**: Define the following columns:
-        -   `status` (text): Publication state such as `'public'`, `'private'`, `'draft'`, `'archived'`.
-        -   `published_at` (timestamptz, nullable): Scheduled publication datetime. `NULL` means "publish immediately."
-    2.  **Query Condition (AND Conjunction)**: Public content retrieval queries MUST **AND-conjoin** the following 2 conditions. Using only one causes either leakage of unpublished content or invalidation of scheduled publishing.
+    1.  **Illustrative Schema**: `status` and `published_at` are candidates; explicitly define whether NULL means immediate, unscheduled, or unset.
+    2.  **Authorization Predicate**: Public queries evaluate state and effective time together, with preview/operator paths separated. This is an example:
         ```sql
         WHERE status = 'public'
           AND (published_at IS NULL OR published_at <= NOW())
         ```
-    3.  **Indexing**: `published_at` is frequently used in range queries; index creation is recommended.
--   **Rationale**: Filtering by `status = 'public'` alone leaks content before its scheduled publication date. Filtering by `published_at` alone publishes draft content. Only the AND conjunction of both achieves accurate publication control.
+    3.  **Indexing & Test**: Design indexes from actual predicates, sort, tenant, and partial conditions; test boundary times, time zones, drafts, scheduled, and expired content.
 
 ---
 
@@ -592,67 +542,61 @@
 -   **Action**: Design Multi-region Read/Local Write architectures considering future Data Localization requirements.
 
 ### Rule 11.2: The Audit Bypass Anti-Pattern (Server Action Mandate)
--   **Law**: Direct writes from client side bypass server Audit Logs and validation, creating a "Governance Hole".
+-   **Law**: Every write path must pass risk-appropriate authentication, authorization, validation, abuse controls, and audit. Server Actions, APIs, and database policies/triggers are implementation options; no single framework is universally mandated.
 -   **Action**:
-    1.  **Surgical Write**: Consolidate writes into **Server Actions** that call `recordAuditLog`.
-    2.  **Exception**: If client INSERT is unavoidable, implement `AFTER INSERT` DB Trigger to enforce logging.
+    1.  **Trusted Boundary**: Concentrate privileged, PII, financial, authorization-changing, or multi-entity writes in a server-side command boundary or transactional database function, with actor and decision audit.
+    2.  **Direct Client Writes**: Low-risk operations expressible safely through RLS and schema validation may use direct client writes after negative tests, rate limits, idempotency, and required audit are proven.
 
 ### Rule 11.3: The RLS Best Practices Protocol (Policy Hygiene)
--   **Law 1: No Redundant Admin Policy**: `service_role` key completely bypasses RLS. Therefore, policies with `TO service_role` are **meaningless and redundant**. Control admin access at the application layer (`is_admin()` helper).
--   **Law 2: One Policy Per Action**: If multiple `PERMISSIVE` policies exist for the same table and same action (e.g., `SELECT`), PostgreSQL combines them with `OR`. This creates unintended access grants. Enforce **1 table, 1 action = 1 policy** as a rule.
--   **Law 3: No WITH CHECK (true)**: `WITH CHECK (true)` means "anyone can write." Applying this to production tables is strictly prohibited. Always include ownership checks via `auth.uid()` or admin role checks.
+-   **Law 1: No Redundant Bypass Policy**: A request connected with a `service_role` credential bypasses RLS, so never mistake a `TO service_role` policy for an authorization control. Select the least-privileged method for admin/system access from user-scoped RLS, constrained RPC, dedicated roles, or a service boundary.
+-   **Law 2: Explicit Policy Semantics**: Multiple `PERMISSIVE` policies combine with `OR`, while `RESTRICTIVE` policies add constraints. Do not mechanically consolidate to one policy; test role, command, intent, and combined outcomes, removing only redundancy or over-granting.
+-   **Law 3: Explicit Public Write**: `WITH CHECK (true)` permits all rows for the targeted role. Do not use it unless an intentional public-ingestion path proves rate, validation, abuse, quota, PII, and audit controls. Ownership or admin roles are not the only valid model.
 
 ### Rule 11.4: The Poison Row Prevention Protocol (Type Collapse Prevention)
--   **Context**: When extending auto-generated types (`database.types.ts`) using intersection types (`&`), setting `Insert` / `Update` to `never` breaks type inference (Type Collapse), causing legitimate INSERT/UPDATE operations to be rejected by type errors.
--   **Law**: Overwriting the `Insert` / `Update` subtypes of auto-generated types with `never` in extended type definitions is prohibited.
+-   **Context**: Manual extension of generated database contracts can corrupt read, create, update, nullability, and runtime-validation semantics.
+-   **Law**: Keep generator output reproducible as authority and separate domain types through adapters. Do not universally ban syntax such as `never`, intersections, or inheritance; prove safety with type tests for valid read/insert/update operations plus runtime contract tests.
 -   **Action**:
-    1.  **Type Alias**: Use **`type` aliases** instead of `interface` for extended types (compatibility with Mapped Types).
-    2.  **Intersection Safety**: When extending via intersection types, only target `Row` and let `Insert` / `Update` inherit the original types as-is.
-    3.  **Validation**: After defining an extended type, verify that `supabase.from('table').insert({...})` compiles successfully.
+    1.  **Generated Sovereignty**: Never hand-edit generated files; track schema revision and generator version.
+    2.  **Operation Parity**: Test row, insert, update, and function results separately and avoid accidentally making write types uninhabitable.
+    3.  **Language Neutrality**: In languages other than TypeScript, provide equivalent compiler/schema tests and representative SDK operations.
 
 ### Rule 11.5: The Idempotent Migration Protocol
--   **Context**: Migrations run in both "clean rooms" (CI's fresh DB) and "dirty rooms" (production DB with existing data). A design that lowers failure risk in both environments is required.
--   **Law**: Migration files MUST have **idempotency**—producing the same result no matter how many times they are executed.
+-   **Context**: Test migrations against both clean rebuild and upgrade paths with existing data.
+-   **Law**: Apply schema migrations once in order, verify the migration ledger, and keep them immutable after shared application. Universal re-runnability of all DDL is not required.
 -   **Action**:
-    -   **Functions**: Use `CREATE OR REPLACE FUNCTION` instead of `CREATE FUNCTION`.
-    -   **Policies**: Write `DROP POLICY IF EXISTS` before `CREATE POLICY`.
-    -   **DML**: Attach `ON CONFLICT ... DO NOTHING` or `DO UPDATE` to `INSERT` to prevent conflicts with existing data.
-    -   **Tables/Indexes**: Always include `IF NOT EXISTS`.
--   **Rationale**: To handle re-execution in CI/CD pipelines or re-application after rollbacks. Non-idempotent migrations are "bombs."
+    -   **Fail Loudly**: Do not hide unexpected drift behind `IF NOT EXISTS` or `DROP IF EXISTS`; assert explicit preconditions and postconditions.
+    -   **Retry-Safe Data Work**: Make only retryable backfills, seeds, and online batches idempotent through business keys, checkpoints, or `ON CONFLICT` semantics.
+    -   **Recovery**: Define transaction support, partial-failure behavior, resume/forward-fix, backup/restore, and rollback per migration.
 
-### Rule 11.6: The Admin/System Write Service Role Mandate
--   **Law**: Admin write operations (Create/Update/Delete) MUST use **`serviceRoleKey` (`createAdminClient()`)**, not `anon` key + Cookie session (`createClient()`).
--   **Reason**:
-    1.  Session information may not be correctly passed when calling Supabase via Server Actions.
-    2.  RLS rejecting `UPDATE` **returns no error but 0 affected rows (silent failure)**.
-    3.  Admin operations frequently need to exceed RLS constraints for business reasons.
+### Rule 11.6: The Admin/System Write Identity Protocol
+-   **Law**: Select the least-privilege identity for each administrator operation and system job. Human administrators normally retain a verified user identity and pass RLS/RBAC; do not make an RLS-bypass credential such as `service_role` the default for all administration.
+-   **Reason**: A broad bypass credential turns one implementation flaw into access across all data and weakens actor attribution. Session propagation failures signal a broken identity boundary, not justification for universal bypass.
 -   **Action**:
-    1.  **Admin Write**: All write operations from the admin dashboard MUST use `createAdminClient()`.
-    2.  **System Job**: Background jobs (Cron, Webhook, etc.) MUST also use `createAdminClient()` (no user session exists).
-    3.  **Read is OK**: Admin read operations can use `createClient()`, but `createAdminClient()` is recommended for consistency.
+    1.  **Human Admin**: Preserve MFA, short-lived sessions, role/tenant scope, RLS, and step-up authorization.
+    2.  **System Job**: Prefer workload identity, a dedicated database role, or a constrained RPC scoped to the job. If bypass credentials are unavoidable, require server-side secrets, network restrictions, rotation, audit, and a narrow code path.
+    3.  **Authorization Test**: Prove read and write scopes separately through positive, negative, and cross-tenant tests plus actor-aware audit.
 
 ### Rule 11.7: The Silent RLS Failure Detection Protocol
--   **Law**: When RLS policies reject an operation, PostgREST **returns no error but "0 affected rows"**. This is a "Silent Failure" and the most difficult-to-detect bug source.
+-   **Law**: Mutation responses vary by SDK, request options, policy, and target-row existence. Validate success against the business contract; do not infer an RLS denial from a zero-row or empty response alone.
 -   **Action**:
-    1.  **Count Check**: After UPDATE/DELETE operations, verify the return value's `count` is not `null` or `0`. `hasError: false` with `count: null` is an RLS violation signal.
-    2.  **Explicit Error**: When `count === 0`, implement a wrapper function that returns an explicit error (e.g., `throw new Error('RLS policy may have blocked this operation')`).
-    3.  **Logging**: In suspected silent failure cases, log `{ operation, table, userId, affectedRows }` to enable post-mortem investigation.
+    1.  **Contract Check**: For exactly-one updates, verify an affected row or returned identifier; distinguish valid zero-row contracts such as zero-or-one deletes.
+    2.  **Diagnostic**: On zero results, distinguish not-found, concurrent change, filter mismatch, and authorization denial through a non-disclosing error contract.
+    3.  **Safe Logging**: Log operation, resource class, request/trace ID, and result classification without unnecessary PII or raw credentials.
 -   **Diagnostic**: "Save succeeded but data reverts on reload" → **Suspect Silent RLS Failure**.
 
 ### Rule 11.8: The RPC Scope Limitation Protocol
--   **Law**: Pushing complex business logic (chained conditionals, external API call simulation, multi-entity workflows) into DB-side RPCs (PL/pgSQL functions) is **prohibited**.
+-   **Law**: Place logic in RPCs, application services, or queues/workflows according to atomicity, data locality, latency, portability, failure recovery, security boundaries, and operational capability. Do not prohibit database logic based on complexity alone; avoid hiding external I/O in database transactions and avoid untestable monolithic RPCs.
 -   **Action**:
-    1.  **Atomic Operations Only**: Restrict RPC usage to "atomic data operations." Permitted uses: bulk updates (`UPDATE ... WHERE id = ANY(...)`), system permission checks, aggregate queries, multi-table operations within a single transaction.
-    2.  **Application Layer Logic**: Conditional branching, workflow control, external service integration, notification dispatch, and other business logic MUST be written in the application layer (Server Actions / TypeScript, etc.).
-    3.  **Debuggability**: PL/pgSQL has low type safety and limited debugging tools. Keeping logic in the application layer enables breakpoints, log output, and easier test writing.
-    4.  **DB Load Offloading**: Pushing heavy computation into the DB side pressures the DB connection pool and causes latency for other queries. Offload computation to the application layer.
--   **Rationale**: Concentrating business logic in RPCs creates a triple risk of debugging difficulty, lack of type safety, and increased DB load. Restrict RPCs to "operations the DB processes most efficiently" and maintain proper separation of concerns with the application layer.
+    1.  **Database Candidate**: Set-based work, authorization near constraints, and multi-table updates in one transaction are RPC candidates with explicit input/output, privilege, timeout, lock, and tests.
+    2.  **Service Candidate**: External I/O, long-running workflows, human approval, and retry orchestration belong in a language-neutral application/workflow boundary, with an outbox or equivalent preserving consistency with the database commit.
+    3.  **Operability**: Give the selected boundary a type or schema contract, traces, load tests, versioning, owner, and rollback.
+-   **Rationale**: Place responsibilities by evidence about consistency and failure boundaries, not by a specific framework or language.
 
 ### Rule 11.9: The Ghost Migration Ban
 -   **Law**: DB operations not captured in migration files (manual column additions/changes/deletions, schema changes via Dashboard, etc.) are defined as **"Ghost Migrations" and are strictly prohibited**.
 -   **Action**:
-    1.  **Migration File Mandate**: All schema changes MUST go through migration tools (`supabase migration new`, etc.) and be saved as migration files in Git.
-    2.  **No Dashboard Edits**: Direct schema changes via DB management consoles (Supabase Dashboard, pgAdmin, etc.) are prohibited as they make history tracking impossible. Even in emergencies, a migration file MUST be created after the fact and committed to Git.
+    1.  **Migration File Mandate**: All schema changes MUST go through an approved migration tool and be stored as immutable, version-controlled migration artifacts.
+    2.  **No Dashboard Edits**: Direct schema changes through database consoles are prohibited during normal operations. For emergency break-glass use, record actor, approval, query, and result, then immediately reconcile the migration ledger and version-controlled artifacts.
     3.  **Schema Consistency Protocol**: When the local environment's schema diverges (becomes contaminated) from migration files, do NOT hesitate to rebuild the DB (`supabase db reset`, etc.). Always treat migration files as the Source of Truth, with the local DB as subordinate.
     4.  **Verification**: After applying migrations, verify that the diff between local and remote schemas is zero. If differences exist, suspect the presence of Ghost Migrations.
 -   **Rationale**: Changes not recorded in migration files cause non-reproducibility across teams, CI/CD failures, and inconsistencies with the production environment. The principle that "all changes are recorded" is the foundation of schema reliability.
@@ -660,57 +604,48 @@
 ## 12. Migrations & Privileged Operations
 
 ### Rule 12.1: The Admin Write Service Role Protocol
--   **Law**: DB write operations from admin panels or background jobs MUST use a **privileged client (Service Role Key)** that does not depend on user authentication sessions. Admin writes via regular clients (user session) risk being silently rejected by RLS policies.
+-   **Law**: Admin panels and background jobs follow the Rule 11.6 identity matrix, selecting the narrowest user-scoped, job-scoped, or privileged identity. A Service Role Key is an exceptional break-glass/system boundary, not a universal administrator default.
 -   **Action**:
-    1.  **Admin Write**: All write operations (INSERT/UPDATE/DELETE) from admin panels MUST use a privileged client capable of bypassing RLS.
-    2.  **System Job**: Background jobs (Cron, Webhook, batch processing, etc.) MUST also use a privileged client (no user session exists).
-    3.  **Principle of Least Privilege**: Privileged client usage MUST be restricted to server-side code. Using Service Role Key in client-side code is **strictly prohibited**.
-    4.  **Audit Trail**: Since privileged client operations bypass RLS, explicitly record audit logs at the application layer.
--   **Rationale**: Even in server-executed code (Server Actions, etc.), authentication information may not be properly passed depending on the framework's session management mechanism, causing RLS to unintentionally reject operations. Admin operations that complete with "no error, 0 affected rows" — a "Silent Failure" — are the most difficult bugs to discover.
+    1.  **Human Path**: Preserve user identity, MFA, RBAC/RLS, and tenant scope.
+    2.  **Machine Path**: Use workload identity or a dedicated role scoped to required tables and operations.
+    3.  **Bypass Guard**: Never expose bypass secrets to clients; manage usage sites, owner, rotation, audit, and incident revocation.
+    4.  **Audit Trail**: Record actor, reason, scope, and result in tamper-resistant audit evidence.
 
 ### Rule 12.2: The Idempotent Migration Protocol
--   **Law**: Database migration files MUST guarantee **idempotency (producing the same result no matter how many times executed)**. Always anticipate that migrations may be partially executed across CI, preview, and production environments.
+-   **Law**: Verify exactly-once schema migration application through a ledger and checksums, then keep files immutable after shared application. Make only retryable data operations explicitly idempotent.
 -   **Action**:
-    1.  **CREATE OR REPLACE**: Use `CREATE OR REPLACE` for creating/updating Functions and Views. Prefer declarative definitions over `ALTER`.
-    2.  **IF NOT EXISTS**: Use `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS` for table and index creation.
-    3.  **DROP IF EXISTS + CREATE**: For objects where `CREATE OR REPLACE` is unavailable (policies, triggers), use the `DROP ... IF EXISTS` → `CREATE` pattern.
-    4.  **Defensive DML**: Use `INSERT ... ON CONFLICT DO NOTHING` (or `DO UPDATE`) for seed data insertion to prevent duplicate insert errors.
--   **Rationale**: CI environments always achieve idempotency since they apply migrations against an empty DB, but preview environments and manual recovery scenarios may have partially applied past migrations. Non-idempotent migrations cause deployment failures in these environments.
+    1.  **Pre/Postconditions**: Assert the expected source and target schemas; fail closed on an unexpected state.
+    2.  **Atomicity**: Identify transactional DDL boundaries; design checkpoints and resume/forward-fix for non-transactional operations.
+    3.  **Data Operations**: Make backfills and seeds retry-safe through business keys, upsert policy, batch checkpoints, and reconciliation.
+    4.  **Clean and Upgrade Tests**: Test both complete history on an empty database and upgrades from supported prior states.
 
-### Rule 12.3: The Anti-Permissive Policy Duplication Mandate
--   **Law**: In RLS (Row Level Security) policy design, **creating redundant Permissive policies for the same role and same action is prohibited**. In particular, `service_role` bypasses RLS entirely, making separate admin policies unnecessary.
+### Rule 12.3: The Permissive Policy Semantics Protocol
+-   **Law**: Remove logically redundant `PERMISSIVE` policies for the same role/command, but do not make policy count itself a security target. Treat `service_role` credential bypass and policies for normal roles as separate boundaries.
 -   **Action**:
-    1.  **One Policy Per Role-Action**: Do not create multiple Permissive policies for the same role (`authenticated`, `anon`, etc.) and same action (`SELECT`, `INSERT`, etc.) on the same table. Combine multiple conditions with `OR` into a single policy.
-    2.  **No service_role Policy**: Since `service_role` completely bypasses RLS, creating RLS policies for `service_role` is redundant and prohibited.
-    3.  **Policy Audit**: When adding or modifying existing policies, list all policies for the same table and verify there are no logical duplications.
--   **Rationale**: PostgreSQL Permissive policies are combined with `OR`, creating a risk of unintentionally permitting a wider scope. The one-policy-per-role-action principle clarifies permission intent and prevents security holes.
+    1.  **Combined Access**: Inventory all policies and grants by table, role, and command; test the combined `PERMISSIVE` OR and `RESTRICTIVE` AND outcome.
+    2.  **Consolidation Decision**: Consolidate when there is duplication, over-granting, or measured overhead. Separation that clarifies distinct owners, roles, or lifecycles is valid.
+    3.  **Bypass Inventory**: Govern bypass credential/role paths outside policy through least privilege, secrets, network, audit, and rotation.
 
 ### Rule 12.3.1: The RLS Auth Function InitPlan Optimization
--   **Law**: When using authentication functions such as `auth.uid()`, `auth.role()`, `current_setting()` within RLS policies, they MUST be **wrapped with `(select ...)`** to prevent re-evaluation on each row.
+-   **Law**: InitPlan row-invariant auth/session helpers with a scalar subquery when official guidance, volatility, and the query plan support it. Do not mechanically apply this to correlated expressions, row-dependent helpers, or set-returning functions.
 -   **Action**:
-    1.  **Subquery Wrap**: Write `USING (user_id = (select auth.uid()))` instead of `USING (user_id = auth.uid())`.
-    2.  **All Auth Functions**: Apply to all session-returning functions: `auth.uid()`, `auth.role()`, `auth.jwt()`, `current_setting()`, etc.
-    3.  **Inside EXISTS Too**: Within `EXISTS (SELECT 1 FROM ... WHERE ... = auth.uid())`, wrap the inner `auth.uid()` as `(select auth.uid())` as well.
--   **Rationale**: Without wrapping, PostgreSQL re-evaluates these functions on every row scan (treated as Volatile). Wrapping with `(select ...)` enables the optimizer to evaluate the result as an **InitPlan (pre-computation)** only once, achieving dramatic performance improvements on large tables.
--   **Anti-Pattern**:
+    1.  **Candidate**: `user_id = (select auth.uid())` is a candidate for a row-invariant helper.
+    2.  **Semantics**: Preserve correlation, cardinality, NULL behavior, and index use in `EXISTS`, joins, and tenant lookups.
+    3.  **Evidence**: Compare authorization tests and `EXPLAIN (ANALYZE, BUFFERS)` or a safe equivalent under representative roles and data.
+-   **Illustration**:
     ```sql
-    -- ❌ Prohibited: auth.uid() re-evaluated per row
+    -- Before measurement
     USING (user_id = auth.uid())
-    ```
--   **Correct Pattern**:
-    ```sql
-    -- ✅ Correct: Evaluated once via InitPlan
+    -- Candidate after semantic and plan verification
     USING (user_id = (select auth.uid()))
     ```
 
 ### Rule 12.4: The Type Extension Safety Protocol
--   **Law**: When extending auto-generated type definitions from database SDKs, ORMs, etc., with application-specific types, techniques that do not compromise type safety must be used.
+-   **Law**: Keep generated schema/SDK contracts reproducible and unmodified, and version domain extensions in separate adapters. Select a method appropriate to each language's type system and detect drift through runtime schema and operation tests.
 -   **Action**:
-    1.  **No `never` in Type Extensions**: Prohibit type extensions that overwrite auto-generated type properties with `never`. `never` means "unreachable," causing a "Poison Row" where properties exist at runtime but are inaccessible at the type level.
-    2.  **Type Alias over Interface**: Prefer `type` aliases with intersection types (`&`) over `interface extends` for extending auto-generated types. Interface `extends` carries the risk of unintended contamination through Declaration Merging.
-    3.  **Simple Intersection over Omit**: Excessive use of `Omit<GeneratedType, 'key1' | 'key2' | ...>` severely degrades type readability. Use simple intersection types whenever possible, and use `Omit` only when changing a property's type.
-    4.  **Generated Type Sovereignty**: Manual editing of auto-generated type files is strictly prohibited. Extensions must always be done in separate files.
--   **Rationale**: Auto-generated types are valuable assets reflecting the "truth of the DB schema." Improper extensions distort this truth and cause divergence between type definitions and actual data.
+    1.  **Uninhabitable Type Check**: Compile-test that constructs such as `never` do not make valid operations impossible.
+    2.  **Composition Choice**: Select aliases, interfaces, intersections, mapped types, classes, or code generation from toolchain fit and readability.
+    3.  **Contract Coverage**: Test representative read, insert, update, RPC, nullable, JSON, decimal, and timestamp cases.
 
 ### Rule 12.5: The Migration System Schema Exclusion Protocol
 -   **Law**: When creating scripts that batch-modify function security settings (`search_path`, `SECURITY DEFINER/INVOKER`, etc.) in database migrations, **functions in system schemas managed by the hosting service must be included in the exclusion list**.
@@ -721,13 +656,11 @@
 -   **Rationale**: Modifying the `search_path` or security settings of managed service system functions (authentication, storage management, etc.) can destroy the service's foundational capabilities. This is a fatal failure that immediately leads to complete service outage.
 
 ### Rule 12.6: The RLS InitPlan Optimization Protocol
--   **Law**: Session function calls such as `auth.uid()` and `auth.role()` within RLS (Row Level Security) policies **must be written as sub-queries using `(SELECT auth.uid())`** format.
+-   **Law**: Rule 12.3.1 is authoritative. InitPlan an RLS helper only when row invariance, planner behavior, official guidance, and measurement align; do not apply it universally to every session function.
 -   **Action**:
-    1.  **Sub-Select Wrapping**: When using `auth.uid()` in `USING` or `WITH CHECK` clauses of RLS policies, always use the `(SELECT auth.uid())` format. This allows PostgreSQL's query planner to evaluate the function once and cache the result as an InitPlan, preventing per-row re-evaluation.
-    2.  **All Auth Functions**: Apply the same pattern not only to `auth.uid()` but to all session functions including `auth.role()`, `auth.jwt()`, etc.
-    3.  **Linter Integration**: If Supabase's security linter or similar tools raise `auth_rls_initplan` warnings, fix them immediately.
-    4.  **Performance Impact**: For large tables (tens of thousands of rows or more), applying this pattern can result in performance differences of orders of magnitude.
--   **Rationale**: When functions within RLS policies are re-evaluated per row, O(N) function calls occur with every table scan. Sub-query wrapping reduces this to O(1), dramatically improving query performance on large tables.
+    1.  Triage a linter warning as a finding and inspect query semantics plus plans.
+    2.  Verify identical positive, negative, and cross-tenant results before and after optimization.
+    3.  Do not promise a fixed row threshold or orders-of-magnitude gain in Universal; decide from latency, CPU, and buffers on actual data.
 
 ### Rule 12.7: The Client Identity Audit Protocol
 -   **Law**: Before optimizing RLS policies (consolidation or deletion), **comprehensively audit which IDENTITY** (`service_role` / User JWT / Anonymous) is used by **all access paths** (Server Actions, API Routes, SSR, admin panels, etc.) that access the target data.
@@ -739,120 +672,109 @@
 -   **Rationale**: Careless deletion through RLS policy "optimization" invites not security holes but "invisibility of legitimate access." Especially when admin panels use Server Actions (user JWT context), deleting JWT policies thinking service_role is sufficient silently rejects administrators' CRUD operations.
 
 ### Rule 2.8: The Idempotent Migration Protocol
--   **Law**: Migration files must be written in an **idempotent structure** that produces the same result regardless of how many times they are executed. When including DML (data manipulation), write defensive code that anticipates collisions with production data.
+-   **Law**: Migration safety comes from ordered exactly-once application, immutability of applied files, explicit preconditions, and retry-safe data steps—not universal re-execution of all DDL.
 -   **Action**:
-    1.  **DDL Idempotency**: Always use `IF NOT EXISTS` for `CREATE TABLE`, `IF EXISTS` for `DROP TABLE`, and `IF NOT EXISTS` for `ALTER TABLE ADD COLUMN` (PostgreSQL 9.6+).
-    2.  **DML Idempotency**: Use `ON CONFLICT DO NOTHING` or `ON CONFLICT DO UPDATE` for `INSERT` to prevent errors on duplicate data.
-    3.  **Function/Trigger Idempotency**: Use `CREATE OR REPLACE FUNCTION` for safe function recreation. Write triggers as `DROP TRIGGER IF EXISTS ... ; CREATE TRIGGER ...`.
-    4.  **RLS Policy Idempotency**: Execute `DROP POLICY IF EXISTS "policy_name" ON table_name;` before creating policies to prevent collisions with existing policies.
--   **Rationale**: Non-idempotent migrations cause critical failures — "a migration that passed once breaks" — during staging/production environment differences, migration re-execution, and branch conflicts. Idempotency is the foundation of safe deployment and environment reproducibility.
+    1.  **DDL Drift Detection**: Limit `IF NOT EXISTS` to expected states and separately assert object-definition equality.
+    2.  **DML Retry Safety**: Give seeds/backfills intentional conflict semantics, checkpoints, and reconciliation.
+    3.  **Object Replacement Safety**: Validate dependencies, permissions, availability, and transaction boundaries before replace or drop-create operations on functions, triggers, and policies.
+    4.  **History Integrity**: Make the migration ledger, checksums, clean rebuild, and upgrade tests CI evidence.
 
 ### Rule 2.9: The Read-Write Privilege Symmetry
--   **Law**: In admin panels and similar interfaces, when writes (Mutations) are executed with privileged clients (`service_role`, etc.), **reads (Query for Edit Form) must also guarantee equivalent visibility**. Using different privilege-level clients for writes and reads causes the opaque bug of "save succeeds but data reverts on reload."
+-   **Law**: Each read/write path holds the least privilege required for its actor, resource, and operation while preserving fields and rows required by the product contract. Do not elevate reads to the same broad privilege merely because writes use a bypass identity.
 -   **Action**:
-    1.  **Privilege Parity Check**: When using `createAdminClient()` (RLS bypass) for writes, verify that the corresponding "fetch for editing" is also executed with equivalent privileges. If reads use `anon` or restricted `authenticated` permissions, RLS filters out some data, feeding stale or empty data into the form.
-    2.  **Strict Field Selection Synchronization**: Verify that the Strict Field Selectionification used in DTOs encompasses all columns that are save targets. Adding a column to only one side creates a "half-lung" state where "data is saved but not displayed in the edit screen."
-    3.  **Admin Gateway Awareness**: In functions with explicit admin purposes (e.g., `getAdminStoreById`), use privileged clients as needed or fully open RLS policies for admin roles.
-    4.  **Post-Update Verification**: For high-importance mutations (image reordering, status changes, etc.), consider applying the "Verification Fetch" pattern: immediately after update, execute a `select` with the same ID and verify current values via logs.
--   **Rationale**: Writes via privileged clients bypass RLS and correctly save data, but when non-privileged clients are used during edit screen reload, RLS `SELECT` policies exclude some columns or records. As a result, users feel "data wasn't saved" and repeat the same operation, creating a vicious cycle of expanding data inconsistencies.
+    1.  **Capability Matrix**: For each screen, job, and API, map read fields, write fields, row scope, and actor identity; test for both missing and excessive privilege.
+    2.  **DTO Synchronization**: Test intended differences between edit DTO and mutation schema as a versioned contract. Never expose secret/internal fields on reads merely to match write authority.
+    3.  **Scoped Admin Gateway**: Express administration through resource- and operation-scoped gateways or RPCs, avoiding whole-table RLS bypass or broad policy opening.
+    4.  **Post-Update Verification**: For important mutations, read back version, identifier, or expected fields through the authorized view and trace consistency without logging PII.
+-   **Rationale**: Missing read-back capability can look like an opaque save failure, but universal privilege symmetry is not the remedy. Prove consistency through a least-privilege capability contract and explicit verification.
 
-### Rule 2.10: The RLS Policy Consolidation Mandate
--   **Law**: When multiple `PERMISSIVE` policies are defined for the same table and same operation (SELECT, INSERT, UPDATE, DELETE), they must be **consolidated into a single policy with OR conditions** wherever possible to reduce evaluation overhead.
+### Rule 2.10: The RLS Policy Composition Protocol
+-   **Law**: Optimize policy composition for effective authorization, ownership, readability, auditability, and performance together. One policy is not a Universal objective.
 -   **Action**:
-    1.  **Consolidation by Operation**: Instead of defining separate `SELECT` policies for `anon` and `authenticated`, consolidate into a single policy like `USING (true)` or `USING (auth.role() IN ('anon', 'authenticated'))`. PostgreSQL evaluates all `PERMISSIVE` policies with OR conjunction, so splitting into individual policies unnecessarily increases evaluation count.
+    1.  **Consolidation by Evidence**: Treat duplicate conditions for the same role/command/intent as candidates; never broaden distinct roles or owners into `USING (true)`.
     2.  **Service Role Redundancy Elimination**: Since `service_role` completely bypasses RLS, explicit policies targeting `service_role` are redundant. Delete policies that target only `service_role`.
     3.  **RESTRICTIVE Policy Awareness**: `RESTRICTIVE` policies are evaluated as **AND conditions** against all `PERMISSIVE` policies, so only `PERMISSIVE` policies are consolidation targets. Consolidating `RESTRICTIVE` policies may cause side effects.
-    4.  **New Table Checklist**: When designing RLS policies for new tables, use "minimum number of policies per operation" as a design principle. When creating more than one policy for the same operation, explicitly comment the reason why consolidation is not possible.
--   **Rationale**: Since PostgreSQL evaluates all `PERMISSIVE` policies for the same operation with OR conjunction, splitting functionally equivalent conditions into multiple policies doesn't change the result but increases evaluation overhead. For tables with large numbers of records especially, unnecessary policy splitting directly impacts query performance.
+    4.  **New Table Checklist**: Record intent and test owner by actor/role/command/combined outcome, and document why multiple policies are separated.
 
 ### Rule 2.11: The Orphan File Defense Protocol
--   **Law**: Leaving storage files behind when deleting database records (Orphan Files) is prohibited. Orphan files continuously increase storage costs and create risks of unintended data persistence.
+-   **Law**: Define a lifecycle contract between database records and objects to prevent unowned objects, unintended retention, and premature deletion.
 -   **Action**:
-    1.  **Cascade Deletion**: Within `DELETE` triggers or application mutation logic, incorporate processing to **asynchronously delete** related storage files when DB records are deleted. Synchronous deletion impacts response times, so asynchronous jobs (Queue/Worker) are recommended.
-    2.  **Batch Cleanup**: Set up a sweeper that runs periodically (e.g., weekly) as a batch job to detect and delete storage files with no corresponding DB reference (orphan files).
-    3.  **Soft Delete Awareness**: When using soft delete (`deleted_at`), defer file deletion until physical record deletion (or archive migration). Deleting files at soft-delete time causes file loss upon restoration.
--   **Rationale**: The practice of deleting only records while leaving files behind causes a "silent leak" in storage costs. Especially for services with high UGC (User Generated Content), tens of gigabytes of orphan files accumulate monthly, resulting in significant FinOps losses.
+    1.  **Deletion Workflow**: Select synchronous deletion, queue, outbox, or storage lifecycle rules from consistency, latency, retry, restore, and legal hold.
+    2.  **Reconciliation**: Compare references and object inventory at a risk-based cadence, deleting only after quarantine, grace period, and dry run. Weekly is not fixed.
+    3.  **Restore Semantics**: When using soft delete/archive, align object retention with record restore windows.
 
 ### Rule 2.12: The Safety Valve Protocol
--   **Law**: Major entity tables (users, content, products, stores, etc.) MUST have at least one **free-text column** (`notes`, `remarks`, `internal_memo`, etc.) that allows recording irregular information without requiring schema changes.
+-   **Law**: Add a free-text field only to entities with an explicit business or operational need. Do not mandate precautionary notes on every table; design PII, access, retention, search, moderation, and export.
 -   **Action**:
-    1.  **Escape Hatch**: In real-world operations, exceptions frequently arise that strict schemas alone cannot express (e.g., "closed for winter", "call to confirm", "special handling required"). Free-text columns serve as an "Escape Hatch" to record such information without waiting for schema changes.
-    2.  **Type**: `TEXT` type is recommended (or `TEXT` if Markdown support is needed). `VARCHAR(n)` character limits become operational obstacles, so avoid unless there is a specific reason.
-    3.  **Nullable**: Free-text columns should allow `NULL`. Not all records require descriptions.
-    4.  **No Business Logic**: Depending on free-text column values for business logic (conditional branching, filtering) is prohibited. Information required for logic must be promoted to normalized columns.
--   **Rationale**: Schema changes require migration, deployment, and testing cycles, and cannot be addressed immediately. By installing safety valve columns, information that "needs to be recorded right now" can be saved without loss, achieving both operational flexibility and development speed.
+    1.  **Typed Promotion**: Promote recurring decisions, filters, or authorization inputs to versioned typed fields.
+    2.  **Bounds**: Validate length, format, rendering, malicious content, and sensitive data.
+    3.  **Nullability**: Derive required/optional semantics from domain invariants.
 
 ### Rule 2.13: The Time-Series Partitioning & Retention Protocol
--   **Law**: Tables that grow over time—such as log data (`audit_logs`, `access_logs`) and transaction histories (`point_transactions`, etc.)—MUST be designed with **Range Partitioning** keyed on `created_at`.
+-   **Law**: Observe time-series growth, query predicates, vacuum, indexes, backup, retention, and delete cost; partition only when benefits exceed operational complexity.
 -   **Action**:
-    1.  **Range Partitioning**: Use `pg_partman` or similar to automatically create monthly or quarterly partitions for time-series tables. Consider adoption when a single table's record count is projected to exceed 10 Million (10M).
-    2.  **Retention Policy**: Old partitions (e.g., older than 2 years) must be automatically **Detached** and excluded from active query targets. After detachment, plan to move them to Cold Storage or export to Object Storage.
-    3.  **No Premature Partitioning**: Introducing partitions during development phases with little data is over-engineering. Adopt a "Ready-to-Fire" strategy: complete the design before reaching the threshold (10M records) and apply when reached.
--   **Rationale**: Tables that grow without partitioning cause index size inflation, extended vacuum times, and increased backup times. Time-series partitioning brings operational overhead for old data near zero while enabling compliance with legal retention requirements.
+    1.  **Partition Key & Interval**: Select range/hash/list, keys, and intervals from actual queries and distribution; do not fix `created_at`, monthly, `pg_partman`, or 10M.
+    2.  **Lifecycle**: Test create-ahead, default partitions, retention, detach/archive, indexes, FKs, replication, and restore.
+    3.  **Decision Evidence**: Compare non-partitioned baseline and prototype by plans, latency, maintenance duration, and cost.
 
 ### Rule 2.14: The Cold Data Offloading Protocol
--   **Law**: Data that "has not been accessed for 1+ years" or "has legal retention requirements but is rarely referenced" MUST be separated from the active DB and offloaded to **Archived Tables** or Object Storage (CSV/Parquet).
+-   **Law**: Select active, archive, object, or warehouse storage from data temperature, retention, retrieval SLO, legal hold, deletion, format longevity, and cost. One year is not a fixed boundary.
 -   **Action**:
-    1.  **Archived Tables**: Prepare an archive schema (e.g., `archives`) and move old data there (e.g., `archives.old_audit_logs`). Application normal queries must not reference this schema.
-    2.  **Object Storage Export**: Export large amounts of old data in CSV or Parquet format to Object Storage (S3/R2/GCS, etc.). When analysis is needed, reference from a Data Warehouse (BigQuery, etc.).
-    3.  **Transparent Migration**: Execute data offloading in a manner that has zero impact on application behavior. Verify that archived records are not included in API responses.
-    4.  **Compliance**: Data with legal retention requirements (Tax Law: 7 years, Labor Law: 3 years, etc.) must NOT be physically deleted until the retention period has elapsed. Manage retention periods at the archive destination.
--   **Rationale**: Keeping old data in the active DB causes index size bloat, query performance degradation, and increased backup times. Separating storage by data "temperature" maximizes both active data performance and cost efficiency.
+    1.  **Contract**: Define archive owner, schema/format version, encryption, access, index/catalog, retrieval, restore tests, and deletion propagation.
+    2.  **Cutover**: Validate consumer contracts, backfill checkpoints, checksums, late-arriving data, and rollback.
+    3.  **Compliance**: Derive retention from jurisdiction, record class, legal advice, and policy; do not treat example years as Universal legal judgment.
 
 ### Rule 2.15: The RLS Inheritance Protocol (Chain of Trust)
--   **Law**: Access permissions for child/grandchild tables (e.g., medical records, comments, attachments) must **NOT be defined independently**, but MUST always be determined by referencing the parent table's (e.g., pets, posts, projects) ownership or participation via `EXISTS` subqueries.
+-   **Law**: Make authorization sources explicit from domain ownership, membership, delegation, and resource relations. Compare parent inheritance, direct owners, capability tables, claims, and policy services; do not universally trace every child to the top parent.
 -   **Action**:
-    1.  **Parent Ownership Check**: In child table RLS policies, instead of authenticating directly with `auth.uid() = user_id`, verify parent table ownership via `EXISTS (SELECT 1 FROM parent_table WHERE id = child_table.parent_id AND user_id = (select auth.uid()))`.
-    2.  **Chain of Trust**: When table hierarchies extend to 3+ levels (grandparent → parent → child), always trace back to the top-level ownership for verification. Checking only intermediate tables creates security holes.
-    3.  **SECURITY DEFINER for Cross-Table**: When permission checks need to reference other tables (`profiles`, etc.), wrap them in `SECURITY DEFINER` functions with a fixed `search_path` (`SET search_path = public, pg_temp`).
-    4.  **No Redundant Columns**: The approach of "simplifying" permission checks by duplicating `user_id` in child tables is discouraged as it becomes a breeding ground for data inconsistency. Permissions must always be derived through Relations.
--   **Rationale**: Defining independent permission logic per child table causes update omissions when parent table permissions change, becoming a source of security holes. Inheriting parent table ownership as a Chain of Trust achieves both centralization of permission logic and elimination of inconsistencies.
+    1.  **Consistency**: If a denormalized owner/tenant key is used, prevent drift with an FK, trigger, generated value, or write boundary.
+    2.  **Performance**: Compare `EXISTS`, joins, helpers, and claims with positive/negative/cross-tenant tests and plans.
+    3.  **Privilege**: Express cross-table checks with invoker semantics first; use `SECURITY DEFINER` only at the smallest boundary that truly needs elevation.
 
 ### Rule 2.16: The Brittle Table Reference Prohibition
--   **Law**: Concatenating table names as dynamic strings within SQL functions (`CREATE FUNCTION`) or RPCs (`EXECUTE 'SELECT * FROM ' || table_name`) is **prohibited**.
+-   **Law**: Limit dynamic SQL to metadata-driven operations not expressible statically and require identifier quoting, allowlists, parameter binding, least privilege, tests, and audit.
 -   **Action**:
-    1.  **Static References Only**: All table references within SQL functions MUST be written as static SQL statements. Dependencies MUST be resolved at compile time (or migration application time).
-    2.  **No Dynamic EXECUTE**: Patterns like `EXECUTE format('SELECT * FROM %I', variable)` are prohibited because they cannot detect typos or references to non-existent tables until runtime.
-    3.  **Schema Change Safety**: Static table references ensure that dependent functions error at migration time when tables are renamed or deleted, enabling early problem detection.
--   **Rationale**: Dynamic table references are a breeding ground for SQL injection and make it impossible to trace impact scope during schema changes. Mandating static references ensures compile-time safety and maintainability.
+    1.  **Static Default**: Use static SQL for known objects so migrations detect dependencies.
+    2.  **Safe Dynamic Identifier**: Value parameters do not protect identifiers; use a server-controlled allowlist and correct identifier quoting such as `format('%I', identifier)`.
+    3.  **Impact Inventory**: Register dynamic dependencies for testing before renames or drops.
 
 ### Rule 2.17.1: The Data Quality Management Framework
--   **Law**: Accumulated data must be designed and managed not as a \"byproduct\" but as an independent **revenue asset**. There is an obligation to systematically measure and manage data quality across the following 6 dimensions and detect quality degradation early.
+-   **Law**: Manage applicable dimensions such as accuracy, completeness, consistency, freshness, uniqueness, and conformity with owners according to material data-product consumers and risk. Do not treat every datum as a revenue asset; privacy minimization and deletion take precedence.
 -   **DQ Framework**:
 
     | Quality Dimension | Definition | Measurement Method | Target |
     |:------------------|:-----------|:-------------------|:-------|
-    | **Accuracy** | Does the data correctly reflect reality? | Sampling verification | ≥ 95% |
-    | **Completeness** | Are required fields populated? | NULL rate measurement | ≥ 90% |
-    | **Consistency** | Is data for the same entity free of contradictions? | Cross-table verification | ≥ 99% |
-    | **Freshness** | Is the data up-to-date? | `updated_at` elapsed days | ≤ 30 days |
-    | **Uniqueness** | Are there no duplicate data entries? | Duplicate detection query | Duplicate rate ≤ 1% |
-    | **Conformity** | Do data types and formats comply with specifications? | Schema Validation | 100% |
+    | **Accuracy** | Does data reflect reality? | Source reconciliation/sampling | Blueprint target |
+    | **Completeness** | Are contract-required fields populated? | NULL/missing rate | Blueprint target |
+    | **Consistency** | Are entities/sources non-contradictory? | Constraint/cross-source checks | Blueprint target |
+    | **Freshness** | Is data updated within consumer SLO? | Event/load age | Blueprint target |
+    | **Uniqueness** | Are business keys non-duplicated? | Duplicate query | Blueprint target |
+    | **Conformity** | Does data match schema/format contracts? | Validation | Blueprint target |
 
 -   **Action**:
-    1.  **Automated DQ Checks**: Automatically measure the above 6 metrics via monthly batch jobs (`pg_cron` or cloud scheduler) and display them on the admin dashboard.
-    2.  **Asset Registry**: Catalog major data assets, explicitly documenting each asset's \"owner,\" \"quality owner,\" and \"monetization potential.\"
-    3.  **Cleansing Mandate**: Data must always be maintained in a cleansed state. Leaving dirty data (unvalidated inputs, duplicate records, type violations) is prohibited.
-    4.  **Alert Threshold**: When any quality dimension falls below its target value, trigger an alert and complete corrective measures within 30 days.
--   **Rationale**: Without quantitative data quality management, data that \"looks clean but is actually full of inconsistencies\" accumulates, negatively impacting API sales, AI training, and analytics. The 6-dimension framework structurally prevents quality degradation.
+    1.  **Automated DQ Checks**: Measure at a cadence based on freshness and impact, exposing results to consumers and owners.
+    2.  **Asset Registry**: Record owner, consumers, classification, quality SLO, lineage, and retention for material datasets.
+    3.  **Quarantine & Repair**: Do not blindly delete invalid data; contract rejection, quarantine, repair, backfill, and consumer notification.
+    4.  **Response**: A threshold violation has severity, owner, error budget, due date, and waiver. Do not apply a fixed 30 days to every domain.
 
 ---
 
 ## 13. Edge Functions Design Strategy
 
 ### Rule 13.1: The Edge Functions Architecture Protocol
--   **Law**: Supabase Edge Functions (based on Deno Deploy) MUST be designed following the principles of **short-lived, stateless, single responsibility**. Using them as a general-purpose backend server replacement is prohibited.
+-   **Law**: Check current runtime limits for duration, memory, CPU, region, network, concurrency, background work, dependencies, observability, and cost; place only fitting HTTP, webhook, orchestration, or equivalent workloads.
 -   **Action**:
-    1.  **Single Responsibility**: Each Edge Function handles exactly one task (webhook reception, external API call, PDF generation, etc.). Monolithic designs cramming multiple responsibilities into a single function are prohibited.
-    2.  **Stateless Execution**: Sharing state between Edge Functions is prohibited. Persist state in the DB (PostgreSQL) or cache (Redis, etc.).
-    3.  **Timeout Awareness**: Edge Functions have **execution time limits** (default 150s, max 400s on Pro plan). Long-running processes (bulk data processing, video encoding, etc.) are unsuitable for Edge Functions. Delegate batch processing to Database `pg_cron` + PL/pgSQL or external workers.
-    4.  **Cold Start Minimization**: Minimize import statements and eliminate unnecessary dependency packages. Imports via Deno's `esm.sh` incur network I/O on initial load.
+    1.  **Cohesion**: Group responsibilities that share ownership, deployment, rollback, dependencies, and blast radius; do not force exactly one task per function.
+    2.  **State**: Do not use local mutable state as durable authority; place it in a database, queue, object store, or equivalent. Instance caches never carry correctness.
+    3.  **Runtime Limit**: Revalidate current plan/region/runtime limits and cancellation at deployment; move exceeding workloads to jobs, queues, workers, or database operations.
+    4.  **Startup & Supply Chain**: Measure dependency graph, artifact size, remote imports, lock/integrity, and cold start; make immutable resolved dependencies build evidence.
+    5.  **Nested Call Budget**: Inventory direct recursion, function chaining, circular calls, and fan-out as one request chain. A hosted runtime may apply a shared limit across that chain, so revalidate the effective quota and 429 behavior at deployment and avoid unbounded recursion. Move long-running or high-fan-out work to queues, durable workflows, bounded orchestrators, or equivalents, and design timeouts, retries and backoff, idempotency, cost ceilings, and cycle detection.
 
 ### Rule 13.2: The Edge Functions Security Mandate
--   **Law**: Edge Functions security MUST be ensured across three layers: function-level, network-level, and secret management.
+-   **Law**: Layer caller identity, authorization, input, abuse, network/egress, secrets, data access, and audit according to the endpoint threat model.
 -   **Action**:
-    1.  **JWT Verification**: For externally-invoked Edge Functions, verify the JWT from the request's `Authorization` header and confirm the authenticated user via `supabase.auth.getUser()`. If allowing access with only the `anon` key, explicitly comment the reason.
-    2.  **CORS Configuration**: When calling directly from browsers, write explicit CORS configuration. `Access-Control-Allow-Origin: '*'` is restricted to development environments; enumerate allowed domains in production.
+    1.  **Caller Verification**: Select user JWT, webhook signature, mTLS/workload identity, public anonymous, or another model from the endpoint contract. For JWT, verify claims and authorization at a trusted boundary.
+    2.  **CORS Configuration**: For browser access, design origins, methods, headers, credentials, preflight, and caching. `*` can be valid for intentional public resources without credentials; do not decide solely by environment name.
         ```typescript
         // ✅ CORS Configuration Template
         const corsHeaders = {
@@ -865,8 +787,8 @@
           return new Response('ok', { headers: corsHeaders });
         }
         ```
-    3.  **Secret Management**: Retrieve API keys and external service credentials via `Deno.env.get('SECRET_NAME')`. Hardcoding in source code is strictly prohibited. Register secrets via `supabase secrets set`.
-    4.  **No `--no-verify-jwt` in Production**: `supabase functions deploy --no-verify-jwt` is for development/debugging only. Disabling JWT verification in production is a critical security hole that allows unauthenticated function execution.
+    3.  **Secret Management**: Retrieve secrets through runtime bindings from an approved store; never expose them in source, logs, or responses. `supabase secrets set` is a candidate command for managed projects.
+    4.  **JWT Verification Setting**: An endpoint that disables provider JWT verification must prove alternate authentication such as webhook signatures, or an intentional public contract, plus rate/abuse controls, negative tests, and ownership. A flag or environment name alone does not determine safety.
 
 ### Rule 13.3: The Edge Functions Error Handling & Observability
 -   **Law**: Edge Functions errors MUST be recorded in a structured format, and appropriate HTTP status codes MUST be returned to callers.
@@ -878,15 +800,15 @@
           { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
         ```
-    2.  **Logging**: `console.log` / `console.error` are automatically sent to Edge Function Logs in the Supabase Dashboard. Record results of important operations (external API calls, DB writes, etc.) as structured logs (JSON format).
-    3.  **Retry Safety**: Edge Functions may be retried; ensure **idempotency**. Use request IDs or idempotency keys to prevent duplicate execution.
+    2.  **Logging**: Confirm provider routing and record machine-queryable events, trace/request IDs, severity, and result. Never log PII, tokens, or raw payloads, and avoid double-encoded JSON.
+    3.  **Retry Safety**: Make only retryable mutations and external side effects idempotent or duplicate-safe; never confuse a request ID with a stable idempotency key.
 
 ### Rule 13.4: The Edge Functions Local Development Protocol
--   **Law**: Edge Functions development MUST use `supabase functions serve` for local development. Debugging via direct deployment to production is prohibited.
+-   **Law**: Use reproducible tests in local, isolated-project, or preview environments, and do not make direct production debugging the normal path. Cover emulation gaps with deployed integration tests.
 -   **Action**:
-    1.  **Local Serve**: Run locally with `supabase functions serve function-name --env-file .env.local` for testing.
-    2.  **Shared Code**: Place utilities shared across multiple Edge Functions in the `supabase/functions/_shared/` directory. Directories with `_` prefix are excluded from deployment.
-    3.  **Import Map**: Manage dependencies via `import_map.json` with pinned versions.
+    1.  **Local Serve**: `supabase functions serve` is a managed-CLI candidate; record current runtime, environment, network, and auth differences.
+    2.  **Shared Code**: Select shared packages, workspaces, or provider-recommended directories by ownership and versioning; do not depend on one fixed path.
+    3.  **Dependencies**: Use a supported manifest/lock/integrity mechanism to resolve direct and transitive versions reproducibly.
 
 ---
 
@@ -903,13 +825,13 @@
 -   **Anti-pattern**: Using Broadcast for chat message delivery. Messages must be persisted in DB and delivered via Postgres Changes. Broadcast is for ephemeral (temporary) data only.
 
 ### Rule 14.2: The Realtime Security & Performance Protocol
--   **Law**: Realtime channel design MUST be optimized from the perspectives of authentication, bandwidth control, and connection count management.
+-   **Law**: Contract authentication, authorization, tenant boundaries, bandwidth, fan-out, connection count, ordering, reconnection, loss tolerance, and cost for Realtime channels.
 -   **Action**:
     1.  **RLS Enforcement**: Postgres Changes automatically pass through RLS policies, so security is ensured if RLS is correctly configured. Note that tables with `USING (true)` broadcast all data to all users.
     2.  **Channel Granularity**: Design channel names with fine granularity (e.g., `room:${roomId}`). Funneling all events into one "global channel" causes all clients to receive all events, wasting bandwidth.
-    3.  **Connection Limits**: Plan-specific concurrent connection limits apply (Free: 200, Pro: 500, Team: 10,000). Explicitly clean up channels no longer needed with `supabase.removeChannel(channel)`.
-    4.  **Throttling**: High-frequency events (mouse movement, etc.) MUST be **throttled** (100-200ms interval) on the client side before sending. Event transmission exceeding server processing capacity causes message drops.
-    5.  **Unsubscribe on Unmount**: In React and similar component frameworks, always call `supabase.removeChannel()` on unmount. This is a breeding ground for memory leaks and unnecessary connections.
+    3.  **Connection Budget**: Verify contracted-plan and effective quotas from current documentation/settings, then capacity-test peak users, tabs/devices, reconnection storms, and headroom. Use the SDK-appropriate unsubscribe/cleanup when the consumer lifecycle ends.
+    4.  **Event Rate Control**: Select throttling, debouncing, sampling, or aggregation from UX latency, loss tolerance, message size, and provider quotas; do not put a fixed interval in Universal.
+    5.  **Lifecycle Cleanup**: Release subscriptions at component, view, process, socket, or background-transition ownership boundaries, not only React unmount, and test duplicate listeners after reconnection.
         ```typescript
         useEffect(() => {
           const channel = supabase.channel('room:123')
@@ -930,13 +852,14 @@
     | Notification badge updates | Postgres Changes | Subscribe to notification table changes |
     | Collaborative editing (cursors) | Broadcast | Low latency, ephemeral |
     | Dashboard metrics updates | Postgres Changes | Subscribe to aggregation table changes |
+    | Continuous replication to analytics | managed CDC or Pipelines (§15.4) | Manage initial copy, redelivery, and recovery separately from end-user Realtime |
 
 ---
 
 ## 15. Cron & Queues Design Strategy
 
 ### Rule 15.1: The pg_cron Scheduling Protocol
--   **Law**: Use **`pg_cron`** for scheduled tasks (data purging, aggregation batches, health checks, etc.) and minimize dependency on external schedulers.
+-   **Law**: Select a database scheduler, platform scheduler, workflow engine, or another mechanism for recurring tasks by transaction proximity, runtime, retry, secrets, observability, blast radius, and portability. `pg_cron` is a candidate, not a universal mandate.
 -   **Action**:
     1.  **Cron Expression**: Define using standard cron expressions (`minute hour day month weekday`). Note that expressions are UTC-based; clearly comment timezone conversions.
         ```sql
@@ -948,24 +871,33 @@
         );
         ```
     2.  **Idempotent Jobs**: Design SQL within cron jobs to be idempotent. Anticipate overlapping execution (next run starts before current completes) and consider using lock mechanisms (`pg_advisory_lock`).
-    3.  **Monitoring**: Cron job execution results are available in the `cron.job_run_details` view. Review execution history monthly to verify no failed jobs.
-    4.  **Resource Guard**: Cron jobs processing large volumes of data MUST limit batch size (`LIMIT 10000`) to prevent DB load spikes.
+    3.  **Monitoring**: Monitor start/finish, duration, attempt, checkpoint, affected count, and result; define alert and review cadence from SLO and risk.
+    4.  **Resource Guard**: Use bounded batches and backpressure derived from measured locks, WAL, replication lag, latency, memory, and timeout. Do not put a fixed batch size in Universal.
 
 ### Rule 15.2: The Message Queue Protocol (pgmq / Supabase Queues)
--   **Law**: Asynchronous processing (email sending, external API calls, heavy computations, etc.) MUST use **Supabase Queues (pgmq)**. Executing these within synchronous request processing is prohibited.
+-   **Law**: Where latency, failure isolation, durability, ordering, throughput, or delivery semantics require an asynchronous boundary, compare Supabase Queues, another broker, or a workflow engine by capability. Do not queue every short synchronous operation or operation requiring strong transactional consistency.
 -   **Action**:
     1.  **Queue-First Architecture**: Do NOT call external APIs or send emails within user request processing. Enqueue messages and let workers (Edge Function/pg_cron) process them asynchronously.
-    2.  **Retry Strategy**: Implement Exponential Backoff (`1s → 2s → 4s → 8s → max 30s`) for message processing failures. After a fixed number of retry failures (5), move to Dead Letter Queue (DLQ) for manual handling.
-    3.  **Visibility Timeout**: Set message visibility timeout (`vt`) to at least **2x the processing time**. If the timeout is too short, messages being processed are redelivered, causing duplicate processing.
+    2.  **Retry Strategy**: Retry transient failures only, with jittered backoff and a retry budget; classify permanent errors into quarantine/DLQ. Derive attempts, caps, and redrive conditions from dependency SLO and the business deadline.
+    3.  **Lease and Redelivery**: Set visibility/lease from processing distribution, heartbeats, shutdown, and network partitions; assume at-least-once redelivery and design idempotency keys plus atomic side effects.
     4.  **Message Size**: Include only **minimal data** (ID and operation type) in queue messages. Rather than cramming bulk data into messages, keep data in DB and include only pointers (IDs) in messages.
 -   **Anti-pattern**: Directly executing `await sendEmail(...)` within a Server Action and making users wait for email sending to complete. Enqueue and return a response immediately.
 
 ### Rule 15.3: The Database Webhook Protocol
--   **Law**: When notifying external services of table change events (INSERT/UPDATE/DELETE), use **Database Webhooks** and eliminate polling-based designs.
+-   **Law**: For change notification, select database webhooks, an outbox, CDC, a queue, or bounded polling by delivery guarantees, ordering, replay, transaction consistency, consumer count, and cost.
 -   **Action**:
     1.  **Event-Driven**: Webhooks automatically issue HTTP requests on table trigger events. Use for real-time integration with external services (Slack notifications, Analytics, CRM integration, etc.).
     2.  **Idempotency**: Design webhook receivers to be idempotent. Network failures may cause the same event to be delivered multiple times due to retries.
-    3.  **Secret Header**: Include a secret header (`X-Webhook-Secret`) in webhook requests and verify it on the receiving side. Unverified webhooks are a security hole that accepts spoofed requests from third parties.
+    3.  **Sender Authentication**: Verify sender, integrity, and timestamp/nonce with an approved shared-secret signature, asymmetric signature, mTLS, workload identity, or equivalent, and reject replay. Do not fix one header name in Universal.
+
+### Rule 15.4: The Managed CDC / Pipelines Protocol
+-   **Law**: Managed CDC or Pipelines is a boundary that continuously replicates changes from a transactional database into analytics, search, warehouses, or similar destinations. It does not replace a transactional outbox, end-user Realtime, or backups.
+-   **Action**:
+    1.  **Capability and Maturity**: Verify current availability, support tier, destinations, delivery semantics, limits, and pricing at adoption and update time. Alpha or preview capability follows §60 maturity and exception governance; availability alone does not promote it to Standard.
+    2.  **Delivery Correctness**: Contract the initial-snapshot and WAL boundary, at-least-once redelivery, duplicates, ordering scope, deletes and truncates, checkpoints, slots, lag, backpressure, and recovery. Make consumers idempotent and automate source-to-destination reconciliation.
+    3.  **Schema and Data Governance**: Define table, column, and row allowlists plus PII, residency, encryption, access, and retention. Automatic schema propagation does not replace compatibility review; use expand-contract for breaking changes. Where the service copies data without transformation, make source- or destination-side masking and transformation plus failure behavior explicit.
+    4.  **Operations**: Own replication lag, failures, slot growth, source overhead, destination quotas, pause, resume, rebuild, runbooks, RPO/RTO, export, and exit. A monitoring screen alone is not evidence of recoverability.
+    5.  **FinOps**: Budget initial copy, active duration, change volume, egress, destination storage and queries, and logs as cost drivers, with alerts, stop conditions, and recovery procedures for anomalous growth.
 
 ---
 
@@ -974,7 +906,7 @@
 ### Rule 16.1: The Database Performance Monitoring Protocol
 -   **Law**: Database performance MUST be maintained through **proactive monitoring and preventive optimization**. The reactive approach of "responding only when it feels slow" is prohibited.
 -   **Action**:
-    1.  **pg_stat_statements**: Enable the `pg_stat_statements` extension and review the **Top 20 by execution frequency + Top 20 by average execution time** queries monthly. Queries with `mean_exec_time` exceeding 100ms are optimization candidates.
+    1.  **Workload Evidence**: Use effective telemetry such as `pg_stat_statements` to observe total time, tail latency, frequency, rows, I/O, and locks. Review top-contributing queries at a cadence and query budget derived from SLO, cost, and change risk; do not make fixed counts or 100ms a Universal threshold.
         ```sql
         -- Top 10 Slowest Queries
         SELECT query, calls, mean_exec_time, total_exec_time
@@ -983,19 +915,11 @@
         LIMIT 10;
         ```
     2.  **Index Advisor**: Leverage the Supabase Dashboard **Index Advisor** and regularly review recommended index suggestions. Do not blindly apply suggested indexes; consider impacts on write performance before deciding.
-    3.  **Connection Monitoring**: Monitor current active connection count via `pg_stat_activity` and trigger alerts when exceeding **70%** of `max_connections`. Connection exhaustion directly leads to total service outage.
-    4.  **Table Bloat**: Monitor `n_dead_tup` (dead tuple count) via `pg_stat_user_tables`. When dead tuples exceed **20%** of table size, manually execute `VACUUM ANALYZE`. Default Auto Vacuum settings may be insufficient.
+    3.  **Connection Monitoring**: Alert on active/idle/waiting connections, pool saturation, queue time, and reserved headroom according to the capacity model and SLO.
+    4.  **Table Maintenance**: Observe dead tuples, vacuum lag, wraparound, table/index bloat, and write rate. Respect provider-managed autovacuum while tuning or maintaining only with measured evidence and a runbook.
 
-### Rule 16.2: The Supabase Dashboard Monitoring Checklist
--   **Law**: Verify the following items **weekly** to detect anomalies early.
--   **Checklist**:
-    - [ ] **Database Health**: Is CPU usage sustained above **70%**?
-    - [ ] **Disk Usage**: Has storage usage reached **80%** of plan limits?
-    - [ ] **API Requests**: Does the 5xx error rate exceed **0.1%**?
-    - [ ] **Auth Users**: Any registration spikes (suspected bot registrations)?
-    - [ ] **Edge Function Invocations**: Error rate and latency trends
-    - [ ] **Realtime Connections**: Is concurrent connection count approaching plan limits?
-    - [ ] **Storage**: Storage bandwidth consumption and growth rate
+### Rule 16.2: The Supabase Monitoring Checklist
+-   **Law**: Use dashboards, APIs, metric exports, and log/trace drains to monitor golden signals, quota headroom, growth, and security anomalies across database, disk, API, Auth, Functions, Realtime, and Storage. Define thresholds, windows, cadence, owner, and escalation in Blueprint from SLO, forecasts, contracted plans, and incident history.
 
 ### Rule 16.3: The Supabase FinOps Protocol (Cost Optimization)
 -   **Law**: The Supabase billing model MUST be accurately understood, and cost optimization MUST be incorporated as part of architecture design.
@@ -1011,54 +935,53 @@
         | **Realtime** | 200 connections | 500 connections | Channel design optimization, unused connection cleanup |
         | **Auth MAU** | 50K | 100K incl. | Bot prevention, fraudulent account deletion |
 
-    2.  **Query Optimization for Cost**: Prohibit `select('*')` and specify only required columns. This reduces transferred data volume (Bandwidth billing).
+    2.  **Query Optimization for Cost**: Select required fields and bounded results on public, large, or high-frequency paths. Do not universally prohibit `select('*')` for an explicit small contract; test schema expansion and transfer cost.
     3.  **Storage Tiering**: Cache images and static assets via CDN (Cloudflare, etc.) to minimize direct access to Supabase Storage. This is the most effective bandwidth cost reduction strategy.
-    4.  **Free Tier Guard**: Use Free Tier projects for development/staging environments to isolate production costs. Note that Free Tier projects auto-pause after 7 days of inactivity (set up periodic health check pings).
+    4.  **Non-Production Economics**: Select plans and lifecycles for dev/test/preview from required isolation, availability, data class, quotas, resume time, and contract terms. Do not send synthetic keep-alives solely to avoid billing behavior.
     5.  **Compute Add-on Rightsizing**: Select appropriate Compute Add-on sizes based on actual CPU/memory usage. Excessive Compute is a direct cost waste.
 
 ### Rule 16.4: The Log Management Protocol
 -   **Law**: Logs generated by Supabase (API, Auth, Database, Edge Functions) MUST be centrally managed and maintained in a state immediately usable for incident investigation.
 -   **Action**:
     1.  **Log Drain**: In production, use Supabase's **Log Drain** feature to forward logs to external log management services (Datadog, Logflare, BigQuery, etc.). Native logs in the Supabase Dashboard have limited retention periods.
-    2.  **Structured Logging**: Within Edge Functions, output structured logs in the format `console.log(JSON.stringify({ event, userId, duration }))` to facilitate search and filtering.
-    3.  **PII Exclusion**: Including PII (email addresses, passwords, tokens, etc.) in logs is strictly prohibited. Logs are accessible to all developers, and recording PII creates GDPR/Global Privacy Laws violation risks.
+    2.  **Structured Logging**: Within Edge Functions, emit identifier-free structured logs such as `console.log(JSON.stringify({ event, correlationId, outcome, duration }))` to support search and filtering. Security audits that must identify a person belong in a protected, purpose-limited audit sink with least privilege, tamper resistance, retention, and deletion controls, separate from general application logs.
+    3.  **Sensitive Data Control**: Never log credentials, tokens, or passwords. Limit PII to approved exceptions with purpose, legal basis, minimization, masking, retention, and access controls. Apply least privilege and audit to log access.
 
 ---
 
 ## 17. AI & Vector Search Strategy
 
 ### Rule 17.1: The pgvector Architecture Protocol
--   **Law**: When implementing vector search (semantic search, recommendations, RAG, etc.) with Supabase, the **`pgvector`** extension MUST be used with a systematically designed strategy for embedding storage, search, and indexing.
+-   **Law**: Select pgvector, a managed vector service, a search engine, or another option by scale, filtering/authorization, latency, recall, freshness, operations, cost, and exit. pgvector is a candidate where data locality provides value.
 -   **Action**:
     1.  **Extension Enable**: Enable pgvector with `CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;`. Installing into the `public` schema violates §2.2 (Schema Separation).
-    2.  **Column Definition**: Define embedding columns with `vector(dimension)` type specifying explicit dimensions. OpenAI `text-embedding-3-small` is 1536 dimensions, `text-embedding-3-large` is 3072 dimensions.
+    2.  **Vector Contract**: Contract provider/model, model revision, dimension, distance metric, normalization, and source version as metadata; verify the current model dimension during implementation.
         ```sql
         ALTER TABLE public.documents
         ADD COLUMN embedding vector(1536);
         ```
-    3.  **Cosine Similarity**: Use **cosine similarity** (`<=>` operator) as the standard for similarity search. Inner product (`<#>`) and L2 distance (`<->`) are limited to specialized use cases.
+    3.  **Distance Metric**: Select cosine, inner product, L2, or another metric from the model training contract and offline/online evaluation; do not set one Universal default.
     4.  **RLS Integration**: Always apply RLS to tables containing embedding columns. Designs where vector search results bypass RLS (direct search via `service_role` → unvalidated return to client) are prohibited.
 
 ### Rule 17.2: The Vector Index Strategy
 -   **Law**: Vector indexes MUST be selected based on data size and search accuracy requirements.
 -   **Action**:
-    1.  **HNSW (Recommended)**: Best balance of search accuracy and speed. Higher memory usage but suitable for most use cases.
+    1.  **HNSW Candidate**: Select when measured recall, latency, build time, memory, and write rate fit.
         ```sql
         CREATE INDEX idx_documents_embedding ON public.documents
         USING hnsw (embedding vector_cosine_ops)
         WITH (m = 16, ef_construction = 64);
         ```
-    2.  **IVFFlat**: Use when memory is constrained. Set `lists` parameter to approximately `sqrt(N)` of data row count.
-    3.  **Index Creation Timing**: Create indexes **after data has accumulated** (several thousand rows+). Creating indexes on empty tables prevents the query planner from utilizing them effectively.
-    4.  **Probes Setting**: For IVFFlat, adjust the search list count with `SET LOCAL ivfflat.probes = 10;` during search. This is a precision-speed tradeoff.
+    2.  **IVFFlat Candidate**: Select where training data, memory, and update patterns fit; tune lists/probes through benchmarks.
+    3.  **Index Lifecycle**: With a representative corpus and filter selectivity, measure recall against exact search, p95/p99, memory, and build/rebuild cost to decide creation, tuning, and reindex timing.
 
 ### Rule 17.3: The RAG Pipeline Protocol
 -   **Law**: When building RAG (Retrieval-Augmented Generation) pipelines, the entire process of embedding generation, storage, search, and retrieval MUST be managed with a consistent design.
 -   **Action**:
     1.  **Embedding Generation**: Execute embedding generation in Edge Functions or server-side. Direct API calls from clients (exposing OpenAI API keys) are strictly prohibited.
-    2.  **Chunk Strategy**: Split long documents into chunks (approximately 500-1000 tokens) before generating embeddings. A single embedding for an entire document degrades search accuracy.
+    2.  **Chunk Strategy**: Evaluate chunking from content structure, model context, retrieval unit, citations, overlap, and language; do not put a fixed token width in Universal.
     3.  **Metadata Co-Storage**: Store **original text, source URL, and chunk position** as metadata in the same table alongside embeddings. Storing only embeddings with separate original data management makes it impossible to reconstruct source text from search results.
-    4.  **RPC Search Function**: Execute vector search via RPC functions (`SECURITY DEFINER`) combined with RLS filters.
+    4.  **Authorized Retrieval**: Select RLS, a security-invoker RPC, a service boundary, pre-filtering/post-filtering, or another design that proves authorization for both candidates and returned results. Do not default to `SECURITY DEFINER`.
         ```sql
         CREATE OR REPLACE FUNCTION public.match_documents(
           query_embedding vector(1536),
@@ -1080,20 +1003,21 @@
         END;
         $$;
         ```
-    5.  **Re-Embedding Strategy**: When source data is updated, corresponding embeddings MUST be **regenerated**. Inconsistency between stale embeddings and new text causes fatal degradation of search quality.
+    5.  **Embedding Freshness**: Record source hash, model revision, generation status, retries, backfill, and a staleness SLO; regenerate on semantic changes rather than every metadata-only update.
 
 ---
 
 ## 18. Advanced Auth Design Strategy
 
-### Rule 18.1: The API Key Security Protocol (2025 New Model)
--   **Law**: Based on Supabase's new API key system (introduced 2025), the roles of **Publishable Key** and **Secret Key** MUST be correctly understood and security boundaries strictly managed.
+### Rule 18.1: The API Key Security Protocol
+-   **Law**: Inventory **Publishable Keys**, **Secret Keys**, legacy `anon` and `service_role` keys, user JWTs, and JWT signing keys as separate credential classes, managing client exposure, RLS, rotation, revocation, consumers, and migration.
 -   **Action**:
-    1.  **Publishable Key (formerly anon key)**: Low-privilege key safe for client-side exposure. Controlled by RLS only. Embed in browsers and mobile apps.
-    2.  **Secret Key (formerly service_role key)**: High-privilege server-side only key. Completely bypasses RLS. **Embedding in client code is strictly prohibited**.
-    3.  **Key Rotation**: If a Secret Key is leaked, rotate immediately from the Supabase Dashboard. Since 2025, Secret Keys detected in GitHub public repositories are **automatically revoked**.
-    4.  **RSA Asymmetric Keys**: New projects created after May 2025 use RSA asymmetric keys by default. JWT verification uses the Public Key, enabling token verification in external services without sharing the Secret Key.
-    5.  **Data API Disable**: For projects not requiring public API access (internal tools, etc.), disable the Data API entirely (2025 new feature). This is a fundamental reduction of attack surface.
+    1.  **Publishable Key**: It may be distributed to browsers, mobile, and desktop clients, but it is not authorization. Require RLS, least-privilege grants, abuse controls, and data classification for exposed schemas.
+    2.  **Secret Key**: Use only in trusted runtimes such as servers, workers, and Edge Functions; never expose it in client bundles, logs, previews, or user-controlled headers. Assume an RLS-bypass-equivalent blast radius and design per-workload keys, minimal use, rotation, and audit.
+    3.  **Legacy Migration**: Track the current official deprecation deadline for legacy `anon` and `service_role` keys, migrate one consumer at a time to publishable and secret keys, verify usage telemetry, and then disable legacy keys.
+    4.  **Key Rotation**: On suspected exposure, do not depend on automatic revocation by a detection service. Immediately revoke or rotate, update consumers, investigate log and data access, and retain incident evidence.
+    5.  **JWT Verification**: Do not conflate API keys with JWT signing keys. An external service validates the current JWKS or asymmetric-signing contract, issuer, audience, expiry, and key rotation; it never reuses a shared high-privilege API key for token verification.
+    6.  **Data API Exposure**: Disable the Data API or limit exposed schemas when the architecture does not use it. When it is used, never assume a new table is automatically exposed; manage exposure, grants, and RLS in migrations and tests.
 
 ### Rule 18.2: The PKCE & MFA Implementation Protocol
 -   **Law**: In authentication flows, **PKCE (Proof Key for Code Exchange)** MUST be the standard, and **MFA (Multi-Factor Authentication)** MUST be implemented for applications requiring high security.
@@ -1117,7 +1041,7 @@
     1.  **Anonymous Auth Use Case**: Use for guest carts, onboarding experiences, demo features, etc., where temporary DB writes are needed without authentication.
     2.  **Account Linking**: When anonymous users later sign up via email/social, use `supabase.auth.linkIdentity()` to link new credentials to the existing anonymous session, guaranteeing data continuity.
     3.  **RLS for Anonymous**: In RLS policies for anonymous users, use `auth.jwt()->>'is_anonymous'` to distinguish between anonymous and authenticated users and restrict write scope.
-    4.  **Cleanup**: Anonymous users that were not elevated MUST be automatically deleted via `pg_cron` batch after a set period (e.g., 30 days). Neglecting this causes infinite growth of the `auth.users` table, impacting Auth MAU billing.
+    4.  **Cleanup**: Derive retention for anonymous identities that are not elevated from purpose, fraud, legal hold, user expectations, and provider billing, then delete/anonymize with an approved scheduler. Do not fix 30 days or `pg_cron` in Universal.
     5.  **Session Refresh**: Monitor session state changes via `supabase.auth.onAuthStateChange()` and handle token refresh appropriately. Neglecting token expiration causes sudden user logouts.
 
 ---
@@ -1125,7 +1049,7 @@
 ## 19. Testing Strategy
 
 ### Rule 19.1: The RLS Policy Testing Protocol
--   **Law**: RLS policies MUST be verified through **automated testing**. Relying solely on manual verification is prohibited. When modifying policies, include test SQL in the same migration file as the changes.
+-   **Law**: Verify RLS policies through automated tests and never rely on manual inspection alone. Version test artifacts in the same change set as the migration, without universally requiring test SQL inside a production migration file.
 -   **Action**:
     1.  **pgTAP Integration**: Use the `pgTAP` extension to write unit tests for RLS policies.
         ```sql
@@ -1172,23 +1096,23 @@
     1.  **Boundary Value Testing**: Test function behavior against boundary values such as NULL inputs, empty strings, extremely large numbers, and invalid UUIDs.
     2.  **Permission Testing**: Verify that `SECURITY DEFINER` functions do not cause unintended privilege escalation. Confirm that calling from the `anon` role does not return data that should be inaccessible.
     3.  **Transaction Safety**: Confirm that when errors occur within functions, partial data changes do not persist and proper rollback occurs.
-    4.  **Seed Data**: Manage test seed data in `supabase/seed.sql` and build deterministic state before test execution.
+    4.  **Seed Data**: Build test fixtures deterministically through an approved seed file, factory, snapshot, or equivalent without depending on production data or a fixed path.
 
 ---
 
 ## 20. Multi-Environment & Branching Strategy
 
 ### Rule 20.1: The Environment Isolation Protocol
--   **Law**: Development (Dev), Staging, and Production environments MUST be physically separated to prevent data contamination between environments.
+-   **Law**: Separate the production trust boundary from non-production. Choose the physical project count for dev, test, preview, and staging from data class, blast radius, parallelism, cost, and provider capability; never share production credentials or data.
 -   **Action**:
-    1.  **Separate Projects**: Each environment MUST be created as an **independent Supabase project**. Reusing a single project across environments (changing only env variables) is a breeding ground for data contamination and configuration errors.
+    1.  **Isolation Pattern**: Select independent projects, branch/preview instances, ephemeral local stacks, or equivalent for the required isolation; production retains an independent access, secret, and approval boundary.
     2.  **Environment Variable Isolation**: Each environment's `SUPABASE_URL` and `SUPABASE_ANON_KEY` MUST be strictly managed via environment variables. Hardcoding is prohibited.
     3.  **Production Data Isolation**: When copying production data to development/staging environments, PII MUST be **anonymized/masked**. Unprocessed copies of production data create Global Privacy Laws/GDPR violation risks.
-    4.  **Migration Flow**: Migration application order is unidirectional: `Dev → Staging → Production`. Direct application to Production is prohibited per §7.6 (Zero SQL Editor Policy).
+    4.  **Migration Flow**: Migration application order is unidirectional: `Dev → Staging → Production`. Unmanaged production changes are prohibited by §7.6 (Controlled Remote Change Policy).
     5.  **Seed Data Separation**: Manage seed data (`seed.sql`) separately per environment to prevent development test data from contaminating production.
 
 ### Rule 20.2: The Supabase Branching Protocol
--   **Law**: Leverage Supabase Branching (2025 Public Alpha) to safely execute schema change previews and testing.
+-   **Law**: Where the current plan and maturity fit, use Supabase Branching, preview projects, local ephemeral stacks, or equivalent to isolate schema-change verification. Adoption of a preview feature is not itself a Universal requirement.
 -   **Action**:
     1.  **Branch = Isolated Instance**: Each branch functions as an independent Supabase instance (with its own API credentials, Auth, Storage). Test schema changes without impacting production.
     2.  **Dashboard / CLI Creation**: Branches can be created from the Supabase Dashboard, CLI (`supabase branches create`), or Management API. Git integration is not required (Branching 2.0).
@@ -1201,17 +1125,17 @@
 ## 21. PostgREST API Design Strategy
 
 ### Rule 21.1: The Select Optimization Protocol
--   **Law**: Data retrieval via PostgREST (Supabase Auto-generated REST API) MUST specify only **the minimum required columns**, and casual use of `select('*')` is prohibited.
+-   **Law**: Bound fields and results for public, large, or high-frequency PostgREST queries. An explicit small contract may use `select('*')`, but must test schema expansion, PII exposure, and egress.
 -   **Action**:
     1.  **Explicit Select**: Explicitly specify needed columns like `.select('id, name, created_at')`. `select('*')` increases transferred data volume and directly impacts Bandwidth billing (see §16.3).
     2.  **Computed Columns**: Leverage PostgreSQL Generated Columns and Views to return computed results directly via the API. Eliminate client-side recalculation.
-    3.  **Type Generation**: Column lists specified in `select()` are reflected in types generated by `supabase gen types`. To maintain type safety, always regenerate types when changing select statements.
+    3.  **Type Contract**: Refresh generated types when the database schema or generator version changes. When `select()` changes, verify query-result inference, DTOs, consumer contracts, and contract tests; do not confuse a select-list-only change with a reason to regenerate database-schema types.
 
 ### Rule 21.2: The Filtering & Embedding Protocol
--   **Law**: PostgREST filtering and **Embedding (table joins)** MUST be properly utilized to minimize client-side data processing.
+-   **Law**: Filter unbounded data at its source, then choose Embedding, multiple queries, RPC, or service aggregation by cardinality, payload, cacheability, latency, and authorization boundaries. Neither one-request delivery nor Embedding is a goal by itself.
 -   **Action**:
     1.  **Filter Operators**: Use PostgREST filters such as `.eq()`, `.in()`, `.gte()`, `.lte()`, `.like()`, `.ilike()` to filter data server-side. Designs that retrieve all records and filter client-side are prohibited.
-    2.  **Embedding (Foreign Table Joins)**: Retrieve related table data via foreign keys in **a single request**.
+    2.  **Embedding Candidate**: Foreign-key Embedding is a strong candidate when bounded related data shares an authorization and cache boundary. Compare multiple queries or a dedicated endpoint when independent caching, different change rates, large fan-out, or separate authorization boundaries exist.
         ```typescript
         // ✅ Retrieve posts and author info in 1 request
         const { data } = await supabase
@@ -1223,15 +1147,15 @@
         ```typescript
         .select('id, title, author:profiles!inner(name)')
         ```
-    4.  **Deep Nesting Limit**: Limit Embedding nesting depth to **3 levels or fewer**. Deep nesting exponentially increases query complexity and degrades response times.
+    4.  **Nesting Budget**: Set acceptable depth from measured execution plans, row fan-out, serialized payload, memory, timeout, and egress budgets rather than a fixed level count. Split over-budget nested contracts into views, RPC, separate fetches, or pre-aggregation.
 
 ### Rule 21.3: The Pagination & Aggregate Protocol
--   **Law**: List retrieval APIs MUST always implement **pagination**; retrieving all records is prohibited. Use PostgREST's aggregate function capabilities.
+-   **Law**: Collections that can grow or whose upper bound cannot be proven require bounded pagination, streaming, export jobs, or an equivalent control. Do not force pagination on small reference data with an enforced upper bound.
 -   **Action**:
     1.  **Range Pagination**: Implement offset-based pagination with `.range(from, to)`. Total count is available via the `Content-Range` response header.
     2.  **Count Option**: When total count is needed, use `{ count: 'exact' }` option. However, for large tables, `count: 'estimated'` is recommended (`exact` triggers a full table scan).
-    3.  **Cursor Pagination**: For tables with large datasets (1M+ rows), adopt Keyset Pagination using `created_at` or `id` as cursors. Offset-based pagination severely degrades on deep pages.
-    4.  **Max Page Size**: Do not exceed **1000 records** per request (PostgREST default). If necessary, `max_rows` can be adjusted in `supabase_settings`, but reconsider the design of clients bulk-fetching large datasets.
+    3.  **Cursor Pagination**: Consider Keyset Pagination with a unique tie-breaker when growth, deep pages, concurrent mutation, or stable ordering requires it. Do not use a fixed row-count threshold; compare it with offset pagination through execution plans and consistency tests.
+    4.  **Page Budget**: Set page size in Blueprint from effective provider limits, payload, client memory, latency SLO, egress, and rate limits, then enforce it with a server-side maximum and tests. Do not embed a fixed count in Universal.
 
 ---
 
@@ -1241,7 +1165,7 @@
 -   **Law**: Center the Supabase CLI in the development workflow and minimize dependency on Dashboard GUI operations.
 -   **Action**:
     1.  **Local Development**: Build local development environments with `supabase init` → `supabase start`. The local environment runs identical PostgreSQL, Auth, Storage, and Edge Functions as production.
-    2.  **Migration Workflow**: Create new migration files with `supabase migration new <name>` and write SQL. Manual changes via Dashboard are prohibited per §7.6 (Zero SQL Editor Policy).
+    2.  **Migration Workflow**: Create new migration files with `supabase migration new <name>` and write SQL. Unmanaged remote-console changes are prohibited by §7.6 (Controlled Remote Change Policy).
     3.  **Linking**: Configure remote project linking with `supabase link --project-ref <ref>`.
     4.  **Type Generation**: Generate type definitions from local DB with `supabase gen types typescript --local > src/types/database.types.ts`. Remote DB generation is available via the `--project-id` option.
     5.  **Deploy**: Deploy Edge Functions with `supabase functions deploy <name>`. The `--no-verify-jwt` option is permitted only during development per §13.2.
@@ -1260,27 +1184,25 @@
 ## 23. Connection Pooling / Supavisor Strategy
 
 ### Rule 23.1: The Supavisor Architecture Protocol
--   **Law**: In Supabase production environments, database connections MUST go through **Supavisor** (Supabase's official connection pooler, PgBouncer successor). Direct connections are limited to specific use cases.
+-   **Law**: Select the Data API, a pooler, or a direct connection from runtime concurrency, connection lifetime, network reachability, session semantics, and provider capability. Supavisor is a strong candidate for elastic/short-lived workloads, not a universal requirement for every path.
 -   **Action**:
-    1.  **Pooler Endpoint**: Application connections MUST use the **Pooler connection string** (port `6543`) available from the Dashboard. Direct connections (port `5432`) are limited to migration execution and cases requiring Prepared Statements.
+    1.  **Endpoint Contract**: Obtain endpoint, port, TLS, IPv4/IPv6, pooling mode, credentials, and prepared-statement compatibility from current project settings and documentation; do not fix ports in Universal.
     2.  **Serverless Optimization**: In serverless environments (Vercel Functions, Edge Functions, etc.), DB connections are created and destroyed per request. Supavisor manages **hot connections** in a pool, significantly reducing connection overhead (TCP handshake, TLS negotiation, PostgreSQL startup).
     3.  **IPv6 Mediation**: Supavisor provides IPv4 → IPv6 mediation. Use Pooler connections from IPv4 environments like GitHub Actions to avoid IPv6 connection errors.
-    4.  **Query Load Balancing**: Supavisor **automatically distributes read queries** across read replicas when enabled. Route writes to primary and reads to replicas to distribute load.
+    4.  **Replica Routing Verification**: When adopting read replicas, verify the routing behavior provided by the current plan, connection endpoint, client, and pooling mode against official documentation and measurement. Do not assume automatic distribution; test primary/replica paths, read-after-write consistency, and failover behavior.
 
 ### Rule 23.2: The Pool Size Design Protocol
 -   **Law**: Connection pool size MUST be **designed using calculations** based on PostgreSQL's max connections and application characteristics. Leaving default values is prohibited.
 -   **Action**:
-    1.  **Pool Size Calculation**: Configure Supavisor pool size via "Database Settings > Connection Pooling" in the Dashboard. Calculation guidelines:
-        -   PostgREST API-centric apps: Allocate **40%** of DB max connections to Supavisor
-        -   Direct connection-centric apps: Allocate **80%** of DB max connections to Supavisor
-    2.  **Max Connections Awareness**: PostgreSQL `max_connections` varies by plan (Free: 60, Pro: 200, Team: 400, etc.). Connection requests exceeding this limit result in "Too many connections" errors.
+    1.  **Pool Size Calculation**: Calculate the pool budget from peak instances, per-instance concurrency, transaction duration, database/pooler capacity, and migration/operator/replication headroom; load-test queue time and saturation.
+    2.  **Max Connections Awareness**: Read effective `max_connections`, pooler limits, reserved connections, and contracted plan from runtime evidence; do not embed fixed values by plan name.
     3.  **Connection Monitoring**: Periodically monitor connection trends on the **Database > Connections** page in the Dashboard. Teams/Enterprise plans provide breakdowns by connection type (Postgres, PostgREST, Auth, Storage, etc.).
     4.  **Connection Leak Prevention**: Forgetting `supabase.removeAllChannels()` or explicit DB connection closure on the application side causes connection leaks. Always release connections on request completion in serverless functions.
 
 ### Rule 23.3: The Connection Mode Decision Protocol
 -   **Law**: **Transaction Mode** and **Session Mode** MUST be correctly selected based on application characteristics.
 -   **Action**:
-    1.  **Transaction Mode (Recommended)**: Optimal for serverless environments and short-lived API connections. Connections are returned to the pool on transaction completion. **Use Transaction Mode by default.**
+    1.  **Transaction Mode Candidate**: A candidate for short-lived/elastic workloads that do not need session state. Test current driver and prepared-statement compatibility.
     2.  **Session Mode**: Use only when features depending on session state are needed, such as Prepared Statements or `LISTEN/NOTIFY`. Connections are occupied until session end.
     3.  **Transaction Mode Restrictions**: The following features are **unavailable** in Transaction Mode:
         -   Session variables via `SET` commands
@@ -1294,33 +1216,25 @@
 ## 24. Backup & Disaster Recovery Strategy
 
 ### Rule 24.1: The Backup Strategy Protocol
--   **Law**: Production data MUST be protected with a **multi-layered backup strategy**. Designs that rely solely on Supabase managed backups are prohibited.
+-   **Law**: Protect production data and every resource needed for recovery with a verifiable backup strategy aligned to defined RPO, RTO, retention, failure domains, and data classification. Identify dependence on one control plane, account, or region in risk assessment and design required redundancy.
 -   **Action**:
-    1.  **Daily Automated Backups**: Pro plan and above includes Supabase daily automated backups retained for 7 days. Periodically verify status via **Database > Backups** in the Dashboard.
-    2.  **Point-in-Time Recovery (PITR)**: For finer RPO (Recovery Point Objective), **enable PITR**. This allows restoration to any point in time (available on Pro plan and above).
-    3.  **External Backup Redundancy**: Implement periodic external exports in addition to Supabase backups:
-        -   **`pg_dump`**: Generate compressed backups with `pg_dump --format=custom` and store in Object Storage (S3/R2/GCS, etc.)
-        -   **Scheduled Execution**: Execute daily/weekly via Edge Functions or external schedulers (GitHub Actions, Cloud Scheduler, etc.)
-        -   **Cross-Region Storage**: Store backup files in a **different region** from the production DB. Avoid the risk of losing both to the same regional failure.
-    4.  **Backup Encryption**: If backups contain PII, **encrypt** before storage. Manage encryption keys separately from backups (Vault, AWS KMS, etc.).
-    5.  **Free Plan Warning**: Backup downloads are not available on Free plans. Always configure self-managed backups using `pg_dump` or `supabase db dump`.
+    1.  **Effective Capability Inventory**: Verify the contracted plan and current official documentation, then inventory backup frequency, retention, PITR, download or export, restore method, encryption, region, and permissions from effective settings and evidence. Do not encode fixed plan names or retention periods in this rule.
+    2.  **Resource-complete Scope**: Do not assume database backups include Storage objects, Auth configuration, Edge Functions, secrets, networks, custom domains, or external identities and queues. Define protection, reconstruction, and consistency order for each resource.
+    3.  **Independent Copy When Required**: When the threat model includes provider-account deletion, control-plane or regional failure, operator error, or ransomware, export logical or physical copies through an approved scheduler to an encrypted separate failure domain, considering immutability and deletion protection.
+    4.  **Privacy and Key Separation**: Apply encryption, access logging, retention, legal hold, deletion, and key separation to backups containing PII according to data classification.
+    5.  **Continuous Evidence**: Monitor backup jobs, freshness, size anomalies, and restore eligibility, and alert the owner on failure. A success indicator alone is not proof of recoverability.
 
 ### Rule 24.2: The Disaster Recovery Planning Protocol
 -   **Law**: Disaster recovery (DR) procedures MUST be **documented and tested**. Production operation without existing or tested recovery procedures is prohibited.
 -   **Action**:
-    1.  **RTO/RPO Definition**: Define RTO (Recovery Time Objective) and RPO (Recovery Point Objective) in advance:
-        -   **RTO Guidelines**: Daily backup restoration = several hours to half a day, PITR = tens of minutes
-        -   **RPO Guidelines**: Daily backups = up to 24 hours of data loss, PITR = minutes
+    1.  **RTO/RPO Definition**: Define RTO and RPO per service and data domain in Blueprint from business impact, data-loss tolerance, dependency chain, and regulation, then validate feasibility with measured provider capabilities.
     2.  **Recovery Runbook**: Create and share a recovery procedures document with the team including:
-        -   Supabase Dashboard restoration procedures
+        -   Restoration through an approved control plane, API, or CLI
         -   `pg_restore` backup restoration procedures
         -   PITR point-in-time restoration procedures
         -   Recovery checklist for all services including Auth/Storage/Edge Functions
-    3.  **DR Test**: Conduct **recovery tests** in staging environments at least quarterly. Actually restore from backups and verify data integrity and application functionality. Untested backups are equivalent to "non-existent."
-    4.  **Critical Table Identification**: Rank all tables by importance and specify recovery priority:
-        -   **Tier 1 (Immediate Recovery)**: `auth.users`, payment data, core business data
-        -   **Tier 2 (Within 6 hours)**: User content, configuration data
-        -   **Tier 3 (Within 24 hours)**: Logs, analytics data, caches
+    3.  **DR Test**: Perform real restoration into an isolated environment at a cadence based on release risk, change events, compliance, and RTO or RPO; verify data integrity, identity, Storage objects, the application, observability, and DNS or routing. Do not describe an untested backup as recoverable.
+    4.  **Recovery Priority**: Define recovery order, parallelism, and consistency checkpoints from the data-domain dependency graph in Blueprint. Do not force fixed tiers or fixed durations on every project.
     5.  **Incident Communication**: Include communication procedures for incidents (user notification, stakeholder contact, status page updates) in the recovery runbook.
 
 ---
@@ -1330,18 +1244,15 @@
 ### Rule 25.1: The Auth Rate Limiting Protocol
 -   **Law**: Supabase Auth's built-in rate limits MUST be understood and incorporated into application design. Designs that ignore rate limits cause legitimate user blocking and service denial.
 -   **Action**:
-    1.  **Built-in Limits Awareness**: Supabase Auth applies the following default rate limits:
-        -   **Email Sending**: Up to 3 emails per hour to the same email address (confirmation, password reset, etc.)
-        -   **SMS Sending**: Up to 30 messages per hour to the same phone number
-        -   **Sign-up**: Per-IP rate limiting applied
+    1.  **Effective Limits**: Read current defaults, project overrides, and provider quotas from the Dashboard, Management API, and official documentation; design capacity and abuse budgets for email, SMS, signup, token, and other dimensions.
     2.  **Management API Customization**: Customize rate limit values through the Dashboard or Management API. Default values are startup-oriented and require adjustment as traffic grows.
     3.  **Client-Side Throttling**: Implement throttling on authentication requests client-side as well. Prevent unnecessary rate limit exceedance from button spam or retry loops.
     4.  **Error Handling**: Properly handle HTTP 429 responses on rate limit exceedance. Display "Please wait" messages to users and control retry timing based on the `Retry-After` header.
 
 ### Rule 25.2: The Custom API Rate Limiting Protocol
--   **Law**: Custom Rate Limiting MUST be implemented for PostgREST API / Edge Functions to prevent abuse, DDoS, and cost explosions.
+-   **Law**: Internet-facing or cost-amplifying Data APIs/Functions require appropriate rate, concurrency, and quota controls selected from provider controls, gateways, distributed stores, databases, or equivalent.
 -   **Action**:
-    1.  **Edge Functions Rate Limiting**: Use external stores like Upstash Redis to control request rates in Edge Functions. Sliding Window algorithm is recommended.
+    1.  **Control Selection**: Select token buckets, sliding windows, concurrency limits, quotas, or another control by exactness, distribution, latency, failure modes, and cost. Upstash and similar services are non-normative examples.
         ```typescript
         // Rate Limiting example in Edge Function
         import { Ratelimit } from "@upstash/ratelimit";
@@ -1355,11 +1266,8 @@
         const { success } = await ratelimit.limit(identifier);
         if (!success) return new Response("Rate limited", { status: 429 });
         ```
-    2.  **Per-User Limiting**: Apply Rate Limiting based on `IP` for anonymous users and `user_id` for authenticated users. Recommend a tier system granting authenticated users higher rates than anonymous.
-    3.  **Endpoint-Specific Limits**: Differentiate rates based on resource consumption rather than applying uniform rates across all endpoints:
-        -   **Read operations**: 60 requests/min (lenient)
-        -   **Write operations**: 20 requests/min (strict)
-        -   **Auth operations**: 5 requests/min (strictest)
+    2.  **Identity and Fairness**: Combine IP, account, tenant, device, credential, and resource according to privacy, NAT, evasion, and enterprise fairness.
+    3.  **Resource Budget**: Set limits from per-endpoint CPU, database rows, egress, downstream quotas, and business tier; do not put fixed requests-per-minute values in Universal.
     4.  **Abuse Detection**: Implement logic to detect anomalous patterns (mass sign-ups in short periods, consecutive login failures from same IP, etc.) and trigger temporary IP blocks or CAPTCHA challenges.
 
 ---
@@ -1367,7 +1275,7 @@
 ## 26. Vault & Secret Management Strategy
 
 ### Rule 26.1: The Vault Encrypted Storage Protocol
--   **Law**: Sensitive information such as API keys, external service secrets, and encryption keys MUST be stored encrypted using Supabase **Vault** (PostgreSQL extension). Plain text DB storage and direct hardcoding in environment variables are prohibited.
+-   **Law**: Protect secrets with an approved secret manager, workload identity, platform secret, or Vault appropriate to the purpose and execution boundary, providing encryption, least privilege, rotation, and audit. Storage in source code, client bundles, logs, or plaintext database fields is prohibited.
 -   **Action**:
     1.  **Vault Extension**: Supabase Vault stores secrets with **Authenticated Encryption**. Manage secrets via the Dashboard "Vault" section or SQL.
         ```sql
@@ -1379,16 +1287,13 @@
         ```
     2.  **Statement Logging Disable**: Use `SET LOCAL log_statement = 'none';` when inserting secrets to prevent plain text from being recorded in logs. Neglecting this leaves secrets persisted in log files.
     3.  **Access Restriction**: Restrict access to the `vault.decrypted_secrets` view to minimum required roles (`service_role` or dedicated admin role). Direct access from `anon` or `authenticated` roles is prohibited.
-    4.  **pgsodium Deprecation**: The `pgsodium` extension has entered a deprecation cycle. For new projects, do NOT use `pgsodium` directly; manage secrets **via Vault**. Vault's internal implementation will transparently migrate away from pgsodium with no API impact.
-    5.  **Use Cases**: Encrypted secrets in Vault are accessible from PostgreSQL Functions, Triggers, and Database Webhooks. For Edge Functions, use environment variables (`Deno.env.get()`).
+    4.  **Lifecycle Compatibility**: Verify extension/provider deprecations and migration paths from current official documentation; never assume an internal implementation migrates transparently.
+    5.  **Boundary Selection**: Vault is a candidate for secrets needed only inside database execution; Functions, CI, and external workloads use the runtime's approved secret binding or workload identity.
 
 ### Rule 26.2: The Secret Rotation & Lifecycle Protocol
 -   **Law**: Secrets MUST be **rotated periodically** and immediately invalidated on leak. Operating without documented rotation procedures is prohibited.
 -   **Action**:
-    1.  **Rotation Schedule**: Use the following rotation intervals as guidelines:
-        -   **Supabase API Keys**: Every 90 days (regenerate from Dashboard)
-        -   **External Service API Keys**: Per service recommendation (max 90 days)
-        -   **JWT Secret**: Annually (execute with planning due to large impact scope)
+    1.  **Rotation Schedule**: Prefer keyless or short-lived credentials. For long-lived secrets, derive Blueprint rotation/revocation cadence from secret type, compromise impact, provider capability, regulation, and consumer rollout time. Revoke immediately on suspected compromise.
     2.  **Automated Rotation**: Automate secret rotation where possible. Execute in order: Update secret in Vault → Verify dependent Functions/Triggers → Invalidate old secret.
     3.  **Leak Response**: Since 2025, Supabase provides **automatic detection and invalidation of API keys pushed to public GitHub repositories**. Do not rely solely on this; always implement `.env` file gitignore configuration and CI/CD secret scanning (GitHub Secret Scanning, GitLeaks, etc.).
     4.  **Environment Separation**: Completely separate dev/staging/production secrets. Sharing the same API keys across multiple environments is prohibited.
@@ -1399,7 +1304,7 @@
 ## 27. Foreign Data Wrappers (FDW) Strategy
 
 ### Rule 27.1: The FDW Architecture Protocol
--   **Law**: Access to external data sources (Stripe, Firebase, S3, other PostgreSQL, etc.) MUST leverage Supabase **Wrappers** (Foreign Data Wrappers extension) for unified SQL interface access.
+-   **Law**: For external data-source integration, compare FDW/Supabase Wrappers, APIs, event ingestion, ETL/ELT, and replication by consistency, latency, credential isolation, query pushdown, rate limits, failure propagation, cost, and portability. Wrappers are a candidate, not a universal requirement.
 -   **Action**:
     1.  **SQL-Native Access**: FDWs enable operating on external APIs and databases using standard SQL just like native PostgreSQL tables. Reduce individual API call logic on the application side and ensure data access uniformity.
     2.  **Supported Wrappers**: The following major FDWs are available:
@@ -1412,9 +1317,9 @@
     4.  **No ETL Required**: FDWs access data while keeping it in its original source, eliminating the need for ETL pipeline construction. However, understand the latency vs. data freshness tradeoff.
 
 ### Rule 27.2: The FDW Security & Performance Protocol
--   **Law**: FDW credentials MUST be encrypted and managed via **Vault**, and foreign tables MUST be placed in **private schemas**. Materialized View usage is mandatory for performance optimization.
+-   **Law**: Protect FDW credentials at an approved secret boundary and minimize API exposure and grants for foreign objects. Adopt caching/materialization only when measurements of latency, freshness, consistency, and cost justify it.
 -   **Action**:
-    1.  **Vault Integration**: FDW credentials (API keys, DB connection strings, etc.) MUST be encrypted and stored using `vault.create_secret()` (see §26.1). Writing keys in plain text in FDW SERVER options is prohibited.
+    1.  **Credential Integration**: Never embed credentials in SQL source, migrations, SERVER options, or logs; use an approved secret reference supported by the extension or an isolated execution boundary.
         ```sql
         -- Store secret in Vault
         SELECT vault.create_secret('sk_live_xxx', 'stripe_api_key');
@@ -1424,8 +1329,8 @@
           OPTIONS (api_key_id (SELECT id FROM vault.decrypted_secrets WHERE name = 'stripe_api_key'));
         ```
     2.  **Private Schema Placement**: Do **NOT** place foreign tables in the `public` schema or public API schemas. Place them in dedicated private schemas (e.g., `fdw_stripe`, `fdw_firebase`) to block direct Data API access.
-    3.  **Materialized Views**: External API calls via FDW have high latency, so periodically cache frequently accessed data using **Materialized Views**. Configure refresh schedules with `pg_cron`.
-    4.  **SECURITY DEFINER Functions**: When partially exposing foreign table data to the public API, create `SECURITY DEFINER` functions in the public/api schema as thin wrappers returning only necessary columns. Directly exposing foreign tables is prohibited.
+    3.  **Materialization Choice**: Select a query cache, materialized view, replication, ETL, or another mechanism appropriate to freshness SLO, failure recovery, and source quotas.
+    4.  **Controlled Exposure**: Expose only necessary fields and rows through a security-invoker view/function, constrained service, materialized projection, or equivalent. Do not default to `SECURITY DEFINER`.
     5.  **Error Handling**: External API failures (rate limits, network errors) propagate to PostgreSQL query timeouts. Set `statement_timeout` on FDW queries to prevent failure propagation.
 
 ---
@@ -1473,9 +1378,9 @@
 ## 29. Multi-tenancy Strategy
 
 ### Rule 29.1: The Tenant Isolation Design Protocol
--   **Law**: In multi-tenant applications, data isolation between tenants MUST be enforced with **RLS and a tenant_id column**. Isolation relying solely on application logic is prohibited.
+-   **Law**: In multi-tenant systems, select an enforceable boundary such as shared-row RLS, schema isolation, database or project isolation, or a service boundary according to threat, regulation, blast radius, operations, and cost. Isolation based only on an optional application filter is prohibited.
 -   **Action**:
-    1.  **tenant_id Column**: Add a `tenant_id UUID NOT NULL` column to all tables requiring tenant isolation. This column is used as the filter condition for RLS policies.
+    1.  **Isolation Discriminator**: In a shared-row model, align an immutable tenant or organization discriminator, foreign keys, indexes, and RLS. Choose its name and type from the domain and identity model; `tenant_id UUID` is not the only representation. The following is an example.
         ```sql
         CREATE TABLE public.projects (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1486,38 +1391,24 @@
         -- Create index on tenant_id (essential for RLS performance)
         CREATE INDEX idx_projects_tenant_id ON public.projects (tenant_id);
         ```
-    2.  **RLS Policy with tenant_id**: Store the tenant ID in the JWT `app_metadata` and validate it in RLS policies. Use `app_metadata` (modifiable only by admins) to prevent users from tampering with their tenant ID.
+    2.  **Trusted Tenant Context**: RLS compares an authoritative tenant context such as a signed claim, membership relation, or session context that meets revocation-freshness and consistency requirements. JWT `app_metadata` is a candidate, but stale claims and membership changes must be designed. The following is a single-tenant-claim example.
         ```sql
         ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
         CREATE POLICY "tenant_isolation" ON public.projects
           FOR ALL
           USING (tenant_id = (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::UUID);
         ```
-    3.  **Tenant Assignment**: Automatically set tenant_id in `app_metadata` during user registration. Implement via Auth Hooks or server-side logic.
-    4.  **Shared vs Dedicated**: Architecture selection guidelines:
-        -   **Shared Database + RLS** (Recommended): Cost-efficient and simple to manage. Optimal for SaaS with 100 or fewer tenants
-        -   **Schema-per-Tenant**: Stronger logical separation. Consider for regulatory requirements
-        -   **Database-per-Tenant**: Complete isolation. Only for enterprise customers with strict requirements
+    3.  **Membership Lifecycle**: Manage tenant assignment, invitation, role change, transfer, departure, and deletion through an authoritative membership workflow, and test claim refresh, session revocation, audit, and race conditions.
+    4.  **Shared vs Dedicated**: Compare shared-row, schema-per-tenant, database or project-per-tenant, and hybrid models by data sensitivity, noisy-neighbor risk, backup and restore unit, residency, customization, SLO, operating capacity, and unit economics rather than a fixed tenant-count threshold.
 
 ### Rule 29.2: The Tenant Isolation Audit Protocol
 -   **Law**: Tenant isolation MUST be **periodically audited and tested** to verify no data leakage exists.
 -   **Action**:
     1.  **Cross-Tenant Query Test**: Test suites MUST include test cases verifying that "Tenant A's users cannot access Tenant B's data."
-    2.  **Missing tenant_id Check**: Periodically detect tables without a `tenant_id` column using the following query:
-        ```sql
-        SELECT table_name FROM information_schema.tables t
-        WHERE t.table_schema = 'public'
-          AND t.table_type = 'BASE TABLE'
-          AND NOT EXISTS (
-            SELECT 1 FROM information_schema.columns c
-            WHERE c.table_schema = t.table_schema
-              AND c.table_name = t.table_name
-              AND c.column_name = 'tenant_id'
-          );
-        ```
+    2.  **Isolation Coverage Check**: Use a machine-readable tenancy inventory as the source of truth and verify that each resource has its declared model, discriminator or schema or database mapping, policy, index, negative test, and owner. Do not determine coverage from a fixed `tenant_id` name search alone.
     3.  **RLS Enforcement Check**: Periodically audit that RLS is enabled on all `public` schema tables (see §3).
-    4.  **Tenant-Aware RBAC**: Implement intra-tenant permission management (admin/member/viewer, etc.) by combining RLS policies with JWT custom claims. Cross-tenant admin privileges are restricted to `service_role`.
-    5.  **Performance Monitoring**: Monitor RLS policy performance degradation as tenant count increases. Verify that `tenant_id` column indexes exist and RLS policies use the InitPlan pattern (see §3.0).
+    4.  **Tenant-Aware RBAC**: Select a model such as membership tables, claims, RLS, or a policy service for intra- and cross-tenant authorization according to revocation and consistency needs. Separate cross-tenant operations from the normal user path and require resource and action scope, step-up, time-bound approval, and audit; do not make `service_role` the only administrator model.
+    5.  **Performance Monitoring**: Monitor RLS performance as tenant count grows, select indexes and InitPlan-style optimizations from real queries, and verify them under the evidence requirements in §3.0.
 
 ---
 
@@ -1611,23 +1502,22 @@
 ## 32. Log Drain & External Observability Strategy
 
 ### Rule 32.1: The Log Drain Configuration Protocol
--   **Law**: Production environments MUST configure **Log Drains** to forward all Supabase service logs (Database, Auth, Storage, Realtime, Edge Functions, API Gateway) to external observability platforms.
+-   **Law**: Send logs, metrics, and traces required for service SLOs, security detection, audit, and incident response to an observability path that supports required querying, correlation, retention, and export. Adopt an external path such as a Log Drain when provider retention is insufficient, centralized SOC or SIEM operation is required, or a contract requires retention.
 -   **Action**:
-    1.  **Supported Destinations**: The following Log Drain destinations are natively supported:
-        -   **Datadog**: Configure API key and site region. Logs are gzip-compressed and tagged for transfer
-        -   **Custom HTTP Endpoint**: Send to any HTTP endpoint. Filtering and restructuring via Edge Functions is possible
-    2.  **Plan Requirement**: Log Drains are available on Team / Enterprise / Pro plans. Not available on the Free plan.
-    3.  **Log Retention**: Supabase's default log retention period is limited (varies by plan). Transfer to external storage via Log Drain when long-term retention is required.
-    4.  **Structured Logging**: Output logs within Edge Functions as structured JSON using `console.log(JSON.stringify({...}))`. This facilitates parsing and filtering in external tools.
-    5.  **Sensitive Data Filtering**: Verify that logs forwarded to Log Drains do **NOT contain PII or secrets**. If necessary, filter logs via Edge Functions and mask sensitive data before forwarding.
+    1.  **Capability Check**: At deployment, verify destination, plan availability, delivery guarantee, retry, ordering, latency, volume limit, and egress cost from current official documentation. Datadog and HTTP endpoints are candidates, not fixed requirements.
+    2.  **Retention & Access**: Define retention in Blueprint from data class, investigation window, law, and cost, applying encryption, least privilege, tenant isolation, deletion, and legal hold.
+    3.  **Structured Logging**: Use structured fields, severity, trace correlation, and source revision supported by the runtime or logging SDK. Do not mandate one `console.log(JSON.stringify(...))` form.
+    4.  **Sensitive Data Filtering**: Allowlist or redact PII, credentials, tokens, and request bodies at the source and test samples and permissions before and after transfer. Do not universally require an Edge Function as a relay.
+    5.  **Failure & Cost**: Define detection, buffering, drop policy, and cost ownership for drain failure, duplicates, backpressure, provider outage, and quota exhaustion.
+    6.  **Control-Plane API Lifecycle**: When automating log queries, analytics, or audit export through a Management API or equivalent, inventory the endpoint and API version, response schema, pagination, authentication scope, rate and cost limits, deprecation deadline, and consumer owner, then migrate with contract fixtures and shadow comparison or equivalent evidence. As of 2026-07-23, complete the `logs.all` to `logs` migration before removal on 2026-09-23 and validate parity in result count, time range, filters, permissions, and failure alerts. Dashboard visibility is not proof of automation compatibility.
 
 ### Rule 32.2: The External Metrics & Alerting Protocol
--   **Law**: Leverage Supabase's **Metrics API** (Prometheus-compatible) to build custom dashboards and alerts with external monitoring tools.
+-   **Law**: Inside or outside the provider, configure metrics and alerts that detect user-visible SLIs, capacity, database health, authentication abuse, and queue or function failure. Adopt external monitoring where cross-system correlation, retention, independence, or team operation creates value.
 -   **Action**:
     1.  **Prometheus Metrics API**: Supabase exposes Prometheus-compatible metrics at the `/metrics` endpoint (Beta). CPU usage, I/O, WAL, connection count, and query statistics are scrapeable.
     2.  **OpenTelemetry**: Supabase supports **OpenTelemetry (OTel) integration**. Export logs, metrics, and traces to OTel-compatible tools (Datadog, Honeycomb, Grafana, etc.).
     3.  **Datadog Agent**: Detailed database monitoring via the Datadog Agent is available. Query metrics, samples, and EXPLAIN plan visualization are supported. **The agent must connect directly to the host, bypassing the Dedicated Pooler**.
-    4.  **Alert Design**: Configure alerts for the following metrics:
+    4.  **Alert Design**: Define thresholds in Blueprint from SLOs, baselines, capacity headroom, and provider quota. The following are candidate metrics and reference starting points, not Universal fixed values:
         -   **Connection count**: `active_connections / max_connections > 80%` → Warning
         -   **CPU usage**: `> 90%` sustained for 5+ minutes → Critical
         -   **Disk usage**: `> 80%` → Warning, `> 90%` → Critical
@@ -1640,7 +1530,7 @@
 ## 33. Auth Hooks & Custom Claims Strategy
 
 ### Rule 33.1: The Custom Access Token Hook Protocol
--   **Law**: When adding **custom claims** (roles, tenant IDs, permission levels, etc.) to JWTs, you MUST use Supabase **Auth Hooks (Custom Access Token Hook)**.
+-   **Law**: For token claims, select Auth Hooks, IdP mapping, server-side authorization lookups, or another method by freshness, token size, revocation, latency, and provider support. Auth Hooks are a candidate for issuance-time claim enrichment.
 -   **Action**:
     1.  **Hook Architecture**: The Custom Access Token Hook is a PostgreSQL function executed **immediately before** token issuance. It receives user information and returns JSONB containing custom claims.
         ```sql
@@ -1672,7 +1562,7 @@
     4.  **Performance**: The hook function executes on every token issuance. **Keep it lightweight** and avoid heavy queries or network communication.
 
 ### Rule 33.2: The Auth Trigger Protocol
--   **Law**: Automated processing linked to authentication events (user registration, login, etc.) MUST be implemented via **Database Triggers on auth.users**.
+-   **Law**: For processing linked to auth events, select database triggers, Auth Hooks, webhooks, queues/workflows, or equivalent by transaction coupling, failure isolation, retries, and managed-schema boundaries.
 -   **Action**:
     1.  **Profile Auto-Creation**: Trigger pattern for auto-creating profile table entries on new user registration:
         ```sql
@@ -1692,7 +1582,7 @@
           AFTER INSERT ON auth.users
           FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
         ```
-    2.  **SECURITY DEFINER Required**: Trigger functions on the `auth.users` table MUST be created with `SECURITY DEFINER` (see §31.1). The `auth` schema is not accessible from normal `anon`/`authenticated` roles.
+    2.  **Privilege Boundary**: When adopting a managed-auth-schema trigger, verify current provider support and apply minimum owner/grants, a safe search path, and failure tests. `SECURITY DEFINER` is an exception whose need must be proven.
     3.  **Error Handling**: Errors within trigger functions cause the original auth operation to rollback. Handle errors appropriately with `BEGIN...EXCEPTION` blocks to prevent entire auth flow failures.
     4.  **Migration Management**: Auth Trigger creation and modifications MUST be managed in migration files (see §7, §31.2).
 
@@ -1701,22 +1591,23 @@
 ## 34. Self-hosted & Email Configuration Strategy
 
 ### Rule 34.1: The Self-hosted Deployment Protocol
--   **Law**: When self-hosting Supabase, you MUST use **Docker Compose** and assume full responsibility for security, backups, and updates.
+-   **Law**: When self-hosting, select the current official distribution, Kubernetes/container platform, Compose, or another topology by supportability, HA, upgrades, backups, security, and observability, and explicitly own every responsibility previously carried by the managed service.
 -   **Action**:
-    1.  **Minimum Requirements**: **8GB+ RAM / 4+ CPU cores** recommended for production. Development environments can run on 4GB RAM / 2 CPU cores.
+    1.  **Capacity Requirements**: Capacity-plan per-component CPU, memory, storage, IOPS, connections, replicas, and growth from load tests and RPO/RTO. Do not put fixed minimums in Universal.
     2.  **Critical Environment Variables**: The following environment variables MUST be changed from default values:
         -   `POSTGRES_PASSWORD`: Strong password
         -   `JWT_SECRET`: Minimum 32-character random string
         -   `ANON_KEY` / `SERVICE_ROLE_KEY`: Keys generated from JWT_SECRET
         -   `DASHBOARD_USERNAME` / `DASHBOARD_PASSWORD`: Supabase Studio authentication
-    3.  **HTTPS Required**: Production environments MUST terminate HTTPS via **Caddy** or **Nginx** reverse proxy. Direct HTTP exposure is prohibited.
+    3.  **Transport Security**: Use an approved load balancer, gateway, reverse proxy, or equivalent to manage current TLS, certificate rotation, security headers, and the trusted proxy chain. Caddy and Nginx are examples.
     4.  **Data Persistence**: Configure data persistence with Docker volumes. The default setup where data is lost on `docker-compose down` is unacceptable for production.
     5.  **Update Strategy**: Regularly update Docker images for each Supabase component (GoTrue, PostgREST, Realtime, etc.). Version pinning (`:latest` tag prohibited) is recommended.
+    6.  **Gateway Lifecycle**: Inventory the API gateway, image, configuration, routes, TLS termination, auth callbacks or SSO, header normalization, client IP, admin endpoints, plugins or custom policies, and operational tooling as one compatibility unit. Before a default-gateway change, compare the current official distribution and validate positive and negative route tests, canary, and rollback. Product names such as Kong or Envoy are time-dependent implementation examples; treat a legacy-gateway override as a migration mechanism with an owner and expiry.
 
 ### Rule 34.2: The Email & SMTP Configuration Protocol
--   **Law**: Production environments MUST configure a **custom SMTP provider** and customize email templates to match the project.
+-   **Law**: Production email uses a provider and branded templates appropriate to volume, deliverability, regional/privacy requirements, bounce/complaint handling, SLA, and cost. Do not mandate external SMTP when built-in delivery meets effective requirements.
 -   **Action**:
-    1.  **Custom SMTP Required**: Supabase's built-in email service has sending limits (e.g., 3 per hour). Configure external SMTP (SendGrid, AWS SES, Resend, etc.) for production.
+    1.  **Effective Capability**: Verify current built-in/custom SMTP quotas, deliverability, and support conditions from official documentation and effective settings; migrate to an external provider when required.
     2.  **SMTP Configuration**: Configure via Dashboard "Authentication > SMTP Settings" or environment variables:
         -   `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
         -   `SMTP_SENDER_NAME`: Sender display name
@@ -1734,7 +1625,7 @@
 ## 35. SSR & Framework Integration Strategy
 
 ### Rule 35.1: The @supabase/ssr Client Design Protocol
--   **Law**: When integrating Supabase with **SSR frameworks** such as Next.js App Router, SvelteKit, or Nuxt, you MUST use the `@supabase/ssr` package and implement **Cookie-based authentication**. Token management via `localStorage` is prohibited.
+-   **Law**: In SSR/server-rendered frameworks, use a current official adapter or equivalent implementation that provides server-readable sessions, secure cookie attributes, refresh, request isolation, and CSRF/XSS boundaries. `@supabase/ssr` is a candidate for supported JavaScript frameworks, not a requirement for every language.
 -   **Action**:
     1.  **Browser Client**: Use `createBrowserClient` for client components.
         ```typescript
@@ -1768,11 +1659,11 @@
           );
         }
         ```
-    3.  **localStorage Prohibition Rationale**: `localStorage` is vulnerable to XSS attacks and unavailable in SSR/RSC. The Cookie-based approach addresses SSR, security, and SEO comprehensively.
+    3.  **Storage Boundary**: When the server needs the session, use cookies designed with HttpOnly, Secure, SameSite, and related controls or a framework-supported server session. A client-only public token may use another storage mechanism if its threat model permits.
     4.  **@supabase/auth-helpers Deprecated**: The legacy package `@supabase/auth-helpers-nextjs` is deprecated. Migrate to `@supabase/ssr`.
 
 ### Rule 35.2: The Middleware Auth Guard Protocol
--   **Law**: In SSR frameworks, implement session refresh and route protection via **Middleware**. However, do NOT rely solely on Middleware; verify authentication at the data access layer as well.
+-   **Law**: Middleware, server hooks, gateways, and equivalent layers are candidates for session refresh and early route gating. Always re-verify authorization at the resource access boundary and never make the routing layer the sole defense.
 -   **Action**:
     1.  **Session Refresh Middleware**: Refresh expired sessions in Middleware. This ensures sessions are up-to-date before reaching Server Components.
         ```typescript
@@ -1859,7 +1750,7 @@
 ## 37. Client SDK Best Practices Strategy
 
 ### Rule 37.1: The Error Handling & Retry Protocol
--   **Law**: For `supabase-js` API calls, you MUST **always check the `error` object** and implement retry logic for transient network errors.
+-   **Law**: Explicitly handle the success/error contract of the selected SDK or protocol, and retry only idempotent transient failures. The `data`/`error` result in `supabase-js` is one example.
 -   **Action**:
     1.  **Structured Error Handling**: `supabase-js` queries return `data` and `error`. Always check `error`:
         ```typescript
@@ -1875,11 +1766,11 @@
         ```
     2.  **Auth-Specific Errors**: For Auth operations, distinguish `AuthError` class subtypes (`AuthApiError`, `AuthRetryableFetchError`, etc.) to determine retryability.
     3.  **Edge Functions Errors**: Distinguish between `FunctionsHttpError` (function returned an error), `FunctionsRelayError` (network issue with Supabase), and `FunctionsFetchError` (function unreachable).
-    4.  **Retry Logic**: Implement retries for transient network errors (e.g., 520) using `fetch-retry` or similar. To avoid exhausting the Data API connection pool, **max 3 retries with exponential backoff** is recommended.
-    5.  **Timeouts**: Set a **5-second timeout** on API calls to prevent infinite request hangs.
+    4.  **Retry Logic**: Derive jittered backoff, maximum attempts, and circuit breaking from error classification, operation idempotency, dependency SLO, business deadline, and retry budget. Do not put a fixed three attempts in Universal.
+    5.  **Timeouts**: Allocate the end-to-end latency budget across DNS, connect, request, stream, and downstream work, and propagate abort/cancellation. Do not apply a fixed five seconds to every API.
 
 ### Rule 37.2: The Realtime Subscription Lifecycle Protocol
--   **Law**: Realtime subscriptions MUST be **cleaned up on component unmount**, with proper reconnection handling and throttling implemented.
+-   **Law**: Clean up Realtime subscriptions when the owning component, view, process, socket, or background state ends, and contract reconnection, deduplication, ordering, and rate control.
 -   **Action**:
     1.  **Subscription Cleanup**: In React, unsubscribe in the `useEffect` cleanup function:
         ```typescript
@@ -1898,35 +1789,41 @@
         ```sql
         ALTER TABLE public.messages REPLICA IDENTITY FULL;
         ```
-    3.  **High-Frequency Update Throttling**: Throttle high-frequency events (cursor movements, typing indicators, etc.) at **100-200ms intervals** before broadcasting.
+    3.  **High-Frequency Update Control**: Derive throttling, debouncing, sampling, or aggregation intervals from UX latency, loss tolerance, quotas, and device performance.
     4.  **Channel Status Monitoring**: Monitor channel status via `channel.on('system', ...)` and provide connection state feedback to users.
     5.  **RLS Application**: Apply access policies at both channel and table levels for Realtime data (see §3, §14).
+
+### Rule 37.3: Client Library Support Surface Protocol
+-   **Law**: Do not reduce “Supabase supports this language” to one Boolean value. Inventory REST, Realtime, Auth, Storage, Functions invocation, and other capabilities separately from browser, server, mobile, or desktop targets, official versus community support authority, maturity, feature parity, release cadence, and security response.
+-   **Current Snapshot**: As of 2026-07-23, the official Client Libraries page classifies JavaScript or TypeScript, Dart or Flutter, Swift, and Python as official libraries, and C#, Go, Kotlin, Ruby, GDScript, Elixir, and R as community libraries. This is not a future guarantee; revalidate the official list, repository activity, release notes, and supported capabilities at adoption and major-upgrade boundaries.
+-   **Adoption Evidence**: For each adopted client, record session and credential storage, SSR or mobile lifecycle, type mapping, Realtime reconnection, uploads, error and retry semantics, offline behavior, supported platforms, EOL, and the test matrix. Do not assume identical feature parity even for official clients. For a community client, add an accountable owner, upstream-continuity assessment, and a fallback through direct protocol, generated client, or a service boundary.
+-   **Language-Native Gates**: TypeScript or JavaScript, Swift, Kotlin, Dart, Python, and other code inherit native gates from `engineering/320_programming_language_governance.md` and the relevant language canon. A client library does not imply Edge Functions execution-runtime support; verify the Deno-compatible TypeScript or JavaScript runtime, PostgreSQL or SQL, and client SDK as separate surfaces.
 
 ---
 
 ## 38. Schema Design Patterns Strategy
 
 ### Rule 38.1: The Soft Delete & Data Lifecycle Protocol
--   **Law**: For data deletion, adopt the **Soft Delete pattern** and implement it using a combination of `deleted_at` columns and RLS policies.
+-   **Law**: Select hard delete, soft delete, tombstone, anonymization, or legal hold per data category. Soft delete is a candidate for restore/audit needs, but does not satisfy privacy deletion by itself and is not universal for all data.
 -   **Action**:
-    1.  **`deleted_at` Column**: Add `deleted_at TIMESTAMPTZ DEFAULT NULL` to tables. Use `UPDATE SET deleted_at = NOW()` instead of physical deletion (`DELETE`).
-    2.  **Active Records View**: Create a View that returns only active records:
+    1.  **Deletion Representation**: For a data category that selects soft delete, contract an explicit marker such as `deleted_at`, actor, reason, restore privilege, uniqueness, cascading behavior, and retention. Do not force a marker on data that selects hard deletion.
+    2.  **Active Records Boundary**: When soft delete is selected, design one source of truth such as a query, view, or repository that returns only active data. The following is a view example:
         ```sql
         CREATE VIEW public.active_profiles AS
           SELECT * FROM public.profiles WHERE deleted_at IS NULL;
         ```
-    3.  **RLS Auto-Exclusion**: Add `deleted_at IS NULL` condition to RLS policies to hide deleted records by default:
+    3.  **Authorization Alignment**: Deny ordinary access to soft-deleted records in policy and separate restore, audit, and legal-hold privileges. The following is an RLS example:
         ```sql
         CREATE POLICY "Hide soft-deleted rows" ON profiles
           FOR SELECT USING (deleted_at IS NULL);
         ```
-    4.  **Restore Functionality**: Records can be restored by setting `deleted_at` back to `NULL`. Design a restore UI as well.
-    5.  **Physical Deletion Schedule**: Use `pg_cron` (see §15.1) to set up batch jobs that physically delete records where `deleted_at` exceeds a certain period (e.g., 90 days).
+    4.  **Restore Contract**: If restore is offered, design its privilege, window, uniqueness conflicts, related data, and audit. Do not force a UI on a non-restorable category.
+    5.  **Final Disposition**: Anonymize or physically delete through a scheduler, queue, lifecycle job, or equivalent according to retention, legal hold, privacy deletion, and backup expiry. Do not make a fixed duration or `pg_cron` a Universal requirement.
 
 ### Rule 38.2: The Audit Trail & JSONB Design Protocol
 -   **Law**: Track data change history with **Audit Trails** and use **JSONB** appropriately for flexible metadata.
 -   **Action**:
-    1.  **supa_audit Extension**: Use Supabase's `supa_audit` extension for generic table auditing. It auto-records `INSERT`/`UPDATE`/`DELETE` events. However, **disable auditing for high-write tables (>3k ops/sec)** — it degrades write throughput.
+    1.  **Audit Mechanism Selection**: Choose `supa_audit`, custom triggers, application events, logical decoding, provider logs, or an equivalent by required actor and before-after data, tamper resistance, throughput, retention, and queryability. Do not disable audit at a fixed operations threshold; use load tests and compliance requirements to design sampling, asynchronous delivery, or a separate sink.
     2.  **Custom Audit Trail**: When `supa_audit` is insufficient, create a trigger-based custom audit table:
         ```sql
         CREATE TABLE public.audit_log (
@@ -1968,7 +1865,7 @@
     6.  **Scope Minimization**: Keep the scopes (permissions) requested from each provider to the absolute minimum. Excessive scopes erode user trust.
 
 ### Rule 39.2: The SAML SSO & Mobile Deep Linking Protocol
--   **Law**: Enterprise **SAML 2.0 SSO** MUST be configured via CLI, and mobile apps MUST properly handle Auth redirects using **Deep Linking**.
+-   **Law**: Configure enterprise SSO reproducibly and audibly through the current provider control plane, API, CLI, IaC, or another approved path; mobile redirects prefer verified Universal Links/App Links or an equivalent secure callback.
 -   **Action**:
     1.  **SAML SSO Setup**: SAML 2.0 is available on Team/Enterprise plans. Configure with CLI v1.46.4+:
         ```bash
@@ -1995,9 +1892,10 @@
 ## 40. Data Migration & Seeding Strategy
 
 ### Rule 40.1: The Database Migration Protocol
--   **Law**: Migration from existing databases to Supabase MUST use **`pg_dump`/`pg_restore`**, and migration procedures MUST be documented and reproducible.
+-   **Law**: Select a migration method from source/target engines, data volume, tolerated downtime, change rate, consistency, encryption, and rollback requirements. Procedures MUST be documented and reproducible. `pg_dump`/`pg_restore` is a strong option for compatible PostgreSQL paths, not a universal requirement.
 -   **Action**:
-    1.  **Schema Export**: Export schema and data using `supabase db dump` or `pg_dump`:
+    1.  **Discovery and Plan**: Inventory extensions, types, constraints, triggers, functions, roles, grants, RLS, identities, large objects, sequences, and integrations. Define mapping, cutover, rollback, data validation, and owners.
+    2.  **Compatible PostgreSQL Example**: For a PostgreSQL path whose compatibility is verified, consider `supabase db dump` or `pg_dump`/`pg_restore`:
         ```bash
         # Schema only
         pg_dump --schema-only --no-owner --no-privileges \
@@ -2006,21 +1904,14 @@
         pg_dump --data-only --no-owner \
           -d "postgresql://user:pass@host:5432/db" > data.sql
         ```
-    2.  **Import**: Import into the Supabase project using `psql`:
-        ```bash
-        psql -d "postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres" \
-          -f schema.sql
-        psql -d "postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres" \
-          -f data.sql
-        ```
-    3.  **Caveats**: Users/roles and RLS policy status are NOT migrated by `pg_dump`. Recreate manually after migration.
-    4.  **Large Data Migration**: For data exceeding 100MB, use `pgloader`. It also supports migration from MySQL/MS SQL.
-    5.  **CSV Import**: For small datasets (under 100MB), use the Dashboard CSV import feature. For programmatic imports, use the Supabase API `upsert`, but note that **bulk imports are subject to Rate Limiting**.
+    3.  **Heterogeneous or Online Migration**: For heterogeneous engines, low downtime, continuous changes, or high volume, compare verified ETL, CDC, logical replication, bulk loaders, and staged dual runs. Tools and size thresholds belong to benchmarks and Blueprint.
+    4.  **Security Reconciliation**: Dump coverage and restore behavior vary by option and version. Reconcile roles, grants, RLS, Auth identities, secrets, ownership, and extensions in a separate inventory while preserving default deny.
+    5.  **Validation and Cutover**: Record checksums or samples, constraints, sequences, permissions, application contracts, performance, RPO/RTO, and rollback rehearsal in approval evidence, not only row counts.
 
 ### Rule 40.2: The Seed Data Management Protocol
--   **Law**: Development seed data MUST be managed in **`supabase/seed.sql`**, with a clear separation between schema definitions and data population.
+-   **Law**: Keep initial/reference/test data separate in responsibility from schema migrations and make it reproducible through a version-controlled approved seed artifact, factory, snapshot, or equivalent. `supabase/seed.sql` is a CLI-default candidate.
 -   **Action**:
-    1.  **seed.sql Placement**: Write initial data INSERT statements in `supabase/seed.sql`. It auto-executes after migrations during `supabase start` or `supabase db reset`.
+    1.  **Seed Discovery**: Declare seed order, environment eligibility, and checksums through the current CLI `seed_paths` configuration or an equivalent manifest; do not make one path a Universal requirement.
     2.  **Schema Separation**: seed.sql should contain **data INSERTs only**. Table definitions and ALTER statements belong in migration files (see §7).
     3.  **Modularization**: For large seed datasets, split into multiple files and configure in `config.toml`:
         ```toml
@@ -2035,15 +1926,12 @@
 ## 41. Multigres & Horizontal Scaling Strategy
 
 ### Rule 41.1: The Multigres Architecture Protocol
--   **Law**: When data volume approaches petabyte scale or the vertical scaling limits of a single PostgreSQL instance, plan for adopting Supabase **Multigres** (Vitess-based horizontal sharding).
+-   **Law**: When measured capacity approaches single-PostgreSQL limits, compare partitioning, read replicas, workload separation, distributed PostgreSQL/sharding, and other options. Adopt emerging options such as Multigres only after verifying current maturity, support, migration, consistency, and exit.
 -   **Action**:
-    1.  **Phased Scaling**: Multigres provides graduated scaling:
-        -   **Phase 1**: Smart connection pooling (Supavisor integration)
-        -   **Phase 2**: High availability (HA) and failover
-        -   **Phase 3**: Full sharding (data distribution)
-    2.  **Shard Key Design**: Design with **tenant ID** or **user ID** as the shard key. Random UUIDs as shard keys cause frequent cross-shard queries and performance degradation.
-    3.  **Application Transparency**: Multigres operates transparently from the application layer. No changes to existing `supabase-js` code are required, but schema design must consider avoiding cross-shard JOINs.
-    4.  **Co-located Data**: Data belonging to the same user/tenant must be placed on the same shard (Co-location). Parent-child tables must share the same shard key to enable local JOINs.
+    1.  **Current Capability Evidence**: Verify delivery stage, preview or GA status, plan, region, support, and constraints for connection management, HA, failover, sharding, and related capabilities from current official documentation and experiments at adoption time; do not treat a roadmap as a guarantee.
+    2.  **Shard Key Design**: Select a shard key from query and transaction locality, cardinality, growth, hotspots, residency, rebalancing, and cross-shard cost. Tenant ID and user ID are candidates; do not reject any type, including random UUID, by name alone.
+    3.  **Application Compatibility**: Test driver, Data API, SDK, transaction, sequence, extension, migration, observability, and backup compatibility. Do not assume application transparency or zero changes to existing code.
+    4.  **Co-location Contract**: Co-locate data that measured workloads require in the same transaction or frequent join. Do not unconditionally pin every parent-child relation or all tenant data to one shard.
 -   **Rationale**: Multigres is designed as "Vitess for Postgres", applying the sharding technology that scaled YouTube to PostgreSQL. However, for most applications, partitioning (§2.13) and Read Replicas (§49) are sufficient.
 
 ### Rule 41.2: The OrioleDB Storage Engine Protocol
@@ -2058,32 +1946,32 @@
 ## 42. PostgreSQL 18 New Features Strategy
 
 ### Rule 42.1: The Asynchronous I/O (AIO) Optimization Protocol
--   **Law**: Leverage PostgreSQL 18's **AIO** subsystem (`io_uring`-based) for I/O-intensive workload optimization.
+-   **Law**: When the effective database version, provider support, OS, and configuration allow it, treat PostgreSQL 18 AIO as a candidate and adopt it only after measuring benefit and regression on representative workloads.
 -   **Action**:
-    1.  **Performance Awareness**: PostgreSQL 18's AIO achieves **2-3x throughput improvement** for sequential scans and VACUUM operations.
-    2.  **Linux Requirement**: `io_uring` requires Linux kernel 5.1+. Automatically enabled in Supabase managed environments.
-    3.  **Monitoring**: Monitor AIO effectiveness via `pg_stat_io` view.
+    1.  **Capability Check**: Verify the current PostgreSQL version, Supabase plan and region, I/O method, OS kernel, parameters, and rollback from official documentation and effective settings. Do not assume it is automatically enabled in a managed environment.
+    2.  **Benchmark**: Compare throughput, p95 and p99 latency, CPU, I/O wait, and cost for representative sequential scan, VACUUM, and concurrent OLTP workloads; do not use a published multiplier as a guarantee.
+    3.  **Monitoring**: Observe benefit and saturation through available telemetry such as `pg_stat_io` and provider metrics, preserving upgrade and configuration evidence.
 
 ### Rule 42.2: The UUIDv7 Migration Protocol
--   **Law**: Adopt **UUIDv7** (time-ordered UUID) via PostgreSQL 18's native `uuidv7()` function for new table primary keys.
+-   **Law**: Select identifiers from ordering, hotspot, privacy, offline generation, interoperability, index locality, and runtime support. UUIDv7 is a strong PostgreSQL 18 candidate, not a universal requirement for every new table.
 -   **Action**:
-    1.  **UUIDv7 Default**: Use `uuidv7()` instead of `gen_random_uuid()` (UUIDv4):
+    1.  **UUIDv7 Candidate**: Evaluate `uuidv7()` when time-ordered locality and distributed generation fit the requirement and the effective version supports it. The following is an example:
         ```sql
         CREATE TABLE public.new_table (
           id UUID PRIMARY KEY DEFAULT uuidv7(),
           created_at TIMESTAMPTZ DEFAULT NOW()
         );
         ```
-    2.  **B-tree Performance**: UUIDv7 is time-sorted, significantly reducing B-tree index fragmentation.
-    3.  **Migration Strategy**: **No need** to migrate existing UUIDv4 tables. Adopt UUIDv7 for new tables incrementally.
-    4.  **Backward Compatibility**: UUIDv7 is fully compatible with the standard UUID type.
+    2.  **Trade-off Measurement**: Compare insert locality, index size, page splits, write hotspots, identifier enumeration, and clock behavior with ULID, UUIDv4, sequences, compound keys, and other candidates.
+    3.  **Migration Strategy**: Evaluate effects on foreign keys, external contracts, replication, and rollback, and migrate an existing identifier only when business value is proven. Coexistence and no change are valid outcomes.
+    4.  **Compatibility Verification**: PostgreSQL UUID type compatibility does not prove application, serializer, SDK, downstream, or ordering-semantics compatibility; run contract tests.
 
 ### Rule 42.3: The B-tree Skip Scan Protocol
--   **Law**: Leverage PostgreSQL 18's **B-tree Skip Scan** for composite index queries not specifying the leading column.
+-   **Law**: Treat PostgreSQL 18 B-tree Skip Scan as one possible planner choice and make existing or additional index decisions from execution plans and measurement.
 -   **Action**:
-    1.  **Skip Scan Awareness**: For composite index `(a, b)`, queries with `WHERE b = 'value'` will automatically use Skip Scan.
-    2.  **Index Design Impact**: Skip Scan is most effective when the leading column has a small NDV (Number of Distinct Values).
-    3.  **EXPLAIN Verification**: Verify with `EXPLAIN ANALYZE` for the `Skip` marker.
+    1.  **Planner Choice**: Even for `WHERE b = ...` on `(a, b)`, statistics, NDV, cost, and cache state may lead to Skip Scan, another index, or Seq Scan; do not guarantee automatic adoption.
+    2.  **Index Design Impact**: Decide index order and additional indexes from leading-column NDV, major predicates, sorting, write amplification, storage, and maintenance together.
+    3.  **EXPLAIN Verification**: Compare representative data and parameters with `EXPLAIN (ANALYZE, BUFFERS)` or an equivalent, recording plan shape, row estimates, latency, and I/O.
 
 ---
 
@@ -2131,9 +2019,9 @@
 ## 45. MCP Server & AI Development Integration Strategy
 
 ### Rule 45.1: The Supabase MCP Server Protocol
--   **Law**: Leverage the Supabase **MCP Server** to securely connect AI coding assistants to Supabase projects.
+-   **Law**: If Supabase MCP is adopted, treat it as a least-privilege development-assistance boundary separated from ordinary production access. MCP is optional; Blueprint must show that its value outweighs expanded access, data exposure, prompt-injection, misoperation, and audit risks.
 -   **Action**:
-    1.  **Remote MCP Server (Recommended)**: Use the Remote MCP Server (since October 2025) for enhanced security.
+    1.  **Current Capability Check**: Revalidate remote/local availability, authentication, tool scope, read-only options, and project scope against current official documentation, then select the mode that fits the environment and threat model.
     2.  **Permitted Operations**: Table design, data queries (read-only), migration assistance, Edge Functions scaffolding.
     3.  **Prohibited Operations**: Direct production data modification, unreviewed RLS policy application, Service Role key usage, backup/restore operations.
     4.  **Project-scoped Access**: Use Project-scoped Roles (§50) for MCP connections with minimum privileges.
@@ -2144,36 +2032,36 @@
 ## 46. Security Advisor & Auto-Remediation Strategy
 
 ### Rule 46.1: The Security Advisor Compliance Protocol
--   **Law**: Treat Supabase **Security Advisor** warnings equivalent to §0.1 (Zero Tolerance Linter Protocol).
+-   **Law**: Triage Supabase **Security Advisor** findings through the §0.1 risk-based gate. Do not release with an unresolved applicable Critical or High finding or an unexplained finding.
 -   **Action**:
-    1.  **Weekly Scan**: Execute Security Advisor scans **weekly**. Integrate into CI/CD pipelines.
-    2.  **Alert Categories**: Critical (immediate), High (24h), Medium (1 week) response priorities.
+    1.  **Risk-Based Scan**: Run after schema, policy, extension, or privilege changes and on a risk-based Blueprint cadence; integrate with CI or release evidence where possible.
+    2.  **Disposition**: Prioritize by severity, reachability, data sensitivity, exploitability, false positive, owner, expiry, and compensating control. Fixed response SLAs belong in Blueprint.
     3.  **AI-Assisted Fix**: Use AI fix suggestions as reference only. **Applying without review is prohibited**.
-    4.  **Baseline Maintenance**: Track warning count baselines and verify no increases.
+    4.  **Baseline Maintenance**: Track finding state, rationale, owner, and expiry in addition to counts; a lower count alone is not proof of safety.
 
 ---
 
 ## 47. Per-Table API Control & Data API Disable Strategy
 
 ### Rule 47.1: The Granular API Exposure Protocol
--   **Law**: Leverage **per-table API control** (2025) to control PostgREST Data API exposure per-table.
+-   **Law**: Design Data API exposure deny-by-default through separate controls for exposed schemas, schema/table/function grants, RLS, column privileges, and API configuration. Defaults such as automatic exposure of new tables can change by version or project setting; verify effective behavior when objects are created.
 -   **Action**:
-    1.  **Dashboard Toggle**: Toggle API exposure ON/OFF per table. Internal tables should be API-hidden.
-    2.  **Default Deny**: Set **API-hidden as default** for new tables.
-    3.  **Data API Disable**: For internal-tool-only projects, **completely disable the Data API** (2025 feature).
-    4.  **API Layer Architecture**: Recommend the "API Gateway Pattern" with Edge Functions and Data API disabled.
+    1.  **Exposure Inventory**: Inventory exposed schemas and API-reachable tables, views, and functions in machine-readable form; migration tests prove only intended objects are reachable.
+    2.  **Default Deny**: Do not expose a new object until it has an explicit API contract, least-privilege grants, RLS or column privileges, and negative tests.
+    3.  **Data API Disable**: Evaluate disabling the Data API when a workload does not need it, after assessing management, SDK, integration, and rollback effects.
+    4.  **API Layer Architecture**: Compare direct Data API, Edge Functions, and a custom API gateway by authorization, validation, latency, cost, and portability.
 
 ---
 
 ## 48. VPC & Private Link Strategy
 
 ### Rule 48.1: The Network Isolation Protocol
--   **Law**: Production databases must implement **network-level isolation**, minimizing public internet access.
+-   **Law**: Combine private connectivity, network restrictions, TLS, and identity-aware access according to data sensitivity and threat model, minimizing public exposure.
 -   **Action**:
-    1.  **AWS Private Link**: Configure **AWS PrivateLink** on Enterprise/Team plans for private VPC connections.
-    2.  **IP Allow List**: Configure allowed IPs/CIDRs in Dashboard "Network Restrictions".
-    3.  **SSL Enforcement**: **Require SSL/TLS encryption** for all database connections.
-    4.  **Bastion Host Pattern**: Use Bastion Host SSH tunnels for developer DB access. Direct port exposure is prohibited.
+    1.  **Private Connectivity**: When the plan, region, and network topology support it, evaluate PrivateLink or an equivalent. Authentication, encryption, DNS, egress, and provider control-plane risks remain on a private path.
+    2.  **Network Restriction**: Apply IP or CIDR restrictions where stable source identity can be proven through static egress, VPN, or private connectivity. Do not place dynamic CI in broad allowlists; evaluate federated identity, ephemeral runners, or proxies.
+    3.  **TLS Enforcement**: Verify the current TLS contract for the provider or self-hosted topology and require encrypted connections with certificate verification. A private network is not a reason for plaintext.
+    4.  **Privileged Human Access**: Separate production database human access from normal paths and require MFA, time-bound identity, approval, session audit, least privilege, and revocation. Identity-aware proxies, provider access, bastions, and temporary tokens are candidates; a permanent SSH bastion is not universally required.
     5.  **Zero Trust**: Combine with RLS (§3), CLS (§43), and Data API Hardening (§28) for defense in depth.
 
 ---
@@ -2181,76 +2069,77 @@
 ## 49. Read Replicas & Load Balancing Strategy
 
 ### Rule 49.1: The Read Replica Architecture Protocol
--   **Law**: For read-heavy applications, deploy **Read Replicas** to distribute load from the primary DB.
+-   **Law**: Evaluate read replicas as a candidate for measured read bottlenecks, latency, availability, analytics isolation, or regional requirements. Adopt them only when need and cost-effectiveness are demonstrated.
 -   **Action**:
-    1.  **Query Routing**: Route read-only queries (SELECT) to Read Replicas and write queries to primary. Supavisor (§23) manages this routing automatically.
-    2.  **Replication Lag Awareness**: Asynchronous replication incurs millisecond-to-second lag. Implement **Read-Your-Writes** pattern for post-write reads by querying the primary directly.
-    3.  **Geo-distributed Replicas**: Place Read Replicas in regions close to end-users for minimized read latency.
-    4.  **Analytics Offloading**: Offload analytical queries to dedicated Read Replicas, achieving zero impact on OLTP.
-    5.  **Monitoring**: Monitor replication lag via `pg_stat_replication`, alerting when lag exceeds thresholds (e.g., 5 seconds).
+    1.  **Query Routing**: Do not assume provider or pooler auto-routing. Verify current plan and endpoint behavior. Route writes, strong read-after-write, and transactional reads to primary; send only stale-tolerant reads explicitly to replicas by default.
+    2.  **Replication Lag Awareness**: Measure asynchronous replication lag and failure modes. Design read-your-writes, session stickiness, primary fallback, or staleness indicators from consistency requirements.
+    3.  **Regional Placement**: Decide placement from latency, data residency, failure domains, cross-region transfer cost, and service availability together.
+    4.  **Analytics Offloading**: Load-test the isolation benefit and do not assume a replica reduces OLTP impact to zero.
+    5.  **Monitoring**: Monitor replication lag, replay failures, connection saturation, primary/replica errors, and fallbacks. Define alert thresholds in Blueprint from SLOs and the data-consistency budget.
 
 ---
 
 ## 50. Project-scoped Roles & Team Management Strategy
 
 ### Rule 50.1: The Project-scoped RBAC Protocol
--   **Law**: Leverage Supabase's **Project-scoped Roles** (2025) to restrict team member and CI/CD tool access to **minimum required privileges** per-project.
+-   **Law**: Verify current plan availability and effective role capabilities, then minimize privileges for humans, workloads, CI, and AI tools at organization, project, environment, and feature-group boundaries. Never treat a role name alone as proof of safety.
 -   **Action**:
-    1.  **Role Granularity**: Owner (minimal), Admin (tech leads), Developer (all devs), Read-only (QA, managers).
-    2.  **CI/CD Service Account**: Create **dedicated Service Accounts** for CI/CD pipelines with minimum privileges. Using personal account API keys in CI/CD is prohibited.
-    3.  **Regular Audit**: Quarterly audit of project members and role assignments. Immediately revoke access for departing/transferring members.
-    4.  **MCP Integration**: Assign Developer-level or below roles to AI coding tools (§45).
+    1.  **Capability Inventory**: Reconcile names such as Owner, Administrator, Developer, and Read-Only with current access-control documentation, and record project-scoped-role plan availability and effective permissions, including secret access. Do not assume `Read-Only` means secretless or harmless.
+    2.  **Human Access**: Grant only feature groups required by job function. Apply step-up, approval, time-bound elevation, and break-glass to production write, secrets, billing, and member management. Blanket roles for all developers are prohibited.
+    3.  **Workload Identity**: Do not use personal credentials in CI/CD. Use dedicated identities restricted by environment and job, short-lived or revocable credentials, protected contexts, rotation, and audit.
+    4.  **Lifecycle Review**: Update access immediately on joiner, mover, and leaver events, and review unused or over-privileged access at a cadence based on inventory, usage telemetry, risk, and compliance.
+    5.  **AI/MCP Integration**: Default AI tools to read-only and explicit project scope, limiting feature groups, data classes, tool calls, and approval boundaries. Do not allow write, DDL, or production-data access without task-specific human approval and audit evidence.
 
 ---
 
-## 51. GitHub Actions Full Integration CI/CD Strategy
+## 51. Provider-neutral CI/CD Strategy
 
 ### Rule 51.1: The Supabase CI/CD Pipeline Protocol
--   **Law**: Fully automate migrations, testing, and Edge Functions deployment via **GitHub Actions**, eliminating manual deployments.
+-   **Law**: Independently of the selected CI/CD provider, integrate migrations, policy tests, function or configuration deployment, and promotion into a version-controlled reproducible pipeline. Production mutations pass protected environments, separation of duties, explicit approval, audit, and concurrency control.
 -   **Action**:
-    1.  **Pipeline Architecture**: test → deploy-migrations → deploy-functions → type-gen pipeline.
-    2.  **Branch Preview**: Auto-create preview environments per PR using Supabase Branching (§20.2).
-    3.  **Rollback Strategy**: Define automatic rollback procedures for failed migrations.
-    4.  **Secret Management**: Store Supabase API keys and Service Role keys in **GitHub Secrets**. Direct inclusion in workflow files is prohibited.
-    5.  **Notification**: Notify deployment success/failure to Slack/Discord for team visibility.
+    1.  **Pipeline Contract**: Define evidence-producing stages in this order: clean rebuild, migration lint and reset, RLS and permission and data-contract tests, artifact or type-generation drift check, preview or staging apply, production approval, and post-deploy verification.
+    2.  **Environment Strategy**: Separate projects, credentials, and data by environment. Adopt branch or preview environments only where plan, cost, PII, test fidelity, and lifecycle fit; do not require one for every pull request.
+    3.  **Schema Recovery**: Do not assume automatic reverse rollback is safe for destructive migrations. Define expand-contract, backward-compatible application behavior, backup or restore, forward-fix, and deployment halt by change class.
+    4.  **Credential Management**: Use the CI provider's approved secret store or federated or short-lived identity, and never expose privileged keys to repositories, workflows, logs, or preview clients.
+    5.  **Deployment Evidence**: Record source revision, migration checksums, artifact digest, approver, target project and environment, command or tool version, result, and rollback or forward-fix decision, then notify an approved owner channel.
 
 ---
 
 ## 52. PostgreSQL Advisory Locks & Concurrency Control Strategy
 
 ### Rule 52.1: The Advisory Lock Architecture Protocol
--   **Law**: Use PostgreSQL **Advisory Locks** for exclusive processing (batch job deduplication, concurrent edit prevention, etc.).
+-   **Law**: For exclusion, leader election, or duplicate prevention, select a coordination mechanism such as transaction row locks, unique constraints, leases, queue guarantees, idempotency keys, or advisory locks that fits the failure model and ownership. Advisory locks are a candidate when an application-defined resource stays within one PostgreSQL boundary.
 -   **Action**:
-    1.  **Session vs Transaction Locks**: Session Lock (`pg_advisory_lock`) for long-running batches; Transaction Lock (`pg_advisory_xact_lock`) for short exclusive operations.
-    2.  **Try Lock Pattern**: Use `pg_try_advisory_lock` for non-blocking acquisition; skip or retry on failure. Infinite waiting is prohibited.
-    3.  **Lock Key Design**: Use table OID + record ID combination for unique `bigint` keys.
+    1.  **Session vs Transaction Locks**: Treat transaction locks as the safer default candidate. Use session locks only after proving pool session affinity, disconnect, timeout, cleanup, and ownership transfer; a long batch alone is not sufficient reason.
+    2.  **Acquisition Policy**: Match blocking or try-lock, timeout, retry, skip, and fencing tokens to business semantics, and prohibit unbounded waiting.
+    3.  **Lock Key Design**: Define namespace, collision behavior, multi-tenant isolation, and stable 64-bit mapping, with a test that every caller maps one resource to the same key.
     4.  **Deadlock Prevention**: Always acquire multiple Advisory Locks in the same order.
-    5.  **Release Obligation**: Explicitly release Session Locks with `pg_advisory_unlock`. Unreleased locks are resource leaks.
+    5.  **Release & Failure**: Test explicit unlock and `finally` behavior for session locks, connection loss, process crash, and pool reuse. Keep transaction duration short and do not casually hold a lock across external side effects.
 
 ---
 
 ## 53. Webhook Signature & Event-Driven Integration Strategy
 
 ### Rule 53.1: The Webhook Security Protocol
--   **Law**: Require **Signature Verification** for all webhook integrations, physically blocking spoofed requests.
+-   **Law**: Authenticate webhook origin and payload integrity through the provider contract, using signatures, mTLS, tokens, network controls, or an equivalent, and prevent replay and duplicate side effects. Raw-body signature verification is mandatory when the provider supports signed delivery.
 -   **Action**:
-    1.  **HMAC Verification**: Verify request signatures with **HMAC-SHA256** in webhook receivers (Edge Functions, etc.).
-    2.  **Timestamp Validation**: Verify request timestamps are within **5 minutes** to prevent replay attacks.
-    3.  **Idempotency Key**: Use **idempotency keys** to prevent duplicate event processing. Record received keys in DB.
-    4.  **Dead Letter Queue**: Store failed webhook events in a **Dead Letter Queue** (pgmq, etc.) for manual/batch reprocessing.
-    5.  **Schema Versioning**: Include version numbers (`v1`, `v2`, etc.) in webhook payloads for backward compatibility.
+    1.  **Provider Verification Contract**: Follow current provider requirements for algorithm, header, canonicalization, key rotation, multiple signatures, and raw body; implement timing-safe comparison and negative tests. HMAC-SHA256 is an example, not a fixed mandate.
+    2.  **Replay Window**: Derive the freshness window from provider timestamp behavior, clock skew, delivery retries, and business latency, and combine it with event ID, nonce, signature version, or an equivalent. Do not make five minutes a Universal constant.
+    3.  **Idempotency Key**: Record a provider event ID or normalized idempotency key through an atomic unique constraint or equivalent, and design processing state and retries without mistaking side effects for exactly-once delivery.
+    4.  **Failure Recovery**: Select a durable inbox, queue, DLQ, replay tool, alert, and manual reconciliation according to delivery guarantees and business criticality, separating acceptance from heavy processing.
+    5.  **Schema Evolution**: Validate provider event type and API version, and design unknown-field tolerance, required fields, adapters, contract fixtures, and deprecation migration. Do not assume the receiver can add an arbitrary version to provider payloads.
 
 ---
 
 ## 54. Advanced Database Partitioning Strategy
 
 ### Rule 54.1: The Partitioning Decision Framework
--   **Law**: When table records are projected to exceed 10 million (10M) or retention management is needed, implement the partitioning strategy defined in §2.13.
+-   **Law**: Decide partitioning from measured query or maintenance bottlenecks, retention deletion, tenant or region isolation, vacuum, indexes, backup, and operational complexity, adopting it when a non-partitioned table cannot meet the SLO rather than at a fixed record count.
 -   **Action**:
     1.  **Partition Type Selection**: Range (time-series), List (tenant/region), Hash (uniform distribution).
-    2.  **pg_partman Integration**: Use `pg_partman` for automatic partition creation and retention management.
-    3.  **Partition Pruning**: Always include partition key in WHERE clauses to enable optimizer partition pruning.
-    4.  **Index Strategy**: Create indexes per-partition. Define template indexes on parent tables for automatic application to new partitions.
+    2.  **Lifecycle Automation**: Select native automation, `pg_partman`, scheduled migrations, or an equivalent that fits provider support and recovery procedures.
+    3.  **Partition Pruning**: Include a partition-key predicate when query semantics permit and verify pruning with `EXPLAIN`. For legitimate all-period queries, design an aggregate, replica, or analytics path.
+    4.  **Index Strategy**: Test per-partition indexes, unique-constraint limitations, new-partition application, attach or detach, and restore against the adopted PostgreSQL and automation versions.
 
 ---
 
@@ -2282,36 +2171,36 @@
 ## 57. Type-Safe End-to-End Strategy
 
 ### Rule 57.1: The Full-Stack Type Safety Protocol
--   **Law**: Build an **unbroken type safety chain** from DB schema to frontend UI.
+-   **Law**: Build a verifiable data-contract chain from database schema through APIs, events, backend, and clients in adopted languages. Complement boundaries without compile-time types with runtime schemas, contract tests, or generated clients.
 -   **Action**:
-    1.  **Layer 1 — DB Types**: `database.types.ts` from `supabase gen types typescript` as **Single Source of Truth**.
-    2.  **Layer 2 — Zod Validation**: Runtime validation with Zod schemas at API boundaries (Server Actions, Edge Functions).
-    3.  **Layer 3 — DTO Mapping**: Per §0.2 (Trinity DTO Mandate), define explicit DB→DTO→Props transformation chains.
+    1.  **Layer 1 — Schema Contract**: Treat migrations and database schema as authoritative and reproducibly generate client contracts with the selected language's official generator, schema introspection, OpenAPI, or an equivalent. TypeScript generation is one example.
+    2.  **Layer 2 — Runtime Validation**: Validate untrusted APIs, events, and database JSON with an approved mechanism such as Zod, JSON Schema, or a language-native validator.
+    3.  **Layer 3 — Domain Adapter**: Make required transformations among persistence, domain, transport, and view models explicit, testing nulls, decimals, time, unknown enum values, and PII. Do not universally require fixed layer names or mapped types.
     4.  **Layer 4 — Type Synchronization**: Integrate type generation into CI/CD pipelines (§51).
-    5.  **Type Gap Detection**: Include `tsc --noEmit` as mandatory CI check.
+    5.  **Contract Gap Detection**: Add the adopted language's native compiler, type checker, or schema-compatibility gate to CI. Follow `engineering/320_programming_language_governance.md`.
 
 ---
 
 ## 58. Global CDN & Edge Caching Strategy
 
 ### Rule 58.1: The Edge Caching Architecture Protocol
--   **Law**: Maximize **Edge Caching** for public content delivery, reducing unnecessary requests to origin (Supabase).
+-   **Law**: Decide public response caching from cacheability, data classification, freshness, invalidation, personalization, version skew, and cost. Optimize origin load and latency after correctness and safety rather than maximizing cache-hit rate.
 -   **Action**:
-    1.  **Cache-Control Headers**: Set appropriate headers per content type (static assets: 1 year immutable, public images: CDN 7d/Browser 1d, API: SWR 60s, authenticated: no-store).
-    2.  **Stale-While-Revalidate**: Use SWR for public API endpoints to maintain UX during cache updates.
+    1.  **Cache-Control Headers**: Define values in Blueprint from content identity and freshness SLO. Immutable content-addressed assets, public images, public APIs, and user-specific or sensitive data require different policies; sample durations are non-normative.
+    2.  **Stale-While-Revalidate**: Use stale serving only where stale data is explicitly safe and bounded.
     3.  **Cache Invalidation**: Explicitly purge CDN cache or use version parameters (`?v=hash`) for cache busting.
-    4.  **Cloudflare Integration**: Optimize CDN integration per §1 (Hybrid Stack) for maximum cache hit rates.
+    4.  **Provider-neutral Integration**: Integration-test cache keys, authentication headers, cookies, purge, signed URLs, and version skew across the adopted CDN or application platform and Supabase Storage or APIs. Cloudflare is one candidate.
 
 ---
 
 ## 59. Compliance & Data Sovereignty Strategy
 
 ### Rule 59.1: The Regulatory Compliance Framework
--   **Law**: Identify applicable **data protection regulations** (GDPR, CCPA, Global Privacy Laws, SOC2) and implement technical compliance measures in the Supabase environment.
+-   **Law**: Distinguish and identify applicable data-protection law, industry regulation, contractual controls, and assurance frameworks, then implement the shared-responsibility technical and operational controls for Supabase. Do not treat attestations such as SOC 2 as statutes.
 -   **Action**:
-    1.  **Data Classification**: Classify all data by sensitivity: Top Secret (Vault encryption), Confidential (TLS + RLS/CLS), Internal (RLS admin-only), Public.
-    2.  **Region Selection**: Choose Supabase project regions aligned with jurisdictional requirements (e.g., Global Privacy Laws → `ap-northeast-1`). Coordinate with §11.1.
-    3.  **DSAR Automation**: Prepare RPC functions for automated user data export/deletion to respond to Data Subject Access Requests within 24 hours.
+    1.  **Data Classification**: Classify all data and define encryption, retention, access, residency, deletion, and audit in Blueprint rather than relying on a fixed sensitivity recipe.
+    2.  **Region Selection**: Validate PII location against applicable law, contracts, cross-border transfer, subprocessors, backup/replica locations, and current provider region capability with legal/privacy owners. A region name alone is not proof of compliance.
+    3.  **DSAR Workflow**: Operationalize the applicable legal deadline, identity verification, exceptions, legal hold, third-party data, and export/deletion scope. RPC is one implementation option; Universal does not impose a fixed 24-hour SLA.
     4.  **SOC2 Alignment**: Implement SOC2 principles (encryption, access control, audit logs, incident response) at the application layer.
     5.  **Cookie Consent**: Coordinate with SSR framework (§35) cookie management; no tracking cookies without user consent.
 
@@ -2332,9 +2221,9 @@
     | **L5: Resilient** | Resilient | Tested DR plans, automated security audits, Incident Response |
 
 -   **Action**:
-    1.  **Quarterly Assessment**: Conduct team maturity evaluations quarterly.
-    2.  **L3 Target**: New projects should target **L3 (Defined)** initially. Production release below L3 is prohibited in principle.
-    3.  **Gap Analysis**: Identify gaps between current and target levels, referencing relevant sections of this document.
+    1.  **Risk-based Assessment**: Perform evidence-based maturity assessment at major releases, incidents, architecture or plan changes, regulatory events, and the cadence defined in Blueprint.
+    2.  **Target Profile**: Define production gates in Blueprint from controls required by data class, criticality, team size, regulation, and recovery requirements rather than one level name. Treat an unmet control as an exception with an owner, deadline, compensating control, and approval.
+    3.  **Gap Analysis**: Prioritize gaps between current capabilities and the target profile by risk, tracing each to the relevant section of this document.
 
 ---
 
@@ -2350,6 +2239,7 @@
 | **Storage** | §6, §6.1, §6.2, §2.11, §58 |
 | **Edge Functions** | §13, §19.2, §25.2, §53 |
 | **Realtime** | §14, §37.2 |
+| **Managed CDC / Pipelines** | §15.4 |
 | **Migrations** | §7, §11.5, §11.9, §12.2, §40, §51 |
 | **Type Safety** | §2.3, §11.4, §12.4, §57 |
 | **pgvector / AI** | §17, §55, §56 |
@@ -2365,7 +2255,7 @@
 | **VPC / Private Link / Network** | §48 |
 | **Read Replicas / Load Balancing** | §49 |
 | **Project-scoped Roles / Team** | §50 |
-| **CI/CD / GitHub Actions** | §51 |
+| **CI/CD / Delivery Provider** | §51 |
 | **Advisory Locks / Concurrency** | §52 |
 | **Webhook / Event-Driven** | §53 |
 | **Database Partitioning** | §54 |
@@ -2383,7 +2273,7 @@
 -   **Performance Optimization**: §4 (basics) → §42 (PostgreSQL 18 AIO/UUIDv7) → §49 (Read Replicas) → §54 (Partitioning) → §55 (Full-Text Search) → §41 (Multigres)
 -   **Security Defense in Depth**: §3 (RLS) → §43 (CLS) → §48 (VPC/Private Link) → §47 (API Control) → §46 (Security Advisor) → §28 (Data API Hardening)
 -   **AI Integration**: §17 (pgvector/AI Search) → §45 (MCP Server) → §56 (AI SQL Governance)
--   **CI/CD Full Automation**: §7 (Migration basics) → §51 (GitHub Actions) → §19 (Testing) → §20 (Branching) → §57 (Type Safety E2E)
+-   **CI/CD Governance**: §7 (Migration basics) → §51 (Provider-neutral CI/CD) → §19 (Testing) → §20 (Branching) → §57 (Type Safety E2E)
 -   **Compliance**: §11.1 (Data Residency) → §59 (Compliance Framework) → §2.18 (Retention) → §43 (CLS) → §26 (Vault)
 -   **Operational Maturity**: §60 (Maturity Model) → All Sections
 
@@ -2399,3 +2289,16 @@
 | §28 (Data API Hardening) | `engineering/100_api_integration` |
 | §42 (PostgreSQL 18) | `engineering/000_engineering_standards` |
 | §59 (Compliance / Data Sovereignty) | `security/100_data_governance`, `security/300_ip_due_diligence` |
+
+---
+
+## Appendix B: Official Reference Snapshot
+
+- [Supabase Changelog](https://supabase.com/changelog.md): time-dependent platform, managed CDC or Pipelines, API-key, and Data API changes
+- [Edge Functions recursive and nested call limits](https://supabase.com/changelog/43644-edge-functions-rate-limits-on-recursive-nested-edge-functions-calls): request-chain shared limits and revalidation boundaries for direct recursion, function chaining, circular calls, and fan-out
+- [Management API `logs.all` endpoint migration](https://supabase.com/changelog/48235-migration-of-supabase-management-api-logs-all-analytics-endpoint-to-logs-endpoin): endpoint-removal deadline and migration verification for log automation
+- [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security): official RLS, bypass, and performance boundaries
+- [Migrating to publishable and secret API keys](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys): credential classes and legacy-key migration
+- [Securing the Data API](https://supabase.com/docs/guides/api/securing-your-api): separation of exposed schemas, grants, and RLS
+- [Database Backups](https://supabase.com/docs/guides/platform/backups): effective plan capabilities, PITR, and restore decisions
+- [Self-hosted Changelog](https://supabase.com/changelog?tags=self-hosted): point-in-time API-gateway, distribution, and breaking changes

@@ -10,6 +10,7 @@
 > - クラウドコスト最適化は一度きりのプロジェクトではなく、**継続的な運用規律**である。
 > - FinOpsはエンジニアリング・財務・ビジネスを統合し、テクノロジー価値を最大化する。
 > - **「コストを知らずにアーキテクチャを設計することは、予算を知らずに家を建てることと同じである。」**
+> - Universal適用契約: 必須成果はcost visibility、allocation、owner、unit economics、forecast、anomaly detection、安全なcontrol、commitment／waste／egress管理、valueとのtrade-off、監査証跡である。provider、service、role名、専任組織、tag key、tool、command、割引率、price、budget比率、閾値、期間、cadenceは、適用法令・契約、現行provider制約、安全下限でない限り時点付きreference profileまたはBlueprint parameterとする。公式料金・plan・limit・FOCUS／FinOps仕様は採用時とreview時に再検証し、cost削減をsecurity、privacy、reliability、data integrityより優先しない。
 > **35パート・100+セクション構成（2026-04-15改定）。**
 
 ---
@@ -67,7 +68,7 @@
     |:--|:-----|:-----|
     | 1 | **Teams need to collaborate** | エンジニアリング・財務・ビジネスの三位一体。サイロ化したコスト管理は禁止 |
     | 2 | **Everyone takes ownership for their technology usage** | エンジニア自身がコストオーナー。「インフラチームの問題」ではない |
-    | 3 | **A centralized team drives FinOps** | FinOps CoE（Center of Excellence）がベストプラクティスを推進 |
+    | 3 | **A centrally enabled team drives FinOps** | 中央のenablement機能が標準、データ、意思決定を支援する。専任CoEの有無は規模と複雑性で決める |
     | 4 | **FinOps data should be accessible, timely, and accurate** | コストデータは全員に即時かつ正確にアクセス可能であること |
     | 5 | **Decisions are driven by the business value of technology** | ROI・ユニットエコノミクスに基づく意思決定 |
     | 6 | **Take advantage of the variable cost model of technology** | クラウドの変動コストモデルを武器にする |
@@ -169,9 +170,9 @@
 
 ### §4. FinOps組織モデル
 
--   **Law**: FinOpsは「追加の仕事」ではなく「仕事のやり方」である。専任のFinOps機能（CoE）を設置し、全組織横断でコスト責任を浸透させなければならない。
+-   **Law**: FinOpsは「追加の仕事」ではなく「仕事のやり方」である。中央のenablement機能とworkload ownerを明確にし、組織横断でコスト責任を浸透させる。小規模組織では兼務ownerと既存のengineering / finance cadenceでよく、専任CoEは支出規模、team数、契約、規制、複雑性が正当化する場合に設置する。
 
--   **FinOps CoE（Center of Excellence）の責務**:
+-   **中央enablement機能の責務（専任CoEまたは兼務）**:
 
     | 責務 | 内容 |
     |:-----|:-----|
@@ -185,7 +186,7 @@
 
 -   **ステークホルダーRACI**:
 
-    | 活動 | FinOps CoE | エンジニア | EM/PM | Finance | CTO/CFO |
+    | 活動 | 中央enablement | エンジニア | EM/PM | Finance | CTO/CFO |
     |:-----|:---------:|:---------:|:-----:|:-------:|:-------:|
     | タグ付け実施 | C | **R** | A | I | I |
     | ライトサイジング | C | **R** | A | I | I |
@@ -1151,7 +1152,7 @@
 
 ### §45. 開発者ポータルへのコスト統合
 
--   **Law**: FinOpsは開発者ワークフローに**組み込み（Built-in）**で提供されなければならない。開発者ポータル（Backstage等）にコスト情報を統合し、サービスカタログとコストを紐付けること。
+-   **Law**: コスト情報は、意思決定が行われる開発者ワークフローへ適時に届ける。Portalは多数のservice / teamに共通の自己サービス需要がある場合の選択肢であり、PR comment、dashboard、CLI、alert、定例review等で同じ成果を満たしてよい。
 
 -   **統合ポイント**:
 
@@ -1159,12 +1160,12 @@
     |:------|:--------|:-----|
     | **サービスカタログ** | サービスごとの月間コスト | コスト責任の可視化 |
     | **セルフサービスポータル** | リソース作成時のコスト見積もり | コスト意識の醸成 |
-    | **スコアカード** | チーム別FinOpsスコア | ゲーミフィケーション |
-    | **Golden Path** | コスト最適化済みテンプレート | ベストプラクティスの強制 |
+    | **スコアカード** | workload別unit costと改善機会 | 意思決定支援 |
+    | **Golden Path** | 検証済みtemplate | 安全な既定値と任意の再利用 |
 
 ### §46. Golden Path（推奨パス）によるコスト最適化
 
--   **Law**: 開発者が「正しい道（Golden Path）」を選ぶことで自動的にコスト最適化が実現される環境を構築すること。
+-   **Law**: 繰り返し発生するworkloadでは、任意で合成可能なGolden Pathに安全で費用対効果の高い既定値を提供する。例外を禁止せず、materialな逸脱は理由とtrade-offを記録する。
 -   **Golden Path例**:
     - IaCテンプレートにコスト最適化済みデフォルト値を組み込み
     - 非本番環境の自動停止スケジュールをテンプレートに内蔵
@@ -1837,7 +1838,7 @@
 
 ### §81. IDE統合コストフィードバック
 
--   **Law**: エンジニアがコストを意識するのは「月末レポート」ではなく**コーディング中**であるべき。IDE/エディタにリアルタイムコストフィードバックを統合せよ。
+-   **Law**: materialなコスト影響を、設計、PR、provisioning、運用のうち変更可能性が高い最も早い地点で提示する。IDE統合はIaC変更が多く即時見積もりに価値がある場合の選択肢であり、一律要件ではない。
 -   **Developer Cost Experience ツール**:
 
     | ツール/手法 | 統合ポイント | 効果 |
@@ -1871,7 +1872,7 @@
 
 ### §83. エンジニアリングコストスコアカード
 
--   **Law**: チーム単位の**コスト効率スコアカード**を導入し、コスト意識をゲーミフィケーションせよ。
+-   **Law**: スコアカードを使う場合は、team間の単純な支出額ではなく、business outcome、需要、SLO、security、unit economicsをcontextとして示す。競争や個人評価を既定にせず、学習と共同改善へ使う。
 -   **スコアカード項目**:
 
     | 指標 | 計算 | 目標 | ウェイト |
@@ -1882,7 +1883,7 @@
     | **Unit Cost改善** | 前月比Unit Cost変化率 | ↓ 改善 | 20% |
     | **予算遵守率** | 実績 ÷ 予算 | 90-110% | 20% |
 
--   **スコアカード運用**: 月次でチーム別ランキングを公開。上位チームにはイノベーション予算追加等のインセンティブ。
+-   **スコアカード運用**: 閲覧範囲、cadence、target、incentiveは組織文化と不正な最適化のriskから決める。公開ランキングや予算連動を行う場合は、指標操作、必要投資の抑制、team間条件差を監視する。
 
 ---
 

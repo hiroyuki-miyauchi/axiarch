@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24 | Target: Kotlin 2.2+ / Swift 6.2+ / Android 16+ / iOS 26+
+> Last Updated: 2026-07-23 | Scope: supported stable Kotlin / Swift releases (verified baseline: Kotlin 2.4.10 / Swift 6.3; platform research baseline: Android 16 / iOS 26)
 
 > [!IMPORTANT]
 > **Primary Directive**
@@ -19,8 +19,8 @@
 | Part | Topic | Sections |
 |------|-------|---------| 
 | I | Philosophy & Fundamentals | §1–§4 |
-| II | Kotlin 2.2+ Language Standards | §5–§10 |
-| III | Swift 6.2+ Language Standards | §11–§17 |
+| II | Kotlin Language Standards | §5–§10 |
+| III | Swift Language Standards | §11–§17 |
 | IV | Android Architecture | §18–§25 |
 | V | iOS Architecture | §26–§33 |
 | VI | KMP / Kotlin Multiplatform | §34–§40 |
@@ -64,12 +64,22 @@
 
 ## Part I: Philosophy & Fundamentals
 
+### Universal Applicability Contract
+
+This file governs Kotlin-, Swift-, Android-, and Apple-platform-specific compatibility and safety without forcing one project's architecture, libraries, repository layout, or organization chart on every adopter. Interpret all sections in this order:
+
+1. Official platform constraints, store requirements, language safety, and artifact compatibility are normative.
+2. Architecture patterns, libraries, CI providers, device farms, and code-generation tools are reference implementations; an alternative with equivalent outcomes and evidence conforms.
+3. OS support breadth, sharing percentage, coverage, build time, vulnerability SLA, review SLA, rollout percentage, organization headcount, and cadence are Blueprint parameters derived from user distribution, threat model, regulation, service level, and team scale.
+4. When later wording such as required, prohibited, always, a fixed number, or a product name conflicts with this contract, treat the verifiable outcome as normative and the stated mechanism as a non-normative reference default unless an official constraint or explicit safety rationale is present.
+5. Individuals and small teams may combine accountabilities. Prefer independent review for high-assurance changes; when separation is impossible, record risk acceptance and add an independent release control. A large organization may separate the same responsibilities into specialist functions.
+
 ### §1. Primary Directive — Native Excellence
 
 - **Principle**: Native development is the means to achieve the highest standard of user experience, not a supplement to cross-platform
 - **Priority**: Security > UX > Performance > Maintainability > Development Speed
-- **Zero Compromise**: Maintain 100% native quality in cutting-edge OS APIs and hardware integration
-- **Latest Stable**: Always target the latest stable versions of Kotlin/Swift. New use of deprecated APIs is prohibited
+- **Quality Outcomes**: For OS-specific APIs and hardware integration, assure UX, safety, performance, and recoverability through measurable acceptance criteria. Do not use an unmeasurable phrase such as "100%" as an acceptance gate
+- **Supported Releases**: Production exactly pins a stable release inside the official support window. Current stable is the first candidate for new adoption, but verify OS, SDK, library, and enterprise-support compatibility first. Permit new use of a deprecated API only under a time-bounded exception with a no-alternative rationale and exit condition
 - **Platform Conventions First**: Fully comply with each platform's HIG/Material Design Guidelines. Do not forcefully unify UX patterns across platforms
 - **Privacy by Design**: Minimize user data collection and prioritize on-device processing
 
@@ -77,7 +87,7 @@
 
 | Use Case | Recommended Approach | Rationale |
 |---|---|---|
-| Business logic sharing | KMP (`commonMain`) | 85%+ code reuse rate |
+| Business logic sharing | Evaluate KMP (`commonMain`) | Measure duplication reduction and platform fidelity; sharing percentage is not the goal |
 | UI-intensive apps | Compose Multiplatform | iOS stable reached, maximized dev efficiency |
 | Deep OS integration (HealthKit, NFC, etc.) | Platform-specific native | API constraints / HW dependency |
 | High-performance real-time processing | Native (Kotlin/Swift) | Minimized latency |
@@ -89,33 +99,34 @@
 
 ### §3. Architecture Principles
 
-- **Clean Architecture**: Strict 3-layer separation of Domain / Data / Presentation
+- **Separation of Responsibilities**: Design Domain, Data, Presentation, or equivalent boundaries from reasons to change, testability, and dependency direction. Three-layer Clean Architecture is a reference pattern, not a fixed structure
 - **Dependency Inversion**: Upper layers must not depend on concrete implementations of lower layers
-- **Single Source of Truth (SSOT)**: Local DB (Room / SwiftData) is the single source of truth
-- **Unidirectional Data Flow (UDF)**: MVI / TCA or similar unidirectional data flow is mandatory
-- **Feature Module Architecture**: Split by feature unit for minimal build times and test scope
+- **Single Source of Truth (SSOT)**: Identify the authoritative source for each state domain. A local database may serve offline-first systems, but Room, SwiftData, and local-first design are not mandatory for every system
+- **State Flow**: Make state-update ownership, direction, side effects, and concurrency predictable. UDF, MVI, and TCA are reference patterns
+- **Module Boundaries**: Design module boundaries from codebase scale, change frequency, ownership, and the build graph. Feature modules are one option; avoid needless fragmentation
 - **Composition over Inheritance**: Prefer composition over inheritance. Protocol/interface-oriented design
 - **Defensive Programming**: Distrust all external inputs and enforce validation at boundaries
 
 ### §4. Versioning Strategy
 
-- **Minimum SDK**: Recommend `minSdk = 28` (Android 9), iOS `deploymentTarget = 16.0` as minimum
-- **Target SDK**: Always track the latest stable Android `targetSdk` (Android 16 = API 36). Build iOS with the latest SDK
-- **Language Version**: Kotlin 2.2+ and Swift 6.2+ are mandatory. Enable K2 compiler by default
-- **Deprecated API SLA**: APIs officially deprecated must be migrated **within 2 release cycles**
-- **OS Support Policy**: Support latest OS + previous 2 generations
-- **Dependency Updates**: Security patches within 72 hours; regular updates via Renovate/Dependabot with 21-day waiting period before merge
+- **Minimum OS**: Derive Android `minSdk` and Apple deployment targets from user distribution, security updates, required APIs, law, and support cost. `minSdk = 28` and iOS 16 are reference baselines as of 2026-07-23
+- **Target SDK**: Use a target SDK that satisfies store policy and official deadlines and is verified with the adopted toolchain. Android 16 or API 36 and the latest Apple SDK are verification examples as of 2026-07-23, not fixed values
+- **Language Version**: Production must exactly pin a supported stable release. The baseline verified on 2026-07-23 is Kotlin 2.4.10 and Swift 6.3. When platform or vendor constraints require an older supported release, record its support window, owner, migration deadline, and compatibility tests in an ADR
+- **Android Toolchain Compatibility**: Verify the official Kotlin, AGP, D8, R8, JDK, and Compose compiler compatibility matrix. Never update the language version in isolation
+- **Deprecated API SLA**: Derive migration deadlines from scheduled removal, security impact, usage, and alternative maturity. Two release cycles is a reference default
+- **OS Support Policy**: Define the support matrix from user distribution, vendor security support, required capabilities, and test capacity, and verify at least the minimum-supported and current OS
+- **Dependency Updates**: Set a risk-based SLA from exploitability, KEV or EPSS, data sensitivity, exposure, and compensating controls. Seventy-two hours and a 21-day wait are reference values; Renovate and Dependabot are implementation examples
 
 ---
 
-## Part II: Kotlin 2.2+ Language Standards
+## Part II: Kotlin Language Standards
 
-### §5. Kotlin 2.2 Language Features
+### §5. Major Language Features Since Kotlin 2.2
 
 - **Guard Conditions (Stable)**: Guard conditions in `when` expressions for improved readability
 - **Non-local break/continue (Stable)**: Leverage `break`/`continue` inside inline function lambdas
 - **Multi-dollar interpolation (Stable)**: Simplified escaping for strings with frequent `$` literals
-- **Context Parameters (Preview)**: Simplified context-dependent dependency management. Successor to Context Receivers
+- **Context Parameters (Stable in Kotlin 2.4)**: Simplified context-dependent dependency management and the successor to Context Receivers. Treat explicit context arguments and callable references as separate experimental features
 - **Context-sensitive resolution (Preview)**: Improved enum type inference. Type name omission from context
 - **`@JvmExposeBoxed`**: Improved Java interop for inline value classes
 - **Base64 / HexFormat API (Stable)**: Stabilized standard library encoding APIs
@@ -137,7 +148,7 @@ fun render(state: UiState) = when (state) {
     is UiState.Error -> showFatalError(state.message)
 }
 
-// ✅ Good: Context Parameters (Preview — Kotlin 2.2)
+// ✅ Good: Context Parameters (Stable in Kotlin 2.4)
 context(logger: Logger, db: Database)
 fun processOrder(order: Order): Result<Receipt> {
     logger.info("Processing order: ${order.id}")
@@ -146,36 +157,37 @@ fun processOrder(order: Order): Result<Receipt> {
 }
 ```
 
-### §6. Kotlin 2.2.20 Additional Features
+### §6. Evolution from Kotlin 2.2.20 to the 2.4 Line
 
-- **Kotlin/Wasm Beta**: Web target reached Beta. Built-in browser debugging support
-- **Swift Export (Default-Enabled, Experimental)**: Direct Swift mapping replacing Obj-C export
-- **`js`/`wasmJs` shared source set**: Code sharing for multi-target Web
-- **Kotlin/Native Xcode 26 support**: Stack canaries, release binary size reduction
-- **Long→BigInt (JS)**: Long values compile to BigInt on JavaScript target
-- **Stable cross-platform compilation**: Stable cross-compilation for Kotlin libraries
+- **2.2.20 Migration Foundation**: Treat Kotlin/Wasm Beta, the shared `js` / `wasmJs` source set, JS Long-to-BigInt mapping, and Xcode 26 support as capabilities introduced by that release
+- **2.4 Stabilization**: Context parameters, explicit backing fields, the common standard-library UUID API, and Kotlin/Wasm incremental compilation are stable. Do not retain obsolete preview opt-ins by inertia
+- **JVM / Java Boundary**: Java 26 bytecode, Maven Toolchains, and Java / JVM target alignment are available. Define the adopted JDK and consumer support matrix first
+- **Kotlin/Native**: Swift Export became Alpha in 2.4, with Swift package import and improved concurrency mapping. Production adoption still requires a compatibility matrix, fallback, and generated-API diff tests
+- **Kotlin/Wasm**: The WebAssembly Component Model remains experimental. Do not treat browser, WASI, and FaaS as one runtime; separate host capabilities and security boundaries
+- **Compatibility**: Kotlin 2.4 no longer supports K1. Verify compiler plugins, KSP / kapt processors, Gradle, AGP, D8 / R8, and Compose in one upgrade PR
 
 ### §7. K2 Compiler
 
-- **Mandatory Enablement**: Use K2 compiler by default. K1 is deprecated (deprecated in IntelliJ IDEA 2025.1)
-- **Build Speed**: Average 2x compilation speed improvement. 40%+ reduction in JetBrains IntelliJ monorepo
+- **Mandatory Enablement**: Use the K2 compiler. Kotlin 2.4 no longer supports K1, so any compatibility mode for older estates requires an owner, deadline, and compiler-plugin compatibility tests
+- **Build Speed**: Measure K2 improvement on the project's clean and incremental builds, cache hits, and CI runners. Published benchmarks are supporting evidence, not a guaranteed improvement for an individual build
 - **Type Inference Improvement**: Unified data structure for more accurate type inference and call resolution
 - **Multiplatform Consistency**: Guarantees identical compilation behavior across JVM/JS/Native
-- **KAPT→KSP Migration**: Mandatory migration from KAPT to KSP (Kotlin Symbol Processing) with K2
+- **KAPT→KSP Migration**: Default new processors to KSP where supported. Migrate existing kapt usage incrementally with processor compatibility checks, blocker, owner, deadline, and generated-API diff tests
 
 ```kotlin
 // build.gradle.kts — K2 + KSP configuration
 plugins {
-    id("com.google.devtools.ksp") version "2.2.0-1.0.x"
+    id("com.google.devtools.ksp") version "<pinned-compatible-version>"
 }
 
 kotlin {
     compilerOptions {
         allWarningsAsErrors.set(true)
-        freeCompilerArgs.addAll("-Xcontext-parameters")
     }
 }
 ```
+
+Do not retain the old preview flag for context parameters on Kotlin 2.4. Inventory only the specific opt-in for experimental features such as explicit context arguments when they are used.
 
 ### §8. Null Safety & Type Safety
 
@@ -184,16 +196,16 @@ kotlin {
 - **Result type**: Use `kotlin.Result` or custom Sealed class for fallible operations
 - **Data classes**: Use `data class` for DTOs and value objects. Eliminate boilerplate
 - **Immutability first**: `val` > `var`, `List` > `MutableList`, `Map` > `MutableMap`
-- **Sealed hierarchies**: Mandatory for state management and error types to guarantee `when` exhaustiveness
+- **Sealed Hierarchies**: Prefer a sealed class or interface for closed state sets and error taxonomies; where the contract requires open extension, choose an interface or equivalent and test unknown values and compatibility
 - **Value class**: Leverage `@JvmInline value class` for semantic type distinction (UserId, Email, etc.)
 
 ### §9. Code Style & Linters
 
 - **Style Guide**: Strictly follow [Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide)
-- **ktlint**: Mandatory in CI pipeline. PR merge gate
+- **Formatter and Lint**: Pin ktlint, detekt, or equivalent controls and run them in the change gate. A suppression has a reason, scope, owner, and expiry. A Pull Request is one gate implementation
 - **detekt**: Static analysis for Complexity, Naming, Performance. Custom rule sets recommended
 - **Naming Convention**: `lowerCamelCase` base, constants `UPPER_SNAKE_CASE`, packages `lowercase`
-- **Function Length Limit**: Recommended ≤ 30 lines per function. Consider refactoring when exceeded
+- **Function Complexity**: Judge lines, branches, responsibility, nesting, and testability. Thirty lines is a reference review heuristic, not a fixed conformance threshold
 - **Extension Functions**: Organize utility code as extension functions. Limit receiver type scope
 - **Scope Function Guidelines**:
   - `let`: Null safety chaining / variable scope limitation
@@ -204,7 +216,7 @@ kotlin {
 
 ### §10. Kotlin Native & Wasm
 
-- **Kotlin/Native**: LLVM 19-based. Leverage memory consumption tracking and adjustment features
+- **Kotlin/Native**: Kotlin 2.4 is based on LLVM 21. With CMS GC as the default, measure pauses, throughput, and peak memory on representative devices
 - **Stack Canaries**: Enable stack canaries in release binaries (buffer overflow detection)
 - **Binary Size**: Release build optimizations for binary size reduction
 - **Kotlin/Wasm (Beta)**: Web target reached Beta. Per-project Binaryen configuration customization
@@ -213,11 +225,11 @@ kotlin {
 
 ---
 
-## Part III: Swift 6.2+ Language Standards
+## Part III: Swift Language Standards
 
 ### §11. Swift 6.2 Approachable Concurrency
 
-- **Default MainActor execution**: Scripts and UI code run on main thread by default. Explicit `@MainActor` not required
+- **Default actor isolation**: Swift 6.2 can default a module or target to `MainActor` isolation. Record the build setting and annotate public or cross-module boundaries when the contract would otherwise be ambiguous; do not assume every script, package, or UI-adjacent function has the same isolation
 - **`@concurrent` attribute**: New attribute for explicitly specifying asynchronous execution
 - **Reduced false data-race warnings**: Dramatically reduced false positives for code not heavily using concurrency
 - **Predictable `async` behavior**: Async calls default to respecting the caller's Actor
@@ -236,9 +248,9 @@ func fetchData() async throws -> Data {
 
 ### §12. Swift 6 Strict Concurrency Foundation
 
-- **Strict Concurrency mandatory**: Detect data races at compile time
+- **Strict Concurrency**: Enable complete checking for Swift 6 production modules and migrate warnings through bounded, owned exceptions so data-race safety is verified rather than silently disabled
 - **`Sendable` protocol**: Types shared across threads must conform to `Sendable`
-- **Actor isolation**: Use Actors for shared mutable state. Replace traditional lock mechanisms
+- **Actor isolation**: Prefer actors for shared mutable state when their isolation and reentrancy model fits. Locks, atomics, and other primitives remain valid at measured low-level boundaries with documented invariants, ownership, and tests
 - **`@MainActor`**: Apply to UI update logic to guarantee main thread execution
 - **Structured Concurrency**: Structure async processing with `async/await` and `TaskGroup`
 
@@ -259,7 +271,7 @@ actor ImageCache: Sendable {
 ### §13. Type Safety & Protocol-Oriented Programming
 
 - **Protocol Oriented Programming (POP)**: Prefer protocols + structs over class inheritance
-- **Value types first**: `struct` > `class`. Use `class` only when reference semantics are needed
+- **Value and reference semantics**: Prefer `struct` for independent values and `class` or actors for identity, shared lifetime, or reference semantics. Record mutability and isolation instead of applying a universal type ranking
 - **Opaque Types**: Use `some Protocol` to balance API boundary flexibility and type safety
 - **`@Observable` macro**: Use for observable objects integrated with SwiftUI
 - **Typed Throws (Swift 6)**: Type-safe error handling
@@ -302,22 +314,24 @@ func process(_ span: Span<UInt8>) {
 
 - **Package Traits (Swift 6.1)**: Feature adaptation based on environment (Embedded Swift, WebAssembly, etc.)
 - **`@implementation` attribute**: Provide Swift implementations for Objective-C declarations. Use for gradual migration
-- **Version Resolution**: Commit `Package.resolved` to guarantee reproducibility
+- **Version Resolution**: An app or executable root commits `Package.resolved` and verifies the same resolution in CI. Because a published package's `Package.resolved` does not pin consumer resolution, assure compatibility through declared constraints, pinned CI test and release resolution, minimum and maximum supported ranges, and a locked example app when needed
 - **Dependency Minimization**: Keep package dependencies minimal. Evaluation via OpenSSF Scorecard recommended
 
 ### §16. Code Style & Linters
 
-- **SwiftLint**: Mandatory. Integrate into CI pipeline as PR merge gate
-- **SwiftFormat**: Automatic code format unification
+- **Formatter and Lint**: Pin SwiftLint, SwiftFormat, or equivalent controls and integrate them into the change gate. A suppression has a reason, scope, owner, and expiry. A Pull Request is one gate implementation
 - **Naming Convention**: Strictly follow Apple Swift API Design Guidelines
 - **Trailing comma**: Swift 6.1 supports trailing commas in various lists. Enable recommended
 - **Documentation Comments**: Mandatory `///` for all public APIs
 
-### §17. Swift WebAssembly & Embedded Swift
+### §17. Swift 6.3, Cross-Platform, and Embedded Swift
 
 - **WebAssembly Official Support (Swift 6.2)**: Compilation targeting browser and serverless runtimes
 - **Embedded Swift**: Swift for embedded systems. IoT/automotive domains
 - **Enhanced C++ Interoperability (Swift 6.2)**: Seamless integration with C++ projects
+- **Swift 6.3 C Interoperability**: Use `@c` and `@implementation` to make C ABI boundaries explicit, and test generated headers, ownership, errors, allocation, and ABI compatibility
+- **Swift SDK for Android**: Swift 6.3 provides the first official release, but adoption must prove JNI boundaries with Kotlin / Java, Android toolchain compatibility, binary size, debugging, and on-call capability in an ADR. It does not automatically replace the default mobile stack
+- **Swift Build Integration**: Treat Swift Package Manager integration as a preview. Adopt a production build-system change only after measuring reproducibility, cache behavior, plugins, and CI parity
 - **Subprocess Package**: Launch and manage subprocesses directly from Swift code
 - **VS Code Extension**: Background indexing, LLDB integration, DocC live preview
 
@@ -328,15 +342,15 @@ func process(_ span: Span<UInt8>) {
 ### §18. Jetpack Library Stack
 
 - **BOM Management**: Unify Compose dependency versions with `androidx.compose:compose-bom`
-- **Required Libraries**: Compose UI, Material 3, Navigation, Lifecycle, Hilt, Room, DataStore, WorkManager
-- **Gradle Version Catalog**: Centralize all dependencies in `libs.versions.toml`. Direct version declarations in `build.gradle.kts` prohibited
-- **Type-safe Navigation**: Use Compose Navigation 2.8+ type-safe APIs. String routes prohibited
+- **Capability-Based Library Selection**: State the needed UI, design-system, navigation, lifecycle, DI, persistence, settings, and background-work capabilities, then adopt only fitting tools such as Compose, Material, Hilt, Room, DataStore, or WorkManager
+- **Dependency-Version Source of Truth**: Use one resolution source suited to the build, such as a version catalog, platform or BOM, lock, or central-management plugin. `libs.versions.toml` is an implementation example
+- **Type-Safe Navigation**: Verify route contracts with types or schemas and avoid implicit string contracts. Compose Navigation's type-safe API is an implementation example
 
 ```kotlin
 // libs.versions.toml
 [versions]
 compose-bom = "2025.12.00"
-kotlin = "2.2.20"
+kotlin = "<pinned-supported-version>"
 hilt = "2.54"
 room = "2.7.1"
 
@@ -390,12 +404,12 @@ class OrderViewModel @Inject constructor(
 - **Convention Plugin**: Centralize build configurations with Convention Plugins. Minimize each module's `build.gradle.kts`
 - **Dependency Direction**: `feature → domain → data`. Reverse dependencies prohibited
 
-### §21. Dependency Injection — Hilt
+### §21. Dependency Injection
 
-- **Hilt mandatory**: Hilt is the standard DI for Android. Manual DI only for prototypes
-- **`@HiltViewModel`**: Unify ViewModel DI through Hilt
-- **`@Module` splitting**: Distribute `@Module` per feature module
-- **Test Module**: Enable easy test substitution with `@TestInstallIn`
+- **Selection Criteria**: Select DI from object lifecycle, scope, startup, code generation, KMP compatibility, test substitution, and debuggability. Hilt, Koin, compile-time DI, and explicit manual composition may all conform
+- **Boundary**: Centralize creation responsibility and scope for ViewModels, services, and repositories at composition roots, avoiding implicit service-locator dependencies
+- **Module Splitting**: Divide modules according to reasons the dependency graph changes and ownership, not a universal feature-per-module rule
+- **Test Substitution**: Safely replace production bindings with test doubles and prevent scope leaks or an unverified alternate graph. `@TestInstallIn` is an implementation example when using Hilt
 
 ### §22. Android 16 Platform API Integration
 
@@ -453,12 +467,12 @@ android {
 
 ## Part V: iOS Architecture
 
-### §26. SwiftUI + MVVM/TCA
+### §26. Apple UI Architecture
 
-- **SwiftUI first**: New screens implemented in SwiftUI. UIKit only for maintaining existing screens
-- **MVVM**: Standard pattern of ViewModel + SwiftUI using `@Observable` macro
-- **TCA (The Composable Architecture)**: Consider TCA for large-scale apps. Unidirectional data flow + testability
-- **Preview-Driven Development**: Actively leverage SwiftUI Previews. Previewable design = testable design
+- **UI framework selection**: Evaluate SwiftUI first for new UI when the deployment target, required platform APIs, performance, accessibility, and team capability fit. UIKit, AppKit, or mixed composition remains valid when those constraints require it
+- **State and responsibility boundaries**: Separate rendering, state transitions, side effects, and domain logic. MVVM with `@Observable`, TCA, and other unidirectional patterns are replaceable implementations, not universal architecture mandates
+- **Migration**: Introduce framework changes at a screen or capability boundary with interoperability, rollback, and regression tests; do not require a full rewrite
+- **Previews**: Use SwiftUI Previews where they improve feedback, but retain executable unit, integration, accessibility, and device tests because previewability is not proof of correctness
 
 ### §27. iOS 26 Framework Integration
 
@@ -469,12 +483,12 @@ android {
 - **PhotosUI**: Use `PhotosPicker` for system photo picker
 - **WebView (SwiftUI)**: Native SwiftUI `WebView` component (new in iOS 26)
 
-### §28. Privacy Manifest (Mandatory)
+### §28. Privacy Manifest and Required-Reason APIs
 
-- **`PrivacyInfo.xcprivacy`**: Mandatory for all apps. Declare reasons for API usage
-- **Required Reason API**: Declare usage reasons for UserDefaults, FileTimestamp, SystemBootTime, DiskSpace, etc.
-- **Tracking Domains**: Declare tracking domains of third-party SDKs
-- **Third-party SDKs**: Verify Privacy Manifests of all used SDKs. SDKs without manifests are prohibited
+- **Applicability**: Generate and validate `PrivacyInfo.xcprivacy` when current Apple policy requires it for the app, embedded SDK, collected data, tracking, or Required Reason API usage. Re-evaluate at every SDK and store-policy change
+- **Required Reason API**: Inventory APIs such as UserDefaults, file timestamps, system boot time, and disk space, then declare only approved reasons that match actual behavior
+- **Tracking Domains and Data**: Keep tracking domains and collected-data declarations consistent with runtime behavior, consent, App Store privacy details, and third-party SDKs
+- **Third-party SDKs**: Verify required manifests and signatures for embedded SDKs. Replace, update, or place a time-bounded exception on a non-compliant SDK rather than assuming every SDK has the same manifest obligation
 
 ```xml
 <!-- PrivacyInfo.xcprivacy -->
@@ -514,15 +528,19 @@ android {
 - **`@Index` macro (iOS 26+)**: Define optimization indexes for sorting and fetching
 - **`@Unique` macro (iOS 26+)**: Unique constraints across multiple attributes
 
-### §31. Deployment Target Standards
+### §31. Deployment Target Decision Contract
 
-| Target | Minimum Version | Rationale |
-|--------|----------------|-----------|
-| iOS | 16.0 | SwiftUI maturity, 95%+ device coverage |
-| macOS | 13.0 | SwiftUI/SwiftData foundation |
-| watchOS | 9.0 | WidgetKit + SwiftUI |
-| tvOS | 16.0 | SwiftUI standardization |
-| visionOS | 1.0 | Support from first version |
+A deployment target is a Blueprint parameter; a fixed OS version is not a Universal conformance condition. Determine every target from user distribution, vendor security support, required APIs, store deadlines, hardware constraints, test capacity, legal or contractual duties, and support cost. Record the evidence date and re-evaluation triggers.
+
+| Target | Primary Decision Evidence | Required Verification |
+|--------|---------------------------|-----------------------|
+| iOS / iPadOS | active-device distribution, security updates, required SDKs and APIs, enterprise fleet | minimum supported OS, current OS, upgrade install, stored-data migration, accessibility |
+| macOS | hardware and OS fleet, distribution method, sandbox and entitlements, required frameworks | minimum and current OS, Intel and Apple silicon scope, signing and notarization, upgrade |
+| watchOS | paired-iPhone constraints, sensor and background APIs, deployed devices | supported pairs, minimum and current OS, disconnection, battery, accessibility |
+| tvOS | remote input, media and DRM, deployed device generations | minimum and current OS, focus, network, media playback |
+| visionOS | target users, device availability, spatial APIs, alternative experience | device or justified test environment, safety, comfort, fallback, performance |
+
+iOS 16, macOS 13, watchOS 9, tvOS 16, and visionOS 1 may be evaluation examples as of 2026-07-23, but they are not a reusable default support range or a coverage guarantee. Re-evaluate with official data and product telemetry for every release plan.
 
 ### §32. Xcode Configuration Standards
 
@@ -530,13 +548,13 @@ android {
 - **Swift 6 Language Mode**: Enable
 - **Build Settings**: `SWIFT_STRICT_CONCURRENCY = complete`
 - **Warnings as Errors**: Enable `-warnings-as-errors`
-- **Code Signing**: Automatic signing + Xcode Cloud / Fastlane integration
+- **Code Signing**: Protect credentials with least privilege and retain a reproducible automated-signing or controlled-signing procedure plus audit evidence. Xcode Cloud and Fastlane are implementation examples
 
 ### §33. Observations & Reactive Patterns
 
 - **`Observations` async sequences (Swift 6.2)**: Stream transactional state changes of observable types
 - **UIKit Integration (iOS 26+)**: UIKit automatically integrates Swift Observation. Auto-tracking in `layoutSubviews`, etc.
-- **Migration from Combine**: New code uses `@Observable`+`Observations`. Combine only for maintaining existing code
+- **Observation selection**: Select Observation, `Observations`, Combine, or `AsyncSequence` by state versus event semantics, deployment target, backpressure, cancellation, and interoperability. A migration needs measured benefit and a compatibility plan
 
 ---
 
@@ -544,7 +562,7 @@ android {
 
 ### §34. KMP Architecture Design
 
-- **Maximize `commonMain`**: Share business logic, data layer, and domain models. Target 85%+ sharing rate
+- **Right-Size `commonMain`**: Share business logic, data, and domain models where doing so improves maintainability and testability without hiding platform differences. Do not use sharing percentage as a KPI
 - **`expect`/`actual`**: Only for platform-specific implementations. Prioritize searching existing multiplatform libraries
 - **Source Set Structure**: `commonMain` → `androidMain` / `iosMain` / `jvmMain` / `wasmJsMain`
 - **Flexible UI**: Choose between Compose Multiplatform (shared UI) or platform-specific UI (maximum UX)
@@ -574,12 +592,12 @@ actual fun platformName(): String = UIDevice.current.systemName()
 | Collections | kotlinx.collections.immutable | Immutable collections |
 | Images | Coil 3 Multiplatform | KMP-compatible image loading |
 
-### §36. Swift Export (GA)
+### §36. Swift Export (Alpha and Gradual Adoption)
 
-- **Swift Export**: Default-enabled in Kotlin 2.2.20 (Experimental). Standard interop replacing Objective-C export
+- **Swift Export**: Alpha in Kotlin 2.4, with improved structured concurrency and `Flow`-to-`AsyncSequence` mapping. Do not treat it as the production default or an unconditional replacement for Objective-C export
 - **Swift Type Mapping**: Kotlin types map directly to Swift native types
 - **Nullability Preservation**: Kotlin null safety accurately converts to Swift `Optional`
-- **Benefits**: Naturally generates Swift-idiomatic interfaces. Eliminates Obj-C bridge limitations
+- **Adoption Conditions**: Contract-test public API differences, concurrency, exceptions, binary compatibility, the Xcode and Swift matrix, and the Objective-C export fallback in both languages
 
 ### §37. KMP Gradual Adoption Strategy
 
@@ -587,7 +605,7 @@ actual fun platformName(): String = UIDevice.current.systemName()
 2. **Phase 2**: Share network layer and repositories
 3. **Phase 3**: Share domain logic and UseCases
 4. **Phase 4**: Share UI with Compose Multiplatform (optional)
-- **Team Training**: Conduct KMP workshops before adoption
+- **Team Capability**: Before adoption, verify practical capability in KMP, Swift and Kotlin boundaries, builds, debugging, and incident response. Workshops are one training mechanism
 - **Gradual Migration**: KMP-ify new features first. Bulk migration of existing code prohibited
 
 ### §38. KMP Testing Strategy
@@ -601,7 +619,7 @@ actual fun platformName(): String = UIDevice.current.systemName()
 
 - **Gradle Configuration**: Suppress stability warnings with `kotlin.mpp.stability.nowarn=true`
 - **Incremental Compilation**: Leverage K2 multiplatform incremental compilation
-- **Caching**: Enable Gradle Build Cache. Configure remote cache for CI environments
+- **Caching**: Use build caches only when reproducibility, cache keys, secrets, tenant separation, and recovery from poisoning are verified. A remote cache is an optional enhancement when scale and economics justify it
 - **Binary Compatibility**: Minimize `@OptIn(ExperimentalKotlinApi::class)` usage
 
 ### §40. KMP Common Dependency Management
@@ -692,10 +710,10 @@ fun AnimatedHeader(scroll: Int) {
 
 ### §49. Baseline Profiles
 
-- **Mandatory**: Generate app-specific Baseline Profiles. Default Compose Profiles alone are insufficient
-- **Generation Method**: Cover critical user flows with Macrobenchmark tests
-- **Effect**: ~30% improvement in startup code execution speed via AOT compilation
-- **CI Integration**: Integrate Baseline Profile generation into CI pipeline
+- **Applicability decision**: For Android applications where startup or critical-flow latency matters, measure whether an app-specific Baseline Profile materially improves representative devices beyond library-provided profiles
+- **Generation Method**: When adopted, cover measured critical user flows with Macrobenchmark or an equivalent and version the profile with the release artifact
+- **Evidence**: Retain before-and-after startup, frame, binary-size, and build-cost evidence instead of assuming a fixed percentage improvement
+- **CI Integration**: Regenerate and validate the profile when covered code, toolchains, or target devices change; the Blueprint selects the CI or release gate
 
 ```kotlin
 // Baseline Profile Generation — Macrobenchmark
@@ -887,7 +905,7 @@ func loadDashboard() async throws -> Dashboard {
 - **GCD→Swift Concurrency**: Migrate `DispatchQueue.main.async` to `@MainActor`
 - **`DispatchQueue.global()`→`Task.detached`**: Background processing migration
 - **DispatchGroup→TaskGroup**: Multi-async task waiting migration
-- **Gradual Migration**: New code requires Swift Concurrency. Systematically migrate existing GCD
+- **Gradual Migration**: Treat Swift Concurrency as the first candidate for new asynchronous code. A boundary that retains GCD or callbacks has platform-API, latency, interop, or comparable rationale and tests. Plan existing migration from inventory, risk, compatibility, and capacity
 
 ---
 
@@ -895,10 +913,10 @@ func loadDashboard() async throws -> Dashboard {
 
 ### §64. Startup Time Optimization
 
-- **Cold Start Target**: Under 500ms (until main content display)
+- **Cold Start Budget**: Define the percentile and measurement point in the Blueprint from user device distribution, operating systems, launch paths, and the UX SLO, and continuously measure release artifacts. Five hundred milliseconds is a product-specific reference budget
 - **Android Measures**: Lazy initialization of Content Providers, App Startup library, Baseline Profiles
 - **iOS Measures**: Minimize `pre-main` time, minimize dylibs, leverage Static Linking
-- **Measurement**: Continuous monitoring with Firebase App Start Trace / MetricKit `MXAppLaunchMetric`
+- **Measurement**: Continuously monitor with complementary platform metrics, device labs, and field telemetry. Firebase App Start Trace and MetricKit `MXAppLaunchMetric` are implementation examples
 - **Splash Screen**: Unified with Android 12+ `SplashScreen` API / iOS Launch Storyboard
 
 ### §65. Memory Management
@@ -907,11 +925,11 @@ func loadDashboard() async throws -> Dashboard {
 - **iOS**: Instruments Allocations/Leaks. Proper Autoreleasepool usage
 - **Image Management**: Memory cache management with Coil (Android) / Kingfisher (iOS)
 - **Large Heap Avoidance**: `android:largeHeap="true"` is a last resort. Prioritize fundamental memory optimization
-- **Threshold**: Target < 50MB memory usage when backgrounded
+- **Memory Budget**: Define it in the Blueprint from device class, OS kill policy, feature, and foreground or background state; measure peak, steady state, leaks, and recovery under memory pressure. Fifty megabytes is a reference value
 
 ### §66. Rendering Performance
 
-- **Target Frame Rate**: 60fps / 120fps (ProMotion/high refresh rate support)
+- **Rendering Budget**: Define frame-time, jank, and long-frame budgets from target-display refresh rates and the UX SLO. Do not fix 60 or 120 fps for every screen; measure animation, battery, thermal, and accessibility effects
 - **Adaptive Refresh Rate (Android 16)**: Optimal variable refresh rate utilization via `getSuggestedFrameRate`
 - **Jank Detection**: JankStats API (Android) / MetricKit `MXAnimationMetric` (iOS)
 - **Overdraw Reduction**: GPU Overdraw debugging. Eliminate unnecessary background/clip operations
@@ -938,10 +956,10 @@ func loadDashboard() async throws -> Dashboard {
 
 - **Android App Bundle (AAB)**: Device-specific APK delivery. Minimize download size
 - **App Thinning (iOS)**: Slicing / On-Demand Resources
-- **Target**: Initial download < 30MB. Fetch large assets on demand
+- **Target**: Follow the §134 Blueprint budget and measure initial download, install, and update size from artifacts. Decide asset splitting and on-demand delivery with UX, offline needs, and retention cost included
 - **R8/ProGuard**: Automatic removal of unused code and resources
-- **Asset Compression**: Images in WebP, video in HEVC, fonts in woff2 subsets
-- **Monitoring**: Output app size diff reports per PR in CI
+- **Asset Compression**: Select from formats supported by target operating systems and devices after measuring quality, decode performance, licensing, accessibility, and fallbacks, and remove unused variants
+- **Monitoring**: Generate a size-difference report for size-affecting changes and releases, preserving evidence that budget overruns are approved or blocked. A Pull Request is an implementation example
 
 ### §70. Hardware Resource Monitoring
 
@@ -956,11 +974,11 @@ func loadDashboard() async throws -> Dashboard {
 
 ### §71. On-Device AI Strategy
 
-- **Privacy First**: Process AI without sending user data off-device
-- **Offline Operation**: AI features fully functional without network
-- **Latency**: Target < 10ms response for edge inference
-- **Model Size**: Initial bundled < 20MB. Deliver large models via OTA
-- **Hardware Utilization**: Maximize Neural Engine (Apple) / NPU (Android)
+- **Placement Decision**: Select on-device, cloud, or hybrid processing from data sensitivity, latency, offline needs, model capability, device coverage, energy, cost, and law. On-device placement alone is not a privacy guarantee
+- **Offline Contract**: Define which flows, quality, fallback, synchronization, and model availability are required offline; do not force network independence on every AI feature
+- **Performance Budget**: Derive inference latency, model and download size, memory, battery, thermal, and quality budgets from representative devices and user flows in the Blueprint
+- **Distribution**: Choose bundled, on-demand, OTA, or another method from runtime compatibility, signatures, rollback, store policy, and network and storage constraints
+- **Hardware Utilization**: Profile Neural Engine, NPU, GPU, CPU, or other paths and verify benefit and fallback on supported devices
 
 ### §72. Android — ML Kit & TensorFlow Lite
 
@@ -1026,6 +1044,8 @@ print(response.content)
 
 ### §77. Edge AI Performance Standards
 
+The following numbers are starting reference budgets for measuring a small interactive model, not Universal conformance thresholds. Calibrate them in the Blueprint from the model, task, devices, UX SLO, quality, safety, and energy, and state percentiles and representative devices.
+
 | Metric | Target | Measurement Method |
 |--------|--------|--------------------|
 | Inference Latency | < 50ms (CPU) / < 10ms (NPU) | Systrace / Instruments |
@@ -1047,19 +1067,19 @@ print(response.content)
 
 ### §79. Offline-First Design Principles
 
-- **SSOT**: Local DB (Room / SwiftData) is the single source of truth. Server is a replica
-- **Optimistic Updates**: Immediate UI reflection → background sync. Predefine conflict resolution strategy
-- **Network State Awareness**: Monitor network state with `ConnectivityManager` (Android) / `NWPathMonitor` (iOS)
-- **Data Consistency**: Conflict resolution via CRDT / Last-Write-Wins
-- **Queuing**: Accumulate offline operations in queue, execute sequentially upon network recovery
+- **Applicability**: Decide offline, cache-only, read-through, or online-required behavior per capability from user needs, data sensitivity, consistency, and operational cost
+- **SSOT**: Declare the authoritative source for each data domain. A local database may be the read model or offline authority, but the server, device, or another system may own writes and conflict resolution
+- **Optimistic Updates**: When used, predefine idempotency, rollback, conflict policy, and user-visible failure behavior
+- **Network State Awareness**: Observe connectivity through platform APIs such as `ConnectivityManager` or `NWPathMonitor`, while treating reachability as a hint rather than proof that a dependency works
+- **Data Consistency and Queues**: Select version checks, server arbitration, CRDT, last-write-wins, merge UI, or another policy from domain semantics. Bound, encrypt where needed, migrate, retry, and purge offline queues
 
 ### §80. Android Data Persistence — Room
 
-- **Room**: Type-safe SQLite ORM. KSP support mandatory
-- **`@Entity`/`@Dao`/`@Database`**: Standard Room configuration
-- **Migration**: Prefer `AutoMigration`. Manual Migration for destructive changes
-- **Flow Integration**: Return `Flow<List<T>>` from `@Query` for reactive UI updates
-- **Paging 3**: Large data pagination. `PagingSource` + `RemoteMediator`
+- **Selection**: Room is a reference implementation for structured SQLite persistence. Select it, another database, files, preferences, or no durable local store from schema, query, encryption, migration, and offline requirements
+- **Room toolchain**: When Room is adopted, pin a compatible Room, Kotlin, Gradle, and KSP or supported processor matrix and verify generated-schema differences
+- **Migration**: Prefer automatically verifiable migrations where supported, and use explicit migrations when transformation or review is required. Destructive fallback needs explicit data-loss approval
+- **Reactive queries**: Expose `Flow`, paging, or another lifecycle-aware API only where consumers need streaming updates and cancellation
+- **Paging**: Use `PagingSource`, `RemoteMediator`, or an equivalent only for datasets whose size and access pattern justify pagination
 
 ```kotlin
 // Room + Flow + Paging
@@ -1095,9 +1115,9 @@ interface OrderDao {
 
 ### §83. iOS Keychain & UserDefaults
 
-- **Keychain**: Mandatory for auth tokens, encryption keys, sensitive data
+- **Secure Storage**: Store authentication tokens, encryption keys, and sensitive data in a protected facility suited to the threat model and accessibility needs, such as Keychain, Secure Enclave integration, or a hardware-backed keystore; define backup, migration, logout, and device-lock behavior
 - **`kSecAttrAccessibleWhenUnlockedThisDeviceOnly`**: Device lock-linked access control
-- **UserDefaults**: Non-sensitive settings only. Usage reason declaration required in Privacy Manifest
+- **UserDefaults**: Use only for small non-sensitive preferences. When current Apple policy classifies the accessed API as a Required Reason API, declare an approved reason consistent with actual behavior
 - **App Group**: Data sharing between host app and extensions
 
 ### §84. Background Sync
@@ -1130,7 +1150,7 @@ interface OrderDao {
 ### §87. Encryption & Data Protection
 
 - **At-rest Encryption**: Android `EncryptedFile` / iOS `FileProtection.complete`
-- **Transport Encryption**: TLS 1.3 mandatory. TLS 1.2 only for backward compatibility
+- **Transport Encryption**: Require platform-standard certificate and hostname validation and prohibit cleartext for protected traffic. Prefer TLS 1.3; allow a currently supported TLS 1.2 configuration only when platform or dependency compatibility requires it and weak algorithms are disabled
 - **Hashing**: SHA-256 or higher. MD5/SHA-1 prohibited
 - **Key Management**: Hardware-backed key generation (Keystore / Secure Enclave)
 - **Cryptographic Agility**: Develop migration plan for quantum-resistant cryptography (ML-KEM, ML-DSA)
@@ -1165,18 +1185,18 @@ val promptInfo = BiometricPrompt.PromptInfo.Builder()
 
 - **Play Integrity API (Android)**: Verify app authenticity, device integrity, and account integrity
 - **App Attest (iOS)**: Guarantee request authenticity with Secure Enclave-based cryptographic proof
-- **Root/Jailbreak Detection**: Restrict or block operation on tampered devices
+- **Root/Jailbreak Detection**: Use integrity and tamper signals according to the threat model. They may trigger step-up, restricted capability, or investigation, but never replace server-side authentication and authorization
 - **RASP**: Runtime self-protection. Tampering detection, reverse engineering defense, hooking detection
 - **Code Obfuscation**: ProGuard/R8 (Android). iOS Swift limited due to ABI stability
 - **Debugger Detection**: `ptrace` detection (iOS), `Debug.isDebuggerConnected()` (Android)
 
 ### §90. Network Security
 
-- **Certificate Transparency (Recommended)**: New standard replacing Certificate Pinning. No app update needed for cert rotation
-- **Certificate Pinning (Legacy)**: Public key pinning. Always configure backup pins
+- **Certificate Transparency**: Use platform trust and Certificate Transparency where available as the default public-PKI evidence; it is not an application-identity substitute in every threat model
+- **Certificate Pinning**: Adopt only for controllable, high-risk endpoints with a rotation and recovery design. Prefer SPKI pins, include an independent backup pin, and prohibit fail-open TLS validation
 - **Network Security Config (Android)**: Prohibit cleartext in `res/xml/network_security_config.xml`
 - **ATS (App Transport Security / iOS)**: Enabled by default. Minimize exceptions
-- **Man-in-the-Middle Defense**: Multi-layer defense with TLS 1.3 + Certificate Transparency/Pinning
+- **Man-in-the-Middle Defense**: Combine current platform TLS validation with risk-based CT, pinning, or application-layer request protection; document which layer addresses which threat
 
 ```xml
 <!-- Android Network Security Config -->
@@ -1199,7 +1219,7 @@ val promptInfo = BiometricPrompt.PromptInfo.Builder()
 ### §91. Secure Coding
 
 - **Input Validation**: Sanitize and validate all user inputs
-- **SQL Injection Prevention**: Mandatory parameter binding with Room/SwiftData
+- **SQL Injection Prevention**: Avoid string concatenation and require parameter binding, typed queries, or an equivalent safe construction mechanism in the adopted database API. Room and SwiftData are implementation examples
 - **WebView Security**: Prohibit unrestricted JavaScript. Minimum privilege for `addJavascriptInterface`
 - **Intent Spoofing Prevention**: Strict permission settings for exported Activity/BroadcastReceiver
 - **URL Scheme Hijacking**: Prevent URL Scheme hijacking with Universal Links / App Links
@@ -1216,8 +1236,8 @@ val promptInfo = BiometricPrompt.PromptInfo.Builder()
 
 - **SAST**: CI integration of ktlint security rules / SwiftLint security rules
 - **DAST**: API and communication security testing with OWASP ZAP / Burp Suite
-- **SBOM**: Generate third-party dependency inventory in CycloneDX format
-- **Vulnerability SLA**: Critical — fix within 24 hours, High — 7 days, Medium — 30 days
+- **SBOM**: Generate and validate the third-party dependency inventory in CycloneDX, SPDX, or an interoperable format suited to consumers and toolchains
+- **Vulnerability SLA**: Derive deadlines from exploitability, KEV or EPSS, exposure, data sensitivity, and compensating controls, not severity alone. Critical in 24 hours, High in seven days, and Medium in 30 days are reference defaults for a high-risk internet-facing product
 - **OWASP MASVS**: Compliance verification against Mobile App Security Verification Standard
 
 ### §94. Security Monitoring & Incident Response
@@ -1256,7 +1276,7 @@ val promptInfo = BiometricPrompt.PromptInfo.Builder()
 
 ### §98. App Clips / Instant Apps
 
-- **App Clips (iOS)**: < 15MB. Triggered by NFC/QR code/Safari Smart Banner
+- **App Clips (iOS)**: Confirm current platform size, capability, invocation, privacy, and distribution constraints for each release and complete the target task within those constraints
 - **Instant Apps (Android)**: Google Play Instant format
 - **Design Principle**: Single-task completion type. Design pathway to full app
 
@@ -1289,11 +1309,11 @@ val promptInfo = BiometricPrompt.PromptInfo.Builder()
 
 ## Part XVI: Flutter / Cross-Platform Integration
 
-### §102. Platform Channel — Pigeon Mandatory
+### §102. Typed Platform Boundary
 
-- **Pigeon**: Type-safe Platform Channel generation. Manual MethodChannel prohibited
-- **Code Generation**: Auto-generated type-safe bindings for `.dart` + `.kt` / `.swift`
-- **Error Type Unification**: Unified error types across platforms via Pigeon-generated code
+- **Typed Contract**: APIs between Dart and Kotlin or Swift explicitly define types, nullability, errors, threads, and lifecycle through a schema, generated binding, or thin hand-written adapter
+- **Pigeon**: A strong reference implementation in the Flutter ecosystem. When not using Pigeon, provide equivalent contract-drift tests, boundary validation, and compatibility policy
+- **Hand-Written Channels**: Do not scatter raw string method names and unchecked casts. Isolate an existing MethodChannel behind one adapter and protect it with a typed facade and contract tests
 
 ```dart
 // Pigeon Definition — messages.dart
@@ -1322,14 +1342,15 @@ abstract class NativeAuthApi {
 ### §105. KMP + Flutter Hybrid
 
 - **KMP Business Logic + Flutter UI**: Share business logic via KMP, implement UI in Flutter
-- **Via Pigeon**: Expose KMP artifacts to Flutter via Pigeon
+- **Via Typed Bridge**: Expose KMP artifacts to Flutter through Pigeon or an equivalent typed bridge
 - **Responsibility Boundary**: KMP = Domain/Data layer, Flutter = Presentation layer
 
 ### §106. React Native Integration
 
-- **Turbo Modules**: New standard API for native modules. Migration from Bridge
-- **Fabric**: Integration with new rendering engine
-- **Constraints**: Even with RN, implement native-specific API parts in Kotlin/Swift
+- **Dedicated Source of Truth**: Follow `420_react_native.md` for the overall React Native architecture, tests, CI, OTA, and team governance
+- **New Architecture**: Default to Turbo Native Modules, Fabric Native Components, and typed Codegen specs
+- **Native Responsibility**: Implement OS-specific APIs in Kotlin or Swift and maintain JS, iOS, and Android owners plus a compatibility matrix
+- **Boundary Verification**: Assure nullability, errors, threads, lifecycle, cancellation, and size limits through Codegen contracts and tests on both operating systems
 
 ---
 
@@ -1337,9 +1358,9 @@ abstract class NativeAuthApi {
 
 ### §107. Unit Testing
 
-- **Kotlin**: JUnit 5 + MockK. Coroutines testing with `kotlinx-coroutines-test` Turbine
+- **Kotlin**: JUnit 5 + MockK. Use `kotlinx-coroutines-test` for coroutine time and dispatcher control, and a separately adopted tool such as Turbine for Flow value assertions
 - **Swift**: Swift Testing framework (`@Test` macro). Migration from XCTest recommended
-- **Coverage**: Business logic 80%+, utilities 100%. UI tested separately
+- **Coverage**: Assess test adequacy from risk, critical paths, mutation or fault detection, and past defects. Eighty and 100 percent are reference values; coverage alone is not a release gate
 
 ```kotlin
 // Kotlin ViewModel Test
@@ -1400,15 +1421,15 @@ fun `loadOrders should emit Success state`() = runTest {
 
 - **Static Analysis**: detekt security rules / SwiftLint security rules
 - **Dependency Scanning**: Dependabot / Renovate + OSV Scanner
-- **Penetration Testing**: External penetration testing at least annually
+- **Penetration Testing**: Derive scope and cadence from the threat model, data sensitivity, regulation, internet exposure, material changes, and past incidents. Annual external testing is a reference default for high-risk products
 - **OWASP MASVS**: Compliance verification against Mobile App Security Verification Standard
 
 ### §113. Test Infrastructure
 
-- **Firebase Test Lab**: Real device testing. Robo test + custom tests
-- **Xcode Cloud**: iOS CI/CD and test integration
+- **Device Testing**: Select managed devices, a device farm, Firebase Test Lab, or an equivalent according to the device matrix and reproducibility needs
+- **iOS CI**: Select self-hosted runners, managed CI, Xcode Cloud, or an equivalent according to signing, simulator or device, and artifact-retention needs
 - **Test Sharding**: Parallel execution of large test suites
-- **Flaky Test Elimination**: Auto-detect and quarantine flaky tests. Fix within 2 weeks mandatory
+- **Flaky Test Management**: Automatically detect flaky tests and record owner, impact, and quarantine expiry. Do not quarantine a critical release flow. The Blueprint derives the repair SLA from frequency and impact; two weeks is a reference default
 
 ### §114. Screenshot Testing
 
@@ -1423,24 +1444,24 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §115. Build Optimization
 
-- **Gradle**: Enable Configuration Cache. Build Cache (local + remote) mandatory
+- **Gradle**: Adopt Configuration Cache and Build Cache after verifying compatibility and reproducibility. Choose local or remote from scale, trust boundaries, and economics
 - **Gradle 9.x**: Isolated Projects support
 - **Xcode**: Leverage DerivedData Cache. Optimize parallel build settings
-- **Target**: Full build under 15 minutes. Incremental build under 3 minutes
+- **Target**: Set and continuously measure a build budget from developer-feedback and release SLOs. Fifteen minutes full and three minutes incremental are reference defaults
 - **Convention Plugin**: Simplify build.gradle.kts through shared build configurations
 
 ### §116. CI/CD Pipeline
 
 - **5-Stage Gate**: Lint → Unit Test → Integration Test → Build → Release
-- **Affected Module Detection (Android)**: Test and build only changed modules
-- **Code Signing Automation**: Fastlane Match / App Store Connect API
+- **Impact-aware verification**: Use the build and contract graph to test and build affected modules, dependents, schemas, toolchains, and release artifacts. Retain a serialized-integration or scheduled full gate because path or module filters alone do not prove safety
+- **Code Signing**: Use automation or a controlled procedure that provides credential isolation, rotation, least privilege, and an audit trail. Fastlane Match and the App Store Connect API are implementation examples
 - **Artifact Management**: Auto-save and version-link APK/IPA/dSYM/mapping.txt
 
 ### §117. Release Management
 
-- **Staged Rollout (Android)**: 1% → 5% → 20% → 50% → 100% phased delivery
+- **Staged Rollout**: Derive cohorts, observation time, stop conditions, and rollback capability from risk and user scale. One, five, 20, 50, and 100 percent is a reference example
 - **TestFlight (iOS)**: Internal/external tester distribution. Automatic feedback collection
-- **Release Criteria**: Crash rate < 0.1%, ANR rate < 0.5% as Go conditions
+- **Release Criteria**: Evaluate crash and ANR rates, hangs, startup, and business SLIs against baselines and error budgets. Values of 0.1 and 0.5 percent are initial Blueprint references, not fixed Universal thresholds
 - **Hotfix**: Define emergency release flow for critical bug discovery
 
 ### §118. Store Guideline Compliance
@@ -1452,7 +1473,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §119. Feature Flag Operations
 
-- **Firebase Remote Config / LaunchDarkly**: Feature ON/OFF toggle
+- **Feature Control**: Select local or server-side flags, Firebase Remote Config, LaunchDarkly, or an equivalent according to authorization, audit, offline, and kill-switch needs
 - **Phased Rollout**: Gradually expose new features to users
 - **A/B Testing**: Comparative experiments of feature variants
 - **Kill Switch**: Immediate feature disable on issue discovery
@@ -1461,7 +1482,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 - **Semantic Versioning**: `MAJOR.MINOR.PATCH`
 - **Build Number**: Auto-increment via CI/CD. Manual changes prohibited
-- **versionCode (Android)**: Monotonically increasing. `MAJOR * 10000 + MINOR * 100 + PATCH`
+- **versionCode (Android)**: Increase monotonically as required by the store. The Blueprint chooses a formula that accounts for the release train and numeric limit; `MAJOR * 10000 + MINOR * 100 + PATCH` is one example
 - **CFBundleVersion (iOS)**: Linked to build number
 
 ### §121. Gradle Latest Developments
@@ -1471,12 +1492,12 @@ fun `loadOrders should emit Success state`() = runTest {
 - **Configuration Cache**: Avoid reconfiguration through build config caching
 - **Amper (Experimental)**: JetBrains new build tool. Simplified for KMP projects
 
-### §122. Xcode Cloud & Fastlane
+### §122. Apple Build and Release Automation
 
-- **Xcode Cloud**: Apple official CI/CD. TestFlight distribution automation
-- **Fastlane**: Code signing (Match), screenshot automation, metadata management
-- **Tuist**: Xcode project generation and management automation tool
-- **Mise**: Development environment version management (Ruby, Node, etc. for Fastlane dependencies)
+- **CI/CD**: Select self-hosted runners, managed CI, Xcode Cloud, or an equivalent according to signing boundaries, device tests, artifacts, and audit requirements
+- **Release Automation**: Fastlane is an implementation example for signing, screenshots, and metadata. Pin its transitive toolchain, including plugins and Ruby or Node dependencies
+- **Project Generation**: When adopting Tuist or an equivalent, verify the generation source of truth, differences, version, and rollback
+- **Environment Pinning**: Make the release toolchain reproducible through Mise, another version manager, or an equivalent mechanism
 
 ---
 
@@ -1523,11 +1544,11 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §128. Crash Reporting
 
-- **Firebase Crashlytics**: Common crash analysis for Android/iOS
-- **Non-fatal errors**: Record non-fatal errors in Crashlytics
+- **Crash Analysis**: Select platform reports, a service such as Crashlytics, or an equivalent control and associate Android and Apple symbols, releases, and user impact
+- **Non-fatal Errors**: Record actionable non-fatal errors under sampling, privacy, and cost policy
 - **ProGuard/R8 Mapping**: Automatic deobfuscation of stack traces
-- **dSYM**: Xcode auto-upload setup. dSYM still required after Bitcode deprecation
-- **Alert Criteria**: Alert when crash-free rate < 99.9%
+- **Symbol Artifacts**: Bind dSYM, R8 mappings, and equivalent artifacts to the release digest and securely retain, transfer, and verify them so the adopted backend can deobfuscate reports. Xcode auto-upload is an implementation example
+- **Alert Criteria**: Calibrate crash-free, fatal, ANR, and hang alerts in the Blueprint against baselines, error budgets, and user impact. A 99.9 percent crash-free rate is an initial reference value
 
 ### §129. Performance Monitoring
 
@@ -1547,7 +1568,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 - **User Flow Analysis**: Visualize screen transitions, feature usage rates, drop-off points
 - **Core Web Vitals-like Metrics**: Startup time, interaction responsiveness, visual stability
-- **Alert Threshold Definition**:
+- **Alert Threshold Definition**: Derive thresholds in the Blueprint from baselines, error budgets, and user impact. The following are initial reference values:
   - Crash rate > 0.1% → P1 alert
   - ANR rate > 0.5% → P1 alert
   - Startup time > 2s → P2 alert
@@ -1556,7 +1577,7 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §132. Logging Strategy
 
 - **Structured Logs**: JSON format. Include timestamp, session ID, user ID (hashed)
-- **Log Levels**: ERROR/WARN/INFO/DEBUG. Release builds only INFO and above
+- **Log Levels**: Define language- and platform-appropriate severity, sampling, retention, and remote collection. A production build excludes verbose or sensitive diagnostics unless a controlled, time-bounded support mode enables them
 - **PII Exclusion**: Never output personal information in logs
 - **Rotation**: Set log file size limits. Auto-delete old logs
 
@@ -1566,29 +1587,29 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §133. Build Cost Optimization
 
-- **CI/CD Execution Time**: Build time under 15 minutes (common target for Android/iOS)
+- **CI/CD Execution Time**: Derive a build budget from the developer-feedback SLO and cost. Fifteen minutes is a common initial reference
 - **Cache Strategy**: Reduce rebuilds with Gradle Build Cache / Xcode DerivedData Cache / SPM Cache
-- **Selective Test Execution**: Run only change-related tests with Affected Module Detection (Android)
-- **Self-Hosted Runners**: Reduce CI/CD costs with Apple Silicon Mac mini / Linux ARM64
+- **Selective Test Execution**: Use build-graph impact analysis for fast feedback, while preserving full contract, compatibility, and release gates on a risk-appropriate cadence
+- **Runner Selection**: Measure hosted versus self-hosted, CPU architecture, isolation, maintenance, queue time, and cost, then select runners that reproduce the release toolchain. Specific hardware is a reference implementation
 - **Parallel Builds**: Minimize wait time with iOS parallel builds and test sharding
 
 ### §134. Store Cost Optimization
 
-- **App Size**: < 30MB initial download. Regularly analyze correlation with store conversion rate
+- **App Size**: Define download, install, and update size budgets in the Blueprint from store constraints, user network and storage distribution, startup, feature value, and conversion impact, and continuously measure release artifacts
 - **On-Demand Resources (iOS)**: On-demand download of large assets
 - **Dynamic Feature Modules (Android)**: On-demand feature installation
 - **ASO ROI**: Measure effectiveness of keyword optimization and screenshot A/B testing
 
 ### §135. Cloud Service Costs
 
-- **Firebase Blaze Plan**: Set monitoring alerts for free tier exceedance
+- **Managed-service budget**: Set usage and cost alerts for the adopted backend, build, update, telemetry, and device-testing services. Firebase Blaze is one implementation example
 - **Telemetry Costs**: Optimize log/metrics volume. Appropriate sampling rate
 - **CDN Optimization**: Reduce origin server costs with CDN delivery for images/assets
 - **API Call Optimization**: Reduce API call count with batch requests and caching
 
 ### §136. Device Farm Optimization
 
-- **Firebase Test Lab**: Maximum coverage with minimal real device configuration
+- **Device-verification mix**: Select owned devices, managed labs, Firebase Test Lab, another device farm, simulators, and emulators from the risk-based device matrix; no single provider proves maximum coverage
 - **Test Parallelization**: Reduce execution time through test sharding
 - **Emulator Usage**: Use emulators to cut costs when real device testing isn't needed
 - **Test Selection**: Optimize execution targets with risk-based testing
@@ -1607,7 +1628,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §138. visionOS Performance & UX
 
-- **Rendering**: 90fps mandatory (VR sickness prevention). RealityKit optimization
+- **Rendering**: Meet the target device's supported refresh and frame-time budget for the interaction mode, measuring dropped frames, latency, thermal state, and motion comfort in production-equivalent builds. RealityKit is one platform implementation
 - **Spatial Audio**: Enhance realism with 3D positional audio
 - **Accessibility**: VoiceOver spatial support, pointer control alternative input
 - **Privacy**: Minimum camera/location data collection. ARSession permission management
@@ -1633,7 +1654,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §141. watchOS Development
 
-- **SwiftUI First**: watchOS UI is SwiftUI only. WatchKit (Storyboard) is deprecated
+- **watchOS UI**: Prefer SwiftUI for supported new UI and retain or migrate legacy WatchKit according to the deployment target, API availability, regression risk, and product roadmap
 - **WidgetKit**: watchOS widgets/complications
 - **HealthKit**: Heart rate, workout, sleep data retrieval and recording
 - **WCSession**: iPhone↔Apple Watch communication. File transfer/messaging
@@ -1641,8 +1662,8 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §142. Wearable UX Principles
 
-- **Glanceable**: Information must be understandable at a glance. Long text prohibited
-- **2-Second Rule**: User interactions complete within 2 seconds
+- **Glanceable**: Prioritize concise information and progressive disclosure while preserving required safety, legal, and accessibility content
+- **Interaction budget**: Define completion-time and step budgets per scenario from urgency, motor constraints, connectivity, and device context. Two seconds is a reference heuristic for a simple glanceable action, not a universal limit
 - **Context Aware**: Proactive information presentation based on time/location/activity
 - **Haptics**: Convey important notifications via tactile feedback
 
@@ -1656,7 +1677,7 @@ fun `loadOrders should emit Success state`() = runTest {
 - **ARCore**: Environment recognition, plane detection, occlusion
 - **Compose for XR**: Build spatial UIs with Compose syntax
 - **Cross-Device**: Unified experience design across smartphone/tablet/headset
-- **Performance**: 90fps target. Low-latency rendering pipeline
+- **Performance**: Target the supported refresh and latency budget of each device and interaction mode, with representative-device profiling and thermal evidence
 
 ### §144. Immersive Experience Design
 
@@ -1686,6 +1707,8 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §147. Energy Efficiency KPIs
 
+The values below are reference budgets for starting measurement. Calibrate them in the Blueprint to devices, workload, usage duration, and business SLOs.
+
 | Metric | Target | Measurement Method |
 |--------|--------|--------------------|
 | Background Battery Consumption | < 1%/hour | Battery Historian / Energy Log |
@@ -1699,7 +1722,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §148. Privacy Manifest Deep Dive (iOS)
 
-- **Required Reason API**: Declare all usage reasons for UserDefaults, FileTimestamp, SystemBootTime, DiskSpace
+- **Required Reason API**: Inventory the current Apple list, declare approved reasons only for APIs actually used, and verify generated and third-party code against the same inventory
 - **Third-Party SDK Privacy Manifests**: Verify and aggregate Privacy Manifests of all used SDKs
 - **Tracking Transparency**: Proper implementation of ATT (App Tracking Transparency) framework
 - **Privacy Nutrition Labels**: Accurate privacy label declaration in App Store Connect
@@ -1717,36 +1740,36 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §150. Regulatory Compliance
 
 - **GDPR**: Data processing consent for EU users. Data portability and deletion rights
-- **Global Privacy Laws**: Compliance with Japan's 2025 Personal Information Protection Act amendments
-- **CCPA/CPRA**: California Consumer Privacy Act compliance
-- **EU CRA (Cyber Resilience Act)**: Effective 2027. SBOM and vulnerability reporting obligations
-- **Child Protection**: COPPA compliance. Special protections for users under 13
-- **Review**: In-app privacy policy display and regular updates
+- **Global Privacy Laws**: Determine applicable law from service regions, operator classification, data subjects, processing purposes, cross-border transfers, and contracts, retaining traceability to current official text and legal judgment
+- **Regional Law**: Do not infer applicability from the names GDPR, CCPA or CPRA, Japan's APPI, or another law alone. Confirm scope, rights, notice, retention, and processor or controller responsibilities
+- **Cyber Resilience Act and equivalents**: When the product and operator are in scope, confirm current applicability dates and duties for SBOMs, vulnerability handling and reporting, support periods, and related controls from official text
+- **Children and minors**: Derive age scope and extra controls from COPPA and other applicable law, age-assurance method, parental consent, and store category. Do not use age 13 as a universal global threshold
+- **Review**: Keep the privacy notice and store disclosures aligned with actual processing, and re-evaluate on data-flow, SDK, region, law, or store-policy changes and on a risk-based cadence
 
 ### §151. Permission Management Best Practices
 
 - **Just-in-Time**: Request permissions in context just before use
 - **Pre-Permission Pattern**: Display value explanation screen before system dialog
 - **Graceful Degradation**: Provide alternative UI even when permissions denied
-- **Permission Audit**: Re-verify necessity of used permissions every 6 months
+- **Permission Audit**: Re-verify the necessity of permissions on OS, SDK, feature, threat-model, or store-policy changes and on the Blueprint's risk-based cadence. Six months is a reference example
 
-### §152. EAA (European Accessibility Act 2025)
+### §152. EAA and Other Accessibility Law
 
-- **Legal Requirements**: Effective June 2025. Mandatory accessibility for digital products
-- **Scope**: Mobile apps targeting EU market. Prepare self-declaration of conformity
-- **WCAG 2.2 AA**: WCAG 2.2 AA compliance mandated as technical standard
-- **User Testing**: Verification process including testing by people with disabilities
+- **Applicability**: Confirm market, product or service category, operator class, exceptions, and transition measures from current official text and legal judgment. Do not infer scope solely because an app targets the EU
+- **Conformance Evidence**: Bind applicable declarations, technical documentation, support, monitoring, remediation, and record retention to release artifacts
+- **Technical Baseline**: Treat WCAG 2.2 AA as a strong engineering baseline while confirming the exact standard and version required by applicable law, harmonised standards, and platform policy
+- **User Testing**: Plan verification involving people with disabilities according to critical flows and material risk, whether or not legally mandated, and never assert conformance from automation alone
 
 ---
 
 ## Part XXVII: Team & Organization Design
 
-### §153. Mobile Platform Team
+### §153. Mobile Platform Function
 
-- **Platform Team**: Specialized team responsible for common infrastructure (CI/CD, design system, network layer)
-- **Feature Teams**: Cross-functional teams by feature. Include Android/iOS developers
-- **Code Ownership**: Clarify review responsibilities per module with `CODEOWNERS`
-- **Architecture Review**: Mandatory architecture review for new feature design
+- **Platform Function**: Carry common CI/CD, design-system, network, toolchain, and release responsibilities through an individual role, shared responsibility, virtual group, or dedicated team suited to scale
+- **Product Ownership**: A feature or product owner is accountable for user outcomes and SLOs on both Android and Apple platforms. Do not prescribe one organization chart
+- **Code Ownership**: Clarify review responsibility and continuity through CODEOWNERS, an ownership registry, or an equivalent mechanism
+- **Architecture Review**: Perform design review according to impact radius, irreversibility, safety, and cross-platform boundaries. Do not force the same meeting on every change
 
 ### §154. Knowledge Sharing & Development
 
@@ -1758,9 +1781,9 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §155. Code Review Standards
 
 - **Review Checklist**: 4 perspectives: security, performance, accessibility, test coverage
-- **PR Size**: Target ≤ 400 lines changed per PR. Use stacked PRs for large changes
-- **Review SLA**: Initial review within 24 hours of PR submission
-- **Automated Checks**: Lint/Format/Test auto-check pass as merge prerequisites
+- **Change Size**: Split changes for reviewability and rollback while accounting for generated and mechanical changes. Four hundred lines is a reference heuristic, not a conformance gate
+- **Review SLA**: The Blueprint derives it from delivery risk, team time zones, and incident priority. Twenty-four hours is a reference default for collaborative teams
+- **Automated Checks**: Make applicable lint, format, test, and equivalent checks change-acceptance conditions. Pull Requests and merges are VCS implementation examples
 
 ---
 
@@ -1768,17 +1791,17 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §156. UIKit → SwiftUI Migration
 
-- **Gradual Migration**: Implement new screens in SwiftUI. Partially replace existing screens with `UIHostingController`
-- **Coexistence Period**: UIKit/SwiftUI coexistence over 2-3 year long-term plan
-- **Data Flow Unification**: Unify state management with `@Observable` macro
-- **Test Strategy**: VRT-based regression detection using SwiftUI Previews for migrated screens
+- **Gradual Migration**: Evaluate SwiftUI as the first candidate for new screens and introduce it incrementally with mechanisms such as `UIHostingController` where OS support, existing architecture, required APIs, team capability, and testability fit
+- **Coexistence Period**: Plan UIKit and SwiftUI coexistence from inventory, risk, delivery capacity, and OS support. Two to three years is a reference example for a large legacy migration
+- **Data Flow Integration**: Define existing-contract boundaries, state owners, lifecycle, and concurrency; `@Observable` is an implementation example when it fits
+- **Test Strategy**: Detect regressions in migrated screens with a risk-appropriate combination of unit, integration, accessibility, snapshot, and visual-regression tests. Previews alone are not an acceptance gate
 
 ### §157. View → Compose / Java → Kotlin Migration
 
-- **Compose Migration**: Compose-ify new screens. Gradually replace existing XML layouts with `AndroidView`/`ComposeView`
-- **Java→Kotlin**: New code must be Kotlin. Gradually migrate existing Java with Android Studio auto-conversion
+- **Compose Migration**: Evaluate Compose as the first candidate for new screens and introduce it incrementally with mechanisms such as `AndroidView` and `ComposeView` where OS support, existing Views, libraries, performance, accessibility, and team capability fit
+- **Java→Kotlin**: Treat Kotlin as the first candidate for new Android code. Record the rationale for continuing Java due to existing APIs, generated code, toolchains, or vendor support; test nullability, concurrency, and behavior rather than relying on automatic conversion alone
 - **Interop**: Bidirectional integration with `ComposeView` (Compose in XML) / `AndroidView` (View in Compose)
-- **Migration Metrics**: Track Kotlin adoption rate and Compose adoption rate on dashboards
+- **Migration Metrics**: Track defect rate, build time, performance, accessibility, and maintainability as well as language and UI migration rates in a queryable report, dashboard, or equivalent evidence
 
 ### §158. Migration ROI Measurement
 
@@ -1792,17 +1815,17 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §159. Material Design 3 / Material 3 Expressive
 
-- **Material 3**: Android standard design system. Dynamic Color, Typography Scale compliance
-- **Material 3 Expressive (2025)**: Expanded emotional design expression. Rich Motion, Shape, Color expression
-- **Design Tokens**: Figma→code conversion. Centralized theme management with `MaterialTheme`
-- **Custom Components**: Build project-specific components based on Material 3
+- **Material 3**: Evaluate Dynamic Color, typography, motion, and component behavior against current Android guidance and adopted targets
+- **Material 3 Expressive**: If adopted, verify compatible libraries and operating systems, brand fit, accessibility, performance, and existing-UI compatibility. A calendar year alone is not an adoption rationale
+- **Design Tokens**: Do not fix one design tool. Reproducibly transform a versioned token source of truth into platform representations such as `MaterialTheme`
+- **Custom Components**: Meet brand and product needs while retaining platform conventions, accessibility, state, and test contracts
 
 ### §160. Human Interface Guidelines (HIG)
 
-- **HIG Compliance**: Strict compliance with HIG for iOS/macOS/visionOS/watchOS
-- **SF Symbols**: Standard icon set. Create custom symbols in HIG format
-- **Typography**: SF Pro / SF Mono / New York. Dynamic Type integration
-- **Spacing/Layout**: 8pt grid system. Safe Area compliance
+- **HIG Alignment**: Align with current HIG and OS behavior for each target Apple platform, documenting UX, safety, and accessibility rationale for intentional differences
+- **Symbols**: Prefer evaluating platform assets such as SF Symbols, and verify license, meaning, localization, accessibility, and rendering compatibility for custom symbols
+- **Typography**: Respect platform typography and Dynamic Type; verify readability, fallbacks, licensing, and download size for custom fonts
+- **Spacing/Layout**: Do not make one grid a Universal requirement. Define tokens and layout contracts that support Safe Areas, window sizes, inputs, Dynamic Type, and platform conventions
 
 ### §161. Liquid Glass Design System (iOS 26+)
 
@@ -1825,9 +1848,9 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §163. Kotlin/Native Embedded
 
-- **Kotlin/Native**: LLVM 19-based, supporting embedded targets
+- **Kotlin/Native**: Kotlin 2.4 is based on LLVM 21. Verify formal support for each target hardware and toolchain
 - **C Interop**: Direct C library calls via `cinterop`
-- **Memory Management**: Reference counting-based. Predictable execution under real-time constraints
+- **Memory Management**: CMS GC is the default. Do not assume hard-real-time predictability; measure pauses, allocation, and memory bounds on target hardware
 - **Binary Size**: Size reduction through optimization flags
 
 ### §164. IoT Protocol Integration
@@ -1852,7 +1875,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 - **gRPC-Kotlin**: gRPC client for Kotlin. Coroutines integration
 - **gRPC-Swift**: gRPC client for Swift. async/await integration
-- **Protocol Buffers**: Payload size reduction. 70-80% reduction vs JSON
+- **Protocol Buffers**: An option where schemas, generated code, and binary compatibility fit. Compare payload size, CPU, memory, and debuggability against JSON or other alternatives on the real workload; do not assume a fixed reduction
 - **Streaming**: Server/Client/Bidirectional streaming support
 - **Error Handling**: Proper mapping of gRPC status codes
 
@@ -1912,16 +1935,15 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §173. Dependency Management
 
-- **Gradle Version Catalog**: Centralized management in `libs.versions.toml` (Android/KMP)
-- **Swift Package Manager**: Version pinning with `Package.swift`+`Package.resolved`
-- **CocoaPods**: Legacy. Gradual migration to SPM recommended
-- **Renovate / Dependabot**: Automatic update PRs. Merge security patches within 72 hours
-- **OSV Scanner**: Automatic detection of known vulnerabilities
+- **Android and KMP Dependencies**: Define one resolution source of truth suited to the build, such as a version catalog, platform or BOM, dependency lock, or central-management plugin
+- **Apple Dependencies**: Pin and verify version, source, checksum or signature, transitive dependencies, and support ownership for each adopted form such as SPM, CocoaPods, or a binary framework. Do not force migration based only on the package-manager name
+- **Automated Updates**: Use Renovate, Dependabot, or an equivalent to propose updates, then accept them through a risk-based SLA and compatibility tests. Seventy-two hours is a reference for a high-urgency patch
+- **Vulnerability Detection**: Combine complementary sources such as OSV, ecosystem advisories, and SCA services, triaging results by reachability, KEV or EPSS, exposure, and compensating controls
 
 ### §174. SBOM (Software Bill of Materials)
 
-- **CycloneDX**: Standard format for SBOM generation
-- **EU CRA Compliance**: Prepare for EU Cyber Resilience Act SBOM mandate effective 2027
+- **Format**: Select CycloneDX, SPDX, or an interoperable format according to consumers, regulators, and toolchains; pin and validate the schema version and generator
+- **Law and Contracts**: When the CRA, another applicable law, or a customer contract requires it, confirm exact scope, timing, format, delivery, retention, and vulnerability-handling duties from current official text
 - **License Audit**: Check license compatibility of all dependencies
 - **Vulnerability Tracking**: Continuous vulnerability monitoring based on SBOM
 
@@ -1932,9 +1954,9 @@ fun `loadOrders should emit Success state`() = runTest {
 ### §175. Kotlin Error Handling
 
 - **Result Type**: Express errors type-safely with `kotlin.Result` or custom Sealed class
-- **runCatching**: Use `runCatching`+`onSuccess`/`onFailure`/`fold` instead of try-catch
+- **runCatching**: Use it only at synchronous boundaries that return failures as values. Because it catches `Throwable`, always rethrow `CancellationException` in suspending work and do not make it an unconditional replacement for try-catch
 - **Exception Hierarchy**: Clearly separate business exceptions from technical exceptions
-- **Coroutine Exceptions**: Control propagation with `CoroutineExceptionHandler` + `supervisorScope`
+- **Coroutine Exceptions**: Default to structured concurrency and limit `CoroutineExceptionHandler` to final observation of uncaught exceptions on root coroutines. Use `supervisorScope` only where child failures must be isolated, and never swallow cancellation
 
 ### §176. Swift Error Handling
 
@@ -1950,7 +1972,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §177. Kotlin Code Generation
 
-- **KSP (Kotlin Symbol Processing)**: KAPT successor. 2x+ build speed improvement
+- **KSP (Kotlin Symbol Processing)**: Preferred processor API for supported K2 workloads. Measure clean and incremental build effects in the adopted project rather than assuming a fixed speedup
 - **KSP-Compatible Libraries**: Room, Hilt, Moshi, kotlinx.serialization
 - **Custom KSP Processors**: Project-specific boilerplate reduction
 - **K2 Compiler Plugin API**: Stable compiler plugin API design in progress
@@ -1970,7 +1992,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §179. AI Coding Assistants
 
-- **GitHub Copilot / Gemini Code Assist**: Integrate AI code completion into IDE
+- **Optional Assistance**: GitHub Copilot, Gemini Code Assist, and other assistants are optional implementations; a project without one still conforms. When adopted, evaluate data boundaries, retention, licensing, access control, and model changes
 - **Review Assistance**: AI-powered PR review support. Automatic security and performance checks
 - **Test Generation**: AI assistant test code generation. Manual review mandatory
 - **Constraints**: AI-generated code must always be human-reviewed. Verify license compatibility
@@ -1988,7 +2010,7 @@ fun `loadOrders should emit Success state`() = runTest {
 
 ### §181. App Store Review Preparation
 
-- **App Store Review Guidelines**: Regular check of latest version (2025 edition)
+- **App Store Review Guidelines**: Check the current version, effective date, and target regions during release planning and on policy changes, recording the review date and impact
 - **Rejection Avoidance**: Key guidelines: 4.3 (spam), 5.1.1 (data collection), 3.1.1 (IAP)
 - **Complete Privacy Manifest**: Prevent review rejections due to manifest deficiencies
 - **App Review Information**: Prepare test accounts and explanation materials for reviewers
@@ -2010,9 +2032,9 @@ fun `loadOrders should emit Success state`() = runTest {
 |-------|------|----------------|
 | L1 | Ad Hoc | No native standards. Platform knowledge is individual. No testing |
 | L2 | Defined | Coding conventions and architecture guides established. Lint/Format unified. Unit testing introduced |
-| L3 | Managed | CI/CD integration, automated tests 70%+, Baseline Profiles, a11y AA compliance, KMP adoption |
-| L4 | Optimized | KMP sharing 85%+, on-device AI integration, performance budget operations, full Compose/SwiftUI migration |
-| L5 | Autonomous | Auto regression detection, A/B model delivery, 0-day vulnerability auto-patch, SLO-driven development, Green SRE integration |
+| L3 | Managed | Both-OS CI/CD, risk-based layered tests, accessibility, owners, and dependency-update operations exist |
+| L4 | Optimized | Measured performance budgets, a device matrix, integrated SBOM, staged delivery, compatibility, and upgrade lead time are continuously managed |
+| L5 | Adaptive | Native and shared boundaries, toolchains, dependencies, and release controls continuously improve from SLOs and real-use data while control evidence is generated automatically |
 
 ### §184. 30 Anti-Patterns
 
@@ -2021,32 +2043,32 @@ fun `loadOrders should emit Success state`() = runTest {
 | 1 | Excessive `!!` operator use | Safe handling with `?.`, `?:`, `let` |
 | 2 | Hardcoded API Keys | Keystore/Keychain + CI Secrets |
 | 3 | Main thread I/O | `Dispatchers.IO` / `Task.detached` |
-| 4 | Raw MethodChannel | Use Pigeon |
+| 4 | Raw MethodChannel scattered across the codebase | Isolate it behind Pigeon or an equivalent typed adapter with contract tests |
 | 5 | Sensitive data in SharedPreferences | EncryptedSharedPreferences/Keychain |
 | 6 | Unresolved ARC circular references | Proper `[weak self]` usage |
 | 7 | Full-screen recomposition | Fine-grained state management and deferred State reading |
-| 8 | Release without tests | Unit/UI/E2E tests mandatory |
+| 8 | Release without risk-based test layers | Require applicable static, unit, integration, UI, device, and non-functional evidence |
 | 9 | Postponing a11y | Design for accessibility from Day 1 |
 | 10 | Using deprecated APIs | Coroutines/async-await/latest APIs |
-| 11 | No Baseline Profiles | Generate AOT profiles for critical flows |
-| 12 | No Privacy Manifest | `PrivacyInfo.xcprivacy` mandatory |
+| 11 | Unmeasured startup or profile decision | Measure critical flows and adopt or reject Baseline Profiles with evidence |
+| 12 | Missing required privacy declarations | Generate manifests, reason declarations, and store disclosures according to current policy and actual behavior |
 | 13 | Unrestricted WebView JS | Minimum privilege + sanitization |
-| 14 | No Root/JB detection | Play Integrity / App Attest |
+| 14 | Treating Root/JB detection as authorization | Use Play Integrity, App Attest, or equivalent as risk signals alongside server-side authorization |
 | 15 | Immediate permission request | Pre-Permission Pattern with value explanation first |
-| 16 | No offline support | Local DB SSOT + background sync |
-| 17 | Single monolithic module | Feature Module splitting |
-| 18 | No Certificate measures | Certificate Transparency / Pinning |
+| 16 | Undefined failure behavior for expected offline use | Define cache, queue, conflict, recovery, and user communication for the capability |
+| 17 | Module boundaries unrelated to change and ownership | Split or combine modules from build graph, cohesion, ownership, and test impact |
+| 18 | Disabled TLS verification or pinning without an update plan | Require platform TLS and use pinning only for threat-modeled high-risk APIs with backup pins and safe rotation |
 | 19 | Battery consumption neglect | Doze/BGTaskScheduler compliance |
 | 20 | Unchecked store guidelines | Check latest policies before release |
 | 21 | GlobalScope.launch | Use structured CoroutineScope |
-| 22 | Continuing KAPT use | Migrate to KSP |
-| 23 | Continuing ObservableObject use | Migrate to `@Observable` macro (iOS 17+) |
-| 24 | Using K1 compiler | Migrate to K2 compiler |
+| 22 | New KAPT adoption without rationale | Verify processor compatibility and migrate supported scope incrementally to KSP |
+| 23 | Observation migration that ignores the deployment target | Evaluate `@Observable` for iOS 17+ scope and retain an existing compatible approach for older OS support |
+| 24 | Indefinite K1 compatibility mode | Record the K2 migration blocker, owner, deadline, and compiler-plugin compatibility tests |
 | 25 | Pinning Only (no CT) | Prioritize Certificate Transparency |
 | 26 | Using Context Receivers | Migrate to Context Parameters (Kotlin 2.2+) |
-| 27 | New Combine usage | Migrate to `@Observable` + `Observations` |
+| 27 | Conflating state, event streams, and asynchronous sequences in one framework | Select Observation, Combine, or AsyncSequence by responsibility and OS support |
 | 28 | No SBOM generation | Generate CycloneDX SBOM for EU CRA readiness |
-| 29 | Not considering InlineArray | Leverage for performance-critical sections |
+| 29 | Low-level optimization without measurement | Adopt specialized data structures only where profiling and before-and-after evidence justify them |
 | 30 | No EAA compliance | WCAG 2.2 AA compliance to mitigate legal risk |
 
 ---
@@ -2061,14 +2083,14 @@ fun `loadOrders should emit Success state`() = runTest {
 - **AI-Native Development**: AI Copilot code generation, review, and test automation becoming standard
 - **Quantum-Safe Cryptography**: ML-KEM/ML-DSA mobile crypto libraries
 - **Spatial Computing Proliferation**: visionOS/Android XR ecosystem maturation
-- **Context Parameters GA (Kotlin 2.3+)**: Context-dependent DI/DSL standardization
+- **WebAssembly Component Model Maturity**: Standardize cross-language component contracts, capabilities, sandboxing, and observability, including Kotlin and Swift
 - **Swift Value Generics**: Further expansion of compile-time constant generics
 
 ### §186. Recommended Learning Path
 
-- **Android**: Kotlin 2.2 → Compose 1.10 → Hilt → KMP → ML Kit → Compose Multiplatform → Android XR
-- **iOS**: Swift 6.2 → SwiftUI → SwiftData → Observation → Foundation Models → visionOS
-- **Common**: Clean Architecture → CI/CD → Security → Accessibility → Performance Optimization → SBOM/CRA
+- **Android**: Supported stable Kotlin → UI and state → dependency composition → KMP, AI, or XR when needed. Compose, Hilt, and ML Kit are learning examples for an adopted stack
+- **iOS**: Supported stable Swift → UI and state → persistence and dependency composition → AI or spatial computing when needed. SwiftUI, SwiftData, Observation, Foundation Models, and visionOS are learning examples for an adopted stack
+- **Common**: Responsibility separation and boundary design → CI/CD → security → accessibility → measured performance → SBOM and supply chain. Learning one architecture pattern is not itself the goal
 
 ---
 
@@ -2076,9 +2098,9 @@ fun `loadOrders should emit Success state`() = runTest {
 
 | Keyword | Referenced Sections |
 |---------|-------------------|
-| Kotlin 2.2 / K2 / Context Parameters | §5–§7 |
-| Kotlin 2.2.20 / Swift Export / Wasm Beta | §6, §36 |
-| Swift 6.2 / Approachable Concurrency / @concurrent | §11–§12 |
+| Kotlin 2.4 / K2 / Context Parameters | §5–§7 |
+| Kotlin 2.2.20–2.4 / Swift Export / Wasm | §6, §36 |
+| Swift 6.2–6.3 / Approachable Concurrency / @concurrent / @c | §11–§17 |
 | InlineArray / Span / Memory Safety | §14 |
 | Sendable / Actor / Structured Concurrency | §12, §58 |
 | KMP / Kotlin Multiplatform / Swift Export | §34–§40 |
@@ -2151,3 +2173,15 @@ fun `loadOrders should emit Success state`() = runTest {
 | Analytics Intelligence | [ai/100_data_analytics.md](../ai/100_data_analytics.md) | OTel Mobile/Mobile Analytics |
 | Language Protocol | [core/200_language_protocol.md](../core/200_language_protocol.md) | Mobile-specific Language Protocol |
 | Global Expansion | [800_internationalization.md](../product/800_internationalization.md) | Mobile i18n/RTL Support |
+
+---
+
+## Appendix C: Primary Sources
+
+- [NIST SP 800-218 SSDF](https://csrc.nist.gov/pubs/sp/800/218/final): outcome-oriented secure-development practices that do not mandate one SDLC or tool
+- [RFC 2119](https://www.rfc-editor.org/info/rfc2119) and [RFC 8174](https://www.rfc-editor.org/info/rfc8174): BCP 14 guidance limiting normative terms such as MUST to cases needed for interoperability or harm prevention
+- [Kotlin release process](https://kotlinlang.org/docs/releases.html) / [Kotlin 2.4](https://kotlinlang.org/docs/whatsnew24.html): current stable release, support window, K1 removal, and KMP / Wasm updates
+- [Android Kotlin compatibility](https://developer.android.com/build/kotlin-support): Kotlin and AGP / D8 / R8 compatibility matrix
+- [Google Play target API requirements](https://developer.android.com/google/play/requirements/target-sdk): the Android 16 / API 36 baseline from August 31, 2026 and device-category exceptions
+- [Swift 6.3 Released](https://www.swift.org/blog/swift-6.3-released/): `@c`, the Swift SDK for Android, and the Swift Build integration preview
+- [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/): Swift-native public API design

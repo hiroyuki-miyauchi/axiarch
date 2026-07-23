@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-05-06 (Rev.14)
+> 改定日: 2026-07-23 (Rev.15)
 
 > [!IMPORTANT]
 > **Universal Constitution Declaration (Universal憲法宣言)**
@@ -356,21 +356,26 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
 ### 1.17. Technology Governance Protocol（技術選定・ライフサイクル・ガバナンス）
 優れた技術選定は「流行」ではなく、**「長期的な保守コスト・チームの認知負荷・エコシステムの健全性」**を根拠とした構造的判断であるべきである。
 
+*   **Universal Applicability & Parameterization Contract（適用可能性・パラメータ化契約）**:
+    *   Universalは、複数の言語、framework、provider、規模、team形態で再利用できる**検証可能な成果、制約、判断軸、証跡**を規定する。特定製品、コマンド、ファイルパス、固定閾値、固定cadence、固定人数、特定team名は、法令・標準・platform安全要件により不可避な場合を除き、非規範例またはBlueprintで決めるparameterとして扱う。
+    *   MUST／必須は、security、privacy、data integrity、interoperability、法令・契約、回復不能な損害を避ける最低成果へ限定する。特定のHowを強制しなくても成果を検証できる場合は、Howではなくoutcome、適用条件、失敗時挙動、evidenceを規定する。
+    *   各controlは適用surface、data class、threat model、criticality、規模、provider capabilityを評価する。非該当の場合は、単なる省略ではなく、理由、残存risk、必要な代替統制、再評価triggerを記録する。
+    *   言語・ecosystem・providerの公式support contractとnative conventionがHowを決める。Universalの例示toolを、同等成果を示す別toolの禁止根拠にしてはならない。
 *   **Anti-Golden Hammer（ハンマー病の禁止）**:
     *   「すでに知っている技術」「最近使った技術」を問題の性質と無関係に使い続けることを **Golden Hammer アンチパターン** と定義し、禁止する。
     *   技術選定の判断基準: **①問題との適合性 → ②チームの習熟度 → ③エコシステムの成熟度 → ④TCO（総所有コスト）** の順で評価すること。
 *   **Tech Radar（技術レーダー）**:
-    *   プロジェクトで使用する全技術（言語・フレームワーク・インフラ・外部サービス）を以下の4象限で分類し、`axiarch-rules/{lang}/blueprint/` に **Tech Radar** として記録・定期更新する:
+    *   productionまたは重要なdelivery pathで使用する技術（言語・フレームワーク・インフラ・外部サービス）を以下の4象限または同等の機械可読なsupport tierで分類し、Blueprintの技術台帳として記録・更新する:
         *   **Adopt（採用）**: 本番環境で積極的に使用。推奨。
         *   **Trial（試験）**: 限定スコープで試験中。本番採用前の評価段階。
         *   **Assess（評価）**: 将来の採用を検討中。リサーチ段階。
         *   **Hold（保留/廃止）**: 新規採用禁止。既存利用は移行計画を策定せよ。
-    *   **更新義務**: 四半期ごと（または重大な技術変更時）に Tech Radar を見直す。
+    *   **更新義務**: 公式EOL、重大脆弱性、provider変更、incident、採用・廃止等のevent時と、criticality・変更速度に応じてBlueprintで定めたcadenceで見直す。四半期は大規模portfolioの参考例であり、Universal固定値ではない。
 *   **Golden Path（推奨パス）の整備**:
-    *   開発者が「最初から最善の選択をできる」よう、プロジェクト標準の技術スタック・ツールチェーン・テンプレートを **Golden Path** として整備・維持する。
-    *   Golden Path は「強制」ではなく「最小抵抗経路（Paved Road）」として機能させ、逸脱する場合は ADR（Architecture Decision Record）での根拠提示を義務とする。
+    *   反復利用またはteam-scaleの価値がある領域では、開発者が安全な既定から開始できるよう、標準技術、toolchain、template、control evidenceを **Golden Path** として整備・維持する。単発・小規模作業へ専用platformを一律要求しない。
+    *   Golden Path は「最小抵抗経路（Paved Road）」として機能させる。逸脱のreview強度は変更のriskとblast radiusに比例させ、低riskの同等手段まで一律に重いADRへ送らない。
 *   **ADR（Architecture Decision Record）義務トリガー**:
-    *   以下のいずれかに該当する意思決定は、必ず ADR を作成してから実施する:
+    *   以下のうち、複数component・team・consumerへ影響する、不可逆性が高い、security／privacy／data／cost／recovery境界を変える、または長期保守責任を生む意思決定は、実施前にADRまたは同等のversion管理されたdecision recordを作成する:
         1. 新しい言語・フレームワーク・データベースの採用または廃止
         2. API 設計の破壊的変更（Breaking Change）
         3. インフラアーキテクチャの変更（クラウド移行、マルチリージョン化等）
@@ -379,23 +384,22 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
     *   **ADR テンプレート最小要素**: タイトル / ステータス / コンテキスト / 決定内容 / 比較した代替案 / トレードオフ / 結果
     *   「口頭で決まった」「Slackで共有した」は ADR の代替にならない。
 *   **Deprecation Protocol（廃止プロトコル）**:
-    *   Tech Radar で **Hold** に分類された技術には、必ず **移行期限（Migration Deadline）** と **移行先技術** を明示した Deprecation Plan を策定する。
-    *   Deprecation Plan なき Hold 技術の使用継続は「技術的負債の積極的な積み上げ」とみなし、次のスプリントで計画化を義務付ける。
+    *   Tech Radarで **Hold** に分類されたproduction技術には、owner、利用箇所、new-use禁止、移行またはcontainment方針、exit criteria、期限または再評価triggerを持つDeprecation Planを策定する。移行先が未決定なら評価責任とdecision deadlineを明示する。
+    *   計画なき継続は受け入れない。対応時期は「次のsprint」の固定値ではなく、EOL、脆弱性、業務影響、移行riskを基に優先順位付けする。
 
 ---
 
 ### 1.18. SBOM & Supply Chain Security Protocol（SBOM・サプライチェーンセキュリティ・プロトコル）
-現代のソフトウェアは**数百〜数千のオープンソース依存関係**で構成される。サプライチェーン攻撃（SolarWinds事件等）は「自分で書いたコード」ではなく「信頼した依存関係」を通じて侵入する。SBOM（Software Bill of Materials）を全プロジェクトの強制要件とする。
+現代のソフトウェアは外部依存関係とbuild serviceを通じて供給網riskへさらされる。SBOM（Software Bill of Materials）は、配布・deployするartifact、規制・契約対象、複雑な依存graph、高risk workloadで重要な証跡となる。
 
 *   **SBOM Generation Mandate（SBOM生成義務）**:
-    *   全プロジェクトは、CIパイプライン内で **SBOM を自動生成** し、成果物としてアーカイブしなければならない。
-    *   推奨形式: **SPDX 2.3** または **CycloneDX 1.6**（どちらもOSS標準）
-    *   推奨ツール: `syft`（コンテナ・npm・Python対応）、`cdxgen`（多言語対応）
-    *   生成タイミング: PR マージ時 + リリースビルド時（最低でも後者は必須）
+    *   配布・deployされるproduction artifact、customer／regulatorが要求するartifact、またはrisk評価で必要としたartifactは、release対象と一致するSBOMを自動生成し、digest、source revision、生成tool versionと共に保管する。依存を持たない非配布artifact等で非該当とする場合は理由を記録する。
+    *   形式はconsumer、ecosystem、契約に対応する現行SPDXまたはCycloneDX等を選び、parser互換性を検証する。tool名とversionはBlueprintで選定する。
+    *   生成は少なくともrelease candidateまたはrelease artifactに対して行う。PR時生成は変更risk、速度、差分分析の価値に応じて選ぶ。
 
 *   **Vulnerability Tracking（脆弱性追跡）**:
-    *   SBOMと連携した **継続的脆弱性スキャン** を義務化する（`grype`, `Trivy`, `Snyk` 等）。
-    *   CVSS スコアによる対応 SLA:
+    *   production dependencyとartifactを、advisory、reachability、exploitability、asset exposure、business impactを考慮する継続的脆弱性管理へ接続する。scanner名は非規範例とし、誤検知、unfixed、accepted riskも期限・owner付きで管理する。
+    *   CVSSだけで一律SLAを決めない。次表はBlueprintで定めるresponse objectiveの参考開始点であり、既知悪用、internet exposure、privilege、data sensitivity、patch availabilityで短縮・延長を承認する:
 
     | CVSSスコア | 重大度 | 対応期限 |
     |---|---|---|
@@ -404,10 +408,10 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
     | 4.0〜6.9 | Medium | **30日以内** に対応 |
     | 0.1〜3.9 | Low | 次回メジャーリリースまでに対応 |
 
-*   **Dependency Pinning & Lock File Integrity（依存関係固定とロックファイル整合性）**:
-    *   `package-lock.json` / `yarn.lock` / `Gemfile.lock` 等のロックファイルは**必ずコミット**し、CI上ではロックファイルに基づいたインストール（`npm ci` 等）のみを許可する。
-    *   `npm install`（ロックファイル無視）をCIで実行することを禁止する。
-    *   **アンチパターン禁止**: 「バージョン固定が面倒だから `^` や `~` 範囲指定のみで管理」→ 再現不可能ビルドの温床。
+*   **Dependency Resolution Integrity（依存解決完全性）**:
+    *   deployable applicationと実行rootは、採用ecosystemが生成するlockfile、checksum、resolved graph、wrapper、image digest等の解決証跡をversion管理し、CIでfrozen／locked installまたは同等のdrift検出を行う。
+    *   公開libraryはconsumerの解決を内部lockfileで拘束せず、宣言constraintとsupport rangeを示し、固定したtest／release環境とexampleで互換性を検証する。
+    *   `npm ci`、`cargo --locked`等は非規範例である。range指定自体を禁止せず、release時に実際の解決graphを再現・検証できない状態を禁止する。
 
 *   **Trusted Registry Policy（信頼済みレジストリポリシー）**:
     *   外部パッケージは公式レジストリ（npmjs.com / PyPI / crates.io 等）からのみインストールを許可する。
@@ -1032,25 +1036,27 @@ AIをコード補完ツールとして矮小化せず、**「チーム全体の�
 ### 1.31. Type Safety as Foundation Protocol（型安全性を基盤とするプロトコル）
 **型はツールではなく「契約」である。** Compile-time / Boundary-time に検証可能なら、Runtime まで持ち越してはならない。型情報の欠落は技術的負債の最も静かで最も深い形態である。
 
-*   **Strict Mode by Default（Strict Mode を既定値に）**:
-    *   TypeScript: `tsconfig.json` で `"strict": true` / `"noUncheckedIndexedAccess": true` / `"exactOptionalPropertyTypes": true` を **全プロジェクト必須**。`any` 使用は明示的な `// @ts-expect-error` + 理由コメント必須。
-    *   Python: `mypy --strict` を CI に組み込み、`Any` 戻り値は禁止。`from __future__ import annotations` で前方参照を許容。
-    *   Rust / Go: コンパイラの警告を全て **エラー扱い**（`-Werror` / `RUSTFLAGS="-D warnings"`）。
+*   **Strictest Sustainable Native Mode（持続可能な言語ネイティブ厳格性）**:
+    *   public contract、domain model、I/O boundary、security／money critical codeは型または同等の機械検証を持ち、採用言語・compiler・frameworkが公式対応する最も厳格で持続可能なmodeを新規codeの既定にする。legacy codeはbaselineと段階移行を定義し、警告総数を隠さない。
+    *   TypeScriptでは`strict`を新規applicationの基線候補とし、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`等はframework、generated code、library consumer互換性を検証して有効化する。JavaScriptを選ぶ場合はJSDoc、runtime schema、lint、test等で同等の境界安全性を証明する。
+    *   Pythonはmypy、Pyright等の承認済みcheckerを選び、型未対応dependencyや動的境界の`Any`を小さなadapterへ隔離する。`mypy --strict`や`from __future__ import annotations`を全Python runtimeへ一律強制しない。
+    *   Rustはcompiler、Clippy、必要なtarget／feature matrixを、Goはcompiler、`go vet`、Staticcheck等を用途に応じて使用する。存在しない共通flagへ正規化せず、新規警告の失敗条件、既存baseline、generated／third-party codeの扱いをtoolchainごとに定める。
+    *   抑制は最小scope、理由、owner、Issue、期限または削除条件を持つ。`@ts-expect-error`は実際に期待するcompiler errorがあり、不要化時にCIが失敗する場合だけ使用し、`any`の説明commentとして流用しない。
 *   **Validate at the Boundary（境界で検証）**:
-    *   外部入力（HTTP body / CLI args / env / DB row / LLM 出力）は **必ず Schema 検証** を通過させる：Zod / Valibot / Pydantic / Cue / Protobuf。
+    *   外部入力（HTTP body / CLI args / env / DB row / event / file / LLM 出力）は、schema、parser、generated decoder、manual validation等の交換可能な手段で、type、size、range、encoding、unknown field、failure behaviorを検証する。Zod、Valibot、Pydantic、CUE、Protobufはecosystem別の参考例である。
     *   「型注釈はあるが Runtime 検証なし」は型安全ではなく **型ファッション**。
 *   **Branded / Nominal Types（公称型による意味の付与）**:
-    *   `string` ではなく `UserId & { __brand: "UserId" }` のように、**値の意味を型に埋め込む**。`UserId` と `OrderId` を取り違えるバグはコンパイル時に発見されるべき。
+    *   同じprimitiveで表現される値を取り違えるriskが高い場合は、言語ネイティブなnewtype、value object、branded／nominal type等で意味を型へ埋め込む。TypeScriptの`UserId & { __brand: "UserId" }`は一例であり、単純なlocal valueへ一律適用しない。
 *   **Typed Errors over Exceptions（例外より型化エラー）**:
-    *   関数の失敗は `Result<T, E>` / `Either<E, T>` で表現することを推奨。例外による「暗黙のコントロールフロー」を最小化する。
-    *   TypeScript なら `neverthrow`、Rust なら `Result`、Go なら `(T, error)` の徹底。
+    *   expectedなbusiness failure、validation、remote failureは、言語ネイティブなtyped result、checked／documented exception、error value等でconsumerが処理できる契約にする。unexpected defectとexpected failureを同じcatch-allへ潰さない。
+    *   `Result<T, E>`、`Either<E, T>`、Rustの`Result`、Goの`(T, error)`は参考パターンであり、`neverthrow`等の特定libraryをUniversal要件にしない。
 *   **Exhaustive Switching（網羅性チェック）**:
-    *   Discriminated Union の `switch` 文は `default: const _exhaustive: never = x;` で **コンパイル時の網羅性を強制** する。新ケース追加時に全箇所で型エラーが出ることを安全網とする。
+    *   closed union、enum、sealed hierarchy、state machineは、compiler、lint、generated matcherまたはtestで網羅性を検証する。TypeScriptの`never`、Rust／Swift／Kotlin等のexhaustive matchは言語別実装例である。
 *   **アンチパターン禁止**:
-    *   `as any` / `as unknown as T` / `// @ts-ignore` の濫用 → コードレビューで自動 reject。
+    *   unchecked cast、wide `Any`、warning suppressionで境界検証を迂回する変更はrejectまたは期限付き例外とする。
     *   「Runtime で動けば良い」思想 → 型は「動くか」ではなく「壊れないか」を保証する道具。
     *   生 `Object` / `dict[str, Any]` の API 戻り値 → コンシューマに認知負荷を押し付けている。
-*   **クロスリファレンス**: §1.4 対症療法禁止 / §1.9 認知負荷最小化 / §1.26 API Design Governance
+*   **クロスリファレンス**: §1.4 対症療法禁止 / §1.9 認知負荷最小化 / §1.26 API Design Governance / `engineering/320_programming_language_governance.md`
 
 ### 1.32. Compositional Architecture Protocol（合成可能アーキテクチャ・プロトコル）
 **継承より合成（Composition over Inheritance）を信仰の対象とせよ。** モジュールが「他モジュールに何を要求するか（Port）」と「自身が何を提供するか（Capability）」を明示することで、システムは検証・差し替え・並行進化が可能になる。

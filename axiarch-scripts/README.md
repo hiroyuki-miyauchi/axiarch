@@ -26,7 +26,7 @@
 | [`axiarch-task-state.sh`](#axiarch-task-statesh) | **現在タスク文書ライフサイクル補助**。`task.md` / `implementation_plan.md` / `walkthrough.md` をarchive-before-refreshで更新 / Current-task document lifecycle helper; archive-before-refresh for `task.md` / `implementation_plan.md` / `walkthrough.md` | `axiarch-init-task-md.sh` から呼び出し / Called by `axiarch-init-task-md.sh` |
 | [`axiarch-upgrade.sh`](#axiarch-upgradesh) | **Safe Upgrade Wizard**。`axiarch-manifest.json` に基づき、Axiarch本体・プロジェクト固有Blueprint・任意ファイルをグループ単位で更新判断 / Manifest-based safe upgrade wizard; groups Axiarch-owned files, project Blueprint state, and optional files | 既存プロジェクトへ必要分だけアップグレードしたい時 / When upgrading only the needed parts of an existing adopter project |
 | [`axiarch-prompts-install.sh`](#axiarch-prompts-installsh) | **プロンプト → Claude Code slash command 生成**（v1.13.0+）。`axiarch-prompts/` から `.claude/commands/axiarch-<name>.md`（`/axiarch-<name>`）を冪等生成。コマンドは正本プロンプトを Read+実行する thin pointer / Generates Claude Code slash commands (`/axiarch-<name>`) from `axiarch-prompts/`; thin pointers (idempotent, bilingual, `--clean`/`--dry-run`) | プロンプトを `/` から呼びたい時（Claude Code）。`init.sh` で opt-in 生成、または手動実行 / To invoke prompts via `/` in Claude Code |
-| [`check-git-config-clean.sh`](#check-git-config-cleansh) | `.git/config` 健全性チェック（`worktreeConfig` 残留検出・修復） / `.git/config` integrity check | Antigravity Go-based language server がクラッシュ（`ECONNREFUSED 127.0.0.1:50347`）する時 |
+| [`check-git-config-clean.sh`](#check-git-config-cleansh) | Git worktree管理情報・branch config整合チェック / Git worktree metadata and branch-config integrity | 複数worktree／tool利用後、prunable metadataやstale branch configを確認する時 / after concurrent worktree or tool use |
 
 ---
 
@@ -100,6 +100,10 @@ bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --interactive
 **Axiarch 公式健全性診断ツール**。Hook（導入済みの場合）+ LOADING_PROTOCOL + CRYSTALLIZATION_PROTOCOL + AXIARCH.mdプロトコルのうち**外部検証可能な 10 領域以上**を一発診断する（v1.5.5 で Anti-Full-Overwrite が物理遮断対象に追加、v1.6.0 で sublimated files index 追加、v1.8.0 で Check D Task Boundary Detection 追加、v1.9.0 で PostToolUse diff guard を追加、v1.10.0でAxiarch本体のリリース版メタデータ整合とSafe Upgrade Wizard検査を追加、v1.11.0で現在タスク文書ローテーション、ネイティブタスク状態同期検査、Claude Memory正本境界検査を追加）。Claude Code / Codex の hook 設定が存在しない場合は「任意 hook 層が未導入」として扱い、hook 未導入だけを理由に失敗させない。「どこに不整合があるか」を見つけやすくする設計。
 
 The official Axiarch health diagnostic. One-shot 16-stage check covering hook firing when the hook layer is installed, AI adherence, crystallization threshold (count + time-axis), the verifiable subset of AXIARCH.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, the v1.8.0 task-boundary detection wiring, the v1.9.0 PostToolUse diff guard, v1.10.0 release metadata parity and Safe Upgrade Wizard checks, v1.11.0 current-task document rotation, native task-state sync, ja/en numbered-heading parity, Claude Memory canonical-boundary checks, and Check 16 reminder invariants including Language First, Execution Harness, and the read-only subagent/security-scan delegation boundary. If Claude Code / Codex hook settings are absent, the diagnostic treats the hook layer as optional and not installed rather than failing only on hook absence. `--quiet` flag for pre-commit usage.
+
+言語・mobile・platform統治については、日英`320_programming_language_governance.md`、`420_react_native.md`、`520_cloud_application_platforms.md`、`530_azure_cloud.md`のsection数、Rule連番、必須成果、INDEX／README／compliance／公開digest導線、Universal件数を検証する。これらの新設正本がGit追跡外のままrelease候補になることもblockする。Provider profileがSupabase固定SSOT、Firestore一律禁止、全project固定plan、TypeScript固定へ逆戻りしていないことも回帰検査する。
+
+For language, mobile, and platform governance, the diagnostic verifies section counts, consecutive Rule IDs, required outcomes, INDEX/README/compliance/public-digest links, Universal counts, and Git tracking for the ja/en 320, 420, 520, and 530 rules. It blocks a release candidate while a new canonical rule remains untracked, and guards provider profiles against regressions to a fixed Supabase SSOT, universal Firestore prohibition, one billing plan for every project, or TypeScript-only compute.
 
 ### 使い方 / Usage
 
@@ -304,9 +308,9 @@ bash axiarch-scripts/axiarch-task-state.sh --mode status
 
 ### 概要 / Overview
 
-`.git/config` 内の `[extensions] worktreeConfig = true` 残留を検出・修復する。Antigravity の Go ベース language server クラッシュ（`ECONNREFUSED 127.0.0.1:50347`）の再発リスク低減策。`engineering/600_git_workflow.md` Worktree Hygiene Protocol と連動。
+Gitがprune可能と判定するworktree管理情報と、local branchが存在しない`branch.<name>` configを検出し、`--fix`ではGitの正規操作で対象metadataだけを修復する。`extensions.worktreeConfig`は正式機能として保持し、active worktree、branch ref、未保存変更は削除しない。`engineering/600_git_workflow.md` Worktree Hygiene Protocol と連動。
 
-Detects and repairs residual `[extensions] worktreeConfig = true` in `.git/config` to reduce the risk of Antigravity Go-based language server crashes. Linked with `engineering/600_git_workflow.md` Worktree Hygiene Protocol.
+Detects worktree administrative data that Git marks as prunable and `branch.<name>` configuration whose local branch no longer exists. With `--fix`, it repairs only that metadata through supported Git operations. It preserves the supported `extensions.worktreeConfig` feature and never deletes active worktrees, branch refs, or unsaved changes. Linked with the `engineering/600_git_workflow.md` Worktree Hygiene Protocol.
 
 ### 使い方 / Usage
 
@@ -320,15 +324,16 @@ bash axiarch-scripts/check-git-config-clean.sh --fix
 # サイレント実行（CI 用）/ Silent mode (for CI)
 bash axiarch-scripts/check-git-config-clean.sh --quiet
 
-# 全 worktree 含めて完全クリーンアップ / Full cleanup including all worktrees
+# 非推奨の互換alias。--fixと同じでbranchやactive worktreeは削除しない
+# Deprecated compatibility alias. Same as --fix; never deletes branches or active worktrees
 bash axiarch-scripts/check-git-config-clean.sh --full-clean
 ```
 
 ### 推奨ワークフロー / Recommended Workflow
 
-- 開発開始時に `--quiet` 実行（pre-commit hook 等に組み込み可能）
-- 問題検出時は `--fix` で自動修復
-- 並行 AI Agent 運用時は週次で `--full-clean` 実行
+- worktreeの追加・削除・移動後、またはtask終了gateで`--quiet`を実行
+- 検出内容と`git worktree prune --dry-run --verbose`を確認してから`--fix`を実行
+- active worktree、branch ref、未保存変更の削除は本scriptと分離し、人間判断で行う
 
 ---
 

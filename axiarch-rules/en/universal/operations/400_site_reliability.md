@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
@@ -10,6 +10,7 @@
 > - All production reliability decisions MUST be based on **quantitative SLO evidence**.
 > - Systems without monitoring are not "running" — they are "broken without anyone noticing."
 > - **"Slow is the New Down."** — A technically running but slow service IS an outage. Prioritize user-perceived quality above all.
+> - Universal application contract: Vendors, cloud topologies, job titles, headcount, thresholds, durations, cadences, and SLA values are reference implementations or Blueprint parameters unless they come from applicable law or contract, an official platform constraint, or a safety floor for irreversible risk. Derive concrete values and equivalent mechanisms from service SLOs, the threat model, user impact, scale, regulation, and incident history.
 > **60 Parts, 60 Sections.**
 
 
@@ -687,22 +688,22 @@
 
 ### §33. Automated Deployment Mandate
 
--   **Law**: Production deployments MUST NEVER be performed via manual commands.
--   **Prohibition**: "Manual deployment" is an "engineering suicide act" that invites operational mistakes.
--   **Action**: Deployment is the automatic result of "verified code (PR)" passing through a "trusted pipeline (GitHub Actions, etc.)."
+-   **Law**: Production changes use a reproducible delivery path that traces source revision, artifact, target, verification, approval, executor, result, and rollback or forward-fix. Automate the normal path and restrict interactive commands to approved runbooks or break-glass.
+-   **Break-glass**: If an incident makes the standard pipeline unable to meet RTO, require the smallest change, two-person confirmation, session recording, post-checks, and reconciliation of declarative state and history within the same incident window.
+-   **Action**: CI/CD provider, VCS, and promotion mechanism are replaceable; promote verified changes and immutable artifacts across environments.
 -   **Pre-Deploy Gates**:
-    1.  `tsc --noEmit` (type check) ✅
-    2.  `npm run build` (build check) ✅
-    3.  Automated tests passed ✅
-    4.  Responsible person approval ✅
+    1.  Language-native static, type, and lint gates
+    2.  Production artifact build with pinned toolchains and locked dependencies
+    3.  Unit, integration, contract, security, migration, and release tests appropriate to change impact
+    4.  Approval appropriate to risk and separation of duties
 
 ### §34. Branch Hygiene & Preview Environment Management
 
--   **Branch Hygiene**: "Delete after merge" is an engineer's reflex.
--   **Preview Environment Evacuation**: If migration inconsistency occurs in a preview environment, abandon immediately and create a new one instead of wasting time on repair.
+-   **Branch Hygiene**: Retire merged, closed, or abandoned branches and workspaces only after checking unpublished commits, active worktrees, release references, and retention policy.
+-   **Preview Environment Lifecycle**: Manage preview owner, TTL, data class, cost, migration ledger, and cleanup. On inconsistency, preserve cause and drift evidence, then choose immutable recreation or managed reconciliation by risk.
 -   **Gatekeeper**:
-    -   **Linter Zero Tolerance**: `eslint --max-warnings=0` mandatory
-    -   **Husky Guard**: Block direct pushes to `main`/`master` via `pre-push` hooks
+    -   **Language-native Quality**: Define warning budgets and blocking categories in the language profile and Blueprint
+    -   **Protected Change Path**: Treat VCS server policy as canonical and local hooks as fast-feedback reinforcement
 
 ---
 
@@ -710,17 +711,17 @@
 
 ### §35. Progressive Delivery Strategy
 
--   **Law**: Release new features incrementally; avoid simultaneous rollout to all users.
+-   **Law**: Release changes incrementally when blast radius can be limited and version skew is safe. For protocol or security changes that require coordinated cutover, achieve equivalent risk control through isolation, compatibility, rollback, and approval.
 
     | Strategy | Overview | Risk Mitigation | Use Case |
     |:---------|:--------|:---------------|:---------|
     | **Blue/Green** | Parallel old/new environments, instant traffic switch | Zero downtime | Infrastructure changes |
-    | **Canary** | Deploy to 1-5% of users first | Incremental risk detection | Feature releases |
+    | **Canary** | Deploy first to a small representative traffic cohort | Incremental risk detection | Feature releases |
     | **Feature Flag** | Decouple code deploy from release | Instant disable | All features |
     | **Shadow Traffic** | Mirror production traffic to new service | Lower-risk validation | Backend overhaul |
     | **Dark Launch** | Deploy feature invisibly, collect metrics | Performance validation | Major changes |
 
--   **SLO-Linked Rollback**: Auto-rollback if SLO violation detected during canary.
+-   **SLO-Linked Response**: Default to automatic halt on SLO or guardrail violations during canary. Auto-rollback changes that are safe to reverse; for data or schema changes where reversal is dangerous, select traffic isolation, forward-fix, or restore through the runbook.
 
 ### §36. Feature Flag Reliability
 
@@ -738,7 +739,7 @@
 
 ### §37. Immediate Rollback Principle
 
--   **Law**: Rollback MUST always be executable in **a single step**.
+-   **Law**: Keep reversible application and configuration changes recoverable through an approved low-cognitive-load procedure. Do not require one-step rollback for data, schema, or external side effects; verify expand-contract, forward-fix, restore, and traffic isolation by change class.
 
 ### §38. Destructive Migration Constraints
 
@@ -749,6 +750,8 @@
     3.  **Contract**: Remove old columns/tables (after all code migrated)
 
 ### §39. Rollback Criteria
+
+> The following values are a reference profile for web services. Define triggers, windows, baselines, and actions in Blueprint from service SLOs, error budgets, traffic, change class, and user harm.
 
 | Metric | Threshold | Verdict |
 |:-------|:---------|:--------|
@@ -950,17 +953,17 @@
 
 ### §53. Infrastructure as Code (IaC) Principles
 
--   **Law**: Define all infrastructure as declarative code (Terraform / Pulumi / OpenTofu, etc.) under version control.
+-   **Law**: Manage infrastructure changes that require reconstruction, review, audit, or rollback through declarative code, versioned APIs, immutable images, or an equivalent machine-readable source of truth. Terraform, Pulumi, and OpenTofu are references; dynamic resources and emergency changes have a time-bounded reconciliation record.
 -   **Principles**:
     1.  **Declarative**: Describe the desired state
-    2.  **Version Controlled**: All IaC code in Git with review/approval workflows
+    2.  **Version Controlled**: IaC sources in the adopted VCS with review and approval workflows
     3.  **Reproducible**: Reconstruct identical environments from the same code
-    4.  **State Management**: Remote backends only. Local state files prohibited
+    4.  **State Management**: Shared and production state uses a durable backend with access control, encryption, locking, backup, and audit. Limit local state to disposable sandboxes
     5.  **Drift Detection**: Periodically detect divergence between infrastructure reality and code
 
 ### §54. GitOps & Declarative Infrastructure Management
 
--   **Law**: Adopt GitOps flow with Git as "Single Source of Truth."
+-   **Law**: Continuously reconcile declarations, approved revisions, application results, and actual state, and make manual changes detectable, explainable, and recoverable. GitOps is a representative implementation; another auditable VCS or configuration authority may conform.
 -   **Principles**: Declarative → Version controlled → Auto-applied → Auto-reconciliation (Reconciliation Loop)
 
 ---
@@ -969,15 +972,15 @@
 
 ### §55. Container/Kubernetes Reliability Patterns
 
-1.  **Liveness / Readiness / Startup Probes**: Always define
-2.  **Resource Limits**: Set `requests`/`limits` on all Pods
-3.  **Pod Disruption Budget (PDB)**: Guarantee minimum available Pods during rolling updates
-4.  **Anti-Affinity**: Distribute same-service Pods across different nodes/AZs
-5.  **Graceful Shutdown**: Handle SIGTERM + wait for in-flight request completion
+1.  **Health Signals**: Define startup, readiness, and liveness from workload lifecycle and failure modes; avoid restart loops caused by incorrect liveness checks
+2.  **Resource Governance**: Set scheduling requests and select memory limits, CPU limits, and QoS from workload and autoscaling behavior
+3.  **Disruption Budget**: Configure a PDB or equivalent availability constraint with replica count, maintenance, autoscalers, and quorum in mind
+4.  **Placement**: Select topology spread, anti-affinity, dedicated nodes, or alternatives from failure domains, cost, latency, and data gravity
+5.  **Graceful Shutdown**: Align platform termination signals, grace period, in-flight work, queue leases, and connection draining
 
 ### §56. Service Mesh Reliability
 
--   **Law**: In microservice environments, use **Service Mesh** (Istio / Envoy / Linkerd) for inter-service communication reliability.
+-   **Law**: Consistently provide the required identity, encryption, timeout, retry, load balancing, telemetry, and policy for service-to-service communication. A service mesh is a candidate when scale justifies its operational cost; libraries, gateways, and platform-native controls may provide equivalent outcomes.
 -   **Features**:
     1.  **mTLS**: Automatic encryption of inter-service communication
     2.  **Traffic Management**: Weighted routing, canary, mirroring
@@ -991,9 +994,9 @@
 
 ### §57. Serverless / Edge Reliability
 
-1.  **Cold Start Mitigation**: Warm-up strategy (periodic heartbeat calls)
-2.  **Timeout Design**: Set to **1.5x** estimated maximum processing time
-3.  **Idempotency**: Design all functions as idempotent considering retry-induced duplicate execution
+1.  **Cold Start Mitigation**: Select provisioned concurrency, artifact reduction, lazy initialization, warm-up, or another control from SLOs and measurements. Do not require purposeless periodic calls
+2.  **Timeout Design**: Derive deadlines from caller budget, downstream deadlines, queue visibility, and platform limits. A fixed 1.5 multiplier is not universal
+3.  **Idempotency**: Apply idempotency keys, deduplication, transactional outbox, or equivalents to retryable side effects. Do not force meaningless state tracking on read-only or pure functions
 4.  **Global Distribution**: Mind data source latency for Edge Functions
 5.  **Concurrency Control**: Set concurrency limits. Prevent backend DB connection exhaustion
 
@@ -1051,19 +1054,18 @@
 
 ### §63. RPO/RTO Design
 
--   **RPO**: **24 hours**. Daily backups.
--   **RTO**: **2 hours**. Establish restore procedures for service resumption within 2 hours.
+-   **Outcome**: Define RPO and RTO in Blueprint from business impact, data domain, dependencies, regulation, and recovery cost, and prove feasibility with backup, replication, and rebuild capabilities plus measured restore time. Twenty-four hours and two hours are only low-criticality reference values.
 -   **Cross-Reference**: `operations/500_incident_response.md` §3 (BIA), §13 (DR Strategy)
 
 ### §64. Backup Strategy
 
--   **3-2-1-1 Rule**: 3 copies, 2 media types, 1 off-site, 1 immutable.
--   **Off-Site Backup Mandate**: Regular logical backups to external storage (S3/R2, etc.) mandatory.
+-   **Failure-domain Design**: Threat-model provider account, region, control plane, operator error, and ransomware, then choose copy count, media, off-provider or off-region placement, immutability, and key separation. 3-2-1-1 is a strong reference pattern; equivalent or stronger recoverability evidence is acceptable.
+-   **Resource-complete Recovery**: Inventory not only databases but objects, identities, secrets, configuration, queues, artifacts, DNS, and external dependencies, and define recovery order.
 
 ### §65. Fire Drill Protocol
 
--   **Mandate**: Quarterly actual restore and operational verification. Untested backups "don't exist."
--   **Verification Matrix**: Restore completion, table count match, row count integrity (±5%), RLS verification, app startup confirmation. Any failure triggers **P1 alert**.
+-   **Mandate**: Perform real restores into an isolated environment at a cadence based on release risk, change events, RPO or RTO, and regulation; do not call an untested backup recoverable. Quarterly is a reference cadence.
+-   **Verification Matrix**: Verify resource inventory, schema and row and object integrity, authorization, application behavior, observability, routing, and measured RTO or RPO; derive severity from the actual recovery gap and business impact.
 
 ---
 
@@ -1071,14 +1073,16 @@
 
 ### §66. Dependency Management
 
--   **Lockfile Integrity**: `package-lock.json`/`pnpm-lock.yaml` is "sacred ground." Regenerate lockfile on CI errors.
+-   **Dependency Resolution Integrity**: Deployable applications and executable roots commit a lockfile and use frozen or locked installation when the ecosystem provides them; otherwise they retain equivalent evidence such as checksums, a resolved graph, source, and artifact digests. Publishable libraries follow consumer-compatibility conventions while retaining CI resolution and dependency evidence. Do not make deletion and regeneration of resolution evidence the standard response to CI errors; diagnose runtime, package manager, registry, platform, and digest differences first.
 -   **SBOM**: Manage all dependencies in CycloneDX/SPDX format. Auto-generate at build time.
--   **Cross-Reference**: `security/200_oss_compliance.md` (SBOM/SCA details)
+-   **SLSA v1.2**: Use Build L2 and Source L2 as production baselines, and target Build L3 and Source L4, including two-party review, for high-assurance areas. Verify the corresponding numeric level plus `SLSA_SOURCE_TWO_PARTY_REVIEWED` in the Source VSA, along with attestations, builder identity, source history, and policy enforcement, rather than inferring conformance from a CI product name.
+-   **Cross-Reference**: `security/200_oss_compliance.md` (SBOM/SCA/SLSA details)
 
 ### §67. Vulnerability Scanning
 
--   **Law**: Integrate into CI pipeline. Block merge on Critical/High.
--   **Response SLA**: Critical: 24 hours, High: 1 week, Medium: Next sprint, Low: Backlog
+-   **Law**: Integrate SCA and artifact scanning into change acceptance, builds, and releases, and expose coverage for every detected ecosystem and distributed artifact. Do not block all Critical or High findings solely by CVSS; determine release risk from KEV, EPSS, reachability, exposure, data sensitivity, the deployed version, and compensating controls.
+-   **Response SLA**: Immediately contain actively exploited or externally exposed critical vulnerabilities. Define risk-tier deadlines for remediation, mitigation, VEX, or risk acceptance in the Blueprint, with applicable law and vendor deadlines as lower bounds. Critical within 24 hours and High within one week are onboarding references; track owner, deadline, exception, and recheck date in machine-readable form.
+-   **Cross-Reference**: `security/200_oss_compliance.md` §11, §16, and §54
 
 ### §68. Schema-Code Synchronization
 
@@ -1105,6 +1109,8 @@
 
 ### §71. Cloud Budget Alerts
 
+> The following percentages are a reference profile. Because budget alerts are not hard caps, define forecasts, anomalies, quotas, rate limits, safe degradation, and owners in Blueprint from billing models and service criticality.
+
 | Level | Consumption Rate | Action |
 |:------|:----------------|:-------|
 | **Warning** | 50% / 80% | Slack/chat notification |
@@ -1113,7 +1119,7 @@
 
 ### §72. Zombie Resource Elimination
 
--   **Law**: Monthly scan of all cloud environments to physically delete unused resources.
+-   **Law**: Continuously reconcile inventory, usage, owner, TTL, retention, and dependencies, then safely quarantine, archive, or delete unused candidates. Define cadence from resource volatility and cost risk.
 -   **Targets**: Unused IPs, remaining preview environments, orphaned storage, stopped instances, over-retention backups
 
 ### §73. Telemetry Cost Management
@@ -1129,8 +1135,8 @@
 ### §74. AI Cost Governance
 
 -   **Model Selection**: Tier 1 (high accuracy) for complex reasoning, Tier 2 (fast/low cost) for routine processing.
--   **30% Profitability Rule**: AI cost MUST NOT exceed **30%** of plan monthly revenue.
--   **Circuit Breaker**: Auto-shutdown AI features on API cost anomalies.
+-   **Unit-economics Guardrail**: Define acceptable AI cost, gross margin, customer value, quality, and latency in Blueprint from product economics. Thirty percent is a reference value.
+-   **Circuit Breaker**: On cost anomalies, progressively apply rate limits, model or quality tier changes, queues, feature degradation, or shutdown based on safety and contractual impact; do not mandate a hard stop universally.
 -   **Spend Cap Phase**: Phase 1 (development) = ON, Phase 2 (growth) = OFF.
 
 ---
@@ -1321,6 +1327,8 @@
 ## Part XXXIX: SRE Organization, Culture & Education
 
 ### §92. SRE Team Structure Models
+
+The table is a reference model for responsibility placement. Conformance depends on service ownership, on-call, platform capability, escalation, toil reduction, and continuity, not an organization name or a dedicated team. Small organizations may combine roles.
 
 | Model | Overview | Use Case |
 |:------|:--------|:---------|
@@ -1596,7 +1604,7 @@
 
 ### §120. Release Candidate Management
 
--   **Law**: Production releases MUST go through a **Release Candidate (RC)**. Direct release without RC certification is prohibited.
+-   **Law**: Identify a production release candidate by an immutable revision or artifact and bind tests, approval, provenance, and rollback to that subject. An RC branch or label is one implementation; do not impose it universally on continuous delivery or mobile-store releases.
 -   **RC Process**:
     1.  **RC Cut**: Cut RC branch from main branch
     2.  **RC Validation**: Full test and load test in staging environment
@@ -1605,22 +1613,22 @@
 
 ### §121. Cherry-Pick Protocol
 
--   **Law**: Emergency fixes after RC are handled via **Cherry-Pick**. Prevents mixing of non-RC changes.
+-   **Law**: After a release candidate is fixed, trace an emergency fix's target revision, reason, minimum diff, target verification, approval, and upstream reconciliation. Choose cherry-pick, forward fix, or rebuild from the release model.
 -   **Requirements**:
     1.  State Cherry-Pick reason in PR
     2.  CI test pass on target branch
-    3.  Review by 2+ reviewers
+    3.  Risk-based review; independent two-party review for a high-assurance release
     4.  Cherry-Pick history tracking
 
 ### §122. Release Train Model
 
--   **Law**: Regular release cycles (Release Train) improve deployment predictability.
--   **Model**: Weekly Train (Mon-Thu: feature addition, Fri: freeze, following Mon: release)
+-   **Law**: Make release cadence, cutoff, exceptions, and support window predictable to users and operators. Select release trains, continuous delivery, store waves, firmware waves, or another model from product constraints.
+-   **Model**: A weekly train is a reference; fixed weekdays are not a Universal requirement.
 
 ### §123. Rollout Percentage Management
 
 -   **Law**: Large-scale change rollouts are staged incrementally, linked with SLI monitoring.
--   **Stages**: 1% → 5% → 25% → 50% → 100%. Minimum 30-minute stability verification at each stage. Rollback to previous stage on SLI degradation.
+-   **Stages**: Bound blast radius by cohort, traffic, region, tenant, device ring, or equivalent. Derive sample size, observation time, and success and abort criteria from traffic and failure latency. 1% → 5% → 25% → 50% → 100% with 30 minutes is a reference profile.
 
 ---
 
@@ -1779,10 +1787,10 @@
 ### §140. WebAssembly (Wasm) Runtime Reliability
 
 -   **Law**: As Wasm emerges as a server-side runtime, prepare for Wasm-specific reliability challenges.
--   **Challenges**: Memory safety verification, Sandbox escape risk, Cold start characteristics (faster than Docker), Observability instrumentation (OTel Wasm SDK)
--   **WASI 0.3.0 (Feb 2026 expected)**: WebAssembly System Interface 0.3.0 supports async/event-driven deployments. Adoption as container alternative accelerating.
-    -   **Edge devices**, **Serverless environments**, **CDN Workers** are promising adoption targets
-    -   Wasm binary size (few MB) and startup speed (milliseconds) are optimal for edge computing
+-   **Challenges**: host-capability isolation, sandbox-escape risk, runtime and WIT compatibility, cold-start and steady-state characteristics, resource limits, debugging, and observability instrumentation
+-   **WASI 0.3.0 (released June 11, 2026)**: Native `async func`, `stream<T>`, and `future<T>` enable async component composition. WASI 0.2 remains a stable target and 0.1 is legacy but broadly implemented; pin the component, runtime, WIT, and host-capability matrix rather than assuming transparent portability.
+    -   Edge devices, serverless environments, CDN workers, plugins, and sidecars are candidate targets whose fit must be measured
+    -   Benchmark binary size, startup, throughput, memory, observability, and operational recovery against the adopted container, process, or language runtime
 
 ### §140-b. Ambient Mesh (Sidecar-less Service Mesh)
 
@@ -2191,10 +2199,10 @@
 -   **Law**: OTA (Over-The-Air) firmware update failure means device bricking.
 -   **Reliability Requirements**:
     1.  **A/B Partitioning**: Dual partition for old/new firmware. Fallback to old version on update failure
-    2.  **Staged Rollout**: 1%→5%→25%→100%. Verify device health metrics at each stage
-    3.  **Rollback SLO**: Update failure rate ≦ 0.1%. Immediately halt rollout on breach
-    4.  **Delta Update**: Minimize bandwidth usage via differential updates
-    5.  **Update Completion Confirmation**: Mandatory Activation Report receipt from devices
+    2.  **Staged Rollout**: Separate waves by hardware, firmware, region, connectivity, and risk cohort, and verify device health and sample size. 1%→5%→25%→100% is a reference profile
+    3.  **Rollback SLO**: Derive stop criteria from failure, bricking, battery, connectivity, and rollback success. 0.1% is a reference for a large fleet
+    4.  **Update Format**: Select full or delta updates from bandwidth, storage, verification, and rollback safety
+    5.  **Update Completion Confirmation**: Collect cryptographically verifiable activation, health, and version evidence or an equivalent completion record
 
 ### §181. Edge Device Observability
 

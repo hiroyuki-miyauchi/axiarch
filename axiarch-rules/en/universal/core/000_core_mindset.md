@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-05-06 (Rev.14)
+> Last Updated: 2026-07-23 (Rev.15)
 
 > [!IMPORTANT]
 > **Universal Constitution Declaration**
@@ -355,21 +355,26 @@ Excellent engineering is achieved only through **Sustainable Velocity**. Code pr
 ### 1.17. Technology Governance Protocol
 Superior technology selection must be based not on "trends" but on **structural judgment grounded in long-term maintenance cost, team cognitive load, and ecosystem health.**
 
+*   **Universal Applicability & Parameterization Contract**:
+    *   Universal rules define **verifiable outcomes, constraints, decision criteria, and evidence** that are reusable across languages, frameworks, providers, scales, and team shapes. Product names, commands, file paths, fixed thresholds, fixed cadences, fixed headcounts, and named teams are non-normative examples or Blueprint parameters unless law, a standard, or a platform safety contract makes them unavoidable.
+    *   Limit MUST to minimum outcomes that prevent security, privacy, data-integrity, interoperability, legal, contractual, or irrecoverable harm. When an outcome can be verified without mandating one implementation, define the outcome, applicability, failure behavior, and evidence rather than the implementation.
+    *   Evaluate every control against the applicable surface, data class, threat model, criticality, scale, and provider capability. A non-applicable determination records the reason, residual risk, any required compensating control, and a re-evaluation trigger.
+    *   Official language, ecosystem, and provider support contracts and native conventions determine the implementation. A Universal example tool is never a reason to reject another tool that proves equivalent outcomes.
 *   **Anti-Golden Hammer**:
     *   Continuing to use "already familiar technology" or "recently used technology" regardless of the problem's nature is defined as the **Golden Hammer anti-pattern** and is prohibited.
     *   Technology selection criteria: **① Fitness for the problem → ② Team proficiency → ③ Ecosystem maturity → ④ TCO (Total Cost of Ownership)** — evaluate in this order.
 *   **Tech Radar**:
-    *   Classify all technologies used in the project (languages, frameworks, infrastructure, external services) into the following four quadrants and record/update them as a **Tech Radar** in `axiarch-rules/{lang}/blueprint/`:
+    *   Classify technologies used in production or a material delivery path into the following quadrants, or an equivalent machine-readable support tier, and maintain them as the Blueprint technology inventory:
         *   **Adopt**: Actively used in production. Recommended.
         *   **Trial**: Being tested in a limited scope. Evaluation stage before production adoption.
         *   **Assess**: Under consideration for future adoption. Research stage.
         *   **Hold**: New adoption prohibited. Existing usage must have a migration plan.
-    *   **Update Obligation**: Review the Tech Radar every quarter (or upon any significant technology change).
+    *   **Update Obligation**: Review it on official EOL, critical vulnerability, provider change, incident, adoption, or retirement and on a Blueprint cadence proportional to criticality and change rate. Quarterly review is a reference example for large portfolios, not a Universal fixed value.
 *   **Golden Path (Paved Road)**:
-    *   Prepare and maintain a **Golden Path** — the project's standard technology stack, toolchain, and templates — so developers can "make the best choices from the start."
-    *   The Golden Path operates as a "path of least resistance (Paved Road)," not a mandate. Deviations require an ADR (Architecture Decision Record) with documented rationale.
+    *   Where reuse or team scale creates value, prepare a **Golden Path** containing safe defaults, standard technologies, toolchains, templates, and control evidence. Do not require a dedicated platform for every one-off or small task.
+    *   Operate it as a path of least resistance. Make deviation review proportional to risk and blast radius; do not force every low-risk equivalent implementation through a heavyweight ADR.
 *   **ADR (Architecture Decision Record) Obligation Triggers**:
-    *   Any decision matching the following must produce an ADR before implementation:
+    *   Before implementation, produce an ADR or equivalent version-controlled decision record for the following when the decision affects multiple components, teams, or consumers; is difficult to reverse; changes a security, privacy, data, cost, or recovery boundary; or creates long-lived ownership:
         1. Adopting or retiring a new language, framework, or database
         2. Breaking changes to API design
         3. Infrastructure architecture changes (cloud migration, multi-region, etc.)
@@ -378,23 +383,22 @@ Superior technology selection must be based not on "trends" but on **structural 
     *   **ADR Minimum Template**: Title / Status / Context / Decision / Alternatives Considered / Trade-offs / Consequences
     *   "We decided verbally" or "shared on Slack" are not substitutes for an ADR.
 *   **Deprecation Protocol**:
-    *   Technologies classified as **Hold** in the Tech Radar must have a Deprecation Plan specifying a **Migration Deadline** and **Target Replacement Technology**.
-    *   Continued use of a Hold technology without a Deprecation Plan is treated as "active accumulation of technical debt" and must be planned for resolution in the next sprint.
+    *   A production technology classified as **Hold** has a Deprecation Plan with an owner, usage inventory, new-use prohibition, migration or containment approach, exit criteria, and a deadline or re-evaluation trigger. When no replacement is selected, record the evaluation owner and decision deadline.
+    *   Continued use without a plan is unacceptable. Prioritize action from EOL, vulnerability, business impact, and migration risk instead of a fixed "next sprint" rule.
 
 ---
 
 ### 1.18. SBOM & Supply Chain Security Protocol
-Modern software is composed of **hundreds to thousands of open-source dependencies**. Supply chain attacks (e.g., the SolarWinds incident) infiltrate not through "your own code" but through "trusted dependencies." SBOM (Software Bill of Materials) is a mandatory requirement for all projects.
+Modern software is exposed to supply-chain risk through external dependencies and build services. An SBOM is important evidence for distributed or deployed artifacts, regulated or contracted deliverables, complex dependency graphs, and high-risk workloads.
 
 *   **SBOM Generation Mandate**:
-    *   All projects must **automatically generate an SBOM** within the CI pipeline and archive it as a build artifact.
-    *   Recommended formats: **SPDX 2.3** or **CycloneDX 1.6** (both OSS standards)
-    *   Recommended tools: `syft` (containers, npm, Python), `cdxgen` (multi-language)
-    *   Generation timing: On PR merge + on release build (at minimum, the latter is mandatory)
+    *   For a distributed or deployed production artifact, a customer- or regulator-required artifact, or an artifact selected by risk assessment, automatically generate an SBOM matching the release and retain its digest, source revision, and generator version. Record why an artifact is non-applicable, such as having no dependencies and not being distributed.
+    *   Select a current SPDX, CycloneDX, or equivalent format supported by consumers, ecosystems, and contracts, and test parser compatibility. Select the tool and version in Blueprint.
+    *   Generate at least for the release candidate or release artifact. PR generation depends on change risk, delivery speed, and the value of differential analysis.
 
 *   **Vulnerability Tracking**:
-    *   Mandate **continuous vulnerability scanning** integrated with SBOM (`grype`, `Trivy`, `Snyk`, etc.).
-    *   Response SLA by CVSS score:
+    *   Connect production dependencies and artifacts to continuous vulnerability management that considers advisories, reachability, exploitability, asset exposure, and business impact. Scanner names are non-normative examples; manage false positives, unfixed findings, and accepted risk with owners and expiry.
+    *   Do not set a universal SLA from CVSS alone. The following table is a reference starting point for Blueprint response objectives and may be shortened or extended with approval based on known exploitation, internet exposure, privilege, data sensitivity, and patch availability:
 
     | CVSS Score | Severity | Response Deadline |
     |---|---|---|
@@ -403,10 +407,10 @@ Modern software is composed of **hundreds to thousands of open-source dependenci
     | 4.0–6.9 | Medium | Remediation **within 30 days** |
     | 0.1–3.9 | Low | Address by next major release |
 
-*   **Dependency Pinning & Lock File Integrity**:
-    *   Lock files (`package-lock.json`, `yarn.lock`, `Gemfile.lock`, etc.) must **always be committed**; CI must only allow lock-file-based installs (e.g., `npm ci`).
-    *   Running `npm install` (which ignores lock files) in CI is prohibited.
-    *   **Anti-Pattern Ban**: "Pinning versions is tedious, so I'll just use `^` or `~` ranges" → a breeding ground for non-reproducible builds.
+*   **Dependency Resolution Integrity**:
+    *   A deployable application or executable root version-controls the ecosystem's resolution evidence, such as a lockfile, checksum, resolved graph, wrapper, or image digest, and uses frozen or locked installation or equivalent drift detection in CI.
+    *   A published library does not constrain consumers with its internal lockfile; declare constraints and supported ranges and verify them with pinned test and release environments and an example application.
+    *   Commands such as `npm ci` and `cargo --locked` are non-normative examples. Do not prohibit ranges themselves; prohibit a release whose actually resolved graph cannot be reproduced and verified.
 
 *   **Trusted Registry Policy**:
     *   External packages may only be installed from official registries (npmjs.com, PyPI, crates.io, etc.).
@@ -1033,25 +1037,27 @@ With AI-generated code exceeding 50% of all code from 2026 onward, **test strate
 ### 1.31. Type Safety as Foundation Protocol
 **Types are not tooling — they are contracts.** If something can be verified at compile-time or boundary-time, it MUST NOT leak to runtime. Missing type information is the quietest and deepest form of technical debt.
 
-*   **Strict Mode by Default**:
-    *   TypeScript: `tsconfig.json` MUST set `"strict": true` / `"noUncheckedIndexedAccess": true` / `"exactOptionalPropertyTypes": true`. Use of `any` requires an explicit `// @ts-expect-error` with a justification comment.
-    *   Python: `mypy --strict` MUST run in CI. `Any` return types are forbidden. Use `from __future__ import annotations` for forward refs.
-    *   Rust / Go: All compiler warnings MUST be treated as errors (`-Werror` / `RUSTFLAGS="-D warnings"`).
+*   **Strictest Sustainable Native Mode**:
+    *   Public contracts, domain models, I/O boundaries, and security- or money-critical code must have types or equivalent machine verification. Make the strictest sustainable mode officially supported by the selected language, compiler, and framework the default for new code. For legacy code, define a baseline and staged migration without hiding the warning total.
+    *   For TypeScript, treat `strict` as the baseline candidate for new applications. Enable `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and similar options after validating framework, generated-code, and library-consumer compatibility. When JavaScript is selected, prove equivalent boundary safety through JSDoc, runtime schemas, linting, tests, or comparable controls.
+    *   For Python, select an approved checker such as mypy or Pyright and isolate `Any` from untyped dependencies or dynamic boundaries in small adapters. Do not impose `mypy --strict` or `from __future__ import annotations` on every Python runtime.
+    *   For Rust, use the compiler, Clippy, and the required target and feature matrix. For Go, use the compiler, `go vet`, Staticcheck, or comparable tools as appropriate. Do not normalize ecosystems to a nonexistent common flag; define new-warning failure policy, existing baselines, and generated or third-party code handling per toolchain.
+    *   Suppressions must have the smallest scope plus a reason, owner, issue, and expiry or removal condition. Use `@ts-expect-error` only when a compiler error is genuinely expected and CI fails after it becomes unnecessary; do not repurpose it as a justification comment for `any`.
 *   **Validate at the Boundary**:
-    *   All external inputs (HTTP body / CLI args / env / DB rows / LLM outputs) MUST pass schema validation: Zod / Valibot / Pydantic / Cue / Protobuf.
+    *   Validate external inputs (HTTP bodies, CLI arguments, environment values, DB rows, events, files, and LLM output) for type, size, range, encoding, unknown fields, and failure behavior through interchangeable mechanisms such as schemas, parsers, generated decoders, or manual validation. Zod, Valibot, Pydantic, CUE, and Protobuf are ecosystem-specific examples.
     *   "Type-annotated but not runtime-validated" is **not** type safety — it is type fashion.
 *   **Branded / Nominal Types**:
-    *   Encode meaning into types: `UserId & { __brand: "UserId" }` instead of bare `string`. Mistaking `UserId` for `OrderId` MUST fail at compile time.
+    *   Where confusing values represented by the same primitive creates material risk, encode meaning with the language's native newtype, value object, branded type, or nominal type. TypeScript's `UserId & { __brand: "UserId" }` is one example, not a mandate for every simple local value.
 *   **Typed Errors over Exceptions**:
-    *   Express failure with `Result<T, E>` / `Either<E, T>`. Minimize implicit control flow via exceptions.
-    *   TypeScript: `neverthrow`. Rust: `Result`. Go: `(T, error)` discipline.
+    *   Give consumers an actionable contract for expected business failures, validation failures, and remote failures through native typed results, checked or documented exceptions, error values, or equivalent mechanisms. Do not collapse unexpected defects and expected failures into the same catch-all.
+    *   `Result<T, E>`, `Either<E, T>`, Rust's `Result`, and Go's `(T, error)` are reference patterns; a specific library such as `neverthrow` is not a Universal requirement.
 *   **Exhaustive Switching**:
-    *   Discriminated unions MUST use `default: const _exhaustive: never = x;` to enforce exhaustiveness at compile time. Adding a new variant MUST trigger a type error at every switch site.
+    *   Verify exhaustiveness for closed unions, enums, sealed hierarchies, and state machines through the compiler, linting, generated matchers, or tests. TypeScript's `never` and exhaustive matching in Rust, Swift, Kotlin, and similar languages are implementation examples.
 *   **Anti-Pattern Prohibitions**:
-    *   Abuse of `as any` / `as unknown as T` / `// @ts-ignore` → auto-rejected at code review.
+    *   Reject unchecked casts, broad `Any`, or warning suppressions that bypass boundary validation unless they are managed as expiring exceptions.
     *   "If it works at runtime, it's fine" mindset → types prove "won't break", not "will run".
     *   Returning raw `Object` / `dict[str, Any]` from an API → pushing cognitive load to consumers.
-*   **Cross-References**: §1.4 No Band-Aid Solutions / §1.9 Cognitive Load Minimization / §1.26 API Design Governance
+*   **Cross-References**: §1.4 No Band-Aid Solutions / §1.9 Cognitive Load Minimization / §1.26 API Design Governance / `engineering/320_programming_language_governance.md`
 
 ### 1.32. Compositional Architecture Protocol
 **Composition over Inheritance is a religion, not a preference.** Systems become verifiable, swappable, and independently evolvable when each module declares what it requires (Port) and what it provides (Capability).

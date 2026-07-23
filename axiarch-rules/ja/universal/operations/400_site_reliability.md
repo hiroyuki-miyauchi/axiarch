@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-24
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
@@ -10,6 +10,7 @@
 > - 本番環境の信頼性に影響する全ての判断は、**SLO（Service Level Objective）に基づく定量的根拠**によって行われなければならない。
 > - 監視なきシステムは「動いている」のではなく「壊れていることに気づいていない」だけである。
 > - **「Slow is the New Down」** — 技術的に稼働していても遅いサービスは「障害」である。ユーザー体感品質を最優先せよ。
+> - Universal適用契約: vendor、cloud topology、役職、人数、閾値、期間、cadence、SLA値は、適用法令・契約、official platform制約、または不可逆なriskへの安全下限でない限りreference implementationまたはBlueprint parameterである。service SLO、threat model、利用者影響、規模、規制、過去incidentから具体値と同等手段を定める。
 > **60パート・60セクション構成。**
 
 
@@ -707,22 +708,22 @@
 
 ### §37. Automated Deployment Mandate
 
--   **Law**: 本番環境へのデプロイは、**いかなる場合も手動コマンドで行ってはならない**。
--   **Prohibition**: 「手動デプロイ」はオペミスを誘発する「エンジニアリングの自殺行為」。
--   **Action**: デプロイは「検証されたコード（PR）」が「信頼されたパイプライン（GitHub Actions等）」を通過した結果として自動実行。
+-   **Law**: 本番変更はsource revision、artifact、target、検証、承認、実行者、結果、rollback／forward-fixが追跡できる再現可能なdelivery pathを通す。通常経路は自動化し、対話的commandは承認済みrunbookまたはbreak-glassへ限定する。
+-   **Break-glass**: incidentで標準pipelineがRTOを満たせない場合、最小変更、二者確認、session記録、post-check、同一incident windowでのdeclarative state／履歴reconciliationを必須とする。
+-   **Action**: CI/CD provider、VCS、promotion方式は置換可能であり、verified changeとimmutable artifactを環境間で昇格させる。
 -   **デプロイ前ゲート**:
-    1.  `tsc --noEmit`（型チェック）✅
-    2.  `npm run build`（ビルドチェック）✅
-    3.  自動テスト通過 ✅
-    4.  責任者の承認 ✅
+    1.  採用言語のstatic／type／lint gate
+    2.  pinned toolchainとlocked dependencyによるproduction artifact build
+    3.  変更影響に対応するunit、integration、contract、security、migration、release test
+    4.  riskとseparation of dutiesに応じた承認
 
 ### §38. ブランチ衛生・Preview環境管理
 
--   **Branch Hygiene**: 「マージされたら削除」はエンジニアの呼吸。
--   **Preview Environment Evacuation**: Preview環境でマイグレーション不整合が発生した場合、修復に時間を浪費せず即座に放棄して新環境を作成。
+-   **Branch Hygiene**: merged、closed、abandoned branch／workspaceは、unpublished commit、active worktree、release reference、retention policyを確認してから安全にretireする。
+-   **Preview Environment Lifecycle**: Preview環境のowner、TTL、data class、cost、migration ledger、cleanupを管理する。不整合時は原因とdriftを証跡化し、immutable再作成か管理されたreconciliationをriskで選ぶ。
 -   **Gatekeeper**:
-    -   **Linter Zero Tolerance**: `eslint --max-warnings=0`を義務付け
-    -   **Husky Guard**: `pre-push`フックでの`main`/`master`への直接プッシュ禁止
+    -   **Language-native Quality**: warning budgetとblocking categoryを言語profileとBlueprintで定義する
+    -   **Protected Change Path**: VCS server policyを正本とし、local hookは高速feedbackとして補完する
 
 ---
 
@@ -730,17 +731,17 @@
 
 ### §39. Progressive Delivery戦略
 
--   **Law**: 新機能のリリースは段階的に行い、全ユーザーへの一斉展開を避ける。
+-   **Law**: blast radiusを限定でき、version skewが安全な変更は段階的にreleaseする。一斉切替が必要なprotocol／security changeは、別の隔離、互換性、rollback、承認controlで同等riskを達成する。
 
     | 戦略 | 概要 | リスク軽減 | 適用場面 |
     |:-----|:-----|:---------|:--------|
     | **Blue/Green** | 新旧環境を並行稼働、トラフィック瞬時切替 | ダウンタイムゼロ | インフラ変更 |
-    | **Canary** | 1-5%のユーザーに先行展開 | 漸進的リスク検知 | 機能リリース |
+    | **Canary** | 少量の代表trafficへ先行展開 | 漸進的リスク検知 | 機能リリース |
     | **Feature Flag** | コードデプロイとリリースを分離 | 即時無効化可能 | 全機能 |
     | **Shadow Traffic** | 本番トラフィックを新サービスに複製 | 低リスク検証 | バックエンド刷新 |
     | **Dark Launch** | 機能を非表示で本番投入・メトリクス収集 | パフォーマンス検証 | 大規模変更 |
 
--   **SLO連動ロールバック**: カナリア中にSLO違反を検知したら**自動ロールバック**。
+-   **SLO連動対応**: canary中のSLO／guardrail違反時は自動停止を既定とし、rollbackが安全なchangeは自動rollback、data／schema等でreverseが危険なchangeはtraffic遮断、forward-fix、restoreをrunbookに従って選ぶ。
 
 ### §40. Feature Flag信頼性
 
@@ -758,7 +759,7 @@
 
 ### §41. ロールバック即時実行原則
 
--   **Law**: ロールバックは常に**1ステップで実行可能**な状態を維持。
+-   **Law**: reversibleなapplication／configuration changeは低認知負荷の承認済み手順で迅速に戻せる状態を維持する。data、schema、external side effectは一律one-step rollbackを要求せず、expand-contract、forward-fix、restore、traffic isolationをchange classごとに検証する。
 
 ### §42. 破壊的マイグレーション制約
 
@@ -769,6 +770,8 @@
     3.  **Contract**: 旧カラム/テーブルを削除（全コード移行後）
 
 ### §43. ロールバック基準
+
+> 以下の数値はWeb service向けreference profileである。実際のtrigger、window、baseline、actionはservice SLO、error budget、traffic、change class、user harmをBlueprintで定義する。
 
 | 指標 | 閾値 | 判定 |
 |:-----|:-----|:-----|
@@ -976,18 +979,18 @@
 
 ### §58. Infrastructure as Code（IaC）原則
 
--   **Law**: 全インフラを宣言的コード（Terraform / Pulumi / OpenTofu等）で定義しバージョン管理。
+-   **Law**: 再構築、review、audit、rollbackが必要なインフラ変更を、宣言的code、versioned API、immutable image、または同等のmachine-readable正本で管理する。Terraform、Pulumi、OpenTofuは参照実装であり、動的resourceや緊急変更は期限付きreconciliation記録を持つ。
 -   **原則**:
     1.  **宣言的定義**: 「あるべき状態」を記述
-    2.  **バージョン管理**: 全IaCコードをGitで管理。レビュー・承認フロー経由
+    2.  **バージョン管理**: IaC正本を採用VCSで管理し、review・承認フロー経由
     3.  **再現可能性**: 同じコードから同一環境を何度でも再構築可能
-    4.  **ステートファイル管理**: リモートバックエンドで管理。ローカルステート禁止
+    4.  **ステート管理**: shared／production stateはアクセス制御、暗号化、locking、backup、auditを持つdurable backendで管理する。local stateは使い捨てsandboxに限定
     5.  **ドリフト検出**: 定期的にインフラ実態とコードの乖離を検出
--   **Drift Detection深化**: ドリフト検出はスケジュール実行（最低日次）し、検出時にP2アラートを発報。手動変更の痕跡を許容しない。
+-   **Drift Detection深化**: 変更eventとBlueprintのrisk-based cadenceでdriftを検出し、severity、owner、期限、reconciliationまたは期限付き例外を記録する。最低日次とP2は高権限productionの参考profileである。
 
 ### §59. GitOps・宣言的インフラ管理
 
--   **Law**: Gitを「Single Source of Truth」としたGitOpsフローを採用。
+-   **Law**: 宣言、承認済みrevision、適用結果、実状態の関係を継続reconcileし、手動変更を検出・説明・復旧できること。GitOpsは代表的な実装であり、Git以外の監査可能なVCS／configuration authorityも許容する。
 -   **原則**: 宣言的 → バージョン管理 → 自動適用 → 自動差分検知（Reconciliation Loop）
 
 ---
@@ -996,15 +999,15 @@
 
 ### §60. コンテナ/Kubernetes信頼性パターン
 
-1.  **Liveness / Readiness / Startup Probe**: 必ず定義
-2.  **Resource Limits**: 全Podに`requests`/`limits`を設定
-3.  **Pod Disruption Budget（PDB）**: ローリングアップデート時の最小可用Pod数を保証
-4.  **Anti-Affinity**: 同一サービスのPodを異なるノード/AZに分散
-5.  **Graceful Shutdown**: SIGTERMハンドル + in-flight request完了待機
+1.  **Health Signals**: startup、readiness、livenessをworkload lifecycleとfailure modeに応じて定義し、誤ったlivenessによるrestart loopを防ぐ
+2.  **Resource Governance**: schedulingに必要なrequestを設定し、memory limit、CPU limit、QoSはworkloadとautoscaling特性から選ぶ
+3.  **Disruption Budget**: replica数、maintenance、autoscaler、quorumを考慮してPDBまたは同等の可用性制約を設定する
+4.  **Placement**: failure domain、cost、latency、data gravityに基づきtopology spread、anti-affinity、dedicated node等を選ぶ
+5.  **Graceful Shutdown**: platformのtermination signal、grace period、in-flight work、queue lease、connection drainingを整合させる
 
 ### §61. SLO Operator（Kubernetes）
 
--   **Law**: KubernetesネイティブのSLO管理にはSLO Operator（Sloth/Pyrra/OpenSLO Operator）を導入。
+-   **Law**: SLO定義、burn-rate alert、dashboard、ownerをversion管理し、serviceと実telemetryのdriftを検出する。SLO Operator、Sloth、Pyrra、OpenSLOはKubernetes向け参照実装であり、既存observability platformの同等機能も許容する。
 -   **機能**:
     1.  **CRD（Custom Resource Definition）ベースのSLO定義**: SLO仕様をKubernetesマニフェストとして管理
     2.  **Burn-rateアラート自動生成**: SLO定義からMulti-Window Burn-rateアラートルールを自動生成
@@ -1013,7 +1016,7 @@
 
 ### §62. Service Mesh信頼性
 
--   **Law**: マイクロサービス環境では**Service Mesh**（Istio / Envoy / Linkerd）によるサービス間通信の信頼性確保を推奨。
+-   **Law**: service間通信に必要なidentity、encryption、timeout、retry、load balancing、telemetry、policyを一貫して保証する。Service Meshは規模とoperational costが見合う場合の候補であり、library、gateway、platform-native機能の組合せも許容する。
 -   **提供機能**:
     1.  **mTLS**: サービス間通信の自動暗号化
     2.  **トラフィック管理**: 重み付きルーティング、カナリア、ミラーリング
@@ -1027,9 +1030,9 @@
 
 ### §63. Serverless / Edge信頼性
 
-1.  **コールドスタート対策**: Warm-up戦略（定期Heartbeat呼出し）
-2.  **タイムアウト設計**: 想定最大処理時間の**1.5倍**に設定
-3.  **冪等性**: リトライによる重複実行を考慮し全関数を冪等に設計
+1.  **コールドスタート対策**: SLOと実測からprovisioned concurrency、artifact縮小、lazy initialization、warm-up等を選ぶ。無目的な定期呼出しを必須にしない
+2.  **タイムアウト設計**: caller budget、downstream deadline、queue visibility、platform上限からdeadlineを導出する。1.5倍は固定公式ではない
+3.  **冪等性**: retryされ得る副作用操作へidempotency key、deduplication、transactional outbox等を適用する。read-only／pure functionへ無意味な状態管理を強制しない
 4.  **グローバル分散**: Edge Functionのデータソースレイテンシに注意
 5.  **Concurrency制御**: 同時実行数の上限設定。バックエンドDB接続枯渇を防止
 
@@ -1096,20 +1099,18 @@
 
 ### §70. RPO/RTO設計
 
--   **RPO**: **24時間**。毎日バックアップ取得。
--   **RTO**: **2時間**。リストア手順を確立し2時間以内にサービス再開。
+-   **Outcome**: RPO／RTOはbusiness impact、data domain、dependency、規制、復旧costからBlueprintで定義し、backup／replication／rebuild能力と実測restore timeで達成可能性を証明する。24時間／2時間は低criticality workloadの参考値にすぎない。
 -   **Cross-Reference**: `operations/500_incident_response.md` §3 (BIA), §13 (DR戦略)
 
 ### §71. バックアップ戦略
 
--   **3-2-1-1ルール**: 3コピー、2メディア、1オフサイト、1イミュータブル。
--   **Off-Site Backup Mandate**: 外部ストレージ（S3/R2等）への定期論理バックアップを義務付け。
--   **イミュータブルバックアップ**: ランサムウェア対策として、最低1つのバックアップはイミュータブル（上書き不可）ストレージに保存。
+-   **Failure-domain Design**: provider account、region、control plane、operator error、ransomwareを脅威モデル化し、必要なcopy数、media、off-provider／off-region、immutability、key separationを選ぶ。3-2-1-1は強いreference patternであり、同等以上のrecoverability evidenceを許容する。
+-   **Resource-complete Recovery**: databaseだけでなくobject、identity、secret、configuration、queue、artifact、DNSと外部dependencyをinventoryし、復旧順序を定義する。
 
 ### §72. Fire Drill Protocol
 
--   **Mandate**: 四半期に1回、実際にリストアを行い正常稼働を確認。未検証バックアップは「存在しない」。
--   **Verification Matrix**: リストア完了、テーブル数一致、行数整合性（±5%）、RLS適用確認、アプリ起動確認。いずれかの失敗で**P1アラート**発報。
+-   **Mandate**: release risk、change event、RPO／RTO、規制に応じたcadenceで隔離環境へ実restoreし、未テストbackupをrecoverableと表現しない。四半期は参考cadenceである。
+-   **Verification Matrix**: resource inventory、schema／row／object integrity、authorization、application、observability、routing、measured RTO／RPOを検証し、severityは実際のrecovery gapとbusiness impactで判定する。
 
 ---
 
@@ -1117,15 +1118,16 @@
 
 ### §73. 依存関係管理
 
--   **Lockfile Integrity**: `package-lock.json`/`pnpm-lock.yaml`は「聖域」。CIでエラー時はLockfile再生成。
+-   **Dependency Resolution Integrity**: deploy可能なapplicationと実行rootは、lockfileがあるecosystemではcommitしてfrozen／locked installを使用し、それ以外ではchecksum、resolved graph、source、artifact digest等の同等証跡を固定する。公開libraryはconsumer互換性慣行に従い、CI解決と依存証跡を保持する。CIエラー時に解決証跡を削除・再生成することを標準復旧にせず、runtime、package manager、registry、platform、digestの差を先に診断する。
 -   **SBOM（Software Bill of Materials）**: CycloneDX 1.6/SPDX 3.0形式で全依存関係を管理。ビルド時に自動生成。
 -   **VEX（Vulnerability Exploitability eXchange）**: 脆弱性の実際の悪用可能性を評価し、誤検知の削減とトリアージ効率化を実現。
 -   **Cross-Reference**: `security/200_oss_compliance.md` (SBOM/SCA/SLSA詳細)
 
 ### §74. 脆弱性スキャン
 
--   **Law**: CIパイプラインに統合。Critical/Highでマージをブロック。
--   **対応SLA**: Critical: 24時間、High: 1週間、Medium: 次スプリント、Low: バックログ
+-   **Law**: SCAとartifact scanを変更受入・build・releaseへ統合し、検出ecosystemと配布artifactのcoverageを可視化する。CVSSだけでCritical／Highを一律blockせず、KEV、EPSS、reachability、exposure、data感度、利用中version、補償統制でrelease riskを判定する。
+-   **対応SLA**: 悪用中または外部公開の重大脆弱性は直ちに封じ込める。修正、緩和、VEX、risk acceptanceの期限は適用法令・vendor deadlineを下限とし、risk tier別にBlueprintで定義する。Critical 24時間、High 1週間は参考初期値であり、owner、期限、例外、再確認日を機械可読に追跡する。
+-   **Cross-Reference**: `security/200_oss_compliance.md` §11、§16、§54
 
 ### §75. Schema-Code同期
 
@@ -1135,9 +1137,9 @@
 
 ### §76. SLSA・サプライチェーン整合性
 
--   **Law**: ソフトウェアサプライチェーンの整合性をSLSA（Supply-chain Levels for Software Artifacts）v1.1フレームワークで保証。
--   **最低要件**: SLSA Level 2（ビルドサービスの使用 + 署名付き来歴情報）
--   **目標**: SLSA Level 3（ビルドプラットフォームの堅牢化）
+-   **Law**: ソフトウェアサプライチェーンの整合性をSLSA v1.2のBuild / Source Tracksで保証する。
+-   **最低要件**: 本番成果物はBuild L2、source管理はSource L2。CI製品名だけで適合を断定せず、署名、builder identity、履歴、Source Provenanceを検証する。
+-   **目標**: 高保証領域はhardened build platformのBuild L3と、二者reviewを含むSource L4。Source VSAでは対応する数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`属性を検証する。
 -   **Sigstore統合**: コンテナイメージ・SBOMの署名にSigstore（Cosign/Fulcio/Rekor）を使用。OIDC Trusted Publishingによるキーレス署名を推奨。
 
 ---
@@ -1168,6 +1170,8 @@
 
 ### §80. クラウド予算アラート
 
+> 以下の割合はreference profileである。budget alertはhard capではないため、forecast、anomaly、quota、rate limit、safe degradation、ownerを課金モデルとservice criticalityからBlueprintで定義する。
+
 | レベル | 消費率 | アクション |
 |:------|:------|:---------|
 | **Warning** | 50% / 80% | Slack/チャット通知 |
@@ -1176,7 +1180,7 @@
 
 ### §81. ゾンビリソース排除
 
--   **Law**: 月に一度、全クラウド環境をスキャンし不要リソースを物理削除。
+-   **Law**: inventory、usage、owner、TTL、retention、dependencyを継続照合し、未使用候補を安全にquarantine／archive／deleteする。cadenceはresource volatilityとcost riskから定義する。
 -   **対象**: 未使用IP、残存Preview環境、孤立ストレージ、停止中インスタンス、保持ポリシー超過バックアップ
 
 ### §82. テレメトリコスト管理
@@ -1192,8 +1196,8 @@
 ### §83. AI Cost Governance
 
 -   **Model Selection**: 複雑推論はTier 1（高精度）、定型処理はTier 2（高速・低コスト）。
--   **30% Profitability Rule**: AI原価はプラン月額の**30%を超えない**。
--   **Circuit Breaker**: APIコスト異常急騰時、AI機能を自動停止。
+-   **Unit-economics Guardrail**: AI原価、gross margin、customer value、quality、latencyの許容範囲をproduct economicsからBlueprintで定義する。30%は参考値である。
+-   **Circuit Breaker**: cost anomaly時はrate limit、model／quality tier変更、queue、feature degradation、停止を安全性と契約影響に応じて段階適用し、hard stopを一律強制しない。
 
 ---
 
@@ -1431,6 +1435,8 @@
 ## Part XXXIX: SRE組織・文化・教育
 
 ### §106. SREチーム構成モデル
+
+次表は責務配置のreference modelである。組織名や専任teamの存在ではなく、service ownership、on-call、platform能力、escalation、toil削減、継続経路を満たすことを適合条件とする。小規模組織では兼務できる。
 
 | モデル | 概要 | 適用場面 |
 |:------|:-----|:--------|
@@ -1686,7 +1692,7 @@
 
 ### §132. Release Candidate管理
 
--   **Law**: 本番リリースは**Release Candidate（RC）**を経由。RC認定なしの直接リリースは禁止。
+-   **Law**: 本番release候補をimmutable revisionまたはartifactで識別し、同一subjectにtest、approval、provenance、rollbackを結び付ける。RC branch／labelは一つの実装であり、continuous deliveryやmobile store releaseに一律強制しない。
 -   **RCプロセス**:
     1.  **RC Cut**: メインブランチからRCブランチを切り出し
     2.  **RC Validation**: ステージング環境でのフルテスト・負荷テスト
@@ -1695,22 +1701,22 @@
 
 ### §133. Cherry-Pick Protocol
 
--   **Law**: RC後の緊急修正は**Cherry-Pick**で対応。RC外の変更混入を防止。
+-   **Law**: release候補確定後の緊急修正は、対象revision、理由、最小差分、target上の再検証、承認、upstreamへのreconciliationを追跡する。Cherry-pick、forward fix、rebuildはrelease modelに応じて選ぶ。
 -   **要件**:
     1.  Cherry-Pickの理由をPRに明記
     2.  ターゲットブランチでのCIテスト通過
-    3.  2名以上のレビュー
+    3.  risk-based review。高保証releaseは独立した二者review
     4.  Cherry-Pick履歴の追跡
 
 ### §134. Release Train Model
 
--   **Law**: 定期的なリリースサイクル（Release Train）により、デプロイ可予測性を向上。
--   **モデル**: 週次Train（月〜木はFeature追加、金はFreeze、翌週月にリリース）
+-   **Law**: release cadence、cutoff、exception、support windowを利用者と運用者が予測できるようにする。Release Train、continuous delivery、store／firmware wave等をproduct制約から選ぶ。
+-   **モデル**: 週次Trainはreferenceであり、曜日固定をUniversal要件にしない。
 
 ### §135. Rollout Percentage管理
 
 -   **Law**: 大規模変更のロールアウトは段階的に実施。SLI監視と連動。
--   **段階**: 1% → 5% → 25% → 50% → 100%。各段階で最低30分の安定性確認。SLI劣化時は前段階にロールバック。
+-   **段階**: cohort、traffic、region、tenant、device ring等からblast radiusを制限し、各waveのsample size、観測時間、success／abort criteriaをtrafficとfailure latencyから定める。1% → 5% → 25% → 50% → 100%と30分はreference profileである。
 
 ---
 
@@ -1869,10 +1875,10 @@
 ### §152. WebAssembly (Wasm) Runtime信頼性
 
 -   **Law**: Wasmがサーバーサイドランタイムとして台頭。Wasm固有の信頼性課題に備える。
--   **課題**: メモリ安全性の検証、サンドボックス脱出リスク、コールドスタート特性（Docker比で高速）、可観測性計装（OTel Wasm SDK）
--   **WASI 0.3.0（2026年2月予定）**: WebAssembly System Interfaceが0.3.0で非同期/イベント駆動デプロイをサポート。コンテナ代替としての採用が加速。
-    -   **エッジデバイス**、**Serverless環境**、**CDN Workers**でのの採用が有望
-    -   Wasmバイナリサイズの小ささ（数MB）と起動速度（ミリ秒単位）がエッジコンピューティングに最適
+-   **課題**: host capability隔離、sandbox escape risk、runtime／WIT互換性、cold-startとsteady-state特性、resource limit、debug、observability計装
+-   **WASI 0.3.0（2026年6月11日公開）**: nativeな`async func`、`stream<T>`、`future<T>`によりasync component compositionへ対応した。WASI 0.2もstableな対象、0.1はlegacyだが広く実装されるため、透明なportabilityを仮定せずcomponent、runtime、WIT、host capability matrixをpinする。
+    -   edge device、serverless、CDN worker、plugin、sidecarは候補であり、適合性を実測する
+    -   binary size、startup、throughput、memory、observability、運用復旧を採用済みcontainer、process、言語runtimeと比較する
 
 ### §152-b. Ambient Mesh（Sidecar-less Service Mesh）
 
@@ -2281,10 +2287,10 @@
 -   **Law**: OTA（Over-The-Air）ファームウェア更新の失敗はデバイスの文鎮化を意味する。
 -   **信頼性要件**:
     1.  **A/B Partitioning**: 新旧ファームウェアのデュアルパーティション。更新失敗時は旧バージョンにフォールバック
-    2.  **段階的ロールアウト**: 1%→5%→25%→100%。各段階でデバイスヘルスメトリクスを確認
-    3.  **ロールバックSLO**: 更新失敗率 ≦ 0.1%。超過時は即座にロールアウト停止
-    4.  **Delta Update**: 差分アップデートにより帯域使用量を最小化
-    5.  **更新完了確認**: デバイスからのActivation Report受信を必須化
+    2.  **段階的ロールアウト**: hardware、firmware、region、connectivity、risk cohortでwaveを分け、device healthとsample sizeを確認する。1%→5%→25%→100%は参考profile
+    3.  **ロールバックSLO**: failure、brick、battery、connectivity、rollback成功率から停止条件を定める。0.1%は高規模fleetの参考値
+    4.  **Update形式**: full／deltaをbandwidth、storage、verification、rollback安全性から選ぶ
+    5.  **更新完了確認**: cryptographically verifiableなactivation、health、version evidenceまたは同等の完了証跡を収集する
 
 ### §181. エッジデバイス可観測性
 

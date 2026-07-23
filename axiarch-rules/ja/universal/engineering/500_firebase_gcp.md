@@ -2,20 +2,18 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-24
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
-> 「Firebaseは"補助エンジン"であり、データの主権はSupabase (PostgreSQL)にある。」
-> Firebase/GCPの実装において、**セキュリティ(App Check + Security Rules) > 信頼性(冪等性 + リトライ) > コスト効率(FinOps) > パフォーマンス > 開発生産性** の優先順位を厳守せよ。
-> この文書はFirebase & GCPに関するすべての設計判断の最上位基準である。
-> **55パート・Rule 32.1〜32.200+ ・Appendix A〜D 構成。**
+> 「Firebase/GCPは能力に基づいて採用し、データ・権限・コスト・復旧の責任境界を明示する。」
+> Firebase/GCPの実装において、**セキュリティ・プライバシー > データ整合性・信頼性 > コスト効率(FinOps) > パフォーマンス > 開発生産性** の優先順位を厳守せよ。App Check、Security Rules、IAM、冪等性、retry等は利用surfaceと脅威に応じて選ぶcontrolである。
+> この文書はFirebase/GCPを採用したシステム向けのプロバイダープロファイルである。
+> **57セクション（§0〜§56）・Rule 32.1〜32.175・Appendix A〜E 構成。**
 
-> [!WARNING]
-> **Deprecated / Auxiliary Mode Only**
-> 本プロジェクトの **Single Source of Truth (SSOT)** は **Supabase (PostgreSQL)** です。
-> Firestoreをユーザーデータやドメインデータの保存に使用することは原則禁止です。
-> Firebaseの利用は、**FCM (Push Notification)**, **Google Analytics**, **Crashlytics**, **App Check**, **Remote Config** などの「周辺機能」に限定してください。
+> [!NOTE]
+> **Universal適用契約**
+> 本ファイルはFirebase/GCPの採用を全プロジェクトへ強制せず、Supabaseその他のデータ基盤に従属させない。採用判断は `engineering/520_cloud_application_platforms.md` に従い、利用する機能に対応する規則だけを適用する。サービス名、generation、runtime、上限、料金、リージョン、CLI、既定値は変動情報として、実装時に公式文書と実効設定を再確認する。固定構成、固定閾値、固有の命名はBlueprintへ配置する。
 
 ---
 
@@ -96,8 +94,8 @@
 - §39. Google Maps Platform 最適化
 - §40. Google Ecosystem 統合戦略
 
-**XVIII. Firebase Studio**
-- §41. Firebase Studio
+**XVIII. 開発環境の可搬性**
+- §41. Firebase Studio Sunset & 開発環境の可搬性
 
 **XIX. コンプライアンス・ガバナンス**
 - §42. コンプライアンス & データ主権
@@ -121,61 +119,65 @@
 - §52. Python 固有設計
 - §53. Python パフォーマンス & テスト
 
-**XXIV. アンチパターン・将来展望**
+**XXIV. アンチパターン・技術lifecycle**
 - §54. アンチパターン35選
-- §55. 将来展望
+- §55. 技術lifecycle radar
+
+**XXV. 言語・SDK・runtime support**
+- §56. 言語・SDK・runtime support surface
 
 **Appendix**
 - Appendix A: サービス別逆引き索引
 - Appendix B: クロスリファレンス
 - Appendix C: FinOps チェックリスト
 - Appendix D: セキュリティチェックリスト
+- Appendix E: 公式資料スナップショット
 
 ---
 
 ## §0. 主要方針 (Primary Directives)
 
-### Primary Directive 0.1: Auxiliary Engine Principle（補助エンジン原則）
--   **Law**: Firebaseは「補助エンジン」であり、**データの主権はSupabase (PostgreSQL)** に存在する。Firestoreへの新規データ保存は原則禁止。
+### Primary Directive 0.1: Authoritative Data Boundary（権威データ境界）
+-   **Law**: データ領域ごとに権威ある保存先を一つ定義し、Firestore、Data Connect、Cloud SQL、Supabaseその他の候補を整合性、クエリ、オフライン、レイテンシ、運用、規制、退出要件で評価する。
 -   **Mandate**:
-    1.  **Data Sovereignty**: ユーザーデータ・ドメインデータは全てSupabaseに保存する。Firestoreはレガシー保守のみ許可。
-    2.  **Peripheral Services Only**: Firebase利用はFCM、Analytics、Crashlytics、App Check、Remote Config、Performance Monitoring等の周辺機能に限定する。
-    3.  **No New Firestore Collections**: 新規コレクションの作成は禁止。既存コレクションの保守のみ許可。
+    1.  **Explicit Ownership**: 各データ集合のowner、system of record、同期方向、競合解決、保持、削除、exportを明示する。
+    2.  **Firestore Validity**: Firestoreは文書・リアルタイム・オフライン要件に適合し、Security Rules、IAM、index、cost、backup、portabilityが設計される場合に有効な選択肢である。
+    3.  **No Accidental Dual Authority**: 複数ストアへの二重書き込みは、outbox、idempotency、reconciliation、障害時挙動を備えない限り禁止する。
 
 ### Primary Directive 0.2: Defense in Depth（多層防御原則）
--   **Law**: セキュリティは単一レイヤーに依存してはならない。App Check + Security Rules + IAM + VPCの多層防御を必須とする。
+-   **Law**: セキュリティは単一レイヤーに依存してはならない。client attestation、authentication、Security Rules、IAM、network control、abuse control、監査から、利用surfaceと脅威モデルに適用可能な相互補完controlを選び、各controlが保護しない境界を明記する。
 -   **Mandate**:
-    1.  **App Check Mandatory**: 全てのFirebaseサービスおよびカスタムバックエンドでApp Checkを有効化する。
-    2.  **Least Privilege**: 全てのサービスアカウントとIAMロールは最小権限の原則に従う。`roles/owner`の本番使用は禁止。
-    3.  **Zero Trust Network**: VPC Service ControlsとPrivate Google Accessを活用し、信頼境界を最小化する。
+    1.  **App Check Where Eligible**: 対応するクライアント面とバックエンドではリスクに応じてApp Checkを段階導入する。App CheckはFirebase Authentication、Security Rules、IAM、rate limitの代替ではない。
+    2.  **Least Privilege**: 全てのworkload identityとIAM bindingは最小権限にし、broad basic roleを通常の本番実行identityへ付与しない。人間のemergency accessは分離、time-bound、承認、監査する。
+    3.  **Zero Trust Network**: VPC Service Controls、Private Google Accessその他のnetwork controlは、対象serviceの対応状況、data exfiltration risk、latency、cost、operational complexityを評価して適用する。
 
 ### Primary Directive 0.3: Idempotency First（冪等性最優先原則）
--   **Law**: 全てのCloud Run FunctionsおよびCloud Runサービスは冪等に設計しなければならない。
+-   **Law**: retry、redelivery、timeout後の再実行が起こり得るevent handler、job、mutation endpoint、外部side effectを冪等または重複安全に設計する。read-only requestまで同一実装patternへ強制せず、side-effect boundaryごとに保証を定義する。
 -   **Mandate**:
-    1.  **Event ID Deduplication**: イベントトリガー関数は`eventId`による重複排除を実装する。
-    2.  **Transactional Writes**: Firestoreへの書き込みはトランザクションまたはバッチ書き込みを使用する。
+    1.  **Stable Idempotency Identity**: retry／redeliveryされるside effectは、event ID、resource version、business operation ID等から安定したidempotency keyを定義する。`eventId`だけを全triggerへ固定しない。
+    2.  **Atomicity at the Boundary**: 同一database内のclaim、state transition、複数document invariantにはtransaction／conditional write／batchを適用する。単一document writeまで機械的にtransaction化せず、外部side effectはprovider idempotency key、outbox、lease／fencing、reconciliation等でdatabase transaction外のfailureを扱う。
     3.  **Retry Safety**: リトライにより副作用が重複しないことを保証する。
 
 ### Primary Directive 0.4: FinOps Guardian（コスト監視原則）
 -   **Law**: クラウドコストは「技術的負債」と同等の管理対象である。予算超過は障害と同等に扱う。
 -   **Mandate**:
-    1.  **Budget Alerts**: 全プロジェクトに50%/80%/100%/120%の予算アラートを設定する。
-    2.  **Automated Response**: 100%超過時はCloud Run Functionsで自動的に非クリティカルリソースを停止する。
-    3.  **Cost Tagging**: 全GCPリソースに`environment`/`service`/`owner`ラベルを付与する。
+    1.  **Budget Controls**: 通知閾値、forecast、quota、rate limit、spend anomaly、ownerをworkloadの重要度と課金モデルに応じてBlueprintで定義する。Budget alertは支出のhard capではない。
+    2.  **Safe Automated Response**: 自動制限は安全性、データ整合性、法令、SLOを損なわない対象に限定し、段階的縮退と手動復旧手順を備える。
+    3.  **Cost Attribution**: resourceが対応するlabel／tag、project／folder、billing export、service metadataを用いてenvironment、service、owner、cost centerへ費用を帰属させる。全resourceが同じlabel keyを支持すると仮定せず、非対応resourceはmapping table等で補完する。
 
-### Primary Directive 0.5: Cloud Run Unified（Cloud Run統一原則）
--   **Law**: 2025年以降、Cloud Functions (2nd Gen) は**Cloud Run Functions**に名称変更された。全てのサーバーレスコンピュートはCloud Runファミリーとして統一的に管理する。
+### Primary Directive 0.5: Compute Lifecycle（コンピュート世代管理）
+-   **Law**: 利用中のfunctions、services、jobsとruntime generationを台帳化し、公式support、EOL、互換性、workload適合性に基づいて選定・移行する。
 -   **Mandate**:
     1.  **Naming**: ドキュメント・コード・IaCにおいて「Cloud Run Functions」の名称を使用する。
     2.  **Unified Management**: Cloud Run Functions、Cloud Run Services、Cloud Run Jobsを統一的に監視・管理する。
-    3.  **Migration Path**: 1st Gen Functionsは速やかにCloud Run Functionsへ移行する。
+    3.  **Migration Path**: legacy generationは、公式期限とリスクに基づく移行計画、互換性試験、rollbackを備え、未検証の一括移行を避ける。
 
 ---
 
 ## §1. Firebase プロジェクト戦略 & GCP 統合
 
 ### Rule 32.1: プロジェクト分離戦略
--   **Mandate**: 環境ごとにFirebaseプロジェクト/GCPプロジェクトを分離する。
+-   **Mandate**: 開発・検証・本番のidentity、data、secret、quota、billing、deploy権限、blast radiusを分離する。別Firebase/GCPプロジェクトは強い標準例であり、共有プロジェクトを選ぶ場合は同等の境界と例外承認を証明する。
 -   **Structure**:
     ```
     myapp-dev      → 開発環境（自由にテスト可能）
@@ -185,77 +187,60 @@
 -   **Rationale**: 環境分離により、開発ミスが本番に影響するリスクを物理的に排除。課金・アクセス制御も分離。
 
 ### Rule 32.2: GCPプロジェクト構成
--   **Mandate**: Firebaseプロジェクトは常にGCPプロジェクトの上に構築される。
+-   **Mandate**: FirebaseプロジェクトはGCPプロジェクトとして、継続可能なowner、resource hierarchy、billing、policy、identity境界へ配置する。企業利用ではOrganization、Folder、Project、group-based IAMをteam、環境、法域、compliance、shared serviceの境界に合わせる。個人・小規模利用へ不要なFolderや専任teamを強制せず、project-level統制を選ぶ場合も所有移管、退職・離脱、billing、break-glass、将来のOrganization編入経路を記録する。
 -   **Configuration**:
-    -   **Organization**: GCP Organizationの下にフォルダ構造を設定し、ポリシーを階層的に適用。
-    -   **Billing Account**: 環境ごとに予算を設定し、本番と開発の課金を分離。
+    -   **Hierarchy**: Organization／Folder／Projectのpolicy inheritanceと例外scopeを検証し、単一巨大projectや個人所有projectを暗黙のteam境界にしない。
+    -   **Identity**: 人間の継続権限は可能な範囲で個人bindingではなく管理されたgroupとjob functionへ付与し、workload identity、CI、break-glassを分離する。
+    -   **Billing Account**: 環境、service、team、cost centerへ費用を帰属させ、productionと非productionの予算・abuse制御をriskに応じて分離する。
     -   **API Enablement**: 必要なAPIを明示的に有効化する（`firebase.googleapis.com`, `run.googleapis.com`, `artifactregistry.googleapis.com`等）。
 
 ### Rule 32.3: リージョン選定
--   **Mandate**: サービスのリージョンは一貫性を保つ。Cloud Run Functions、Cloud Run、Firestoreは同一リージョンに配置する。
--   **Recommended**: `asia-northeast1`（東京）を日本向けサービスのデフォルトとする。
--   **Caution**: Firestoreのリージョンは作成後に変更不可。初期設定を慎重に行う。
--   **GPU Availability**: Cloud Run GPU（NVIDIA L4 GA / RTX PRO 6000 Blackwell Preview）は特定リージョンのみ対応（`us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`等）。AI推論ワークロードのリージョン選定時に考慮。
+-   **Mandate**: 利用者分布、data residency、サービス間latency、可用性、carbon、価格、復旧、各サービスのlocation互換性を評価してリージョンを選定し、決定をADRへ記録する。
+-   **Caution**: 作成後の移動に制約があるデータサービスは、初期作成前に移行・replication・backup・exitを設計する。
+-   **Dynamic Availability**: GPU、runtime、multi-region、service availabilityは変動するため、deploy時に公式region matrixを再確認する。
 
-### Rule 32.4: Blaze Plan 必須化
--   **Mandate**: 2026年2月3日以降、全FirebaseプロジェクトにBlazeプラン（従量課金）が必須。SparkプランではCloud Storage等の主要機能が利用不可。
--   **Action**: 全プロジェクトをBlazeプランに移行し、予算アラートを必ず設定する（§26参照）。
+### Rule 32.4: Billing Plan適合性
+-   **Mandate**: 採用機能が要求するbilling plan、無料枠、課金単位、quota、停止挙動を公式文書で確認する。App Hosting等の従量課金planを要する機能だけを根拠に、全Firebase projectへ一律のplanを強制しない。
+-   **Action**: 従量課金を有効化する前にbudget alert、quota、abuse防止、cost owner、緊急縮退、請求exportを構成する。alert単体はhard capではない。
 
 ---
 
 ## §2. Cloud Run Functions（旧 Cloud Functions 2nd Gen）
 
 ### Rule 32.5: Cloud Run Functions 標準化
--   **Mandate**: 新規のサーバーレス関数は**Cloud Run Functions**を使用する。1st Genの新規作成は禁止。
+-   **Mandate**: 新規functionは公式に推奨され、必要なruntime、trigger、latency、duration、network、observability、costを満たす現行generationを選ぶ。legacy generationの新規採用には期限付き例外が必要である。
 -   **Advantage**:
     -   Cloud Run基盤による高性能（最大32GB RAM、8 vCPU）
     -   並列処理（Concurrency）対応（デフォルト80、最大1000）
     -   Eventarcによる125+イベントソース対応
     -   トラフィック分割・リビジョンロールバック
     -   HTTP関数は最大1時間実行可能
--   **Supported Runtimes（2026年3月時点）**: Node.js 22/24、Go 1.23/1.24/1.26、Python 3.12/3.13/3.14、Java 21/25、Ruby 3.3/4.0、PHP 8.4/8.5、.NET 8/10。
+-   **Supported Runtimes**: deploy時点の公式runtime一覧とEOLを確認し、`engineering/320_programming_language_governance.md` の選定基準、team能力、library compatibilityに従ってversionをpinする。
 
 ### Rule 32.6: コールドスタート対策
--   **Mandate**: レイテンシに敏感な関数にはコールドスタート対策を必ず実装する。
+-   **Mandate**: latency-sensitive functionはcold-start率、p95／p99、traffic shape、dependency初期化、idle costを計測し、SLOとcost budgetを満たす対策を選ぶ。
 -   **Strategies**:
-    1.  **Min Instances**: ログイン・決済等のクリティカル関数は`minInstances: 1`以上を設定。
-    2.  **Concurrency活用**: 並列処理により、単一インスタンスで複数リクエストを処理。
-    3.  **グローバル変数の再利用**: DB接続やHTTPクライアントはグローバルスコープで初期化し、呼び出し間で再利用する。
-    4.  **軽量な初期化**: 重い初期化はLazy Loadingで遅延実行する。
-    5.  **Cloud Schedulerによるウォームアップ**: 低頻度呼び出し関数は定期的にpingを送信。
-
-```typescript
-// ✅ Good: グローバル変数でDB接続を再利用
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-
-const app = initializeApp();
-const db = getFirestore(app);
-
-export const myFunction = onRequest(
-  { minInstances: 1, concurrency: 80, memory: "512MiB" },
-  async (req, res) => {
-    const doc = await db.collection("config").doc("main").get();
-    res.json(doc.data());
-  }
-);
-```
+    1.  **Min Instances**: 実測SLOが必要とし、idle billingをownerが承認したenvironmentだけで最小instanceを設定する。test環境や低traffic workloadへ一律設定しない。
+    2.  **Concurrency**: handler、SDK、global stateがthread／request safeで、CPU／memory／downstream capacityが許す値をload testで決める。
+    3.  **Instance Reuse**: immutable client、connection pool、model等を安全に再利用し、credential refresh、stale state、connection limitをtestする。
+    4.  **Initialization**: critical pathをprofileし、lazy load、artifact削減、connection reuse等を比較する。
+    5.  **No Synthetic Warmup Default**: scheduler pingを通常のcold-start対策にせず、min instances、architecture変更、SLO緩和との費用・quota・観測歪みを比較し、採用時は期限付き例外にする。
 
 ### Rule 32.7: ランタイム設定
--   **Mandate**: 全ての関数にリソース制限とタイムアウトを明示的に設定する。デフォルト値に依存しない。
+-   **Mandate**: memory、CPU、timeout、concurrency、min／max instances、regionをworkloadの実測、downstream limit、SLO、cost、provider defaultから決定し、defaultを採用する場合も理由と解決値をevidence化する。
 -   **Configuration**:
     ```typescript
     export const processOrder = onRequest({
       region: "asia-northeast1",
       memory: "512MiB",
       timeoutSeconds: 120,
-      minInstances: 1,
+      minInstances: 0,
       maxInstances: 100,
       concurrency: 80,
       cpu: 1,
     }, handler);
     ```
--   **Guidelines**:
+-   **Guidelines**: 次表はload test前の非規範的な観測開始点であり、release既定値ではない。
     | 用途 | Memory | Timeout | Min Instances | Concurrency |
     |---|---|---|---|---|
     | APIエンドポイント | 256-512MiB | 60s | 1 | 80 |
@@ -266,8 +251,8 @@ export const myFunction = onRequest(
     | Genkit AIフロー | 1-2GiB | 120s | 0-1 | 20 |
 
 ### Rule 32.8: 関数の組織化
--   **Mandate**: 関数は機能モジュール単位でファイルを分割し、Codebases機能を活用する。
--   **Structure**:
+-   **Mandate**: ownership、dependency、deploy／rollback、blast radius、build timeに沿ってfunctionをmoduleまたはcodebaseへ分割する。Codebasesは独立lifecycleに価値がある場合の候補である。
+-   **Illustrative Structure**:
     ```
     functions/
     ├── src/
@@ -281,34 +266,19 @@ export const myFunction = onRequest(
     ├── package.json
     └── tsconfig.json
     ```
--   **Deployment**: 大量の関数をデプロイする場合は10関数以下のグループに分割。
+-   **Deployment**: function数の固定上限で分割せず、provider quota、deploy duration、failure isolation、change graphを測定し、再実行可能なdeploy groupを定義する。
 
 ### Rule 32.9: 冪等性の実装
--   **Mandate**: 全てのイベントトリガー関数は冪等に設計する。
--   **Pattern**:
-    ```typescript
-    export const onOrderCreated = onDocumentCreated(
-      "orders/{orderId}",
-      async (event) => {
-        const eventId = event.id;
-        
-        // 重複排除: 処理済みイベントをスキップ
-        const processedRef = db.collection("processedEvents").doc(eventId);
-        const processed = await processedRef.get();
-        if (processed.exists) {
-          console.log(`Event ${eventId} already processed. Skipping.`);
-          return;
-        }
-        
-        await processOrder(event.data);
-        await processedRef.set({ processedAt: FieldValue.serverTimestamp() });
-      }
-    );
-    ```
+-   **Mandate**: redeliveryまたはretryされるevent handlerは冪等またはduplicate-safeに設計し、side effectごとに保証とrecoveryを定義する。
+-   **Protocol**:
+    1.  **Atomic Claim**: read-then-writeで処理済みを確認しない。transaction／create-if-absent等でidempotency keyを原子的にclaimし、status、lease owner、expiry、attempt、result referenceを保存する。
+    2.  **External Side Effect**: payment、email、webhook等は相手providerのidempotency keyを再利用するか、transactional outbox／inboxとreconciliationを使う。database markerをexternal call後に書くだけではcrash windowを閉じられない。
+    3.  **Lease Recovery**: `processing`のまま停止したclaimを安全に再取得するtimeoutとfencingを定義し、完了resultを再利用できるようにする。
+    4.  **Failure Test**: 同時delivery、claim直後crash、external成功後timeout、marker書込失敗、順序逆転をfault-injection testする。
 
 ### Rule 32.10: 1st Gen → Cloud Run Functions 移行
--   **Mandate**: 1st Gen FunctionsはCloud Run Functionsへ速やかに移行する。
--   **Migration Tool**: GCPが提供するアップグレードツール（Preview）を活用。
+-   **Mandate**: legacy functionは公式support期限、security、runtime、trigger互換、costに基づく期限付き移行計画を持ち、検証済みtarget generationへ段階移行する。
+-   **Migration Tool**: GCP提供toolが現行support対象なら候補とし、生成差分、trigger、IAM、rollbackをreviewする。
 -   **Breaking Changes**: Eventarc統合によるトリガー構文変更に注意。
 
 ### Rule 32.11: onCallGenkit トリガー
@@ -352,13 +322,14 @@ export const myFunction = onRequest(
 ### Rule 32.13: Cloud Run Services 設計
 -   **Mandate**: Cloud Run Servicesはステートレスかつコンテナ化された設計とする。
 -   **Best Practices**:
-    1.  **Stateless**: インスタンス間で状態を共有しない。状態はFirestore/Cloud SQL/Redisに保存。
-    2.  **Fast Startup**: コンテナの起動時間を最小化（目標: 2秒以内、GPU: 5秒以内）。
-    3.  **Health Check**: `/health`エンドポイントを実装し、Startup/Livenessプローブを有効化。
-    4.  **Graceful Shutdown**: SIGTERMシグナルを適切にハンドリング（10秒以内にクリーンアップ完了）。
+    1.  **Language & Artifact Contract**: Cloud Run Servicesはcontainer contractを満たす任意の言語を候補にできる。source deployのmanaged runtime／buildpackとcustom containerを区別し、base image、Linux ABI／architecture、listening address／`PORT`、dependency、SBOM、patch責任、runtime EOLをartifactへ結び付ける。Cloud Run Functionsのmanaged runtime対応をCloud Run Servicesの言語上限と誤認しない。
+    2.  **Stateless**: instance間でlocal memoryや一時filesystemをdurable stateとして共有せず、authority、consistency、latency、costに適合する外部state serviceへ保存する。Firestore、Cloud SQL、Redisは候補である。
+    3.  **Startup Budget**: CPU／GPU、image size、dependency、traffic、min instance、SLOからstartup budgetをBlueprintで定義し、測定します。
+    4.  **Health Check**: current Cloud Run health mechanismとapplication semanticsに合うstartup／liveness probeまたは同等signalを実装します。固定pathを要件にしません。
+    5.  **Graceful Shutdown**: current termination contract内でSIGTERM、request drain、checkpoint、connection closeを処理し、cleanup budgetを実測します。
 
 ### Rule 32.14: Cloud Run GPU サポート（GA）
--   **Mandate**: AI推論・ML処理にはCloud Run GPU（NVIDIA L4 Tensor Core GA / RTX PRO 6000 Blackwell Preview）を活用する。
+-   **Mandate**: AI/ML workloadでGPUが必要な場合、model fit、latency、throughput、startup、region、quota、driver、security、cost、fallbackを比較し、Cloud Run GPUを候補として評価する。CPU、managed AI、batch、他基盤の方が適合する場合は強制しない。
 -   **Features**:
     -   秒単位課金、ゼロスケール対応
     -   約5秒で起動（ドライバプリインストール）
@@ -378,7 +349,7 @@ export const myFunction = onRequest(
               memory: "16Gi"
               cpu: "4"
     ```
--   **Available Regions**: `us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`。
+-   **Availability**: GPU type、region、quota、上限はdeploy時に公式文書とproject設定を再確認する。
 
 ### Rule 32.15: Cloud Run Jobs
 -   **Mandate**: 実行完了型のバッチ処理にはCloud Run Jobsを使用する。
@@ -442,17 +413,17 @@ export const myFunction = onRequest(
 ## §5. Firebase Authentication 戦略
 
 ### Rule 32.22: 認証プロバイダ方針
--   **Mandate**: Firebase Authenticationは「認証レイヤー」として利用し、ユーザーデータはSupabaseに保存する。
--   **Recommended Providers**:
-    | プロバイダ | 用途 | 優先度 |
+-   **Mandate**: Firebase Authenticationを採用する場合、identity profileとdomain dataの権威境界、UID mapping、account deletion、export、他の認証基盤への移行手順を定義する。domain dataの保存先はPrimary Directive 0.1で選定する。
+-   **Selection Matrix**: 次表は候補の例であり、Universal優先順位ではない。user population、platform policy、account recovery、MFA、enterprise federation、privacy、cost、migrationから選ぶ。
+    | プロバイダ | 代表用途 | 適用条件 |
     |---|---|---|
-    | Google Sign-In | 一般ユーザー認証 | 最優先 |
-    | Apple Sign-In | iOSアプリ（App Store要件） | 必須（iOS） |
-    | Email/Password | フォールバック認証 | 標準 |
-    | Phone (SMS) | MFA・電話認証 | オプション |
-    | Anonymous | ゲストアクセス | 限定的 |
-    | SAML/OIDC | エンタープライズSSO | 要件次第 |
--   **Prohibited**: 認証なしでのFirestoreアクセスは禁止。
+    | Google Sign-In | consumer／workspace identity | 対象userとplatformに適合 |
+    | Apple Sign-In | Apple platform | App Store policyと採用login構成により必要 |
+    | Email／Password | password-based identity | recovery、breach defense、MFAを運用可能 |
+    | Phone (SMS) | phone verification／fallback | SIM swap、cost、regional deliveryを受容 |
+    | Anonymous | guest access | lifecycle、abuse、linking、cleanupを設計 |
+    | SAML／OIDC | enterprise federation | tenant discovery、claim mapping、offboardingを設計 |
+-   **Default Deny**: Firestoreは認証・認可を既定とする。意図的な公開コンテンツは、公開範囲、rate limit、abuse防止、PII不在をSecurity Rulesとtestで証明する。
 
 ### Rule 32.23: Passkeys / FIDO2 対応
 -   **Mandate**: パスワードレス認証としてPasskeys (FIDO2)の導入を推奨する。
@@ -460,11 +431,11 @@ export const myFunction = onRequest(
 -   **Benefit**: フィッシング耐性、パスワードリスト攻撃の排除、ユーザーUXの向上。
 
 ### Rule 32.24: Custom Claims（カスタムクレーム）
--   **Mandate**: ロールベースアクセス制御（RBAC）にはCustom Claimsを使用する。
+-   **Mandate**: Custom Claimsはtoken sizeとrefresh delayを許容できる、粗粒度で安定したauthorization attributeに限定する。高頻度に変わるpermission、subscription状態、resource membershipの正本にせず、database／policy service等と使い分ける。
 -   **Rules**:
     1.  Admin SDKでのみ設定（クライアントからの設定は禁止）。
     2.  ペイロードは1000バイト以内に制限。
-    3.  変更はトークンリフレッシュまで反映されない。1時間の猶予を考慮した設計とする。
+    3.  変更はtoken refreshまで反映されないため、権限削除、緊急失効、stale claimの許容時間をriskに基づいて設計する。固定猶予時間をUniversal既定にしない。
     ```typescript
     // Admin SDK: カスタムクレーム設定
     await admin.auth().setCustomUserClaims(uid, {
@@ -474,10 +445,10 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.25: Token管理とセッション設計
--   **Mandate**: ID TokenのTTLはデフォルト1時間。長時間セッションにはRefresh Tokenを使用する。
+-   **Mandate**: ID TokenとRefresh TokenのTTL、更新、失効、再認証は、公式の現行契約とriskに基づいて設計し、client clock、revocation delay、offline behaviorをtestする。
 -   **Security**:
-    1.  Refresh TokenはHTTP-only Cookieに保存。LocalStorage/SessionStorageへの保存は禁止。
-    2.  Token Revocationを実装し、アカウント侵害時に即座に無効化可能にする。
+    1.  Webではsecure／HTTP-only／SameSite Cookie、nativeではOSのsecure storage、SDK管理session等、surfaceに適した保存方式を使う。任意scriptが読める汎用storageへ高権限tokenを置かない。
+    2.  account侵害時はrefresh tokenをrevokeし、高risk backendでは`checkRevoked`またはSecurity Rules等の失効確認を適用する。既発行ID tokenは短命だがstatelessであり、revoke callだけで全resourceが即時拒否すると仮定しない。
     3.  Multi-Factor Authentication (MFA) を管理者・高権限ユーザーに必須化。
 
 ### Rule 32.26: 認証イベント監視
@@ -488,18 +459,18 @@ export const myFunction = onRequest(
 
 ## §6. App Check & アプリ認証
 
-### Rule 32.27: App Check 必須化
--   **Mandate**: 全てのFirebaseサービス（Firestore、Cloud Storage、Cloud Run Functions）およびカスタムバックエンドでApp Checkを有効化する。
+### Rule 32.27: App Check適用
+-   **Mandate**: 対応するapp surfaceとbackendについて、脅威モデルとclient compatibilityに基づいてApp Checkを評価・導入する。monitoringで正規trafficのattestation率と失敗影響を確認してからenforcementへ進む。
 -   **Attestation Providers**:
     | プラットフォーム | プロバイダ | 推奨 |
     |---|---|---|
     | Android | Play Integrity API | ✅ |
     | iOS | App Attest (Device Check) | ✅ |
     | Web | reCAPTCHA Enterprise | ✅ |
--   **Enforcement Mode**: 十分なApp Check導入率（90%以上）を確認後、エンフォースメントモードを有効化。
+-   **Enforcement Mode**: 正規trafficの成功率、unsupported client、false rejection、rollback手順がBlueprint基準を満たした後に段階enforcementする。
 
 ### Rule 32.28: カスタムバックエンドでのApp Check
--   **Mandate**: Cloud Run Services等のカスタムバックエンドでもApp Check Tokenを検証する。
+-   **Mandate**: Firebase clientから呼ばれ、App Check対応SDK／clientとthreat modelが適合するcustom backendではtoken検証を導入する。server-to-server、unsupported client、third-party webhook等へ一律強制せず、IAM、OAuth、mTLS、signature、rate limit等の適切なcontrolを選ぶ。
     ```typescript
     import { getAppCheck } from "firebase-admin/app-check";
     
@@ -525,8 +496,8 @@ export const myFunction = onRequest(
 ## §7. Firestore 設計 & Security Rules
 
 ### Rule 32.30: Firestore 利用制限
--   **Mandate**: Firestoreへの新規データ保存は原則禁止（Primary Directive 0.1準拠）。
--   **Permitted Use Cases**:
+-   **Mandate**: FirestoreはPrimary Directive 0.1の能力評価を通過し、Security Rules、IAM、index、quota、cost、backup、export、data retentionが設計されたデータ領域に使用する。
+-   **Representative Use Cases**:
     1.  リアルタイムリスナーが必須のデータ（プレゼンス、チャット等）。
     2.  既存Firestoreコレクションの保守・運用。
     3.  Firebase関連の設定データ（Remote Config用メタデータ等）。
@@ -557,7 +528,7 @@ export const myFunction = onRequest(
 
 ### Rule 32.32: Security Rules ベストプラクティス
 -   **Rules**:
-    1.  **認証必須**: `request.auth != null`を全てのルールのベースとする。
+    1.  **Default Deny and Explicit Authorization**: 既定denyを基礎とし、許可pathごとにsubject、resource、action、tenant、field、time等を検証する。意図的なpublic readはscope、PII不在、abuse／cost control、testを明示し、`request.auth != null`を全pathへ機械的に追加しない。
     2.  **スキーマ検証**: `request.resource.data`の型・値・サイズを検証する。
     3.  **Custom Claims検証**: 管理者操作は`request.auth.token.role == 'admin'`で制御。
     4.  **Functions活用**: ルールロジックの再利用にはSecurity Rules Functionsを使用。
@@ -567,13 +538,13 @@ export const myFunction = onRequest(
 ### Rule 32.33: Firestore クエリ最適化
 -   **Mandate**: Firestoreクエリは常にパフォーマンスとコストを意識する。
 -   **Rules**:
-    1.  **`.limit()`必須**: 全てのクエリに`limit()`を設定。無制限クエリは禁止。
+    1.  **Bounded Reads**: user-controlled、collection-wide、反復実行されるreadはlimit、cursor、termination condition、quotaを持つ。unique-key lookupや明確に有界なreadでは不要なpaginationを強制せず、最大結果数をdata contractで証明する。
     2.  **カーソルベースページネーション**: `startAfter()`/`endBefore()`を使用。
     3.  **複合インデックス**: 複合クエリには明示的にインデックスを定義。
-    4.  **ドキュメントサイズ**: 1ドキュメントは小さく保つ（目標: 10KB以内）。
-    5.  **サブコレクション**: 大量のネストデータはサブコレクションを使用。
-    6.  **キャッシュ**: Firestore SDK のキャッシュ機能を有効化（`enablePersistentCacheIndexAutoCreation`）。
-    7.  **Hotspot回避**: ドキュメントIDにシーケンシャルな値を使用しない。
+    4.  **Document Budget**: access pattern、update contention、index fanout、network、offline requirementからdocument size budgetをBlueprintで定義し、固定10KBをUniversal目標にしない。
+    5.  **Collection Shape**: subcollection、reference、denormalizationはquery、transaction、deletion、Security Rules、costのtrade-offで選び、一律のnesting patternを強制しない。
+    6.  **Caching**: offline persistenceとcache indexはdevice trust、shared-device privacy、freshness、storage、query profileを評価して有効化する。
+    7.  **Hotspot Avoidance**: high-write pathではsequential key、単一document、narrow key rangeによるhotspotをload testで検証し、必要に応じてdistributed IDやshardingを採用する。
 
 ---
 
@@ -586,25 +557,26 @@ export const myFunction = onRequest(
     -   リレーショナルデータモデルのFirebase統合
     -   AI支援によるオンボーディングとスキーマ生成
     -   Firebase SDK（Web, iOS, Android, Flutter）によるクライアントアクセス
--   **Caution**: 本プロジェクトのSSOTはSupabase。Data ConnectはSupabaseが提供しない特定のFirebase統合機能が必要な場合にのみ検討。
+-   **Caution**: Data Connect、Firestore、Cloud SQL、Supabase等は、データモデル、認可境界、SDK統合、運用、lock-in、costを同じ評価表で比較し、既存vendorの存在だけで決定しない。
 
-### Rule 32.35: Data Connect vs. Supabase 判断基準
--   **Decision Matrix**:
-    | 要件 | Supabase | Data Connect |
-    |---|---|---|
-    | SSOT (データ主権) | ✅ 最優先 | △ Firebase統合限定 |
-    | RLS / Row Level Security | ✅ 最適 | △ Firebase Security Rules |
-    | リアルタイムサブスクリプション | ✅ Realtime | △ 制限あり |
-    | Firebase SDK統合 | △ カスタム必要 | ✅ ネイティブ |
-    | エッジランタイム | ✅ Edge Functions | ❌ 不可 |
-    | GraphQL API | △ pg_graphql | ✅ ネイティブ |
+### Rule 32.35: Relational Backend Capability Decision
+-   **Decision Contract**: Data Connect、Supabase、Cloud SQLその他のrelational backendを、特定vendorを既定勝者にせず同一evidenceで比較する。
+
+    | 判断軸 | 必須確認 |
+    |---|---|
+    | Data ownership | authoritative store、replication、export、retention、deletion |
+    | Authorization | client／server境界、row／field control、testability、admin path |
+    | Contract | schema、generated SDK、transaction、migration、backward compatibility |
+    | Runtime integration | supported client／server runtime、offline／realtime、network path |
+    | Operations | backup／restore、observability、SLO、incident、team permission |
+    | Economics and exit | usage-based cost、egress、lock-in、migration proof、sunset plan |
 
 ---
 
 ## §9. Cloud Storage for Firebase
 
 ### Rule 32.36: Storage 設計原則
--   **Mandate**: ファイルストレージにはCloud Storage for Firebaseを使用する。
+-   **Mandate**: Cloud Storage for Firebaseを採用する場合、object ownership、public／private境界、retention、malware、metadata、egress、restore、exitを設計する。file storageの選定は§0.1と`engineering/520_cloud_application_platforms.md`のcapability評価に従い、本serviceを全projectへ強制しない。
 -   **Architecture**:
     1.  **バケット分離**: 用途別にバケットを分離する（例: `user-uploads`, `public-assets`, `backups`）。
     2.  **Security Rules**: Storage Security Rulesでファイルアクセスを制御（認証必須、ファイルサイズ制限、MIME Type検証）。
@@ -639,7 +611,7 @@ export const myFunction = onRequest(
 -   **Alternative**: Firebase Extensions「Resize Images」を活用し、サムネイル・中サイズ・大サイズを自動生成。
 
 ### Rule 32.39: Resumable Upload
--   **Mandate**: 大きなファイル（10MB以上）のアップロードにはResumable Uploadを使用し、ネットワーク中断からの回復を保証する。
+-   **Mandate**: file size、network不安定性、mobile background、provider threshold、再送costに基づき、失敗影響が大きいuploadへresumable／multipart方式を採用する。固定サイズ閾値はBlueprintで決める。
 
 ---
 
@@ -674,7 +646,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.41: App Hosting（GA — SSRアプリケーション）
--   **Mandate**: Next.js/AngularのSSR（Server-Side Rendering）アプリケーションにはFirebase App Hosting（2025年4月GA）を使用する。
+-   **Mandate**: Firebase統合、自動build/rollout、framework support、region、observability、cost、rollbackが要件に適合する場合、App HostingをSSR/SSGの候補として評価する。全Next.js/Angular projectへの一律強制は禁止する。
 -   **Features**:
     -   GitHub連携による自動ロールアウト
     -   Cloud Run上でのSSRコンテンツ配信
@@ -685,8 +657,8 @@ export const myFunction = onRequest(
     -   VPCネットワーク接続
     -   Firebase SDK初期化の自動簡略化
     -   ビルドデバッグUI
--   **Supported Frameworks**: Next.js（App Router推奨）、Angular（v17+）。
--   **Cost**: Blaze Planの無料枠超過時に課金（2025年8月以降）。
+-   **Supported Frameworks**: 公式の現行framework/version matrixをdeploy時に確認する。
+-   **Cost**: App Hostingはbilling accountを伴うplan、build、runtime、bandwidth等の課金境界を確認し、budget alertがhard capではない前提でguardrailを設計する。
 
 ### Rule 32.42: Hosting vs App Hosting 選択基準
 -   **Decision Matrix**:
@@ -735,7 +707,7 @@ export const myFunction = onRequest(
 -   **Rules**:
     1.  **トークン更新**: アプリ起動時にトークンを取得し、サーバーに最新トークンを保存。
     2.  **無効トークンのクリーンアップ**: 送信エラー（`messaging/registration-token-not-registered`）を検知し、DBから無効トークンを削除。
-    3.  **定期クリーンアップ**: 90日以上未更新のトークンを自動削除するバッチジョブを設定。
+    3.  **定期クリーンアップ**: providerのstaleness guidance、送信結果、app利用周期、privacy／retention要件からBlueprintの期限を決め、stale tokenを段階的に無効化・削除する。
     4.  **Topic Messaging**: 大規模一斉配信にはTopic Messagingを活用。
     5.  **マルチデバイス**: Condition Messagingでユーザーの全デバイスに配信。
 
@@ -773,8 +745,8 @@ export const myFunction = onRequest(
 
 ## §13. Crashlytics & 安定性監視
 
-### Rule 32.48: Crashlytics 必須化
--   **Mandate**: 全てのモバイルアプリにFirebase Crashlyticsを統合する。
+### Rule 32.48: Crashlytics適用
+-   **Mandate**: Crashlyticsを採用するmobile appでは、release artifact、symbol、version、environment、privacy-safe contextを結び、代替crash platformとの二重計測を意図なく作らない。
 -   **Configuration**:
     1.  **dSYMアップロード**: iOSではビルド時にdSYM（デバッグシンボル）を自動アップロード。
     2.  **Proguardマッピング**: AndroidではProguard/R8のマッピングファイルをアップロード。
@@ -783,7 +755,7 @@ export const myFunction = onRequest(
     5.  **Breadcrumbs**: ユーザー操作のパンくずリストを記録。
 
 ### Rule 32.49: Crash-Free Rate 目標
--   **Mandate**: Crash-Free Users率を**99.5%以上**に維持する。99%を下回った場合は緊急対応。
+-   **Mandate**: crash-free users／sessions、severity、affected cohortをservice SLOとしてBlueprintに定義し、breach時のrelease停止、rollback、incident基準を持つ。固定率を全appへ強制しない。
 -   **Monitoring**: Crashlytics Alertsを設定し、新しいクラッシュクラスタを即座に検知。
 
 ---
@@ -791,11 +763,11 @@ export const myFunction = onRequest(
 ## §14. Performance Monitoring
 
 ### Rule 32.50: Performance Monitoring 設定
--   **Mandate**: Firebase Performance Monitoringで主要パフォーマンスメトリクスを追跡する。
+-   **Mandate**: Firebase Performance Monitoringを採用する場合、主要user journeyのperformance metricを計測し、platform共通のSLIと相関可能にする。
 -   **Tracked Metrics**:
-    1.  **App Start Time**: コールドスタートを2秒以内に維持。
-    2.  **HTTP Response Time**: API応答時間（p95 < 1秒）。
-    3.  **Screen Rendering**: 画面描画時間（p95 < 500ms）。
+    1.  **App Start Time**: device／OS／network cohort別にcold／warm startを計測。
+    2.  **HTTP Response Time**: APIのp50／p95／p99とerror rateを計測。
+    3.  **Screen Rendering**: slow／frozen frameと主要画面のrender時間を計測。
     4.  **Network Payload Size**: 過大なレスポンスサイズの検出。
 -   **Custom Traces**: ビジネスクリティカルな操作（ログイン、決済、検索等）にカスタムトレースを設定。
 
@@ -804,22 +776,20 @@ export const myFunction = onRequest(
 ## §15. Google Analytics for Firebase
 
 ### Rule 32.51: Analytics 統合
--   **Mandate**: Firebase向けGoogle Analyticsで全てのユーザー行動を計測する。
+-   **Mandate**: 明示したproduct／business outcomeに必要な最小限のeventだけを、data classification、lawful basis／consent、retention、deletion、access、sampling、costとともに計測する。Google Analytics for Firebaseは候補であり、全行動・全属性の収集を禁止する。
 -   **Configuration**:
-    1.  **自動イベント**: `first_open`, `session_start`, `screen_view`等を自動収集。
-    2.  **カスタムイベント**: ビジネスメトリクス（購入、登録、機能使用等）を明示的に記録。
-    3.  **User Properties**: ユーザー属性（プラン、地域、セグメント等）を設定。
-    4.  **Conversion Events**: コンバージョンイベントを定義し、目標達成率を追跡。
-    5.  **BigQuery Export**: 生データをBigQueryにエクスポートして詳細分析。
-    6.  **DebugView**: 開発中はDebugViewでリアルタイムにイベントを確認。
--   **Privacy**: GDPRに準拠したConsent Modeを実装（§42参照）。
+    1.  **Event Contract**: event name、purpose、owner、property schema、PII禁止、retention、downstream consumerをregistry化する。
+    2.  **Automatic Events**: providerの自動収集項目とdefaultをinventoryし、不要な収集を無効化または同意前に送信しない。
+    3.  **User Properties**: sensitive attribute、精密位置、永続identifierを安易に設定せず、cohort re-identification riskを評価する。
+    4.  **Validation**: debug／stagingでschema、duplicate、consent state、deletion、export costを検証する。
+-   **Privacy**: 適用法、地域、年齢、platform policyに応じてconsent、opt-out、deletion、data processing termsを設計し、Consent Modeだけを法令遵守の証明にしない。
 
 ---
 
 ## §16. Firebase AI Logic & Genkit
 
 ### Rule 32.52: Firebase AI Logic 概要
--   **Mandate**: Firebase AI Logic（旧 Vertex AI in Firebase）を使用し、生成AIモデルをアプリにセキュアに統合する。
+-   **Mandate**: clientから生成AIへ接続する場合、Firebase AI Logicを候補として、model、region、data use、App Check、認可、rate、safety、evaluation、cost、server proxyとの責任差を比較する。
 -   **Features**:
     -   Gemini Developer API（無料枠アリ）およびVertex AI APIへの直接アクセス
     -   App Check統合によるAIエンドポイント保護
@@ -833,13 +803,8 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.53: Genkit フレームワーク
--   **Mandate**: AIワークフロー構築にはGenkit（オープンソース）を使用する。
--   **Language Support（2026年3月時点）**:
-    | 言語 | バージョン | ステータス | 成熟度 |
-    |---|---|---|---|
-    | Node.js (TypeScript) | 1.x | GA | ✅ 本番対応 |
-    | Go | 1.0 (2025年9月GA) | GA | ✅ 本番対応 |
-    | Python | Alpha | Preview | △ 実験的 |
+-   **Mandate**: GenkitはAI workflow frameworkの候補であり、既存AI正本に従ってmodel portability、evaluation、observability、tool security、runtime、team support、exitを比較して採用する。
+-   **Language Support**: Node.js、Go、Python等の対応version、status、feature parity、EOLを採用時とupgrade時に公式documentで再確認する。
 -   **Core Features**:
     -   統一モデルAPI（Gemini、OpenAI、Anthropic、Ollama等マルチプロバイダ）
     -   型安全なAIフロー定義
@@ -876,7 +841,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.55: Genkit Tool Calling
--   **Mandate**: LLMに外部データアクセスやアクション実行を許可する場合、Genkit Tool Callingを使用する。
+-   **Mandate**: Genkitを採用し、LLMに外部データアクセスやaction実行を許可する場合は、Genkit Tool Calling等のtyped tool contractを使い、任意code実行や無制限権限を与えない。
 -   **Security**: ツールの実行権限を最小限に制限。ユーザー入力に基づくツール呼び出しには入力検証を必須とする。
     ```typescript
     const getWeatherTool = ai.defineTool(
@@ -971,7 +936,7 @@ export const myFunction = onRequest(
 -   **Mandate**: AI関連コストを独立して追跡・管理する。
 -   **Strategies**:
     1.  **トークン消費量追跡**: Genkit Monitoring経由でトークン使用量をダッシュボード化。
-    2.  **30%ルール**: AI関連コストが全体の30%を超えた場合にアラート。
+    2.  **Budget Threshold**: AI関連コストの予算、単位経済性、成長率、異常検知thresholdをfeature ownerとFinOps ownerがBlueprintで定義する。
     3.  **モデル最適化**: より低コストなモデル（Flash系）への段階的移行を検討。
     4.  **ラベリング**: AI関連リソースに`ai-feature`ラベルを付与してコスト分離。
     5.  **Context Caching**: Vertex AI Context Cachingでトークンコストを削減。
@@ -992,8 +957,8 @@ export const myFunction = onRequest(
 ## §19. Firebase Extensions 戦略
 
 ### Rule 32.66: Extensions の活用方針
--   **Mandate**: 定型的なインテグレーションにはFirebase Extensionsを活用する。
--   **Recommended Extensions**:
+-   **Mandate**: 定型integrationではFirebase Extensions、managed integration、自前実装を、権限、data flow、release cadence、support、cost、observability、exitで比較し、第三者codeとconfigurationをsupply-chain reviewする。
+-   **Candidate Examples**:
     | Extension | 用途 |
     |---|---|
     | Stream Firestore to BigQuery | Firestoreデータの分析基盤構築 |
@@ -1003,22 +968,22 @@ export const myFunction = onRequest(
     | Delete User Data | ユーザー削除時のデータクリーンアップ |
 
 ### Rule 32.67: カスタムExtension
--   **Mandate**: プロジェクト固有の繰り返し処理はカスタムExtensionとして開発・パッケージ化する。
+-   **Applicability**: 複数environment／projectで再利用し、独立したversion、configuration contract、test、owner、upgrade／deprecationを維持できる処理だけをcustom Extension化する。一度限りのproject logicを無理にpackage化しない。
 
 ---
 
 ## §20. BigQuery 連携 & データ分析基盤
 
-### Rule 32.68: BigQuery をSSOT（分析用）
--   **Mandate**: 全ての分析データはBigQueryに集約する。
--   **Data Sources**:
+### Rule 32.68: 分析データ基盤の権威境界
+-   **Mandate**: analytics、billing、operational telemetryごとにauthoritative source、warehouse／lakehouse、freshness、lineage、retention、deletion、access、costを定義する。BigQueryはGCP／Firebase workloadの有力候補だが、全データの一律集約や機微dataの不要な複製を強制しない。
+-   **Candidate Sources**:
     -   Firebase Analytics → BigQuery Export
     -   Firestore → BigQuery Extension
     -   Cloud Logging → BigQuery Sink
     -   Billing Data → BigQuery Export
 
 ### Rule 32.69: ELTパターン
--   **Mandate**: データはRaw形式でBigQueryにロードし、BigQuery内でdbt等で変換・テストする。
+-   **Mandate**: ETL、ELT、stream processingをlatency、volume、privacy、source load、replay、costから選ぶ。raw zoneを持つ場合もimmutable、encryption、access、retention、schema evolution、deletion propagationを設計し、BigQueryやdbtをUniversalの固定実装にしない。
     ```
     Source → Raw Layer (BigQuery) → Staging Layer (dbt) → Mart Layer (dbt) → Dashboard
     ```
@@ -1027,7 +992,7 @@ export const myFunction = onRequest(
 -   **Mandate**: データパイプラインに自動品質テストを組み込む。
 -   **Tests**:
     1.  **Freshness**: データの鮮度チェック。
-    2.  **Volume**: レコード数の異常検知（前日比±30%で警告）。
+    2.  **Volume**: 曜日性、seasonality、source別baseline、expected growthを考慮した動的thresholdでrecord数の異常を検知する。
     3.  **Schema**: スキーマ変更の自動検知。
     4.  **Null Check**: 必須フィールドのNull率監視。
 
@@ -1051,7 +1016,7 @@ export const myFunction = onRequest(
 -   **Mandate**: Admin SDKはSecurity Rulesをバイパスする。信頼されたサーバー環境でのみ使用。
 -   **Requirements**:
     1.  **最小権限IAM**: 必要最小限のロールのみ付与。
-    2.  **認証情報のローテーション**: 90日ごとにローテーション。
+    2.  **認証情報のライフサイクル**: keyless／short-lived identityを優先する。長期credentialが不可避なら、risk、provider capability、規制、incident responseに基づくrotationと即時revocationを自動化する。
     3.  **環境変数管理**: キーファイルはSecret Managerで管理。ソースコードにコミットしない。
 
 ### Rule 32.73: OWASP Top 10 2025対策
@@ -1069,31 +1034,31 @@ export const myFunction = onRequest(
 
 ### Rule 32.74: 最小権限の原則
 -   **Mandate**: 全てのIAMロールは最小権限の原則に従う。
--   **Prohibited**: 本番環境での`roles/owner`および`roles/editor`の使用は禁止。
--   **Recommended**: カスタムIAMロールを作成し、必要な権限のみを含める。IAM Recommenderの推奨を適用。
+-   **Prohibited**: 通常のproduction workload identity、CI identity、恒久的な人間accessへ`roles/owner`／`roles/editor`等のbroad basic roleを付与してはならない。
+-   **Recommended**: predefined roleを最小scopeで組み合わせ、必要な場合だけversion管理されたcustom roleを作る。IAM Recommenderはevidenceとしてreviewし、機械的に適用しない。emergency owner accessは分離、time-bound、強固な認証、承認、alert、監査を備える。
 
 ### Rule 32.75: サービスアカウント管理
--   **Mandate**: 機能ごとに専用のサービスアカウントを作成し、権限を分離する。
+-   **Mandate**: trust boundary、privilege、environment、lifecycle、blast radiusが異なるworkloadを別service accountへ分離する。全functionへ無条件に個別accountを作らず、過剰なidentity sprawlとshared high privilegeの両方を避ける。
 -   **Best Practices**:
-    1.  **専用アカウント**: Cloud Run Functions、Cloud Run、CI/CDそれぞれに専用サービスアカウント。
+    1.  **Boundary-aligned Accounts**: production／non-production、runtime／deployment、異なるdata classやprivilegeを分離し、同じ権限・owner・lifecycleを持つ低risk workloadは根拠を残して共有できる。
     2.  **キーレス認証**: Workload Identity Federationを使用し、サービスアカウントキーの発行を最小化。
-    3.  **定期監査**: 未使用のサービスアカウントとキーを90日ごとに監査・削除。
+    3.  **定期監査**: identity inventory、利用telemetry、risk、compliance cadenceに基づき未使用のservice accountとkeyを監査し、安全に無効化・削除する。
 
 ### Rule 32.76: Workload Identity Federation
--   **Mandate**: 外部IDプロバイダー（GitHub Actions、AWS等）からGCPへのアクセスにはWorkload Identity Federationを使用する。サービスアカウントキーの発行は原則禁止。
+-   **Mandate**: 対応する外部identity providerやCIからGCPへ接続する場合はWorkload Identity Federation等のshort-lived federationを優先し、subject、repository／project、branch／environment、audience、attribute conditionを限定する。未対応経路で長期keyが不可避なら、期限付き例外、最小権限、保護されたsecret store、rotation、usage alert、失効手順を必須とする。
 
 ---
 
 ## §23. Secret Manager & 機密情報管理
 
-### Rule 32.77: Secret Manager 必須化
--   **Mandate**: 全ての機密情報（APIキー、DBパスワード等）はSecret Managerで管理する。
--   **Prohibited**: 機密情報をソースコード、`.env`ファイル、Firebase Configにハードコードすることは**厳禁**。
+### Rule 32.77: Approved Secret Store Protocol
+-   **Mandate**: productionとshared environmentの機密情報は、承認済みprovider-nativeまたは組織secret storeで暗号化、access control、versioning、audit、rotation、revocationを管理する。GCP workloadではSecret Managerを標準候補とする。
+-   **Prohibited**: 機密情報をsource、container image、client bundle、version管理対象の`.env`、平文CI設定、logへ保存・出力してはならない。local-only `.env`を使う場合はignore、sample分離、最小scope、短命value、漏洩scanを適用する。
 
 ### Rule 32.78: シークレットの管理
 -   **Best Practices**:
     1.  **バージョニング**: シークレットはバージョン管理し、ロールバック可能に。
-    2.  **自動ローテーション**: 90日ごとにローテーション。自動ローテーションを推奨。
+    2.  **自動ローテーション**: secretの種類、漏洩影響、provider capability、規制に応じてrotation／revocation cadenceをBlueprintで定義し、自動化する。漏洩時はcadenceを待たず即時失効する。
     3.  **アクセス制御**: `roles/secretmanager.secretAccessor`を必要なサービスアカウントにのみ付与。
     4.  **CMEK**: コンプライアンス要件がある場合、顧客管理暗号化キー（CMEK）を使用。
     5.  **監査**: Secret Managerへのアクセスログを監視。
@@ -1115,17 +1080,17 @@ export const myFunction = onRequest(
 ## §24. VPC & ネットワークセキュリティ
 
 ### Rule 32.80: VPC Service Controls
--   **Mandate**: セキュリティ要件が高い環境ではVPC Service Controlsを設定し、GCPサービスへのアクセス境界を定義する。
+-   **Mandate**: 対応serviceでdata exfiltration risk、規制、identity境界が必要な場合にVPC Service Controlsを評価し、dry run、supported-service matrix、ingress／egress policy、break-glass、observabilityを検証して段階導入する。
 
 ### Rule 32.81: Private Google Access
--   **Mandate**: Cloud Run Functions/Servicesから GCPサービスへのアクセスにはPrivate Google Accessを使用。
+-   **Mandate**: public IPを持たないsubnet resourceからGoogle APIへ到達させる場合はPrivate Google Accessその他の承認済みprivate pathを評価し、DNS、route、egress、service support、failure modeを検証する。
 
 ### Rule 32.82: Direct VPC Egress
--   **Mandate**: Cloud Run FunctionsのDirect VPC Egress（GA）を活用し、VPC内プライベートリソースに安全にアクセスする。
--   **Configuration**: `--egress-settings=all`を設定して全アウトバウンドトラフィックをVPC経由にルーティング。
+-   **Mandate**: private resourceへの接続が必要なCloud Run Functions／Servicesでは、Direct VPC egress、connector、別architectureをlatency、throughput、IP、cost、availabilityで比較する。
+-   **Configuration**: `private-ranges-only`相当か`all-traffic`相当かをthreat model、inspection、NAT、external API到達性で選び、全traffic routingを無条件に強制しない。
 
 ### Rule 32.83: Cloud Armor WAF
--   **Mandate**: Cloud Run/Load BalancerのフロントにCloud Armorを配置する。
+-   **Mandate**: internet-facing HTTP surfaceの脅威、traffic、architectureが適合する場合、supported load-balancing pathとCloud Armorその他のWAF／DDoS controlを評価する。直接endpointを残す場合はbypass防止を検証する。
 -   **Architecture**: Cloud Run → Serverless NEG → Application Load Balancer → Cloud Armor Security Policy。
 -   **Policy**:
     1.  **OWASP Top 10 WAFルール**: SQL Injection、XSS等の事前構成ルールを適用。
@@ -1136,15 +1101,15 @@ export const myFunction = onRequest(
 -   **Testing**: 新ポリシーは必ず「preview」モードで影響を評価してからエンフォースメント。
 
 ### Rule 32.84: Private Service Connect
--   **Mandate**: GCPマネージドサービス（Cloud SQL、Memorystore等）へのプライベート接続にはPrivate Service Connectを活用する。
+-   **Applicability**: private connectivityが脅威モデル、data exfiltration、compliance、latencyに必要な場合、Private Service Connect、private IP、VPC connector、provider-supported同等手段をservice support、DNS、egress、failover、costから選び、public bypassを検証する。
 
 ---
 
 ## §25. FinOps & コスト最適化
 
 ### Rule 32.85: コスト配分の原則
--   **Mandate**: 全てのGCPリソースにラベルを付与する。
--   **Required Labels**:
+-   **Mandate**: billing export、project／folder hierarchy、supported labels／tags、service metadataを組み合わせ、material costをenvironment、service、owner、cost center、featureへ追跡できるようにする。label非対応resourceはmapping inventoryと代替配賦を持つ。
+-   **Candidate Dimensions**:
     | Label Key | Values（例） | Purpose |
     |---|---|---|
     | `environment` | prod / staging / dev | 環境別コスト分析 |
@@ -1181,13 +1146,13 @@ export const myFunction = onRequest(
 ## §26. 予算アラート & 自動応答
 
 ### Rule 32.89: 予算アラート設定
--   **Mandate**: 全プロジェクトに多段階の予算アラートを設定する。
+-   **Mandate**: 課金が発生しうる環境には、owner、通知先、実額・予測額、対応runbookを持つ多段階alertを設定する。閾値はBlueprintで定義し、alertがhard capではないことを明記する。
     | 段階 | 実際コスト | 予測コスト | アクション |
     |---|---|---|---|
-    | 警告 | 50% | 75% | チームSlack通知 |
-    | 注意 | 80% | 90% | マネージャーEscalation |
-    | 危険 | 100% | 100% | 自動リソース制限実行 |
-    | 超過 | 120% | — | 緊急対応（全チーム） |
+    | 早期警告 | Blueprint値 | forecast閾値 | cost owner通知・原因確認 |
+    | 注意 | Blueprint値 | forecast閾値 | 担当チームへescalation |
+    | 危険 | 承認済み上限付近 | 承認済み上限付近 | 安全な縮退・変更凍結を検討 |
+    | 超過 | 承認済み上限超過 | — | incident手順と経営判断 |
 
 ### Rule 32.90: 自動応答（Budget Automation）
 -   **Architecture**:
@@ -1196,19 +1161,19 @@ export const myFunction = onRequest(
     ```
 -   **Actions**:
     1.  **Slack/Email通知**: 関連チームへの即時通知。
-    2.  **リソース制限**: 非クリティカルなCloud Run Functions/Servicesの`maxInstances`を0に設定。
-    3.  **課金停止**: 最終手段としてCloud Billing APIでプロジェクトの課金を無効化。
--   **Caution**: 課金停止は全サービスを停止させるため、本番環境では慎重に適用。
+    2.  **リソース制限**: 事前に分類した非クリティカル機能を段階的に制限し、データ処理中のworkloadを突然停止しない。
+    3.  **緊急停止**: 課金停止等の破壊的操作はbreak-glass承認、依存関係評価、復旧手順を満たす最終手段とする。
+-   **Caution**: Budget通知は停止装置ではない。安全な自動化を別途設計し、本番停止やデータ損失を防ぐ。
 
 ### Rule 32.91: 月次レビュー
--   **Mandate**: 月次でコスト実績を予算と照合し、異常なコスト増加の原因を特定。
+-   **Mandate**: spend volatility、予算、criticalityに応じたcadenceで実績・forecast・unit economics・anomaly・commitment・unused resourceをreviewし、ownerと対応期限を記録する。月次は安定workloadの候補であり固定周期ではない。
 
 ---
 
 ## §27. Observability (Cloud Logging / Monitoring / Trace)
 
 ### Rule 32.92: 構造化ログ
--   **Mandate**: 全てのCloud Run Functions/Servicesのログは構造化JSON形式で出力する。
+-   **Mandate**: machine-queryableなstructured loggingを採用し、runtime／agentがJSON envelopeを生成する場合はapplicationで二重encodeしない。event schema、severity、service、environment、trace／correlation、error class等を用途に応じて標準化する。
     ```typescript
     import { log, warn, error } from "firebase-functions/logger";
     
@@ -1220,18 +1185,12 @@ export const myFunction = onRequest(
       processingTimeMs: 234,
     });
     ```
--   **Required Fields**: `timestamp`, `severity`, `message`, `traceId`。
+-   **Reference Fields**: `timestamp`, `severity`, `message`, `service`, `environment`, `traceId`／`correlationId`。provider自動付与とsignal用途を確認し、存在しないtraceを捏造しない。
 -   **Prohibited**: 機密情報（パスワード、クレジットカード番号、PII）のログ出力は厳禁。
 
 ### Rule 32.93: Cloud Monitoring
--   **Mandate**: 主要なメトリクスにアラートポリシーを設定する。
-    | メトリクス | 閾値 | アクション |
-    |---|---|---|
-    | Function Error Rate | > 5% | 即時Slack通知 |
-    | Function Latency (p99) | > 5s | 調査開始 |
-    | Pub/Sub Unacked Messages | > 1000 | 処理能力スケールアップ |
-    | Cloud Run CPU Utilization | > 80% | インスタンス数確認 |
-    | AI Token Consumption | > Budget 80% | コスト最適化実施 |
+-   **Mandate**: user journey、SLO、saturation、backlog、error、cost anomalyに結び付くsignalを選び、owner、severity、notification route、runbook、escalationを設定する。固定thresholdや通知先はUniversalへ置かず、traffic baseline、error budget、capacity test、予算からBlueprintで決める。
+-   **Reference Signals**: request error／latency、event age／backlog、instance saturation、quota pressure、AI unit cost、budget consumptionは候補であり、未使用serviceのmetricを義務化しない。
 
 ### Rule 32.94: Cloud Trace & OpenTelemetry
 -   **Mandate**: 分散システムのリクエストフローを追跡するためにCloud Traceを活用する。
@@ -1261,27 +1220,21 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.98: リトライ戦略
--   **Mandate**: 全ての外部呼び出しにリトライ戦略を実装する。ジッター付き指数バックオフ。
-    | パラメータ | 値 |
-    |---|---|
-    | Initial Delay | 1秒 |
-    | Max Delay | 60秒 |
-    | Multiplier | 2x |
-    | Max Retries | 5回 |
-    | Jitter | ±20% |
+-   **Mandate**: transientで、かつ処理が冪等または冪等性keyで保護される失敗だけを、deadlineとretry budget内で再試行する。providerのretry guidance、`Retry-After`、jitter付きbackoff、呼び出し階層全体の増幅を考慮し、回数と時間はBlueprintで決める。
+-   **No Retry**: validation、認証／認可、恒久的なquota／configuration error、非冪等side effect、deadline超過を無条件再試行してはならない。event-driven functionのprovider retryを有効化する前にRule 32.15の冪等性とpoison-message処理を証明する。
 
 ### Rule 32.99: Dead Letter Queue (DLQ)
 -   **Mandate**: リトライ上限を超えたメッセージはDead Letter Queueに転送する。
 
 ### Rule 32.100: Circuit Breaker
--   **Mandate**: 外部サービスの障害がシステム全体に波及することを防ぐため、Circuit Breakerパターンを実装する。
+-   **Applicability**: downstream障害がresource exhaustion、retry storm、latency cascadeを起こし得る同期依存では、Circuit Breaker、concurrency limit、load shedding、fallbackの組み合わせを評価する。短命functionやprovider-managed clientで独自breakerが逆に状態不整合を生む場合は、deadline、bounded retry、queue isolationなどの代替controlと根拠を記録する。
 
 ---
 
 ## §29. Terraform / IaC 管理
 
 ### Rule 32.101: IaC必須化
--   **Mandate**: Firebase/GCPの全てのインフラストラクチャ設定はTerraformでコード管理する。手動操作（ClickOps）は禁止。
+-   **Mandate**: 再現可能なFirebase/GCP設定は、Terraform、Google Cloud Config Connector、provider-native構成、または承認済み同等手段でversion管理し、review・plan・drift detectionを行う。API未対応の手動操作は承認、監査証跡、再現手順、定期drift確認を必須とする。
 -   **Scope**: GCPプロジェクト設定、Firebase設定、Cloud Run Functions/Services設定、Security Rules、App Check、Budget Alerts、Monitoring Alert Policies。
 
 ### Rule 32.102: プロジェクト構成
@@ -1301,7 +1254,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.103: State管理
--   **Mandate**: Terraform StateはGCSバケットにリモート保存する。バケットバージョニング有効化、State Lockingを実装、手動編集は禁止。
+-   **Mandate**: Terraform Stateは、encryption、access control、lockingまたは同等のconcurrency control、version／recovery、auditを備えた承認済みremote backendで管理する。GCSはGCP workloadの候補であり、backendのcurrent locking semanticsを検証する。stateの手動編集はbreak-glass手順以外禁止する。
 
 ### Rule 32.104: バージョン管理
 -   **設定例**:
@@ -1357,8 +1310,8 @@ export const myFunction = onRequest(
 
 ## §31. Emulator Suite & テスト戦略
 
-### Rule 32.108: Emulator Suite 必須化
--   **Mandate**: ローカル開発およびCIテストにはFirebase Emulator Suiteを使用する。
+### Rule 32.108: Emulator and Isolated Test Protocol
+-   **Mandate**: 対象serviceをFirebase Emulator Suiteが十分なfidelityで再現する場合はlocal／CIの高速検証に使用する。非対応機能、IAM、quota、network、billing、provider integrationは隔離されたnon-production projectで補完し、emulator-only結果をproduction equivalenceとみなさない。
 -   **Supported Emulators**:
     | Emulator | Port | 用途 |
     |---|---|---|
@@ -1377,14 +1330,15 @@ export const myFunction = onRequest(
 ### Rule 32.110: テスト戦略
 -   **Layers**:
     1.  **Unit Test**: ビジネスロジックの単体テスト（Firebaseに依存しない）。
-    2.  **Integration Test**: Emulator Suiteを使用した統合テスト。
-    3.  **E2E Test**: ステージング環境での端末間テスト。
+    2.  **Integration Test**: Emulator Suiteまたは隔離projectをfidelityに応じて使う統合テスト。
+    3.  **E2E Test**: productionとの差異を記録したstaging環境での端末間テスト。
 
 ---
 
 ## §32. CI/CD パイプライン統合
 
-### Rule 32.111: GitHub Actions 推奨
+### Rule 32.111: Provider-neutral CI/CD Contract
+-   **Mandate**: CI providerに依存せず、lint、unit、Security Rules、emulator／isolated integration、IaC plan、artifact provenance、preview、approval、deploy、post-deploy verificationをriskに応じて構成する。次はGitHub Actionsを選定した場合の参考例であり、Universal要件ではない。
 -   **設定例**:
     ```yaml
     name: Firebase CI/CD
@@ -1421,7 +1375,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.112: Workload Identity Federation
--   **Mandate**: GitHub ActionsからGCPへの認証にはWorkload Identity Federationを使用する。サービスアカウントキーの使用は禁止。
+-   **Mandate**: CI providerがOIDC等の外部identityを提供する場合はWorkload Identity Federationを使用し、provider／repository／branch／environment claimを検証する。例外はRule 32.76に従う。
 
 ### Rule 32.113: デプロイメント戦略
 -   **Flow**:
@@ -1434,43 +1388,35 @@ export const myFunction = onRequest(
 ## §33. 環境管理 (Dev / Staging / Prod)
 
 ### Rule 32.114: 環境分離
--   **マトリクス**:
-
-    | 環境 | GCP Project | 用途 | アクセス |
-    |---|---|---|---|
-    | Dev | `myapp-dev` | 開発・実験 | 開発チーム全員 |
-    | Staging | `myapp-staging` | 受け入れテスト | 開発チーム + QA |
-    | Prod | `myapp-prod` | 本番運用 | 制限付き（IAM厳格化） |
+-   **Mandate**: productionと非productionのidentity、data、secret、billing、quota、deploy authority、observabilityをriskに応じて隔離する。単一project、複数project、folder／organization分離の選択はblast radius、compliance、team topology、costからBlueprintで決める。
+-   **Access**: accessは職種名や「開発者全員」で固定せず、least privilege、separation of duties、time-bound elevation、break-glass、audit evidenceで設計する。environment名やproject namingは例でありUniversal契約ではない。
 
 ### Rule 32.115: 環境パリティ
--   **Mandate**: Staging環境は本番と同等の構成を維持する。
+-   **Mandate**: Stagingは本番の重要なidentity、policy、runtime、network、data contract、deploy／rollback経路を再現できなければならない。costやprivacy上の理由で縮小・合成dataを使う差分は、test coverageとresidual riskをdocument化する。
 
 ### Rule 32.116: 環境変数管理
--   **Methods**:
-    1.  **Firebase Config**: `firebase functions:config:set`（非機密情報）。
-    2.  **Secret Manager**: 機密情報（§23参照）。
-    3.  **Terraform Variables**: インフラ設定。
-    4.  **Remote Config**: アプリ動的設定（§12参照）。
+-   **Non-Secret Configuration**: parameterized configurationまたはversion管理されたenvironment configをschema、default、owner、validation、rolloutとともに管理する。
+-   **Secrets**: Secret Managerなどの承認済みsecret storeで管理し、必要なfunction／serviceへだけ明示的にbindingする。plan、log、client bundle、version管理対象へ値を露出しない。
+-   **Legacy Migration**: `functions.config()`は非推奨であり、2027年3月以降は新規deploymentを阻害する予定のため、新規導入を禁止し、既存利用をinventoryしてparameterized configurationとSecret Managerへ移行する。
+-   **Boundary**: IaC variableは非機密入力とsecret referenceを扱う。Remote Configはclient behavior／feature rollout用であり、secret、認証、server authorizationの保管先にしない。
 
 ---
 
 ## §34. マルチリージョン & DR戦略
 
 ### Rule 32.117: リージョン選定基準
--   **Primary**: `asia-northeast1`（東京）— 日本向けサービスのデフォルト。
--   **Secondary**: `us-central1`（アイオワ）— グローバルサービス向け。
--   **GPU対応**: Cloud Run GPU（NVIDIA L4 GA）は`us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`等で利用可能。
+-   **Primary/Secondary**: §1の評価軸とRTO/RPOに基づきBlueprintで決定する。primaryとsecondaryは同一障害domainへ置かず、data residencyとservice compatibilityを検証する。
+-   **Dynamic Availability**: GPU、runtime、multi-region構成は公式の現行region matrixで再確認する。
 
 ### Rule 32.118: リージョン一貫性
--   **Mandate**: 関連サービスは同一リージョンに配置する。
+-   **Mandate**: 関連serviceのregionは、latency、data residency、availability、failure domain、cross-region transfer costを合わせて決める。同一regionはlatency最適化の候補ですが、DR要件と矛盾する場合は明示的なmulti-region boundaryを設計する。
 
 ### Rule 32.119: Disaster Recovery
 -   **Strategies**:
-    1.  **Firestore**: マルチリージョンロケーション（`nam5`/`eur3`等）を使用。
-    2.  **Cloud Storage**: マルチリージョンバケットまたはDual-regionバケット。
-    3.  **Cloud Run**: 複数リージョンへのデプロイとロードバランシング。
-    4.  **Backup**: Firestore自動バックアップ（日次）の設定とリカバリテスト。
-    5.  **RTO/RPO定義**: サービスごとのRTO（目標復旧時間）・RPO（目標復旧ポイント）を定義。
+    1.  **Location Capability**: current official location matrix、residency、consistency、costを確認し、RTO／RPOが必要とするsingle／dual／multi-region構成を選ぶ。
+    2.  **Storage and Compute**: data copy、compute deployment、traffic failoverを同じfailure scenarioで設計し、片側だけの冗長化を避ける。
+    3.  **Backup**: backup frequencyとretentionをRPO、法令、deletion要件、costから決め、productionとは独立したcredential／failure domainでrestore testする。
+    4.  **RTO/RPO Evidence**: serviceごとのRTO／RPO、restore／failover手順、test cadence、last result、ownerを記録する。
 
 ---
 
@@ -1478,15 +1424,15 @@ export const myFunction = onRequest(
 
 ### Rule 32.120: API設計原則
 -   **Principles**:
-    1.  **統一インターフェース**: リソース指向のURL設計（`/api/v1/users/{id}`）。
-    2.  **バージョニング**: APIバージョンをURLパスに含める。
-    3.  **ページネーション**: カーソルベースのページネーションを実装。
+    1.  **Contract First**: consumer、error model、idempotency、compatibility、rate／size limit、deprecationを明示する。REST、GraphQL、RPC、event contractは利用形態から選ぶ。
+    2.  **Versioning**: path、header、schema evolutionなどの方式をconsumer互換性から選び、breaking changeには移行期間とusage evidenceを持つ。
+    3.  **Bounded Retrieval**: cursor、keyset、page token、streamingなどdata consistencyとscaleに合う方式で応答量とscan costを制限する。
 
 ### Rule 32.121: 認証 & 認可
--   **Pattern**: App Check（§6） + Firebase Auth Token + Custom Claims（§5）の三層認証。
+-   **Mandate**: endpointごとにcaller identity、token verification、resource authorization、abuse protection、privileged bypassを設計する。Firebase Auth、App Check、custom claimsは対応surfaceの候補であり、server-to-server、public webhook、anonymous flowへ同一の三層patternを強制しない。
 
 ### Rule 32.122: OpenAPI仕様
--   **Mandate**: APIエンドポイントはOpenAPI (Swagger)仕様で文書化する。
+-   **Mandate**: HTTP APIはOpenAPI等のmachine-readable contract、GraphQLはschema、RPCはIDL、eventはversioned schemaで文書化し、CIでimplementation／consumer compatibilityを検証する。
 
 ---
 
@@ -1552,9 +1498,9 @@ export const myFunction = onRequest(
 
 ## §40. Google Ecosystem 統合戦略
 
-### Rule 32.131: Google First 原則
--   **Mandate**: 技術選定はGoogleエコシステムを最優先する。
--   **Exception**: サードパーティ製品はGoogleサービスに対する圧倒的な優位性が証明される場合のみ採用を許可。
+### Rule 32.131: Ecosystem Fit 原則
+-   **Mandate**: 技術選定は、必要能力、security、privacy、operability、support、cost、portability、既存team skillを比較し、520のdecision recordで根拠を残す。
+-   **Provider Boundary**: Google native integrationは有力候補ですが自動的な優先権を持ちません。first-party／third-partyの別だけで採否を決めず、lock-inとexit costを含むtotal valueで判断します。
 
 ### Rule 32.132: サービス間統合パターン
 -   **マトリクス**:
@@ -1569,28 +1515,16 @@ export const myFunction = onRequest(
 
 ---
 
-## §41. Firebase Studio
+## §41. Firebase Studio Sunset & 開発環境の可搬性
 
-### Rule 32.133: Firebase Studio の活用
--   **Mandate**: プロトタイピングおよびフルスタックAIアプリケーション開発にはFirebase Studioを活用する。
--   **Features**:
-    -   クラウドベースのAIネイティブ開発環境
-    -   Gemini 2.5によるプロンプトtoアプリ生成
-    -   エージェントモード（自律的タスク実行）
-    -   Figmaデザインからの統合
-    -   App Hosting統合によるデプロイ
-    -   バックエンド自動プロビジョニング（Firestore、Firebase Authentication等の自動検出・設定）
-    -   MCP Server ネイティブサポート
--   **Use Cases**:
-    1.  **ラピッドプロトタイピング**: AIプロンプトからアプリの骨格を即座に生成。
-    2.  **フルスタック開発**: フロントエンド + バックエンド + Firebase連携の一気通貫開発。
-    3.  **チーム協調**: クラウドベースで即座に共有可能。
+### Rule 32.133: Firebase Studio Sunset
+-   **Mandate**: Firebase Studioを新規標準環境として採用しない。新規workspace作成は2026年6月22日に無効化され、serviceは2027年3月22日にsunset予定のため、既存workspace、owner、repository、secret、preview／deploy dependencyをinventoryし、期限前に承認済み開発環境へ移行する。
+-   **Continuity**: sunsetはFirebaseのcore productやdeployed appを直ちに停止するものではないが、source、configuration、artifact、runbookをStudio外のversion管理とCIへ保持し、provider UIなしでbuild、test、deploy、rollbackできることを検証する。
 
-### Rule 32.134: Firebase Studio の制約
--   **Caution**:
-    1.  本番コードの直接デプロイは非推奨（CI/CDパイプラインを経由すること）。
-    2.  生成されたコードは必ずレビューし、Security Rules・IAM設定を確認。
-    3.  大規模プロジェクトでは従来のIDE + CLIワークフローを推奨。
+### Rule 32.134: 開発環境の選定と移行
+-   **Selection**: local／cloud IDE、AI coding environment、remote workspaceは、source portability、identity、secret isolation、network boundary、audit、reproducible CI、cost、vendor exitで比較する。特定IDEやteam sizeをUniversalで固定しない。
+-   **Generated Changes**: AI生成codeと自動provisioningはuntrusted changeとしてreview、test、Security Rules／IAM diff、supply-chain scanを通し、productionへ直接deployしない。
+-   **Migration Evidence**: source export、secret rotation、environment recreation、CI build、preview、production release、rollback、workspace deletion／retentionのownerとtest resultを残す。
 
 ---
 
@@ -1617,9 +1551,9 @@ export const myFunction = onRequest(
 ## §43. サプライチェーンセキュリティ
 
 ### Rule 32.138: コンテナセキュリティ
--   **Mandate**: Cloud Runのコンテナイメージはセキュリティスキャンを実施する。
--   **Tools**: Artifact Registry のコンテナ脆弱性スキャン、Binary Authorization。
--   **Binary Authorization**: 本番環境へのデプロイは署名済みコンテナイメージのみ許可するポリシーを適用。
+-   **Mandate**: productionへ到達するcontainer artifactはdependency／OS vulnerability、provenance、signature／attestation、base image、secret、licenseをriskに応じて検証し、exception ownerと期限を持つ。
+-   **Tools**: Artifact Registry scanning、Binary Authorization、SLSA-compatible provenance、policy engineは候補である。
+-   **Admission**: supply-chain threat、platform support、criticalityに応じて署名／attestation verificationまたは同等のadmission controlを適用し、break-glassとrollbackをtestする。
 
 ### Rule 32.139: 依存関係管理
 -   **Mandate**: サードパーティライブラリの脆弱性を継続的に監視する。
@@ -1644,26 +1578,25 @@ export const myFunction = onRequest(
     | L5 | Optimized | 自動スケーリング、自動復旧、AI駆動分析 |
 
 ### Rule 32.142: 最低要件
--   **Mandate**: 本番環境は最低L3を達成すること。L2以下での本番運用は禁止。
+-   **Mandate**: productionに必要な成熟度targetは、service criticality、data sensitivity、regulation、team size、SLO、blast radiusに応じてBlueprintで決めます。level labelだけでrelease可否を決めず、未達control、compensating control、owner、期限をevidence化します。
 
 ---
 
 ## §45. マイグレーション & 廃止戦略
 
-### Rule 32.143: Firestore → Supabase マイグレーション
+### Rule 32.143: Firestoreから別データ基盤へのマイグレーション
 -   **Strategy**:
-    1.  **データマッピング**: NoSQLスキーマからRDBスキーマへの変換設計。
-    2.  **段階的移行**: サービス単位で段階的に移行。
-    3.  **Dual Write**: 移行期間中は両方のDBに書き込み。
-    4.  **Read Switch**: 読み取り先をSupabaseに切り替え。
-    5.  **Write Switch**: 書き込み先をSupabaseに切り替え。
-    6.  **Cleanup**: Firestoreのデータとコードを削除。
+    1.  **Contract & Mapping**: source／targetのschema、identity、ordering、timestamp、TTL、index、authorization、consistency、retentionをmappingし、loss／transform policyを承認する。
+    2.  **Backfill & Change Capture**: bulk backfillとCDC、outbox、replay log等を組み合わせ、restartable checkpoint、rate limit、checksum／count／sample validationを持つ。
+    3.  **Dual Write Guardrail**: application-levelのbest-effort dual writeは禁止する。dual writeを選ぶ場合はatomicityまたはdurable outbox、ordering、idempotency、retry、reconciliation、partial-failure recoveryを証明する。
+    4.  **Shadow Read & Cutover**: production-like trafficでshadow read／compareを行い、error budgetとexit criteriaを満たしてread、次にwriteを段階切替する。RTO、RPO、freeze、rollback pointを事前定義する。
+    5.  **Reconciliation & Cleanup**: lagと不一致を解消し、consumerとbackup／restoreを検証してから、法令・retention・rollback windowに従って旧data、credential、index、codeを廃止する。
 
 ### Rule 32.144: レガシーAPI廃止
 -   **Process**: Deprecation Notice → Migration Guide → Usage Monitoring → Sunset。
 
 ### Rule 32.145: 1st Gen Functions 移行
--   **Mandate**: 1st Gen Cloud FunctionsをCloud Run Functionsへ速やかに移行する。GCP提供のアップグレードツールを活用。
+-   **Mandate**: legacy functionはRule 32.10のinventory、公式support期限、互換性test、段階移行、rollbackに従う。provider toolは検証済みの補助手段として使う。
 
 ---
 
@@ -1686,7 +1619,7 @@ export const myFunction = onRequest(
 
     | 問題 | 原因 | 対処 |
     |---|---|---|
-    | Cold Start遅延 | インスタンス起動 | `minInstances`設定、コード最適化 |
+    | Cold Start遅延 | instance起動、初期化、artifact、接続 | traceと負荷試験後、初期化削減、再利用、`minInstances`、SLO変更を比較 |
     | CORS エラー | ヘッダー未設定 | `cors`ミドルウェア追加 |
     | Permission Denied | IAM/Security Rules | 権限確認、Emulatorでテスト |
     | Quota Exceeded | API制限超過 | クォータ増加申請、最適化 |
@@ -1696,7 +1629,7 @@ export const myFunction = onRequest(
 
 ### Rule 32.148: インシデント対応
 -   **Process**:
-    1.  **Detection**: アラートによる検知（<5分）。
+    1.  **Detection**: SLOとseverityに応じたBlueprint時間内にalertで検知する。
     2.  **Triage**: 影響範囲の特定とSeverity判定。
     3.  **Mitigation**: 一時的な対処（Feature Flag OFF、ロールバック等）。
     4.  **Resolution**: 根本原因の修正と検証。
@@ -1707,15 +1640,15 @@ export const myFunction = onRequest(
 ## §47. Node.js/TypeScript 固有設計
 
 ### Rule 32.149: ランタイム選定
--   **Mandate**: Node.js 22+ LTSを標準ランタイムとする（Node.js 24も利用可能）。
--   **Configuration**: `engines`フィールドでバージョンを明示。
+-   **Mandate**: providerが公式対応し、security support期間内にあるNode.js releaseを、dependency互換とEOL計画を確認して選ぶ。
+-   **Configuration**: `engines`等のprovider対応機構でexact majorまたは許容範囲を明示し、CIとproductionの解決versionを照合する。
     ```json
     { "engines": { "node": "22" } }
     ```
 
-### Rule 32.150: TypeScript 必須
--   **Mandate**: 全てのCloud Run Functions/Servicesコードは**TypeScript**で記述する。JavaScriptの直接使用は禁止。
--   **Configuration**: `strict: true`を`tsconfig.json`に設定。`noUncheckedIndexedAccess: true`を推奨。
+### Rule 32.150: Node.js型安全性
+-   **Mandate**: Node.jsを選択した場合はTypeScriptのstrict modeを標準候補とする。JavaScriptを選択する場合もruntime validation、lint、型check可能なJSDoc、test等で同等の境界安全性を証明する。Cloud Runが公式対応するGo、Python、Java、.NET等をこの節で排除しない。
+-   **Configuration**: TypeScriptでは`strict: true`を設定し、境界入力にはruntime validationを併用する。詳細な言語選定は`engineering/320_programming_language_governance.md`に従う。
 
 ### Rule 32.151: ESM vs CJS
 -   **Mandate**: 新規プロジェクトではESModulesを推奨する。
@@ -1740,7 +1673,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.153: Genkit Node.js 統合
--   **Mandate**: Node.js 環境でのAIワークフローにはGenkit Node.js SDK（GA）を使用する。`onCallGenkit`トリガーでCallable Functions統合が可能（§2 Rule 32.11参照）。
+-   **Mandate**: Node.jsのAI workflowでは、Genkitを候補としてmodel portability、evaluation、observability、security、runtime support、exitを比較する。採用時は公式の現行statusと`onCallGenkit`等のintegrationを再確認する。
 
 ---
 
@@ -1754,29 +1687,29 @@ export const myFunction = onRequest(
     3.  `--only=production`または`npm ci --omit=dev`でデプロイ。
 
 ### Rule 32.155: テストフレームワーク
--   **Mandate**: Vitest（推奨）またはJestでテストを実施する。
--   **Coverage**: ビジネスロジックのカバレッジ80%以上を目標。
+-   **Mandate**: repositoryとruntimeに適合するmaintained test frameworkを選び、unit、integration、emulator、contract、failure pathを実行する。Vitest／Jestは参考実装である。
+-   **Coverage**: line率だけで合否を決めず、risk、branch、mutation、重要journeyに基づくBlueprint基準を設ける。
 
 ---
 
 ## §49. Node.js デプロイ & パッケージ管理
 
 ### Rule 32.156: パッケージマネージャー
--   **Mandate**: npm（標準）またはpnpmを使用する。yarnは非推奨。
--   **Lock File**: `package-lock.json`（npm）または`pnpm-lock.yaml`を必ずコミット。
+-   **Mandate**: teamがsupportでき、provider buildと互換なmaintained package managerを一つ選び、versionをpinする。npm、pnpm、Yarn等を名称だけで一律除外しない。
+-   **Lock File**: deploy可能applicationでは選択したmanagerのlockfileまたは同等のresolved dependency digestをversion管理し、frozen installをCIで検証する。
 
 ### Rule 32.157: Monorepo対応
--   **Mandate**: 大規模プロジェクトではnpm workspacesまたはpnpm workspacesを活用し、共通ユーティリティを共有する。
+-   **Mandate**: 複数packageのatomic change、共有policy、build graphが必要な場合だけworkspace／monorepoを採用する。npm／pnpm／Yarn workspaces、Bazel、Nx、Turborepo等は要件に応じた参考実装である。
 
 ---
 
 ## §50. Go 固有設計
 
 ### Rule 32.158: Go ランタイム
--   **Mandate**: Go 1.23+ を使用する（Go 1.24/1.26も利用可能）。Cloud Run FunctionsおよびCloud Run Servicesの双方で利用可能。
+-   **Mandate**: providerが公式対応し、security support期間内にあるGo releaseを、module、library、build image互換とEOL計画を確認してpinする。
 
 ### Rule 32.159: Genkit Go（GA）
--   **Mandate**: Go言語でのAIワークフロー構築にはGenkit Go SDK（1.0 GA、2025年9月）を使用する。
+-   **Mandate**: GoのAI workflowではGenkitを候補として、公式の現行status、model support、evaluation、observability、security、exitを比較し、採用をADRで決める。
     ```go
     import "github.com/firebase/genkit/go/ai"
     
@@ -1810,14 +1743,14 @@ export const myFunction = onRequest(
 ## §52. Python 固有設計
 
 ### Rule 32.163: Python ランタイム
--   **Mandate**: Python 3.12+ を使用する（Python 3.13/3.14も利用可能）。Cloud Run FunctionsおよびCloud Run Servicesで利用可能。
+-   **Mandate**: providerが公式対応し、security support期間内にあるPython releaseを、dependency、native wheel、build image互換とEOL計画を確認してpinする。
 
 ### Rule 32.164: Genkit Python
--   **Mandate**: Python でのAIワークフロー構築にはGenkit Python SDK（Alpha）を使用する。
--   **Caution**: Alpha段階のため、本番利用には安定性を慎重に評価。GA予定を注視する。
+-   **Mandate**: PythonのAI workflowではGenkitを候補として、公式の現行status、model support、evaluation、observability、security、exitを比較し、採用をADRで決める。
+-   **Caution**: preview／pre-GA機能を採用する場合はsupport、breaking change、fallback、退出期限を持つ期限付き例外として扱う。
 
 ### Rule 32.165: 型ヒント
--   **Mandate**: 全てのPythonコードに型ヒント（Type Hints）を付与し、`mypy`でチェックする。
+-   **Mandate**: public API、domain model、I/O boundary、security／money critical codeへ型を付け、選定したstatic checkerをCIで実行する。動的境界や未型付けdependencyの例外はscope、owner、期限を明示する。`mypy`、Pyright等は候補であり、単一toolをUniversalで固定しない。
     ```python
     from firebase_functions import https_fn
     from pydantic import BaseModel
@@ -1839,11 +1772,12 @@ export const myFunction = onRequest(
 ## §53. Python パフォーマンス & テスト
 
 ### Rule 32.166: テスト
--   **Mandate**: pytestでテストを実施する。`pytest-asyncio`で非同期テストに対応。
--   **Coverage**: `pytest-cov`でカバレッジ計測。
+-   **Mandate**: Python標準または承認済みtest runnerでunit、boundary、integration、emulator／isolated-project testを実施する。async fixtureは実際のconcurrency boundaryがある場合に導入する。
+-   **Coverage**: coverage toolはuntested riskを発見するsignalとして使い、固定率だけをrelease条件にしない。critical path、authorization deny、retry／idempotency、migration failureを優先する。
 
 ### Rule 32.167: 依存関係管理
--   **Mandate**: `requirements.txt`または`pyproject.toml`で依存関係を管理。`pip-tools`でロックファイルを生成。`uv`の採用も推奨。
+-   **Mandate**: supported manifestと、再現可能なresolved dependency／checksum evidenceをversion管理し、index source、transitive dependency、native artifact、license、vulnerability、runtime compatibilityをCIで検証する。
+-   **Tools**: `pyproject.toml`、lock／constraints file、`uv`、pip-tools、Poetry、PDM等はprojectのruntimeとpackaging contractに合う候補として比較し、採用toolとupgrade policyをBlueprintへ記録する。
 
 ---
 
@@ -1853,57 +1787,81 @@ export const myFunction = onRequest(
 
 | # | アンチパターン | 正しいアプローチ |
 |---|---|---|
-| 1 | Firestoreに新規コレクションを作成 | Supabaseにテーブルを作成 |
+| 1 | 評価・Rules・index・cost ownerなしでFirestore collectionを作成 | Primary Directive 0.1の能力評価とdata contractを先に完了 |
 | 2 | 1st Gen Cloud Functionsの新規作成 | Cloud Run Functionsを使用 |
 | 3 | `roles/owner`を本番SAに付与 | カスタムロールで最小権限 |
 | 4 | サービスアカウントキーをGitにコミット | Secret Manager + WIF |
-| 5 | `.env`ファイルに機密情報を記載 | Secret Managerで管理 |
-| 6 | App Checkなしでの本番運用 | 全サービスにApp Check適用 |
+| 5 | version管理対象の`.env`やclient bundleへ機密情報を格納 | 承認済みsecret store、ignore、sample分離で管理 |
+| 6 | 対応surfaceでApp Checkを未評価のまま本番運用 | 脅威モデル、monitoring、段階enforcementを実施 |
 | 7 | Security Rules未設定のFirestore | Default Deny + Authentication |
-| 8 | `.limit()`なしのFirestoreクエリ | 常にページネーション実装 |
-| 9 | 冪等性を無視した関数設計 | Event ID重複排除 |
+| 8 | user-controlled／collection-wide readに上限や終了条件がない | limit、cursor、quota、data contractでbounded readを保証 |
+| 9 | 冪等性を無視した関数設計 | stable key、atomic claim、outbox、reconciliationでside effectを保護 |
 | 10 | 同期的な重い処理 | Pub/Sub/Cloud Tasksで非同期化 |
-| 11 | コールドスタート対策なし | `minInstances`設定 |
-| 12 | デフォルトのメモリ/タイムアウト使用 | 明示的にリソース設定 |
-| 13 | 予算アラート未設定 | 4段階アラート設定 |
-| 14 | GCPリソースにラベルなし | 必須ラベル5種を付与 |
+| 11 | SLO／cost evidenceなしにcold start対策を固定 | latency、traffic、idle costを計測し必要なserviceだけ`minInstances`等を選定 |
+| 12 | default resourceを未検証または過剰設定 | load test、quota、costからmemory／CPU／timeout／concurrencyを決定 |
+| 13 | 予算監視とownerが未設定 | Blueprintの予算threshold・通知・安全な対応を設定 |
+| 14 | GCPリソースのownership／cost attribution不能 | 組織標準のlabels／tagsとpolicyで追跡可能にする |
 | 15 | 手動インフラ設定（ClickOps） | Terraform/IaCで管理 |
 | 16 | 本番環境で`firebase deploy`の手動実行 | CI/CDパイプライン経由 |
-| 17 | テストなしのSecurity Rulesデプロイ | Emulator Suiteでユニットテスト |
+| 17 | テストなしのSecurity Rulesデプロイ | Emulator Suiteまたは隔離projectでallow／deny双方を自動テスト |
 | 18 | 構造化されていないログ出力 | JSON構造化ログ |
 | 19 | エラーハンドリングの不統一 | 統一ErrorResponseフォーマット |
-| 20 | リトライ戦略なしの外部呼び出し | 指数バックオフ + DLQ |
+| 20 | failure classと冪等性を無視した外部呼び出し | deadline、retry budget、jitter、idempotency、DLQ／reconciliationを設計 |
 | 21 | FCMレガシーAPIの使用 | HTTP v1 APIへの移行 |
 | 22 | Admin SDKの不適切な使用 | 最小権限IAM + Secret Manager |
-| 23 | VPC設定なしでのDB直接アクセス | Direct VPC Egress設定 |
+| 23 | private data pathのnetwork境界・egress・bypassが未設計 | 対応serviceと脅威に合うprivate path／egress controlを選定 |
 | 24 | 機密情報のログ出力 | PII/パスワードのログ禁止 |
 | 25 | AI出力のガードレールなし | 入力検証 + 出力フィルタ + Kill Switch |
-| 26 | AI関連コストの未追跡 | AI FinOpsラベリング + 30%ルール |
-| 27 | Staging≠Prodの構成 | 環境パリティの維持 |
-| 28 | DRテストの未実施 | 四半期ごとのDRテスト |
+| 26 | AI関連コストの未追跡 | AI FinOpsラベリング + Blueprintのunit economics／threshold |
+| 27 | Staging差分が未管理 | 重要controlのparityとdocument化した差分を維持 |
+| 28 | DRテストの未実施 | RTO／RPOとriskに基づくcadenceでrestore／failoverを検証 |
 | 29 | SBOMなしのコンテナデプロイ | SBOM生成・保管 |
-| 30 | Firebase Studioの本番直デプロイ | CI/CDパイプライン経由 |
+| 30 | sunset対象のFirebase Studioへsource／deploy経路を依存 | portable source、承認済み開発環境、再現可能CIへ移行 |
 | 31 | Genkit フローのテスト未実施 | Developer UIとユニットテスト |
-| 32 | Binary Authorizationなしの本番デプロイ | 署名済みイメージのみ許可 |
+| 32 | provenance／signature／admission riskを未評価の本番container | criticalityに応じてattestation verificationまたは同等controlを適用 |
 | 33 | MCPサーバーの認証なし公開 | IAM + App Checkによるアクセス制御 |
-| 34 | App Hosting無料枠の未監視 | Blaze Plan + 予算アラート設定 |
-| 35 | Refresh TokenのLocalStorage保存 | HTTP-only Cookie + Token Revocation |
+| 34 | billing plan／free tierをhard capと誤認 | usage-based billing、quota、abuse、budget、degradationを設計 |
+| 35 | tokenをthreat modelなしに永続保存 | platform別にXSS、CSRF、device compromise、rotation、revocationを評価し安全なstorageを選ぶ |
 
 ---
 
-## §55. 将来展望
+## §55. 技術lifecycle radar
 
 ### Rule 32.169: 技術トレンド監視
--   **Mandate**: 以下の技術トレンドを継続的に監視し、採用準備を整える。
--   **Trends**:
-    1.  **WebAssembly Functions**: WASM対応のCloud Run Functionsによるパフォーマンス向上。
-    2.  **Edge Computing**: Cloud Run on GDC（Google Distributed Cloud）によるエッジ展開。
-    3.  **Quantum-Safe Cryptography**: 量子耐性暗号への移行準備。
-    4.  **AI-Native Infrastructure**: AIによるインフラ自動最適化・自己修復。
-    5.  **Confidential Computing**: TEE（Trusted Execution Environment）でのデータ処理。
-    6.  **Multi-Cloud AI**: Cloud Run GPUとVertex AI Agent Engineの融合による分散AI推論。
-    7.  **Genkit Python GA**: Python SDKのGA化による機械学習エンジニアの活用拡大。
-    8.  **Cloud Run RTX PRO 6000**: 次世代GPU（NVIDIA Blackwell）による高性能AI推論。
+-   **Mandate**: 利用中または採用候補のcapabilityについて、公式release stage、deprecation／EOL、runtime／SDK、region、quota、pricing、security model、data use、support contractの変化を継続監視し、capability manifestの再検証triggerへ接続する。
+-   **Signals**:
+    1.  **Execution Surface**: managed runtime、buildpack、container、edge／distributed、GPU／accelerator、confidential computeのsupportと責任分界。
+    2.  **Language & SDK**: 言語version、official／community SDK、feature parity、experimental／preview／GA、security support、migration guide。
+    3.  **Security & Identity**: workload identity、attestation、encryption、data perimeter、supply-chain verification、quantum-safe移行に関する公式controlと適用条件。
+    4.  **Data & AI**: database／stream／vector／AI framework／agent protocolのmaturity、evaluation、安全性、data governance、unit economics、exit。
+    5.  **Operations & Commercial**: observability、backup／restore、SLA、support、quota、pricing／terms、sunset、provider incident。
+-   **Promotion Gate**: 新機能は存在または話題性だけでproduction標準へ昇格させない。workload fit、maturity、feature parity、security、performance、cost、operability、portability、rollback、team ownershipを既存選択肢と同じevidenceで比較し、preview／experimentalは限定scope、exit、revalidation dateを持つ。
+
+---
+
+## §56. 言語・SDK・runtime support surface
+
+### Rule 32.170: Support Claim Decomposition
+-   **Mandate**: 「Firebase／GCPが言語Xをsupportする」を単一の真偽値にしない。client SDK、Admin SDK、framework binding、Functions managed runtime、Cloud Run source buildpack、任意container、REST／gRPC、CLI／IaCを別surfaceとして、support主体、maturity、feature parity、runtime、artifact、identity、deployment、observability、EOLをinventory化する。
+
+### Rule 32.171: Firebase Client SDK Surface
+-   **Current Snapshot**: 2026-07-23時点の公式資料は、Android、Flutter、Apple platforms、JavaScript、Unity、C++をofficial client SDK surfaceとして示す。Swift、Kotlin／Java、Dart、TypeScript／JavaScript、C#、C++のcode qualityは `engineering/320_programming_language_governance.md`、`engineering/400_mobile_flutter.md`、`engineering/410_native_platforms.md` を継承する。
+-   **Framework Boundary**: AngularFire、ReactFire、React Native Firebase、Vuefire等のframework bindingはofficial Firebase SDKと同じsupport契約とは限らない。React Nativeでは `engineering/420_react_native.md` に従い、JS package、iOS／Android SDK、native module、Codegen／bridge、両OS build、release compatibilityを別々にpin・testする。
+
+### Rule 32.172: Firebase Admin SDK Surface
+-   **Current Snapshot**: 2026-07-23時点のAdmin SDK公式資料はNode.js、Java、Python、Go、C#をserver-side surfaceとして示し、Dartをexperimentalとして案内する。言語名だけで全機能対応を推定せず、feature matrix、minimum runtime、deprecation、release noteをcapabilityごとに確認する。
+-   **Privilege Boundary**: Admin SDKはclient Security Rulesを通るuntrusted client libraryではない。workload identity、least privilege、tenant／project、audit、credential lifecycleをserver boundaryで強制し、mobile／browser bundleへ含めない。
+
+### Rule 32.173: Cloud Run Execution Surface
+-   **Current Snapshot**: 2026-07-23時点のCloud Run source deployment資料はGo、Node.js、Python、Java buildpack経由のKotlin／Groovy／Scala、.NET、Ruby、PHPをsource-build surfaceとして示し、Dockerfile／container imageではcontainer contractを満たす任意言語を実行できる。Functions runtime、source buildpack、任意containerを同じsupport契約とみなさない。
+-   **Build Contract**: source deploymentでもbuilder、base image、resolved dependency、runtime patch mode、Artifact Registry image、SBOM、provenance、architecture、startup／health、rollbackをrelease evidenceへ結び付ける。自動検出を再現可能性またはsecurity updateの完全な保証にしない。
+
+### Rule 32.174: Language-Native Quality Gates
+-   **Mandate**: Node.js／TypeScript、Go、Python以外のJava／Kotlin／Groovy／Scala、C#／F#、Ruby、PHPその他も `engineering/320_programming_language_governance.md` のformatter、compiler／type、test、dependency、artifact、SBOM、runtime EOL gateを適用する。provider profileへ同じ言語規則を複製せず、Firebase／GCP固有のidentity、emulator fidelity、runtime、deployment、quotaだけを追加する。
+
+### Rule 32.175: Polyglot Team Ownership
+-   **Mandate**: productionで利用する言語・SDK・runtime surfaceごとにaccountable owner、support level、upgrade／EOL、security advisory route、CI gate、on-call／incident、fallback、decommissionをservice catalogまたは同等台帳へ結ぶ。小規模teamは役割を兼務できるが、experimental／community binding、privileged Admin SDK、native mobile、managed runtimeの責任を一つの「Firebase owner」へ暗黙集約しない。
+-   **CI Selection**: change graphから影響するclient、admin、runtime、mobile OS、containerのnative gateとmanaged conformance testを選ぶ。全言語を全PRで一律実行せず、shared schema、Auth／Rules、SDK major、runtime、generated contractの変更では全dependentを再検証する。
 
 ---
 
@@ -1943,7 +1901,7 @@ export const myFunction = onRequest(
 | レート制限を実装したい | §36 |
 | キャッシングを最適化したい | §37 |
 | Google Maps を使いたい | §39 |
-| Firebase Studioを活用したい | §41 |
+| Firebase Studioから移行したい | §41 |
 | GDPRに対応したい | §42 |
 | コンテナセキュリティを強化したい | §43 |
 | 運用を改善したい | §44 |
@@ -1951,6 +1909,9 @@ export const myFunction = onRequest(
 | Node.js/TypeScript固有のガイド | §47, §48, §49 |
 | Go固有のガイド | §50, §51 |
 | Python固有のガイド | §52, §53 |
+| Java／Kotlin／Scala、C#／.NET、Ruby、PHPをCloud Runへ配置したい | §56 |
+| Swift／Kotlin／Dart／Unity／C++ client SDKのsupportを判断したい | §56 |
+| React Native Firebase等のframework bindingを評価したい | §56、`engineering/420_react_native.md` |
 
 ---
 
@@ -1962,7 +1923,10 @@ export const myFunction = onRequest(
 | `engineering/300_web_frontend` | フロントエンド統合パターン |
 | `engineering/100_api_integration` | API設計・マイクロサービス設計 |
 | `engineering/410_native_platforms` | モバイルアプリ統合（iOS/Android） |
-| `engineering/200_supabase_architecture` | SSOT (Supabase) との連携・移行 |
+| `engineering/420_react_native` | React NativeのJS／native／SDK境界 |
+| `engineering/320_programming_language_governance` | 言語native gate、support tier、polyglot team統治 |
+| `engineering/200_supabase_architecture` | Supabaseを採用した場合の連携・移行 |
+| `engineering/520_cloud_application_platforms` | platform選定・共有責任・退出戦略 |
 | `engineering/510_aws_cloud` | マルチクラウド戦略・比較 |
 | `ai/000_ai_engineering` | AI/ML実装ガイドライン |
 | `ai/100_data_analytics` | 分析・Observability |
@@ -1974,10 +1938,12 @@ export const myFunction = onRequest(
 
 ## Appendix C: FinOps チェックリスト
 
+> 対応serviceを採用し、cost／risk modelで必要と判定した項目だけを適用する。BigQuery、Pub/Sub、Recommender、Remote Config等はGCP／Firebase profileの実装例であり、Universalな唯一解ではない。
+
 ### 初期セットアップ
 - [ ] 全GCPリソースに`environment`/`service`/`owner`/`cost-center`/`ai-feature`ラベルを付与
 - [ ] Billing Export to BigQueryを有効化
-- [ ] 予算アラート（50%/80%/100%/120%）を設定
+- [ ] Blueprintで承認された多段階の実額・予測予算アラートを設定
 - [ ] 予算超過時の自動応答（Pub/Sub + Cloud Run Functions）を設定
 - [ ] AI関連コストの独立追跡を設定
 
@@ -2006,17 +1972,19 @@ export const myFunction = onRequest(
 
 ## Appendix D: セキュリティチェックリスト
 
-### 初期セットアップ
-- [ ] App Checkを全Firebaseサービスに有効化
-- [ ] Security Rules のDefault Denyパターンを適用
-- [ ] 本番環境から`roles/owner`/`roles/editor`を除去
-- [ ] Workload Identity Federationを設定
-- [ ] Secret Managerに全機密情報を移行
-- [ ] VPC Service Controlsを本番環境に設定
-- [ ] Cloud Armor WAFポリシーを適用
-- [ ] Binary Authorizationを有効化
+> 対応serviceとthreat modelに該当する項目だけを適用し、provider capability、法域、data classに応じた同等controlを認める。
 
-### 定期監査（90日ごと）
+### 初期セットアップ
+- [ ] 対応surfaceでApp Checkを評価し、monitoringから段階enforcementへ移行
+- [ ] Security Rules のDefault Denyパターンを適用
+- [ ] 通常のproduction workload／CI／恒久human accessからbroad basic roleを除去し、break-glassを分離
+- [ ] 対応する外部identity経路にshort-lived federationとclaim restrictionを設定
+- [ ] production／shared secretを承認済みsecret storeへ移行
+- [ ] data exfiltration threatとservice supportに応じてVPC Service Controlsを評価・検証
+- [ ] internet-facing surfaceに適合するWAF／DDoS controlとbypass防止を評価
+- [ ] container supply-chain threatに応じてBinary Authorizationその他のadmission controlを評価
+
+### 定期監査（risk-based cadence）
 - [ ] サービスアカウントとキーの棚卸し
 - [ ] IAM権限の最小権限レビュー
 - [ ] Secret Managerのシークレットローテーション
@@ -2031,3 +1999,19 @@ export const myFunction = onRequest(
 - [ ] AI機能のKill Switch（Remote Config）設定
 - [ ] AIエージェントの自律性レベル分類
 - [ ] EU AI Act リスク分類の実施
+
+---
+
+## Appendix E: 公式資料スナップショット
+
+- [Cloud Run container runtime contract](https://cloud.google.com/run/docs/container-contract): 任意言語container、port、filesystem、lifecycle、architectureの実行契約
+- [Cloud Run Functions runtimes](https://cloud.google.com/run/docs/runtimes/function-runtimes): managed language runtimeとsupport／decommission期限
+- [Firebase supported libraries](https://firebase.google.com/docs/libraries): 公式client／Admin SDKとcommunity framework bindingのsupport境界
+- [Firebase Admin SDK setup](https://firebase.google.com/docs/admin/setup): Admin SDKの言語別feature matrix、runtime要件、experimental status
+- [Cloud Run deploy from source](https://cloud.google.com/run/docs/deploying-source-code): source buildpack対応言語、container経路、builder／artifact境界
+- [Google Cloud resource hierarchy](https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy): Organization、Folder、Projectのownershipとpolicy継承
+- [Cloud Functions retry](https://firebase.google.com/docs/functions/retries): retry、at-least-once、idempotencyの境界
+- [Configure environment](https://firebase.google.com/docs/functions/config-env): parameterized config、secret、`functions.config()`廃止移行
+- [Manage sessions](https://firebase.google.com/docs/auth/admin/manage-sessions): ID token、refresh token、revocation
+- [Firebase App Check](https://firebase.google.com/docs/app-check): app／device attestationと認証・認可の責任分離
+- [Firebase Studio release notes](https://firebase.google.com/support/release-notes/firebase-studio): 2026-06-22の新規workspace停止と2027-03-22 sunset
