@@ -2,13 +2,14 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-04-19 → **2026-04-19（v4: §59-§63追加・§29構造バグ修正・考慮漏れゼロ化）**
+> 改定日: 2026-07-23（v5: プログラミング言語ecosystem拡張）
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
 > 「すべての依存関係は信頼の決定 — 管理されていないライセンスは法的時限爆弾である。」
 > すべてのサードパーティ依存関係は監査・承認・継続的監視されなければならない。
 > **ライセンス準拠 > セキュリティ > 安定性 > 利便性** の優先順位を厳守せよ。
+> Universal適用契約: license分類、vendor tool、VCS event、役職、人数、期限、頻度、score閾値は、適用法令・契約、official deadline、または回復不能なriskへの安全下限でない限りreference implementationまたはBlueprint parameterである。Project Blueprintは配布・network利用形態、法域、exposure、reachability、KEV／EPSS、data感度、組織規模からpolicyを定め、同等能力と兼務可能なaccountable functionを認める。
 > **63セクション構成（v4: §59-§63 新規追加 + §29構造バグ修正 + NIS2・AI IDE SCA・SBOM Federation・ML BOM・依存関係SLO対応）。**
 
 ---
@@ -47,7 +48,7 @@
 | 28 | [VEX（Vulnerability Exploitability eXchange）](#28-vexvulnerability-exploitability-exchange) |
 | 29 | [CBOM（Cryptographic Bill of Materials）](#29-cbomcryptographic-bill-of-materials) |
 | 30 | [マルチエコシステム依存関係管理](#30-マルチエコシステム依存関係管理) |
-| 31 | [パッケージ公開セキュリティとOIDC完全移行](#31-パッケージ公開セキュリティとoidc完全移行) |
+| 31 | [パッケージ公開セキュリティとWorkload Identity](#31-パッケージ公開セキュリティとworkload-identity) |
 | 32 | [GitHub Dependency Review統合](#32-github-dependency-review統合) |
 | 33 | [OSS法的リスクマネジメント](#33-oss法的リスクマネジメント) |
 | 34 | [ゼロデイ依存関係対応プレイブック](#34-ゼロデイ依存関係対応プレイブック) |
@@ -75,9 +76,9 @@
 | **56** | [**Reproducible Builds & Hermetic Repository標準**](#56-reproducible-builds--hermetic-repository標準) |
 | **57** | [**SBOM品質成熟度モデル（SBOM Quality Maturity Model）**](#57-sbom品質成熟度モデルsbom-quality-maturity-model) |
 | **58** | [**新世代パッケージマネージャ対応（uv / Bun / cargo-auditable）**](#58-新世代パッケージマネージャ対応uv--bun--cargo-auditable) |
-| **59** | [**NIS2指令：ソフトウェア供給者セキュリティ義務**](#59-nis2指令ソフトウェア供給者セキュリティ義務) |
+| **59** | [**NIS2指令：適用性とソフトウェア供給網**](#59-nis2指令適用性とソフトウェア供給網) |
 | **60** | [**AI IDE統合型リアルタイムSCA**](#60-ai-ide統合型リアルタイムsca) |
-| **61** | [**SBOM Federation（OCI Artifact配布標準）**](#61-sbom-federationoci-artifact配布標準) |
+| **61** | [**SBOM Federation（OCI Artifact参考パターン）**](#61-sbom-federationoci-artifact参考パターン) |
 | **62** | [**ML BOM（Machine Learning Bill of Materials）**](#62-ml-bombmachine-learning-bill-of-materials) |
 | **63** | [**依存関係SLO / Error Budget管理**](#63-依存関係slo--error-budget管理) |
 | A | [Appendix A: 逆引き索引](#appendix-a-逆引き索引) |
@@ -89,26 +90,28 @@
 
 ### 1.1 三層分類
 
-**✅ 許可（Safe — 即時利用可）**:
+> 以下は組織policyを作るためのreference profileであり、Universalな法的判断ではない。実際の分類はlicense本文、利用version、配布・network利用形態、link／改変関係、顧客契約、法域、知財方針をaccountableなlicense／legal risk ownerが判定する。
 
-| ライセンス | リスク | 備考 |
+**✅ 低摩擦候補（義務確認後にallowしやすい）**:
+
+| ライセンス | 基準profileでの扱い | 備考 |
 |:----------|:------|:-----|
-| MIT | ✅ 安全 | 最も緩やか。商用利用可。帰属表示必須 |
-| Apache-2.0 | ✅ 安全 | 特許条項含む。商用利用可。NOTICE保持必須 |
-| BSD-2-Clause | ✅ 安全 | 商用利用可 |
-| BSD-3-Clause | ✅ 安全 | 商用利用可。名称利用制限あり |
-| ISC | ✅ 安全 | MIT同等 |
-| CC0-1.0 | ✅ 安全 | パブリックドメイン相当 |
-| 0BSD | ✅ 安全 | 帰属表示不要 |
-| Unlicense | ✅ 安全 | パブリックドメイン相当 |
-| Zlib | ✅ 安全 | 商用利用可 |
-| PSF-2.0 | ✅ 安全 | Python標準ライブラリ |
+| MIT | 低摩擦候補 | 緩やかな条件。商用利用可。帰属表示を確認 |
+| Apache-2.0 | 低摩擦候補 | 特許条項含む。商用利用可。NOTICE保持を確認 |
+| BSD-2-Clause | 低摩擦候補 | 商用利用可。著作権・免責表示を確認 |
+| BSD-3-Clause | 低摩擦候補 | 商用利用可。名称利用制限を確認 |
+| ISC | 低摩擦候補 | 簡潔なpermissive条件。表示義務を確認 |
+| CC0-1.0 | 低摩擦候補 | public-domain dedicationと法域差を確認 |
+| 0BSD | 低摩擦候補 | attribution不要の条件をlicense本文で確認 |
+| Unlicense | 要法域確認 | public-domain dedicationと法域差を確認 |
+| Zlib | 低摩擦候補 | 商用利用可。表示・改変表記を確認 |
+| PSF-2.0 | 低摩擦候補 | Python由来のpermissive条件。対象componentを確認 |
 
-**⚠️ 要注意（Caution — 法務確認必須）**:
+**⚠️ 条件確認必須（利用形態によりallow／review／deny）**:
 
 | ライセンス | リスク | 対応 |
 |:----------|:------|:-----|
-| LGPL-2.1 / LGPL-3.0 | ⚠️ 条件付き | 動的リンクならOK。法務確認後に例外許可 |
+| LGPL-2.1 / LGPL-3.0 | ⚠️ 条件付き | link、改変、再link可能性、notice、source提供義務を確認 |
 | MPL-2.0 | ⚠️ 条件付き | ファイル単位Copyleft。法務確認後に例外許可 |
 | EPL-2.0 | ⚠️ 条件付き | モジュール単位Copyleft。法務確認 |
 | CDDL-1.0 | ⚠️ 条件付き | ファイル単位Copyleft。法務確認 |
@@ -117,35 +120,35 @@
 | CC-BY-SA-4.0 | ⚠️ 条件付き | ShareAlike条件あり。法務確認 |
 | EUPL-1.2 | ⚠️ 条件付き | EU公共ライセンス。Copyleft互換性条項あり。互換ライセンスリスト確認 |
 
-**🔴 禁止（Prohibited — 即時ブロック）**:
+**🔴 高い義務または制約（組織policyのreview／deny候補）**:
 
 | ライセンス | リスク | 理由 |
 |:----------|:------|:-----|
-| GPL-2.0 / GPL-3.0 | 🔴 高 | プロジェクト全体のソース公開義務 |
-| AGPL-3.0 | 🔴 最高 | SaaS/ネットワーク利用でも公開義務 |
-| SSPL | 🔴 最高 | MongoDB系。類似の感染力 |
-| CC-BY-NC-* | 🔴 高 | 商用利用不可 |
-| CC-BY-ND-* | 🔴 高 | 改変不可 |
-| CAL-1.0 | 🔴 高 | 強力Copyleft。ユーザーデータの暗号化義務あり |
+| GPL-2.0 / GPL-3.0 | 🔴 高 | convey、link、derivative workの範囲と対応source提供義務を専門確認 |
+| AGPL-3.0 | 🔴 最高 | 改変版のnetwork利用者への対応source提供を含む§13義務と結合範囲を専門確認 |
+| SSPL | 🔴 最高 | OSI非承認のsource-available terms。service提供時の追加source要件を確認 |
+| CC-BY-NC-* | 🔴 高 | commercial use制限が目的と両立するか確認 |
+| CC-BY-ND-* | 🔴 高 | 改変禁止が変換、翻訳、編集、配布と両立するか確認 |
+| CAL-1.0 | 🔴 高 | 強いreciprocityと利用者データ関連義務を専門確認 |
 
 ### 1.2 Source-Availableライセンスの扱い
 
 | ライセンス | 分類 | 注意点 |
 |:----------|:-----|:------|
-| BSL-1.1 (Business Source License) | 🔴 禁止 | 期限付きでApache-2.0に転換するが、転換前は商用制限。HashiCorp Terraform等 |
-| FSL-1.1 (Functional Source License) | 🔴 禁止 | 2年後にApache-2.0/MITに転換。転換前は競合利用禁止 |
-| Elastic License 2.0 | 🔴 禁止 | SaaS提供禁止。再配布制限 |
-| PolyForm Shield 1.0.0 | 🔴 禁止 | 競合利用禁止 |
-| BUSL (MariaDB BSL) | 🔴 禁止 | BSL-1.1の派生。同等の制限 |
+| BSL-1.1 (Business Source License) | 🔴 review／deny候補 | Change Date前の追加利用制限とChange Licenseを個別確認 |
+| FSL-1.1 (Functional Source License) | 🔴 review／deny候補 | Change Date前の競合利用制限と将来licenseを個別確認 |
+| Elastic License 2.0 | 🔴 review／deny候補 | managed service、再配布等の制限を目的と照合 |
+| PolyForm Shield 1.0.0 | 🔴 review／deny候補 | competitive use制限を目的と照合 |
+| BUSL (MariaDB BSL) | 🔴 review／deny候補 | 採用物の実際のBusiness Source License本文とChange Dateを確認 |
 
 > [!CAUTION]
 > Source-Availableライセンスは「ソースコードが見える ≠ OSS」である。OSI非承認であり、従来のOSSと同じ扱いは厳禁。
 
 ### 1.3 デュアルライセンス戦略への対応
 
-- **ルール**: デュアルライセンスパッケージでは、**商用利用に最も有利なライセンス**を選択し、`package.json` の `license` フィールドに明記する
-- **ルール**: CopyleftとPermissiveのデュアルライセンスでは、Permissive側を選択する
-- **ルール**: ライセンス選択の根拠を `licenses/decisions/` ディレクトリに記録する
+- **ルール**: デュアルライセンスでは、実際に選択可能で、予定する利用・配布・改変と互換なlicenseを選ぶ。package metadataはcomponent自身のlicenseを表すため、組織の選択根拠の代替にしない
+- **ルール**: Copyleft／Permissiveの選択肢があっても、商用契約、support、特許条項、再配布条件を含めて評価し、単語だけで自動選択しない
+- **ルール**: 選択したlicense、対象version、根拠、owner、証跡をversion管理されたdecision record、SBOM property、license inventoryまたは同等手段へ記録する。固定directory名は要求しない
 
 → クロスリファレンス: [`security/100_data_governance.md`](../security/100_data_governance.md) §GenAI著作権
 
@@ -155,52 +158,60 @@
 
 ### 2.1 互換性ルール
 
-| 出力物の形態 | 許容されるライセンスの組み合わせ |
-|:------------|:-------------------------------|
-| 静的リンク | 全ライブラリのライセンスが互換であること |
-| 動的リンク | LGPLは許可。GPLは不可 |
-| SaaS配信 | AGPL除外必須。SSPL除外必須 |
-| コンテナ配布 | ベースイメージ含む全レイヤーの互換性確認 |
-| WebAssembly配布 | 静的リンクと同等の扱い |
-| npm / PyPI公開 | 推移的依存の互換性も含めて検証 |
+license名やlink方式だけで互換性を断定しない。対象versionのlicense本文、例外、改変、結合、配布、network利用、法域、顧客契約を入力に、accountableなownerが次の判断を記録する。
 
-### 2.2 自動互換性チェック
+| 利用・出力形態 | 必須判断 |
+|:--------------|:---------|
+| source取込、静的link、native binary、WebAssembly | combined work、改変範囲、object／source提供、relink可能性、notice、特許条項を確認 |
+| 動的link、plugin、FFI、IPC、service境界 | link名だけで分離を推定せず、process、interface、共有data構造、配布単位、license例外を確認 |
+| hosted／SaaS／API | network利用をtriggerとする条項、改変版、利用者へのsource offer、service提供制限をlicenseごとに確認。AGPLやsource-availableを一律除外しない |
+| container／VM／firmware配布 | base、OS package、runtime、driver、model、全layerのlicenseとsource／notice義務をrelease artifact単位で確認 |
+| package／SDK／CLI／library公開 | 直接・推移依存、bundled code、generated code、runtime fetch、dual license、consumerへの義務伝播を確認 |
+| internal-only利用 | 「未配布」を記録し、remote user、group company、contractor、customer環境への提供で前提が変わるtriggerを設定 |
+
+> 本節は法的助言ではない。曖昧なlicense表現、複合license、例外、強いcopyleft、source-available、商標・特許条件は、組織policyに従いlicense専門家または法務へ送る。
+
+### 2.2 policy駆動の自動検出
+
+自動化はlicenseを検出して組織policyへ照合する。法的な「互換性」そのものを文字列一致で決めない。SPDX expressionの`AND`、`OR`、`WITH`、`LicenseRef`、dual license、package単位例外をparseできないscannerは、判定不能としてreviewへ送る。
 
 ```yaml
-# .github/workflows/license-compat.yml
+# 参考実装。VCS、scanner、commandは置換可能
 - name: License Compatibility Check
   run: |
-    npx license-checker --production --json > licenses.json
-    node scripts/check-license-compat.js licenses.json
+    license-inventory --format json > licenses.json
+    policy-engine evaluate \
+      --policy .governance/license-policy.json \
+      --input licenses.json \
+      --require-complete-inventory
 ```
 
-```javascript
-// scripts/check-license-compat.js
-const fs = require('fs');
-const PROHIBITED = ['GPL-2.0', 'GPL-3.0', 'AGPL-3.0', 'SSPL'];
-const REVIEW_REQUIRED = ['LGPL-2.1', 'LGPL-3.0', 'MPL-2.0', 'EPL-2.0'];
-const SOURCE_AVAILABLE = ['BSL-1.1', 'FSL-1.1', 'Elastic-2.0'];
-
-const licenses = JSON.parse(fs.readFileSync(process.argv[2]));
-const violations = [];
-for (const [pkg, info] of Object.entries(licenses)) {
-  const lic = info.licenses || '';
-  if (PROHIBITED.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'BLOCK' });
-  } else if (SOURCE_AVAILABLE.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'BLOCK' });
-  } else if (REVIEW_REQUIRED.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'REVIEW' });
-  }
-}
-if (violations.some(v => v.severity === 'BLOCK')) {
-  console.error('❌ 禁止ライセンス検出:', JSON.stringify(violations, null, 2));
-  process.exit(1);
-}
-if (violations.some(v => v.severity === 'REVIEW')) {
-  console.warn('⚠️ 要確認ライセンス:', JSON.stringify(violations, null, 2));
+```json
+{
+  "schemaVersion": 1,
+  "defaultDecision": "review",
+  "profiles": {
+    "internal-service": {
+      "allow": ["ORG_APPROVED_SPDX_EXPRESSIONS"],
+      "review": ["ORG_REVIEW_SPDX_EXPRESSIONS"],
+      "deny": ["ORG_DENIED_SPDX_EXPRESSIONS"]
+    }
+  },
+  "exceptions": [
+    {
+      "component": "pkg:ecosystem/name@version",
+      "decision": "allow",
+      "owner": "license-risk-owner",
+      "expiresAt": "YYYY-MM-DD",
+      "evidence": "decision-record-id"
+    }
+  ]
 }
 ```
+
+- **ルール**: policyは配布model、製品profile、法域、license version、例外期限をversion管理し、scannerやIDEへ同じdecision dataを配布する
+- **ルール**: missing、unknown、`NOASSERTION`、非標準text、parse不能expressionはsilent allowせずreviewへ送る
+- **ルール**: block結果にはcomponent、解決version、license expression、利用経路、policy rule、owner、remediationまたは期限付き例外を含める
 
 → クロスリファレンス: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §サプライチェーンセキュリティ
 
@@ -390,32 +401,35 @@ sbom:
 
 ## §9. サプライチェーンセキュリティ基盤
 
-### 9.1 SLSA（Supply-chain Levels for Software Artifacts）v1.1
+### 9.1 SLSA（Supply-chain Levels for Software Artifacts）v1.2
 
-| レベル | 要件 | 保護対象 |
+| Track / Level | 要件 | 保護対象 |
 |:------|:-----|:--------|
-| SLSA 1 | ビルドプロセスの文書化。Provenanceの存在 | 改ざん監査の開始 |
-| SLSA 2 | ホスト型ビルドサービス使用。署名付きProvenance | ビルド環境の改ざん |
-| SLSA 3 | 隔離されたビルド環境。再現可能なビルド。エフェメラルワーカー | 内部脅威・ビルドインジェクション |
+| Build L1 | Build Provenanceが存在する | 誤操作と監査開始 |
+| Build L2 | ホスト型build platformが署名付きProvenanceを生成する | build後の改ざん |
+| Build L3 | hardened build platformを使用する | build中の改ざん |
+| Source L2 | 変更履歴を保持し、Source Provenanceを生成する | source revisionの追跡と帰属 |
+| Source L3 | 組織の技術統制を継続的に強制する | branch統制の形骸化 |
+| Source L4 | すべての変更に信頼された二者reviewを要求する | 単独行為者による改変 |
 
-- **ルール**: 最低 **SLSA 2** を達成する（GitHub Actions + Artifact Attestation で到達可能）
-- **ルール**: SLSA 3を目標とし、ephemeral runners + hermetic builds を導入する
+- **ルール**: 本番成果物は最低 **Build L2**、source管理は最低 **Source L2** を基線とする。CI製品名だけで適合を断定せず、attestation、builder identity、履歴統制を検証する
+- **ルール**: 高保証領域は **Build L3** と **Source L4** を目標とする。Source VSAの`verifiedLevels`は対応する数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`属性で表現し、存在しない`SLSA_SOURCE_LEVEL_4`を生成しない。ephemeral、isolated、hermetic、reproducible buildは要件と補償統制を区別して記録する
 
-### 9.2 OIDC Trusted Publishing
+### 9.2 Workload Identityによる公開
 
-- **ルール**: パッケージ公開は **OIDC Trusted Publishing** を唯一の方法とする（§31参照）
-- **ルール**: 長期アクセストークンの使用を原則禁止する（npm/PyPI/GitHub Packages共通）
+- **ルール**: registryとbuild platformが対応する場合は、OIDC Trusted Publishing等の短命なworkload identityを使用し、長期の公開credentialを保存しない（§31参照）
+- **ルール**: 対応しないecosystemでは、最小権限、短い有効期限、保護されたsecret store、自動rotation、公開元と成果物への監査可能なbindingを備える代替方式を採用し、移行条件を記録する
 
-### 9.3 GitHub Artifact Attestation
+### 9.3 Provenance Attestation
 
-- **ルール**: CI/CDビルドで `actions/attest-build-provenance` を使用してProvenance Attestationを生成する
-- **ルール**: 消費者側で `gh attestation verify` を実行し、Provenanceの検証を行う
-- **ルール**: in-totoアテステーションフレームワークに準拠し、エンドツーエンドのサプライチェーン検証を実現する
+- **ルール**: release artifactごとに、source revision、builder identity、build inputs、artifact digestを結び付ける署名付きProvenanceを生成する。`actions/attest-build-provenance`は実装例であり必須製品ではない
+- **ルール**: 消費者またはpolicy gateは、期待するowner、repository、builder、workflow、artifact digestに対してProvenanceを検証する。`gh attestation verify`はGitHubを使用する場合の実装例とする
+- **ルール**: in-toto、SLSA Provenance、または同等の相互運用可能なattestation contractを使用し、生成だけでなく配布・検証までend-to-endで成立させる
 
 ### 9.4 Sigstore統合
 
-- **ルール**: コンテナイメージは `cosign` で署名する（Keylessモード推奨）
-- **ルール**: 署名検証をKubernetes Admission Controllerで強制する
+- **ルール**: 配布するコンテナイメージは、`cosign`等でidentityとProvenanceに結び付く署名を付与する。対応環境ではkeyless方式を優先する
+- **ルール**: 署名とProvenanceの検証は、Kubernetes Admission Controller、registry、deployment orchestrator、release gate等の実際の配布境界で強制する
 
 ```bash
 # Keyless署名（Sigstore Fulcio + Rekor）
@@ -432,13 +446,13 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 
 ## §10. SCAツール統合
 
-### 10.1 推奨ツールスタック（2026年版）
+### 10.1 交換可能なSCA能力と実装例
 
 | ツール | 主な強み | 用途 |
 |:------|:--------|:-----|
-| Snyk | 脆弱性検知 + AI修正提案 + Snyk Code SAST統合 | 脆弱性管理の第一選択 |
-| FOSSA | ライセンスコンプライアンス + SBOM + NOTICE自動生成 | ライセンス管理の第一選択 |
-| Socket.dev | マルウェア検知 + AI行動分析 + **到達可能性分析（Coana統合）** | サプライチェーン攻撃対策の第一選択 |
+| Snyk | 脆弱性検知 + AI修正提案 + Snyk Code SAST統合 | 商用統合SCAの選択肢 |
+| FOSSA | ライセンスコンプライアンス + SBOM + NOTICE自動生成 | 商用license管理の選択肢 |
+| Socket.dev | マルウェア検知 + AI行動分析 + **到達可能性分析（Coana統合）** | package挙動分析の選択肢 |
 | Semgrep Supply Chain | 推移的到達可能性分析（Reachability Analysis） | 偽陽性削減 |
 | Trivy | コンテナ + IaC + SBOM + ライセンス | コンテナセキュリティ |
 | Endor Labs | DCA（Dependency Caller Analysis） + Binary-to-Source AI | 到達可能性分析・コンテキスト重視 |
@@ -460,15 +474,17 @@ flowchart TD
     B -->|到達可能性分析| G[Endor Labs / Socket.dev / Semgrep SC]
 ```
 
+このflowchartはtool探索の例であり、vendor選定の規範ではない。対応ecosystem、artifact形式、advisory source、reachability、VEX、license、API／export、費用、data residency、運用継続性を評価し、同等能力のtoolへ置換できる。
+
 ### 10.3 ルール
 
-- **ルール**: 最低1つのSCAツールをCIに統合する（Snyk推奨）
-- **ルール**: ライセンスチェックとセキュリティスキャンは **別々のジョブ** として実行する
-- **ルール**: SCAツールのスキャン対象に、npm/yarn/pnpmだけでなくGoモジュール、Pythonのpyproject.toml、RustのCargo.toml等も含める
-- **ルール**: 偽陽性は `.snyk` ポリシーファイル等で明示的に抑制し、理由と期限をコメントする
-- **ルール**: Socket.devの行動分析アラート（install scripts/network access/filesystem access）を有効化する
-- **ルール**: 到達可能性分析ツール（Socket.dev / Endor Labs / Semgrep SC）を導入し、真に対応が必要な脆弱性に集中する
-- **ルール**: AI生成コードのライセンス汚染スキャンをSCAパイプラインに統合する（§42参照）
+- **ルール**: すべての検出済みecosystemとrelease artifactを扱えるSCA能力をCIへ統合する。単一toolで不足する場合は複数toolの結果を正規化し、coverage gapを台帳化する
+- **ルール**: license policyと脆弱性policyは独立した判定、owner、例外、failure reasonとして可視化する。同じCI jobで実行しても、証跡と失敗原因を分離できればよい
+- **ルール**: manifestだけでなくlock、推移依存、vendored code、container、native library、生成物を対象にし、検出した全言語ecosystemのcoverageを報告する
+- **ルール**: 偽陽性・未到達・補償統制は採用toolのpolicyまたは共通waiver台帳で抑制し、対象version、根拠、owner、期限、再評価triggerを記録する
+- **ルール**: install script、network、filesystem、dynamic execution、credential access等のpackage behaviorを、scanner、sandbox、static analysis、egress policy等の同等能力でriskに応じて検査する
+- **ルール**: reachabilityは優先度を高めるevidenceとして使用し、scanner、call graph、runtime evidence、manual analysisを組み合わせる。未到達だけで将来の影響を永久除外しない
+- **ルール**: AI-assisted codeには§35／§42の第三者code照合をriskに応じて統合し、SCAだけで著作権・license判断を完結させない
 
 ---
 
@@ -476,17 +492,19 @@ flowchart TD
 
 ### 11.1 自動ブロックルール
 
-| 検知事象 | アクション | 例外手続き |
-|:--------|:---------|:----------|
-| 🔴禁止ライセンス（GPL/AGPL/SSPL） | PRマージ自動ブロック | CTO書面承認 |
-| 🟡Source-Availableライセンス（BSL/FSL/Elastic） | PRマージ自動ブロック | CTO/法務承認 |
-| Critical脆弱性（CVSS ≥ 9.0） | PRマージ自動ブロック | セキュリティリード承認（24h以内） |
-| High脆弱性（CVSS ≥ 7.0） | 警告 + 7日以内修正義務 | チームリード承認 |
-| ライセンス不明（UNKNOWN） | PRマージ自動ブロック | 手動調査後にallowlistへ追加 |
-| OpenSSF Scorecard < 4.0 | 警告 | §26参照 |
-| Socket.dev行動分析: High-risk | PRマージ自動ブロック | セキュリティリード承認 |
+| 検知事象 | Universalなchange／release gate | 例外・解決手続き |
+|:--------|:-------------------------------|:------------------|
+| 組織policyがdenyとしたlicense | 変更受入と配布をblock | accountableなlicense／legal risk ownerによる期限付き例外。義務、配布形態、顧客契約を記録 |
+| review必須のsource-available／copyleft等 | 分類完了まで配布をblockし、利用形態に応じて変更受入をreview | 法務またはdelegated policy ownerがallow／条件付きallow／denyを証跡化 |
+| 悪用中、到達可能、外部公開の重大脆弱性 | 即時封じ込め。安全な変更受入またはreleaseをblock | security risk ownerが修正、緩和、VEX、期限付きrisk acceptanceを承認 |
+| その他のHigh／Critical | KEV、EPSS、reachability、exposure、data感度とBlueprint SLAでblock／警告を決定 | accountable owner、期限、補償統制、再確認日を記録 |
+| UNKNOWN license | 分類完了まで変更受入または配布をblock | authoritative sourceを調査し、versioned policyへ分類を追加 |
+| project health score低下 | 単一scoreで自動拒否せず、保守、provenance、脆弱性、退出可能性のreviewを要求 | §26に従い複合riskを記録 |
+| install script、network、filesystem等のhigh-risk behavior | installまたは変更受入をblockしてmanual review | security／supply-chain ownerが必要性、scope、sandbox、代替を承認 |
 
-### 11.2 CI設定例
+Pull Requestとmergeは実装例である。Merge Request、pre-submit、release approval、package registry policy等でも、同じ判定、block、owner、例外証跡を強制できれば適合する。
+
+### 11.2 CI設定参考例（GitHub Actions）
 
 ```yaml
 # .github/workflows/dependency-guard.yml
@@ -535,6 +553,8 @@ jobs:
 
 ### 12.1 ヘルスメトリクス（導入前チェックリスト）
 
+次の数値は新規導入時のreference profileである。言語ecosystem、project規模、component criticalityにより分布が異なるため、stars、download、coverage、単一scoreをUniversalな合否条件にしない。
+
 | 指標 | 最低基準 | 理想 |
 |:----|:--------|:-----|
 | GitHub Stars | ≥ 500 | ≥ 5,000 |
@@ -551,11 +571,11 @@ jobs:
 
 ### 12.2 リスクスコアリング
 
-- **ルール**: 新規依存関係の追加時、上記チェックリストの合格率が **70%未満** の場合はチームリードの承認を必須とする
-- **ルール**: 依存関係の代替候補を最低2つ比較検討する
-- **ルール**: 「1パッケージ = 1機能」の原則を徹底し、メガライブラリよりも軽量な代替を優先する
-- **ルール**: OpenSSF Scorecardスコア **4.0未満** のパッケージは原則採用禁止（§26参照）
-- **ルール**: Bus Factor 1のパッケージは追加リスク評価を実施する（§47参照）
+- **ルール**: 新規dependencyは機能fit、maintenance、Provenance、脆弱性、license、権限、artifact、performance、運用、退出可能性を複合評価し、risk tierに応じたownerが承認する
+- **ルール**: 現状維持、標準library、内部実装、service、viable candidateを比較し、candidate数を満たすためだけの形式的比較を要求しない
+- **ルール**: dependency数と機能重複を最小化するが、micro-package化による推移依存・maintainer・install riskも評価する
+- **ルール**: OpenSSF Scorecard等のscoreは個別checkのevidenceへ分解し、単一総合scoreだけで自動denyしない（§26参照）
+- **ルール**: Bus Factor 1は追加risk signalとし、criticality、release capability、fork権利、代替、内部expertiseと合わせて評価する（§47参照）
 
 ---
 
@@ -563,8 +583,8 @@ jobs:
 
 ### 13.1 ルール
 
-- **ルール**: Webアプリの新規依存追加時は [`bundlephobia.com`](https://bundlephobia.com) でサイズ影響を確認する
-- **ルール**: gzip後 **50KB以上** の依存関係追加はチームリード承認を必須とする
+- **ルール**: client、edge、mobile、function、embedded等のsize／startup制約があるartifactは、採用bundler、profiler、artifact diff等で実測する。BundlephobiaはWeb packageの参考手段である
+- **ルール**: size、parse、startup、memory、network、battery、cost budgetはtargetとuser impactからBlueprintで定め、固定50KBや固定役職をUniversal gateにしない
 - **ルール**: Tree-shaking対応（ESM）のパッケージを優先する
 - **ルール**: 同機能の軽量代替を常に検討する
 
@@ -586,14 +606,23 @@ jobs:
 
 ### 14.1 ルール
 
-- **ルール**: `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Podfile.lock`, `pubspec.lock` は**必ずコミット**する
-- **ルール**: CI環境では **`npm ci`**（または `pnpm install --frozen-lockfile`）を使用し、`npm install` を禁止する
-- **ルール**: ロックファイルの差分はPRレビューで**必ず確認**する
-- **ルール**: `lockfile-lint` をCIに統合し、信頼されたレジストリからの取得を保証する
-- **ルール**: チーム全員が同一のNode.js/npmバージョンを使用する（`.nvmrc` / `.node-version` で統一）
-- **ルール**: Corepackを有効化し、`packageManager` フィールドでパッケージマネージャのバージョンを固定する
+- **ルール**: deployable application、service、CLI、firmware、container、infrastructure rootは、採用ecosystemの再現可能な解決sourceをversion管理する。公開libraryはconsumer互換性の慣行を守りつつ、CIとreleaseで解決結果を固定し証跡を保持する
+- **ルール**: CIはlockまたはresolution sourceとmanifestの不一致、暗黙update、未承認sourceへのfallbackを失敗させる`locked`、`frozen`、`immutable`相当modeを使用する
+- **ルール**: lock、checksum、wrapper、version catalog、provider selection等のmachine-generated差分をreviewし、追加・削除・source・version・integrity・lifecycle scriptの変化を表示する
+- **ルール**: package manager、runtime、compiler、SDK、wrapperはsupport policyに従いpinし、開発、CI、releaseの解決差を検出する
+- **ルール**: install／build scriptは実行能力として扱い、既定拒否または最小allowlist、network／filesystem制限、review済み例外のいずれかを適用する
 
-### 14.2 Corepack設定
+| ecosystem例 | resolution source例 | CIの不変条件例 |
+|:------------|:--------------------|:---------------|
+| JavaScript／TypeScript | `package-lock.json`、`pnpm-lock.yaml`、`yarn.lock`、`bun.lock` | `npm ci`、frozen／immutable install、`bun ci` |
+| Python | `uv.lock`、Poetry等のlock | locked／frozen sync、hash検証 |
+| JVM | Gradle dependency locking + dependency verification、またはversion制約済みMaven manifest／BOM + 記録済みresolved graph／checksum | Gradle／Maven wrapperを依存とは別にpinし、graphまたはverification driftを拒否 |
+| .NET | `packages.lock.json`または`paket.lock` | SDKを依存とは別にpinし、locked-mode restoreとgraph drift拒否を行う |
+| Go／Rust | `go.sum`、`Cargo.lock` | read-only module、`--locked`。公開libraryのlock扱いはecosystem慣行を記録 |
+| Swift／Dart | `Package.resolved`、`Podfile.lock`、`pubspec.lock` | applicationと公開libraryの境界を記録し、release解決を固定 |
+| Terraform／OpenTofu | `.terraform.lock.hcl`とmodule source ref | provider checksumとmodule commit／digestを検証 |
+
+### 14.2 Corepack設定の参考例
 
 ```json
 // package.json
@@ -611,8 +640,8 @@ corepack prepare pnpm@9.15.0 --activate
 
 ### 14.3 Install Script セキュリティ
 
-- **ルール**: `.npmrc` で `ignore-scripts=true` をデフォルト設定し、信頼されたパッケージのみ `allow-scripts` でホワイトリスト化する
-- **ルール**: `postinstall` / `preinstall` スクリプトを持つパッケージは追加レビュー対象とする
+- **ルール**: Node.js ecosystemでは`.npmrc`の`ignore-scripts=true`、pnpmのallowlist、Bunの`trustedDependencies`等を選べる。native build、Python build backend、Gradle plugin、Cargo build script等にも同じ能力境界を適用する
+- **ルール**: lifecycle script、plugin、compiler extension、macro、code generatorを追加・変更するdependencyは追加review対象とする
 
 ```ini
 # .npmrc — Install Script防御
@@ -627,13 +656,15 @@ ignore-scripts=true
 
 ### 15.1 推奨設定
 
-- **ルール**: Renovateを第一選択とする（Dependabotより柔軟な設定が可能）
-- **ルール**: セキュリティアップデートは **自動マージ** を有効化する（patch/minorレベル + CI全通過条件）
-- **ルール**: メジャーアップデートは手動レビュー必須とする
-- **ルール**: **minimumReleaseAge: 21日** を設定し、新規リリースの安定性を確認してから取り込む
-- **ルール**: 週次のグルーピングPRで依存関係を一括更新する（ノイズ削減）
+- **ルール**: Renovate、Dependabot、ecosystem bot、内部service等から、対象言語、private source、grouping、署名・Provenance、例外台帳、監査APIに適合する交換可能な更新能力を選ぶ
+- **ルール**: 自動mergeは、変更scopeが限定され、artifact provenanceを検証でき、互換性・security・license・performance gateが通り、rollback可能なrisk tierに限る。security updateであることだけを理由に自動mergeしない
+- **ルール**: breaking change、runtime／compiler、native dependency、database driver、認証・暗号、build plugin、未検証major updateはaccountable ownerのreviewを要求する
+- **ルール**: release ageはecosystemのtakeover risk、署名、maintainer、悪用状況、rollout能力からBlueprintで校正する。actively exploited vulnerabilityの修正を待機期間で遅らせない
+- **ルール**: cadenceとgroupingはteam capacityと共通failure domainから決め、無関係な大量更新をひとつのrollback単位へまとめない
 
-### 15.2 Renovate設定例
+### 15.2 Renovate設定の参考例
+
+次の21日、週末、patch／minor自動mergeはUniversal既定値ではない。採用時はBlueprintのrisk tier、required checks、emergency bypass、rollback契約へ置換する。
 
 ```json
 {
@@ -663,34 +694,36 @@ ignore-scripts=true
 
 ### 16.1 SLA定義
 
-| 深刻度 | CVSS | 対応期限 | 自動化 |
+対応期限はCVSSだけで固定せず、悪用状況、KEV、EPSS、reachability、exposure、data感度、利用中version、補償統制、法令・契約・vendor deadlineからBlueprintで定める。次は新規導入時のreference profileであり、Universal deadlineではない。
+
+| scanner深刻度 | CVSS参考帯 | reference初期目標 | 自動化例 |
 |:------|:-----|:--------|:------|
-| Critical | ≥ 9.0 | **24時間以内** | 自動PR作成 + Slack通知 |
-| High | ≥ 7.0 | **7日以内** | 自動PR作成 |
-| Medium | ≥ 4.0 | **30日以内** | 週次レポート |
-| Low | < 4.0 | **90日以内** | 四半期レビュー |
+| Critical | ≥ 9.0 | 直ちにtriage。24時間以内のremediation判断 | 更新候補 + 即時通知 |
+| High | ≥ 7.0 | 7日以内のremediation判断 | 更新候補 + owner通知 |
+| Medium | ≥ 4.0 | 30日以内のrisk処理 | risk report |
+| Low | < 4.0 | 90日以内の再評価 | portfolio review |
 
 ### 16.2 CISA KEV連携とEPSS統合型優先順位付け
 
 > [!IMPORTANT]
-> CVSSスコアだけのパッチ優先順位付けは2026年の実務では不十分。**CISA KEV登録（限定3日以内広用実績あり）がSLAの起点**となり、EPSSスコア（最大リスク・上位5%）による現実的な悪用可能性で補完する。
+> CVSSだけの優先順位付けは不十分である。CISA KEVは実悪用のevidenceとして優先度を上げ、EPSS、reachability、exposure、asset criticalityで補完する。CISA catalogのdue dateやBODは適用対象へ従うofficial deadlineであり、全組織共通の「3日以内」へ置換しない。
 
-| 優先度 | 条件 | SLA | 自動化 |
+| 優先度 | 条件 | 対応契約 | 自動化例 |
 |:--------|:-----|:----|:------|
-| 🔴 P0（経緯） | **CISA KEV登録** | **3日以内** | 即時アラート + WAFアップデート |
-| 🔴 P1 | Critical + EPSS ≥ 0.8 | **6時間以内** | 封じ込め + アラート |
-| 🟠 P2 | Critical (CVSS≥ 9.0) | 24時間 | 自動PR |
-| 🟡 P3 | High (CVSS ≥ 7.0) | 7日 | 自動PR |
-| 🟢 P4 | Medium/Low | 30日 / 90日 | 週次レポート |
+| 🔴 P0 | 実悪用 + exposed／reachable、または適用official deadline | 即時封じ込め。修正期限はofficial deadlineまたはより厳しいBlueprint SLA | incident alert + mitigation候補 |
+| 🔴 P1 | KEV、credible exploitation、critical asset等の高risk signal | owner、補償統制、remediation期限を即時確定 | urgent update + alert |
+| 🟠 P2 | Criticalだが到達不能等の根拠がある | VEXと再評価triggerを含むrisk-based SLA | update candidate |
+| 🟡 P3 | High | exposureと利用状況に基づくBlueprint SLA | scheduled update |
+| 🟢 P4 | Medium／Low | portfolio cadenceまたはevent-driven review | risk report |
 
 
 ### 16.3 ルール
 
-- **ルール**: Critical脆弱性は到達可能性分析を実施し、到達可能な場合は**4時間以内**にWAFルール等の緩和策を適用する
-- **ルール**: **CISA KEV登録CVE**は到達可能性分析に関わらず、期限（3日）以内に修正またはVEXによる緩和策を必須とする
-- **ルール**: EPSS スコア ≥ 0.8（上位20%）のMedium CVEは、CVSSのみの評価と異なりP1扱いとして処理する
+- **ルール**: Criticalまたは実悪用された脆弱性は到達可能性とexposureを直ちに分析し、影響がある場合はrisk-basedな封じ込め目標でWAF、機能停止、version固定、credential rotation等の補償統制を適用する。4時間は高risk serviceのreference objectiveである
+- **ルール**: CISA KEV登録CVEは優先triageし、適用されるcatalog due date、法令、契約、vendor deadlineまたはBlueprint SLAのうち最も厳しい期限で修正、緩和、隔離またはrisk acceptanceを完了する
+- **ルール**: EPSS thresholdはportfolio分布と誤検知costからBlueprintで校正し、単一の固定値だけでseverityを決めない
 - **ルール**: パッチ適用不可の場合、VEXステータスを発行し根拠を文書化する（§28参照）
-- **ルール**: SLA逸脱が発生した場合、月次レトロスペクティブで根本原因を分析する
+- **ルール**: SLA逸脱はseverityと再発riskに応じて即時reviewまたはrisk-based cadenceのretrospectiveで根本原因を分析する
 
 → クロスリファレンス: §28 VEX、§54 CISA KEV連携詳細
 
@@ -700,12 +733,13 @@ ignore-scripts=true
 
 ### 17.1 ルール
 
-- **ルール**: Monorepoではpnpm workspaces（推奨）またはnpm workspacesを使用する
-- **ルール**: 共通依存関係はルートに配置し、パッケージ固有の依存関係のみ個別に管理する
-- **ルール**: `pnpm-lock.yaml` の**単一ロックファイル**で全ワークスペースを管理する
-- **ルール**: Merge Queue を必ず有効化し、CI通過後の安全なマージを保証する
+- **ルール**: Monorepoは採用言語のnative workspace、build graph、module systemを使用し、package境界、owner、公開API、release単位、dependency directionを明示する。pnpm／npm workspacesはJavaScriptの参考実装である
+- **ルール**: hoistやroot配置を前提にせず、各componentの直接依存をmanifestへ宣言し、ghost dependencyと循環依存を検出する
+- **ルール**: 単一lock、複数lock、version catalog、workspace graphのいずれを選んでも、同じinputから同じ解決結果を得て、componentとrelease artifactへ逆引きできるSSOTを定める
+- **ルール**: 変更影響範囲をbuild graphから計算しつつ、shared contract、compiler、base image、policy変更は全影響consumerを検証する
+- **ルール**: merge queueまたは同等の最新base再検証と直列化を、競合率とrequired checkの性質から必要なbranchへ適用する。全repositoryへの一律導入は要求しない
 
-### 17.2 Monorepo推奨構成
+### 17.2 JavaScript Monorepoの参考構成
 
 ```
 monorepo-root/
@@ -724,15 +758,14 @@ monorepo-root/
 
 ### 18.1 ルール
 
-- **ルール**: プライベートパッケージはプライベートレジストリ（GitHub Packages / Artifactory / Verdaccio）で管理する
-- **ルール**: パブリックレジストリのプロキシ/キャッシュ層を設置し、可用性を向上させる
-- **ルール**: 内部パッケージのスコープ（`@company/`）をnpmパブリックレジストリで**必ず予約**し、**typosquatting**を防止する（§27参照）
-- **ルール**: レジストリへのパッケージ公開権限は**最小権限の原則**で管理する
-- **ルール**: npm tokenは **OIDC Trusted Publishing** に移行し、長期トークンの使用を廃止する（§31参照）
-- **ルール**: レジストリへのアクセスにMFA（多要素認証）を必須化する
+- **ルール**: private componentは、access control、immutability、retention、availability、data residency、監査、ecosystem互換性を満たすregistryまたはartifact repositoryで管理する。VCS package、object storage等を選ぶ場合も同じ成果を満たす
+- **ルール**: public sourceのproxy／cache／mirrorは、dependency confusion防止、malware block、緊急deny、可用性、費用の必要性から採用し、stale artifactとupstream署名の検証方針を定める
+- **ルール**: 内部namespaceはpublic namespaceとの衝突を防ぐ。scope予約、明示registry mapping、private-only source、名前policyは交換可能な対策である
+- **ルール**: publish、yank、delete、promote権限を分離し、humanにはMFA、workloadにはregistryが対応する短命federated identityを優先する。未対応時はowner、期限、rotationを持つcredential例外を記録する
+- **ルール**: release artifactをsource revision、builder identity、digest、Provenance、SBOM、承認へ結び付け、consumerが検証できるようにする
 
 ```ini
-# .npmrc（プライベートレジストリ設定）
+# npmを使う場合の参考例。組織scopeとregistryはBlueprintで置換する
 @mycompany:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
 ```
@@ -743,10 +776,10 @@ monorepo-root/
 
 ### 19.1 ルール
 
-- **ルール**: `npm ls --all` で依存ツリー全体を定期的に確認する
-- **ルール**: 推移的依存にCritical脆弱性がある場合、直接依存のアップグレードまたは`overrides`で対処する
-- **ルール**: 推移的依存の深さが **7階層** を超える場合は代替ライブラリを検討する
-- **ルール**: `npm explain <package>` で特定パッケージがなぜ含まれているかを追跡する
+- **ルール**: release artifactに到達する直接・推移・runtime取得依存をecosystem native graph、SBOM、artifact scan等で列挙し、componentから導入rootへ逆引きできるようにする
+- **ルール**: 推移依存の脆弱性は、直接依存update、upstream修正、代替、機能無効化、期限付きoverride／patchの順にriskと互換性を評価し、到達可能性と実配布versionを検証する
+- **ルール**: dependency depth、重複、fan-out、native binary、install script、maintainer集中を複合riskとして評価し、固定階層数だけで採否を決めない
+- **ルール**: `npm explain`、`go mod why`、Gradle dependency insight、`cargo tree`等の交換可能な手段で、導入経路、owner、利用機能を記録する
 
 ### 19.2 `overrides` による強制解決
 
@@ -760,7 +793,7 @@ monorepo-root/
 ```
 
 > [!CAUTION]
-> `overrides` は一時的な緊急対応手段。根本解決（直接依存のアップグレード）を30日以内に完了すること。
+> `overrides`等の強制解決は一時的なrisk処理である。owner、導入理由、互換性test、upstream link、期限、削除条件を記録し、Blueprint SLA内にroot causeを解消する。
 
 ---
 
@@ -768,12 +801,12 @@ monorepo-root/
 
 ### 20.1 ルール
 
-- **ルール**: `npm outdated` を週次で実行し、メジャーバージョン遅れのパッケージを検出する
-- **ルール**: `deprecated` フラグのあるパッケージは **30日以内** に代替へ移行する
-- **ルール**: Node.js自体のLTSスケジュールに従い、EOLバージョンでの運用を禁止する
-- **ルール**: フレームワーク（Next.js, React等）のメジャーバージョンは、リリースから **6ヶ月以内** にアップグレード計画を策定する
+- **ルール**: 採用runtime、compiler、SDK、framework、package、base image、OS、providerの公式support／EOL／deprecated eventを継続取得し、inventoryとownerへ照合する
+- **ルール**: deprecatedは即時削除と同義ではない。security、support終了日、代替成熟度、移行影響から期限付きのretain、replace、remove判断を記録する
+- **ルール**: EOL componentの本番利用は原則禁止し、例外にはexposure低減、監視、補償統制、移行owner、資金、期限、経営risk acceptanceを要求する
+- **ルール**: upgrade planは公式support終了前に実行可能な余裕を確保し、major release日からの一律月数では決めない
 
-### 20.2 EOL監視ツール
+### 20.2 EOL監視の参考実装
 
 - **endoflife.date**: API経由でNode.js/フレームワークのEOL日付を取得可能
 - **libyear**: 依存関係の「年齢」を計測し、技術的負債を定量化する
@@ -784,12 +817,12 @@ monorepo-root/
 
 ### 21.1 ルール
 
-- **ルール**: OSSライセンス帰属表示をアプリ内に表示する仕組みを必ず実装する
-- **ルール**: 表示場所は「設定 > ライセンス」または「About」画面とする
-- **ルール**: CI/CDで `NOTICE` ファイルを自動生成し、各リリースに同梱する
-- **ルール**: FOSSAのNOTICE自動再生成機能を活用し、依存関係更新時にNOTICEを自動更新する
+- **ルール**: 対象release artifactのlicense text、copyright、NOTICE、source offer等の義務をinventoryから生成し、licenseと配布媒体が要求する方法でrecipientへ到達可能にする
+- **ルール**: application内画面、Web page、CLI option、同梱file、package metadata、physical documentは交換可能なdelivery channelであり、「設定 > ライセンス」を全製品へ要求しない
+- **ルール**: release gateで帰属物とSBOMの対象component・versionを照合し、dependency変更時に差分と欠落を検出する
+- **ルール**: FOSSA、license-checker、license-plist、oss-licenses-plugin等は参考実装であり、選定toolを単一vendorへ固定しない
 
-### 21.2 プラットフォーム別ツール
+### 21.2 プラットフォーム別の参考ツール
 
 | プラットフォーム | ツール | 備考 |
 |:--------------|:------|:-----|
@@ -801,7 +834,7 @@ monorepo-root/
 
 ### 21.3 Apache-2.0 NOTICEファイルの特記
 
-- **ルール**: Apache-2.0ライセンスのライブラリを使用する場合、元の `NOTICE` ファイルの内容を保持・同梱する（ライセンス要件）
+- **ルール**: Apache-2.0 §4(d)等、対象licenseとcomponentがNOTICE処理を要求する場合、該当するattribution noticeをlicense本文が認める場所と形式で保持する。存在しないNOTICEを生成したり、無関係なnoticeを法的義務として追加しない
 
 ---
 
@@ -809,8 +842,8 @@ monorepo-root/
 
 ### 22.1 ルール
 
-- **ルール**: 従業員50名以上の組織ではOSPOまたはOSSガバナンス担当者を設置する
-- **ルール**: OSSへの貢献（contribution）時は、CLA（Contributor License Agreement）の署名を確認する
+- **ルール**: repository数、配布model、規制、OSS利用・貢献量、M&A、license例外量に応じ、兼務owner、virtual team、OSPO等のscale-appropriateなaccountable functionを設置する。固定従業員数をUniversal triggerにしない
+- **ルール**: OSS貢献時は対象projectのcontribution policy、CLA、DCO、sign-off、著作権・雇用契約、export controlを確認し、CLAを存在しないprojectへ一律要求しない
 - **ルール**: 社内プロジェクトのOSS公開前に、知的財産・ライセンス・セキュリティのレビューを実施する
 
 ### 22.2 OSSガバナンスプロセス
@@ -945,9 +978,9 @@ OpenSSF ScorecardはOSSプロジェクトのセキュリティ成熟度を自動
 ### 26.3 ルール
 
 - **ルール**: 新規依存関係の追加時にOpenSSF Scorecardスコアを確認する
-- **ルール**: スコア **4.0未満** のパッケージは原則採用禁止。例外は文書化する
-- **ルール**: 自社のOSSプロジェクトもScorecardを定期実行し、スコア **7.0以上** を維持する
-- **ルール**: 2026年のOpenSSFテーマ（AI/MLセキュリティ、CRAアライメント）に対応するチェック項目を注視する
+- **ルール**: scoreをBranch Protection、review、token、release、vulnerability等の個別checkへ分解し、利用形態と代替controlを評価する。低scoreだけで自動denyしない
+- **ルール**: 自社OSS projectもScorecardまたは同等のcontrol assessmentをrisk-based cadenceとrelease時に実行し、改善対象、受容理由、期限を追跡する
+- **ルール**: Scorecardのversion、check semantics、data source変更を監視し、前年の総合scoreや固定閾値を不変の比較基準にしない
 
 ```yaml
 # OpenSSF Scorecard CIチェック
@@ -974,12 +1007,12 @@ OpenSSF ScorecardはOSSプロジェクトのセキュリティ成熟度を自動
 
 ### 27.2 防御ルール
 
-- **ルール**: 内部パッケージのスコープ（`@company/`）をnpmパブリックレジストリで**必ず予約**する
-- **ルール**: `.npmrc` でレジストリの優先順位を明示的に設定する
-- **ルール**: CIパイプラインでパッケージ名の類似度チェックを実行する
-- **ルール**: `ignore-scripts=true` をデフォルトとし、信頼されたパッケージのみ許可する
-- **ルール**: Socket.devまたは同等のツールでマルウェア行動分析を有効化する
-- **ルール**: npm Provenanceを検証し、パッケージの発行元CIを確認する
+- **ルール**: public／private namespaceの衝突を、scope予約、明示source mapping、private-only registry、名前policy、version pinの組合せで防ぐ
+- **ルール**: ecosystemごとにauthoritative sourceとfallback禁止を設定し、manifest、lock、CI、developer環境の解決差を検出する
+- **ルール**: 新規component名はtypo／namespace類似、source URL、ownerを検査する
+- **ルール**: lifecycle scriptとpluginは既定拒否または最小allowlist、sandbox、追加reviewで管理する
+- **ルール**: malware behaviorをscanner、static analysis、sandbox、egress監視等でriskに応じて検査する
+- **ルール**: registryが提供する署名・Provenanceまたは同等のsource-to-artifact evidenceを検証し、発行identityとbuildを確認する
 
 ### 27.3 レジストリ優先順位設定
 
@@ -1007,7 +1040,7 @@ VEXは、脆弱性が自社製品に実際に影響するかを機械可読形�
 | not_affected | 脆弱性は存在するが影響しない | 対応不要（理由を文書化） |
 | affected | 脆弱性が影響する | §16のSLAに従い修正 |
 | fixed | 修正済み | SBOM/VEX更新 |
-| under_investigation | 調査中 | 72時間以内に判定完了 |
+| under_investigation | 調査中 | risk-based SLA内に判定し、期限とownerを記録 |
 
 ### 28.3 VEXフォーマット比較
 
@@ -1019,10 +1052,10 @@ VEXは、脆弱性が自社製品に実際に影響するかを機械可読形�
 
 ### 28.4 ルール
 
-- **ルール**: Critical/High脆弱性に対して、72時間以内にVEXステータスを決定する
+- **ルール**: 重要な脆弱性はexposure、reachability、悪用、asset criticalityからBlueprint SLA内にVEX statusを決定し、期限とownerを記録する
 - **ルール**: `not_affected` の判定には、到達可能性分析の根拠を必ず記録する
 - **ルール**: VEXドキュメントはSBOMと紐づけてバージョン管理する
-- **ルール**: EU CRA対応が必要な製品では、CSAF VEXフォーマットを使用する
+- **ルール**: consumer、authority、contractが要求するinteroperable VEX形式を使用する。CSAF、CycloneDX VEX、OpenVEXは対象channelとtoolchainに応じて選ぶ
 
 ```json
 // OpenVEX例
@@ -1053,11 +1086,11 @@ CycloneDX 1.6で新設された暗号資産インベントリ。使用中の暗�
 
 ### 29.2 ルール
 
-- **ルール**: CycloneDX 1.6+ を使用してCBOMを生成する
+- **ルール**: 暗号assetの変更影響、規制、高保証、PQC移行を管理する必要がある対象では、toolchainが対応するCycloneDX等でCBOMまたは同等inventoryを生成する
 - **ルール**: 非推奨暗号（SHA-1, MD5, DES, 3DES, RSA-1024）の使用を検出し排除する
 - **ルール**: 量子安全移行計画（PQC Migration Plan）を策定する
 - **ルール**: **NIST FIPS 203（ML-KEM / 旧Kyber）・ FIPS 204（ML-DSA / 旧Dilithium）・ FIPS 205（SLH-DSA / 旧SPHINCS+）**への移行ロードマップを文書化する（2024年8月正式標準化済み）
-- **ルール**: ハイブリッドモード（従来アルゴリズム + PQCの並列適用）による移行期間中の趣漸的リスク低減を評価・導入する
+- **ルール**: 高保証領域では、protocol interoperability、performance、algorithm agility、downgrade riskをtestし、従来方式とPQCのhybrid移行を採用するか記録する
 
 ### 29.3 暗号アジリティチェックリスト
 
@@ -1067,7 +1100,7 @@ CycloneDX 1.6で新設された暗号資産インベントリ。使用中の暗�
 | ハッシュアルゴリズム | SHA-256以上必須。SHA-1完全禁止 |
 | 鍵交換 | ECDH (P-256以上) または X25519。RSA-2048以上 |
 | 量子安全準備 | ML-KEM（鍵カプセル化）・ ML-DSA（署名）のハイブリッド導入評価開始 |
-| CBOM生成 | 全プロジェクトの暗号資産をCycloneDX 1.6+でインベントリ |
+| CBOM生成 | 対象systemの暗号資産を、対応schemaのCBOMまたは同等inventoryで追跡 |
 
 ```yaml
 # PQC移行ロードマップ例
@@ -1096,22 +1129,43 @@ phases:
 
 ### 30.1 エコシステム別ロックファイル・ツール
 
-| エコシステム | ロックファイル | SCAツール | SBOM生成 |
+| エコシステム | 解決正本 / ロックファイル | SCAツール | SBOM生成 |
 |:-----------|:------------|:---------|:---------|
-| Node.js (npm/pnpm/yarn) | `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` | Snyk, Socket.dev | `@cyclonedx/cyclonedx-npm` |
-| Go | `go.sum` | Snyk, Trivy | `syft`, `cyclonedx-gomod` |
-| Python | `poetry.lock` / `uv.lock` | Snyk, Safety | `syft`, `cyclonedx-python` |
-| Rust | `Cargo.lock` | `cargo-audit` | `syft`, `cyclonedx-rust-cargo` |
-| Java/Kotlin | `pom.xml` / `build.gradle.kts` | Snyk, OWASP Dep-Check | `cyclonedx-maven-plugin` |
+| Node.js (npm/pnpm/yarn/Bun) | `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` / `bun.lock` | `npm audit`, Snyk, Socket.dev | `@cyclonedx/cyclonedx-npm`, `syft` |
+| Go | `go.mod` / `go.sum` | `govulncheck`, OSV-Scanner, Trivy | `syft`, `cyclonedx-gomod` |
+| Python (uv / poetry) | `uv.lock` / `poetry.lock` | `uv audit`, `pip-audit`, OSV-Scanner, Snyk | `uv export --format cyclonedx1.5`、`syft`、`cyclonedx-python` |
+| Rust | `Cargo.lock` | `cargo-audit`, `cargo-deny` | `syft`, `cyclonedx-rust-cargo` |
+| Java/Kotlin | Gradle dependency locking + dependency verification、またはversion制約済みMaven manifest／BOM + 記録済みresolved graph／checksum | OWASP Dependency-Check, OSV-Scanner, Snyk | CycloneDX Gradle / Maven plugin、`syft` |
 | Ruby | `Gemfile.lock` | `bundler-audit` | `cyclonedx-ruby` |
-| Swift/iOS | `Package.resolved` / `Podfile.lock` | Snyk | `syft` |
+| Swift/iOS | application／実行rootの`Package.resolved` / `Podfile.lock`。公開packageのCI解決は別途固定 | Snyk | `syft` |
+| Dart / Flutter | `pubspec.yaml` + applicationの`pubspec.lock`。公開packageはconsumer contractとしてlockfileを扱わず、CI解決を別途固定 | Dart Pub security advisory、OSV-Scanner、Dependabot | 組織承認済みCycloneDX / SPDX generator + release artifact inventory |
+| .NET | `packages.lock.json` / `paket.lock` + SDK pin | .NET 10+: `dotnet package list --vulnerable --include-transitive`、.NET 9以前: `dotnet list package --vulnerable --include-transitive`、OSV-Scanner | CycloneDX .NET、`syft` |
+| PHP | `composer.lock` | `composer audit`, OSV-Scanner | CycloneDX PHP Composer、`syft` |
+| R | `renv.lock` | OSV-Scanner、組織指定SCA | `syft` |
+| Lua | version固定rockspec + 組織定義resolved manifest | OSV / repository advisory照合、組織指定SCA | `syft` |
+| Perl | `cpanfile` / `cpanfile.snapshot` + `.perl-version` | `cpan-audit` | `syft` |
+| PowerShell | module manifestのexact version + 組織定義resolved manifest | OSV / repository advisory照合、組織指定SCA | `syft` |
+| VBA / Office | export済みtext source + Office / reference manifest + 署名artifact digest | 組織指定SAST、macro / malware scan | 組織定義component inventory |
+| C / C++ | `conan.lock` / vcpkg manifest + version baseline | OSV-Scanner, Trivy, Snyk | `syft`, `cdxgen` |
+| Terraform / OpenTofu | providerは`.terraform.lock.hcl`。remote moduleはlockfile対象外のためexact versionと承認sourceを固定 | provider / module advisory・registry・組織指定policy / SCA照合 | provider / module inventory + 対応するrelease binary / containerのSBOM |
+
+> [!NOTE]
+> uvは`uv.lock`をcommitし、`uv sync --locked`と`uv export --locked`でmanifest driftと暗黙の再解決を拒否する。CycloneDX 1.5出力は現行公式文書でpreviewのため、uv版をpinし、schema、推移依存、platform marker、生成失敗を検証してから組織のSBOM targetへnormalizeする。
+> Bun 1.2以降の既定はtext形式の`bun.lock`。旧`bun.lockb`は公式手順で移行し、CIでは`bun ci`または`bun install --frozen-lockfile`を使用する。
+> Gradle／Mavenでは、version catalogは要求versionを宣言するがresolved transitive graphをlockしない。Gradle／Maven wrapperはbuild toolをpinするが依存をpinしない。toolchain pinとdependency lock、verification metadata、記録済みresolved graph、checksumを分離する。
+> SwiftPMではapplication／実行rootが`Package.resolved`をcommitする。公開packageの`Package.resolved`はconsumer解決を拘束しないため、宣言constraintとsupport範囲を、固定したCI test／release解決と必要に応じたlocked example applicationで検証する。
+> Dart applicationは`pubspec.lock`をcommitする。公開packageは利用者の依存解決を狭めないためlockfileをconsumer contractにせず、CIのtest / release解決、advisory scan、成果物inventoryを証跡化する。
+> Terraform / OpenTofuはprovider lockの署名済みchecksumを全対象platform向けに事前取得する。ただしchecksumだけでproviderを信頼せず、source、publisher、version、組織allowlistを検証する。moduleはlockfileに含まれないため、remote moduleのexact versionと承認sourceを別途固定する。
 
 ### 30.2 統一ルール
 
-- **ルール**: 全エコシステムのロックファイルを**必ずコミット**する
-- **ルール**: CI/CDで全エコシステムの脆弱性スキャンを実行する
-- **ルール**: 全エコシステムのSBOMを生成し、統合SBOMとしてマージする
-- **ルール**: ライセンスチェックは全エコシステムを対象とする
+- **ルール**: deploy可能なapplicationと実行rootは、ecosystemが提供するlockfileをcommitする。標準lockfileがない、またはlockfileが完全な解決snapshotでない場合は、version、source、checksum、digestを記録したresolved manifestまたは同等証跡をversion管理する。公開libraryはconsumer互換性慣行に従い、CIのtest／release解決と依存証跡を固定する
+- **ルール**: 対象release artifactへ到達する全ecosystemの直接・推移・runtime依存を、対応するSCAまたはadvisory照合で検査する
+- **ルール**: 対象release artifactを構成するecosystemのSBOMまたはdependency inventoryをartifact digestへ結び付け、consumerとincident responseが必要とする粒度で統合する
+- **ルール**: 配布または利用するcomponentのlicenseチェックは、対象artifactへ到達する全ecosystemを覆う
+- **ルール**: source manifestだけでなく推移依存とrelease artifactを走査し、false positiveは期限付きVEXまたはwaiverで管理する
+- **ルール**: VBA / Office成果物はexport済みtext source、Office / reference manifest、署名済みartifact digestをrelease recordで結び付ける
+- **ルール**: Terraform / OpenTofuはprovider lockとremote module inventoryを分離して検証し、両方をrelease recordと統合SBOMへ結び付ける
 
 ```bash
 # 統合SBOMマージ
@@ -1131,29 +1185,39 @@ cyclonedx merge \
 | セキュリティ脆弱性の意図せぬ保持 | npm推移的 | `npm ls <pkg>` で解決ツリー確認 + `overrides` でピン固定 |
 | Ghost Dependency（暗黙依存） | JavaScript（特にpnpm以前） | pnpmのstrict modeで暗黙的アクセスを禁止 |
 
-- **ルール**: `pnpm` の `shamefully-hoist=false`（デフォルト）を维持し、Ghost Dependencyを構造的に排除する
-- **ルール**: Diamond Dependencyが発生した場合、`overrides` で一時固定しつつ、直接依存のアップグレードで30日以内に根本解消する
-- **ルール**: Go modules の `replace` ディレクティブは一時的なフォーク適用に限定し、`go.mod` にコメントで期限を明記する
+- **ルール**: 採用workspace／module systemのstrict resolutionを使用し、暗黙依存を検出する。pnpmのhoist設定はJavaScriptの参考実装である
+- **ルール**: Diamond Dependencyは、compatible range、直接依存update、分離、vendor修正、期限付きoverrideを比較し、ownerとBlueprint期限を持つ根本解消へつなげる
+- **ルール**: Go `replace`、npm `overrides`、Cargo patch等の解決上書きは、source、digest、理由、互換性test、owner、期限、削除条件を記録する
 
 → クロスリファレンス: [`engineering/000_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD、§19 推移的依存関係管理
 
 ---
 
-## §31. パッケージ公開セキュリティとOIDC完全移行
+## §31. パッケージ公開セキュリティとWorkload Identity
 
-### 31.1 npmアカウントセキュリティ
+### 31.1 公開identityとregistry capability
 
 | 対策 | 必須/推奨 | 詳細 |
 |:----|:---------|:-----|
 | 2FA（WebAuthn/TOTP） | **必須** | 全メンテナアカウントで有効化。WebAuthn優先（phishing耐性） |
-| OIDC Trusted Publishing | **必須** | npm GA (2025-07)。対応環境では長期トークンをOIDCへ置換 |
-| `npm access` 最小権限 | **必須** | 公開権限を最小限のメンテナに限定 |
-| Granular Access Token | 廃止移行中 | OIDC TP完全移行までの暫定措置。90日ローテーション |
+| OIDC Trusted Publishing | **対応時必須** | registryとbuild platformが対応する場合は長期トークンをOIDCへ置換 |
+| 公開権限の最小化 | **必須** | package、namespace、workflow、environment、操作を必要最小限へ制限 |
+| Granular Access Token | 条件付き暫定 | OIDC非対応時だけ、最小権限、組織が定める短い有効期限、自動rotation、監査を適用 |
+
+2026-07-23時点の代表的な公開経路。対応provider、private repository、self-hosted runner、account rollout等の条件は変更されるため、公開時にregistry公式文書で再確認する。
+
+| Ecosystem | 短命identityの公式経路 | Universalでの扱い |
+|:--|:--|:--|
+| JavaScript／TypeScript | npm Trusted Publishing | 対応CI／runnerとclaim制約を確認し、可能ならtoken公開を廃止。staged publishing、2FA承認、provenanceもriskに応じて利用 |
+| Python | PyPI Trusted Publishing | repository、workflow、environment等のclaimを最小化し、発行される短命tokenを公開直前だけ利用 |
+| Ruby | RubyGems Trusted Publishing | gemごとのpublisherを登録し、reusable workflowを含む実行主体とclaimを確認 |
+| .NET | nuget.org Trusted Publishing | accountへの提供状況とpolicy ownershipを確認し、利用可能なら短命API key exchangeを使用 |
+| その他registry／private registry | 公式capabilityを個別確認 | OIDC、federated workload identity等がなければ、package限定・短寿命credential、rotation、監査、期限付き再評価を使用 |
 
 > [!IMPORTANT]
-> npm Trusted Publishingは2025年7月にGA。OIDC対応のCI/CD（GitHub Actions、GitLab CI等）からのみパッケージ公開が可能。長期トークンの新規発行は将来的に制限される見通し。
+> npmと対応CI/CDを組み合わせる場合はOIDCを優先する。他のregistryやbuild platformでは同等の短命workload identityを選び、未対応時だけ期限付きcredential例外を記録する。OIDCは公開credentialを短命化するが、公開されるcodeの安全性、build後の改変防止、workflow自体の正当性までは単独で保証しない。
 
-### 31.2 パッケージ公開ワークフロー
+### 31.2 パッケージ公開ワークフローの参照実装
 
 ```yaml
 # .github/workflows/publish.yml
@@ -1169,20 +1233,25 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
       - run: npm ci
-      - run: npm publish --provenance --access public
+      - run: npm test
+      - run: npm pack
+      - run: npm publish ./*.tgz --provenance --access public
         env:
           NODE_AUTH_TOKEN: ''  # OIDC TPでは不要
       - name: Generate Attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-path: '*.tgz'
 ```
+
+このGitHub Actionsとnpmの例は交換可能である。適合条件は、保護されたrelease trigger、最小権限、再現可能な依存解決、短命identity、artifact digestに結び付くProvenance、承認済みregistryへの公開を同等に実現することである。
 
 ### 31.3 Provenance検証
 
@@ -1194,15 +1263,26 @@ gh attestation verify $(npm pack --dry-run 2>&1 | tail -1) \
   --owner myorg
 ```
 
+検証commandとowner表現はregistry、VCS、attestation storeに応じて置換する。検証を人手の任意手順にせず、consumerまたはpolicy gateの失敗条件として実行する。
+
+### 31.4 Workflow、policy、チーム統制
+
+- **ルール**: Trusted Publisherへ登録するworkflow／pipelineをpublish credentialと同じtrust boundaryとして扱い、対象repository、workflow、ref、environment、audience／subject claimを可能な最小範囲へ固定する。公開identityを取得できるjobで未信頼PR code、fork code、動的に選ばれたscriptを実行しない
+- **ルール**: release workflow、再利用workflow、third-party action／plugin、build dependencyをreview対象へ含め、immutable digestまたは管理されたversionへpinする。高保証packageは公開policyとworkflowの変更に独立承認、承認後変更時の再review、保護されたrelease environmentまたは同等統制を要求する
+- **ルール**: package owner、registry organization、Trusted Publisher policy、CI identityにaccountable ownerと継続経路を設定し、異動・退職・repository移管・workflow rename時にpolicy、token、owner、environmentを再検証または失効させるoffboarding手順を持つ
+- **ルール**: OIDC token exchange、package upload、registry response、artifact digest、source revision、provenance、承認を一つのrelease recordへ結び付ける。Trusted Publishingだけをsource安全性またはartifact integrityの証明にしない
+
+公式一次資料: [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/)、[PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/)、[PyPI security model](https://docs.pypi.org/trusted-publishers/security-model/)、[RubyGems Trusted Publishing](https://guides.rubygems.org/trusted-publishing/)、[nuget.org Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
+
 → クロスリファレンス: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §サプライチェーン
 
 ---
 
-## §32. GitHub Dependency Review統合
+## §32. 依存関係変更レビュー統合
 
 ### 32.1 概要
 
-GitHub Dependency Review Actionは、PRで追加/更新される依存関係のライセンスと脆弱性を自動チェックする。
+すべてのrepositoryは、変更提案で追加・更新される直接／推移依存のversion、source、license、既知脆弱性、maintenance riskを差分として検査する。GitHub Dependency Review ActionはGitHubを使用する場合の参照実装である。
 
 ### 32.2 設定例
 
@@ -1227,9 +1307,9 @@ jobs:
 
 ### 32.3 ルール
 
-- **ルール**: 全リポジトリでDependency Review Actionを有効化する
-- **ルール**: ライセンスdenyリストを§1の禁止リストと同期させる
-- **ルール**: PRコメントサマリーを有効化し、レビュアーが変更の影響を即座に把握できるようにする
+- **ルール**: すべてのrepositoryで、VCSまたはCIに適合するdependency diff gateを有効化する。GitHubではDependency Review Actionを使用できる
+- **ルール**: license policy、脆弱性severity、source allowlist、例外台帳を組織のrisk分類と同期する
+- **ルール**: reviewerが変更理由、直接／推移影響、block理由、期限付き例外を確認できるmachine-readable resultを残す。PR commentは表示方法の一例である
 
 ---
 
@@ -1237,29 +1317,30 @@ jobs:
 
 ### 33.1 主要判例・動向
 
-| 判例/動向 | 年 | 影響 |
-|:---------|:---|:-----|
-| SFC v. Vizio | 2024 | GPL準拠の消費者訴訟権を認定。OSSライセンス違反の訴訟リスク増大 |
-| Artificial Intelligence Act (EU) | 2025-2027 | AIモデルの学習データに対するライセンス追跡義務。高リスクAIシステムに対する技術文書化義務 |
-| OSSRA 2025報告 | 2025 | 商用コードベースの33%にライセンス衝突。AI生成コードの「ライセンスロンダリング」が主因 |
-| Google LLC v. Oracle America (最終判決確定) | 2021 (影響継続) | Java API利用はフェアユース認定。APIライセンスリスクの一定整理 |
-| Elastic NV v. AWS | 2025和解 | ElasticのAWSへのSSPL適用係争。SaaS事業者のSource-Availableリスクを再確認 |
-| EU CRA施行 (段階的) | 2025-2027 | デジタル製品の製造者責任をOSS貢献者に部分適用。CRA Art.16の「著しく寄与するOSS開発者」定義が法的リスク源に浮上 |
-| Cisco / Apache License Reaffirmation | 2026-Q1 | 大手ベンダが自社製品のApache-2.0を再確認。特許条項の実務解釈ガイドラインを公表 |
+判例、規制、license変更は更新頻度と法域差が大きいため、Universalへ静的な結論表として固定しない。組織は次のfieldを持つversion管理されたlegal horizon registerを維持する。
+
+| field | 内容 |
+|:------|:-----|
+| authority | 裁判所、規制当局、標準団体、license steward等の一次source |
+| scope | 法域、対象entity、製品・service、license version、利用形態 |
+| status | draft、施行済み、係争中、上訴、和解、移管状況等。事実と解釈を分離 |
+| dates | 公開日、発効日、移行期限、最終確認日時 |
+| decision | 適用可否、必要control、owner、期限、外部専門家の確認 |
+| evidence | 一次資料URL、保存snapshot、法務memo、影響component／release |
 
 ### 33.2 ライセンス変更リスク監視
 
-- **ルール**: 依存パッケージのライセンス変更を四半期で監視する（HashiCorp BSL移行、Redis SSPL→AGPL等の事例）
-- **ルール**: ライセンス変更検知時は、影響評価を72時間以内に完了する
-- **ルール**: Source-Availableへの移行リスクが高いパッケージ（単一企業メンテナンス）のフォーク計画を策定する
+- **ルール**: component update、release、license metadata／text変更、M&A、法令・判例・契約変更をevent-drivenに検出し、portfolio riskに応じたcadenceで取りこぼしを照合する
+- **ルール**: license変更時は新規取得を保留し、利用中version、配布・network model、変更前後のterms、customer obligation、代替可能性をBlueprint SLA内に評価する
+- **ルール**: source-available移行やmaintenance停止の集中riskには、version固定、commercial terms、代替、fork、internal ownership、data／API移行を費用と権利を含めて比較する。常にforkを要求しない
 
 ### 33.3 法的リスク評価フレームワーク
 
 | リスクレベル | 条件 | 対応 |
 |:-----------|:-----|:-----|
-| 🔴 高 | Copyleftライセンス混入 / 商用利用制限違反 | 即時除去 + 法務エスカレーション |
-| 🟡 中 | Source-Available条件抵触の可能性 | 法務レビュー + 代替検討 |
-| 🟢 低 | Permissiveライセンス・帰属表示漏れ | NOTICE更新で対処 |
+| 🔴 高 | 適用義務への不適合、権利欠如、差止め・source開示・顧客違反のcredible risk | 配布停止または封じ込め、法務／accountable executive判断、remediation期限 |
+| 🟡 中 | 解釈不明、source-available条件、例外・dual license・特許条項 | 追加証拠、専門review、期限付き利用判断、代替評価 |
+| 🟢 低 | 権利と利用形態は整合し、帰属物等の修正可能な欠落 | release前に生成物を修正し再検証 |
 
 → クロスリファレンス: [`security/100_data_governance.md`](../security/100_data_governance.md)、[`security/300_ip_due_diligence.md`](../security/300_ip_due_diligence.md)
 
@@ -1288,9 +1369,9 @@ flowchart TD
 
 ### 34.2 ルール
 
-- **ルール**: ゼロデイ検知後 **4時間以内** に到達可能性分析を完了する
-- **ルール**: 到達可能な場合、**8時間以内** に緩和策を実施する
-- **ルール**: 一時フォーク作成時は、公式パッチリリースから **48時間以内** に公式版へ復帰する
+- **ルール**: ゼロデイ検知後、exposure、reachability、実配布version、悪用evidence、asset criticalityに応じたincident SLAでtriageとowner割当を完了する。4時間は高risk serviceの参考目標である
+- **ルール**: 影響がある場合、service停止、隔離、設定変更、credential rotation、WAF、version変更等の補償統制をrisk-based containment objective内に適用する
+- **ルール**: 一時forkは権利、署名、review、CI、release、upstream差分を管理し、公式修正の安全性確認後に期限付きで収束させる。固定48時間より再侵入riskと互換性を優先する
 - **ルール**: ゼロデイ対応の全ステップを時系列で記録する
 
 → クロスリファレンス: [`operations/500_incident_response.md`](../operations/500_incident_response.md)、[`security/000_security_privacy.md`](../security/000_security_privacy.md)
@@ -1310,22 +1391,22 @@ flowchart TD
 
 ### 35.2 ルール
 
-- **ルール**: AI生成コードに対して、OSSコード類似度スキャン（FOSSA / Snyk Code等）を実施する
-- **ルール**: GitHub Copilotの「Public code filter」を有効化する
-- **ルール**: AI生成コードの割合が50%を超えるファイルは、ライセンス汚染リスクの手動レビューを実施する
-- **ルール**: AIコーディングツールの利用規約における知的財産条項を法務が年1回レビューする
-- **ルール**: 社内の「AI生成コードポリシー」を策定し、許可ツールと利用条件を明文化する
-- **ルール**: AI生成コードを含むコミットには `ai-assisted` ラベルを付与することを推奨する
+- **ルール**: codeの由来にかかわらず、第三者codeの長い・特徴的な一致、license header、attribution要求、生成されたdependencyを検出できるreviewと必要時の類似度／provenance照合を適用する
+- **ルール**: 採用AI toolがpublic code match、citation、source reference等を提供する場合は組織policyに沿って有効化し、出力を法的結論ではなくreview evidenceとして扱う
+- **ルール**: review強度は生成率の推定値ではなく、変更の長さ・新規性・重要度、配布model、出力の一致signal、入力source、developerの理解とtest evidenceから決める
+- **ルール**: AI toolのToS、data use、retention、IP、indemnity、model／feature変更を契約更新・機能変更時とrisk-based cadenceでreviewする
+- **ルール**: 許可tool、入力禁止情報、source確認、human accountability、記録、例外、incident対応をAI-assisted development policyへ定義する
+- **ルール**: AI利用の記録は監査・再現・法的義務に必要な粒度で行い、全commitへの固定labelをUniversal要件にしない
 
 ### 35.3 AIコードポリシーテンプレート
 
 | 項目 | ポリシー |
 |:----|:--------|
-| 使用許可ツール | GitHub Copilot（Business以上）、Cursor（Team以上） |
-| 公開コードフィルタ | **必須有効化** |
+| 使用許可ツール | 組織が契約・data・IP・securityを審査したtoolとfeature |
+| 公開コード照合 | 提供されるfilter／citationを有効化し、高signal matchをreview |
 | 生成コードのレビュー | 通常のPRレビュープロセスに統合 |
-| Copyleft汚染チェック | CIでOSSコード類似度スキャンを実行 |
-| 記録義務 | 大規模AI生成（ファイルの50%超）時はPR説明に明記 |
+| 第三者code照合 | riskに応じてsource lookup、類似度、license／attribution scanを実行 |
+| 記録義務 | sensitive、高影響、長い一致、外部配布等の組織triggerで根拠を記録 |
 
 → クロスリファレンス: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md)、[`security/100_data_governance.md`](../security/100_data_governance.md) §GenAI著作権
 
@@ -1339,10 +1420,10 @@ AI（ChatGPT, Copilot等）が存在しないパッケージ名を「幻覚」�
 
 ### 36.2 ルール
 
-- **ルール**: AIが推奨したパッケージ名は必ずnpm/PyPIで実在確認してから `npm install` する
-- **ルール**: パッケージの公開日・ダウンロード数・メンテナ情報を確認し、「新規公開+低DL数」のパッケージを警戒する
-- **ルール**: Socket.devの行動分析でSlopsquattingパッケージの自動検知を有効化する
-- **ルール**: CIで `npm install` 前にパッケージのProvenance検証を実施する
+- **ルール**: AI、人、templateが提案した未採用componentは、対象ecosystemのauthoritative registryまたはsource、正確なnamespace、owner、version、digest／署名、Provenanceを取得前に確認する
+- **ルール**: 公開時期、maintainer変更、downloadはsignalの一部に留め、typosquatting、install behavior、sourceとartifactの対応、権限、network access、既知incidentを複合評価する
+- **ルール**: Socket.dev等のbehavior scannerまたはsandbox、static analysis、install-script review、egress control等の同等能力をriskに応じて適用する
+- **ルール**: CI／releaseで実際に取得したartifactのsource、digest、署名、Provenance、registryをpolicyに照合し、未検証fallbackを失敗させる
 
 ---
 
@@ -1445,23 +1526,26 @@ npx depcheck --ignores="@types/*,eslint-*"
 
 ### 41.1 成熟度レベル
 
-| レベル | 名称 | 主な達成条件 | 目標達成年限 |
-|:------|:-----|:-----------|:-----------|
-| L1 | Reactive | npm auditの手動実行 / ライセンスの手動確認 | — |
-| L2 | Managed | CIにSCAツール統合 / ロックファイルコミット義務化 / 禁止ライセンス自動ブロック | 初年度 |
-| L3 | Defined | SBOM自動生成 / 自動更新（Renovate） / セキュリティパッチSLA定義 / OpenSSF Scorecard導入 | 1年以内 |
-| L4 | Quantified | VEXによる優先順位付け / 到達可能性分析導入 / OSPO機能稼働 / KPIダッシュボード運用 | 2年以内 |
-| L5 | Optimized | SLSA 3達成 / Runtime SCA / CBOM生成 / 連続的検証 / 完全OIDC TP移行 / GUAC統合 | 3年以内 |
+| レベル | 名称 | 主な達成条件 | 適用判断 |
+|:------|:-----|:-----------|:---------|
+| L1 | Reactive | ecosystem別の依存・license確認が手動で、releaseとのbindingが弱い | 可視化とowner割当を最優先する移行開始点 |
+| L2 | Managed | CIのSCA、解決正本／lockfile、禁止policy、期限付き例外 | production applicationの最低運用基線 |
+| L3 | Defined | artifact単位SBOM、更新自動化、risk-based patch SLA、外部健全性評価 | 複数repositoryまたは継続releaseの標準候補 |
+| L4 | Quantified | reachability／VEX、query可能なportfolio指標、governance機能、runtime feedback | 規制対象、大規模portfolio、高い供給網riskで優先 |
+| L5 | Optimized | 高保証artifactのSLSA Build L3とSource L4証跡、継続検証、短命publishing identity、artifact知識統合 | 脅威、規制、consumer要求に見合う範囲で採用 |
 
-### 41.2 KPI目標値（レベル別）
+達成年限はUniversalに固定しない。現在risk、repository数、release頻度、規制期限、人員、外部consumerとの契約からBlueprintにmilestone、owner、完了証跡を定める。Renovate、OpenSSF Scorecard、OSPO、GUACは実装例であり、同等能力を認める。
 
-| KPI | L2 | L3 | L4 | L5 |
-|:----|:---|:---|:---|:---|
-| Critical脆弱性対応SLA | 7日 | 24時間 | 24時間 | 4時間 |
-| SBOM生成率 | 0% | 100% | 100% | 100% |
-| VEXカバレッジ | 0% | 0% | ≥90% | ≥95% |
-| OpenSSF Scorecard平均 | N/A | ≥4.0 | ≥6.0 | ≥7.0 |
-| SLSA Level | 0 | 1 | 2 | 3 |
+### 41.2 成熟度指標の決定契約
+
+| 指標 | Universalな成果 | Blueprint parameterの例 |
+|:----|:---------------|:------------------------|
+| 脆弱性対応 | KEV／EPSS、reachability、exposure、data感度、補償統制に基づくSLAと例外証跡 | severity別期限、緊急変更経路、risk acceptance期限 |
+| SBOM | 対象release artifactの依存を完全性検証付きで追跡 | 対象artifact、必要field、保持期間。対象scopeでは100%を目標にできる |
+| VEX | 重要な脆弱性判断をstatus、根拠、timestamp、authoritative sourceへ結び付ける | 対象severity、到達可能性分析範囲、再評価cadence |
+| project health | maintainer、release、provenance、脆弱性、license、退出可能性を複合評価 | Scorecard等の参考閾値。単一scoreだけで自動拒否しない |
+| SLSA Build | 本番artifactはBuild L2を基線、高保証artifactはBuild L3を目標 | 対象artifact、builder、verification policy |
+| SLSA Source | source管理はSource L2を基線、高保証領域はSource L3／L4を目標 | protected reference、technical control、二者review範囲 |
 
 ---
 
@@ -1469,19 +1553,19 @@ npx depcheck --ignores="@types/*,eslint-*"
 
 ### 42.1 概要
 
-AI生成コードにおける「ライセンスロンダリング」とは、AI（Copilot/ChatGPT等）がCopyleftライセンスのOSSコード断片を学習し、元のライセンス情報を付与せずに出力することで、意図せずライセンス違反が発生する現象。2025年のOSSRA報告では、商用コードベースの**33%にライセンス衝突**が検出された。
+AI-assisted codeでは、第三者codeとの一致やlicense・attribution情報が欠落したまま変更へ入る可能性がある。一方、類似度だけで学習元、著作権侵害、license義務を確定することもできない。本節は由来不明codeを検出・調査・除去または適法化するevidence workflowを定める。
 
 ### 42.2 ルール
 
-- **ルール**: AI生成コードに対して、FOSSA / Snyk Code / Black Duck等のコード類似度スキャンをCIに必須統合する
-- **ルール**: 類似度スコアが一定閾値（例: 80%以上の行一致）を超えた場合、PRをブロックし手動レビューを実施する
+- **ルール**: 変更riskに応じ、code search、source citation、license header、attribution、類似度scanner等から一つ以上の独立signalを組み合わせる。FOSSA、Snyk Code、Black Duck等は参考実装である
+- **ルール**: 高signal matchはmergeを保留し、source、license version、表現の創作性、変更量、独立実装、配布影響をhumanが確認する。vendor固有scoreだけで法的結論を出さない
 - **ルール**: AI生成コードポリシーにライセンスロンダリングリスクの記述を含める
-- **ルール**: OSSコード類似度データベースを使用し、GPL/AGPL由来のコード片を検出する
+- **ルール**: 特定licenseだけでなく全第三者codeを対象に、allow、review、deny、attribution、rewrite、commercial license等の処理を組織policyから決定する
 
 ### 42.3 検出パイプライン
 
 ```yaml
-# .github/workflows/license-laundering-check.yml
+# 参考実装。組織が採用したscannerとpolicyに置換する
 - name: AI Code License Check
   run: |
     # FOSSA CLIまたは同等ツールでコード片の類似度チェック
@@ -1497,7 +1581,7 @@ AI生成コードにおける「ライセンスロンダリング」とは、AI�
 
 ### 43.1 概要
 
-RDD（Remote Dynamic Dependencies）は、パッケージのinstallスクリプトまたはランタイムコードが、インストール時にリモートサーバーから動的に依存関係をダウンロード・実行する手法。PhantomRavenキャンペーン（2025-10〜2026-02）で使用され、従来のSCAスキャンを完全に回避した。
+RDD（Remote Dynamic Dependencies）は、packageのinstall／build script、plugin、runtime code等が、解決済みinventory外のcodeやbinaryをremote sourceから取得・実行するrisk patternである。manifest中心のSCAだけでは取得先・内容・実行時点を把握できない場合がある。
 
 ### 43.2 攻撃メカニズム
 
@@ -1510,10 +1594,10 @@ RDD（Remote Dynamic Dependencies）は、パッケージのinstallスクリプ�
 
 ### 43.3 防御ルール
 
-- **ルール**: `.npmrc` で `ignore-scripts=true` をデフォルトに設定する
-- **ルール**: Socket.devの行動分析で「ネットワークアクセス」「ファイルシステムアクセス」「動的コード実行（eval）」を検知する
-- **ルール**: CIビルドでネットワーク隔離（`--network=none`）を検討する
-- **ルール**: インストール後に `node_modules` 内のネットワーク通信コードを静的解析する
+- **ルール**: ecosystemのinstall／build／plugin executionを既定拒否、最小allowlist、review済みsandboxのいずれかで管理する。`.npmrc`はNode.jsの参考実装である
+- **ルール**: network、filesystem、process、dynamic code、credential accessをbehavior scanner、static analysis、runtime policy等で検査する
+- **ルール**: 再現可能なbuildはnetworkを原則閉じ、承認済みsource、digest、protocol、phaseだけを許可し、取得物をSBOMとProvenanceへ追加する
+- **ルール**: package install後だけでなく、Gradle／Maven plugin、Python build backend、Cargo build script、compiler plugin、container build、runtime fetchを対象にする
 
 → クロスリファレンス: §27 依存関係混同攻撃対策、§23 インシデント対応
 
@@ -1677,7 +1761,7 @@ flowchart TD
 
 ### 50.1 概要
 
-WebAssembly（Wasm）コンポーネントおよびナティブバイナリ（Rust/Go/C/C++コンパイル済み成果物）の依存関係管理は、従来のエコシステムとは異なる特有のリスクを持つ。WASI 0.2コンポーネントモデルの普及に伴い、Wasm固有のSBOM管理が2026年の新興課題として浮上している。
+WebAssembly（Wasm）componentおよびnative binary（Rust／Go／C／C++のcompile済み成果物）は、従来ecosystemと異なる依存riskを持つ。stableなWASI 0.2／0.3 component、legacyな0.1 module、runtime対応差が併存するため、Wasm固有のSBOMと互換性管理をrelease concernとして扱う。
 
 ### 50.2 WasmコンポーネントのSBOM課題
 
@@ -1685,7 +1769,7 @@ WebAssembly（Wasm）コンポーネントおよびナティブバイナリ（Ru
 |:----|:-----|:------|
 | 静的リンクの同等性 | Wasmコンポーネントは全依存をバンドル内に含む | 全依存を `syft`/`trivy` でスキャン |
 | ソースマップ欠如 | コンパイル済みWasmからソース依存を逆引きしにくい | コンパイル前のソースSBOMを生成し紐づける |
-| WASI ABI互換性 | WASIバージョン（Preview1/Preview2/0.2）の依存互換性 | `wasm-tools compose` でコンポーネントグラフを可視化 |
+| WASI／component互換性 | 0.1 module、0.2／0.3 component、WIT、binding、runtime、host capabilityの互換性 | 完全なmatrixをpinし、graphのvalidate／composeとhost conformanceまたは互換testを行う。`wasm-tools`は実装例 |
 | Custom Section未対応 | 既存SCAツールがWasm Custom Sectionを無視する場合あり | `wasm-metadata`でカスタムセクションのSBOM埋め込みを確認 |
 
 ### 50.3 ネイティブバイナリのサプライチェーンリスク
@@ -1693,16 +1777,16 @@ WebAssembly（Wasm）コンポーネントおよびナティブバイナリ（Ru
 | リスク | 例 | 防御策 |
 |:------|:---|:------|
 | Caveats in C/C++ 依存 | OpenSSL, zlib, libpng の旧バージョン混入 | `syft` でバイナリ依存スキャン + SBOM生成 |
-| ビルドツールチェーン汚染 | GCC/Clangのビルドサーバー上のマルウェア | SLSA 3 + Hermetic Build強制 |
+| ビルドツールチェーン汚染 | GCC/Clangのビルドサーバー上のマルウェア | SLSA Build L3 + Hermetic Build強制 |
 | ストリップ済みシンボル | デバッグ情報削除でバージョン検出不可 | コンパイル時に `buildinfo` を埋め込む（Goの場合: `debug.ReadBuildInfo()`）|
 
 ### 50.4 ルール
 
-- **ルール**: Wasmモジュールを含むプロジェクトは、コンパイル前のソースSBOM（`Cargo.lock`/`go.sum`等）を必ず保持し、最終Wasmと紐づける
-- **ルール**: `wasm-metadata` を使用してWasmファイルにSBOM情報をCustom Sectionとして埋め込む
+- **ルール**: Wasm moduleを含むprojectは、source dependency inventoryと最終Wasm digestをProvenanceまたはrelease recordで結び付ける
+- **ルール**: consumerが必要とする場合、`wasm-metadata`等でcomponent metadataを埋め込むか、外部attestationから同じdigestへ逆引きできるようにする
 - **ルール**: npm経由で配布されるWasmパッケージ（`@ffmpeg/ffmpeg`等）は、内包するCライブラリの依存も含めてSBOMに記載する
 - **ルール**: `wasmtime`/`wasmer` 等のWasmランタイム自体も依存関係として管理し、CVEを監視する
-- **ルール**: Wasmコンポーネントの署名には `cosign` を使用し、OCI Artifact形式でContainer Registryに格納する
+- **ルール**: Wasm componentをsource revision、builder identity、digest、SBOMへ結び付けて署名またはattestし、consumerが利用できる検証可能なchannelで配布する。cosignとOCI Artifactは参考実装である
 
 ```bash
 # Wasmバイナリの依存スキャン
@@ -1725,13 +1809,13 @@ go version -m ./app.wasm
 
 ### 51.1 概要
 
-Platform Engineering（内部開発者プラットフォーム: IDP）が成熟した組織では、依存関係ガバナンスは個別チームから**プラットフォームレベルの集中制御**へ移行する。Golden Pathを通じて事前承認済み依存関係カタログを提供し、スコアカードが低い・ライセンスリスクが高い依存関係を組織レベルで排除する。
+複数repositoryまたは複数teamで同じ依存関係riskを扱う場合、規模に応じたPlatform Engineering機能が、再利用可能なpolicy、catalog、Golden Path、evidence集約を提供する。実装は担当者の共有設定、virtual team、専任platform team、IDPのいずれでもよい。各service ownerは採用理由、例外、更新、退出の責任を保持し、中央化そのものを目的にしない。
 
 ### 51.2 アーキテクチャ
 
 ```mermaid
 flowchart TD
-    A[開発チーム] --> B[IDP / Backstage]
+    A[開発チーム] --> B[Platform機能 / IDP等]
     B --> C[承認済み依存関係カタログ]
     C --> D[Allowlist Registry]
     C --> E[Denylist Registry]
@@ -1739,17 +1823,17 @@ flowchart TD
     F --> G[プロジェクト初期化]
     G --> H[承認済み依存のみプリインストール]
     B --> I[Policy-as-Code エンジン]
-    I --> J[OPA / Kyverno]
+    I --> J[Policy engine]
     J --> K[CI/CDゲートレール強制]
 ```
 
 ### 51.3 承認済み依存関係カタログ（IDP Dependency Catalog）
 
-| カタログ要素 | 内容 | ツール |
+| カタログ要素 | 内容 | 交換可能な実装例 |
 |:-----------|:-----|:------|
 | 承認済みパッケージリスト | ライセンス・セキュリティ・ヘルスメトリクスをクリアしたパッケージ | FOSSA / Endor Labs |
 | バージョン制約 | 許可バージョン範囲（SemVerレンジ） | Renovate Preset配布 |
-| Renovate Preset共有 | 全チームに統一設定を配布 | Renovate Global Config |
+| 更新policy共有 | 対象repositoryへ共通の更新原則を配布 | Renovate Global Config等 |
 | 禁止パッケージリスト | 即時ブロック対象パッケージ一覧 | OPA Policy |
 
 ### 51.4 Policy-as-Code実装例
@@ -1785,14 +1869,16 @@ deny[msg] {
 }
 ```
 
+上記のscoreやlicense集合は説明用である。実際の閾値、deny／review／allowの扱い、例外期限はrisk tierとBlueprintで定義し、単一scoreだけで採否を決めない。
+
 ### 51.5 ルール
 
-- **ルール**: IDPを運用する組織では、全チーム共通のRenovate Global Config（Preset）を中央配布し、依存更新戦略を統一する
-- **ルール**: Backstage Software Catalog に依存関係ガバナンスダッシュボードを統合し、OpenSSF Scorecard・SBOM生成状況・SLA遵守率を可視化する
-- **ルール**: Golden Path テンプレートには、承認済みの依存関係のみを含む `package.json` を提供し、初期構成から禁止依存の混入を防ぐ
-- **ルール**: OPA/Kyverno等のPolicy-as-CodeエンジンをCIに統合し、禁止依存・低スコア依存をコードレベルで自動ブロックする
+- **ルール**: 複数repositoryで統制を共有する組織は、Renovate Global Config等のversion管理された共通policyを対象範囲へ配布する。各ecosystem固有のcompatibilityと例外を上書き可能にし、全teamへの一律適用をUniversal要件にしない
+- **ルール**: 使用中のportal、catalog、dashboardまたは監査基盤で、dependency owner、SBOM生成状況、脆弱性／license exception、更新SLAを発見可能にする。Backstageは実装例である
+- **ルール**: Golden Pathまたはproject templateは、対象ecosystemの承認済みmanifest、lock方針、source policy、scan設定を提供し、`package.json`だけを前提にしない
+- **ルール**: Policy-as-Codeまたは同等のCI gateで禁止依存をblockし、低scoreは単独の自動拒否理由ではなく、risk、reachability、maintenance、Provenanceを含むreview入力として扱う
 - **ルール**: 内部ライブラリ（共通UI・SDK等）の公開にはOSSOガバナンスプロセス（§22参照）を適用し、ライセンスを明示する
-- **ルール**: プラットフォームチームは四半期ごとに承認済みカタログを更新し、EOL・低スコア化したパッケージを除去する
+- **ルール**: platform機能のownerは、riskに応じたBlueprint cadenceと重大event triggerでcatalogを再評価し、EOL、侵害、license変更、保守停止となったpackageを期限付き移行計画へ移す
 
 → クロスリファレンス: §22 OSPO、§24 監査・レポーティング、§26 OpenSSF Scorecard統合、§41 依存関係ガバナンス成熟度モデル
 
@@ -1862,12 +1948,12 @@ deny_patterns:
 
 - **ルール**: LLMフレームワークのメジャーバージョンアップデートは、AIエージェント動作の回帰テストを必須とする
 - **ルール**: MCPサーバーは**承認ホワイトリスト**で管理し、未承認サーバーの実行を環境レベルで禁止する
-- **ルール**: AIツールがコードとして提案したパッケージは、インストール前にSocket.dev等で必ず行動分析を実施する（§36参照）
-- **ルール**: LLMフレームワークのSBOMには、プロンプトテンプレート・RAGコンフィグ等の「ソフトウェア外コンポーネント」も記録する
-- **ルール**: MCPツールの実行環境には、ネットワーク隔離（Internet Egress制限）を適用し、悪意あるツールによるデータ流出を防止する
+- **ルール**: AI toolが提案したcomponentは、人が提案したcomponentと同じsource、license、Provenance、behavior、lock gateを通す（§36参照）
+- **ルール**: AI system inventoryは、riskと規制に応じてprompt、RAG configuration、model、dataset、tool／MCP server、native runtime等のsoftware外componentをSBOM、ML-BOM、model card等で相互参照する
+- **ルール**: MCP／agent toolの実行環境はdeny-by-default capability、最小egress、filesystem／secret isolation、human approval等をtool riskに応じて適用する。完全network isolationを一律要求しない
 - **ルール**: AIツールチェーン依存関係のCVEは通常の依存関係と同じSLA（§16）で対応するが、AIエージェントのPromptInjection影響評価を追加する
 - **ルール**: Agentic AIフレームワーク（LangGraph・CrewAI等）のアップグレード時は、エージェントの自律判断ロジックへの影響をステージング環境で検証する
-- **ルール**: A2AエージェントSDK（Google A2A SDK等）はすべてSBOM管理対象とし、Agent定義ファイルの署名検証を必須化する
+- **ルール**: A2A SDK、agent definition、tool manifestをrelease inventoryへ含め、配布channelが署名・attestationを提供する場合はtrust policyで検証する。未署名formatはsource、digest、review、allowlistで補完する
 
 → クロスリファレンス: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §サプライチェーン、§36 Slopsquatting対策、§43 RDD対策、[`000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLMセキュリティ
 
@@ -2151,11 +2237,11 @@ curl -sSf "https://api.first.org/data/v1/epss?cve=$CVE_ID" \
 
 ### 54.4 ルール
 
-- **ルール**: SBOMとCISA KEVカタログの自動マッチングを**週次以上**で実行する
-- **ルール**: KEV登録CVEは到達可能性分析に関わらず**3日以内**の対応を義務化する（§16参照）
-- **ルール**: EPSS ≥ 0.8のMedium CVEはHigh扱いに引き上げ、7日SLAを適用する
-- **ルール**: SCAツール（Snyk, Dependency-Track等）のKEV/EPSS連携機能を有効化する
-- **ルール**: KEVマッチ検出時は、即時にセキュリティリードへSlack通知を送信する
+- **ルール**: SBOMとCISA KEVカタログの自動マッチングを、依存変更、新規KEV公開、releaseとrisk-based cadenceで実行する。週次は安定portfolioのreference初期値である
+- **ルール**: KEV登録CVEは優先triageし、適用されるcatalog due date、法令、契約、vendor deadlineまたはBlueprint SLAで対応する（§16参照）
+- **ルール**: EPSS thresholdとseverity escalationはportfolio分布、exposure、reachability、誤検知costからBlueprintで校正する
+- **ルール**: 採用SCAまたは同等pipelineでKEV／EPSS／reachabilityを結合し、判定根拠を機械可読に保持する
+- **ルール**: KEV matchはaccountable security routeへ即時通知する。security leadとSlackは実装例である
 
 → クロスリファレンス: §16 セキュリティパッチ適用SLA、§28 VEX、§45 連続的検証
 
@@ -2334,12 +2420,12 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 
 ### 56.5 ルール
 
-- **ルール**: 全てのリリースビルドで `SOURCE_DATE_EPOCH` を設定し、タイムスタンプ依存を排除する
-- **ルール**: `npm ci --ignore-scripts` （またはタスクに応じた同等コマンド）を使用し、インストールスクリプトを無効化したHermeticビルドを実施する
-- **ルール**: SLSA 3を目標とし、`actions/attest-build-provenance` でビルド来歴（Provenance）を生成・検証する
-- **ルール**: リリース毎に `sha256sum` でビルド成果物のハッシュを記録し、SBOM内のComponent Hashと一致することを確認する
-- **ルール**: 成熟度L4以上（§41参照）の組織では、Bazel/Buck2等のHermetic Buildツールの採用を評価する
-- **ルール**: Rekorの透明性ログを活用し、リリース成果物が正規のCIパイプラインから生成されたことを消費者側で検証可能にする
+- **ルール**: target ecosystemが対応する場合、`SOURCE_DATE_EPOCH`、compiler flag、normalized archive、deterministic ordering等で非決定inputを制御し、再現性testで残差を記録する
+- **ルール**: build inputを事前解決し、network、clock、locale、filesystem、credential、install script等を明示policyで制限する。`npm ci --ignore-scripts`はNode.jsの参考手段である
+- **ルール**: SLSA Build L3を目標とし、`actions/attest-build-provenance` 等でビルド来歴（Provenance）を生成し、policy gateで検証する
+- **ルール**: release artifactのcryptographic digestを記録し、SBOM、Provenance、signature、distribution metadataと同じsubjectへ結び付ける。hash algorithmとtoolはpolicyで選ぶ
+- **ルール**: 高保証artifactでは、Bazel、Buck2、Nix、containerized builder等のhermetic capabilityを、既存build systemと移行costを含めて評価する
+- **ルール**: transparency logまたは同等のappend-only evidenceを利用できる場合、consumerが正規builderとartifact digestを検証できるようにする。Rekorを全環境へ要求しない
 
 → クロスリファレンス: §9 サプライチェーンセキュリティ基盤（SLSA）、§41 依存関係ガバナンス成熟度モデル
 
@@ -2352,6 +2438,8 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 SBOMを「生成する」だけでは不十分。**SBOMの品質（正確性・完全性・鮮度・機械可読性）**を定量的に評価し、継続的に改善する。CISA / NTIAのSBOM最小要素基準（§7参照）を超えた「高品質SBOM」の実現が2026-2027年の目標。
 
 ### 57.2 SBOM品質の5次元評価モデル
+
+次の値はreference profileであり、標準適合をscoreから推定する規則ではない。必要field、component範囲、許容欠落、freshness、formatは対象artifact、consumer contract、CISA等の適用profileから定義する。
 
 | 次元 | 評価観点 | 最低品質 | 高品質 |
 |:----|:--------|:---------|:------|
@@ -2386,7 +2474,7 @@ def score_sbom(sbom_path: str) -> dict:
     # 各次元の充足率
     dimension_scores = {k: v / total * 100 for k, v in scores.items()}
 
-    # 総合スコア（NIST SSDF準拠の重み付け）
+    # 組織固有reference profileの重み。標準適合判定には使用しない
     weights = {'has_version': 0.2, 'has_hash': 0.25, 'has_purl': 0.25,
                'has_license': 0.2, 'has_supplier': 0.1}
     total_score = sum(dimension_scores[k] * w for k, w in weights.items())
@@ -2396,7 +2484,7 @@ def score_sbom(sbom_path: str) -> dict:
         'grade': 'A' if total_score >= 90 else 'B' if total_score >= 70 else 'C' if total_score >= 50 else 'F',
         'component_count': total,
         'dimensions': dimension_scores,
-        'ntia_conformance': total_score >= 80,  # NTIA最小要素達成
+        'profile_score_only': True,
     }
 
 if __name__ == '__main__':
@@ -2425,11 +2513,11 @@ if __name__ == '__main__':
 
 ### 57.5 ルール
 
-- **ルール**: 全SBOMに対して `ntia-conformance-checker` を実行し、NTIA最小要素の100%充足を確認する
-- **ルール**: §57.2の5次元評価でスコア**70点未満（Cグレード）**のSBOMはリリースをブロックする
-- **ルール**: PURLを全コンポーネントに付与し、SBOM間の相互参照を可能にする
-- **ルール**: SBOMの品質スコアを§24のKPIダッシュボードに組み込み、月次でトレンドを追跡する
-- **ルール**: SBOM品質スコア90点（Aグレード）の達成を**1年以内**の目標として設定する
+- **ルール**: 対象SBOMを選択したCycloneDX／SPDX schema、consumer profile、適用されるCISA最小要素等へ直接validateする。`ntia-conformance-checker`は対応profile向けの参考実装である
+- **ルール**: release gateは必須field、対象component coverage、subject digest、dependency relationship、schema、consumer requirementの欠落をblockする。組織固有の総合70点だけをUniversal block条件にしない
+- **ルール**: PURL、CPE、SWID、supplier identifier等はcomponentとecosystemに適合するidentifierを使用し、存在しない・不正確なPURLを強制しない
+- **ルール**: 品質dimensionと欠落理由をrelease、generator、artifact type別に追跡し、trend cadenceをportfolio riskから定める
+- **ルール**: 改善目標は測定baseline、consumer need、規制deadline、generator capabilityから設定し、固定90点・1年をUniversal目標にしない
 
 → クロスリファレンス: §7 SBOM生成、§8 SBOM規制コンプライアンス、§24 監査・レポーティング
 
@@ -2443,7 +2531,7 @@ if __name__ == '__main__':
 
 ### 58.2 uv（Python）
 
-**特性**: AstralがRustで実装した超高速Pythonパッケージマネージャ。`pip`/`poetry`/`pipenv`の後継として急速に普及（2025年末：GitHub Stars 47K+）。
+**特性**: AstralがRustで実装した高性能なPython package / project manager。lock、sync、audit、exportを一つのtoolchainで扱える。
 
 ```bash
 # uv基本セットアップ
@@ -2451,80 +2539,71 @@ uv init myproject
 uv add requests numpy  # 依存追加（uv.lockが自動生成）
 
 # セキュリティスキャン
-uv pip audit  # pip-auditと統合（2025年Q3より）
+uv audit --frozen  # lockfileを再解決せず既知脆弱性を監査
 
-# SBOM生成（uv環境対応）
-uv export --format requirements-txt | \
-  python3 -m cyclonedx sbom --from-pip-requirements /dev/stdin > sbom.cdx.json
+# SBOM生成。lockfile driftを拒否してuvから直接CycloneDX 1.5を出力
+uv export --locked --format cyclonedx1.5 > sbom-uv.cdx.json
 
 # CI: ロックファイルを凍結してインストール
-uv sync --frozen  # uv.lockが変更されている場合はエラー
+uv sync --locked  # pyproject.tomlとuv.lockが不整合ならエラー
 ```
 
 **ガバナンスルール**:
 - **ルール**: `uv.lock` を **必ずコミット**する（`pip install` 等による生成は禁止）
-- **ルール**: CIでは `uv sync --frozen` を使用し、ロックファイル凍結を強制する
-- **ルール**: `pip-audit` または `uv pip audit` で脆弱性スキャンを実施する
-- **ルール**: Python 3.12以降のプロジェクトでは `uv` の採用を推奨し、`requirements.txt` の生成より `uv.lock` の管理を優先する
+- **ルール**: CIでは `uv sync --locked` を使用し、古いlockfileの見逃しと暗黙更新を防止する
+- **ルール**: `uv audit --frozen` または `pip-audit` で脆弱性スキャンを実施する
+- **ルール**: previewである`uv export --locked --format cyclonedx1.5`の出力はuv版をpinしてschemaと依存coverageをvalidateし、組織標準のCycloneDX / SPDX版へnormalizeして統合する。要件を満たせない場合は承認済みgeneratorへfallbackする
+- **ルール**: uv採用projectではPython版数だけを根拠に他toolchainから強制移行せず、`engineering/320_programming_language_governance.md`の採用契約に従う。採用後は`uv.lock`を依存解決の正本とし、重複する`requirements.txt`との二重管理を避ける
 
 ### 58.3 Bun（JavaScript/TypeScript）
 
-**特性**: JavaScriptランタイム・バンドラ・パッケージマネージャの統合ツール。npmより最大25倍高速とされる。
+**特性**: JavaScriptランタイム・bundler・package managerの統合ツール。Bun 1.2以降はhuman-readableな`bun.lock`を既定とする。
 
 ```bash
-# Bunのロックファイル管理
-bun install  # bun.lockb（バイナリ形式）を生成
+# Bunのtext lockfileを生成。既存bun.lockbは公式migration手順で移行
+bun install  # bun.lockを生成
 
-# ロックファイルの差分確認（バイナリのため直接diffは不可）
-bun install --print-lockfile  # テキスト出力で差分確認
+# CI: package.jsonとbun.lockの不整合および再解決を禁止
+bun ci
 
-# セキュリティ監査（bunは現状audit機能が限定的）
-# → npmの依存関係ファイルと統合してSnyk/Socket.devを使用
-npx snyk test --file=bun.lockb  # Snyk対応（2025年Q4〜）
-socket scan --lockfile bun.lockb  # Socket.dev対応
+# 既定registryの既知脆弱性を監査
+bun audit --audit-level=high
 
 # SBOM生成
-# bunはCycloneDXプラグイン未対応のため、package.jsonベースで生成
-npx @cyclonedx/cyclonedx-npm --output-file sbom.cdx.json
+# source treeとrelease artifactの双方から生成
+syft dir:. -o cyclonedx-json=sbom-source.cdx.json
+syft ./dist -o cyclonedx-json=sbom-artifact.cdx.json
 ```
 
 **ガバナンスルール**:
-- **ルール**: `bun.lockb` を **必ずコミット**する
-- **ルール**: PRレビューで `bun install --print-lockfile` の出力を人間可読形式で確認する
-- **ルール**: bunの`audit`機能が成熟するまで、Snyk/Socket.devをSCAとして必ず併用する
-- **ルール**: Bunプロジェクトのライセンスチェックは `license-checker` を npm経由で実行する
+- **ルール**: `bun.lock` を **必ずコミット**し、CIは`bun ci`または`--frozen-lockfile`を強制する
+- **ルール**: `trustedDependencies`とdependency lifecycle scriptを最小allowlistとしてreviewする
+- **ルール**: `bun audit`が対象外とする非既定registry等は、OSV-Scanner、Snyk、Socket.dev等で補完する
+- **ルール**: source manifestだけでなくrelease artifactのSBOMとlicenseを検査する
 
 ### 58.4 cargo-auditable（Rust）
 
-**特性**: コンパイル済みRustバイナリに依存関係情報（`Cargo.lock`相当）をELFセクションとして埋め込むツール。デプロイ後のバイナリから直接SBOMを生成可能にする。
+**特性**: コンパイル済みRust実行形式の専用linker sectionへ依存関係情報（`Cargo.lock`相当）を埋め込むツール。Linux、Windows、macOS、WebAssemblyを含む対応形式で、デプロイ後のバイナリから依存inventoryを復元可能にする。
 
 ```bash
 # cargo-auditableのインストールと設定
 cargo install cargo-auditable cargo-audit
 
-# auditableフラグを有効化してビルド（依存情報をバイナリに埋め込む）
-RUSTFLAGS="-C codegen-units=1" cargo auditable build --release
+# cargo-auditable経由でlocked release build（依存情報をバイナリに埋め込む）
+cargo auditable build --locked --release
 
 # デプロイ済みバイナリから依存情報を抽出
 cargo audit bin ./target/release/myapp
 
-# SBOM生成（バイナリから直接）
-cargo auditable list --binary ./target/release/myapp --json | \
-  python3 scripts/auditable-to-cyclonedx.py > sbom-binary.cdx.json
-
-# CI/CD設定例
-# .cargo/config.toml
-[build]
-rustflags = ["-C", "codegen-units=1"]
-# CARGO_AUDITABLE=1 環境変数設定でビルド時に自動埋め込み
+# SBOM生成（cargo-auditable情報を読めるSyft 1.15+の例）
+syft packages ./target/release/myapp \
+  -o cyclonedx-json=sbom-binary.cdx.json
 ```
 
 ```yaml
 # .github/workflows/rust-sbom.yml
 - name: Build with cargo-auditable
-  env:
-    CARGO_AUDITABLE: "1"
-  run: cargo build --locked --release
+  run: cargo auditable build --locked --release
 
 - name: Extract SBOM from binary
   run: |
@@ -2533,62 +2612,63 @@ rustflags = ["-C", "codegen-units=1"]
 ```
 
 **ガバナンスルール**:
-- **ルール**: Rustプロジェクトは全てのリリースビルドで `CARGO_AUDITABLE=1` を設定し、バイナリにSBOM情報を埋め込む
-- **ルール**: `cargo audit` に加え `cargo audit bin` をCI・デプロイ後検証の両方で実行する
-- **ルール**: `Cargo.lock` を **必ずコミット**し（バイナリクレートでも）、`cargo build --locked` を強制する
-- **ルール**: `cargo-auditable` で埋め込んだSBOM情報をインシデント対応時の影響範囲特定に活用する（§23参照）
+- **ルール**: デプロイ済みnative binaryまたはcontainerからRust依存を逆引きする要件があるprojectは、`cargo auditable build`または同等のartifact-linked dependency inventoryを採用する。metadataを載せられないembedded artifactは、artifact digest、`Cargo.lock`、compiler / LLVM版、SBOM、provenanceを署名済みrelease recordで結び付ける
+- **ルール**: sourceの`cargo audit`をCIで実行し、cargo-auditable情報を埋め込んだ配布binaryは`cargo audit bin`または対応scannerでrelease後も検証する
+- **ルール**: deploy可能なapplicationと実行rootは`Cargo.lock`をcommitし、`cargo build --locked`を強制する。公開libraryはCargoのconsumer互換性慣行に従い、CI / release解決と依存証跡を固定する
+- **ルール**: 埋め込んだinventoryはインシデント時の影響範囲特定に利用するが、SBOMだけでsupply-chain attackを防げると仮定せず、source review、provenance、署名、必要時`cargo-vet`等の信頼評価を併用する（§23参照）
 
 ### 58.5 パッケージマネージャ比較・移行判断マトリクス
 
 | 観点 | npm | pnpm | Bun | uv（Python） | cargo + cargo-auditable |
 |:----|:----|:-----|:----|:------------|:-----------------------|
-| ロックファイル | ✅ 成熟 | ✅ 成熟 | ⚠️ バイナリ形式 | ✅ 成熟（GA 2025） | ✅ `Cargo.lock` |
-| SCAツール対応 | ✅ 全ツール | ✅ 全ツール | ⚠️ 一部未対応 | ⚠️ `pip-audit`要 | ✅ `cargo-audit` |
-| SBOM生成 | ✅ DX公式 | ✅ DX公式 | ⚠️ 間接 | ⚠️ 間接 | ✅ バイナリから直接 |
-| 成熟度 | ✅ 安定 | ✅ 安定 | 🟡 成長中 | 🟡 成長中 | ✅ 安定 |
-| CI推奨コマンド | `npm ci` | `pnpm install --frozen-lockfile` | `bun install --frozen-lockfile` | `uv sync --frozen` | `cargo build --locked` |
+| ロックファイル | ✅ 成熟 | ✅ 成熟 | text `bun.lock` | `uv.lock` | ✅ `Cargo.lock` |
+| SCAツール対応 | ✅ 広い | ✅ 広い | `bun audit` + 外部補完 | `uv audit` / `pip-audit` | ✅ `cargo-audit` |
+| SBOM生成 | ✅ DX公式 | ✅ DX公式 | ⚠️ artifact scanner経由 | ⚠️ CycloneDX 1.5 preview直接出力 | ✅ バイナリから復元可能 |
+| 成熟度 | ✅ 安定 | ✅ 安定 | project評価 | project評価 | ✅ 安定 |
+| CI推奨コマンド | `npm ci` | `pnpm install --frozen-lockfile` | `bun ci` | `uv sync --locked` | `cargo build --locked` |
 
 → クロスリファレンス: §14 ロックファイル整合性、§30 マルチエコシステム依存関係管理、§50 WebAssembly / ネイティブバイナリ
 
 ---
 
-## §59. NIS2指令：ソフトウェア供給者セキュリティ義務
+## §59. NIS2指令：適用性とソフトウェア供給網
 
 ### 59.1 概要
 
-NIS2指令（Directive (EU) 2022/2555、2024年10月各国完全移管）は、**重要インフラをソフトウェアで支援するサプライヤー**にも間接的なサイバーセキュリティ義務を課す。CRA（製品）とNIS2（サービス・インフラ）は相互補完関係にあり、OSS依存関係管理はその両方の対象となる。
+NIS2指令（Directive (EU) 2022/2555）の移管期限は2024-10-17だが、加盟国ごとの移管・適用状況は変化し、2026年7月時点でも欧州委員会の手続きが継続している。指令の直接義務をすべてのsoftware supplierやOSS projectへ一律適用しない。組織はentity、sector、規模、service、加盟国の国内法を確認し、covered essential／important entity、その直接supplier、契約上のflow-downを区別する。
 
 ### 59.2 NIS2がOSS依存関係管理に与える影響
 
 | NIS2要件 | 依存関係管理への影響 | 参照セクション |
 |:---------|:------------------|:-------------|
-| Art. 21 サイバーセキュリティリスク管理措置 | OSSサプライチェーンリスク評価の書面化義務 | §12, §41 |
-| Art. 21(d) サプライチェーンセキュリティ | 主要OSSコンポーネントのリスクプロファイル文書化 | §24, §44 |
-| Art. 23 インシデント報告（24h以内） | OSSサプライチェーンインシデントも対象範囲 | §23 |
-| Art. 32-35 エンティティ監督 | 監督機関への技術文書提出（SBOM含む可能性） | §7, §8 |
-| Recital 86 サプライヤー責任 | 重大なOSSコンポーネントをCritical ICT Supplierとして評価 | §47 |
+| Art. 20 governance | covered entityのmanagement bodyがArt. 21措置を承認・監督し、必要なtrainingを受ける | §22, §24 |
+| Art. 21 risk-management | 適切かつ比例的なtechnical、operational、organizational措置に供給網securityを含める | §12, §41, §44 |
+| Art. 23 incident reporting | covered entityのsignificant incidentに24時間early warning、72時間notification、原則1か月以内final report | §23 |
+| 加盟国国内法・契約 | scope、authority、追加deadline、証跡、supplier flow-downは国と契約で確認 | §8, §24 |
 
 > [!IMPORTANT]
-> NIS2の「本質的エンティティ（Essential Entity）」または「重要エンティティ（Important Entity）」に該当する場合、OSSサプライチェーンリスク評価が経営責任として帰属する。CTO/CISOレベルでの承認が必要。
+> NIS2のessential／important entityに該当する場合、Art. 20に従うmanagement bodyがArt. 21措置を承認・監督する。CTO、CISO等の固定役職へUniversalに置換せず、国内法と組織のgovernanceでaccountable bodyを特定する。
 
 ### 59.3 NIS2対応チェックリスト（OSS依存関係)
 
 | 項目 | 対応内容 | 証跡 |
 |:----|:--------|:-----|
-| ICTサプライヤーリスト | 主要OSSライブラリをICT Supplierとして登録 | サプライヤー台帳 |
-| リスク評価 | Bus Factor・EOL・脆弱性履歴の評価 | リスク評価書 |
-| セキュリティ要件 | 重要OSS依存のOpenSSF Scorecard ≥ 6.0 | §26 |
-| インシデント報告フロー | OSSサプライチェーンインシデントの24h報告体制 | §23 ランブック |
-| 退出戦略 | Critical依存の代替計画文書 | 退出戦略書 |
-| 年次レビュー | NIS2要件への適合性の年次確認 | 監査レポート |
+| 適用性 | entity、sector、規模、service、加盟国、国内法、authorityを記録 | dated applicability memo |
+| component／supplier inventory | critical serviceへ到達するOSS、商用supplier、build・registry・CI providerを追跡 | SBOM、service map、supplier ledger |
+| 比例的risk評価 | exposure、代替可能性、maintenance、EOL、脆弱性、Provenance、concentrationを複合評価 | risk decision record |
+| incident reporting | significant判定、24h／72h／1か月のclock、authority、customer連絡を国内法へ合わせる | tested runbook |
+| exit／continuity | critical dependencyとservice providerの代替、fork、data export、credential rotationを準備 | exit planとexercise evidence |
+| governance | management bodyの承認、実装監督、training、exceptionを証拠化 | minutes、training、risk register |
 
 ### 59.4 ルール
 
-- **ルール**: NIS2の「本質的/重要エンティティ」に該当する場合、主要OSSコンポーネントをICTサプライヤーリストに登録し、年次リスク評価を実施する
-- **ルール**: OSSサプライチェーンインシデントをNIS2のArt. 23に準拠した**24時間以内の初期通知**対象として、インシデント対応プレイブックに明記する
-- **ルール**: Bus Factor=1のCritical依存関係（§47参照）は、NIS2「集中リスク」として特別管理する
-- **ルール**: NIS2コンプライアンス証跡として、SBOMと脆弱性パッチ実績（SLA遵守記録）を3年間保持する
-- **ルール**: EU加盟国での事業展開時、各国のNIS2国内実装法（Germany BSIG 2.0、France LPM等）の追加要件を確認する
+- **ルール**: NIS2 applicabilityを一次資料と現行国内法で判定し、last verified日時、legal owner、対象service、再評価triggerを記録する
+- **ルール**: covered entityはsignificant incident判定をrunbook化し、適用される国内法に従い24時間early warning、72時間notification、final report等を実行する。すべてのdependency findingを自動的な法定通知対象にしない
+- **ルール**: concentration riskはbus factorだけでなく、代替、market share、switching cost、data portability、privileged access、service criticalityを複合評価する
+- **ルール**: SBOM、patch、incident、supplier、governance証跡の保持期間は、国内法、authority要求、契約、訴訟hold、製品support期間からrecords scheduleに定める。固定3年をUniversal要件にしない
+- **ルール**: EUでserviceを提供する場合、欧州委員会の移管statusと対象加盟国の最新lawを確認し、指令本文だけで実装完了としない
+
+公式一次資料: [Directive (EU) 2022/2555](https://eur-lex.europa.eu/eli/dir/2022/2555/oj)、[European Commission NIS2 transposition status](https://digital-strategy.ec.europa.eu/en/policies/nis-transposition)
 
 → クロスリファレンス: §8 SBOM規制コンプライアンス、§23 依存関係侵害インシデント対応、§44 DORA ICTサプライチェーン要件、§47 メンテナバーノウトリスク対策
 
@@ -2598,7 +2678,7 @@ NIS2指令（Directive (EU) 2022/2555、2024年10月各国完全移管）は、*
 
 ### 60.1 概要
 
-GitHub Copilot、Cursor、Windsurf等のAI IDEが標準ツールとなった2025-2026年において、**AIがコードを書く時点でのリアルタイムSCA（Software Composition Analysis）**が新たな防衛線となる。コードがPRになる前、**AIが依存関係を提案した瞬間**にライセンス・脆弱性・行動分析を実施する。
+AI IDE、agent、code generatorは、利用者が内容を十分確認する前に新しいdependencyやimportを提案できる。防御契約は、提案時の早いfeedback、取得前のsource確認、変更差分のpolicy評価、CI／releaseでのauthoritative gate、例外証跡を組み合わせる。IDE内検査は補助であり、導入していないIDEやnon-interactive agentにも適用できる設計にする。
 
 ### 60.2 AI IDE固有のリスクベクター
 
@@ -2606,11 +2686,13 @@ GitHub Copilot、Cursor、Windsurf等のAI IDEが標準ツールとなった2025
 |:------|:-----|:----|
 | ハルシネーション由来の不存在パッケージ | AIが存在しないパッケージ名を生成 → Slopsquatting攻撃に悪用される | §36 |
 | 古いバージョンの推奨 | AIが学習データの古いバージョン（脆弱性あり）を提案 | CVE混入 |
-| ライセンス未考慮の提案 | AIがGPL/AGPLライセンスパッケージを自然に提案 | ライセンス汚染 |
+| ライセンス未考慮の提案 | AIが製品の利用・配布policyと整合しないlicenseを提案 | 未評価のlicense義務 |
 | MCP経由のパッケージ注入 | 悪意あるMCPサーバーが改ざんされたコード例を注入（PromptInjection） | §52 |
 | 学習データの著作権コード引用 | AIが著作権コードをそのまま出力（§35参照） | IP侵害 |
 
-### 60.3 IDE統合型SCA実装パターン
+### 60.3 IDE統合型SCAの交換可能な参考パターン
+
+以下のSnyk、Socket.dev、Husky、ESLint、npmは特定stack向けの参考例であり、Universal要件ではない。editor pluginが使えない環境では、language server、package-manager plugin、wrapper command、sandbox、CI diff gate等で同じ成果を実現する。
 
 ```yaml
 # .vscode/settings.json（VS Code + 拡張で実現）
@@ -2623,7 +2705,7 @@ GitHub Copilot、Cursor、Windsurf等のAI IDEが標準ツールとなった2025
 ```
 
 ```bash
-# pre-commit フックベースのSCA（最低保証ライン）
+# pre-commitフックを使う場合の早期feedback例。CI gateの代替にはしない
 # .husky/pre-commit
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
@@ -2659,48 +2741,48 @@ module.exports = {
 };
 ```
 
-### 60.4 GitHub Copilot向け依存関係ポリシー連携
+### 60.4 AI coding tool向け依存関係policy template
 
 ```yaml
-# .github/copilot/instructions.md（Copilot用インストラクション）
-# AI IDEに依存関係ポリシーを記述し、AI提案を誘導する
+# AI toolが読み込めるproject instructionの参考例
+# 実際のpathとsyntaxは採用toolへ合わせる
 
 ## Dependency Policy
-- Always prefer packages with MIT or Apache-2.0 license.
-- NEVER suggest GPL, AGPL, SSPL, BSL, or Elastic-licensed packages.
-- Before suggesting any npm package, confirm it exists on https://www.npmjs.com/
-- Prefer packages with OpenSSF Scorecard ≥ 5.0
-- For Python: Use `uv add` instead of `pip install`
-- For date/time manipulation, prefer `date-fns` over `moment.js`
+- Do not add a dependency until the need, existing alternatives, and owner are recorded.
+- Resolve components only from the approved source policy for the target ecosystem.
+- Evaluate the exact version and SPDX expression against the versioned license policy.
+- Verify digest, signature, provenance, maintenance, vulnerabilities, and install behavior.
+- Use the project's pinned package manager and locked or frozen workflow.
+- Never bypass a policy gate; propose an expiring exception with evidence.
 ```
 
 ### 60.5 ルール
 
-- **ルール**: AI IDEを使用する開発環境に、SnykまたはSocket.devのIDE拡張をインストールし、リアルタイムSCAを有効化する
-- **ルール**: `pre-commit` フックに `package.json` 変更時のSCA自動スキャンを統合し、AI提案依存のCIリーチ前検出を実現する
-- **ルール**: GitHub Copilot / Cursor等のカスタムインストラクション（`.github/copilot/instructions.md` / `.cursorrules`）に依存関係ポリシーを明記し、AI提案を許可ライセンス・高スコアパッケージに誘導する
-- **ルール**: AIが提案したパッケージは、インストール前に必ずnpmレジストリでの実在確認とSocket.devスキャンを実施する（Slopsquatting対策 §36参照）
-- **ルール**: MCP経由のコード提案（Agentic Coding）については、提案されたパッケージの自動行動分析（Socket.dev API連携等）をCDEパイプラインに組み込む
+- **ルール**: 採用editor、IDE、agent、CLIで利用可能な早期feedbackを提供するが、特定vendor extensionを全開発者の必須条件にしない
+- **ルール**: dependency manifest、lock、source設定、lifecycle script、generated codeの変更をlocalまたはpre-commitで早期検出し、同じversioned policyをauthoritative CI gateで再評価する
+- **ルール**: AI toolがproject instructionを読み込める場合、依存追加手順、approved source、license policy、lock workflow、例外禁止を記述し、instruction自体をreview・version管理する
+- **ルール**: AI提案componentは対象ecosystemのauthoritative sourceで実在、namespace、version、owner、digest／署名、Provenanceを確認し、riskに応じたbehavior analysisを実行する（§36参照）
+- **ルール**: MCPやagent経由の提案にも同じgateを適用し、tool出力をtrusted inputとせず、取得・install・実行権限をsandboxとpolicyで分離する
 
 → クロスリファレンス: §36 Slopsquatting対策、§52 LLM/AIツールチェーン依存関係管理、§35 AI生成コードのライセンスリスク、§11 CIパイプラインガードレール
 
 ---
 
-## §61. SBOM Federation（OCI Artifact配布標準）
+## §61. SBOM Federation（OCI Artifact参考パターン）
 
 ### 61.1 概要
 
-「SBOMを生成する」フェーズから「SBOMを組織横断で流通・検索・照合する」フェーズへ。**SBOM Federation**は、複数チーム・組織・エコシステムにまたがるSBOMを統一的に配布・消費・照合するアーキテクチャパターン。OCI Artifact形式による配布、GitHub Container Registry（GHCR）への格納、Dependency-Trackによる中央一元管理が2026年のベストプラクティス。
+「SBOMを生成する」フェーズから「SBOMを組織横断で流通・検索・照合する」フェーズへ。**SBOM Federation**は、複数チーム・組織・エコシステムにまたがるSBOMを一貫して配布・消費・照合するアーキテクチャパターンである。Universalで固定するのは、機械可読なSBOM、対象成果物との完全性保護された関連付け、検証可能な配布、検索可能な台帳、脆弱性・VEX照合という成果である。OCI Artifact、コンテナレジストリ、Dependency-Track、GUACは参考実装であり、組織は相互運用性、保持、可用性、データ所在、費用、既存基盤に応じてBlueprintで選定する。
 
 ### 61.2 SBOMライフサイクルとFederation
 
 ```mermaid
 flowchart LR
     A[ビルドCI] -->|生成| B[SBOM cdx.json / spdx.json]
-    B -->|OCI Artifact形式でプッシュ| C[Container Registry]
-    C --> D[Dependency-Track]
-    C --> E[消費者 CI/Scanner]
-    D --> F[統合脆弱性DB / GUAC]
+    B -->|digestへ関連付け| C[検証可能なEvidence Store]
+    C --> D[検索可能なSBOM台帳]
+    C --> E[消費者 CI/Scanner/API]
+    D --> F[脆弱性・VEX・Provenance照合]
     E --> G[KEV照合 / VEX取得]
     F --> H[全組織横断リスクダッシュボード]
 ```
@@ -2708,14 +2790,18 @@ flowchart LR
 ### 61.3 OCI Artifact形式でのSBOM格納
 
 ```bash
+# 参考実装。レジストリ、名前空間、認証方式はBlueprintで置換する
 # SBOM を OCI Artifact として GHCR に push
 oras push ghcr.io/myorg/myapp:sbom-$(git rev-parse HEAD) \
   --artifact-type application/vnd.cyclonedx+json \
   sbom.cdx.json:application/vnd.cyclonedx+json
 
-# cosign でSBOMに署名（改ざん防止）
+# CycloneDXが認識する公式predicate type
+CDX_PREDICATE_TYPE="https://cyclonedx.org/bom"
+
+# cosign でSBOMをアテステーションとして関連付ける
 cosign attest --predicate sbom.cdx.json \
-  --type https://cyclonedx.org/bom \
+  --type "${CDX_PREDICATE_TYPE}" \
   ghcr.io/myorg/myapp:v1.0.0
 
 # 消費者側: コンテナイメージに付属するSBOMを取得
@@ -2723,13 +2809,13 @@ oras pull ghcr.io/myorg/myapp:sbom-${COMMIT_SHA}
 
 # cosign でSBOMの署名検証
 cosign verify-attestation \
-  --type https://cyclonedx.org/bom \
+  --type "${CDX_PREDICATE_TYPE}" \
   --certificate-identity=github.com/myorg/myapp \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
   ghcr.io/myorg/myapp:v1.0.0 | jq '.payload | @base64d | fromjson'
 ```
 
-### 61.4 Dependency-Track中央管理設定
+### 61.4 Dependency-Trackを使う場合の参考設定
 
 ```yaml
 # .github/workflows/sbom-upload.yml — SBOMのDependency-Trackへの自動アップロード
@@ -2757,12 +2843,12 @@ jobs:
 
 ### 61.5 ルール
 
-- **ルール**: 全リリースSBOMを **OCI Artifact形式** でContainer Registry（GHCR/ECR/GCR等）に格納し、コンテナイメージと同一リポジトリで管理する
-- **ルール**: SBOMに `cosign attest` で署名し、消費者が `cosign verify-attestation` で真正性を確認できる検証可能な証跡を提供する
-- **ルール**: **Dependency-Track**または同等のSBOM管理プラットフォームに全プロジェクトのSBOMを自動アップロードし、横断的な脆弱性照合を実現する
-- **ルール**: SBOM Federationの参照アーキテクチャとして、ORAS（OCI Registry as Storage）CLI を標準ツールとして採用する
-- **ルール**: 外部パートナー・顧客向けにSBOMを提供する場合、OCI Artifact URL（+ 署名検証手順）を納品物に含める
-- **ルール**: 取得したSBOMの鮮度（生成日時）を確認し、**14日超過**のSBOMは再生成を要求する
+- **ルール**: release SBOMを対象artifactのimmutable identifier／digest、生成器、timestamp、source revision、build provenanceへ結び付け、policy-approvedな改ざん検知可能evidence channelへ保持する。OCI Artifactは選択肢の一つであり、container registryや同一repositoryを一律要求しない
+- **ルール**: consumerがissuer、subject digest、predicate type、signature／attestation、trust policyを検証できるようにする。cosign、in-toto、Sigstore bundle、registry-native signing等は交換可能な実装である
+- **ルール**: 複数project／teamのSBOMを検索し、component、version、service owner、脆弱性、VEX、releaseへ相互参照できるinventoryを持つ。Dependency-Track、GUAC、data warehouse、graph DB等は参考実装である
+- **ルール**: ORAS等のclient、API、event、batch uploadは採用storageとconsumerへ合わせて選び、単一CLIをUniversal標準にしない
+- **ルール**: 外部partner／customerには、契約、調達portal、規制、機密性に合うfile、API、attestation、URL等でSBOMと検証手順を提供する。内部path、脆弱性、supplier情報のaccess controlも定義する
+- **ルール**: SBOMは対象artifact digestと一致し、releaseまたはdependency／build変更時に生成され、必要fieldと直接・推移dependencyを満たすことをfreshness条件とする。固定14日ではなく、artifact変更、consumer契約、incident、policy SLAを再生成triggerにする
 
 → クロスリファレンス: §7 SBOM生成・ライフサイクル管理、§57 SBOM品質成熟度モデル、§9.4 Sigstore統合、§46 OpenSSF GUAC統合
 
@@ -2831,18 +2917,18 @@ jobs:
 
 ### 62.4 ML BOMとData SBOMの関係
 
-- **Data SBOM**（§55参照）: EU AI Act Art.53義務。学習データのライセンス追跡に特化
+- **Data inventory／Data BOM**（§55参照）: 適用性に応じ、学習・評価dataのsource、権利、version、governanceを追跡
 - **ML BOM**: より広範な「AIシステム全体の材料目録」。モデル・データ・コード・インフラを統合
 - **CBOM**（§29参照）: 暗号資産インベントリ。ML BOM内の暗号コンポーネントをCBOMで補完
 
 ### 62.5 ルール
 
-- **ルール**: 社内開発・デプロイするAIシステムは、コードSBOM（§7）に加えてML BOMを作成し、モデルウェイト・主要データセットを記録する
-- **ルール**: ML BOMフォーマットはCycloneDX 1.6+の `machine-learning-model` / `data` コンポーネント型を使用し、既存SBOMと統合管理する
-- **ルール**: モデルウェイトの **PURL（pkg:huggingface/...）**を採用し、バージョン追跡とSBOM相互参照を可能にする
-- **ルール**: ML BOMのデータコンポーネントには、§55の学習データライセンスマニフェスト（`training-data-manifest.yml`）の参照URLを記録する
-- **ルール**: AIシステムのリリース毎にML BOMをリフレッシュし、モデルバージョン・データセットバージョンの変更を追跡する
-- **ルール**: ML BOMをDependency-Track（§61参照）に取り込み、AIモデルウェイトの脆弱性（例: 将来のモデル権限悪用CVE）を横断監視できる体制を整備する
+- **ルール**: 外部配布、規制対象、高影響、第三者model／dataset利用等のrisk profileに該当するAI systemは、code SBOMと相互参照できるML inventoryを作成し、model、dataset、pipeline、runtime、toolを追跡する
+- **ルール**: CycloneDX ML-BOM、SPDX profile、model card、data manifest等からconsumerとregulationに適合するmachine-readable形式を選び、schema versionをpinする
+- **ルール**: model identifierはregistry PURL、URI、digest、vendor ID等からauthoritativeでimmutableなものを使用し、全modelをHugging Face PURLへ強制しない
+- **ルール**: data componentは§55の権利・source・governance evidenceへstable identifierで参照し、特定filenameやstorage URLをUniversalに固定しない
+- **ルール**: release、model／dataset／pipeline変更、incidentをrefresh triggerにし、subject digestとversion差分を記録する
+- **ルール**: §61の検索可能なinventoryへ取り込み、model、data、software、vulnerability、ownerを照合する。Dependency-Trackは参考実装である
 
 → クロスリファレンス: §3 AI/MLモデルライセンス、§55 EU AI Act技術文書化義務、§29 CBOM、§61 SBOM Federation、[`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md)
 
@@ -2855,6 +2941,8 @@ jobs:
 **依存関係SLO（Service Level Objective）**は、SRE原則を依存関係管理に適用した概念。「依存関係の健全性」を定量的なSLOとして定義し、Error Budgetで許容限界を管理する。違反時にはフィーチャーフリーズ（新規依存追加禁止）を発動し、技術的負債の蓄積を構造的に防止する。
 
 ### 63.2 依存関係SLO定義
+
+以下のtarget、月次window、freeze条件はreference profileである。組織はservice criticality、release頻度、portfolio規模、法令・契約、team capacity、false-positive costからSLI、window、target、burn-rate、actionをBlueprintに定める。
 
 | SLO名 | 計測指標 | SLO目標 | Error Budget（月次） |
 |:------|:--------|:--------|:-------------------|
@@ -2946,12 +3034,12 @@ def compute_slo_report(metrics: dict) -> dict:
 
 ### 63.6 ルール
 
-- **ルール**: §63.2の依存関係SLOを組織として正式に採用し、§24のKPIダッシュボードに組み込む
-- **ルール**: Error Budgetを月次で集計し、「フィーチャーフリーズ発動条件」（§63.3）を経営チームに合意の上で運用する
-- **ルール**: `libyear` を四半期で計測し、1.0年を超えた場合は依存関係リフレッシュスプリントを計画する
-- **ルール**: 依存関係SLOのレポートを毎月のエンジニアリングレビューに組み込み、CTO/VPoEへ報告する
-- **ルール**: Error Budgetが月次で50%以上消費された場合、翌週のスプリントに依存関係回復タスクを必ず含める
-- **ルール**: 依存関係SLOを「開発速度の指標」として扱い、SLO改善がデプロイ頻度・機能リリース速度に与える正の相関を定期的に計測・発信する
+- **ルール**: 依存riskが複数team／serviceへ継続影響する場合、§63.2をreferenceに測定可能なSLI、owner、target、window、data qualityを定義し、既存governance dashboardまたはreviewへ統合する
+- **ルール**: Error Budgetのwindowとburn-rate alertをservice／portfolio特性から定め、feature freeze、dependency追加制限、staffing、exception review等のactionをaccountable leadershipが事前承認する
+- **ルール**: ageだけでなくEOL、悪用、release lag、unsupported version、maintenance、Provenanceを測定し、単一`libyear`閾値でsprintを自動決定しない
+- **ルール**: report先、cadence、roleは組織規模に合わせ、CTO／VPoEという固定役職をUniversal要件にしない
+- **ルール**: recovery workはburn-rate、active risk、capacity、法令・契約deadlineから優先し、固定50％・翌週だけで決めない
+- **ルール**: dependency SLOとdelivery outcomeの関係は実測し、正の相関を前提にせず、security、reliability、developer time、costのtrade-offを報告する
 
 → クロスリファレンス: §16 セキュリティパッチ適用SLA、§24 監査・レポーティング、§39 依存関係最小化原則、§41 依存関係ガバナンス成熟度モデル、§57 SBOM品質成熟度モデル
 
@@ -2965,9 +3053,9 @@ def compute_slo_report(metrics: dict) -> dict:
 
 | § | タイトル | 解決した考慮漏れ |
 |---|---------|:--------------|
-| §59 | NIS2指令：ソフトウェア供給者セキュリティ義務 | CRA（製品）と補完するNIS2（サービス拠点）の未対応 |
+| §59 | NIS2指令：適用性とソフトウェア供給網 | NIS2の対象entity・経営責任・incident報告・供給網riskの適用境界不足 |
 | §60 | AI IDE統合型リアルタイムSCA | Copilot/Cursor等でのAI提案パッケージのリアルタイム検証欠如 |
-| §61 | SBOM Federation（OCI Artifact配布標準） | SBOM生成→流通・横断照合アーキテクチャの欠如 |
+| §61 | SBOM Federation（OCI Artifact参考パターン） | 実装を固定しないSBOM生成→流通→横断照合の成果契約不足 |
 | §62 | ML BOM（Machine Learning Bill of Materials） | AIシステム全体材料目録（モデル・データ含む）の欠如 |
 | §63 | 依存関係SLO / Error Budget管理 | 依存関係健全性の定量SLO化・フィーチャーフリーズ連動の欠如 |
 
@@ -2977,7 +3065,7 @@ def compute_slo_report(metrics: dict) -> dict:
 |---|---------|:--------------|
 | §54 | CISA KEV連携とEPSS統合型脆弱性優先順位付け | CVSS一辺倒のSLAからリスク駆動型への移行 |
 | §55 | EU AI Act技術文書化義務（学習データライセンス追跡） | AI Act Art.53 GPAI義務への未対応 |
-| §56 | Reproducible Builds & Hermetic Repository標準 | SLSA 3の実装ガイドが不足していた |
+| §56 | Reproducible Builds & Hermetic Repository標準 | SLSA Build L3と追加hardeningの実装ガイドが不足していた |
 | §57 | SBOM品質成熟度モデル | SBOMの「生成 → 品質管理」への昇格 |
 | §58 | 新世代パッケージマネージャ対応 | uv/Bun/cargo-auditableへの未対応 |
 

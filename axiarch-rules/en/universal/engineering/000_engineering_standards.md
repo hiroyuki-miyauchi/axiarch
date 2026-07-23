@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited without explicit "Amend Constitution" instruction.**
-> Revision date: 2026-04-20 (Rev.8)
+> Revision date: 2026-07-23 (Rev.9)
 
 > [!IMPORTANT]
 > **Primary Directive**
@@ -10,7 +10,9 @@
 > All engineering decisions must prioritize correctness, security, and maintainability over speed.
 > Strictly follow the priority: **Security > Correctness > Maintainability > Performance > Development Speed**.
 > This document is the primary standard for all design decisions regarding engineering quality and standards.
-> **22-part, 160-section architecture.**
+> Language scope: TypeScript, JavaScript, and web-specific tool names and examples in this standard apply only to their ecosystems. `320_programming_language_governance.md` is the source of truth for cross-language selection, naming, toolchains, quality gates, ownership, and retirement; do not impose tool names unchanged on another ecosystem.
+> Universal application contract: Product names, VCS features, job titles, headcount, ratios, deadlines, cadences, and thresholds are reference implementations or Blueprint parameters unless they are official platform constraints, law or contract, or a safety floor needed to prevent irrecoverable harm. The Project Blueprint selects concrete values and equivalent mechanisms from risk, scale, regulation, and user impact without omitting verifiable outcomes, owners, or exception evidence.
+> **22-part, 141-section architecture.**
 
 ---
 
@@ -40,7 +42,7 @@
 | XX | AI Agent & Orchestration Safety | §20.1 – §20.5 | 5 |
 | XXI | Privacy Engineering | §21.1 – §21.7 | 7 |
 | XXII | Advanced Runtime Security Hardening | §22.1 – §22.8 | 8 |
-| | | **Total** | **145** |
+| | | **Total** | **141** |
 
 ---
 
@@ -48,9 +50,9 @@
 
 ### 1.0. Naming & Structural Foundations
 *   **The Consolidated Naming Convention**:
-    *   **Files & Directories**: All file and directory names must use `kebab-case` (e.g., `user-profile-card.tsx`). PascalCase and snake_case are strictly prohibited due to Git case-sensitivity issues across operating systems.
-    *   **Components**: File names use `kebab-case`, but component names use `PascalCase`, and function names use `camelCase`.
-    *   **The Barrel File Ban**: Re-exporting via `index.ts` (Barrel Files) is prohibited as it causes circular dependencies and hinders Tree Shaking.
+    *   **Files & Directories**: Follow the official style guide, formatter, framework generator, and established repository convention. TypeScript and JavaScript web projects default to `kebab-case`; do not impose it on Python modules, Dart packages, Java, Kotlin, or C# type files, Terraform resources, or other language-native structures. Names distinguished only by letter case are prohibited across languages for operating-system compatibility.
+    *   **Symbols**: Component, class, function, package, and other symbol names follow language-native conventions. See `320_programming_language_governance.md` for the cross-language source of truth.
+    *   **The Barrel File Ban**: In TypeScript and JavaScript, unrestricted re-exporting through `index.ts` is prohibited. An official language package or module entry point may be used after validating cycles, public API boundaries, Tree Shaking, or link-time impact.
 *   **UI/Logic Consistency**:
     *   **Principle**: "Similar but different" is a lack of professionalism and a bug. All features (delete, edit, list) must have unified UI and logic.
     *   **Tiered Security**: Security is tiered based on risk. Tier 1 (standard operations): confirmation only. Tier 2 (bulk operations, critical single operations like user deletion): high-security authentication (OTP/Passkey/2FA) required.
@@ -86,7 +88,7 @@
 ### 1.5. Zero Warnings Mandate
 *   **Rule**: Warnings are treated as errors. CI must fail on any warning.
 *   **Strict Error Handling**: Empty `catch` blocks are prohibited. All errors must be logged and properly handled.
-*   **Zero Tolerance for Band-Aid Solutions**: `// @ts-ignore`, `any` casts, `legacy-peer-deps` are prohibited. Temporary workarounds require `// TODO(#IssueID): reason`.
+*   **Zero Tolerance for Band-Aid Solutions**: Hiding root causes with `// @ts-ignore`, `any` casts, warning suppression, `legacy-peer-deps`, or an ecosystem equivalent is prohibited. A temporary exception uses the language-appropriate suppression at the narrowest scope and records its reason, owner, Issue, and expiry.
 *   **The Incident Response Protocol (SRE)**: Define incident response communication channels and conduct drills every six months.
 *   **The Anti-Blindness Protocol**: Saving AI-generated code abbreviations (`// ...`) directly to files is prohibited.
 
@@ -103,33 +105,33 @@
 
 ### 1.8. Config Change Impact Analysis
 *   **Context**: Changes to project-wide configuration files can cascade unexpected effects.
-*   **Mandate**: 1. **Impact Scan** all affected files via `grep`. 2. **Approval Gate** if >10 files impacted. 3. **Atomic Fix** all affected files in the same commit/PR.
+*   **Mandate**: 1. **Impact Scan** affected consumers, generated artifacts, runtimes, and release paths through repository search, a build graph, dependency analysis, or an equivalent mechanism. 2. **Risk-Based Approval** based on security boundaries, compatibility, shared toolchains, production blast radius, and rollback difficulty rather than file count alone. Require owner review, independent approval, or staged delivery as risk warrants. 3. **Cohesive Change** keeps affected configuration, generated output, migration, verification, and rollback traceable as one change unit and prevents an intermediate state from reaching users or release paths.
 
-### 1.9. Codebase-as-Truth Protocol
-*   **Law**: When using framework/library APIs, prioritize "existing codebase implementation patterns" over "official documentation."
-*   **Action**: Search existing usage via `grep` before using any API. When docs and code conflict, follow the code.
-*   **The Silent Async Bug Pattern**: Always use `await` with database write operations and async functions. Enable ESLint `@typescript-eslint/no-floating-promises`.
+### 1.9. Version-Aware Contract and Codebase Consistency
+*   **Law**: Existing code is evidence of adopted patterns, while official version-specific documentation, security advisories, and support policies are authoritative for contracts and EOL decisions. Never prefer either unconditionally. Reconcile the lockfile, runtime or compiler pin, and installed-package types, signatures, generated output, and tests. Working code does not justify deprecated, undocumented, vulnerable, or accidental behavior.
+*   **Action**: 1. Before using an API, inspect repository usage, the installed version's types and signatures, and official version-specific material. 2. Classify a conflict as version mismatch, generated drift, deprecated API, or undocumented behavior, then fix it or record an ADR with an owner and expiry. 3. Verify compatibility, migration, and rollback for a new pattern and update only the necessary existing implementation and documentation in the same change.
+*   **The Silent Async Bug Pattern**: Every Promise, Future, Task, or equivalent asynchronous result is observed through `await`, return to the caller, aggregation, or a managed background task under §7.1. Prohibit fire-and-forget and unhandled failure, using language-appropriate static analysis.
 
 ---
 
 ## Part II: Infrastructure & Performance
 
 ### 2.0. Infrastructure Standards (The Golden Quad)
-*   **Managed Hosting**: Use managed hosting (e.g., Vercel Pro) with DDoS protection and scalability.
-*   **BaaS**: Use a Backend-as-a-Service with integrated DB and backup capabilities.
-*   **Edge Shield**: Deploy edge WAF/CDN to absorb attacks and load at the edge.
-*   **Email Deliverability**: Adopt email infrastructure with excellent developer experience and deliverability.
-*   **The Email Deliverability Protocol**: `DMARC`, `SPF`, `DKIM` records are mandatory. Include `List-Unsubscribe` header (RFC 8058) for marketing emails.
+*   **Hosting Outcome**: Select managed, self-managed, or hybrid hosting that satisfies DDoS protection, availability, scalability, data residency, portability, operating capability, cost, and exit needs, recording an owner, SLO, backup, recovery, and migration runbook. Vercel is an example, not the only conforming mechanism.
+*   **Data Platform Outcome**: Evaluate BaaS, managed databases, and self-managed databases by encryption, separation of privilege, backup and restore, PITR, HA, auditability, capacity, connection limits, and data portability. A product name such as Supabase is not evidence by itself.
+*   **Edge Protection**: According to threat model, traffic, latency, and origin exposure, deploy a WAF, CDN, rate limits, DDoS protection, or equivalent origin controls, testing bypass paths and fail-open or fail-closed behavior. Cloudflare is an example.
+*   **Email Deliverability**: When the system sends email, use a managed provider or operable self-hosted design that assures authentication, bounce and complaint handling, suppression, unsubscribe, rates, monitoring, and data handling. Resend is an example.
+*   **The Email Deliverability Protocol**: For an organizational sending domain, configure SPF, DKIM, DMARC alignment, and staged enforcement appropriate to the provider and receiver requirements, testing forwarding, subdomains, and third-party senders. Bulk or marketing email follows applicable law and mailbox-provider requirements for RFC 8058 one-click unsubscribe and a user-facing opt-out route.
 *   **Database Connection Pool Protocol**:
-    *   **Mandatory Pooling**: Direct DB connections are prohibited. Always route through a connection pooler (PgBouncer / Supabase Connection Pooler). Connection exhaustion is the #1 cause of production outages.
-    *   **Pool Size Formula**: Use `pool_size = ceil((core_count × 2) + spindle_count)` as baseline; default to `max_connections: 10` per process. Tune dynamically based on monitoring data.
-    *   **Idle Timeout**: Set idle connection timeout to **30 seconds** to prevent zombie connection exhaustion.
-    *   **Transaction vs Session Pooling**: Use `transaction mode` for stateless APIs; use `session mode` when temporary tables or `SET` statements are needed (Supabase defaults to transaction mode).
+    *   **Bounded Connections**: Require bounded connection management compatible with the runtime, driver, database, process or instance count, autoscaling, and transaction semantics. Prefer a pooler or proxy for serverless and high fan-out workloads, but do not universally prohibit a direct pool in a long-lived process.
+    *   **Capacity Model**: Reserve database headroom for administration, migration, and recovery, then allocate the remainder across workloads and maximum instance count. Do not use one fixed formula as a Universal value; tune from measured queueing, saturation, latency, timeout, and failover behavior.
+    *   **Lifecycle**: Define acquisition, query, transaction, idle, and lifetime timeouts, backpressure, retries, cancellation, shutdown, and credential rotation. Thirty seconds is a reference value to validate against load tests and provider constraints.
+    *   **Mode Compatibility**: Test transaction or session pooling, prepared statements, temporary tables, advisory locks, session state, and read replicas, recording pooler-specific constraints in the runbook.
 
 ### 2.1. Read-Optimized Architecture
-*   **Pre-calculation**: Rankings, aggregations, and complex filter results must be pre-calculated during data updates or batch jobs, not on-the-fly per request.
-*   **CQRS**: Separate read and write models. Use denormalized read-only tables or materialized views for queries.
-*   **The Hybrid CMS Design Strategy**: Manage "layout/order" in JSON and "content" in RDB tables.
+*   **Measured Read Optimization**: Measure query plans, traffic, latency SLOs, update frequency, tolerated staleness, and cost for rankings, aggregations, and filters, then choose the smallest adequate index, cache, precomputation, materialized view, search engine, or equivalent. A precomputed path includes invalidation, rebuild, backfill, and consistency verification.
+*   **CQRS Decision**: Adopt CQRS or a read model when independent scaling, a distinct model, audit needs, or latency gains outweigh the complexity. Do not force separation on a system whose requirements fit one model.
+*   **Content Model Boundary**: Derive sources of truth for layout, ordering, content, and metadata from update ownership, schema evolution, localization, querying, and audit needs. A JSON and relational hybrid is one implementation, not a fixed Universal schema.
 
 ### 2.2. Performance Budgets
 *   **Lighthouse Scores**: Maintain **90+ scores** across Performance, Accessibility, Best Practices, and SEO.
@@ -192,25 +194,25 @@
 ### 3.5. Software Supply Chain Security
 *   **Law**: Treat dependency packages as "potential attack vectors," not "trusted code." Supply chain attacks are a top-tier threat in 2026.
 *   **Action**:
-    1.  **SLSA Level 2+**: Target SLSA Level 2+ for build pipelines with automated provenance generation.
-    2.  **Lockfile Pinning**: Verify integrity hashes in lockfiles. Always use `npm ci` in CI.
-    3.  **Dependency Review**: Auto-scan new packages for vulnerabilities and licenses via GitHub Dependency Review Action.
-    4.  **Sigstore Verification**: Enable package signature verification (npm provenance / Sigstore) when available.
+    1.  **SLSA v1.2 Tracks**: Use SLSA Build L2 or higher for production builds and Source L2 or higher for source management, with verifiable signed Build Provenance and Source Provenance. High-assurance areas target Build L3 and Source L4, including two-party review, and verify the corresponding numeric level plus the `SLSA_SOURCE_TWO_PARTY_REVIEWED` property in the Source VSA.
+    2.  **Dependency Resolution Pinning**: Verify the adopted ecosystem's lockfile or equivalent resolved graph, checksums, sources, and artifact digests. Use frozen or locked installation in CI where supported and prohibit unverified implicit re-resolution.
+    3.  **Dependency Review**: Automatically inspect new and updated package diffs for vulnerabilities, licenses, source, and provenance through an organization-approved dependency-diff or SCA gate available in the repository host or CI. GitHub Dependency Review Action is one implementation example, not a Universal host requirement.
+    4.  **Sigstore Verification**: Where available, verify ecosystem provenance, signatures, Sigstore, or an equivalent and retain traceability to source, builder, and artifact digest.
     5.  **SBOM Generation**: Auto-generate SBOM in CI/CD pipelines for each deployment.
 *   **Rationale**: As demonstrated by 2025-2026 incidents, attacks on trusted OSS packages are increasing. Only automated verification mechanisms protect the supply chain.
 
 ### 3.6. Secret Rotation Protocol
-*   **Law**: API keys, DB passwords, JWT secrets, and all other credentials must be rotated periodically. "Set it and forget it" is the greatest security risk.
-*   **Rotation Schedule**:
-    | Credential Type | Max Lifetime | Method |
-    |:---------------|:------------|:-------|
-    | JWT Signing Secret | 90 days | Cloud Secret Manager + automated CI/CD rotation |
-    | DB Password | 90 days | RDS/Supabase password reset + connection string update |
-    | External API Key | 180 days | Re-issue in vendor portal + update `.env` secret |
-    | Service Account / OAuth Client Secret | 365 days | Regenerate in Google Cloud / GitHub Apps |
-*   **Zero-Downtime Rotation**: Perform rotation in 2 phases — activate the new secret before deactivating the old one — to prevent service interruption.
-*   **Rotation Audit**: Always record rotation events in audit logs and auto-schedule the next rotation date in the calendar.
-*   **Broken Glass Protocol**: If credential exposure is suspected, **invalidate immediately**. "Wait and see" is prohibited. Create an incident report within 24 hours documenting the exposure time and impact scope.
+*   **Law**: Prefer an issuable and revocable identity such as OIDC workload identity, managed identity, dynamic credentials, or short-lived tokens over a long-lived secret. When a static API key, database password, signing key, or equivalent remains necessary, record its expiry and rotation triggers in the Blueprint from provider limits, cryptoperiod, exposure, privilege, usage locations, rotation cost, legal or contractual needs, and incident events. Do not impose one number of days on every credential.
+*   **Rotation Contract**:
+    | Credential Type | Required Outcome | Representative Mechanisms |
+    |:---------------|:-----------------|:--------------------------|
+    | Signing key | `kid`, algorithm, overlap, verification-key distribution, revocation, rollback | Asymmetric key, JWKS, HSM or KMS |
+    | Database credential | Least privilege, workload separation, connection switchover, active-session handling | Workload identity, dynamic secret, dual credentials |
+    | External API key | Owner, scope, usage inventory, vendor constraints, switchover and revocation evidence | Short-lived token, dual-key rotation, expiring static key |
+    | Service account or OAuth client | Non-human identity inventory, audience, privilege, offboarding | Federation, managed identity, certificate or secret rotation |
+*   **Zero-Downtime Rotation**: When the provider supports concurrent credentials, stage new-credential activation, consumer switchover, verification, and old-credential revocation. Otherwise design maintenance, queuing, rollback, and user communication according to risk.
+*   **Rotation Audit**: Bind issuance, distribution, use, switchover, revocation, failures, and exceptions to a credential ID and owner, monitoring the next deadline or event trigger in a machine-readable inventory.
+*   **Break-Glass Protocol**: On suspected exposure, use the fastest control that limits impact, such as revocation, scope reduction, consumer isolation, or reissuance, while preserving evidence and recovery. Incident records and external reports follow the triggers and deadlines of applicable law, contracts, and organizational incident SLAs.
 
 ### 3.7. OAuth / OIDC Token Handling Protocol
 *   **Law**: Incorrect token implementation is the security hole with the longest detection delay. Strictly follow these principles.
@@ -288,20 +290,20 @@
 ## Part IV: Technical Debt & Cleanup
 
 ### 4.0. Debt Paydown Strategy
-*   Allocate **20%** of sprint capacity to technical debt (refactoring, library updates).
-*   **The TODO/FIXME Protocol (Ticket First)**: TODOs without issue numbers are "graffiti." Always include ticket references: `// TODO(#123): Refactor later`.
+*   **Law**: Reserve continuous capacity for technical debt, dependency updates, and EOL migration, prioritized by security, reliability, and delivery risk. Twenty percent is a reference default for a stable product team; the actual ratio, cadence, and emergency triggers are Blueprint parameters.
+*   **The TODO/FIXME Protocol (Work Item First)**: Bind every TODO or FIXME to a traceable work item, owner, and completion condition or expiry. An issue number is one implementation; an equivalent change-management system or register conforms. Reject unowned or indefinite TODOs at change acceptance.
 
 ### 4.1. Tech Radar & Dependency Governance
-*   **Quarterly Updates**: Update dependencies quarterly to maintain "safe bleeding edge."
-*   **Dependency Watch (24-Hour Mandate)**: **High/Critical** vulnerabilities must be patched within **24 hours**.
-*   **The Dependency Override Protocol**: `legacy-peer-deps=true` is unconstitutional. Use `package.json` `overrides` instead.
-*   **The License Quarantine (AGPL Block)**: Refer to `security/000_security_privacy.md` for license governance.
+*   **Continuous Updates**: Reassess dependencies on change, support retirement, major vulnerabilities, compromise, license changes, and a risk-based Blueprint cadence. Quarterly updates are a reference default. Maintain a supported, verified, safe release line rather than treating the newest version as the objective.
+*   **Dependency Watch**: Run ecosystem-standard or equivalent SCA, such as `npm audit`, `govulncheck`, `pip-audit`, `dotnet package list --vulnerable` on .NET 10 or later, or `dotnet list package --vulnerable` on .NET 9 or earlier, on dependency changes and a risk-based cadence. Priorities and deadlines consider KEV, EPSS, reachability, exposure, data sensitivity, compensating controls, and vendor deadlines in addition to CVSS. Immediately contain actively exploited or externally exposed critical vulnerabilities, and record the owner and deadline for remediation, mitigation, or risk acceptance in the Blueprint.
+*   **The Dependency Override Protocol**: Options that disable dependency validation are prohibited. A necessary override uses the package manager's supported mechanism and records its reason, owner, expiry, and compatibility tests.
+*   **License Governance**: Determine allow, review, and deny decisions from the distribution model, network service behavior, linking or derivative work, modifications, customer contracts, disclosure obligations, and intellectual-property policy. AGPL and similar licenses are not a universal blanket prohibition; block them automatically when organizational policy classifies them as deny or legal-review. `security/200_oss_compliance.md` is the source of truth.
 
 ### 4.2. Lockfile Integrity Protocol
-*   **Law**: Lockfile inconsistencies causing CI failures are a "cardinal sin."
-*   **CI Discipline**: Always use `npm ci` in CI pipelines.
-*   **Silver Bullet**: When local/CI behavior diverges, run `rm -rf node_modules package-lock.json && npm install`.
-*   **Prohibition**: Pushing without committing lockfile changes after dependency modifications is prohibited.
+*   **Law**: Deployable applications and executable roots version the reproducible resolution source supplied by the ecosystem, such as a lockfile, checksum set, resolved graph, version catalog, provider selection, or vendor tree, and prohibit unintended changes. `package-lock.json`, `pnpm-lock.yaml`, `uv.lock`, `go.sum`, `Cargo.lock`, `packages.lock.json`, `composer.lock`, `Gemfile.lock`, and `renv.lock` are examples with different semantics and are not all treated as lockfiles. Publishable libraries follow ecosystem consumer-compatibility conventions while pinning CI test and release resolution and retaining dependency evidence.
+*   **CI Discipline**: In supporting ecosystems, use frozen or locked commands such as `npm ci`, `pnpm install --frozen-lockfile`, `uv sync --locked`, or `cargo build --locked`. Where no standard lockfile or locked mode exists, use an equivalent gate that verifies version, source, checksum, and artifact digest and rejects unapproved re-resolution.
+*   **Recovery**: When local and CI behavior diverge, compare runtime, package manager, registry, platform, and lockfile digest first. Lockfile regeneration is a reviewed change with an explicit reason, full dependency diff, tests, and SCA, not a standard recovery shortcut.
+*   **Prohibition**: In applications and executable roots where the lockfile is authoritative, pushing after dependency changes without committing the lockfile is prohibited.
 
 ### 4.3. Dead Export Detection
 *   **Law**: Exported functions/types/constants with zero usage must be immediately removed.
@@ -383,17 +385,18 @@
 
 ## Part VII: Bug Risk Reduction Policy
 
-### 7.0. Fix First
-*   Never develop new features while known bugs exist. Bug fixes are the top priority.
+### 7.0. Defect Triage First
+*   **Law**: Classify known defects by severity, user impact, effects on data, money, or authorization, exploitability, workarounds, SLOs, and legal or contractual deadlines, recording an owner, containment, remediation target, and verification method. Define the boundary for pausing feature work in the Blueprint; do not treat critical safety, integrity, or availability defects and error-budget exhaustion the same as known low-impact defects.
 
-### 7.1. 24-Hour Rule
-*   Critical bugs (data loss, security, major feature outage) must be fixed within **24 hours** of discovery.
+### 7.1. Critical Defect Response
+*   **Law**: Immediately triage data loss, exploitable security defects, major feature outages, and similar incidents, containing impact when necessary through rollback, feature disablement, credential revocation, traffic isolation, or an equivalent control. Derive the permanent-fix target from exposure, impact growth, recoverability, vendor, legal, and contractual deadlines, and required verification time, recording the owner and user communication in the incident record. Twenty-four hours is a high-urgency reference target for a critical externally exposed defect, not a Universal completion deadline for every defect.
 
-### 7.2. Framework Signature Reality (Codebase as Truth)
-*   **Law**: Prioritize "existing codebase signatures (actual type definitions)" over official documentation. Always verify existing usage and type definitions via `grep` or IDE before using an API.
+### 7.2. Versioned Contract Reality
+*   **Context**: Current official documentation, the installed version, generated types, and runtime behavior can disagree.
+*   **Law**: For implementation, verify the lockfile, runtime or compiler pin, and the installed package's types, signatures, generated output, and tests as facts about the targeted version. Use version-specific official documentation, security advisories, and support policies as the source of truth for contracts and EOL decisions. Do not blindly prefer either side; resolve or time-bound discrepancies as version mismatch, deprecated API, generated drift, or undocumented behavior in an ADR.
 
 ### 7.3. Fix Twice Principle
-*   When fixing a bug, not only "Fix Once" but also "Fix Twice" — create mechanisms (lint rules, type strictness, tests) to prevent recurrence.
+*   **Law**: When fixing a defect, inspect recurrence paths with the same cause and add a risk-proportionate test, type or schema, lint or static analysis, monitoring, runbook, or design change that detects or prevents recurrence. If automation would create more risk than the fix, record the reason, residual risk, and recheck condition.
 
 ---
 
@@ -415,29 +418,29 @@
 ## Part IX: Compatibility & Testing
 
 ### 9.0. Real Device Testing
-*   Test on real devices (iOS, Android), not just simulators. Hardware features (camera, GPS, biometrics) require real devices.
+*   Mobile or device-dependent features must go beyond simulators and use a device matrix derived from user distribution, supported operating systems, hardware capabilities, and risk. Critical flows involving camera, location, biometrics, push, background execution, or performance include physical devices or an equivalent high-fidelity device farm in the release gate.
 
 ### 9.1. Browser Compatibility
-*   Support the latest 2 versions of Chrome, Safari (iOS/macOS), Firefox, and Edge. Pay attention to Safari-specific bugs (100vh issue, etc.).
+*   Record browser support in the Blueprint from user distribution, contracts, regulation, security updates, and required features, then verify it with automated cross-browser tests and production telemetry. Current and previous releases of major browsers are a reference default, not a universal fixed two-version mandate.
 
 ### 9.2. Self-Check List
-*   Before submitting PRs, developers must self-review for "zero warnings," "no console errors," and "no unnecessary logs."
+*   Before requesting change acceptance, the author self-verifies no unresolved warnings, no runtime errors, and no unnecessary or sensitive logs, and records the result in a Pull Request, Merge Request, change record, or equivalent evidence.
 
-### 9.3. Testing Trophy Protocol
-*   **Context**: More tests does not mean better tests. Based on Kent C. Dodds' **Testing Trophy**, mandate test ratios that maximize ROI (Return on Investment).
-*   **Testing Trophy (Recommended Ratios)**:
+### 9.3. Testing Strategy Mix Protocol
+*   **Context**: More tests do not automatically mean better tests, and one ratio does not fit every system. Select static, unit, integration, contract, E2E, and non-functional tests from `quality/000_qa_testing.md` and `320_programming_language_governance.md` according to change risk, architecture, failure cost, execution time, and historical defects.
+*   **Reference Testing Trophy Profile for Web UI**:
     | Layer | Ratio | Description | Example Tools |
     |:------|:------|:------------|:--------------|
-    | **Static** | Foundation | TypeScript + ESLint. Eliminate type and lint errors before build | `tsc --noEmit`, `eslint` |
-    | **Unit** | 30% | Business logic, pure functions, data transformations. UI component unit tests are generally unnecessary | `vitest`, `jest` |
-    | **Integration** | 50% | API endpoints, DB coupling, Server Actions. **Highest ROI** | `vitest` + `supertest` / Playwright API |
-    | **E2E** | 20% | Critical paths only (login, payment, primary CRUD). Full coverage is prohibited | `Playwright`, `Cypress` |
+    | **Static** | Foundation | TypeScript and ESLint or equivalent for the web profile; remove type, lint, and schema errors before build | `tsc --noEmit`, `eslint` |
+    | **Unit** | Reference 30% | Business logic, pure functions, and data transformations | `vitest`, `jest` |
+    | **Integration** | Reference 50% | Behavior across APIs, databases, state, and components | `vitest` + `supertest` / Playwright API |
+    | **E2E** | Reference 20% | Critical paths such as login, payment, and primary workflows | `Playwright`, `Cypress` |
 *   **Prohibitions**:
     *   "Code copy tests" that mirror implementation 1:1 are prohibited. Tests must verify behavior.
-    *   Test code containing `any` casts or missing async error handling is rejected under the same quality standards as production code.
-*   **Coverage Targets**:
-    *   Business logic and Service layer **Line Coverage must be ≥80%**.
-    *   Business logic and Service layer **Mutation Score must be ≥70%** as a mandatory target. Chasing Line Coverage on UI components is prohibited (meaningless).
+    *   Treat unsafe casts, type or compiler bypasses, and unhandled asynchronous errors in test code under the same quality standard as production code.
+*   **Coverage Decision Contract**:
+    *   Do not judge quality from statement or branch coverage alone. Combine risk, critical invariants, mutation score, escaped defects, and flakiness.
+    *   Line Coverage of 80% and Mutation Score of 70% for business logic are onboarding references. The Blueprint defines blocking scope, thresholds, exclusions, and staged improvement, and does not force the same number on low-risk generated code and high-risk payment logic.
 *   **What is Mutation Score?** A high-level test quality indicator that injects intentional bugs (Mutants) into implementation code and verifies whether tests can detect them. It measures not just "tests exist" but "whether tests genuinely function."
     ```bash
     # Stryker Mutant (TypeScript) configuration example
@@ -533,20 +536,20 @@
 > **v1.3.2 Restructure**: Daily Git workflow rules (Trunk-Based Development, Conventional Commits, Branch Hygiene, Worktree Hygiene, etc.) have been consolidated into `engineering/600_git_workflow.md`. This Part now retains only auxiliary CI/Deploy/DB-related rules transitionally (§10.4–10.6 are candidates for relocation to `engineering/200_supabase_architecture.md` or `engineering/300_web_frontend.md` in future releases).
 
 ### 10.1. CI/Deployment Safety Standards
-*   **The CI Timeout Protocol**: All CI jobs must have `timeout-minutes: 10`. Builds exceeding 10 minutes indicate "design failure."
-*   **The Red Button Checklist**: Before production deployment, mandatory verification of Legal, Security (RLS), FinOps (Spend Cap), and Data.
-*   **Omnichannel Check**: During review, prioritize checking "Is this also usable outside Web?"
+*   **The CI Timeout Protocol**: Give every CI job an explicit timeout derived from normal duration, resources, external dependencies, and retry behavior; prohibit unbounded execution. Ten minutes is a reference target for a fast-feedback job, not a universal cap for builds, device tests, or security scans.
+*   **The Red Button Checklist**: Convert applicable Legal, Security, FinOps, Data, and reliability risks into machine-readable gates or traceable approval. Do not make a manual checklist the sole implementation for every release.
+*   **Omnichannel Check**: When multiple clients are in the product contract, verify shared domain and API contracts separately from client-specific UX. Do not force omnichannel requirements on a system that does not promise non-Web clients.
 *   **Deployment Safety Protocol**:
     *   **Primary Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
-    *   **The Automated Deployment Mandate (CD First)**: Manual deployment to production is **completely prohibited**. CI/CD pipeline only.
-    *   **The Architectural Preservation Protocol**: Mark core feature files with `@preservation_level CRITICAL` to prevent AI-initiated destructive changes.
-*   **Security**: Never commit secrets. Mandate CI secret scanning (TruffleHog).
-*   **The Lockfile Regeneration Reflex**: When only CI fails, first regenerate lockfile: `rm -rf package-lock.json node_modules && npm install`.
-*   **The Connection Verification Protocol**: On DB connection errors, first check `.env.local` connection target.
+    *   **The Automated Deployment Mandate (CD First)**: Default to a reproducible, auditable pipeline that records artifact digest, approval, staged delivery, and rollback. Do not ban break-glass deployment outright; require least privilege, two-party control or independent post-review, complete logging, expiring credentials, and restoration of automation.
+    *   **The Architectural Preservation Protocol**: Protect core boundaries through ownership, protected paths, review policy, contract tests, or equivalent controls. An `@preservation_level CRITICAL` header is an optional implementation.
+*   **Security**: Never commit secrets. Verify the repository and history in CI through a secret scanner or equivalent control; TruffleHog is an example.
+*   **Lockfile Recovery Discipline**: When only CI fails, first compare the runtime, package manager, registry, platform, and lockfile digest. Treat regeneration as an intentional dependency change requiring a complete dependency diff review, tests, and SCA; it is not the default recovery step.
+*   **The Connection Verification Protocol**: On database connection errors, inspect effective configuration, secret source, DNS, IPv4 or IPv6, routing, firewall, TLS, credentials, pool saturation, and provider status by layer. `.env.local` is only one local-development example.
 
 ### 10.2. The IPv6 Deployment Protocol
-*   **Law**: Do not attempt to fix CI Supabase connection failures caused by IPv6 resolution issues through application code changes.
-*   **Action**: Establish connections via Connection Pooler (IPv4).
+*   **Law**: Do not hide a mismatch among CI or runtime IPv4 or IPv6 support, DNS, routing, and provider endpoints by changing domain logic. Reproduce and diagnose the network layer.
+*   **Action**: Select a provider-supported route such as a dual-stack endpoint, compatible network, or IPv4 pooler or proxy, and verify TLS, pooling semantics, failover, and exit conditions. Supabase Connection Pooler is one IPv4 fallback example.
 
 ### 10.4. The Migration Immutability Protocol (History Protection)
 *   **Law**: Using column names planned for future implementation but not yet applied via migration is prohibited.
@@ -593,10 +596,10 @@
 ## Part XII: Engineering Quality Protocols
 
 ### 12.1. The Zero-Warning Lint Protocol
-*   **Law**: True CI pass means zero warnings. `npm run lint` must produce zero warnings. Remove unused variables immediately.
+*   **Law**: A true CI pass means zero warnings from the language-native formatter, linter, type checker, or compiler. `npm run lint` is only a TypeScript or JavaScript example. Follow `320_programming_language_governance.md` for required gates and remove unused symbols immediately.
 
 ### 12.2. The Clean Import Protocol
-*   **Law**: `import` statements must be at the top-level. In-function or in-control-flow imports are strictly prohibited.
+*   **Law**: Imports, uses, and includes follow the language's official placement rules and default to a form that supports static dependency tracing. Dynamic imports for lazy loading, plugins, or cycle avoidance require an explicit boundary, failure handling, and tests.
 
 ### 12.3. The Explicit Explanation Protocol (Zero Jargon)
 *   **Law**: Add `Tooltip` to all technical terms and metrics in admin UIs, explaining "what it is and how it impacts the business" in layperson terms.
@@ -619,7 +622,7 @@
 *   **Breaking Change**: Use `feat!:` or `BREAKING CHANGE:` in footer for breaking changes.
 
 ### 12.8. The Code Review Protocol
-*   **Law**: Code review is the final line of defense. PR size target: **≤400 lines**.
+*   **Law**: Apply risk-based human review or equivalent independent change approval and mandatory automated gates to production changes. Prefer small, single-purpose, revertible changes. Four hundred changed lines is a reference heuristic for considering a split, not a universal limit. Count generated code, migrations, and vendored artifacts separately, and require design review, a reason the change cannot be split, and staged release for large changes.
 *   **Review Checklist**:
     | Aspect | Check |
     |:-------|:------|
@@ -637,8 +640,8 @@
     *   **False Negative Awareness**: AI cannot verify "the correctness of logic intent" or "alignment with business requirements." Humans must take responsibility for these aspects.
     *   **Security Override**: Security aspects (authentication, authorization, PII) must always be explicitly verified by a human, not delegated to AI Review.
 
-### 12.9. The CODEOWNERS Protocol
-*   **Law**: Define per-directory owners in `.github/CODEOWNERS`. Require CODEOWNER approval for PR merges.
+### 12.9. Ownership & Change-Approval Protocol
+*   **Law**: Assign accountable owners and continuity routes to critical directories, modules, schemas, infrastructure, and release paths, and connect the ownership registry to change controls. `.github/CODEOWNERS`, GitLab CODEOWNERS, repository rules, and external change management are example implementations. Enforce independent review of the final revision and dismissal of stale approvals on high-assurance paths; for low-risk or solo maintenance, allow compensating controls recorded in the Blueprint.
 
 ### 12.10. The Git Hooks Automation Protocol (Three-Layer Defense)
 *   **Law**: Enforce quality through "physically impossible" mechanisms, not "be careful" policies.
@@ -714,6 +717,7 @@
 *   **RLS Awareness**: With Row Level Security databases, insufficient permissions return as "0 rows affected," not errors.
 
 ### 13.6. The Type Safety & Integrity Protocol
+This section is an additional TypeScript-specific standard. `320_programming_language_governance.md` is the source of truth for cross-language type and boundary contracts.
 *   **Zero `as any` Policy**: Using `as any` or `as never` to suppress type errors is "embedding bugs." Set ESLint `@typescript-eslint/no-explicit-any` to `error`.
 *   **Root Cause Resolution**: Resolve type errors through "type definition fixes," "DTO redesign," or "generics application," not casts.
 *   **Type Bridge Mandate**: For auto-generated type gaps, define extension types in `database-extensions.ts` using Mapped Types to prevent type collisions.
@@ -790,20 +794,20 @@
 
 ### 13.14. The WebAssembly & Edge Execution Protocol
 > For resilience in edge execution, also refer to **§15.1 Circuit Breaker**.
-*   **Context**: WebAssembly (WASM) and edge computing (Cloudflare Workers / Deno Deploy / Lambda@Edge, etc.) are indispensable architectural options from 2026 onwards. Adoption decisions must be grounded in clear criteria.
-*   **WASM 3.0 Capability Awareness (2026)**:
-    *   **WebAssembly 3.0 is now standardized (April 2026)** and introduces: **WasmGC** (garbage collection for managed languages — Java, Kotlin, Dart — without shipping a full runtime), **Memory64** (extends addressable memory beyond 4 GB for LLM inference and video processing), **Exception Handling** (more efficient error propagation), and the **Component Model** (polyglot interop — Rust, Go, Python modules interacting through standardized type sharing).
-    *   **WASI 0.3 / 1.0**: WASI 0.3 (native async support) is the active focus for early 2026; WASI 1.0 is expected by late 2026 or early 2027, standardizing system resource access across file, network, and clock APIs for portable server-side WASM.
+*   **Context**: WebAssembly (Wasm) and edge execution are architectural options whose value depends on workload, host capability, latency, portability, isolation, observability, and operating cost. Adoption decisions must be grounded in measured criteria rather than trend or vendor availability.
+*   **WASM 3.0 Capability Awareness**:
+    *   **WebAssembly 3.0 was completed on September 17, 2025**. Its core specification includes capabilities such as garbage collection, 64-bit address spaces, exception handling, tail calls, and multiple memories. Verify actual target-engine support rather than assuming every Wasm 3.0 capability is available on every host.
+    *   **Component Model and WASI are separate compatibility decisions**: pin the component, WIT, runtime, and host-capability matrix. WASI 0.3.0 was released on June 11, 2026 with native async constructs including `async func`, `stream<T>`, and `future<T>`; WASI 0.2 remains a stable compatibility target and WASI 0.1 is legacy but widely deployed.
 *   **WASM Adoption Criteria**:
-    *   **Appropriate use cases**: CPU-intensive computation (cryptography, image conversion, audio codecs, physics simulation), porting existing CLI tools to the browser, language-agnostic shared logic (core business logic implemented in Rust).
-    *   **Inappropriate use cases**: DOM manipulation, simple data transformation, predominantly external API call processing — JavaScript/TypeScript is sufficient for these. Complexity introduced by hasty WASM adoption is "engineering self-indulgence" and is prohibited.
-*   **Edge Execution Mandate**:
-    *   **Edge-Eligible Logic**: Auth token verification, A/B test bucket assignment, geo-redirect, CSP header injection, rate-limit counter processing — these benefit dramatically from edge execution, reducing latency.
-    *   **Edge Execution Prohibitions**: Direct database writes, long-running batch processing (edge has CPU time limits), stateful session management (except Edge KV/Durable Objects).
-    *   **Cold Start Budget**: Edge function cold starts must target **≤50ms**. If exceeded, implement warm-up strategies (scheduled pings, etc.).
+    *   **Candidate use cases**: measured CPU-intensive computation, browser portability of existing tools, capability-isolated plugins, and cross-language components. Validate end-to-end latency, binary size, interoperability, debugging, and operational ownership against a native or JavaScript baseline.
+    *   **Poor-fit signal**: Wasm adds a compiler, runtime, interface, or incident boundary without a measured portability, isolation, performance, or reuse benefit. Record the adoption hypothesis and an exit condition instead of categorically banning a workload class.
+*   **Edge Execution Boundary**:
+    *   **Candidate logic**: request-local authorization, routing, header transformation, experimentation, and bounded compute may benefit from proximity when the platform capability and consistency model fit.
+    *   **Host constraints**: Database writes, long-running work, network access, and state are permitted only when the selected host explicitly supports the required duration, consistency, transaction, retry, and recovery semantics. Do not infer safety from an edge product name.
+    *   **Cold-start budget**: Derive the target from the user-facing latency SLO, request path, runtime, region, and cost. Fifty milliseconds is a reference profile, not a Universal threshold; scheduled warm-up is only one costed mitigation and may be unavailable or wasteful.
 *   **WASM Security Constraints**:
     *   WASM modules must be designed with awareness of the Content Security Policy (CSP) `wasm-unsafe-eval` directive.
-    *   Executing WASM binaries obtained from untrusted sources is **absolutely prohibited**. Mandate integrity verification via SRI (Subresource Integrity).
+    *   Treat Wasm as untrusted code despite memory isolation. Verify source, signature or digest, SBOM, provenance, runtime, imports, capabilities, filesystem and network grants, resource limits, and escape response. SRI is a Web transport-integrity control, not publisher trust or a universal non-Web control. Unknown components may run only inside a deliberately isolated analysis or plugin boundary with explicit capabilities and no ambient authority.
 
 ### 13.15. The Idempotency Key Protocol
 *   **Context**: Network failures and timeout-triggered retries cause "terrifying side effects" like double charges and duplicate orders. Idempotency design is a fundamental obligation in distributed systems.
@@ -831,24 +835,26 @@
 > [!NOTE]
 > Platform Engineering is the discipline of designing the developer experience (DX) as a product. The infrastructure team evolves from "managing infrastructure" to "providing an Internal Developer Platform (IDP)." For detailed implementation, refer to `operations/400_site_reliability.md`.
 
-### 14.1. Internal Developer Platform (IDP) Mandate
-*   **Law**: The goal of Platform Engineering is to build an environment (IDP) where application developers can **self-service** infrastructure provisioning, deployment, and observability access. Aim to eliminate "file a ticket to the infra team" as a process.
-*   **Golden Path Mandate**:
-    *   **Definition**: The Golden Path is "the safest, fastest, standard route when adding a new feature." It must always be defined and maintained within the project.
-    *   **Golden Path Components**: Project templates (scaffolding), CI/CD templates (reusable workflows in `.github/workflows/`), infrastructure templates (IaC modules), standard Observability setup.
-    *   **Paved Road vs. Off-Road**: When deviating from the Golden Path (off-road), establish a mandatory consultation process with the platform team. If off-road becomes the norm, suspect a Golden Path design flaw.
-*   **Developer Portal**: Aim long-term to self-serve the service catalog, TechDocs access, template gallery, and cost/metrics dashboards via a developer portal such as Backstage.
+### 14.1. Internal Developer Platform (IDP) Applicability
+*   **Law**: Establish a scale-appropriate Platform Engineering function when repeated undifferentiated work, cognitive load, control inconsistency, or wait time is measured across multiple teams or repositories and the benefit of a shared capability exceeds its build and operating cost. Do not require a dedicated platform team or portal for every small or one-off project.
+*   **Minimum Viable Platform**:
+    *   Treat the platform as a thin product layer providing capabilities selected from user demand. Documentation and standard procedures, repository templates, shared CI, CLIs or APIs, service catalogs, managed-service integration, and portals are all candidates; do not build every element from the start.
+    *   When manual tickets for provisioning, deployment, observability, secrets, or cost evidence become repeated bottlenecks, prioritize safe self-service and policy automation. Do not remove human review unconditionally from high-risk actions.
+*   **Golden Path Contract**:
+    *   For journeys with repeated demand, provide a Golden Path with safe defaults, an owner, support scope, upgrades, rollback, an escape hatch, and verification evidence. Templates, workflows, IaC modules, runbooks, and dashboards are interchangeable components.
+    *   A Golden Path is an optional, composable paved road. Scale deviation review to risk and blast radius; do not force dedicated-team consultation for an equivalent low-risk mechanism. Measure adoption, lead time, failures, and satisfaction, and improve user-demand fit when off-road use becomes normal.
+*   **Evidence**: As described by the [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/), select platform capabilities from user needs, start with the thinnest viable layer, avoid fixing the interface to a portal, and keep the platform optional and composable.
 
 ### 14.2. Infrastructure as Code (IaC) Mandate
-*   **Law**: **Manual creation or modification of cloud resources is absolutely prohibited.** All infrastructure must be defined as IaC (Terraform / Pulumi / CDK, etc.) and managed in Git. "Resources created via console" are hotbeds of drift and require immediate IaC-ification.
+*   **Law**: Manage production, shared, security, identity, or network boundaries and other control-plane configuration requiring recreation, audit, or recovery reproducibly through declarative configuration, IaC, provider-native configuration, versioned API inputs, or equivalent mechanisms where the provider supports machine management. Terraform, OpenTofu, Pulumi, CDK, CloudFormation, and Bicep are interchangeable examples.
+*   **Manual Change Boundary**: For unsupported surfaces, bootstrap, investigation, or emergency containment, record the target, reason, approval, before and after evidence, expiry, rollback, and reconciliation into the declarative source. Routine ClickOps dependency and unrecorded drift are prohibited, but not every console operation has the same risk.
 *   **IaC Quality Standards**:
-    *   **Modularization**: Split IaC code into reusable modules and follow DRY principles.
-    *   **State Management**: Manage Terraform State in a remote backend (S3 + DynamoDB Lock / GCS + CloudSQL, etc.). Git commit of local state files is **absolutely prohibited**.
-    *   **Plan-before-Apply**: Mandate running `terraform plan` in CI/CD pipelines with automatic posting of results as PR comments. `apply` must only run after human approval.
-    *   **Cost Estimation in CI**: Use tools like Infracost to automatically estimate cost changes from IaC modifications per PR. Changes exceeding **+20%** monthly cost increase must require explicit FinOps sign-off.
+    *   **Structure**: Create modules where multiple consumers, a stable contract, and independent tests provide value; do not over-abstract one-off resources merely for DRY.
+    *   **State and Source Management**: Stateful tools must use an approved backend with encryption, access control, concurrency control, versioning or recovery, and audit. Do not force provider-managed state or stateless templates into the same backend. Committing credentials or sensitive state to Git is prohibited.
+    *   **Plan-before-Apply**: Generate a machine-readable plan or diff at a PR, Merge Request, change request, or equivalent approval boundary and inspect policy, security, cost, destructive changes, and drift. Separate apply authority from plan authority and execute after risk-based approval or policy-approved automation.
+    *   **Cost Estimation**: Estimate material billing changes with provider calculators, Infracost, billing models, load tests, or equivalent evidence and connect them to budgets, unit economics, commitments, egress, and rollback. Define approval thresholds and the accountable function in the Blueprint; a fixed `+20%` or named role is not a Universal requirement.
         ```hcl
-        # Terraform: Example policy enforcing required tags (OPA / Sentinel)
-        # Mandate 3 tags on all resources: environment, team, cost-center
+        # Terraform reference policy input. Replace keys in the Blueprint.
         required_tags = ["environment", "team", "cost-center"]
         ```
 
@@ -1043,72 +1049,54 @@
 ## Part XVI: Developer Experience Governance
 
 > [!NOTE]
-> Excellent DX is not a matter of "engineer happiness" — it is a matter of "business velocity." Standardizing development environments and optimizing onboarding are an organization's fastest competitive advantage.
+> Excellent DX is a system capability supporting delivery speed, quality, cognitive load, recoverability, hiring and handoff, and security. Improve reproducible outcomes and measured friction without forcing the same tool or headcount on individuals, distributed teams, and regulated organizations.
 
 ### 16.1. Local Development Environment Standardization
-*   **Law**: Physically eliminate the "Works on My Machine" problem. Always implement mechanisms that guarantee environment reproducibility.
-*   **Dev Container Mandate**:
-    *   **Option A (Recommended)**: Dev Containers via `.devcontainer/devcontainer.json` (VS Code / GitHub Codespaces). The team develops with the same OS and toolchain.
-    *   **Option B**: Reproducible development environments via Nix Flakes with `flake.nix` (shared macOS/Linux).
-    *   **Decide one at project start and document in README.md.** Mixing options is prohibited.
-*   **First-Day Productivity Target**: New joiners should be able to complete environment setup to local dev server startup within **30 minutes**. Measure this and mandate onboarding documentation improvement when exceeded.
-*   **Seed Data Protocol**: Maintain a setup where development-required dummy data can be generated **in a single command** (`npm run seed` or equivalent). A state where developers must manually create data is a "DX failure."
+*   **Law**: Keep the OS and architecture assumptions, runtimes, compilers, package managers, external services, environments, bootstrap, and verification commands needed for development, CI, and release in a machine-readable or executable contract, and continuously test reproducibility.
+*   **Environment Profile**: Dev Containers, Nix, language version managers, package-manager wrappers, container composition, managed development environments, and native toolchain installers are interchangeable implementations. When multiple paths are supported, smoke-test convergence on the same support matrix, dependency resolution, and quality gates, and state the owner and support boundary of each path.
+*   **First-Contribution SLO**: Measure time and failure rates from cloning and access acquisition through representative build, test, local startup, and first accepted change. Derive Blueprint targets from portfolio scale, hardware, network, and security controls. Thirty minutes to local startup is a reference profile for a lightweight project, not a Universal fixed value.
+*   **Test Data Protocol**: Prepare required test data through a reproducible, documented path such as seeds, fixtures, factories, snapshots, synthetic generators, or isolated test tenants. Do not default to production PII, and verify reset, version compatibility, and secret separation. A one-command bootstrap is a useful Golden Path, not the only valid ecosystem implementation.
 
 ### 16.2. Cognitive Load Reduction Protocol
 *   **Context**: The greatest obstacle to engineer productivity is not "code complexity" but "the cognitive cost of understanding the code."
-*   **Complexity Budgets**:
-    *   **File Lines**: **≤300 lines** per file (see §5.4)
-    *   **Function Lines**: **≤50 lines** per function. Functions exceeding this must be split.
-    *   **Parameter Count**: **≤4 parameters** per function. When exceeded, convert to parameter objects (Parameter Object Pattern).
-    *   **Cyclomatic Complexity**: Function cyclomatic complexity must be **≤10**. Auto-measure with ESLint's `complexity` rule.
-*   **Abstraction Level Consistency**: Keep abstraction levels consistent within functions. Mixing "SQL query details" and "business rule natural language expressions" in the same function is prohibited.
-*   **The Naming Investment Rule**: Mandate **5 minutes of thought** for variable and function naming. Meaningless names like `data`, `result`, `val`, `tmp` are rejected.
+*   **Complexity Budgets**: Select applicable signals from file or function size, parameter count, cyclomatic or cognitive complexity, dependency fan-out, nesting, and generated code, then set warning, blocking, or review thresholds in the Blueprint from the language, domain, artifact, baseline, and risk. Three hundred lines, fifty lines, four parameters, and complexity ten are reference heuristics for typical application code; do not apply them mechanically to generated code, declarative tables, parsers, or numerical kernels. Use an ecosystem-native analyzer or equivalent review evidence rather than mandating ESLint.
+*   **Design Cohesion**: Do not place unbounded sets of change reasons, trust boundaries, ownership, or abstraction levels in one unit. Split when it improves cohesion, testability, failure isolation, or API clarity, not merely to satisfy a line count.
+*   **Naming Contract**: Names communicate domain meaning, units, scope, lifecycle, and side effects where relevant. Do not categorically ban short local names or ecosystem conventions; require correction when ambiguity impairs review, operations, or security decisions.
 
 ### 16.3. Onboarding SLO & Knowledge Transfer Protocol
-*   **Onboarding SLO (Service Level Objectives)**:
+*   **Onboarding SLO (Service Level Objectives)**: The Blueprint derives milestones and targets from role, access, regulation, system scale, and employment model, then observes medians, upper percentiles, and failure causes. The following is a reference profile for a lightweight product team.
     | Milestone | Target Timeframe |
     |:----------|:----------------|
     | Local environment setup complete | By end of Day 1 |
     | First PR merged | By Day 3 |
     | Start of independent task | By end of Week 2 |
-*   **Buddy System Mandate**: Assign every new joiner one onboarding buddy. The buddy is obligated to conduct a 15-minute daily 1-on-1 for the first 2 weeks.
-*   **Architecture Decision Record (ADR) Mandate**:
-    *   All significant technical decisions (framework selection, DB design, external API selection, etc.) must be recorded as ADRs in `docs/adr/NNNN-{title}.md`.
-    *   **ADR Format**: 4 mandatory sections — `## Status`, `## Context`, `## Decision`, `## Consequences`.
-    *   ADRs are the only asset through which future engineers can understand "why that decision was made." Undocumented architectural decisions are **a loss of organizational intellectual capital**.
-*   **Single Person Knowledge Ban**: A state where only one person knows a specific feature or system is the greatest risk. Design all core components so that **at least 2 engineers** hold ownership (see CODEOWNERS §12.9).
+*   **Guided Support**: Provide a route through which a joiner can ask questions and reach a safe first change, such as a buddy, mentor, office hours, paired task, recorded walkthrough, or support channel. Derive headcount, frequency, and duration from team capacity and risk; do not universally mandate one person, a daily fifteen-minute meeting, or two weeks.
+*   **Decision Record**: Record important decisions that affect future maintainers in a searchable, versioned source of truth such as repository documentation, an architecture catalog, or a ticket system. Include at least status, context, decision, alternatives or trade-offs, consequences, owner, and review trigger. `docs/adr/NNNN-{title}.md` is one implementation.
+*   **Knowledge Continuity**: Give core capabilities an accountable owner and a continuity route for recovery, change, and handoff during leave, departure, incidents, or vendor termination. Multiple-person ownership is a strong control, but an individual or small team may compensate for key-person risk with runbooks, automation, credential recovery, external support, and an exit plan.
 
 ### 16.4. Engineering Metrics & DORA Protocol
-*   **Context**: "What gets measured gets managed" (Peter Drucker). Adopt DORA (DevOps Research and Assessment) metrics and the SPACE framework to objectively assess engineering health. DORA research has evolved through 2025-2026: the original four keys have been expanded, performance tier labels replaced with archetype analysis, and AI-specific measurement added as a first-class concern.
-*   **DORA 5 Key Metrics (Mandatory Measurement)**:
+*   **Context**: Use metrics to test improvement hypotheses, not to rank individuals, evaluate performance, or game targets. Combine delivery flow, instability, quality, and DX. DORA and SPACE are interchangeable evidence frameworks, and their definitions and current research must be revalidated at adoption against primary sources such as the [official DORA software delivery performance metrics](https://dora.dev/guides/dora-metrics/).
+*   **DORA Delivery Metrics (Reference Profile)**:
 
 > [!NOTE]
-> The traditional "Low/Medium/High/Elite" four-tier model has been retired in DORA 2025-2026 research. Teams are now assessed against **7 team archetypes** based on performance distribution patterns. Focus on **continuous improvement within your own context** rather than chasing static benchmark labels.
+> The 2025 DORA report presented seven team profiles or archetypes to explain interactions among performance, stability, and well-being; they are not a Universal fixed-tier classifier for every organization. Use the current five metrics to baseline and improve one application or service at a time, avoiding simplistic aggregation across organizations and uniform targets.
 
     | Metric | Definition | Type |
     |:-------|:-----------|:-----|
     | **Deployment Frequency** | Frequency of production deployments | Throughput |
-    | **Lead Time for Changes** | Time from code commit to production | Throughput |
+    | **Change Lead Time** | Time from code commit to production | Throughput |
     | **Failed Deployment Recovery Time** | Time from a failed deployment to recovery (formerly MTTR) | Throughput |
-    | **Change Failure Rate** | Percentage of deployments causing incidents | Stability |
-    | **Rework Rate** *(New — 2026)* | Proportion of unplanned/reactive deployments | Stability |
+    | **Change Fail Rate** | Ratio of deployments requiring immediate intervention, rollback, or hotfix | Instability |
+    | **Deployment Rework Rate** | Ratio of unplanned deployments made in response to production incidents | Instability |
 
-*   **Reference Benchmarks (Continuous Improvement Targets)**:
-    | Metric | Strong Performance | Needs Attention |
-    |:-------|:------------------|:----------------|
-    | Deployment Frequency | On-demand (multiple times/day) | Weekly or less |
-    | Lead Time for Changes | Less than 1 hour | More than 1 week |
-    | Failed Deployment Recovery Time | Less than 1 hour | More than 1 day |
-    | Change Failure Rate | ≤5% | ≥15% |
-    | Rework Rate | ≤10% of total deploys | ≥30% |
+*   **Benchmark Contract**: Obtain industry benchmarks from the current official Quick Check or an equivalent current dataset at adoption, and compare only with the same definitions, windows, and application context. Do not make fixed values such as multiple deployments per day, one hour, or five percent Universal targets for every service. Evaluate improvement from the current baseline and balance throughput with instability according to user demand, release risk, SLOs, and error budgets.
 
-*   **Measurement Execution Mandate**:
-    *   All 5 metrics must be auto-collected from the CI/CD pipeline and visualized in a weekly dashboard (manual measurement is prohibited).
-    *   For GitHub, leverage GitHub Actions Metrics / DORA API to automatically calculate DORA metrics.
-    *   Conduct quarterly team retrospectives and add improvement actions to the backlog.
-*   **AI-Aware Measurement (2026 Addition)**:
-    *   **AI-Generated Code CFR**: Separately track the Change Failure Rate for PRs tagged `[AI-Generated]` (see §5.3). If AI CFR exceeds the overall CFR by **+5pp or more**, mandate a review of the AI code governance process.
-    *   **Developer Experience Index (DX Index)**: Measure and report the DX Index alongside DORA metrics. Dimensions include flow efficiency, cognitive load, toolchain friction, and psychological safety. Use tooling such as DX Core 4 or Haystack Analytics to capture subjective developer friction.
+*   **Measurement Contract**:
+    *   For each selected metric, record its definition, source, window, covered services or teams, missing-data behavior, owner, privacy treatment, and intended decision. Automate collection from CI/CD, incident, and deployment systems where practical. A small team or transition may use verifiable manual sampling when automation cost would exceed decision value.
+    *   Do not mandate one dashboard product or VCS. Review trends and outliers at a cadence that can drive change and bind improvement actions to observed results. A weekly dashboard and quarterly retrospective are reference profiles.
+*   **AI-Aware Measurement**:
+    *   **AI-Assisted Change Outcomes**: After checking law, labor obligations, privacy, and measurement validity, compare quality, security, rework, review effort, and delivery outcomes for AI-assisted changes only when it informs a decision. Document the identification method, such as labels, provenance, or repository events, and its false positives and negatives. Derive difference thresholds from sample size and risk in the Blueprint; a fixed `+5pp` is not a Universal blocker.
+    *   **Developer Experience**: Observe flow efficiency, cognitive load, toolchain friction, and psychological safety through an appropriate mix of anonymous surveys, interviews, and telemetry. DX Core 4 and commercial analytics are candidates, not individual-surveillance mechanisms or the only compliant implementation.
 *   **SPACE Framework (Complementary Measurement)**:
     | Dimension | Sample Metrics |
     |:----------|:---------------|
@@ -1668,7 +1656,7 @@ type AgentAuditLog = {
 ## Part XXI: Privacy Engineering
 
 > [!CAUTION]
-> Privacy is not "a compliance department concern" — it is an engineering design responsibility. In an era where GDPR, EU AI Act, CCPA, and national data protection laws apply simultaneously, a privacy violation carries the risk of system shutdown orders and multi-billion-dollar fines. **Privacy by Design — embedding protections at the design phase — is the only correct approach.**
+> Privacy is not only a compliance-department concern; it is an engineering design responsibility. Determine GDPR, EU AI Act, CCPA, and national data-protection applicability separately from jurisdiction, entity, processing purpose, data subjects, product scope, and effective date. Use Privacy by Design as a baseline and embed controls proportionate to applicable law and actual privacy risk from the design phase.
 
 ### 21.1. Privacy by Design (PbD Principles)
 
@@ -1804,13 +1792,13 @@ type AgentAuditLog = {
 > [!CAUTION]
 > Build-time security checks are merely the "starting point." The top threats in 2026 (zero-days, container escapes, supply chain poisoning) occur at runtime. This Part defines the obligation to build a runtime defense layer to protect "systems as they run."
 
-### 22.1. SLSA Level 3+ Supply Chain Hardening
+### 22.1. SLSA Build L3 Supply Chain Hardening
 
-*   **Law**: Extending the SLSA Level 2 requirements of §3.5 (Software Supply Chain Security), the target for production deployments is **SLSA Level 3** and above.
-*   **Additional Requirements for SLSA Level 3**:
-    *   **Hardened Build Platform**: Builds must run on **trusted platforms** (GitHub Actions, Google Cloud Build, etc.) to prevent contamination by custom runners.
+*   **Law**: Extend the SLSA Build L2 baseline in §3.5 (Software Supply Chain Security) and target **SLSA Build L3** for high-assurance production artifacts. On the Source track, enforce organizational controls mechanically and target Source L4, including two-party review, for critical areas. Do not emit a nonexistent `SLSA_SOURCE_LEVEL_4` in a Source VSA's `verifiedLevels`; verify the corresponding numeric level plus `SLSA_SOURCE_TWO_PARTY_REVIEWED`.
+*   **Additional Requirements for SLSA Build L3**:
+    *   **Hardened Build Platform**: Use a build platform assessed against Build L3 requirements. Do not treat a product name such as GitHub Actions or Google Cloud Build as evidence by itself; verify builder identity, isolation, ephemerality, and the provenance issuance boundary.
     *   **Non-forgeable Provenance**: Build provenance must be **digitally signed** with `sigstore/cosign`, and signature verification must be required before deployment.
-    *   **Isolated Build**: Build processes must run in network-isolated sandboxes, with external network access blocked during the build.
+    *   **Isolated Build**: Run builds in isolated ephemeral environments. Apply hermetic or no-network builds as additional hardening separate from the SLSA level label, and require allowlists and evidence for unavoidable dependency retrieval.
     ```yaml
     # GitHub Actions: Example of signing artifacts with Cosign
     - name: Sign container image with Cosign
@@ -1830,7 +1818,7 @@ type AgentAuditLog = {
 
 ### 22.2. eBPF-based Runtime Security
 
-*   **Context**: eBPF (extended Berkeley Packet Filter) is the 2026 standard runtime security technology that monitors system calls at the kernel level and detects malicious behavior with near-zero overhead.
+*   **Context**: eBPF (extended Berkeley Packet Filter) is a strong implementation option for observing and controlling kernel-level events in runtime security. Do not treat it as the only standard for every workload or operating system. Select eBPF, OS-native telemetry, workload instrumentation, or an equivalent control from the threat model, kernel and platform support, required visibility, operational capability, and measured overhead.
 *   **Recommended Tool Stack**:
     | Tool | Category | Key Function | Adoption Criteria |
     |:----|:--------|:------------|:----------------|
@@ -1851,25 +1839,26 @@ type AgentAuditLog = {
          cmd=%proc.cmdline)
       priority: WARNING
     ```
-*   **Alert Integration**: Falco/Tetragon alerts must be forwarded immediately to **Slack + PagerDuty** and treated as P1 incidents.
+*   **Alert Integration**: Route runtime-security signals without undue delay into the adopted alert, on-call, and incident-management path. Derive severity and response SLO from asset criticality, exploitability, exposure, and impact. Slack and PagerDuty are reference implementations; do not promote every signal to a fixed P1.
 
 ### 22.3. Container Security Hardening Protocol
 
-*   **Distroless Image Mandate**: Production containers must use **Distroless images** (Google Distroless / Chainguard Images, etc.). Standard Linux distribution images containing shells, package managers, and unnecessary system utilities unnecessarily expand the attack surface and are prohibited.
+*   **Minimal Runtime Image Contract**: Pin a supported minimal production runtime image by digest and require non-root execution, a read-only filesystem, vulnerability scanning, an SBOM, and provenance. Remove shells, package managers, compilers, and debugging utilities when the runtime does not need them. Google Distroless and Chainguard Images are reference implementations. If operational or compatibility needs require additional utilities, record the need, added attack surface, patch path, and alternative debugging path in an ADR; do not make one vendor image the only conformance path.
     ```dockerfile
-    # Standard multi-stage build + Distroless configuration
-    FROM node:20-slim AS builder
+    # Reference using Node.js Active LTS and matching Debian generations.
+    # In production, pin both FROM lines to registry-resolved sha256 digests.
+    FROM node:24-trixie-slim AS builder
     WORKDIR /app
     COPY package*.json ./
-    RUN npm ci --only=production
+    RUN npm ci
     COPY . .
-    RUN npm run build
+    RUN npm run build && npm prune --omit=dev
 
-    FROM gcr.io/distroless/nodejs20-debian12 AS runtime
+    FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runtime
+    ENV NODE_ENV=production
     WORKDIR /app
     COPY --from=builder /app/dist ./dist
     COPY --from=builder /app/node_modules ./node_modules
-    USER nonroot
     CMD ["dist/index.js"]
     ```
 *   **Read-Only Root Filesystem**: Set `readOnlyRootFilesystem: true` in Kubernetes PodSpec to prevent filesystem manipulation after a container escape. Limit writable areas to the minimum necessary `emptyDir` or `tmpfs` mounts.
@@ -1908,7 +1897,7 @@ type AgentAuditLog = {
 
 ### 22.5. Secrets Detection & Rotation Automation
 
-*   **Law**: Building on §3.6 (Secret Rotation) and §19.5 (Secrets Governance), **full rotation automation** is added as an additional obligation. "Manual rotation on a schedule" contains human error and automation is the only correct approach.
+*   **Law**: Building on §3.6 and §19.5, automate issuance, distribution, verification, revocation, and audit where the issuer or provider supports a safe API and overlap. For vendor credentials that do not safely support full automation, use a managed workflow with an owner, expiring reminders, a two-party procedure, preflight checks, rollback, and execution evidence. Automation percentage alone is not proof of safety.
 *   **Automated Rotation Implementation (Vault Dynamic Secrets)**:
     ```bash
     # HashiCorp Vault: PostgreSQL dynamic secrets (auto-generates short-lived credentials on every access)
@@ -1918,7 +1907,7 @@ type AgentAuditLog = {
         default_ttl="1h" \
         max_ttl="24h"
     ```
-*   **GitHub Actions Automatic Secret Rotation Pattern**:
+*   **Scheduled Workflow Example (GitHub Actions)**:
     ```yaml
     on:
       schedule:

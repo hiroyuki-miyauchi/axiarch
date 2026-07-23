@@ -2,20 +2,18 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
-> "Firebase is an 'Auxiliary Engine'; data sovereignty belongs to Supabase (PostgreSQL)."
-> In all Firebase/GCP implementations, strictly follow this priority order: **Security (App Check + Security Rules) > Reliability (Idempotency + Retry) > Cost Efficiency (FinOps) > Performance > Developer Productivity**.
-> This document is the primary standard for all design decisions related to Firebase & GCP.
-> **55 Parts · Rule 32.1–32.200+ · Appendix A–D.**
+> "Adopt Firebase/GCP by capability and make responsibility boundaries for data, access, cost, and recovery explicit."
+> In all Firebase/GCP implementations, strictly follow this priority order: **Security & Privacy > Data Integrity & Reliability > Cost Efficiency (FinOps) > Performance > Developer Productivity**. App Check, Security Rules, IAM, idempotency, and retry are controls selected according to the adopted surface and threat.
+> This document is the provider profile for systems that adopt Firebase/GCP.
+> **57 sections (§0–§56) · Rules 32.1–32.175 · Appendices A–E.**
 
-> [!WARNING]
-> **Deprecated / Auxiliary Mode Only**
-> The **Single Source of Truth (SSOT)** for this project is **Supabase (PostgreSQL)**.
-> Storing user data or domain data in Firestore is prohibited in principle.
-> Firebase usage is limited to **peripheral services** such as **FCM (Push Notification)**, **Google Analytics**, **Crashlytics**, **App Check**, and **Remote Config**.
+> [!NOTE]
+> **Universal Applicability Contract**
+> This file neither mandates Firebase/GCP for every project nor subordinates it to Supabase or another data platform. Adoption follows `engineering/520_cloud_application_platforms.md`; apply only rules corresponding to capabilities in use. Service names, generations, runtimes, limits, pricing, regions, CLI commands, and defaults are volatile information and must be revalidated against current official documentation and effective settings. Fixed topology, thresholds, and naming belong in Blueprint.
 
 ---
 
@@ -96,8 +94,8 @@
 - §39. Google Maps Platform Optimization
 - §40. Google Ecosystem Integration Strategy
 
-**XVIII. Firebase Studio**
-- §41. Firebase Studio
+**XVIII. Development Environment Portability**
+- §41. Firebase Studio Sunset & Development Environment Portability
 
 **XIX. Compliance & Governance**
 - §42. Compliance & Data Sovereignty
@@ -121,61 +119,65 @@
 - §52. Python Specific Design
 - §53. Python Performance & Testing
 
-**XXIV. Anti-Patterns & Future Outlook**
+**XXIV. Anti-Patterns & Technology Lifecycle**
 - §54. 35 Anti-Patterns
-- §55. Future Outlook
+- §55. Technology Lifecycle Radar
+
+**XXV. Language, SDK & Runtime Support**
+- §56. Language, SDK & Runtime Support Surfaces
 
 **Appendix**
 - Appendix A: Quick Reference Index
 - Appendix B: Cross-References
 - Appendix C: FinOps Checklist
 - Appendix D: Security Checklist
+- Appendix E: Official Reference Snapshot
 
 ---
 
 ## §0. Primary Directives
 
-### Primary Directive 0.1: Auxiliary Engine Principle
--   **Law**: Firebase is an "Auxiliary Engine"; **data sovereignty belongs to Supabase (PostgreSQL)**. New data storage in Firestore is prohibited in principle.
+### Primary Directive 0.1: Authoritative Data Boundary
+-   **Law**: Define one authoritative store per data domain and evaluate Firestore, Data Connect, Cloud SQL, Supabase, or other candidates by consistency, queries, offline behavior, latency, operations, regulation, and exit requirements.
 -   **Mandate**:
-    1.  **Data Sovereignty**: All user and domain data must be stored in Supabase. Firestore is permitted only for legacy maintenance.
-    2.  **Peripheral Services Only**: Firebase usage is limited to FCM, Analytics, Crashlytics, App Check, Remote Config, Performance Monitoring, etc.
-    3.  **No New Firestore Collections**: Creating new collections is prohibited. Only maintenance of existing collections is permitted.
+    1.  **Explicit Ownership**: State the owner, system of record, synchronization direction, conflict resolution, retention, deletion, and export for each dataset.
+    2.  **Firestore Validity**: Firestore is a valid option when document, realtime, or offline needs fit and Security Rules, IAM, indexes, cost, backup, and portability are designed.
+    3.  **No Accidental Dual Authority**: Dual writes across stores are prohibited without an outbox, idempotency, reconciliation, and defined failure behavior.
 
 ### Primary Directive 0.2: Defense in Depth
--   **Law**: Security must not depend on a single layer. Multi-layered defense with App Check + Security Rules + IAM + VPC is mandatory.
+-   **Law**: Security must not depend on a single layer. Select mutually reinforcing controls applicable to the surface and threat model from client attestation, authentication, Security Rules, IAM, network controls, abuse controls, and audit, and state the boundary each control does not protect.
 -   **Mandate**:
-    1.  **App Check Mandatory**: Enable App Check on all Firebase services and custom backends.
-    2.  **Least Privilege**: All service accounts and IAM roles must follow the principle of least privilege. `roles/owner` in production is prohibited.
-    3.  **Zero Trust Network**: Minimize trust boundaries using VPC Service Controls and Private Google Access.
+    1.  **App Check Where Eligible**: Roll out App Check according to risk on supported client surfaces and backends. App Check does not replace Firebase Authentication, Security Rules, IAM, or rate limiting.
+    2.  **Least Privilege**: Minimize every workload identity and IAM binding, and do not grant broad basic roles to normal production runtime identities. Separate, time-bound, approve, and audit human emergency access.
+    3.  **Zero Trust Network**: Apply VPC Service Controls, Private Google Access, or another network control after evaluating service support, data-exfiltration risk, latency, cost, and operational complexity.
 
 ### Primary Directive 0.3: Idempotency First
--   **Law**: All Cloud Run Functions and Cloud Run Services must be designed to be idempotent.
+-   **Law**: Design event handlers, jobs, mutation endpoints, and external side effects that can be retried, redelivered, or repeated after timeout to be idempotent or duplicate-safe. Do not force one implementation pattern onto read-only requests; define guarantees at each side-effect boundary.
 -   **Mandate**:
-    1.  **Event ID Deduplication**: Event-triggered functions must implement deduplication using `eventId`.
-    2.  **Transactional Writes**: Use transactions or batch writes for Firestore writes.
+    1.  **Stable Idempotency Identity**: For a retried or redelivered side effect, define a stable idempotency key from an event ID, resource version, business operation ID, or equivalent. Do not fix every trigger to `eventId`.
+    2.  **Atomicity at the Boundary**: Use transactions, conditional writes, or batches for claims, state transitions, or multi-document invariants within one database. Do not mechanically wrap every single-document write in a transaction; handle failures outside a database transaction with provider idempotency keys, outboxes, leases or fencing, and reconciliation.
     3.  **Retry Safety**: Guarantee that retries do not cause duplicate side effects.
 
 ### Primary Directive 0.4: FinOps Guardian
 -   **Law**: Cloud costs are managed with the same rigor as technical debt. Budget overruns are treated as incidents.
 -   **Mandate**:
-    1.  **Budget Alerts**: Set budget alerts at 50%/80%/100%/120% for all projects.
-    2.  **Automated Response**: Automatically stop non-critical resources when exceeding 100% via Cloud Run Functions.
-    3.  **Cost Tagging**: Apply `environment`/`service`/`owner` labels to all GCP resources.
+    1.  **Budget Controls**: Define notification thresholds, forecasts, quotas, rate limits, spend anomaly detection, and owners in Blueprint according to workload criticality and billing model. A budget alert is not a hard spending cap.
+    2.  **Safe Automated Response**: Automate restrictions only for targets that preserve safety, data integrity, legal duties, and SLOs; provide graceful degradation and a manual recovery procedure.
+    3.  **Cost Attribution**: Attribute cost to environment, service, owner, and cost center with supported labels or tags, project or folder boundaries, billing exports, and service metadata. Do not assume every resource supports the same label keys; use a mapping inventory for unsupported resources.
 
-### Primary Directive 0.5: Cloud Run Unified
--   **Law**: Since 2025, Cloud Functions (2nd Gen) has been renamed to **Cloud Run Functions**. All serverless compute is managed uniformly as the Cloud Run family.
+### Primary Directive 0.5: Compute Lifecycle
+-   **Law**: Inventory functions, services, jobs, and runtime generations, then select and migrate according to official support, EOL, compatibility, and workload fit.
 -   **Mandate**:
     1.  **Naming**: Use "Cloud Run Functions" in documentation, code, and IaC.
     2.  **Unified Management**: Monitor and manage Cloud Run Functions, Services, and Jobs uniformly.
-    3.  **Migration Path**: Migrate 1st Gen Functions to Cloud Run Functions promptly.
+    3.  **Migration Path**: For legacy generations, maintain a migration plan, compatibility tests, and rollback based on official deadlines and risk; avoid unvalidated bulk migration.
 
 ---
 
 ## §1. Firebase Project Strategy & GCP Integration
 
 ### Rule 32.1: Project Separation Strategy
--   **Mandate**: Separate Firebase/GCP projects per environment.
+-   **Mandate**: Isolate identity, data, secrets, quotas, billing, deployment rights, and blast radius across development, verification, and production. Separate Firebase/GCP projects are a strong reference pattern; a shared project requires proof of equivalent boundaries and an approved exception.
 -   **Structure**:
     ```
     myapp-dev      → Development (free testing)
@@ -184,77 +186,60 @@
     ```
 
 ### Rule 32.2: GCP Project Configuration
--   **Mandate**: Firebase projects are always built on top of GCP projects.
+-   **Mandate**: Place every Firebase project, as a GCP project, inside a continuity-safe ownership, resource-hierarchy, billing, policy, and identity boundary. For enterprise use, align Organization, Folder, Project, and group-based IAM boundaries to teams, environments, jurisdictions, compliance, and shared services. Do not force unnecessary folders or dedicated teams on individual or small-scale use; when selecting project-level controls, still record ownership transfer, leaver handling, billing, break-glass, and a future path into an Organization.
 -   **Configuration**:
-    -   **Organization**: Set up folder structure under GCP Organization and apply policies hierarchically.
-    -   **Billing Account**: Set budgets per environment, separating production and development billing.
+    -   **Hierarchy**: Verify Organization, Folder, and Project policy inheritance and exception scope; do not silently treat one giant project or a personally owned project as a team boundary.
+    -   **Identity**: Where supported, grant continuing human access to managed groups and job functions rather than individual bindings, separating workload identities, CI, and break-glass access.
+    -   **Billing Account**: Attribute costs to environments, services, teams, and cost centers, separating production and non-production budgets and abuse controls according to risk.
     -   **API Enablement**: Explicitly enable required APIs (`firebase.googleapis.com`, `run.googleapis.com`, `artifactregistry.googleapis.com`, etc.).
 
 ### Rule 32.3: Region Selection
--   **Mandate**: Maintain region consistency across services. Deploy Cloud Run Functions, Cloud Run, and Firestore in the same region.
--   **Recommended**: `us-central1` (Iowa) or `europe-west1` (Belgium) as default for global-facing services.
--   **Caution**: Firestore region cannot be changed after creation. Configure initial setup carefully.
--   **GPU Availability**: Cloud Run GPU (NVIDIA L4 GA / RTX PRO 6000 Blackwell Preview) is available only in specific regions (`us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`, etc.). Consider this when selecting regions for AI inference workloads.
+-   **Mandate**: Select regions by user distribution, data residency, inter-service latency, availability, carbon, price, recovery, and location compatibility; record the decision in an ADR.
+-   **Caution**: For data services with post-creation move constraints, design migration, replication, backup, and exit before initial creation.
+-   **Dynamic Availability**: GPU, runtime, multi-region, and service availability change; revalidate the official region matrix at deployment.
 
-### Rule 32.4: Blaze Plan Mandatory
--   **Mandate**: As of February 3, 2026, Blaze plan (pay-as-you-go) is required for all Firebase projects. Spark plan no longer supports key features like Cloud Storage.
--   **Action**: Migrate all projects to Blaze plan and always set budget alerts (see §26).
+### Rule 32.4: Billing Plan Fitness
+-   **Mandate**: Verify the billing plan, free tier, billing units, quotas, and suspension behavior required by adopted capabilities. Do not infer a universal Firebase plan requirement from capabilities such as App Hosting that require a usage-based plan.
+-   **Action**: Before enabling usage-based billing, configure budget alerts, quotas, abuse controls, a cost owner, emergency degradation, and billing export. Alerts alone are not a hard cap.
 
 ---
 
 ## §2. Cloud Run Functions (formerly Cloud Functions 2nd Gen)
 
 ### Rule 32.5: Cloud Run Functions Standardization
--   **Mandate**: All new serverless functions must use **Cloud Run Functions**. Creating new 1st Gen functions is prohibited.
+-   **Mandate**: New functions use a currently recommended generation that satisfies runtime, trigger, latency, duration, network, observability, and cost needs. New adoption of a legacy generation requires a time-bound exception.
 -   **Advantage**:
     -   High performance via Cloud Run infrastructure (up to 32GB RAM, 8 vCPU)
     -   Concurrency support (default 80, max 1000)
     -   125+ event sources via Eventarc
     -   Traffic splitting and revision rollback
     -   HTTP functions can run up to 1 hour
--   **Supported Runtimes (as of March 2026)**: Node.js 22/24, Go 1.23/1.24/1.26, Python 3.12/3.13/3.14, Java 21/25, Ruby 3.3/4.0, PHP 8.4/8.5, .NET 8/10.
+-   **Supported Runtimes**: At deployment, verify the official runtime list and EOL, then pin a version according to `engineering/320_programming_language_governance.md`, team capability, and library compatibility.
 
 ### Rule 32.6: Cold Start Mitigation
--   **Mandate**: Implement cold start mitigation for latency-sensitive functions.
+-   **Mandate**: For a latency-sensitive function, measure cold-start rate, p95 and p99, traffic shape, dependency initialization, and idle cost, then select controls that meet the SLO and cost budget.
 -   **Strategies**:
-    1.  **Min Instances**: Set `minInstances: 1` or higher for critical functions (login, payment).
-    2.  **Concurrency**: Process multiple requests per instance using concurrency.
-    3.  **Global Variable Reuse**: Initialize DB connections and HTTP clients at global scope for reuse across invocations.
-    4.  **Lightweight Initialization**: Use lazy loading for heavy initialization.
-    5.  **Cloud Scheduler Warmup**: Send periodic pings to low-frequency functions.
-
-```typescript
-// ✅ Good: Reuse DB connection via global variable
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-
-const app = initializeApp();
-const db = getFirestore(app);
-
-export const myFunction = onRequest(
-  { minInstances: 1, concurrency: 80, memory: "512MiB" },
-  async (req, res) => {
-    const doc = await db.collection("config").doc("main").get();
-    res.json(doc.data());
-  }
-);
-```
+    1.  **Min Instances**: Configure minimum instances only in an environment where measured SLOs require them and an owner accepts idle billing. Do not apply them universally to test or low-traffic workloads.
+    2.  **Concurrency**: Load-test a value that fits handler and SDK request safety, CPU, memory, and downstream capacity.
+    3.  **Instance Reuse**: Safely reuse immutable clients, connection pools, or models, testing credential refresh, stale state, and connection limits.
+    4.  **Initialization**: Profile the critical path and compare lazy loading, artifact reduction, and connection reuse.
+    5.  **No Synthetic Warmup Default**: Do not use scheduler pings as the normal cold-start control. Compare them with minimum instances, architecture change, and SLO relaxation, and treat adoption as a time-bound exception.
 
 ### Rule 32.7: Runtime Configuration
--   **Mandate**: Explicitly set resource limits and timeouts for all functions. Do not rely on defaults.
+-   **Mandate**: Decide memory, CPU, timeout, concurrency, minimum and maximum instances, and region from workload measurements, downstream limits, SLOs, cost, and provider defaults. When retaining a default, record the reason and resolved value as evidence.
 -   **Configuration**:
     ```typescript
     export const processOrder = onRequest({
       region: "asia-northeast1",
       memory: "512MiB",
       timeoutSeconds: 120,
-      minInstances: 1,
+      minInstances: 0,
       maxInstances: 100,
       concurrency: 80,
       cpu: 1,
     }, handler);
     ```
--   **Guidelines**:
+-   **Guidelines**: The following are non-normative observation starting points before load testing, not release defaults.
     | Use Case | Memory | Timeout | Min Instances | Concurrency |
     |---|---|---|---|---|
     | API Endpoint | 256-512MiB | 60s | 1 | 80 |
@@ -265,8 +250,8 @@ export const myFunction = onRequest(
     | Genkit AI Flow | 1-2GiB | 120s | 0-1 | 20 |
 
 ### Rule 32.8: Function Organization
--   **Mandate**: Split functions by feature module and leverage Codebases.
--   **Structure**:
+-   **Mandate**: Split functions into modules or codebases along ownership, dependency, deployment and rollback, blast radius, and build-time boundaries. Codebases are a candidate where independent lifecycle creates value.
+-   **Illustrative Structure**:
     ```
     functions/
     ├── src/
@@ -280,34 +265,19 @@ export const myFunction = onRequest(
     ├── package.json
     └── tsconfig.json
     ```
--   **Deployment**: Split into groups of 10 or fewer when deploying many functions.
+-   **Deployment**: Do not split by a fixed function count. Measure provider quotas, deployment duration, failure isolation, and the change graph, then define retryable deployment groups.
 
 ### Rule 32.9: Idempotency Implementation
--   **Mandate**: All event-triggered functions must be designed idempotently.
--   **Pattern**:
-    ```typescript
-    export const onOrderCreated = onDocumentCreated(
-      "orders/{orderId}",
-      async (event) => {
-        const eventId = event.id;
-        
-        // Deduplication: Skip already-processed events
-        const processedRef = db.collection("processedEvents").doc(eventId);
-        const processed = await processedRef.get();
-        if (processed.exists) {
-          console.log(`Event ${eventId} already processed. Skipping.`);
-          return;
-        }
-        
-        await processOrder(event.data);
-        await processedRef.set({ processedAt: FieldValue.serverTimestamp() });
-      }
-    );
-    ```
+-   **Mandate**: Design an event handler subject to redelivery or retry as idempotent or duplicate-safe, defining guarantees and recovery per side effect.
+-   **Protocol**:
+    1.  **Atomic Claim**: Never use a read-then-write processed check. Atomically claim the idempotency key with a transaction or create-if-absent operation and store status, lease owner, expiry, attempt, and result reference.
+    2.  **External Side Effect**: Reuse the receiving provider's idempotency key for payments, email, or webhooks, or use a transactional outbox or inbox and reconciliation. Writing a database marker only after an external call leaves a crash window.
+    3.  **Lease Recovery**: Define timeout and fencing for safely reclaiming a stuck `processing` claim and make a completed result reusable.
+    4.  **Failure Test**: Fault-inject concurrent delivery, crash immediately after claim, timeout after external success, marker-write failure, and reordering.
 
 ### Rule 32.10: 1st Gen → Cloud Run Functions Migration
--   **Mandate**: Migrate 1st Gen Functions to Cloud Run Functions promptly.
--   **Migration Tool**: Use the GCP-provided upgrade tool (Preview).
+-   **Mandate**: Legacy functions have a time-bound migration plan based on official support deadlines, security, runtimes, trigger compatibility, and cost, with gradual movement to a validated target generation.
+-   **Migration Tool**: Treat a current supported GCP migration tool as a candidate and review generated diffs, triggers, IAM, and rollback.
 -   **Breaking Changes**: Note trigger syntax changes due to Eventarc integration.
 
 ### Rule 32.11: onCallGenkit Trigger
@@ -351,13 +321,14 @@ export const myFunction = onRequest(
 ### Rule 32.13: Cloud Run Services Design
 -   **Mandate**: Cloud Run Services must be stateless and containerized.
 -   **Best Practices**:
-    1.  **Stateless**: Do not share state between instances. Store state in Firestore/Cloud SQL/Redis.
-    2.  **Fast Startup**: Minimize container startup time (target: under 2s, GPU: under 5s).
-    3.  **Health Check**: Implement `/health` endpoint and enable Startup/Liveness probes.
-    4.  **Graceful Shutdown**: Handle SIGTERM appropriately (complete cleanup within 10s).
+    1.  **Language & Artifact Contract**: Cloud Run Services may use any language whose image satisfies the container contract. Distinguish source-deployed managed runtimes and buildpacks from custom containers, binding the base image, Linux ABI and architecture, listening address and `PORT`, dependencies, SBOM, patch responsibility, and runtime EOL to the artifact. Do not mistake the managed runtime list for Cloud Run Functions as the language ceiling for Cloud Run Services.
+    2.  **Stateless**: Do not treat local memory or the ephemeral filesystem as durable state shared across instances. Store authoritative state in an external service selected for consistency, latency, and cost; Firestore, Cloud SQL, and Redis are candidates.
+    3.  **Startup Budget**: Define and measure a Blueprint startup budget from CPU/GPU, image size, dependencies, traffic, minimum instances, and SLO.
+    4.  **Health Check**: Implement a startup/liveness probe or equivalent signal appropriate to current Cloud Run health mechanisms and application semantics. Do not require one fixed path.
+    5.  **Graceful Shutdown**: Handle SIGTERM, request draining, checkpoints, and connection closure within the current termination contract, measuring the cleanup budget.
 
 ### Rule 32.14: Cloud Run GPU Support (GA)
--   **Mandate**: Use Cloud Run GPU (NVIDIA L4 Tensor Core GA / RTX PRO 6000 Blackwell Preview) for AI inference and ML processing.
+-   **Mandate**: When an AI/ML workload needs GPUs, compare model fit, latency, throughput, startup, region, quota, drivers, security, cost, and fallback, and evaluate Cloud Run GPU as a candidate. Do not mandate it when CPU, managed AI, batch, or another platform fits better.
 -   **Features**:
     -   Per-second billing, scale-to-zero support
     -   Approximately 5-second startup (pre-installed drivers)
@@ -377,7 +348,7 @@ export const myFunction = onRequest(
               memory: "16Gi"
               cpu: "4"
     ```
--   **Available Regions**: `us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`.
+-   **Availability**: Revalidate GPU types, regions, quotas, and limits against current official documentation and project settings at deployment.
 
 ### Rule 32.15: Cloud Run Jobs
 -   **Mandate**: Use Cloud Run Jobs for run-to-completion batch processing.
@@ -441,17 +412,17 @@ export const myFunction = onRequest(
 ## §5. Firebase Authentication Strategy
 
 ### Rule 32.22: Authentication Provider Policy
--   **Mandate**: Use Firebase Authentication as the "authentication layer" and store user data in Supabase.
--   **Recommended Providers**:
-    | Provider | Use Case | Priority |
+-   **Mandate**: When Firebase Authentication is adopted, define authority boundaries between identity profiles and domain data, UID mapping, account deletion, export, and migration to another identity platform. Select the domain data store under Primary Directive 0.1.
+-   **Selection Matrix**: The following are candidate examples, not a Universal priority. Select from user population, platform policy, account recovery, MFA, enterprise federation, privacy, cost, and migration.
+    | Provider | Representative use | Applicability |
     |---|---|---|
-    | Google Sign-In | General user authentication | Highest |
-    | Apple Sign-In | iOS apps (App Store requirement) | Required (iOS) |
-    | Email/Password | Fallback authentication | Standard |
-    | Phone (SMS) | MFA / Phone verification | Optional |
-    | Anonymous | Guest access | Limited |
-    | SAML/OIDC | Enterprise SSO | As needed |
--   **Prohibited**: Accessing Firestore without authentication is prohibited.
+    | Google Sign-In | Consumer or workspace identity | Fits target users and platform |
+    | Apple Sign-In | Apple platform | Required by App Store policy and adopted login mix |
+    | Email/Password | Password-based identity | Recovery, breach defense, and MFA are operable |
+    | Phone (SMS) | Phone verification or fallback | SIM-swap, cost, and regional delivery are accepted |
+    | Anonymous | Guest access | Lifecycle, abuse, linking, and cleanup are designed |
+    | SAML/OIDC | Enterprise federation | Tenant discovery, claim mapping, and offboarding are designed |
+-   **Default Deny**: Firestore requires authentication and authorization by default. Intentional public content must prove scope, rate limiting, abuse controls, and absence of PII through Security Rules and tests.
 
 ### Rule 32.23: Passkeys / FIDO2 Support
 -   **Mandate**: Recommend Passkeys (FIDO2) adoption for passwordless authentication.
@@ -459,11 +430,11 @@ export const myFunction = onRequest(
 -   **Benefit**: Phishing resistance, elimination of password list attacks, improved user UX.
 
 ### Rule 32.24: Custom Claims
--   **Mandate**: Use Custom Claims for Role-Based Access Control (RBAC).
+-   **Mandate**: Limit Custom Claims to coarse, stable authorization attributes whose token size and refresh delay are acceptable. Do not use them as the source of truth for frequently changing permissions, subscription state, or resource membership; combine them with a database or policy service as appropriate.
 -   **Rules**:
     1.  Set only via Admin SDK (setting from client is prohibited).
     2.  Payload limited to 1000 bytes.
-    3.  Changes are not reflected until token refresh. Design with 1-hour grace period.
+    3.  Changes are not reflected until token refresh, so design permission removal, emergency revocation, and acceptable stale-claim duration from risk. Do not set one Universal grace period.
     ```typescript
     // Admin SDK: Set custom claims
     await admin.auth().setCustomUserClaims(uid, {
@@ -473,10 +444,10 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.25: Token Management and Session Design
--   **Mandate**: ID Token TTL defaults to 1 hour. Use Refresh Tokens for long sessions.
+-   **Mandate**: Design ID and refresh token TTL, renewal, revocation, and reauthentication from current official contracts and risk; test client clocks, revocation delay, and offline behavior.
 -   **Security**:
-    1.  Store Refresh Tokens in HTTP-only Cookies. Storage in LocalStorage/SessionStorage is prohibited.
-    2.  Implement Token Revocation for immediate invalidation on account compromise.
+    1.  Use a surface-appropriate mechanism such as secure, HTTP-only, SameSite cookies on web, OS secure storage on native, or SDK-managed sessions. Do not place high-privilege tokens in general storage readable by arbitrary scripts.
+    2.  Revoke refresh tokens on account compromise and apply `checkRevoked`, Security Rules, or an equivalent revocation check at high-risk backends. Existing ID tokens are short-lived but stateless; do not assume a revocation call makes every resource reject them immediately.
     3.  Require Multi-Factor Authentication (MFA) for admin and high-privilege users.
 
 ### Rule 32.26: Authentication Event Monitoring
@@ -487,18 +458,18 @@ export const myFunction = onRequest(
 
 ## §6. App Check & App Authentication
 
-### Rule 32.27: App Check Mandatory
--   **Mandate**: Enable App Check on all Firebase services (Firestore, Cloud Storage, Cloud Run Functions) and custom backends.
+### Rule 32.27: App Check Applicability
+-   **Mandate**: Evaluate and adopt App Check for supported application surfaces and backends according to the threat model and client compatibility. Observe legitimate traffic attestation and failure impact before enforcement.
 -   **Attestation Providers**:
     | Platform | Provider | Recommended |
     |---|---|---|
     | Android | Play Integrity API | ✅ |
     | iOS | App Attest (Device Check) | ✅ |
     | Web | reCAPTCHA Enterprise | ✅ |
--   **Enforcement Mode**: Enable enforcement mode after confirming sufficient App Check adoption rate (90%+).
+-   **Enforcement Mode**: Move to staged enforcement after legitimate-traffic success, unsupported clients, false rejection, and rollback meet Blueprint criteria.
 
 ### Rule 32.28: App Check for Custom Backends
--   **Mandate**: Verify App Check Tokens on custom backends such as Cloud Run Services.
+-   **Mandate**: Verify App Check tokens on a custom backend called from Firebase clients where supported SDKs, client compatibility, and the threat model fit. Do not force it onto server-to-server calls, unsupported clients, or third-party webhooks; select controls such as IAM, OAuth, mTLS, signatures, and rate limiting for those surfaces.
     ```typescript
     import { getAppCheck } from "firebase-admin/app-check";
     
@@ -524,8 +495,8 @@ export const myFunction = onRequest(
 ## §7. Firestore Design & Security Rules
 
 ### Rule 32.30: Firestore Usage Restriction
--   **Mandate**: New data storage in Firestore is prohibited in principle (per Primary Directive 0.1).
--   **Permitted Use Cases**:
+-   **Mandate**: Use Firestore for data domains that pass Primary Directive 0.1 capability evaluation and have Security Rules, IAM, indexes, quotas, cost, backup, export, and retention designed.
+-   **Representative Use Cases**:
     1.  Data requiring real-time listeners (presence, chat, etc.).
     2.  Maintenance of existing Firestore collections.
     3.  Firebase-related configuration data (Remote Config metadata, etc.).
@@ -556,7 +527,7 @@ export const myFunction = onRequest(
 
 ### Rule 32.32: Security Rules Best Practices
 -   **Rules**:
-    1.  **Authentication Required**: Use `request.auth != null` as the base for all rules.
+    1.  **Default Deny and Explicit Authorization**: Start from default deny and validate subject, resource, action, tenant, fields, time, and other relevant attributes for every allowed path. For intentional public reads, prove narrow scope, absence of PII, abuse and cost controls, and tests rather than mechanically adding `request.auth != null` to every path.
     2.  **Schema Validation**: Validate type, value, and size of `request.resource.data`.
     3.  **Custom Claims Validation**: Control admin operations with `request.auth.token.role == 'admin'`.
     4.  **Functions**: Use Security Rules Functions for reusable rule logic.
@@ -566,13 +537,13 @@ export const myFunction = onRequest(
 ### Rule 32.33: Firestore Query Optimization
 -   **Mandate**: Always consider performance and cost when writing Firestore queries.
 -   **Rules**:
-    1.  **`.limit()` Required**: Set `limit()` on all queries. Unlimited queries are prohibited.
+    1.  **Bounded Reads**: User-controlled, collection-wide, or repeatedly executed reads require a limit, cursor, termination condition, and quota. Do not force unnecessary pagination on unique-key or demonstrably bounded reads; prove the maximum result count in the data contract.
     2.  **Cursor-based Pagination**: Use `startAfter()`/`endBefore()`.
     3.  **Composite Indexes**: Explicitly define indexes for composite queries.
-    4.  **Document Size**: Keep documents small (target: under 10KB).
-    5.  **Subcollections**: Use subcollections for large nested data.
-    6.  **Caching**: Enable Firestore SDK caching (`enablePersistentCacheIndexAutoCreation`).
-    7.  **Hotspot Avoidance**: Do not use sequential values for document IDs.
+    4.  **Document Budget**: Define the document-size budget in Blueprint from access patterns, update contention, index fanout, network, and offline requirements; do not use a fixed 10KB Universal target.
+    5.  **Collection Shape**: Select subcollections, references, or denormalization from query, transaction, deletion, Security Rules, and cost trade-offs rather than mandating one nesting pattern.
+    6.  **Caching**: Enable offline persistence and cache indexes only after evaluating device trust, shared-device privacy, freshness, storage, and query profiles.
+    7.  **Hotspot Avoidance**: On high-write paths, load-test hotspots from sequential keys, single documents, or narrow key ranges and adopt distributed IDs or sharding where needed.
 
 ---
 
@@ -585,25 +556,26 @@ export const myFunction = onRequest(
     -   Relational data model Firebase integration
     -   AI-assisted onboarding and schema generation
     -   Client access via Firebase SDK (Web, iOS, Android, Flutter)
--   **Caution**: Project SSOT is Supabase. Consider Data Connect only when specific Firebase integration features not provided by Supabase are required.
+-   **Caution**: Compare Data Connect, Firestore, Cloud SQL, Supabase, and other candidates with the same matrix for data model, authorization boundary, SDK integration, operations, lock-in, and cost; do not decide solely because one vendor already exists.
 
-### Rule 32.35: Data Connect vs. Supabase Decision Criteria
--   **Decision Matrix**:
-    | Requirement | Supabase | Data Connect |
-    |---|---|---|
-    | SSOT (Data Sovereignty) | ✅ Highest priority | △ Firebase integration only |
-    | RLS / Row Level Security | ✅ Optimal | △ Firebase Security Rules |
-    | Real-time Subscriptions | ✅ Realtime | △ Limited |
-    | Firebase SDK Integration | △ Custom needed | ✅ Native |
-    | Edge Runtime | ✅ Edge Functions | ❌ Not possible |
-    | GraphQL API | △ pg_graphql | ✅ Native |
+### Rule 32.35: Relational Backend Capability Decision
+-   **Decision Contract**: Compare Data Connect, Supabase, Cloud SQL, and other relational backends with the same evidence, without making one vendor the default winner.
+
+    | Decision Axis | Required Evidence |
+    |---|---|
+    | Data ownership | authoritative store, replication, export, retention, deletion |
+    | Authorization | client or server boundary, row or field controls, testability, admin path |
+    | Contract | schema, generated SDK, transactions, migrations, backward compatibility |
+    | Runtime integration | supported client or server runtimes, offline or realtime, network path |
+    | Operations | backup or restore, observability, SLO, incident response, team permissions |
+    | Economics and exit | usage-based cost, egress, lock-in, migration proof, sunset plan |
 
 ---
 
 ## §9. Cloud Storage for Firebase
 
 ### Rule 32.36: Storage Design Principles
--   **Mandate**: Use Cloud Storage for Firebase for file storage.
+-   **Mandate**: When Cloud Storage for Firebase is selected, design object ownership, public or private boundaries, retention, malware controls, metadata, egress, restoration, and exit. Select file storage through the capability evaluation in §0.1 and `engineering/520_cloud_application_platforms.md`; do not force this service on every project.
 -   **Architecture**:
     1.  **Bucket Separation**: Separate buckets by purpose (e.g., `user-uploads`, `public-assets`, `backups`).
     2.  **Security Rules**: Control file access with Storage Security Rules (auth required, file size limits, MIME type validation).
@@ -638,7 +610,7 @@ export const myFunction = onRequest(
 -   **Alternative**: Use Firebase Extensions "Resize Images" for automatic thumbnail/medium/large generation.
 
 ### Rule 32.39: Resumable Upload
--   **Mandate**: Use Resumable Upload for large files (10MB+) to guarantee recovery from network interruptions.
+-   **Mandate**: Adopt resumable or multipart upload when file size, network instability, mobile background behavior, provider thresholds, and retransmission cost make failure material. Define any fixed size threshold in Blueprint.
 
 ---
 
@@ -673,7 +645,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.41: App Hosting (GA — SSR Applications)
--   **Mandate**: Use Firebase App Hosting (GA April 2025) for Next.js/Angular SSR applications.
+-   **Mandate**: Evaluate App Hosting as an SSR/SSG candidate when Firebase integration, automated build and rollout, framework support, region, observability, cost, and rollback fit the requirements. Never mandate it for every Next.js or Angular project.
 -   **Features**:
     -   Automatic rollout via GitHub integration
     -   SSR content delivery on Cloud Run
@@ -684,8 +656,8 @@ export const myFunction = onRequest(
     -   VPC network connectivity
     -   Automatic Firebase SDK initialization simplification
     -   Build debug UI
--   **Supported Frameworks**: Next.js (App Router recommended), Angular (v17+).
--   **Cost**: Charges apply when exceeding Blaze Plan free tier (from August 2025).
+-   **Supported Frameworks**: Verify the current official framework and version matrix at deployment.
+-   **Cost**: Confirm billing boundaries for the required billing plan, build, runtime, and bandwidth; design guardrails knowing budget alerts are not hard caps.
 
 ### Rule 32.42: Hosting vs App Hosting Selection Criteria
 -   **Decision Matrix**:
@@ -725,7 +697,7 @@ export const myFunction = onRequest(
 -   **Rules**:
     1.  **Token Refresh**: Retrieve tokens on app launch and store the latest token on the server.
     2.  **Invalid Token Cleanup**: Detect send errors (`messaging/registration-token-not-registered`) and delete invalid tokens from DB.
-    3.  **Periodic Cleanup**: Set up batch job to auto-delete tokens not updated for 90+ days.
+    3.  **Periodic Cleanup**: Derive a Blueprint retention period from provider staleness guidance, send results, app usage cycles, and privacy/retention requirements; progressively invalidate and delete stale tokens.
     4.  **Topic Messaging**: Use Topic Messaging for large-scale broadcasts.
     5.  **Multi-device**: Use Condition Messaging to deliver to all user devices.
 
@@ -763,8 +735,8 @@ export const myFunction = onRequest(
 
 ## §13. Crashlytics & Stability Monitoring
 
-### Rule 32.48: Crashlytics Mandatory
--   **Mandate**: Integrate Firebase Crashlytics into all mobile apps.
+### Rule 32.48: Crashlytics Applicability
+-   **Mandate**: A mobile application that adopts Crashlytics links release artifacts, symbols, versions, environments, and privacy-safe context, and avoids accidental duplicate telemetry with another crash platform.
 -   **Configuration**:
     1.  **dSYM Upload**: Auto-upload dSYMs at build time for iOS.
     2.  **Proguard Mapping**: Upload Proguard/R8 mapping files for Android.
@@ -773,7 +745,7 @@ export const myFunction = onRequest(
     5.  **Breadcrumbs**: Record breadcrumbs of user actions.
 
 ### Rule 32.49: Crash-Free Rate Target
--   **Mandate**: Maintain Crash-Free Users rate at **99.5%+**. Emergency response if below 99%.
+-   **Mandate**: Define crash-free users or sessions, severity, and affected cohorts as a service SLO in Blueprint, with release stop, rollback, and incident criteria for a breach. Do not mandate one fixed rate for every application.
 -   **Monitoring**: Configure Crashlytics Alerts to instantly detect new crash clusters.
 
 ---
@@ -781,11 +753,11 @@ export const myFunction = onRequest(
 ## §14. Performance Monitoring
 
 ### Rule 32.50: Performance Monitoring Configuration
--   **Mandate**: Track key performance metrics with Firebase Performance Monitoring.
+-   **Mandate**: When Firebase Performance Monitoring is adopted, measure key user-journey performance and correlate it with platform-wide SLIs.
 -   **Tracked Metrics**:
-    1.  **App Start Time**: Maintain cold start under 2 seconds.
-    2.  **HTTP Response Time**: API response time (p95 < 1s).
-    3.  **Screen Rendering**: Screen render time (p95 < 500ms).
+    1.  **App Start Time**: Measure cold and warm starts by device, OS, and network cohort.
+    2.  **HTTP Response Time**: Measure API p50, p95, p99, and error rate.
+    3.  **Screen Rendering**: Measure slow or frozen frames and key-screen render time.
     4.  **Network Payload Size**: Detect oversized response sizes.
 -   **Custom Traces**: Set custom traces for business-critical operations (login, payment, search).
 
@@ -794,22 +766,20 @@ export const myFunction = onRequest(
 ## §15. Google Analytics for Firebase
 
 ### Rule 32.51: Analytics Integration
--   **Mandate**: Measure all user behavior with Google Analytics for Firebase.
+-   **Mandate**: Measure only the minimum events needed for explicit product/business outcomes, with data classification, lawful basis/consent, retention, deletion, access, sampling, and cost. Google Analytics for Firebase is a candidate; prohibit collection of every action or attribute.
 -   **Configuration**:
-    1.  **Automatic Events**: Auto-collect `first_open`, `session_start`, `screen_view`, etc.
-    2.  **Custom Events**: Explicitly record business metrics (purchases, registrations, feature usage).
-    3.  **User Properties**: Set user attributes (plan, region, segment, etc.).
-    4.  **Conversion Events**: Define conversion events and track goal completion rates.
-    5.  **BigQuery Export**: Export raw data to BigQuery for detailed analysis.
-    6.  **DebugView**: Use DebugView for real-time event verification during development.
--   **Privacy**: Implement GDPR-compliant Consent Mode (see §42).
+    1.  **Event Contract**: Register event name, purpose, owner, property schema, PII prohibition, retention, and downstream consumers.
+    2.  **Automatic Events**: Inventory provider-collected fields and defaults, disabling unnecessary collection or preventing transmission before consent.
+    3.  **User Properties**: Avoid casual use of sensitive attributes, precise location, or persistent identifiers; assess cohort re-identification risk.
+    4.  **Validation**: In debug/staging, verify schema, duplicates, consent state, deletion, and export cost.
+-   **Privacy**: Design consent, opt-out, deletion, and data-processing terms for applicable law, region, age, and platform policy; Consent Mode alone is not proof of legal compliance.
 
 ---
 
 ## §16. Firebase AI Logic & Genkit
 
 ### Rule 32.52: Firebase AI Logic Overview
--   **Mandate**: Use Firebase AI Logic (formerly Vertex AI in Firebase) to securely integrate generative AI models into apps.
+-   **Mandate**: When a client connects to generative AI, evaluate Firebase AI Logic as a candidate against models, regions, data use, App Check, authorization, rates, safety, evaluation, cost, and the responsibility difference from a server proxy.
 -   **Features**:
     -   Direct access to Gemini Developer API (free tier available) and Vertex AI API
     -   AI endpoint protection via App Check integration
@@ -823,13 +793,8 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.53: Genkit Framework
--   **Mandate**: Use Genkit (open source) for building AI workflows.
--   **Language Support (as of March 2026)**:
-    | Language | Version | Status | Maturity |
-    |---|---|---|---|
-    | Node.js (TypeScript) | 1.x | GA | ✅ Production-ready |
-    | Go | 1.0 (Sept 2025 GA) | GA | ✅ Production-ready |
-    | Python | Alpha | Preview | △ Experimental |
+-   **Mandate**: Genkit is a candidate AI workflow framework. Adopt it only after comparing model portability, evaluation, observability, tool security, runtimes, team support, and exit under the AI authority.
+-   **Language Support**: Revalidate supported Node.js, Go, Python, or other versions, status, feature parity, and EOL against current official documentation at adoption and upgrade.
 -   **Core Features**:
     -   Unified model API (Gemini, OpenAI, Anthropic, Ollama, multi-provider)
     -   Type-safe AI flow definitions
@@ -866,7 +831,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.55: Genkit Tool Calling
--   **Mandate**: Use Genkit Tool Calling to allow LLMs external data access and action execution.
+-   **Mandate**: When Genkit is adopted and an LLM may access external data or execute actions, use Genkit Tool Calling or an equivalent typed tool contract without granting arbitrary code execution or unbounded permissions.
 -   **Security**: Minimize tool execution permissions. Require input validation for tool calls based on user input.
     ```typescript
     const getWeatherTool = ai.defineTool(
@@ -961,7 +926,7 @@ export const myFunction = onRequest(
 -   **Mandate**: Track and manage AI-related costs independently.
 -   **Strategies**:
     1.  **Token Consumption Tracking**: Dashboard token usage via Genkit Monitoring.
-    2.  **30% Rule**: Alert when AI costs exceed 30% of total.
+    2.  **Budget Threshold**: Feature and FinOps owners define the AI budget, unit economics, growth rate, and anomaly threshold in Blueprint.
     3.  **Model Optimization**: Consider gradual migration to lower-cost models (Flash series).
     4.  **Labeling**: Apply `ai-feature` labels to AI-related resources for cost isolation.
     5.  **Context Caching**: Reduce token costs with Vertex AI Context Caching.
@@ -982,8 +947,8 @@ export const myFunction = onRequest(
 ## §19. Firebase Extensions Strategy
 
 ### Rule 32.66: Extensions Usage Policy
--   **Mandate**: Use Firebase Extensions for standard integrations.
--   **Recommended Extensions**:
+-   **Mandate**: For standard integrations, compare Firebase Extensions, managed integrations, and custom implementations by permissions, data flow, release cadence, support, cost, observability, and exit; supply-chain review third-party code and configuration.
+-   **Candidate Examples**:
     | Extension | Use Case |
     |---|---|
     | Stream Firestore to BigQuery | Analytics platform for Firestore data |
@@ -993,22 +958,22 @@ export const myFunction = onRequest(
     | Delete User Data | User deletion data cleanup |
 
 ### Rule 32.67: Custom Extensions
--   **Mandate**: Develop and package project-specific repetitive processes as custom Extensions.
+-   **Applicability**: Package only work that is reused across environments/projects and can sustain an independent version, configuration contract, tests, owner, and upgrade/deprecation policy. Do not force one-off project logic into an extension.
 
 ---
 
 ## §20. BigQuery Integration & Data Analytics Platform
 
-### Rule 32.68: BigQuery as SSOT (Analytics)
--   **Mandate**: Consolidate all analytics data in BigQuery.
--   **Data Sources**:
+### Rule 32.68: Analytics Data Authority Boundary
+-   **Mandate**: Define authoritative sources, warehouse/lakehouse, freshness, lineage, retention, deletion, access, and cost for analytics, billing, and operational telemetry. BigQuery is a strong candidate for GCP/Firebase workloads, but do not force universal consolidation or unnecessary duplication of sensitive data.
+-   **Candidate Sources**:
     -   Firebase Analytics → BigQuery Export
     -   Firestore → BigQuery Extension
     -   Cloud Logging → BigQuery Sink
     -   Billing Data → BigQuery Export
 
 ### Rule 32.69: ELT Pattern
--   **Mandate**: Load data in raw format to BigQuery, then transform/test within BigQuery using dbt, etc.
+-   **Mandate**: Select ETL, ELT, or stream processing from latency, volume, privacy, source load, replay, and cost. If a raw zone exists, design immutability, encryption, access, retention, schema evolution, and deletion propagation; do not fix BigQuery or dbt as Universal implementation.
     ```
     Source → Raw Layer (BigQuery) → Staging Layer (dbt) → Mart Layer (dbt) → Dashboard
     ```
@@ -1017,7 +982,7 @@ export const myFunction = onRequest(
 -   **Mandate**: Embed automated quality tests in data pipelines.
 -   **Tests**:
     1.  **Freshness**: Data freshness checks.
-    2.  **Volume**: Anomaly detection for record counts (alert at ±30% vs previous day).
+    2.  **Volume**: Detect record-volume anomalies with dynamic thresholds that account for weekday effects, seasonality, source baselines, and expected growth.
     3.  **Schema**: Automatic schema change detection.
     4.  **Null Check**: Null rate monitoring for required fields.
 
@@ -1041,7 +1006,7 @@ export const myFunction = onRequest(
 -   **Mandate**: Admin SDK bypasses Security Rules. Use only in trusted server environments.
 -   **Requirements**:
     1.  **Least Privilege IAM**: Grant only minimum required roles.
-    2.  **Credential Rotation**: Rotate every 90 days.
+    2.  **Credential Lifecycle**: Prefer keyless and short-lived identity. If a long-lived credential is unavoidable, automate rotation and immediate revocation from risk, provider capability, regulation, and incident-response needs.
     3.  **Environment Variable Management**: Manage key files with Secret Manager. Never commit to source code.
 
 ### Rule 32.73: OWASP Top 10 2025 Countermeasures
@@ -1059,31 +1024,31 @@ export const myFunction = onRequest(
 
 ### Rule 32.74: Principle of Least Privilege
 -   **Mandate**: All IAM roles must follow the principle of least privilege.
--   **Prohibited**: Use of `roles/owner` and `roles/editor` in production is prohibited.
--   **Recommended**: Create custom IAM roles containing only required permissions. Apply IAM Recommender suggestions.
+-   **Prohibited**: Do not grant broad basic roles such as `roles/owner` or `roles/editor` to normal production workload identities, CI identities, or permanent human access.
+-   **Recommended**: Combine predefined roles at the smallest scope and create a version-controlled custom role only when needed. Review IAM Recommender output as evidence rather than applying it mechanically. Emergency owner access is separate, time-bound, strongly authenticated, approved, alerted, and audited.
 
 ### Rule 32.75: Service Account Management
--   **Mandate**: Create dedicated service accounts per function and isolate permissions.
+-   **Mandate**: Separate workloads into service accounts when trust boundary, privilege, environment, lifecycle, or blast radius differs. Do not create an account per function unconditionally; avoid both identity sprawl and shared high privilege.
 -   **Best Practices**:
-    1.  **Dedicated Accounts**: Separate service accounts for Cloud Run Functions, Cloud Run, and CI/CD.
+    1.  **Boundary-aligned Accounts**: Separate production and non-production, runtime and deployment, and different data classes or privileges. Low-risk workloads with the same privileges, owner, and lifecycle may share an account with documented rationale.
     2.  **Keyless Authentication**: Use Workload Identity Federation to minimize service account key issuance.
-    3.  **Periodic Audit**: Audit and delete unused service accounts and keys every 90 days.
+    3.  **Periodic Audit**: Audit unused service accounts and keys using identity inventory, usage telemetry, risk, and compliance cadence, then disable and delete them safely.
 
 ### Rule 32.76: Workload Identity Federation
--   **Mandate**: Use Workload Identity Federation for access from external ID providers (GitHub Actions, AWS, etc.) to GCP. Service account key issuance is prohibited in principle.
+-   **Mandate**: Prefer short-lived federation such as Workload Identity Federation when connecting a supported external identity provider or CI system to GCP, restricting subject, repository or project, branch or environment, audience, and attribute conditions. If an unsupported path makes a long-lived key unavoidable, require a time-bound exception, least privilege, protected secret store, rotation, usage alerts, and revocation procedure.
 
 ---
 
 ## §23. Secret Manager & Sensitive Data Management
 
-### Rule 32.77: Secret Manager Mandatory
--   **Mandate**: Manage all sensitive information (API keys, DB passwords, etc.) with Secret Manager.
--   **Prohibited**: Hard-coding sensitive information in source code, `.env` files, or Firebase Config is **strictly forbidden**.
+### Rule 32.77: Approved Secret Store Protocol
+-   **Mandate**: Manage production and shared-environment secrets in an approved provider-native or organizational secret store with encryption, access control, versioning, audit, rotation, and revocation. Secret Manager is the default candidate for GCP workloads.
+-   **Prohibited**: Do not store or emit secrets in source, container images, client bundles, version-controlled `.env` files, plaintext CI settings, or logs. If local-only `.env` files are used, apply ignore rules, separate samples, minimum scope, short-lived values, and leak scanning.
 
 ### Rule 32.78: Secret Management
 -   **Best Practices**:
     1.  **Versioning**: Version-manage secrets for rollback capability.
-    2.  **Auto-Rotation**: Rotate every 90 days. Recommend automatic rotation.
+    2.  **Auto-Rotation**: Define and automate rotation/revocation cadence in Blueprint from secret type, compromise impact, provider capability, and regulation. Revoke immediately after suspected compromise rather than waiting for cadence.
     3.  **Access Control**: Grant `roles/secretmanager.secretAccessor` only to required service accounts.
     4.  **CMEK**: Use Customer-Managed Encryption Keys (CMEK) when compliance requires.
     5.  **Audit**: Monitor Secret Manager access logs.
@@ -1105,17 +1070,17 @@ export const myFunction = onRequest(
 ## §24. VPC & Network Security
 
 ### Rule 32.80: VPC Service Controls
--   **Mandate**: Configure VPC Service Controls in high-security environments to define access boundaries for GCP services.
+-   **Mandate**: Where supported services need a data-exfiltration, regulatory, or identity boundary, evaluate VPC Service Controls and introduce them gradually after validating dry run, the supported-service matrix, ingress and egress policy, break-glass, and observability.
 
 ### Rule 32.81: Private Google Access
--   **Mandate**: Use Private Google Access for Cloud Run Functions/Services access to GCP services.
+-   **Mandate**: When resources without public IPs must reach Google APIs, evaluate Private Google Access or another approved private path and verify DNS, routes, egress, service support, and failure modes.
 
 ### Rule 32.82: Direct VPC Egress
--   **Mandate**: Use Cloud Run Functions Direct VPC Egress (GA) to securely access private resources within VPC.
--   **Configuration**: Set `--egress-settings=all` to route all outbound traffic through VPC.
+-   **Mandate**: For Cloud Run Functions or Services that need private resources, compare Direct VPC egress, connectors, and alternate architectures by latency, throughput, IP behavior, cost, and availability.
+-   **Configuration**: Select private-range-only or all-traffic behavior from the threat model, inspection, NAT, and external API reachability; never require routing all traffic unconditionally.
 
 ### Rule 32.83: Cloud Armor WAF
--   **Mandate**: Place Cloud Armor in front of Cloud Run/Load Balancer.
+-   **Mandate**: Where the threat, traffic, and architecture of an internet-facing HTTP surface fit, evaluate a supported load-balancing path with Cloud Armor or another WAF and DDoS control. Verify bypass prevention if a direct endpoint remains.
 -   **Architecture**: Cloud Run → Serverless NEG → Application Load Balancer → Cloud Armor Security Policy.
 -   **Policy**:
     1.  **OWASP Top 10 WAF Rules**: Apply preconfigured rules for SQL Injection, XSS, etc.
@@ -1126,15 +1091,15 @@ export const myFunction = onRequest(
 -   **Testing**: Always evaluate new policies in "preview" mode before enforcement.
 
 ### Rule 32.84: Private Service Connect
--   **Mandate**: Use Private Service Connect for private connections to GCP managed services (Cloud SQL, Memorystore, etc.).
+-   **Applicability**: Where threat model, data exfiltration, compliance, or latency requires private connectivity, select Private Service Connect, private IP, VPC connectors, or a provider-supported equivalent by service support, DNS, egress, failover, and cost, and verify public bypass prevention.
 
 ---
 
 ## §25. FinOps & Cost Optimization
 
 ### Rule 32.85: Cost Allocation Principles
--   **Mandate**: Apply labels to all GCP resources.
--   **Required Labels**:
+-   **Mandate**: Combine billing export, project/folder hierarchy, supported labels/tags, and service metadata so material cost is traceable to environment, service, owner, cost center, and feature. Maintain a mapping inventory and alternate allocation for resources that do not support labels.
+-   **Candidate Dimensions**:
     | Label Key | Values (examples) | Purpose |
     |---|---|---|
     | `environment` | prod / staging / dev | Per-environment cost analysis |
@@ -1171,13 +1136,13 @@ export const myFunction = onRequest(
 ## §26. Budget Alerts & Automated Response
 
 ### Rule 32.89: Budget Alert Configuration
--   **Mandate**: Configure multi-stage budget alerts for all projects.
+-   **Mandate**: For environments that can incur charges, configure multi-stage actual and forecast alerts with an owner, recipients, and response runbook. Define thresholds in Blueprint and state that alerts are not hard caps.
     | Stage | Actual Cost | Forecasted Cost | Action |
     |---|---|---|---|
-    | Warning | 50% | 75% | Team Slack notification |
-    | Caution | 80% | 90% | Manager escalation |
-    | Critical | 100% | 100% | Auto resource restriction |
-    | Exceeded | 120% | — | Emergency response (all teams) |
+    | Early Warning | Blueprint value | Forecast threshold | Notify cost owner and investigate |
+    | Caution | Blueprint value | Forecast threshold | Escalate to owning team |
+    | Critical | Near approved limit | Near approved limit | Consider safe degradation and change freeze |
+    | Exceeded | Above approved limit | — | Incident procedure and business decision |
 
 ### Rule 32.90: Automated Response (Budget Automation)
 -   **Architecture**:
@@ -1186,19 +1151,19 @@ export const myFunction = onRequest(
     ```
 -   **Actions**:
     1.  **Slack/Email Notification**: Immediate notification to relevant teams.
-    2.  **Resource Restriction**: Set `maxInstances` to 0 for non-critical Cloud Run Functions/Services.
-    3.  **Billing Disable**: Disable project billing via Cloud Billing API as last resort.
--   **Caution**: Billing disable stops all services. Apply cautiously in production.
+    2.  **Resource Restriction**: Gradually restrict pre-classified non-critical features; do not abruptly stop workloads processing data.
+    3.  **Emergency Stop**: Destructive actions such as billing disable are a last resort requiring break-glass approval, dependency assessment, and a recovery procedure.
+-   **Caution**: A budget notification is not a shutoff device. Design safe automation separately to prevent production outage or data loss.
 
 ### Rule 32.91: Monthly Review
--   **Mandate**: Reconcile cost actuals against budget monthly; identify root causes of abnormal cost increases.
+-   **Mandate**: At a cadence based on spend volatility, budget, and criticality, review actuals, forecasts, unit economics, anomalies, commitments, and unused resources; record owners and due dates. Monthly is a candidate for stable workloads, not a fixed Universal period.
 
 ---
 
 ## §27. Observability (Cloud Logging / Monitoring / Trace)
 
 ### Rule 32.92: Structured Logging
--   **Mandate**: All Cloud Run Functions/Services logs must be in structured JSON format.
+-   **Mandate**: Adopt machine-queryable structured logging. Where the runtime/agent produces the JSON envelope, do not double-encode it in the application. Standardize event schema, severity, service, environment, trace/correlation, and error class as appropriate to use.
     ```typescript
     import { log, warn, error } from "firebase-functions/logger";
     
@@ -1210,18 +1175,12 @@ export const myFunction = onRequest(
       processingTimeMs: 234,
     });
     ```
--   **Required Fields**: `timestamp`, `severity`, `message`, `traceId`.
+-   **Reference Fields**: `timestamp`, `severity`, `message`, `service`, `environment`, and `traceId`/`correlationId`. Confirm provider-populated fields and signal use; never fabricate a nonexistent trace.
 -   **Prohibited**: Logging sensitive information (passwords, credit card numbers, PII) is strictly forbidden.
 
 ### Rule 32.93: Cloud Monitoring
--   **Mandate**: Set alert policies for key metrics.
-    | Metric | Threshold | Action |
-    |---|---|---|
-    | Function Error Rate | > 5% | Immediate Slack notification |
-    | Function Latency (p99) | > 5s | Start investigation |
-    | Pub/Sub Unacked Messages | > 1000 | Scale up processing capacity |
-    | Cloud Run CPU Utilization | > 80% | Check instance count |
-    | AI Token Consumption | > Budget 80% | Execute cost optimization |
+-   **Mandate**: Select signals tied to user journeys, SLOs, saturation, backlog, errors, and cost anomalies; assign owner, severity, notification route, runbook, and escalation. Do not place fixed thresholds or destinations in Universal; derive them in Blueprint from traffic baselines, error budgets, capacity tests, and budgets.
+-   **Reference Signals**: Request errors/latency, event age/backlog, instance saturation, quota pressure, AI unit cost, and budget consumption are candidates; do not mandate metrics for unused services.
 
 ### Rule 32.94: Cloud Trace & OpenTelemetry
 -   **Mandate**: Use Cloud Trace to track request flows across distributed systems.
@@ -1251,27 +1210,21 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.98: Retry Strategy
--   **Mandate**: Implement retry strategy for all external calls. Exponential backoff with jitter.
-    | Parameter | Value |
-    |---|---|
-    | Initial Delay | 1 second |
-    | Max Delay | 60 seconds |
-    | Multiplier | 2x |
-    | Max Retries | 5 |
-    | Jitter | ±20% |
+-   **Mandate**: Retry only transient failures whose operation is idempotent or protected by an idempotency key, within a deadline and retry budget. Consider provider retry guidance, `Retry-After`, jittered backoff, and amplification across the call hierarchy; place counts and durations in Blueprint.
+-   **No Retry**: Never blindly retry validation, authentication/authorization, permanent quota/configuration errors, non-idempotent side effects, or expired deadlines. Before enabling provider retry for event-driven functions, prove Rule 32.15 idempotency and poison-message handling.
 
 ### Rule 32.99: Dead Letter Queue (DLQ)
 -   **Mandate**: Forward messages exceeding retry limits to a Dead Letter Queue.
 
 ### Rule 32.100: Circuit Breaker
--   **Mandate**: Implement Circuit Breaker pattern to prevent external service failures from cascading through the entire system.
+-   **Applicability**: For synchronous dependencies that can cause resource exhaustion, retry storms, or latency cascades, evaluate a combination of circuit breaking, concurrency limits, load shedding, and fallback. When custom breaker state is unsafe in short-lived functions or conflicts with provider-managed clients, document deadline, bounded retry, queue isolation, or equivalent controls and rationale.
 
 ---
 
 ## §29. Terraform / IaC Management
 
 ### Rule 32.101: IaC Mandatory
--   **Mandate**: Manage all Firebase/GCP infrastructure settings with Terraform. Manual operations (ClickOps) are prohibited.
+-   **Mandate**: Version reproducible Firebase/GCP settings through Terraform, Google Cloud Config Connector, provider-native configuration, or an approved equivalent, with review, plan, and drift detection. Manual operations required by API gaps need approval, audit evidence, a reproduction procedure, and periodic drift checks.
 -   **Scope**: GCP project settings, Firebase settings, Cloud Run Functions/Services settings, Security Rules, App Check, Budget Alerts, Monitoring Alert Policies.
 
 ### Rule 32.102: Project Structure
@@ -1291,7 +1244,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.103: State Management
--   **Mandate**: Store Terraform State remotely in GCS bucket. Enable bucket versioning, implement State Locking, prohibit manual editing.
+-   **Mandate**: Manage Terraform State in an approved remote backend with encryption, access control, locking or equivalent concurrency control, version/recovery, and audit. GCS is a candidate for GCP workloads; verify the backend's current locking semantics. Prohibit manual state editing except through a break-glass procedure.
 
 ### Rule 32.104: Version Management
 -   **Configuration**:
@@ -1347,8 +1300,8 @@ export const myFunction = onRequest(
 
 ## §31. Emulator Suite & Testing Strategy
 
-### Rule 32.108: Emulator Suite Mandatory
--   **Mandate**: Use Firebase Emulator Suite for local development and CI testing.
+### Rule 32.108: Emulator and Isolated Test Protocol
+-   **Mandate**: Use Firebase Emulator Suite for fast local and CI validation when it reproduces the target service with sufficient fidelity. Supplement unsupported capabilities, IAM, quotas, networks, billing, and provider integrations in an isolated non-production project; never treat emulator-only results as production equivalence.
 -   **Supported Emulators**:
     | Emulator | Port | Purpose |
     |---|---|---|
@@ -1367,14 +1320,15 @@ export const myFunction = onRequest(
 ### Rule 32.110: Testing Strategy
 -   **Layers**:
     1.  **Unit Test**: Business logic unit tests (independent of Firebase).
-    2.  **Integration Test**: Integration tests using Emulator Suite.
-    3.  **E2E Test**: End-to-end tests in staging environment.
+    2.  **Integration Test**: Integration tests using Emulator Suite or an isolated project according to fidelity.
+    3.  **E2E Test**: End-to-end tests in staging with differences from production recorded.
 
 ---
 
 ## §32. CI/CD Pipeline Integration
 
-### Rule 32.111: GitHub Actions Recommended
+### Rule 32.111: Provider-neutral CI/CD Contract
+-   **Mandate**: Independently of the CI provider, compose lint, unit tests, Security Rules tests, emulator or isolated integration, IaC plan, artifact provenance, preview, approval, deploy, and post-deploy verification according to risk. The following is only a reference when GitHub Actions is selected, not a Universal requirement.
 -   **Example**:
     ```yaml
     name: Firebase CI/CD
@@ -1411,7 +1365,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.112: Workload Identity Federation
--   **Mandate**: Use Workload Identity Federation for GitHub Actions to GCP authentication. Service account key usage is prohibited.
+-   **Mandate**: When the CI provider exposes an external identity through OIDC or equivalent, use Workload Identity Federation and validate provider, repository, branch, and environment claims. Exceptions follow Rule 32.76.
 
 ### Rule 32.113: Deployment Strategy
 -   **Flow**:
@@ -1424,43 +1378,35 @@ export const myFunction = onRequest(
 ## §33. Environment Management (Dev / Staging / Prod)
 
 ### Rule 32.114: Environment Separation
--   **Matrix**:
-
-    | Environment | GCP Project | Purpose | Access |
-    |---|---|---|---|
-    | Dev | `myapp-dev` | Development/experimentation | All developers |
-    | Staging | `myapp-staging` | Acceptance testing | Developers + QA |
-    | Prod | `myapp-prod` | Production operations | Restricted (strict IAM) |
+-   **Mandate**: Isolate production and non-production identity, data, secrets, billing, quota, deploy authority, and observability according to risk. Decide single-project, multi-project, or folder/organization separation in Blueprint from blast radius, compliance, team topology, and cost.
+-   **Access**: Do not fix access by job title or "all developers"; design least privilege, separation of duties, time-bound elevation, break-glass, and audit evidence. Environment and project names are examples, not Universal contracts.
 
 ### Rule 32.115: Environment Parity
--   **Mandate**: Maintain staging environment with production-equivalent configuration.
+-   **Mandate**: Staging must reproduce production's material identity, policy, runtime, network, data-contract, deploy, and rollback paths. Document test coverage and residual risk for differences caused by cost or privacy, such as reduced scale or synthetic data.
 
 ### Rule 32.116: Environment Variable Management
--   **Methods**:
-    1.  **Firebase Config**: `firebase functions:config:set` (non-sensitive info).
-    2.  **Secret Manager**: Sensitive information (see §23).
-    3.  **Terraform Variables**: Infrastructure settings.
-    4.  **Remote Config**: App dynamic settings (see §12).
+-   **Non-Secret Configuration**: Manage parameterized or version-controlled environment configuration with schema, defaults, owner, validation, and rollout.
+-   **Secrets**: Store secrets in Secret Manager or an approved equivalent and bind them explicitly only to functions/services that need them. Never expose values in plans, logs, client bundles, or version control.
+-   **Legacy Migration**: `functions.config()` is deprecated and is scheduled to block new deployments after March 2027; prohibit new use, inventory existing use, and migrate to parameterized configuration and Secret Manager.
+-   **Boundary**: IaC variables carry non-secret inputs and secret references. Remote Config controls client behavior and feature rollout; it is not a store for secrets, authentication, or server authorization.
 
 ---
 
 ## §34. Multi-Region & DR Strategy
 
 ### Rule 32.117: Region Selection Criteria
--   **Primary**: `us-central1` (Iowa) — Default for global-facing services.
--   **Secondary**: `us-central1` (Iowa) — For global services.
--   **GPU Support**: Cloud Run GPU (NVIDIA L4 GA) available in `us-central1`, `europe-west1`, `europe-west4`, `asia-southeast1`, `asia-south1`, etc.
+-   **Primary/Secondary**: Decide in Blueprint using §1 criteria and RTO/RPO. Avoid placing both in one failure domain and verify data residency and service compatibility.
+-   **Dynamic Availability**: Revalidate GPU, runtime, and multi-region configurations against the current official region matrix.
 
 ### Rule 32.118: Region Consistency
--   **Mandate**: Deploy related services in the same region.
+-   **Mandate**: Decide related-service regions from latency, data residency, availability, failure domains, and cross-region transfer cost together. Co-location is a latency option; when it conflicts with DR, design an explicit multi-region boundary.
 
 ### Rule 32.119: Disaster Recovery
 -   **Strategies**:
-    1.  **Firestore**: Use multi-region locations (`nam5`/`eur3`, etc.).
-    2.  **Cloud Storage**: Multi-region or dual-region buckets.
-    3.  **Cloud Run**: Deploy to multiple regions with load balancing.
-    4.  **Backup**: Configure daily Firestore auto-backups and test recovery.
-    5.  **RTO/RPO Definition**: Define RTO/RPO per service.
+    1.  **Location Capability**: Check the current official location matrix, residency, consistency, and cost, then select single, dual, or multi-region architecture required by RTO/RPO.
+    2.  **Storage and Compute**: Design data copies, compute deployment, and traffic failover against the same failure scenarios; avoid protecting only one layer.
+    3.  **Backup**: Derive backup frequency and retention from RPO, law, deletion requirements, and cost; restore-test with credentials and failure domains independent of production.
+    4.  **RTO/RPO Evidence**: Record per-service RTO/RPO, restore/failover procedure, test cadence, last result, and owner.
 
 ---
 
@@ -1468,15 +1414,15 @@ export const myFunction = onRequest(
 
 ### Rule 32.120: API Design Principles
 -   **Principles**:
-    1.  **Uniform Interface**: Resource-oriented URL design (`/api/v1/users/{id}`).
-    2.  **Versioning**: Include API version in URL path.
-    3.  **Pagination**: Implement cursor-based pagination.
+    1.  **Contract First**: Specify consumers, error model, idempotency, compatibility, rate/size limits, and deprecation. Choose REST, GraphQL, RPC, or event contracts from the interaction model.
+    2.  **Versioning**: Select path, header, schema evolution, or another mechanism from consumer compatibility; breaking changes require a migration window and usage evidence.
+    3.  **Bounded Retrieval**: Control response size and scan cost using cursors, keysets, page tokens, streaming, or another method appropriate to consistency and scale.
 
 ### Rule 32.121: Authentication & Authorization
--   **Pattern**: Three-layer auth with App Check (§6) + Firebase Auth Token + Custom Claims (§5).
+-   **Mandate**: Design caller identity, token verification, resource authorization, abuse protection, and privileged bypass per endpoint. Firebase Auth, App Check, and custom claims are candidates on eligible surfaces; do not force one three-layer pattern onto server-to-server calls, public webhooks, or anonymous flows.
 
 ### Rule 32.122: OpenAPI Specification
--   **Mandate**: Document API endpoints with OpenAPI (Swagger) specification.
+-   **Mandate**: Document HTTP APIs with OpenAPI or an equivalent machine-readable contract, GraphQL with schemas, RPC with IDLs, and events with versioned schemas; verify implementation and consumer compatibility in CI.
 
 ---
 
@@ -1542,9 +1488,9 @@ export const myFunction = onRequest(
 
 ## §40. Google Ecosystem Integration Strategy
 
-### Rule 32.131: Google First Principle
--   **Mandate**: Prioritize Google ecosystem in technology selection.
--   **Exception**: Third-party products are only permitted when demonstrable overwhelming advantage over Google services.
+### Rule 32.131: Ecosystem Fit Principle
+-   **Mandate**: Compare required capability, security, privacy, operability, support, cost, portability, and current team skill, then record the decision under 520.
+-   **Provider Boundary**: Google-native integration is a strong candidate but has no automatic priority. Do not decide from first-party versus third-party status alone; evaluate total value including lock-in and exit cost.
 
 ### Rule 32.132: Inter-Service Integration Patterns
 -   **Matrix**:
@@ -1559,28 +1505,16 @@ export const myFunction = onRequest(
 
 ---
 
-## §41. Firebase Studio
+## §41. Firebase Studio Sunset & Development Environment Portability
 
-### Rule 32.133: Firebase Studio Usage
--   **Mandate**: Use Firebase Studio for prototyping and full-stack AI application development.
--   **Features**:
-    -   Cloud-based AI-native development environment
-    -   Prompt-to-app generation with Gemini 2.5
-    -   Agent mode (autonomous task execution)
-    -   Figma design integration
-    -   App Hosting integrated deployment
-    -   Backend auto-provisioning (auto-detect/configure Firestore, Firebase Authentication, etc.)
-    -   MCP Server native support
--   **Use Cases**:
-    1.  **Rapid Prototyping**: Instantly generate app scaffolding from AI prompts.
-    2.  **Full-Stack Development**: End-to-end development of frontend + backend + Firebase integration.
-    3.  **Team Collaboration**: Instantly shareable via cloud.
+### Rule 32.133: Firebase Studio Sunset
+-   **Mandate**: Do not adopt Firebase Studio as a new standard environment. New workspace creation was disabled on June 22, 2026 and the service is scheduled to sunset on March 22, 2027; inventory existing workspaces, owners, repositories, secrets, and preview/deploy dependencies, then migrate them to an approved development environment before the deadline.
+-   **Continuity**: The sunset does not immediately stop core Firebase products or deployed apps, but source, configuration, artifacts, and runbooks must live in version control and CI outside Studio. Verify build, test, deploy, and rollback without the provider UI.
 
-### Rule 32.134: Firebase Studio Constraints
--   **Caution**:
-    1.  Direct production code deployment is not recommended (go through CI/CD pipeline).
-    2.  Always review generated code and verify Security Rules/IAM settings.
-    3.  For large-scale projects, recommend traditional IDE + CLI workflow.
+### Rule 32.134: Development Environment Selection & Migration
+-   **Selection**: Compare local/cloud IDEs, AI coding environments, and remote workspaces by source portability, identity, secret isolation, network boundary, audit, reproducible CI, cost, and vendor exit. Do not fix a particular IDE or team size in Universal.
+-   **Generated Changes**: Treat AI-generated code and auto-provisioning as untrusted changes; require review, tests, Security Rules/IAM diff, and supply-chain scans, and never deploy them directly to production.
+-   **Migration Evidence**: Record owners and test results for source export, secret rotation, environment recreation, CI build, preview, production release, rollback, and workspace deletion/retention.
 
 ---
 
@@ -1607,9 +1541,9 @@ export const myFunction = onRequest(
 ## §43. Supply Chain Security
 
 ### Rule 32.138: Container Security
--   **Mandate**: Perform security scans on Cloud Run container images.
--   **Tools**: Artifact Registry container vulnerability scanning, Binary Authorization.
--   **Binary Authorization**: Apply policy allowing only signed container images for production deployment.
+-   **Mandate**: For container artifacts reaching production, validate dependency/OS vulnerabilities, provenance, signatures/attestations, base images, secrets, and licenses according to risk, with owned and expiring exceptions.
+-   **Tools**: Artifact Registry scanning, Binary Authorization, SLSA-compatible provenance, and policy engines are candidates.
+-   **Admission**: Apply signature/attestation verification or an equivalent admission control according to supply-chain threat, platform support, and criticality; test break-glass and rollback.
 
 ### Rule 32.139: Dependency Management
 -   **Mandate**: Continuously monitor third-party library vulnerabilities.
@@ -1634,26 +1568,25 @@ export const myFunction = onRequest(
     | L5 | Optimized | Auto-scaling, self-healing, AI-driven analysis |
 
 ### Rule 32.142: Minimum Requirements
--   **Mandate**: Production environments must achieve minimum L3. Production operations at L2 or below is prohibited.
+-   **Mandate**: Define the production maturity target in Blueprint from service criticality, data sensitivity, regulation, team size, SLOs, and blast radius. Do not decide release eligibility from a level label alone; evidence unmet controls, compensating controls, owners, and expiry.
 
 ---
 
 ## §45. Migration & Deprecation Strategy
 
-### Rule 32.143: Firestore → Supabase Migration
+### Rule 32.143: Firestore to Another Data Platform Migration
 -   **Strategy**:
-    1.  **Data Mapping**: Conversion design from NoSQL schema to RDB schema.
-    2.  **Phased Migration**: Migrate incrementally by service unit.
-    3.  **Dual Write**: Write to both DBs during migration period.
-    4.  **Read Switch**: Switch read target to Supabase.
-    5.  **Write Switch**: Switch write target to Supabase.
-    6.  **Cleanup**: Delete Firestore data and code.
+    1.  **Contract & Mapping**: Map source/target schema, identity, ordering, timestamps, TTL, indexes, authorization, consistency, and retention; approve loss and transformation policies.
+    2.  **Backfill & Change Capture**: Combine bulk backfill with CDC, outbox, replay logs, or equivalents; provide restartable checkpoints, rate limits, and checksum/count/sample validation.
+    3.  **Dual-Write Guardrail**: Prohibit application-level best-effort dual writes. If dual write is selected, prove atomicity or a durable outbox, ordering, idempotency, retry, reconciliation, and partial-failure recovery.
+    4.  **Shadow Read & Cutover**: Shadow-read and compare with production-like traffic; after meeting error-budget and exit criteria, switch reads and then writes in stages. Predefine RTO, RPO, freeze, and rollback points.
+    5.  **Reconciliation & Cleanup**: Resolve lag and discrepancies and verify consumers plus backup/restore before retiring old data, credentials, indexes, and code under legal, retention, and rollback-window requirements.
 
 ### Rule 32.144: Legacy API Deprecation
 -   **Process**: Deprecation Notice → Migration Guide → Usage Monitoring → Sunset.
 
 ### Rule 32.145: 1st Gen Functions Migration
--   **Mandate**: Promptly migrate 1st Gen Cloud Functions to Cloud Run Functions. Use the GCP-provided upgrade tool.
+-   **Mandate**: Legacy functions follow Rule 32.10 inventory, official support deadlines, compatibility tests, staged migration, and rollback. Use provider tools only as validated aids.
 
 ---
 
@@ -1676,7 +1609,7 @@ export const myFunction = onRequest(
 
     | Issue | Cause | Solution |
     |---|---|---|
-    | Cold Start Delay | Instance startup | Set `minInstances`, optimize code |
+    | Cold Start Delay | Instance startup, initialization, artifact, connections | Trace and load-test, then compare initialization reduction, reuse, `minInstances`, and SLO changes |
     | CORS Error | Missing headers | Add `cors` middleware |
     | Permission Denied | IAM/Security Rules | Verify permissions, test in Emulator |
     | Quota Exceeded | API limit exceeded | Request quota increase, optimize |
@@ -1686,7 +1619,7 @@ export const myFunction = onRequest(
 
 ### Rule 32.148: Incident Response
 -   **Process**:
-    1.  **Detection**: Alert-based detection (<5 min).
+    1.  **Detection**: Detect through alerts within a Blueprint time based on SLO and severity.
     2.  **Triage**: Identify impact scope and determine severity.
     3.  **Mitigation**: Temporary measures (Feature Flag OFF, rollback, etc.).
     4.  **Resolution**: Fix root cause and validate.
@@ -1697,15 +1630,15 @@ export const myFunction = onRequest(
 ## §47. Node.js/TypeScript Specific Design
 
 ### Rule 32.149: Runtime Selection
--   **Mandate**: Use Node.js 22+ LTS as the standard runtime (Node.js 24 also available).
--   **Configuration**: Specify version explicitly in `engines` field.
+-   **Mandate**: Select a provider-supported Node.js release within its security support window after checking dependency compatibility and an EOL plan.
+-   **Configuration**: Declare the exact major or allowed range through `engines` or another provider-supported mechanism and reconcile the resolved CI and production version.
     ```json
     { "engines": { "node": "22" } }
     ```
 
-### Rule 32.150: TypeScript Mandatory
--   **Mandate**: All Cloud Run Functions/Services code must be written in **TypeScript**. Direct JavaScript usage is prohibited.
--   **Configuration**: Set `strict: true` in `tsconfig.json`. Recommend `noUncheckedIndexedAccess: true`.
+### Rule 32.150: Node.js Type Safety
+-   **Mandate**: When Node.js is selected, TypeScript strict mode is the default candidate. A JavaScript choice must provide equivalent boundary safety through runtime validation, linting, type-checkable JSDoc, and tests. This section does not exclude officially supported Go, Python, Java, .NET, or other runtimes.
+-   **Configuration**: For TypeScript set `strict: true` and combine it with runtime validation at boundaries. Language selection follows `engineering/320_programming_language_governance.md`.
 
 ### Rule 32.151: ESM vs CJS
 -   **Mandate**: Recommend ESModules for new projects.
@@ -1730,7 +1663,7 @@ export const myFunction = onRequest(
     ```
 
 ### Rule 32.153: Genkit Node.js Integration
--   **Mandate**: Use Genkit Node.js SDK (GA) for AI workflows in Node.js environments. Callable Functions integration via `onCallGenkit` trigger is available (see §2 Rule 32.11).
+-   **Mandate**: For Node.js AI workflows, evaluate Genkit as a candidate against model portability, evaluation, observability, security, runtime support, and exit. If adopted, revalidate its current official status and integrations such as `onCallGenkit`.
 
 ---
 
@@ -1744,29 +1677,29 @@ export const myFunction = onRequest(
     3.  Deploy with `--only=production` or `npm ci --omit=dev`.
 
 ### Rule 32.155: Testing Framework
--   **Mandate**: Test with Vitest (recommended) or Jest.
--   **Coverage**: Target 80%+ coverage for business logic.
+-   **Mandate**: Choose a maintained test framework compatible with the repository and runtime, and execute unit, integration, emulator, contract, and failure-path tests. Vitest and Jest are reference implementations.
+-   **Coverage**: Do not decide quality from line coverage alone; define Blueprint criteria from risk, branches, mutation, and critical journeys.
 
 ---
 
 ## §49. Node.js Deployment & Package Management
 
 ### Rule 32.156: Package Manager
--   **Mandate**: Use npm (standard) or pnpm. yarn is not recommended.
--   **Lock File**: Always commit `package-lock.json` (npm) or `pnpm-lock.yaml`.
+-   **Mandate**: Select one maintained package manager that the team can support and the provider build supports, and pin its version. Do not exclude npm, pnpm, Yarn, or another manager by name alone.
+-   **Lock File**: A deployable application versions the selected manager's lockfile or equivalent resolved-dependency digest and verifies frozen installation in CI.
 
 ### Rule 32.157: Monorepo Support
--   **Mandate**: Use npm workspaces or pnpm workspaces for large-scale projects to share common utilities.
+-   **Mandate**: Adopt workspaces or a monorepo only when multiple packages need atomic changes, shared policy, or a build graph. npm, pnpm, or Yarn workspaces, Bazel, Nx, and Turborepo are requirement-dependent reference implementations.
 
 ---
 
 ## §50. Go Specific Design
 
 ### Rule 32.158: Go Runtime
--   **Mandate**: Use Go 1.23+ (Go 1.24/1.26 also available). Available for both Cloud Run Functions and Cloud Run Services.
+-   **Mandate**: Pin a provider-supported Go release within its security support window after verifying module, library, build-image compatibility, and an EOL plan.
 
 ### Rule 32.159: Genkit Go (GA)
--   **Mandate**: Use Genkit Go SDK (1.0 GA, September 2025) for building AI workflows in Go.
+-   **Mandate**: For Go AI workflows, evaluate Genkit as a candidate against current official status, model support, evaluation, observability, security, and exit, and record adoption in an ADR.
     ```go
     import "github.com/firebase/genkit/go/ai"
     
@@ -1800,14 +1733,14 @@ export const myFunction = onRequest(
 ## §52. Python Specific Design
 
 ### Rule 32.163: Python Runtime
--   **Mandate**: Use Python 3.12+ (Python 3.13/3.14 also available). Available for Cloud Run Functions and Cloud Run Services.
+-   **Mandate**: Pin a provider-supported Python release within its security support window after verifying dependency, native-wheel, build-image compatibility, and an EOL plan.
 
 ### Rule 32.164: Genkit Python
--   **Mandate**: Use Genkit Python SDK (Alpha) for building AI workflows in Python.
--   **Caution**: Alpha stage — carefully evaluate stability for production use. Monitor GA schedule.
+-   **Mandate**: For Python AI workflows, evaluate Genkit as a candidate against current official status, model support, evaluation, observability, security, and exit, and record adoption in an ADR.
+-   **Caution**: Treat a preview or pre-GA feature as a time-bound exception with support, breaking-change, fallback, and exit deadlines.
 
 ### Rule 32.165: Type Hints
--   **Mandate**: Add Type Hints to all Python code and check with `mypy`.
+-   **Mandate**: Type public APIs, domain models, I/O boundaries, and security/money-critical code, and run the selected static checker in CI. Scope, own, and time-bound exceptions for dynamic boundaries or untyped dependencies. `mypy`, Pyright, and equivalents are candidates; Universal does not fix one tool.
     ```python
     from firebase_functions import https_fn
     from pydantic import BaseModel
@@ -1829,11 +1762,12 @@ export const myFunction = onRequest(
 ## §53. Python Performance & Testing
 
 ### Rule 32.166: Testing
--   **Mandate**: Test with pytest. Support async tests with `pytest-asyncio`.
--   **Coverage**: Measure coverage with `pytest-cov`.
+-   **Mandate**: Use the Python standard or an approved test runner for unit, boundary, integration, and emulator/isolated-project tests. Introduce async fixtures only where an actual concurrency boundary exists.
+-   **Coverage**: Use coverage tooling as a signal for untested risk, not a fixed percentage as the sole release gate. Prioritize critical paths, authorization denials, retry/idempotency, and migration failures.
 
 ### Rule 32.167: Dependency Management
--   **Mandate**: Manage dependencies with `requirements.txt` or `pyproject.toml`. Generate lock files with `pip-tools`. Adoption of `uv` is also recommended.
+-   **Mandate**: Version a supported manifest and reproducible resolved-dependency/checksum evidence; verify index sources, transitive dependencies, native artifacts, licenses, vulnerabilities, and runtime compatibility in CI.
+-   **Tools**: Compare `pyproject.toml`, lock/constraints files, `uv`, pip-tools, Poetry, PDM, and equivalents as candidates that fit the project's runtime and packaging contract; record the adopted tool and upgrade policy in Blueprint.
 
 ---
 
@@ -1843,57 +1777,81 @@ export const myFunction = onRequest(
 
 | # | Anti-Pattern | Correct Approach |
 |---|---|---|
-| 1 | Creating new Firestore collections | Create tables in Supabase |
+| 1 | Creating a Firestore collection without evaluation, Rules, indexes, or a cost owner | Complete Primary Directive 0.1 evaluation and the data contract first |
 | 2 | Creating new 1st Gen Cloud Functions | Use Cloud Run Functions |
 | 3 | Granting `roles/owner` to production SA | Custom roles with least privilege |
 | 4 | Committing service account keys to Git | Secret Manager + WIF |
-| 5 | Storing sensitive info in `.env` files | Manage with Secret Manager |
-| 6 | Production without App Check | Apply App Check to all services |
+| 5 | Storing secrets in version-controlled `.env` files or client bundles | Use an approved secret store, ignore rules, and separate samples |
+| 6 | Production on an eligible surface without evaluating App Check | Perform threat modeling, monitoring, and staged enforcement |
 | 7 | Firestore without Security Rules | Default Deny + Authentication |
-| 8 | Firestore queries without `.limit()` | Always implement pagination |
-| 9 | Ignoring idempotency in function design | Event ID deduplication |
+| 8 | User-controlled or collection-wide reads without a bound or termination condition | Guarantee bounded reads with limits, cursors, quotas, and a data contract |
+| 9 | Ignoring idempotency in function design | Protect side effects with stable keys, atomic claims, outbox, and reconciliation |
 | 10 | Synchronous heavy processing | Async via Pub/Sub/Cloud Tasks |
-| 11 | No cold start mitigation | Set `minInstances` |
-| 12 | Using default memory/timeout | Explicitly configure resources |
-| 13 | No budget alerts configured | Configure 4-stage alerts |
-| 14 | GCP resources without labels | Apply 5 required labels |
+| 11 | Fixing cold-start mitigation without SLO/cost evidence | Measure latency, traffic, and idle cost; select `minInstances` or another control only where needed |
+| 12 | Leaving default resources unverified or overprovisioning them | Derive memory/CPU/timeout/concurrency from load tests, quotas, and cost |
+| 13 | Budget monitoring and owner missing | Configure Blueprint budget thresholds, notifications, and safe responses |
+| 14 | Resource ownership/cost cannot be attributed | Use organizational labels/tags and policy for traceability |
 | 15 | Manual infrastructure setup (ClickOps) | Manage with Terraform/IaC |
 | 16 | Manual `firebase deploy` in production | Via CI/CD pipeline |
-| 17 | Deploying Security Rules without tests | Unit test with Emulator Suite |
+| 17 | Deploying Security Rules without tests | Automate allow and deny tests in Emulator Suite or an isolated project |
 | 18 | Unstructured log output | JSON structured logging |
 | 19 | Inconsistent error handling | Unified ErrorResponse format |
-| 20 | External calls without retry strategy | Exponential backoff + DLQ |
+| 20 | External calls that ignore failure class and idempotency | Design deadlines, retry budgets, jitter, idempotency, and DLQ/reconciliation |
 | 21 | Using FCM Legacy API | Migrate to HTTP v1 API |
 | 22 | Improper Admin SDK usage | Least privilege IAM + Secret Manager |
-| 23 | Direct DB access without VPC | Configure Direct VPC Egress |
+| 23 | Network boundary, egress, or bypass for a private data path is undefined | Select a private path and egress control appropriate to supported services and threats |
 | 24 | Logging sensitive information | Prohibit PII/password logging |
 | 25 | AI output without guardrails | Input validation + output filter + Kill Switch |
-| 26 | Untracked AI costs | AI FinOps labeling + 30% rule |
-| 27 | Staging ≠ Prod configuration | Maintain environment parity |
-| 28 | DR testing not performed | Quarterly DR testing |
+| 26 | Untracked AI costs | AI FinOps labeling + Blueprint unit economics and thresholds |
+| 27 | Unmanaged staging differences | Maintain material-control parity and documented differences |
+| 28 | DR testing not performed | Validate restore/failover at a risk-based cadence derived from RTO/RPO |
 | 29 | Container deployment without SBOM | Generate and store SBOM |
-| 30 | Firebase Studio direct production deploy | Via CI/CD pipeline |
+| 30 | Depending on sunset-bound Firebase Studio for source or deploy paths | Migrate to portable source, an approved development environment, and reproducible CI |
 | 31 | Genkit flows without testing | Developer UI and unit tests |
-| 32 | Production deploy without Binary Auth | Allow only signed images |
+| 32 | Production containers without evaluating provenance/signature/admission risk | Apply attestation verification or an equivalent control by criticality |
 | 33 | MCP server published without auth | Access control via IAM + App Check |
-| 34 | App Hosting free tier unmonitored | Blaze Plan + budget alert setup |
-| 35 | Refresh Token in LocalStorage | HTTP-only Cookie + Token Revocation |
+| 34 | Treating a billing plan/free tier as a hard cap | Design usage billing, quotas, abuse controls, budgets, and degradation |
+| 35 | Persisting tokens without a threat model | Select storage per platform after evaluating XSS, CSRF, device compromise, rotation, and revocation |
 
 ---
 
-## §55. Future Outlook
+## §55. Technology Lifecycle Radar
 
 ### Rule 32.169: Technology Trend Monitoring
--   **Mandate**: Continuously monitor the following technology trends and prepare for adoption.
--   **Trends**:
-    1.  **WebAssembly Functions**: Performance improvement via WASM-enabled Cloud Run Functions.
-    2.  **Edge Computing**: Edge deployment via Cloud Run on GDC (Google Distributed Cloud).
-    3.  **Quantum-Safe Cryptography**: Preparation for migration to quantum-resistant cryptography.
-    4.  **AI-Native Infrastructure**: AI-driven automatic infrastructure optimization and self-healing.
-    5.  **Confidential Computing**: Data processing in TEE (Trusted Execution Environment).
-    6.  **Multi-Cloud AI**: Distributed AI inference combining Cloud Run GPU and Vertex AI Agent Engine.
-    7.  **Genkit Python GA**: Python SDK GA enabling broader adoption by ML engineers.
-    8.  **Cloud Run RTX PRO 6000**: High-performance AI inference with next-gen GPU (NVIDIA Blackwell).
+-   **Mandate**: For capabilities in use or under consideration, continuously monitor changes in official release stage, deprecation or EOL, runtimes and SDKs, regions, quotas, pricing, security model, data use, and support contracts, and connect them to revalidation triggers in the capability manifest.
+-   **Signals**:
+    1.  **Execution Surface**: Support and responsibility boundaries for managed runtimes, buildpacks, containers, edge or distributed execution, GPU or accelerators, and confidential compute.
+    2.  **Language & SDK**: Language versions, official or community SDKs, feature parity, experimental or preview or GA status, security support, and migration guides.
+    3.  **Security & Identity**: Official controls and applicability conditions for workload identity, attestation, encryption, data perimeters, supply-chain verification, and quantum-safe migration.
+    4.  **Data & AI**: Maturity, evaluation, safety, data governance, unit economics, and exit for databases, streams, vectors, AI frameworks, and agent protocols.
+    5.  **Operations & Commercial**: Observability, backup or restore, SLA, support, quota, pricing or terms, sunset, and provider incidents.
+-   **Promotion Gate**: Do not promote a new feature to a production standard merely because it exists or is popular. Compare workload fit, maturity, feature parity, security, performance, cost, operability, portability, rollback, and team ownership against existing options using the same evidence. Preview or experimental use requires limited scope, an exit path, and a revalidation date.
+
+---
+
+## §56. Language, SDK & Runtime Support Surfaces
+
+### Rule 32.170: Support Claim Decomposition
+-   **Mandate**: Do not reduce “Firebase or GCP supports language X” to one Boolean value. Inventory client SDKs, Admin SDKs, framework bindings, managed Functions runtimes, Cloud Run source buildpacks, arbitrary containers, REST or gRPC, and CLI or IaC as separate surfaces with support authority, maturity, feature parity, runtime, artifact, identity, deployment, observability, and EOL.
+
+### Rule 32.171: Firebase Client SDK Surface
+-   **Current Snapshot**: As of 2026-07-23, official documentation lists Android, Flutter, Apple platforms, JavaScript, Unity, and C++ as official client SDK surfaces. Code quality for Swift, Kotlin or Java, Dart, TypeScript or JavaScript, C#, and C++ inherits `engineering/320_programming_language_governance.md`, `engineering/400_mobile_flutter.md`, and `engineering/410_native_platforms.md`.
+-   **Framework Boundary**: AngularFire, ReactFire, React Native Firebase, Vuefire, and other framework bindings do not necessarily share the official Firebase SDK support contract. For React Native, follow `engineering/420_react_native.md` and separately pin and test the JavaScript package, iOS and Android SDKs, native modules, Codegen or bridge, both-OS builds, and release compatibility.
+
+### Rule 32.172: Firebase Admin SDK Surface
+-   **Current Snapshot**: As of 2026-07-23, the official Admin SDK documentation presents Node.js, Java, Python, Go, and C# as server-side surfaces and labels Dart experimental. Do not infer support for every feature from the language name; verify the feature matrix, minimum runtime, deprecations, and release notes per capability.
+-   **Privilege Boundary**: An Admin SDK is not an untrusted client library governed by client Security Rules. Enforce workload identity, least privilege, tenant or project boundaries, audit, and credential lifecycle at the server boundary, and never include it in a mobile or browser bundle.
+
+### Rule 32.173: Cloud Run Execution Surface
+-   **Current Snapshot**: As of 2026-07-23, Cloud Run source-deployment documentation lists Go, Node.js, Python, Kotlin or Groovy or Scala through the Java buildpack, .NET, Ruby, and PHP as source-build surfaces, while a Dockerfile or container image can run any language satisfying the container contract. Do not treat a Functions runtime, source buildpack, and arbitrary container as the same support contract.
+-   **Build Contract**: Even for source deployment, connect the builder, base image, resolved dependencies, runtime patch mode, Artifact Registry image, SBOM, provenance, architecture, startup and health behavior, and rollback to release evidence. Automatic detection is not complete proof of reproducibility or security updating.
+
+### Rule 32.174: Language-Native Quality Gates
+-   **Mandate**: Java, Kotlin, Groovy, Scala, C# or F#, Ruby, PHP, and other languages receive the formatter, compiler or type, test, dependency, artifact, SBOM, and runtime-EOL gates from `engineering/320_programming_language_governance.md`, just as Node.js or TypeScript, Go, and Python do. Do not duplicate the same language rules in this provider profile; add only Firebase or GCP-specific identity, emulator fidelity, runtime, deployment, and quota controls.
+
+### Rule 32.175: Polyglot Team Ownership
+-   **Mandate**: Connect every production language, SDK, and runtime surface to an accountable owner, support level, upgrade or EOL path, security-advisory route, CI gate, on-call or incident path, fallback, and decommission route in a service catalog or equivalent inventory. A small team may combine roles, but must not silently collapse responsibility for experimental or community bindings, privileged Admin SDKs, native mobile code, and managed runtimes into one generic “Firebase owner.”
+-   **CI Selection**: Select native gates and managed conformance tests for affected clients, admin surfaces, runtimes, mobile operating systems, and containers from the change graph. Do not run every language on every PR indiscriminately; revalidate all dependents when shared schemas, Auth or Rules, SDK majors, runtimes, or generated contracts change.
 
 ---
 
@@ -1933,7 +1891,7 @@ export const myFunction = onRequest(
 | Implement rate limiting | §36 |
 | Optimize caching | §37 |
 | Use Google Maps | §39 |
-| Use Firebase Studio | §41 |
+| Migrate from Firebase Studio | §41 |
 | Comply with GDPR | §42 |
 | Strengthen container security | §43 |
 | Improve operations | §44 |
@@ -1941,6 +1899,9 @@ export const myFunction = onRequest(
 | Node.js/TypeScript specific guide | §47, §48, §49 |
 | Go specific guide | §50, §51 |
 | Python specific guide | §52, §53 |
+| Place Java or Kotlin or Scala, C# or .NET, Ruby, or PHP on Cloud Run | §56 |
+| Decide support for Swift, Kotlin, Dart, Unity, or C++ client SDKs | §56 |
+| Evaluate framework bindings such as React Native Firebase | §56 and `engineering/420_react_native.md` |
 
 ---
 
@@ -1952,7 +1913,10 @@ export const myFunction = onRequest(
 | `engineering/300_web_frontend` | Frontend integration patterns |
 | `engineering/100_api_integration` | API design & microservices design |
 | `engineering/410_native_platforms` | Mobile app integration (iOS/Android) |
-| `engineering/200_supabase_architecture` | SSOT (Supabase) coordination & migration |
+| `engineering/420_react_native` | React Native JavaScript, native, and SDK boundaries |
+| `engineering/320_programming_language_governance` | Language-native gates, support tiers, and polyglot team governance |
+| `engineering/200_supabase_architecture` | Integration and migration when Supabase is adopted |
+| `engineering/520_cloud_application_platforms` | Platform selection, shared responsibility, and exit strategy |
 | `engineering/510_aws_cloud` | Multi-cloud strategy & comparison |
 | `ai/000_ai_engineering` | AI/ML implementation guidelines |
 | `ai/100_data_analytics` | Analytics & Observability |
@@ -1964,10 +1928,12 @@ export const myFunction = onRequest(
 
 ## Appendix C: FinOps Checklist
 
+> Apply only items for adopted services that the cost/risk model requires. BigQuery, Pub/Sub, Recommender, and Remote Config are GCP/Firebase profile examples, not the only Universal implementation.
+
 ### Initial Setup
 - [ ] Apply `environment`/`service`/`owner`/`cost-center`/`ai-feature` labels to all GCP resources
 - [ ] Enable Billing Export to BigQuery
-- [ ] Configure budget alerts (50%/80%/100%/120%)
+- [ ] Configure approved multi-stage actual and forecast budget alerts from Blueprint
 - [ ] Configure automated response on budget exceeded (Pub/Sub + Cloud Run Functions)
 - [ ] Set up independent AI cost tracking
 
@@ -1996,17 +1962,19 @@ export const myFunction = onRequest(
 
 ## Appendix D: Security Checklist
 
-### Initial Setup
-- [ ] Enable App Check on all Firebase services
-- [ ] Apply Default Deny pattern in Security Rules
-- [ ] Remove `roles/owner`/`roles/editor` from production environment
-- [ ] Configure Workload Identity Federation
-- [ ] Migrate all sensitive information to Secret Manager
-- [ ] Configure VPC Service Controls for production
-- [ ] Apply Cloud Armor WAF policies
-- [ ] Enable Binary Authorization
+> Apply only items relevant to supported services and the threat model, allowing equivalent controls appropriate to provider capability, jurisdiction, and data class.
 
-### Periodic Audit (Every 90 Days)
+### Initial Setup
+- [ ] Evaluate App Check on eligible surfaces and move from monitoring to staged enforcement
+- [ ] Apply Default Deny pattern in Security Rules
+- [ ] Remove broad basic roles from normal production workloads, CI, and permanent human access; separate break-glass
+- [ ] Configure short-lived federation and claim restrictions on supported external identity paths
+- [ ] Move production and shared secrets to an approved secret store
+- [ ] Evaluate and verify VPC Service Controls from data-exfiltration threats and service support
+- [ ] Evaluate a fitting WAF and DDoS control plus bypass prevention for internet-facing surfaces
+- [ ] Evaluate Binary Authorization or another admission control from container supply-chain threats
+
+### Periodic Audit (Risk-Based Cadence)
 - [ ] Inventory service accounts and keys
 - [ ] Least privilege IAM review
 - [ ] Secret Manager secret rotation
@@ -2021,3 +1989,19 @@ export const myFunction = onRequest(
 - [ ] Configure AI feature Kill Switch (Remote Config)
 - [ ] Classify AI agent autonomy levels
 - [ ] Conduct EU AI Act risk classification
+
+---
+
+## Appendix E: Official Reference Snapshot
+
+- [Cloud Run container runtime contract](https://cloud.google.com/run/docs/container-contract): execution contract for arbitrary-language containers, ports, filesystems, lifecycle, and architecture
+- [Cloud Run Functions runtimes](https://cloud.google.com/run/docs/runtimes/function-runtimes): managed language runtimes and support or decommission deadlines
+- [Firebase supported libraries](https://firebase.google.com/docs/libraries): support boundaries between official client and Admin SDKs and community framework bindings
+- [Firebase Admin SDK setup](https://firebase.google.com/docs/admin/setup): Admin SDK feature matrix by language, runtime requirements, and experimental status
+- [Cloud Run deploy from source](https://cloud.google.com/run/docs/deploying-source-code): source-buildpack languages, container path, and builder or artifact boundaries
+- [Google Cloud resource hierarchy](https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy): ownership and policy inheritance across Organizations, Folders, and Projects
+- [Cloud Functions retry](https://firebase.google.com/docs/functions/retries): retry, at-least-once, and idempotency boundaries
+- [Configure environment](https://firebase.google.com/docs/functions/config-env): parameterized configuration, secrets, and migration from deprecated `functions.config()`
+- [Manage sessions](https://firebase.google.com/docs/auth/admin/manage-sessions): ID tokens, refresh tokens, and revocation
+- [Firebase App Check](https://firebase.google.com/docs/app-check): separation of app/device attestation from authentication and authorization
+- [Firebase Studio release notes](https://firebase.google.com/support/release-notes/firebase-studio): new-workspace shutdown on 2026-06-22 and sunset on 2027-03-22

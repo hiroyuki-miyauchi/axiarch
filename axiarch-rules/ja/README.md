@@ -44,12 +44,16 @@
 *   **300. Engineering Standards** ([🇯🇵](./universal/engineering/000_engineering_standards.md) / [🇺🇸](../en/universal/engineering/000_engineering_standards.md))
 *   **301. API Integration** ([🇯🇵](./universal/engineering/100_api_integration.md) / [🇺🇸](../en/universal/engineering/100_api_integration.md))
 *   **320. Supabase & PostgreSQL** ([🇯🇵](./universal/engineering/200_supabase_architecture.md) / [🇺🇸](../en/universal/engineering/200_supabase_architecture.md))
+*   **320. Programming Language Governance** ([🇯🇵](./universal/engineering/320_programming_language_governance.md) / [🇺🇸](../en/universal/engineering/320_programming_language_governance.md))
 *   **340. Web Frontend (Next.js)** ([🇯🇵](./universal/engineering/300_web_frontend.md) / [🇺🇸](../en/universal/engineering/300_web_frontend.md))
 *   **341. Headless CMS** ([🇯🇵](./universal/engineering/310_headless_cms.md) / [🇺🇸](../en/universal/engineering/310_headless_cms.md))
 *   **342. Mobile (Flutter)** ([🇯🇵](./universal/engineering/400_mobile_flutter.md) / [🇺🇸](../en/universal/engineering/400_mobile_flutter.md))
 *   **343. Native Platforms (Kotlin/Swift)** ([🇯🇵](./universal/engineering/410_native_platforms.md) / [🇺🇸](../en/universal/engineering/410_native_platforms.md))
+*   **344. React Native Engineering** ([🇯🇵](./universal/engineering/420_react_native.md) / [🇺🇸](../en/universal/engineering/420_react_native.md))
 *   **360. Firebase & GCP** ([🇯🇵](./universal/engineering/500_firebase_gcp.md) / [🇺🇸](../en/universal/engineering/500_firebase_gcp.md))
 *   **361. AWS Cloud** ([🇯🇵](./universal/engineering/510_aws_cloud.md) / [🇺🇸](../en/universal/engineering/510_aws_cloud.md))
+*   **362. Cloud & Application Platform Governance** ([🇯🇵](./universal/engineering/520_cloud_application_platforms.md) / [🇺🇸](../en/universal/engineering/520_cloud_application_platforms.md))
+*   **363. Microsoft Azure Cloud** ([🇯🇵](./universal/engineering/530_azure_cloud.md) / [🇺🇸](../en/universal/engineering/530_azure_cloud.md))
 
 #### AI & Data
 *   **400. AI Engineering** ([🇯🇵](./universal/ai/000_ai_engineering.md) / [🇺🇸](../en/universal/ai/000_ai_engineering.md))

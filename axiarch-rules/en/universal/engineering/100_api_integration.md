@@ -2,14 +2,21 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
 > "APIs are the most valuable assets of an organization; design them as salable products."
 > In API design, strictly follow this priority order: **Security > Reliability > Compatibility > Performance > DX**.
 > This document serves as the primary standard for all design decisions related to API integration and microservices.
-> **35 Parts, 70 Sections.**
+> **70 Parts.**
+
+## Universal Applicability Contract
+
+- Do not apply the same governance strength to in-process calls, boundaries inside one deployable unit, service APIs, public APIs, events, webhooks, and SDKs
+- Scale controls with consumer count, trust boundary, independent deployment, compatibility horizon, data sensitivity, regulation, latency, delivery guarantees, and runtime
+- Specific protocols, schema formats, gateways, service meshes, portals, generators, SDK languages, review bodies, and fixed TTLs or thresholds are reference implementations or Blueprints when their applicability conditions hold, not universal defaults
+- When a material control is not adopted, record the reason, compensating control, owner, and reevaluation trigger in a decision record
 
 ---
 
@@ -94,9 +101,9 @@
 
 ### 1.1. Core Principles of API Implementation
 
-- **Rule 35.1**: All APIs must be designed as "Salable Assets." Even internal-only APIs must not be developed carelessly, as that creates seeds of technical debt
-- **Rule 35.2**: Breaking changes to an API are equivalent to a "product recall." Design with compatibility as the top priority
-- **Rule 35.3**: API design must define contracts (specifications) before code (Contract-First)
+- **Rule 35.1**: APIs with multiple consumers, independent deployment, an organizational boundary, or a long compatibility horizon must be designed to product quality with an owner, SLO, change policy, and consumer documentation. Apply a lighter contract proportionate to risk for local internal boundaries
+- **Rule 35.2**: Changes that break existing consumers must define a compatibility window, migration path, notice, and observability without weakening security, data integrity, legal obligations, or rollback safety
+- **Rule 35.3**: Define a machine-readable contract and compatibility policy before consumers depend on a shared or remote boundary. Code-first is acceptable when contract extraction, diff checks, and conformance tests provide the same outcome
 
 ### 1.2. Priority Hierarchy
 
@@ -110,8 +117,8 @@
 
 ### 1.3. Omnichannel First Principle
 
-- **Rule 35.4**: Treating the web frontend as a "privileged client" is prohibited. Treat iOS/Android apps equally, and make all operations available via API for external consumption
-- Tiered Gateway: Separate "Tier 1 (Public/Read-Only)" and "Tier 2 (Enterprise/Auth/Paid)" from the start to prepare for future API monetization (Stripe Metering)
+- **Rule 35.4**: Do not give browsers, mobile apps, desktop apps, or other public clients shared secrets or implicit privilege. Enforce the same authentication, authorization, and business invariants at the boundary, and do not expose web operations as public APIs by default
+- Introduce a Tiered Gateway when real consumer classes, billing, SLOs, or identity boundaries require distinct policies. Do not split tiers initially on a future hypothesis alone
 
 ---
 
@@ -119,19 +126,19 @@
 
 ### 2.1. API-First Design
 
-- **Rule 35.5**: Always define the API specification (contract) before starting implementation
+- **Rule 35.5**: For shared or remote boundaries, define the API specification (contract) before consumers depend on it
 - Enable parallel development of frontend and backend
 - Auto-generate mocks/stubs from specifications and run integration tests in advance
 
 ### 2.2. Contract-First Development
 
-- **OpenAPI 3.1**: REST APIs must be defined with OpenAPI 3.1 specification as the source of truth, auto-generating code, type definitions, and client SDKs
+- **OpenAPI**: REST APIs use a machine-readable [current specification](https://spec.openapis.org/oas/latest.html) supported by the toolchain and consumers (for example OpenAPI 3.1/3.2) as the source of truth
 - **Schema-Driven (GraphQL)**: GraphQL uses schema definitions as the source of truth, ensuring type safety between frontend and backend
 - **Protobuf (gRPC)**: gRPC uses `.proto` files as the source of truth, automating multi-language code generation
 
-### 2.3. Mandatory Code Generation
+### 2.3. Code Generation and Conformance
 
-- **Rule 35.6**: Hand-written type definitions are prohibited. Always auto-generate client code and server type definitions from OpenAPI/GraphQL/Protobuf schemas
+- **Rule 35.6**: Generate types or clients from OpenAPI, GraphQL, Protobuf, or equivalent contracts when generated output meets the target language's idioms, security, and maintainability needs. When using hand-written adapters, prevent drift with conformance tests and contract diffs
 
 ```typescript
 // ✅ Correct: Auto-generated from OpenAPI specification
@@ -148,7 +155,7 @@ interface StoreResponse {
 
 ### 2.4. API Governance
 
-- **API Review Board**: Only allow implementation after design review for new APIs and Breaking Changes
+- **Accountable Review**: New shared APIs and Breaking Changes require an accountable owner and independent review. Establish a dedicated Review Board only when API volume, team count, or regulatory risk justifies it
 - **API Style Guide**: Unify API design guidelines across the organization for consistency
 - **Linting**: Integrate OpenAPI spec linting (Spectral, etc.) into CI to auto-detect design rule violations
 
@@ -169,14 +176,14 @@ interface StoreResponse {
 
 ### 3.2. Protocol Selection Principles
 
-- **Rule 35.7**: REST is the standard for externally published APIs (maximum versatility and tool ecosystem)
-- **Rule 35.8**: gRPC is recommended for internal communication between microservices (performance and type safety)
-- **Rule 35.9**: GraphQL is recommended for frontend-facing BFF (eliminates over-fetching and saves bandwidth)
-- **Rule 35.10**: Define contracts for event-driven patterns using AsyncAPI specification
+- **Rule 35.7**: Select a public API protocol from consumer compatibility, HTTP semantics, caching, streaming, and tooling. REST is a strong default candidate, not the only valid choice
+- **Rule 35.8**: Select service-to-service communication from latency, streaming, schema evolution, debuggability, and operational capability. gRPC is a candidate when those conditions fit
+- **Rule 35.9**: Introduce a BFF and GraphQL only when client-specific aggregation or query-shape complexity outweighs their additional operational cost
+- **Rule 35.10**: Define event payloads, ownership, compatibility, ordering, duplication, retry, and failure handling in a machine-checkable contract. AsyncAPI is one option
 
 ### 3.3. Multi-Protocol Gateway
 
-- Deploy the API Gateway as a "protocol orchestrator" to transparently perform protocol conversion such as external REST to internal gRPC
+- Deploy an API Gateway when multiple services need common authentication, rate limiting, routing, observability, or protocol conversion. Do not add an unnecessary network hop to a single service
 
 ---
 
@@ -1012,11 +1019,11 @@ Retry-After: 30
 
 ### 27.4. Bearer Token Verification
 
-- **Rule 35.45**: Bearer Token verification must use server-side verification such as `supabase.auth.getUser()`, not just signature checking. Verify ban status and session expiration in real-time
+- **Rule 35.45**: Verify trusted issuer, audience, signature, time constraints, and token type for Bearer Tokens on the server. When immediate revocation or ban state is required, use a suitable authorization-server check, introspection, short-lived token, revocation list, or equivalent mechanism. `supabase.auth.getUser()` is an option when Supabase is selected
 
-### 27.5. Native Bypass Protocol (VIP Lane Strategy)
+### 27.5. Public Client Authentication Boundary
 
-- **Rule 35.46**: Requiring API Key (`x-api-key`) from own apps is prohibited. Implement OR condition in Middleware for API Key authentication (Enterprise) and Bearer Token authentication (Native/VIP), granting Enterprise-equivalent privileges to authenticated own-app users
+- **Rule 35.46**: Do not embed a shared API Key in a public client. Use short-lived credentials based on user or workload identity. Do not elevate privilege merely because a client is first-party; enforce the same server-side authorization policy
 
 ---
 
@@ -1024,15 +1031,17 @@ Retry-After: 30
 
 ### 28.1. API Key Storage
 
-- **Rule 35.47**: Storing API Keys (`sk_live_...`) in plaintext in DB is strictly prohibited. Store hashed with `SHA-256` and verify by hashing input values during authentication
+- **Rule 35.47**: Do not store the secret portion of an API credential in plaintext. For high-entropy random tokens, separate an ID or prefix from a one-way verifier such as SHA-256 or HMAC and compare in constant time. For low-entropy or human-chosen secrets, use a password KDF such as Argon2id. Display the full value only at issuance and manage scope, owner, last use, revocation, and rotation
 
 ### 28.2. Token Lifecycle
 
-| Token Type | TTL | Rotation |
+The following values are starting-point examples, not fixed requirements. Decide from the threat model, revocation capability, user experience, regulation, and provider constraints, and verify the maximum exposure window after compromise.
+
+| Token Type | Example TTL | Rotation |
 |:---|:---|:---|
 | **Access Token** | 15 minutes | Automatic (using Refresh Token) |
 | **Refresh Token** | 7 days | Rotation method (new issuance on use) |
-| **API Key** | No expiration | Manual rotation every 90 days |
+| **API Key** | Based on purpose and revocation capability | Automated issuance, revocation, and periodic or event-driven rotation |
 
 ### 28.3. Scope Minimization
 
@@ -1046,7 +1055,7 @@ Retry-After: 30
 ### 29.1. Schema Validation
 
 - **Rule 35.49**: Perform request body schema validation on all API endpoints (Zod, Joi, etc.)
-- Reject unknown fields (`strictMode`)
+- Define unknown-field behavior in the contract. Default to rejection for commands such as privilege or financial changes, while forward-compatible events or read models may safely ignore or retain unknown fields
 
 ### 29.2. Content-Type Enforcement
 
@@ -1060,8 +1069,9 @@ Retry-After: 30
 
 ### 29.4. SSRF Prevention
 
-- When using user-provided URLs for internal requests, mandate whitelist verification and internal IP blacklist checks
-- Block requests to private IPs: `169.254.169.254` (cloud metadata), `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
+- Normalize user-provided URLs and allowlist schemes, hosts, ports, credentials, and destinations, revalidating after DNS resolution and every redirect
+- Reject loopback, link-local, private, reserved, multicast, and metadata endpoints for both IPv4 and IPv6; where possible, constrain reachability through an egress proxy or network policy
+- Negative-test DNS rebinding, redirects, encoded addresses, credential forwarding, response size, and timeouts
 
 ---
 
@@ -1366,17 +1376,17 @@ logger.info('External API call', {
 
 ### 41.1. Developer Portal
 
-- Provide a portal site for API consumers
-- Enable self-service registration, API key issuance, usage monitoring, and billing management
+- When external consumers or many internal consumers have a self-service need, provide the smallest suitable mechanism among a documentation site, catalog, CLI, API, or portal
+- Make registration, credential issuance, usage monitoring, and billing self-service incrementally, aligned with actual product capability and segregation of duties
 
-### 41.2. SDK Auto-Generation
+### 41.2. SDK Portfolio
 
-- **Rule 35.61**: Auto-generate client SDKs for TypeScript, Python, Go, Swift, Kotlin from OpenAPI specifications
-- Use `openapi-generator-cli` or `openapi-typescript`
+- **Rule 35.61**: Select SDK languages from validated consumer demand, runtimes, maintenance capacity, and security-update SLOs. Do not generate TypeScript, Python, Go, Swift, Kotlin, or any fixed set by default
+- Choose generated or hand-written SDKs from target-language idioms, public API quality, compatibility testing, release automation, and vulnerability response capability
 
 ### 41.3. Onboarding Optimization
 
-- Set DX goal as "succeed in first API call within 5 minutes"
+- Treat "succeed in the first API call within 5 minutes" as a reference target for a simple public API. For integrations involving authentication, regulation, or infrastructure preparation, define a measurable target that reflects the consumer journey
 - Enrich Quick Start guides, Sandbox environments, and sample code
 
 ### 41.4. Changelog Management
@@ -1468,12 +1478,14 @@ logger.info('External API call', {
 
 ## Part XLVI: Microservices Design Principles
 
-### 46.1. Bounded Context
+### 46.1. Service Boundaries and Data Ownership
 
-- **Rule 35.68**: Microservice boundaries must align with DDD (Domain-Driven Design) Bounded Contexts
-- Directly sharing databases between services is a "serious offense" (Database-per-Service principle)
+- **Rule 35.68**: Justify decomposition into deployable services from business capabilities, data and transaction invariants, change frequency, latency, security and compliance boundaries, failure isolation, team cognitive load, and operating cost. Compare a modular monolith, service decomposition, and incremental migration of existing systems; microservice adoption itself is not a maturity metric.
+- When multiple services access the same writable data, declare the authoritative owner of schemas, tables, or records, write permissions, transaction boundaries, migration coordination, contention, audit, and exit routes. Database per service is a strong isolation option, not the only solution mandated for every workload.
 
 ### 46.2. Decomposition Strategy
+
+The following are non-normative options. Compare them, including the choice not to decompose, against the outcomes above.
 
 | Strategy | Description | Application |
 |:---|:---|:---|
@@ -1483,14 +1495,13 @@ logger.info('External API call', {
 
 ### 46.3. Service Size Guidelines
 
-- Standard: "Size that one team can own and operate" (Two-Pizza Team rule)
-- If services are too large, review Bounded Contexts; if too small, consider consolidation
+- Use a granularity that one accountable ownership boundary can understand, change, operate on call, recover, and retire continuously. Do not make a fixed team size or organization model a Universal requirement.
+- Measure cohesion, change independence, dependency edges, build and deploy time, incident blast radius, and cost attribution. Consolidate when the added network, data, release, and observability burden of decomposition exceeds its value.
 
 ### 46.4. Inter-Service API Design
 
-- Recommend gRPC for internal APIs (performance and type safety)
-- Recommend REST for public APIs (versatility and tool ecosystem)
-- Apply Contract Testing (Part XLII) to internal APIs as well
+- Select REST, GraphQL, gRPC, events, provider bindings, shared-memory or in-process interfaces from consumer needs, latency, streaming, schema evolution, debugging, security, runtime and language support, cost, and portability.
+- Do not fix a protocol from the public or internal label alone. Apply versioned contracts, authentication and authorization, timeouts, observability, and positive and negative Contract Testing (Part XLII) at every deployment boundary.
 
 ---
 
@@ -1503,19 +1514,21 @@ logger.info('External API call', {
 | **Synchronous (Request-Response)** | Immediate response, strong consistency | Queries, real-time requirements |
 | **Asynchronous (Event-Driven)** | Loose coupling, high resilience | Commands, background processing |
 
-- **Rule 35.69**: Default to asynchronous communication. Limit synchronous communication to queries requiring real-time responses
+- **Rule 35.69**: Select synchronous or asynchronous communication from business invariants, response requirements, latency budgets, ordering, throughput, failure recovery, backpressure, operating capability, and unit cost. Contract deadlines, cancellation, bounded retries, and overload isolation for synchronous paths; contract delivery semantics, idempotency, retention, poison handling, and replay for asynchronous paths. Do not impose one universal default.
 
 ### 47.2. Choreography vs Orchestration
 
 | Method | Characteristics | Recommended Case |
 |:---|:---|:---|
-| **Choreography** | Each service independently publishes/subscribes events | Simple flows (2-3 steps) |
-| **Orchestration** | Central orchestrator controls flow | Complex flows (4+ steps) |
+| **Choreography** | Each service publishes and subscribes to events | Flows emphasizing local autonomy, loose coupling, and event contracts |
+| **Orchestration** | An explicit coordinator controls the flow | Flows centralizing end-to-end state, timeout, compensation, and audit |
+
+Do not select a method from step count alone. Record ownership, visibility, change frequency, failure recovery, and vendor or runtime constraints in the ADR.
 
 ### 47.3. Data Mesh Integration
 
-- Each microservice exposes APIs as "data products"
-- Data ownership belongs to domain teams; central data team focuses on platform provision
+- At scales requiring distributed domain ownership and a self-service platform, evaluate data products, federated governance, and consumer SLOs.
+- Do not mandate a Data Mesh organization for small teams or domains where centralized governance is appropriate. In every model, declare authoritative owners, schemas, quality, access, and lineage.
 
 ---
 
@@ -1523,17 +1536,15 @@ logger.info('External API call', {
 
 ### 48.1. Saga Pattern Details
 
-- Detailed implementation guide for the Saga pattern outlined in Part XV
-- Pre-define compensating transactions for each step
-- Persist Saga state to guarantee recovery on failure
+- Only for cross-service business invariants that cannot be protected by one atomic transaction, compare sagas, reservations, escrow, workflows, and manual reconciliation.
+- When selecting a saga, define step idempotency, timeouts, resumable state, the feasibility and limits of compensation, and human escalation. Compensation is not the same as rollback.
 
 ### 48.2. Outbox Pattern Details
 
-- **Rule 35.70**: Guarantee atomicity of local DB transactions and event publishing
-- Write events to `outbox` table, forward to event broker via CDC tools like Debezium
+- **Rule 35.70**: When the causal relationship between a durable state change and event publication cannot be lost, select an atomic boundary suited to the data store and delivery contract, such as a transactional outbox, transaction log or CDC, event store, broker transaction, or idempotent reconciliation. Test crash windows before and after commit, duplicates, ordering, and replay. Do not mandate one tool or pattern for every system.
 
 ```sql
--- Outbox Table
+-- Non-normative outbox table example
 CREATE TABLE outbox (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   aggregate_type VARCHAR(255) NOT NULL,
@@ -1547,13 +1558,12 @@ CREATE TABLE outbox (
 
 ### 48.3. Change Data Capture (CDC)
 
-- Convert DB changes to real-time event streams using CDC tools like Debezium
-- Combined with Outbox Pattern to realize event-driven architecture
+- When adopting CDC, verify transaction boundaries, snapshots, schema evolution, ordering, duplicates, deletes or tombstones, PII, retention, consumer lag, and recovery.
+- Do not treat raw database changes as domain events without review. Combine CDC with an explicit semantic event boundary such as an outbox when required.
 
 ### 48.4. Eventual Consistency
 
-- **Rule 35.71**: Assume eventual consistency for data consistency between microservices, guaranteeing consistency via compensating transactions
-- When strong consistency is required, complete processing within the same service
+- **Rule 35.71**: For each business invariant, define the consistency model, such as strong, causal, session, bounded staleness, or eventual, together with acceptable staleness, conflict rules, reconciliation, and user-visible failure. Do not default to eventual consistency or a synchronous distributed transaction merely because a boundary crosses services; verify the trade-offs among consistency, availability, latency, complexity, and cost.
 
 ---
 
@@ -1636,22 +1646,20 @@ CREATE TABLE outbox (
 
 ### 52.1. Deployment Strategies
 
-| Strategy | Description | Risk |
+| Strategy | Description | Primary Verification |
 |:---|:---|:---|
-| **Blue-Green** | Switch between old and new environments | Low risk, high cost |
-| **Canary** | Gradually migrate traffic | Low risk, incremental |
-| **Rolling** | Sequentially update instances | Medium risk |
-| **Feature Flag** | Code-level feature toggle | Lowest risk |
+| **Blue-Green** | Switch between old and new environments | State and traffic cutover, duplicate cost, drift |
+| **Canary** | Gradually shift traffic | Cohort, version skew, sample size, stop conditions |
+| **Rolling** | Sequentially update instances | N and N-1 compatibility, capacity, session and state |
+| **Feature Flag** | Gradually enable a code path | Schema compatibility, authorization, flag lifecycle, fallback |
 
 ### 52.2. Progressive Delivery
 
-- **Rule 35.76**: Mandate Progressive Delivery for new API version rollout: Canary → gradual expansion → full cutover
-- Monitor SLIs at each stage, auto-rollback on threshold violations
+- **Rule 35.76**: Select a deployment strategy from change risk, state, traffic, platform capabilities, SLOs, and cost. Validate high-risk changes in the smallest available cohort or an equivalent isolated surface, and define SLIs, observation windows, stop conditions, and rollback or forward-fix authority before release. When the platform lacks traffic splitting, demonstrate equivalent outcomes through preview or staging, feature isolation, immediate reversion, or another suitable control.
 
-### 52.3. Independent Service Deployment
+### 52.3. Release Topology and Compatibility
 
-- **Rule 35.77**: Each microservice must be independently deployable without dependency on other services
-- Eliminate deployment order dependencies
+- **Rule 35.77**: Declare the release topology of multiple services as independent, coordinated, or aggregate, and bind every deployment unit, compatibility range, ordering constraint, partial failure, and rollback or forward fix to machine-readable evidence. Independent deployment is a strong loose-coupling outcome, not a mandate for every platform. Automate ordered changes as expand → compatible producer or consumer → contract. Unless atomic switching of every unit, route, binding, and state is proven, treat an aggregate deployment as subject to partial rollout and version skew.
 
 ---
 
@@ -1811,10 +1819,10 @@ const mcpTool = {
 
 ## Part LVII: HTTP/3 & QUIC Migration
 
-### 57.1. HTTP/3 Mandate Roadmap
+### 57.1. HTTP/3 Applicability Decision
 
-- **Rule 35.85**: Mandate HTTP/3 (QUIC) support for new API services. Migrate existing services incrementally
-- As of March 2026, HTTP/3 global adoption is 35% (Cloudflare data). All major browsers natively support it
+- **Rule 35.85**: For internet-facing APIs, evaluate HTTP/3 from end-to-end client, CDN, load balancer, gateway, and origin support plus measured connection latency, loss tolerance, and operational cost. Do not mandate it for every new service
+- Treat [RFC 9114](https://www.rfc-editor.org/rfc/rfc9114.html) as the normative HTTP/3 semantics and revalidate adoption and provider support from official sources at decision time
 
 ### 57.2. HTTP/3 Benefits
 
@@ -1827,15 +1835,14 @@ const mcpTool = {
 
 ### 57.3. gRPC over QUIC
 
-- Migrate gRPC from HTTP/2 dependency to HTTP/3 for further performance improvement
-- QUIC's UDP base improves connection persistence during mobile network transitions
+- Select gRPC over HTTP/3 only when the chosen runtime and clients officially support it and interoperability plus failure fallback can be verified
+- Measure characteristics such as QUIC connection migration on real networks; do not promise mobile improvement from inference alone
 
 ### 57.4. Migration Strategy
 
-- **Phase 1**: Enable HTTP/3 at CDN/Edge layer (negotiation via ALTSVC header)
-- **Phase 2**: Enable HTTP/3 at API Gateway layer
-- **Phase 3**: Migrate inter-service communication to HTTP/3
-- Maintain backward compatibility with HTTP/2, negotiating protocols based on client capabilities
+- A representative phased rollout enables HTTP/3 at CDN/Edge, then external gateways, then required origins, comparing success rate, p95/p99, egress, CPU, and fallback at each stage
+- HTTP/3 between CDN and client does not require the same protocol at the origin or between services
+- Negotiate HTTP/3 for capable clients and verify safe fallback to HTTP/2 or an equivalent protocol for unsupported clients or incidents
 
 ---
 
@@ -1897,8 +1904,9 @@ const mcpTool = {
 
 ### 60.1. Ingress → Gateway API Migration
 
-- **Rule 35.89**: Adopt k8s Gateway API as the standard for new Kubernetes clusters. Plan gradual migration from legacy Ingress API
-- Gateway API, as Ingress's successor, provides more expressive routing and traffic management
+- **Rule 35.89**: Evaluate Kubernetes Gateway API when infrastructure and application ownership need role separation, multiple protocols, shared policy, or portable route expression. Do not mandate it for every new cluster
+- Before adoption, verify that the controller conforms to required resources and features, resource status, policy attachment, rollback, and migration from existing Ingress
+- Start with the official [Ingress migration guide](https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress/) and check controller documentation for implementation-specific differences
 
 ### 60.2. Gateway API Resource Model
 
@@ -1964,7 +1972,7 @@ schemathesis run https://api.example.com/openapi.json \
 
 ### 62.1. API Design Linting Automation
 
-- **Rule 35.91**: Mandate OpenAPI spec linting in CI pipelines. Use Spectral/Optic as default tools
+- **Rule 35.91**: Integrate a parser, linter, compatibility checker, and conformance tests appropriate to the selected schema format into CI for shared APIs. Spectral, Optic, and oasdiff are candidates, not fixed tools
 
 ```yaml
 # Spectral ruleset example
@@ -1995,9 +2003,9 @@ rules:
 | **Documentation** | 15% | Changelog, error specs, samples |
 | **Testing** | 10% | Contract Test, Breaking Change Gate |
 
-### 62.3. API Review Board Operations
+### 62.3. API Review Operations
 
-- **Rule 35.92**: Mandate API Review Board design review approval for Breaking Changes or new API publications
+- **Rule 35.92**: Require approval from an accountable owner and independent reviewer for Breaking Changes or publication of a new shared API. Establish a dedicated API Review Board only when scale or regulatory risk justifies it
 - Review criteria: security, naming conventions, versioning, SLO definition, documentation quality
 
 ---

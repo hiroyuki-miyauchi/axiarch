@@ -2,14 +2,21 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-03-24
+> 改定日: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
 > 「APIは組織の最も価値ある資産であり、販売可能な商品として設計せよ。」
 > API設計において、**セキュリティ > 信頼性 > 互換性 > パフォーマンス > DX** の優先順位を厳守せよ。
 > この文書は API統合・マイクロサービスに関するすべての設計判断の最上位基準である。
-> **35パート・70セクション構成。**
+> **70パート構成。**
+
+## Universal 適用契約
+
+- インプロセスの関数呼び出し、同一デプロイ単位内の内部境界、サービス間API、外部公開API、イベント、Webhook、SDKを同じ統制強度で扱わない
+- 統制は、コンシューマー数、信頼境界、独立デプロイ、互換期間、データ機密性、規制、レイテンシ、配信保証、実行環境に比例させる
+- 特定プロトコル、スキーマ形式、Gateway、Service Mesh、Portal、コード生成器、SDK言語、レビュー組織、固定TTL・閾値は既定の義務ではなく、適用条件を満たす場合の参照実装または Blueprint とする
+- 採用しない統制は、リスクが重要な場合に限り、理由、代替統制、責任者、再評価条件を意思決定記録へ残す
 
 ---
 
@@ -94,9 +101,9 @@
 
 ### 1.1. API実装の最高原則
 
-- **Rule 35.1**: 全APIは「販売可能な商品（Salable Asset）」として設計する。内部専用であっても手抜きは「技術的負債の種」である
-- **Rule 35.2**: APIの破壊的変更は「商品のリコール」と等価。互換性を最優先に設計する
-- **Rule 35.3**: API設計はコードより先にコントラクト（仕様書）を定義する（Contract-First）
+- **Rule 35.1**: 複数コンシューマー、独立デプロイ、組織境界、長期互換性のいずれかを持つAPIは、所有者、SLO、変更方針、利用者向け文書を備えたプロダクト品質で設計する。局所的な内部境界には、そのリスクに見合う軽量な契約を適用する
+- **Rule 35.2**: 既存コンシューマーを壊す変更は、セキュリティ、データ完全性、法令、ロールバック可能性を損なわない範囲で、互換期間、移行手段、通知、観測可能性を設計する
+- **Rule 35.3**: 共有または遠隔の境界は、コンシューマーが依存する前に機械可読な契約と互換性方針を定義する。コードファーストでも、契約抽出、差分検査、適合テストにより同じ結果を保証できる
 
 ### 1.2. 優先順位階層
 
@@ -110,8 +117,8 @@
 
 ### 1.3. Omnichannel First原則
 
-- **Rule 35.4**: Webフロントエンドを「特権的なクライアント」として扱うことを禁止する。iOS/Androidアプリと対等に扱い、Webで可能な全操作をAPI経由で外部利用可能にする
-- Tiered Gateway: 「Tier 1 (Public/Read-Only)」と「Tier 2 (Enterprise/Auth/Paid)」を初期から分離し、将来的なAPI収益化（Stripe Metering）に備える
+- **Rule 35.4**: ブラウザ、モバイル、デスクトップ等の公開クライアントへ共有シークレットや暗黙の特権を与えない。同じ認証・認可・業務不変条件を境界で適用し、Web操作を外部公開APIへ無条件に露出しない
+- Tiered Gatewayは、実在するコンシューマー区分、課金、SLO、ID境界が別ポリシーを必要とする場合に導入する。将来の仮説だけで初期分離しない
 
 ---
 
@@ -119,19 +126,19 @@
 
 ### 2.1. API-First Design
 
-- **Rule 35.5**: 実装を始める前に、必ずAPI仕様（コントラクト）を定義する
+- **Rule 35.5**: 共有・遠隔境界では、コンシューマーが依存する前にAPI仕様（コントラクト）を定義する
 - フロントエンドとバックエンドの並行開発を可能にする
 - 仕様からモック/スタブを自動生成し、統合テストを先行実施する
 
 ### 2.2. Contract-First Development
 
-- **OpenAPI 3.1**: REST APIは OpenAPI 3.1 仕様書を正として定義し、コード・型定義・クライアントSDKを自動生成する
+- **OpenAPI**: REST APIはツールチェーンとコンシューマーが対応する[現行仕様](https://spec.openapis.org/oas/latest.html)（例: OpenAPI 3.1/3.2）の機械可読契約を正本とする
 - **Schema-Driven (GraphQL)**: GraphQLはスキーマ定義を正とし、フロントエンド・バックエンド間の型安全性を担保する
 - **Protobuf (gRPC)**: gRPCは `.proto` ファイルを正とし、多言語コード生成を自動化する
 
-### 2.3. コード生成の義務化
+### 2.3. コード生成と適合性
 
-- **Rule 35.6**: 手書きの型定義は禁止。必ず OpenAPI/GraphQL/Protobuf スキーマからクライアントコードとサーバーの型定義を自動生成する
+- **Rule 35.6**: 生成物が対象言語の慣用性、セキュリティ、保守性を満たす場合は、OpenAPI/GraphQL/Protobuf等から型やクライアントを生成する。手書きアダプターを使う場合は、適合テストと契約差分検査でドリフトを防ぐ
 
 ```typescript
 // ✅ 正: OpenAPI仕様から自動生成
@@ -148,7 +155,7 @@ interface StoreResponse {
 
 ### 2.4. API Governance
 
-- **API Review Board**: 新規API・Breaking Changeは設計レビューを経てからのみ実装を許可する
+- **Accountable Review**: 新規共有APIとBreaking Changeは、責任ある所有者と独立レビューを通す。専任Review BoardはAPI数、チーム数、規制リスクが正当化する場合に置く
 - **API Style Guide**: 組織内でAPI設計ガイドラインを統一し、一貫性を維持する
 - **Linting**: OpenAPI仕様のLint（Spectral等）をCIに組み込み、設計ルール違反を自動検出する
 
@@ -169,14 +176,14 @@ interface StoreResponse {
 
 ### 3.2. プロトコル選択原則
 
-- **Rule 35.7**: 外部公開APIはRESTを標準とする（最大の汎用性とツールエコシステム）
-- **Rule 35.8**: マイクロサービス間の内部通信にはgRPCを推奨する（パフォーマンス・型安全）
-- **Rule 35.9**: フロントエンド向けBFFにはGraphQLを推奨する（Over-fetching解消・帯域幅節約）
-- **Rule 35.10**: イベント駆動パターンにはAsyncAPI仕様でコントラクトを定義する
+- **Rule 35.7**: 外部公開APIのプロトコルは、コンシューマー互換性、HTTPセマンティクス、キャッシュ、ストリーミング、ツール支援から選択する。RESTは有力な既定候補だが唯一の正解ではない
+- **Rule 35.8**: サービス間通信は、レイテンシ、ストリーミング、スキーマ進化、デバッグ容易性、運用能力から選択する。gRPCは条件に合う場合の候補である
+- **Rule 35.9**: BFFの導入とGraphQL採用は、クライアント固有集約や取得形状の複雑性が追加の運用コストを上回る場合に限る
+- **Rule 35.10**: イベント駆動境界は、ペイロード、所有者、互換性、順序、重複、再試行、失敗処理を機械検査可能な契約で定義する。AsyncAPIはその選択肢である
 
 ### 3.3. マルチプロトコルゲートウェイ
 
-- API Gatewayを「プロトコルオーケストレーター」として配置し、外部REST→内部gRPC等のプロトコル変換を透過的に実行する
+- API Gatewayは、複数サービスに共通する認証、レート制限、ルーティング、観測、プロトコル変換が必要な場合に配置する。単一サービスへ不要なネットワークホップを追加しない
 
 ---
 
@@ -1012,11 +1019,11 @@ Retry-After: 30
 
 ### 27.4. Bearer Token検証
 
-- **Rule 35.45**: Bearer Tokenの検証には単なる署名確認ではなく、必ず `supabase.auth.getUser()` 等のサーバーサイド検証を使用する。Ban状態やセッション失効をリアルタイムに確認する
+- **Rule 35.45**: Bearer Tokenは、信頼するissuer、audience、署名、時刻制約、token typeをサーバー側で検証する。即時失効やBan状態が要件なら、認可サーバー照会、introspection、短命token、失効リスト等の対応機構を用いる。`supabase.auth.getUser()` はSupabase採用時の選択肢である
 
-### 27.5. Native Bypass Protocol（VIP Lane Strategy）
+### 27.5. Public Client Authentication Boundary
 
-- **Rule 35.46**: 自社アプリからのアクセスにAPI Key（`x-api-key`）を要求することを禁止する。MiddlewareでAPI Key認証（Enterprise）とBearer Token認証（Native/VIP）のOR条件を実装し、自社アプリのログインユーザーにはEnterprise相当の特権を付与する
+- **Rule 35.46**: 公開クライアントに共有API Keyを埋め込まず、ユーザーまたはworkload identityに基づく短命credentialを用いる。自社クライアントという理由だけで権限を昇格せず、サーバー側で同じ認可ポリシーを適用する
 
 ---
 
@@ -1024,15 +1031,17 @@ Retry-After: 30
 
 ### 28.1. APIキー保存
 
-- **Rule 35.47**: API Key（`sk_live_...`）を平文でDBに保存することを厳禁する。`SHA-256` でハッシュ化して保存し、認証時は入力値をハッシュ化して照合する
+- **Rule 35.47**: API credentialのsecret部分を平文保存しない。高entropyなrandom tokenはID／prefixと一方向verifier（SHA-256またはHMAC等）を分離してconstant-timeで照合し、低entropyまたは人が選ぶsecretはArgon2id等のpassword KDFを使う。発行時だけ完全値を表示し、scope、owner、最終利用、失効、rotationを管理する
 
 ### 28.2. トークンライフサイクル
 
-| トークン種別 | TTL | ローテーション |
+次の値は固定要件ではなく開始点の例である。脅威モデル、失効能力、利用者UX、規制、provider制約に基づき決定し、漏洩時の最大影響時間を検証する。
+
+| トークン種別 | 参考TTL | ローテーション |
 |:---|:---|:---|
 | **Access Token** | 15分 | 自動（Refresh Token使用） |
 | **Refresh Token** | 7日 | ローテーション方式（使用で新発行） |
-| **API Key** | 無期限 | 90日ごとの手動ローテーション |
+| **API Key** | 用途と失効能力に応じる | 自動化された発行、失効、定期またはイベント駆動ローテーション |
 
 ### 28.3. Scope最小化
 
@@ -1046,7 +1055,7 @@ Retry-After: 30
 ### 29.1. Schema Validation
 
 - **Rule 35.49**: 全APIエンドポイントでリクエストボディのスキーマバリデーションを実施する（Zod, Joi等）
-- 未知のフィールドは拒否する（`strictMode`）
+- 未知fieldの扱いをcontractで定義する。権限変更や金銭操作等のcommandは拒否を既定にし、forward-compatibleなevent／read modelでは安全に無視または保持できるようにする
 
 ### 29.2. Content-Type強制
 
@@ -1060,8 +1069,9 @@ Retry-After: 30
 
 ### 29.4. SSRF防止
 
-- ユーザー提供のURLを内部リクエストに使用する場合、ホワイトリスト検証・内部IPブラック確認を必須とする
-- `169.254.169.254`（クラウドメタデータ）, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` 等のプライベートIPへのリクエストをブロックする
+- ユーザー提供URLは正規化してscheme、host、port、credential、destinationをallowlistし、DNS解決後と各redirect後に再検証する
+- loopback、link-local、private、reserved、multicast、metadata endpointをIPv4／IPv6の双方で拒否し、可能ならegress proxyまたはnetwork policyで到達経路自体を制限する
+- DNS rebinding、redirect、encoded address、credential forwarding、response size／timeoutをnegative testする
 
 ---
 
@@ -1366,17 +1376,17 @@ logger.info('External API call', {
 
 ### 41.1. Developer Portal
 
-- API利用者向けのポータルサイトを提供する
-- 登録・APIキー発行・使用量確認・課金管理を自己完結可能にする
+- 外部利用者または多数の内部利用者に自己サービス需要がある場合、文書サイト、catalog、CLI、API、Portalのうち最小の手段を提供する
+- 登録、credential発行、使用量確認、課金管理は、実在する提供機能と権限分離に合わせて段階的に自己サービス化する
 
-### 41.2. SDK自動生成
+### 41.2. SDKポートフォリオ
 
-- **Rule 35.61**: OpenAPI仕様から TypeScript, Python, Go, Swift, Kotlin のクライアントSDKを自動生成する
-- `openapi-generator-cli` または `openapi-typescript` を使用する
+- **Rule 35.61**: SDK言語は、検証済みの利用者需要、runtime、保守能力、セキュリティ更新SLOに基づいて選ぶ。TypeScript、Python、Go、Swift、Kotlin等を一律に生成しない
+- 生成SDKと手書きSDKは、対象言語の慣用性、公開API品質、互換性テスト、release automation、脆弱性対応能力で選択する
 
 ### 41.3. Onboarding最適化
 
-- 「5分以内に最初のAPIコールを成功させる」をDX目標とする
+- 「5分以内に最初のAPIコールを成功させる」は単純な公開APIの参考目標とし、認証、規制、インフラ準備を伴う統合では、利用者journeyに即した測定可能な目標を置く
 - Quick Startガイド、Sandbox環境、サンプルコードを充実させる
 
 ### 41.4. Changelog管理
@@ -1468,12 +1478,14 @@ logger.info('External API call', {
 
 ## Part XLVI: マイクロサービス設計原則
 
-### 46.1. Bounded Context
+### 46.1. サービス境界とデータ所有
 
-- **Rule 35.68**: マイクロサービスの境界はDDD（Domain-Driven Design）のBounded Contextに一致させる
-- サービス間で直接DBを共有することを「重罪」とする（Database-per-Service原則）
+- **Rule 35.68**: deploy可能なserviceへの分割は、business capability、data／transaction invariant、変更頻度、latency、security／compliance境界、failure isolation、teamの認知負荷、運用費用から正当化する。modular monolith、service分割、既存systemの段階移行を比較し、microservice化自体を成熟度指標にしない。
+- 複数serviceから同じwritable dataへ接続する場合は、schema／table／recordのauthoritative owner、write権限、transaction境界、migration調整、contention、監査、退出経路を明示する。Database-per-Serviceは有力な分離手段だが、全workloadへ強制する唯一解ではない。
 
 ### 46.2. Decomposition Strategy
+
+以下は非規範の候補であり、分割しない判断も含めて上記の成果で比較する。
 
 | 戦略 | 説明 | 適用ケース |
 |:---|:---|:---|
@@ -1483,14 +1495,13 @@ logger.info('External API call', {
 
 ### 46.3. サービスサイズの指針
 
-- 「1チームが所有・運用できるサイズ」を基準とする（Two-Pizza Teamルール）
-- 大きすぎるサービスはBounded Contextの見直し、小さすぎるサービスは統合を検討する
+- 一つのaccountable ownership境界が理解、変更、on-call、復旧、廃止まで継続できる粒度を基準にする。固定人数や組織モデルをUniversal要件にしない。
+- cohesion、変更の独立性、依存edge、build／deploy時間、incident blast radius、cost attributionを計測し、分割によるnetwork、data、release、observabilityの追加負担が価値を上回る場合は統合する。
 
 ### 46.4. サービス間API設計
 
-- 内部APIはgRPCを推奨（パフォーマンス・型安全）
-- 公開APIはRESTを推奨（汎用性・ツールエコシステム）
-- 内部APIにもContract Testing（Part XLII）を適用する
+- REST、GraphQL、gRPC、event、provider binding、shared-memory／in-process interface等を、consumer、latency、streaming、schema evolution、debug、security、runtime／language support、cost、portabilityから選ぶ。
+- 公開／内部という区分だけでprotocolを固定せず、すべてのdeploy境界にversioned contract、認証・認可、timeout、observability、positive／negative Contract Testing（Part XLII）を適用する。
 
 ---
 
@@ -1503,19 +1514,21 @@ logger.info('External API call', {
 | **同期（Request-Response）** | 即時応答、強い一貫性 | クエリ、リアルタイム要求 |
 | **非同期（Event-Driven）** | 疎結合、高回復力 | コマンド、バックグラウンド処理 |
 
-- **Rule 35.69**: デフォルトは非同期通信を推奨する。同期通信はリアルタイム応答が必要なクエリに限定する
+- **Rule 35.69**: 同期／非同期は、business invariant、応答要件、latency budget、ordering、throughput、failure recovery、backpressure、運用能力、unit costから選ぶ。同期経路はdeadline、cancellation、bounded retry、overload isolationを、非同期経路はdelivery semantics、idempotency、retention、poison handling、replayを契約化し、一律の既定方式を置かない。
 
 ### 47.2. Choreography vs Orchestration
 
 | 方式 | 特性 | 推奨ケース |
 |:---|:---|:---|
-| **Choreography** | 各サービスが独立してイベント発行・購読 | シンプルなフロー（2-3ステップ） |
-| **Orchestration** | 中央のオーケストレーターがフロー制御 | 複雑なフロー（4ステップ以上） |
+| **Choreography** | 各serviceがeventを発行・購読 | local autonomy、疎結合、event contractを重視するflow |
+| **Orchestration** | 明示したcoordinatorがflowを制御 | end-to-end state、timeout、補償、監査を一元追跡するflow |
+
+step数だけで方式を固定しない。ownership、可視性、変更頻度、failure recovery、vendor／runtime制約をADRへ記録する。
 
 ### 47.3. Data Mesh連携
 
-- 各マイクロサービスが「データプロダクト」としてAPIを公開する
-- データの所有権はドメインチームが持ち、中央データチームはプラットフォーム提供に集中する
+- domain分散所有とself-service platformが必要な規模では、data product、federated governance、consumer SLOを評価する。
+- 小規模teamや中央管理が適切なdomainへData Mesh組織形態を強制しない。どの形態でもauthoritative owner、schema、quality、access、lineageを明示する。
 
 ---
 
@@ -1523,17 +1536,15 @@ logger.info('External API call', {
 
 ### 48.1. Saga Pattern詳細
 
-- Part XVで概説したSagaパターンの詳細実装ガイド
-- 各ステップの補償トランザクションを事前定義する
-- Sagaの状態を永続化し、障害時のリカバリを保証する
+- 単一の原子transactionで守れないcross-service business invariantに限り、Saga、reservation、escrow、workflow、manual reconciliation等を比較する。
+- Sagaを選ぶ場合は各stepのidempotency、timeout、再開可能なstate、補償の可否と限界、human escalationを定義する。補償をrollbackと同一視しない。
 
 ### 48.2. Outbox Pattern詳細
 
-- **Rule 35.70**: ローカルDBトランザクションとイベント発行のアトミック性を保証する
-- `outbox` テーブルにイベントを書き込み、Debezium等のCDCツールでイベントブローカーに転送する
+- **Rule 35.70**: durable state変更とevent発行の因果関係を失えない場合は、transactional outbox、transaction log／CDC、event store、broker transaction、idempotent reconciliation等からdata storeとdelivery contractに適合する原子境界を選び、commit前後のcrash window、duplicate、ordering、replayをtestする。特定toolまたは一つのpatternを全systemへ強制しない。
 
 ```sql
--- Outboxテーブル
+-- 非規範のOutboxテーブル例
 CREATE TABLE outbox (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   aggregate_type VARCHAR(255) NOT NULL,
@@ -1547,13 +1558,12 @@ CREATE TABLE outbox (
 
 ### 48.3. Change Data Capture (CDC)
 
-- Debezium等のCDCツールでDBの変更をリアルタイムにイベントストリームへ変換する
-- Outbox Patternとの併用でイベント駆動アーキテクチャを実現する
+- CDCを採用する場合は、transaction boundary、snapshot、schema evolution、ordering、duplicate、delete／tombstone、PII、retention、consumer lag、recoveryを検証する。
+- raw database changeを無審査でdomain eventとみなさず、必要時はOutbox等の明示したsemantic event境界と組み合わせる。
 
 ### 48.4. 結果整合性（Eventual Consistency）
 
-- **Rule 35.71**: マイクロサービス間のデータ整合性は結果整合性を前提にし、補償トランザクションで一貫性を保証する
-- 強い一貫性が必要な場合は同一サービス内で処理を完結させる
+- **Rule 35.71**: business invariantごとにstrong、causal、session、bounded-staleness、eventual等のconsistency model、許容staleness、conflict rule、reconciliation、user-visible failureを定義する。cross-serviceという理由だけでeventual consistencyまたは同時分散transactionを既定にせず、整合性・可用性・latency・complexity・costのtrade-offを検証する。
 
 ---
 
@@ -1636,22 +1646,20 @@ CREATE TABLE outbox (
 
 ### 52.1. デプロイ戦略
 
-| 戦略 | 説明 | リスク |
+| 戦略 | 説明 | 主な検証点 |
 |:---|:---|:---|
-| **Blue-Green** | 旧環境と新環境を切り替え | 低リスク、高コスト |
-| **Canary** | 段階的にトラフィックを移行 | 低リスク、漸進的 |
-| **Rolling** | インスタンスを順次更新 | 中リスク |
-| **Feature Flag** | コードレベルで機能ON/OFF | 最低リスク |
+| **Blue-Green** | 旧環境と新環境を切り替え | state／traffic切替、二重費用、drift |
+| **Canary** | 段階的にtrafficを移行 | cohort、version skew、sample size、停止条件 |
+| **Rolling** | instanceを順次更新 | N/N-1互換、capacity、session／state |
+| **Feature Flag** | code pathを段階的に有効化 | schema互換、権限、flag lifecycle、fallback |
 
 ### 52.2. Progressive Delivery
 
-- **Rule 35.76**: 新APIバージョンの展開はCanary→段階的拡大→全面切替のProgressive Deliveryを義務付ける
-- 各段階でSLIを監視し、閾値違反時は自動ロールバックする
+- **Rule 35.76**: deployment strategyはchange risk、state、traffic、platform capability、SLO、costから選ぶ。高risk変更は利用可能な最小cohortまたは同等の隔離surfaceで段階検証し、各段階のSLI、観測期間、停止条件、rollback／forward-fix authorityをrelease前に定義する。platformがtraffic splitを提供しない場合は、preview／staging、feature isolation、即時切戻し等で同等成果を示す。
 
-### 52.3. サービスの独立デプロイ
+### 52.3. Release topologyと互換性
 
-- **Rule 35.77**: 各マイクロサービスは他のサービスと独立してデプロイ可能でなければならない
-- デプロイ順序への依存を排除する
+- **Rule 35.77**: 複数serviceのrelease topologyをindependent、coordinated、aggregateのいずれかとして明示し、各deployment unit、互換範囲、順序、partial failure、rollback／forward fixをmachine-readable evidenceへ結ぶ。独立deployは疎結合の有力な成果だが全platformへ強制せず、順序が必要な変更はexpand → compatible producer／consumer → contractとして自動gate化する。aggregate deployは全unit・route・binding・stateが原子的に切り替わる証明がない限り、partial rolloutとversion skewを前提にする。
 
 ---
 
@@ -1811,10 +1819,10 @@ const mcpTool = {
 
 ## Part LVII: HTTP/3 & QUIC移行
 
-### 57.1. HTTP/3義務化ロードマップ
+### 57.1. HTTP/3適用判断
 
-- **Rule 35.85**: 新規APIサービスはHTTP/3（QUIC）対応を義務付ける。既存サービスは段階的に移行する
-- 2026年3月時点でHTTP/3のグローバル採用率は35%（Cloudflareデータ）。主要ブラウザ全てがネイティブ対応済み
+- **Rule 35.85**: インターネット向けAPIは、client、CDN、load balancer、gateway、originのend-to-end対応と、実測した接続レイテンシ、損失耐性、運用コストからHTTP/3を評価する。新規サービスへ一律に義務付けない
+- HTTP/3の標準セマンティクスは [RFC 9114](https://www.rfc-editor.org/rfc/rfc9114.html) を正本とし、採用率やprovider対応は意思決定時に公式情報を再確認する
 
 ### 57.2. HTTP/3の利点
 
@@ -1827,15 +1835,14 @@ const mcpTool = {
 
 ### 57.3. gRPC over QUIC
 
-- gRPCのHTTP/2依存をHTTP/3に移行し、パフォーマンスを更に向上する
-- QUIC の UDP ベースにより、モバイル環境でのネットワーク切替時のコネクション維持が向上
+- gRPCのHTTP/3利用は、採用するruntimeとclientが公式に対応し、相互運用性と障害時のfallbackを検証できる場合のみ選択する
+- QUICのconnection migration等の特性は実ネットワークで測定し、モバイル環境の改善を推測だけで保証しない
 
 ### 57.4. 移行戦略
 
-- **Phase 1**: CDN/Edge層でHTTP/3を有効化（ALTSVCヘッダーによるネゴシエーション）
-- **Phase 2**: API Gateway層でHTTP/3を有効化
-- **Phase 3**: サービス間通信をHTTP/3に移行
-- HTTP/2との後方互換を維持し、クライアント対応状況に応じてプロトコルをネゴシエーションする
+- 代表的な段階導入は、CDN/Edgeでの有効化、外部Gateway、必要なoriginの順に進め、各段階で成功率、p95/p99、egress、CPU、fallbackを比較する
+- CDNとclient間でHTTP/3を使っても、originやサービス間通信まで同じプロトコルにする必要はない
+- 対応clientにはHTTP/3をnegotiationし、非対応または問題発生時にHTTP/2等へ安全にfallbackできることを検証する
 
 ---
 
@@ -1897,8 +1904,9 @@ const mcpTool = {
 
 ### 60.1. Ingress → Gateway API移行
 
-- **Rule 35.89**: 新規Kubernetesクラスタではk8s Gateway APIを標準採用する。従来のIngress APIからの段階的移行を計画する
-- Gateway APIはIngressの後継として、より表現力豊かなルーティング・トラフィック管理を提供する
+- **Rule 35.89**: Kubernetes Gateway APIは、インフラ所有者とアプリ所有者の役割分離、複数protocol、共有policy、可搬なroute表現が必要な場合に評価する。新規clusterへ一律に義務付けない
+- 採用時はcontrollerが必要resourceとfeatureのconformanceを満たすこと、resource status、policy attachment、rollback、既存Ingressとの移行手順を検証する
+- 公式の [Ingressからの移行ガイド](https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress/) を出発点とし、実装固有の差異はcontroller文書で確認する
 
 ### 60.2. Gateway API リソースモデル
 
@@ -1964,7 +1972,7 @@ schemathesis run https://api.example.com/openapi.json \
 
 ### 62.1. API Design Linting自動化
 
-- **Rule 35.91**: OpenAPI仕様のLintをCIパイプラインに義務付ける。Spectral/Opticをデフォルトツールとする
+- **Rule 35.91**: 共有APIの契約は、採用したschema形式に適したparser、linter、互換性checker、適合テストをCIへ組み込む。Spectral、Optic、oasdiff等は候補であり、固定しない
 
 ```yaml
 # Spectral ルールセット例
@@ -1995,9 +2003,9 @@ rules:
 | **ドキュメント** | 15% | Changelog・エラー仕様・サンプル |
 | **テスト** | 10% | Contract Test・Breaking Change Gate |
 
-### 62.3. API Review Board運用
+### 62.3. API Review運用
 
-- **Rule 35.92**: Breaking ChangeまたはAPI新規公開には、API Review Boardでの設計レビュー承認を義務付ける
+- **Rule 35.92**: Breaking Changeまたは共有APIの新規公開には、責任あるownerと独立reviewerによる承認を要求する。専任API Review Boardは規模または規制リスクが正当化する場合に設置する
 - レビュー基準: セキュリティ・命名規約・バージョニング・SLO定義・ドキュメント品質
 
 ---

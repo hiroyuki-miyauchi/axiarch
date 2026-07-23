@@ -22,12 +22,15 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **Google/Apple Guidelines** | `universal/product/700_appstore_compliance.md` | "Human Interface Guidelines" |
 | **Mobile-First Perspective** | `universal/design/000_design_ux.md` | "Mobile First Strategy", "Touch Targets" |
 | **UI Animation & Performance** | `universal/design/000_design_ux.md` | "60fps Target", "Haptics" |
-| **Code Quality & Clean Code** | `universal/engineering/000_engineering_standards.md` | "Zero Warnings", "kebab-case", "Barrel File Ban" |
+| **Code Quality & Clean Code** | `universal/engineering/000_engineering_standards.md` | "Zero Warnings", "language-native naming", "public API boundaries" |
+| **Programming Language Governance** | `universal/engineering/320_programming_language_governance.md` | "Universal Applicability Contract", "support tiers", "Framework portfolio", "Desktop", "query, semantic, observability, and infrastructure DSLs", "public libraries, SDKs, and packages", "source, binary, and behavioral compatibility", "consumer matrix", "immutable distribution", "generated SDKs", "organizational ownership", "notebook and literate computational artifacts", "clean execution", "rich outputs", "production jobs", "team handoff", "effective artifacts", "continuity route", "polyglot CI", "retirement" |
+| **React Native Engineering** | `universal/engineering/420_react_native.md` | "Universal Applicability Contract", "New Architecture", "both-OS tests", "OTA rollback", "Mobile Platform function" |
+| **Cloud & Application Platforms** | `universal/engineering/520_cloud_application_platforms.md` | "Universal Applicability Contract", "shared responsibility", "artifact and managed-runtime lifecycle", "SDK and client-interface lifecycle", "Managed Async and Event Delivery Contract", "fidelity matrix", "managed-environment conformance", "provider-managed integration and extension lifecycle", "service graph", "aggregate release record", "BaaS capability manifest", "identity portability", "FinOps", "exit strategy" |
 | **Security by Design (DevSecOps)** | `universal/engineering/000_engineering_standards.md` | "Zero Trust", "Single Source of Config", "Env Drift Prevention" |
-| **Technical Debt Management** | `universal/engineering/000_engineering_standards.md` | "Sprint 20% Debt Paydown", "Tech Radar", "Dependency Governance" |
+| **Technical Debt Management** | `universal/engineering/000_engineering_standards.md` | "risk-based capacity", "Tech Radar", "Dependency Governance" |
 | **AI-First Engineering** | `universal/engineering/000_engineering_standards.md` | "PDD", "RAG Optimization", "Schema Trust Protocol" |
-| **Bug Risk Reduction Policy** | `universal/engineering/000_engineering_standards.md` | "24-Hour Rule", "Fix Twice Principle" |
-| **Git & Version Control** | `universal/engineering/000_engineering_standards.md` | "Trunk Based Development", "Conventional Commits", "Git Hooks 3-Layer Defense" |
+| **Bug Risk Reduction Policy** | `universal/engineering/000_engineering_standards.md` | "risk-based defect triage", "immediate critical-defect containment", "Fix Twice" |
+| **Git & Version Control** | `universal/engineering/600_git_workflow.md` | "Protected Reference Control", "reviewable change", "ownership and approval" |
 | **Documentation Ops** | `universal/engineering/000_engineering_standards.md` | "Living Documentation", "ADR Mandate", "Runbook" |
 | **Architecture Quality** | `universal/engineering/000_engineering_standards.md` | "Trinity DTO", "CQRS Separation", "Thin Controller", "Feature Flag Lifecycle" |
 | **Cost & Expense Perspective** | `universal/engineering/500_firebase_gcp.md` | "FinOps", "Cloud Bankruptcy Prevention" |
@@ -46,13 +49,15 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **Legal Perspective** | `universal/security/100_data_governance.md` | "GDPR/CCPA/ePrivacy", "Terms of Service" |
 | **Terms & Privacy Perspective** | `universal/security/100_data_governance.md` | "Privacy Policy", "Data Minimization" |
 | **License/Plugin Rules** | `universal/security/200_oss_compliance.md` | "License Whitelist" |
-| **Testing Perspective** | `universal/quality/000_qa_testing.md` | "Shift Left Testing", "Flaky Tests" |
+| **Testing Perspective** | `universal/quality/000_qa_testing.md` | "Shift Left Testing", "Flaky Tests", "release topology", "partial deployment" |
 | **Growth & Marketing** | `universal/product/500_growth_marketing.md` | "Growth Loops", "Viral Coefficient" |
-| **API Design & Microservices** | `universal/engineering/100_api_integration.md` | "API First", "Contract Testing" |
+| **API Design & Microservices** | `universal/engineering/100_api_integration.md` | "API First", "Contract Testing", "release topology", "independent, coordinated, or aggregate" |
 | **Supabase Architecture** | `universal/engineering/200_supabase_architecture.md` | "RLS by Default", "Edge Functions" |
 | **Headless CMS** | `universal/engineering/310_headless_cms.md` | "Content Modeling", "API-First CMS" |
 | **Flutter / Cross-Platform** | `universal/engineering/400_mobile_flutter.md` | "Widget Architecture", "Platform Channels" |
 | **AWS Cloud** | `universal/engineering/510_aws_cloud.md` | "Well-Architected Framework", "IaC" |
+| **Microsoft Azure Cloud** | `universal/engineering/530_azure_cloud.md` | "Universal Applicability Contract", "landing zones", "Microsoft Entra", "Azure Policy", "Custom Handler", "managed conformance", "exit plan" |
+| **Major PaaS, BaaS, Edge, Regional & Sovereign Cloud Platforms** | `universal/engineering/520_cloud_application_platforms.md` | "Vercel", "Supabase", "Firebase", "Cloudflare", "AWS Amplify", "Appwrite", "Convex", "sovereign cloud", "Platform Engineering" |
 | **Incident Response** | `universal/operations/500_incident_response.md` | "Incident Commander", "Blameless Postmortem" |
 | **IP Due Diligence** | `universal/security/300_ip_due_diligence.md` | "IP Portfolio", "Trade Secret Protection" |
 | **Cloud FinOps** | `universal/operations/600_cloud_finops.md` | "Cost Optimization", "FinOps Lifecycle" |

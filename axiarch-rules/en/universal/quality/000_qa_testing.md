@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (immutable rule). Editing is prohibited without explicit "Amend Constitution" instruction.**
-> Last Updated: 2026-04-16
+> Last Updated: 2026-07-23
 
 > [!IMPORTANT]
 > **Primary Directive**
@@ -10,6 +10,8 @@
 > All releases must pass comprehensive quality gates before deployment.
 > Strictly observe the priority order: **Test Coverage > Code Quality > Feature Velocity > Delivery Speed**.
 > Quality is not the responsibility of a specific team, but a **shared responsibility of all engineers (Quality-as-a-Shared-Responsibility)**.
+> Language scope: TypeScript and JavaScript commands and tools are web-profile examples. Apply the same verification categories to every language, with concrete gates following the language-native rules in `engineering/320_programming_language_governance.md`.
+> Universal application contract: Named tools, test ratios, coverage thresholds, execution times, cadences, and team structures are reference profiles or Blueprint parameters unless they are official platform constraints or safety floors for irrecoverable risk. The Project Blueprint chooses concrete values from product risk, architecture, users, regulation, change frequency, and historical defects. It may not omit the outcomes of static, behavioral, boundary, failure-path, and release-artifact verification.
 > **42-Part, 130+ Section Architecture.**
 
 ---
@@ -91,7 +93,7 @@
     -   **Action**: Embed quality metrics into team-wide KPIs, institutionally ensuring the culture of "quality is everyone's job."
 -   **QAOps — Fusion with DevOps/Platform Engineering**:
     -   Practice "QAOps" — integrating QA processes with pipelines, infrastructure, and observability. Testing is an inseparable part of DevOps, and test gates are embedded into Platform Engineering "Golden Paths."
-    -   **Action**: Build test execution environments, test data management, and test observability as standard services provided by the Platform Team.
+    -   **Action**: When repeated use across teams creates value, provide test execution environments, test data management, and test observability as shared capabilities. A small or single-project context may meet the same quality outcome with repository-local automation and a clear owner.
 
 ---
 
@@ -99,8 +101,8 @@
 
 -   **Testing Pyramid**:
     -   Classic model proposed by Mike Cohn. Structure tests in the ratio of Unit (many) → Integration (medium) → E2E (few).
-    -   **Recommended Ratio**: Unit 70% / Integration 20% / E2E 10%
-    -   **Application**: Optimal for backend APIs, libraries, and business-logic-heavy systems.
+    -   **Reference Ratio**: Unit 70% / Integration 20% / E2E 10%. This is not a fixed target; tune from defect history, execution cost, boundary risk, and feedback speed.
+    -   **Application**: A useful candidate for backend APIs, libraries, and business-logic-heavy systems.
 -   **Testing Trophy**:
     -   Modern model proposed by Kent C. Dodds. Thickens integration tests and emphasizes user-perspective testing.
     -   **Composition**: Static (Types + Lint) → Unit (few) → **Integration (most)** → E2E (few)
@@ -110,7 +112,7 @@
     -   A model increasingly used in microservice environments. Centers on contract and integration tests, with thinner E2E and unit layers on both ends.
     -   **Composition**: Unit (few) → **Contract + Integration (most)** → E2E (few)
     -   **Application**: Distributed systems, event-driven architectures.
--   **Selection Guidelines by Project Characteristics**:
+-   **Selection Guidelines by System Characteristics**:
 
     | Project Characteristic | Recommended Model | Rationale |
     |:---|:---|:---|
@@ -122,8 +124,8 @@
     | Event-Driven Systems | Diamond + Message Contract | Async processing consistency guarantee |
 
 -   **Testing Priority (Common)**:
-    -   **Priority**: 1. Type Check (`tsc`) > 2. Lint > 3. Integration > 4. E2E > 5. Unit
-    -   **Law**: Static analysis (`tsc --noEmit`) is the most powerful test. Zero type errors is a prerequisite for all tests.
+    -   **Priority**: 1. Language-native formatter, lint, type, and compiler gates > 2. Risk-based Unit, Integration, and Contract tests > 3. E2E and non-functional verification
+    -   **Law**: Static analysis is the first fast gate, not a substitute for runtime behavior or cross-language contract tests. TypeScript's `tsc --noEmit` is one example; `engineering/320_programming_language_governance.md` is the source of truth for language-specific gates.
 
 ---
 
@@ -158,6 +160,8 @@
 ---
 
 ## §4. Static Testing
+
+The TypeScript rules below are additional requirements for the web profile. Other languages use official or de facto standard tools from equivalent categories.
 
 -   **Type Checking**:
     -   `tsc --noEmit` is mandatory as the **first gate** in CI pipelines. Merging with even one type error is prohibited.
@@ -313,13 +317,14 @@
 
     | Condition | Contract Testing | Integration Testing |
     |:---|:---|:---|
-    | Independent service deployment | ✅ Required | Supplementary |
-    | Inter-module within monolith | Not required | ✅ Priority |
-    | External SaaS API | Not required (Provider uncontrolled) | ✅ + Mocks |
-    | Event-driven architecture | ✅ Message contract (AsyncAPI) | Supplementary |
-    | gRPC inter-service | ✅ Protobuf compatibility testing | Supplementary |
+    | Independent or coordinated services | ✅ Verify version compatibility | Supplement critical journeys and managed behavior |
+    | Aggregate deployment unit | ✅ Shift-left unit boundaries | ✅ Verify composition, routes, and partial deployment |
+    | Interfaces inside a modular monolith | Interface tests according to risk | ✅ Prioritize in-process integration |
+    | External SaaS API | ✅ Diff public schema, versions, or fixtures | ✅ Sandbox or managed test + mocks |
+    | Event-driven architecture | ✅ Message schema and delivery contract | Supplement replay, failure, and broker integration |
+    | gRPC between services | ✅ IDL and wire compatibility | Supplement runtime, network, and policy |
 
--   **Rationale**: Verifying service-to-service contracts with integration tests requires both services to be running, significantly degrading CI speed and stability. Contract testing verifies each service independently, enabling fast and reliable feedback.
+-   **Rationale**: Contract tests rapidly verify boundary compatibility, while integration and E2E tests verify real routing, identity, runtime, and provider behavior. Do not universally omit either; combine them according to release topology, risk, and local-to-managed fidelity.
 
 ---
 
@@ -644,7 +649,7 @@
 ## §14. Security Testing Strategy (DevSecOps)
 
 -   **Defense-in-Depth Testing**:
-    -   Security testing is not a single approach but a **multi-layered composition of SAST + DAST + SCA + IAST + RASP**.
+    -   Do not depend on one security-testing method. Combine SAST, DAST, SCA, IAST, runtime protection, manual review, or equivalents according to the threat model, artifact, execution environment, and attack surface. Universal conformance does not require every method everywhere.
 
     | Method | Detection Timing | Detection Target | Tool Examples |
     |:---|:---|:---|:---|
@@ -655,16 +660,20 @@
     | **RASP** | Production runtime | Real-time attack detection & blocking | Sqreen, Hdiv |
 
 -   **CI/CD Pipeline Integration**:
-    -   **Pre-commit**: Secret detection and unsafe pattern blocking via Semgrep + gitleaks.
-    -   **PR Check**: Auto-execute SAST + SCA scans. Auto-block Critical/High findings.
-    -   **Staging**: Auto-execute DAST scans against staging environment.
+    -   **Early Feedback**: Local hooks, IDEs, or pre-commit checks may provide fast secret and unsafe-pattern feedback. Semgrep and gitleaks are reference implementations.
+    -   **Change Gate**: Re-run applicable SAST, SCA, and policy checks in CI or a server-side gate, blocking according to a risk policy that includes reachability, exposure, KEV status, and exception expiry.
+    -   **Runtime Boundary**: Where a deployable environment exists, apply DAST or equivalent dynamic verification to authentication, network, configuration, and external boundaries.
 -   **OWASP Top 10 Testing**:
-    -   **Law**: Maintain test cases corresponding to each category of the OWASP Top 10 (2025 edition).
+    -   **Law**: Map the adopted current OWASP Top 10 to the threat model and test inventory, retaining automated-test, manual-review, design-control, or compensating-control evidence for applicable categories.
 -   **Supply Chain Security Testing (SBOM / SLSA)**:
-    -   **SBOM (Software Bill of Materials) Generation Mandate**:
-        -   **Law**: Auto-generate **SBOM** for all production builds as a mandatory CI/CD pipeline step. SBOM submission is a legal obligation under the EU Cyber Resilience Act (CRA).
-        -   **Formats**: Use **CycloneDX 1.6+** (optimal for security/vulnerability correlation) or **SPDX 3.0+** (ISO standard compliance).
-        -   **Tools**: **Syft** (OSS, lightweight CLI), **Trivy** (scanner-integrated) recommended.
+    -   **SBOM (Software Bill of Materials) Generation**:
+        -   **Law**: Generate a machine-readable SBOM for every releasable artifact, bind it to the matching digest, and refresh it when dependency or build inputs change. Prefer CI/CD automation; an emergency fallback must meet the same integrity verification and audit-evidence contract.
+        -   **Formats**: Select a supported CycloneDX or SPDX version from consumer, regulatory, and toolchain requirements, then validate schema, component coverage, and artifact binding.
+        -   **Tools**: Syft, Trivy, and cdxgen are reference implementations, not mandatory products.
+        -   **SLSA v1.2**: Select required Build and Source track properties from threat, consumer, regulation, and builder trust, binding provenance and policy evaluation to release evidence. Build L2 and Source L2 are a common reference profile; Build L3 and Source L4 with two-party review are a strengthened high-assurance profile, not universal minimums. Do not confuse a Source VSA numeric level with `SLSA_SOURCE_TWO_PARTY_REVIEWED`.
+        -   **VEX**: Record affected, not affected, fixed, or under-investigation status with product, version, vulnerability, rationale, and update time to reduce noise without suppressing unresolved risk.
+        -   **Reachability**: Use reachability analysis to improve triage while retaining uncertainty for unanalyzed code, dynamic dispatch, and native components. Do not claim that it eliminates all false positives or false negatives.
+        -   **Portfolio Monitoring**: Aggregate SBOMs into a searchable inventory and continuously correlate advisories, VEX, policy, and reassessment results. Dependency-Track is one reference implementation.
 
     ```bash
     # SBOM generation with Syft (CycloneDX format)
@@ -675,38 +684,29 @@
     trivy sbom sbom.cdx.json --severity HIGH,CRITICAL
     ```
 
-    -   **SLSA (Supply Chain Levels for Software Artifacts)**:
-        -   **Law**: Guarantee build artifact provenance through cryptographic signatures. Progressively achieve SLSA Level 3+.
-        -   Enable SBOM authenticity verification through cryptographic signing (Cosign / Sigstore).
-    -   **VEX (Vulnerability Exploitability eXchange) Integration**:
-        -   Vulnerability contextualization: Use VEX data to determine "is this vulnerability actually exploitable in this product," reducing unnecessary patching effort.
-    -   **Reachability Analysis**:
-        -   **Law**: For vulnerabilities detected by SCA scans, apply **reachability analysis** to determine whether the vulnerable function is actually called from application code, eliminating false positives.
-        -   Tools: Socket.dev (built-in reachability analysis), Snyk (Reachable Vulnerabilities feature).
-    -   **SBOM Continuous Monitoring**:
-        -   **Dependency-Track**: Continuously cross-reference SBOMs against the latest vulnerability DBs to detect and alert on newly published vulnerability impacts in real-time.
-        -   Leaving static SBOM files unmonitored is prohibited. SBOMs must be maintained as **Living SBOMs** with continuous monitoring.
--   **Cross-reference**: → `security/000_security_privacy.md`, `security/100_oss_compliance.md`
+-   **Cross-reference**: → `security/000_security_privacy.md`, `security/200_oss_compliance.md`
 
 ---
 
 ## §15. Penetration Testing & Bug Bounty
 
 -   **Regular Assessments**:
-    -   **Law**: Production services must undergo **at least annual** external penetration testing. Additional testing upon major architectural changes.
-    -   Scope: Web application, API, mobile app, infrastructure.
+    -   **Law**: Define independent penetration testing or an equivalent adversarial assessment from exposure, criticality, regulation, contracts, material architecture changes, incident history, and release model. Annual external testing is a reference profile for continuously operated high-risk services, not a universal cadence.
+    -   Scope the assessment across applicable web, API, mobile, identity, infrastructure, client, and supply-chain boundaries, documenting exclusions and residual risk.
 -   **Vulnerability Assessment Process**:
-    -   Classify discovered vulnerabilities by priority based on CVSS scores and remediate per SLA.
+    -   Prioritize findings using CVSS together with exploit activity, KEV or equivalent catalogs, EPSS, reachability, exposure, data sensitivity, business impact, compensating controls, and applicable deadlines. Record an owner, containment decision, target date, and verification evidence.
 
-    | CVSS | Severity | Remediation SLA |
+    | CVSS reference band | Typical severity | Example initial objective |
     |:---|:---|:---|
-    | 9.0-10.0 | Critical | Within 24 hours |
-    | 7.0-8.9 | High | Within 7 days |
-    | 4.0-6.9 | Medium | Within 30 days |
-    | 0.1-3.9 | Low | Next release |
+    | 9.0-10.0 | Critical | Immediate triage and risk-based containment |
+    | 7.0-8.9 | High | Prioritized remediation or compensating control |
+    | 4.0-6.9 | Medium | Planned remediation within the Blueprint SLA |
+    | 0.1-3.9 | Low | Backlog or acceptance under expiry and recheck policy |
+
+    The table is a triage reference, not a fixed deadline. The strictest applicable law, contract, catalog due date, vendor deadline, or Blueprint SLA governs.
 
 -   **Bug Bounty Program**:
-    -   Based on product maturity, consider introducing a bug bounty program through HackerOne/Bugcrowd. Clearly define scope, reward framework, and disclosure policy.
+    -   Maintain a vulnerability-disclosure intake and response path. Add a managed bug bounty when exposure, maturity, response capacity, and economics justify it. HackerOne and Bugcrowd are reference implementations; define scope, safe harbor, reward rules, duplicate handling, and disclosure policy independently of provider.
 -   **Cross-reference**: → `security/000_security_privacy.md`, `operations/500_incident_response.md`
 
 ---
@@ -883,7 +883,7 @@
     -   **Law**: Test suite definitions, configurations, and environment settings must be **managed as code** and tracked in version control systems. Test definitions that rely on manual configuration or GUI-only tools are prohibited.
     -   **Declarative Configuration**: Declaratively define test execution configurations (target browsers, parallelism, retry counts, timeouts, etc.) to eliminate inter-environment differences.
     -   **Separation of Test Environment and Test Cases**: Clearly separate test environment definitions (Docker Compose, Testcontainers settings) from test case definitions (test files), maintaining a structure where environment changes do not affect test logic.
-    -   **Infrastructure-as-Test**: Define test environment provisioning itself via IaC to guarantee 100% reproducibility of test environments.
+    -   **Environment Reproducibility**: Manage rebuildable test infrastructure through IaC, container images, versioned APIs, fixtures, or equivalent machine-readable definitions, recording allowed variation and external dependencies. Do not promise absolute 100 percent reproducibility.
 
 ---
 
@@ -894,16 +894,16 @@
 ## §19. CI/CD Test Pipeline
 
 -   **Stage Gate Configuration**:
-    -   **Law**: CI/CD pipelines must have the following **7-stage gates**. If any single stage fails, block merge.
+    -   **Law**: According to change risk and artifact type, include the required static and policy, test, build, UI-quality, security, supply-chain, and non-functional capabilities in a change or release gate. The seven stages below are a reference profile that may be combined, split, or parallelized, not one mandatory pipeline order.
 
     | Stage | Content | Block Condition |
     |:---|:---|:---|
-    | **1. Static Check** | `tsc --noEmit` + `eslint --max-warnings=0` | 1+ error or warning |
-    | **2. Unit/Integration Tests** | Vitest / Jest execution | 1+ test failure |
-    | **3. Build** | `npm run build` | Build error |
-    | **4. a11y / VRT** | axe-core scan + VRT | Critical/Serious violation |
-    | **5. Security** | SAST + SCA scan | Critical/High vulnerability |
-    | **6. SBOM / Supply Chain** | SBOM generation + vulnerability cross-reference | SBOM generation failure, Critical dependency vulnerability |
+    | **1. Static Check** | Language-native formatter + lint + type/compiler + policy | Unapproved error, policy violation, or warning-budget excess |
+    | **2. Unit/Integration Tests** | Language-native test runner + contract tests | 1+ test failure |
+    | **3. Build** | Locked production build with the pinned toolchain | Build error or lockfile re-resolution |
+    | **4. a11y / VRT** | Accessibility engine + VRT for UI artifacts | Violation outside the impact and approval policy |
+    | **5. Security** | SAST + SCA scan | Risk-policy violation considering reachability, exposure, KEV, and related signals |
+    | **6. SBOM / Supply Chain** | SBOM generation + vulnerability cross-reference | Missing SBOM or provenance, or supply-chain policy violation |
     | **7. Carbon Budget** | Pipeline CO2 estimation | Carbon budget exceeded (optional) |
 
 -   **Carbon Budget Gate**:
@@ -918,10 +918,10 @@
 -   **Test Sharding**:
     -   When test suites grow large, split with `--shard=1/4` etc. and execute in parallel across multiple CI runners.
 -   **Cache Strategy**:
-    -   Share `node_modules`, build cache, and test cache across CI runs to reduce execution time.
-    -   Cache invalidation trigger: Changes to `package-lock.json`.
+    -   Share dependency, build, and test caches across CI runs to reduce execution time.
+    -   Include runtime or compiler, every lockfile, target, feature, and environment in the cache key, and never reuse unverified artifacts across trust boundaries.
 -   **Reusable Workflows**:
-    -   Modularize common test pipelines with GitHub Actions Reusable Workflows / Composite Actions, applying uniform QA gates across all repositories.
+    -   Reuse common test capabilities through versioned workflows, templates, packages, containers, policy bundles, or equivalents, composing them for each repository's risk and artifacts. GitHub Actions Reusable Workflows and Composite Actions are reference implementations.
 
 ---
 
@@ -932,7 +932,7 @@
 ## §20. Production Build Verification
 
 -   **Production Build Verification Protocol**:
-    -   **Law**: A working development server (`dev` mode) **guarantees nothing** about code correctness. `npm run build` must **always pass** before PR creation.
+    -   **Law**: A working development server, interpreter, REPL, or watch mode does not prove the production artifact. Before allowing merge or release, generate and verify each affected deployable or distributable build, package, image, firmware, or equivalent with a pinned toolchain and reproducible dependency resolution. Draft, documentation-only, and build-unaffected changes may defer this to a later gate based on impact analysis. `npm run build` is one web-profile example.
 -   **Dev ≠ Prod Differences**:
 
     | Aspect | Dev | Prod |
@@ -944,8 +944,8 @@
 
     -   **Rationale**: "It worked in the dev environment" is the most valueless report during a production incident. Dev/Prod behavioral differences are structural, and skipping build verification is equivalent to "scheduling an incident."
 -   **Build Time Budget**:
-    -   5 min exceeded → Start performance investigation
-    -   10 min exceeded → Prioritize speed improvement as highest-priority task
+    -   Continuously measure build-time baseline, P50 and P95, queue time, cache hit, and change size.
+    -   Define regression budgets and improvement priority in the Blueprint from team feedback SLO, release frequency, and runner cost. Five and ten minutes are reference starting values for a small service.
 
 ---
 
@@ -961,9 +961,9 @@
 -   **AI-Driven Test Selection (Predictive Test Selection)**:
     -   ML models analyze code change impact and prioritize execution of highest-risk tests.
     -   Tools: **Launchable**, **Codecov Test Analytics**, **Trunk Merge**.
-    -   **Law**: When introducing AI-driven test selection, maintain daily full test suite execution to prevent regression misses from selection errors.
+    -   **Law**: When adopting AI or impact-based test selection, measure selection precision, false negatives, excluded paths, and shared dependencies, then run the full suite on material events and a risk-based cadence. Daily execution is a reference default for a high-change repository.
 -   **Test Execution Time Monitoring**:
-    -   Continuously monitor total test suite execution time and alert when thresholds are exceeded.
+    -   Continuously monitor total test-suite execution time. The values below are a reference budget for a small service; define Blueprint values from repository baseline, change frequency, critical path, and runner cost.
 
     | Test Type | Target Time | Alert Threshold |
     |:---|:---|:---|
@@ -985,21 +985,21 @@
 ## §22. Release Criteria
 
 -   **Blocker Definition**:
-    -   **Law**: Releasing with P0 (Critical) or P1 (Major) bugs remaining is **absolutely prohibited**.
-    -   **0 Warnings**: Releasing with warnings in console or build logs is also prohibited.
+    -   **Law**: Do not release a change with unacceptable security, privacy, data-integrity, safety, contractual, or SLO risk. Record reachability, exposure, user harm, workaround, regulation, compensating controls, and risk acceptance rather than deciding by severity label alone.
+    -   **Warning Budget**: Classify new warnings, known baselines, false positives, and deprecation deadlines, and block releases that exceed the language-profile and Blueprint warning budget. Do not give every warning from every tool the same severity unconditionally.
 -   **Release Checklist**:
 
     | Item | Verification | Pass Criteria |
     |:---|:---|:---|
-    | Type Check | `tsc --noEmit` | Zero errors |
-    | Build | `npm run build` | Zero errors |
-    | Tests | Full test suite | All pass |
-    | Security | SAST/SCA | Zero Critical/High |
-    | a11y | axe-core | Zero Critical/Serious |
-    | Performance | Lighthouse CI | Score threshold met |
+    | Static verification | Language-native compiler, type, lint, and format | No blocking error; within warning budget |
+    | Artifact | Production build, package, or image with pinned toolchain and locked dependencies | Reproducible artifact, digest, and provenance |
+    | Tests | Impact-appropriate unit, integration, contract, E2E, device, and infrastructure tests | Required suites pass; skips, flakes, and exceptions tracked |
+    | Security | SAST, SCA, secret, IaC, and artifact scans | No risk-policy violation; SBOM, VEX, and exceptions consistent |
+    | UX and a11y | Accessibility, visual, and interaction checks for affected surfaces | Applicable criteria and approved baseline met |
+    | Performance and reliability | Workload-native benchmark, SLO or budget, migration and recovery test | Blueprint guardrails met |
 
 -   **Large-Scale Change Verification**:
-    -   **Law**: Large-scale refactoring changing 100+ files requires more than standard CI checks. Mandate the following **5-step verification**.
+    -   **Law**: Classify large changes by semantic scope, critical paths, public contracts, data or infrastructure mutation, generated code, and blast radius rather than file count alone. One hundred files is a reference trigger; apply the stages below to the impact map when triggered.
 
     | Step | Content | Pass Criteria |
     |:---|:---|:---|
@@ -1014,9 +1014,9 @@
 ## §23. Canary Deploy & Progressive Rollout
 
 -   **Progressive Rollout**:
-    -   Don't expose to all users at once — progressively expand: **1% → 5% → 20% → 100%**.
+    -   Where version skew and cohort isolation are safe, start with a small representative cohort, observe SLO and business guardrails, and expand progressively. Fixed percentages are a reference profile.
 -   **Stage Gates**:
-    -   **Law**: Allow a minimum **15-minute observation period** at each stage, checking metrics before advancing.
+    -   **Law**: At each stage, collect a sample and observation window sufficient for traffic volume, seasonality, metric delay, error budget, and risk. Fifteen minutes is only a high-traffic-service reference.
 -   **Rollback Criteria**:
     -   **Immediately rollback** upon detecting any of the following:
 
@@ -1032,7 +1032,7 @@
 -   **Automation**:
     -   Automate rollback decisions as much as possible (Feature Flag tools, CD platform health checks) to prevent damage escalation from human judgment delays.
 -   **Post-Deployment Verification**:
-    -   Maintain **rollback capability for 24 hours** even after reaching 100%.
+    -   After full rollout, retain rollback, forward-fix, traffic isolation, or restore capability for a duration based on change class and failure-detection latency. Twenty-four hours is a reference profile.
 
 ---
 
@@ -1042,7 +1042,7 @@
     -   Leverage production environment metrics, logs, and traces to discover issues in real-time that testing couldn't detect.
     -   **Error Tracking**: Auto-collect, classify, and alert on runtime errors with Sentry / Datadog Error Tracking.
 -   **Synthetic Monitoring**:
-    -   **Law**: Continuously execute **synthetic transactions at 5-minute intervals** against critical paths (login, payment, core APIs) in production to monitor service health.
+    -   **Law**: Apply synthetic or equivalent active verification to critical paths, defining interval, regions, credentials, test data, rate, and cost from SLOs and abuse risk. Five minutes is a reference interval.
     -   Tools: Checkly, Datadog Synthetic Tests, AWS CloudWatch Synthetics.
 -   **RUM (Real User Monitoring) Integration**:
     -   Monitor real user page load times, Core Web Vitals, and error rates in real-time.
@@ -1102,12 +1102,17 @@
 
 ## §27. Mobile & Cross-Platform Testing
 
+-   **React Native Multi-Layer Gates**:
+    -   Unit and component tests in Node.js assure only the JS layer, not Swift or Kotlin, native modules, OS APIs, or release artifacts.
+    -   PRs independently gate TypeScript, Codegen differences, Android release builds and tests, and iOS release builds and tests; critical flows use device E2E on both operating systems.
+    -   Include deep links, permissions, background behavior, offline queues, upgrade installs, OTA runtime compatibility, and rollback in the release matrix. `engineering/420_react_native.md` is the detailed source of truth.
+
 -   **Physical Device Testing Mandate**:
     -   Simulators/emulators are not perfect. Pre-release physical device (iOS/Android) verification is mandatory.
     -   **TestFlight / Internal App Sharing**: Entire dev team dogfoods on physical devices to detect UX discomfort.
 -   **Fragmentation Countermeasures**:
-    -   **Android**: Verify behavior on major manufacturers (Samsung, Pixel, Xiaomi) and different OS versions using BrowserStack / AWS Device Farm.
-    -   **iOS**: Verification on latest iOS + 1 previous generation iOS version is mandatory.
+    -   **Android**: Derive the device matrix from actual user distribution and include the minimum-supported and current OS, representative manufacturers, CPU and memory tiers, and screen form factors; verify on physical devices or a high-fidelity device farm.
+    -   **iOS**: Derive the device matrix from actual user distribution and include at least the minimum-supported and current OS; verify on physical devices or a high-fidelity device farm. Do not use a fixed latest-plus-one-previous rule to omit an older supported range.
 -   **Network Testing**:
     -   Test behavior under **unstable network conditions**: offline, 3G (slow), airplane mode recovery.
     -   Network throttling: Use Chrome DevTools / Playwright `route.abort()`.
@@ -1153,7 +1158,7 @@
     | **ToxiProxy** | Network failure specialized | Microservice inter-communication testing |
 
 -   **GameDay**:
-    -   **Law**: Conduct **GameDay** (simulated failure exercises) at least quarterly with the entire team.
+    -   **Law**: Run a GameDay or equivalent resilience exercise with a cadence and participants derived from criticality, change volume, incident history, regulation, and recovery capability. Quarterly and whole-team participation are a reference profile for a large, high-criticality service.
     -   Scenarios: DB failure, external API timeout, CDN failure, sudden traffic surge.
     -   Document results in post-mortem format and file improvement actions.
 -   **DORA Regulation Compliance**:
@@ -1416,18 +1421,18 @@
 ## §35. Compliance-Driven Testing
 
 -   **Test Requirements from Regulatory Requirements**:
-    -   **Law**: Convert regulatory requirements into "test requirements" to achieve **automated compliance verification**. Overcome manual audit limitations through technology.
+    -   **Law**: Convert regulations determined to be applicable into verifiable tests, policies, and evidence requirements, automating the machine-verifiable portion. Do not claim legal conformity from automated tests alone; record the in-scope entity or product, jurisdiction, applicability date, exclusions, accountable owner, and current primary source in the compliance matrix.
 -   **Major Regulatory & Test Requirements Mapping**:
 
     | Regulation | Test Requirements | Implementation Example |
     |:---|:---|:---|
-    | **DORA (EU)** | ICT risk scenario testing, resilience testing | Periodic chaos engineering experiments with documentation |
+    | **DORA (EU)** | ICT risk, resilience, and third-party-dependency verification for in-scope financial entities | Risk- and requirement-based scenario tests, recovery exercises, and TLPT with evidence where applicable |
     | **EAA (EU)** | Accessibility conformance testing | axe-core CI auto-scan, WCAG 2.2 AA compliance verification |
     | **EU AI Act** | AI system risk classification & quality testing | Bias verification, explainability testing, log retention |
-    | **EU CRA** | SBOM submission, vulnerability disclosure, security update obligations | CI/CD SBOM auto-generation (§14), 24h vulnerability disclosure process |
+    | **EU CRA** | Evidence for essential cybersecurity, component inventory, vulnerability handling, and support period of an in-scope product | Artifact-bound component evidence such as an SBOM, vulnerability and update flows, a support period derived from expected use and legal conditions, and runbook tests for applicable reporting triggers and deadlines |
     | **GDPR** | Data processing privacy testing | Consent flow verification, data deletion E2E testing |
     | **Revised APPI (Japan)** | Cross-border transfer regulation, personal-related information testing | Cross-border data flow verification, cookie consent mechanism testing |
-    | **SOC 2** | Security control test evidence | Audit-ready test execution log retention (min 1 year) |
+    | **SOC 2** | Control-design and operating evidence for the selected Trust Services Criteria | Test, approval, and incident evidence retained according to the assessment period, auditor request, contract, and retention policy |
     | **PCI DSS** | Payment data processing security testing | Card info non-retention verification, encryption testing |
 
 -   **Compliance Test Automation**:
@@ -1436,7 +1441,7 @@
 -   **Privacy Testing**:
     -   **Consent Flow Testing**: Verify the complete flow of consent acquisition → data collection → consent withdrawal → data deletion with E2E tests.
     -   **Data Minimization Testing**: Auto-verify that API responses do not contain unnecessary PII fields.
--   **Cross-reference**: → `governance/100_data_governance.md`, `security/000_security_privacy.md`
+-   **Cross-reference**: → `security/100_data_governance.md`, `security/000_security_privacy.md`
 
 ---
 
@@ -1790,7 +1795,7 @@
 ## §47. Internal Developer Platform (IDP) Quality Assurance
 
 -   **Golden Path Validation**:
-    -   **Law**: Verify that projects generated from Golden Paths (recommended templates/service catalogs) provided by the Platform Team **automatically pass all quality gates**. Golden Path quality is platform reliability itself.
+    -   **Law**: When a Golden Path is offered, verify that generated output passes the mandatory quality gates for its declared profile and lets consumers omit unused capabilities. Do not generate unused services, credentials, or provider configuration.
     -   **Scaffolding Test**: Build a CI job that auto-validates the complete lifecycle: generate new project from template → build → test → deploy.
 
     ```bash
@@ -1886,9 +1891,9 @@
 ## §50. Infrastructure Drift Detection & Compliance
 
 -   **Configuration Drift Detection Mandate**:
-    -   **Law**: **Automatically detect weekly** any "drift" where the **actual state** of IaC-managed infrastructure diverges from code definitions, treating discoveries as incidents.
+    -   **Law**: Automatically compare actual state with declarations on change events and the Blueprint's risk-based cadence for IaC-managed subjects. Weekly is a reference starting value; privileged or internet-facing changes need a shorter window, while immutable ephemeral environments may use a release gate instead.
     -   Tools: `terraform plan` (diff detection), Driftctl (AWS-specialized), CloudQuery (multi-cloud).
-    -   **Zero Drift Policy**: When drift is detected, resolve within 48 hours through either code reflection (Import) or resource correction. Neglect is prohibited.
+    -   **Drift Response**: Immediately contain public exposure, privilege expansion, encryption removal, and similar material risk. Otherwise record impact, owner, deadline, code import or resource correction, and any exception with a review date. Forty-eight hours is a reference starting value.
 -   **CIS Benchmarks Auto-Verification**:
     -   **Action**: Automate cloud configuration security verification based on CIS (Center for Internet Security) benchmarks.
     -   Tools: Prowler (AWS), ScoutSuite (multi-cloud), CSPM (Cloud Security Posture Management).
@@ -2320,13 +2325,13 @@
     | Phase | Test Content |
     |:---|:---|
     | **Creation** | Flag created with default OFF → verified OFF for all users |
-    | **Gradual Rollout** | 1% → 5% → 20% → 100% rollout with metric validation at each stage |
+    | **Gradual Rollout** | Validate assignment, consistency, and metrics at each Blueprint-defined cohort and guardrail stage |
     | **Full Rollout** | Flag ON for 100% → no behavioral difference from hardcoded |
     | **Cleanup** | Flag removed → code paths simplified → no dead code |
     | **Emergency Kill** | Flag forced OFF → feature immediately disabled for all users |
 
 -   **Stale Flag Detection**:
-    -   **Law**: Detect and alert on feature flags that have been at 100% rollout for **more than 30 days** without cleanup. Stale flags are technical debt.
+    -   **Law**: After full rollout, track owner, expiry, cleanup issue, and references, and alert when a flag exceeds its risk-based Blueprint deadline. Thirty days is a high-change-service reference.
     -   **Action**: Build automated tooling that scans code for flag references and cross-references with flag management platform status.
 -   **Flag Dependency Testing**:
     -   Test interactions between dependent flags. Verify that enabling Flag A while Flag B is disabled produces correct behavior, not undefined states.
@@ -2361,11 +2366,11 @@
 
 ---
 
-## §63. Independent Deployment & Integration Testing
+## §63. Micro-Frontend Release Topology and Integration Testing
 
--   **Independent Deployability Verification**:
-    -   **Law**: Each micro-frontend must be independently deployable and testable. Verify that deploying one micro-frontend does not break others. **Deployment independence is the foundational guarantee**.
-    -   **Action**: Build CI pipelines that deploy each micro-frontend in isolation and run integration tests against a shell application with all other micro-frontends at their current production versions.
+-   **Release Topology Verification**:
+    -   **Law**: Declare a micro-frontend release topology as independent, coordinated, or aggregate, and verify the compatibility range and partial-failure behavior of shells, remotes, routes, shared dependencies, runtimes, and feature state. Independent deployment is an optional isolation outcome, not a mandate for every composition model.
+    -   **Action**: For independent topologies, test the changed remote against the current shell and other remotes; for coordinated topologies, test allowed version windows and ordering; for aggregate topologies, test every unit's build result, route composition, missing or stale remotes, partial activation, and application-level rollback or forward fix in CI and managed smoke tests.
 -   **Module Federation Contract Testing**:
     -   **Law**: Apply contract testing principles to Module Federation exposed/consumed modules. Verify that exposed module interfaces (props, events, shared state) are backward compatible.
 
@@ -2386,9 +2391,9 @@
     ```
 
 -   **Shell Application Integration Testing**:
-    -   Test the shell (host) application's ability to load, render, and communicate with all remote micro-frontends. Verify routing, layout composition, and error boundaries.
+    -   Test the shell or host application's ability to load, render, and communicate with all remotes. Verify routing, base paths, layout composition, authentication and authorization context, error boundaries, and degraded behavior when a remote times out or is unavailable.
 -   **Version Matrix Testing**:
-    -   Maintain a compatibility matrix of micro-frontend versions. Test critical version combinations to ensure backward compatibility during rolling deployments.
+    -   Maintain a compatibility matrix for shell and remote versions that can coexist under the declared release topology, and test critical combinations. An aggregate-deploy label is not proof that version skew cannot occur.
 
     | Shell Version | MFE-A Version | MFE-B Version | Status |
     |:---|:---|:---|:---|
@@ -2473,7 +2478,7 @@
     -   **Law**: Test that features requiring specific consent categories are **inaccessible** without the corresponding consent. Analytics, personalization, and marketing features must be consent-gated.
 -   **Underage User Protection Testing**:
     -   Test age verification flows and verify that users under the applicable age threshold (13 COPPA / 16 GDPR) receive appropriate restrictions and parental consent mechanisms.
--   **Cross-reference**: → `security/000_security_privacy.md`, `governance/100_data_governance.md`, §35
+-   **Cross-reference**: → `security/000_security_privacy.md`, `security/100_data_governance.md`, §35
 
 ---
 
@@ -2502,7 +2507,7 @@
     -   Verify data processing agreements (DPA) are reflected in actual data flows.
 -   **Data Retention & Auto-Deletion Testing**:
     -   **Law**: Test that automated data retention policies execute correctly. Verify that data older than the defined retention period is automatically purged or anonymized.
--   **Cross-reference**: → `governance/100_data_governance.md`, §35, §53
+-   **Cross-reference**: → `security/100_data_governance.md`, §35, §53
 
 ---
 
@@ -2513,7 +2518,9 @@
 ## §67. Device Matrix & Browser Compatibility Testing
 
 -   **Device & Browser Coverage Matrix**:
-    -   **Law**: Define and maintain a **minimum device/browser coverage matrix** based on production analytics data. Test against the top 95% of actual user device/browser combinations.
+    -   **Law**: Define a device and browser matrix from the product contract, user analytics, accessibility, geography, enterprise policy, OS and browser vendor support, and Web Platform Baseline, then expose affected users outside coverage. Top 95% is a consumer-web reference starting value; regulated, B2B, and public services prioritize contracted support.
+
+    The following is a reference matrix. Fixed Latest or N values and a named cloud device farm are not Universal requirements.
 
     | Platform | Minimum Coverage | Testing Method |
     |:---|:---|:---|
@@ -2526,7 +2533,7 @@
     | **Edge** | Latest | CI (Playwright Chromium) |
 
 -   **Responsive Breakpoint Testing**:
-    -   **Law**: Test all responsive breakpoints defined in the design system. Verify layout, typography, and interactive elements at each breakpoint.
+    -   **Law**: Test design-system contract breakpoints plus the minimum and maximum supported viewport, content-driven boundaries, zoom, orientation, keyboard, and safe areas for layout, typography, and interaction. The widths below are references; project-specific tokens take precedence.
 
     | Breakpoint | Width | Verification Focus |
     |:---|:---|:---|
@@ -2769,8 +2776,8 @@
 | API Integration | `engineering/100_api_integration.md` | §7, §14, §33, §51, §52, §57, §58, §59, §60 |
 | General Engineering | `engineering/000_engineering_standards.md` | §4, §19, §20, §55, §56, §61, §63, §64 |
 | Data Analytics & Intelligence | `ai/100_data_analytics.md` | §24, §34, §37, §62 |
-| OSS Compliance | `security/100_oss_compliance.md` | §14 |
+| OSS Compliance | `security/200_oss_compliance.md` | §14 |
 | AI Implementation | `ai/000_ai_engineering.md` | §30, §31, §32 |
-| Data Governance | `governance/100_data_governance.md` | §35, §65, §66 |
+| Data Governance | `security/100_data_governance.md` | §35, §65, §66 |
 | Platform Engineering | `engineering/000_engineering_standards.md` | §47, §48 |
 | Cloud FinOps | `operations/600_cloud_finops.md` | §49, §50 |

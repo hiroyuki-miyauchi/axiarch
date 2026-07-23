@@ -22,12 +22,15 @@
 | **Google/Appleガイドライン** | `universal/product/700_appstore_compliance.md` | "ヒューマンインターフェースガイドライン" |
 | **モバイルファースト観点** | `universal/design/000_design_ux.md` | "モバイルファースト戦略", "タッチ領域" |
 | **UIアニメーション・パフォーマンス** | `universal/design/000_design_ux.md` | "60fpsターゲット", "ハプティクス" |
-| **コード品質・クリーンコード** | `universal/engineering/000_engineering_standards.md` | "警告ゼロ", "kebab-case統一", "Barrel File禁止" |
+| **コード品質・クリーンコード** | `universal/engineering/000_engineering_standards.md` | "警告ゼロ", "言語ネイティブ命名", "公開API境界" |
+| **プログラミング言語ガバナンス** | `universal/engineering/320_programming_language_governance.md` | "Universal適用契約", "支持区分", "フレームワークportfolio", "デスクトップ", "query／semantic／observability／infra DSL", "公開library／SDK／package", "source／binary／behavior互換性", "consumer matrix", "immutable配布", "generated SDK", "組織ownership", "notebook／literate computational artifact", "clean execution", "rich output", "production job", "team引継ぎ", "effective artifact", "継続経路", "ポリグロットCI", "廃止" |
+| **React Nativeエンジニアリング** | `universal/engineering/420_react_native.md` | "Universal適用契約", "New Architecture", "両OS test", "OTA rollback", "Mobile Platform機能" |
+| **クラウド・アプリケーションプラットフォーム** | `universal/engineering/520_cloud_application_platforms.md` | "Universal適用契約", "共有責任", "artifact／managed runtime lifecycle", "SDK・client interface lifecycle", "managed async・event delivery contract", "fidelity matrix", "managed環境へのconformance", "provider-managed integration／extension lifecycle", "service graph", "aggregate release record", "BaaS capability manifest", "identity portability", "FinOps", "退出戦略" |
 | **DevSecOps・設計によるセキュリティ** | `universal/engineering/000_engineering_standards.md` | "ゼロトラスト", "設定の単一真実源", "環境変数ドリフト防止" |
-| **技術的負債管理** | `universal/engineering/000_engineering_standards.md` | "スプリント20%負債返済", "テックレーダー", "依存関係ガバナンス" |
+| **技術的負債管理** | `universal/engineering/000_engineering_standards.md` | "risk-based capacity", "テックレーダー", "依存関係ガバナンス" |
 | **AIファースト開発** | `universal/engineering/000_engineering_standards.md` | "PDD（プロンプト駆動開発）", "RAG最適化", "スキーマ信頼プロトコル" |
-| **バグリスク低減ポリシー** | `universal/engineering/000_engineering_standards.md` | "24時間ルール", "二度直し原則" |
-| **Git・バージョン管理** | `universal/engineering/000_engineering_standards.md` | "トランクベース開発", "Conventional Commits", "Git Hooks三層防御" |
+| **バグリスク低減ポリシー** | `universal/engineering/000_engineering_standards.md` | "risk-based欠陥triage", "重大欠陥の即時封じ込め", "Fix Twice" |
+| **Git・バージョン管理** | `universal/engineering/600_git_workflow.md` | "Protected Reference Control", "review可能な変更", "ownershipと承認" |
 | **ドキュメント運用** | `universal/engineering/000_engineering_standards.md` | "生きたドキュメント", "ADR義務", "ランブック" |
 | **アーキテクチャ品質** | `universal/engineering/000_engineering_standards.md` | "Trinity DTO", "CQRS分離", "薄いコントローラー", "Feature Flagライフサイクル" |
 | **費用・経費観点** | `universal/engineering/500_firebase_gcp.md` | "FinOps", "クラウド破産防止" |
@@ -46,13 +49,15 @@
 | **法務・法的観点** | `universal/security/100_data_governance.md` | "GDPR/Privacy Laws", "利用規約" |
 | **利用規約・プライバシー観点** | `universal/security/100_data_governance.md` | "プライバシーポリシー", "データ最小化" |
 | **ライセンス・プラグイン規約** | `universal/security/200_oss_compliance.md` | "ライセンスホワイトリスト" |
-| **テスト観点** | `universal/quality/000_qa_testing.md` | "シフトレフトテスト", "Flakyテスト" |
+| **テスト観点** | `universal/quality/000_qa_testing.md` | "シフトレフトテスト", "Flakyテスト", "release topology", "partial deployment" |
 | **グロース・マーケティング** | `universal/product/500_growth_marketing.md` | "グロースループ", "バイラル係数" |
-| **API設計・マイクロサービス** | `universal/engineering/100_api_integration.md` | "APIファースト", "コントラクトテスト" |
+| **API設計・マイクロサービス** | `universal/engineering/100_api_integration.md` | "APIファースト", "コントラクトテスト", "release topology", "independent／coordinated／aggregate" |
 | **Supabaseアーキテクチャ** | `universal/engineering/200_supabase_architecture.md` | "デフォルトRLS", "エッジファンクション" |
 | **ヘッドレスCMS** | `universal/engineering/310_headless_cms.md` | "コンテンツモデリング", "APIファーストCMS" |
 | **Flutter/クロスプラットフォーム** | `universal/engineering/400_mobile_flutter.md` | "ウィジェットアーキテクチャ", "プラットフォームチャネル" |
 | **AWSクラウド** | `universal/engineering/510_aws_cloud.md` | "Well-Architectedフレームワーク", "IaC" |
+| **Microsoft Azureクラウド** | `universal/engineering/530_azure_cloud.md` | "Universal適用契約", "landing zone", "Microsoft Entra", "Azure Policy", "Custom Handler", "managed conformance", "exit plan" |
+| **主要PaaS・BaaS・Edge・地域／主権cloud基盤** | `universal/engineering/520_cloud_application_platforms.md` | "Vercel", "Supabase", "Firebase", "Cloudflare", "AWS Amplify", "Appwrite", "Convex", "sovereign cloud", "Platform Engineering" |
 | **インシデント対応** | `universal/operations/500_incident_response.md` | "インシデントコマンダー", "ブレームレスポストモーテム" |
 | **知財デューデリジェンス** | `universal/security/300_ip_due_diligence.md` | "知財ポートフォリオ", "営業秘密保護" |
 | **Cloud FinOps** | `universal/operations/600_cloud_finops.md` | "コスト最適化", "FinOpsライフサイクル" |

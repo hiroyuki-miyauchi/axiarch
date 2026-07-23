@@ -2,13 +2,14 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-04-19 → **2026-04-19 (v4: §59-§63 added + §29 structural bug fix + zero coverage gaps)**
+> Last Updated: 2026-07-23 (v5: programming-language ecosystem expansion)
 
 > [!IMPORTANT]
 > **Primary Directive**
 > "Every dependency is a trust decision — unmanaged licenses are legal time bombs."
 > All third-party dependencies must be audited, approved, and continuously monitored.
 > Strictly follow: **License Compliance > Security > Stability > Convenience**.
+> Universal application contract: License classes, vendor tools, VCS events, job titles, headcount, deadlines, cadences, and score thresholds are reference implementations or Blueprint parameters unless they come from applicable law or contract, an official deadline, or a safety floor for irrecoverable risk. The Project Blueprint derives policy from distribution and network-use models, jurisdiction, exposure, reachability, KEV and EPSS, data sensitivity, and organization scale, and permits equivalent capabilities and accountable functions whose duties may be combined.
 > **63 Sections (v4: §59-§63 newly added + §29 structural bug fixed + NIS2, AI IDE SCA, SBOM Federation, ML BOM, Dependency SLO coverage).**
 
 ---
@@ -47,7 +48,7 @@
 | 28 | [VEX (Vulnerability Exploitability eXchange)](#28-vex-vulnerability-exploitability-exchange) |
 | 29 | [CBOM (Cryptographic Bill of Materials)](#29-cbom-cryptographic-bill-of-materials) |
 | 30 | [Multi-Ecosystem Dependency Management](#30-multi-ecosystem-dependency-management) |
-| 31 | [Package Publishing Security & OIDC Migration](#31-package-publishing-security--oidc-migration) |
+| 31 | [Package Publishing Security and Workload Identity](#31-package-publishing-security-and-workload-identity) |
 | 32 | [GitHub Dependency Review Integration](#32-github-dependency-review-integration) |
 | 33 | [OSS Legal Risk Management](#33-oss-legal-risk-management) |
 | 34 | [Zero-Day Dependency Response Playbook](#34-zero-day-dependency-response-playbook) |
@@ -75,9 +76,9 @@
 | **56** | [**Reproducible Builds & Hermetic Repository Standard**](#56-reproducible-builds--hermetic-repository-standard) |
 | **57** | [**SBOM Quality Maturity Model**](#57-sbom-quality-maturity-model) |
 | **58** | [**Next-Generation Package Manager Governance (uv / Bun / cargo-auditable)**](#58-next-generation-package-manager-governance-uv--bun--cargo-auditable) |
-| **59** | [**NIS2 Directive: Software Supplier Security Obligations**](#59-nis2-directive-software-supplier-security-obligations) |
+| **59** | [**NIS2 Directive: Applicability and Software Supply Chain**](#59-nis2-directive-applicability-and-software-supply-chain) |
 | **60** | [**AI IDE-Integrated Real-Time SCA**](#60-ai-ide-integrated-real-time-sca) |
-| **61** | [**SBOM Federation (OCI Artifact Distribution Standard)**](#61-sbom-federation-oci-artifact-distribution-standard) |
+| **61** | [**SBOM Federation (OCI Artifact Reference Pattern)**](#61-sbom-federation-oci-artifact-reference-pattern) |
 | **62** | [**ML BOM (Machine Learning Bill of Materials)**](#62-ml-bom-machine-learning-bill-of-materials) |
 | **63** | [**Dependency SLO / Error Budget Management**](#63-dependency-slo--error-budget-management) |
 | A | [Appendix A: Quick Reference Index](#appendix-a-quick-reference-index) |
@@ -89,26 +90,28 @@
 
 ### 1.1 Three-Tier Classification
 
-**✅ Allowed (Safe — Immediate Use)**:
+> The following is a reference profile for building organization policy, not a Universal legal determination. An accountable license or legal-risk owner classifies the actual license text and version against distribution, network use, linking and modification, customer contracts, jurisdictions, and intellectual-property policy.
 
-| License | Risk | Notes |
+**✅ Lower-Friction Candidates (commonly allowed after obligation review)**:
+
+| License | Baseline Profile Treatment | Notes |
 |:--------|:-----|:------|
-| MIT | ✅ Safe | Most permissive. Commercial use OK. Attribution required |
-| Apache-2.0 | ✅ Safe | Includes patent clause. Commercial use OK. NOTICE retention required |
-| BSD-2-Clause | ✅ Safe | Commercial use OK |
-| BSD-3-Clause | ✅ Safe | Commercial use OK. Name use restriction |
-| ISC | ✅ Safe | Equivalent to MIT |
-| CC0-1.0 | ✅ Safe | Public domain equivalent |
-| 0BSD | ✅ Safe | No attribution required |
-| Unlicense | ✅ Safe | Public domain equivalent |
-| Zlib | ✅ Safe | Commercial use OK |
-| PSF-2.0 | ✅ Safe | Python standard library |
+| MIT | Lower-friction candidate | Permissive terms. Commercial use allowed. Confirm attribution |
+| Apache-2.0 | Lower-friction candidate | Includes patent terms. Commercial use allowed. Confirm NOTICE retention |
+| BSD-2-Clause | Lower-friction candidate | Commercial use allowed. Confirm copyright and disclaimer notices |
+| BSD-3-Clause | Lower-friction candidate | Commercial use allowed. Confirm name-use restriction |
+| ISC | Lower-friction candidate | Concise permissive terms. Confirm notice obligations |
+| CC0-1.0 | Lower-friction candidate | Confirm public-domain dedication and jurisdictional differences |
+| 0BSD | Lower-friction candidate | Confirm the no-attribution terms in the license text |
+| Unlicense | Jurisdiction review | Confirm public-domain dedication and jurisdictional differences |
+| Zlib | Lower-friction candidate | Commercial use allowed. Confirm notice and alteration marking |
+| PSF-2.0 | Lower-friction candidate | Permissive Python-origin terms. Confirm the in-scope component |
 
-**⚠️ Caution (Legal Review Required)**:
+**⚠️ Conditional Review (allow, review, or deny depends on use)**:
 
 | License | Risk | Action |
 |:--------|:-----|:-------|
-| LGPL-2.1 / LGPL-3.0 | ⚠️ Conditional | Dynamic linking OK. Legal review + exception approval |
+| LGPL-2.1 / LGPL-3.0 | ⚠️ Conditional | Review linking, modification, relinking, notices, and source-offer duties |
 | MPL-2.0 | ⚠️ Conditional | File-level copyleft. Legal review + exception approval |
 | EPL-2.0 | ⚠️ Conditional | Module-level copyleft. Legal review |
 | CDDL-1.0 | ⚠️ Conditional | File-level copyleft. Legal review |
@@ -117,35 +120,35 @@
 | CC-BY-SA-4.0 | ⚠️ Conditional | ShareAlike condition. Legal review |
 | EUPL-1.2 | ⚠️ Conditional | EU public license. Copyleft compatibility clause. Check compatible license list |
 
-**🔴 Prohibited (Immediate Block)**:
+**🔴 Higher Obligations or Restrictions (organization-policy review or deny candidates)**:
 
 | License | Risk | Reason |
 |:--------|:-----|:-------|
-| GPL-2.0 / GPL-3.0 | 🔴 High | Source disclosure obligation for entire project |
-| AGPL-3.0 | 🔴 Highest | Disclosure obligation even for SaaS/network use |
-| SSPL | 🔴 Highest | MongoDB-origin. Similar viral effect |
-| CC-BY-NC-* | 🔴 High | No commercial use |
-| CC-BY-ND-* | 🔴 High | No modifications allowed |
-| CAL-1.0 | 🔴 High | Strong copyleft. User data encryption obligation |
+| GPL-2.0 / GPL-3.0 | 🔴 High | Obtain specialist review of conveyance, linking, derivative-work scope, and corresponding-source duties |
+| AGPL-3.0 | 🔴 Highest | Review section 13 network-user source-offer duties for modified versions and the integration boundary |
+| SSPL | 🔴 Highest | OSI-unapproved source-available terms with additional service-source requirements |
+| CC-BY-NC-* | 🔴 High | Confirm that non-commercial restrictions fit the intended use |
+| CC-BY-ND-* | 🔴 High | Confirm that no-derivatives restrictions fit conversion, translation, editing, and distribution |
+| CAL-1.0 | 🔴 High | Obtain specialist review of strong reciprocity and user-data-related duties |
 
 ### 1.2 Source-Available License Handling
 
 | License | Classification | Notes |
 |:--------|:-------------|:------|
-| BSL-1.1 (Business Source License) | 🔴 Prohibited | Converts to Apache-2.0 after time limit, but commercial restrictions before conversion. HashiCorp Terraform, etc. |
-| FSL-1.1 (Functional Source License) | 🔴 Prohibited | Converts to Apache-2.0/MIT after 2 years. Competitive use prohibited before conversion |
-| Elastic License 2.0 | 🔴 Prohibited | SaaS provision prohibited. Redistribution restricted |
-| PolyForm Shield 1.0.0 | 🔴 Prohibited | Competitive use prohibited |
-| BUSL (MariaDB BSL) | 🔴 Prohibited | BSL-1.1 derivative. Equivalent restrictions |
+| BSL-1.1 (Business Source License) | 🔴 Review or deny candidate | Review pre-Change-Date restrictions and the stated Change License |
+| FSL-1.1 (Functional Source License) | 🔴 Review or deny candidate | Review pre-Change-Date competitive-use restrictions and the future license |
+| Elastic License 2.0 | 🔴 Review or deny candidate | Compare managed-service and redistribution restrictions with the intended use |
+| PolyForm Shield 1.0.0 | 🔴 Review or deny candidate | Compare competitive-use restrictions with the intended use |
+| BUSL (MariaDB BSL) | 🔴 Review or deny candidate | Review the adopted component's actual Business Source License text and Change Date |
 
 > [!CAUTION]
 > Source-Available licenses mean "source code is visible ≠ OSS." They are NOT OSI-approved and MUST NOT be treated like traditional open source.
 
 ### 1.3 Dual Licensing Strategy
 
-- **Rule**: For dual-licensed packages, select the **most commercially favorable license** and specify it in `package.json`'s `license` field
-- **Rule**: For Copyleft/Permissive dual licenses, always choose the Permissive side
-- **Rule**: Document license selection rationale in the `licenses/decisions/` directory
+- **Rule**: For dual licensing, select a license that is actually available and compatible with the intended use, distribution, and modification. Package metadata describes the component's license and does not replace the organization's selection record
+- **Rule**: Even when copyleft and permissive choices exist, evaluate commercial support, patent terms, and redistribution conditions instead of selecting from the label alone
+- **Rule**: Record the selected license, component version, rationale, owner, and evidence in a version-controlled decision record, SBOM property, license inventory, or equivalent mechanism. No fixed directory name is required
 
 → Cross-reference: [`security/100_data_governance.md`](../security/100_data_governance.md) §GenAI Copyright
 
@@ -155,52 +158,60 @@
 
 ### 2.1 Compatibility Rules
 
-| Output Form | Compatible License Requirements |
-|:-----------|:-------------------------------|
-| Static linking | All library licenses must be compatible |
-| Dynamic linking | LGPL allowed. GPL not allowed |
-| SaaS delivery | AGPL exclusion mandatory. SSPL exclusion mandatory |
-| Container distribution | Full layer compatibility including base image |
-| WebAssembly distribution | Treated same as static linking |
-| npm / PyPI publishing | Verify transitivity dependency compatibility |
+Do not infer compatibility from a license name or linking mode alone. An accountable owner records the decision from the license text for the adopted version, exceptions, modifications, combination, distribution, network use, jurisdiction, and customer contracts.
 
-### 2.2 Automated Compatibility Check
+| Use or output form | Required decision |
+|:-------------------|:------------------|
+| Source inclusion, static linking, native binary, WebAssembly | Determine combined-work scope, modifications, object or source delivery, relinking, notices, and patent terms |
+| Dynamic linking, plug-ins, FFI, IPC, service boundary | Do not infer separation from the linking label; assess processes, interfaces, shared data structures, distribution units, and license exceptions |
+| Hosted service, SaaS, API | Assess network-use triggers, modified versions, source offers to users, and service restrictions per license. Do not universally exclude AGPL or source-available terms |
+| Container, VM, firmware distribution | Assess licenses and source or notice duties for the base, OS packages, runtime, drivers, models, and every layer of the release artifact |
+| Package, SDK, CLI, or library publication | Assess direct and transitive dependencies, bundled and generated code, runtime fetches, dual licenses, and duties passed to consumers |
+| Internal-only use | Record the no-distribution assumption and define triggers for remote users, affiliates, contractors, or delivery into a customer environment |
+
+> This section is not legal advice. Route ambiguous license expressions, compound licenses, exceptions, strong copyleft, source-available terms, and trademark or patent conditions to the organization's license specialist or legal function under policy.
+
+### 2.2 Policy-Driven Automated Detection
+
+Automation detects licenses and evaluates them against organizational policy. It does not decide legal compatibility through string matching. A scanner that cannot parse SPDX expression `AND`, `OR`, `WITH`, `LicenseRef`, dual licensing, and package-specific exceptions sends the result to review.
 
 ```yaml
-# .github/workflows/license-compat.yml
+# Reference implementation. Replace the VCS, scanner, and command
 - name: License Compatibility Check
   run: |
-    npx license-checker --production --json > licenses.json
-    node scripts/check-license-compat.js licenses.json
+    license-inventory --format json > licenses.json
+    policy-engine evaluate \
+      --policy .governance/license-policy.json \
+      --input licenses.json \
+      --require-complete-inventory
 ```
 
-```javascript
-// scripts/check-license-compat.js
-const fs = require('fs');
-const PROHIBITED = ['GPL-2.0', 'GPL-3.0', 'AGPL-3.0', 'SSPL'];
-const REVIEW_REQUIRED = ['LGPL-2.1', 'LGPL-3.0', 'MPL-2.0', 'EPL-2.0'];
-const SOURCE_AVAILABLE = ['BSL-1.1', 'FSL-1.1', 'Elastic-2.0'];
-
-const licenses = JSON.parse(fs.readFileSync(process.argv[2]));
-const violations = [];
-for (const [pkg, info] of Object.entries(licenses)) {
-  const lic = info.licenses || '';
-  if (PROHIBITED.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'BLOCK' });
-  } else if (SOURCE_AVAILABLE.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'BLOCK' });
-  } else if (REVIEW_REQUIRED.some(l => lic.includes(l))) {
-    violations.push({ pkg, license: lic, severity: 'REVIEW' });
-  }
-}
-if (violations.some(v => v.severity === 'BLOCK')) {
-  console.error('❌ Prohibited license detected:', JSON.stringify(violations, null, 2));
-  process.exit(1);
-}
-if (violations.some(v => v.severity === 'REVIEW')) {
-  console.warn('⚠️ Review-required license:', JSON.stringify(violations, null, 2));
+```json
+{
+  "schemaVersion": 1,
+  "defaultDecision": "review",
+  "profiles": {
+    "internal-service": {
+      "allow": ["ORG_APPROVED_SPDX_EXPRESSIONS"],
+      "review": ["ORG_REVIEW_SPDX_EXPRESSIONS"],
+      "deny": ["ORG_DENIED_SPDX_EXPRESSIONS"]
+    }
+  },
+  "exceptions": [
+    {
+      "component": "pkg:ecosystem/name@version",
+      "decision": "allow",
+      "owner": "license-risk-owner",
+      "expiresAt": "YYYY-MM-DD",
+      "evidence": "decision-record-id"
+    }
+  ]
 }
 ```
+
+- **Rule**: Version policy by distribution model, product profile, jurisdiction, license version, and exception expiry, and distribute the same decision data to scanners and IDE controls
+- **Rule**: Send missing, unknown, `NOASSERTION`, non-standard text, and unparseable expressions to review instead of silently allowing them
+- **Rule**: A blocking result identifies the component, resolved version, license expression, use path, policy rule, owner, and remediation or expiring exception
 
 → Cross-reference: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain Security
 
@@ -390,32 +401,35 @@ sbom:
 
 ## §9. Supply Chain Security Foundation
 
-### 9.1 SLSA (Supply-chain Levels for Software Artifacts) v1.1
+### 9.1 SLSA (Supply-chain Levels for Software Artifacts) v1.2
 
-| Level | Requirements | Protection Target |
+| Track / Level | Requirements | Protection Target |
 |:------|:-----------|:----------------|
-| SLSA 1 | Build process documentation. Provenance existence | Tampering audit initiation |
-| SLSA 2 | Hosted build service. Signed provenance | Build environment tampering |
-| SLSA 3 | Isolated build environment. Reproducible builds. Ephemeral workers | Insider threats, build injection |
+| Build L1 | Build Provenance exists | Mistakes and audit initiation |
+| Build L2 | A hosted build platform generates signed provenance | Post-build tampering |
+| Build L3 | Use a hardened build platform | In-build tampering |
+| Source L2 | Preserve change history and generate Source Provenance | Source-revision traceability and attribution |
+| Source L3 | Continuously enforce organizational technical controls | Branch-control drift |
+| Source L4 | Require review by two trusted persons for every change | Unilateral source subversion |
 
-- **Rule**: Achieve minimum **SLSA 2** (achievable with GitHub Actions + Artifact Attestation)
-- **Rule**: Target SLSA 3 with ephemeral runners + hermetic builds
+- **Rule**: Use **Build L2** as the minimum production-artifact baseline and **Source L2** as the minimum source-management baseline. Do not infer conformance from a CI product name alone; verify attestations, builder identity, and history controls
+- **Rule**: Target **Build L3** and **Source L4** for high-assurance areas. Represent the claim in a Source VSA with the corresponding numeric level plus `SLSA_SOURCE_TWO_PARTY_REVIEWED`, and do not emit a nonexistent `SLSA_SOURCE_LEVEL_4`. Record ephemeral, isolated, hermetic, and reproducible builds separately as requirements or compensating controls
 
-### 9.2 OIDC Trusted Publishing
+### 9.2 Publishing with Workload Identity
 
-- **Rule**: OIDC Trusted Publishing is the **sole method** for package publishing (see §31)
-- **Rule**: Prohibit long-lived access tokens by default (npm/PyPI/GitHub Packages universal)
+- **Rule**: When the registry and build platform support it, use a short-lived workload identity such as OIDC Trusted Publishing and do not store a long-lived publishing credential (see §31)
+- **Rule**: In ecosystems without that support, adopt an alternative with least privilege, short lifetime, protected secret storage, automatic rotation, and an auditable binding between publisher and artifact; record migration conditions
 
-### 9.3 GitHub Artifact Attestation
+### 9.3 Provenance Attestation
 
-- **Rule**: Generate Provenance Attestation using `actions/attest-build-provenance` in CI/CD builds
-- **Rule**: Verify provenance on consumer side with `gh attestation verify`
-- **Rule**: Comply with in-toto attestation framework for end-to-end supply chain verification
+- **Rule**: Generate signed Provenance for each release artifact, binding source revision, builder identity, build inputs, and artifact digest. `actions/attest-build-provenance` is an implementation example, not a mandatory product
+- **Rule**: A consumer or policy gate verifies Provenance against the expected owner, repository, builder, workflow, and artifact digest. `gh attestation verify` is an implementation example when GitHub is used
+- **Rule**: Use in-toto, SLSA Provenance, or an equivalent interoperable attestation contract, and make generation, distribution, and verification work end to end
 
 ### 9.4 Sigstore Integration
 
-- **Rule**: Sign container images with `cosign` (Keyless mode recommended)
-- **Rule**: Enforce signature verification via Kubernetes Admission Controller
+- **Rule**: Sign distributed container images with `cosign` or an equivalent that binds the signature to identity and Provenance. Prefer a keyless method where supported
+- **Rule**: Enforce signature and Provenance verification at the actual distribution boundary, such as a Kubernetes admission controller, registry, deployment orchestrator, or release gate
 
 ```bash
 # Keyless signing (Sigstore Fulcio + Rekor)
@@ -432,13 +446,13 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 
 ## §10. SCA Tool Integration
 
-### 10.1 Recommended Tool Stack (2026 Edition)
+### 10.1 Replaceable SCA Capabilities and Implementation Examples
 
 | Tool | Primary Strength | Use Case |
 |:-----|:----------------|:---------|
-| Snyk | Vulnerability detection + AI fix suggestions + Snyk Code SAST integration | Primary choice for vulnerability management |
-| FOSSA | License compliance + SBOM + NOTICE auto-generation | Primary choice for license management |
-| Socket.dev | Malware detection + AI behavior analysis + **Reachability analysis (Coana integration)** | Primary choice for supply chain attack defense |
+| Snyk | Vulnerability detection + AI fix suggestions + Snyk Code SAST integration | Commercial integrated SCA option |
+| FOSSA | License compliance + SBOM + NOTICE auto-generation | Commercial license-management option |
+| Socket.dev | Malware detection + AI behavior analysis + **Reachability analysis (Coana integration)** | Package-behavior analysis option |
 | Semgrep Supply Chain | Transitive reachability analysis | False positive reduction |
 | Trivy | Container + IaC + SBOM + License | Container security |
 | Endor Labs | DCA (Dependency Caller Analysis) + Binary-to-Source AI | Reachability analysis, context-centric |
@@ -460,15 +474,17 @@ flowchart TD
     B -->|Reachability analysis| G[Endor Labs / Socket.dev / Semgrep SC]
 ```
 
+This flowchart is an example for tool discovery, not a vendor-selection norm. Evaluate ecosystem and artifact-format coverage, advisory sources, reachability, VEX, licenses, API and export, cost, data residency, and operational continuity; equivalent tools are replaceable.
+
 ### 10.3 Rules
 
-- **Rule**: Integrate at least one SCA tool into CI (Snyk recommended)
-- **Rule**: Execute license checks and security scans as **separate jobs**
-- **Rule**: Include Go modules, Python pyproject.toml, Rust Cargo.toml in SCA scope beyond npm/yarn/pnpm
-- **Rule**: Suppress false positives explicitly via `.snyk` policy files with documented reason and expiry
-- **Rule**: Enable Socket.dev behavior analysis alerts (install scripts/network access/filesystem access)
-- **Rule**: Deploy reachability analysis tools (Socket.dev / Endor Labs / Semgrep SC) to focus on genuinely actionable vulnerabilities
-- **Rule**: Integrate AI-generated code license contamination scanning into SCA pipeline (see §42)
+- **Rule**: Integrate SCA capabilities into CI for every detected ecosystem and release artifact. When one tool is insufficient, normalize results from multiple tools and register coverage gaps
+- **Rule**: Expose license policy and vulnerability policy as independent decisions, owners, exceptions, and failure reasons. They may run in the same CI job if evidence and failure causes remain separable
+- **Rule**: Cover manifests, locks, transitive dependencies, vendored code, containers, native libraries, and generated artifacts, and report coverage for every detected language ecosystem
+- **Rule**: Suppress a false positive, non-reachable finding, or compensating control in the adopted tool policy or common waiver ledger with affected version, rationale, owner, expiry, and reassessment trigger
+- **Rule**: Inspect package behaviors such as install scripts, network, filesystem, dynamic execution, and credential access according to risk through an equivalent scanner, sandbox, static analysis, or egress policy
+- **Rule**: Use reachability as prioritization evidence, combining scanner, call graph, runtime evidence, and manual analysis. Non-reachability does not permanently exclude future impact
+- **Rule**: Integrate the third-party-code checks in §35 and §42 for AI-assisted code according to risk; SCA alone does not complete copyright or license analysis
 
 ---
 
@@ -476,17 +492,19 @@ flowchart TD
 
 ### 11.1 Auto-Block Rules
 
-| Detection | Action | Exception Procedure |
-|:---------|:-------|:-------------------|
-| 🔴 Prohibited license (GPL/AGPL/SSPL) | PR merge auto-block | CTO written approval |
-| 🟡 Source-Available license (BSL/FSL/Elastic) | PR merge auto-block | CTO/Legal approval |
-| Critical vulnerability (CVSS ≥ 9.0) | PR merge auto-block | Security lead approval (within 24h) |
-| High vulnerability (CVSS ≥ 7.0) | Warning + 7-day fix obligation | Team lead approval |
-| Unknown license (UNKNOWN) | PR merge auto-block | Manual review then add to allowlist |
-| OpenSSF Scorecard < 4.0 | Warning | See §26 |
-| Socket.dev behavior analysis: High-risk | PR merge auto-block | Security lead approval |
+| Detection | Universal Change or Release Gate | Exception or Resolution Procedure |
+|:---------|:---------------------------------|:----------------------------------|
+| License classified as deny by organizational policy | Block change acceptance and distribution | Expiring exception from the accountable license or legal-risk owner, recording obligations, distribution model, and customer contracts |
+| Source-available, copyleft, or another review-required class | Block distribution until classified and review change acceptance according to use | Legal or a delegated policy owner records allow, conditional-allow, or deny |
+| Actively exploited, reachable, externally exposed critical vulnerability | Contain immediately and block unsafe change acceptance or release | Security-risk owner approves remediation, mitigation, VEX, or expiring risk acceptance |
+| Other High or Critical vulnerability | Select block or warning from KEV, EPSS, reachability, exposure, data sensitivity, and the Blueprint SLA | Record the accountable owner, deadline, compensating controls, and recheck date |
+| Unknown license | Block change acceptance or distribution until classified | Investigate an authoritative source and add the classification to versioned policy |
+| Project-health score degradation | Do not auto-reject on one score; require review of maintenance, provenance, vulnerabilities, and exit feasibility | Record composite risk under §26 |
+| High-risk install-script, network, or filesystem behavior | Block installation or change acceptance pending manual review | Security or supply-chain owner approves need, scope, sandboxing, and alternatives |
 
-### 11.2 CI Configuration Example
+Pull Requests and merges are example implementations. A Merge Request, pre-submit, release approval, or package-registry policy conforms when it enforces the same decision, block, owner, and exception evidence.
+
+### 11.2 CI Configuration Reference (GitHub Actions)
 
 ```yaml
 # .github/workflows/dependency-guard.yml
@@ -533,6 +551,8 @@ jobs:
 
 ### 12.1 Health Metrics (Pre-Adoption Checklist)
 
+The numeric values below are an onboarding reference profile. Distributions vary by language ecosystem, project size, and component criticality, so stars, downloads, coverage, and one score are not Universal pass or fail conditions.
+
 | Indicator | Minimum | Ideal |
 |:---------|:--------|:------|
 | GitHub Stars | ≥ 500 | ≥ 5,000 |
@@ -549,11 +569,11 @@ jobs:
 
 ### 12.2 Risk Scoring
 
-- **Rule**: Require team lead approval when checklist pass rate is **below 70%** for new dependencies
-- **Rule**: Compare at least 2 alternative candidates for each new dependency
-- **Rule**: Enforce "1 package = 1 function" principle; prefer lightweight alternatives over mega-libraries
-- **Rule**: Packages with OpenSSF Scorecard **below 4.0** are prohibited by default (see §26)
-- **Rule**: Perform additional risk assessment for Bus Factor 1 packages (see §47)
+- **Rule**: Evaluate a new dependency across functional fit, maintenance, provenance, vulnerabilities, license, permissions, artifact, performance, operations, and exit capability, with approval by the accountable owner for its risk tier
+- **Rule**: Compare the status quo, standard library, internal implementation, service, and viable candidates without requiring a ceremonial number of alternatives
+- **Rule**: Minimize dependencies and overlapping capability while assessing transitive, maintainer, and install risk from excessive micro-packages
+- **Rule**: Decompose an OpenSSF Scorecard or equivalent score into individual checks and evidence; do not automatically deny from one aggregate score (see §26)
+- **Rule**: Treat Bus Factor 1 as an additional risk signal alongside criticality, release capability, fork rights, alternatives, and internal expertise (see §47)
 
 ---
 
@@ -561,8 +581,8 @@ jobs:
 
 ### 13.1 Rules
 
-- **Rule**: Check size impact on [`bundlephobia.com`](https://bundlephobia.com) before adding web app dependencies
-- **Rule**: Dependencies **over 50KB gzipped** require team lead approval
+- **Rule**: For size- or startup-constrained client, edge, mobile, function, or embedded artifacts, measure through the adopted bundler, profiler, or artifact diff. Bundlephobia is a Web-package reference option
+- **Rule**: Define size, parse, startup, memory, network, battery, and cost budgets from target and user impact in the Blueprint; do not use a fixed 50KB or job title as the Universal gate
 - **Rule**: Prefer tree-shaking compatible (ESM) packages
 - **Rule**: Always evaluate lightweight alternatives for equivalent functionality
 
@@ -584,14 +604,23 @@ jobs:
 
 ### 14.1 Rules
 
-- **Rule**: **Always commit** `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Podfile.lock`, `pubspec.lock`
-- **Rule**: Use **`npm ci`** (or `pnpm install --frozen-lockfile`) in CI; prohibit `npm install`
-- **Rule**: **Always review** lockfile diffs in PRs
-- **Rule**: Integrate `lockfile-lint` in CI to guarantee retrieval from trusted registries
-- **Rule**: Ensure all team members use identical Node.js/npm versions (`.nvmrc` / `.node-version`)
-- **Rule**: Enable Corepack and pin package manager version via `packageManager` field
+- **Rule**: Version the adopted ecosystem's reproducible resolution source for deployable applications, services, CLIs, firmware, containers, and infrastructure roots. Public libraries follow consumer-compatibility conventions while pinning CI and release resolution and retaining evidence
+- **Rule**: CI uses a `locked`, `frozen`, `immutable`, or equivalent mode that rejects manifest and lock drift, implicit updates, and fallback to unapproved sources
+- **Rule**: Review machine-generated changes to locks, checksums, wrappers, version catalogs, provider selections, and similar resolution data, showing additions, removals, source, version, integrity, and lifecycle-script changes
+- **Rule**: Pin the package manager, runtime, compiler, SDK, and wrapper under the support policy and detect resolution differences across development, CI, and release
+- **Rule**: Treat install and build scripts as executable capabilities and apply default denial or a minimal allowlist, network and filesystem restrictions, or a reviewed exception
 
-### 14.2 Corepack Configuration
+| Example ecosystem | Example resolution source | Example CI invariant |
+|:------------------|:--------------------------|:---------------------|
+| JavaScript or TypeScript | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock` | `npm ci`, frozen or immutable install, `bun ci` |
+| Python | `uv.lock`, Poetry or equivalent lock | locked or frozen sync, hash verification |
+| JVM | Gradle dependency locking plus dependency verification, or version-constrained Maven manifests or BOMs plus a recorded resolved graph and checksums | pin the Gradle or Maven wrapper separately from dependencies; reject graph or verification drift |
+| .NET | `packages.lock.json` or `paket.lock` | pin the SDK separately; use locked-mode restore and reject graph drift |
+| Go or Rust | `go.sum`, `Cargo.lock` | read-only module mode, `--locked`; record ecosystem policy for public-library locks |
+| Swift or Dart | `Package.resolved`, `Podfile.lock`, `pubspec.lock` | record the application versus public-library boundary and pin release resolution |
+| Terraform or OpenTofu | `.terraform.lock.hcl` and module source ref | verify provider checksums and module commit or digest |
+
+### 14.2 Corepack Reference Configuration
 
 ```json
 // package.json
@@ -602,8 +631,8 @@ jobs:
 
 ### 14.3 Install Script Security
 
-- **Rule**: Set `ignore-scripts=true` as default in `.npmrc`; whitelist trusted packages only via `allow-scripts`
-- **Rule**: Packages with `postinstall` / `preinstall` scripts require additional review
+- **Rule**: The Node.js ecosystem may use `.npmrc` `ignore-scripts=true`, a pnpm allowlist, Bun `trustedDependencies`, or equivalent. Apply the same capability boundary to native builds, Python build backends, Gradle plug-ins, Cargo build scripts, and other ecosystems
+- **Rule**: A dependency that adds or changes a lifecycle script, plug-in, compiler extension, macro, or code generator requires additional review
 
 ```ini
 # .npmrc — Install Script defense
@@ -616,13 +645,15 @@ ignore-scripts=true
 
 ### 15.1 Recommended Configuration
 
-- **Rule**: Prefer Renovate as primary tool (more flexible configuration than Dependabot)
-- **Rule**: Enable **auto-merge** for security updates (patch/minor level + all CI pass)
-- **Rule**: Require manual review for major updates
-- **Rule**: Set **minimumReleaseAge: 21 days** to verify stability before adoption
-- **Rule**: Use weekly grouped PRs for batch dependency updates (noise reduction)
+- **Rule**: Select a replaceable update capability such as Renovate, Dependabot, an ecosystem bot, or an internal service based on language coverage, private sources, grouping, signature and provenance checks, exception ledger integration, and audit APIs
+- **Rule**: Permit automatic merge only for a risk tier with bounded scope, verified artifact provenance, passing compatibility, security, license, and performance gates, and tested rollback. A security label alone does not justify automatic merge
+- **Rule**: Breaking changes, runtimes and compilers, native dependencies, database drivers, authentication and cryptography, build plug-ins, and unverified major updates require accountable-owner review
+- **Rule**: Calibrate release age from ecosystem takeover risk, signatures, maintainers, exploitation, and rollout capability. Do not delay a fix for an actively exploited vulnerability merely to satisfy an age window
+- **Rule**: Derive cadence and grouping from team capacity and shared failure domains; do not combine unrelated mass updates into one rollback unit
 
-### 15.2 Renovate Configuration Example
+### 15.2 Renovate Reference Configuration
+
+The following 21-day window, weekend schedule, and patch or minor automerge are not Universal defaults. Replace them with the Blueprint risk tier, required checks, emergency bypass, and rollback contract.
 
 ```json
 {
@@ -652,25 +683,27 @@ ignore-scripts=true
 
 ### 16.1 SLA Definition
 
-| Severity | CVSS | Response Deadline | Automation |
+Do not derive deadlines from CVSS alone. Define them in the Blueprint from exploitation evidence, KEV, EPSS, reachability, exposure, data sensitivity, deployed version, compensating controls, and applicable legal, contractual, or vendor deadlines. The following is an onboarding reference profile, not a Universal deadline.
+
+| Scanner Severity | Reference CVSS Band | Reference Initial Objective | Automation Example |
 |:---------|:-----|:-----------------|:-----------|
-| Critical | ≥ 9.0 | **Within 24 hours** | Auto PR + Slack notification |
-| High | ≥ 7.0 | **Within 7 days** | Auto PR |
-| Medium | ≥ 4.0 | **Within 30 days** | Weekly report |
-| Low | < 4.0 | **Within 90 days** | Quarterly review |
+| Critical | ≥ 9.0 | Triage immediately; decide remediation within 24 hours | Update candidate + immediate notification |
+| High | ≥ 7.0 | Decide remediation within 7 days | Update candidate + owner notification |
+| Medium | ≥ 4.0 | Resolve the risk decision within 30 days | Risk report |
+| Low | < 4.0 | Reassess within 90 days | Portfolio review |
 
 ### 16.2 CISA KEV Integration & EPSS-Driven Prioritization
 
 > [!IMPORTANT]
-> CVSS-only SLA prioritization is insufficient for 2026 practice. **CISA KEV registration (confirmed active exploitation) becomes the SLA trigger point**, supplemented by EPSS score (≥0.8 = top ~20% exploitation probability) for real-world risk assessment.
+> CVSS-only prioritization is insufficient. Treat CISA KEV as evidence of active exploitation that raises priority, then supplement it with EPSS, reachability, exposure, and asset criticality. CISA catalog due dates and BOD obligations are official deadlines for their applicable subjects; do not turn them into a universal three-day deadline for every organization.
 
-| Priority | Condition | SLA | Automation |
+| Priority | Condition | Response Contract | Automation Example |
 |:---------|:---------|:----|:-----------|
-| 🔴 P0 | **CISA KEV registered** | **Within 3 days** | Immediate alert + WAF update |
-| 🔴 P1 | Critical + EPSS ≥ 0.8 | **Within 6 hours** | Containment + alert |
-| 🟠 P2 | Critical (CVSS ≥ 9.0) | 24 hours | Auto PR |
-| 🟡 P3 | High (CVSS ≥ 7.0) | 7 days | Auto PR |
-| 🟢 P4 | Medium/Low | 30 days / 90 days | Weekly report |
+| 🔴 P0 | Active exploitation plus exposed or reachable impact, or an applicable official deadline | Contain immediately; remediate by the official deadline or a stricter Blueprint SLA | Incident alert + mitigation candidate |
+| 🔴 P1 | KEV, credible exploitation, critical asset, or equivalent high-risk signal | Immediately assign owner, compensating control, and remediation deadline | Urgent update + alert |
+| 🟠 P2 | Critical finding with evidence of non-reachability or equivalent constraint | Risk-based SLA with VEX and reassessment triggers | Update candidate |
+| 🟡 P3 | High finding | Blueprint SLA based on exposure and deployed use | Scheduled update |
+| 🟢 P4 | Medium or Low finding | Portfolio cadence or event-driven review | Risk report |
 
 ```bash
 # Auto-matching CISA KEV list against your SBOM
@@ -687,11 +720,11 @@ curl -s "$DTRACK_URL/api/v1/finding/project/$PROJECT_UUID" \
 
 ### 16.3 Rules
 
-- **Rule**: For Critical vulnerabilities, perform reachability analysis; if reachable, apply mitigations (WAF rules, etc.) **within 4 hours**
-- **Rule**: **CISA KEV-registered CVEs** require remediation or VEX-based mitigation within 3 days, regardless of reachability analysis result
-- **Rule**: Medium CVEs with EPSS score ≥ 0.8 (top ~20%) are escalated to P1 treatment, overriding CVSS-only classification
+- **Rule**: Immediately analyze reachability and exposure for Critical or actively exploited vulnerabilities. When affected, apply compensating controls such as WAF policy, feature suspension, version pinning, or credential rotation against a risk-based containment objective. Four hours is a reference objective for high-risk services
+- **Rule**: Prioritize every CISA KEV entry and complete remediation, mitigation, isolation, or risk acceptance by the strictest applicable catalog due date, law, contract, vendor deadline, or Blueprint SLA
+- **Rule**: Calibrate EPSS thresholds from portfolio distribution and false-positive cost in the Blueprint; do not derive severity from one fixed threshold alone
 - **Rule**: If patching is not feasible, issue VEX status with documented rationale (see §28)
-- **Rule**: Analyze root cause in monthly retrospective when SLA is breached
+- **Rule**: Analyze SLA breaches in an immediate review or a risk-based retrospective cadence according to severity and recurrence risk
 
 → Cross-reference: §28 VEX, §54 CISA KEV Integration Details
 
@@ -701,12 +734,13 @@ curl -s "$DTRACK_URL/api/v1/finding/project/$PROJECT_UUID" \
 
 ### 17.1 Rules
 
-- **Rule**: Use pnpm workspaces (recommended) or npm workspaces for monorepos
-- **Rule**: Place common dependencies at root; manage package-specific dependencies individually
-- **Rule**: Manage all workspaces with a **single lockfile** (`pnpm-lock.yaml`)
-- **Rule**: Enable Merge Queue for safe post-CI merge guarantee
+- **Rule**: A monorepo uses the adopted language's native workspace, build graph, or module system and declares package boundaries, owners, public APIs, release units, and dependency directions. pnpm and npm workspaces are JavaScript reference implementations
+- **Rule**: Do not rely on hoisting or root placement to imply dependencies; declare each component's direct dependencies and detect ghost and cyclic dependencies
+- **Rule**: Whether using one lock, multiple locks, a version catalog, or a workspace graph, define a resolution source of truth that produces the same result from the same inputs and can be traced to a component and release artifact
+- **Rule**: Compute affected work from the build graph, while validating every affected consumer for shared contracts, compilers, base images, and policy changes
+- **Rule**: Apply a merge queue or equivalent latest-base retest and serialization to branches that need it based on conflict rates and required-check semantics. Universal does not require it for every repository
 
-### 17.2 Recommended Monorepo Structure
+### 17.2 JavaScript Monorepo Reference Structure
 
 ```text
 monorepo-root/
@@ -725,12 +759,11 @@ monorepo-root/
 
 ### 18.1 Rules
 
-- **Rule**: Manage private packages via private registry (GitHub Packages / Artifactory / Verdaccio)
-- **Rule**: Set up proxy/cache layer for public registries for availability
-- **Rule**: **Reserve** internal package scopes (`@company/`) on npm public registry to prevent **typosquatting** (see §27)
-- **Rule**: Manage registry publish permissions with **least privilege principle**
-- **Rule**: Migrate npm tokens to **OIDC Trusted Publishing**; deprecate long-lived tokens (see §31)
-- **Rule**: Enforce MFA for registry access
+- **Rule**: Manage private components in a registry or artifact repository that meets access control, immutability, retention, availability, data residency, audit, and ecosystem compatibility. A VCS package or object store meets the same outcomes when selected
+- **Rule**: Adopt a public-source proxy, cache, or mirror when dependency-confusion defense, malware blocking, emergency denial, availability, or cost requires it, and define stale-artifact and upstream-signature verification policy
+- **Rule**: Prevent collisions between internal and public namespaces. Scope reservation, explicit registry mapping, private-only sources, and naming policy are replaceable mitigations
+- **Rule**: Separate publish, yank, delete, and promote privileges; require MFA for humans and prefer short-lived federated identity where the registry supports it. Record an owner, expiry, and rotation for credential exceptions
+- **Rule**: Bind a release artifact to its source revision, builder identity, digest, provenance, SBOM, and approval so consumers can verify it
 
 ---
 
@@ -738,10 +771,10 @@ monorepo-root/
 
 ### 19.1 Rules
 
-- **Rule**: Periodically verify entire dependency tree with `npm ls --all`
-- **Rule**: Address Critical vulnerabilities in transitive deps via direct dep upgrade or `overrides`
-- **Rule**: Consider alternative libraries when transitive depth exceeds **7 levels**
-- **Rule**: Track why specific packages are included with `npm explain <package>`
+- **Rule**: Enumerate direct, transitive, and runtime-fetched dependencies that reach a release artifact through an ecosystem-native graph, SBOM, artifact scan, or equivalent, and support reverse tracing from a component to its introduction root
+- **Rule**: For a vulnerable transitive dependency, evaluate direct-dependency updates, upstream fixes, alternatives, feature disablement, and an expiring override or patch in risk and compatibility order, then verify reachability and the actually deployed version
+- **Rule**: Evaluate dependency depth, duplication, fan-out, native binaries, install scripts, and maintainer concentration as compound risk; do not decide adoption from one fixed depth
+- **Rule**: Record the introduction path, owner, and used capability through replaceable mechanisms such as `npm explain`, `go mod why`, Gradle dependency insight, or `cargo tree`
 
 ### 19.2 Override-Based Forced Resolution
 
@@ -755,7 +788,7 @@ monorepo-root/
 ```
 
 > [!CAUTION]
-> `overrides` is a temporary emergency measure. Complete root-cause resolution (direct dependency upgrade) within 30 days.
+> An `overrides`-style forced resolution is temporary risk treatment. Record its owner, rationale, compatibility tests, upstream link, expiry, and removal criteria, and resolve the root cause within the Blueprint SLA.
 
 ---
 
@@ -763,12 +796,12 @@ monorepo-root/
 
 ### 20.1 Rules
 
-- **Rule**: Run `npm outdated` weekly to detect major version gaps
-- **Rule**: Migrate packages with `deprecated` flag to alternatives **within 30 days**
-- **Rule**: Prohibit running on EOL Node.js versions per LTS schedule
-- **Rule**: Establish upgrade plan **within 6 months** of major framework releases (Next.js, React, etc.)
+- **Rule**: Continuously ingest official support, EOL, and deprecation events for adopted runtimes, compilers, SDKs, frameworks, packages, base images, operating systems, and providers, and correlate them with inventory and owners
+- **Rule**: Deprecated does not always mean immediate removal. Record an expiring retain, replace, or remove decision from security, support end date, alternative maturity, and migration impact
+- **Rule**: Prohibit production use of EOL components by default. An exception requires reduced exposure, monitoring, compensating controls, a funded migration owner and deadline, and management risk acceptance
+- **Rule**: Make the upgrade plan executable with sufficient margin before official support ends; do not derive it from one number of months after a major release
 
-### 20.2 EOL Monitoring Tools
+### 20.2 EOL Monitoring Reference Implementations
 
 - **endoflife.date**: Retrieve EOL dates for Node.js/frameworks via API
 - **libyear**: Measure dependency "age" to quantify technical debt
@@ -779,12 +812,12 @@ monorepo-root/
 
 ### 21.1 Rules
 
-- **Rule**: Implement OSS license attribution display mechanism in the application
-- **Rule**: Display location: "Settings > Licenses" or "About" screen
-- **Rule**: Auto-generate `NOTICE` file in CI/CD and include with each release
-- **Rule**: Leverage FOSSA's auto-NOTICE regeneration on dependency updates
+- **Rule**: Generate required license text, copyright, NOTICE, source offers, and similar obligations for the in-scope release artifact from the inventory and make them accessible to recipients in the manner required by the license and distribution medium
+- **Rule**: An in-application screen, web page, CLI option, bundled file, package metadata, or physical document is a replaceable delivery channel; Universal does not require a Settings or About screen for every product
+- **Rule**: A release gate reconciles attribution output with the SBOM's in-scope components and versions and detects diffs and omissions when dependencies change
+- **Rule**: FOSSA, license-checker, license-plist, and oss-licenses-plugin are reference implementations; do not bind the control to one vendor
 
-### 21.2 Platform-Specific Tools
+### 21.2 Platform-Specific Reference Tools
 
 | Platform | Tool | Notes |
 |:---------|:-----|:------|
@@ -796,7 +829,7 @@ monorepo-root/
 
 ### 21.3 Apache-2.0 NOTICE File Specifics
 
-- **Rule**: When using Apache-2.0 licensed libraries, retain and include original `NOTICE` file content (license requirement)
+- **Rule**: When the adopted license and component require NOTICE handling, such as Apache-2.0 §4(d), retain the applicable attribution notices in a location and form permitted by the license text. Do not invent a missing NOTICE or add unrelated notices as legal obligations
 
 ---
 
@@ -804,8 +837,8 @@ monorepo-root/
 
 ### 22.1 Rules
 
-- **Rule**: Organizations with 50+ employees should establish an OSPO or OSS governance lead
-- **Rule**: Verify CLA (Contributor License Agreement) signature when contributing to OSS
+- **Rule**: Establish a scale-appropriate accountable function, such as a combined owner, virtual team, or OSPO, based on repository count, distribution model, regulation, OSS use and contribution volume, M&A, and license exceptions. Do not use a fixed employee count as a Universal trigger
+- **Rule**: Before contributing to OSS, follow the project's contribution policy, CLA, DCO, sign-off, copyright and employment terms, and export controls as applicable; do not require a CLA where the project has none
 - **Rule**: Conduct IP, license, and security review before open-sourcing internal projects
 
 ### 22.2 OSS Governance Process
@@ -940,9 +973,9 @@ OpenSSF Scorecard is a tool that automatically evaluates OSS project security ma
 ### 26.3 Rules
 
 - **Rule**: Check OpenSSF Scorecard score when adding new dependencies
-- **Rule**: Packages with score **below 4.0** are prohibited by default. Exceptions must be documented
-- **Rule**: Run Scorecard regularly on own OSS projects; maintain score **7.0+**
-- **Rule**: Monitor 2026 OpenSSF themes (AI/ML Security, CRA Alignment) related checks
+- **Rule**: Decompose the score into checks such as branch protection, review, tokens, releases, and vulnerabilities and assess use and compensating controls. Do not automatically deny from a low score alone
+- **Rule**: Run Scorecard or an equivalent control assessment on the organization's OSS projects on a risk-based cadence and at release, tracking improvement targets, accepted rationale, and expiry
+- **Rule**: Monitor Scorecard version, check semantics, and data-source changes; do not treat a prior-year aggregate score or fixed threshold as immutable
 
 ---
 
@@ -960,12 +993,12 @@ OpenSSF Scorecard is a tool that automatically evaluates OSS project security ma
 
 ### 27.2 Defense Rules
 
-- **Rule**: **Reserve** internal package scopes (`@company/`) on npm public registry
-- **Rule**: Explicitly set registry priority in `.npmrc`
-- **Rule**: Execute package name similarity checks in CI
-- **Rule**: Default `ignore-scripts=true`; allow only trusted packages
-- **Rule**: Enable malware behavior analysis via Socket.dev or equivalent
-- **Rule**: Verify npm Provenance to confirm package publisher CI
+- **Rule**: Prevent public and private namespace collision through a combination of scope reservation, explicit source mapping, private-only registry, naming policy, and version pinning
+- **Rule**: Configure the authoritative source and prohibit fallback per ecosystem, detecting resolution differences across manifests, locks, CI, and developer environments
+- **Rule**: Check a new component name for typo and namespace similarity, source URL, and owner
+- **Rule**: Manage lifecycle scripts and plug-ins through default denial or a minimal allowlist, sandbox, and additional review
+- **Rule**: Inspect malware behavior according to risk through a scanner, static analysis, sandbox, egress monitoring, or equivalent
+- **Rule**: Verify registry-provided signatures and provenance or equivalent source-to-artifact evidence, including publisher identity and build
 
 ### 27.3 Registry Priority Configuration
 
@@ -993,7 +1026,7 @@ VEX is a machine-readable mechanism for communicating whether a vulnerability ac
 | not_affected | Vulnerability exists but does not affect product | No action (document rationale) |
 | affected | Vulnerability affects product | Remediate per §16 SLA |
 | fixed | Remediated | Update SBOM/VEX |
-| under_investigation | Under review | Complete determination within 72 hours |
+| under_investigation | Under review | Decide within a risk-based SLA and record deadline and owner |
 
 ### 28.3 VEX Format Comparison
 
@@ -1005,10 +1038,10 @@ VEX is a machine-readable mechanism for communicating whether a vulnerability ac
 
 ### 28.4 Rules
 
-- **Rule**: Determine VEX status for Critical/High vulnerabilities within 72 hours
+- **Rule**: Determine VEX status for material vulnerabilities within the Blueprint SLA derived from exposure, reachability, exploitation, and asset criticality, recording deadline and owner
 - **Rule**: Record reachability analysis evidence for `not_affected` determinations
 - **Rule**: Version-control VEX documents linked to SBOM
-- **Rule**: Use CSAF VEX format for EU CRA-regulated products
+- **Rule**: Use the interoperable VEX format required by the consumer, authority, or contract. Select CSAF, CycloneDX VEX, or OpenVEX for the target channel and toolchain
 
 ```json
 // OpenVEX example
@@ -1039,10 +1072,11 @@ CBOM is a cryptographic asset inventory introduced in CycloneDX 1.6. It records 
 
 ### 29.2 Rules
 
-- **Rule**: Generate CBOM using CycloneDX 1.6+
+- **Rule**: For in-scope systems that need to manage cryptographic change impact, regulation, high assurance, or PQC migration, generate a CBOM or equivalent inventory using CycloneDX or another schema supported by the toolchain
 - **Rule**: Detect and eliminate deprecated cryptography (SHA-1, MD5, DES, 3DES, RSA-1024)
 - **Rule**: Establish Post-Quantum Cryptography Migration Plan
 - **Rule**: Document migration roadmap to NIST PQC standardized algorithms (ML-KEM, ML-DSA, SLH-DSA)
+- **Rule**: In high-assurance areas, test protocol interoperability, performance, algorithm agility, and downgrade risk and record whether to adopt a hybrid transition combining classical and PQC mechanisms
 
 ### 29.3 Crypto Agility Checklist
 
@@ -1052,7 +1086,7 @@ CBOM is a cryptographic asset inventory introduced in CycloneDX 1.6. It records 
 | Hash Algorithm | SHA-256+ mandatory. SHA-1 fully prohibited |
 | Key Exchange | ECDH (P-256+) or X25519. RSA-2048+ |
 | Quantum Readiness | Begin hybrid mode (classical + PQC) evaluation |
-| CBOM Generation | Inventory cryptographic assets for all projects using CycloneDX 1.6+ |
+| CBOM Generation | Track cryptographic assets for in-scope systems in a supported CBOM schema or equivalent inventory |
 
 → Cross-reference: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §Cryptographic Policy, [`security/100_data_governance.md`](../security/100_data_governance.md) §Quantum Crypto Agility
 
@@ -1062,30 +1096,44 @@ CBOM is a cryptographic asset inventory introduced in CycloneDX 1.6. It records 
 
 ### 30.1 Ecosystem Lockfile & Tool Matrix
 
-| Ecosystem | Lockfile | SCA Tool | SBOM Generation |
+| Ecosystem | Resolution Source / Lockfile | SCA Tool | SBOM Generation |
 |:----------|:--------|:---------|:----------------|
-| Node.js (npm/pnpm/yarn/Bun) | `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` / `bun.lockb` | Snyk, Socket.dev | `@cyclonedx/cyclonedx-npm` |
-| Go | `go.sum` | Snyk, Trivy | `syft`, `cyclonedx-gomod` |
-| Python (uv / poetry) | `uv.lock` / `poetry.lock` / `requirements.txt` | Snyk, Safety, `pip-audit` | `syft`, `cyclonedx-python` |
-| Rust | `Cargo.lock` | `cargo-audit`, `cargo-auditable` | `syft`, `cyclonedx-rust-cargo` |
-| Java/Kotlin | `pom.xml` / `build.gradle.kts` | Snyk, OWASP Dep-Check | `cyclonedx-maven-plugin` |
+| Node.js (npm/pnpm/yarn/Bun) | `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` / `bun.lock` | `npm audit`, Snyk, Socket.dev | `@cyclonedx/cyclonedx-npm`, `syft` |
+| Go | `go.mod` / `go.sum` | `govulncheck`, OSV-Scanner, Trivy | `syft`, `cyclonedx-gomod` |
+| Python (uv / poetry) | `uv.lock` / `poetry.lock` | `uv audit`, `pip-audit`, OSV-Scanner, Snyk | `uv export --format cyclonedx1.5`, `syft`, `cyclonedx-python` |
+| Rust | `Cargo.lock` | `cargo-audit`, `cargo-deny` | `syft`, `cyclonedx-rust-cargo` |
+| Java/Kotlin | Gradle dependency locking plus dependency verification; or version-constrained Maven manifests or BOMs plus a recorded resolved graph and checksums | OWASP Dependency-Check, OSV-Scanner, Snyk | CycloneDX Gradle or Maven plugin, `syft` |
 | Ruby | `Gemfile.lock` | `bundler-audit` | `cyclonedx-ruby` |
-| Swift/iOS | `Package.resolved` / `Podfile.lock` | Snyk | `syft` |
-| .NET | `packages.lock.json` / `*.csproj` | Snyk, OWASP Dep-Check | `CycloneDX.NET` |
+| Swift/iOS | Application or executable-root `Package.resolved` / `Podfile.lock`; pin publishable-package CI resolution separately | Snyk | `syft` |
+| Dart / Flutter | `pubspec.yaml` plus application `pubspec.lock`; a publishable package does not treat the lockfile as a consumer contract and pins CI resolution separately | Dart Pub security advisories, OSV-Scanner, Dependabot | Organization-approved CycloneDX or SPDX generator plus release-artifact inventory |
+| .NET | `packages.lock.json` / `paket.lock` + SDK pin | .NET 10+: `dotnet package list --vulnerable --include-transitive`; .NET 9 or earlier: `dotnet list package --vulnerable --include-transitive`; OSV-Scanner | CycloneDX .NET, `syft` |
+| PHP | `composer.lock` | `composer audit`, OSV-Scanner | CycloneDX PHP Composer, `syft` |
+| R | `renv.lock` | OSV-Scanner, organization-designated SCA | `syft` |
+| Lua | Version-pinned rockspec + organization-defined resolved manifest | OSV or repository-advisory correlation, organization-designated SCA | `syft` |
+| Perl | `cpanfile` / `cpanfile.snapshot` + `.perl-version` | `cpan-audit` | `syft` |
+| PowerShell | Exact versions in module manifests + organization-defined resolved manifest | OSV or repository-advisory correlation, organization-designated SCA | `syft` |
+| VBA / Office | Exported text source + Office and reference manifest + signed artifact digest | Organization-designated SAST and macro or malware scanning | Organization-defined component inventory |
+| C / C++ | `conan.lock` / vcpkg manifest + version baseline | OSV-Scanner, Trivy, Snyk | `syft`, `cdxgen` |
+| Terraform / OpenTofu | `.terraform.lock.hcl` for providers; exact versions and approved sources for remote modules because modules are outside the lockfile | Provider or module advisory, registry, and organization-designated policy or SCA correlation | Provider and module inventory plus SBOMs for corresponding release binaries or containers |
 
 > [!NOTE]
 > **`cargo-auditable`**: Embeds dependency information (equivalent to `Cargo.lock`) as an ELF/Mach-O section in compiled Rust binaries. Enables SBOM reverse-lookup from deployed binaries (see also §50).
-> **`uv`**: Astral's Rust-based Python package manager. `uv.lock` must be committed as the lockfile. Use `pip-audit` for CVE scanning.
-> **Bun**: `bun.lockb` is binary format. Use `bun install --print-lockfile` for human-readable diff in CI reviews.
+> **`uv`**: Commit `uv.lock`, and use `uv sync --locked` and `uv export --locked` to reject manifest drift and implicit re-resolution. The current official documentation marks CycloneDX 1.5 export as preview; pin the uv version and validate schema, transitive dependencies, platform markers, and failure behavior before normalizing it to the organization's SBOM target.
+> **Bun**: Bun 1.2 and later default to the text-based `bun.lock`. Migrate legacy `bun.lockb` through the official procedure and use `bun ci` or `bun install --frozen-lockfile` in CI.
+> **Gradle / Maven**: A Gradle version catalog declares requested versions but does not lock the resolved transitive graph. The Gradle or Maven wrapper pins the build tool, not dependencies. Keep toolchain pins separate from dependency locks, verification metadata, a recorded resolved graph, and checksums.
+> **SwiftPM**: An application or executable root commits `Package.resolved`. A publishable package's `Package.resolved` does not constrain consumer resolution, so verify declared constraints and supported ranges through fixed CI test and release resolution and, where useful, a locked example application.
+> **Dart**: Applications commit `pubspec.lock`. A publishable package does not make the lockfile a consumer contract; instead, retain evidence of CI test and release resolution, advisory scans, and the artifact inventory.
+> **Terraform / OpenTofu**: Pre-populate provider locks with signed checksums for every target platform, but do not infer provider trust from checksums alone. Verify source, publisher, version, and the organizational allowlist. Because modules are not recorded in the lockfile, separately pin exact remote-module versions and approved sources.
 
 ### 30.2 Unified Rules
 
-- **Rule**: **Always commit** lockfiles for all ecosystems
-- **Rule**: Execute vulnerability scans for all ecosystems in CI/CD
-- **Rule**: Generate SBOMs for all ecosystems and merge into unified SBOM
-- **Rule**: License checks must cover all ecosystems
-- **Rule**: Rust projects must embed SBOM information in binaries using `cargo-auditable` (see §58)
-- **Rule**: For Python projects adopting `uv`, commit `uv.lock` and use `pip-audit` for vulnerability scanning
+- **Rule**: Deployable applications and executable roots commit the lockfile supplied by the ecosystem. If no standard lockfile exists or it is not a complete resolution snapshot, version a resolved manifest or equivalent evidence recording version, source, checksum, and digest. Publishable libraries follow consumer-compatibility conventions while pinning CI test and release resolution and retaining dependency evidence
+- **Rule**: Inspect direct, transitive, and runtime dependencies from every ecosystem that reaches an in-scope release artifact using corresponding SCA or advisory matching
+- **Rule**: Bind an SBOM or dependency inventory for each ecosystem composing an in-scope release artifact to its digest, and combine it at the granularity required by consumers and incident response
+- **Rule**: License checks cover every ecosystem whose components are distributed or used by the in-scope artifact
+- **Rule**: Scan transitive dependencies and release artifacts in addition to source manifests, and manage false positives through expiring VEX statements or waivers
+- **Rule**: Bind exported VBA or Office text source, the Office and reference manifest, and the signed artifact digest in the release record
+- **Rule**: Verify Terraform or OpenTofu provider locks separately from remote-module inventories and bind both to the release record and unified SBOM
 
 ```bash
 # Unified SBOM merge
@@ -1105,30 +1153,40 @@ The "Diamond Dependency Problem" — where packages A and B require different ve
 | Unintentional vulnerability retention | npm transitive | Verify resolution tree with `npm ls <pkg>` + pin with `overrides` |
 | Ghost Dependency (implicit dep access) | JavaScript (pre-pnpm era) | Prohibit implicit access with pnpm strict mode |
 
-- **Rule**: Maintain `pnpm`'s `shamefully-hoist=false` (default) to structurally eliminate Ghost Dependencies
-- **Rule**: When Diamond Dependencies occur, temporarily pin via `overrides` while achieving root-cause resolution (direct dep upgrade) within 30 days
-- **Rule**: Go modules' `replace` directive must be limited to temporary fork application; document expiry date in `go.mod` comment
+- **Rule**: Use strict resolution in the adopted workspace or module system and detect implicit dependencies. pnpm hoist settings are a JavaScript reference implementation
+- **Rule**: For a diamond dependency, compare compatible ranges, direct-dependency updates, isolation, vendor fixes, and an expiring override, leading to root-cause resolution with an owner and Blueprint deadline
+- **Rule**: For a Go `replace`, npm `overrides`, Cargo patch, or similar resolution override, record source, digest, rationale, compatibility tests, owner, expiry, and removal criteria
 
 → Cross-reference: [`engineering/000_engineering_standards.md`](../engineering/000_engineering_standards.md) §CI/CD, §19 Transitive Dependency Management
 
 
 ---
 
-## §31. Package Publishing Security & OIDC Migration
+## §31. Package Publishing Security and Workload Identity
 
-### 31.1 npm Account Security
+### 31.1 Publishing Identity and Registry Capability
 
 | Measure | Required/Recommended | Details |
 |:--------|:--------------------|:--------|
-| 2FA (WebAuthn/TOTP) | **Required** | Enable on all maintainer accounts. Prefer WebAuthn (phishing-resistant) |
-| OIDC Trusted Publishing | **Required** | npm GA (2025-07). Replace long-lived tokens with OIDC where supported |
-| `npm access` least privilege | **Required** | Limit publish permissions to minimum maintainers |
-| Granular Access Token | Deprecation in progress | Interim measure until full OIDC TP migration. 90-day rotation |
+| 2FA (WebAuthn/TOTP) | **Required** | Enable on all maintainer accounts. Prefer WebAuthn for phishing resistance |
+| OIDC Trusted Publishing | **Required when supported** | Replace long-lived tokens with OIDC when both registry and build platform support it |
+| Least publishing privilege | **Required** | Restrict package, namespace, workflow, environment, and operation to the minimum required |
+| Granular Access Token | Conditional interim | Only when OIDC is unavailable; apply least privilege, an organization-defined short lifetime, automatic rotation, and audit |
+
+Representative publishing paths as of 2026-07-23 follow. Provider support, private-repository and self-hosted-runner constraints, and account rollout can change; recheck official registry documentation at publication time.
+
+| Ecosystem | Official short-lived identity path | Universal treatment |
+|:--|:--|:--|
+| JavaScript and TypeScript | npm Trusted Publishing | Verify supported CI and runner constraints and claim scope, then remove token publishing where possible; use staged publishing, 2FA approval, and provenance according to risk |
+| Python | PyPI Trusted Publishing | Minimize repository, workflow, environment, and related claims; use the minted short-lived token only immediately before upload |
+| Ruby | RubyGems Trusted Publishing | Register publishers per gem and verify the execution identity and claims, including reusable workflows |
+| .NET | nuget.org Trusted Publishing | Verify account availability and policy ownership, then use short-lived API-key exchange when available |
+| Other or private registries | Verify official capability per registry | If OIDC or another federated workload identity is absent, use a package-scoped short-lived credential, rotation, audit, and time-bound reassessment |
 
 > [!IMPORTANT]
-> npm Trusted Publishing reached GA in July 2025. Only OIDC-capable CI/CD (GitHub Actions, GitLab CI, etc.) can publish packages. New long-lived token issuance expected to be restricted in the future.
+> Prefer OIDC when combining npm with a supported CI/CD platform. For other registries or build platforms, choose an equivalent short-lived workload identity and record a time-bound credential exception only when unsupported. OIDC shortens the publishing credential but does not by itself prove code safety, prevent post-build modification, or establish the legitimacy of the publishing workflow.
 
-### 31.2 Package Publishing Workflow
+### 31.2 Reference Package Publishing Workflow
 
 ```yaml
 # .github/workflows/publish.yml
@@ -1144,20 +1202,25 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
       - run: npm ci
-      - run: npm publish --provenance --access public
+      - run: npm test
+      - run: npm pack
+      - run: npm publish ./*.tgz --provenance --access public
         env:
           NODE_AUTH_TOKEN: ''  # Not needed with OIDC TP
       - name: Generate Attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest@v4
         with:
           subject-path: '*.tgz'
 ```
+
+This GitHub Actions and npm workflow is replaceable. Conformance requires equivalent protected release triggers, least privilege, reproducible dependency resolution, short-lived identity, Provenance bound to the artifact digest, and publication to an approved registry.
 
 ### 31.3 Provenance Verification
 
@@ -1169,15 +1232,26 @@ gh attestation verify $(npm pack --dry-run 2>&1 | tail -1) \
   --owner myorg
 ```
 
+Replace the verification command and owner expression for the registry, VCS, and attestation store in use. Execute verification as a consumer or policy-gate failure condition, not an optional manual step.
+
+### 31.4 Workflow, Policy, and Team Controls
+
+- **Rule**: Treat a workflow or pipeline registered as a Trusted Publisher as a publish-credential trust boundary. Constrain repository, workflow, ref, environment, and audience or subject claims to the narrowest supported scope. Do not run untrusted PR code, fork code, or dynamically selected scripts in a job that can obtain the publishing identity
+- **Rule**: Review the release workflow, reusable workflows, third-party actions or plug-ins, and build dependencies and pin them to immutable digests or managed versions. A high-assurance package requires independent approval, re-review after approved changes, and a protected release environment or equivalent control for publishing-policy and workflow changes
+- **Rule**: Assign an accountable owner and continuity route to package ownership, registry organization, Trusted Publisher policy, and CI identity. Maintain an offboarding procedure that revalidates or revokes policies, tokens, owners, and environments after role changes, departure, repository transfer, or workflow rename
+- **Rule**: Bind OIDC token exchange, package upload, registry response, artifact digest, source revision, provenance, and approval into one release record. Do not treat Trusted Publishing alone as proof of source safety or artifact integrity
+
+Official primary sources: [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/), [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/), [PyPI security model](https://docs.pypi.org/trusted-publishers/security-model/), [RubyGems Trusted Publishing](https://guides.rubygems.org/trusted-publishing/), [nuget.org Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
+
 → Cross-reference: [`security/000_security_privacy.md`](../security/000_security_privacy.md) §Supply Chain
 
 ---
 
-## §32. GitHub Dependency Review Integration
+## §32. Dependency Change Review Integration
 
 ### 32.1 Overview
 
-GitHub Dependency Review Action automatically checks license and vulnerability impact for dependencies added or updated in pull requests.
+Every repository inspects the version, source, license, known vulnerabilities, and maintenance risk of direct and transitive dependencies added or updated by a change proposal. GitHub Dependency Review Action is a reference implementation when GitHub is used.
 
 ### 32.2 Configuration Example
 
@@ -1202,9 +1276,9 @@ jobs:
 
 ### 32.3 Rules
 
-- **Rule**: Enable Dependency Review Action on all repositories
-- **Rule**: Synchronize license deny list with §1 prohibited list
-- **Rule**: Enable PR comment summary for immediate reviewer impact awareness
+- **Rule**: Enable a dependency-diff gate appropriate to the VCS or CI in every repository. GitHub repositories may use Dependency Review Action
+- **Rule**: Synchronize license policy, vulnerability severity, source allowlists, and the exception register with the organization's risk classification
+- **Rule**: Retain a machine-readable result that lets reviewers inspect the change rationale, direct and transitive impact, block reason, and expiring exception. A pull-request comment is one presentation option
 
 ---
 
@@ -1212,29 +1286,30 @@ jobs:
 
 ### 33.1 Key Precedents & Trends
 
-| Case/Trend | Year | Impact |
-|:----------|:-----|:-------|
-| SFC v. Vizio | 2024 | Consumer standing recognized for GPL compliance suits. Increased OSS license litigation risk |
-| Artificial Intelligence Act (EU) | 2025-2027 | License tracking obligation for AI model training data. Technical documentation mandate for high-risk AI systems |
-| OSSRA 2025 Report | 2025 | 33% of commercial codebases have license conflicts. AI-generated code "license laundering" as primary cause |
-| Google LLC v. Oracle America (Final ruling) | 2021 (ongoing impact) | Java API use ruled fair use. Partial clarification of API license risk |
-| Elastic NV v. AWS | 2025 settlement | SSPL enforcement dispute clarifies Source-Available risk for SaaS providers |
-| EU CRA Enforcement (phased) | 2025-2027 | Manufacturer liability partially extended to OSS contributors. CRA Art.16 "significantly contributing OSS developer" definition emerges as legal risk source |
-| Cisco / Apache License Reaffirmation | 2026-Q1 | Major vendor reaffirms Apache-2.0 on own products. Publishes practical patent clause interpretation guidelines |
+Cases, regulations, and license changes vary rapidly by time and jurisdiction, so Universal does not freeze them into a static conclusions table. The organization maintains a version-controlled legal horizon register with these fields.
+
+| Field | Content |
+|:------|:--------|
+| Authority | Primary source such as a court, regulator, standards body, or license steward |
+| Scope | Jurisdiction, covered entity, product or service, license version, and use model |
+| Status | Draft, effective, disputed, appealed, settled, or transposition state, separating fact from interpretation |
+| Dates | Publication, effective, transition, and last-verified dates |
+| Decision | Applicability, required controls, owner, deadline, and external-expert confirmation |
+| Evidence | Primary-source URL, preserved snapshot, legal memo, and affected components or releases |
 
 ### 33.2 License Change Risk Monitoring
 
-- **Rule**: Monitor dependency package license changes quarterly (HashiCorp BSL migration, Redis SSPL→AGPL examples)
-- **Rule**: Complete impact assessment within 72 hours upon license change detection
-- **Rule**: Establish fork plans for packages with high Source-Available migration risk (single-company maintained)
+- **Rule**: Detect component updates, releases, license metadata or text changes, M&A, and legal, case, or contractual changes event-first, then reconcile gaps on a portfolio-risk cadence
+- **Rule**: On a license change, pause new acquisition and assess the deployed version, distribution and network model, old and new terms, customer obligations, and alternatives within the Blueprint SLA
+- **Rule**: For concentration risk from source-available migration or maintenance cessation, compare pinning, commercial terms, alternatives, a fork, internal ownership, and data or API migration with their cost and rights. Do not always require a fork
 
 ### 33.3 Legal Risk Assessment Framework
 
 | Risk Level | Condition | Action |
 |:-----------|:---------|:-------|
-| 🔴 High | Copyleft license contamination / commercial use violation | Immediate removal + legal escalation |
-| 🟡 Medium | Potential Source-Available condition breach | Legal review + alternative evaluation |
-| 🟢 Low | Permissive license, attribution gap | Fix with NOTICE update |
+| 🔴 High | Non-compliance with an applicable duty, missing rights, or credible injunction, source-disclosure, or customer-breach risk | Stop distribution or contain, obtain legal and accountable-executive decision, set remediation deadline |
+| 🟡 Medium | Ambiguous interpretation, source-available term, exception, dual license, or patent clause | Gather evidence, specialist review, expiring use decision, alternative assessment |
+| 🟢 Low | Rights and use align, with a remediable attribution or artifact gap | Correct generated material before release and reverify |
 
 → Cross-reference: [`security/100_data_governance.md`](../security/100_data_governance.md), [`security/300_ip_due_diligence.md`](../security/300_ip_due_diligence.md)
 
@@ -1263,9 +1338,9 @@ flowchart TD
 
 ### 34.2 Rules
 
-- **Rule**: Complete reachability analysis **within 4 hours** of zero-day detection
-- **Rule**: If reachable, implement mitigations **within 8 hours**
-- **Rule**: Revert to official version **within 48 hours** of official patch release when using temporary fork
+- **Rule**: After zero-day detection, complete triage and owner assignment under an incident SLA derived from exposure, reachability, deployed version, exploitation evidence, and asset criticality. Four hours is a reference objective for a high-risk service
+- **Rule**: When affected, apply service suspension, isolation, configuration changes, credential rotation, WAF policy, version changes, or other compensating controls within a risk-based containment objective
+- **Rule**: A temporary fork manages rights, signatures, review, CI, release, and upstream diffs and converges on a verified official fix under an expiry. Prefer reinfection risk and compatibility evidence over a fixed 48-hour rule
 - **Rule**: Record all zero-day response steps chronologically
 
 → Cross-reference: [`operations/500_incident_response.md`](../operations/500_incident_response.md), [`security/000_security_privacy.md`](../security/000_security_privacy.md)
@@ -1285,22 +1360,22 @@ flowchart TD
 
 ### 35.2 Rules
 
-- **Rule**: Perform OSS code similarity scanning (FOSSA / Snyk Code, etc.) on AI-generated code
-- **Rule**: Enable GitHub Copilot's "Public code filter"
-- **Rule**: Files with 50%+ AI-generated code require manual license contamination review
-- **Rule**: Legal reviews AI coding tool ToS IP clauses annually
-- **Rule**: Establish internal "AI-Generated Code Policy" specifying allowed tools and conditions
-- **Rule**: Recommend `ai-assisted` label for commits containing AI-generated code
+- **Rule**: Regardless of origin, apply review and, when warranted, similarity or provenance checks that can detect long or distinctive third-party-code matches, license headers, attribution duties, and generated dependencies
+- **Rule**: When an adopted AI tool provides public-code matching, citation, or source references, enable them under organizational policy and treat the output as review evidence rather than a legal conclusion
+- **Rule**: Derive review strength from change length, novelty, criticality, distribution model, match signals, input source, developer understanding, and test evidence, not an estimated generation percentage
+- **Rule**: Review AI-tool terms for data use, retention, IP, indemnity, and model or feature changes at contract and feature changes and on a risk-based cadence
+- **Rule**: Define allowed tools, prohibited inputs, source confirmation, human accountability, records, exceptions, and incident response in an AI-assisted development policy
+- **Rule**: Record AI use at the granularity required for audit, reproducibility, and legal obligations; Universal does not mandate a fixed label on every commit
 
 ### 35.3 AI Code Policy Template
 
 | Item | Policy |
 |:----|:-------|
-| Allowed Tools | GitHub Copilot (Business+), Cursor (Team+) |
-| Public Code Filter | **Mandatory enabled** |
+| Allowed Tools | Tools and features reviewed by the organization for contract, data, IP, and security |
+| Public Code Matching | Enable available filtering or citation and review high-signal matches |
 | Generated Code Review | Integrated into standard PR review process |
-| Copyleft Contamination Check | Run OSS code similarity scan in CI |
-| Recording Obligation | Document in PR description for large AI generation (50%+ of file) |
+| Third-Party Code Check | Run source lookup, similarity, and license or attribution scans according to risk |
+| Recording Obligation | Record rationale on organizational triggers such as sensitive, high-impact, long-match, or externally distributed changes |
 
 → Cross-reference: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md), [`security/100_data_governance.md`](../security/100_data_governance.md) §GenAI Copyright
 
@@ -1314,10 +1389,10 @@ AI assistants (ChatGPT, Copilot, etc.) generate non-existent package names as "h
 
 ### 36.2 Rules
 
-- **Rule**: Always verify AI-recommended package names exist on npm/PyPI before `npm install`
-- **Rule**: Check package publish date, download count, and maintainer info; be wary of "newly published + low downloads"
-- **Rule**: Enable automated slopsquatting detection via Socket.dev behavior analysis
-- **Rule**: Perform package provenance verification before `npm install` in CI
+- **Rule**: Before acquisition, verify every previously unadopted component proposed by AI, a human, or a template against the ecosystem's authoritative registry or source, exact namespace, owner, version, digest or signature, and provenance
+- **Rule**: Treat publication date, maintainer change, and downloads as signals only, combining them with typosquatting, install behavior, source-to-artifact mapping, permissions, network access, and known incidents
+- **Rule**: Apply a behavior scanner such as Socket.dev or equivalent sandboxing, static analysis, install-script review, and egress control according to risk
+- **Rule**: In CI and release, evaluate the actually retrieved artifact's source, digest, signature, provenance, and registry against policy and fail unverified fallback
 
 ---
 
@@ -1420,23 +1495,26 @@ npx depcheck --ignores="@types/*,eslint-*"
 
 ### 41.1 Maturity Levels
 
-| Level | Name | Key Achievement Criteria | Target Year |
-|:------|:-----|:------------------------|:-----------|
-| L1 | Reactive | Manual npm audit / manual license verification | — |
-| L2 | Managed | CI SCA integration / lockfile commit mandate / prohibited license auto-block | Year 1 |
-| L3 | Defined | SBOM auto-generation / automated updates (Renovate) / security patch SLA / OpenSSF Scorecard | Within 1 year |
-| L4 | Quantified | VEX-based prioritization / reachability analysis / OSPO operational / KPI dashboard | Within 2 years |
-| L5 | Optimized | SLSA 3 / Runtime SCA / CBOM / Continuous Verification / full OIDC TP / GUAC integration | Within 3 years |
+| Level | Name | Key Achievement Criteria | Adoption Decision |
+|:------|:-----|:------------------------|:------------------|
+| L1 | Reactive | Ecosystem-specific dependency and license checks are manual, with weak binding to releases | Starting point that prioritizes visibility and owner assignment |
+| L2 | Managed | CI SCA, resolution source and lockfiles, prohibited-item policy, expiring exceptions | Minimum operational baseline for production applications |
+| L3 | Defined | Artifact-level SBOM, update automation, risk-based patch SLA, external project-health assessment | Standard candidate for multiple repositories or continuous releases |
+| L4 | Quantified | Reachability and VEX, queryable portfolio metrics, governance capability, runtime feedback | Prioritize for regulated systems, large portfolios, or high supply-chain risk |
+| L5 | Optimized | SLSA Build L3 and Source L4 evidence for high-assurance artifacts, continuous verification, short-lived publishing identity, artifact knowledge integration | Adopt where justified by threat, regulation, or consumer requirements |
 
-### 41.2 KPI Targets by Level
+Do not fix achievement timelines in Universal rules. Define Blueprint milestones, owners, and completion evidence from current risk, repository count, release frequency, regulatory deadlines, staffing, and external consumer contracts. Renovate, OpenSSF Scorecard, an OSPO, and GUAC are implementation examples; equivalent capabilities are valid.
 
-| KPI | L2 | L3 | L4 | L5 |
-|:----|:---|:---|:---|:---|
-| Critical vuln response SLA | 7 days | 24 hours | 24 hours | 4 hours |
-| SBOM generation rate | 0% | 100% | 100% | 100% |
-| VEX coverage | 0% | 0% | ≥90% | ≥95% |
-| OpenSSF Scorecard average | N/A | ≥4.0 | ≥6.0 | ≥7.0 |
-| SLSA Level | 0 | 1 | 2 | 3 |
+### 41.2 Maturity Indicator Decision Contract
+
+| Indicator | Universal Outcome | Blueprint Parameter Examples |
+|:----------|:------------------|:-----------------------------|
+| Vulnerability response | SLA and exception evidence based on KEV and EPSS, reachability, exposure, data sensitivity, and compensating controls | severity deadlines, emergency-change path, risk-acceptance expiry |
+| SBOM | Track dependencies for in-scope release artifacts with completeness validation | artifact scope, required fields, retention. A project may target 100% within the declared scope |
+| VEX | Bind material vulnerability decisions to status, rationale, timestamp, and authoritative source | severity scope, reachability-analysis scope, re-evaluation cadence |
+| Project health | Combine maintainer, release, provenance, vulnerability, license, and exit-capability evidence | reference threshold from Scorecard or equivalent; never auto-reject from one score alone |
+| SLSA Build | Use Build L2 as the production-artifact baseline and target Build L3 for high-assurance artifacts | artifact scope, builder, verification policy |
+| SLSA Source | Use Source L2 as the source-management baseline and target Source L3 or L4 for high-assurance areas | protected references, technical controls, two-party-review scope |
 
 ---
 
@@ -1444,19 +1522,19 @@ npx depcheck --ignores="@types/*,eslint-*"
 
 ### 42.1 Overview
 
-"License laundering" in AI-generated code occurs when AI (Copilot/ChatGPT, etc.) learns copyleft-licensed OSS code fragments and outputs them without original license information, creating unintentional license violations. The 2025 OSSRA report detected **license conflicts in 33% of commercial codebases**.
+AI-assisted code may enter a change with a third-party-code match or missing license and attribution information. Similarity alone also cannot establish training source, copyright infringement, or a license duty. This section defines an evidence workflow to detect, investigate, remove, or properly license code of unknown provenance.
 
 ### 42.2 Rules
 
-- **Rule**: Integrate code similarity scanning (FOSSA / Snyk Code / Black Duck) for AI-generated code as mandatory CI step
-- **Rule**: Block PRs and require manual review when similarity score exceeds threshold (e.g., 80%+ line match)
+- **Rule**: According to change risk, combine one or more independent signals such as code search, source citation, license headers, attribution, and similarity scanners. FOSSA, Snyk Code, and Black Duck are reference implementations
+- **Rule**: Hold a high-signal match for human review of source, license version, expressive content, modification, independent implementation, and distribution impact. Do not derive a legal conclusion from a vendor-specific score alone
 - **Rule**: Include license laundering risk description in AI-generated code policy
-- **Rule**: Use OSS code similarity databases to detect GPL/AGPL-derived code fragments
+- **Rule**: Cover all third-party code rather than selected licenses and derive allow, review, deny, attribution, rewrite, or commercial-license treatment from organizational policy
 
 ### 42.3 Detection Pipeline
 
 ```yaml
-# .github/workflows/license-laundering-check.yml
+# Reference implementation. Replace with the organization's scanner and policy
 - name: AI Code License Check
   run: |
     fossa analyze --policy license-compliance
@@ -1472,7 +1550,7 @@ npx depcheck --ignores="@types/*,eslint-*"
 
 ### 43.1 Overview
 
-RDD (Remote Dynamic Dependencies) is a technique where a package's install script or runtime code dynamically downloads and executes dependencies from a remote server at install time. Used in the PhantomRaven campaign (2025-10~2026-02), completely evading conventional SCA scanning.
+RDD (Remote Dynamic Dependencies) is a risk pattern in which an install or build script, plug-in, runtime code, or similar capability retrieves and executes code or binaries outside the resolved inventory. Manifest-centered SCA may not observe the source, content, or execution time.
 
 ### 43.2 Attack Mechanism
 
@@ -1485,10 +1563,10 @@ RDD (Remote Dynamic Dependencies) is a technique where a package's install scrip
 
 ### 43.3 Defense Rules
 
-- **Rule**: Set `ignore-scripts=true` as default in `.npmrc`
-- **Rule**: Detect "network access," "filesystem access," and "dynamic code execution (eval)" via Socket.dev behavior analysis
-- **Rule**: Consider network isolation (`--network=none`) for CI builds
-- **Rule**: Static-analyze network communication code within `node_modules` post-install
+- **Rule**: Manage ecosystem install, build, and plug-in execution through default denial, a minimal allowlist, or a reviewed sandbox. `.npmrc` is a Node.js reference implementation
+- **Rule**: Inspect network, filesystem, process, dynamic-code, and credential access through a behavior scanner, static analysis, runtime policy, or equivalent
+- **Rule**: A reproducible build closes network access by default, allowing only approved sources, digests, protocols, and phases and adding retrieved material to the SBOM and provenance
+- **Rule**: Cover Gradle and Maven plug-ins, Python build backends, Cargo build scripts, compiler plug-ins, container builds, and runtime fetches in addition to post-install `node_modules`
 
 → Cross-reference: §27 Dependency Confusion Attack Defense, §23 Incident Response
 
@@ -1652,7 +1730,7 @@ flowchart TD
 
 ### 50.1 Overview
 
-Managing dependencies for WebAssembly (Wasm) components and native binaries (Rust/Go/C/C++ compiled artifacts) carries unique risks distinct from traditional ecosystems. With the proliferation of the WASI 0.2 Component Model, Wasm-specific SBOM management has emerged as a key challenge in 2026.
+Managing dependencies for WebAssembly (Wasm) components and native binaries (Rust/Go/C/C++ compiled artifacts) carries unique risks distinct from traditional ecosystems. Stable WASI 0.2 and 0.3 component targets, legacy 0.1 modules, and uneven runtime support make Wasm-specific SBOM and compatibility management a distinct release concern.
 
 ### 50.2 Wasm Component SBOM Challenges
 
@@ -1660,7 +1738,7 @@ Managing dependencies for WebAssembly (Wasm) components and native binaries (Rus
 |:---------|:-----------|:-----------|
 | Equivalent to static linking | Wasm components bundle all dependencies inside | Scan all deps with `syft`/`trivy` |
 | Lack of source mapping | Hard to reverse-lookup source deps from compiled Wasm | Generate source SBOM pre-compile and link to binary |
-| WASI ABI compatibility | Compatibility across WASI versions (Preview1/Preview2/0.2) | Visualize component graph with `wasm-tools compose` |
+| WASI and component compatibility | Compatibility across 0.1 modules, 0.2 or 0.3 components, WIT, bindings, runtime, and host capabilities | Pin the complete matrix, validate and compose the graph, and run host conformance or compatibility tests; `wasm-tools` is one implementation |
 | Unsupported Custom Sections | Existing SCA tools may ignore Wasm Custom Sections | Validate SBOM embedding via `wasm-metadata` |
 
 ### 50.3 Native Binary Supply Chain Risks
@@ -1668,16 +1746,16 @@ Managing dependencies for WebAssembly (Wasm) components and native binaries (Rus
 | Risk | Example | Defense |
 |:-----|:--------|:--------|
 | C/C++ dependency caveats | Outdated OpenSSL, zlib, libpng bundled | `syft` binary dependency scan + SBOM generation |
-| Build toolchain compromise | Malware on GCC/Clang build servers | SLSA 3 + Hermetic Build enforcement |
+| Build toolchain compromise | Malware on GCC/Clang build servers | SLSA Build L3 + Hermetic Build enforcement |
 | Stripped symbols | Debug info removal makes version detection impossible | Embed `buildinfo` at compile time (Go: `debug.ReadBuildInfo()`) |
 
 ### 50.4 Rules
 
-- **Rule**: Projects containing Wasm modules MUST retain source SBOMs (`Cargo.lock`/`go.sum` etc.) pre-compile and link them to the final Wasm artifact
-- **Rule**: Use `wasm-metadata` to embed SBOM information as a Custom Section in Wasm files
+- **Rule**: A project containing a Wasm module binds the source dependency inventory to the final Wasm digest through provenance or a release record
+- **Rule**: When consumers require it, embed component metadata with `wasm-metadata` or equivalent, or enable reverse lookup from an external attestation to the same digest
 - **Rule**: For Wasm packages distributed via npm (e.g., `@ffmpeg/ffmpeg`), include bundled C library dependencies in the SBOM
 - **Rule**: Manage Wasm runtimes (`wasmtime`/`wasmer` etc.) as dependencies and monitor their CVEs
-- **Rule**: Sign Wasm components with `cosign` and store in a Container Registry in OCI Artifact format
+- **Rule**: Sign or attest the Wasm component while binding source revision, builder identity, digest, and SBOM, and distribute it through a verifiable channel available to consumers. cosign and OCI Artifact are reference implementations
 
 ```bash
 # Scan Wasm binary dependencies
@@ -1700,13 +1778,13 @@ go version -m ./app.wasm
 
 ### 51.1 Overview
 
-In organizations with mature Platform Engineering (Internal Developer Platforms: IDPs), dependency governance transitions from individual team responsibility to **platform-level centralized control**. By providing a pre-approved dependency catalog via the Golden Path, low-scorecard or high-license-risk dependencies are excluded at the organizational level.
+When multiple repositories or teams handle the same dependency risks, a scale-appropriate Platform Engineering function provides reusable policies, catalogs, Golden Paths, and evidence aggregation. It may be implemented by an owner maintaining shared configuration, a virtual team, a dedicated platform team, or an IDP. Each service owner retains responsibility for adoption rationale, exceptions, updates, and exit; centralization is not an end in itself.
 
 ### 51.2 Architecture
 
 ```mermaid
 flowchart TD
-    A[Development Teams] --> B[IDP / Backstage]
+    A[Development Teams] --> B[Platform function / IDP]
     B --> C[Approved Dependency Catalog]
     C --> D[Allowlist Registry]
     C --> E[Denylist Registry]
@@ -1714,17 +1792,17 @@ flowchart TD
     F --> G[Project Initialization]
     G --> H[Pre-install Approved Deps Only]
     B --> I[Policy-as-Code Engine]
-    I --> J[OPA / Kyverno]
+    I --> J[Policy engine]
     J --> K[CI/CD Guardrail Enforcement]
 ```
 
 ### 51.3 Approved Dependency Catalog (IDP Dependency Catalog)
 
-| Catalog Element | Content | Tool |
+| Catalog Element | Content | Replaceable Implementation Example |
 |:--------------|:--------|:-----|
 | Approved Package List | Packages cleared for license, security, and health metrics | FOSSA / Endor Labs |
 | Version Constraints | Permitted version ranges (SemVer range) | Renovate Preset distribution |
-| Shared Renovate Preset | Distribute unified config to all teams | Renovate Global Config |
+| Shared update policy | Distribute common update principles to in-scope repositories | Renovate Global Config or equivalent |
 | Prohibited Package List | List of packages subject to immediate block | OPA Policy |
 
 ### 51.4 Policy-as-Code Implementation Example
@@ -1760,14 +1838,16 @@ deny[msg] {
 }
 ```
 
+The score and license set above are illustrative. Define actual thresholds, deny/review/allow treatment, and exception expiry by risk tier and Blueprint; do not decide adoption from a single score alone.
+
 ### 51.5 Rules
 
-- **Rule**: Organizations running an IDP MUST centrally distribute a shared Renovate Global Config (Preset) to all teams to standardize dependency update strategy
-- **Rule**: Integrate a dependency governance dashboard into the Backstage Software Catalog, visualizing OpenSSF Scorecard, SBOM generation status, and SLA compliance rates
-- **Rule**: Golden Path templates MUST include a `package.json` containing only approved dependencies, preventing prohibited dependencies from the initial scaffold
-- **Rule**: Integrate Policy-as-Code engines (OPA/Kyverno etc.) into CI to automatically block prohibited and low-score dependencies at the code level
+- **Rule**: An organization sharing controls across repositories distributes a versioned common policy, such as a Renovate Global Config, to the in-scope repositories. Allow ecosystem-specific compatibility and exceptions to override it; applying one policy to every team is not a Universal requirement
+- **Rule**: Make dependency owners, SBOM generation status, vulnerability and license exceptions, and update SLAs discoverable in the portal, catalog, dashboard, or audit system in use. Backstage is an implementation example
+- **Rule**: A Golden Path or project template provides approved manifests, lock policy, source policy, and scan configuration for the target ecosystem; it does not assume `package.json` alone
+- **Rule**: Use Policy-as-Code or an equivalent CI gate to block prohibited dependencies. Treat a low score as a review input alongside risk, reachability, maintenance, and Provenance, not as a sole automatic rejection reason
 - **Rule**: Apply the OSSO governance process (§22) to internal library (shared UI, SDK, etc.) publication and explicitly state the license
-- **Rule**: The platform team MUST update the approved catalog quarterly, removing EOL and down-scored packages
+- **Rule**: The owner of the platform function reassesses the catalog on a risk-based Blueprint cadence and critical event triggers, moving packages with EOL, compromise, license change, or maintenance cessation into a time-bound migration plan
 
 → Cross-reference: §22 OSPO, §24 Audit & Reporting, §26 OpenSSF Scorecard Integration, §41 Dependency Governance Maturity Model
 
@@ -1837,12 +1917,12 @@ With Google A2A, Anthropic MCP, and Microsoft AutoGen standardizing agent-to-age
 
 - **Rule**: LLM framework major version upgrades MUST include regression tests for AI agent behavior
 - **Rule**: MCP servers MUST be managed via an **approved allowlist**; execution of unapproved servers MUST be prohibited at the environment level
-- **Rule**: Packages suggested as code by AI tools MUST undergo behavior analysis via Socket.dev or equivalent before installation (see §36)
-- **Rule**: The SBOM for LLM frameworks MUST record "non-software components" such as prompt templates and RAG configs
-- **Rule**: MCP tool execution environments MUST apply network isolation (Internet Egress restrictions) to prevent data exfiltration by malicious tools
+- **Rule**: A component proposed by an AI tool passes the same source, license, provenance, behavior, and lock gates as one proposed by a human (see §36)
+- **Rule**: According to risk and regulation, an AI-system inventory cross-references prompts, RAG configuration, models, datasets, tools and MCP servers, native runtimes, and other non-software components through an SBOM, ML-BOM, model card, or equivalent
+- **Rule**: An MCP or agent-tool execution environment applies deny-by-default capabilities, minimal egress, filesystem and secret isolation, and human approval according to tool risk. Universal does not require complete network isolation for every tool
 - **Rule**: CVEs in AI toolchain dependencies MUST be addressed under the same SLA as regular dependencies (§16), with an added PromptInjection impact assessment for AI agents
 - **Rule**: When upgrading agentic AI frameworks (LangGraph, CrewAI, etc.), verify the impact on agent autonomous decision logic in a staging environment
-- **Rule**: All A2A agent SDKs (Google A2A SDK, etc.) MUST be included in SBOM management scope, and agent definition file signature verification MUST be enforced
+- **Rule**: Include A2A SDKs, agent definitions, and tool manifests in the release inventory and verify signatures or attestations through trust policy when the distribution channel provides them. For unsigned formats, compensate with source, digest, review, and allowlist evidence
 
 → Cross-reference: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §Supply Chain, §36 Slopsquatting Defense, §43 RDD Defense, [`000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLM Security
 
@@ -2122,11 +2202,11 @@ curl -sSf "https://api.first.org/data/v1/epss?cve=$CVE_ID" \
 
 ### 54.4 Rules
 
-- **Rule**: Execute automatic SBOM vs. CISA KEV catalog matching **at least weekly**
-- **Rule**: KEV-registered CVEs require remediation **within 3 days**, regardless of reachability analysis (see §16)
-- **Rule**: Medium CVEs with EPSS ≥ 0.8 are escalated to High treatment with 7-day SLA
-- **Rule**: Enable KEV/EPSS integration features in SCA tools (Snyk, Dependency-Track, etc.)
-- **Rule**: Immediately send Slack notification to security lead upon KEV match detection
+- **Rule**: Automatically match SBOMs against the CISA KEV catalog on dependency changes, new KEV publications, releases, and a risk-based cadence. Weekly is a reference starting point for a stable portfolio
+- **Rule**: Prioritize KEV entries and respond by the applicable catalog due date, law, contract, vendor deadline, or Blueprint SLA (see §16)
+- **Rule**: Calibrate EPSS thresholds and severity escalation from portfolio distribution, exposure, reachability, and false-positive cost in the Blueprint
+- **Rule**: Combine KEV, EPSS, and reachability through the adopted SCA or equivalent pipeline and retain machine-readable decision evidence
+- **Rule**: Immediately notify an accountable security route when a KEV match is found. A security lead and Slack are implementation examples
 
 → Cross-reference: §16 Security Patch SLA, §28 VEX, §45 Continuous Verification
 
@@ -2305,12 +2385,12 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 
 ### 56.5 Rules
 
-- **Rule**: Set `SOURCE_DATE_EPOCH` in all release builds to eliminate timestamp dependencies
-- **Rule**: Use `npm ci --ignore-scripts` (or equivalent) for Hermetic builds with install scripts disabled
-- **Rule**: Target SLSA 3 and generate/verify Build Provenance with `actions/attest-build-provenance`
-- **Rule**: Record build artifact hashes with `sha256sum` per release and verify they match Component Hash in SBOM
-- **Rule**: Organizations at maturity L4+ (see §41) should evaluate adoption of Hermetic Build tools such as Bazel/Buck2
-- **Rule**: Leverage Rekor transparency log to enable consumer-side verification that release artifacts were generated from legitimate CI pipelines
+- **Rule**: Where the target ecosystem supports it, control non-deterministic inputs through `SOURCE_DATE_EPOCH`, compiler flags, normalized archives, deterministic ordering, or equivalent and record residuals through reproducibility tests
+- **Rule**: Resolve build inputs in advance and restrict network, clock, locale, filesystem, credentials, and install scripts through explicit policy. `npm ci --ignore-scripts` is a Node.js reference mechanism
+- **Rule**: Target SLSA Build L3, generate Build Provenance with tools such as `actions/attest-build-provenance`, and verify it in a policy gate
+- **Rule**: Record a release artifact's cryptographic digest and bind the SBOM, provenance, signature, and distribution metadata to the same subject. Select the hash algorithm and tool by policy
+- **Rule**: For high-assurance artifacts, evaluate hermetic capabilities such as Bazel, Buck2, Nix, or a containerized builder with the existing build system and migration cost
+- **Rule**: When a transparency log or equivalent append-only evidence is available, enable consumers to verify the authorized builder and artifact digest. Universal does not require Rekor in every environment
 
 → Cross-reference: §9 Supply Chain Security Foundation (SLSA), §41 Dependency Governance Maturity Model
 
@@ -2323,6 +2403,8 @@ cosign verify myregistry.com/myapp:v1.0.0 \
 Merely "generating" an SBOM is insufficient. **SBOM quality (accuracy, completeness, freshness, machine-readability)** must be quantitatively assessed and continuously improved. Achieving "high-quality SBOMs" beyond the CISA/NTIA minimum elements standard (see §7) is the 2026-2027 goal.
 
 ### 57.2 Five-Dimension SBOM Quality Assessment Model
+
+The following values are a reference profile, not a rule for inferring standards conformance from a score. Define required fields, component scope, allowed omissions, freshness, and format from the artifact, consumer contract, and applicable profile such as CISA's.
 
 | Dimension | Assessment Criteria | Minimum Quality | High Quality |
 |:---------|:-------------------|:---------------|:-------------|
@@ -2357,7 +2439,7 @@ def score_sbom(sbom_path: str) -> dict:
     # Fulfillment rate per dimension
     dimension_scores = {k: v / total * 100 for k, v in scores.items()}
 
-    # Overall score (NIST SSDF-aligned weighting)
+    # Organization-specific reference weights; not a standards-conformance decision
     weights = {'has_version': 0.2, 'has_hash': 0.25, 'has_purl': 0.25,
                'has_license': 0.2, 'has_supplier': 0.1}
     total_score = sum(dimension_scores[k] * w for k, w in weights.items())
@@ -2367,7 +2449,7 @@ def score_sbom(sbom_path: str) -> dict:
         'grade': 'A' if total_score >= 90 else 'B' if total_score >= 70 else 'C' if total_score >= 50 else 'F',
         'component_count': total,
         'dimensions': dimension_scores,
-        'ntia_conformance': total_score >= 80,  # NTIA minimum elements achieved
+        'profile_score_only': True,
     }
 
 if __name__ == '__main__':
@@ -2396,11 +2478,11 @@ if __name__ == '__main__':
 
 ### 57.5 Rules
 
-- **Rule**: Run `ntia-conformance-checker` on all SBOMs and verify 100% fulfillment of NTIA minimum elements
-- **Rule**: SBOMs with scores **below 70 (grade C)** in the §57.2 five-dimension assessment MUST block the release
-- **Rule**: Assign PURL to all components to enable cross-SBOM referencing
-- **Rule**: Integrate SBOM quality score into the §24 KPI dashboard and track monthly trends
-- **Rule**: Set achieving SBOM quality score 90 (grade A) as a target **within 1 year**
+- **Rule**: Directly validate an in-scope SBOM against the selected CycloneDX or SPDX schema, consumer profile, and applicable CISA minimum elements. `ntia-conformance-checker` is a reference implementation for a supported profile
+- **Rule**: A release gate blocks missing required fields, component coverage, subject digest, dependency relationships, schema, and consumer requirements. Universal does not block from one organization-specific aggregate score of 70
+- **Rule**: Use PURL, CPE, SWID, supplier identifiers, or equivalent when accurate for the component and ecosystem; do not force a missing or incorrect PURL
+- **Rule**: Track quality dimensions and omission rationale by release, generator, and artifact type, deriving trend cadence from portfolio risk
+- **Rule**: Set improvement objectives from measured baseline, consumer need, regulatory deadline, and generator capability rather than a fixed score of 90 within one year
 
 → Cross-reference: §7 SBOM Generation, §8 SBOM Regulatory Compliance, §24 Audit & Reporting
 
@@ -2414,7 +2496,7 @@ Next-generation package managers that accelerated adoption in 2025-2026 introduc
 
 ### 58.2 uv (Python)
 
-**Characteristics**: Rust-implemented ultra-fast Python package manager by Astral. Rapidly displacing `pip`/`poetry`/`pipenv` (47K+ GitHub Stars by end of 2025).
+**Characteristics**: Astral's high-performance Python package and project manager, implemented in Rust, with locking, syncing, auditing, and exporting in one toolchain.
 
 ```bash
 # uv basic setup
@@ -2422,74 +2504,71 @@ uv init myproject
 uv add requests numpy  # Add deps (uv.lock auto-generated)
 
 # Security scanning
-uv pip audit  # Integrates with pip-audit (since 2025 Q3)
+uv audit --frozen  # Audits known vulnerabilities without re-locking
 
-# SBOM generation (uv-compatible)
-uv export --format requirements-txt | \
-  python3 -m cyclonedx sbom --from-pip-requirements /dev/stdin > sbom.cdx.json
+# SBOM generation: reject lockfile drift and export CycloneDX 1.5 directly
+uv export --locked --format cyclonedx1.5 > sbom-uv.cdx.json
 
 # CI: install with frozen lockfile
-uv sync --frozen  # Errors if uv.lock has been modified
+uv sync --locked  # Errors when pyproject.toml and uv.lock are inconsistent
 ```
 
 **Governance Rules**:
 - **Rule**: **Always commit** `uv.lock` (generation via `pip install` etc. is prohibited)
-- **Rule**: Use `uv sync --frozen` in CI to enforce lockfile freezing
-- **Rule**: Run vulnerability scanning with `pip-audit` or `uv pip audit`
-- **Rule**: For projects on Python 3.12+, adopt `uv` and prioritize `uv.lock` management over `requirements.txt` generation
+- **Rule**: Use `uv sync --locked` in CI to prevent stale-lockfile acceptance and implicit updates
+- **Rule**: Run vulnerability scanning with `uv audit --frozen` or `pip-audit`
+- **Rule**: Because `uv export --locked --format cyclonedx1.5` is preview, pin the uv version, validate its schema and dependency coverage, and normalize it to the organization's required CycloneDX or SPDX version before aggregation. Fall back to an approved generator if it cannot meet the contract
+- **Rule**: Do not force a project to migrate from another toolchain based on its Python version alone. Follow the adoption contract in `engineering/320_programming_language_governance.md`; after adopting uv, make `uv.lock` the resolution source of truth and avoid dual maintenance with a redundant `requirements.txt`
 
 ### 58.3 Bun (JavaScript/TypeScript)
 
-**Characteristics**: Integrated JavaScript runtime, bundler, and package manager. Claimed up to 25x faster than npm.
+**Characteristics**: Integrated JavaScript runtime, bundler, and package manager. Bun 1.2 and later default to the human-readable `bun.lock`.
 
 ```bash
-# Bun lockfile management
-bun install  # Generates bun.lockb (binary format)
+# Generate the text lockfile. Migrate legacy bun.lockb through the official procedure
+bun install  # Generates bun.lock
 
-# View lockfile diff (cannot diff binary directly)
-bun install --print-lockfile  # Text output for diff review
+# CI: reject package.json / bun.lock drift and re-resolution
+bun ci
 
-# Security audit (Bun audit capability is currently limited)
-# → Use Snyk/Socket.dev integrated with npm dependency files
-npx snyk test --file=bun.lockb  # Snyk support (since 2025 Q4)
-socket scan --lockfile bun.lockb  # Socket.dev support
+# Audit known vulnerabilities in the default registry
+bun audit --audit-level=high
 
 # SBOM generation
-# Bun lacks CycloneDX plugin; generate from package.json base
-npx @cyclonedx/cyclonedx-npm --output-file sbom.cdx.json
+# Generate from both the source tree and release artifact
+syft dir:. -o cyclonedx-json=sbom-source.cdx.json
+syft ./dist -o cyclonedx-json=sbom-artifact.cdx.json
 ```
 
 **Governance Rules**:
-- **Rule**: **Always commit** `bun.lockb`
-- **Rule**: Review `bun install --print-lockfile` output in human-readable format during PR review
-- **Rule**: Until Bun's `audit` functionality matures, always use Snyk/Socket.dev in parallel as SCA
-- **Rule**: Run license checks for Bun projects via `license-checker` through npm
+- **Rule**: **Always commit** `bun.lock` and enforce `bun ci` or `--frozen-lockfile` in CI
+- **Rule**: Review `trustedDependencies` and dependency lifecycle scripts as a minimal allowlist
+- **Rule**: Cover non-default registries and other `bun audit` exclusions with OSV-Scanner, Snyk, Socket.dev, or an equivalent
+- **Rule**: Inspect both source manifests and release-artifact SBOMs and licenses
 
 ### 58.4 cargo-auditable (Rust)
 
-**Characteristics**: Embeds dependency information (equivalent to `Cargo.lock`) as an ELF section in compiled Rust binaries, enabling SBOM generation directly from deployed binaries.
+**Characteristics**: Embeds dependency information equivalent to `Cargo.lock` in a dedicated linker section of a compiled Rust executable. Supported formats include Linux, Windows, macOS, and WebAssembly, enabling dependency inventory recovery from deployed binaries.
 
 ```bash
 # Install cargo-auditable
 cargo install cargo-auditable cargo-audit
 
-# Build with auditable flag enabled (embeds dep info in binary)
-RUSTFLAGS="-C codegen-units=1" cargo auditable build --release
+# Locked release build through cargo-auditable (embeds dependency data)
+cargo auditable build --locked --release
 
 # Extract dependency info from deployed binary
 cargo audit bin ./target/release/myapp
 
-# SBOM generation (directly from binary)
-cargo auditable list --binary ./target/release/myapp --json | \
-  python3 scripts/auditable-to-cyclonedx.py > sbom-binary.cdx.json
+# SBOM generation with Syft 1.15+ reading cargo-auditable data
+syft packages ./target/release/myapp \
+  -o cyclonedx-json=sbom-binary.cdx.json
 ```
 
 ```yaml
 # .github/workflows/rust-sbom.yml
 - name: Build with cargo-auditable
-  env:
-    CARGO_AUDITABLE: "1"
-  run: cargo build --locked --release
+  run: cargo auditable build --locked --release
 
 - name: Extract SBOM from binary
   run: |
@@ -2498,62 +2577,63 @@ cargo auditable list --binary ./target/release/myapp --json | \
 ```
 
 **Governance Rules**:
-- **Rule**: Set `CARGO_AUDITABLE=1` for all Rust release builds to embed SBOM information in binaries
-- **Rule**: Run both `cargo audit` and `cargo audit bin` in CI and post-deployment verification
-- **Rule**: **Always commit** `Cargo.lock` (even for binary crates) and enforce `cargo build --locked`
-- **Rule**: Leverage SBOM information embedded by `cargo-auditable` for impact scope determination during incident response (see §23)
+- **Rule**: A project that must reverse-map Rust dependencies from a deployed native binary or container adopts `cargo auditable build` or an equivalent artifact-linked dependency inventory. For embedded artifacts that cannot carry metadata, bind the artifact digest, `Cargo.lock`, compiler and LLVM versions, SBOM, and provenance in a signed release record
+- **Rule**: Run source-level `cargo audit` in CI. For distributed binaries carrying cargo-auditable data, run `cargo audit bin` or a compatible scanner in release and post-deployment verification
+- **Rule**: Deployable applications and executable roots commit `Cargo.lock` and enforce `cargo build --locked`. Publishable libraries follow Cargo consumer-compatibility conventions while pinning CI and release resolution and retaining dependency evidence
+- **Rule**: Use the embedded inventory to determine incident impact, but never assume an SBOM prevents a supply-chain attack. Combine source review, provenance, signatures, and trust assessment such as `cargo-vet` when required (see §23)
 
 ### 58.5 Package Manager Comparison & Migration Decision Matrix
 
 | Criteria | npm | pnpm | Bun | uv (Python) | cargo + cargo-auditable |
 |:---------|:----|:-----|:----|:------------|:-----------------------|
-| Lockfile | ✅ Mature | ✅ Mature | ⚠️ Binary format | ✅ Mature (GA 2025) | ✅ `Cargo.lock` |
-| SCA Tool Support | ✅ All tools | ✅ All tools | ⚠️ Partial | ⚠️ `pip-audit` required | ✅ `cargo-audit` |
-| SBOM Generation | ✅ DX official | ✅ DX official | ⚠️ Indirect | ⚠️ Indirect | ✅ Directly from binary |
-| Maturity | ✅ Stable | ✅ Stable | 🟡 Growing | 🟡 Growing | ✅ Stable |
-| Recommended CI Command | `npm ci` | `pnpm install --frozen-lockfile` | `bun install --frozen-lockfile` | `uv sync --frozen` | `cargo build --locked` |
+| Lockfile | ✅ Mature | ✅ Mature | Text `bun.lock` | `uv.lock` | ✅ `Cargo.lock` |
+| SCA Tool Support | ✅ Broad | ✅ Broad | `bun audit` + external coverage | `uv audit` / `pip-audit` | ✅ `cargo-audit` |
+| SBOM Generation | ✅ DX official | ✅ DX official | ⚠️ Through artifact scanners | ⚠️ Preview direct CycloneDX 1.5 export | ✅ Recoverable from binary |
+| Maturity | ✅ Stable | ✅ Stable | Project assessment | Project assessment | ✅ Stable |
+| Recommended CI Command | `npm ci` | `pnpm install --frozen-lockfile` | `bun ci` | `uv sync --locked` | `cargo build --locked` |
 
 → Cross-reference: §14 Lockfile Integrity, §30 Multi-Ecosystem Dependency Management, §50 WebAssembly / Native Binary
 
 ---
 
-## §59. NIS2 Directive: Software Supplier Security Obligations
+## §59. NIS2 Directive: Applicability and Software Supply Chain
 
 ### 59.1 Overview
 
-NIS2 Directive (Directive (EU) 2022/2555, fully transposed by all member states October 2024) imposes **indirect cybersecurity obligations on suppliers whose software supports critical infrastructure**. CRA (product-focused) and NIS2 (service/infrastructure-focused) are complementary frameworks—OSS dependency management falls within the scope of both.
+The transposition deadline for the NIS2 Directive, Directive (EU) 2022/2555, was 2024-10-17, but Member State transposition and application continue to change, with European Commission proceedings still active in July 2026. Do not apply every direct duty to every software supplier or OSS project. Determine the entity, sector, size, service, and applicable Member State law, distinguishing a covered essential or important entity, its direct suppliers, and contractual flow-down.
 
 ### 59.2 NIS2 Impact on OSS Dependency Management
 
 | NIS2 Requirement | Impact on Dependency Management | Reference |
 |:----------------|:-------------------------------|:---------|
-| Art. 21 Cybersecurity Risk Management Measures | Mandate for documented OSS supply chain risk assessment | §12, §41 |
-| Art. 21(d) Supply Chain Security | Document risk profiles of critical OSS components | §24, §44 |
-| Art. 23 Incident Reporting (within 24h) | OSS supply chain incidents fall within scope | §23 |
-| Art. 32-35 Entity Supervision | Technical document submission to supervisory authority (may include SBOM) | §7, §8 |
-| Recital 86 Supplier Responsibility | Evaluate critical OSS components as Critical ICT Suppliers | §47 |
+| Art. 20 governance | A covered entity's management body approves and oversees Art. 21 measures and receives required training | §22, §24 |
+| Art. 21 risk management | Appropriate and proportionate technical, operational, and organizational measures include supply-chain security | §12, §41, §44 |
+| Art. 23 incident reporting | A covered entity's significant incident has a 24-hour early warning, 72-hour notification, and generally a final report within one month | §23 |
+| Member State law and contracts | Scope, authority, extra deadlines, evidence, and supplier flow-down are verified by country and contract | §8, §24 |
 
 > [!IMPORTANT]
-> If an organization qualifies as an NIS2 "Essential Entity" or "Important Entity," OSS supply chain risk assessment becomes a **board-level responsibility**. CTO/CISO-level sign-off is required.
+> When an organization is an NIS2 essential or important entity, the management body under Art. 20 approves and oversees Art. 21 measures. Do not replace that body with a fixed CTO or CISO title in Universal; identify the accountable body under national law and organizational governance.
 
 ### 59.3 NIS2 Compliance Checklist (OSS Dependencies)
 
 | Item | Action | Evidence |
 |:----|:-------|:---------|
-| ICT Supplier Register | Register critical OSS libraries as ICT Suppliers | Supplier ledger |
-| Risk Assessment | Evaluate Bus Factor, EOL status, vulnerability history | Risk assessment doc |
-| Security Requirements | Critical OSS deps must have OpenSSF Scorecard ≥ 6.0 | §26 |
-| Incident Reporting Flow | 24h initial notification for OSS supply chain incidents | §23 runbook |
-| Exit Strategy | Document alternative plans for critical dependencies | Exit strategy doc |
-| Annual Review | Annual conformity check against NIS2 requirements | Audit report |
+| Applicability | Record entity, sector, size, service, Member State, national law, and authority | Dated applicability memo |
+| Component and supplier inventory | Trace OSS, commercial suppliers, build, registry, and CI providers reaching critical services | SBOM, service map, supplier ledger |
+| Proportionate risk assessment | Combine exposure, alternatives, maintenance, EOL, vulnerabilities, provenance, and concentration | Risk decision record |
+| Incident reporting | Align significance, 24-hour, 72-hour, and one-month clocks, authority, and customer communications with national law | Tested runbook |
+| Exit and continuity | Prepare alternatives, forks, data export, and credential rotation for critical dependencies and service providers | Exit plan and exercise evidence |
+| Governance | Evidence management-body approval, implementation oversight, training, and exceptions | Minutes, training, risk register |
 
 ### 59.4 Rules
 
-- **Rule**: If the organization qualifies as an NIS2 Essential/Important Entity, register critical OSS components in the ICT Supplier Register and conduct annual risk assessments
-- **Rule**: Classify OSS supply chain incidents as subject to **NIS2 Art. 23 24-hour initial notification** and document this explicitly in the incident response playbook
-- **Rule**: Bus Factor=1 Critical dependencies (see §47) are treated as NIS2 "concentration risk" and managed under special controls
-- **Rule**: Retain SBOM and vulnerability patching records (SLA compliance logs) for **3 years** as NIS2 compliance evidence
-- **Rule**: When operating in EU member states, verify additional requirements under national NIS2 transposition laws (Germany BSIG 2.0, France LPM, etc.)
+- **Rule**: Determine NIS2 applicability from primary sources and current national law, recording the last-verified date, legal owner, covered services, and reassessment triggers
+- **Rule**: A covered entity defines significant-incident assessment in its runbook and follows applicable national law for the 24-hour early warning, 72-hour notification, final report, and related duties. Do not automatically treat every dependency finding as a statutory notification
+- **Rule**: Assess concentration risk from alternatives, market share, switching cost, data portability, privileged access, and service criticality in addition to bus factor
+- **Rule**: Define retention of SBOM, patch, incident, supplier, and governance evidence in the records schedule from national law, authority requests, contracts, litigation holds, and product support life. Universal does not impose a fixed three years
+- **Rule**: When providing services in the EU, verify the European Commission transposition status and current law of each covered Member State; the Directive text alone does not complete implementation
+
+Official primary sources: [Directive (EU) 2022/2555](https://eur-lex.europa.eu/eli/dir/2022/2555/oj), [European Commission NIS2 transposition status](https://digital-strategy.ec.europa.eu/en/policies/nis-transposition)
 
 → Cross-reference: §8 SBOM Regulatory Compliance, §23 Dependency Compromise Incident Response, §44 DORA ICT Supply Chain Requirements, §47 Maintainer Burnout Risk Mitigation
 
@@ -2563,7 +2643,7 @@ NIS2 Directive (Directive (EU) 2022/2555, fully transposed by all member states 
 
 ### 60.1 Overview
 
-With AI IDEs such as GitHub Copilot, Cursor, and Windsurf becoming standard tools in 2025-2026, **real-time SCA (Software Composition Analysis) at the moment AI writes code** has become a new defensive frontier. The goal is to perform license, vulnerability, and behavioral analysis **before a PR is created—at the instant AI suggests a dependency**.
+AI IDEs, agents, and code generators can propose a new dependency or import before the user has fully assessed it. The defense contract combines early feedback at suggestion time, source verification before acquisition, policy evaluation of the change, an authoritative CI and release gate, and exception evidence. IDE inspection is supplemental and must also work for editors without a plug-in and for non-interactive agents.
 
 ### 60.2 AI IDE-Specific Risk Vectors
 
@@ -2571,11 +2651,13 @@ With AI IDEs such as GitHub Copilot, Cursor, and Windsurf becoming standard tool
 |:-----|:-----------|:-------|
 | Hallucinated non-existent packages | AI generates package names that don't exist → exploited via Slopsquatting | §36 |
 | Outdated version recommendations | AI suggests old versions (with vulnerabilities) from training data | CVE injection |
-| License-unaware suggestions | AI naturally suggests GPL/AGPL-licensed packages | License contamination |
+| License-unaware suggestions | AI proposes a license incompatible with the product's use and distribution policy | Unevaluated license duties |
 | MCP-mediated package injection | Malicious MCP server injects tampered code examples (PromptInjection) | §52 |
 | Copyrighted code citation | AI reproduces copyright-protected code verbatim (see §35) | IP infringement |
 
-### 60.3 IDE-Integrated SCA Implementation Patterns
+### 60.3 Replaceable IDE-Integrated SCA Reference Patterns
+
+The Snyk, Socket.dev, Husky, ESLint, and npm examples below target one stack and are not Universal requirements. An environment without editor plug-ins can meet the same outcomes through a language server, package-manager plug-in, wrapper command, sandbox, or CI diff gate.
 
 ```yaml
 # .vscode/settings.json (realized via VS Code extensions)
@@ -2588,7 +2670,7 @@ With AI IDEs such as GitHub Copilot, Cursor, and Windsurf becoming standard tool
 ```
 
 ```bash
-# pre-commit hook-based SCA (minimum guarantee line)
+# Early-feedback example when using a pre-commit hook; it does not replace the CI gate
 # .husky/pre-commit
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
@@ -2624,48 +2706,48 @@ module.exports = {
 };
 ```
 
-### 60.4 GitHub Copilot Dependency Policy Integration
+### 60.4 AI Coding Tool Dependency Policy Template
 
 ```yaml
-# .github/copilot/instructions.md (Copilot custom instructions)
-# Document dependency policy in AI IDE to guide AI suggestions
+# Reference project instruction loaded by an AI tool
+# Adapt the path and syntax to the adopted tool
 
 ## Dependency Policy
-- Always prefer packages with MIT or Apache-2.0 license.
-- NEVER suggest GPL, AGPL, SSPL, BSL, or Elastic-licensed packages.
-- Before suggesting any npm package, confirm it exists on https://www.npmjs.com/
-- Prefer packages with OpenSSF Scorecard ≥ 5.0
-- For Python: Use `uv add` instead of `pip install`
-- For date/time manipulation, prefer `date-fns` over `moment.js`
+- Do not add a dependency until the need, existing alternatives, and owner are recorded.
+- Resolve components only from the approved source policy for the target ecosystem.
+- Evaluate the exact version and SPDX expression against the versioned license policy.
+- Verify digest, signature, provenance, maintenance, vulnerabilities, and install behavior.
+- Use the project's pinned package manager and locked or frozen workflow.
+- Never bypass a policy gate; propose an expiring exception with evidence.
 ```
 
 ### 60.5 Rules
 
-- **Rule**: Install Snyk or Socket.dev IDE extensions in development environments using AI IDEs; enable real-time SCA
-- **Rule**: Integrate automatic SCA scanning on `package.json` changes into `pre-commit` hooks to detect AI-suggested dependencies before they reach CI
-- **Rule**: Embed dependency policy in AI IDE custom instructions (`.github/copilot/instructions.md` / `.cursorrules`) to guide AI toward permissive-licensed, high-score packages
-- **Rule**: Before installing any AI-suggested package, always confirm its existence on the npm registry and run a Socket.dev scan (Slopsquatting defense, see §36)
-- **Rule**: For MCP-mediated code suggestions (Agentic Coding), integrate automated behavioral analysis (Socket.dev API, etc.) of suggested packages into the CDE pipeline
+- **Rule**: Provide early feedback through the adopted editor, IDE, agent, or CLI when available, without making one vendor extension mandatory for every developer
+- **Rule**: Detect dependency manifest, lock, source-configuration, lifecycle-script, and generated-code changes locally or at pre-commit and reevaluate them against the same versioned policy in the authoritative CI gate
+- **Rule**: When an AI tool loads project instructions, document dependency-addition procedure, approved sources, license policy, lock workflow, and the no-bypass rule, and review and version the instruction itself
+- **Rule**: For an AI-proposed component, verify existence, namespace, version, owner, digest or signature, and provenance at the ecosystem's authoritative source and perform risk-based behavior analysis (see §36)
+- **Rule**: Apply the same gate to MCP- and agent-mediated proposals, treating tool output as untrusted input and separating acquisition, install, and execution privileges through sandboxing and policy
 
 → Cross-reference: §36 Slopsquatting Defense, §52 LLM/AI Toolchain Dependency Management, §35 AI-Generated Code License Risk, §11 CI Pipeline Guardrails
 
 ---
 
-## §61. SBOM Federation (OCI Artifact Distribution Standard)
+## §61. SBOM Federation (OCI Artifact Reference Pattern)
 
 ### 61.1 Overview
 
-Moving beyond the "generate an SBOM" phase to the "distribute, search, and cross-reference SBOMs across the organization" phase. **SBOM Federation** is an architecture pattern for distributing, consuming, and cross-referencing SBOMs across multiple teams, organizations, and ecosystems. Distributing via OCI Artifact format, storing in GitHub Container Registry (GHCR), and centralized management via Dependency-Track represents the 2026 best practice.
+Moving beyond the "generate an SBOM" phase to the "distribute, search, and cross-reference SBOMs across the organization" phase. **SBOM Federation** is an architecture pattern for consistently distributing, consuming, and cross-referencing SBOMs across multiple teams, organizations, and ecosystems. Universal fixes the outcomes: a machine-readable SBOM, an integrity-protected association with the subject artifact, verifiable distribution, a searchable inventory, and vulnerability and VEX correlation. OCI Artifacts, container registries, Dependency-Track, and GUAC are reference implementations. The organization selects the implementation in its Blueprint based on interoperability, retention, availability, data residency, cost, and existing platforms.
 
 ### 61.2 SBOM Lifecycle & Federation
 
 ```mermaid
 flowchart LR
     A[Build CI] -->|Generate| B[SBOM cdx.json / spdx.json]
-    B -->|Push as OCI Artifact| C[Container Registry]
-    C --> D[Dependency-Track]
-    C --> E[Consumer CI/Scanner]
-    D --> F[Integrated Vuln DB / GUAC]
+    B -->|Bind to digest| C[Verifiable Evidence Store]
+    C --> D[Searchable SBOM Inventory]
+    C --> E[Consumer CI/Scanner/API]
+    D --> F[Vulnerability / VEX / Provenance Correlation]
     E --> G[KEV Matching / VEX Retrieval]
     F --> H[Cross-Organization Risk Dashboard]
 ```
@@ -2673,14 +2755,18 @@ flowchart LR
 ### 61.3 SBOM Storage as OCI Artifact
 
 ```bash
+# Reference implementation. Replace registry, namespace, and authentication in the Blueprint
 # Push SBOM to GHCR as an OCI Artifact
 oras push ghcr.io/myorg/myapp:sbom-$(git rev-parse HEAD) \
   --artifact-type application/vnd.cyclonedx+json \
   sbom.cdx.json:application/vnd.cyclonedx+json
 
-# Sign SBOM with cosign (tamper prevention)
+# Official predicate type recognized by CycloneDX
+CDX_PREDICATE_TYPE="https://cyclonedx.org/bom"
+
+# Attach the SBOM as a cosign attestation
 cosign attest --predicate sbom.cdx.json \
-  --type https://cyclonedx.org/bom \
+  --type "${CDX_PREDICATE_TYPE}" \
   ghcr.io/myorg/myapp:v1.0.0
 
 # Consumer: Retrieve SBOM attached to container image
@@ -2688,13 +2774,13 @@ oras pull ghcr.io/myorg/myapp:sbom-${COMMIT_SHA}
 
 # Verify SBOM signature with cosign
 cosign verify-attestation \
-  --type https://cyclonedx.org/bom \
+  --type "${CDX_PREDICATE_TYPE}" \
   --certificate-identity=github.com/myorg/myapp \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
   ghcr.io/myorg/myapp:v1.0.0 | jq '.payload | @base64d | fromjson'
 ```
 
-### 61.4 Dependency-Track Central Management
+### 61.4 Dependency-Track Reference Configuration
 
 ```yaml
 # .github/workflows/sbom-upload.yml — Auto-upload SBOM to Dependency-Track
@@ -2722,12 +2808,12 @@ jobs:
 
 ### 61.5 Rules
 
-- **Rule**: Store all release SBOMs in **OCI Artifact format** in a Container Registry (GHCR/ECR/GCR, etc.), managed in the same repository as container images
-- **Rule**: Sign SBOMs with `cosign attest` and provide verifiable evidence so consumers can confirm authenticity via `cosign verify-attestation`
-- **Rule**: Auto-upload all project SBOMs to **Dependency-Track** or equivalent SBOM management platform for cross-project vulnerability correlation
-- **Rule**: Adopt ORAS (OCI Registry as Storage) CLI as the standard tool for SBOM Federation reference architecture
-- **Rule**: When providing SBOMs to external partners or customers, include the OCI Artifact URL (+ signature verification procedure) in the deliverables
-- **Rule**: Verify the freshness (generation timestamp) of retrieved SBOMs; SBOMs older than **14 days** must trigger re-generation
+- **Rule**: Bind a release SBOM to the subject artifact's immutable identifier or digest, generator, timestamp, source revision, and build provenance and retain it in a policy-approved tamper-evident evidence channel. OCI Artifact is one option; Universal does not require a container registry or the same repository
+- **Rule**: Enable a consumer to verify issuer, subject digest, predicate type, signature or attestation, and trust policy. cosign, in-toto, a Sigstore bundle, and registry-native signing are replaceable implementations
+- **Rule**: Maintain an inventory that searches and cross-references SBOMs across projects and teams by component, version, service owner, vulnerability, VEX, and release. Dependency-Track, GUAC, a data warehouse, and a graph database are reference implementations
+- **Rule**: Select a client, API, event, or batch-upload mechanism such as ORAS for the adopted storage and consumers; do not make one CLI the Universal standard
+- **Rule**: Provide external partners and customers the SBOM and verification procedure through a file, API, attestation, URL, procurement portal, or equivalent that fits contracts, regulation, and confidentiality. Define access control for internal paths, vulnerabilities, and supplier information
+- **Rule**: Freshness means the SBOM matches the subject artifact digest, is generated on release or dependency and build change, and meets required fields and direct and transitive coverage. Use artifact changes, consumer contracts, incidents, and policy SLA as regeneration triggers instead of a fixed 14 days
 
 → Cross-reference: §7 SBOM Generation & Lifecycle, §57 SBOM Quality Maturity Model, §9.4 Sigstore Integration, §46 OpenSSF GUAC Integration
 
@@ -2796,18 +2882,18 @@ Traditional SBOMs (recording software library dependencies) cannot fully capture
 
 ### 62.4 Relationship Between ML BOM and Data SBOM
 
-- **Data SBOM** (see §55): EU AI Act Art. 53 obligation. Specialized for training data license tracking
+- **Data inventory or Data BOM** (see §55): Tracks source, rights, version, and governance for training and evaluation data when applicable
 - **ML BOM**: Broader "complete materials inventory for the entire AI system." Integrates models, data, code, and infrastructure
 - **CBOM** (see §29): Cryptographic asset inventory. Complements ML BOM's cryptographic components
 
 ### 62.5 Rules
 
-- **Rule**: AI systems developed and deployed internally must create an ML BOM in addition to the code SBOM (§7), recording model weights and major datasets
-- **Rule**: Use CycloneDX 1.6+ `machine-learning-model` / `data` component types for ML BOM format, managing it alongside existing SBOMs
-- **Rule**: Adopt **PURL (`pkg:huggingface/...`)** for model weights to enable version tracking and cross-SBOM referencing
-- **Rule**: In ML BOM data components, record the reference URL to the §55 training data license manifest (`training-data-manifest.yml`)
-- **Rule**: Refresh ML BOM with each AI system release, tracking model version and dataset version changes
-- **Rule**: Ingest ML BOM into Dependency-Track (see §61) to establish cross-inventory monitoring of AI model weight vulnerabilities (e.g., future model permission abuse CVEs)
+- **Rule**: An AI system in a risk profile such as external distribution, regulated or high impact, or third-party model and dataset use creates an ML inventory cross-referenced to the code SBOM and tracks models, datasets, pipelines, runtimes, and tools
+- **Rule**: Select a machine-readable format such as CycloneDX ML-BOM, an SPDX profile, model card, or data manifest for the consumer and regulation, and pin its schema version
+- **Rule**: Use an authoritative immutable model identifier such as a registry PURL, URI, digest, or vendor ID; do not force every model into a Hugging Face PURL
+- **Rule**: Reference the §55 rights, source, and governance evidence for each data component through a stable identifier rather than a fixed filename or storage URL
+- **Rule**: Use release, model, dataset, pipeline change, and incident as refresh triggers and record subject digest and version differences
+- **Rule**: Ingest the inventory into the searchable capability in §61 and correlate model, data, software, vulnerabilities, and owners. Dependency-Track is a reference implementation
 
 → Cross-reference: §3 AI/ML Model Licensing, §55 EU AI Act Technical Documentation, §29 CBOM, §61 SBOM Federation, [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md)
 
@@ -2820,6 +2906,8 @@ Traditional SBOMs (recording software library dependencies) cannot fully capture
 **Dependency SLO (Service Level Objective)** applies SRE principles to dependency management. "Dependency health" is defined as quantitative SLOs, with Error Budgets managing acceptable limits. Violations trigger a **feature freeze** (prohibition on adding new dependencies), structurally preventing the accumulation of technical debt.
 
 ### 63.2 Dependency SLO Definitions
+
+The targets, monthly window, and freeze conditions below are a reference profile. The organization defines SLI, window, target, burn rate, and action in the Blueprint from service criticality, release frequency, portfolio size, law and contracts, team capacity, and false-positive cost.
 
 | SLO Name | Metric | SLO Target | Error Budget (Monthly) |
 |:---------|:-------|:-----------|:-----------------------|
@@ -2911,12 +2999,12 @@ def compute_slo_report(metrics: dict) -> dict:
 
 ### 63.6 Rules
 
-- **Rule**: Formally adopt the Dependency SLOs defined in §63.2 and integrate them into the §24 KPI dashboard
-- **Rule**: Aggregate Error Budget monthly; operate the "feature freeze trigger conditions" (§63.3) by mutual agreement with leadership
-- **Rule**: Measure `libyear` quarterly; plan a dependency refresh sprint when it exceeds 1.0 year
-- **Rule**: Include Dependency SLO reports in monthly Engineering Reviews and report to CTO/VPoE
-- **Rule**: When Error Budget is consumed >50% in a given month, the following sprint must include dependency recovery tasks
-- **Rule**: Treat Dependency SLOs as "development velocity indicators" and regularly measure and communicate the positive correlation between SLO improvement and deploy frequency/feature release cadence
+- **Rule**: When dependency risk repeatedly affects multiple teams or services, use §63.2 as a reference to define measurable SLIs, owner, target, window, and data quality and integrate them into the existing governance dashboard or review
+- **Rule**: Derive the error-budget window and burn-rate alert from service or portfolio characteristics and have accountable leadership pre-approve actions such as feature freeze, dependency-addition limits, staffing, or exception review
+- **Rule**: Measure EOL, exploitation, release lag, unsupported versions, maintenance, and provenance in addition to age; do not automatically schedule a sprint from one `libyear` threshold
+- **Rule**: Adapt reporting destination, cadence, and role to organization scale; Universal does not require fixed CTO or VPoE titles
+- **Rule**: Prioritize recovery work from burn rate, active risk, capacity, and legal or contractual deadlines rather than a fixed 50 percent and following week
+- **Rule**: Measure the relationship between dependency SLOs and delivery outcomes instead of assuming a positive correlation, reporting trade-offs across security, reliability, developer time, and cost
 
 → Cross-reference: §16 Security Patch SLA, §24 Audit & Reporting, §39 Dependency Minimization Principle, §41 Dependency Governance Maturity Model, §57 SBOM Quality Maturity Model
 
@@ -2930,9 +3018,9 @@ def compute_slo_report(metrics: dict) -> dict:
 
 | § | Title | Gap Addressed |
 |---|-------|:--------------|
-| §59 | NIS2 Directive: Software Supplier Security Obligations | Unaddressed NIS2 (service/infrastructure) complementing CRA (product) |
+| §59 | NIS2 Directive: Applicability and Software Supply Chain | Missing applicability boundaries for covered entities, management accountability, incident reporting, and supply-chain risk |
 | §60 | AI IDE-Integrated Real-Time SCA | Missing real-time validation of AI-suggested packages in Copilot/Cursor |
-| §61 | SBOM Federation (OCI Artifact Distribution Standard) | Missing SBOM generation→distribution→cross-system query architecture |
+| §61 | SBOM Federation (OCI Artifact Reference Pattern) | Missing implementation-neutral outcome contract for SBOM generation, distribution, and cross-system correlation |
 | §62 | ML BOM (Machine Learning Bill of Materials) | Missing full AI system materials inventory (models, data, prompts) |
 | §63 | Dependency SLO / Error Budget Management | Missing quantified SLO for dependency health with feature-freeze linkage |
 
@@ -2942,7 +3030,7 @@ def compute_slo_report(metrics: dict) -> dict:
 |---|-------|:--------------|
 | §54 | CISA KEV Integration & EPSS-Driven Vulnerability Prioritization | Transition from CVSS-only SLA to risk-driven prioritization |
 | §55 | EU AI Act Technical Documentation (Training Data License Tracking) | Unaddressed EU AI Act Art.53 GPAI obligations |
-| §56 | Reproducible Builds & Hermetic Repository Standard | Insufficient SLSA 3 implementation guidance |
+| §56 | Reproducible Builds & Hermetic Repository Standard | Insufficient guidance for SLSA Build L3 and additional hardening |
 | §57 | SBOM Quality Maturity Model | Elevate SBOM from "generation" to "quality management" |
 | §58 | Next-Generation Package Manager Governance | Missing uv/Bun/cargo-auditable governance |
 

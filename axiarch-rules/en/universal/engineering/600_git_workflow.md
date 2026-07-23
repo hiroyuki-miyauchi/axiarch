@@ -7,6 +7,10 @@
 This file consolidates **domain-agnostic Git operations that occur during daily development, regular work, and upload tasks** into a Universal Rule.
 Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in respective domain files and is referenced from here.
 
+## Universal Application Contract
+
+The invariants in this file are history integrity, change traceability, ownership and approval, reproducible integration, recoverability, and isolation of concurrent work. Branch names, lifetime, diff size, commit format, merge strategy, approval count, SLA, hooks, hosting services, AI tools, and notification destinations are reference implementations or Blueprint parameters unless required by law, contract, an official platform constraint, or an explicit safety rationale. An environment without Pull Requests, GitHub, CODEOWNERS, or merge queues conforms when it provides equivalent change proposals, independent approval, ownership, serialization, evidence, and rollback. Individuals and small teams may combine roles; high-assurance changes separate proposal and approval where possible, or use explicit risk acceptance and an independent release control.
+
 ---
 
 ## Table of Contents
@@ -52,25 +56,25 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
 
 ### 1.0. Trunk-Based Development (Principle)
 
-- **Principle**: Eliminate long-lived branches. Merge short-lived branches to `main` frequently (daily).
-- **Stacked Diffs**: Avoid giant PRs by stacking small, dependent PRs.
+- **Principle**: Keep integration changes reviewable and measure unintegrated time and conflict risk. Select trunk-based development, release branches, stacked diffs, or another model in the Blueprint from the product's release model, regulatory obligations, multi-version maintenance, hardware or mobile review, and offline-development constraints.
+- **Short-Cycle Integration**: Short-lived branches and frequent integration are the normal default, but neither a daily cadence nor a fixed lifetime is a Universal requirement. A necessary long-lived branch has an owner, synchronization method, security-fix backport policy, and exit condition.
 
 ### 1.1. Branch Naming Standard
 
-- **Branch Naming**: Use `type/summary` format (e.g., `feat/user-profile`, `fix/login-bug`).
+- **Branch Naming**: Define one machine-verifiable repository or organization schema that makes purpose, work item, or release intent traceable. `type/summary` is a reference format.
 - **Types (fully aligned with §2.0 Conventional Commits)**:
     - Development: `feat/`, `fix/`, `refactor/`, `perf/`
     - Auxiliary: `docs/`, `style/`, `test/`, `build/`, `ci/`, `chore/`
     - History: `revert/<reverted-sha>`
     - Release: `release/v1.4.0` (release freeze), `hotfix/critical-auth-bug` (production emergency fix)
-    - Exploration: `experiment/`, `spike/` (**lifespan ≤1 week**, aligned with §1.2 short-lived branch mandate)
-- **Summary Discipline**: kebab-case, lowercase ASCII, 3–5 words (e.g., `feat/oauth-google-login`; bad: `feat/test123`).
-- **Anti-Pattern**: branches without a type prefix (`wip/xxx`, `temp/xxx`, `mybranch/xxx`, `john-test`) are **forbidden**.
+    - Exploration: `experiment/`, `spike/`
+- **Summary Discipline**: Exclude personal names and secrets, and use a concise identifier compatible with the adopted tools and Unicode policy. Kebab-case, lowercase ASCII, and three to five words are a reference default.
+- **Anti-Pattern**: Prohibit temporary branches whose owner, purpose, or exit condition cannot be traced, and names intended to bypass protected-reference policy.
 
 ### 1.2. Short-Lived Branch Mandate
 
-- **Law**: Branch lifetime should be **a few hours to maximum 2 days**.
-- **Action**: When a giant merge-difficult branch threatens to form, hide it behind a Feature Flag in production and integrate to main early.
+- **Law**: Expose branch age, base divergence, unresolved conflicts, and security-patch delay. Require an owner and resolution plan when a branch exceeds the Blueprint's risk budget.
+- **Action**: Choose compatibility shims, branch by abstraction, feature flags, stacked diffs, staged migration, or another suitable technique to integrate or isolate incomplete work safely. Neither a fixed two-day limit nor feature flags are the only conforming method.
 
 ---
 
@@ -78,7 +82,7 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
 
 ### 2.0. Conventional Commits
 
-- **Format**: Strictly follow `type(scope): subject` format. Describe details in the project's native language.
+- **Format**: Define a repository commit schema from which release notes, automation, and auditors can reconstruct change intent. Conventional Commits `type(scope): subject` is a reference implementation suited to SemVer automation; another verifiable schema may conform.
 - **Standard Types (Conventional Commits 1.0.0 full compliance)**:
 
     | Type | Use Case | SemVer Impact |
@@ -103,7 +107,7 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
 
 ### 2.2. Pull Request Template Protocol
 
-- **Law**: `.github/pull_request_template.md` MUST exist. The following **8 fields** are mandatory:
+- **Law**: A change proposal retains enough information for a reviewer to judge at least purpose, difference, verification evidence, risk, rollback, and migration or compatibility impact. `.github/pull_request_template.md` and the following eight fields are a GitHub reference implementation:
 
     ```markdown
     ## Type of Change
@@ -134,37 +138,31 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
     ## Screenshots / Recordings
     <!-- Mandatory for UI changes. Show Before/After side by side -->
     ```
-- **CI Integration**: When the PR description is empty or required sections are missing, fail via **`actions/required-pr-fields-validator`**.
-- **Anti-Pattern**: Submitting with template placeholders intact and sections empty → auto-rejected.
+- **CI Integration**: Machine-validate required fields in the adopted change-proposal schema through the VCS, review system, or CI. Do not make one Action the only conforming mechanism.
+- **Anti-Pattern**: Reject placeholders, empty fields, or unverifiable descriptions before approval.
 
-### 2.3. PR Size Mandate (100-Line Rule)
+### 2.3. Reviewable Change Size
 
-- **Law**: Keep PRs small. Aim for under 100 lines of changes. Direct push to `main` is prohibited; CI pass and review approval are mandatory.
+- **Law**: Keep a change proposal small enough for a reviewer to understand one intent, independent verification, and an explicit rollback. Do not use line count alone to classify risk; distinguish generated files, lockfiles, schemas, migrations, and binary changes. One hundred lines is a reference signal for considering a split, not a conformance threshold. Enforce mandatory checks and approval for protected changes through server-side policy or an equivalent control.
 
 ### 2.4. Pre-Push Branch Protection Hook
 
-- **Law**: All projects MUST mandate a `pre-push` hook that blocks direct pushes to protected branches (`main`, `release/*`, `production`).
-- **Implementation**: The `pre-push` hook MUST check `git symbolic-ref HEAD` and reject pushes to protected refs such as `refs/heads/main`. (See §9.3 lefthook config for a concrete example.)
+- **Law**: Reject unauthorized changes to protected references through an authoritative server-side policy or equivalent control. A local `pre-push` hook is one early-feedback mechanism and cannot be the final control because it is bypassable.
+- **Implementation**: If a hook is used, account for remote references, multiple worktrees, detached HEAD, and GUI or bot paths, and follow the distribution contract in §9.3.
 - **Cross-References**: Framework selection (lefthook / Husky / etc.) → §9.3 Hooks Distribution. Server-side complement → §6.0 Branch Protection.
 
 ### 2.5. Pre-Commit Auto-Formatting Hook
 
-- **Law**: A `pre-commit` hook MUST auto-format staged files (`eslint --fix` / `prettier --write` / etc.). Use a tool that **scopes to staged files only** (lint-staged, or lefthook's `glob` + `staged_files`).
+- **Law**: Reproduce formatter and lightweight-lint results deterministically in local tooling or CI, with CI as the authoritative gate. If a local hook auto-fixes content, it stays within the staged scope, preserves partial staging, and lets the user inspect the mutation. A hook itself is not mandatory for every project.
 - **Cross-References**: Framework selection → §9.3 Hooks Distribution. Commit-message hook (commitlint) → §2.10.
 
 ### 2.6. Merge Strategy Mandate
 
-- **Default Strategy: Squash & Merge**:
-    - Feature-branch → `main` integration MUST default to **Squash & Merge**. Reason: `main` history becomes linear at the "logical change per PR" granularity, making `git log --oneline` readable.
-    - In GitHub `Settings > General > Pull Requests`, enable ONLY "Allow squash merging"; disable the others.
-- **Exception: Merge Commit**:
-    - Permitted only when there is a legitimate need to preserve individual commit history (release-branch integration, multi-feature coordination merges).
-- **Forbidden: Rebase Merge to main**:
-    - Rebase Merge to `main` is **forbidden**. Stacking individual commits onto `main` makes back-compat checks, revert, and bisect harder.
-- **Linear History on main**:
-    - Enable "Require linear history" in GitHub Branch Protection. Combined with the merge-commit ban, this keeps history easier to understand and audit.
+- **Strategy Contract**: Whether the repository uses squash, merge commits, rebase merge, or fast-forward, it must trace the change proposal, final revision, approval, tests, release artifact, and rollback unit.
+- **Reference Default**: Squash & Merge with linear history is effective for a product repository that wants one revertable commit per proposal. A repository that maintains multiple versions, synchronizes an upstream, or preserves signed commits may choose merge commits or another method.
+- **Policy**: Declare the merge method per repository and do not mix methods chaotically on the same protected reference. Enforce it with hosting settings, server hooks, a merge bot, or an equivalent control.
 - **Local Rebase Discipline**:
-    - `git rebase main` on your own working branch is **recommended** (sync before opening a PR). Rebasing **shared** branches is **strictly forbidden**.
+    - A solely owned branch may be rebased. Rewriting a shared branch requires explicit agreement from every collaborator and a recovery point; normally prefer a merge or a new branch.
 
 ### 2.7. Force-Push Protocol
 
@@ -286,49 +284,40 @@ Domain-specific Git usage (security signing, GitOps, QA hooks, etc.) remains in 
 
 ## Part 4: Worktree Hygiene Protocol
 
-> **Domain**: Daily / dev environment / AI Agent tooling integration
+> **Domain**: Daily work / development environment / concurrent-tool integration
 >
-> **Severity**: HIGH — Neglect causes complete failure of other AI agents (e.g., Antigravity).
+> **Severity**: HIGH — stale metadata or tool incompatibility can cause branch confusion, work loss, or tool failure
 
-### 4.0. The Worktree Config Pollution Problem
+### 4.0. Worktree State and Compatibility
 
-- **Context**: When any AI agent (Claude Code, Cursor, etc.) or developer runs `git worktree add`, Git **automatically appends** `[extensions] worktreeConfig = true` to `.git/config`.
-- **Critical Gap**: `git worktree remove` does **NOT delete** this entry (Git's conservative behavior accounting for other potentially dependent worktrees).
-- **Cumulative Result**: Each worktree creation/removal cycle adds to `.git/config`:
-    1. `[extensions] worktreeConfig = true` (persistent)
-    2. `[branch "<name>"]` stale settings (remain after worktree removal)
-- **Symptoms**: Accumulated pollution causes:
-    - **Antigravity's Go-based language server crash** — startup error "does not support extension: worktreeconfig", `ECONNREFUSED 127.0.0.1:50347`
-    - **Complete chat function stoppage** for the affected project
-    - Other projects unaffected, making **root cause identification extremely difficult**
+- **Official Boundary**: `extensions.worktreeConfig` is a supported Git feature for worktree-specific configuration and may be enabled by features such as sparse checkout. Its presence alone is not pollution. Never unset it unconditionally while an active worktree or `config.worktree` depends on it.
+- **Stale State**: Detect prunable administrative data after a worktree directory was removed outside supported commands, `branch.<name>` configuration for a missing local branch, and path inconsistency after a move.
+- **Tool Compatibility**: If an older Git or surrounding tool cannot read a supported extension, confirm the Git version, error, reproduction, and scope, then choose tool upgrade, isolation, serialized execution, or a time-bounded exception. Deleting valid Git configuration is not the default recovery.
+- **Supported Operations**: Inspect with `git worktree list --porcelain`, clean with `git worktree remove` or `git worktree prune`, and repair move inconsistencies with `git worktree repair`. Never edit `.git/worktrees` directly.
 
 ### 4.1. Mandatory Cleanup Protocol
 
-- **Law**: Verify `.git/config` health every time `git worktree add` or `git worktree remove` is executed.
+- **Law**: At a change boundary that adds, removes, or moves a worktree, verify the worktree inventory, prunable state, branch configuration, and unsaved changes. The same outcome may be automated or enforced at task completion instead of requiring a manual action after every command.
 - **Required Checks**:
-    1. Check `git config --get extensions.worktreeConfig`
-    2. Detect stale `[branch "*"]` entries via `git config --list | grep "branch\."`
-- **Cleanup Commands** (Copy-paste-ready):
+    1. Inspect registered worktrees, HEAD, branch, and lock or prunable state with `git worktree list --porcelain`
+    2. Inspect administrative data Git considers prunable with `git worktree prune --dry-run --verbose`
+    3. Compare `git config --local --name-only --get-regexp '^branch\.'` with local branch refs
+    4. When using `extensions.worktreeConfig`, verify `git config --worktree` and support in adopted Git and tools
+- **Cleanup Commands**:
 
 ```bash
-# 1. Remove worktree extension flag
-git config --unset extensions.worktreeConfig 2>/dev/null
-
-# 2. Bulk-remove stale claude/* branch config
-for b in $(git branch | grep "claude/" | sed 's/^[ *]*//'); do
-  git config --unset "branch.$b.vscode-merge-base" 2>/dev/null
-  git config --unset "branch.$b.remote" 2>/dev/null
-  git config --unset "branch.$b.merge" 2>/dev/null
-done
-
-# 3. (Optional) Delete unnecessary claude/* branches
-git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
+git worktree list --porcelain
+git worktree prune --dry-run --verbose
+git worktree prune --verbose
+git worktree repair <moved-worktree-path>
 ```
+
+`git worktree prune` and `repair` are limited to metadata Git manages. Deleting branch refs or unsaved changes and disabling `extensions.worktreeConfig` are separate human decisions and are not part of this cleanup.
 
 ### 4.2. Automated Detection Script (Recommended)
 
-- **Law**: Manual verification becomes ritualistic in large projects. Integrate **automated detection scripts** into CI / pre-commit hooks.
-- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — axiarch's standard distributed detection/repair script.
+- **Law**: Repositories using multiple worktrees or tools integrate detection based on supported Git commands into a task-completion gate, CI, scheduled audit, or equivalent. An individual repository may perform the same check manually.
+- **Reference Implementation**: `axiarch-scripts/check-git-config-clean.sh` — a reference script that detects and repairs prunable worktree metadata and configuration for missing local branches.
 - **Usage**:
 
 ```bash
@@ -337,24 +326,26 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ./axiarch-scripts/check-git-config-clean.sh --quiet # CI silent mode (exit 1 if dirty)
 ```
 
-### 4.3. Additional Caution for Parallel AI Agent Use
+### 4.3. Additional Caution for Concurrent Tools and AI Agents
 
-- **Context**: When using Claude Code and Antigravity in parallel, Claude Code's worktree operations break Antigravity.
+- **Context**: IDEs, AI agents, automation, and developers that concurrently modify repository metadata, branches, indexes, or worktrees can encounter support differences, locks, base confusion, or overwriting of unseen changes.
 - **Mitigation**:
-    1. Consolidate to a single AI agent (recommended)
-    2. When running in parallel, frequently execute `axiarch-scripts/check-git-config-clean.sh --fix`
-    3. Always run cleanup at AI agent termination / switching
+    1. Isolate worktrees, branches, credentials, write scope, and owners per tool
+    2. Serialize operations writing the same branch or index with a lock, queue, handoff, or equivalent
+    3. Check status, worktree inventory, remote parity, and unpublished changes at task start, handoff, and completion
+    4. Review dry-run output before repair and never delete active worktrees, branch refs, or unsaved changes automatically
 
-### 4.4. Recurrence Documentation (Observed Cases)
+### 4.4. Failure Pattern Documentation
 
-- **Law**: This problem **structurally recurs** (persists as long as Git's behavior remains unchanged). Maintain the strategy of automated mitigation rather than manual response.
-- **Observed Recurrences**:
+- **Law**: An incident or compatibility issue is anonymized into reusable conditions, signals, and controls rather than importing a project name, user name, or real branch name into Universal. Keep observation dates, projects, and sensitive logs in a Blueprint or incident record.
+- **Reusable Failure Patterns**:
 
-    | Date | Project | Residual Entries |
+    | Condition | Signal | Control |
     |---|---|---|
-    | 2026-04-29 | inucomi (initial detection) | `[extensions] worktreeConfig = true` + `[branch "claude/agitated-rubin-1a895e"]` |
-    | 2026-05-03 | inucomi (recurrence) | `[extensions] worktreeConfig = true` + 5 instances of `[branch "claude/*"]` |
-    | 2026-05-03 | axiarch (detected during v1.3.2 release) | `[extensions] worktreeConfig = true` + `[branch "claude/nostalgic-moser-a1d7c8"]` |
+    | Worktree path deleted through file operations | `git worktree prune --dry-run --verbose` reports a prunable entry | run `git worktree prune` after confirming cleanliness |
+    | Worktree moved through file operations | registered path differs from actual path | run `git worktree repair` |
+    | Config section remains after local branch deletion | `branch.<name>` key exists without a local ref | review and remove only that section |
+    | Tool does not support a valid Git extension | reproducible unsupported-extension error | upgrade tool or Git, isolate, serialize, or use a time-bounded exception |
 
 ---
 
@@ -363,11 +354,11 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 ### 5.0. `.git/config` Health Audit
 
 - **Law**: `.git/config` is the **repository's nervous system**. Pollution disrupts various tool integrations.
-- **Action**: Periodically `cat .git/config` and detect unexpected entries (especially `[extensions]` sections and stale `[branch "*"]`).
+- **Action**: Run `git config --show-origin --list`, `git worktree list --porcelain`, and comparison with local branch refs on material events and the Blueprint's risk-based cadence. Do not treat a supported extension as anomalous solely because it exists; identify its source and consumer.
 
 ### 5.1. `.gitignore` for AI Agent Artifacts
 
-- **Law**: Session-specific files generated by AI agents (worktrees, session logs, plan files, etc.) **must NEVER be committed**.
+- **Law**: Classify agent output into canonical team-shared configuration and task evidence versus credentials, personal settings, caches, session logs, and temporary worktrees. The former may be versioned under schema, review, and retention rules; only ephemeral or sensitive artifacts are ignored. Do not exclude `plan files` based on their name alone.
 - **Required `.gitignore` Entries**:
 
     ```gitignore
@@ -389,33 +380,31 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 >
 > **Severity**: HIGH — absence directly causes production incidents, miss-merges, and history pollution
 
-### 6.0. Branch Protection Rules Mandate
+### 6.0. Protected Reference Control
 
-- **Law**: `main` and all release branches MUST enforce the following Branch Protection rules:
+- **Law**: Apply a ruleset, branch protection, server hook, ACL, or equivalent control from the adopted VCS to protected references that can reach production, releases, policy, CI, signing keys, or distribution metadata. The table is a GitHub reference profile; its values are not universal for every repository:
 
     | Setting | Value | Rationale |
     |---|---|---|
     | Require a pull request before merging | ✅ ON | Block direct push |
-    | Require approvals | **≥2 (minimum 1)** | Prevent review bypass |
+    | Require approvals | Risk-based; two-party review for high assurance | Prevent review bypass |
     | Dismiss stale approvals when new commits are pushed | ✅ ON | Force re-review after edits |
     | Require review from Code Owners | ✅ ON | Pairs with §6.1 |
     | Require status checks to pass | ✅ ON (enumerate required checks) | Merge only on green CI |
     | Require branches to be up to date before merging | ✅ ON | Prevent merge against stale base |
-    | Require signed commits | ✅ ON (for repos at SemVer minor+) | Pairs with §7.1 |
-    | Require linear history | ✅ ON | Pairs with §2.6 |
+    | Require signed commits | ON when required by source or artifact identity policy | Pairs with §7.1 |
+    | Require linear history | ON when required by the selected merge method | Pairs with §2.6 |
     | Require deployments to succeed before merging | ✅ ON (when preview deploys exist) | Force preview verification |
     | Lock branch | ⚠️ Temporarily ON (during release freeze) | Emergency only |
-    | Do not allow bypassing the above | ✅ ON (incl. admins) | No exceptions |
-    | Restrict who can push | ✅ ON (CI bots only) | No human direct pushes |
+    | Do not allow bypassing the above | Normally ON; emergency bypass is a recorded break-glass event | No unaudited exceptions |
+    | Restrict who can push | Approved actors and automation only | Minimize direct changes |
     | Allow force pushes | ❌ OFF | Pairs with §2.7 |
     | Allow deletions | ❌ OFF | Prevent history loss |
-- **Anti-Pattern Prohibitions**:
-    - "Admins can bypass" setting → invites accidents and insider threat in emergencies
-    - approvals = 1 in practice → single-perspective bias, rubber-stamping from review fatigue
+- **Required Outcome**: Machine-verify required checks, approval of the final revision, renewed review after approval-changing commits, force-push and deletion controls, and the owner, reason, expiry, and audit trail of any bypass. Derive approval counts from risk, regulation, and team size; high-assurance areas meet SLSA Source two-party-review requirements.
 
-### 6.1. CODEOWNERS Discipline
+### 6.1. Ownership Resolution
 
-- **Law**: `.github/CODEOWNERS` MUST be present, mapping responsible engineers per directory.
+- **Law**: Resolve an accountable owner and required reviewer mechanically from a changed path, component, schema, or policy. `.github/CODEOWNERS` is a GitHub reference implementation; GitLab Code Owners, Gerrit groups, ownership registries, and equivalent mechanisms may conform.
 - **Format**:
 
     ```
@@ -429,18 +418,18 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     /security/             @security-team @cto
     ```
 - **Required Practices**:
-    - Every path MUST resolve to at least one owner (use `*` fallback as the last line)
-    - Critical paths (`/security/`, `/infra/`, `*.sql`) MUST have **≥2 owners**
-- **Synergy**: pairs with §6.0 "Require review from Code Owners" — every owner-tagged path goes through owner review.
+    - Every protected subject resolves to at least one accountable owner or continuity route
+    - An ownerless critical path blocks the change; enforce expert review and independent approval according to risk
+    - Apply ownership, review, and renewed-review controls to the ownership policy itself
+- **Synergy**: Combine ownership resolution with §6.0 protected-reference control so ownership is more than a notification list.
 
 ### 6.2. PR Review SLA & Stale PR Hygiene
 
-- **Review Response SLA**:
-    - Once a PR is assigned to a reviewer, they MUST respond (Approve / Request Changes / Comment) within **24 business hours**.
-    - SLA breach → Slack notification → escalation.
-- **Stale PR Auto-Close**:
-    - PRs idle for 7 days are auto-tagged "stale". After another 7 days, auto-closed.
-    - Implementation: GitHub Actions `actions/stale@v9`.
+- **Review Response SLO**:
+    - Define a response objective and escalation route in the Blueprint from change risk, team time zones, and incident or release urgency, then measure wait time and review load. Twenty-four business hours is a reference starting value.
+    - Do not fix the destination to Slack; use the adopted chat, email, ticket, pager, or equivalent route.
+- **Stale Change Hygiene**:
+    - For inactive changes, decide whether to confirm ownership, update the base, split, supersede, or close. Do not unconditionally auto-close at a fixed age; classify security fixes, external contributions, and long-running migrations.
 - **Proper Use of Draft PRs**:
     - WIP MUST be a **Draft PR**, signaling "not ready for review". The SLA timer starts on "Ready for review".
 - **Re-Review Triggering**:
@@ -473,7 +462,7 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 ### 6.4. AI-Assisted PR Review
 
-- **Law**: AI-assisted review tools are adopted as **defense-in-depth** and MUST NOT replace human reviewers. **AI never becomes an approver.**
+- **Law**: If AI-assisted review is used, treat it as defense-in-depth, not a replacement for an accountable approval authority, the secure SDLC, SAST, SCA, or tests. AI adoption itself is not mandatory for every project.
 - **Recommended Tools (2026 stable)**:
 
     | Tool | Strengths | Languages/Ecosystem |
@@ -483,9 +472,9 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     | **Codium PR-Agent** | OSS, self-hostable, custom prompts | Polyglot |
     | **GitHub Copilot Code Review** | GitHub-native, IDE integration | Polyglot |
 - **Mandatory Boundaries**:
-    - AI review MUST run **in parallel with** human review (not sequentially).
-    - **AI comments are "suggestions", not "decisions".** Approval by the human reviewer designated in CODEOWNERS is the **only merge gate** (aligned with §6.0 / §6.1).
-    - Even when AI says "LGTM", human reviewers MUST signal that they performed a deep review (≥10 minutes) using Conventional Comments labels (§6.3) like `praise:` / `issue:`.
+    - Retain traceable evidence of model or service, target revision, execution time, policy, and result. Include confidential code, prompt injection, and data retention in the threat model.
+    - **AI comments are suggestions, not decisions.** A risk-based human or explicitly approved governance authority retains final accountability. Define fail-open or fail-closed behavior so an unavailable AI result does not block human review indefinitely.
+    - Prove review quality through the final revision, material risks, test evidence, and decisions on unresolved findings, not elapsed minutes or comment count.
 - **Use Cases (Assistive Scope)**:
     - Style / naming-convention auto-detection
     - Obvious bugs, missing null checks, missing error handling
@@ -805,9 +794,9 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     - When squashing locally, retain manually
 - **Cross-Reference**: §8.7 AI-Generated Code Provenance Protocol (paired with `@ai-coauthor` headers)
 
-### 9.2. Renovate / Dependabot Discipline
+### 9.2. Dependency Update Automation
 
-- **Law**: Every project MUST adopt **Renovate or Dependabot** for automated dependency-update PRs.
+- **Law**: Continuously detect support retirement, vulnerabilities, and version drift for every ecosystem, and generate or file an update change with an owner, deadline, and compatibility tests. Renovate, Dependabot, registry bots, platform services, and in-house automation are interchangeable implementations.
 - **Required Configuration (Recommended)**:
 
     ```json
@@ -828,27 +817,18 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     }
     ```
 - **Auto-Merge Policy**:
-    - **patch / minor**: green CI → auto-merge (no human review)
-    - **major**: human review required (potential breaking changes)
-    - **security alert**: immediate PR; auto-merge on green CI
+    - Do not infer risk only from semantic-version labels. Classify runtime, lockfile, build plugin, native binary, container base, transitive dependency, and maintainer or source changes
+    - Limit auto-merge to low-risk updates with sufficient impact tests, provenance, license and reachability checks, rollback, and post-change monitoring
+    - Triage actively exploited vulnerabilities immediately and choose mitigation, update, or rollback; green CI alone does not justify unconditional merge
 - **Anti-Pattern Prohibitions**:
     - PR explosion → cap with `prConcurrentLimit`; adopt batched updates
     - All-auto-merge → major bumps will break; gate with review
 
 ### 9.3. Hooks Distribution & Framework Choice
 
-- **Law**: Git Hooks MUST guarantee **all team members run the same implementation**. Putting hooks only in personal `~/.gitconfig` is forbidden.
-- **Framework Comparison (2026 stable)**:
-
-    | Framework | Language | Config File | Performance | Recommendation |
-    |---|---|---|---|---|
-    | **lefthook** | Go binary | `lefthook.yml` (single) | ⚡ Parallel, fastest | ✅ **First choice (2026+)** |
-    | **Husky** | Node.js | `.husky/<hook-name>` shell scripts | 🐢 Sequential, Node startup overhead | ⚠️ Node-only projects |
-    | **pre-commit (Python)** | Python | `.pre-commit-config.yaml` | 🐢 Medium speed, requires Python | ⚠️ Python / monorepo-friendly |
-    | **Native `core.hooksPath`** | Shell | `.githooks/<hook-name>` | ⚡ Fastest | ⚠️ Poor team-config automation |
-- **Recommended Default: lefthook**:
-    - Single YAML declaration for all hooks, parallel execution, language-agnostic, full Windows/macOS/Linux support.
-    - Sample config (`lefthook.yml`):
+- **Law**: When local hooks are adopted, provide version-controlled configuration and a reproducible installation path, and enforce the same checks in CI or a server-side gate. Do not use only personal `~/.gitconfig` as an organization control.
+- **Selection Contract**: Choose lefthook, Husky, pre-commit, native `core.hooksPath`, or another mechanism by recording target languages, OS support, IDE and GUI-client behavior, partial staging, installation-failure behavior, measured latency, and maintenance ownership in the Blueprint. The Universal layer does not mandate one framework.
+- **Reference Implementation**: The following lefthook configuration is one example, not a mandatory product, command set, or file layout.
 
     ```yaml
     pre-commit:
@@ -874,35 +854,29 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
             [ "$branch" = "main" ] && echo "Direct push to main forbidden" && exit 1 || exit 0
     ```
 - **Mandatory Practices**:
-    - Configuration files MUST be **checked into the repo** (`.husky/` / `lefthook.yml` / `.pre-commit-config.yaml`)
-    - `package.json` `prepare` script (or README Setup section) MUST **auto-install hooks after clone**
-    - `--no-verify` is a **last resort**; when used, the reason MUST be stated in the PR description (see §10.0 Anti-Pattern Catalog)
-- **Migration Note (Existing Husky → lefthook)**:
-    - In large repos, `pre-commit` often exceeds 5 seconds. lefthook's parallel execution typically delivers 3–5× speedup.
-    - Migrate gradually: keep husky alongside lefthook → 1 week of verification → remove husky.
+    - Version the hook definition, its generator, or its installation recipe so that it is reproducible from the same revision.
+    - Provide a consistent installation path after clone or workspace bootstrap that fits the adopted runtime and package manager.
+    - Treat local hooks as fast feedback, not final merge or release evidence. Re-run material checks in CI or a server-side control.
+    - When bypass is allowed, require a reason, compensating verification, and audit evidence proportionate to risk.
+- **Migration Note**: Before changing hook frameworks, compare OS, IDE and GUI-client compatibility, installation failure, measured latency, partial staging, and existing development environments. Define the observation period and rollback criteria in the Blueprint.
 - **Cross-References**: §2.5 lint-staged / §2.10 commitlint / §9.0 Multi-Layer Secret Scanning
 
 ### 9.4. Shallow Clone & Sparse Checkout for CI
 
 > **Note**: This section governs **Git-side mechanisms**. End-to-end CI/CD pipeline optimization belongs to `engineering/000` and `operations/` domains.
 
-- **Law**: In CI (GitHub Actions / CircleCI / GitLab CI / etc.), clone **only the minimum history and files needed** to eliminate wasted transfer, storage, and time.
+- **Law**: In CI, declare the history, tags, submodules, LFS objects, and paths required for job correctness, then minimize transfer, storage, and I/O without breaking completeness.
+- **Depth Contract**: Do not make one `fetch-depth` value a fixed standard. Derive it from the history actually consumed by merge-base calculation, change detection, versioning, changelog, provenance, bisect, and other job logic.
 - **Shallow Clone (history shallowing)**:
 
     ```bash
-    # Default for all CI jobs (GitHub Actions actions/checkout@v4 already defaults to fetch-depth: 1)
+    # Example for a job that is complete with the current revision only
     git clone --depth=1 <url>
 
-    # Only jobs that need `git log` or bisect should fetch deeper
+    # Example for a history-dependent job, extended explicitly when needed
     git clone --depth=50 <url>
-    git fetch --deepen=50              # Extend depth on demand
+    git fetch --deepen=50
     ```
-
-    | fetch-depth | Use Case |
-    |---|---|
-    | `1` | Simple lint / build / test jobs (default) |
-    | `50` | Conventional-commit validation, changelog generation |
-    | `0` (full) | Only jobs that analyze full history (release-please / semantic-release) |
 - **Sparse Checkout (partial file fetch — for monorepos)**:
 
     ```bash
@@ -910,27 +884,13 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
     cd repo
     git sparse-checkout init --cone
     git sparse-checkout set apps/web packages/shared    # Only the target dirs
-    git checkout main
+    git checkout <revision>
     ```
-
-    Effect: a 100GB monorepo can be checked out at <1GB.
-- **GitHub Actions Example**:
-
-    ```yaml
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1                      # Enough for most jobs
-        sparse-checkout: |                  # In a monorepo, only the relevant workspaces
-          apps/web
-          packages/shared
-        sparse-checkout-cone-mode: true
-    ```
-- **Cost Impact**:
-    - Shallow clone: **30-60% reduction** in CI startup time on large repos
-    - Sparse checkout (monorepos): **80-95% reduction** in storage / I/O; enables affected-workspace-only builds
+- **Verification**: Measure checkout time, transferred data, cache hits, and job results before and after optimization. Use fixtures or representative changes to verify that required artifacts, policies, and change detection remain complete.
 - **Anti-Patterns**:
-    - Specifying `fetch-depth: 0` (full history) on **every job** → wasteful transfer, runaway CI cost
-    - Monorepo without sparse-checkout → every job expands all files, I/O dominates
+    - Applying either full history or minimum history to every job without evidence.
+    - Using sparse checkout or path filters that omit dependencies, policy files, generated artifacts, or security checks.
+    - Treating vendor defaults or unverified reduction percentages as Universal performance guarantees.
 - **Cross-References**: §8.1 Git LFS (large-file transfer optimization) / §9.2 Renovate (batched dependency updates)
 
 ---
@@ -943,31 +903,28 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 
 | Category | Anti-Pattern | Detection | Reference |
 |---|---|---|---|
-| **Branch** | Direct push to `master`/`main` | Branch Protection | §6.0 |
-| **Branch** | Long-running branch (>2 days) | Stale check / Slack alert | §1.2 |
-| **Branch** | Abandoned merged branches | Auto `git branch --merged` check | §3.0 |
-| **Commit** | Single-word messages (`"fix"` / `"wip"`) | commitlint | §2.0, §2.8 |
-| **Commit** | Non-atomic (multiple logical changes) | Caught at review | §2.1 |
-| **Commit** | AI-generated without `Co-Authored-By:` | commit-msg hook | §9.1 |
-| **Commit** | PR exceeding 100 lines | PR template / lint | §2.3 |
-| **Push** | `git push --force` in general (especially to protected branches) | pre-push hook (`--force-with-lease` required) + Branch Protection | §2.7, §6.0 |
-| **Push** | `--no-verify` abuse (hook bypass) | Watch in code review | §9.3 |
-| **Tag** | Lightweight tag for release | `git tag --list --format='%(taggerdate)'` check | §7.0 |
-| **Tag** | Moving / deleting an existing tag | Branch Protection (tag protection rules) | §7.0 |
-| **Merge** | Rebase Merge to `main` | GitHub merge button settings | §2.6 |
-| **Merge** | Conflict markers (`<<<<<<<`) committed | grep + CI gate | — |
-| **History** | Secret commit → only history removal | Secret scanning | §7.5, §9.0 |
-| **History** | Using `git filter-branch` (deprecated) | Caught at code review | §7.5 |
-| **Worktree** | `worktreeConfig` residue | `check-git-config-clean.sh` | §4.0–§4.4 |
-| **Repo** | No `.gitattributes` → line-ending drift | Verify in CI | §8.0 |
-| **Repo** | >10 MB binary not in LFS | pre-commit + CI | §8.1 |
-| **Repo** | Unjustified submodule adoption | Architecture review | §8.2 |
-| **Review** | Rubber-stamp approval (seconds) | Avg review-time metric | §6.2 |
-| **Review** | Self-merging your own PR | Defended by CODEOWNERS | §6.0, §6.1 |
-| **Tooling** | No server-side secret scan | GitHub Push Protection | §9.0 |
-| **Commit** | Branch/commit without type prefix (commitlint failure) | commitlint CI gate | §2.0, §2.10 |
-| **Review** | AI Rubber-Stamp (human approves in seconds because AI said OK) | Avg review-time metric | §6.4 |
-| **Tooling** | Hook config only on personal machine (no team distribution) | Repository review | §9.3 |
+| **Branch** | Changing a protected reference directly by bypassing policy | Protected Reference Control | §6.0 |
+| **Branch** | Keeping a branch active without an owner, status, or integration plan | inactivity and ownership check | §1.2 |
+| **Branch** | Retaining merged branches or tracking metadata indefinitely | repository hygiene check | §3.0, §3.1 |
+| **Commit** | Intent is not identifiable under the adopted message schema | schema validation + review | §2.0, §2.8, §2.10 |
+| **Commit** | Combining logical changes that cannot be verified and reverted independently | review + change graph | §2.1 |
+| **Commit** | Omitting AI-use, authorship, or sign-off data required by organization policy | policy validation | §2.8, §9.1 |
+| **Change** | Exceeding the risk-based reviewability budget without a reason the change cannot be split | measured size and complexity signal | §2.3 |
+| **Push** | Rewriting shared history without an approved recovery procedure, lease, and audit trail | client feedback + server policy | §2.7, §6.0 |
+| **Push** | Bypassing a local control without compensating verification or rationale | CI evidence + audit log | §9.3 |
+| **Release** | Replacing an existing release reference or published artifact without traceability | release integrity check | §7.0, §7.1 |
+| **Merge** | Integrating conflict markers or unresolved generated differences | content scan + CI gate | — |
+| **History** | Closing a secret incident by rewriting history without revocation or impact review | incident evidence + secret scan | §7.5, §9.0 |
+| **History** | Rewriting shared history without backup, mapping, coordination, and verification | approved runbook | §7.5 |
+| **Worktree** | Leaving prunable metadata, stale branch config, or tool incompatibility unresolved | `check-git-config-clean.sh` or equivalent | §4.0–§4.4 |
+| **Repo** | Non-reproducible line endings, encoding, or binary classification across target platforms | cross-platform CI | §8.0 |
+| **Repo** | Storing large artifacts as Git objects without rationale | repository size policy | §8.1 |
+| **Repo** | Adopting submodules or other external references without ownership, update, trust, and recovery models | architecture review | §8.2 |
+| **Review** | Approval lacks evidence of final-revision, material-risk, and unresolved-finding review | approval evidence | §6.2, §6.3 |
+| **Review** | Author-only approval and integration when independent approval is required | ownership + approval policy | §6.0, §6.1 |
+| **Tooling** | Depending on local checks without server-side or CI secret prevention | layered secret-control check | §9.0 |
+| **Review** | Replacing approval with an AI result without rationale, false-positive disposition, or final-revision review | finding disposition + human approval evidence | §6.4 |
+| **Tooling** | Hook definitions and installation paths exist only on personal machines | repository or bootstrap review | §9.3 |
 
 ---
 
@@ -999,24 +956,24 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 | Conventional Commits | §2.0 |
 | Atomic Commits | §2.1 |
 | PR Template | §2.2 |
-| 100-line rule / PR Size | §2.3 |
-| Pre-Push Branch Protection Hook (block direct push to protected branches) | §2.4 |
+| Reviewable Change Size / risk budget | §2.3 |
+| Protected Reference Control / local pre-push feedback | §2.4 |
 | Pre-Commit Auto-Formatting Hook (lint-staged, etc.) | §2.5 |
 | Merged branch deletion | §3.0 |
 | Stale remote tracking | §3.1 |
-| Worktree pollution / `worktreeConfig` | §4.0 |
+| Worktree state / `worktreeConfig` compatibility | §4.0 |
 | Worktree cleanup commands | §4.1 |
 | `check-git-config-clean.sh` | §4.2 |
 | Parallel AI agent use | §4.3 |
 | `.git/config` health | §5.0 |
 | `.gitignore` AI artifacts | §5.1 |
-| Merge Strategy / Squash & Merge / Rebase forbidden | §2.6 |
+| Merge Strategy Contract / history traceability | §2.6 |
 | Force-Push / `--force-with-lease` | §2.7 |
 | Commit Body / Trailers / `Co-Authored-By:` / Sign-off | §2.8 |
 | fixup / autosquash / WIP cleanup | §2.9 |
-| Branch Protection Rules / Required Reviews / Linear History | §6.0 |
-| CODEOWNERS | §6.1 |
-| PR Review SLA / Stale PR / Draft PR | §6.2 |
+| Protected Reference Control / Required Reviews / history policy | §6.0 |
+| Ownership Resolution / CODEOWNERS and equivalents | §6.1 |
+| Review Response SLO / inactive change / Draft | §6.2 |
 | Conventional Comments | §6.3 |
 | SemVer Tag / annotated tag / pre-release | §7.0 |
 | Commit Signing / Tag Signing / SSH Signing | §7.1 |
@@ -1029,19 +986,29 @@ git branch | grep "claude/" | xargs -I {} git branch -D {} 2>/dev/null
 | Submodule Policy / `git subtree` | §8.2 |
 | Multi-Layer Secret Scanning / GitHub Push Protection | §9.0 |
 | AI Co-Authored-By / AI Attribution | §9.1 |
-| Renovate / Dependabot / Auto-Merge Policy | §9.2 |
+| Dependency Update Automation / Renovate / Dependabot | §9.2 |
 | Anti-Pattern Catalog | §10.0 |
 | Conventional Commits Types (feat/fix/refactor/perf/docs/style/test/build/ci/chore/revert) | §2.0 |
 | commitlint / commitizen / commit-msg validation | §2.10 |
 | PR Required Fields (Risk / Rollback / Migration / ADR) | §2.2 |
-| AI-Assisted PR Review (CodeRabbit / Greptile / Codium) | §6.4 |
-| lefthook / Husky / pre-commit / Hooks Distribution | §9.3 |
+| AI-Assisted Review Governance / review assistants | §6.4 |
+| Hook Distribution and Tool Choice / lefthook / Husky / pre-commit | §9.3 |
 | `git maintenance` / auto GC / commit-graph / prefetch | §7.6 |
 | `.git-blame-ignore-revs` / mass-format / git blame transparency | §8.3 |
 | Shallow Clone / Sparse Checkout / CI optimization / fetch-depth | §9.4 |
 
 ---
 
-**Last Updated**: 2026-05-05
+## Primary Sources
+
+- [Official git-worktree documentation](https://git-scm.com/docs/git-worktree.html) — worktree listing, removal, pruning, repair, and worktree-specific configuration
+- [Official git-config documentation](https://git-scm.com/docs/git-config.html) — authoritative behavior of `--worktree` and `extensions.worktreeConfig`
+- [SLSA Source Track requirements](https://slsa.dev/spec/v1.2/source-requirements) — review, change history, and protected controls for high-assurance source
+- [GitHub Rulesets documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) — one implementation of protection rules for branches, tags, and pushes
+- [GitLab Approval Rules documentation](https://docs.gitlab.com/user/project/merge_requests/approvals/rules/) — one implementation of approval rules by role, group, and target branch
+
+---
+
+**Last Updated**: 2026-07-23
 **Authority**: Universal Constitution (axiarch core)
 **Classification**: Engineering — Git Workflow & Repository Hygiene

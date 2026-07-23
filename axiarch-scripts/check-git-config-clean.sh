@@ -5,19 +5,18 @@
 # ----------------------------------------------------------------------------
 #
 # Purpose / 用途:
-#   AI agent (Claude Code, Cursor, Codex, etc.) や開発者が `git worktree add` を実行した後、
-#   `.git/config` に残留する `[extensions] worktreeConfig = true` および
-#   `[branch "claude/..."]` や `[branch "codex/..."]` 等のステイルエントリを検出し、必要に応じて自動除去する。
+#   AI agentや開発者がworktreeを利用した後、Gitがprune可能と判定する管理情報と、
+#   実在しないlocal branchに対応するステイル設定を検出し、必要に応じて安全に除去する。
 #
-#   Detect and optionally remove `[extensions] worktreeConfig = true` and stale
-#   `[branch "claude/..."]` or `[branch "codex/..."]` entries left in `.git/config` after worktree operations.
+#   Detect and optionally remove worktree administrative data that Git marks as
+#   prunable and branch configuration whose local branch no longer exists.
 #
 # Why / 理由:
-#   残留エントリは Antigravity 等の Go ベース language server をクラッシュさせ、
-#   該当プロジェクトのチャット機能を停止させる可能性がある。
+#   stale metadataやbranch configはtoolingの誤認、branch一覧の混乱、誤ったbase選択を起こし得る。
+#   `extensions.worktreeConfig`自体はGitの正式機能であり、検出・削除対象にしない。
 #
-#   Residual entries can crash Go-based language servers (e.g., Antigravity), causing
-#   chat function failure for the affected project.
+#   Stale metadata and branch config can confuse tooling, branch inventory, and base
+#   selection. `extensions.worktreeConfig` is a supported Git feature and is not removed.
 #
 # Reference / 詳細:
 #   axiarch-rules/{ja,en}/universal/engineering/600_git_workflow.md §4
@@ -26,7 +25,7 @@
 #   ./axiarch-scripts/check-git-config-clean.sh             # Detection only (exit 1 if dirty)
 #   ./axiarch-scripts/check-git-config-clean.sh --fix       # Detection + auto-repair
 #   ./axiarch-scripts/check-git-config-clean.sh --quiet     # CI silent mode (no output if clean)
-#   ./axiarch-scripts/check-git-config-clean.sh --full-clean # --fix + delete stale claude/codex branches
+#   ./axiarch-scripts/check-git-config-clean.sh --full-clean # deprecated alias for --fix; never deletes branches
 # ----------------------------------------------------------------------------
 
 set -euo pipefail
@@ -69,61 +68,73 @@ log() {
   fi
 }
 
-# 1. extensions.worktreeConfig 残留チェック / Check for residual extensions.worktreeConfig
-if git config --get extensions.worktreeConfig >/dev/null 2>&1; then
-  log "❌ DIRTY: [extensions] worktreeConfig = true が残留しています / residual entry detected"
+# 1. repositoryとworktree状態をGit自身で検証 / Validate repository and worktree state through Git
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  log "❌ ERROR: Git repositoryではありません / not a Git repository"
+  exit 2
+fi
+
+if git config --local --bool --get extensions.worktreeConfig 2>/dev/null | grep -qx 'true'; then
+  log "ℹ️  VALID: extensions.worktreeConfig is enabled; supported Git configuration is preserved"
+fi
+
+PRUNABLE_OUTPUT=$(git worktree prune --dry-run --verbose 2>&1 || true)
+if [[ -n "$PRUNABLE_OUTPUT" ]]; then
+  log "❌ DIRTY: prune可能なworktree管理情報があります / prunable worktree metadata detected"
+  if ! $QUIET_MODE; then
+    printf '%s\n' "$PRUNABLE_OUTPUT" | sed 's/^/    /'
+  fi
   DIRTY=true
   if $FIX_MODE; then
-    git config --unset extensions.worktreeConfig
-    log "  ✅ FIXED: extensions.worktreeConfig を除去しました / removed"
+    git worktree prune --verbose
+    log "  ✅ FIXED: Git worktree pruneで管理情報を整理しました / pruned through Git"
   fi
 fi
 
-# 2. ステイル claude/* や codex/* ブランチ config エントリ検出 / Detect stale claude/* or codex/* branch config
-# 現在チェックアウト中のブランチは除外 / Exclude currently checked-out branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
-STALE_BRANCHES=$(git config --list 2>/dev/null \
-  | grep -oE "branch\.(claude|codex)/[^.]+" \
-  | sort -u \
-  | awk -v cur="branch.${CURRENT_BRANCH}" '$0 != cur' || true)
+# 2. local branchが存在しないbranch configを検出 / Detect config for missing local branches
+STALE_BRANCHES=$(git config --local --name-only --get-regexp '^branch\.' 2>/dev/null \
+  | while IFS= read -r config_key; do
+      branch_and_key=${config_key#branch.}
+      branch_name=${branch_and_key%.*}
+      if [[ -n "$branch_name" ]] && ! git show-ref --verify --quiet "refs/heads/${branch_name}"; then
+        printf '%s\n' "$branch_name"
+      fi
+    done \
+  | sort -u || true)
 if [[ -n "$STALE_BRANCHES" ]]; then
   COUNT=$(echo "$STALE_BRANCHES" | wc -l | tr -d ' ')
-  log "❌ DIRTY: $COUNT 件のステイル claude/codex ブランチ config / stale entries detected"
+  log "❌ DIRTY: $COUNT 件のステイルbranch config / stale branch config entries detected"
   if ! $QUIET_MODE; then
-    echo "$STALE_BRANCHES" | sed 's/^/    - /'
+    while IFS= read -r stale_branch; do
+      printf '    - %s\n' "$stale_branch"
+    done <<< "$STALE_BRANCHES"
   fi
   DIRTY=true
   if $FIX_MODE; then
-    while IFS= read -r entry; do
-      branch_name="${entry#branch.}"
-      git config --unset "branch.${branch_name}.vscode-merge-base" 2>/dev/null || true
-      git config --unset "branch.${branch_name}.remote" 2>/dev/null || true
-      git config --unset "branch.${branch_name}.merge" 2>/dev/null || true
-      log "  ✅ FIXED: branch.${branch_name}.* config を除去 / config entries removed"
-
-      if $FULL_CLEAN; then
-        if git branch -D "$branch_name" 2>/dev/null; then
-          log "  ✅ FIXED: ブランチ $branch_name を削除 / branch deleted"
-        fi
-      fi
+    while IFS= read -r branch_name; do
+      git config --local --remove-section "branch.${branch_name}" 2>/dev/null || true
+      log "  ✅ FIXED: branch.${branch_name} config を除去 / config section removed"
     done <<< "$STALE_BRANCHES"
   fi
 fi
 
+if $FULL_CLEAN; then
+  log "ℹ️  --full-clean is deprecated and behaves as --fix; branch references are never deleted"
+fi
+
 # 3. 結果出力 / Result output
 if ! $DIRTY; then
-  log "✅ .git/config はクリーン状態です / .git/config is clean"
+  log "✅ worktree管理情報とbranch configは整合しています / worktree metadata and branch config are consistent"
   exit 0
 fi
 
 if $FIX_MODE; then
   log ""
-  log "✅ 全ての残留エントリを修復しました / All residual entries repaired"
-  log "   Antigravity を再起動して動作確認してください / Restart Antigravity to verify"
+  log "✅ 検出したステイル管理情報をGitの正規操作で修復しました / repaired detected stale metadata through supported Git operations"
   exit 0
 else
   log ""
   log "🔧 修復するには / To repair: $0 --fix"
-  log "   完全クリーン (ブランチ削除含む) / Full clean (incl. branch removal): $0 --full-clean"
+  log "   --full-clean は互換aliasでありbranchを削除しません / deprecated compatibility alias; never deletes branches"
   exit 1
 fi

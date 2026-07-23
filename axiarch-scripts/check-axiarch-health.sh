@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # =============================================================================
 # Axiarch Health Diagnostic Tool
 # https://github.com/hiroyuki-miyauchi/axiarch
@@ -166,7 +167,7 @@ fi
 # Check 4: Session log firing history (technical firing)
 # =============================================================================
 print_section "Check 4: Recent session firing history"
-PROJECT_KEY=$(echo "${PROJECT_DIR}" | sed 's|/|-|g')
+PROJECT_KEY="${PROJECT_DIR//\//-}"
 SESSION_DIR="${HOME}/.claude/projects/${PROJECT_KEY}"
 
 if ! "${HOOK_FILE_OK}"; then
@@ -177,8 +178,12 @@ elif [[ "${HOOK_FILE_PATH}" == */.codex/hooks.json ]]; then
   print_warn "Codex hook config detected — Claude Code session log firing history is not applicable"
   print_info "Codex hook validation is limited to structural checks in this diagnostic"
 elif [[ -d "${SESSION_DIR}" ]]; then
-  LATEST_JSONL=$(find "${SESSION_DIR}" -maxdepth 2 -name "*.jsonl" -type f 2>/dev/null \
-    | xargs ls -t 2>/dev/null | head -1)
+  LATEST_JSONL=""
+  while IFS= read -r -d '' session_candidate; do
+    if [[ -z "${LATEST_JSONL}" || "${session_candidate}" -nt "${LATEST_JSONL}" ]]; then
+      LATEST_JSONL="${session_candidate}"
+    fi
+  done < <(find "${SESSION_DIR}" -maxdepth 2 -name "*.jsonl" -type f -print0 2>/dev/null)
   if [[ -n "${LATEST_JSONL}" ]]; then
     print_info "Latest session: $(basename "${LATEST_JSONL}")"
     # v1.5.2+: hook output uses hookSpecificOutput.additionalContext format,
@@ -322,17 +327,17 @@ fi
 print_section "Check 7: AXIARCH §7 Documentation and Native Task State (task docs)"
 
 DOCS_OK=0
-DOCS_MISSING=()
+PROCESS_DOCS_MISSING=()
 for f in task.md implementation_plan.md walkthrough.md; do
   if [[ -f "${PROJECT_DIR}/${f}" ]]; then
     SIZE=$(wc -c < "${PROJECT_DIR}/${f}" 2>/dev/null | awk '{print $1}')
     if [[ "${SIZE:-0}" -gt 0 ]]; then
       DOCS_OK=$((DOCS_OK + 1))
     else
-      DOCS_MISSING+=("${f} (empty)")
+      PROCESS_DOCS_MISSING+=("${f} (empty)")
     fi
   else
-    DOCS_MISSING+=("${f} (not found)")
+    PROCESS_DOCS_MISSING+=("${f} (not found)")
   fi
 done
 
@@ -340,7 +345,7 @@ if [[ "${DOCS_OK}" -eq 3 ]]; then
   print_pass "All three documents present and non-empty (task / implementation_plan / walkthrough)"
 elif [[ "${DOCS_OK}" -gt 0 ]]; then
   print_warn "Partial: ${DOCS_OK}/3 documents present"
-  for missing in "${DOCS_MISSING[@]}"; do
+  for missing in "${PROCESS_DOCS_MISSING[@]}"; do
     print_info "Missing/empty: ${missing}"
   done
   print_info "→ Per AXIARCH.md, all three are required current-task evidence — generate before any task"
@@ -1075,6 +1080,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
       print_info "Expected next steps to recommend axiarch-upgrade.sh --safe-only --dry-run, describe it as an upgrade preview, and distribute/validate axiarch-task-state.sh"
       DOCS_MISSING=1
     fi
+    # shellcheck disable=SC2016 # The copied shell expressions are matched as literals.
     if grep -q "check_existing_install" "${PROJECT_DIR}/init.sh" 2>/dev/null \
       && grep -q "Existing Axiarch files detected" "${PROJECT_DIR}/init.sh" 2>/dev/null \
       && grep -q "Stopped before file copy" "${PROJECT_DIR}/init.sh" 2>/dev/null \
@@ -1236,6 +1242,7 @@ if [[ "${IS_AXIARCH_SOURCE_REPO}" -eq 1 ]]; then
           if [[ -n "${expanded_excludes:-}" ]]; then
             while IFS= read -r manifest_exclude; do
               [[ -z "${manifest_exclude}" ]] && continue
+              # shellcheck disable=SC2053 # Manifest excludes intentionally support glob patterns.
               if [[ "${manifest_candidate}" == ${manifest_exclude} ]]; then
                 manifest_excluded=1
                 break
@@ -1264,6 +1271,703 @@ EOF
       DOCS_MISSING=1
     fi
     rm -f "${manifest_expanded_paths}" "${manifest_duplicate_paths}" "${manifest_match_list}"
+  fi
+
+  language_governance_missing=0
+  language_governance_rel="universal/engineering/320_programming_language_governance.md"
+  react_native_rel="universal/engineering/420_react_native.md"
+  cloud_platform_rel="universal/engineering/520_cloud_application_platforms.md"
+  azure_profile_rel="universal/engineering/530_azure_cloud.md"
+  for lang in ja en; do
+    language_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/${language_governance_rel}"
+    if [[ ! -f "${language_governance_file}" ]]; then
+      print_warn "Axiarch source programming-language governance rule missing for ${lang}"
+      language_governance_missing=1
+      continue
+    fi
+
+    language_governance_sections=$(grep -Ec '^## §[0-9]+\.' "${language_governance_file}" 2>/dev/null || true)
+    language_governance_rules=$(grep -Ec 'Rule 320\.[0-9]+:' "${language_governance_file}" 2>/dev/null || true)
+    language_governance_rule_ids=$(grep -oE 'Rule 320\.[0-9]+' "${language_governance_file}" 2>/dev/null \
+      | sed 's/.*\.//' | sort -n | uniq | paste -sd, -)
+    language_governance_expected_rule_ids=$(awk 'BEGIN { for (i = 1; i <= 86; i++) printf "%s%d", (i > 1 ? "," : ""), i }')
+    if ! grep -Eq '^# 320\.' "${language_governance_file}" 2>/dev/null \
+      || ! grep -Eq 'Rules? 320\.1.*320\.86|Rule 320\.1.*320\.86' "${language_governance_file}" 2>/dev/null \
+      || [[ "${language_governance_sections}" -ne 19 \
+      || "${language_governance_rules}" -ne 86 \
+      || "${language_governance_rule_ids}" != "${language_governance_expected_rule_ids}" ]]; then
+      print_warn "Axiarch source programming-language governance structure drift for ${lang}: sections=${language_governance_sections}, rules=${language_governance_rules}"
+      language_governance_missing=1
+    fi
+
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "source、binary／ABI" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "consumer matrix" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "同一の検証済みartifact" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "generated SDK" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "registry namespace" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source public library, SDK, package compatibility, or distribution contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "source, binary or ABI" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "consumer matrix" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "same verified artifact" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "generated SDK" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "registry namespace" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source public library, SDK, package compatibility, or distribution contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "freshかつ隔離されたenvironment" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "rich HTML／JavaScript" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "orphaned schedule" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "別の権限主体" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source notebook or literate computational artifact contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "fresh isolated environment" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "rich HTML or JavaScript" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "orphaned schedules" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "another authorized principal" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source notebook or literate computational artifact contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    if ! grep -q "HTML / CSS" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "Node.js" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "Dockerfile / Containerfile" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "VBA" "${language_governance_file}" 2>/dev/null \
+      || ! grep -Eq "Universal Applicability Contract|Universal適用契約" "${language_governance_file}" 2>/dev/null \
+      || ! grep -Eq "continuity route|継続経路" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "offboarding" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "Blueprint parameter" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "CODEOWNERS" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "language_portfolio:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "schema_version:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "primary:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "secondary:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "required_gates:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "evidence_refs:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "exception_ids:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "dependency_resolution:" "${language_governance_file}" 2>/dev/null \
+      || grep -q "lock_or_wrapper:" "${language_governance_file}" 2>/dev/null \
+      || ! grep -q "uv export --locked --format cyclonedx1.5" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "pubspec.lock" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq ".terraform.lock.hcl" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Eq "version catalog.*resolved transitive graph.*lock|version catalog.*resolved transitive graphをlockしない" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Eq "wrapper.*build tool.*not dependencies|wrapperはbuild toolをpinするが依存をpinしない" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Eq "publishable package's.*Package.resolved.*does not constrain consumer resolution|公開packageの.*Package.resolved.*consumer解決を拘束しない" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "PyPI Trusted Publishing" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "RubyGems Trusted Publishing" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "nuget.org Trusted Publishing" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "offboarding" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -Fq "SLSA_SOURCE_TWO_PARTY_REVIEWED" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md" 2>/dev/null \
+      || ! grep -q "VBA / Office" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/000_security_privacy.md" 2>/dev/null \
+      || grep -q "SLSA v1.0" "${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/000_security_privacy.md" 2>/dev/null; then
+      print_warn "Axiarch source enterprise language profile or current dependency-tooling guidance drift for ${lang}"
+      language_governance_missing=1
+    fi
+
+    oss_compliance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/200_oss_compliance.md"
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "AGPLやsource-availableを一律除外しない" "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq '"defaultDecision": "review"' "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq 'CDX_PREDICATE_TYPE="https://cyclonedx.org/bom"' "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq "欧州委員会の移管status" "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq "組織固有の総合70点だけをUniversal block条件にしない" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "GPLは不可" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "AGPL除外必須" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "全リリースSBOMを **OCI Artifact形式**" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "**14日超過**のSBOM" "${oss_compliance_file}" 2>/dev/null; then
+        print_warn "Axiarch source license, SBOM, or NIS2 Universal applicability contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "Do not universally exclude AGPL or source-available terms" "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq '"defaultDecision": "review"' "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq 'CDX_PREDICATE_TYPE="https://cyclonedx.org/bom"' "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq "European Commission transposition status" "${oss_compliance_file}" 2>/dev/null \
+        || ! grep -Fq "Universal does not block from one organization-specific aggregate score of 70" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "GPL not allowed" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "AGPL exclusion mandatory" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "Store all release SBOMs in **OCI Artifact format**" "${oss_compliance_file}" 2>/dev/null \
+        || grep -Fq "older than **14 days**" "${oss_compliance_file}" 2>/dev/null; then
+        print_warn "Axiarch source license, SBOM, or NIS2 Universal applicability contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    git_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/600_git_workflow.md"
+    engineering_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/000_engineering_standards.md"
+    aws_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/510_aws_cloud.md"
+    security_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/security/000_security_privacy.md"
+    quality_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/quality/000_qa_testing.md"
+    sre_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/operations/400_site_reliability.md"
+    finops_governance_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/operations/600_cloud_finops.md"
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "Protected Reference Control（保護ref統制）" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "重大欠陥対応 (Critical Defect Response)" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq '発見から **24時間以内** に修正' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Version-Aware Contract and Codebase Consistency" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq '「既存コードベースの実装パターン」を正' "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq "Codebase-as-Truth" "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" 2>/dev/null \
+        || ! grep -Fq "Hosting Outcome" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Bounded Connections" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'BaaSを「唯一の正解」' "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'timeout-minutes: 10` を設定してください' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "OIDC workload identity" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Dependency Resolution Pinning" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq '自動化が唯一の正解' "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq '同時適用時代' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "100行は分割を促す参考signal" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Universal層は特定frameworkを必須化しない" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq '固定標準にしない' "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "固定7.0等の総合scoreだけでblock／allowせず" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "deploy可能なapplicationと実行rootは各ecosystemのlockfileをcommit" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "lockfileまたは同等のdependency-resolution digest" "${language_governance_file}" 2>/dev/null \
+        || grep -Fq "**APIキー** | 90日ごと" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "IAMクレデンシャルやJWT署名鍵は **90日ごと**" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "LLMプロバイダーAPIキーを90日以内" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "特定hostをUniversal要件にしません" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "secretlessなworkload identity" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "全clusterの必須技術にしない" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Web Platform Baseline" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "自動testだけで法的適合を断定せず" "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq "セキュリティアップデート5年保証" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "release可能なartifactごと" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "GitHub Actions Reusable Workflows／Composite Actionsは参考実装" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "workload-native benchmark" "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq '型チェック | `tsc --noEmit`' "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq "1% → 5% → 20% → 100%" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq '`@ts-check`とJSDoc' "${language_governance_file}" 2>/dev/null \
+        || grep -Fq 'legacy、設定、短いscript、型導入困難な領域に限定' "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "WebAssembly 3.0は2025年9月17日に完成" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "WASI 0.3.0（2026年6月11日公開）" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "2026年2月予定" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "GitOpsは代表的な実装" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Dependency Resolution Integrity" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "再現可能なdelivery path" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "いかなる場合も手動コマンド" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "AI原価はプラン月額の**30%を超えない**" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Universal適用契約: 必須成果はcost visibility" "${finops_governance_file}" 2>/dev/null \
+        || ! grep -Fq "RC branch／labelは一つの実装" "${sre_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source cross-cutting language governance may regress to a fixed vendor, score, cadence, or team model for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "Protected Reference Control" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Critical Defect Response" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'fixed within **24 hours**' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Version-Aware Contract and Codebase Consistency" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'prioritize "existing codebase implementation patterns"' "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq "Codebase-as-Truth" "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" 2>/dev/null \
+        || ! grep -Fq "Hosting Outcome" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Bounded Connections" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'All CI jobs must have `timeout-minutes: 10`' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "OIDC workload identity" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Dependency Resolution Pinning" "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'automation is the only correct approach' "${engineering_governance_file}" 2>/dev/null \
+        || grep -Fq 'laws apply simultaneously' "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "One hundred lines is a reference signal" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "does not mandate one framework" "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq 'fixed standard' "${git_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Do not block or allow solely on a fixed aggregate" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "Deployable applications and executable roots commit each ecosystem's lockfile" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "lockfile or equivalent dependency-resolution digest" "${language_governance_file}" 2>/dev/null \
+        || grep -Fq "**API Keys** | Every 90 days" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "Rotate IAM credentials and JWT signing keys every **90 days**" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "Rotate LLM provider API keys within 90 days" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "not a Universal host requirement" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "secretless workload identity" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "do not mandate it for every cluster" "${security_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Web Platform Baseline" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Do not claim legal conformity from automated tests alone" "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq "24h vulnerability disclosure process" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "every releasable artifact" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "GitHub Actions Reusable Workflows and Composite Actions are reference implementations" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Workload-native benchmark" "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq 'Type Check | `tsc --noEmit`' "${quality_governance_file}" 2>/dev/null \
+        || grep -Fq "1% → 5% → 20% → 100%" "${quality_governance_file}" 2>/dev/null \
+        || ! grep -Fq '`@ts-check` with JSDoc' "${language_governance_file}" 2>/dev/null \
+        || grep -Fq 'Restricted to legacy code, configuration, short scripts' "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "WebAssembly 3.0 was completed on September 17, 2025" "${engineering_governance_file}" 2>/dev/null \
+        || ! grep -Fq "WASI 0.3.0 (released June 11, 2026)" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "Feb 2026 expected" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "GitOps is a representative implementation" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Dependency Resolution Integrity" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "reproducible delivery path" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "MUST NEVER be performed via manual commands" "${sre_governance_file}" 2>/dev/null \
+        || grep -Fq "AI cost MUST NOT exceed **30%**" "${sre_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Universal application contract: Required outcomes are cost visibility" "${finops_governance_file}" 2>/dev/null \
+        || ! grep -Fq "An RC branch or label is one implementation" "${sre_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source cross-cutting language governance may regress to a fixed vendor, score, cadence, or team model for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    major_language_tokens=(
+      "TypeScript" "JavaScript" "HTML / CSS" "SQL" "Python" "Shell"
+      "Java" "C#" "C++" "PowerShell" "PHP" "Go" "Rust" "Kotlin"
+      "Lua" "Ruby" "Dart" "Swift" "Groovy" "Assembly" "Visual Basic"
+      "VBA" "GDScript" "Scala" "Elixir" "MATLAB" "Delphi" "Lisp"
+      "Zig" "MicroPython" "Erlang" "F#" "Ada" "Gleam" "Fortran"
+      "OCaml" "Prolog" "COBOL" "Mojo" "Julia" "Haskell" "Clojure"
+      "Objective-C" "HCL" "Bicep" "Rego" "Vyper" "Cairo" "Verilog"
+      "ABAP" "Apex" "PL/I" "Power Fx" "SAS" "Stata"
+      "Solidity" "Move" "SystemVerilog" "VHDL"
+      "CUDA" "HIP" "SYCL" "Triton" "OpenCL" "WGSL" "GLSL" "HLSL"
+      "Metal Shading Language" "Electron" "Tauri" ".NET MAUI" "Avalonia"
+      "Qt" "Compose Desktop" "GraphQL" "Cypher" "Gremlin" "SPARQL"
+      "PromQL" "LogQL" "KQL" "Flux" "DAX" "MDX" "Power Query M"
+      "dbt" "Jinja" "OpenTofu" "Helm" "Kustomize" "Crossplane"
+      "Ansible" "Puppet" "Chef" "Packer"
+    )
+    for major_language_token in "${major_language_tokens[@]}"; do
+      if ! grep -Fq "${major_language_token}" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source programming-language coverage missing for ${lang}: ${major_language_token}"
+        language_governance_missing=1
+      fi
+    done
+
+    compiled_artifact_tokens=(
+      "SPIR-V" "DXIL" "metallib" "eBPF" "ELF" "BTF" "CO-RE"
+    )
+    for compiled_artifact_token in "${compiled_artifact_tokens[@]}"; do
+      if ! grep -Fq "${compiled_artifact_token}" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source compiled-artifact coverage missing for ${lang}: ${compiled_artifact_token}"
+        language_governance_missing=1
+      fi
+    done
+
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "CPUまたは信頼できるreference実装との差分test" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "shader validatorまたはeBPF verifierのpassだけで" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "driver JIT" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source accelerator, shader, or eBPF outcome contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "differential tests against a CPU or trusted reference implementation" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "Passing a shader validator or eBPF verifier alone" "${language_governance_file}" 2>/dev/null \
+        || ! grep -Fq "driver JITs" "${language_governance_file}" 2>/dev/null; then
+        print_warn "Axiarch source accelerator, shader, or eBPF outcome contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    if ! grep -Fq "memory-safe roadmap" "${PROJECT_DIR}/axiarch-rules/en/${language_governance_rel}" 2>/dev/null \
+      || ! grep -Fq "memory-safe roadmap" "${PROJECT_DIR}/axiarch-rules/ja/${language_governance_rel}" 2>/dev/null; then
+      print_warn "Axiarch source memory-safe language migration roadmap guidance drift"
+      language_governance_missing=1
+    fi
+
+    for language_governance_index in \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/README.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/compliance_matrix.md"; do
+      if [[ ! -f "${language_governance_index}" ]] \
+        || ! grep -q "320_programming_language_governance.md" "${language_governance_index}" 2>/dev/null; then
+        print_warn "Axiarch source programming-language governance is missing from ${language_governance_index#"${PROJECT_DIR}/"}"
+        language_governance_missing=1
+      fi
+    done
+
+    react_native_file="${PROJECT_DIR}/axiarch-rules/${lang}/${react_native_rel}"
+    if [[ ! -f "${react_native_file}" ]]; then
+      print_warn "Axiarch source React Native engineering rule missing for ${lang}"
+      language_governance_missing=1
+    else
+      react_native_sections=$(grep -Ec '^## §[0-9]+\.' "${react_native_file}" 2>/dev/null || true)
+      react_native_rules=$(grep -Ec 'Rule 420\.[0-9]+:' "${react_native_file}" 2>/dev/null || true)
+      react_native_rule_ids=$(grep -oE 'Rule 420\.[0-9]+' "${react_native_file}" 2>/dev/null \
+        | sed 's/.*\.//' | sort -n | uniq | paste -sd, -)
+      react_native_expected_rule_ids=$(awk 'BEGIN { for (i = 1; i <= 52; i++) printf "%s%d", (i > 1 ? "," : ""), i }')
+      if ! grep -Eq '^# 420\.' "${react_native_file}" 2>/dev/null \
+        || ! grep -Eq 'Rules? 420\.1.*420\.52' "${react_native_file}" 2>/dev/null \
+        || [[ "${react_native_sections}" -ne 17 \
+        || "${react_native_rules}" -ne 52 \
+        || "${react_native_rule_ids}" != "${react_native_expected_rule_ids}" ]]; then
+        print_warn "Axiarch source React Native structure drift for ${lang}: sections=${react_native_sections}, rules=${react_native_rules}"
+        language_governance_missing=1
+      fi
+
+      if ! grep -q "New Architecture" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "0.82" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "Hermes" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "Codegen" "${react_native_file}" 2>/dev/null \
+        || ! grep -Eq "Universal Applicability Contract|Universal適用契約" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "AsyncStorage" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "OTA" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "runtime compatibility" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "rollback" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "CODEOWNERS" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "SBOM" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "provenance" "${react_native_file}" 2>/dev/null \
+        || ! grep -q "secondary" "${react_native_file}" 2>/dev/null \
+        || ! grep -Eq "version catalog単独では解決済み推移graphを固定しない|version catalog alone does not lock the resolved transitive graph" "${react_native_file}" 2>/dev/null \
+        || ! grep -Eq "Mobile Platform function|Mobile Platform機能" "${react_native_file}" 2>/dev/null; then
+        print_warn "Axiarch source React Native architecture, security, release, or enterprise controls drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    for react_native_index in \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/README.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/compliance_matrix.md"; do
+      if [[ ! -f "${react_native_index}" ]] \
+        || ! grep -q "420_react_native.md" "${react_native_index}" 2>/dev/null; then
+        print_warn "Axiarch source React Native engineering is missing from ${react_native_index#"${PROJECT_DIR}/"}"
+        language_governance_missing=1
+      fi
+    done
+
+    cloud_platform_file="${PROJECT_DIR}/axiarch-rules/${lang}/${cloud_platform_rel}"
+    if [[ ! -f "${cloud_platform_file}" ]]; then
+      print_warn "Axiarch source cloud and application platform governance rule missing for ${lang}"
+      language_governance_missing=1
+    else
+      cloud_platform_sections=$(grep -Ec '^## §[0-9]+\.' "${cloud_platform_file}" 2>/dev/null || true)
+      cloud_platform_rules=$(grep -Ec '^- Rule 520\.[0-9]+:' "${cloud_platform_file}" 2>/dev/null || true)
+      cloud_platform_rule_ids=$(grep -oE 'Rule 520\.[0-9]+' "${cloud_platform_file}" 2>/dev/null \
+        | sed 's/.*\.//' | sort -n | uniq | paste -sd, -)
+      cloud_platform_expected_rule_ids=$(awk 'BEGIN { for (i = 1; i <= 89; i++) printf "%s%d", (i > 1 ? "," : ""), i }')
+      if ! grep -Eq '^# 520\.' "${cloud_platform_file}" 2>/dev/null \
+        || ! grep -Eq 'Rules? 520\.1.*520\.89' "${cloud_platform_file}" 2>/dev/null \
+        || [[ "${cloud_platform_sections}" -ne 22 \
+        || "${cloud_platform_rules}" -ne 89 \
+        || "${cloud_platform_rule_ids}" != "${cloud_platform_expected_rule_ids}" ]]; then
+        print_warn "Axiarch source cloud and application platform structure drift for ${lang}: sections=${cloud_platform_sections}, rules=${cloud_platform_rules}"
+        language_governance_missing=1
+      fi
+
+      cloud_platform_tokens=(
+        "Vercel" "Supabase" "Firebase" "Cloudflare" "OIDC" "SBOM"
+        "data-less" "App Check" "code rollback" "Platform Engineering"
+        "feature parity" "version skew" "protocol fallback"
+        "at-least-once" "idempotency" "poison message" "cost per event"
+        "fidelity matrix" "managed conformance"
+        "provider-managed integration" "effective permission diff" "orphan scan"
+        "service graph" "release topology" "aggregate release record"
+        "partial deployment" "sovereign cloud"
+        "AWS Amplify" "Appwrite" "Convex" "platform_capabilities:"
+        "identity portability" "trust surface"
+      )
+      for cloud_platform_token in "${cloud_platform_tokens[@]}"; do
+        if ! grep -Fq "${cloud_platform_token}" "${cloud_platform_file}" 2>/dev/null; then
+          print_warn "Axiarch source cloud and application platform coverage missing for ${lang}: ${cloud_platform_token}"
+          language_governance_missing=1
+        fi
+      done
+
+      if [[ "${lang}" == "ja" ]]; then
+        if ! grep -Fq "Universal適用契約" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "共有責任" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "exit plan" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "budget alertをhard capと誤認しない" "${cloud_platform_file}" 2>/dev/null; then
+          print_warn "Axiarch source cloud platform Universal outcome contract drift for ${lang}"
+          language_governance_missing=1
+        fi
+      else
+        if ! grep -Fq "Universal Applicability Contract" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "shared responsibility" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "Exit plans" "${cloud_platform_file}" 2>/dev/null \
+          || ! grep -Fq "never treat budget alerts as hard caps" "${cloud_platform_file}" 2>/dev/null; then
+          print_warn "Axiarch source cloud platform Universal outcome contract drift for ${lang}"
+          language_governance_missing=1
+        fi
+      fi
+    fi
+
+    api_integration_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/100_api_integration.md"
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "independent、coordinated、aggregate" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "microservice化自体を成熟度指標にしない" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "Web操作を外部公開APIへ無条件に露出しない" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "新規サービスへ一律に義務付けない" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "新規clusterへ一律に義務付けない" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "本契約と個別節が競合する場合は本契約を優先する" "${aws_governance_file}" 2>/dev/null \
+        || ! grep -Fq "専任CoEは支出規模" "${finops_governance_file}" 2>/dev/null \
+        || ! grep -Fq "局所scriptや配布されないprototype" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "各マイクロサービスは他のサービスと独立してデプロイ可能でなければならない" "${api_integration_file}" 2>/dev/null \
+        || grep -Fq "サービス間で直接DBを共有することを「重罪」とする" "${api_integration_file}" 2>/dev/null; then
+        print_warn "Axiarch source API, cloud, team, or supply-chain Universal applicability contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "independent, coordinated, or aggregate" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "microservice adoption itself is not a maturity metric" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "do not expose web operations as public APIs by default" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "Do not mandate it for every new service" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "Do not mandate it for every new cluster" "${api_integration_file}" 2>/dev/null \
+        || ! grep -Fq "This contract prevails over a conflicting service-specific section" "${aws_governance_file}" 2>/dev/null \
+        || ! grep -Fq "establish a dedicated CoE only when spend" "${finops_governance_file}" 2>/dev/null \
+        || ! grep -Fq "local script or undistributed prototype" "${security_governance_file}" 2>/dev/null \
+        || grep -Fq "Each microservice must be independently deployable without dependency on other services" "${api_integration_file}" 2>/dev/null \
+        || grep -Fq 'Directly sharing databases between services is a "serious offense"' "${api_integration_file}" 2>/dev/null; then
+        print_warn "Axiarch source API, cloud, team, or supply-chain Universal applicability contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    qa_release_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/quality/000_qa_testing.md"
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "Micro Frontend release topologyと統合テスト" "${qa_release_file}" 2>/dev/null \
+        || ! grep -Fq "aggregate deployment unit" "${qa_release_file}" 2>/dev/null \
+        || grep -Fq "各マイクロフロントエンドは独立してデプロイ・テスト可能でなければならない" "${qa_release_file}" 2>/dev/null \
+        || grep -Fq "外部SaaS API | Provider側制御不可のため不要" "${qa_release_file}" 2>/dev/null; then
+        print_warn "Axiarch source QA and micro-frontend release-topology contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "Micro-Frontend Release Topology and Integration Testing" "${qa_release_file}" 2>/dev/null \
+        || ! grep -Fq "Aggregate deployment unit" "${qa_release_file}" 2>/dev/null \
+        || grep -Fq "Each micro-frontend must be independently deployable and testable" "${qa_release_file}" 2>/dev/null \
+        || grep -Fq "External SaaS API | Not required (Provider uncontrolled)" "${qa_release_file}" 2>/dev/null; then
+        print_warn "Axiarch source QA and micro-frontend release-topology contract drift for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+
+    for cloud_platform_index in \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/README.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/compliance_matrix.md"; do
+      if [[ ! -f "${cloud_platform_index}" ]] \
+        || ! grep -q "520_cloud_application_platforms.md" "${cloud_platform_index}" 2>/dev/null; then
+        print_warn "Axiarch source cloud and application platform governance is missing from ${cloud_platform_index#"${PROJECT_DIR}/"}"
+        language_governance_missing=1
+      fi
+    done
+
+    azure_profile_file="${PROJECT_DIR}/axiarch-rules/${lang}/${azure_profile_rel}"
+    if [[ ! -f "${azure_profile_file}" ]]; then
+      print_warn "Axiarch source Microsoft Azure provider profile missing for ${lang}"
+      language_governance_missing=1
+    else
+      azure_profile_sections=$(grep -Ec '^## §[0-9]+\.' "${azure_profile_file}" 2>/dev/null || true)
+      azure_profile_rules=$(grep -Ec '^- Rule 530\.[0-9]+:' "${azure_profile_file}" 2>/dev/null || true)
+      azure_profile_rule_ids=$(grep -oE 'Rule 530\.[0-9]+' "${azure_profile_file}" 2>/dev/null \
+        | sed 's/.*\.//' | sort -n | uniq | paste -sd, -)
+      azure_profile_expected_rule_ids=$(awk 'BEGIN { for (i = 1; i <= 85; i++) printf "%s%d", (i > 1 ? "," : ""), i }')
+      if ! grep -Eq '^# 530\.' "${azure_profile_file}" 2>/dev/null \
+        || ! grep -Eq 'Rules? 530\.1.*530\.85' "${azure_profile_file}" 2>/dev/null \
+        || [[ "${azure_profile_sections}" -ne 21 \
+        || "${azure_profile_rules}" -ne 85 \
+        || "${azure_profile_rule_ids}" != "${azure_profile_expected_rule_ids}" ]]; then
+        print_warn "Axiarch source Microsoft Azure provider profile structure drift for ${lang}: sections=${azure_profile_sections}, rules=${azure_profile_rules}"
+        language_governance_missing=1
+      fi
+
+      azure_profile_tokens=(
+        "landing zone" "subscription vending" "Microsoft Entra" "managed identity"
+        "PIM" "Azure Policy" "Bicep" "App Service" "Functions"
+        "Container Apps" "AKS" "SDK" "Private Link" "Front Door"
+        "Key Vault" "Service Bus" "Event Grid" "Activity Log"
+        "diagnostic setting" "budget alert" "managed conformance"
+        "exit plan" "SBOM" "provenance" "Custom Handler"
+        "worker model" "hosting plan" "Go" "Preview"
+      )
+      for azure_profile_token in "${azure_profile_tokens[@]}"; do
+        if ! grep -Fq "${azure_profile_token}" "${azure_profile_file}" 2>/dev/null; then
+          print_warn "Axiarch source Microsoft Azure coverage missing for ${lang}: ${azure_profile_token}"
+          language_governance_missing=1
+        fi
+      done
+
+      if [[ "${lang}" == "ja" ]]; then
+        if ! grep -Fq "Universal適用契約" "${azure_profile_file}" 2>/dev/null \
+          || ! grep -Fq "budget alertをhard capと誤認" "${azure_profile_file}" 2>/dev/null \
+          || ! grep -Fq "個人subscriptionでのproduction" "${azure_profile_file}" 2>/dev/null; then
+          print_warn "Axiarch source Microsoft Azure Universal outcome contract drift for ${lang}"
+          language_governance_missing=1
+        fi
+      else
+        if ! grep -Fq "Universal Applicability Contract" "${azure_profile_file}" 2>/dev/null \
+          || ! grep -Fq "budget alert as a hard cap" "${azure_profile_file}" 2>/dev/null \
+          || ! grep -Fq "production in a personal subscription" "${azure_profile_file}" 2>/dev/null; then
+          print_warn "Axiarch source Microsoft Azure Universal outcome contract drift for ${lang}"
+          language_governance_missing=1
+        fi
+      fi
+    fi
+
+    for azure_profile_index in \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/INDEX.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/README.md" \
+      "${PROJECT_DIR}/axiarch-rules/${lang}/compliance_matrix.md"; do
+      if [[ ! -f "${azure_profile_index}" ]] \
+        || ! grep -q "530_azure_cloud.md" "${azure_profile_index}" 2>/dev/null; then
+        print_warn "Axiarch source Microsoft Azure provider profile is missing from ${azure_profile_index#"${PROJECT_DIR}/"}"
+        language_governance_missing=1
+      fi
+    done
+
+    supabase_profile_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/200_supabase_architecture.md"
+    firebase_profile_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/500_firebase_gcp.md"
+    aws_profile_file="${PROJECT_DIR}/axiarch-rules/${lang}/universal/engineering/510_aws_cloud.md"
+    firebase_profile_sections=$(grep -Ec '^## §[0-9]+\.' "${firebase_profile_file}" 2>/dev/null || true)
+    firebase_profile_rules=$(grep -Ec '^### Rule 32\.[0-9]+:' "${firebase_profile_file}" 2>/dev/null || true)
+    firebase_profile_rule_ids=$(grep -oE '^### Rule 32\.[0-9]+' "${firebase_profile_file}" 2>/dev/null \
+      | sed 's/.*\.//' | sort -n | uniq | paste -sd, -)
+    firebase_profile_expected_rule_ids=$(awk 'BEGIN { for (i = 1; i <= 175; i++) printf "%s%d", (i > 1 ? "," : ""), i }')
+    if [[ "${firebase_profile_sections}" -ne 57 \
+      || "${firebase_profile_rules}" -ne 175 \
+      || "${firebase_profile_rule_ids}" != "${firebase_profile_expected_rule_ids}" ]]; then
+      print_warn "Axiarch source Firebase/GCP provider profile structure drift for ${lang}: sections=${firebase_profile_sections}, rules=${firebase_profile_rules}"
+      language_governance_missing=1
+    fi
+
+    if ! grep -Fq "Rule 37.3: Client Library Support Surface Protocol" "${supabase_profile_file}" 2>/dev/null \
+      || ! grep -Fq "Rule 32.170: Support Claim Decomposition" "${firebase_profile_file}" 2>/dev/null \
+      || ! grep -Fq "Rule 32.175: Polyglot Team Ownership" "${firebase_profile_file}" 2>/dev/null; then
+      print_warn "Axiarch source Supabase or Firebase/GCP language support-surface governance drift for ${lang}"
+      language_governance_missing=1
+    fi
+
+    if [[ "${lang}" == "ja" ]]; then
+      if ! grep -Fq "Universal適用契約" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal適用契約" "${firebase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal適用契約" "${aws_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal適用契約" "${azure_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Provider-neutral CI/CD戦略" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "The Privileged Access RLS Protocol" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Relational Backend Capability Decision" "${firebase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Provider-neutral CI/CD Contract" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq '既存データベースからSupabaseへの移行は**`pg_dump`/`pg_restore`**を使用' "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq '管理画面からの全書き込み操作は `createAdminClient()`' "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "マイグレーションは何度実行しても同じ結果" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "全てのRLSポリシー" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "GitHub Actionsフル統合" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "本番スキーマ変更はDashboard" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "Firestoreへの新規データ保存は原則禁止" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "全FirebaseプロジェクトにBlazeプラン" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "全てのCloud Run Functions/Servicesコードは**TypeScript**" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq '全てのクエリに`limit()`' "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "目標: 10KB以内" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "全アウトバウンドトラフィックをVPC経由" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "技術選定はGoogleエコシステムを最優先" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "本番環境は最低L3" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "AI関連コストが全体の30%" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "90日ごとにローテーション" "${firebase_profile_file}" 2>/dev/null; then
+        print_warn "Axiarch source provider profile may regress to a project-specific mandate for ${lang}"
+        language_governance_missing=1
+      fi
+    else
+      if ! grep -Fq "Universal Applicability Contract" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal Applicability Contract" "${firebase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal Applicability Contract" "${aws_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Universal Applicability Contract" "${azure_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Provider-neutral CI/CD Strategy" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "The Privileged Access RLS Protocol" "${supabase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Relational Backend Capability Decision" "${firebase_profile_file}" 2>/dev/null \
+        || ! grep -Fq "Provider-neutral CI/CD Contract" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq 'Migration from existing databases to Supabase MUST use **`pg_dump`/`pg_restore`**' "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq 'All write operations from the admin dashboard MUST use `createAdminClient()`' "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "Migrations must produce same result upon re-execution" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "All RLS policies MUST include" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "GitHub Actions Full Integration" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "Use Dashboard SQL Editor for schema changes" "${supabase_profile_file}" 2>/dev/null \
+        || grep -Fq "New data storage in Firestore is prohibited in principle" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "required for all Firebase projects" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "All Cloud Run Functions/Services code must be written in **TypeScript**" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq 'Set `limit()` on all queries' "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "target: under 10KB" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "route all outbound traffic through VPC" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "Prioritize Google ecosystem in technology selection" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "Production environments must achieve minimum L3" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "AI costs exceed 30% of total" "${firebase_profile_file}" 2>/dev/null \
+        || grep -Fq "Rotate every 90 days" "${firebase_profile_file}" 2>/dev/null; then
+        print_warn "Axiarch source provider profile may regress to a project-specific mandate for ${lang}"
+        language_governance_missing=1
+      fi
+    fi
+  done
+
+  oss_ja_rule_count=$(grep -Ec '^- \*\*ルール\*\*:' "${PROJECT_DIR}/axiarch-rules/ja/universal/security/200_oss_compliance.md" 2>/dev/null || true)
+  oss_en_rule_count=$(grep -Ec '^- \*\*Rule\*\*:' "${PROJECT_DIR}/axiarch-rules/en/universal/security/200_oss_compliance.md" 2>/dev/null || true)
+  if [[ "${oss_ja_rule_count}" -ne "${oss_en_rule_count}" ]]; then
+    print_warn "Axiarch source OSS compliance rule-count parity drift: ja=${oss_ja_rule_count}/en=${oss_en_rule_count}"
+    language_governance_missing=1
+  fi
+
+  universal_ja_count=$(find "${PROJECT_DIR}/axiarch-rules/ja/universal" -type f -name '*.md' 2>/dev/null | wc -l | tr -d '[:space:]')
+  universal_en_count=$(find "${PROJECT_DIR}/axiarch-rules/en/universal" -type f -name '*.md' 2>/dev/null | wc -l | tr -d '[:space:]')
+  engineering_ja_count=$(find "${PROJECT_DIR}/axiarch-rules/ja/universal/engineering" -type f -name '*.md' 2>/dev/null | wc -l | tr -d '[:space:]')
+  engineering_en_count=$(find "${PROJECT_DIR}/axiarch-rules/en/universal/engineering" -type f -name '*.md' 2>/dev/null | wc -l | tr -d '[:space:]')
+  if [[ "${universal_ja_count}" -ne "${universal_en_count}" \
+    || "${engineering_ja_count}" -ne "${engineering_en_count}" ]]; then
+    print_warn "Axiarch source programming-language governance count parity drift: universal ja=${universal_ja_count}/en=${universal_en_count}, engineering ja=${engineering_ja_count}/en=${engineering_en_count}"
+    language_governance_missing=1
+  fi
+
+  for language_governance_public_doc in README.md llms.txt llms-full.txt CHANGELOG.md; do
+    if [[ ! -f "${PROJECT_DIR}/${language_governance_public_doc}" ]] \
+      || ! grep -q "320_programming_language_governance.md" "${PROJECT_DIR}/${language_governance_public_doc}" 2>/dev/null \
+      || ! grep -q "420_react_native.md" "${PROJECT_DIR}/${language_governance_public_doc}" 2>/dev/null \
+      || ! grep -q "520_cloud_application_platforms.md" "${PROJECT_DIR}/${language_governance_public_doc}" 2>/dev/null \
+      || ! grep -q "530_azure_cloud.md" "${PROJECT_DIR}/${language_governance_public_doc}" 2>/dev/null; then
+      print_warn "Axiarch source programming-language, React Native, cloud platform, or Microsoft Azure governance is missing from ${language_governance_public_doc}"
+      language_governance_missing=1
+    fi
+  done
+
+  if [[ -f "${PROJECT_DIR}/README.md" ]] \
+    && grep -q "Universal_Rules-${universal_ja_count}_files" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && grep -q "Engineering | ${engineering_ja_count}" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && grep -q "${universal_ja_count}のUniversalルールファイル" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && grep -q "result: ${universal_ja_count} Universal Rule files" "${PROJECT_DIR}/README.md" 2>/dev/null \
+    && [[ -f "${PROJECT_DIR}/llms.txt" ]] \
+    && grep -q "${universal_ja_count} immutable rule files" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+    && grep -q "All ${universal_ja_count} universal rules" "${PROJECT_DIR}/llms.txt" 2>/dev/null \
+    && [[ -f "${PROJECT_DIR}/llms-full.txt" ]] \
+    && grep -q "Universal Rules (${universal_ja_count} files" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+    && grep -q "Technical Implementation (${engineering_ja_count} files)" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+    && grep -q "All ${universal_ja_count} Universal Rules" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null; then
+    :
+  else
+    print_warn "Axiarch source Universal/Engineering public counts are stale"
+    language_governance_missing=1
+  fi
+
+  if [[ "${language_governance_missing}" -eq 0 ]]; then
+    print_pass "Axiarch source programming-language, React Native, cloud platform, and Microsoft Azure governance are integrated in ja/en rules, indexes, public docs, and counts (${universal_ja_count} universal; ${engineering_ja_count} engineering)"
+  else
+    print_info "Expected ja/en 320 programming-language, 420 React Native, 520 cloud/application-platform, and 530 Microsoft Azure rules with consecutive IDs and 19/17/22/21 sections; Universal applicability contracts; major-language, framework, desktop, native, query/semantic/observability/infrastructure DSL, public library/SDK/package source-binary-behavior compatibility, consumer matrices, immutable artifact promotion, generated SDKs, registry ownership, notebook/literate-artifact clean execution, rich-output trust boundaries, production jobs, team handoff, polyglot CI, Vercel/Supabase/Firebase/Cloudflare/Azure, Azure Functions managed/Preview/Custom Handler/worker/hosting support surfaces, BaaS capability manifests, identity portability, shared-responsibility, landing-zone, Entra, Policy, IaC, release/rollback, workload-identity, data, SDK lifecycle, async-event delivery, local/emulator fidelity, managed conformance, provider-managed integration lifecycle, multi-service service graphs, release topologies, aggregate evidence, partial deployments, security, FinOps, exit, and Platform Engineering controls; generic provider profiles; INDEX/README/compliance links; public digest links; and dynamic count parity"
+    DOCS_MISSING=1
+  fi
+
+  git_worktree_safety_missing=0
+  git_config_check_script="${PROJECT_DIR}/axiarch-scripts/check-git-config-clean.sh"
+  git_workflow_ja="${PROJECT_DIR}/axiarch-rules/ja/universal/engineering/600_git_workflow.md"
+  git_workflow_en="${PROJECT_DIR}/axiarch-rules/en/universal/engineering/600_git_workflow.md"
+  if [[ ! -f "${git_config_check_script}" ]] \
+    || ! grep -Fq 'git worktree prune --dry-run --verbose' "${git_config_check_script}" 2>/dev/null \
+    || ! grep -Fq 'git show-ref --verify --quiet' "${git_config_check_script}" 2>/dev/null \
+    || ! grep -Fq -- '--full-clean is deprecated' "${git_config_check_script}" 2>/dev/null \
+    || grep -Fq 'git config --unset extensions.worktreeConfig' "${git_config_check_script}" 2>/dev/null \
+    || grep -Fq 'git branch -D' "${git_config_check_script}" 2>/dev/null; then
+    print_warn "Axiarch source Git worktree checker may remove supported configuration or branch references"
+    git_worktree_safety_missing=1
+  fi
+  if [[ ! -f "${git_workflow_ja}" || ! -f "${git_workflow_en}" ]] \
+    || ! grep -Fq 'Gitの正式機能' "${git_workflow_ja}" 2>/dev/null \
+    || ! grep -Fq 'supported Git feature' "${git_workflow_en}" 2>/dev/null \
+    || grep -Fq 'inucomi' "${git_workflow_ja}" 2>/dev/null \
+    || grep -Fq 'inucomi' "${git_workflow_en}" 2>/dev/null; then
+    print_warn "Axiarch source Git worktree guidance may drift from official Git semantics or Universal anonymity"
+    git_worktree_safety_missing=1
+  fi
+  if [[ "${git_worktree_safety_missing}" -eq 0 ]]; then
+    print_pass "Axiarch source Git worktree guidance preserves supported worktreeConfig, anonymizes failure patterns, and limits repair to prunable metadata and stale branch config"
+  else
+    print_info "Expected ja/en engineering/600 and check-git-config-clean.sh to preserve supported extensions.worktreeConfig, use Git dry-run/prune and local-ref checks, avoid project-specific incident names, and never force-delete branch refs"
+    DOCS_MISSING=1
   fi
 
   heading_parity_missing=0
@@ -1324,6 +2028,14 @@ EOF
       "axiarch-harness/en/EVIDENCE_PACKET_PROTOCOL.md"
       "axiarch-harness/en/HUMAN_APPROVAL_GATE.md"
       "axiarch-harness/en/SUBAGENT_DELEGATION_PROTOCOL.md"
+      "axiarch-rules/ja/universal/engineering/320_programming_language_governance.md"
+      "axiarch-rules/en/universal/engineering/320_programming_language_governance.md"
+      "axiarch-rules/ja/universal/engineering/420_react_native.md"
+      "axiarch-rules/en/universal/engineering/420_react_native.md"
+      "axiarch-rules/ja/universal/engineering/520_cloud_application_platforms.md"
+      "axiarch-rules/en/universal/engineering/520_cloud_application_platforms.md"
+      "axiarch-rules/ja/universal/engineering/530_azure_cloud.md"
+      "axiarch-rules/en/universal/engineering/530_azure_cloud.md"
       "axiarch-scripts/axiarch-upgrade.sh"
       "axiarch-scripts/axiarch-task-state.sh"
       "axiarch-prompts/ja/develop/safe_upgrade_execute.md"

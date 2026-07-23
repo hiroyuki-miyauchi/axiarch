@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **このファイルは Universal Rule（不変ルール）です。「憲法改正」の明示的指示がない限り編集禁止。**
-> 改定日: 2026-04-20（Rev.8）
+> 改定日: 2026-07-23（Rev.9）
 
 > [!IMPORTANT]
 > **Primary Directive（主要方針）**
@@ -10,7 +10,9 @@
 > すべてのエンジニアリング判断はスピードよりも正確性・セキュリティ・保守性を優先しなければならない。
 > **セキュリティ > 正確性 > 保守性 > パフォーマンス > 開発速度** の優先順位を厳守せよ。
 > この文書はエンジニアリング品質と標準に関するすべての設計判断の最上位基準である。
-> **22パート・160セクション構成。**
+> 言語scope: 本書のTypeScript / JavaScript / Web固有のツール名と例は該当ecosystemだけへ適用する。言語横断の選定、命名、toolchain、品質gate、所有、廃止は `320_programming_language_governance.md` を正本とし、別ecosystemへツール名をそのまま強制しない。
+> Universal適用契約: 製品名、VCS機能名、役職名、人数、比率、期限、頻度、閾値は、公式platform制約、法令・契約、または回復不能な安全上の下限でない限り参考実装またはBlueprint parameterである。Project Blueprintはrisk、規模、規制、利用者影響から具体値と同等手段を定め、検証可能な成果、owner、例外証跡を省略してはならない。
+> **22パート・141セクション構成。**
 
 ---
 
@@ -40,7 +42,7 @@
 | XX | AIエージェント・オーケストレーション安全基準 | §20.1 – §20.5 | 5 |
 | XXI | **プライバシー・エンジニアリング** | **§21.1 – §21.7** | **7** |
 | XXII | **ランタイム・セキュリティ強化** | **§22.1 – §22.8** | **8** |
-| | | **合計** | **145** |
+| | | **合計** | **141** |
 
 ---
 
@@ -48,9 +50,9 @@
 
 ### 1.0. 命名規約と構造原則 (Naming & Structural Foundations)
 *   **The Consolidated Naming Convention**:
-    *   **Files & Directories**: 全てのファイル名とディレクトリ名は `kebab-case` (例: `user-profile-card.tsx`) で統一します。PascalCaseやsnake_caseはOS間のGit互換性問題（Case Sensitivity）を引き起こすため厳禁です。
-    *   **Components**: ファイル名は `kebab-case` ですが、コンポーネント名は `PascalCase`、関数名は `camelCase` とします。
-    *   **The Barrel File Ban**: `index.ts` による再エクスポート（Barrel File）は、循環参照とTree Shaking阻害の主因となるため、原則禁止とします。
+    *   **Files & Directories**: 公式style guide、formatter、framework generator、既存リポジトリ規約に従います。TypeScript / JavaScript Webでは `kebab-case` を既定とし、Pythonのmodule、Dart package、Java / Kotlin / C#の型ファイル、Terraform resource等へ一律適用しません。OS間の互換性のため、大文字小文字だけで区別する名前は全言語で禁止します。
+    *   **Symbols**: component、class、function、package等のsymbol名は言語ネイティブ規約を優先します。言語別の正本は `320_programming_language_governance.md` を参照します。
+    *   **The Barrel File Ban**: TypeScript / JavaScriptでは、`index.ts` による無制限の再エクスポートを原則禁止します。言語公式のpackage/module入口は、循環参照、公開API、Tree Shakingまたはlink時影響を検証した場合に使用できます。
 *   **UI/Logic Consistency (完全統一)**:
     *   **原則**: 「似ているが違う」はプロ意識の欠如であり、バグです。すべての機能（削除、編集、一覧）において、UIとロジックは統合されていなければなりません。
     *   **Tiered Security**: セキュリティはリスクに応じて段階化します。
@@ -95,8 +97,8 @@
 *   **ルール**: 警告（Warning）はエラー（Error）として扱います。CIは警告が1つでもあれば失敗させます。
 *   **厳格なエラーハンドリング**: 空の `catch` ブロックは禁止です。全てのエラーはログに記録され、適切に処理されなければなりません。
 *   **Zero Tolerance for Band-Aid Solutions**:
-    *   **Prohibition**: `// @ts-ignore`, `any` キャスト、`legacy-peer-deps` は「思考停止」であり、エンジニアとしての敗北です。
-    *   **Mandate**: 一時的な回避が必要な場合は、必ず `// TODO(#IssueID): reason` とチケット番号を添えて理由を記述してください。
+    *   **Prohibition**: `// @ts-ignore`、`any` キャスト、警告抑制、`legacy-peer-deps`等で根本原因を隠すことを禁止します。
+    *   **Mandate**: 一時的な回避が必要な場合は、言語に適した抑制方法を最小範囲へ限定し、理由、owner、Issue、期限を記録してください。
 *   **The Incident Response Protocol (SRE)**: セキュリティインシデント発生時の連絡網と初動対応を定義し、半年に1回訓練を行ってください。障害対応後は必ず根本原因を特定し、教訓をBlueprintへ反映させるまでを一つの不可分なプロセスとします。
 *   **The Anti-Blindness Protocol (AI Hygiene)**: AIが生成したコードに含まれる `// ...` や `// implementation details` といった省略記法を、そのままファイルに保存することを物理的に禁止します。必ず**完全なコード**を展開させてください。
 
@@ -118,41 +120,41 @@
 ### 1.8. Config Change Impact Analysis（設定変更影響分析）
 *   **Context**: ビルド設定（`next.config.ts`等）、コンパイラ設定（`tsconfig.json`等）のプロジェクト全体設定ファイルの変更は、コードベース全体に予期しない影響を波及させます。
 *   **Mandate**:
-    1.  **Impact Scan**: 設定変更前に、影響を受ける可能性のある全ファイルを `grep` で特定してください。
-    2.  **Approval Gate**: 影響ファイル数が10を超える場合、変更適用前にレビュワーの承認を得てください。
-    3.  **Atomic Fix**: 影響のある全ファイルを同一コミット（またはPR）で修正し、半端な状態を防止してください。
+    1.  **Impact Scan**: 設定変更前に、repository検索、build graph、依存解析または同等手段で、影響を受けるconsumer、生成物、runtime、release経路を特定してください。
+    2.  **Risk-Based Approval**: 変更ファイル数だけでriskを判定しません。security境界、互換性、共有toolchain、production blast radius、rollback難易度に応じて、owner review、独立承認または段階配信を要求してください。
+    3.  **Cohesive Change**: 影響対象、設定、生成物、migration、検証、rollbackを追跡可能な変更単位として同期し、途中状態が利用者やrelease経路へ露出しないようにしてください。
 *   **Scan Examples**: `trailingSlash` 変更 → 全 `router.push` / `redirect` / `Link href` をスキャン。`paths` エイリアス変更 → 全 `import` 文をスキャン。
 
-### 1.9. Codebase-as-Truth Protocol（コードベースを正とする原則）
-*   **Law**: フレームワークやライブラリのAPIを使用する際、「公式ドキュメント」よりも「既存コードベースの実装パターン」を正としてください。ドキュメントは古い場合がありますが、動いているコードは常に最新です。
+### 1.9. Version-Aware Contract and Codebase Consistency（導入版契約と既存実装の整合）
+*   **Law**: 既存コードは利用中のpatternを示す証拠であり、公式のversion別document、security advisory、support policyは契約とEOL判断の正本です。どちらかを無条件に優先せず、lockfile、runtime／compiler pin、導入packageの型・signature・生成物・testを照合してください。既存コードが動いていても、deprecated、未文書、脆弱、または偶然の挙動なら正当化にはなりません。
 *   **Action**:
-    1.  APIや関数を使用する前に、必ず `grep` で既存の使用例を検索し、プロジェクト内で確立されたパターンに従ってください。
-    2.  公式ドキュメントと既存コードの実装が矛盾する場合、既存コードの実装を優先してください。
-    3.  新しいパターンを導入する場合は、既存のコードベースとの一貫性を確認し、不整合があれば先に既存コードを統一してください。
-*   **The Silent Async Bug Pattern**: データベース書き込み操作やPromiseを返す非同期関数には、**必ず `await` を付与してください**。ESLint `@typescript-eslint/no-floating-promises` の有効化を推奨します。
+    1.  APIや関数を使用する前に、repository内の既存利用、導入版の型・signature、公式のversion別資料を確認してください。
+    2.  矛盾はversion mismatch、生成drift、deprecated API、未文書挙動として分類し、修正するか、ownerと期限を持つADRへ記録してください。
+    3.  新しいpatternは互換性、migration、rollbackを検証し、必要な範囲だけ既存実装と文書を同じ変更で更新してください。
+*   **The Silent Async Bug Pattern**: Promise、Future、Task等の非同期結果は、`await`、呼出元へのreturn、集約、または§7.1の管理対象background taskとして必ず観測可能にしてください。fire-and-forgetと未処理失敗を禁止し、言語に適したstatic analysisを使用してください。
 
 ---
 
 ## Part II: インフラとパフォーマンス (Infrastructure & Performance)
 
 ### 2.0. インフラストラクチャ基準 (The Golden Quad)
-*   **Managed Hosting**: Vercel Pro等、DDoS保護とスケーラビリティを備えたマネージドホスティングを利用します。
-*   **BaaS**: Supabase等、DBとバックアップ機能が統合されたBaaSを「唯一の正解」として利用します。
-*   **Edge Shield**: Cloudflare等のエッジWAF/CDNを配置し、攻撃と負荷をエッジで吸収します。
-*   **Email Deliverability**: Resend等、開発者体験と到達率に優れたメールインフラを採用します。
+*   **Hosting Outcome**: managed、self-managed、hybridから、DDoS対策、可用性、拡張性、data residency、portability、運用能力、費用、退出可能性を満たす方式を選び、owner、SLO、backup、復旧・移行runbookを記録します。Vercel等は実装例であり唯一の適合手段ではありません。
+*   **Data Platform Outcome**: BaaS、managed database、self-managed databaseは、暗号化、権限分離、backup／restore、PITR、HA、監査、容量、接続上限、data portabilityで評価します。Supabase等の製品名だけで適合を証明しません。
+*   **Edge Protection**: threat model、traffic、latency、origin露出に応じてWAF、CDN、rate limit、DDoS保護または同等のorigin統制を配置し、bypass経路とfail-open／fail-closedをtestします。Cloudflare等は実装例です。
+*   **Email Deliverability**: email送信がある場合、managed providerまたは運用可能なself-hosted構成で、認証、bounce／complaint、suppression、unsubscribe、rate、監視、data handlingを保証します。Resend等は実装例です。
 *   **The Email Deliverability Protocol (DMARC/RFC 8058)**:
-    *   **Authentication**: `DMARC`, `SPF`, `DKIM` レコードの設定を完全に義務付けます。未設定のドメインからの送信は**「機能不全」と同義**です。
-    *   **One-Click Unsubscribe**: マーケティングメールには `List-Unsubscribe` ヘッダー (RFC 8058) を付与し、1クリックで解約できる導線を実装してください。
+    *   **Authentication**: 自組織domainから送信する場合、採用providerと受信者要件に適合するSPF、DKIM、DMARC alignmentと段階的enforcementを設定し、転送・subdomain・第三者送信を含め検証します。
+    *   **One-Click Unsubscribe**: bulkまたはmarketing emailは、適用法令とmailbox provider要件に従い、RFC 8058のone-click unsubscribeと利用者向け解除経路を実装します。
 *   **Database Connection Pool Protocol（接続プール基準）**:
-    *   **Mandatory Pooling**: 直接DBへの接続は禁止。必ず接続プーラー（PgBouncer / Supabase Connection Pooler）を介してください。コネクション枯渇は本番障害の最大要因です。
-    *   **Pool Size Formula**: `pool_size = ceil((core_count × 2) + spindle_count)` を基準とし、デフォルトは `max_connections: 10` per process。監視データにより動的に調整してください。
-    *   **Idle Timeout**: アイドルコネクションのタイムアウトは **30秒** を目安とし、ゾンビ接続による枯渇を防止してください。
-    *   **Transaction vs Session Pooling**: ステートレスなAPIには `transaction mode`、一時テーブルや `SET` 文を使う場合は `session mode` を選択してください（Supabaseのデフォルトはtransaction mode）。
+    *   **Bounded Connections**: runtime、driver、database、process／instance数、autoscaling、transaction semanticsに適合するbounded connection管理を必須にします。serverlessや高fan-outではpooler／proxyを第一候補とし、長寿命processのdirect poolを一律禁止しません。
+    *   **Capacity Model**: database上限から管理・migration・復旧用headroomを確保し、残りをworkloadと最大instance数へ配分します。固定formulaをUniversal値にせず、queueing、saturation、latency、timeout、failover実測で調整します。
+    *   **Lifecycle**: acquisition、query、transaction、idle、lifetimeのtimeout、backpressure、retry、cancellation、shutdown、credential rotationを定義します。30秒等はload testとprovider制約から決める参考値です。
+    *   **Mode Compatibility**: transaction／session pooling、prepared statement、temporary table、advisory lock、session state、read replicaの互換性をtestし、pooler固有の制約をrunbookへ記録します。
 
 ### 2.1. 読み取り最適化 (Read-Optimized Architecture)
-*   **事前計算 (Pre-calculation)**: ランキング、集計、複雑なフィルタリング結果は、リクエストごとに計算せず、データ更新時または定期バッチで事前計算し、DBのカラムに保存します。
-*   **CQRS**: 参照系と更新系のモデルを分離し、参照系には非正規化された読み取り専用テーブルやマテリアライズドビューの使用を推奨します。
-*   **The Hybrid CMS Design Strategy**: 「レイアウト・順序」はJSON (`site_settings.sidebar_order`) で管理し、「コンテンツ」はRDBテーブルで管理するハイブリッド構成を標準とします。
+*   **Measured Read Optimization**: ranking、aggregation、filter等はquery plan、traffic、latency SLO、更新頻度、staleness許容、費用を計測し、index、cache、事前計算、materialized view、search engine等から最小の方式を選びます。事前計算にはinvalidaton、rebuild、backfill、整合性検証を持たせます。
+*   **CQRS Decision**: 読み書きの独立scale、異なるmodel、監査、latencyが複雑性を上回る場合にCQRSやread modelを採用します。単一modelで要求を満たせるsystemへ分離を強制しません。
+*   **Content Model Boundary**: layout、ordering、content、metadataの正本は更新責任、schema evolution、localization、query、監査から決めます。JSONとRDBのhybridは一つの実装例であり、固定schemaをUniversalへ持ち込みません。
 
 ### 2.2. パフォーマンス予算 (Performance Budgets)
 *   **Lighthouseスコア**: Performance, Accessibility, Best Practices, SEO の全てで **90点以上** を維持します。
@@ -222,25 +224,25 @@
 ### 3.5. ソフトウェアサプライチェーンセキュリティ (Software Supply Chain Security)
 *   **Law**: 依存パッケージは「信頼されたコード」ではなく「潜在的な攻撃ベクター」として扱ってください。サプライチェーン攻撃（typosquatting, dependency confusion, malicious package injection）は2026年最大級の脅威です。
 *   **Action**:
-    1.  **SLSA Level 2+**: ビルドパイプラインはSLSA (Supply chain Levels for Software Artifacts) Level 2以上を目標とし、ビルドの来歴（Provenance）を自動生成してください。
-    2.  **Lockfile Pinning**: `package-lock.json` / `yarn.lock` のIntegrity Hash（`sha512-...`）を検証し、改ざんを検出してください。CIでは必ず `npm ci` を使用します。
-    3.  **Dependency Review**: 新規パッケージの追加時は、GitHub Dependency Review Action等で脆弱性・ライセンスを自動スキャンしてください。
-    4.  **Sigstore Verification**: 可能な場合、パッケージの署名検証（npm provenance / Sigstore）を有効化し、パッケージの真正性を保証してください。
+    1.  **SLSA v1.2 Tracks**: 本番ビルドはSLSA Build L2以上、source管理はSource L2以上を基線とし、署名付きBuild ProvenanceとSource Provenanceを検証可能にしてください。高保証領域はBuild L3と二者reviewを含むSource L4を目標とし、Source VSAでは対応する数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`属性を検証してください。
+    2.  **Dependency Resolution Pinning**: 採用ecosystemのlockfileまたは同等のresolved graph、checksum、source、artifact digestを検証してください。対応ecosystemのCIではfrozen／locked installを使用し、未検証の暗黙再解決を禁止します。
+    3.  **Dependency Review**: 新規・更新パッケージの差分は、repository hostまたはCIで利用できる組織承認済みのdependency diff／SCA gateにより、脆弱性、license、source、provenanceを自動検査してください。GitHub Dependency Review Actionは実装例であり、特定hostをUniversal要件にしません。
+    4.  **Sigstore Verification**: 可能な場合、ecosystemのprovenance、署名、Sigstore等を検証し、source、builder、artifact digestの追跡可能性を確保してください。
     5.  **SBOM Generation**: CI/CDパイプラインでSBOM（Software Bill of Materials）を自動生成し、デプロイごとの依存関係スナップショットを保持してください。
 *   **Rationale**: 2025-2026年のインシデント（xz-utils backdoor等）が示す通り、信頼されたOSSパッケージへの攻撃は増加の一途です。人間の注意ではなく、自動化された検証メカニズムのみがサプライチェーンを守ります。
 
 ### 3.6. シークレットローテーションプロトコル (Secret Rotation Protocol)
-*   **Law**: APIキー、DBパスワード、JWTシークレット等の機密情報は定期的に更新しなければなりません。「一度作ったら永久に使う」は最大のセキュリティリスクです。
-*   **Rotation Schedule（ローテーション周期）**:
-    | 機密種別 | 最大有効期限 | 方法 |
-    |:--------|:-----------|:-----|
-    | JWT Signing Secret | 90日 | クラウドのSecret Manager + CI/CDで自動ローテーション |
-    | DB Password | 90日 | RDS/Supabaseのパスワードリセット + 接続文字列更新 |
-    | External API Key | 180日 | ベンダーポータルで再発行 + `.env`シークレット更新 |
-    | Service Account / OAuth Client Secret | 365日 | Google Cloud / GitHub Apps での再生成 |
-*   **Zero-Downtime Rotation**: ローテーション手順は「旧シークレットの無効化前に新シークレットを有効化する」2フェーズで実施し、サービス停止を防いでください。
-*   **Rotation Audit**: ローテーション実施履歴を監査ログに必ず記録し、次回ローテーション日をカレンダーに自動予約してください。
-*   **Broken Glass Protocol**: シークレット漏洩が疑われた場合は、**即座に無効化**してください。「様子見」は禁止です。漏洩日時・影響範囲のインシデントレポートを24時間以内に作成してください。
+*   **Law**: 長寿命secretより、OIDC workload identity、managed identity、dynamic credential、短命token等の発行・失効可能なidentityを優先します。static API key、DB password、signing key等が必要な場合は、provider上限、cryptoperiod、exposure、権限、利用箇所、rotation費用、法令・契約、incident eventから有効期限とrotation triggerをBlueprintへ記録します。単一の日数を全credentialへ強制しません。
+*   **Rotation Contract**:
+    | 機密種別 | 必須成果 | 代表的な方式 |
+    |:--------|:---------|:-------------|
+    | Signing key | `kid`、algorithm、overlap、verification key配布、失効、rollback | asymmetric key、JWKS、HSM／KMS |
+    | Database credential | 最小権限、利用者分離、接続切替、active session処理 | workload identity、dynamic secret、二重credential |
+    | External API key | owner、scope、利用箇所、vendor制約、切替と失効証跡 | short-lived token、dual-key rotation、期限付きstatic key |
+    | Service account／OAuth client | non-human identity inventory、audience、権限、offboarding | federation、managed identity、certificate／secret rotation |
+*   **Zero-Downtime Rotation**: providerが並行credentialを支持する場合、new credential有効化、consumer切替、検証、old credential失効の段階手順を使用します。支持しない場合はmaintenance、queue、rollback、利用者通知をriskに応じて設計します。
+*   **Rotation Audit**: 発行、配布、利用、切替、失効、失敗、例外をcredential IDとownerへ結び付け、次回期限またはevent triggerをmachine-readable inventoryで監視します。
+*   **Break-Glass Protocol**: 漏洩が疑われた場合は、影響を拡大しない最短手段で失効、scope縮小、consumer隔離、再発行を行い、証拠保全と復旧を両立します。incident recordと外部報告は適用法令、契約、組織incident SLAのtrigger／期限に従います。
 
 ### 3.7. OAuth / OIDC トークン管理プロトコル (OAuth/OIDC Token Handling)
 *   **Law**: 認証トークンの誤った実装は、最も発見が遅れるセキュリティホールです。以下の原則を厳守してください。
@@ -318,20 +320,20 @@
 ## Part IV: 技術的負債とクリーンアップ (Technical Debt & Cleanup)
 
 ### 4.0. 負債返済戦略 (Debt Paydown Strategy)
-*   スプリントの **20%** は技術的負債の返済（リファクタリング、ライブラリ更新）に充てます。
-*   **The TODO/FIXME Protocol (Ticket First)**: コード内の `// TODO:` や `// FIXME:` は、チケット（Issue）化されなければ「単なる落書き」です。TODOコメントを残す際は、必ず対応する Issue 番号を併記することを義務付けます。番号のないTODOはPRで却下されます。
+*   **Law**: 技術的負債、依存更新、EOL移行へ継続的なcapacityを確保し、security、reliability、deliveryへのriskで優先順位を付けます。20%は安定したproduct teamの参考既定であり、実際の比率、cadence、緊急triggerはBlueprintで定めます。
+*   **The TODO/FIXME Protocol (Work Item First)**: TODO／FIXMEには、追跡可能なwork item、owner、完了条件または期限を結び付けます。Issue番号は実装例であり、利用中の変更管理・台帳で同等に追跡できれば適合します。無期限・所有者不明のTODOは変更受入時に拒否します。
 
 ### 4.1. テックレーダー & 依存関係ガバナンス (Tech Radar & Dependency Governance)
-*   **定期更新**: 依存ライブラリは四半期ごとに更新し、常に「安全な最先端」を維持します。
-*   **Dependency Watch (24-Hour Mandate)**: `npm audit` を定期的に実行してください。**High/Critical** な脆弱性が発見された場合は、発見から **24時間以内** にパッチを適用するか、緊急の回避策を講じることを義務付けます。
-*   **The Dependency Override Protocol**: `legacy-peer-deps=true` は全ての依存関係チェックを無効化する「法治国家の放棄」であり憲法違反とします。React 19等の互換性エラーが出た場合は、`package.json` の `overrides` フィールドを使用してください。
-*   **The License Quarantine (AGPL Block)**: ライセンスガバナンスの詳細については、`security/000_security_privacy.md` を参照し、**AGPL** の使用防止を徹底してください。
+*   **継続更新**: 依存関係は変更時、support終了、重大脆弱性、侵害、license変更等のeventと、Blueprintのrisk-based cadenceで再評価します。四半期更新は参考既定であり、最新版そのものではなく、support中で検証済みの安全なrelease lineを維持します。
+*   **Dependency Watch**: `npm audit`、`govulncheck`、`pip-audit`、.NET 10以降の`dotnet package list --vulnerable`または.NET 9以前の`dotnet list package --vulnerable`等、ecosystem標準または同等のSCAを依存変更時とrisk-based cadenceで実行します。対応順序と期限はCVSSだけでなく、KEV、EPSS、reachability、exposure、data感度、補償統制、vendor deadlineから決めます。悪用中または外部公開された重大脆弱性は直ちに封じ込め、修正・緩和・risk acceptanceの期限とownerをBlueprintへ記録します。
+*   **The Dependency Override Protocol**: 依存関係検証を無効化するoptionは禁止します。やむを得ないoverrideはpackage manager固有の正規機能を使い、理由、owner、期限、互換性testを記録します。
+*   **License Governance**: licenseのallow／review／denyは、配布形態、network service、link・derivative work、変更内容、顧客契約、公開義務、知財方針から決定します。AGPL等は一律のUniversal禁止ではなく、組織policyでdenyまたは法務reviewとした場合に自動blockします。詳細は`security/200_oss_compliance.md`を正本とします。
 
 ### 4.2. Lockfile整合性 (Lockfile Integrity Protocol)
-*   **Law**: ロックファイル（`package-lock.json` / `yarn.lock`）の不整合によるCI失敗を「大罪」として禁じます。
-*   **CI Discipline**: CIパイプライン上では必ず `npm ci` を使用し、ロックファイルを厳密に守らせてください。
-*   **Silver Bullet**: ローカルとCIで挙動が異なる場合、`rm -rf node_modules package-lock.json && npm install` でロックファイルを完全に再生成してください。
-*   **Prohibition**: 依存関係変更後にロックファイルをコミットせずにPushすることを禁止します。
+*   **Law**: deploy可能なapplicationと実行rootは、採用ecosystemが提供するlockfile、checksum、resolved graph、version catalog、provider selection、vendor tree等の再現可能な解決正本をversion管理し、意図しない差分を禁止します。`package-lock.json`、`pnpm-lock.yaml`、`uv.lock`、`go.sum`、`Cargo.lock`、`packages.lock.json`、`composer.lock`、`Gemfile.lock`、`renv.lock`は性質の異なる例であり、すべてをlockfileとみなさない。公開libraryはecosystemのconsumer互換性慣行に従い、CIのtest／release解決と依存証跡を固定します。
+*   **CI Discipline**: 対応ecosystemでは`npm ci`、`pnpm install --frozen-lockfile`、`uv sync --locked`、`cargo build --locked`等のfrozen／locked commandを使用します。標準lockfileやlocked modeがない場合は、version、source、checksum、artifact digestを検証する同等gateで未承認の再解決を拒否します。
+*   **Recovery**: localとCIが乖離した場合はruntime、package manager、registry、platform、lockfile digestを先に比較します。lockfile再生成は明示理由、完全な依存差分review、test、SCAを伴う変更として扱い、標準復旧手順にしません。
+*   **Prohibition**: lockfileを正本とするapplication／実行rootで、依存関係変更後にlockfileをcommitせずPushすることを禁止します。
 
 ### 4.3. Dead Export検出 (Dead Export Detection)
 *   **Law**: エクスポートされた関数・型・定数の使用箇所がゼロになった場合、即座に除去しなければなりません。
@@ -415,18 +417,18 @@
 
 ## Part VII: バグリスク低減ポリシー (Bug Risk Reduction Policy)
 
-### 7.0. 修正優先 (Fix First)
-*   既知のバグがある状態で新機能を開発しません。バグ修正は最優先事項です。
+### 7.0. 欠陥トリアージ優先 (Defect Triage First)
+*   **Law**: 既知の欠陥をseverity、利用者影響、データ／資金／権限への影響、exploitability、回避策、SLO、法令・契約期限で分類し、owner、封じ込め、修正目標、検証方法を記録します。新機能を停止する境界はBlueprintで定め、重大な安全性・完全性・可用性の欠陥やerror budget超過を、低影響の既知欠陥と同一に扱いません。
 
-### 7.1. 24時間ルール (24-Hour Rule)
-*   クリティカルなバグ（データ損失、セキュリティ、主要機能停止）は、発見から **24時間以内** に修正します。
+### 7.1. 重大欠陥対応 (Critical Defect Response)
+*   **Law**: データ損失、悪用可能なセキュリティ欠陥、主要機能停止等は直ちにtriageし、必要ならrollback、feature停止、credential失効、traffic隔離等で影響を封じ込めます。恒久修正期限はexposure、影響拡大速度、復旧可能性、vendor／法令／契約期限、検証に必要な時間から決め、ownerと利用者連絡を含むincident記録へ残します。24時間は外部公開された重大欠陥の高緊急度参考目標であり、全欠陥のUniversalな修正完了期限ではありません。
 
-### 7.2. Framework Signature Reality (Codebase as Truth)
-*   **Context**: ライブラリやフレームワークの公式ドキュメントは更新が遅れることがあります。
-*   **Law**: 公式ドキュメントよりも「既存コードベースのシグネチャ（実際の型定義）」を正とします。APIを使用する前に、必ず `grep` やIDEの定義ジャンプで既存使用例と型定義を確認してください。
+### 7.2. Versioned Contract Reality（導入版を正本にする）
+*   **Context**: 最新の公式ドキュメント、導入済みversion、生成された型、実行時挙動が一致しない場合があります。
+*   **Law**: 実装時はlockfile、runtime／compiler pin、導入済みpackageの型・signature・生成物・test結果を対象versionの事実として確認し、公式のversion対応文書、security advisory、support policyを契約とEOL判断の正本にします。どちらかを盲信せず、差異はversion不一致、非推奨API、生成drift、未文書化挙動として解消またはADRへ期限付きで記録します。
 
 ### 7.3. Fix Twice Principle（再発防止）
-*   バグを修正する際は、「そのバグを直す (Fix Once)」だけでなく、「二度と同じバグが起きない仕組み（Lint追加、型厳格化、テスト追加）を作る (Fix Twice)」までをワンセットとします。
+*   **Law**: 欠陥修正では原因と同種の再発経路を確認し、riskと再発費用に見合うtest、型・schema、lint／static analysis、監視、runbook、design変更のいずれかで再発を検出または防止します。機械化が修正riskを上回る場合は、理由、残存risk、再確認条件を記録します。
 
 ---
 
@@ -448,29 +450,29 @@
 ## Part IX: 互換性とテスト (Compatibility & Testing)
 
 ### 9.0. 実機テスト (Real Device Testing)
-*   シミュレーターだけでなく、必ず実機（iOS, Android）でテストを行います。特にカメラ、GPS、生体認証などのハードウェア機能は実機必須です。
+*   mobileまたはdevice依存機能は、simulatorだけで完了せず、利用者分布、support OS、hardware capability、riskに基づくdevice matrixで検証します。カメラ、位置情報、生体認証、push、background、性能等のcritical flowは実機または同等の高忠実度device farmをrelease gateへ含めます。
 
 ### 9.1. ブラウザ互換性 (Browser Compatibility)
-*   Chrome, Safari (iOS/macOS), Firefox, Edge の最新2バージョンをサポートします。特にSafari（iOS）特有のバグ（100vh問題など）に注意します。
+*   browser supportは利用者分布、契約、規制、security update、利用機能に基づきBlueprintへ記録し、自動cross-browser testとproduction telemetryで検証します。主要browserの現行版と直前版は参考既定であり、固定の「最新2版」を全projectへ強制しません。
 
 ### 9.2. セルフチェックリスト (Self-Check List)
-*   PRを出す前に、開発者は自身のコードをレビューし、「警告ゼロ」「コンソールエラーなし」「不要なログ削除」を確認します。
+*   変更受入を申請する前に、作成者は「未処理警告なし」「runtime errorなし」「不要・機密logなし」を自己検証し、結果をPull Request、Merge Request、change recordまたは同等の証跡へ残します。
 
-### 9.3. Testing Trophy Protocol（テスト戦略・比率の義務化）
-*   **Context**: テストは「多ければいい」というものではありません。Kent C. Doddsの **Testing Trophy** に基づき、ROI（投資対効果）を最大化するテスト比率を義務付けます。
-*   **Testing Trophy（推奨比率）**:
+### 9.3. Testing Strategy Mix Protocol（テスト構成決定）
+*   **Context**: テストは「多ければいい」ものでも、全systemへ同じ比率を当てるものでもありません。変更risk、architecture、failure cost、実行時間、過去defectに基づき、`quality/000_qa_testing.md`と`320_programming_language_governance.md`から適切なstatic、unit、integration、contract、E2E、non-functional testを選びます。
+*   **Web UI向けTesting Trophy参考profile**:
     | レイヤー | 比率 | 説明 | ツール例 |
     |:--------|:-----|:----|:--------|
-    | **Static（静的解析）** | 基盤 | TypeScript + ESLint。ビルド前に型エラー・Lintエラーをゼロにする | `tsc --noEmit`, `eslint` |
-    | **Unit（単体）** | 30% | ビジネスロジック、純粋関数、データ変換。UIコンポーネントの単体テストは原則不要 | `vitest`, `jest` |
-    | **Integration（統合）** | 50% | APIエンドポイント、DBとの結合、Server Actions。**最もROIが高い** | `vitest` + `supertest` / Playwright API |
-    | **E2E（エンドツーエンド）** | 20% | クリティカルパスのみ（ログイン・決済・主要CRUD）。全網羅は禁止 | `Playwright`, `Cypress` |
+    | **Static（静的解析）** | 基盤 | Web profileではTypeScript + ESLint等。build前に型・lint・schema errorを除去 | `tsc --noEmit`, `eslint` |
+    | **Unit（単体）** | 参考30% | business logic、純粋関数、data変換 | `vitest`, `jest` |
+    | **Integration（統合）** | 参考50% | API、DB、state、component間の振る舞い | `vitest` + `supertest` / Playwright API |
+    | **E2E（エンドツーエンド）** | 参考20% | login、payment、主要workflow等のcritical path | `Playwright`, `Cypress` |
 *   **Prohibitions**:
     *   実装コードと1:1対応する「コードコピーテスト」は禁止。テストは「振る舞いを検証」するものです。
-    *   `any` キャストや非同期のハンドリング漏れを含むテストコードは、プロダクションコードと同等の品質基準で却下します。
-*   **Coverage Targets**:
-    *   ビジネスロジック・Service層の**Line Coverage: 80%以上**を必須とします。
-    *   ビジネスロジック・Service層の**Mutation Score: 70%以上**を必須目標とします。UIコンポーネントのLine Coverageを追いかけることは禁止（意味がない）。
+    *   unsafe cast、型・compiler bypass、非同期errorの未処理を含むtest codeは、production codeと同等の品質基準で扱います。
+*   **Coverage Decision Contract**:
+    *   statement／branch coverageだけで品質を判定せず、risk、重要invariant、mutation score、escaped defect、flakinessを組み合わせます。
+    *   business logicのLine Coverage 80%とMutation Score 70%は導入時の参考値です。変更受入をblockする対象、閾値、除外、段階的引き上げはBlueprintで定義し、低riskの生成codeと高riskの決済logicへ同じ数値を強制しません。
 *   **Mutation Score（変異スコア）とは**: 実装コードに意図的なバグ（Mutant）を注入し、テストがそれを検出できるか検証する高度テスト品質指標です。「テストがあるだけ」ではなく「テストが本当に機能しているか」を計測します。
     ```bash
     # Stryker Mutant（TypeScript向け）による設定例
@@ -566,20 +568,20 @@
 > **v1.3.2 構造変更**: 日常的な Git workflow（Trunk-Based Development、Conventional Commits、Branch Hygiene、Worktree Hygiene 等）は `engineering/600_git_workflow.md` へ集約されました。本Partは CI/Deploy/DB 関連の補助的なルールのみを暫定的に保持しています（§10.4–10.6 は今後 `engineering/200_supabase_architecture.md` や `engineering/300_web_frontend.md` への再配置を検討予定）。
 
 ### 10.1. CI/Deployment Safety Standards (CI・デプロイ安全基準)
-*   **The CI Timeout Protocol**: すべてのCIジョブには必ず `timeout-minutes: 10` を設定してください。10分を超えるビルドは「設計ミス」とみなします。
-*   **The Red Button Checklist**: 本番デプロイ直前には、Legal、Security（RLS）、FinOps（Spend Cap）、Dataの指差し確認を義務付けます。
-*   **Omnichannel Check**: レビュー時は「Web以外でも利用可能か？」を最優先で確認します。
+*   **The CI Timeout Protocol**: すべてのCI jobへ、通常実行時間、resource、外部依存、retryを基に明示timeoutを設定し、無期限実行を禁止します。10分は高速feedback jobの参考目標であり、build、device test、security scan等へ一律適用しません。
+*   **The Red Button Checklist**: 本番変更は、適用されるLegal、Security、FinOps、Data、reliabilityのriskをmachine-readable gateまたは追跡可能な承認へ変換します。毎回の手動指差し確認を唯一の方式にしません。
+*   **Omnichannel Check**: 複数clientをproduct契約に含む場合、共有domain／API contractとclient固有UXを別々に検証します。Web以外を要件としないsystemへomnichannelを強制しません。
 *   **Deployment Safety Protocol**:
     *   **Primary Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
-    *   **The Automated Deployment Mandate (CD First)**: 本番環境へのデプロイを手動コマンドで行うことは**完全禁止**。CI/CDパイプライン経由のみ。
-    *   **The Architectural Preservation Protocol**: プロジェクトの中核機能ファイルには `@preservation_level CRITICAL` ヘッダーを付与し、AIの独断での破壊的変更を防止してください。
-*   **セキュリティ**: APIキー等の機密情報は厳正にコミットせず、CIでシークレットスキャン（TruffleHog）を義務付けます。
-*   **The Lockfile Regeneration Reflex**: CIのみが失敗する場合、まず `rm -rf package-lock.json node_modules && npm install` でLockfileを再生成してプッシュしてください。
-*   **The Connection Verification Protocol**: データベース接続エラー発生時は、まず `.env.local` の接続先を確認してください。
+    *   **The Automated Deployment Mandate (CD First)**: 再現可能で監査可能なpipelineを既定とし、artifact digest、approval、段階配信、rollbackを記録します。手動break-glassは全面禁止せず、最小権限、二者統制または事後独立review、完全log、期限付きcredential、再自動化を要求します。
+    *   **The Architectural Preservation Protocol**: 中核境界はownership、protected path、review policy、contract test等で保護します。`@preservation_level CRITICAL` headerは任意の実装例です。
+*   **セキュリティ**: 機密情報をcommitせず、CIでrepositoryと履歴をsecret scannerまたは同等統制により検証します。TruffleHogは実装例です。
+*   **Lockfile Recovery Discipline**: CIのみが失敗する場合、runtime、package manager、registry、platform、lockfile digestを先に比較します。lockfile再生成は完全な依存差分review、test、SCAを伴う意図的な依存変更として扱い、標準復旧手順にしません。
+*   **The Connection Verification Protocol**: database接続エラーでは、effective configuration、secret source、DNS、IPv4／IPv6、route、firewall、TLS、credential、pool saturation、provider statusを層別に確認します。`.env.local`はlocal開発での一例です。
 
 ### 10.2. The IPv6 Deployment Protocol
-*   **Law**: CI環境において、Supabase (PostgreSQL) への接続が IPv6 名前解決の不備により失敗する現象を、アプリケーションのコード修正で解決しようとしてはなりません。
-*   **Action**: 必ず Connection Pooler (IPv4) 経由の接続を確立してください。
+*   **Law**: CIまたはruntimeのIPv4／IPv6、DNS、route、provider endpointの不一致を、domain logic変更で隠してはなりません。network層で原因を再現・診断します。
+*   **Action**: dual-stack endpoint、対応network、IPv4 pooler／proxy等からproviderが支持する経路を選び、TLS、pooling semantics、failover、退出条件を検証します。Supabase Connection PoolerはIPv4 fallbackの一例です。
 
 ### 10.4. The Migration Immutability Protocol (History Protection)
 *   **Law**: 将来の実装予定にあるカラム名を、実際のDBマイグレーション完了前にコードで使用することは禁止です。
@@ -626,10 +628,10 @@
 ## Part XII: エンジニアリング品質プロトコル (Engineering Quality Protocols)
 
 ### 12.1. The Zero-Warning Lint Protocol
-*   **Law**: CI全通過の真の意味は、警告数0です。`npm run lint` の結果は、必ず警告数0でなければなりません。未使用変数は即座に削除してください。
+*   **Law**: CI全通過の真の意味は、言語ネイティブなformatter、linter、type checkerまたはcompilerの警告数0です。`npm run lint` はTypeScript / JavaScriptの一例にすぎません。必須ゲートは `320_programming_language_governance.md` に従い、未使用symbolは削除してください。
 
 ### 12.2. The Clean Import Protocol
-*   **Law**: `import` ステートメントは必ずファイルの最上部に記述してください。関数や制御フロー内でのインポートは厳禁です。
+*   **Law**: import / use / includeは言語公式の配置規則に従い、依存関係を静的に追跡できる形を既定とします。遅延読み込み、plugin、循環参照回避等の動的importは、境界、失敗処理、testを明示した場合だけ許可します。
 
 ### 12.3. The Explicit Explanation Protocol (Zero Jargon)
 *   **Law**: 管理画面上の専門用語や指標には必ず `Tooltip` を付与し、「それが何であり、ビジネスにどう影響するか」を素人の言葉で解説してください。
@@ -652,7 +654,7 @@
 *   **Breaking Change**: 破壊的変更がある場合は `feat!:` または footer に `BREAKING CHANGE:` を記載してください。
 
 ### 12.8. The Code Review Protocol（コードレビュー基準）
-*   **Law**: コードレビューは品質の最終防衛線です。PRサイズは **400行以下** を目安とします。
+*   **Law**: production変更には、riskに応じた人間reviewまたは同等の独立変更承認と、必須の自動gateを適用します。小さく単一目的でrevert可能な変更を既定とし、400変更行は分割判断の参考heuristicであって一律上限ではありません。generated code、migration、vendored artifactは別集計し、巨大変更には設計review、分割不能理由、段階releaseを要求します。
 *   **レビュー観点チェックリスト**:
     | 観点 | チェック内容 |
     |:-----|:-----------|
@@ -670,8 +672,8 @@
     *   **False Negative Awareness**: AIは「ロジックの意図の正しさ」「ビジネス要件との整合性」を確認できません。この観点は人間が責任を持って確認してください。
     *   **Security Override**: セキュリティ観点（認証・認可・PII）はAI Reviewに頼らず、人間が必ず明示的に確認してください。
 
-### 12.9. The CODEOWNERS Protocol（コード所有権管理）
-*   **Law**: `.github/CODEOWNERS` ファイルでディレクトリごとの所有者を定義してください。CODEOWNERSに指定された所有者のApproveをPRマージの必須条件としてください。
+### 12.9. Ownership & Change-Approval Protocol（所有権と変更承認）
+*   **Law**: criticalなdirectory、module、schema、infra、release pathへaccountable ownerと継続経路を割り当て、ownership registryを変更統制と結び付けます。`.github/CODEOWNERS`、GitLab CODEOWNERS、repository rules、外部変更管理は実装例です。高保証pathでは最終revisionへの独立reviewと古い承認の失効を強制し、低riskまたは単独保守ではBlueprintに記録した補償統制を認めます。
 
 ### 12.10. The Git Hooks Automation Protocol（三層防御）
 *   **Law**: 「気をつける」運用ルールではなく、「物理的に不可能にする仕組み」で品質を担保してください。
@@ -747,6 +749,7 @@
 *   **RLS Awareness**: Row Level Securityを使用するデータベースでは、権限不足はエラーではなく「0行に影響」として返されることを常に念頭に置いてください。
 
 ### 13.6. The Type Safety & Integrity Protocol（型安全性と誠実性）
+この節はTypeScript固有の追加基準です。全言語共通の型・境界契約は `320_programming_language_governance.md` を正本とします。
 *   **Zero `as any` Policy**: `as any` や `as never` を用いて型エラーを黙殺する行為は「バグの埋め込み」です。ESLint `@typescript-eslint/no-explicit-any` を `error` に設定し、CIで物理的にブロックしてください。
 *   **Root Cause Resolution**: 型エラーが発生した場合は、キャストではなく「型定義の修正」「DTOの再設計」「ジェネリクスの適用」で**根本原因**を解消してください。
 *   **Type Bridge Mandate**: 自動生成型に不足がある場合は、`database-extensions.ts` に拡張型を定義し、Mapped Typeで型衝突を防いでください。
@@ -823,20 +826,20 @@
 
 ### 13.14. The WebAssembly & Edge Execution Protocol（WASM・エッジ実行境界）
 > エッジ実行の障害対応については **§15.1 Circuit Breaker** も参照してください。
-*   **Context**: WebAssembly (WASM) とエッジコンピューティング（Cloudflare Workers / Deno Deploy / Lambda@Edge等）は、2026年以降のシステムアーキテクチャにおいて不可欠な選択肢です。採用判断は明確な基準に基づかなければなりません。
-*   **WASM 3.0 機能の把握（2026年）**:
-    *   **WebAssembly 3.0が2026年4月に正式標準化**されました。主な新機能: **WasmGC**（巨大なランタイムを同梱せずにJava・Kotlin・Dart等をターゲット化可能にするGC）、**Memory64**（4GBを超えたメモリアドレス対応—LLM推論・大規模動画処理向け）、**Exception Handling**（効率的なエラー伝達）、**Component Model**（Rust・Go・Pythonなど異なる言語のモジュールが標準化された型共有で連携できるポリグロット相互運用）。
-    *   **WASI 0.3 / 1.0**: WASI 0.3（ネイティブ非同期サポート）は2026年前半の重点事項。WASI 1.0は2026年末～2027年初頭の予定で、ファイル・ネットワーク・クロック等システムリソースへのアクセスを標準化し、サーバーサイドWASMのポータビリティを高めます。
+*   **Context**: WebAssembly（Wasm）とedge実行は、workload、host capability、latency、portability、isolation、observability、運用costによって価値が変わるarchitecture optionである。流行やvendorの提供有無ではなく、測定可能な基準で採用を判断する。
+*   **WASM 3.0 機能の把握**:
+    *   **WebAssembly 3.0は2025年9月17日に完成**した。core specificationはgarbage collection、64-bit address space、exception handling、tail call、multiple memories等を含む。すべてのhostが全機能を実装済みと仮定せず、対象engineの対応を検証する。
+    *   **Component ModelとWASIは別の互換性判断**として、component、WIT、runtime、host capabilityのmatrixをpinする。WASI 0.3.0は2026年6月11日に公開され、`async func`、`stream<T>`、`future<T>`によるnative asyncを追加した。WASI 0.2もstableな互換対象であり、WASI 0.1はlegacyだが広く実装されている。
 *   **WASM採用基準**:
-    *   **適切なユースケース**: CPU負荷の高い計算（暗号処理・画像変換・音声コーデック・物理シミュレーション）、既存CLIツールのブラウザ移植、言語非依存の共有ロジック（核心ビジネスロジックのRustによる実装）。
-    *   **不適切なユースケース**: DOM操作、シンプルなデータ変換、外部APIコール主体の処理 — これらはJavaScript/TypeScriptで十分です。WASMを安易に採用することで起きる複雑性増大は「エンジニアリングの自己満足」であり禁止します。
-*   **Edge Execution Mandate**:
-    *   **Edge-Eligible Logic**: 認証トークン検証、A/Bテストのバケット振り分け、地理的リダイレクト、CSPヘッダー付与、レート制限のカウンター処理 — これらはエッジで処理することでレイテンシを劇的に削減できます。
-    *   **Edge Execution Prohibitions**: データベースへの直接書き込み、長時間実行バッチ処理（エッジはCPU時間制限がある）、ステートフルなセッション管理（ただしEdge KV/Durable Objectsを除く）。
-    *   **Cold Start Budget**: エッジ関数のコールドスタートは **50ms以内** を目標とし、これを超える場合はウォームアップ戦略（スケジュールpingなど）を実装してください。
+    *   **候補ユースケース**: 測定済みのCPU集約処理、既存toolのbrowser portability、capability隔離plugin、言語間component。nativeまたはJavaScript基線に対し、end-to-end latency、binary size、相互運用、debug、運用ownershipを検証する。
+    *   **不適合の兆候**: portability、isolation、performance、再利用の測定効果がないままcompiler、runtime、interface、incident境界だけを増やす利用。workload分類を一律禁止せず、採用仮説と退出条件を記録する。
+*   **Edge実行境界**:
+    *   **候補処理**: request-localなauthorization、routing、header変換、experiment、bounded computeは、platform capabilityとconsistency modelが合えばproximityの効果を得られる。
+    *   **Host制約**: DB write、長時間処理、network access、stateは、選定hostが必要なduration、consistency、transaction、retry、recoveryを明示的に支える場合だけ認める。edge製品名だけから安全性を推定しない。
+    *   **Cold-start budget**: user-facing latency SLO、request path、runtime、region、costから目標を決める。50msはreference profileでありUniversal固定閾値ではない。scheduled warm-upはcostを伴う一案で、利用不能または非効率な場合がある。
 *   **WASM Security Constraints**:
     *   WASMモジュールは必ずContent Security Policy (CSP) の `wasm-unsafe-eval` ディレクティブを意識した設計にしてください。
-    *   信頼できないソースから取得したWASMバイナリの実行は**絶対禁止**です。SRI (Subresource Integrity) による整合性検証を義務付けます。
+    *   memory isolationがあってもWasmを未信頼codeとして扱い、source、signatureまたはdigest、SBOM、provenance、runtime、import、capability、filesystem／network grant、resource limit、escape対応を検証する。SRIはWeb transportのintegrity統制であり、publisher trustや非Web環境の万能統制ではない。未知componentは、ambient authorityを持たない明示的なcapabilityと隔離済みanalysis／plugin境界でのみ実行する。
 
 ### 13.15. The Idempotency Key Protocol（べき等性キー義務化）
 *   **Context**: ネットワーク障害・タイムアウトによるリトライは、料金二重請求・二重注文などの「恐怖の副作用」を引き起こします。べき等性（Idempotency）の設計は、分散システムの基本義務です。
@@ -864,24 +867,26 @@
 > [!NOTE]
 > Platform Engineeringは「開発者体験（DX）を製品として設計する」思想です。インフラチームが「インフラを管理する」から「Internal Developer Platform (IDP)を提供する」へと役割が進化します。詳細実装は `operations/400_site_reliability.md` を参照してください。
 
-### 14.1. Internal Developer Platform (IDP) Mandate
-*   **Law**: プラットフォームエンジニアリングの目標は、アプリケーション開発者が**セルフサービスで**インフラのプロビジョニング・デプロイ・可観測性アクセスを完結できる環境（IDP）を構築することです。「インフラチームへのチケット起票」という工程の撲滅を目指してください。
-*   **Golden Path Mandate**:
-    *   **Definition**: Golden Pathとは「新機能を追加する際の、最も安全で最も速い標準的な道筋」です。プロジェクト内に常に定義・維持されていなければなりません。
-    *   **Golden Path Components**: プロジェクトテンプレート（スキャフォールディング）、CI/CDテンプレート（`.github/workflows/`の再利用可能ワークフロー）、インフラテンプレート（IaCモジュール）、標準的なObservabilityセットアップ。
-    *   **Paved Road vs. Off-Road**: Golden Pathから外れる（off-road）場合は、プラットフォームチームへの必須相談プロセスを設けてください。off-roadが常態化するならGolden Pathの設計不良を疑ってください。
-*   **Developer Portal**: Backstage等の開発者ポータルを介して、サービスカタログ・TechDocsへのアクセス・テンプレートギャラリー・コスト/メトリクスダッシュボードをセルフサービス提供することを長期目標としてください。
+### 14.1. Internal Developer Platform (IDP) Applicability
+*   **Law**: 複数team／repositoryで反復するundifferentiated work、認知負荷、統制不一致、待ち時間が計測され、共有能力の便益が構築・運用costを上回る場合は、規模に応じたPlatform Engineering機能を設けます。小規模・単発projectへ専任platform teamやportalを一律要求しません。
+*   **Minimum Viable Platform**:
+    *   platformは利用者の需要から選んだ能力を提供する薄いproduct layerとします。文書と標準手順、repository template、共有CI、CLI／API、service catalog、managed service統合、portalのいずれも候補であり、最初から全要素を構築しません。
+    *   provisioning、deploy、observability、secret、cost evidence等のmanual ticketが反復bottleneckとなる場合は、安全なself-serviceとpolicy automationを優先します。人間reviewが必要な高risk操作まで無条件に無人化しません。
+*   **Golden Path Contract**:
+    *   反復需要があるjourneyには、安全な既定、owner、support範囲、upgrade、rollback、escape hatch、検証証跡を持つGolden Pathを提供します。template、workflow、IaC module、runbook、dashboardは交換可能な構成要素です。
+    *   Golden Pathはoptionalかつcomposableなpaved roadです。逸脱reviewはriskとblast radiusに比例させ、低riskの同等手段に専任team相談を強制しません。利用率、lead time、failure、満足度を測定し、off-roadが常態化する場合は利用者需要との不一致を改善します。
+*   **Evidence**: [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)が示すとおり、platform capabilityは利用者需要で選び、最小の実用層から始め、portalに固定せず、optionalかつcomposableにします。
 
 ### 14.2. Infrastructure as Code (IaC) Mandate
-*   **Law**: クラウドリソースの**手動作成・手動変更は絶対禁止**です。全てのインフラはIaC（Terraform / Pulumi / CDK等）で定義し、Gitで管理してください。「コンソールで作成したリソース」はドリフトの温床であり、即時IaC化が必要です。
+*   **Law**: production、shared、security／identity／network境界、または再作成・監査・復旧が必要なcontrol-plane構成は、providerが機械管理を支持する範囲で、宣言的構成、IaC、provider-native config、versioned API input等により再現可能に管理します。Terraform、OpenTofu、Pulumi、CDK、CloudFormation、Bicepは交換可能な例です。
+*   **Manual Change Boundary**: API未対応surface、bootstrap、調査、緊急封じ込め等の手動操作は、対象、理由、承認、before／after evidence、expiry、rollback、declarative sourceへのreconciliationを記録します。通常経路のClickOps依存と未記録driftは禁止しますが、全console操作を同一riskとして扱いません。
 *   **IaC品質基準**:
-    *   **モジュール化**: IaCコードは再利用可能なモジュールに分割し、DRY原則を遵守してください。
-    *   **State管理**: Terraform Stateはリモートバックエンド（S3 + DynamoDB Lock / GCS + CloudSQL等）で管理し、ローカルstateファイルのGitコミットを**絶対禁止**とします。
-    *   **Plan-before-Apply**: CI/CDパイプラインで `terraform plan` の実行と結果のPRコメントへの自動投稿を義務付けます。`apply` は人間の承認後のみ実行してください。
-    *   **Cost Estimation in CI**: Infracost等を使用し、PRごとにIaC変更によるコスト増減を自動見積もりしてください。月次コスト増加が **+20%** を超える変更は、FinOps担当者の明示的な承認を必須とします。
+    *   **構造**: module化は複数consumer、安定したcontract、独立testに価値がある境界で行い、単発resourceまでDRY目的で過剰抽象化しません。
+    *   **State／Source管理**: stateful toolはencryption、access control、concurrency control、version／recovery、auditを満たす承認済みbackendを使用します。provider-managed stateやstateless templateを同じbackendへ強制しません。credentialやsensitive stateのGit commitは禁止します。
+    *   **Plan-before-Apply**: PR、Merge Request、change request等の承認境界でmachine-readableなplan／diffを生成し、policy、security、cost、destructive change、driftを検査します。apply権限はplan権限と分離し、riskに応じたapprovalまたはpolicy-approved automationの後に実行します。
+    *   **Cost Estimation**: materialな課金変更をprovider calculator、Infracost、billing model、load test等で見積もり、予算、unit economics、commitment、egress、rollbackへ結び付けます。承認thresholdとaccountable functionはBlueprintで定義し、固定の`+20%`や役職名をUniversal要件にしません。
         ```hcl
-        # Terraform: 必須タグを強制するポリシー例（OPA / Sentinel）
-        # 全リソースに environment, team, cost-center の3タグを義務付ける
+        # Terraform reference policy input. Replace keys in the Blueprint.
         required_tags = ["environment", "team", "cost-center"]
         ```
 
@@ -1075,71 +1080,53 @@
 ## Part XVI: 開発者体験ガバナンス (Developer Experience Governance)
 
 > [!NOTE]
-> 優れたDXは「エンジニアの幸福度」ではなく「ビジネス速度」の問題です。開発環境の標準化とオンボーディングの最適化は、組織の最速の競争優位となります。
+> 優れたDXは、delivery速度だけでなく、品質、認知負荷、回復性、採用・引継ぎ、securityを支えるsystem capabilityです。個人、分散team、規制対象組織へ同じtoolや人数を強制せず、再現可能な成果と摩擦の実測で改善します。
 
 ### 16.1. Local Development Environment Standardization（ローカル環境標準化）
-*   **Law**: 「私のマシンでは動く（Works on My Machine）」問題を物理的に排除することを義務とします。環境の再現性を保証する仕組みを必ず実装してください。
-*   **Dev Container Mandate**:
-    *   **方法A（推奨）**: `.devcontainer/devcontainer.json` を使用したDev Containers (VS Code / GitHub Codespaces)。チームは同一のOSとツールチェーンで開発します。
-    *   **方法B**: `flake.nix` を使用したNix Flakesによる再現可能な開発環境（macOS/Linux共通）。
-    *   どちらかを**プロジェクト開始時に決定し、README.mdに記載**してください。選択肢の混在は禁止です。
-*   **First-Day Productivity Target（初日生産性目標）**: 新規参画者が、環境構築からローカル開発サーバー起動まで **30分以内** に完了できることを目標とし、計測してください。超過する場合はオンボーディングドキュメントの改善を義務付けます。
-*   **Seed Data Protocol**: `npm run seed` または同等のコマンドで、開発に必要なダミーデータが**1コマンドで**生成できる体制を維持してください。開発者が手動でデータを作成する必要がある状態は「DXの失敗」です。
+*   **Law**: 開発・CI・releaseで必要なOS／architecture前提、runtime、compiler、package manager、external service、environment、bootstrap、検証commandを機械可読または実行可能な契約として保持し、再現性を継続検証します。
+*   **Environment Profile**: Dev Containers、Nix、language version manager、package-manager wrapper、container compose、managed development environment、native toolchain installer等は交換可能な実装です。複数経路を提供する場合は、同じsupport matrix、dependency resolution、quality gateへ収束することをsmoke testし、各経路のownerとsupport範囲を明示します。
+*   **First-Contribution SLO**: clone／access取得から代表的なbuild、test、local起動、最初の変更受入までの時間と失敗率を計測し、portfolioの規模、hardware、network、security controlからBlueprint目標を決めます。30分でlocal起動は軽量projectの参考profileであり、Universal固定値ではありません。
+*   **Test Data Protocol**: 必要なtest dataを、seed、fixture、factory、snapshot、synthetic generator、isolated test tenant等の再現可能でdocumentedな経路から準備します。production PIIを既定にせず、reset、version compatibility、secret分離を検証します。1 command bootstrapは有効なGolden Pathですが、全ecosystemの唯一解ではありません。
 
 ### 16.2. Cognitive Load Reduction Protocol（認知的負荷低減）
 *   **Context**: エンジニアの生産性を最も阻害するのは「コードの複雑さ」ではなく「コードを理解するための認知的コスト」です。
-*   **Complexity Budgets（複雑度予算）**:
-    *   **ファイル行数**: 1ファイル **300行以下**（§5.4参照）
-    *   **関数行数**: 1関数 **50行以下**。超過する関数は分割を義務付けます。
-    *   **引数の個数**: 関数引数は **4個以下**。超過する場合はオブジェクト引数（パラメータオブジェクトパターン）に変換してください。
-    *   **Cyclomatic Complexity**: 関数の循環的複雑度は **10以下**を必須とします。ESLintの `complexity` ルールで自動計測してください。
-*   **Abstraction Level Consistency**: 関数内の抽象レベルを一定に保ってください。「SQLクエリの詳細」と「ビジネスルールの日本語表現」が同一関数内に混在することを禁止します。
-*   **The Naming Investment Rule**: 変数・関数名の命名に「5分思考」を義務付けます。`data`, `result`, `val`, `tmp` 等の無意味な名前は否認してください。
+*   **Complexity Budgets（複雑度予算）**: file／function size、parameter count、cyclomatic／cognitive complexity、dependency fan-out、nesting、generated code等から、言語・domain・artifactに適用可能な指標を選び、baselineとriskからwarning／block／review閾値をBlueprintへ設定します。300行、50行、4引数、complexity 10は一般application codeの参考ヒューリスティックであり、generated code、declarative table、parser、numerical kernel等へ機械適用しません。ESLint等の特定toolではなくecosystem-native analyzerまたは同等のreview evidenceを使います。
+*   **Design Cohesion**: 一つのunitへ異なる変更理由、trust boundary、ownership、抽象水準を無制限に混在させません。分割は行数達成のためではなく、cohesion、testability、failure isolation、API明確化が改善する場合に行います。
+*   **Naming Contract**: 名前はdomain meaning、unit、scope、lifecycle、side effectを必要な範囲で伝えます。短い局所変数やecosystem conventionを一律禁止せず、曖昧さがreview、運用、security判断を損なう場合に修正します。
 
 ### 16.3. Onboarding SLO & Knowledge Transfer Protocol（オンボーディングとナレッジ移転）
-*   **Onboarding SLO（サービスレベル目標）**:
+*   **Onboarding SLO（サービスレベル目標）**: Blueprintは役割、権限、規制、system規模、雇用形態からmilestoneとtargetを定め、中央値、上位percentile、失敗原因を継続観測します。次は軽量product teamの参考profileです。
     | マイルストーン | 目標期間 |
     |:------------|:--------|
     | ローカル環境構築完了 | 入社1日目 終業まで |
     | 最初のPRのマージ | 入社3日目まで |
     | 独立したタスクの開始 | 入社2週間目まで |
-*   **Buddy System Mandate（バディ制度の義務化）**: 新規参画者には必ず1名のオンボーディングバディを割り当ててください。バディは最初の2週間、毎日15分の1on1を実施する義務を負います。
-*   **Architecture Decision Record (ADR) Mandate**:
-    *   重要な技術的意思決定（フレームワーク選定・DB設計・外部API選定等）は、`docs/adr/NNNN-{title}.md` にADRとして記録することを義務付けます。
-    *   **ADR Format**: `## Status`, `## Context`, `## Decision`, `## Consequences` の4セクション必須。
-    *   ADRは「なぜその決定をしたか」を後任エンジニアが理解できる唯一の資産です。記録のないアーキテクチャ判断は**組織の知的財産の損失**です。
-*   **Single Person Knowledge Ban（属人化防止）**: 特定の機能・システムについて「あの人しか知らない」状態は最大のリスクです。全てのコアコンポーネントに対して、最低**2名以上**がオーナーシップを持つように設計してください（CODEOWNERS §12.9参照）。
+*   **Guided Support**: buddy、mentor、office hours、paired task、recorded walkthrough、support channel等から、参画者が質問し安全に最初の変更へ到達できる経路を用意します。人数、頻度、期間はteam capacityとriskで決め、1名・毎日15分・2週間を固定義務にしません。
+*   **Decision Record**: 後続の保守者へ影響する重要判断は、repository文書、architecture catalog、ticket system等の検索可能でversionedな正本へ記録します。最低限、status、context、decision、alternatives／trade-offs、consequences、owner、review triggerを含めます。`docs/adr/NNNN-{title}.md`は実装例です。
+*   **Knowledge Continuity**: core capabilityにはaccountable ownerと、休暇、退職、incident、vendor終了時に復旧・変更・引継ぎできるcontinuity routeを持たせます。複数人ownershipは有力な統制ですが、個人または小規模teamではrunbook、automation、credential recovery、外部support、退出計画でkey-person riskを補償できます。
 
 ### 16.4. エンジニアリングメトリクス & DORAプロトコル (Engineering Metrics & DORA)
-*   **Context**: 「計測できないものは改善できない（Peter Drucker）」。エンジニアリングの健全性を客観的に把握するため、DORA（DevOps Research and Assessment）のメトリクスとSPACEフレームワークを採用してください。DORA調査は2025-2026年にかけて大きく進化しました：従来の4指標が5指標に拡張され、パフォーマンスの「ティア（階層）」評価がアーキタイプ分析に置き換えられ、AI計測が一等市民として追加されました。
-*   **DORA 5大メトリクス（必須計測）**:
+*   **Context**: metricは改善仮説を検証するために使い、個人評価、ranking、目標値gamingへ転用しません。delivery flow、instability、quality、DXを組み合わせ、DORAとSPACEは交換可能なevidence frameworkとして利用します。metric定義と最新研究は[DORA公式のsoftware delivery performance metrics](https://dora.dev/guides/dora-metrics/)等の一次資料で採用時に再確認します。
+*   **DORA delivery metrics（参考profile）**:
 
 > [!NOTE]
-> 従来の「Low/Medium/High/Elite」4段階ティア評価は、DORA 2025-2026調査で廃止されました。現在はパフォーマンス分布に基づく**7つのチームアーキタイプ**を用いて分析します。固定ベンチマーク到達より「自組織内での継続的改善」に焦点を当ててください。
+> DORA 2025 reportはperformance、stability、well-beingの関係を説明するため7つのteam profile／archetypeを提示しましたが、全組織を固定tierへ分類するUniversal基準ではありません。現在の5 metricはapplication／service単位のbaselineと継続改善に使い、組織横断の単純合算や一律目標を避けます。
 
     | メトリクス | 定義 | 分類 |
     |:----------|:----|:----|
     | **Deployment Frequency（デプロイ頻度）** | プロダクションへのデプロイ頻度 | スループット |
-    | **Lead Time for Changes（変更リードタイム）** | コードコミットからプロダクション反映までの時間 | スループット |
+    | **Change Lead Time（変更リードタイム）** | コードコミットからプロダクション反映までの時間 | スループット |
     | **Failed Deployment Recovery Time（デプロイ失敗からの復旧時間）** | 失敗したデプロイから復旧までの時間（旧MTTR） | スループット |
-    | **Change Failure Rate（変更失敗率）** | デプロイが障害を引き起こす割合 | 安定性 |
-    | **Rework Rate（手戻り率）** | 計画外・リアクティブなデプロイの割合 | 安定性 |
+    | **Change Fail Rate（変更失敗率）** | 即時介入、rollback、hotfix等を要するdeployの割合 | 不安定性 |
+    | **Deployment Rework Rate（デプロイ手戻り率）** | production incidentへの対応として発生した計画外deployの割合 | 不安定性 |
 
-*   **参考ベンチマーク（継続改善の目安）**:
-    | メトリクス | 目指すべき水準 | 要改善 |
-    |:----------|:-------------|:-------|
-    | デプロイ頻度 | オンデマンド（1日複数回） | 週1回以下 |
-    | 変更リードタイム | 1時間以内 | 1週間以上 |
-    | デプロイ失敗からの復旧時間 | 1時間以内 | 1日以上 |
-    | 変更失敗率 | 5%以下 | 15%以上 |
-    | 手戻り率 | 全デプロイの10%以下 | 30%以上 |
-*   **計測の実行義務**:
-    *   上記5指標はCI/CDパイプラインから自動収集し、週次ダッシュボードで可視化してください（手動計測は禁止）。
-    *   GitHubであれば GitHub Actions Metrics / DORA APIを活用し、DORA指標を自動算出してください。
-    *   四半期ごとにチームで振り返り、改善アクションをバックログに積んでください。
-*   **AI対応計測（2026年追加）**:
-    *   **AI生成コードCFR**: `[AI-Generated]`タグが付いたPRの変更失敗率を独立してトラッキングしてください（§5.3参照）。AI CFRが全体CFRを**+5pp以上**上回った場合、AIコードガバナンスプロセスの見直しを義務付けます。
-    *   **Developer Experience Index（DX指数）**: DORA指標と並行してDX指数を計測・報告してください。計測軸はフロー効率性・認知負荷・ツールチェーン摩擦・心理的安全性です。DX Core 4やHaystack Analyticsなどのツールを活用してください。
+*   **Benchmark Contract**: industry benchmarkは採用時点のofficial Quick Checkまたは同等のcurrent datasetから取得し、同じ定義、window、application contextでだけ比較します。固定の「1日複数回」「1時間」「5%」等を全serviceのUniversal目標にせず、利用者需要、release risk、SLO、error budget、現行baselineに対する改善と、throughput／instabilityの均衡を判断します。
+*   **Measurement Contract**:
+    *   選択したmetricごとに定義、source、window、対象service／team、欠損、owner、privacy、利用目的を記録し、可能な範囲でCI/CD、incident、deployment systemから自動収集します。小規模teamや移行期は検証可能な手動samplingも許容し、automationの費用が意思決定価値を上回らないようにします。
+    *   dashboard製品やVCSを固定せず、変更を促すcadenceでtrendとoutlierをreviewし、改善actionと結果を結び付けます。週次dashboardと四半期retrospectiveは参考profileです。
+*   **AI対応計測**:
+    *   **AI-assisted change outcomes**: 法令、労務、privacy、計測精度を確認し、必要な場合だけAI支援変更のquality、security、rework、review effort、delivery outcomeを比較します。label、provenance、repository event等の識別方法とfalse positive／negativeを明示し、差分閾値はsample sizeとriskからBlueprintで決めます。固定`+5pp`をUniversal blockerにしません。
+    *   **Developer Experience**: flow efficiency、認知負荷、toolchain摩擦、心理的安全性を、匿名survey、interview、telemetry等の適切な組合せで観測します。DX Core 4やcommercial analyticsは候補であり、個人監視または唯一の適合手段にしません。
 *   **SPACE フレームワーク（補完的計測）**:
     | 軸 | 計測指標（例） |
     |:--|:------------|
@@ -1703,7 +1690,7 @@ type AgentAuditLog = {
 ## Part XXI: プライバシー・エンジニアリング (Privacy Engineering)
 
 > [!CAUTION]
-> プライバシーは「コンプライアンス部門の問題」ではなく「エンジニアリングの設計責任」です。GDPR・EU AI Act・CCPA・個人情報保護法（改正2022年）の同時適用時代において、プライバシー違反はシステムの即時停止命令と数十億円規模の制裁金リスクを内包します。**設計フェーズから組み込むこと（Privacy by Design）が唯一の正解です。**
+> プライバシーは「コンプライアンス部門の問題」だけではなく、エンジニアリングの設計責任です。GDPR、EU AI Act、CCPA、個人情報保護法等は、法域、entity、処理目的、data subject、product scope、適用日から個別に対象を判定します。Privacy by Designを基線とし、適用法令と実際のprivacy riskに比例した統制を設計段階から組み込みます。
 
 ### 21.1. Privacy by Design（プライバシー設計原則）
 
@@ -1838,13 +1825,13 @@ type AgentAuditLog = {
 > [!CAUTION]
 > ビルド時のセキュリティチェックは「スタート地点」に過ぎません。2026年のトップ脅威（ゼロデイ・コンテナエスケープ・サプライチェーン汚染）はランタイムで発生します。本パートは「動いているシステムを守る」ためのランタイム防衛層の構築義務を定めます。
 
-### 22.1. SLSA Level 3+ サプライチェーン強化
+### 22.1. SLSA Build L3サプライチェーン強化
 
-*   **Law**: §3.5（ソフトウェアサプライチェーンセキュリティ）のSLSA Level 2要件を拡張し、本番デプロイには **SLSA Level 3** 以上を目標とします。
-*   **SLSA Level 3の追加要件**:
-    *   **Hardened Build Platform**: ビルドはGitHub Actions / Google Cloud Build等の**信頼されたプラットフォーム**で実行し、カスタムランナーによる汚染を防いでください。
+*   **Law**: §3.5（ソフトウェアサプライチェーンセキュリティ）のSLSA Build L2基線を拡張し、高保証の本番成果物は **SLSA Build L3** を目標とします。Source側は組織統制を機械強制し、重要領域では二者reviewを要求するSource L4を目標とします。Source VSAの`verifiedLevels`へ存在しない`SLSA_SOURCE_LEVEL_4`を生成せず、対応する数値levelと`SLSA_SOURCE_TWO_PARTY_REVIEWED`を検証してください。
+*   **SLSA Build L3の追加要件**:
+    *   **Hardened Build Platform**: Build L3要件への適合性を評価したbuild platformを使用します。GitHub ActionsやGoogle Cloud Build等の製品名だけを適合証拠にせず、builder identity、隔離、ephemeral性、provenance発行境界を検証してください。
     *   **Non-forgeable Provenance（偽造不可な来歴）**: ビルドの来歴（Provenance）は`sigstore/cosign`で**デジタル署名**し、デプロイ前に署名検証を必須としてください。
-    *   **Isolated Build**: ビルドプロセスはネットワーク隔離されたサンドボックスで実行し、ビルド中の外部ネットワークアクセスを遮断してください。
+    *   **Isolated Build**: ビルドを隔離されたephemeral環境で実行します。Hermetic / no-network buildはSLSA level表記とは分離した追加強化として適用し、実施できない依存取得にはallowlistと証跡を要求してください。
     ```yaml
     # GitHub Actions: Cosign による成果物署名の例
     - name: Sign container image with Cosign
@@ -1864,7 +1851,7 @@ type AgentAuditLog = {
 
 ### 22.2. eBPF-based Runtime Security（ランタイム脅威検知）
 
-*   **Context**: eBPF（extended Berkeley Packet Filter）は、カーネルレベルでシステムコールを監視し、悪意ある挙動をゼロオーバーヘッドで検知できる2026年の標準ランタイムセキュリティ技術です。
+*   **Context**: eBPF（extended Berkeley Packet Filter）は、カーネルレベルのeventを観測・制御できるruntime securityの有力な実装手段です。すべてのworkloadやOSで唯一の標準とはせず、脅威model、kernel／platform対応、必要な可視性、運用能力、実測overheadからeBPF、OS-native telemetry、workload instrumentation等を選択してください。
 *   **推奨ツールスタック**:
     | ツール | 分類 | 主な機能 | 採用基準 |
     |:------|:----|:--------|:--------|
@@ -1885,25 +1872,26 @@ type AgentAuditLog = {
          cmd=%proc.cmdline)
       priority: WARNING
     ```
-*   **アラート連携**: Falco/Tetragonのアラートは**Slack + PagerDuty**に即時転送し、P1インシデントとして扱ってください。
+*   **アラート連携**: runtime securityのsignalは、採用組織のalert／on-call／incident管理経路へ遅延なく連携し、asset criticality、exploitability、exposure、影響からseverityとresponse SLOを決定してください。Slack、PagerDuty等は参考実装であり、全signalを固定P1へ昇格させないでください。
 
 ### 22.3. コンテナ・セキュリティ強化プロトコル
 
-*   **Distroless Image Mandate**: 本番コンテナは**Distrolessイメージ**（Google Distroless / Chainguard Images等）を使用してください。シェル・パッケージマネージャー・不要なシステムユーティリティを含む通常のLinuxディストリビューションイメージは、攻撃面を不必要に拡大するため禁止します。
+*   **Minimal Runtime Image Contract**: 本番コンテナは、対応期間内の最小runtime imageをdigestでpinし、非root、read-only、脆弱性scan、SBOM、provenanceを満たしてください。shell、package manager、compiler、debug utilityはruntimeに不要なら除外します。Google Distroless、Chainguard Images等は参考実装です。運用・互換性上必要なutilityを含める場合は、必要性、追加attack surface、patch経路、代替debug手段をADRへ記録し、特定vendorのimageだけを適合条件にしないでください。
     ```dockerfile
-    # マルチステージビルド + Distroless の標準構成
-    FROM node:20-slim AS builder
+    # Node.js Active LTS + 同一Debian世代の最小runtimeを使う参照例。
+    # productionでは両FROMをregistryで解決したsha256 digestへpinする。
+    FROM node:24-trixie-slim AS builder
     WORKDIR /app
     COPY package*.json ./
-    RUN npm ci --only=production
+    RUN npm ci
     COPY . .
-    RUN npm run build
+    RUN npm run build && npm prune --omit=dev
 
-    FROM gcr.io/distroless/nodejs20-debian12 AS runtime
+    FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runtime
+    ENV NODE_ENV=production
     WORKDIR /app
     COPY --from=builder /app/dist ./dist
     COPY --from=builder /app/node_modules ./node_modules
-    USER nonroot
     CMD ["dist/index.js"]
     ```
 *   **Read-Only Root Filesystem**: Kubernetes PodSpecで `readOnlyRootFilesystem: true` を設定し、コンテナ脱出後のファイルシステム操作を防いでください。writable領域は必要最小限の `emptyDir` または `tmpfs` マウントに限定してください。
@@ -1942,7 +1930,7 @@ type AgentAuditLog = {
 
 ### 22.5. Secrets Detection & Rotation Automation（シークレット検知・自動ローテーション）
 
-*   **Law**: §3.6（シークレットローテーション）と §19.5（Secrets Governance）を基盤とし、**ローテーションの完全自動化**を追加義務として課します。「スケジュールを守って手動でローテーション」は人的エラーを内包するため、自動化が唯一の正解です。
+*   **Law**: §3.6と§19.5を基盤とし、issuer／providerが安全なAPIとoverlapを支持するcredentialは、発行、配布、検証、失効、監査を自動化します。完全自動化を支持しないvendor credentialは、owner、期限付き通知、二者手順、preflight、rollback、実施証跡を持つ管理対象workflowとし、自動化率だけで安全を断定しません。
 *   **自動ローテーション実装（Vault Dynamic Secrets）**:
     ```bash
     # HashiCorp Vault: PostgreSQL動的シークレット（毎回短命の認証情報を自動生成）
@@ -1952,7 +1940,7 @@ type AgentAuditLog = {
         default_ttl="1h" \
         max_ttl="24h"
     ```
-*   **GitHub Actions シークレット自動更新パターン**:
+*   **定期workflowの実装例（GitHub Actions）**:
     ```yaml
     on:
       schedule:

@@ -2,13 +2,13 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited without an explicit "Amend Constitution" instruction.**
-> Revision date: 2026-04-19
+> Revision date: 2026-07-23
 
 > [!IMPORTANT]
 > **Level 1 Priority: Absolute Compliance**
 > Security and legal compliance are the **highest priority**.
 > They take precedence over user convenience, development speed, and profitability.
-> **40 Parts / 170+ Sections architecture. Revision date: 2026-04-19**
+> **40 Parts / 170+ Sections architecture. Revision date: 2026-07-23**
 
 > [!CAUTION]
 > **Primary Directive**
@@ -17,6 +17,9 @@
 >
 > **The Zero Tolerance Protocol**:
 > When a risk is identified, regardless of its size or probability, respond **without exception, immediately, and thoroughly**.
+
+> [!IMPORTANT]
+> **Universal Application Contract**: The normative outcomes in this document are confidentiality, integrity, availability, authenticity, least privilege, privacy, verifiability, and recoverability. Treat named vendors, clouds, VCS features, tools, roles, team structures, headcounts, fixed thresholds, periods, cadences, and SLA values as reference implementations or Blueprint parameters unless they are imposed by applicable law, contract, an official platform deadline, or a safety floor against irreversible harm. The Project Blueprint selects concrete values and equivalent controls from the threat model, exposure, data classification, scale, regulation, user impact, and prior incidents. “Immediately” means no indefinite deferral of triage and risk-proportionate containment; it does not create an unsupported one-size-fits-all duration. Verify legal and regulatory values against current primary sources in the applicable jurisdiction. Individuals and small teams may combine responsibilities, while high-assurance changes use independent review where practicable and record risk acceptance plus independent release control when separation is impossible.
 
 ---
 
@@ -520,7 +523,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 
 ### 6.7. The Secret Rotation Lifecycle
 
--   Rotate IAM credentials and JWT signing keys every **90 days**.
+-   Replace IAM credentials with short-lived credentials or workload identity where possible. For credentials that remain and for JWT signing keys, define the cadence in the Blueprint from key type, provider or CA lifetime, cryptoperiod, privilege, exposure, distribution and rollback capability, law, and contract; rotate or revoke without waiting for the cadence after an event in §21.5.
 -   **Panic Button (Kill Switch)**: Maintain up-to-date procedures for bulk session invalidation upon leakage.
 
 ### 6.8. The Physical Master Key (Bus Factor Defense)
@@ -583,9 +586,15 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 // ❌ PROHIBITED: Log output containing PII
 console.log('User login:', { email: user.email, name: user.name });
 
-// ✅ CORRECT: PII masked
-console.log('User login:', { userId: user.id, role: user.role });
+// ✅ CORRECT: General logs contain no personal identifier
+console.log('User login:', {
+  event: 'auth.login',
+  correlationId: context.correlationId,
+  outcome: 'success',
+});
 ```
+
+When a security audit must identify a person, do not emit a raw `userId` to general application logs. Write it to a protected, purpose-limited audit sink with least privilege, tamper resistance, retention and deletion controls, and a documented legal basis. When correlation is sufficient, prefer a short-lived or rotatable pseudonymous reference separated by environment and purpose, and protect the re-identification data behind a separate boundary.
 
 ### 7.5. Encryption Requirements
 
@@ -932,39 +941,40 @@ http {
 
 ## §11. Supply Chain Security
 
-> **Reference**: NIST SSDF (SP 800-218), SLSA v1.0, OWASP Top 10 2025 A03
+> **Reference**: NIST SSDF (SP 800-218), SLSA v1.2, OWASP Top 10 2025 A03
 
 ### 11.1. SBOM (Software Bill of Materials)
 
--   **Law**: Auto-generate and manage SBOMs (CycloneDX/SPDX) for all projects.
--   **Action**: Integrate SBOM generation step into CI/CD pipelines, generating signed SBOMs per build.
--   **Compliance**: Proactively address EU CRA 2027 mandate.
+-   **Law**: Generate and manage a machine-readable SBOM bound to the digest for release artifacts subject to distribution, deployment, regulation, customer contract, or ongoing vulnerability-impact analysis. Decide by risk whether a local script or undistributed prototype is sufficiently covered by dependency inventory and SCA.
+-   **Action**: Integrate SBOM generation plus schema and completeness validation into CI/CD for in-scope artifacts. Apply signatures or attestations according to provenance, tampering risk, and consumer requirements.
+-   **Compliance**: Have legal counsel determine EU CRA or other legal applicability from the product, role, effective date, and harmonized standard; do not apply it automatically to every project.
 
 ### 11.2. Dependency Scanning
 
 -   **Law**: Continuously scan vulnerabilities in all dependencies (direct and transitive).
 -   **Action**:
-    1.  Force `npm audit` / `yarn audit` in CI/CD. Critical/High are **merge blockers**.
-    2.  Auto-update PRs via Dependabot / Renovate / Snyk.
-    3.  **Lockfile Integrity Verification**: Detect tampering in `package-lock.json` / `yarn.lock`.
-    4.  **Phantom Dependency Detection**: Detect implicit dependencies on undeclared packages.
+    1.  Run the adopted ecosystem's standard SCA or an organization-approved equivalent in CI/CD, such as `npm audit`, `govulncheck`, `uv audit`, `cargo audit`, or `dotnet package list --vulnerable`. Critical and High findings are **merge blockers** according to the risk policy.
+    2.  Use Dependabot, Renovate, or an ecosystem equivalent to create update PRs with an owner, SLA, and compatibility tests.
+    3.  **Lockfile Integrity Verification**: Verify the adopted ecosystem's lockfile, checksums, and artifact digests and use frozen or locked resolution in CI.
+    4.  **Undeclared and Bundled Dependency Detection**: Cover undeclared, transitive, native, and release-artifact dependencies. Follow the detailed matrix in `security/200_oss_compliance.md`.
 
-### 11.3. SLSA (Supply-chain Levels for Software Artifacts)
+### 11.3. SLSA v1.2 (Supply-chain Levels for Software Artifacts)
 
--   **Target**: Minimum SLSA Level 2. Level 3 recommended.
+-   **Target**: Use Build L2 for production artifacts and Source L2 for source management as minimum baselines. Target Build L3 and Source L4 for high-assurance areas and also verify two-party review through the Source VSA's `SLSA_SOURCE_TWO_PARTY_REVIEWED` property.
 
-| SLSA Level | Requirements | Implementation |
+| Track / Level | Requirements | Implementation |
 |:----------|:------------|:--------------|
-| **Level 1** | Build process documentation | Build script version control |
-| **Level 2** | Build reproducibility + Provenance generation | Automated CI/CD builds + signed Provenance |
-| **Level 3** | Hardened build environment | Ephemeral runners + build isolation |
+| **Build L1** | Build Provenance exists | Record build instructions and source revision in provenance |
+| **Build L2** | Signed provenance from a hosted build platform | Verify builder identity and artifact digest in a policy gate |
+| **Build L3** | Hardened build platform | Assess platform conformance, isolation, ephemerality, and provenance issuance boundary |
+| **Source L2** | Preserved change history and Source Provenance | Verify protected-branch history and control evidence |
+| **Source L4** | Review by two trusted persons | Enforce two-party review of the final revision through branch rules and represent it in the VSA using the corresponding numeric level plus `SLSA_SOURCE_TWO_PARTY_REVIEWED` |
 
 ### 11.4. License Compliance
 
--   **Prohibited Licenses**: AGPL, SSPL, proprietary restrictive licenses.
--   **Caution Licenses**: GPL (copyleft concerns), CC-BY-NC (no commercial use).
--   **Permitted Licenses**: MIT, Apache 2.0, BSD, ISC, MPL 2.0.
--   **Action**: Introduce license checker in CI to block prohibited license dependency additions.
+-   **Organization Policy**: Universal does not unconditionally allow or deny a named license. Define a versioned allow, review, and deny policy from distribution, network use, linking and derivative-work boundaries, modification, customer contracts, disclosure duties, jurisdictions, and intellectual-property policy.
+-   **Obligation Classification**: Even MIT, Apache-2.0, BSD, and ISC require attribution, NOTICE, or patent-term review as applicable. Assess the applicable scope and usage model for copyleft licenses such as MPL, LGPL, GPL, and AGPL. Do not treat SSPL or other source-available terms as OSS; review their specific restrictions.
+-   **Action**: Mechanically enforce the organization policy in CI or an equivalent change and release gate. Block UNKNOWN, unclassified, or policy-denied licenses until classification or a time-bounded exception is complete.
 -   **Cross-Reference**: `security/200_oss_compliance.md`
 
 ### 11.5. Typosquatting & Dependency Confusion
@@ -973,11 +983,11 @@ http {
 -   **Action**:
     1.  Manually review package name accuracy.
     2.  Configure private registry scoping to prevent Dependency Confusion.
-    3.  Use only trusted registries via `npm config set registry`.
+    3.  Constrain approved registries, namespaces, sources, and digests across every resolution path in the package manager, build tool, and CI. `npm config set registry` is a Node.js reference example; Maven, NuGet, PyPI, RubyGems, Go, Cargo, and other ecosystems use equivalent native controls.
 
 ### 11.6. OpenSSF Scorecard & Security Scoring
 
--   **Law**: Score the supply chain health of in-house and third-party dependency packages using **OpenSSF Scorecard** to objectively evaluate trustworthiness.
+-   **Law**: Evaluate supply-chain risk for first-party source and third-party components from maintenance, known vulnerabilities, source-change controls, builds, publishing identity, provenance, and usage context. OpenSSF Scorecard is a valuable risk signal for OSS repositories, but it is neither the sole adoption decision nor a mandatory tool for every ecosystem.
 -   **Evaluation Metrics**:
 
 | Check Item | Score | Meaning |
@@ -991,9 +1001,9 @@ http {
 | **Vulnerabilities** | 0-10 | No neglected known vulnerabilities |
 
 -   **Action**:
-    1.  **CI/CD Integration**: Integrate `ossf/scorecard-action` into CI/CD and auto-display score reports as PR comments.
-    2.  **Adoption Threshold**: Aim for an OpenSSF Scorecard score of **7.0 or above** for newly adopted OSS libraries.
-    3.  **Own Project Improvement**: Measure Scorecard scores for in-house repositories quarterly and continuously improve.
+    1.  **Evidence Integration**: Feed Scorecard or an equivalent assessment into change or acquisition gates and record individual checks, retrieval time, target revision, and unevaluated reasons rather than only the aggregate score.
+    2.  **Adoption Decision**: Do not block or allow solely on a fixed aggregate such as 7.0. Evaluate material checks, component reachability, privileges, distribution path, alternatives, and compensating controls under organization risk policy.
+    3.  **Continuous Improvement**: Reassess on material events and a risk-based cadence. Do not optimize the score itself; remediate root controls or create a time-bounded exception.
 
 ```yaml
 # .github/workflows/scorecard.yml
@@ -1138,7 +1148,7 @@ CREATE POLICY "Admins can view all"
 -   **Background**: CT requires every CA-issued certificate to be logged in a public log (RFC 9162). Even if an attacker obtains a fraudulent certificate, it can still be detected.
 -   **Action**:
     1.  **CAA DNS Record**: Strictly restrict authorized CAs using `issue`/`issuewild`/`iodef` directives (reemphasizing §12.6).
-    2.  **CT Monitoring Automation**: Use [crt.sh](https://crt.sh) API / [Cert Spotter](https://sslmate.com/certspotter) / [Facebook CT Monitor](https://developers.facebook.com/tools/ct/) to monitor new certificate issuances for your domains in real-time with alerts.
+    2.  **CT Monitoring Automation**: Use [crt.sh](https://crt.sh) API / [Cert Spotter](https://sslmate.com/certspotter) to monitor new certificate issuances for your domains in real-time with alerts.
     3.  **SCT (Signed Certificate Timestamp) Verification**: Confirm that SCTs are embedded in TLS certificates in pre-deploy tests.
     4.  **Detection Response SLA**: Investigate and file a revocation request within **4 hours** of detecting an unexpected certificate.
 
@@ -1205,9 +1215,9 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 
 ### 14.1. Image Security
 
--   **Minimal Base Images**: Use Distroless / Alpine minimal images.
--   **CI Scanning**: Integrate image scanning (Trivy / Clair) into CI/CD. Critical/High block deployment.
--   **Image Signing**: Sign build artifacts with Cosign (Sigstore). Reject unsigned images via Admission Webhook.
+-   **Minimal Base Images**: Digest-pin the smallest trusted base that meets runtime, debugging and incident response, patch availability, CPU architecture, and cryptographic requirements. Distroless and Alpine are candidates; verify musl and glibc compatibility.
+-   **CI Scanning**: Scan images, OS packages, application dependencies, secrets, and misconfiguration with an organization-approved scanner. Trivy and Clair are examples; blocking policy considers KEV, EPSS, reachability, exposure, in-use packages, and compensating controls.
+-   **Image Signing**: Bind the artifact digest to builder identity, source revision, SBOM, and provenance, then sign or attest and verify at admission or deployment. Cosign and admission webhooks are reference implementations.
 -   **Latest Tag Prohibited**: Prohibit `latest` tag in production. Specify concrete versions/SHAs.
 
 ### 14.2. Pod Security Standards
@@ -1238,7 +1248,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 ### 14.6. Supply Chain (Container-Specific)
 
 -   Record hashes at each stage of multi-stage Dockerfiles for build reproducibility.
--   Automate base image CVE monitoring. Rebuild within **72 hours** of Critical CVE detection.
+-   Continuously monitor base-image CVEs, EOL, signatures, and digest drift. Immediately contain actively exploited or externally exposed material risk, and derive rebuild or mitigation deadlines from law, vendor deadlines, exposure, and rollback feasibility in the Blueprint. Seventy-two hours is a reference starting value.
 
 ---
 
@@ -1319,7 +1329,7 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 | **Storage** | Store in HSM / KMS / Vault. Plaintext storage prohibited |
 | **Distribution** | Distribute via encrypted channels (TLS 1.2+). Slack pasting prohibited |
 | **Usage** | Non-purpose usage prohibited |
-| **Rotation** | Every 90 days. Immediate rotation on leakage |
+| **Rotation** | Define the cadence in the Blueprint from key type, algorithm strength, cryptoperiod, provider or CA lifetime, exposure, law, and contract. Immediately rotate or revoke on suspected exposure or compromise |
 | **Destruction** | Secure destruction (zero-fill or cryptographic erasure) |
 
 ### 16.4. Post-Quantum Cryptography (PQC)
@@ -1804,8 +1814,8 @@ jobs:
 
 ### 19.4. Security Champion Program
 
--   **Law**: Appoint a **Security Champion** per development team.
--   **Responsibilities**: Security checks in PR reviews, risk assessment of new libraries, quarterly team security sessions, incident first response.
+-   **Law**: Assign each product or service an accountable secure-development owner, consultation route, escalation path, and continuity route. Security Champion is one distributed reference model; central AppSec, platform security, managed services, and combined ownership may provide equivalent outcomes.
+-   **Responsibilities**: Make security review, third-party component risk, threat modeling, exceptions, education, and incident first response explicit. Derive cadence and staffing from risk, scale, and regulation rather than mandating a quarterly session everywhere.
 
 ### 19.5. IaC (Infrastructure as Code) Security Scanning ★NEW
 
@@ -1946,13 +1956,9 @@ const resolvers = {
 
 ### 21.5. Auto-Rotation
 
-| Secret Type | Rotation Frequency |
-|:-----------|:------------------|
-| **API Keys** | Every 90 days |
-| **DB Passwords** | Every 60 days |
-| **Service Accounts** | Every 30 days |
-| **Encryption Keys** | Every 90 days (§16.3) |
-| **High-Risk Secrets** | More frequently as needed |
+Replace long-lived secrets with short-lived credentials or workload identity where possible. For a secret that cannot be eliminated, define rotation in the Blueprint from provider or CA lifetime, applicable law and contract, cryptoperiod, exposure, privilege, distribution and rollback capability, and incident history. A fixed value such as 90 days is only a starting ceiling before risk assessment, not a Universal requirement.
+
+Rotate or revoke without waiting for the cadence after suspected or confirmed exposure, privilege or owner change, offboarding or contract end, end of use, algorithm or provider compromise, policy violation, or a failed recovery exercise.
 
 -   **Dual-Phase Rotation**: Generate new secret → distribute → validate with old secret still active → invalidate old secret after validation.
 
@@ -1962,7 +1968,7 @@ const resolvers = {
 -   **Action**:
     1.  Inventory all NHI IDs with clear owner assignment.
     2.  Strictly apply least privilege to NHI IDs.
-    3.  Apply **shorter rotation cycles** for NHI secrets.
+    3.  Prefer secretless workload identity and short-lived credentials for NHIs; rotate remaining static secrets from privilege, exposure, provider limits, and events.
     4.  Periodically detect and deactivate unused NHI IDs.
 -   **Cross-Reference**: §3.2 (NHI Management)
 
@@ -2180,7 +2186,7 @@ self.addEventListener('fetch', (event) => {
 | **Under Investigation** | Under assessment | Assessment deadline: YYYY-MM-DD |
 
 -   **Action**:
-    1.  **VEX Tool Adoption**: Adopt [OpenVEX](https://github.com/openvex) / [CycloneDX VEX](https://cyclonedx.org/capabilities/vex/) / [CSAF 2.0](https://oasis-tcs.github.io/csaf/) to generate VEX documents.
+    1.  **VEX Tool Adoption**: Adopt [OpenVEX](https://github.com/openvex) / [CycloneDX VEX](https://cyclonedx.org/capabilities/vex/) / [CSAF 2.0](https://docs.oasis-open.org/csaf/csaf/v2.0/csaf-v2.0.html) to generate VEX documents.
     2.  **CI/CD Integration**: Overlay VEX on vulnerability scan results to automatically filter non-exploitable CVEs (reducing False Positives).
     3.  **Public Provision**: Per CRA requirements, maintain SBOMs and VEX documents ready to provide to customers and regulatory authorities alongside product releases.
     4.  **Document Not Affected Justification**: Technically articulate the rationale (Impact Statement) for `Not Affected` determinations, leaving an audit-resistant trail.
@@ -2566,21 +2572,22 @@ Content-Security-Policy: frame-ancestors 'self' https://trusted-parent.example.c
 
 ## §32. Mobile & Native App Security ★NEW
 
-> **Reference**: OWASP MASVS v2.0, OWASP Mobile Top 10 2024, Apple Platform Security Guide, Android Security Guide
+> **Reference**: Current OWASP MASVS and MASTG Testing Profiles, OWASP Mobile Top 10 2024, Apple Platform Security Guide, Android Security Guide
 
-### 32.1. OWASP MASVS v2.0 Compliance
+### 32.1. Applying OWASP MASVS
 
--   **Law**: Mandate L1 (minimum required) compliance with OWASP Mobile Application Security Verification Standard (MASVS) v2.0 for all mobile apps. L2 is recommended for high-risk apps (finance, healthcare).
+-   **Law**: Use the current OWASP MASVS control catalog as the mobile-security baseline and select MASTG Testing Profiles according to the threat model, data sensitivity, regulation, and user impact. Do not treat the former L1, L2, and R labels as current conformance levels. The business owner and security owner document whether each profile is adopted fully or partially and justify all differences.
 
 | Category | Core Controls |
 |:--------|:--------------|
 | **MASVS-STORAGE** | No hardcoded secrets. Sensitive data must be stored in Keychain/Keystore |
 | **MASVS-CRYPTO** | No prohibited algorithms (MD5, DES, etc.). Prefer platform-provided APIs |
 | **MASVS-AUTH** | Biometric authentication must be server-confirmed, not local-only |
-| **MASVS-NETWORK** | Implement Certificate Pinning or SCT validation. Prohibit HTTP communication |
+| **MASVS-NETWORK** | Platform-standard TLS, certificate and hostname validation, and no cleartext; select identity pinning from the threat model and rotation capability |
 | **MASVS-PLATFORM** | Deep Link validation. Intent sniffing countermeasures. Hardened WebView config |
 | **MASVS-CODE** | No debug builds in production releases. Code obfuscation |
-| **MASVS-RESILIENCE** | Root/Jailbreak detection. Emulator detection. Tamper detection |
+| **MASVS-RESILIENCE** | Risk-based root or jailbreak, emulator, debugger, and tamper resistance for high-risk profiles |
+| **MASVS-PRIVACY** | Data minimization, permissions, consent, and prevention of sensitive-data leakage through UI, logs, backups, or networks |
 
 ### 32.2. Sensitive Data Storage
 
@@ -2590,12 +2597,12 @@ Content-Security-Policy: frame-ancestors 'self' https://trusted-parent.example.c
     3.  **SQLite Database Encryption**: Use SQLCipher to encrypt offline databases.
     4.  **Exclude from Backups**: Use `android:allowBackup="false"` or backup rules to exclude sensitive data. iOS: Use `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`.
 
-### 32.3. Certificate Pinning
+### 32.3. TLS Identity Verification / Certificate Pinning
 
--   **Law**: Implement Certificate Pinning for critical API communications to prevent MitM (man-in-the-middle) attacks.
--   **Recommended Approach**: Pin the SPKI (Subject Public Key Info) fingerprint (easier to update than pinning the full certificate).
--   **Backup Pins Required**: Prepare at least 2 pins as backup for when one pin is revoked.
--   **OTA Update Mechanism**: Enable OTA updates of pin information so responses can be made without forced app updates.
+-   **Law**: Require platform-standard TLS, certificate, and hostname validation for every connection and prohibit disabling validation. Add Certificate Pinning only when the threat model confirms a high-risk API, controllable endpoints, certificate rotation, and a recovery path that cannot lock out users.
+-   **Selection**: Prefer the platform trust store and Certificate Transparency by default. If pinning is adopted, prefer SPKI over whole-certificate pins and record the adoption rationale or compensating controls in an ADR.
+-   **Backup Pins Required**: When pinning, provide at least one independent backup pin for revocation and rotation.
+-   **Rotation Mechanism**: Provide a signed pin set, staged delivery, monitoring, and a kill switch or app-update path. A fail-open recovery that disables certificate validation is prohibited.
 
 ```kotlin
 // ✅ Android: OkHttp Certificate Pinning example
@@ -2998,8 +3005,8 @@ async function checkPaymentPageIntegrity(): Promise<void> {
 
 ### 37.1. eBPF-Based Runtime Security
 
--   **Law**: Implement runtime security monitoring leveraging eBPF (extended Berkeley Packet Filter) technology for container workloads on Kubernetes. Achieve lower overhead and higher visibility than traditional sidecar-based agents.
--   **Background**: Traditional runtime security tools like Falco rely on uprobes/kprobes and can only observe a subset of kernel events, whereas eBPF can observe all kernel syscalls with minimal overhead. Tetragon (a CNCF project) can **enforce security policies at the kernel level** via eBPF.
+-   **Law**: From the Kubernetes workload threat model, select controls that can detect and respond to the required audit, runtime behavior, process, file, network, and identity signals. eBPF is a strong implementation on Linux, but assess kernel, managed-platform, Windows-node, performance, and privacy constraints; do not mandate it for every cluster.
+-   **Background**: eBPF, audit logs, seccomp, AppArmor or SELinux, runtime sandboxes, EDR, and service-mesh telemetry differ in visibility and enforcement. Do not generalize that every syscall can always be observed completely at minimal overhead; measure kernel version, hooks, event loss, resource cost, and attack surface.
 
 | eBPF Security Tool | Functionality | Use Case |
 |:------------------|:-------------|:---------|
@@ -3008,11 +3015,11 @@ async function checkPaymentPageIntegrity(): Promise<void> {
 | **Falco + eBPF probe** | Managed eBPF probe-based rule detection | Backward compatibility for legacy environments |
 | **KubeArmor** | eBPF-based container behavior control | System call restriction via LSM/eBPF |
 
--   **Action**:
-    1.  **Tetragon Installation**: Deploy Tetragon via Helm and enable ProcessExec, TCP, and DNS observability.
-    2.  **TracingPolicy Definitions**: Define TracingPolicies to detect and deny unauthorized syscalls (`setuid`, `ptrace`, `bpf`, etc.).
-    3.  **Network Observability**: Enable Cilium's Hubble UI to visualize and monitor pod-to-pod traffic at L7 level.
-    4.  **Alert Integration**: Forward Tetragon events to SIEM (§26) via falcosidekick.
+-   **Reference Implementation**:
+    1.  Collect the required ProcessExec, network, and file signals with Tetragon or an equivalent control.
+    2.  Start in audit mode, measure false positives, event loss, CPU and memory, and kernel compatibility, then progress to enforcement.
+    3.  Route events to the adopted SIEM or incident path and define ownership, retention, PII minimization, and a runbook.
+    4.  The following TracingPolicy is a conceptual example for a specific Linux and Tetragon environment, not a universal workload policy.
 
 ```yaml
 # ✅ CORRECT: Tetragon TracingPolicy example (block unauthorized setuid)
@@ -3179,7 +3186,7 @@ spec:
 -   **Law**: Periodically review the permissions, data access, and external connections held by AI systems based on Zero Trust principles (§2).
 -   **Action**:
     1.  **Enforce Least Privilege**: Inventory AI system (especially Agentic AI) tool and API scopes quarterly. Immediately remove unnecessary permissions (see §18.2).
-    2.  **API Key Rotation**: Rotate LLM provider API keys within 90 days (see §6.7).
+    2.  **API Key Reduction and Rotation**: Replace LLM provider API keys with short-lived credentials or workload identity where possible. Apply the risk-based cadence and event-driven revocation in §6.7 and §21.5 to long-lived keys that remain.
     3.  **Network Egress Control**: Restrict AI agent external communications to whitelisted destinations. Auto-block access to unauthorized endpoints.
     4.  **HITL Re-evaluation**: Quarterly review of HITL requirements for high-risk AI systems; assess appropriateness of automation scope.
 
@@ -3334,9 +3341,9 @@ interface AISystemRecord {
 | 51 | Cache key without tenant ID (cross-tenant cache leakage) | §35.4 |
 | 52 | Storing CVV/CVC on PCI DSS-scoped payment pages | §36.3 |
 | 53 | Payment page scripts without SRI (Req 6.4.3 violation) | §36.2, §22.2 |
-| 54 | Adopting OSS library without checking OpenSSF Scorecard score | §11.6 |
+| 54 | Allowing or denying a third-party component only from a repository score without evaluating individual controls and usage context | §11.6 |
 | 55 | Implementing FAPI 2.0 financial API without mTLS/DPoP | §36.5, §4.10 |
-| 56 | Running production Kubernetes workloads without eBPF/Tetragon runtime monitoring | §37.1 |
+| 56 | Treating installation of a named tool as sufficient without defining the Kubernetes runtime threat model, detection signals, and response route | §37.1 |
 | 57 | Operating multiple AI systems in organization without AI-SPM (Shadow AI / risk invisibility) | §38.1, §38.2 |
 | 58 | Calling LLM APIs directly from application code without a centralized LLM Gateway | §17.14 |
 | 59 | Deploying LLM features to production without a maintained AI Model Card | §17.14.3 |
@@ -3348,13 +3355,23 @@ interface AISystemRecord {
 
 ## Language-Specific Security
 
+`engineering/320_programming_language_governance.md` is the source of truth for adoption, toolchains, quality gates, ownership, and retirement. This section adds secure-coding differences that are especially likely to cause incidents in each language.
+
 ### TypeScript / JavaScript
 
 -   `eval()`, `Function()`, `new Function()` usage is **completely prohibited**.
 -   `dangerouslySetInnerHTML` / `v-html` requires **special PR review approval**.
 -   Minimize `any` type usage. Use `unknown` + Zod for input validation.
--   Enforce secret retrieval via `process.env`. Direct values prohibited.
+-   Retrieve secrets through a validated server-side configuration layer or vault and prohibit embedding them in source or client bundles. `process.env` is one injection mechanism and must remain separated from public variables.
 -   Enforce `===` strict equality (prohibit `==`).
+
+### React Native Framework
+
+-   Never embed secrets in JS bundles, source maps, app configuration, or native resources. Separate environment-specific public configuration from server-side secrets and do not connect a client directly to a secret-bearing resource.
+-   Restrict unencrypted stores such as AsyncStorage to non-sensitive data. Store tokens, credentials, cryptographic keys, and sensitive PII in Keychain- or Keystore-backed storage, and never leak sensitive values by persisting an entire state tree.
+-   Treat Turbo Native Module and Fabric or JSI boundary input as untrusted, validating size, type, depth, timeout, thread, and lifecycle. A Codegen spec alone does not provide runtime safety.
+-   Never put tokens or PII in custom URL schemes. Use Universal Links or App Links with OAuth Authorization Code plus PKCE, state, nonce, and exact redirect validation.
+-   OTA updates require native-runtime compatibility, update signatures, channel isolation, staged delivery, a kill switch, rollback, and store-policy review. `engineering/420_react_native.md` is the detailed source of truth.
 
 ### Python
 
@@ -3362,7 +3379,7 @@ interface AISystemRecord {
 -   `subprocess.call(shell=True)` prohibited. Use `subprocess.run()` + list arguments.
 -   `os.system()` prohibited.
 -   Use `yaml.safe_load()`. `yaml.load()` is **prohibited**.
--   Be cautious of direct user input expansion in `format()` / f-strings. Template injection countermeasures.
+-   Do not treat `format()` or f-strings as inherently unsafe; prohibit inserting untrusted input into SQL, shell commands, or template source. Use parameter binding, argument lists, and fixed templates.
 
 ### Go
 
@@ -3371,12 +3388,75 @@ interface AISystemRecord {
 -   Use `database/sql` placeholders for SQL queries (string concatenation prohibited).
 -   Prevent goroutine resource leaks (`context.WithTimeout` / `context.WithCancel`).
 
+### Java / Kotlin
+
+-   Prohibit Java native serialization, `ObjectInputStream`, and unrestricted polymorphic deserialization for untrusted input. Use explicit schemas, allowlists, and size and depth limits.
+-   Use `PreparedStatement`, ORM parameter binding, or equivalent; prohibit concatenated JPQL and SQL.
+-   Build process invocation from argument lists and prohibit unvalidated expansion into shells, LDAP, expressions, or templates.
+-   Prohibit production TrustManagers that disable TLS certificate validation and HostnameVerifiers that accept every host.
+
+### C# / .NET
+
+-   Prohibit `BinaryFormatter`, `NetDataContractSerializer`, and unrestricted type-directed JSON deserialization for untrusted input.
+-   Use database parameter binding and prohibit string concatenation into SQL, dynamic LINQ expressions, and templates.
+-   Start processes with `UseShellExecute = false` and `ArgumentList`; never concatenate user input into a command line.
+-   Use ASP.NET Core Data Protection, Secret Manager, or an external vault for their intended purpose; prohibit custom cryptography and source-embedded secrets.
+
+### Rust
+
+-   Isolate `unsafe` and FFI to the smallest modules and inventory safety conditions, invariants, owners, and test or fuzz evidence.
+-   Bound external-input length, allocation, and recursion depth; boundary-test integer conversion, panic, and resource exhaustion.
+-   Use individual arguments with `std::process::Command`; never concatenate untrusted input into a shell string.
+-   Include `cargo audit` or `cargo deny`, Clippy, fuzzing, and Miri or sanitizers when applicable in CI.
+
+### PHP
+
+-   Prohibit `unserialize()`, `eval()`, and dynamic `include` for untrusted input.
+-   Use PDO prepared statements or framework parameter binding; prohibit SQL string concatenation.
+-   Escape according to the HTML, URL, JavaScript, SQL, or other output context rather than relying on one global escape.
+-   Disable `display_errors` in production and enforce framework-standard session cookie, CSRF, and upload type, size, and storage boundaries.
+
+### Ruby
+
+-   Prohibit `Marshal.load`, `YAML.load`, and `eval` for untrusted input; use safe parsers and permitted types.
+-   Use Active Record parameter binding and prohibit unvalidated string expansion into raw SQL, scopes, and order clauses.
+-   Use argument arrays for shell commands and do not pass untrusted strings to backticks, `system`, or `Open3`.
+-   In Rails, enforce Strong Parameters, CSRF, and secure cookies, and run Brakeman and dependency auditing in CI.
+
+### Lua / Perl
+
+-   Lua never passes untrusted input to `load`, `loadfile`, or `dofile`, and never executes binary chunks from untrusted sources. When embedded execution is required, the host enforces a restricted `_ENV`, module and FFI allowlists, and instruction, CPU, and memory limits.
+-   Do not implicitly trust Lua's `LUA_INIT`, `LUA_PATH`, or `LUA_CPATH`, or Perl's `PERL5OPT`, `PERL5LIB`, or module search path in production; sanitize or explicitly fix the startup environment.
+-   Perl prohibits string `eval`, backticks, shell-form `system` or `exec`, and two-argument `open` for untrusted input. Use list-form process invocation, three-argument `open`, and DBI placeholders.
+-   Privileged or network-facing Perl combines taint mode with allowlist validation, verifies reproducible dependency resolution such as a Carton snapshot, and runs `cpan-audit` in CI.
+
+### VBA / Office Business Automation
+
+-   Block macros from internet or untrusted zones and do not make per-user unblocking the standard distribution path. Inventory each exception with an owner, business reason, expiry, and distribution source.
+-   Sign production macros with an organization-managed code-signing certificate and centrally deploy trusted publishers. Avoid allowing users to add arbitrary publishers.
+-   Keep Trusted Locations minimal and control write access. Do not casually trust broad network shares or download locations.
+-   Treat workbook, document, and form input passed to `Shell`, COM, filesystems, networks, or the Office object model as untrusted, and never embed secrets in macros, documents, or connection strings.
+
+### C / C++
+
+-   Prefer a memory-safe language for new external-input parsers, authentication, and network-facing functions, and record the reason for continued C or C++ in an ADR.
+-   Use bounds-aware APIs, RAII, and safe containers, and prohibit or isolate unbounded copies, format strings, and manual lifetime operations.
+-   Treat compiler warnings as errors and include ASan and UBSan, TSan or MSan when relevant, and fuzzing in pre-release gates.
+-   Include allocation size, integer overflow, use-after-free, double-free, and ABI ownership in threat models and tests.
+
+### Shell / PowerShell
+
+-   Shell quotes variables, prohibits `eval` and command construction from untrusted strings, creates temporary files safely, and cleans them with `trap`.
+-   PowerShell prohibits `Invoke-Expression` and uses parameter binding, `ArgumentList`, PSScriptAnalyzer, and Pester.
+-   Never expose secrets through arguments, process lists, history, transcripts, or debug logs; use an OS or vault secret store.
+-   Privilege boundaries, remote execution, and download-then-execute require allowlists, digest or signature verification, timeouts, and audit logs.
+
 ### SQL
 
 -   `SELECT *` prohibited. Explicitly specify only needed columns.
 -   Dynamic SQL prohibited. Use parameterized queries only.
 -   `GRANT ALL` prohibited. Grant only necessary permissions individually.
--   `SECURITY DEFINER` functions must include `SET search_path = public`.
+-   A `SECURITY DEFINER` function excludes schemas writable by untrusted users from `search_path`, places `pg_temp` after trusted schemas or uses an empty path with fully qualified names, and revokes default `PUBLIC EXECUTE` in the same transaction before granting only required roles.
 
 ---
 
@@ -3405,7 +3485,7 @@ interface AISystemRecord {
 | Break-Glass Protocol | §33.5 |
 | Browser Security | §31 |
 | CAPTCHA / Turnstile | §6.6, §23.2 |
-| Certificate Pinning (Mobile) | §32.3 |
+| TLS Identity Verification / Certificate Pinning (Mobile) | §32.3 |
 | Certificate Transparency (CT) | §12.9 |
 | Chain of Custody | §25.4 |
 | Container | §14 |

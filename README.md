@@ -8,7 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/hiroyuki-miyauchi/axiarch?label=Version&color=brightgreen)](https://github.com/hiroyuki-miyauchi/axiarch/releases)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Rules](https://img.shields.io/badge/Universal_Rules-50_files-green.svg)](#-universal-rules-50-files--jaen)
+[![Rules](https://img.shields.io/badge/Universal_Rules-54_files-green.svg)](#-universal-rules-54-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
 [![Production Validated](https://img.shields.io/badge/Production_Validated-Antigravity_Codex_Claude_Code-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
@@ -53,7 +53,7 @@ Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)
 │ 第1層: Universal (普遍憲法 / Immutable)                       │
 │ ├─ AXIARCH.md (正本入口 / Canonical Protocol)                 │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (薄い入口)             │
-│ └─ Universal Rules (50ファイル: 不変の普遍的基準)               │
+│ └─ Universal Rules (54ファイル: 不変の普遍的基準)               │
 ├─────────────────────────────────────────────────────────────┤
 │ 第2層: Blueprint (固有仕様 / Mutable)                         │
 │ └─ プロジェクト概要、機能仕様、教訓ログ等の可変ルール                │
@@ -109,7 +109,7 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 │ Layer 1: Universal (Immutable Constitution)                   │
 │ ├─ AXIARCH.md (Canonical Protocol)                            │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)       │
-│ └─ Universal Rules (50 files / Immutable Universal Standards) │
+│ └─ Universal Rules (54 files / Immutable Universal Standards) │
 ├───────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                    │
 │ └─ Project Overview, Feature Specs, Lessons Log               │
@@ -206,7 +206,7 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 | `axiarch-harness/{lang}/HUMAN_APPROVAL_GATE.md` | stage、commit、push、deploy、DB適用などの人間承認境界 | Human approval boundary for stage, commit, push, deploy, DB apply, and related actions |
 | `axiarch-harness/{lang}/SUBAGENT_DELEGATION_PROTOCOL.md` | サブエージェント任意利用、読み取り専用委任の承認境界、メインエージェント順次実行フォールバック | Optional subagent delegation, read-only delegation approval boundary, and main-agent sequential fallback |
 
-### 📚 Universal Rules (50 files × JA/EN)
+### 📚 Universal Rules (54 files × JA/EN)
 
 > Universal Rules はプロジェクトで使う可能性のある技術・運用領域を横断する基準ルール集です。AIは LOADING_PROTOCOL に従い、タスクに必要なファイルのみを選択的にロードします。使わない技術のルールは任意の参照対象であり、将来採用時や未知の技術に直面したときの品質底上げを支える補助資産として扱います。
 >
@@ -217,12 +217,20 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 | Core & Mindset | 1 | 開発哲学、主要方針 | Development philosophy, primary directive |
 | Product & Business | 9 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
 | Design & UX | 1 | デザインシステム、A11y | Design system, accessibility |
-| Engineering | 14 | コード品質(80§)、API、Supabase、Web、CMS、Flutter、Native、Firebase、AWS、**Git Workflow**、**バッチ・バックフィル・失敗計数**、**データ整合・リコンシリエーション**、**キャッシュ規律**、**データコントラクト** | Code quality (80§), API, Supabase, Web, CMS, Flutter, Native, Firebase, AWS, **Git Workflow**, **batch/backfill & failure accounting**, **data reconciliation**, **caching discipline**, **data contracts** |
+| Engineering | 18 | コード品質(141§)、API、Supabase、**プログラミング言語ガバナンス**、Web、CMS、Flutter、Native、**React Native**、Firebase、AWS、**クラウド・アプリケーションプラットフォーム統治**、**Microsoft Azure**、**Git Workflow**、**バッチ・バックフィル・失敗計数**、**データ整合・リコンシリエーション**、**キャッシュ規律**、**データコントラクト** | Code quality (141§), API, Supabase, **programming language governance**, Web, CMS, Flutter, Native, **React Native**, Firebase, AWS, **cloud and application platform governance**, **Microsoft Azure**, **Git Workflow**, **batch/backfill & failure accounting**, **data reconciliation**, **caching discipline**, **data contracts** |
 | AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
 | Operations | 8 | 内部ツール、営業・BizDev、HR、CX、SRE、インシデント、**キャパシティ・スケール崖**、パートナーシップ | Internal tools, sales/BizDev, HR, CX, SRE, incident response, **capacity & scale cliffs**, partnerships |
 | Security & Legal | 10 | セキュリティ、データガバナンス、OSSコンプライアンス、知的財産、認証・パスキー、OAuth/OIDC連携・SSO、ステップアップ・OTP、認可(ReBAC/Zanzibar)、非人間/ワークロード/AIエージェントID、MCPセキュリティ | Security, data governance, OSS compliance, IP, authentication & passkeys, OAuth/OIDC federation & SSO, step-up & OTP, authorization (ReBAC/Zanzibar), non-human/workload/AI-agent identity, MCP security |
 | QA & FinOps | 2 | テスト戦略、クラウドFinOps | Test strategy, Cloud FinOps |
 | Global & Governance | 3 | i18n、ガバナンス、言語プロトコル | i18n, governance, language protocol |
+
+言語横断の採用・品質・チーム統制の正本。主要frontend／backend／mobile／infra言語、JVM／BEAM／関数型、長期運用資産、科学技術計算、accelerator／GPU、shader、eBPF、query／semantic／observability／infra DSL、公開library／SDK／packageのsource・binary・behavior互換性、consumer matrix、immutable配布、生成SDK、組織ownershipに加え、notebook／literate computational artifactのclean execution、rich output、production job、team引継ぎを、evaluator・権限・lineage・費用・effective artifact・exitまで統治: [日本語](axiarch-rules/ja/universal/engineering/320_programming_language_governance.md) / [English](axiarch-rules/en/universal/engineering/320_programming_language_governance.md)
+
+React NativeのNew Architecture・両OS品質・OTA・企業チーム統制: [日本語](axiarch-rules/ja/universal/engineering/420_react_native.md) / [English](axiarch-rules/en/universal/engineering/420_react_native.md)
+
+Vercel、Supabase、Firebase、Cloudflare、hyperscaler、enterprise／regional／sovereign cloud、AWS Amplify／Appwrite／Convex等のBaaSを、選定・共有責任・リリース・データ・SDK lifecycle・async event delivery・local／emulator fidelity・managed conformance・integration lifecycle・multi-service aggregate releaseに加え、capability manifest・trust surface・identity portability・service EOLまで統治: [日本語](axiarch-rules/ja/universal/engineering/520_cloud_application_platforms.md) / [English](axiarch-rules/en/universal/engineering/520_cloud_application_platforms.md)
+
+Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed compute、SDK lifecycle、Azure Functionsのmanaged／Preview／Custom Handler・worker model・hosting plan、network、data、messaging、observability、DR、FinOps、企業チーム統制、退出: [日本語](axiarch-rules/ja/universal/engineering/530_azure_cloud.md) / [English](axiarch-rules/en/universal/engineering/530_azure_cloud.md)
 
 ### 📐 Blueprint (プロジェクト固有テンプレート / Project-Specific Templates)
 
@@ -622,7 +630,7 @@ AIエージェントが登場する以前から、生成AI（ChatGPT等）を新
 
 世界中の開発者がAIエージェントの恩恵を最大限に受けられるように。特にAI活用においてまだ発展途上にある日本からの発信として、自国のAI活用促進にも貢献できればと考えています。そして何より、この取り組み自体が自身の知見を深めるプロセスでもあります。
 
-成果：数千規模の憲法基準を扱う50のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓をルール化しやすくするCrystallization Protocol。現行構成では `AXIARCH.md` を正本入口として参照します。
+成果：数千規模の憲法基準を扱う54のUniversalルールファイル、ハルシネーションリスクを軽減する5ステップのBoot Sequence Protocol、教訓をルール化しやすくするCrystallization Protocol。現行構成では `AXIARCH.md` を正本入口として参照します。
 
 ### 🇺🇸 Why Axiarch Was Built
 
@@ -647,7 +655,7 @@ The industry was facing the same problem at scale. AI-generated code becoming a 
 
 Axiarch was built as one practical approach to this challenge. The author's own background — front-end engineering experience, but no prior back-end or infrastructure expertise — shaped the core design principle: **language-agnostic, framework-agnostic, and approachable across different engineering experience levels. A Constitution-Driven AI Agent Governance Framework that helps developers working with AI — including non-engineers and solo developers — raise their minimum quality floor.**
 
-The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 50 Universal Rule files covering thousands of constitution standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, and a Crystallization Protocol that helps convert lessons into rules. The current structure routes them through `AXIARCH.md` as the canonical entrypoint.
+The goal extends beyond personal use: to contribute to the global adoption of AI-assisted development, and to help accelerate AI utilization worldwide. The result: 54 Universal Rule files covering thousands of constitution standards, a 5-step Boot Sequence Protocol that reduces startup hallucination risk, and a Crystallization Protocol that helps convert lessons into rules. The current structure routes them through `AXIARCH.md` as the canonical entrypoint.
 
 ---
 
