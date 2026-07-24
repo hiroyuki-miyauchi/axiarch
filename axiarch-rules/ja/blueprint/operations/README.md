@@ -11,7 +11,7 @@
 
 | ファイル | 概要 |
 |:--|:--|
-| [010_release_upgrade_operations.md](./010_release_upgrade_operations.md) | リリース・アップグレード運用におけるCHANGELOG整合、dry-run副作用禁止、interactive入力、local-onlyファイルレビュー、source-only既定skip・明示選択・本体リポジトリ専用ファイル分類、EOF時の確認入力default N、本体リリース中核ファイルのGit追跡確認、対話選択肢重複排除 |
+| [010_release_upgrade_operations.md](./010_release_upgrade_operations.md) | リリース・アップグレード運用におけるCHANGELOG整合、dry-run副作用禁止、interactive入力、local-onlyファイルレビュー、source-only既定skip・明示選択・本体リポジトリ専用ファイル分類、EOF時の確認入力default N、本体リリース中核ファイルのGit追跡確認、対話選択肢重複排除、OSS release-state closure、自動復旧、署名付きannotated tag完全性、tag-only復旧と完成済みno-opの分離、GitHub API失敗判別、GitHub Actions immutable SHA固定、日英相対path対称性 |
 
 ## 対応 Universal ルール
 

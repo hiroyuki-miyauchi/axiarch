@@ -10,7 +10,7 @@
 > **Domain**: 運用
 > **Location**: `blueprint/operations/010_release_upgrade_operations.md`
 > **Related Universal Rules**: `universal/operations/400_site_reliability.md`, `universal/engineering/600_git_workflow.md`
-> **12 sections.**
+> **13 sections.**
 
 ---
 
@@ -30,6 +30,7 @@
 | §10 | 非対話EOF時の確認入力default N |
 | §11 | 本体リリース中核ファイルのGit追跡確認 |
 | §12 | 対話選択肢の重複排除 |
+| §13 | OSSリリース状態の閉包と自動復旧 |
 
 ---
 
@@ -320,3 +321,45 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`source_docs` グループの既
 ### Reference
 
 `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/check-axiarch-health.sh`, `task.md`, `walkthrough.md`
+
+---
+
+## §13 OSSリリース状態の閉包と自動復旧
+
+### Context
+
+v1.16.0正式化監査で、内部版数とCHANGELOGがv1.15.0、ROADMAP Current Stableがv1.14.0のまま、英語Roadmapにはv1.15.0以降の完了履歴がない状態を確認した。既存の自動release workflowはCHANGELOG先頭だけをtag根拠とし、tag push成功後にGitHub Release作成だけ失敗すると、再実行時に既存tagを見てRelease作成もskipする構造だった。
+
+追加再監査では、`llms-full.txt`の正規ヘッダーだけがv1.14.0のままでも後段のv1.16.0記載によりhealthが通ること、既存tagの型・対象treeを検証せずReleaseを復旧できること、GitHub APIの認証・通信失敗まで「Releaseなし」と誤認すること、GitHub Actionsが可変tag参照のままであることを確認した。
+
+状態遷移の再検証では、既存tagへ常に現在の`main` revisionとの完全一致を要求すると、tagとReleaseが正常に完成した後の通常の`main`更新まで失敗することを確認した。公開済み状態の冪等確認と、tagだけ残った部分失敗からの復旧は、異なる状態として扱う必要がある。
+
+### Problem
+
+文書内のどこかに現行版数が存在するだけの検査では、Current Stableや日英release entryのstale状態を見逃す。tagとGitHub Releaseを単一状態として扱うと、部分成功後の再実行で欠けた成果物を復旧できない。並行main pushは同一tag作成の競合も起こし得る。GNU固有commandへ依存したrelease note抽出は、ローカルとCIの再現性を下げる。
+
+既存tagを名前だけで信用すると、軽量tag、未署名tag、または別版数のtreeを指すtagから誤ったGitHub Releaseを公開できる。API失敗を404と区別しないfallbackは、権限・rate limit・network障害時に「欠落を復旧する」副作用へ進む。可変action tagは、review済みworkflowと実行codeの同一性を保証しない。日英対称性を件数だけで判定すると、同数のまま別の相対pathへずれた偽対称を見逃す。PR時に本体healthを実行しないと、post-mergeのrelease jobで初めて不整合が判明し、`main`のinstallerが未作成tagを既定参照する時間を延ばす。
+
+一方、tagとReleaseが両方完成済みの状態でtag対象revisionと後続`main` revisionの不一致を異常扱いすると、版数を変えない保守commitや依存更新のたびにrelease workflowが赤くなる。これを避けるためにtagの完全性を緩めると、今度はtag-only部分失敗を後続revisionから誤復旧する恐れがある。
+
+### Rule
+
+OSS releaseは、CHANGELOG先頭、installer、manifest、ROADMAP Current Stable、日英の完了release entry、公開stable表記、配布ref、共有indexの版数が同一である時だけ公開可能とする。版数文字列の単純な文書内存在ではなく、各surfaceの正規位置を解析して一致させる。
+
+自動releaseはtag作成前にfail-closedな整合gateを通し、同一branchのrelease jobを直列化する。annotated tagとGitHub Releaseは独立した収束対象として存在を確認し、tagだけ存在してReleaseがない部分成功状態では、同一release revisionのworkflow rerunが欠けたReleaseだけを冪等に作成する。release note抽出はrunner固有拡張へ依存しない。
+
+既存tagは、署名付きannotated tagであること、構成済みrelease鍵で署名検証できること、tag対象treeのinstaller・manifest・CHANGELOG版数が公開対象と一致することを常に検証する。自動作成では専用の非対話SSH秘密鍵をGitHub Actions secretから権限制限済みrunner一時領域だけへ読み込む。現行・退役公開鍵はrepository variableのallowed signers trust registryに保持し、導出した現在公開鍵が登録済みである場合だけ署名を許可する。値をlogへ出さず、secret／registry未設定、現在鍵未登録、暗号化・不正鍵、署名失敗をtag push前にfail-closedとする。鍵素材はworkflowの成功・失敗にかかわらず削除する。secret登録、公開鍵の信頼登録、rotation、失効、最小権限、break-glassは外部設定変更としてowner承認とrollbackを必要とする。
+
+tagだけ存在してReleaseが欠ける部分失敗を復旧するときは、さらに現在のworkflow revisionそのものを指すことを要求する。単なるancestor一致は、同じ版数表記を持つ古いsnapshotを後続revisionから誤って再利用できるため認めない。tagとpublished stable Releaseが両方完成済みなら、後続の`main` revisionでは安全な冪等no-opとして扱う。GitHub Release lookupは404だけを「欠落」とし、認証・権限・rate limit・network等の失敗はfail-closedにする。release完了後はremote tag objectとpublished stable Releaseの両方をpostconditionとして再検証する。
+
+外部GitHub Actionsは、review時に確認したimmutable commit SHAまたはcontainer digestへ固定し、版数commentと更新botで追従可能性を残す。commit署名、annotated tag署名、lightweight tag等のupstream verification signalは対象ごとに区別し、すべてが署名済みであるかのように一括表現しない。日英ファイルは件数ではなく言語rootからの相対path集合を比較し、同数別pathと片側不足を拒否する。公開版数healthは文書内の任意出現ではなく、`llms-full.txt`のCurrent Release／Latest Stable等の正規surfaceを厳密検証する。release metadata healthはPR時にも実行し、main統合前にdriftを検出する。
+
+### Enforcement
+
+`.github/workflows/release.yml` はmain push時にrelease metadata、ROADMAP日英entry、配布ref、CHANGELOG compare ref、`llms-full.txt`正規ヘッダーを検証し、job concurrencyを保持する。tagとGitHub Releaseを別々に確認し、専用secretによる署名付きannotated tag、既存tagの署名・対象tree完全性、API失敗種別を検証する。新規releaseは現在revisionへ署名tagを作成し、tag-only部分失敗はtagと現在revisionが完全一致するときだけReleaseを復旧し、tagとReleaseの完成済み状態は後続main revisionでno-opにする。必要な成果物だけを作成した後、remote tagとpublished Releaseの収束を再確認する。release noteは一時fileでactionへ渡し、鍵素材は成功・失敗を問わず第三者Action実行前にrunner一時領域からcleanupする。
+
+`.github/workflows/lint.yml` は全外部actionのimmutable SHA固定とrules／Blueprint／Harness／Promptsの日英相対path集合を検査し、PR時にも`check-axiarch-health.sh --quiet`を実行する。Check 15は日英相対path、ROADMAP Current Stable、日英release entry、公開stable表記、`llms-full.txt`正規ヘッダー、CHANGELOG compare ref、GitHub Actions SHA固定、署名tag経路、tag-only復旧と完成済みno-opの状態分離を検査する。正常系に加え、同数別path、片側不足、Current Stable、片言語entry、公開ヘッダー、軽量tag、未署名tag、同版数の古いancestor tag、tag対象tree版数、API非404失敗、後続main上のtag-only部分失敗、署名secret未設定を個別に壊す負のfixtureでexit non-zeroを確認する。完成済み署名tag／Releaseを持つ後続main revisionはexit zeroを確認する。
+
+### Reference
+
+`.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`

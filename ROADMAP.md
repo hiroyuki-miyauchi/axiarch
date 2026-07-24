@@ -1,7 +1,7 @@
 # Axiarch Roadmap
 
-> **現在の安定版 / Current Stable**: v1.14.0 Security Authentication Stack (security 400-450)\
-> **次期作業 / Next**: Read-only subagent / Deep Security Scan approval-boundary patch + Static Lint & Process Supervision（候補 / candidate）\
+> **現在の安定版 / Current Stable**: v1.16.0 Polyglot & Cloud Governance Expansion\
+> **次期作業 / Next**: v1.16.x adoption feedback, release observability, and operational validation（候補 / candidate）\
 > **ステータス / Status**: Actively Maintained
 
 ---
@@ -26,6 +26,20 @@
 ---
 
 > **履歴注記**: v1.11.2以前の完了済みリリース項目には、当時の正本であった `AGENTS.md` や Protocol 0-9 の表記が残っています。v1.12.0以降の現行正本は `AXIARCH.md` であり、過去項目はリリース履歴として扱います。
+
+---
+
+### ✅ v1.16.0 — Polyglot & Cloud Governance Expansion（2026-07-24）
+
+- **プログラミング言語ガバナンス** — 主要web／backend／mobile／systems／data／infra言語、framework、DSL、notebook、public library／SDK／packageを、support tier、toolchain、artifact、互換性、native quality gate、SBOM／provenance、owner、移行・廃止まで一貫して統治。
+- **React Nativeガバナンス** — TypeScript／JavaScript、Swift、Kotlinをまたぐframeworkとして、New Architecture、Hermes、Codegen、native module、OTA、両OSのtest／release／rollback、mobile platform ownershipを統治。
+- **クラウド・アプリケーションプラットフォーム** — Vercel、Supabase、Firebase／GCP、Cloudflare、主要cloud／PaaS／BaaS／Kubernetesを、能力ベース選定、team access、環境分離、identity、data、security、observability、FinOps、DR、exitへ接続。
+- **Microsoft Azureガバナンス** — landing zone、Microsoft Entra、RBAC／PIM、managed identity、Azure Policy、Bicep、App Service／Functions／Container Apps／AKS、data、messaging、monitoring、cost、decommissionを汎用成果契約として追加。
+- **汎用性とenterprise運用の強化** — 特定provider、言語、tool、固定team人数、固定閾値をUniversal唯一解にせず、個人・小規模teamから大企業・規制対象環境まで同じ安全・再現性・ownership・退出成果で運用可能に整理。
+- **OSSリリース整合とfail-closed gate** — `CHANGELOG.md`、ROADMAP、installer、manifest、README、llms、upgrade導線、日英Blueprint INDEXをv1.16.0へ同期。`main`へのrelease commit統合時にworkflowが全release metadataと配布refを再検証し、不一致時は停止、一致時だけ専用SSH秘密鍵Actions secretで署名したannotated tag `v1.16.0`とGitHub Releaseを自動作成する。現行・退役公開鍵はrepository variableのallowed signers trust registryで保持し、secret／registry未設定、現在鍵未登録、暗号化・不正鍵、署名不正はtag作成前に停止する。一時鍵素材は第三者Release Action前にrunnerから削除する。既存tagは型、署名、対象treeの版数を常に検証し、tagだけ作成済みでRelease未作成の中間障害はtagとworkflow revisionが完全一致する同一revisionのrerunでのみ復旧する。tagとReleaseが完成済みなら後続main revisionでは安全なno-opにし、GitHub APIの404以外は欠落扱いせず停止する。公開後はlocal／remote tag objectとstable Releaseの収束まで確認する。health diagnosticもROADMAP Current Stable、正規AI-facing header、CHANGELOG compare ref、immutable action ref、署名tag、鍵cleanup順序、tag-only復旧と完成済みno-opの状態分離を厳密検証する。
+- **CI供給網とPR品質gate** — `actions/checkout` v7.0.1、markdownlint action v24.1.0、release action v3.0.2を検証済みcommit SHAへ固定。inline／quoted stepを含むmutable action refをCIで拒否し、rules、Blueprint、Harness、Promptsの日英Markdownは件数だけでなくexact relative pathを比較する。PR時にAxiarch healthを実行してrelease metadata driftと同数別pathの言語偽対称をmain統合前に検出する。Node 24互換性と既存権限境界は維持する。
+- **チームレビュー証跡** — PRテンプレートへ変更種別、What／Why、検証commandと結果、risk／blast radius、rollback、migration／seed・互換性、SemVer／release、security／privacy／FinOps、外部承認、AI支援来歴を追加し、healthで必須見出しを保持する。
+- **セキュリティ報告導線** — rules／docs中心でも実行されるinstaller、hook、upgrade、health、Actionsのriskを`SECURITY.md`へ正しく反映し、機微な脆弱性をPrivate Vulnerability Reporting、一般改善をIssueへ分離する。
 
 ---
 
@@ -712,12 +726,27 @@ enterprise adoption needs.
 
 ---
 
-### 🚧 v1.14.1 Candidate — Read-only Subagent / Deep Security Scan Approval-Boundary Patch
+### ✅ v1.16.0 — Polyglot & Cloud Governance Expansion (2026-07-24)
 
-- **False-block risk reduction** — Make it less likely that Codex stops with "formal Codex Security Deep Security Scan requires explicit subagent permission." When the user explicitly asks for deep audit, security scan, exhaustive review, or Deep Security Scan, the required read-only worker fanout is included in that request.
-- **No Human Approval Gate regression** — stage, commit, push, deploy, DB apply, production data mutation, increased billing, sensitive-data retrieval, and external tool install/auth remain approval-required. Only the false block on read-only delegation is relaxed.
-- **Honest fallback** — If the runtime lacks delegation capability, do not claim that Deep Security Scan ran; fall back to the ordinary scan or main-agent sequential role passes.
-- **Regression detection** — Keep the boundary in the boot reminder and health Check 16 so deletion or weakening is detected.
+- **Programming language governance** — Governs major web, backend, mobile, systems, data, and infrastructure languages, frameworks, DSLs, notebooks, and public libraries, SDKs, and packages through support tiers, toolchains, artifacts, compatibility, language-native quality gates, SBOM and provenance, ownership, migration, and retirement.
+- **React Native governance** — Treats React Native as a framework spanning TypeScript and JavaScript, Swift, and Kotlin, governing New Architecture, Hermes, Codegen, native modules, OTA delivery, dual-platform testing, release and rollback, and mobile platform ownership.
+- **Cloud and application platforms** — Connects Vercel, Supabase, Firebase and GCP, Cloudflare, and major cloud, PaaS, BaaS, and Kubernetes platforms to capability-based selection, team access, environment isolation, identity, data, security, observability, FinOps, disaster recovery, and exit strategy.
+- **Microsoft Azure governance** — Adds reusable outcome contracts for landing zones, Microsoft Entra, RBAC and PIM, managed identity, Azure Policy, Bicep, App Service, Functions, Container Apps, AKS, data, messaging, monitoring, cost, and decommissioning.
+- **Genericity and enterprise operations** — Avoids making one provider, language, tool, fixed team size, or fixed threshold the only Universal implementation, while preserving the same safety, reproducibility, ownership, and exit outcomes from individual use through regulated enterprises.
+- **OSS release parity and fail-closed gate** — Synchronizes CHANGELOG, ROADMAP, installer, manifest, README, llms, upgrade paths, and ja/en Blueprint INDEX files to v1.16.0. On integration to `main`, the workflow revalidates all release metadata and distribution refs, stopping on any mismatch. It creates `v1.16.0` as a signed annotated tag using a dedicated SSH-private-key Actions secret and keeps current and retired public keys in an allowed-signers trust registry backed by a repository variable. It fails before tag creation when the secret or registry is missing, the active key is unregistered, encrypted, or invalid, and removes ephemeral key material before any third-party Release Action executes. Existing tags must be annotated, carry a valid configured-key signature, and contain matching release metadata. A tag-only intermediate state can be recovered only by rerunning the workflow at the exact tagged revision, while a complete tag-and-Release state is a safe no-op on later main revisions. GitHub API failures other than a confirmed 404 fail closed, and final convergence checks compare the local and remote tag objects plus the published stable Release. The health diagnostic also enforces exact Current Stable, canonical AI-facing headers, the CHANGELOG compare ref, immutable action refs, signed tags, key-cleanup ordering, and separation between tag-only recovery and complete-state no-op.
+- **CI supply chain and PR quality gate** — Pins `actions/checkout` v7.0.1, markdownlint action v24.1.0, and release action v3.0.2 to reviewed commit SHAs. CI rejects mutable refs including inline and quoted step forms, compares exact relative Markdown paths across JA and EN rules, Blueprint, Harness, and Prompts, and runs Axiarch health on pull requests so release metadata drift and equal-count path mismatches are caught before integration to `main`, while preserving Node 24 compatibility and existing permission boundaries.
+- **Team review evidence** — Expands the PR template with change type, What/Why, verification commands and results, risk and blast radius, rollback, migration/seed and compatibility, SemVer and release impact, security/privacy/FinOps, external approval, and AI-assistance provenance, with required headings protected by health checks.
+- **Security reporting path** — Correctly scopes executable installer, hook, upgrade, health, and Actions risks even though Axiarch is rules/documentation-centered, routing sensitive vulnerabilities to Private Vulnerability Reporting and general improvements to Issues.
+
+---
+
+### ✅ v1.15.0 — Agent Validation Status Reversal & Wording Parity Wave (2026-06-30)
+
+- **Validation status reversal** — Presents Antigravity, OpenAI Codex, and Claude Code as primary targets validated through real operational use and dogfooding, with Antigravity as the first proven target and Codex- and Claude-Code-authored commits as continuous-use evidence. The no-operation-guarantee-for-every-environment boundary remains.
+- **Protected wording lockstep** — Synchronizes README ja/en, MARKET_STRATEGY, ROADMAP, llms files, rules ja/en LOADING and README files, init.sh, and health Check 15 so documentation and regression checks remain verifiably aligned.
+- **Read-only subagent and Deep Security Scan approval boundary** — Reduces false stops when a user explicitly requests a read-only deep audit, while preserving Human Approval Gate requirements for stage, commit, push, deploy, DB apply, production mutation, increased billing, sensitive-data retrieval, and external tool install or authentication. When delegation is unavailable, the workflow falls back honestly without claiming the formal scan ran.
+- **Loading and Blueprint wording parity** — Synchronizes stale diagnostic-stage references, load-completion boundaries, pre-provisioned Blueprint folder descriptions, and project-overview claims.
+- **Market research wording and deletion/addition audit** — Refreshes MARKET_STRATEGY and ROADMAP research wording against the 2026-06-12 primary-source review and separates verified facts from strategic hypotheses.
 
 ---
 

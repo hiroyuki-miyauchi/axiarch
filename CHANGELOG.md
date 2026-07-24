@@ -16,7 +16,20 @@ release history, not current canonical numbering.
 
 ---
 
-## [Unreleased]
+## [1.16.0] — 2026-07-24
+
+### Polyglot & Cloud Governance Expansion / ポリグロット・クラウドガバナンス拡張
+
+Axiarchの適用範囲を、主要プログラミング言語、React Native、Vercel／Supabase／Firebase・GCP／Cloudflareを含む
+クラウド・アプリケーションプラットフォーム、Microsoft Azureまで拡張した。個別製品や特定プロジェクトへ
+固定せず、frontend、backend、mobile、infrastructure、enterpriseを横断する成果契約、team ownership、
+互換性、供給網、security、reliability、FinOps、migration・exitの境界として統治する。
+
+Expands Axiarch across major programming languages, React Native, cloud and application platforms including
+Vercel, Supabase, Firebase and GCP, and Cloudflare, plus Microsoft Azure. The release avoids binding Universal
+rules to one product or project and instead governs frontend, backend, mobile, infrastructure, and enterprise
+work through outcome contracts, team ownership, compatibility, supply-chain controls, security, reliability,
+FinOps, migration, and exit boundaries.
 
 ### Added
 
@@ -28,6 +41,10 @@ release history, not current canonical numbering.
 
 ### Changed
 
+- **Fail-closed OSS release automation / fail-closedなOSSリリース自動化** — `main` push時の自動タグ・GitHub Release workflowへ、CHANGELOG、`init.sh`、manifest、ROADMAPのCurrent Stableと日英完了release entry、README／llms／`llms-full.txt`正規ヘッダーの安定版表記、全配布ref、日英Blueprint INDEXの版数一致gateを追加。不一致が1件でもあれば署名付きannotated tagとRelease作成前に停止する。専用Ed25519等のSSH秘密鍵をActions secretから権限制限済みrunner一時領域だけへ読み込み、現行・退役公開鍵を保持するrepository variableのallowed signers trust registryと照合する。secret／trust registry未設定、現在鍵未登録、暗号化・不正鍵、署名作成失敗、既存tag署名不正は公開前にfail-closedとし、一時鍵素材は成功・失敗を問わず、第三者Release Action実行前に削除する。release jobは直列化し、tag型・署名・tag対象treeの版数・GitHub Release API応答を独立検査する。tag push成功後にRelease作成だけ失敗した状態はtagとworkflow revisionが完全一致する同一revisionのrerunでのみ復旧し、tagとReleaseが完成済みなら後続main revisionでは安全なno-opにする。404以外のAPI失敗は欠落と誤認しない。release noteはrepository内容に依存するmultiline outputを使わず一時ファイルで受け渡し、作成後はlocal／remote tag objectと公開Releaseの収束まで検証する。`check-axiarch-health.sh`もCurrent Stable、正規AI-facing header、CHANGELOG compare ref、immutable action ref、署名tag、鍵cleanup順序、tag-only復旧と完成済みno-opの状態分離を厳密検証する。
+- **GitHub Actions supply-chain and PR gate / GitHub Actions供給網・PR gate** — lint、ShellCheck、日英対称性、release workflowの`actions/checkout`をv7.0.1の検証済みcommit SHAへ固定し、markdownlint action v24.1.0とrelease action v3.0.2も各upstream release refの対象commitを確認してimmutable SHAへ固定。利用可能なcommit／tag verification結果を個別に確認し、署名状態を一括で過大表現しない。CIがinline／quoted stepを含むmutable action refを拒否し、rules、Blueprint、Harness、Promptsの日英Markdownを件数ではなく相対path集合で比較して同数別pathの偽陰性も拒否する。PR時のShellCheck jobでAxiarch healthを実行してmain統合前にrelease metadata driftを検出する。既存の権限境界を維持し、`dependencies`／`github-actions`ラベルもDependabot設定と一致させた。
+- **Team review evidence contract / チームレビュー証跡契約** — PRテンプレートを、変更種別、What／Why、実行commandと結果、risk／blast radius、rollback、DB migration／seed・互換性、SemVer／release surface、security／privacy／FinOps、外部状態・人間承認、AI支援来歴まで引き継ぐ構造へ拡張。`check-axiarch-health.sh`が必須見出しを検証し、大規模teamでもreview判断とrelease handoffを再現可能にする。
+- **Security reporting reality / セキュリティ報告実態整合** — `SECURITY.md`の「実行コードなし／一般的な情報漏洩等のriskなし」という実態と異なる断定を撤回。installer、upgrade、health、Git hook、GitHub Actionsの供給網、command、path、credential、release integrityを報告対象へ追加し、機微な脆弱性は有効化済みGitHub Private Vulnerability Reporting、非機微な改善は公開Issueへ分離した。healthはこの境界の後退も検出する。
 - **Public library, SDK, and package compatibility governance / 公開library・SDK・package互換性統治** — 日英`engineering/320`へ§18とRule 320.71–320.78を追加。SemVerだけを互換性証明とせず、source／binary・ABI／behavior／protocol／serialization／toolchain／delivery surface、最古・現行consumer matrix、API／ABI・downstream gate、build-once artifact検査、version不変性とyank等の訂正経路、複数言語generated SDKの協調release、channel／support floor、registry namespaceと組織ownershipの継続性を、特定言語・registry・team構成へ固定しない成果契約として統治する。
 - **Notebook and literate computational artifact governance / Notebook・literate computational artifact統治** — 日英`engineering/320`へ§19とRule 320.79–320.86を追加。notebookを探索専用と一律に限定せず、用途profile、fresh environmentでのclean execution、cell順序／hidden state、source・metadata・rich outputの複合artifact、environment／data／hardware provenance、署名・trust flagの限界、promotion gate、scheduled production jobのreliability／FinOps、managed workspaceの権限・引継ぎ・offboarding・provider exitを、特定言語、製品、file形式、team構成へ固定しない成果契約として統治する。
 - **Language-to-platform support surfaces / 言語とplatformのsupport surface分離** — 日英`engineering/200`へSupabase client libraryのofficial／community区分、capability別feature parity、mobile／SSR lifecycle、fallback、言語native gateを追加。日英`engineering/500`を57セクション・Rule 32.1–32.175へ拡張し、Firebase client SDK、privileged Admin SDK、community framework binding、Functions runtime、Cloud Run source buildpack、任意containerを別support surfaceとして統治する。日英`engineering/510`へLambdaのmanaged runtime、TypeScriptのNode.js変換、OS-only／custom runtime、container、runtime update／EOL、shared responsibility、managed conformance、polyglot ownershipを分離する§156を追加。Java／Kotlin／Scala、Swift、Dart、C#／.NET、Ruby、PHP、Unity／C++、React Native等を、support authority、maturity、EOL、artifact、identity、CI、team ownershipへ接続した。日英`engineering/520`にはVercel official／community Functions runtimeの時点付きprofileを追加し、単なる「対応言語数」を成熟度やproduction supportの証明にしない境界を強化した。
@@ -1129,7 +1146,7 @@ Directory structure fully migrated to "Language-First" layout. All pointer, prom
 
 Built from hundreds of AI-assisted development sessions on Google Antigravity during real production development.
 
-[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.15.0...HEAD
+[1.16.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.1...v1.14.0
 [1.13.1]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.13.0...v1.13.1

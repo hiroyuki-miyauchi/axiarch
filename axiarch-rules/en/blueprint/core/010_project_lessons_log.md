@@ -38,7 +38,7 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 
 | # | Domain | File | Count |
 |:--|:-------|:-----|:------|
-| 1 | Operations | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 12 |
+| 1 | Operations | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 13 |
 | 2 | Governance | [core/020_governance_rules.md](./020_governance_rules.md) | 3 |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
