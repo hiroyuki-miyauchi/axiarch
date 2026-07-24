@@ -75,7 +75,7 @@ Options:
   --target DIR        Adopter project directory. Default: current directory.
   --source DIR        Local Axiarch source directory to upgrade from.
   --to VERSION        Target Axiarch version label, e.g. v1.13.1 or main.
-  --ref REF           GitHub archive ref, e.g. tags/v1.15.0 or heads/main.
+  --ref REF           GitHub archive ref, e.g. tags/v1.16.0 or heads/main.
   --from VERSION      Optional base version for replace-if checks and 3-way merge.
   --from-ref REF      Optional base archive ref for replace-if checks and 3-way merge.
   --base-source DIR   Optional local base Axiarch source for replace-if checks and 3-way merge.
@@ -90,8 +90,8 @@ Options:
   --help              Show this help.
 
 Examples:
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --dry-run
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.15.0 --agent codex --safe-only --apply
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --agent codex --safe-only --apply
   bash axiarch-scripts/axiarch-upgrade.sh --source /path/to/axiarch --interactive
 USAGE
 }
@@ -264,7 +264,15 @@ resolve_sources() {
   if command -v jq >/dev/null 2>&1; then
     SOURCE_AXIARCH_VERSION="$(jq -r '.axiarchVersion // empty' "${SOURCE_DIR}/axiarch-manifest.json" 2>/dev/null || true)"
   else
-    SOURCE_AXIARCH_VERSION="$(sed -n 's/.*"axiarchVersion":[[:space:]]*"\([^"]*\)".*/\1/p' "${SOURCE_DIR}/axiarch-manifest.json" | head -n 1)"
+    SOURCE_AXIARCH_VERSION="$(awk '
+      /"axiarchVersion"[[:space:]]*:/ {
+        line = $0
+        sub(/^.*"axiarchVersion"[[:space:]]*:[[:space:]]*"/, "", line)
+        sub(/".*$/, "", line)
+        print line
+        exit
+      }
+    ' "${SOURCE_DIR}/axiarch-manifest.json")"
   fi
 
   if [[ -n "${BASE_SOURCE_DIR}" ]]; then

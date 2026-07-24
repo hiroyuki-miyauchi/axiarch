@@ -38,7 +38,7 @@
 
 | # | ドメイン | ファイル | 教訓数 |
 |:--|:--------|:--------|:-------|
-| 1 | 運用 | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 12 |
+| 1 | 運用 | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 13 |
 | 2 | ガバナンス | [core/020_governance_rules.md](./020_governance_rules.md) | 3 |
 
 <!-- AUTO-CRYSTALLIZATION: ドメインファイル作成時、上の表に行を追加してください -->

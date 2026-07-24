@@ -53,7 +53,7 @@ your-project/
  │    └── en/
  ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
  │    ├── README.md                    ← 索引・使い方ガイド
- │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（16 段階、`--quiet` 対応、v1.9+ diff guard、v1.11.0現在タスク文書ローテーション・ネイティブタスク状態同期・v1.10.0+由来の本体リリース整合・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査・Claude Memory正本境界検査・Check 16 reminder境界検査）
+ │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（16 段階、`--quiet` 対応、v1.9+ diff guard、v1.11.0現在タスク文書ローテーション・ネイティブタスク状態同期・v1.10.0+由来の本体リリース整合・ROADMAP Current Stable／正規AI-facing header／CHANGELOG compare ref／Actions immutable SHA厳密一致と日英完了release entry・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査・Claude Memory正本境界検査・Check 16 reminder境界検査）
  │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + ネイティブタスク状態reminder v1.11.0+）
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（現在タスク文書の自動初期化、v1.5.5+ / v1.11.0+）

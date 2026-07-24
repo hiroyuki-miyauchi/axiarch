@@ -10,7 +10,7 @@
 > **Domain**: Operations
 > **Location**: `blueprint/operations/010_release_upgrade_operations.md`
 > **Related Universal Rules**: `universal/operations/400_site_reliability.md`, `universal/engineering/600_git_workflow.md`
-> **12 sections.**
+> **13 sections.**
 
 ---
 
@@ -30,6 +30,7 @@
 | §10 | Default N for non-interactive EOF confirmations |
 | §11 | Git tracking checks for source release-critical files |
 | §12 | Deduplication of interactive choices |
+| §13 | OSS release-state closure and automatic recovery |
 
 ---
 
@@ -320,3 +321,45 @@ Interactive group selection must not show the same effective action under multip
 ### Reference
 
 `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/check-axiarch-health.sh`, `task.md`, `walkthrough.md`
+
+---
+
+## §13 OSS Release-State Closure and Automatic Recovery
+
+### Context
+
+The v1.16.0 finalization audit found internal metadata and CHANGELOG still at v1.15.0, ROADMAP Current Stable at v1.14.0, and no completed v1.15.0-or-later entry in the English Roadmap. The existing automatic release workflow trusted only the top CHANGELOG heading. If the tag push succeeded but GitHub Release creation failed, a rerun saw the tag and skipped Release creation as well.
+
+A follow-up audit found that health could still pass while the canonical `llms-full.txt` header remained at v1.14.0 because a later v1.16.0 occurrence satisfied a broad search. It also found that recovery trusted an existing tag without validating its type or target tree, treated authentication and network failures as "Release missing," and used mutable GitHub Actions tag references.
+
+State-transition retesting found that requiring every existing tag to match the current `main` revision also rejects ordinary `main` updates after the tag and Release have completed successfully. Idempotent verification of a published state and recovery from a tag-only partial failure must be treated as different states.
+
+### Problem
+
+A check that only finds the current version somewhere in a document can miss stale Current Stable or ja/en release entries. Treating the tag and GitHub Release as one state prevents recovery after partial success. Concurrent main pushes can also race to create the same tag. Release-note extraction that depends on GNU-only commands reduces reproducibility between local and CI environments.
+
+Trusting a tag by name alone can publish a GitHub Release from a lightweight tag, an unsigned tag, or a tag whose tree contains different release metadata. A fallback that does not distinguish 404 from API failure can enter a mutating "recovery" path during permission, rate-limit, or network failures. Mutable action tags do not guarantee that reviewed workflow code is the code later executed. Count-only bilingual checks can miss equal-count drift to different relative paths. Without a pre-merge health gate, metadata drift is discovered only after merge, extending the interval where the main installer defaults to a tag that does not yet exist.
+
+Conversely, if a complete tag-and-Release state treats a mismatch between the tagged revision and a later `main` revision as an error, every maintenance commit or dependency update without a version bump makes the release workflow fail. Relaxing tag integrity globally would instead allow a tag-only partial release to be recovered incorrectly from a later revision.
+
+### Rule
+
+An OSS release may be published only when the top CHANGELOG entry, installer, manifest, ROADMAP Current Stable, completed ja/en release entries, public stable wording, distribution refs, and shared index metadata all identify the same version. Validate each surface at its canonical location rather than accepting an arbitrary occurrence of the version string.
+
+Automatic release automation must pass a fail-closed parity gate before creating a tag and must serialize release jobs for the same branch. Treat the annotated tag and GitHub Release as independent convergence targets. If a tag exists but the Release does not, rerunning the workflow for the same release revision must idempotently create only the missing Release. Release-note extraction must avoid runner-specific command extensions.
+
+Always validate that an existing tag is a signed annotated tag, verifies against the configured release key, and targets a tree whose installer, manifest, and top CHANGELOG version match the release. For automated creation, load a dedicated non-interactive SSH private key from a GitHub Actions secret only into a permission-restricted ephemeral runner location. Keep current and retired public keys in an allowed-signers trust registry backed by a repository variable, and permit signing only when the derived active public key is registered. Do not log the secret value; fail before tag push on a missing secret or registry, an unregistered active key, an encrypted or invalid key, or signing failure. Remove key material whether the workflow succeeds or fails. Secret provisioning, public-key trust registration, rotation, revocation, least privilege, and break-glass handling are external configuration changes requiring owner approval and rollback.
+
+When recovering a tag-only partial failure, additionally require the tag to point to the exact current workflow revision. Do not accept ancestor-only matching because it can recover an older snapshot carrying the same version text from a later revision. When both the tag and published stable Release are complete, treat a later `main` revision as a safe idempotent no-op. Treat only GitHub API 404 as absence; fail closed on authentication, permission, rate-limit, network, or other lookup errors. After release, revalidate both the remote tag object and a published stable GitHub Release as postconditions.
+
+Pin external GitHub Actions to reviewed immutable commit SHAs or container digests, retaining version comments and update automation for maintainability. Distinguish upstream verification signals such as commit signatures, annotated-tag signatures, and lightweight tags instead of implying that every referenced object is signed. Compare bilingual files by their relative-path sets from each language root, not only by counts, rejecting equal-count path drift and one-sided files. Public-version health must parse canonical surfaces such as the `llms-full.txt` Current Release and Latest Stable header rather than searching for any occurrence. Run release-metadata health on pull requests so drift is caught before main integration.
+
+### Enforcement
+
+`.github/workflows/release.yml` validates release metadata, both ROADMAP language entries, distribution refs, the CHANGELOG compare reference, and the canonical `llms-full.txt` header on main pushes while retaining release-job concurrency. It checks the tag and GitHub Release separately and validates signed annotated tags from dedicated secrets, existing-tag signatures and target trees, and the API failure class. A new release signs the current revision, tag-only recovery is allowed only when the tag exactly matches the current revision, and a complete tag-and-Release state is a no-op on later main revisions. It creates only missing artifacts and finally reconfirms remote-tag and published-Release convergence. Release notes are passed through a temporary file, and runner key material is always removed before any third-party Action executes.
+
+`.github/workflows/lint.yml` rejects non-immutable external action references, compares exact bilingual relative-path sets across Rules, Blueprint, Harness, and Prompts, and runs `check-axiarch-health.sh --quiet` on pull requests. Check 15 validates bilingual paths, ROADMAP Current Stable, both language entries, public stable wording, the canonical `llms-full.txt` header, the CHANGELOG compare reference, GitHub Actions SHA pinning, the signed-tag path, and separation between tag-only recovery and complete-state no-op. In addition to the successful path, use negative fixtures that independently introduce equal-count path drift, a one-sided file, stale Current Stable, one language entry, or a stale public header, and that inject a lightweight tag, an unsigned tag, an older ancestor tag carrying the same version text, mismatched tag-target metadata, a non-404 API failure, a tag-only partial failure on a later main revision, or missing signing secrets, expecting a non-zero exit. A later main revision with both a complete signed tag and Release must exit zero.
+
+### Reference
+
+`.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`

@@ -1981,7 +1981,27 @@ EOF
   for heading_root in "${heading_pair_roots[@]}"; do
     heading_ja_dir="${PROJECT_DIR}/${heading_root}/ja"
     heading_en_dir="${PROJECT_DIR}/${heading_root}/en"
-    [[ -d "${heading_ja_dir}" && -d "${heading_en_dir}" ]] || continue
+    if [[ ! -d "${heading_ja_dir}" || ! -d "${heading_en_dir}" ]]; then
+      print_warn "Axiarch source ja/en directory pair is incomplete: ${heading_root}"
+      heading_parity_missing=1
+      continue
+    fi
+
+    while IFS= read -r heading_ja_file; do
+      heading_rel_path="${heading_ja_file#"${heading_ja_dir}/"}"
+      if [[ ! -f "${heading_en_dir}/${heading_rel_path}" ]]; then
+        print_warn "Axiarch source ja/en file-path drift: missing en counterpart for ${heading_root}/${heading_rel_path}"
+        heading_parity_missing=1
+      fi
+    done < <(find "${heading_ja_dir}" -name "*.md" -type f 2>/dev/null | sort)
+
+    while IFS= read -r heading_en_file; do
+      heading_rel_path="${heading_en_file#"${heading_en_dir}/"}"
+      if [[ ! -f "${heading_ja_dir}/${heading_rel_path}" ]]; then
+        print_warn "Axiarch source ja/en file-path drift: missing ja counterpart for ${heading_root}/${heading_rel_path}"
+        heading_parity_missing=1
+      fi
+    done < <(find "${heading_en_dir}" -name "*.md" -type f 2>/dev/null | sort)
 
     while IFS= read -r heading_ja_file; do
       heading_rel_path="${heading_ja_file#"${heading_ja_dir}/"}"
@@ -2003,9 +2023,142 @@ EOF
   done
   rm -f "${heading_ja_numbers}" "${heading_en_numbers}"
   if [[ "${heading_parity_missing}" -eq 0 ]]; then
-    print_pass "Axiarch source ja/en numbered headings are aligned across rules, harness, and prompts"
+    print_pass "Axiarch source ja/en relative file paths and numbered headings are aligned across rules, harness, and prompts"
   else
-    print_info "Expected ja/en numbered headings to remain aligned across rules, harness, and prompts; add translated sections or explicit numbering aliases instead of silently compressing one language"
+    print_info "Expected exact ja/en relative file-path and numbered-heading parity across rules, harness, and prompts; add translated counterparts or explicit numbering aliases instead of silently diverging"
+    DOCS_MISSING=1
+  fi
+
+  workflow_pin_mismatch=0
+  workflow_files=()
+  while IFS= read -r workflow_file; do
+    workflow_files+=("${workflow_file}")
+  done < <(find "${PROJECT_DIR}/.github/workflows" -maxdepth 1 -type f \
+    \( -name "*.yml" -o -name "*.yaml" \) 2>/dev/null | sort)
+  if [[ "${#workflow_files[@]}" -eq 0 ]]; then
+    print_warn "Axiarch source GitHub Actions workflows were not found — cannot verify immutable action references"
+    workflow_pin_mismatch=1
+  elif workflow_pin_report=$(awk '
+    {
+      ref = $0
+      sub(/^[[:space:]]*/, "", ref)
+      sub(/^-[[:space:]]*/, "", ref)
+      gsub(/["\047]/, "", ref)
+      if (ref !~ /^uses[[:space:]]*:/) {
+        next
+      }
+      sub(/^uses[[:space:]]*:[[:space:]]*/, "", ref)
+      sub(/[[:space:]]+#.*$/, "", ref)
+      if (ref ~ /^\.\//) {
+        next
+      }
+      if (ref ~ /^docker:\/\//) {
+        digest = substr(ref, index(ref, "@sha256:") + 8)
+        if (ref !~ /@sha256:[0-9a-f]+$/ || length(digest) != 64) {
+          print FILENAME ":" FNR ": mutable container action reference: " ref
+          invalid = 1
+        }
+        next
+      }
+      at = index(ref, "@")
+      revision = substr(ref, at + 1)
+      if (at == 0 || length(revision) != 40 || revision !~ /^[0-9a-f]+$/) {
+        print FILENAME ":" FNR ": mutable action reference: " ref
+        invalid = 1
+      }
+    }
+    END { exit invalid ? 1 : 0 }
+  ' "${workflow_files[@]}"); then
+    print_pass "Axiarch source GitHub Actions references are pinned to immutable commit SHAs or container digests"
+  else
+    print_warn "Axiarch source GitHub Actions contain mutable external action references"
+    while IFS= read -r workflow_pin_issue; do
+      [[ -n "${workflow_pin_issue}" ]] && print_info "${workflow_pin_issue}"
+    done <<< "${workflow_pin_report}"
+    workflow_pin_mismatch=1
+  fi
+  if [[ "${workflow_pin_mismatch}" -ne 0 ]]; then
+    print_info "Expected owner/repository@40-character-commit-SHA for external actions and docker://image@sha256:<64-hex> for container actions"
+    DOCS_MISSING=1
+  fi
+
+  release_state_contract_mismatch=0
+  release_workflow="${PROJECT_DIR}/.github/workflows/release.yml"
+  release_cleanup_line=""
+  release_action_line=""
+  if [[ -f "${release_workflow}" ]]; then
+    release_cleanup_line=$(grep -n -m1 'name: Remove ephemeral release signing material' "${release_workflow}" 2>/dev/null | cut -d: -f1)
+    release_action_line=$(grep -n -m1 'uses: softprops/action-gh-release@' "${release_workflow}" 2>/dev/null | cut -d: -f1)
+  fi
+  if [[ ! -f "${release_workflow}" ]] \
+    || ! grep -Fq 'echo "current_revision=true" >> "$GITHUB_OUTPUT"' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'echo "current_revision=false" >> "$GITHUB_OUTPUT"' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'TAG_AT_CURRENT_REVISION: ${{ steps.check_tag.outputs.current_revision }}' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'AXIARCH_RELEASE_SSH_PRIVATE_KEY' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'Release signing key is not registered' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'git config gpg.format ssh' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'git config gpg.ssh.allowedSignersFile' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'git tag -s "$TAG"' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'git verify-tag "$TAG"' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'Remove ephemeral release signing material' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'rm -rf -- "$SIGNING_ROOT"' "${release_workflow}" 2>/dev/null \
+    || [[ -z "${release_cleanup_line}" || -z "${release_action_line}" ]] \
+    || [[ "${release_cleanup_line}" -ge "${release_action_line}" ]] \
+    || ! grep -Fq 'a tag-only partial release can be recovered only from the exact release revision' "${release_workflow}" 2>/dev/null \
+    || ! grep -Fq 'Release state is already complete; this later main revision is a no-op.' "${release_workflow}" 2>/dev/null; then
+    print_warn "Axiarch source release workflow may lack signed-tag enforcement, pre-third-party key cleanup, or safe release-state transitions"
+    print_info "Expected secret-backed signed annotated tags, signing-material cleanup before third-party Actions, and a three-state contract: new release at current revision, exact-revision tag-only recovery, and complete-release no-op on later main revisions"
+    release_state_contract_mismatch=1
+  else
+    print_pass "Axiarch source release workflow enforces secret-backed signed tags, removes key material before third-party Actions, and distinguishes exact-revision recovery from complete-release no-op on later main revisions"
+  fi
+  if [[ "${release_state_contract_mismatch}" -ne 0 ]]; then
+    DOCS_MISSING=1
+  fi
+
+  pr_evidence_template="${PROJECT_DIR}/.github/PULL_REQUEST_TEMPLATE.md"
+  pr_evidence_contract_mismatch=0
+  pr_evidence_headings=(
+    "## 変更種別 / Type of Change"
+    "## 変更内容 / What"
+    "## 変更理由・関連Issue / Why and Related Issue"
+    "## 検証方法・結果 / How to Test and Results"
+    "## リスク評価 / Risk Assessment"
+    "## ロールバック計画 / Rollback Plan"
+    "## マイグレーション・互換性 / Migration and Compatibility"
+    "## リリース影響・版数管理 / Release Impact and Versioning"
+    "## セキュリティ・プライバシー・FinOps / Security, Privacy, and FinOps"
+    "## 承認境界・外部状態 / Approval Boundary and External State"
+  )
+  if [[ ! -f "${pr_evidence_template}" ]]; then
+    pr_evidence_contract_mismatch=1
+  else
+    for pr_evidence_heading in "${pr_evidence_headings[@]}"; do
+      if ! grep -Fxq "${pr_evidence_heading}" "${pr_evidence_template}" 2>/dev/null; then
+        print_warn "Axiarch source PR evidence template is missing: ${pr_evidence_heading}"
+        pr_evidence_contract_mismatch=1
+      fi
+    done
+  fi
+  if [[ "${pr_evidence_contract_mismatch}" -eq 0 ]]; then
+    print_pass "Axiarch source PR template preserves test, risk, rollback, migration, release, security, privacy, FinOps, and approval evidence"
+  else
+    print_warn "Axiarch source PR template does not preserve the evidence required for team review"
+    DOCS_MISSING=1
+  fi
+
+  security_policy="${PROJECT_DIR}/SECURITY.md"
+  if [[ -f "${security_policy}" ]] \
+    && grep -Fq "GitHub Private Vulnerability Reporting" "${security_policy}" 2>/dev/null \
+    && grep -Fq "installer, upgrade" "${security_policy}" 2>/dev/null \
+    && grep -Fq "installer、upgrade" "${security_policy}" 2>/dev/null \
+    && ! grep -Fq "no executable code" "${security_policy}" 2>/dev/null \
+    && ! grep -Fq "実行コードを含まないため" "${security_policy}" 2>/dev/null; then
+    print_pass "Axiarch source SECURITY.md reflects executable distribution surfaces and private vulnerability reporting"
+  else
+    print_warn "Axiarch source SECURITY.md may understate script/workflow risk or direct sensitive reports to a public channel"
+    print_info "Expected bilingual installer/workflow security scope and GitHub Private Vulnerability Reporting without no-executable-code claims"
     DOCS_MISSING=1
   fi
 
@@ -2065,7 +2218,7 @@ EOF
   safe_prompt_missing=0
   safe_prompt_current_version=""
   if [[ -f "${PROJECT_DIR}/init.sh" ]]; then
-    safe_prompt_current_version=$(sed -n 's/^AXIARCH_VERSION="\([^"]*\)".*/\1/p' "${PROJECT_DIR}/init.sh" | head -n 1)
+    safe_prompt_current_version=$(awk -F'"' '/^AXIARCH_VERSION="/ { print $2; exit }' "${PROJECT_DIR}/init.sh")
   fi
   for lang in ja en; do
     if [[ ! -f "${PROJECT_DIR}/axiarch-prompts/${lang}/develop/safe_upgrade_execute.md" ]]; then
@@ -2187,10 +2340,11 @@ EOF
   init_version=""
   manifest_version=""
   changelog_version=""
+  roadmap_version=""
   is_dev_release=0
 
   if [[ -f "${PROJECT_DIR}/init.sh" ]]; then
-    init_version=$(sed -n 's/^AXIARCH_VERSION="\([^"]*\)".*/\1/p' "${PROJECT_DIR}/init.sh" | head -n 1)
+    init_version=$(awk -F'"' '/^AXIARCH_VERSION="/ { print $2; exit }' "${PROJECT_DIR}/init.sh")
   else
     print_warn "Axiarch source init.sh not found — cannot verify release version parity"
     release_version_mismatch=1
@@ -2200,7 +2354,15 @@ EOF
     if command -v jq &>/dev/null; then
       manifest_version=$(jq -r '.axiarchVersion // empty' "${PROJECT_DIR}/axiarch-manifest.json" 2>/dev/null || echo "")
     else
-      manifest_version=$(sed -n 's/.*"axiarchVersion":[[:space:]]*"\([^"]*\)".*/\1/p' "${PROJECT_DIR}/axiarch-manifest.json" | head -n 1)
+      manifest_version=$(awk '
+        /"axiarchVersion"[[:space:]]*:/ {
+          line = $0
+          sub(/^.*"axiarchVersion"[[:space:]]*:[[:space:]]*"/, "", line)
+          sub(/".*$/, "", line)
+          print line
+          exit
+        }
+      ' "${PROJECT_DIR}/axiarch-manifest.json")
     fi
   else
     print_warn "Axiarch source axiarch-manifest.json not found — cannot verify release version parity"
@@ -2208,7 +2370,15 @@ EOF
   fi
 
   if [[ -f "${PROJECT_DIR}/CHANGELOG.md" ]]; then
-    changelog_version=$(sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' "${PROJECT_DIR}/CHANGELOG.md" | head -n 1)
+    changelog_version=$(awk '
+      /^## \[[0-9][^]]*\]/ {
+        line = $0
+        sub(/^## \[/, "", line)
+        sub(/\].*$/, "", line)
+        print line
+        exit
+      }
+    ' "${PROJECT_DIR}/CHANGELOG.md")
   fi
 
   if [[ "${init_version}" == *"-dev" ]]; then
@@ -2231,24 +2401,90 @@ EOF
     release_version_mismatch=1
   fi
 
+  if [[ "${is_dev_release}" -eq 0 ]]; then
+    if [[ -f "${PROJECT_DIR}/ROADMAP.md" ]]; then
+      roadmap_version=$(awk '
+        /^> \*\*現在の安定版 \/ Current Stable\*\*: v[0-9]+\.[0-9]+\.[0-9]+/ {
+          line = $0
+          sub(/^.*Current Stable\*\*: v/, "", line)
+          sub(/[^0-9.].*$/, "", line)
+          print line
+          exit
+        }
+      ' "${PROJECT_DIR}/ROADMAP.md")
+      if [[ -z "${roadmap_version}" ]]; then
+        print_warn "Axiarch source ROADMAP.md lacks a parseable current stable version"
+        print_info "Expected: > **現在の安定版 / Current Stable**: vX.Y.Z"
+        release_version_mismatch=1
+      elif [[ "${roadmap_version}" == "${init_version}" ]]; then
+        print_pass "Axiarch source ROADMAP current stable version parity: ${roadmap_version}"
+      else
+        print_warn "Axiarch source ROADMAP current stable version mismatch"
+        print_info "init.sh=${init_version:-missing}, roadmap-current-stable=${roadmap_version:-missing}"
+        release_version_mismatch=1
+      fi
+      if awk -v release="v${init_version}" '
+        /^## 🇯🇵 ロードマップ/ { section = "ja"; next }
+        /^## 🇺🇸 Roadmap/ { section = "en"; next }
+        section == "ja" && index($0, "### ✅ " release) == 1 { ja = 1 }
+        section == "en" && index($0, "### ✅ " release) == 1 { en = 1 }
+        END { exit !(ja && en) }
+      ' "${PROJECT_DIR}/ROADMAP.md"; then
+        print_pass "Axiarch source ROADMAP includes the current release in both Japanese and English sections"
+      else
+        print_warn "Axiarch source ROADMAP lacks the current release in one or both language sections"
+        print_info "Expected ja/en completed release headings for v${init_version}"
+        release_version_mismatch=1
+      fi
+    else
+      print_warn "Axiarch source ROADMAP.md not found — cannot verify current stable version parity"
+      release_version_mismatch=1
+    fi
+  fi
+
   if [[ -n "${init_version}" ]]; then
     docs_release_mismatch=0
-    for doc in README.md llms.txt llms-full.txt; do
-      if [[ -f "${PROJECT_DIR}/${doc}" ]]; then
-        if ! grep -q "v${init_version}" "${PROJECT_DIR}/${doc}" 2>/dev/null; then
-          print_warn "Axiarch source ${doc} does not mention current release/build v${init_version}"
-          docs_release_mismatch=1
-        fi
-      else
-        print_warn "Axiarch source ${doc} not found — cannot verify current release mention"
+    if [[ ! -f "${PROJECT_DIR}/README.md" ]] \
+      || ! grep -Fq "Axiarch v${init_version} の安定版" "${PROJECT_DIR}/README.md" 2>/dev/null \
+      || ! grep -Fq "stable Axiarch v${init_version} release" "${PROJECT_DIR}/README.md" 2>/dev/null; then
+      print_warn "Axiarch source README.md stable-release wording does not match v${init_version} in both languages"
+      docs_release_mismatch=1
+    fi
+    if [[ ! -f "${PROJECT_DIR}/llms.txt" ]] \
+      || ! grep -Fq "stable Axiarch v${init_version} release" "${PROJECT_DIR}/llms.txt" 2>/dev/null; then
+      print_warn "Axiarch source llms.txt stable-release wording does not match v${init_version}"
+      docs_release_mismatch=1
+    fi
+    if [[ ! -f "${PROJECT_DIR}/llms-full.txt" ]] \
+      || ! grep -Fxq "> Current Release: ${init_version} | Latest Stable: ${init_version} | License: Apache 2.0" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null \
+      || ! grep -Fq "stable Axiarch v${init_version} release" "${PROJECT_DIR}/llms-full.txt" 2>/dev/null; then
+      print_warn "Axiarch source llms-full.txt canonical release header or stable-release wording does not match v${init_version}"
+      docs_release_mismatch=1
+    fi
+
+    if [[ "${is_dev_release}" -eq 0 && -f "${PROJECT_DIR}/CHANGELOG.md" ]]; then
+      previous_release_version=$(awk -v current="${init_version}" '
+        /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
+          line = $0
+          sub(/^## \[/, "", line)
+          sub(/\].*$/, "", line)
+          if (line == current) {
+            found = 1
+            next
+          }
+          if (found) {
+            print line
+            exit
+          }
+        }
+      ' "${PROJECT_DIR}/CHANGELOG.md")
+      expected_compare_reference="[${init_version}]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v${previous_release_version}...v${init_version}"
+      if [[ -z "${previous_release_version}" ]] \
+        || ! grep -Fxq "${expected_compare_reference}" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null; then
+        print_warn "Axiarch source CHANGELOG.md compare reference does not connect the previous release to ${init_version}"
+        print_info "Expected: ${expected_compare_reference}"
         docs_release_mismatch=1
       fi
-    done
-
-    if [[ "${is_dev_release}" -eq 0 && -f "${PROJECT_DIR}/CHANGELOG.md" ]] \
-      && ! grep -q "^\[${init_version}\]:" "${PROJECT_DIR}/CHANGELOG.md" 2>/dev/null; then
-      print_warn "Axiarch source CHANGELOG.md lacks compare reference for ${init_version}"
-      docs_release_mismatch=1
     fi
 
     if [[ "${is_dev_release}" -eq 0 && -f "${PROJECT_DIR}/axiarch-scripts/axiarch-upgrade.sh" ]]; then
@@ -2309,16 +2545,26 @@ EOF
       && grep -q "明示選択" "${ja_operations_readme}" 2>/dev/null \
       && grep -q "本体リポジトリ専用ファイル分類" "${ja_operations_readme}" 2>/dev/null \
       && grep -q "対話選択肢重複排除" "${ja_operations_readme}" 2>/dev/null \
+      && grep -q "annotated tag完全性" "${ja_operations_readme}" 2>/dev/null \
+      && grep -q "GitHub API失敗判別" "${ja_operations_readme}" 2>/dev/null \
+      && grep -q "immutable SHA固定" "${ja_operations_readme}" 2>/dev/null \
+      && grep -q "署名付きannotated tag完全性" "${ja_operations_readme}" 2>/dev/null \
+      && grep -q "日英相対path対称性" "${ja_operations_readme}" 2>/dev/null \
       && [[ -f "${en_operations_readme}" ]] \
       && grep -q "010_release_upgrade_operations.md" "${en_operations_readme}" 2>/dev/null \
       && grep -q "source-only default skip" "${en_operations_readme}" 2>/dev/null \
       && grep -q "explicit selection" "${en_operations_readme}" 2>/dev/null \
       && grep -q "source-repository-only file classification" "${en_operations_readme}" 2>/dev/null \
-      && grep -q "deduplicated interactive choices" "${en_operations_readme}" 2>/dev/null; then
-      print_pass "Axiarch source Blueprint operations README files include release-upgrade source-only, source repository classification, and deduplicated interactive choice boundaries"
+      && grep -q "deduplicated interactive choices" "${en_operations_readme}" 2>/dev/null \
+      && grep -q "annotated-tag integrity" "${en_operations_readme}" 2>/dev/null \
+      && grep -q "GitHub API failure classification" "${en_operations_readme}" 2>/dev/null \
+      && grep -q "immutable SHA pinning" "${en_operations_readme}" 2>/dev/null \
+      && grep -q "signed annotated-tag integrity" "${en_operations_readme}" 2>/dev/null \
+      && grep -q "exact bilingual relative-path symmetry" "${en_operations_readme}" 2>/dev/null; then
+      print_pass "Axiarch source Blueprint operations README files include signed release-state integrity, bilingual path parity, and immutable workflow dependency boundaries"
     else
       print_warn "Axiarch source Blueprint operations README files may have stale release-upgrade summaries"
-      print_info "Expected ja/en operations README files to mention source-only default skip, explicit selection, source-repository-only classification, and deduplicated interactive choices"
+      print_info "Expected ja/en operations README files to mention source-only/default-selection boundaries, signed annotated-tag integrity, exact bilingual path parity, GitHub API failure classification, and immutable SHA pinning"
       operations_readme_mismatch=1
     fi
     if [[ "${operations_readme_mismatch}" -ne 0 ]]; then

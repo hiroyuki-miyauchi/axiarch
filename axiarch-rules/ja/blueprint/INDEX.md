@@ -104,7 +104,7 @@ SRE、インシデント管理、運用要件。
 
 | ファイル | 説明 |
 |:--|:--|
-| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | リリース・アップグレード運用におけるCHANGELOG整合、dry-run副作用禁止、interactive入力、local-onlyファイルレビュー、source-only既定skip・明示選択・本体リポジトリ専用ファイル分類、EOF時の確認入力default N、本体リリース中核ファイルのGit追跡確認、対話選択肢重複排除 |
+| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | リリース・アップグレード運用におけるCHANGELOG整合、dry-run副作用禁止、interactive入力、local-onlyファイルレビュー、source-only既定skip・明示選択・本体リポジトリ専用ファイル分類、EOF時の確認入力default N、本体リリース中核ファイルのGit追跡確認、対話選択肢重複排除、OSS release-state closure、自動復旧、署名付きannotated tag完全性、GitHub API失敗判別、GitHub Actions immutable SHA固定、日英相対path対称性 |
 
 ---
 
@@ -184,6 +184,6 @@ SRE、インシデント管理、運用要件。
 
 ---
 
-**Last Updated**: 2026-06-08
-**Version**: v1.15.0 — セキュリティ認証スタックの新設（security/400 パスキー・MFA、410 OAuth/OIDC連携・SSO、420 ステップアップ・OTP・重要操作、430 認可 ReBAC/Zanzibar、440 非人間/ワークロード/AIエージェントID、450 MCPセキュリティ＝使う側+作る側）＋フレームワーク全体の文言・整合是正。Universal ルール 39→45 ファイル（v1.13.1: Language First の復元と Check 16、v1.13.0: プロンプトの Claude Code slash command 化、v1.12.1: Harness Engineering説明・診断・Safe Upgradeラベル整合、v1.12.0: AXIARCH.md正本入口とExecution Harness / ハーネスエンジニアリング対応、v1.11.x: multi-agent検出ほか）
+**Last Updated**: 2026-07-24
+**Version**: v1.16.0 — プログラミング言語、React Native、クラウド・アプリケーションプラットフォーム、Microsoft Azureの汎用ガバナンス正本を追加。言語・framework・SDK・BaaS・managed runtime・multi-service releaseを、front／back／mobile／infra／enterpriseを横断する成果契約、team ownership、供給網、互換性、運用、FinOps、退出戦略へ接続し、既存のハーネスエンジニアリングによる計画・実行・監査・証跡・人間承認サイクルへ統合した。Universalルールは50→54ファイル、Engineeringは14→18ファイル。
 **Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)

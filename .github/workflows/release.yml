@@ -8,74 +8,407 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: axiarch-release-main
+  cancel-in-progress: false
+
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Extract latest version from CHANGELOG.md
         id: version
         run: |
+          set -euo pipefail
+
           # CHANGELOG.md の最初のリリース見出しだけを正とする。
           # 先頭が [Unreleased] の場合、下位の既存versionを誤って再タグ化しない。
           FIRST_HEADING=$(grep -m1 -E '^## \[(Unreleased|[0-9]+\.[0-9]+\.[0-9]+)\]' CHANGELOG.md || true)
           if echo "$FIRST_HEADING" | grep -q '^## \[Unreleased\]'; then
             echo "Top changelog section is Unreleased. Skipping tag creation."
-            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           VERSION=$(echo "$FIRST_HEADING" | sed -E 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/')
           if [ -z "$VERSION" ]; then
             echo "No version found in CHANGELOG.md"
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
+            exit 1
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
           echo "Detected version: $VERSION"
+
+      - name: Validate release metadata parity
+        if: steps.version.outputs.skip != 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          INIT_VERSION=$(awk -F'"' '/^AXIARCH_VERSION="/ { print $2; exit }' init.sh)
+          MANIFEST_VERSION=$(jq -r '.axiarchVersion // empty' axiarch-manifest.json)
+          ROADMAP_VERSION=$(awk '
+            /^> \*\*現在の安定版 \/ Current Stable\*\*: v[0-9]+\.[0-9]+\.[0-9]+/ {
+              line = $0
+              sub(/^.*Current Stable\*\*: v/, "", line)
+              sub(/[^0-9.].*$/, "", line)
+              print line
+              exit
+            }
+          ' ROADMAP.md)
+          LLMS_FULL_VERSION=$(sed -n 's/^> Current Release: \([0-9][0-9.]*\) | Latest Stable: \([0-9][0-9.]*\) | License: Apache 2.0$/\1 \2/p' llms-full.txt)
+
+          for VERSION_SOURCE in "$INIT_VERSION" "$MANIFEST_VERSION" "$ROADMAP_VERSION"; do
+            if [ "$VERSION_SOURCE" != "$RELEASE_VERSION" ]; then
+              echo "Release metadata mismatch: CHANGELOG=$RELEASE_VERSION init=$INIT_VERSION manifest=$MANIFEST_VERSION roadmap=$ROADMAP_VERSION"
+              exit 1
+            fi
+          done
+          if [ "$LLMS_FULL_VERSION" != "$RELEASE_VERSION $RELEASE_VERSION" ]; then
+            echo "llms-full canonical header mismatch: expected Current Release and Latest Stable to equal $RELEASE_VERSION"
+            exit 1
+          fi
+
+          grep -Fq "Axiarch v${RELEASE_VERSION} の安定版" README.md
+          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" README.md
+          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" llms.txt
+          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" llms-full.txt
+
+          PREVIOUS_VERSION=$(awk -v current="$RELEASE_VERSION" '
+            /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
+              line = $0
+              sub(/^## \[/, "", line)
+              sub(/\].*$/, "", line)
+              if (line == current) {
+                found = 1
+                next
+              }
+              if (found) {
+                print line
+                exit
+              }
+            }
+          ' CHANGELOG.md)
+          if [ -z "$PREVIOUS_VERSION" ]; then
+            echo "CHANGELOG previous release could not be determined for $RELEASE_VERSION"
+            exit 1
+          fi
+          EXPECTED_COMPARE="[${RELEASE_VERSION}]: https://github.com/${GITHUB_REPOSITORY}/compare/v${PREVIOUS_VERSION}...v${RELEASE_VERSION}"
+          if ! grep -Fxq "$EXPECTED_COMPARE" CHANGELOG.md; then
+            echo "CHANGELOG compare reference mismatch: expected $EXPECTED_COMPARE"
+            exit 1
+          fi
+
+          if ! awk -v release="v${RELEASE_VERSION}" '
+            /^## 🇯🇵 ロードマップ/ { section = "ja"; next }
+            /^## 🇺🇸 Roadmap/ { section = "en"; next }
+            section == "ja" && index($0, "### ✅ " release) == 1 { ja = 1 }
+            section == "en" && index($0, "### ✅ " release) == 1 { en = 1 }
+            END { exit !(ja && en) }
+          ' ROADMAP.md; then
+            echo "ROADMAP language parity mismatch: ja/en completed release headings are required for v${RELEASE_VERSION}"
+            exit 1
+          fi
+
+          for DISTRIBUTION_FILE in \
+            README.md \
+            llms.txt \
+            llms-full.txt \
+            axiarch-scripts/axiarch-upgrade.sh; do
+            if ! grep -Fq "tags/v${RELEASE_VERSION}" "$DISTRIBUTION_FILE"; then
+              echo "Distribution ref mismatch: $DISTRIBUTION_FILE does not pin tags/v${RELEASE_VERSION}"
+              exit 1
+            fi
+          done
+
+          for RAW_HELPER_FILE in \
+            axiarch-scripts/README.md \
+            axiarch-prompts/ja/develop/safe_upgrade_execute.md \
+            axiarch-prompts/en/develop/safe_upgrade_execute.md; do
+            if ! grep -Fq "/axiarch/v${RELEASE_VERSION}/axiarch-scripts/axiarch-upgrade.sh" "$RAW_HELPER_FILE"; then
+              echo "Tag-pinned helper mismatch: $RAW_HELPER_FILE does not pin v${RELEASE_VERSION}"
+              exit 1
+            fi
+          done
+
+          for BLUEPRINT_INDEX in \
+            axiarch-rules/ja/blueprint/INDEX.md \
+            axiarch-rules/en/blueprint/INDEX.md; do
+            if ! grep -Eq "\\*\\*Version\\*\\*: v${RELEASE_VERSION}([[:space:]]|$)" "$BLUEPRINT_INDEX"; then
+              echo "Blueprint release metadata mismatch: $BLUEPRINT_INDEX"
+              exit 1
+            fi
+          done
+
+          echo "Release metadata parity validated for v${RELEASE_VERSION}"
+
+      - name: Configure release tag signing
+        if: steps.version.outputs.skip != 'true'
+        env:
+          RELEASE_SSH_PRIVATE_KEY: ${{ secrets.AXIARCH_RELEASE_SSH_PRIVATE_KEY }}
+          RELEASE_SSH_ALLOWED_SIGNERS: ${{ vars.AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$RELEASE_SSH_PRIVATE_KEY" ]; then
+            echo "Release signing is not configured. AXIARCH_RELEASE_SSH_PRIVATE_KEY is required."
+            exit 1
+          fi
+          if [ -z "$RELEASE_SSH_ALLOWED_SIGNERS" ]; then
+            echo "Release trust registry is not configured. AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS is required."
+            exit 1
+          fi
+
+          SIGNING_ROOT="${RUNNER_TEMP}/axiarch-release-signing"
+          PRIVATE_KEY_FILE="${SIGNING_ROOT}/release-signing-key"
+          PUBLIC_KEY_FILE="${SIGNING_ROOT}/release-signing-key.pub"
+          ALLOWED_SIGNERS_FILE="${SIGNING_ROOT}/allowed-signers"
+
+          umask 077
+          mkdir -p "$SIGNING_ROOT"
+          printf '%s\n' "$RELEASE_SSH_PRIVATE_KEY" > "$PRIVATE_KEY_FILE"
+          chmod 600 "$PRIVATE_KEY_FILE"
+          if ! ssh-keygen -y -f "$PRIVATE_KEY_FILE" > "$PUBLIC_KEY_FILE" 2>/dev/null; then
+            echo "Release signing key import failed. Use a dedicated unencrypted SSH private key stored only in the Actions secret."
+            exit 1
+          fi
+
+          SIGNING_FINGERPRINT=$(ssh-keygen -lf "$PUBLIC_KEY_FILE" -E sha256 | awk '{ print $2 }')
+          if [ -z "$SIGNING_FINGERPRINT" ]; then
+            echo "Release signing key import did not yield a public-key fingerprint."
+            exit 1
+          fi
+
+          printf '%s\n' "$RELEASE_SSH_ALLOWED_SIGNERS" | tr -d '\r' > "$ALLOWED_SIGNERS_FILE"
+          PUBLIC_KEY_TYPE=$(awk '{ print $1 }' "$PUBLIC_KEY_FILE")
+          PUBLIC_KEY_DATA=$(awk '{ print $2 }' "$PUBLIC_KEY_FILE")
+          if ! awk \
+            -v principal='github-actions[bot]@users.noreply.github.com' \
+            -v key_type="$PUBLIC_KEY_TYPE" \
+            -v key_data="$PUBLIC_KEY_DATA" \
+            '$1 == principal && $2 == key_type && $3 == key_data { found = 1 }
+             END { exit !found }' "$ALLOWED_SIGNERS_FILE"; then
+            echo "Release signing key is not registered in AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS."
+            exit 1
+          fi
+          echo "AXIARCH_RELEASE_SIGNING_FINGERPRINT=$SIGNING_FINGERPRINT" >> "$GITHUB_ENV"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config gpg.format ssh
+          git config user.signingkey "$PRIVATE_KEY_FILE"
+          git config gpg.ssh.allowedSignersFile "$ALLOWED_SIGNERS_FILE"
+          git config tag.gpgSign true
+          echo "Release signing key loaded into the ephemeral runner directory."
 
       - name: Check if tag already exists
         if: steps.version.outputs.skip != 'true'
         id: check_tag
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          TAG=${{ steps.version.outputs.tag }}
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists. Skipping."
-            echo "exists=true" >> $GITHUB_OUTPUT
+          set -euo pipefail
+
+          if git show-ref --verify --quiet "refs/tags/$TAG"; then
+            TAG_TYPE=$(git cat-file -t "refs/tags/$TAG")
+            if [ "$TAG_TYPE" != "tag" ]; then
+              echo "Tag integrity failure: $TAG is a $TAG_TYPE object, but release tags must be annotated."
+              exit 1
+            fi
+            if ! git verify-tag "$TAG"; then
+              echo "Tag integrity failure: $TAG does not have a valid signature from the configured release key."
+              exit 1
+            fi
+            TAG_COMMIT=$(git rev-parse "${TAG}^{commit}")
+            if [ "$TAG_COMMIT" = "$GITHUB_SHA" ]; then
+              echo "current_revision=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "current_revision=false" >> "$GITHUB_OUTPUT"
+            fi
+
+            TAG_INIT_FILE="${RUNNER_TEMP}/axiarch-tag-init.sh"
+            TAG_MANIFEST_FILE="${RUNNER_TEMP}/axiarch-tag-manifest.json"
+            TAG_CHANGELOG_FILE="${RUNNER_TEMP}/axiarch-tag-changelog.md"
+            git show "${TAG}^{commit}:init.sh" > "$TAG_INIT_FILE"
+            git show "${TAG}^{commit}:axiarch-manifest.json" > "$TAG_MANIFEST_FILE"
+            git show "${TAG}^{commit}:CHANGELOG.md" > "$TAG_CHANGELOG_FILE"
+
+            TAG_INIT_VERSION=$(awk -F'"' '/^AXIARCH_VERSION="/ { print $2; exit }' "$TAG_INIT_FILE")
+            TAG_MANIFEST_VERSION=$(jq -r '.axiarchVersion // empty' "$TAG_MANIFEST_FILE")
+            TAG_CHANGELOG_VERSION=$(awk '
+              /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
+                line = $0
+                sub(/^## \[/, "", line)
+                sub(/\].*$/, "", line)
+                print line
+                exit
+              }
+            ' "$TAG_CHANGELOG_FILE")
+            if [ "$TAG_INIT_VERSION" != "$RELEASE_VERSION" ] \
+              || [ "$TAG_MANIFEST_VERSION" != "$RELEASE_VERSION" ] \
+              || [ "$TAG_CHANGELOG_VERSION" != "$RELEASE_VERSION" ]; then
+              echo "Tag integrity failure: $TAG targets metadata for init=$TAG_INIT_VERSION manifest=$TAG_MANIFEST_VERSION changelog=$TAG_CHANGELOG_VERSION"
+              exit 1
+            fi
+
+            echo "Annotated tag $TAG already exists and targets matching release metadata."
+            echo "Tag target revision: $TAG_COMMIT"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "Tag $TAG does not exist. Will create."
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "current_revision=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Extract changelog for this version
-        if: steps.version.outputs.skip != 'true' && steps.check_tag.outputs.exists == 'false'
-        id: changelog
+      - name: Check if GitHub Release already exists
+        if: steps.version.outputs.skip != 'true'
+        id: check_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          # 該当バージョンのセクションだけ抽出（次の ## [ まで）
-          NOTES=$(sed -n "/^## \[${VERSION}\]/,/^## \[/p" CHANGELOG.md | head -n -1)
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          set -euo pipefail
+
+          RELEASE_JSON="${RUNNER_TEMP}/axiarch-release-state.json"
+          RELEASE_ERROR="${RUNNER_TEMP}/axiarch-release-state.error"
+          if gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" > "$RELEASE_JSON" 2> "$RELEASE_ERROR"; then
+            RELEASE_TAG=$(jq -r '.tag_name // empty' "$RELEASE_JSON")
+            RELEASE_DRAFT=$(jq -r '.draft' "$RELEASE_JSON")
+            RELEASE_PRERELEASE=$(jq -r '.prerelease' "$RELEASE_JSON")
+            if [ "$RELEASE_TAG" != "$TAG" ] || [ "$RELEASE_DRAFT" != "false" ] || [ "$RELEASE_PRERELEASE" != "false" ]; then
+              echo "GitHub Release integrity failure: tag=$RELEASE_TAG draft=$RELEASE_DRAFT prerelease=$RELEASE_PRERELEASE"
+              exit 1
+            fi
+            echo "Published GitHub Release $TAG already exists."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif grep -q '(HTTP 404)' "$RELEASE_ERROR"; then
+            echo "GitHub Release $TAG does not exist. Will create or recover it."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "GitHub Release lookup failed for a reason other than absence:"
+            cat "$RELEASE_ERROR"
+            exit 1
+          fi
+
+      - name: Validate release state transition
+        if: steps.version.outputs.skip != 'true'
+        env:
+          TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
+          RELEASE_EXISTS: ${{ steps.check_release.outputs.exists }}
+          TAG_AT_CURRENT_REVISION: ${{ steps.check_tag.outputs.current_revision }}
+        run: |
+          set -euo pipefail
+          if [ "$RELEASE_EXISTS" = "true" ] && [ "$TAG_EXISTS" != "true" ]; then
+            echo "Release integrity failure: a published GitHub Release exists without its fetched annotated tag."
+            exit 1
+          fi
+          if [ "$TAG_EXISTS" = "true" ] \
+            && [ "$RELEASE_EXISTS" = "false" ] \
+            && [ "$TAG_AT_CURRENT_REVISION" != "true" ]; then
+            echo "Release recovery failure: a tag-only partial release can be recovered only from the exact release revision."
+            echo "Rerun the workflow for the tagged revision instead of publishing from this later main revision."
+            exit 1
+          fi
+          if [ "$TAG_EXISTS" = "true" ] \
+            && [ "$RELEASE_EXISTS" = "true" ] \
+            && [ "$TAG_AT_CURRENT_REVISION" != "true" ]; then
+            echo "Release state is already complete; this later main revision is a no-op."
+          fi
+          echo "Release state accepted: tag=$TAG_EXISTS release=$RELEASE_EXISTS tag_at_current_revision=$TAG_AT_CURRENT_REVISION"
+
+      - name: Extract changelog for this version
+        if: steps.version.outputs.skip != 'true' && steps.check_release.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          # 該当バージョンのセクションだけ抽出（次の ## [ の直前まで）。
+          # GNU固有の head -n -1 を避け、ローカル検証でも同じ結果にする。
+          NOTES_FILE="${RUNNER_TEMP}/axiarch-release-notes.md"
+          awk -v heading="## [${VERSION}]" '
+            index($0, heading) == 1 { capture = 1 }
+            capture && /^## \[/ && index($0, heading) != 1 { exit }
+            capture { print }
+          ' CHANGELOG.md > "$NOTES_FILE"
+          if [ ! -s "$NOTES_FILE" ]; then
+            echo "Release notes extraction produced an empty file for $VERSION"
+            exit 1
+          fi
+          echo "Release notes prepared at $NOTES_FILE"
 
       - name: Create tag
         if: steps.version.outputs.skip != 'true' && steps.check_tag.outputs.exists == 'false'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          TAG=${{ steps.version.outputs.tag }}
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Release $TAG"
+          set -euo pipefail
+          git tag -s "$TAG" -m "Release $TAG"
+          git verify-tag "$TAG"
           git push origin "$TAG"
 
+      - name: Remove ephemeral release signing material
+        if: always() && steps.version.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          SIGNING_ROOT="${RUNNER_TEMP}/axiarch-release-signing"
+          if [ -d "$SIGNING_ROOT" ]; then
+            rm -rf -- "$SIGNING_ROOT"
+          fi
+
       - name: Create GitHub Release
-        if: steps.version.outputs.skip != 'true' && steps.check_tag.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v3
+        if: steps.version.outputs.skip != 'true' && steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          body: ${{ steps.changelog.outputs.notes }}
+          name: ${{ steps.version.outputs.tag }}
+          body_path: ${{ runner.temp }}/axiarch-release-notes.md
           draft: false
           prerelease: false
+          make_latest: true
+
+      - name: Verify release convergence
+        if: steps.version.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          LOCAL_TAG_OBJECT=$(git rev-parse "refs/tags/$TAG")
+          REMOTE_TAG_OBJECT=$(git ls-remote --refs --exit-code origin "refs/tags/$TAG" | awk '{ print $1 }')
+          if [ "$LOCAL_TAG_OBJECT" != "$REMOTE_TAG_OBJECT" ]; then
+            echo "Remote tag convergence failure: local=$LOCAL_TAG_OBJECT remote=$REMOTE_TAG_OBJECT"
+            exit 1
+          fi
+          if [ "$(git cat-file -t "refs/tags/$TAG")" != "tag" ]; then
+            echo "Remote tag convergence failure: $TAG is not an annotated tag."
+            exit 1
+          fi
+
+          RELEASE_JSON="${RUNNER_TEMP}/axiarch-release-final.json"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" > "$RELEASE_JSON"
+          if [ "$(jq -r '.tag_name // empty' "$RELEASE_JSON")" != "$TAG" ] \
+            || [ "$(jq -r '.draft' "$RELEASE_JSON")" != "false" ] \
+            || [ "$(jq -r '.prerelease' "$RELEASE_JSON")" != "false" ]; then
+            echo "GitHub Release convergence failure for $TAG"
+            exit 1
+          fi
+
+          {
+            echo "### Axiarch release convergence"
+            echo ""
+            echo "- Signed annotated tag: $TAG"
+            echo "- Signing key: $AXIARCH_RELEASE_SIGNING_FINGERPRINT"
+            echo "- GitHub Release: published stable"
+            echo "- Tag object: $REMOTE_TAG_OBJECT"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Release convergence verified for $TAG"

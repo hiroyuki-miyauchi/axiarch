@@ -103,7 +103,7 @@ SRE, incident management, operational requirements.
 
 | File | Description |
 |:--|:--|
-| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, and deduplicated interactive choices |
+| [operations/010_release_upgrade_operations.md](operations/010_release_upgrade_operations.md) | Release and upgrade operations rules covering CHANGELOG parity, dry-run side effects, interactive input, local-only file review, source-only default skip, explicit selection, source-repository-only file classification, EOF-safe confirmation defaults, Git tracking checks for source release-critical files, deduplicated interactive choices, OSS release-state closure, automatic recovery, signed annotated-tag integrity, GitHub API failure classification, GitHub Actions immutable SHA pinning, and exact bilingual relative-path symmetry |
 
 ---
 
@@ -183,6 +183,6 @@ Strategies for generating next-generation "value".
 
 ---
 
-**Last Updated**: 2026-06-08
-**Version**: v1.15.0 — New security authentication stack (security/400 passkeys & MFA, 410 OAuth/OIDC federation & SSO, 420 step-up/OTP/sensitive operations, 430 authorization ReBAC/Zanzibar, 440 non-human/workload/AI-agent identity, 450 MCP security = consumer + builder) plus a framework-wide wording/consistency pass. Universal rules 39→45 files (v1.13.1: Restore Language First and Check 16, v1.13.0: Claude Code slash commands from prompts, v1.12.1: Harness Engineering wording/diagnostics/Safe Upgrade label parity, v1.12.0: AXIARCH.md canonical entrypoint and Execution Harness / Harness Engineering support, v1.11.x: multi-agent detection and more)
+**Last Updated**: 2026-07-24
+**Version**: v1.16.0 — Adds reusable governance sources of truth for programming languages, React Native, cloud and application platforms, and Microsoft Azure. Connects languages, frameworks, SDKs, BaaS, managed runtimes, and multi-service releases across frontend, backend, mobile, infrastructure, and enterprise use to outcome contracts, team ownership, supply-chain controls, compatibility, operations, FinOps, and exit strategy, integrated with the existing Harness Engineering cycle for planning, execution, audit, evidence, and human approval. Universal rules increase from 50 to 54 files and Engineering from 14 to 18 files.
 **Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)

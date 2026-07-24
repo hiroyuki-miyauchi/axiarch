@@ -45,7 +45,15 @@ Axiarchの全ドキュメントは日英バイリンガルです。ドキュメ�
 - `ja/universal/` と `en/universal/` の両方を更新
 - `ja/blueprint/` と `en/blueprint/` の両方を更新
 - `axiarch-prompts/` を導入している場合は、`ja/` と `en/` の対応するフォルダ（`develop/`, `audit/`, `govern/`, `operate/`）の両方を更新（任意導入の場合のみ）
+- 日英のファイル件数だけでなく、各言語rootからの相対pathを完全一致させる
 - 片方の言語だけの変更は受け付けません
+
+### リリース安全性
+
+- 正式版ではCHANGELOG、installer、manifest、ROADMAP、README、llms、配布ref、日英indexを同一SemVerへ同期する
+- 自動releaseは専用の非対話SSH秘密鍵を`AXIARCH_RELEASE_SSH_PRIVATE_KEY` GitHub Actions secretから読み込み、`AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS` repository variableの現行・退役公開鍵registryで検証して署名付きannotated tagだけを公開する。secret値をrepository、Issue、PR、logへ記載しない
+- release変更を統合する前に、署名secret、公開鍵registry、rotation owner、失効・rollback手順をrepository ownerが外部設定として確認する
+- merge、tag、GitHub Release、secret、branch protectionの変更は、それぞれ対象を特定した人間承認なしに実行しない
 
 ### 🚨 Axiarch 本体（OSS template）運用ルール — Maintainer Guide
 
@@ -123,7 +131,15 @@ All Axiarch documentation is bilingual (JA/EN). When modifying or adding documen
 - Update both `ja/universal/` and `en/universal/`
 - Update both `ja/blueprint/` and `en/blueprint/`
 - If you have installed `axiarch-prompts/` (optional), update both `ja/` and `en/` in the corresponding subfolders (`develop/`, `audit/`, `govern/`, `operate/`)
+- Match exact relative paths from each language root instead of relying only on equal file counts
 - Changes in only one language will not be accepted
+
+### Release Safety
+
+- For a stable release, synchronize CHANGELOG, installer, manifest, ROADMAP, README, llms, distribution refs, and bilingual indexes to the same SemVer
+- Automated release reads a dedicated non-interactive SSH private key from the `AXIARCH_RELEASE_SSH_PRIVATE_KEY` GitHub Actions secret, validates it against current and retired public keys in the `AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS` repository variable, and publishes only signed annotated tags. Never place the secret value in the repository, Issues, pull requests, or logs
+- Before integrating a release change, the repository owner verifies the signing secret, public-key registry, rotation owner, revocation path, and rollback procedure as external configuration
+- Merges, tags, GitHub Releases, secrets, and branch-protection changes require target-specific human approval
 
 ### 🚨 Axiarch Core (OSS Template) Operational Rules — Maintainer Guide
 

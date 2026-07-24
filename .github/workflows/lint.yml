@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  contents: read
+
 jobs:
   # ===========================================================================
   # Job 1: Markdown Lint
@@ -13,12 +16,49 @@ jobs:
   markdown-lint:
     name: "Markdown Lint"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Verify GitHub Actions are pinned to immutable SHAs
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          workflow_files=(.github/workflows/*.yml .github/workflows/*.yaml)
+          awk '
+            {
+              ref = $0
+              sub(/^[[:space:]]*/, "", ref)
+              sub(/^-[[:space:]]*/, "", ref)
+              gsub(/["\047]/, "", ref)
+              if (ref !~ /^uses[[:space:]]*:/) {
+                next
+              }
+              sub(/^uses[[:space:]]*:[[:space:]]*/, "", ref)
+              sub(/[[:space:]]+#.*$/, "", ref)
+              if (ref ~ /^\.\//) {
+                next
+              }
+              if (ref ~ /^docker:\/\//) {
+                if (ref !~ /@sha256:[0-9a-f]+$/ || length(substr(ref, index(ref, "@sha256:") + 8)) != 64) {
+                  print FILENAME ":" FNR ": mutable container action reference: " ref
+                  invalid = 1
+                }
+                next
+              }
+              at = index(ref, "@")
+              revision = substr(ref, at + 1)
+              if (at == 0 || length(revision) != 40 || revision !~ /^[0-9a-f]+$/) {
+                print FILENAME ":" FNR ": mutable action reference: " ref
+                invalid = 1
+              }
+            }
+            END { exit invalid ? 1 : 0 }
+          ' "${workflow_files[@]}"
 
       - name: Lint Markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v23
+        uses: DavidAnson/markdownlint-cli2-action@6bf21b07787794f89a243495939cd651942aeabe # v24.1.0
         with:
           globs: |
             **/*.md
@@ -31,9 +71,10 @@ jobs:
   shellcheck:
     name: "ShellCheck"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install ShellCheck if missing
         run: |
@@ -48,79 +89,63 @@ jobs:
           set -euo pipefail
           shellcheck --severity=error init.sh axiarch-scripts/*.sh
 
+      - name: Run Axiarch health gate
+        run: bash axiarch-scripts/check-axiarch-health.sh --quiet
+
   # ===========================================================================
   # Job 3: Bilingual Symmetry Check
-  # Ensures JA/EN file counts are always in sync
+  # Ensures JA/EN relative file paths are always in sync
   # ===========================================================================
   bilingual-symmetry:
     name: "Bilingual Symmetry Check"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Check Universal Rules symmetry (ja/ vs en/)
+      - name: Check exact JA/EN file-path symmetry
         run: |
           set -euo pipefail
-          echo "🔍 Checking Universal Rules symmetry..."
+          temp_dir=$(mktemp -d)
+          trap 'rm -rf -- "$temp_dir"' EXIT
 
-          ja_count=$(find axiarch-rules/ja/universal -name "*.md" | wc -l | tr -d ' ')
-          en_count=$(find axiarch-rules/en/universal -name "*.md" | wc -l | tr -d ' ')
+          check_pair() {
+            label=$1
+            ja_dir=$2
+            en_dir=$3
+            optional=${4:-false}
 
-          echo "  ja/universal: ${ja_count} files"
-          echo "  en/universal: ${en_count} files"
+            if [ "$optional" = "true" ] && [ ! -d "$ja_dir" ] && [ ! -d "$en_dir" ]; then
+              echo "ℹ️  ${label}: optional pair not found — skipping."
+              return
+            fi
+            if [ ! -d "$ja_dir" ] || [ ! -d "$en_dir" ]; then
+              echo "❌ FAIL: ${label} requires both ${ja_dir} and ${en_dir}."
+              return 1
+            fi
 
-          if [ "$ja_count" != "$en_count" ]; then
-            echo "❌ FAIL: Universal Rules bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
-            echo "   All universal rule files must have both JA and EN counterparts."
-            exit 1
-          fi
-          echo "✅ Universal Rules: symmetric (${ja_count} files each)"
+            ja_paths="${temp_dir}/$(echo "$label" | tr ' /' '__')-ja.txt"
+            en_paths="${temp_dir}/$(echo "$label" | tr ' /' '__')-en.txt"
+            find "$ja_dir" -type f -name "*.md" | sed "s#^${ja_dir}/##" | sort > "$ja_paths"
+            find "$en_dir" -type f -name "*.md" | sed "s#^${en_dir}/##" | sort > "$en_paths"
 
-      - name: Check Blueprint symmetry (ja/ vs en/)
-        run: |
-          set -euo pipefail
-          echo "🔍 Checking Blueprint symmetry..."
+            if ! diff -u "$ja_paths" "$en_paths"; then
+              echo "❌ FAIL: ${label} relative file paths differ between JA and EN."
+              return 1
+            fi
 
-          ja_count=$(find axiarch-rules/ja/blueprint -name "*.md" | wc -l | tr -d ' ')
-          en_count=$(find axiarch-rules/en/blueprint -name "*.md" | wc -l | tr -d ' ')
+            count=$(wc -l < "$ja_paths" | tr -d ' ')
+            echo "✅ ${label}: ${count} exact relative paths in each language"
+          }
 
-          echo "  ja/blueprint: ${ja_count} files"
-          echo "  en/blueprint: ${en_count} files"
-
-          if [ "$ja_count" != "$en_count" ]; then
-            echo "❌ FAIL: Blueprint bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
-            echo "   All blueprint files must have both JA and EN counterparts."
-            exit 1
-          fi
-          echo "✅ Blueprint: symmetric (${ja_count} files each)"
-
-      - name: Check Prompt Library symmetry (ja/ vs en/) [Optional]
-        run: |
-          set -euo pipefail
-          echo "🔍 Checking Prompt Library symmetry (optional)..."
-
-          if [ ! -d "axiarch-prompts" ]; then
-            echo "ℹ️  axiarch-prompts/ not found — skipping (optional directory)."
-            exit 0
-          fi
-
-          # Count all .md files recursively under ja/ and en/ (supports role-based subdirectories)
-          ja_count=$(find axiarch-prompts/ja -maxdepth 2 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-          en_count=$(find axiarch-prompts/en -maxdepth 2 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-
-          echo "  axiarch-prompts/ja: ${ja_count} files (develop/ audit/ govern/ operate/)"
-          echo "  axiarch-prompts/en: ${en_count} files (develop/ audit/ govern/ operate/)"
-
-          if [ "$ja_count" != "$en_count" ]; then
-            echo "❌ FAIL: Prompt Library bilingual asymmetry detected (ja=${ja_count}, en=${en_count})"
-            echo "   All prompt files must have both JA and EN counterparts."
-            exit 1
-          fi
-          echo "✅ Prompt Library: symmetric (${ja_count} files each)"
+          check_pair "Universal Rules" "axiarch-rules/ja/universal" "axiarch-rules/en/universal"
+          check_pair "Blueprint" "axiarch-rules/ja/blueprint" "axiarch-rules/en/blueprint"
+          check_pair "Execution Harness" "axiarch-harness/ja" "axiarch-harness/en"
+          check_pair "Prompt Library" "axiarch-prompts/ja" "axiarch-prompts/en" "true"
 
       - name: Summary
         run: |
           echo ""
           echo "✅ All bilingual symmetry checks passed!"
-          echo "   Axiarch maintains tracked JA/EN symmetry."
+          echo "   Axiarch maintains exact tracked JA/EN relative-path symmetry."

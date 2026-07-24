@@ -53,7 +53,7 @@
 
 ### 🔍 フック診断
 
-「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、Claude Memory正本境界、Check 16 の Language First / Execution Harness / 読み取り専用委任境界も確認する 16 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
+「フックが動いていない気がする」場合は **`bash axiarch-scripts/check-axiarch-health.sh`** を実行せよ。4 フックすべての配線確認（Check 3 = UserPromptSubmit / Check 11 = PreToolUse / Check 12 = SessionStart / Check 15 = v1.9+ integration）に加え、Axiarch本体ではv1.10.0以降のリリースメタデータ整合、ROADMAP Current Stable・正規AI-facing header・CHANGELOG compare ref・GitHub Actions immutable SHAの厳密一致と日英完了release entry、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの `axiarch-scripts/` 必須/任意境界、Claude Memory正本境界、Check 16 の Language First / Execution Harness / 読み取り専用委任境界も確認する 16 段階の標準診断ツール（`init.sh` 経由で自動配布）。詳細は `README.md` の「Hook補強機構」章を参照。
 
 ---
 
