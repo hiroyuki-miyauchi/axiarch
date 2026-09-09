@@ -31,7 +31,7 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (54 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (55 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -155,7 +155,7 @@ same folder as related rule files for maximum context efficiency.
 
 All Universal rules are immutable ("Constitution"). 3,000+ standards spanning engineering, product, security, operations, AI, business, QA, FinOps, and governance.
 
-### core/ — Foundation Philosophy (3 files)
+### core/ — Foundation Philosophy (4 files)
 - **000_core_mindset.md**: Core behavioral principles. Priority hierarchy
   (Security > UX > Profitability > DX), strict tolerance, Headless First,
   SSOT, band-aid ban, Git/deploy protocols, regression risk reduction.
@@ -163,6 +163,15 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   AI agent authority control, multi-project federation.
 - **200_language_protocol.md**: Three-layer language model, code/document
   language conventions, AI communication protocol.
+- **300_goal_and_current_state.md**: 10 sections. The boot triad (norms +
+  goal + current state) required before work starts, on the premise that
+  an agent boots with zero memory; verifiable completion criteria and a
+  ban on standalone vague terms, non-goals, the goal restatement gate,
+  four-state machine-readable current state (done / in progress / not
+  started / discarded) with product-independent container properties and
+  a freshness-reconciliation duty, the autonomy-distance scaling law
+  (L1-L5), goal drift vs current-state drift, shared state for concurrent
+  work, 15 anti-patterns.
 
 ### product/ — Business & Growth (10 files)
 - **000_product_strategy.md**: MVP→PMF, monetization, unit economics,
@@ -474,7 +483,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 54 Universal Rules and core Blueprint starter files are available in both languages.
+All 55 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.

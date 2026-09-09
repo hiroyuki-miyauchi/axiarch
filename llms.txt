@@ -25,7 +25,7 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 
 - **Layer 1: Universal (Immutable Constitution)**
   - `AXIARCH.md` — Canonical Axiarch protocol. `AGENTS.md` and tool-native files are thin adapters that point to it. Primary targets: OpenAI Codex, Claude Code, and Google Antigravity. Production-validated through real operational use (dogfooding): Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (Antigravity first), with no operation guarantee for every environment. Extended pointer-only candidates: Cursor, GitHub Copilot, Windsurf, etc.
-  - `axiarch-rules/{lang}/universal/` — 54 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance), including first-class programming-language portfolio, React Native, cloud/application-platform, Microsoft Azure, and polyglot delivery governance.
+  - `axiarch-rules/{lang}/universal/` — 55 immutable rule files (3,000+ standards across engineering, product, security, operations, QA, AI, FinOps, and governance), including first-class programming-language portfolio, React Native, cloud/application-platform, Microsoft Azure, and polyglot delivery governance.
 - **Layer 2: Blueprint (Mutable Project State)**
   - `axiarch-rules/{lang}/blueprint/` — Evolving project memory. Project overview, continuously accumulated lessons log, crystallized governance rules, and feature specs.
 - **Layer 3: Prompts (Optional Execution Framework)**
@@ -91,7 +91,7 @@ Existing adopter projects can preview a selective upgrade with `bash axiarch-scr
 ## Language Support
 
 Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 54 universal rules and core blueprint starter files are available in both languages.
+All 55 universal rules and core blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 
 ## License

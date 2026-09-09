@@ -179,35 +179,37 @@ Default lifecycle:
 
 1. Resolve language, task level, and authority hierarchy
 2. Load `AXIARCH.md` and the minimum relevant rule files directly
-3. Classify the task and choose the required harness protocols
-4. Write or update `task.md`, `implementation_plan.md`, and `walkthrough.md`
-5. Keep native task state in sync when the runtime supports it
-6. Present or follow the implementation plan that is authoritative for the task
-7. Implement with narrow, diff-based changes
-8. Run role passes and audit gates
-9. Produce an audit verdict
-10. Run verification commands and record results
-11. Return to the fix loop or replan loop when the verdict requires it
-12. Produce an evidence packet with residual risks
-13. Run crystallization check for lessons that actually occurred in the task
-14. Stop at the human approval gate for stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions
+3. Fix the goal (verifiable completion criteria) and the current state, and confirm they are not drifted before starting
+4. Classify the task and choose the required harness protocols
+5. Write or update `task.md`, `implementation_plan.md`, and `walkthrough.md`
+6. Keep native task state in sync when the runtime supports it
+7. Present or follow the implementation plan that is authoritative for the task
+8. Implement with narrow, diff-based changes
+9. Run role passes and audit gates
+10. Produce an audit verdict
+11. Run verification commands and record results
+12. Return to the fix loop or replan loop when the verdict requires it
+13. Produce an evidence packet with residual risks
+14. Run crystallization check for lessons that actually occurred in the task
+15. Stop at the human approval gate for stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions
 
 既定ライフサイクル:
 
 1. 言語、タスクレベル、優先順位を解決する
 2. `AXIARCH.md` と最小限必要なルールファイルを直接ロードする
-3. タスクを分類し、必要なハーネスプロトコルを選ぶ
-4. `task.md`、`implementation_plan.md`、`walkthrough.md` を作成または更新する
-5. ランタイムが対応している場合はネイティブタスク状態も同期する
-6. タスクの正本となる実装計画を提示または遵守する
-7. 狭く、diffベースで実装する
-8. ロールパスと監査ゲートを実行する
-9. 監査判定を出す
-10. 検証コマンドを実行し、結果を記録する
-11. 判定が要求する場合は修正ループまたは再計画ループへ戻る
-12. 残リスクを含む証跡パケットを作る
-13. 実タスクで発生した教訓だけを対象に結晶化チェックを行う
-14. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作の前で人間承認ゲートに停止する
+3. ゴール（検証可能な完了条件）と現在値を確定し、ずれがないことを着手前に確認する
+4. タスクを分類し、必要なハーネスプロトコルを選ぶ
+5. `task.md`、`implementation_plan.md`、`walkthrough.md` を作成または更新する
+6. ランタイムが対応している場合はネイティブタスク状態も同期する
+7. タスクの正本となる実装計画を提示または遵守する
+8. 狭く、diffベースで実装する
+9. ロールパスと監査ゲートを実行する
+10. 監査判定を出す
+11. 検証コマンドを実行し、結果を記録する
+12. 判定が要求する場合は修正ループまたは再計画ループへ戻る
+13. 残リスクを含む証跡パケットを作る
+14. 実タスクで発生した教訓だけを対象に結晶化チェックを行う
+15. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作の前で人間承認ゲートに停止する
 
 If the user supplies a canonical implementation plan and instructs the agent to implement it, that plan is the implementation source of truth for the task.
 

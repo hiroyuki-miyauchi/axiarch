@@ -301,6 +301,26 @@ write_task_md_ja() {
 - [ ] 実際に読んだファイルだけを上の表に記録した
 - [ ] 関連しうるがロードしないファイルと理由を明記した
 
+## ゴール（完了条件）
+
+| # | 完了条件 | 検証方法 | 判定 |
+|:--|:--|:--|:--|
+| 1 | _(観測可能な形で記述。「改善する」等の曖昧語のみは不可)_ | _(どう確かめるか)_ | _(未達成 / 達成)_ |
+
+- 非ゴール: _(やらないことを明記)_
+- 置いた仮定: _(確認せずに前提としたこと)_
+
+## 現在値
+
+| 状態 | 内容 |
+|:--|:--|
+| 完了 | _(完了条件を満たし検証済みのもの)_ |
+| 進行中 | _(着手済み・未完了。担当を含む)_ |
+| 未着手 | _(予定だが未着手のもの)_ |
+| 破棄 | _(検討したが採らないと決めたものと理由)_ |
+
+- 最終突合: _(いつ・何と突合したか。未突合なら「未突合」と明記)_
+
 ## ネイティブタスク状態
 
 Markdown証跡だけでは、CodexやClaude Codeのネイティブなタスク・プラン表示欄は更新されない。対応ランタイムでは、ここへの記録と並行して以下を実行する。
@@ -347,6 +367,26 @@ This file records only the current task state. Previous task content is archived
 - [ ] Directly opened task-relevant Universal/Blueprint files
 - [ ] Recorded only files actually opened
 - [ ] Recorded relevant-but-not-loaded files and reasons
+
+## Goal (Completion Criteria)
+
+| # | Completion criterion | How it is verified | Status |
+|:--|:--|:--|:--|
+| 1 | _(state it observably; vague terms such as "improve" alone are not allowed)_ | _(how it will be checked)_ | _(unmet / met)_ |
+
+- Non-goals: _(state explicitly what will not be done)_
+- Assumptions made: _(what was assumed without confirmation)_
+
+## Current State
+
+| State | Contents |
+|:--|:--|
+| Done | _(criteria met and verified)_ |
+| In progress | _(started and unfinished, including owner)_ |
+| Not started | _(planned but untouched)_ |
+| Discarded | _(considered and deliberately not taken, with reason)_ |
+
+- Last reconciled: _(when, and against what; write "not reconciled" if it was not)_
 
 ## Native Task State
 
