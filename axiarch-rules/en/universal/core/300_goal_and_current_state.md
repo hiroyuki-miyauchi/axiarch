@@ -38,14 +38,16 @@
   - §4.3. Properties the Current-State Container Must Satisfy
   - §4.4. Duty of Freshness Verification
   - §4.5. Recording Discarded and Rejected Options
+  - §4.6. What Must Never Be Written into the Current State
 - §5. The Autonomy-Distance Scaling Law
 - §6. Two Classes of Drift and Their Detection
   - §6.1. Goal Drift — the Total-Loss Class
   - §6.2. Current-State Drift — the Duplication and Rework Class
   - §6.3. Duplication Check Before Starting
+  - §6.4. Duty to Report Drift and Stop Early
 - §7. Shared Current State (Concurrent Work)
 - §8. Verification Duties
-- §9. Fifteen Anti-Patterns
+- §9. Seventeen Anti-Patterns
 - §10. Maturity Model
 
 ---
@@ -194,6 +196,14 @@
 -   **Rule 300.4.9 (Record discards)**: Options that were considered and not taken should be **recorded as discarded, together with the reason** (SHOULD).
 -   **Law**: without a record of discards, later agents and colleagues **re-propose the same option and repeat the same debate**. A discard is not a record of failure; it is a map of territory already explored.
 
+### §4.6. What Must Never Be Written into the Current State
+
+-   **Rule 300.4.10 (No secrets)**: Credentials, access tokens, private keys, passwords, and connection strings must never be written into the current state (MUST NOT). Where a reference is needed, record **only the name of the store** that holds them.
+-   **Rule 300.4.11 (No production data)**: Actual production personal data must never be pasted into failure examples, reproduction steps, or investigation notes (MUST NOT). Express them as identifiers, counts, categories, or masked values.
+-   **Rule 300.4.12 (Assume the widest audience)**: Write shared current state on the assumption that **the widest set of people and agents able to read that location will read it** (MUST). Consolidation widens visibility, so **consolidation and access control must be designed together** (MUST).
+-   **Rule 300.4.13 (Retention)**: Personal data held in the current state must have a defined retention period and be deleted or anonymized when it expires (MUST). Classification, retention, and deletion are canonical in `security/100_data_governance.md`.
+-   **Law**: consolidating current state raises productivity, but **gathering it in one place simultaneously widens the blast radius of a leak**. "Put everything here and it gets smarter" is, inverted, "if this leaks, everything leaks." The benefit of consolidation and the risk of concentration must always be evaluated as a pair.
+
 ---
 
 ## §5. The Autonomy-Distance Scaling Law
@@ -233,6 +243,15 @@
 -   **Rule 300.6.3 (Duplication check)**: Before building something new, confirm that **an equivalent does not already exist** (MUST). Examples of where to check: existing implementations, configuration, documentation, in-flight changes, and previously discarded options.
 -   **Rule 300.6.4 (Prefer the existing)**: When an equivalent mechanism already exists, **extending it takes precedence over creating a new one** (SHOULD). If new creation is chosen, record the reason.
 
+### §6.4. Duty to Report Drift and Stop Early
+
+-   **Rule 300.6.5 (Never continue silently)**: When the detected drift **changes the deliverable or invalidates work already done**, stop the work at that point and report it to the requester (MUST). Drift that does not change the deliverable should be recorded and reported together at completion (SHOULD). In either case, continuing on the assumption that "it is probably fine" after detecting drift is forbidden (MUST NOT).
+-   **Rule 300.6.6 (Report early)**: Report as soon as it becomes clear that a completion criterion cannot be met (MUST). It must not be concealed until the end of the work. **The worse the news, the more its value depends on arriving early.**
+-   **Rule 300.6.7 (No silent failure)**: Drift, failures, and skips must never be made to disappear by leaving them out of both the record and the report (MUST NOT). Counting discipline for machine execution is canonical in `engineering/700_batch_backfill_operations.md`.
+-   **Rule 300.6.8 (Detect staleness)**: Current-state items whose last reconciliation is older than a defined interval must be **treated as unconfirmed** (MUST). The threshold is set per project.
+-   **Rule 300.6.9 (Recurrence prevention)**: For drift that actually occurred, identify the cause (a vague goal, a missing current state, or a skipped confirmation) and record it as a lesson per `CRYSTALLIZATION_PROTOCOL.md` (MUST). **When the same cause produces drift twice, promote it into a project-specific rule** (SHOULD).
+-   **Law**: drift cannot be eliminated. What can be eliminated is **repeating the same drift**.
+
 ---
 
 ## §7. Shared Current State (Concurrent Work)
@@ -254,7 +273,7 @@
 
 ---
 
-## §9. Fifteen Anti-Patterns
+## §9. Seventeen Anti-Patterns
 
 | # | Anti-pattern | Why it is dangerous |
 |:--|:--|:--|
@@ -273,6 +292,8 @@
 | 13 | Not updating the current state when pausing | The next session is forced into a full re-investigation |
 | 14 | Designing state that can live only in one product | The discipline collapses wherever that product is unavailable |
 | 15 | Asking the requester what could have been looked up | Constant confirmation burdens the requester and hollows out the check |
+| 16 | Pasting credentials or production personal data into state | Consolidation maximizes the blast radius of any leak |
+| 17 | Detecting drift and continuing without reporting it | By the time it is reported, the rework is already maximal |
 
 ---
 
@@ -294,6 +315,9 @@
 -   `core/000_core_mindset.md` — ban on unverified completion reports, fact-based reporting (the parent principle for §4.4 and §8)
 -   `core/100_governance.md` — constitutional authority and separation of layer responsibilities (the basis for this file's placement)
 -   `core/200_language_protocol.md` — the choice of language in which goal and current state are written
+-   `CRYSTALLIZATION_PROTOCOL.md` — turning drift into lessons and promoting them into project rules (canonical for §6.9)
+-   `security/000_security_privacy.md` — handling of secrets (the parent principle for §4.6)
+-   `security/100_data_governance.md` — classification, retention, and deletion of personal data (canonical for §4.6)
 -   `quality/000_qa_testing.md` — the means of verifying completion criteria (canonical for test layer definitions)
 -   `engineering/600_git_workflow.md` — branch and pull-request operation (the principal embodiment of shared state)
 -   `engineering/700_batch_backfill_operations.md` — run summaries and failure accounting for machine jobs (the current state after a run)

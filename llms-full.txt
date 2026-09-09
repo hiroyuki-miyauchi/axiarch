@@ -170,8 +170,11 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   four-state machine-readable current state (done / in progress / not
   started / discarded) with product-independent container properties and
   a freshness-reconciliation duty, the autonomy-distance scaling law
-  (L1-L5), goal drift vs current-state drift, shared state for concurrent
-  work, 15 anti-patterns.
+  (L1-L5), goal drift vs current-state drift, a ban on writing credentials
+  or production personal data into shared state (consolidation and access
+  control designed together, retention), the duty to stop and report drift
+  early with no silent failure, recurrence prevention via crystallization,
+  shared state for concurrent work, 17 anti-patterns.
 
 ### product/ — Business & Growth (10 files)
 - **000_product_strategy.md**: MVP→PMF, monetization, unit economics,
