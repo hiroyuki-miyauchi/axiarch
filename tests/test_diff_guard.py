@@ -15,14 +15,12 @@ import test_runtime as runtime
 
 class DiffGuardTests(unittest.TestCase):
     run_cmd = runtime.RuntimeTests.run_cmd
+    git = runtime.RuntimeTests.git
 
     def setUp(self):
         runtime.RuntimeTests.setUp(self)
         self.env.update(GIT_CONFIG_COUNT='0', GIT_TERMINAL_PROMPT='0')
         self.git('init', '-q')
-
-    def git(self, *args, **kwargs):
-        return self.run_cmd(['git', *args], **kwargs)
 
     def commit(self):
         self.git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
