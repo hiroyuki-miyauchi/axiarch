@@ -27,6 +27,10 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- 別AIをCodexのシェルから起動した際、継承したセッションIDで別作業を再開する不備を修正。起動・補足では入力IDを先に検証し、意図的なAxiarch指定を除き製品自身のIDを優先する。不正入力を環境変数で隠さず警告し、旧記録は保持する。日英の優先順位・移行手順と回帰を追加する。
+- Fix another agent launched from a Codex shell resuming the parent's work records. Startup/reminder hooks validate native IDs first and prefer them over inherited runtime IDs unless an intentional Axiarch override is supplied. Environment variables cannot hide invalid input; existing records remain intact. Add bilingual precedence/migration guidance and regressions.
+- 英語版harnessに抜けていた「ネイティブ計画ツールが利用できない場合」の代替手順を補う。既存承認の範囲確認と不足時の停止を正本・harness・起動補足でそろえ、通常の差分修正まで再承認を要求する曖昧さを解消。起動補足はAIの読了を強制・証明する機構ではないことを明確にする。
+- Restore the English harness fallback when native planning tools are unavailable. Align canonical lifecycle, harness and reminders around existing approval scope and pausing when approval is missing; remove ambiguity that demanded repeated approval for ordinary focused edits. Clarify that startup reminders neither enforce nor prove the agent's reading.
 - Windowsの補助ツール実行条件を明確化。ネイティブWindows Python・Git Bash単独では導入・更新の変更前に終了2で停止し、WSL 2内のLinux Pythonを案内する。本体の実行ファイルをLF形式で維持する `.gitattributes` を追加し、利用先の属性設定は上書きしない。
 - Clarify Windows helper requirements. Native Windows Python and Git Bash alone exit 2 before installation/upgrade changes, with guidance to use Linux Python inside WSL 2. Add source-only `.gitattributes` to keep executable files in LF format without overwriting adopter attributes.
 - Windowsランナーでの非対応環境の拒否とWSL 2・Ubuntu 24.04・一般ユーザーによる全回帰を共通品質検査へ追加。リリースも同じコミットのWindows検査成功を必要とする。日英のWindows手順に環境・改行・移行・製品実証の限界を記載する。

@@ -395,9 +395,9 @@ Only the two project configuration files are inspected. User settings, managed p
 
 Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, delegates to `axiarch-task-state.sh` and prepares `task.md` / `implementation_plan.md` / `walkthrough.md` as session-specific documents, preserving same-session resumes and legacy root files. Successful initialization injects the protocol reminder and actual record location; initialization failure emits a warning.
 
-起動・補足フックは共通補助でセッションIDを解決します。不正JSON、重複キー、競合するsession_id／sessionId、不正なIDを新規作業とは解釈しません。起動時は記録を作らず警告し、補足時はセッション未解決として扱います。正しい空入力は旧呼出しとの互換を保ち、IDなし起動として新規IDを生成します。明示環境変数のIDは入力内IDより優先します。Python 3や共通補助がない場合は、確認できていないことを示す短い警告を返します。
+起動・補足フックは共通補助でセッションIDを解決します。不正JSON、重複キー、競合するsession_id／sessionId、不正なIDを新規作業とは解釈しません。起動時は記録を作らず警告し、補足時はセッション未解決として扱います。環境変数があっても入力IDを検証します。正しい空入力は旧呼出しとの互換を保ち、解決できるIDがなければ新規IDを生成します。優先順位は [実行契約](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md) に従い、継承したCodexのIDで別製品のネイティブIDを隠しません。Python 3や共通補助がない場合は、確認できていないことを示す短い警告を返します。
 
-Startup and reminder hooks share session-ID resolution. Invalid JSON, duplicate keys, conflicting session_id/sessionId fields and invalid IDs do not imply new work: startup preserves records and warns, while reminders leave the session unresolved. Empty input remains a supported legacy invocation that generates fresh IDs on startup. Explicit environment IDs take precedence over payload IDs. Missing Python 3 or helpers produces a short warning without claiming successful inspection.
+Startup and reminder hooks share session-ID resolution. Invalid JSON, duplicate keys, conflicting session_id/sessionId fields and invalid IDs do not imply new work: startup preserves records and warns, while reminders leave the session unresolved. Input IDs are validated even when environment variables are present. Empty input remains supported and generates fresh IDs when no identity can be resolved. Precedence follows the [execution contract](../axiarch-harness/en/TASK_STATE_PROTOCOL.md); inherited Codex identity never hides another product's native ID. Missing Python 3 or helpers produces a short warning without claiming successful inspection.
 
 ### 使い方 / Usage
 

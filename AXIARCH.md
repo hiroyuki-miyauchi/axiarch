@@ -205,7 +205,7 @@ Default lifecycle:
 12. Return to the fix loop or replan loop when the verdict requires it
 13. Produce an evidence packet with residual risks
 14. Run crystallization check for lessons that actually occurred in the task
-15. Stop at the human approval gate for stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions
+15. Apply `axiarch-harness/{lang}/HUMAN_APPROVAL_GATE.md` to stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions; stop if the required approval is missing
 
 既定ライフサイクル:
 
@@ -223,7 +223,7 @@ Default lifecycle:
 12. 判定が要求する場合は修正ループまたは再計画ループへ戻る
 13. 残リスクを含む証跡パケットを作る
 14. 実タスクで発生した教訓だけを対象に結晶化チェックを行う
-15. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作の前で人間承認ゲートに停止する
+15. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作に `axiarch-harness/{lang}/HUMAN_APPROVAL_GATE.md` を適用し、必要な承認がない場合に停止する
 
 If the user supplies a canonical implementation plan and instructs the agent to implement it, that plan is the implementation source of truth for the task.
 

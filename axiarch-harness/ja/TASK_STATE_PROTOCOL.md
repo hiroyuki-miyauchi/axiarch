@@ -14,7 +14,7 @@
 | `--mode status` | `.axiarch/tasks/` を読み、全担当の共通参照一覧を表示。複製した索引は正本にしない |
 | ルートの3文書 | 旧導入先の記録を保持。存在しない場合だけ共通参照ポインターを生成 |
 
-セッションIDはCLI、`AXIARCH_SESSION_ID`、`CODEX_THREAD_ID`、hookの `session_id` / `sessionId` を使用できる。タスクIDはCLIまたは `AXIARCH_TASK_ID`。IDが無い起動は新規IDを生成して出力する。自動的に他セッションを選ばない。次回は出力IDを指定する。IDは認証情報ではない。
+直接CLIのセッションIDは `--session`、`AXIARCH_SESSION_ID`、`CODEX_THREAD_ID` の順に解決する。hookは入力の `session_id` / `sessionId` を先に検証し、両方がある場合は一致を必要とする。その上で `AXIARCH_SESSION_ID` の意図的な指定、入力ID、最後に `CODEX_THREAD_ID` の順で選ぶ。親プロセスから継承したCodexのIDで別製品の入力IDを隠さず、環境変数があっても不正な入力IDを無視しない。タスクIDはCLIまたは `AXIARCH_TASK_ID`。IDが無い起動は新規IDを生成して出力する。自動的に他セッションを選ばない。次回は出力IDを指定する。IDは認証情報ではない。
 
 UUID形式のフォルダ名は衝突回避と再開に使う内部キーであり、作業名ではない。`--mode status` と `--mode sessions` は正本の `goal` を先頭に表示し、作業の目的で識別する。sessions一覧はbindingとタスク正本から都度読み、別の名称台帳を作らない。既存フォルダの手動改名は参照を壊すため行わない。新規IDを明示する場合は `audit-2026-09-13-agent-a` のような作業に合うASCII名も使えるが、既存IDと重複させない。例の作業名・日付は固定値ではない。
 

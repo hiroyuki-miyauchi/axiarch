@@ -113,6 +113,28 @@ class AgentCompatibilityTests(unittest.TestCase):
             self.assertEqual(config['hooks'][event][0]['hooks'][0]['command'], codex_command(script))
             self.assertEqual(len(config['hooks'][event]), 1)
 
+    def test_native_sessions_do_not_borrow_inherited_codex_parent_records(self):
+        self.guard_fixture()
+        inherited = {'CODEX_THREAD_ID': 'parent'}
+        self.configured_hook('codex', 'SessionStart', dict(session_id='parent'), extra=inherited)
+        parent = self.target / '.axiarch/sessions/parent/task.md'
+        parent.write_text('preserve the previous parent binding')
+        for agent in ('codex', 'claude'):
+            with self.subTest(agent=agent):
+                payload = dict(session_id=agent + '-native', cwd=str(self.target / 'nested'))
+                result = self.configured_hook(agent, 'SessionStart', payload, extra=inherited)
+                docs = self.target / '.axiarch/sessions' / payload['session_id']
+                self.assertTrue(docs.is_dir(), result.stdout)
+                (docs / 'task.md').write_text('independent ' + agent)
+                before = self.tree_bytes()
+                self.configured_hook(agent, 'SessionStart', dict(payload, source='resume'), extra=inherited)
+                result = self.configured_hook(agent, 'UserPromptSubmit', dict(payload, prompt='continue'),
+                                              extra=inherited)
+                context = json.loads(result.stdout)['hookSpecificOutput']['additionalContext']
+                self.assertIn('docs=' + str(docs), context)
+                self.assertEqual(self.tree_bytes(), before)
+        self.assertEqual(parent.read_text(), 'preserve the previous parent binding')
+
     def test_three_agent_language_upgrades_preserve_local_state_and_report_pending(self):
         self.install_source()
         for agent, choice in [('codex', 1), ('claude', 2), ('antigravity', 3)]:

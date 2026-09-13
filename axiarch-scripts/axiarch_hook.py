@@ -134,13 +134,19 @@ def payload(text):
 
 
 def session_id(data):
-    explicit = os.environ.get('AXIARCH_SESSION_ID') or os.environ.get('CODEX_THREAD_ID')
-    if explicit:
-        return identifier(explicit)
+    # Validate native identity even with an intentional override. An inherited
+    # parent runtime variable must not hide malformed input or another agent's
+    # own session (for example Claude launched from a Codex shell).
     ids = [identifier(data[key]) for key in ('session_id', 'sessionId') if key in data]
     if len(set(ids)) > 1:
         raise ValueError('conflicting session_id/sessionId')
-    return ids[0] if ids else ''
+    explicit = os.environ.get('AXIARCH_SESSION_ID')
+    if explicit:
+        return identifier(explicit)
+    if ids:
+        return ids[0]
+    fallback = os.environ.get('CODEX_THREAD_ID')
+    return identifier(fallback) if fallback else ''
 
 
 def use_short(args):

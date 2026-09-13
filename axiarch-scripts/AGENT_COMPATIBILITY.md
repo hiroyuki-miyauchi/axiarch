@@ -20,6 +20,8 @@ Claude Codeでは `CLAUDE_PROJECT_DIR` が起動時の場所を指したまま�
 
 ### 日英と記録
 
+Codex・Claude Codeのネイティブイベントには、そのセッションの `session_id` があります。別製品をCodexのシェルから起動しても、継承した `CODEX_THREAD_ID` で置き換えません。意図的に共通の `AXIARCH_SESSION_ID` を指定した場合は、その指定を使います。指定は実行単位に限定し、別の書き手へ同じIDを不用意に継承させないでください。入力IDが不正・競合の場合は、環境変数の有無によらず警告して未解決とします。直接CLIとhookの優先順位は `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` を参照してください。
+
 配布するルール・harness・promptは日本語と英語です。`init.sh` で応答の既定言語と両言語保持／単一言語を選びます。`Project Native Language` と記録テンプレートは共通パーサーで解決されます。ユーザーが明示した応答言語は既定より優先し、翻訳のためだけに設定行を自動変更しません。他言語での回答指定は可能ですが、その言語の規則一式が配布されている意味ではありません。設定・コマンド・異常通知には日英併記や英語の機械用ラベルもあり、生成文書の言語と区別します。
 
 起動の補足は読了証明ではありません。実際のロード範囲を記録し、使える場合だけネイティブな計画ツールも同期します。Antigravityやフック未対応環境では、必要なH2以上の記録を `axiarch-scripts/axiarch-task-state.sh` から生成します。H0/H1に全工程を強制しません。同じタスクの参加者はタスクIDを共有し、異なる書き手は別セッションIDを明示します。製品が同じ親セッションIDを子エージェントに渡す場合も、同一文書の並行編集を避けてください。
@@ -31,6 +33,8 @@ Claude Codeでは `CLAUDE_PROJECT_DIR` が起動時の場所を指したまま�
 3. 更新候補の `REVIEW` / 競合を確認します。今回のhookコマンド変更も既存の独自設定を無条件に置換しません。旧版を比較元にしたreview-eachでのマージ、または設定内のAxiarch handlerだけのレビュー済み差分で反映します。古いhandlerを残して重複追加しません。
 4. `axiarch-scripts/check-axiarch-health.sh --phase structure` と利用する製品の設定画面で配線・有効化・信頼状態を確認します。Codexは `/hooks`、Claude Codeは `/hooks` とプロジェクト設定、AntigravityはCustomizationsのRulesで入口の適用を確認します。
 5. 製品の新しいセッションで入口から正本を参照できることを確認します。隔離した作業場所で新規作成、通常の差分編集、既存ファイル保護、再開、選択言語の記録を確認し、製品版・OS・結果を残します。
+
+以前の環境変数優先で作られた記録は、自動で移動・改名・結合しません。`axiarch-scripts/axiarch-task-state.sh --mode sessions` で目的とbindingを確認します。継続するタスクへは、`--mode resume --task <確認したタスクID> --session <新しい書き手のID>` で参加し、元の証跡を保持します。hookから以前の同一セッションを意図的に再開する必要がある場合だけ、その起動に `AXIARCH_SESSION_ID` を指定します。複数の書き手で共用しません。
 
 ### 検証した範囲と保証しない範囲
 
@@ -56,6 +60,8 @@ Codex runs hooks in the session working directory. Bundled commands search upwar
 
 Claude Code can retain its initial `CLAUDE_PROJECT_DIR` after moving to a worktree. Records, reminders, allowlists and diff measurement resolve the active project from event `cwd`. An unresolved project produces a startup warning without records and an unassessed diff result. Legacy/manual calls without `cwd` use the explicit project or script location.
 
+Native Codex and Claude Code events supply the current `session_id`. Launching another product from a Codex shell does not replace that identity with inherited `CODEX_THREAD_ID`. An intentional `AXIARCH_SESSION_ID` override still applies; scope it to the intended invocation instead of sharing it inadvertently across writers. Invalid or conflicting native IDs remain unresolved with a warning even when environment variables exist. See `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for direct CLI and hook precedence.
+
 Distributed rules, harnesses and prompts are Japanese and English. `init.sh` selects the default response language and either both language trees or one. The language setting and record templates share a parser. Explicit user response language takes precedence; do not rewrite the project setting merely for translation. Requesting another response language does not imply a distributed rule tree in that language. Setup, commands and diagnostic messages may remain bilingual or use English machine labels.
 
 Startup reminders do not prove loading. Record actual read ranges and synchronize native planning tools only when available. For Antigravity or environments without hooks, create necessary H2+ records through `axiarch-scripts/axiarch-task-state.sh`; do not impose the full workflow on H0/H1. Share task IDs for shared work and use distinct session IDs for different writers, including runtimes that pass a parent's session ID to subagents.
@@ -67,6 +73,8 @@ Startup reminders do not prove loading. Record actual read ranges and synchroniz
 3. Resolve `REVIEW` and conflicts. Hook command changes do not overwrite custom configurations unconditionally. For mixed hook settings, use review-each with the previous version as the merge base, or apply reviewed diffs only to Axiarch handlers. A comparison source alone does not auto-apply a review-policy file. Replace obsolete handlers instead of appending duplicates.
 4. Run `axiarch-scripts/check-axiarch-health.sh --phase structure` and verify activation/trust in the actual product: Codex `/hooks`, Claude Code `/hooks` and project settings, or Antigravity Customizations → Rules.
 5. Start a new product session in an isolated project and verify entrypoint discovery, creation, focused edits, existing-file protection, resumption and selected-language records. Record the product version, OS and observations.
+
+Records created under the earlier environment-first behavior are not moved, renamed or merged automatically. Inspect goals and bindings with `axiarch-scripts/axiarch-task-state.sh --mode sessions`. Join continuing work using `--mode resume --task <inspected-task-id> --session <new-writer-id>` and retain the original evidence. Set `AXIARCH_SESSION_ID` for a particular hook launch only when intentionally resuming the same previous session; do not share it across writers.
 
 ### Verification boundaries
 
