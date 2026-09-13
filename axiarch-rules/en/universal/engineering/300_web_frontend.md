@@ -1218,7 +1218,7 @@ async function processLargeDataset(items: Item[]) {
 - **Rule 33.153**: Implement server-side Conversion APIs (Meta CAPI, Google Enhanced Conversions, etc.) to bypass browser-side tracking blockers
 
 ### §153. Privacy-First Tracking
-- **Rule 33.154**: Implement cookie consent banners by jurisdiction (GDPR: opt-in / Japan: opt-out)
+- **Rule 33.154**: Determine cookie consent, notice, refusal and third-party sharing requirements from applicable jurisdictions and actual data flows; do not classify Japan as universally opt-out. Verify local primary sources, including the [PPC APPI FAQ](https://www.ppc.go.jp/personalinfo/faq/APPI_QA/) when Japan is in scope.
 - **Consent Management**: Control tracking script loading based on user consent state
 
 ### §155b. The Post-Privacy Sandbox Tracking Strategy

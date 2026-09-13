@@ -86,7 +86,7 @@
 | **Recovery** | Self-service assumed (automated, low-friction). Weakest-link defense (§9) especially critical | Admin-driven recovery (help desk, identity proofing) possible. Stricter identity proofing (IAL) |
 | **MFA strictness** | Phased rollout, friction minimization (avoid drop-off). Gradual migration to phishing-resistant (§7) | Enforceable without exception. Admin/privileged require Device-Bound (§5.1) |
 | **Provisioning** | Self sign-up + registration-time fraud defense (§8.1b) | Centralized via SSO/JIT/SCIM (→`410` §10) |
-| **Audit retention** | Privacy law (data minimization, retention limits) takes priority (`100_data_governance.md`) | May require long-term retention for internal controls/compliance |
+| **Audit retention** | Privacy law (data minimization, retention limits) takes priority (`axiarch-rules/{lang}/universal/security/100_data_governance.md`) | May require long-term retention for internal controls/compliance |
 | **Scale/anonymity** | Large-scale, anonymous traffic, bot intrusion assumed | Known, finite user set |
 
 -   Registration-time fraud / bot defense (§8.1b) is especially important for CIAM.

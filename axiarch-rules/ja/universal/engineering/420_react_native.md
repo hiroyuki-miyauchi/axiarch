@@ -37,7 +37,7 @@
 ## §1. 適用範囲と正本境界
 
 - Rule 420.1: 本ファイルはReact Native app、brownfield統合、React Native library、native moduleのframework固有正本である。
-- Rule 420.2: TypeScript／JavaScriptの言語品質は`320_programming_language_governance.md` §5、Swift／Kotlinのnative実装は`410_native_platforms.md`を継承する。Web DOM固有規則をReact Nativeへ自動適用しない。
+- Rule 420.2: TypeScript／JavaScriptの言語品質は`axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` §5、Swift／Kotlinのnative実装は`axiarch-rules/{lang}/universal/engineering/410_native_platforms.md`を継承する。Web DOM固有規則をReact Nativeへ自動適用しない。
 - Rule 420.3: securityは`security/000_security_privacy.md`、test層は`quality/000_qa_testing.md`、store審査は`product/700_appstore_compliance.md`を優先する。
 - Rule 420.4: 「一つのcodebase」を「一つの挙動」と解釈しない。iOSとAndroidのUX、権限、lifecycle、background execution、release artifactを独立して保証する。
 

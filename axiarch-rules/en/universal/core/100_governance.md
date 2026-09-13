@@ -4,12 +4,7 @@
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
 > Last Updated: 2026-03-24
 
-> [!IMPORTANT]
-> **Meta-Constitution Declaration**
-> - This document serves as the "Meta-Constitution" for the entire Axiarch rule system loaded from `AXIARCH.md` (the L0 canonical entrypoint).
-> - It defines the **fundamental norms** governing the enactment, amendment, repeal, interpretation, dispute resolution, and operation of all rule files (Universal / Blueprint).
-> - Violations of this document are treated as **maximum severity violations** that undermine the legitimacy and trustworthiness of the entire rule system.
-> **14 Parts, 30 Sections.**
+> This file is part of Axiarch’s Universal constitution and defines rule creation, amendment, interpretation and operation. It is not a separate higher layer. Follow `AXIARCH.md` §2–3 for canonical precedence and three-layer responsibilities. Heading/Rule IDs are reference identifiers and need not equal the file’s placement prefix.
 
 ---
 
@@ -54,9 +49,11 @@
 ### 1.1. Definition of Constitution
 
 -   **Definition**: All rule files under `axiarch-rules/{lang}/universal/` are collectively referred to as the "**Constitution**".
--   **Nature**: Under `AXIARCH.md` (the L0 canonical entrypoint), the Constitution functions as a **universal, immutable higher-level protocol** that transcends individual projects and takes precedence over all project-specific rules (Blueprints).
+-   **Nature**: Under `AXIARCH.md` (the canonical entrypoint), the Constitution functions as a **universal, immutable higher-level protocol** that transcends individual projects and takes precedence over all project-specific rules (Blueprints).
 -   **Metaphor**: The Constitution is analogous to a nation's constitution, while Blueprints are analogous to laws. When a law conflicts with the constitution, the law is invalid.
 -   **Scope**: This Constitution applies to **all actors** who interact with the rule system, including human developers, AI agents, CI/CD pipelines, and automation tools.
+
+Applicability: Mandatory constraints apply when their conditions, operation, authority and impact scope apply. Recommendations, examples and optional items do not become mandatory. Providers, folder names, configurations, currencies, team sizes and numeric settings are adoption examples unless an explicit basis fixes them; establish project facts in Blueprint. Determine legal scope from users, legal entities, processing, contracts and effective dates, never from document language. Verify legal summaries, future dates and product details against current primary sources at application time. Optional governance mechanisms (committees, periodic audits, Policy-as-Code, certification) are not required for every adopter; their requirements apply when adopted.
 
 ### 1.2. Single Source of Truth Principle (SSOT)
 
@@ -104,17 +101,9 @@
 
 ## Part II: Normative Hierarchy
 
-### 2.1. Five-Tier Normative Model
+### 2.1. Canonical Precedence and the Three-Layer Model
 
-The rule system is composed of the following five tiers, with higher tiers having absolute precedence over lower tiers.
-
-| Tier | Name | Location | Nature | Examples |
-|---|---|---|---|---|
-| **L0** | **Top-Level Protocol** | `AXIARCH.md` | Canonical Axiarch entrypoint. Overrides all rules and tool adapters | Deployment ban, language enforcement, AI self-completion, execution harness |
-| **L1** | **Meta-Constitution** | `universal/core/100_governance.md` | Operational norms for the rule system itself | This document |
-| **L2** | **Constitution** | `universal/*.md` (except 72) | Cross-project immutable rules | Security, engineering, UX |
-| **L3** | **Law (Blueprint)** | `blueprint/*.md` | Project-specific provisions | Project overview, lessons log |
-| **L4** | **Implementation** | Source code / config files | Implementation conforming to L0–L3 | `.env`, `tsconfig.json`, source code |
+`AXIARCH.md` §2 is the sole authority for precedence; §3 defines the three layers. Universal (stable constitution), Blueprint (mutable project rules), and Prompts (optional execution drivers) are the core separation. This file is a Universal rule, not a separate meta-constitution above other Universal rules. The harness is the execution procedure and source code is an artifact, not additional rule layers. Do not confuse precedence with harness H, distance D or maturity M levels.
 
 ### 2.2. Precedence Principles
 
@@ -122,15 +111,11 @@ The rule system is composed of the following five tiers, with higher tiers havin
 -   **Lex Specialis (Special Law Prevails)**: When contradictions exist within the same tier, the more **specific and concrete** rule takes precedence over the general one.
     - **Criteria**: Determined by three factors: ① specificity of scope, ② concreteness of conditions, ③ level of detail in instructions.
 -   **Lex Posterior (Later Law Prevails)**: When rules at the same tier and same specificity contradict, the **newer** rule (determined by Git history) takes precedence.
--   **Lex Stricta (Stricter Law Prevails)**: When the above cannot resolve the issue, the **stricter** rule takes precedence, in the order: Security > Protection > Constraint > Guideline.
+-   **Lex Stricta (Stricter Law Prevails)**: When the above cannot resolve the issue, the **stricter applicable** rule takes precedence; optional requirements do not become mandatory, and the latest explicit user instruction and canonical authority order still govern, in the order: Security > Protection > Constraint > Guideline.
 
-### 2.3. Separation of Concerns Between Tiers
+### 2.3. Separation of Responsibilities
 
--   **L0–L2 (Immutable Layer)**: Define principles, policies, and constraints. Specify "What to do" and "Why to do it".
--   **L3 (Mutable Layer)**: Define project-specific specifications and designs. Specify "How to do it".
--   **L4 (Implementation Layer)**: Materialize as code and configurations in accordance with L0–L3.
--   **Principle**: Upper tiers must not depend on implementation details of lower tiers (Dependency Inversion).
--   **Prohibition of Responsibility Violation**: It is a responsibility violation for upper tiers to over-specify "How" of lower tiers, or for lower tiers to modify the "What / Why" of upper tiers.
+Universal defines applicability and stable judgment criteria; Blueprint holds project facts, specifications, decisions and lessons; optional Prompts provide execution entrypoints that reference them. Follow `axiarch-harness/en/EXECUTION_HARNESS_PROTOCOL.md` for execution. Lower-level descriptions do not change Universal authority, and project-specific assumptions do not become universal principles.
 
 ---
 
@@ -146,13 +131,7 @@ The rule system is composed of the following five tiers, with higher tiers havin
 
 ### 3.2. Reference Procedure
 
-AI agents must reference rules following these steps:
-
-1.  **Step 1**: Review `INDEX.md` to understand the overall rule structure.
-2.  **Step 2**: Identify and autonomously load Constitution files (`universal/`) relevant to the task.
-3.  **Step 3**: Identify and autonomously load Blueprints (`blueprint/`) relevant to the task.
-4.  **Step 4**: Verify there are no contradictions among the loaded rules. If contradictions exist, resolve them according to [Part VI](#part-vi-dispute-resolution-protocol).
-5.  **Step 5**: Record loaded filenames in `task.md` (recording obligation).
+Read `AXIARCH.md`, `axiarch-rules/en/LOADING_PROTOCOL.md`, the same-language INDEX, then the relevant files and sections. Do not duplicate the detailed procedure here. H0 needs no recording gate; H1 uses a brief record; H2+ records actual paths and read ranges in session task.md. Index browsing, search hits, inherited summaries and truncated output are not full-file reading.
 
 ### 3.3. Large File Reference
 
@@ -168,9 +147,7 @@ AI agents must reference rules following these steps:
 
 ### 3.5. Compliance Judgment
 
--   **Broken Definition**: Code, designs, or documents generated without referencing and understanding rules are considered "**Broken**" regardless of quality.
--   **Auto-Reject**: Artifacts judged as Broken are **immediately rejected (Auto-Reject)** without review.
--   **Rework Obligation**: Rejected artifacts must be **recreated from scratch** with proper rule reference (partial fixes are not acceptable).
+Mark missing reads or evidence as unverified, read the necessary content directly, and audit the existing artifact against it. Automated checks and keyword matches cannot determine understanding, compliance or violations by themselves. Correct confirmed defects and verify again; do not require wholesale deletion or rebuilding every artifact from scratch. Preserve working behavior and focused edits under `AXIARCH.md` §6.5–6.6.
 
 ---
 
@@ -297,7 +274,7 @@ AI agents must reference rules following these steps:
     1.  **Phase 1 (Deprecation Declaration)**: Add `> [!WARNING] DEPRECATED` at the file header and specify the replacement
     2.  **Phase 2 (Transition Period)**: Allow a minimum transition period of one release cycle (or 30 days)
     3.  **Phase 3 (Physical Deletion)**: Physical deletion after transition completion. Requires Red Button Protocol (§9.2) approval
--   **Recording Obligation**: Record the reason for deprecation and replacement in the lessons log (`core/010_project_lessons_log.md`).
+-   **Recording Obligation**: Record the reason for deprecation and replacement in the lessons log (`axiarch-rules/en/blueprint/core/010_project_lessons_log.md`).
 
 ### 5.4. Rule Lifecycle
 
@@ -351,7 +328,7 @@ When contradictions arise, resolve in the following priority order:
 
 ### 6.4. Precedent Accumulation
 
--   **Recording**: "Precedents" from dispute resolution are accumulated in `core/010_project_lessons_log.md`.
+-   **Recording**: "Precedents" from dispute resolution are accumulated in `axiarch-rules/en/blueprint/core/010_project_lessons_log.md`.
 -   **Reference Obligation**: When similar contradictions recur, past precedents must be referenced to ensure consistent resolutions.
 -   **Binding Nature**: Precedents are "Advisory", not "Binding". Different judgments based on new facts or contexts are permissible.
 
@@ -406,7 +383,7 @@ When contradictions arise, resolve in the following priority order:
 
 ### 8.1. Sparse Numbering Protocol
 
--   **Law**: File numbers for rule files and Blueprint specifications are assigned **independently per containing folder using 3-digit prefixes (`000`–`999`)**. Any number from `000` to `999` may be used within a folder; the only thing to avoid is a **collision with an existing filename in that same folder**. There is no reserved band such as `100`–`599`, and no mandatory number such as a required `000`.
+-   **Law**: File numbers for rule files and Blueprint specifications are assigned **independently per containing folder using 3-digit prefixes (`000`–`999`)**. Any number from `000` to `999` may be used within a folder; the only thing to avoid is a **collision with an existing numeric prefix in that same folder**. There is no reserved band such as `100`–`599`, and no mandatory number such as a required `000`.
 -   **Numbering Independence**: Universal file numbering and Blueprint folder numbering are independent of each other. Universal numbers respect the existing numbering system and INDEX categories (§8.3), while Blueprint numbers are assigned independently within each domain folder using `000`–`999`. Neither side's numbers constrain the other.
 -   **Gaps of 10 (Style Recommendation)**: Leaving **gaps of approximately 5–10** for future insertion improves readability (e.g., `000, 010, 020, 030...` or `000, 005, 010, 015...`). This is a **style recommendation, not a reserved band**; if no gap is available, interstitial numbers (e.g., `011`, `015`) are acceptable. Choose available numbers based on folder context, collision checks, and readability.
 
@@ -425,7 +402,7 @@ When contradictions arise, resolve in the following priority order:
 | Target | Treatment | Notes |
 |---|---|---|
 | Universal | Respect the existing numbering system and INDEX categories | Prioritize compatibility with existing files. For additions, check unused `000`–`999` values within the target folder |
-| Blueprint | Operate `000`–`999` independently per folder | Freely choose any available number from `000`–`999` in each folder. Avoid only collisions with existing filenames such as `core/000_project_overview.md` |
+| Blueprint | Operate `000`–`999` independently per folder | Freely choose any available number from `000`–`999` in each folder. Avoid only collisions with existing filenames such as `axiarch-rules/en/blueprint/core/000_project_overview.md` |
 | `core/` | Existing `000`, `010`, `998`, and `999` numbers have fixed purposes | Other numbers may be used after checking availability in the target folder |
 | New domain folders | Add only after user approval, then apply the same 3-digit rule | Initial folders are not a closed taxonomy, but autonomous folder creation by AI is prohibited |
 
@@ -683,7 +660,7 @@ AI Agent → Project Owner
     3.  Determine whether insights should be crystallized as new rules
 -   **Output Destination Priority**:
     1.  Appending to related existing Blueprints (highest priority)
-    2.  Appending to the lessons log (`core/010_project_lessons_log.md`)
+    2.  Appending to the lessons log (`axiarch-rules/en/blueprint/core/010_project_lessons_log.md`)
     3.  Creating new files only for entirely new concepts
 
 ### 13.4. Anti-Pattern Catalog
@@ -917,7 +894,7 @@ forbid(
     2.  No alternative means exist
     3.  Explicit approval from the project owner is obtained
     4.  An expiration date is set
--   **Waiver Recording**: Approved Waivers must record the following in `core/010_project_lessons_log.md`:
+-   **Waiver Recording**: Approved Waivers must record the following in `axiarch-rules/en/blueprint/core/010_project_lessons_log.md`:
     - Rule ID of the exempted provision
     - Reason and justification for exemption
     - Expiration date (maximum 90 days; extension requires owner re-approval)
@@ -932,14 +909,16 @@ forbid(
 
 -   **Purpose**: Clarify the correspondence between external regulatory requirements and the rule system to prevent compliance gaps.
 -   **Mapping Target Examples**:
-    - EU AI Act (full enforcement August 2026) → `ai/000_ai_engineering.md`, `security/100_data_governance.md`
+    - EU AI Act (phased application; verify current scope and dates) → `ai/000_ai_engineering.md`, `security/100_data_governance.md`
     - GDPR / GDPR Digital Omnibus Reform → `security/000_security_privacy.md`, `security/100_data_governance.md`
     - SOC 2 Type II → `security/000_security_privacy.md`, `operations/400_site_reliability.md`
     - NIST AI RMF 1.0 / Cyber AI Profile → `ai/000_ai_engineering.md`, `security/000_security_privacy.md`
     - ISO/IEC 42001:2023 → This document (§10.5)
     - EU CRA (Cyber Resilience Act) → `security/200_oss_compliance.md`, `security/000_security_privacy.md`
     - DORA (Digital Operational Resilience Act) → `operations/400_site_reliability.md`, `operations/500_incident_response.md`
--   **Management Location**: Manage regulation-rule correspondence in `compliance_matrix.md`.
+-   **Management Location**: Manage regulation-rule correspondence in `axiarch-rules/{lang}/compliance_matrix.md`.
+
+Reference: [European Commission application timeline](https://ai-act-service-desk.ec.europa.eu/en/ai-act/eu-ai-act-implementation-timeline). Do not characterize all obligations as fully applicable in August 2026.
 
 ### 17.2. Regulation-to-Rule Process
 
@@ -1001,7 +980,7 @@ When interpretation is required, apply the following methods in order:
 
 ### 18.5. Interpretation Precedent Accumulation
 
--   **Recording Obligation**: Record interpretation judgments in `core/010_project_lessons_log.md`.
+-   **Recording Obligation**: Record interpretation judgments in `axiarch-rules/en/blueprint/core/010_project_lessons_log.md`.
 -   **Recording Items**:
     1.  Target Rule ID and section number
     2.  Context that necessitated interpretation
@@ -1387,7 +1366,7 @@ When interpretation is required, apply the following methods in order:
 -   **Principle**: Isolation requirements to prevent sandbox rules from propagating effects to the production rule system.
 -   **Isolation Methods**:
     - Place sandbox rules in a dedicated section of `blueprint/`, not in `universal/`
-    - Prefix sandbox rule filenames with `[EXPERIMENTAL]`
+    - Keep the normal `{NNN}_{topic}.md` filename and mark Status as `Experimental` in its content
     - Explicitly limit the scope of sandbox rule application
 -   **Contradiction with Production Rules**: When sandbox rules contradict production rules, **production rules always take priority**.
 
@@ -1405,7 +1384,7 @@ When interpretation is required, apply the following methods in order:
 -   **Purpose**: Lower the entry barrier for new members and AI agents accessing the rule system for the first time, supporting rapid understanding.
 -   **Required Content**:
     1.  Overall picture of the rule system (overview comprehensible in 5 minutes)
-    2.  Recommended reading order (`INDEX.md` → `000_core_mindset.md` → this document → project-specific Blueprints)
+    2.  Use `AXIARCH.md` → `axiarch-rules/{lang}/LOADING_PROTOCOL.md` → `axiarch-rules/{lang}/INDEX.md` to select applicable files and sections
     3.  Frequently Asked Questions (FAQ) and answers
     4.  Specific rule reference procedures (step-by-step)
 -   **Location**: Provided in `axiarch-rules/{lang}/README.md`.
@@ -1433,7 +1412,7 @@ When interpretation is required, apply the following methods in order:
 -   **Initialization Flow**:
     1.  Read `AXIARCH.md` to understand Project Native Language and top-level protocol. Treat tool adapters such as `AGENTS.md` as entrypoints to `AXIARCH.md`
     2.  Read `axiarch-rules/{lang}/INDEX.md` to understand the overall structure
-    3.  Continue from `AXIARCH.md` to `LOADING_PROTOCOL.md`, then autonomously select task-relevant rules based on task classification and `INDEX.md`
+    3.  Continue from `AXIARCH.md` to `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, then autonomously select task-relevant rules based on task classification and `INDEX.md`
     4.  Read L2 summaries of selected rules, referencing L3 full text only when detail is needed
 -   **Initialization Completion Record**: Record file names loaded during initialization in `task.md`.
 
@@ -1539,7 +1518,7 @@ When interpretation is required, apply the following methods in order:
     - **Structural Debt**: File structure inconsistencies, naming convention non-uniformity
     - **Content Debt**: Rules based on outdated technology assumptions, rules diverged from current reality
     - **Operational Debt**: Outdated quick reference indexes, inaccurate cross-references
--   **Repayment Plan**: Record technical debt in `core/010_project_lessons_log.md` and prioritize repayment during periodic reviews (§13.2).
+-   **Repayment Plan**: Record technical debt in `axiarch-rules/en/blueprint/core/010_project_lessons_log.md` and prioritize repayment during periodic reviews (§13.2).
 
 ### 28.5. Future Technology Adaptation Strategy
 

@@ -28,6 +28,8 @@ Bullet）ではありません**。その真の目的は、強固なルールア
 
 ### 報告方法
 
+管理記録・バックアップ・診断ログにも機密情報が入りうるため、そのまま報告へ添付しないでください。Git除外と保存権限、既存記録の扱い、外部通知の境界は [実行記録の保護](axiarch-harness/ja/TASK_STATE_PROTOCOL.md#実行記録の保護) を参照してください。自動検査は秘密・個人データの完全検出や匿名化を保証しません。
+
 - exploit手順、未公開脆弱性、credential、個人情報を含む報告は
   [GitHub Private Vulnerability Reporting](https://github.com/hiroyuki-miyauchi/axiarch/security/advisories/new)
   を使用し、公開Issueへ記載しないでください
@@ -79,6 +81,8 @@ Please report if you discover any of the following:
 | CI and release supply-chain weaknesses    | Secret exposure, excess privilege, unverified artifacts, or tag/Release tampering |
 
 ### How to Report
+
+Managed records, backups and diagnostic logs may contain sensitive information; do not attach them unreviewed. See [runtime artifact protection](axiarch-harness/en/TASK_STATE_PROTOCOL.md#runtime-artifact-protection) for Git exclusions, permissions, existing records and notification boundaries. Automated checks do not guarantee complete detection or anonymization of secrets or personal data.
 
 - Reports containing exploit details, unpublished vulnerabilities, credentials,
   or personal data must use

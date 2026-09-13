@@ -2,15 +2,18 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-09-11 (language scope and execution-contract alignment)
 
 > [!IMPORTANT]
 > **Primary Directive**
-> Absolute Compliance with the Project Native Language.
-> - **Core Principle**: All communication between users and developers must be conducted in the language defined by `Project Native Language` in `AXIARCH.md`. Legacy adopters may fall back to `AGENTS.md`. Advanced language proficiency including cultural context and nuance is required.
-> - **Scope**: Thinking & planning (`task.md`, `implementation_plan.md`), reporting & dialogue (`notify_user`), deliverables (UI, documentation, error messages).
-> - **English Restriction**: English usage is strictly limited to source code, variable names, technical terms, and commit message subjects only. Unnatural translationese or context-ignorant English usage is treated as a **bug**.
-> **11 Parts, 43 Sections.**
+> Communicate decisions and results in the language appropriate to the audience and output.
+> - Core principle: The project-root `AXIARCH.md` §0 defines the authority for AI response-language precedence. Follow the latest explicit user instruction, then `Project Native Language` as the default. English is correct for an adopter that selects English.
+> - Scope: User-visible plans, concise decision rationale, reports and questions, plus audience-facing UI and documentation. This does not require disclosure or inspection of private internal reasoning.
+> - Technical notation: Preserve required original code identifiers, APIs, logs, package names and quotations. A different language alone is not a violation; assess the output's configuration and context.
+
+Universal defines common language-selection and quality principles; Blueprint holds mutable defaults, supported locales, glossaries and review criteria. The optional prompt layer assists applicable rule loading and execution. Mandatory clauses below apply where their feature and audience exist. Recommendations, examples and recurring practices are optional unless explicitly made mandatory; the listed SDKs, notifications, RAG and multilingual products need not be introduced into every adopter.
+
+Product display language follows supported locales and the user's selection. Examples of residual English describe mismatches where another output language is required; English itself is not prohibited. Axiarch's distributed automatic resolver currently supports ja/en. Resolving configuration does not establish content correctness, translation quality or completed loading. Checks and review aim to raise the quality baseline, without guaranteeing elimination of errors.
 
 ---
 
@@ -69,58 +72,61 @@
 
 - **Rule 74.1**: Every project MUST define **one authoritative language** via `Project Native Language` in `AXIARCH.md`. Legacy adopters may fall back to `AGENTS.md`
 - **Rule 74.2**: The authoritative language serves as the **default language** for all decision documents, user-facing text, and team communication
-- **Rule 74.3**: Changing the authoritative language requires a procedure equivalent to a "Constitutional Amendment" (→ see [core/100_governance.md](../core/100_governance.md) Part IV)
+- **Rule 74.3**: Changing a project language value is a project-specific configuration change: apply it within existing authorization and record its impact. Amendments to Universal clauses themselves follow [core/100_governance.md](./100_governance.md) Part IV.
 
 ### 1.2. Three-Layer Language Usage Model
 
 All text is classified into the following three layers, with language policies applied per layer:
 
+L1–L3 here classify language usage; they are independent of autonomy distance D, framework maturity M and execution harness H.
+
 | Layer | Scope | Language | Rationale |
 |---|---|---|---|
-| **L1: User Layer** | UI, notifications, emails, error messages, help | **Project Native Language (mandatory)** | Zero Cognitive Load Principle |
-| **L2: Developer Layer** | Specs, PRs, tasks, commit body, code comments | **Project Native Language (mandatory)**, code itself in English | Accuracy of team communication |
-| **L3: System Layer** | Logs, metrics, audit trails, external APIs | **English (recommended)** | International interoperability & tool compatibility |
+| **L1: User Layer** | UI, notifications, emails, error messages, help | Selected display language (Project Native Language by default) | Reduced translation burden |
+| **L2: Developer Layer** | Specs, PRs, tasks, commit body, code comments | Applicable response language; code and in-code comments follow Part II | Accuracy of team communication |
+| **L3: System Layer** | Logs, metrics, audit trails, external APIs | System contracts and Parts IX/XII | International interoperability & tool compatibility |
 
 ```
 ┌─────────────────────────────────────┐
-│  L1: User Layer                      │ → Project Native Language
+│  L1: User Layer                      │ → Selected display language
 │  (UI, notifications, emails, errors) │
 ├─────────────────────────────────────┤
-│  L2: Developer Layer                 │ → Project Native Language + Code in English
+│  L2: Developer Layer                 │ → Applicable response language; code per Part II
 │  (Specs, PRs, tasks, comments)       │
 ├─────────────────────────────────────┤
-│  L3: System Layer                    │ → English
+│  L3: System Layer                    │ → System contracts and Parts IX/XII
 │  (Logs, metrics, audit, ext. APIs)   │
 └─────────────────────────────────────┘
 ```
 
-### 1.3. Zero Cognitive Load Principle
+### 1.3. Reducing Translation Burden
 
-- **Rule 74.4**: Any situation requiring users to perform "translation" as a cognitive task is treated as an **implementation bug**
-- **Rule 74.5**: System-generated English (`"Invalid input"`, `"Required"`, `"Unknown"`) reaching end users is prohibited under **zero tolerance**
+- **Rule 74.4**: Review wording that imposes avoidable translation effort on the intended audience, using the output language and context.
+- **Rule 74.5**: Correct system-generated defaults that do not match the selected display language or purpose. English text is not a defect when English is selected.
 - **Rule 74.6**: Translation quality is also covered. Unnatural translationese or awkward phrasing is also prohibited. Natural, professional expressions are mandatory
 
 ### 1.4. Language Negotiation Strategy
 
-- **Rule 74.7**: The **priority chain** for determining user language is defined as follows:
+- **Rule 74.7**: For product UI, prioritize the user’s current explicit selection. The following is a resolution example within supported locales; AI response precedence remains in `AXIARCH.md` §0. Geographic inference is optional: review its purpose and authorization, and do not collect precise location just to select language:
 
 ```
-1. DB-stored user language preference (highest priority)
-2. Session/Cookie stored language selection
-3. HTTP `Accept-Language` header
-4. `navigator.language` / `navigator.languages`
-5. GeoIP-based estimation (fallback)
-6. Project default language (final fallback)
+1. Current explicit user selection
+2. DB-stored user language preference
+3. Session/Cookie stored language selection
+4. HTTP `Accept-Language` header
+5. `navigator.language` / `navigator.languages`
+6. Geographic estimate only if adopted and authorized
+7. Project default language
 ```
 
-- **Rule 74.8**: For single-language projects (only one `Project Native Language`), negotiation is unnecessary. The Project Native Language is always applied
+- **Rule 74.8**: Language negotiation is unnecessary for a product that offers only one locale. One default language does not imply that the product offers only one locale.
 - **Rule 74.9**: Ensure UI state preservation during language switching (form input values, scroll position, modal state)
-- **Rule 74.9A**: Recommend a Service Worker language interceptor strategy. Detect language at the request level and prefetch/cache appropriate locale resources
-- **Rule 74.9B**: When using Temporal API (TC39 Stage 3), set `calendar` and `timeZone` of `Temporal.Now.zonedDateTimeISO()` based on the user's locale
+- **Rule 74.9A**: Locale-aware Service Worker prefetching and caching is an optional optimization, selected after assessing existing features and expected benefit.
+- **Rule 74.9B**: Treat language, time zone and calendar as separate settings. If Temporal is adopted, `Temporal.Now.zonedDateTimeISO(timeZone)` returns the ISO calendar; apply `withCalendar()` to the result when another calendar is needed. Do not infer a region or time zone solely from language. Verify runtime support ([official documentation](https://tc39.es/proposal-temporal/docs/now.html)).
 
 ### 1.5. Language Policy Governance
 
-- **Rule 74.10A**: Language policy change proposals follow this RACI matrix:
+- **Rule 74.10A**: Assign accountability and a reviewer able to assess language-policy impact. The following RACI is an organizational example, not a requirement to create every role:
 
 | Role | Responsibility |
 |---|---|
@@ -129,7 +135,7 @@ All text is classified into the following three layers, with language policies a
 | **Consulted** | UX Writer / Localization Engineer |
 | **Informed** | Entire development team |
 
-- **Rule 74.10B**: Language policy changes are proposed via PR and require a minimum of 2 reviewers
+- **Rule 74.10B**: Review configuration changes according to impact and the project’s agreed review policy. Require a PR or two reviewers when that policy mandates it; Universal amendment authority remains unchanged.
 
 ---
 
@@ -207,13 +213,13 @@ const STATUS_LABELS: Record<string, string> = {
 
 ### 3.1. Design Documents & Specifications (Blueprint)
 
-- **Rule 74.20**: Blueprints (under `axiarch-rules/{lang}/blueprint/`) MUST be written in the **Project Native Language**
+- **Rule 74.20**: Author the canonical Blueprint under `axiarch-rules/{lang}/blueprint/` in the default language. Bilingual distribution maintenance retains translations in matching language folders without creating independent specification authorities.
 - **Rule 74.21**: Technical terms and proper nouns (React, Supabase, Next.js, etc.) retain English representation as a rule
 - **Rule 74.22**: ADRs (Architecture Decision Records) are also written in the Project Native Language to accurately capture decision rationale
 
 ### 3.2. Task Management & Issues
 
-- **Rule 74.23**: `task.md`, `implementation_plan.md`, `walkthrough.md` are in the **Project Native Language**
+- **Rule 74.23**: The [task-state contract](../../../../axiarch-harness/en/TASK_STATE_PROTOCOL.md) defines when and where to create work records. Write required records in the applicable response language; do not overwrite legacy root records as current-session evidence.
 - **Rule 74.24**: GitHub/GitLab Issue titles and descriptions are in the **Project Native Language**
 - **Rule 74.25**: Label names may use English (`bug`, `feature`, `priority:high`, etc.)
 
@@ -379,9 +385,9 @@ Migration `20260318_add_reminder_interval` must be applied.
 
 ### 7.1. Validation Messages
 
-- **Rule 74.65**: Displaying default English messages from validation libraries (Zod, Yup, React Hook Form, etc.) to users is a **bug**
-- **Rule 74.66**: All validation rules MUST have explicit `message` set in the Project Native Language
-- **Rule 74.66A**: When using Zod, configure `z.setErrorMap()` to set a global error map, structurally preventing default message leakage
+- **Rule 74.65**: Correct validation-library defaults that do not match the display language or context. Suitable English defaults are not prohibited merely because they are English.
+- **Rule 74.66**: Provide each validation error with a message appropriate to the display language, glossary and user's next action. Reviewed defaults may be retained; explicitly override mismatches.
+- **Rule 74.66A**: When using validation libraries, manage wording through an error map or equivalent supported by the adopted version. Configuration alone does not prove coverage; verify errors actually displayed to users.
 
 ```typescript
 // ✅ Correct pattern: Global error map
@@ -610,10 +616,10 @@ export default function GlobalError() {
 
 ### 11.1. AI Agent Language Compliance Mandate
 
-- **Rule 74.110**: **All AI agent output** (thinking processes, plans, reports, questions) MUST use the Project Native Language
-- **Rule 74.111**: Generation and updates of `task.md`, `implementation_plan.md`, `walkthrough.md` are in the **Project Native Language**
-- **Rule 74.112**: Reports and questions to users via `notify_user` are in the **Project Native Language**
-- **Rule 74.113**: If an AI communicates in a non-project language, it is a **protocol violation** requiring immediate correction
+- **Rule 74.110**: User-visible plans, concise rationale, reports and questions use the language resolved under `AXIARCH.md` §0. This does not prescribe the language or disclosure of private internal reasoning.
+- **Rule 74.111**: Work-record language and location follow Rule 74.23. Do not require records for H0 or the H2+ three-document procedure for H1.
+- **Rule 74.112**: Report and ask questions through ordinary responses or available interaction features. Do not require a product-specific tool such as `notify_user`, or infer external-send authorization from language rules.
+- **Rule 74.113**: Correct a mismatch with the required output language after accounting for explicit instructions, quotations and code. English alone is not evidence of a violation.
 
 ### 11.2. AI-Generated Text Language Quality
 
@@ -627,18 +633,18 @@ export default function GlobalError() {
 ### 11.3. Prompts & System Instructions
 
 - **Rule 74.116**: User-facing AI systems (chatbots, AI assistants, etc.) MUST include **language specification** in system prompts
-- **Rule 74.117**: AI responses follow the user's input language or Project Native Language
+- **Rule 74.117**: AI responses follow `AXIARCH.md` §0. A quotation or source document in another language is not an explicit instruction to change response language.
 - **Rule 74.118**: Implement **fallback mechanisms** for AI responses returned in unintended languages
 
 ### 11.4. RAG & Knowledge Base Multilingual Support
 
-- **Rule 74.119**: When RAG source documents are in a language other than the Project Native Language, AI responses MUST be translated to the Project Native Language
-- **Rule 74.120**: Knowledge base search queries are executed in both the Project Native Language and source language to maximize recall
+- **Rule 74.119**: When RAG is used, answer in the resolved response language while preserving necessary quotations and sources.
+- **Rule 74.120**: Consider source-language queries when they can reduce missed results. Additional queries are optional and must respect external-search authorization and data confidentiality.
 
 ### 11.5. Language Drift Auto-Detection
 
-- **Rule 74.121**: Recommend mechanisms to auto-detect AI output language and alert when non-project language output is mixed in
-- **Rule 74.122**: Language drift detection methods:
+- **Rule 74.121**: Automatic language detection is optional assistance with false positives and false negatives. Sending text to external services or issuing automatic notifications requires separate authorization; do not forward secrets or personal data unchanged.
+- **Rule 74.122**: Candidate detection methods follow. Character scripts and AI self-reports do not prove meaning, quality or completed loading. Health resolves language configuration with the shared parser; it does not implement these document assessments:
   - Character code-based (Unicode Script Property analysis)
   - Language detection libraries (`franc`, `cld3`, etc.) sampling inspection
   - LLM self-verification prompt ("Is your output in the Project Native Language?")
@@ -807,7 +813,7 @@ error.network.timeout     → "Connection timed out"
 
 ### 15.3. Sitemap & robots.txt
 
-- **Rule 74.161**: For multilingual sites, set `hreflang` attributes accurately on all pages (→ see [800_internationalization.md](../product/800_internationalization.md) Part X)
+- **Rule 74.161**: For multilingual sites, set `hreflang` attributes accurately on all pages (→ see [product/800_internationalization.md](../product/800_internationalization.md) Part X)
 - **Rule 74.162**: `robots.txt` is language-independent (written in English)
 
 ---
@@ -910,7 +916,7 @@ Is the text displayed to users?
 
 ### 18.1. Untranslated String Auto-Scan
 
-- **Rule 74.180**: Detect UI components (`.tsx`, `.vue`, etc.) containing string literals not in the Project Native Language via CI/PR review
+- **Rule 74.180**: Inspect UI strings for target-locale mismatches through CI or review. Character scripts alone are insufficient: consider quotations, proper names and display context.
 - **Rule 74.181**: Scan target layers (Deep Layer Scan):
   - UI component layer
   - Server Action / API Route error messages
@@ -932,22 +938,22 @@ Is the text displayed to users?
 
 ### 18.3. PR / Deploy Gate
 
-- **Rule 74.183**: Untranslated string detection MUST be configured as a **blocking item** in PR review
+- **Rule 74.183**: Confirmed translation omissions must be resolved in review. Assess automated candidates before making them blocking findings; do not block solely on character scripts.
 - **Rule 74.184**: Automated glossary consistency check for newly added strings is recommended
-- **Rule 74.185**: Periodic full scans (weekly/monthly) to monitor residual "placeholder English"
-- **Rule 74.185A**: Auto-insert translation coverage as PR comments to visualize progress
+- **Rule 74.185**: Recurring scans for residual placeholder text are optional. If adopted, record an impact-based frequency in project rules.
+- **Rule 74.185A**: Automatically post translation-coverage summaries to PRs only within a workflow authorized for the destination, content and permissions.
 
 ### 18.4. ESLint / Biome Custom Rules
 
-- **Rule 74.186**: Introduce ESLint or Biome custom rules for automated language quality detection
+- **Rule 74.186**: If ESLint, Biome or similar checks are adopted, verify actual rules and their scope. The following is illustrative configuration pseudocode, not a plugin or detector bundled with Axiarch.
 
 ```typescript
-// eslint-plugin-language-protocol configuration example
+// Illustrative configuration; these rule implementations are not bundled
 module.exports = {
   rules: {
-    'no-raw-english-in-jsx': 'error',     // Prohibit English literals in JSX
+    'review-unlocalized-ui': 'warn',      // Illustrative rule; review candidates
     'require-label-map': 'error',          // Detect direct Enum display
-    'no-default-validation-msg': 'error',  // Detect Zod default messages
+    'review-validation-msg': 'warn',     // Illustrative rule; review displayed wording
     'require-aria-lang': 'warn',           // Check aria-label language
   },
 };
@@ -1168,13 +1174,15 @@ const label = t('auth.login.emial_label'); // Typo → compile error detection
 
 ### 25.1. Language Protocol Maturity Model (5 Levels)
 
+Language maturity LM1–LM5 is an optional assessment axis, independent of framework maturity M1–M5.
+
 | Level | Name | Characteristics |
 |---|---|---|
-| **L1: Ad-hoc** | Ad-hoc | No language policy. English/native language mixed based on developer preference |
-| **L2: Basic** | Basic | UI layer localization only. Validation/error messages remain in English |
-| **L3: Standardized** | Standardized | Three-layer model applied. Glossary established. CI scan introduced. Enum/status label maps complete |
-| **L4: Managed** | Managed | Language policy applied across all layers. Quality scoring introduced. Translation drift auto-detection |
-| **L5: Optimized** | Optimized | AI-powered language quality auto-verification. Zero untranslated maintenance. Microcopy A/B testing. Type-safe i18n complete. MTPE workflow finalized |
+| **LM1: Ad-hoc** | Ad-hoc | No language policy. English/native language mixed based on developer preference |
+| **LM2: Basic** | Basic | UI layer localization only. Validation/error messages do not match the selected locale |
+| **LM3: Standardized** | Standardized | Three-layer model applied. Glossary established. CI scan introduced. Enum/status label maps complete |
+| **LM4: Managed** | Managed | Language policy applied across all layers. Quality scoring introduced. Translation drift auto-detection |
+| **LM5: Optimized** | Optimized | AI-powered language quality auto-verification. Continuous reduction of untranslated content. Microcopy A/B testing. Type-safe i18n complete. MTPE workflow finalized |
 
 ### 25.1A. MTPE (Machine Translation Post-Editing) Quality Classification
 
@@ -1189,16 +1197,16 @@ const label = t('auth.login.emial_label'); // Typo → compile error detection
 
 | # | Anti-Pattern Name | Description | Countermeasure Section |
 |---|---|---|---|
-| 1 | **Lazy Translation** | Placeholder English from development persists into production | Part XVIII |
+| 1 | **Lazy Translation** | Unreviewed development placeholders persist into production | Part XVIII |
 | 2 | **CSS Uppercase Trick** | Using CSS `uppercase` to style English constants for display | Part VII §7.3 |
-| 3 | **Validation Leak** | Zod default English messages leak to users | Part VII §7.1 |
+| 3 | **Validation Leak** | Validation defaults bypass the selected locale | Part VII §7.1 |
 | 4 | **Terminology Chaos** | Multiple notations for the same concept coexist | Part VI |
 | 5 | **Fallback Exposure** | `"Unknown"`, `"N/A"` displayed to users | Part V §5.4 |
-| 6 | **Ghost English** | Hidden text like `aria-label`, `alt`, `title` remains in English | Part XVI |
+| 6 | **Hidden Language Mismatch** | Hidden text like `aria-label`, `alt`, `title` ignores the selected locale | Part XVI |
 | 7 | **Log Language Confusion** | Mixed Project Native Language and English in logs | Part XII |
-| 8 | **AI Language Drift** | AI agent unintentionally responds in English | Part XI |
+| 8 | **AI Language Drift** | AI agent ignores the applicable response language | Part XI |
 | 9 | **Commit Message Chaos** | Inconsistent commit message language | Part IV |
-| 10 | **Error Layer Bleed** | Internal English error messages leak into the UI | Part VIII |
+| 10 | **Error Layer Bleed** | Internal diagnostics reach the UI without audience review | Part VIII |
 | 11 | **Plural Blindness** | String concatenation ignoring plural rules | Part VII §7.5 |
 | 12 | **Font Fallback Hell** | Character rendering failure in PDF/CJK due to unembedded fonts | Part XXII §22.1 |
 | 13 | **Translation Key Orphan** | Accumulation of translation keys not referenced by code | Part XIX §19.4 |
@@ -1212,7 +1220,7 @@ const label = t('auth.login.emial_label'); // Typo → compile error detection
 
 ### 25.3. Periodic Audit Protocol
 
-- **Rule 74.250**: Conduct a language protocol compliance audit quarterly
+- **Rule 74.250**: Recurring language audits are optional. If adopted, choose a cadence such as quarterly based on impact and change volume.
 - **Rule 74.251**: Audit items:
   1. Untranslated string scan results
   2. Glossary currency
@@ -1365,9 +1373,9 @@ export async function getMessages(locale: string) {
 
 ### 30.3. Language Protocol Violation Graduated Correction
 
-- **Rule 74.308**: Correct language protocol violations in the following priority order:
-  1. **P0 (Immediate fix)**: User-facing English leakage (validation, error messages)
-  2. **P1 (Next sprint)**: Hidden text English remnants (`aria-label`, `alt`)
+- **Rule 74.308**: Prioritize language mismatches by user impact. These are examples; English itself is not a severity criterion:
+  1. **P0 (Immediate fix)**: User-facing language mismatches (validation, error messages)
+  2. **P1 (Next sprint)**: Hidden text language mismatches (`aria-label`, `alt`)
   3. **P2 (Planned)**: Log language inconsistency, commit message inconsistency
 
 ---
@@ -1660,7 +1668,7 @@ charset = utf-8-bom
 
 - **Rule 74.400**: Set Stripe Elements `locale` parameter to the Project Native Language
 - **Rule 74.401**: Unify display language of PayPal / Square and other payment widgets to the Project Native Language
-- **Rule 74.402**: When payment SDK error messages default to English, translate them via custom error handling
+- **Rule 74.402**: Map payment-SDK defaults to appropriate user-facing wording when they do not match the selected display language or context.
 
 ### 40.2. Maps & Location SDKs
 
@@ -1728,10 +1736,10 @@ const LOCALE_CONFIG = {
 
 ### 42.1. Incident Definition
 
-- **Rule 74.420**: Define the following as language-related incidents:
+- **Rule 74.420**: Classify language incidents by actual impact. These are examples; accessibility or safety omissions must not always be treated as minor:
   - **P0 (Emergency)**: Missing translations for legal documents/safety warnings leaked to production
-  - **P1 (Critical)**: Extensive English remaining across user-facing UI
-  - **P2 (Medium)**: Validation messages on specific screens displayed in English
+  - **P1 (Critical)**: Widespread mismatch with the selected UI locale
+  - **P2 (Medium)**: Validation messages on specific screens ignore the selected locale
   - **P3 (Minor)**: Translation omissions in `aria-label` or `alt` text
 
 ### 42.2. Incident Response Flow
@@ -1752,7 +1760,7 @@ const LOCALE_CONFIG = {
   - Root cause (missing CI gates, review oversights, etc.)
   - Impact scope (number of affected users/screens)
   - Preventive measures (CI rule additions, checklist updates, etc.)
-- **Rule 74.423**: Record postmortem lessons in `core/010_project_lessons_log.md`
+- **Rule 74.423**: Record postmortem lessons in `axiarch-rules/en/blueprint/core/010_project_lessons_log.md`
 
 ---
 
@@ -1828,7 +1836,7 @@ const LOCALE_CONFIG = {
 
 | Related Rule | Referenced Content | Boundary with This Rule |
 |---|---|---|
-| [000_core_mindset.md](../core/000_core_mindset.md) | Zero Tolerance principle | This rule specifies Zero Tolerance for language aspects |
+| [core/000_core_mindset.md](./000_core_mindset.md) | Zero Tolerance principle | This rule specifies Zero Tolerance for language aspects |
 | [design/000_design_ux.md](../design/000_design_ux.md) | Accessibility & UX standards | This rule specializes in language aspects of accessibility |
 | [engineering/000_engineering_standards.md](../engineering/000_engineering_standards.md) | Coding conventions | This rule specializes in language selection criteria |
 | [engineering/100_api_integration.md](../engineering/100_api_integration.md) | API design standards | This rule specializes in API language policy |
@@ -1836,7 +1844,7 @@ const LOCALE_CONFIG = {
 | [ai/000_ai_engineering.md](../ai/000_ai_engineering.md) | AI implementation strategy | This rule specializes in AI communication language protocol |
 | [operations/300_customer_experience.md](../operations/300_customer_experience.md) | Email delivery standards | This rule specializes in notification language policy |
 | [security/000_security_privacy.md](../security/000_security_privacy.md) | Security standards | This rule specializes in multilingual safety guardrails |
-| [800_internationalization.md](../product/800_internationalization.md) | i18n architecture & L10n infrastructure | 71 = international expansion infrastructure, 74 = language selection rules |
+| [product/800_internationalization.md](../product/800_internationalization.md) | i18n architecture & L10n infrastructure | 71 = international expansion infrastructure, 74 = language selection rules |
 | [core/100_governance.md](../core/100_governance.md) Part XXII | Rule translation governance | 72 = translation management of rules themselves, 74 = product language protocol |
 
 ---

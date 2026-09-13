@@ -1,6 +1,6 @@
 {
   "manifestVersion": 1,
-  "axiarchVersion": "1.16.0",
+  "axiarchVersion": "1.17.0-dev",
   "description": "Axiarch upgrade ownership manifest. Axiarch Core can be updated; Project State must be preserved unless the operator explicitly reviews and accepts a change.",
   "groups": [
     {
@@ -286,6 +286,12 @@
       "group": "prompts",
       "owner": "axiarch",
       "policy": "optional"
+    },
+    {
+      "path": "tests",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
     },
     {
       "path": "README.md",

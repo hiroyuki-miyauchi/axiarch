@@ -4,7 +4,7 @@
 > crystallized from `core/010_project_lessons_log.md` for the **Operations domain**.
 
 > [!NOTE]
-> Files are automatically generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `CRYSTALLIZATION_PROTOCOL.md`.
+> Files are automatically generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 > Pre-populating seed files is prohibited as it violates the YAGNI principle. The current file exists because real operations lessons reached the crystallization threshold.
 
 ## Crystallized Rules

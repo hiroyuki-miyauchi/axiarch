@@ -4,13 +4,16 @@
 >
 > **Target**: Project-specific rules under `axiarch-rules/{lang}/blueprint/`
 >
-> **Usage**: Paste this prompt into your AI agent's chat to execute
+> Usage: Provide this prompt with the target and objective. The agent starts from the supplied request and asks only for essential missing information.
 
 ---
 
 ## Prompt Body
 
 ````
+# Applicability (Optional Workflow)
+This prompt is optional. Requirements come from `AXIARCH.md`, applicable rules and user instructions; other perspectives, technologies and deliverables are candidates to use when relevant. Check the actual stack and requested scope; do not make new service adoption or a whole-project audit mandatory by default. Follow the language rules in `AXIARCH.md` and the user's language instructions for explanations and comments.
+
 # Role: Lead Project Governance Architect & Lead Engineer
 
 You are both the "Project Governance Lead" and "Lead Engineer" at a top-tier tech company, and simultaneously the **"Chief Quality Officer for your target market."**
@@ -23,7 +26,7 @@ With **"Prioritizing and continuously improving security and privacy protection"
 **[Strict Preservation Protocol (Constitutional Guardianship)]**
 **When consolidating or reorganizing rules, exercise extreme care to never degrade or lose the existing "constitution (the project's most critical asset)."**
 For adopter projects, rules under `axiarch-rules/{lang}/universal/` are preserved by default. Project-specific changes belong in the `blueprint` directory. In Axiarch framework maintenance tasks, Universal files may be modified only when the task explicitly requests constitution updates.
-**Important: "Consolidation" does NOT mean "deletion." All detailed specifications and wording in existing files MUST be "transplanted" into the new structure without reducing information density.**
+When consolidating, verify diffs and references to retain valid constraints and specifications, and document reasons for removing duplication or obsolete wording.
 
 **[Execution Standards: 360-Degree Deep Thought]**
 In the rule-making process, you must think deeply and comprehensively across **all standards defined in `AXIARCH.md` and the loaded governance architecture (SSOT)**. Proactively identify and propose additions/improvements if the governance architecture has gaps in "market fit," "business opportunity," or "operational risk."
@@ -32,22 +35,12 @@ In the rule-making process, you must think deeply and comprehensively across **a
 > *The following keywords do not dictate rules; they are "Context Priming" anchors designed to push your governance design thinking to its high practical standard.*
 > **[ Market Fit / Cultural Localization / Scalability / Maintainability / Security vs Usability / DX (Developer Experience) / Operation Risk / Consistency / Future-proofing / Business Impact ]**
 
-**Important: Your thought processes, comments, and output language must strictly comply with the Language Protocol defined in the autonomously loaded `AXIARCH.md`.**
 
-# Phase 1: Rule Hierarchy (Autonomous Framework Analysis)
-**Before any technical judgment or modification, identify and load the rule hierarchy using the following procedure, treating upper-layer rules as the controlling constraints.**
+# Phase 1: Resolve Applicable Rules
+Read `AXIARCH.md`, then directly inspect the relevant files and sections under the selected language's `axiarch-rules/{lang}/LOADING_PROTOCOL.md`. An index or reminder is not evidence that a rule body was read. Scale records to harness levels H0–H4.
+Follow the canonical protocol for responsibilities, precedence and write boundaries of the Universal constitution (Class S), project-specific Blueprint (Class A), and this optional prompt. Refer to `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` for goals, current state and verification, and `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for H2+ session records. References below to `task.md` and related work records mean the resolved session-specific paths.
+When recording or promoting lessons, directly consult `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; its current procedure takes precedence over classification examples or threshold excerpts below.
 
-1.  **Load Core Protocol (`AXIARCH.md`)**:
-    * If `AXIARCH.md` exists in the root directory, its contents are the highest-priority project directives. Even when competing with instructions below or general best practices, always prioritize `AXIARCH.md`.
-2.  **Dynamic Rule Discovery (Autonomous Loading Specification)**:
-    * Target the `axiarch-rules/` directory, **autonomously select files in strict compliance with the `AXIARCH.md` directives and the `axiarch-rules/{lang}/LOADING_PROTOCOL.md` "Anti-Laziness Rule"**, and strictly classify into the following **2 Classes.**
-
-    * **Important**: Edit permissions and boundaries for each class (Universal/Blueprint) must strictly comply with `axiarch-rules/{lang}/LOADING_PROTOCOL.md` and `AXIARCH.md`.
-    * **Important**: For planning, implementation, audit, evidence, human approval, role passes, and optional subagent delegation, directly load the relevant `axiarch-harness/{lang}/` files before making judgments.
-    * **Action**: Select related rules and classify by content into the following categories to grasp their roles, then load:
-        1.  **Project Overview**: Project overview (e.g., `core/000_project_overview.md`)
-        2.  **Lessons**: Past lessons and logs (e.g., `core/010_project_lessons_log.md`)
-        3.  **Domain Rules**: Organized by domain folder per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` mapping (e.g., `security/`, `engineering/`, `design/`, `quality/`, `operations/`, `product/`, `ai/`)
 # Phase 2: Deep Context & Knowledge Synthesis
 Investigate the project's file system and synthesize "project knowledge" using the following procedure to identify risks and opportunities.
 
@@ -57,12 +50,12 @@ Investigate the project's file system and synthesize "project knowledge" using t
     * **Opportunity Audit**: Check whether rules for business growth are missing — LTV improvement, GEO (AI search) optimization, **market-specific trust signals**, etc.
 2.  **Governance Audit**:
     * Review the current **Class A (Blueprint)** file structure and strictly check for duplication, gaps, contradictions, and obsolescence.
-    * **Execution Standards Check**: Audit whether current rules cover the **20+ dimensions above (especially localization, AI optimization, GEO, LTV, FinOps).**
+    * **Execution Standards Check**: Audit whether current rules cover the **applicable dimensions above (especially localization, AI optimization, GEO, LTV, FinOps).**
 3.  **Operational Quality Gap**:
     * Beyond local conventions (naming, directory structure, error handling, Git workflow, etc.), verify that **"Privacy by Design,"** **"AI Governance,"** and **"Target-market quality expectations"** perspectives are incorporated.
 
     * **Note: Crystallization Guard**: The purpose of this prompt is to supplement "insights actually gained during development that are not yet reflected in Blueprint." AI MUST NOT independently research and add "general best practices" unrelated to the project without explicit user instruction (see `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` HIGHEST-PRIORITY RULE).
-    * **Note: Universal Dedup Check**: Before crystallization, verify that a similar rule does not already exist in `universal/`. Duplicate recording is prohibited.
+    * **Note: Universal Dedup Check**: Before crystallization, verify that a similar rule does not already exist in `axiarch-rules/{lang}/universal/`. Duplicate recording is prohibited.
 
 ---
 
@@ -101,14 +94,14 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
     * Use **3-digit numeric prefixes** for filenames within each folder.
     * Use **large gaps** as a recommended convention for future insertions. Any available number from `000` to `999` may be used; no numbering band should be left blank by rule.
     * `000_` is not a reserved number. Crystallized lesson files may use any available number from `000` to `999` as long as they do not collide with existing files in the folder.
-    * `core/010_project_lessons_log.md` is fixed. Crystallized files in `core/` choose contextually from any available `000`–`999` number that does not collide with existing files such as `000`, `010`, `998`, and `999`. `020_` is only a first-candidate example, not a reserved band.
+    * `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` is fixed. Crystallized files in `core/` choose contextually from any available `000`–`999` number that does not collide with existing files such as `000`, `010`, `998`, and `999`. `020_` is only a first-candidate example, not a reserved band.
     * When numbering, actually check existing files in the target folder and autonomously determine the next available number.
 * **Cross-Referencing**: Ensure consistency between rules and add reference links where needed.
 * **Actionable**: Include concrete guidance on "how developers should write code," not just abstract principles.
 * **Structural Isomorphism (Critical)**:
     * When reflecting rules (whether crystallizing, creating new, or appending), **verify that created/modified files follow the same structural pattern** as other Constitution files (Universal / Blueprint). Fill in any missing structural elements.
     * **Universal Standard Structure Pattern**: (1) Title line `# {NNN}. {Name}` → (2) CAUTION/NOTE block (file role declaration) → (3) IMPORTANT block (Primary Directive + composition summary) → (4) `## Table of Contents` (table or list format) → (5) Body sections (`##` → `###`) → (6) `## Appendix A: Reverse Lookup Index` (keyword → section → related rules table)
-    * **Litmus Test**: "When placed alongside `000_engineering_standards.md` or `200_language_protocol.md`, does this file look structurally consistent?" → If not, align it.
+    * **Litmus Test**: "When placed alongside `axiarch-rules/{lang}/universal/engineering/000_engineering_standards.md` or `axiarch-rules/{lang}/universal/core/200_language_protocol.md`, does this file look structurally consistent?" → If not, align it.
     * See `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` §4 Structural Isomorphism for details.
 
 ## 3. Future-Proofing
@@ -130,16 +123,10 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 3.  **Write & Refactor**:
     * **Preservation (Critical)**:
         * When consolidating existing rules, **never lose** critical constraints (especially security, legal, business logic, localization quality).
-        * **"File deletion" is only permitted when diff and reference checks confirm that the content has been migrated to a new file.** Consolidation that reduces information density is prohibited.
-    * **Prohibition**: No changes, deletions, or moves to **Class S (Universal)** files whatsoever.
-    * **Domain Distribution (Critical)**:
-        * **The lessons log (`core/010_project_lessons_log.md`) is a "temporary accumulation point," NOT the final destination.**
-        * Insights and lessons MUST be distributed to the **corresponding domain folder** per the `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` Step 1 mapping table, and crystallized into domain-specific Blueprint files.
-        * When same-domain lessons reach 3+ entries in the lessons log, create a dedicated file in the corresponding domain folder and elevate the lessons.
-        * Examples (per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` Step 1 mapping):
-            * Security lessons → `security/{NNN}_security_policy.md`
-            * AI lessons → `ai/{NNN}_ai_content_rules.md`
-            * DB lessons → `engineering/{NNN}_database_auth.md`
+        - Preserve valid constraints, project context and references. Remove duplication, obsolete or contradictory wording with reasons; check the destination or retirement rationale before deletion.
+    - Follow the canonical write boundary in Phase 1; distinguish adopter-specific rules from explicitly requested maintenance of the Axiarch constitution.
+    - Follow the current `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` procedure. Use observed findings, deduplicate and search existing files, then distinguish direct append, temporary accumulation, and promotion by count or time. Valid temporary accumulation is not an incomplete task.
+    - After promotion, verify migrated content and keep references in the original log and index. Choose placement and numbering from actual folders and unused prefixes.
     * **New Creation**: Create missing rules (e.g., **Localization UI Guidelines**, AI Cost Management Policy, Privacy Protection Guidelines, GEO Optimization Standards) as new files.
     * **Revision & Consolidation**: Review existing content and rewrite to be more strict and specific. Consolidate duplicated content.
     * **Protocol Compliance**:
@@ -147,7 +134,7 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 4.  **Final Verify**:
     * Confirm all rules support the project's **target quality floor** and **target market expectations**, and function as the project's constitution.
     * **Safety Check**: Re-confirm that security and privacy descriptions are sufficiently thorough.
-    * **Distribution Check**: Verify lessons are not stagnating in the lessons log but have been promoted/migrated to appropriate domain files.
+    - Distribution check: evaluate canonical count/time thresholds and record whether lessons remain accumulated, are promoted, or require reference updates.
 
 # Phase 5: Knowledge Feedback
 **After completion, output the following information.**
@@ -157,4 +144,8 @@ Based on analysis results, thoroughly improve **Class A (Blueprint)** rules acro
 * **Next Action**: Guidelines for how developers should utilize and operate this governance architecture going forward.
 
 **Begin the thorough optimization and reconstruction of all project-specific rules (`axiarch-rules/{lang}/blueprint/` — all domain folders), leveraging the full knowledge of the project without degrading existing assets (rules).**
+
+# Boot Sequence (Starting Work and Resolving Missing Information)
+Check the request, available conversation and files; when the target and objective are clear, continue from Phase 0. Do not request requirements already supplied. Inspect accessible code, configuration and logs using available tools.
+Ask specific questions only for inaccessible information or human intent necessary to proceed, while continuing independent investigation. Distinguish unread, unverified and failed checks; do not emit canned loading-complete or ready claims. Follow canonical approval boundaries for publication and other gated actions, carrying forward existing explicit authorization within its scope.
 ````

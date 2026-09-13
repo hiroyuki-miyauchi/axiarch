@@ -581,7 +581,7 @@ mvp_charter:
 
 ### 6.6. Pre-PMF価格感度検証プロトコル
 
-- **Rule 11.058**: PMFフェーズにおいても、「価格は後から決める」とせず、**価格感度の初期検証**を実施する。価格設定の詳細は `400_pricing_strategy.md` に委譲するが、PMF前の最低限の検証を本セクションで定義する
+- **Rule 11.058**: PMFフェーズにおいても、「価格は後から決める」とせず、**価格感度の初期検証**を実施する。価格設定の詳細は `axiarch-rules/{lang}/universal/product/400_pricing_strategy.md` に委譲するが、PMF前の最低限の検証を本セクションで定義する
 
 - **Rule 11.059**: Pre-PMF価格検証の3ステップ
 
@@ -1123,7 +1123,7 @@ Phase 4: Enterprise Conversion（企業契約）
 | Monthly Churn | ≤ 5%（B2C）/ ≤ 3%（B2B） |
 | Burn Multiple | ≤ 2.0 |
 
-- **Rule 11.074**: Unit Economicsが基準未達の場合、「収益モデルPMF（Revenue PMF）」が未達成として扱い、価格戦略の再検討（`400_pricing_strategy.md`参照）を義務とする
+- **Rule 11.074**: Unit Economicsが基準未達の場合、「収益モデルPMF（Revenue PMF）」が未達成として扱い、価格戦略の再検討（`axiarch-rules/{lang}/universal/product/400_pricing_strategy.md`参照）を義務とする
 
 ---
 
@@ -1680,7 +1680,7 @@ loi_protocol:
 
 ### 14.4. Design Partner → Paying Customer 転換プロセス
 
-- **Rule 11.133**: Design Partner（`000_product_strategy.md` §2.5参照）から有料顧客へ転換する標準プロセスを定義する
+- **Rule 11.133**: Design Partner（`axiarch-rules/{lang}/universal/product/000_product_strategy.md` §2.5参照）から有料顧客へ転換する標準プロセスを定義する
 
 ```
 Step 1: 価値実証（2-4週間）

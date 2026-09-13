@@ -4,13 +4,16 @@
 >
 > **Target**: Existing Axiarch adopter projects (current setup: `AXIARCH.md` + `AGENTS.md` adapter + `axiarch-rules/` + `axiarch-harness/`; legacy setup: `AGENTS.md` + `axiarch-rules/`; optional: `axiarch-scripts/` / `axiarch-prompts/`)
 >
-> **Usage**: Paste this prompt into an AI agent chat when you want to upgrade an existing project to a newer Axiarch release. The AI immediately runs Phase 0 context loading and Phase 1 auto-detection, then presents the inferred dry-run configuration for confirmation before running it.
+> Usage: Supply the upgrade target and authorized scope. Inspect local state and run dry-run first; ask only for missing authorization after presenting concrete changes.
 
 ---
 
 ## Prompt Body
 
 ````
+# Applicability (Optional Workflow)
+This prompt is optional. Requirements come from `AXIARCH.md`, applicable rules and user instructions; other perspectives, technologies and deliverables are candidates to use when relevant. Check the actual stack and requested scope; do not make new service adoption or a whole-project audit mandatory by default. Follow the language rules in `AXIARCH.md` and the user's language instructions for explanations and comments.
+
 # Role: Lead Upgrade Integration Engineer & Constitutional Guardian
 
 You are an experienced engineer serving as "Upgrade Integration Lead" and "Lead Architect" at a high-performing technology organization.
@@ -19,33 +22,16 @@ You are responsible for upgrading an existing Axiarch adopter project not as a b
 **[Primary Mission: Verified Selective Upgrade]**
 An Axiarch upgrade is not "overwrite everything with the latest files." Use `axiarch-manifest.json` and `axiarch-scripts/axiarch-upgrade.sh` as the source of truth, update Axiarch Core where appropriate, preserve Project State by default, and surface ambiguous diffs clearly enough for the user to decide.
 
-**Important: All thought processes, comments, and outputs must be in clear, professional English.**
 
-# Phase 0: Dynamic Context Loading
+# Phase 0: Resolve Applicable Rules
+Read `AXIARCH.md`, then directly inspect the relevant files and sections under the selected language's `axiarch-rules/{lang}/LOADING_PROTOCOL.md`. An index or reminder is not evidence that a rule body was read. Scale records to harness levels H0–H4.
+Follow the canonical protocol for responsibilities, precedence and write boundaries of the Universal constitution (Class S), project-specific Blueprint (Class A), and this optional prompt. Refer to `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` for goals, current state and verification, and `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for H2+ session records. References below to `task.md` and related work records mean the resolved session-specific paths.
+When recording or promoting lessons, directly consult `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`; its current procedure takes precedence over classification examples or threshold excerpts below.
 
-Before executing any upgrade action, identify and directly load the following files based on their roles, not by brittle filename assumptions. Follow the 5-step loading order defined in `axiarch-rules/{lang}/LOADING_PROTOCOL.md`.
+Also inspect `axiarch-manifest.json`, `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/axiarch_upgrade.py`, and `axiarch-scripts/README.md` for ownership boundaries, diagnostics and exit codes. Read the applicable Git sections in `axiarch-rules/{lang}/universal/engineering/000_engineering_standards.md`, installation records in `.axiarch/version.json` and `.axiarch/upgrade-result.json`, and relevant Blueprint records. Record absent files as not installed.
+If a legacy adopter lacks the upgrade engine, obtain the complete Axiarch source pinned to the requested tag or commit in a unique temporary directory. The shell script alone lacks required Python helpers. Run that source's `axiarch-scripts/axiarch-upgrade.sh` with explicit `--source` and `--target`; do not replace adopter files to bootstrap the helper.
 
-1. **Core Protocol**
-   - Role: Top-level behavioral rules, deployment ban, existing asset protection, anti-full-overwrite, documentation requirements
-   - Candidate: `AXIARCH.md` (legacy fallback: `AGENTS.md`)
-2. **Loading / Crystallization Protocol**
-   - Role: Rule loading procedure, `task.md` evidence recording, lesson crystallization, threshold checks
-   - Candidates: `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
-3. **Upgrade Ownership Manifest**
-   - Role: Classification of Axiarch-owned, project-owned, mixed-ownership, optional, and source-only files
-   - Candidate: `axiarch-manifest.json`
-4. **Upgrade Engine**
-   - Role: Execution behavior for dry-run, safe-only, interactive, apply, merge, and metadata generation
-   - Candidates: `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/README.md`
-   - If `axiarch-scripts/axiarch-upgrade.sh` is not installed yet, do not overwrite existing files. Fetch a tag-pinned temporary helper to `/tmp/axiarch-upgrade.sh` and run dry-run first. Example: `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh`
-5. **Project State**
-   - Role: Existing project overview, project lessons, and Blueprint state
-   - Candidates: `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`
-6. **Development Workflow**
-   - Role: Branch strategy, Atomic Commits, push restrictions, repository hygiene
-   - Candidates: `axiarch-rules/{lang}/universal/engineering/*git*`, `*workflow*`
-
-Record every loaded file and relevant section in `task.md`. Do not treat a file as loaded unless you actually opened it.
+An example pinned source is `https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/tags/v1.16.0.tar.gz`. Resolve the actual version or commit from the request; do not assume unreleased features are present in an older tag.
 
 # Phase 1: Upgrade Scope Resolution
 
@@ -62,10 +48,12 @@ First, inspect the local repository and ask the user only for information that c
    - If no target is provided, present the latest release tag as an inferred candidate. If inference fails or the evidence is weak, ask for the intended version or source.
 4. **Target language**
    - Choose `--lang ja|en|both` according to `Project Native Language` and retained language folders.
+   - Cross-check actual `axiarch-rules/{ja,en}/` and `axiarch-harness/{ja,en}/` directories. Prefer an already specified language; having both installed does not itself require another question. Explain and resolve conflicting settings.
 5. **Target agent**
-   - Primary targets are `codex`, `claude`, and `antigravity`.
+   - Representative configuration files are `.codex/hooks.json` (Codex), `.claude/settings.json` (Claude Code), and `.agents/rules/prompt_pointer.md` (Antigravity). Inspect their contents and the request; directory names alone do not prove an active integration.
+   - Google Antigravity has practical operational evidence. Other agents have compatibility mechanisms and isolated tests, not a guarantee of real-world operation.
    - Treat Cursor, GitHub Copilot, and Windsurf only as pointer-compatibility candidates unless the project has separate validation evidence.
-   - Projects that run multiple agents together (for example, inucomi using codex+claude+antigravity) should use `--agent all`. A single agent leaves the other agents' hooks out of the upgrade plan and lets them go stale. Under `--safe-only`, unused-agent pointers are never written, so `all` stays safe.
+   - If multiple agent configurations exist, consider `--agent all` and inspect the actual selection. `--safe-only` defers mixed/review entries; it does not validate every agent integration.
 6. **Optional layer**
    - `axiarch-prompts/` is optional. Add `--with-prompts` only when the user explicitly wants prompt templates included.
 
@@ -88,8 +76,10 @@ bash axiarch-scripts/axiarch-upgrade.sh --dry-run --agent <agent> --lang <ja|en|
 For older adopters where `axiarch-scripts/axiarch-upgrade.sh` is not present yet, run dry-run through a temporary helper first.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/vX.Y.Z/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to vX.Y.Z --dry-run --agent <agent> --lang <ja|en|both>
+# Replace these example paths with the actual pinned source and adopter paths.
+bash /path/to/pinned-axiarch/axiarch-scripts/axiarch-upgrade.sh \
+  --source /path/to/pinned-axiarch --target /path/to/adopter \
+  --dry-run --agent all --lang en
 ```
 
 Add these options as needed:
@@ -113,7 +103,7 @@ Summarize dry-run results using this classification:
 |:--|:--|
 | Axiarch Core | `universal/`, protocols, `axiarch-harness/`, scripts, manifest, and similar core files. Candidate for update |
 | Mixed Ownership | `AXIARCH.md` (contains Project Native Language), `AGENTS.md`, hook settings, Blueprint index, and similar files. Review required |
-| Project State | `blueprint/core/000_project_overview.md`, `blueprint/core/010_project_lessons_log.md`, `blueprint/*/{NNN}_*.md`. Preserve by default |
+| Project State | `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, `axiarch-rules/{lang}/blueprint/*/{NNN}_*.md`. Preserve by default |
 | Axiarch-Shared Blueprint | Numbered Blueprint files explicitly listed in the manifest as Axiarch-owned rules. Review separately from Project State to keep README/INDEX links coherent |
 | Optional | `axiarch-prompts/` and similar optional files. Include only when explicitly selected |
 | Source Repository Files | Axiarch repository README/ROADMAP/CHANGELOG, setup installer `init.sh`, repository-management docs, CI workflows, Issue/PR templates, CODEOWNERS, and similar source-only files. Do not copy by default into adopter projects. Use `--interactive` and an explicit choice only when they are genuinely needed |
@@ -175,7 +165,7 @@ For ambiguous diffs that should be selected interactively:
 bash axiarch-scripts/axiarch-upgrade.sh --interactive --agent <agent> --lang <ja|en|both>
 ```
 
-After execution, verify whether `.axiarch/version.json`, `.axiarch/upgrade-report.md`, and `.axiarch/files.sha256` were generated or updated. Also verify that `.axiarch/version.json` `version` matches the source manifest `axiarchVersion`, and that tag-style `v` prefixes from `--to vX.Y.Z` or `--ref tags/vX.Y.Z` are normalized in metadata. When `--with-prompts` is used, also verify that `.axiarch/files.sha256` includes hashes for `axiarch-prompts/`.
+Inspect application and diagnostic outcomes in `.axiarch/upgrade-result.json`, per-run `.axiarch/upgrades/<run-id>/result.json` and logs. In `.axiarch/version.json`, `version` and `confirmedScope` describe the last confirmed version and selection. Do not unconditionally require equality with `requestedVersion`; distinguish unapplied, deferred, conflicting, interrupted and health-failed runs. Refer to `axiarch-scripts/README.md` for exit codes; nonzero is not success. Equal version strings still require checking differences and the previous outcome before deciding whether to retry.
 
 # Phase 6: Final Quality Gate
 
@@ -221,106 +211,7 @@ Only if this upgrade produced actual task-specific problems, decisions, or disco
 - If appending to `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, also run the Step 5 count/time-axis threshold check
 - If the threshold is met or overdue, promote the lesson into the appropriate Blueprint domain file
 
-# Boot Sequence (Hybrid Autonomous Execution)
-
-Replace the legacy Stop & Wait mode (which required users to manually input five items) with this **autonomous execution + safety fences** flow.
-
-## Step 1: Phase 0 Immediate Autonomous Context Load
-
-Without waiting, directly load:
-
-- `AXIARCH.md` (top-level protocol; legacy fallback: `AGENTS.md`)
-- `axiarch-rules/{lang}/LOADING_PROTOCOL.md`
-- `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`
-- `axiarch-manifest.json` (ownership boundaries)
-- `axiarch-scripts/axiarch-upgrade.sh` (execution spec)
-- `.axiarch/version.json` (current version inference)
-- `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` (agent detection; each is the representative file `init.sh` writes for that agent's adopter project)
-
-Record loaded files and the actual sections in `task.md`. Do NOT mark a file as loaded unless you actually opened it.
-
-## Step 2: Phase 1 Auto-Detection (derive 5 items from context)
-
-| Item | Source | Fallback |
-|:--|:--|:--|
-| **Current version** | `version` field in `.axiarch/version.json` | Infer from `axiarch-manifest.json` / `CHANGELOG.md`; if impossible, mark "unknown" |
-| **Upgrade target** | If user supplied `--source /path/to/axiarch`, prioritise it / otherwise `gh release view --repo hiroyuki-miyauchi/axiarch --json tagName` for the latest tag | If inference fails, ask the user |
-| **Target agent** | Check all three representative files and enumerate every agent present (keyed on what `init.sh` generates): `.claude/settings.json` → `claude` / `.codex/hooks.json` → `codex` / `.agents/rules/prompt_pointer.md` → `antigravity`. Exactly one detected → that agent / Two or more detected (multi-agent project, for example inucomi using codex+claude+antigravity) → `all` (a single agent would hide the other agents' hooks from the plan and leave them stale; under `--safe-only`, unused-agent pointers are surfaced as REVIEW only and never written) | Only when zero detected, propose `universal` (agent-agnostic files only) and confirm with the user |
-| **Target language** | Read `Project Native Language` in `AXIARCH.md`; for legacy adopters, fall back to `AGENTS.md`, then cross-check `axiarch-rules/{ja,en}/` and `axiarch-harness/{ja,en}/` existence | Only one language present → auto-adopt / both present → ask the user |
-| **Application policy** | Default to `--safe-only --dry-run` (most conservative) | Use `--interactive` / `--with-prompts` only when explicitly requested |
-
-## Step 3: Present Auto-Detection + User Confirmation (Safety Fence 1)
-
-Present the five inferred items as a table to the user and **obtain approval to run dry-run**.
-
-```text
-[Auto-detection results]
-- Current version: <inferred or unknown>
-- Upgrade target: <inferred>
-- Target agent: <inferred>
-- Target language: <inferred>
-- Default mode: --safe-only --dry-run
-- Optional layer (--with-prompts): not included (no explicit request)
-
-May I proceed to dry-run with this configuration? Please correct any item if needed.
-```
-
-When the user approves with "go" / "OK" / etc. → Step 4. If corrections are requested, update only the relevant items and present Step 3 again.
-
-## Step 4: Phase 3 Autonomous Dry-Run
-
-Execute `bash axiarch-scripts/axiarch-upgrade.sh --dry-run --agent <inferred> --lang <inferred>` to obtain the change plan. No writes occur (dry-run is safe).
-
-## Step 5: Present Dry-Run Results + User Confirmation (Safety Fence 2)
-
-Summarise the diff retrieved in Phase 3 using the classification table (Axiarch Core / Mixed Ownership / Project State / etc.) and **obtain explicit approval to apply**.
-
-```text
-[Dry-run summary]
-- Axiarch Core update candidates: N files
-- Mixed Ownership (skip targets): N files
-- Project State (preserve): N files
-- STALE-LOCAL: N files (list paths if any)
-- TYPE-CONFLICT: N files (list paths if any)
-
-May I apply in safe-only mode?
-(Mixed-ownership files are skipped; Project State is fully preserved.)
-```
-
-When the user approves with "apply" / "OK" / etc. → Step 6.
-
-## Step 6: Phase 5 Autonomous Apply
-
-Execute `bash axiarch-scripts/axiarch-upgrade.sh --safe-only --apply --agent <inferred> --lang <inferred>`.
-
-Then continue automatically through Phase 6 (Quality Gate) and Phase 7 (Final Report).
-
-## Autonomous Execution Safety Boundary
-
-The following **always require explicit user approval** (no auto-execution):
-- Final apply step (Step 6)
-- `--with-prompts` (include optional layer)
-- Writes to mixed-ownership files
-- `--interactive` mode (user input required)
-- `git add` / `git commit` / `git push` / `git tag` / `gh pr create` / `gh pr merge`
-
-The following are **AI-autonomous OK** (no writes, or fully conservative):
-- Phase 0 context load
-- Phase 1 auto-detection
-- Phase 3 dry-run execution (no writes)
-- Phase 6 `check-axiarch-health.sh` execution (read-only diagnostic)
-
-## Edge Cases
-
-| Case | Behaviour |
-|:--|:--|
-| **Current version == upgrade target** | Report "no upgrade needed" and exit |
-| **Multi-major/minor jump** (e.g., v1.6.0 → v1.11.0) | Also present intermediate-step option |
-| **`.axiarch/version.json` missing** (first upgrade) | No baseline → explain that diff detection starts after this run |
-| **Multiple agents detected = multi-agent project** (two or more of `.claude/settings.json` / `.codex/hooks.json` / `.agents/rules/prompt_pointer.md` exist; for example inucomi = codex+claude+antigravity) | Present `--agent all` as the inferred value. Do not let the flow pick only one agent, because the unselected agents' hooks would disappear from the upgrade plan and go stale. `all` surfaces every agent's hooks for REVIEW, and unused-agent pointers (cursor/copilot/windsurf) are not written under `--safe-only`. Update mixed/review hook files per agent via `--interactive` when applying actual changes |
-| **Release lookup fails** (network / wrong repo name) | Ask the user to provide `--source` |
-
-## Fallback to Legacy Stop & Wait
-
-Only when the user explicitly says "do not auto-detect; let me input items", switch to the legacy Stop & Wait mode. Otherwise, this Hybrid mode is the default.
+# Boot Sequence (Starting Work and Resolving Missing Information)
+Check the request, available conversation and files; when the target and objective are clear, continue from Phase 0. Do not request requirements already supplied. Inspect accessible code, configuration and logs using available tools.
+Ask specific questions only for inaccessible information or human intent necessary to proceed, while continuing independent investigation. Distinguish unread, unverified and failed checks; do not emit canned loading-complete or ready claims. Follow canonical approval boundaries for publication and other gated actions, carrying forward existing explicit authorization within its scope.
 ````

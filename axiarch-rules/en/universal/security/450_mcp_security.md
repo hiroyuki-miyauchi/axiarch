@@ -8,12 +8,12 @@
 > **Primary Directive**
 > "MCP gives the LLM hands and feet into the outside world. Treat tool descriptions, tool results, and resources as **untrusted input**, **do not pass tokens through**, and gate destructive operations behind **human approval**."
 > Both the **consumer side (host / client / agent)** and the **builder side (server builder)** of MCP (Model Context Protocol) must conform to the current stable best practices in this file.
-> Authentication and authorization follow the priority order in `000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
+> Authentication and authorization follow the priority order in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
 
 > [!NOTE]
-> This file is the **implementation deep-dive** of `000_security_privacy.md` §18.3 (MCP Security overview) and §18.6 (Tool Poisoning), and is the **canonical source for MCP-specific security implementation**.
-> General LLM threats (prompt injection, output handling, excessive agency) are canonical in [`000_security_privacy.md`](./000_security_privacy.md) §17.
-> The **authentication/delegation technical detail** of MCP authorization (OAuth 2.1-based, OBO, Resource Indicators) is canonical in [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11 (this file deep-dives the guards on the MCP server implementation side).
+> This file is the **implementation deep-dive** of `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3 (MCP Security overview) and §18.6 (Tool Poisoning), and is the **canonical source for MCP-specific security implementation**.
+> General LLM threats (prompt injection, output handling, excessive agency) are canonical in [`axiarch-rules/{lang}/universal/security/000_security_privacy.md`](./000_security_privacy.md) §17.
+> The **authentication/delegation technical detail** of MCP authorization (OAuth 2.1-based, OBO, Resource Indicators) is canonical in [`axiarch-rules/{lang}/universal/security/440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11 (this file deep-dives the guards on the MCP server implementation side).
 > AI agent **permission design, autonomy levels, and human approval gates** are canonical in [`core/000_core_mindset.md`](../core/000_core_mindset.md) §9.
 
 > [!NOTE]
@@ -175,25 +175,25 @@
 
 ## §5. Builder Side 2: Input Validation & Indirect Prompt Injection
 
-> **Reference standards**: `000_security_privacy.md` §17.1 (Prompt Injection), §17.10 (Output Handling), OWASP LLM01/LLM05
+> **Reference standards**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1 (Prompt Injection), §17.10 (Output Handling), OWASP LLM01/LLM05
 
 ### 5.1. Strict Validation of Tool Input
 
 -   **Law**: The MCP server **strictly validates tool-call input with a schema (e.g., JSON Schema)**. Enforce type, range, enum, length, and format, and reject unknown fields (fail-closed).
--   **Rule 69.5.1**: Treat tool input as **untrusted external input** and apply injection defenses (SQL/command/path/SSRF/template) (MUST). LLM-generated parameters are subject to validation without exception (consistent with `000_security_privacy.md` §17.10).
+-   **Rule 69.5.1**: Treat tool input as **untrusted external input** and apply injection defenses (SQL/command/path/SSRF/template) (MUST). LLM-generated parameters are subject to validation without exception (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.10).
 -   **Action**: Restrict file paths, URLs, and commands via parameterization/allowlist, and prohibit shell/SQL execution by string concatenation. Also **sanitize** output (tool results) before returning, to prevent unintended execution of HTML/SQL/control characters.
 
 ### 5.2. Indirect Prompt Injection (via content)
 
 -   **Law**: Treat **external content returned by tools (fetched files, web pages, DB records, resource bodies)** as if it contains malicious instructions for the LLM (**indirect prompt injection**). Design the server so it does not become a path that generates or amplifies attack strings.
--   **Rule 69.5.2**: When embedding third-party-derived strings into tool descriptions, resources, or prompt templates, assume injection: separate and label the provenance and, where possible, neutralize (neutralize imperative tokens, quote them) (SHOULD). General prompt-injection defense is canonical in `000_security_privacy.md` §17.1.
+-   **Rule 69.5.2**: When embedding third-party-derived strings into tool descriptions, resources, or prompt templates, assume injection: separate and label the provenance and, where possible, neutralize (neutralize imperative tokens, quote them) (SHOULD). General prompt-injection defense is canonical in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1.
 -   **Cross-Reference**: Final responsibility for defense is shared with the consumer side (§13.1). The server "does not become the launchpad of attacks"; the client "does not trust results" — both wheels.
 
 ---
 
 ## §6. Builder Side 3: Tool Definition Soundness (annotations / output schema)
 
-> **Reference standards**: MCP spec 2025-11-25 (Tools / Tool Annotations), `000_security_privacy.md` §18.6
+> **Reference standards**: MCP spec 2025-11-25 (Tools / Tool Annotations), `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6
 
 ### 6.1. Correctly Applying Tool annotations
 
@@ -216,7 +216,7 @@
 
 ### 6.3. Eliminating hidden instructions
 
--   **Law**: Do not embed **hidden instructions** for the LLM in tool names, tool descriptions, parameter descriptions, or resource bodies. Review the definition text so your own server does not become the launchpad of Tool Poisoning (`000_security_privacy.md` §18.6).
+-   **Law**: Do not embed **hidden instructions** for the LLM in tool names, tool descriptions, parameter descriptions, or resource bodies. Review the definition text so your own server does not become the launchpad of Tool Poisoning (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6).
 -   **Action**: Keep tool definitions machine-readable and version-controlled, and audit changes. Avoid designs that dynamically rewrite descriptions (a breeding ground for the rug pull below), and bump an explicit version on change (§9.2).
 
 ---
@@ -241,7 +241,7 @@
 
 ## §8. Builder Side 5: Execution Isolation, Least Privilege, Secrets, Audit
 
-> **Reference standards**: MCP spec 2025-11-25 (Local Server), `core/000_core_mindset.md` §9, `000_security_privacy.md` §21/§25
+> **Reference standards**: MCP spec 2025-11-25 (Local Server), `core/000_core_mindset.md` §9, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21/§25
 
 ### 8.1. Sandboxing Tool Execution and Least Privilege
 
@@ -250,12 +250,12 @@
 
 ### 8.2. Secret Management and Rate Limiting
 
--   **Law**: Do not **leak** in-server secrets (upstream API keys, DB credentials) into tool descriptions, logs, errors, or tool results. Manage them with a secrets manager / environment separation (canonical in `000_security_privacy.md` §21).
--   **Rule 69.8.2**: Apply **rate limits, timeouts, and resource caps** to tool calls to prevent unbounded consumption (runaway, cost explosion) (MUST, consistent with `000_security_privacy.md` §17.8).
+-   **Law**: Do not **leak** in-server secrets (upstream API keys, DB credentials) into tool descriptions, logs, errors, or tool results. Manage them with a secrets manager / environment separation (canonical in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21).
+-   **Rule 69.8.2**: Apply **rate limits, timeouts, and resource caps** to tool calls to prevent unbounded consumption (runaway, cost explosion) (MUST, consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.8).
 
 ### 8.3. Immutable Audit Logs
 
--   **Rule 69.8.3**: Record every tool call in a structured log including **`tool_name` / `input` (after PII masking) / `output_hash` / acting principal (`sub`/`act`) / `audience` / `timestamp`** (MUST). Retain logs tamper-evidently (append-only) (consistent with `000_security_privacy.md` §25 and the MCP Governance in `core/000_core_mindset.md` §9).
+-   **Rule 69.8.3**: Record every tool call in a structured log including **`tool_name` / `input` (after PII masking) / `output_hash` / acting principal (`sub`/`act`) / `audience` / `timestamp`** (MUST). Retain logs tamper-evidently (append-only) (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25 and the MCP Governance in `core/000_core_mindset.md` §9).
 
 ---
 
@@ -266,7 +266,7 @@
 ### 9.1. Signing Distributions and Verifiability
 
 -   **Law**: **Digitally sign** MCP server distributions (binaries/packages/tool definitions) so consumers can **verify integrity**. Do not let unsigned, unvetted servers be installed by default.
--   **Rule 69.9.1**: Sign tool-definition files (JSON/YAML), verify against tampering at startup, and refuse to start on mismatch (SHOULD, consistent with `000_security_privacy.md` §18.6).
+-   **Rule 69.9.1**: Sign tool-definition files (JSON/YAML), verify against tampering at startup, and refuse to start on mismatch (SHOULD, consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6).
 
 ### 9.2. Care About rug pull (later turning malicious)
 
@@ -280,11 +280,11 @@
 
 ## §10. Consumer Side 1: Server Vetting, Allowlist, Trust Boundaries
 
-> **Reference standards**: MCP spec 2025-11-25, `000_security_privacy.md` §18.3, `core/000_core_mindset.md` §9
+> **Reference standards**: MCP spec 2025-11-25, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3, `core/000_core_mindset.md` §9
 
 ### 10.1. Server Vetting and Allowlist
 
--   **Law**: The host/client subjects the target MCP server to **formal security evaluation (vetting)** and connects only to an **approved allowlist** (consistent with `000_security_privacy.md` §18.3). Do not connect to arbitrary servers without vetting.
+-   **Law**: The host/client subjects the target MCP server to **formal security evaluation (vetting)** and connects only to an **approved allowlist** (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3). Do not connect to arbitrary servers without vetting.
 -   **Rule 69.10.1**: A client that offers **one-click installation** of a local (stdio) server MUST **present the full startup command (including arguments, without truncation)** and obtain explicit user approval before execution (MUST, §12). Warn about dangerous patterns such as `sudo`/`rm -rf`/network operations/home directory & SSH key access.
 
 ### 10.2. Client-Side SSRF Defense (metadata fetch)
@@ -300,7 +300,7 @@
 
 ## §11. Consumer Side 2: Tool Definition Pinning & rug pull / tool poisoning Detection
 
-> **Reference standards**: MCP spec 2025-11-25, `000_security_privacy.md` §18.6, CVE-2025-54136
+> **Reference standards**: MCP spec 2025-11-25, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6, CVE-2025-54136
 
 ### 11.1. Hash-Pinning Tool Definitions
 
@@ -309,7 +309,7 @@
 
 ### 11.2. tool poisoning (hidden instruction) Detection
 
--   **Law**: Assume **hidden instructions (tool poisoning)** are embedded in tool descriptions and parameter descriptions, and have a **human review** the definition text. AI review of definitions is insufficient (it is the same target being attacked), so combine with human review (consistent with `000_security_privacy.md` §18.6).
+-   **Law**: Assume **hidden instructions (tool poisoning)** are embedded in tool descriptions and parameter descriptions, and have a **human review** the definition text. AI review of definitions is insufficient (it is the same target being attacked), so combine with human review (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6).
 -   **Action**: Also prepare for tool shadowing (substitution of a same-named tool), and detect/warn on collisions of same-named/similar tools provided by multiple servers.
 
 ### 11.3. Do Not Over-Trust annotations
@@ -342,11 +342,11 @@
 
 ## §13. Consumer Side 4: Untrusted-by-Default & Credential Discipline
 
-> **Reference standards**: `000_security_privacy.md` §17.1, `440` §10, MCP spec 2025-11-25
+> **Reference standards**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1, `440` §10, MCP spec 2025-11-25
 
 ### 13.1. Do Not Trust Tool Descriptions, Tool Results, or Resources
 
--   **Law**: The client/host treats **tool descriptions, tool results, and resource bodies as "untrusted input."** Assuming the indirect prompt injection they may contain (§5.2), separate provenance, label, and neutralize imperatives when passing them to the LLM (general defense is canonical in `000_security_privacy.md` §17.1).
+-   **Law**: The client/host treats **tool descriptions, tool results, and resource bodies as "untrusted input."** Assuming the indirect prompt injection they may contain (§5.2), separate provenance, label, and neutralize imperatives when passing them to the LLM (general defense is canonical in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1).
 -   **Rule 69.13.1**: Do not **use a tool result directly as the argument of the next tool call or as the trigger of a high-privilege operation** (MUST). Route result-derived actions through HITL (§12) according to reversibility and privilege.
 
 ### 13.2. Credential Discipline (do not pass to the server)
@@ -360,7 +360,7 @@
 
 ### 14.1. Auditing and Anomaly Detection of Tool Calls
 
--   **Action**: For each MCP server/client, baseline the normal patterns of tool calls (frequency, target tools, argument distribution, time of day) and detect deviations (in concert with `000_security_privacy.md` §3.3 ITDR).
+-   **Action**: For each MCP server/client, baseline the normal patterns of tool calls (frequency, target tools, argument distribution, time of day) and detect deviations (in concert with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3 ITDR).
 -   **Metrics to track**:
     -   Changes to tool-definition hashes (rug pull detection firing), changes to annotations.
     -   Token passthrough attempts, denials due to audience mismatch, connection attempts to unapproved servers.
@@ -389,7 +389,7 @@
 
 ### 15.4. Privacy
 
--   **Action**: Limit data passed to tools to **purpose-bound and minimal** (`000_security_privacy.md` §7.2 data minimization). Mask PII in tool input/results/audit logs and block unnecessary PII transmission to external servers.
+-   **Action**: Limit data passed to tools to **purpose-bound and minimal** (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 data minimization). Mask PII in tool input/results/audit logs and block unnecessary PII transmission to external servers.
 
 ---
 
@@ -492,7 +492,7 @@ export function verifyToolDefinitions(serverVersion: string, currentTools: unkno
 ## §17. Anti-Patterns (20)
 
 > [!CAUTION]
-> All of the following are **prohibited or high-risk** in this file. On discovery, remediate immediately per the Zero Tolerance Protocol in `000_security_privacy.md`.
+> All of the following are **prohibited or high-risk** in this file. On discovery, remediate immediately per the Zero Tolerance Protocol in `axiarch-rules/{lang}/universal/security/000_security_privacy.md`.
 
 | # | Anti-pattern | Risk | Correct response |
 |:--|:-------------|:-----|:-----------------|

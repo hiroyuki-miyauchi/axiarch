@@ -1347,7 +1347,7 @@ abstract class NativeAuthApi {
 
 ### §106. React Native連携
 
-- **専用正本**: React Native全体のarchitecture、test、CI、OTA、team governanceは`420_react_native.md`に従う
+- **専用正本**: React Native全体のarchitecture、test、CI、OTA、team governanceは`axiarch-rules/{lang}/universal/engineering/420_react_native.md`に従う
 - **New Architecture**: Turbo Native Modules、Fabric Native Components、型付きCodegen specを既定とする
 - **Native責務**: OS固有APIはKotlin／Swiftで実装し、JS、iOS、Androidのownerと互換性matrixを持つ
 - **境界検証**: nullability、error、thread、lifecycle、cancellation、size limitをCodegen contractと両OStestで保証する

@@ -10,7 +10,7 @@
 > All engineering decisions must prioritize correctness, security, and maintainability over speed.
 > Strictly follow the priority: **Security > Correctness > Maintainability > Performance > Development Speed**.
 > This document is the primary standard for all design decisions regarding engineering quality and standards.
-> Language scope: TypeScript, JavaScript, and web-specific tool names and examples in this standard apply only to their ecosystems. `320_programming_language_governance.md` is the source of truth for cross-language selection, naming, toolchains, quality gates, ownership, and retirement; do not impose tool names unchanged on another ecosystem.
+> Language scope: TypeScript, JavaScript, and web-specific tool names and examples in this standard apply only to their ecosystems. `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` is the source of truth for cross-language selection, naming, toolchains, quality gates, ownership, and retirement; do not impose tool names unchanged on another ecosystem.
 > Universal application contract: Product names, VCS features, job titles, headcount, ratios, deadlines, cadences, and thresholds are reference implementations or Blueprint parameters unless they are official platform constraints, law or contract, or a safety floor needed to prevent irrecoverable harm. The Project Blueprint selects concrete values and equivalent mechanisms from risk, scale, regulation, and user impact without omitting verifiable outcomes, owners, or exception evidence.
 > **22-part, 141-section architecture.**
 
@@ -29,7 +29,7 @@
 | VII | Bug Risk Reduction Policy | §7.0 – §7.3 | 4 |
 | VIII | Continuous Learning & Verification | §8.0 – §8.2 | 3 |
 | IX | Compatibility & Testing | §9.0 – §9.5 | 6 |
-| X | CI/Deploy & Auxiliary Standards (Note: pure git moved to `600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
+| X | CI/Deploy & Auxiliary Standards (Note: pure git moved to `axiarch-rules/{lang}/universal/engineering/600_git_workflow.md`) | §10.1, §10.2, §10.4 – §10.6 | 5 |
 | XI | Documentation Ops | §11.0 – §11.2 | 3 |
 | XII | Engineering Quality Protocols | §12.1 – §12.12 | 12 |
 | XIII | Advanced Architectural Mandates | §13.1 – §13.15 | 15 |
@@ -51,7 +51,7 @@
 ### 1.0. Naming & Structural Foundations
 *   **The Consolidated Naming Convention**:
     *   **Files & Directories**: Follow the official style guide, formatter, framework generator, and established repository convention. TypeScript and JavaScript web projects default to `kebab-case`; do not impose it on Python modules, Dart packages, Java, Kotlin, or C# type files, Terraform resources, or other language-native structures. Names distinguished only by letter case are prohibited across languages for operating-system compatibility.
-    *   **Symbols**: Component, class, function, package, and other symbol names follow language-native conventions. See `320_programming_language_governance.md` for the cross-language source of truth.
+    *   **Symbols**: Component, class, function, package, and other symbol names follow language-native conventions. See `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` for the cross-language source of truth.
     *   **The Barrel File Ban**: In TypeScript and JavaScript, unrestricted re-exporting through `index.ts` is prohibited. An official language package or module entry point may be used after validating cycles, public API boundaries, Tree Shaking, or link-time impact.
 *   **UI/Logic Consistency**:
     *   **Principle**: "Similar but different" is a lack of professionalism and a bug. All features (delete, edit, list) must have unified UI and logic.
@@ -427,7 +427,7 @@
 *   Before requesting change acceptance, the author self-verifies no unresolved warnings, no runtime errors, and no unnecessary or sensitive logs, and records the result in a Pull Request, Merge Request, change record, or equivalent evidence.
 
 ### 9.3. Testing Strategy Mix Protocol
-*   **Context**: More tests do not automatically mean better tests, and one ratio does not fit every system. Select static, unit, integration, contract, E2E, and non-functional tests from `quality/000_qa_testing.md` and `320_programming_language_governance.md` according to change risk, architecture, failure cost, execution time, and historical defects.
+*   **Context**: More tests do not automatically mean better tests, and one ratio does not fit every system. Select static, unit, integration, contract, E2E, and non-functional tests from `quality/000_qa_testing.md` and `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` according to change risk, architecture, failure cost, execution time, and historical defects.
 *   **Reference Testing Trophy Profile for Web UI**:
     | Layer | Ratio | Description | Example Tools |
     |:------|:------|:------------|:--------------|
@@ -540,7 +540,7 @@
 *   **The Red Button Checklist**: Convert applicable Legal, Security, FinOps, Data, and reliability risks into machine-readable gates or traceable approval. Do not make a manual checklist the sole implementation for every release.
 *   **Omnichannel Check**: When multiple clients are in the product contract, verify shared domain and API contracts separately from client-specific UX. Do not force omnichannel requirements on a system that does not promise non-Web clients.
 *   **Deployment Safety Protocol**:
-    *   **Primary Directive: The AI Git Ban**: Refer to `000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
+    *   **Primary Directive: The AI Git Ban**: Refer to `axiarch-rules/{lang}/universal/core/000_core_mindset.md` Rule 8.1 for the strict prohibition of AI Git operations.
     *   **The Automated Deployment Mandate (CD First)**: Default to a reproducible, auditable pipeline that records artifact digest, approval, staged delivery, and rollback. Do not ban break-glass deployment outright; require least privilege, two-party control or independent post-review, complete logging, expiring credentials, and restoration of automation.
     *   **The Architectural Preservation Protocol**: Protect core boundaries through ownership, protected paths, review policy, contract tests, or equivalent controls. An `@preservation_level CRITICAL` header is an optional implementation.
 *   **Security**: Never commit secrets. Verify the repository and history in CI through a secret scanner or equivalent control; TruffleHog is an example.
@@ -596,7 +596,7 @@
 ## Part XII: Engineering Quality Protocols
 
 ### 12.1. The Zero-Warning Lint Protocol
-*   **Law**: A true CI pass means zero warnings from the language-native formatter, linter, type checker, or compiler. `npm run lint` is only a TypeScript or JavaScript example. Follow `320_programming_language_governance.md` for required gates and remove unused symbols immediately.
+*   **Law**: A true CI pass means zero warnings from the language-native formatter, linter, type checker, or compiler. `npm run lint` is only a TypeScript or JavaScript example. Follow `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` for required gates and remove unused symbols immediately.
 
 ### 12.2. The Clean Import Protocol
 *   **Law**: Imports, uses, and includes follow the language's official placement rules and default to a form that supports static dependency tracing. Dynamic imports for lazy loading, plugins, or cycle avoidance require an explicit boundary, failure handling, and tests.
@@ -717,7 +717,7 @@
 *   **RLS Awareness**: With Row Level Security databases, insufficient permissions return as "0 rows affected," not errors.
 
 ### 13.6. The Type Safety & Integrity Protocol
-This section is an additional TypeScript-specific standard. `320_programming_language_governance.md` is the source of truth for cross-language type and boundary contracts.
+This section is an additional TypeScript-specific standard. `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` is the source of truth for cross-language type and boundary contracts.
 *   **Zero `as any` Policy**: Using `as any` or `as never` to suppress type errors is "embedding bugs." Set ESLint `@typescript-eslint/no-explicit-any` to `error`.
 *   **Root Cause Resolution**: Resolve type errors through "type definition fixes," "DTO redesign," or "generics application," not casts.
 *   **Type Bridge Mandate**: For auto-generated type gaps, define extension types in `database-extensions.ts` using Mapped Types to prevent type collisions.

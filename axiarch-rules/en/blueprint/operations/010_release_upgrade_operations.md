@@ -166,7 +166,7 @@ The manifest's broad Project State glob covers additional numbered files under `
 
 ### Rule
 
-When the manifest cannot be read, fallback ownership boundaries should stay as close to the manifest as practical. Explicitly classified files such as `core/000`, `core/010`, templates, and Axiarch-shared Blueprint files like `core/020_governance_rules.md` keep their existing classifications, while additional `core/{NNN}_*.md` files that are not explicitly classified are treated as Project State. Optional prompts remain optional, but when they are applied, `.axiarch/files.sha256` must include their hashes.
+The current helper reads manifests with Python 3 independently of jq. Malformed JSON or field types stop before application. Only a legacy manifest without the `files` key uses fallback ownership boundaries. Explicitly classified files retain their ownership; additional `axiarch-rules/{lang}/blueprint/{folder}/{NNN}_*.md` files are Project State across actual folders and 000–999. Optional prompts remain optional; selected languages alone are updated and applied file hashes are recorded in `.axiarch/files.sha256`.
 
 ### Enforcement
 
@@ -264,9 +264,11 @@ With `set -euo pipefail`, `read -r answer` or `read -r choice` exited on EOF bef
 
 ### Rule
 
-Safe Upgrade Wizard confirmation prompts must not fail only because stdin reaches EOF. Treat EOF as empty input and fall back to the default. For final `--apply` confirmation, default N must set `APPLY=false` and `DRY_RUN=true`. For the final `--interactive` confirmation, default N must also keep dry-run behavior. Non-interactive application must use explicit `--yes` only after the dry-run output has been reviewed and the human owner has explicitly approved apply.
+Safe Upgrade Wizard confirmation prompts treat EOF as empty input and default to no application (`APPLY=false`). An explicit `--dry-run` cannot be overridden by `--apply`, option order or interactive answers. Non-interactive application uses `--yes` within the owner's authorized scope after reviewing the preview. Existing authorization need not be requested again.
 
 ### Enforcement
+
+The 2026-09-11 behavioral regression also checks that `--interactive --apply` never bypasses final confirmation. EOF without explicit `--yes` always returns to no application. `tests/test_runtime.py` executes the real script and checks target bytes remain unchanged.
 
 `axiarch-scripts/axiarch-upgrade.sh` handles confirmation input with `read -r answer || answer=""` and `read -r choice || choice=""`. `check-axiarch-health.sh` Check 15 verifies that the Safe Upgrade Wizard has EOF-safe confirmation defaults.
 
@@ -363,3 +365,5 @@ Pin external GitHub Actions to reviewed immutable commit SHAs or container diges
 ### Reference
 
 `.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`
+
+2026-09-11 addendum: on main push, release.yml invokes lint.yml via workflow_call at the same commit and requires successful needs before signing/publishing. Behavioral tests run on isolated Linux/macOS adopters. Structure, readiness and completion are separate verdicts; partial upgrades and failed diagnosis preserve the confirmed version and return nonzero. See `axiarch-harness/en/TASK_STATE_PROTOCOL.md` and the README outcome table.

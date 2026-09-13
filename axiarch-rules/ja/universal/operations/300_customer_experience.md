@@ -9,7 +9,7 @@
 > 「**ユーザーの成功がプロダクトの成功である**」——サポートは"コストセンター"ではなく"バリュードライバー"として設計せよ。
 > すべてのサポートインタラクションは、ユーザーの**Time-to-Value（価値実現時間）を最短化**し、**Effort（手間）を最小化**するために存在する。
 > **AI Autonomous Resolution Rate ≥ 80%**（2026年目標）を掲げ、人間エージェントは高付加価値対応に集中せよ。
-> 本ルールは `000_core_mindset.md` の優先順位階層（セキュリティ > UX > 収益性 > DX）に従う。
+> 本ルールは `axiarch-rules/{lang}/universal/core/000_core_mindset.md` の優先順位階層（セキュリティ > UX > 収益性 > DX）に従う。
 > **33パート・40セクション構成。**
 
 ---
@@ -1636,7 +1636,7 @@
 
 | 参照先ルール | 関連トピック |
 |:-----------|:-----------|
-| `000_core_mindset.md` | 優先順位階層、既存機能保護 |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | 優先順位階層、既存機能保護 |
 | `product/000_product_strategy.md` | レビュー・信頼性システム |
 | `product/300_revenue_monetization.md` | AIトークンエコノミクス、FinOps |
 | `product/500_growth_marketing.md` | PLG、オンボーディング、リテンション |

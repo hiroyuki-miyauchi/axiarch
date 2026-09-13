@@ -9,7 +9,7 @@
 > "**The user's success IS the product's success.**" — Support is not a "cost center" but a "value driver."
 > Every support interaction exists to **minimize the user's Time-to-Value** and **minimize their Effort**.
 > Target **AI Autonomous Resolution Rate ≥ 80%** (2026 goal), freeing human agents to focus on high-value interactions.
-> This rule follows the priority hierarchy of `000_core_mindset.md` (Security > UX > Revenue > DX).
+> This rule follows the priority hierarchy of `axiarch-rules/{lang}/universal/core/000_core_mindset.md` (Security > UX > Revenue > DX).
 > **33 Parts, 40 Sections.**
 
 ---
@@ -1141,7 +1141,7 @@
 
 | Referenced Rule | Related Topic |
 |:----------------|:-------------|
-| `000_core_mindset.md` | Priority hierarchy, existing functionality protection |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | Priority hierarchy, existing functionality protection |
 | `product/000_product_strategy.md` | Review/trust systems |
 | `product/300_revenue_monetization.md` | AI Token Economics, FinOps |
 | `product/500_growth_marketing.md` | PLG, Onboarding, Retention |

@@ -97,7 +97,7 @@
 | Regulation | Jurisdiction | Effective | Key Obligations | Max Penalty |
 |:-----------|:------------|:----------|:---------------|:-----------|
 | **GDPR** | EU/EEA | 2018 | Consent management, DPO, DPIA, data subject rights | 4% global revenue or €20M |
-| **Global Privacy Laws** (Amended) | Japan | 2022 (2027 amendment expected) | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
+| **APPI** (Amended) | Japan | 2022 (2027 amendment expected) | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
 | **CCPA/CPRA** | California, US | 2020/2023 | Opt-out rights, sensitive PI, ADMT regulation | $7,500/violation (intentional) |
 | **EU AI Act** | EU | 2024 (phased) | Risk classification, high-risk AI conformity, GPAI obligations | 7% global revenue or €35M |
 | **DSA/DMA** | EU | 2022/2024 | Platform transparency, gatekeeper obligations | 6% global revenue |
@@ -1128,7 +1128,7 @@ interface JurisdictionDeadline {
 
 const NOTIFICATION_DEADLINES: JurisdictionDeadline[] = [
   { jurisdiction: 'EU/EEA', regulation: 'GDPR Art.33', deadlineHours: 72, authority: 'Lead DPA', notificationUrl: '' },
-  { jurisdiction: 'Japan', regulation: 'Global Privacy Laws', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
+  { jurisdiction: 'Japan', regulation: 'APPI', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
   { jurisdiction: 'US-CA', regulation: 'CCPA/SB446', deadlineHours: 720, authority: 'CA AG', notificationUrl: '' },
   { jurisdiction: 'Australia', regulation: 'Privacy Act (NDB)', deadlineHours: 720, authority: 'OAIC', notificationUrl: '' },
   { jurisdiction: 'US-Federal', regulation: 'CIRCIA', deadlineHours: 72, authority: 'CISA', notificationUrl: '' },

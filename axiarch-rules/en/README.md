@@ -1,5 +1,7 @@
 # Axiarch Development Rules (Master Index)
 
+> Apply `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1: items outside mandatory applicable constraints are optional. Document language does not determine jurisdiction. Resolve `{lang}` from Project Native Language. `universal/` and `blueprint/` start at `axiarch-rules/{lang}/`; domain shorthand such as `core/` starts at the layer named by its table. Resolve ambiguous references to real paths rather than guessing among equal names.
+
 > [!IMPORTANT]
 > **The Three-Layer Governance Architecture**
 > This folder (`axiarch-rules/`) contains the governance rules of the Axiarch framework.
@@ -118,7 +120,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
+> Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
 
 1.  **Copy**: The minimal required setup is `AXIARCH.md`, the `AGENTS.md` adapter, `axiarch-rules/`, and `axiarch-harness/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash

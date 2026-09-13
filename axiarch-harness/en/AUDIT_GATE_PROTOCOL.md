@@ -40,3 +40,7 @@ For `BLOCKED`, use the same sequence only when the blocker can be resolved insid
 3. Re-run the same verification.
 4. Record the updated result in `walkthrough.md`.
 5. If unresolved, state residual risk and options for human judgment.
+
+## Goal and evidence linkage
+
+`axiarch-rules/en/universal/core/300_goal_and_current_state.md` governs content; use the IDs, owners, four states, targets, timestamps and evidence in [TASK_STATE_PROTOCOL.md](./TASK_STATE_PROTOCOL.md). H0/H1 stay lightweight. H2+ separates readiness from completion and audits evidence for every criterion. Structural health alone is not task completion.

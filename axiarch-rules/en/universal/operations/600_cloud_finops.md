@@ -80,7 +80,7 @@
     4.  **Cost Optimization** — Optimize only after the above three are secured
     5.  **Sustainability** — Achieve both cost optimization and carbon reduction
 
--   **Cross-Reference**: `000_core_mindset.md` (Priority hierarchy)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/core/000_core_mindset.md` (Priority hierarchy)
 
 ### §2. FinOps Foundation Framework 2026
 
@@ -2084,7 +2084,7 @@
 
 | Related Rule File | Related Sections |
 |:-----------------|:----------------|
-| `000_core_mindset.md` | Priority hierarchy (Security > UX > Revenue > DX) |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | Priority hierarchy (Security > UX > Revenue > DX) |
 | `product/300_revenue_monetization.md` | FinOps, unit economics, payment costs |
 | `engineering/000_engineering_standards.md` | CI/CD, coding standards |
 | `engineering/200_supabase_architecture.md` | DB cost management |

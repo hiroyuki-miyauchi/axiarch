@@ -10,11 +10,11 @@
 > Implementations of federated identity, OAuth, OIDC, social login, and enterprise SSO must
 > conform to the current stable best practices in this file.
 > **New adoption of Deprecated patterns (Implicit Flow / ROPC / third-party-cookie dependence) is prohibited.**
-> Authentication and authorization follow the priority order in `000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
+> Authentication and authorization follow the priority order in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
 
 > [!NOTE]
-> This file is the **deep-dive** of `000_security_privacy.md` §3.5 (ID Federation & SSO), §4.4 (Social Login), and §4.10 (OAuth 2.1 & DPoP).
-> Refer to 000 for the summary and to this file for implementation detail. Step-Up (re-authentication) is split into `420_step_up_auth_and_sensitive_operations.md`.
+> This file is the **deep-dive** of `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.5 (ID Federation & SSO), §4.4 (Social Login), and §4.10 (OAuth 2.1 & DPoP).
+> Refer to 000 for the summary and to this file for implementation detail. Step-Up (re-authentication) is split into `axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md`.
 
 ---
 
@@ -66,7 +66,7 @@
 | **Identity Provider (IdP)** | Authenticates users and provides identity | Google / Apple / Entra ID / Okta |
 
 -   **Rule 65.1.2**: When AS and RS are logically separated, the RS **must validate the audience (`aud`)** to confirm the token is meant for it (§5.2).
--   **Rule 65.1.3**: Apply Defense in Depth so that compromise of any one of IdP/AS/RS is contained (`000_security_privacy.md` §1.3).
+-   **Rule 65.1.3**: Apply Defense in Depth so that compromise of any one of IdP/AS/RS is contained (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1.3).
 
 ### 1.2. Client Types
 
@@ -77,7 +77,7 @@
 
 ### 1.3. Application Policy
 
--   **Law**: Building your own OAuth/OIDC provider is prohibited. Use a vetted IDaaS / AS (`000_security_privacy.md` §4.3). The focus of this file is correct RP (client)-side implementation.
+-   **Law**: Building your own OAuth/OIDC provider is prohibited. Use a vetted IDaaS / AS (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.3). The focus of this file is correct RP (client)-side implementation.
 -   **Law**: New implementations default to **OAuth 2.1 + OIDC + PKCE**. The weak flows OAuth 2.0 permitted (§2.2) are not adopted.
 
 ---
@@ -117,7 +117,7 @@
 
 ### 2.4. Scope Minimization
 
--   **Law**: Limit requested `scope` to the minimum needed for the function (`000_security_privacy.md` §7.2 Data Minimization).
+-   **Law**: Limit requested `scope` to the minimum needed for the function (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 Data Minimization).
 -   **Action**: Start from `openid`, `email`, `profile`, etc., and obtain additional permissions via **Incremental Authorization** (request them when actually needed).
 
 ### 2.5. OAuth Consent Phishing (Illicit Consent Grant)
@@ -126,7 +126,7 @@
 -   **Law**: Govern OAuth app registration/consent for your tenant/organization.
     1.  **App/scope review**: Restrict the scopes third-party apps may request against your tenant, and **disable user self-consent** for sensitive scopes (email/files/directory), requiring **admin consent**.
     2.  **Publisher verification**: By default, deny consent for apps that are not from a verified publisher.
-    3.  **Consent observability**: Periodically inventory granted consents and revoke unused/over-scoped apps. Emit anomalous new consent grants to ITDR (`000_security_privacy.md` §3.3).
+    3.  **Consent observability**: Periodically inventory granted consents and revoke unused/over-scoped apps. Emit anomalous new consent grants to ITDR (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3).
 -   When **your tenant is the side providing the AS** (multi-tenant SaaS), implement publisher verification, scope minimization, and consent logging for registered apps.
 
 ### 2.6. Phishing Surface of the Device Authorization Grant (RFC 8628)
@@ -260,7 +260,7 @@
 
 ### 7.1. Common Requirements
 
--   **Law**: Social login satisfies the Social Login Security Protocol in `000_security_privacy.md` §4.4 (Authorization Code + PKCE, `state`, server-side token exchange, scope minimization, explicit account linking, `iss`/`aud`/`exp` validation).
+-   **Law**: Social login satisfies the Social Login Security Protocol in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.4 (Authorization Code + PKCE, `state`, server-side token exchange, scope minimization, explicit account linking, `iss`/`aud`/`exp` validation).
 -   **Action**: **Re-validate** the ID Token / profile received from the IdP **server-side** before issuing a session. Do not trust the client's claims as-is.
 
 ### 7.2. Google (Google Identity Services)
@@ -302,7 +302,7 @@
 
 ### 8.1. Prohibit Automatic Linking
 
--   **Law**: **Do not automatically link** an external identity to an existing account solely because the email address matches (`000_security_privacy.md` §4.4 Explicit Account Link).
+-   **Law**: **Do not automatically link** an external identity to an existing account solely because the email address matches (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.4 Explicit Account Link).
 -   **Rationale**: If the IdP returns `email_verified=false`, or an attacker created an external account with an unverified email, automatic linking leads directly to **Account Takeover**.
 
 ### 8.2. Safe Linking Flow
@@ -350,7 +350,7 @@
 
 ### 9.4. SAML/OIDC Common
 
--   **Action**: Manage IdP metadata/certificates separately per tenant (customer company) to structurally prevent token mixing across tenants (`000_security_privacy.md` multi-tenant isolation). Monitor certificate rotation.
+-   **Action**: Manage IdP metadata/certificates separately per tenant (customer company) to structurally prevent token mixing across tenants (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` multi-tenant isolation). Monitor certificate rotation.
 
 ---
 
@@ -366,14 +366,14 @@
 -   **Action**:
     1.  Protect the SCIM endpoint with a Bearer Token, scoped separately per tenant.
     2.  **Immediate deprovisioning**: On IdP-side deactivation, immediately revoke all sessions of the target user (§17, §11.4).
-    3.  Record SCIM operations in the audit log (`000_security_privacy.md` §4.6).
--   **Cross-Reference**: `000_security_privacy.md` §3.5 (SCIM)
+    3.  Record SCIM operations in the audit log (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.6).
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.5 (SCIM)
 
 ---
 
 ## §11. Token Management, Expiration, Revocation
 
-### 11.1. Token Expiration (consistent with `000_security_privacy.md` §6.1)
+### 11.1. Token Expiration (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.1)
 
 | Token Type | Recommended Expiry | Admin/High-Risk |
 |:-----------|:-------------------|:----------------|
@@ -396,7 +396,7 @@
 -   **Action**:
     1.  Revoke Refresh Tokens at the AS Revocation endpoint.
     2.  Minimize revocation propagation delay with short-lived access tokens + a revocation list (`jti`-based) or short cache TTL.
-    3.  Consistent with `000_security_privacy.md` §6.5 (Server-Side Invalidation).
+    3.  Consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.5 (Server-Side Invalidation).
 
 ---
 
@@ -411,7 +411,7 @@
 ### 12.2. Reuse Detection
 
 -   **Law**: If an already-used (rotated) Refresh Token is presented again, **immediately revoke the entire token family** and require re-authentication of the user. This is a signal of token theft.
--   **Action**: Assign a family ID to Refresh Tokens and track the rotation chain. On reuse detection, revoke the whole family and emit an event to ITDR (`000_security_privacy.md` §3.3).
+-   **Action**: Assign a family ID to Refresh Tokens and track the rotation chain. On reuse detection, revoke the whole family and emit an event to ITDR (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3).
 
 ### 12.3. Combine with Sender-Constraint
 
@@ -425,7 +425,7 @@
 
 ### 13.1. DPoP (Demonstrating Proof of Possession)
 
--   **Overview**: Cryptographically binds access/refresh tokens to the client's public key to prevent reuse of stolen Bearer tokens (consistent with `000_security_privacy.md` §4.10).
+-   **Overview**: Cryptographically binds access/refresh tokens to the client's public key to prevent reuse of stolen Bearer tokens (consistent with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.10).
 -   **Action**:
     1.  The client attaches a DPoP JWT signed with a key pair (`ES256`/`EdDSA` recommended) to the `DPoP` header per request.
     2.  The server validates `htm` (HTTP method), `htu` (HTTP URI), `iat`, `jti` (replay prevention), and confirms the match between the token's `cnf.jkt` (key thumbprint) and the DPoP key.
@@ -451,9 +451,9 @@
 -   **Law**: To counter AiTM and token theft, **mandate sender-constrained tokens (DPoP = RFC 9449 / mTLS = RFC 8705)** for high-risk uses and do not rely on Bearer-token-only operation. A stolen token cannot be replayed by an attacker without the bound key.
 -   **Action**:
     1.  Make both access and refresh tokens sender-constrained (§12.3, §13.1).
-    2.  Detect signs of token theft (sudden IP/device change for the same token, Impossible Travel) and trigger immediate revocation/re-auth via CAEP (→`420_step_up_auth_and_sensitive_operations.md` §10).
+    2.  Detect signs of token theft (sudden IP/device change for the same token, Impossible Travel) and trigger immediate revocation/re-auth via CAEP (→`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §10).
     3.  Revoke the token family en masse via refresh reuse detection (§12.2).
--   **Cross-Reference**: `420_step_up_auth_and_sensitive_operations.md` §28 (ATO detection)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §28 (ATO detection)
 
 ---
 
@@ -472,7 +472,7 @@
     1.  The BFF runs the OAuth flow (Authorization Code + PKCE) as a Confidential Client.
     2.  Tokens are stored in the BFF's server-side session store (encrypted).
     3.  Browser↔BFF uses a same-site cookie session; BFF↔API uses Bearer/DPoP.
-    4.  CSRF defense (`SameSite=Lax`/`Strict` + CSRF token, `000_security_privacy.md` §10.8).
+    4.  CSRF defense (`SameSite=Lax`/`Strict` + CSRF token, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §10.8).
 
 ### 14.3. Pure SPA Without BFF
 
@@ -508,8 +508,8 @@
 ### 15.5. Expressing Authentication Strength (acr / amr) and Step-Up Goes to §420
 
 -   **Law**: Express the assurance level and factors used via the **`acr` (Authentication Context Class Reference) / `amr` (Authentication Methods References, RFC 8176)** claims, and have the RP (resource side) **validate them according to operation criticality**. Do not treat mere token possession as evidence of authentication strength (§19.5 Zero Trust).
--   **AAL/IAL/FAL mapping**: Map the NIST SP 800-63 **AAL (authenticator assurance) / IAL (identity assurance) / FAL (federation assurance)** to `acr` values and define the required level per operation tier. The detailed mapping and Step-Up (re-authentication) implementation are consolidated in **`420_step_up_auth_and_sensitive_operations.md` §2 and §3** (not deep-dived here).
--   Re-authentication for high-risk operations (Step-Up Authentication) and transaction authorization are covered in **`420_step_up_auth_and_sensitive_operations.md`**.
+-   **AAL/IAL/FAL mapping**: Map the NIST SP 800-63 **AAL (authenticator assurance) / IAL (identity assurance) / FAL (federation assurance)** to `acr` values and define the required level per operation tier. The detailed mapping and Step-Up (re-authentication) implementation are consolidated in **`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §2 and §3** (not deep-dived here).
+-   Re-authentication for high-risk operations (Step-Up Authentication) and transaction authorization are covered in **`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md`**.
 
 ---
 
@@ -551,7 +551,7 @@
 
 ### 17.3. Session Sync and Global Logout
 
--   **Action**: Provide a "log out from all devices" feature (`000_security_privacy.md` §6.3). On SCIM deactivation / password change, revoke all sessions + Refresh Tokens.
+-   **Action**: Provide a "log out from all devices" feature (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.3). On SCIM deactivation / password change, revoke all sessions + Refresh Tokens.
 
 ---
 
@@ -579,7 +579,7 @@
 
 ### 19.1. Observability
 
--   **Action**: Measure and log the following (observing PII masking, `000_security_privacy.md` §7.4).
+-   **Action**: Measure and log the following (observing PII masking, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.4).
     -   **OAuth error rate**: occurrence rate of `invalid_grant`, `invalid_client`, `access_denied`, redirect mismatch, etc.
     -   **Token issuance/refresh metrics**: issuance count, refresh success/failure, reuse-detection firings.
     -   **Validation failures**: signature verification failures, `iss`/`aud`/`nonce` mismatches, expiry.
@@ -603,11 +603,11 @@
 
 ### 19.5. Zero Trust
 
--   **Action**: Federation is central to Identity-First Zero Trust (`000_security_privacy.md` §2.4). Token possession ≠ trust; authorize each time by `aud`/`scope`/sender-constraint/context (device, risk score).
+-   **Action**: Federation is central to Identity-First Zero Trust (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §2.4). Token possession ≠ trust; authorize each time by `aud`/`scope`/sender-constraint/context (device, risk score).
 
 ### 19.6. Privacy & Consent
 
--   **Action**: Scope minimization (§2.4), explicit consent via `prompt=consent`, and avoiding over-disclosure with SD-JWT, etc. Consent UIs must not use dark patterns (`000_security_privacy.md` §9.5). Limit attributes retrieved from the IdP to in-purpose use and define a retention period.
+-   **Action**: Scope minimization (§2.4), explicit consent via `prompt=consent`, and avoiding over-disclosure with SD-JWT, etc. Consent UIs must not use dark patterns (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §9.5). Limit attributes retrieved from the IdP to in-purpose use and define a retention period.
 
 ---
 

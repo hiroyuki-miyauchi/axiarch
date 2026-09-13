@@ -2352,7 +2352,7 @@ Competitive Intelligence Pricing System アーキテクチャ:
 | **EU AI Liability Directive** | 2027-2028年 | AI系価格設定の損害賠償責任の明確化 | 🔴 高 |
 | **EU Digital Fairness Act（本格施行）** | 2028-2030年 | Drip Pricing完全禁止、Subscription UXの法定標準化 | 🔴 高 |
 | **US Federal Auto-Renewal Law（統一化）** | 2026-2028年 | 州法乱立の連邦統一化（CA CARLを全米標準化の可能性） | 🟡 中 |
-| **APAC AI Governance Framework** | 2027年以降 | 日本・韓国・シンガポール連携のAI規制調和 | 🟡 中 |
+| APACのAI規制動向（監視候補） | 施行日を一律に仮定しない | 各法域の公布済み法令を確認して価格・費用の前提へ反映 | 要確認 |
 | **ISO 42001 AI Management System** | 2026年以降普及 | AIシステムの第三者認証義務化（一部業界） | 🟡 中 |
 | **India Digital Competition Bill (DCB)** | 2026-2027年 | インド市場向けプラットフォーム御用破砕・価格透明化義務 | 🟡 中 |
 | **Brazil LGPD AIプライシング規制** | 2027年以降 | ANPDによるAI値付けアルゴリズムの個人データ利用規制 | 🟡 中 |
@@ -2614,5 +2614,5 @@ Competitive Intelligence Pricing System アーキテクチャ:
 
 > **End of Document**
 > Version: 2026-04-27 v5.1 | 17 Parts | 180+ Sections | 350+ Rules | 95 Anti-Patterns
-> Cross-reference: `300_revenue_monetization.md` | `000_core_mindset.md` | `100_market_validation.md` | `200_go_to_market.md` | `000_ai_engineering.md`
+> Cross-reference: `axiarch-rules/{lang}/universal/product/300_revenue_monetization.md` | `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | `axiarch-rules/{lang}/universal/product/100_market_validation.md` | `axiarch-rules/{lang}/universal/product/200_go_to_market.md` | `axiarch-rules/{lang}/universal/ai/000_ai_engineering.md`
 

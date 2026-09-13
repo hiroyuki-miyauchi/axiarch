@@ -49,7 +49,7 @@
 - [Part XXVII. Post-Sale Revenue Optimization](#part-xxvii-post-sale-revenue-optimization)
 - [Part XXVIII. Sales Compliance & Data Ethics](#part-xxviii-sales-compliance--data-ethics)
 - [Part XXIX. Maturity Model (5 Levels)](#part-xxix-maturity-model-5-levels)
-- [Part XXX. Appendix: Quick Reference, Anti-Patterns & Cross-References](#part-xxx-appendix-quick-reference-anti-patterns--cross-references)
+- [Part XXXIII. Appendix: Quick Reference, Anti-Patterns & Cross-References](#part-xxxiii-appendix-quick-reference-anti-patterns--cross-references)
 
 ---
 

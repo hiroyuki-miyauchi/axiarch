@@ -10,11 +10,11 @@
 > フェデレーテッドID・OAuth・OIDC・ソーシャルログイン・エンタープライズSSOの実装は、
 > 本ファイルの最新安定版ベストプラクティスに準拠しなければならない。
 > **Deprecated（Implicit Flow / ROPC / サードパーティCookie依存）の新規採用は禁止。**
-> 認証・認可は `000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
+> 認証・認可は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
 
 > [!NOTE]
-> 本ファイルは `000_security_privacy.md` の §3.5（IDフェデレーション&SSO）・§4.4（Social Login）・§4.10（OAuth 2.1 & DPoP）の**深掘り版**です。
-> 概要は 000 を、実装詳細は本ファイルを参照してください。Step-Up（再認証）は `420_step_up_auth_and_sensitive_operations.md` に分離しています。
+> 本ファイルは `axiarch-rules/{lang}/universal/security/000_security_privacy.md` の §3.5（IDフェデレーション&SSO）・§4.4（Social Login）・§4.10（OAuth 2.1 & DPoP）の**深掘り版**です。
+> 概要は 000 を、実装詳細は本ファイルを参照してください。Step-Up（再認証）は `axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` に分離しています。
 
 ---
 
@@ -66,7 +66,7 @@
 | **Identity Provider (IdP)** | ユーザー認証とアイデンティティ提供 | Google / Apple / Entra ID / Okta |
 
 -   **Rule 65.1.2**: AS と RS が論理的に分離している場合、RS は**必ず audience（`aud`）検証**でトークンが自分宛てかを確認する（§5.2）。
--   **Rule 65.1.3**: IdP・AS・RS のどれが侵害されても影響範囲が局所化するよう、Defense in Depth を適用する（`000_security_privacy.md` §1.3）。
+-   **Rule 65.1.3**: IdP・AS・RS のどれが侵害されても影響範囲が局所化するよう、Defense in Depth を適用する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1.3）。
 
 ### 1.2. クライアント種別
 
@@ -77,7 +77,7 @@
 
 ### 1.3. 適用方針
 
--   **Law**: 自前の OAuth/OIDC プロバイダー実装は禁止する。検証済みの IDaaS / AS（`000_security_privacy.md` §4.3）を使用する。RP（クライアント）側の正しい実装が本ファイルの主眼。
+-   **Law**: 自前の OAuth/OIDC プロバイダー実装は禁止する。検証済みの IDaaS / AS（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.3）を使用する。RP（クライアント）側の正しい実装が本ファイルの主眼。
 -   **Law**: 新規実装は **OAuth 2.1 + OIDC + PKCE** を既定とする。OAuth 2.0 の許容していた弱いフロー（§2.2）は採用しない。
 
 ---
@@ -117,7 +117,7 @@
 
 ### 2.4. スコープ最小化
 
--   **Law**: 要求する `scope` は機能遂行に必要な最小限に限定する（`000_security_privacy.md` §7.2 データ最小化）。
+-   **Law**: 要求する `scope` は機能遂行に必要な最小限に限定する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 データ最小化）。
 -   **Action**: `openid`, `email`, `profile` 等から開始し、追加権限は **Incremental Authorization**（必要になった時点で追加要求）で取得する。
 
 ### 2.5. OAuth Consent Phishing（不正同意付与攻撃）
@@ -126,7 +126,7 @@
 -   **Law**: テナント／組織のOAuthアプリ登録・同意を統制する。
     1.  **アプリ／スコープ審査**: 自テナントに対し第三者アプリが要求できるスコープを制限し、機微スコープ（メール・ファイル・ディレクトリ）への**ユーザー任意同意を無効化**して **admin consent（管理者承認）必須**とする。
     2.  **publisher 検証**: 検証済み発行元（verified publisher）でないアプリの同意を既定で拒否する。
-    3.  **同意の可観測性**: 付与済み同意（consent grant）を定期棚卸しし、未使用・過剰スコープのアプリを失効する。異常な新規同意付与を ITDR（`000_security_privacy.md` §3.3）へ送出。
+    3.  **同意の可観測性**: 付与済み同意（consent grant）を定期棚卸しし、未使用・過剰スコープのアプリを失効する。異常な新規同意付与を ITDR（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3）へ送出。
 -   **自テナントが AS を提供する側（マルチテナントSaaS）**の場合は、登録アプリの publisher 検証・スコープ最小化・同意ログ提供を実装する。
 
 ### 2.6. Device Authorization Grant のフィッシング面（RFC 8628）
@@ -260,7 +260,7 @@
 
 ### 7.1. 共通要件
 
--   **Law**: ソーシャルログインは `000_security_privacy.md` §4.4 の Social Login Security Protocol を満たす（Authorization Code + PKCE、`state`、サーバーサイド token 交換、スコープ最小化、明示的アカウントリンク、`iss`/`aud`/`exp` 検証）。
+-   **Law**: ソーシャルログインは `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.4 の Social Login Security Protocol を満たす（Authorization Code + PKCE、`state`、サーバーサイド token 交換、スコープ最小化、明示的アカウントリンク、`iss`/`aud`/`exp` 検証）。
 -   **Action**: IdP から受領した ID Token / プロフィールは**サーバーサイドで再検証**してからセッションを発行する。クライアントの主張をそのまま信頼しない。
 
 ### 7.2. Google（Google Identity Services）
@@ -302,7 +302,7 @@
 
 ### 8.1. 自動リンクの禁止
 
--   **Law**: 同一メールアドレスという理由だけで、既存アカウントと外部IDを**自動リンクしてはならない**（`000_security_privacy.md` §4.4 Explicit Account Link）。
+-   **Law**: 同一メールアドレスという理由だけで、既存アカウントと外部IDを**自動リンクしてはならない**（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.4 Explicit Account Link）。
 -   **Rationale**: IdP が `email_verified=false` を返す、または攻撃者が未検証メールで外部アカウントを作成した場合、自動リンクは**アカウント乗っ取り（Account Takeover）**に直結する。
 
 ### 8.2. 安全なリンクフロー
@@ -350,7 +350,7 @@
 
 ### 9.4. SAML/OIDC 共通
 
--   **Action**: テナント（顧客企業）ごとに IdP メタデータ・証明書を分離管理し、テナント間のトークン混用を構造的に防ぐ（`000_security_privacy.md` マルチテナント分離）。証明書ローテーションを監視する。
+-   **Action**: テナント（顧客企業）ごとに IdP メタデータ・証明書を分離管理し、テナント間のトークン混用を構造的に防ぐ（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` マルチテナント分離）。証明書ローテーションを監視する。
 
 ---
 
@@ -366,14 +366,14 @@
 -   **Action**:
     1.  SCIM エンドポイントは Bearer Token で保護し、テナントごとにスコープ分離。
     2.  **Deprovisioning 即時反映**: IdP 側の無効化を受けて、対象ユーザーの全セッションを即時失効（§17, §11.4）。
-    3.  SCIM 操作を監査ログに記録（`000_security_privacy.md` §4.6）。
--   **Cross-Reference**: `000_security_privacy.md` §3.5（SCIM）
+    3.  SCIM 操作を監査ログに記録（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.6）。
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.5（SCIM）
 
 ---
 
 ## §11. トークン管理・有効期限・失効
 
-### 11.1. トークン有効期限（`000_security_privacy.md` §6.1 と整合）
+### 11.1. トークン有効期限（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.1 と整合）
 
 | トークン種別 | 推奨有効期限 | 管理画面/高リスク |
 |:-----------|:-----------|:----------------|
@@ -396,7 +396,7 @@
 -   **Action**:
     1.  Refresh Token は AS の Revocation エンドポイントで失効。
     2.  短命アクセストークン + 失効リスト（`jti` ベース）または短いキャッシュTTLで失効反映の遅延を最小化。
-    3.  `000_security_privacy.md` §6.5（Server-Side Invalidation）と整合。
+    3.  `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.5（Server-Side Invalidation）と整合。
 
 ---
 
@@ -411,7 +411,7 @@
 ### 12.2. 再利用検知（Reuse Detection）
 
 -   **Law**: 既に使用済み（ローテーション済み）の Refresh Token が再提示された場合、**そのトークンファミリー全体を即時失効**し、ユーザーに再認証を要求する。これはトークン窃取のシグナルである。
--   **Action**: Refresh Token に family ID を付与し、ローテーションチェーンを追跡。再利用検知時は family を一括失効し、ITDR（`000_security_privacy.md` §3.3）へイベント送出。
+-   **Action**: Refresh Token に family ID を付与し、ローテーションチェーンを追跡。再利用検知時は family を一括失効し、ITDR（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3）へイベント送出。
 
 ### 12.3. Sender-Constraint 併用
 
@@ -425,7 +425,7 @@
 
 ### 13.1. DPoP（Demonstrating Proof of Possession）
 
--   **概要**: アクセストークン/リフレッシュトークンをクライアントの公開鍵に暗号的に束縛し、Bearer トークン盗難時の再利用を防止する（`000_security_privacy.md` §4.10 と整合）。
+-   **概要**: アクセストークン/リフレッシュトークンをクライアントの公開鍵に暗号的に束縛し、Bearer トークン盗難時の再利用を防止する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.10 と整合）。
 -   **Action**:
     1.  クライアントはリクエストごとに鍵対（`ES256`/`EdDSA` 推奨）で署名した DPoP JWT を `DPoP` ヘッダーに付与。
     2.  サーバーは `htm`（HTTPメソッド）, `htu`（HTTP URI）, `iat`, `jti`（リプレイ防止）を検証し、トークンの `cnf.jkt`（鍵Thumbprint）と DPoP 鍵の一致を確認。
@@ -451,9 +451,9 @@
 -   **Law**: AiTM とトークン窃取への対抗として、高リスク用途では **sender-constrained token（DPoP=RFC 9449 / mTLS=RFC 8705）を必須**とし、Bearer トークン単独運用に依存しない。盗難トークンは束縛鍵を持たない攻撃者からは再利用できない。
 -   **Action**:
     1.  アクセストークン・リフレッシュトークンの双方を sender-constrained 化（§12.3, §13.1）。
-    2.  トークン窃取の兆候（同一トークンの IP/デバイス急変、Impossible Travel）を検知し、CAEP（→`420_step_up_auth_and_sensitive_operations.md` §10）で即時失効・再認証を発火。
+    2.  トークン窃取の兆候（同一トークンの IP/デバイス急変、Impossible Travel）を検知し、CAEP（→`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §10）で即時失効・再認証を発火。
     3.  リフレッシュ再利用検知（§12.2）でトークンファミリーを一括失効。
--   **Cross-Reference**: `420_step_up_auth_and_sensitive_operations.md` §28（ATO 検知）
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §28（ATO 検知）
 
 ---
 
@@ -472,7 +472,7 @@
     1.  BFF が Confidential Client として OAuth フロー（Authorization Code + PKCE）を実行。
     2.  トークンは BFF のサーバーサイドセッションストア（暗号化）に保管。
     3.  ブラウザ↔BFF は same-site Cookie セッション、BFF↔API は Bearer/DPoP。
-    4.  CSRF 対策（`SameSite=Lax`/`Strict` + CSRF トークン、`000_security_privacy.md` §10.8）。
+    4.  CSRF 対策（`SameSite=Lax`/`Strict` + CSRF トークン、`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §10.8）。
 
 ### 14.3. BFF が使えない純SPAの場合
 
@@ -508,8 +508,8 @@
 ### 15.5. 認証強度の表現（acr / amr）と Step-Up は §420 へ
 
 -   **Law**: 認証の保証レベルと使用要素は **`acr`（Authentication Context Class Reference）/ `amr`（Authentication Methods References, RFC 8176）** クレームで表現し、RP（リソース側）が**操作の重大性に応じて検証**する。トークンを保持していること自体を認証強度の根拠にしない（§19.5 Zero Trust）。
--   **AAL/IAL/FAL マッピング**: NIST SP 800-63 の **AAL（認証器保証）/ IAL（身元確認保証）/ FAL（フェデレーション保証）** を `acr` 値にマッピングし、操作ティアごとに必要レベルを定義する。詳細なマッピングと Step-Up（再認証）の実装は **`420_step_up_auth_and_sensitive_operations.md` §2・§3** に集約する（本ファイルでは深掘りしない）。
--   高リスク操作時の再認証（Step-Up Authentication）、トランザクション認証は **`420_step_up_auth_and_sensitive_operations.md`** を参照。
+-   **AAL/IAL/FAL マッピング**: NIST SP 800-63 の **AAL（認証器保証）/ IAL（身元確認保証）/ FAL（フェデレーション保証）** を `acr` 値にマッピングし、操作ティアごとに必要レベルを定義する。詳細なマッピングと Step-Up（再認証）の実装は **`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md` §2・§3** に集約する（本ファイルでは深掘りしない）。
+-   高リスク操作時の再認証（Step-Up Authentication）、トランザクション認証は **`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md`** を参照。
 
 ---
 
@@ -551,7 +551,7 @@
 
 ### 17.3. セッション同期とグローバルログアウト
 
--   **Action**: 「すべてのデバイスからログアウト」機能を提供（`000_security_privacy.md` §6.3）。SCIM 無効化・パスワード変更時は全セッション+Refresh Token を失効させる。
+-   **Action**: 「すべてのデバイスからログアウト」機能を提供（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.3）。SCIM 無効化・パスワード変更時は全セッション+Refresh Token を失効させる。
 
 ---
 
@@ -579,7 +579,7 @@
 
 ### 19.1. 可観測性（Observability）
 
--   **Action**: 以下を計測・ログ化する（PIIマスキング順守、`000_security_privacy.md` §7.4）。
+-   **Action**: 以下を計測・ログ化する（PIIマスキング順守、`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.4）。
     -   **OAuth エラー率**: `invalid_grant`, `invalid_client`, `access_denied`, redirect mismatch 等の発生率。
     -   **トークン発行/更新メトリクス**: 発行数、リフレッシュ成功/失敗、再利用検知発火数。
     -   **検証失敗**: 署名検証失敗、`iss`/`aud`/`nonce` 不一致、期限切れ。
@@ -603,11 +603,11 @@
 
 ### 19.5. Zero Trust
 
--   **Action**: フェデレーションは Identity-First Zero Trust（`000_security_privacy.md` §2.4）の中核。トークン保持＝信頼ではなく、`aud`/`scope`/sender-constraint/コンテキスト（デバイス・リスクスコア）で都度認可する。
+-   **Action**: フェデレーションは Identity-First Zero Trust（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §2.4）の中核。トークン保持＝信頼ではなく、`aud`/`scope`/sender-constraint/コンテキスト（デバイス・リスクスコア）で都度認可する。
 
 ### 19.6. プライバシー・同意
 
--   **Action**: スコープ最小化（§2.4）、`prompt=consent` による明示同意、SD-JWT 等での過剰開示回避。同意取得UIはダークパターンを禁止（`000_security_privacy.md` §9.5）。IdP から取得した属性は目的内利用に限定し保存期間を定義する。
+-   **Action**: スコープ最小化（§2.4）、`prompt=consent` による明示同意、SD-JWT 等での過剰開示回避。同意取得UIはダークパターンを禁止（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §9.5）。IdP から取得した属性は目的内利用に限定し保存期間を定義する。
 
 ---
 

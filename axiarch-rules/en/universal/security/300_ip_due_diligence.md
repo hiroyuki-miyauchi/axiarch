@@ -666,7 +666,7 @@ rules:
 ### Rule 63.180: IP Management for Training Data
 - **Copyright clearance**:
   - License verification when training data includes third-party copyrighted works
-  - EU AI Act: General-purpose AI model providers must disclose training data summaries (full enforcement August 2026)
+  - EU AI Act: General-purpose AI model providers must disclose training data summaries (phased application; verify role, scope and transitions)
   - Verify applicability of local copyright exceptions for text and data mining (TDM)
 - **Opt-out compliance**:
   - `robots.txt` `ai` directive, `ai.txt` (C2PA-compatible) for crawling control
@@ -1510,7 +1510,7 @@ cursor_privacy:
   - **Images**: Review ToS for DALL·E / Midjourney / Stable Diffusion; understand commercial use restrictions on generated images
   - **Voice**: Note neighboring rights of voice talent/artists (monitor regulatory trends for AI Voice Cloning jurisdiction by jurisdiction)
   - **Video**: Embed C2PA (Content Authenticity Initiative) metadata in AI-generated video to certify provenance
-  - **AI-Generated Content Labeling Obligation**: EU AI Act §50 (full enforcement August 2026) mandates technical marking of AI-generated content
+  - **AI-Generated Content Labeling Obligation**: EU AI Act §50 (phased application; verify role, scope and transitions) mandates technical marking of AI-generated content
 - **Deep Fake & Impersonation Risk**:
   - Strengthen brand monitoring to detect Deep Fake usage of company brand, executive faces, and voices
   - Evidence preservation strategy for Cease & Desist targets involving "Synthetic Media" usage
@@ -1985,8 +1985,10 @@ def attach_c2pa_manifest(
 | **Aug 1, 2024** | AI Act enters into force | Understand GPAI rules; begin IP policy review |
 | **Feb 2, 2025** | Prohibited AI practices apply | Assess IP risks from prohibited-use AI outputs |
 | **Aug 2, 2025** | GPAI obligations apply (Art.53) | Training data IP clearance system operational |
-| **Aug 2, 2026** | Full enforcement | Art.50 content marking, high-risk AI obligations fully met |
+| **From August 2, 2026** | Phased application, not simultaneous full enforcement for all risk categories | Verify separate Art.50, GPAI and high-risk deadlines and transitional provisions |
 | **Ongoing** | Delegated acts / guidelines updates | Quarterly monitoring of EU AI Office publications |
+
+Verify the [European Commission AI Act timeline](https://ai-act-service-desk.ec.europa.eu/en/ai-act/eu-ai-act-implementation-timeline). As checked in September 2026, Annex III and Annex I high-risk provisions have separate December 2, 2027 and August 2, 2028 dates; do not use the former single-date assumption.
 
 ---
 

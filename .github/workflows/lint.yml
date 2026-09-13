@@ -1,8 +1,7 @@
 name: "📋 Markdown Lint & Bilingual Symmetry Check"
 
 on:
-  push:
-    branches: ["main"]
+  workflow_call:
   pull_request:
     branches: ["main"]
 
@@ -149,3 +148,18 @@ jobs:
           echo ""
           echo "✅ All bilingual symmetry checks passed!"
           echo "   Axiarch maintains exact tracked JA/EN relative-path symmetry."
+
+  runtime-regression:
+    name: "隔離導入先での実動作回帰"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: 実行対象コミットの確認
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: 実動作テスト
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v

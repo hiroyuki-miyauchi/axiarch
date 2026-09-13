@@ -1,12 +1,19 @@
 # Axiarch Roadmap
 
+> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §0.1。
+> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §0.1.
+
 > **現在の安定版 / Current Stable**: v1.16.0 Polyglot & Cloud Governance Expansion\
-> **次期作業 / Next**: v1.16.x adoption feedback, release observability, and operational validation（候補 / candidate）\
+> 次期開発版 / Next development: v1.17.0-dev — ゴール・証拠・実行手順の整合 / goal, evidence and runtime consistency（未公開 / unreleased）\
 > **ステータス / Status**: Actively Maintained
 
 ---
 
 ## 🇯🇵 ロードマップ
+
+### 開発中: v1.17.0-dev（2026-09-13）
+
+ゴールと証拠の機械検査、セッションごとの記録、導入・更新の失敗伝播、同じコミットの品質検査を通す公開経路、日英の用語・自律ロード・保証範囲を整備した。隔離回帰テストをCIの検査対象へ追加している。正式版のタグ・公開は別途行い、公開済み安定版はv1.16.0を維持する。詳細は [Unreleasedの変更履歴](CHANGELOG.md#unreleased) を参照する。
 
 このロードマップはAxiarchの開発方向性を共有するための公開文書です。\
 優先度・スコープは実際の使用フィードバックと企業採用ニーズに基づいて調整されます。
@@ -15,11 +22,11 @@
 
 ### 🎯 戦略フォーカス — 主対象3系統への集中（2026-05-15）
 
-- **実運用稼働確認済み主対象**: Google Antigravity・OpenAI Codex・Claude Code（いずれもドッグフーディングで稼働確認済み・全環境保証なし）
+- Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 - **主対象**: OpenAI Codex / Claude Code / Google Antigravity
 - **拡張互換**: Cursor / GitHub Copilot / Windsurf は、未検証のポインター補助対象として扱い、動作保証しない
-- **Codex**: `.codex/hooks.json`、PostToolUse diff guard、`update_plan` 連携を持つ主対象。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証はしない
-- **Claude Code**: hook 補強モデルとTask tools連携を持つ主対象。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証はしない
+- **Codex**: `.codex/hooks.json`、PostToolUse diff guard、`update_plan` 連携を持つ主対象。未実証の対応候補であり、動作保証はしない
+- **Claude Code**: hook 補強モデルとTask tools連携を持つ主対象。未実証の対応候補であり、動作保証はしない
 - **Antigravity**: agent-first IDE 時代の実運用稼働確認済み対象として、長い自律タスクにおける品質床を訴求する
 - **市場戦略文書**: Axiarch 本体固有の戦略は `MARKET_STRATEGY.md` に分離し、採用先へコピーされる `axiarch-rules/{lang}/blueprint/` には混入させない
 
@@ -366,8 +373,8 @@ token cost / 既存 sublimated file 認識率 / stale lesson 放置）を構造�
 - **`axiarch-scripts/axiarch-boot-reminder.sh` Two-Stage Output (TTL)** — 初回
   fire = full reminder + timestamp 記録、TTL 内（default 30 分）かつ違反なしなら
   `[AXIARCH REMINDER]` short-circuit、違反検出時は強制
-  full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。**長時間 session で token
-  約 87% 削減**（24k → 3k）
+  full。`AXIARCH_REMINDER_TTL_SECONDS=0` で disable。繰り返す補足を短縮するが、
+  現行の全体トークン削減率を示す検証結果ではない。効果は作業と再表示頻度に依存する。
 - **Check C — Stale Lesson Detection** — `core/010` の `[YYYY-MM-DD]` 日付が 180
   日以上経過した lesson を `🚨 [VIOLATION-C]`
   として検出。`AXIARCH_LESSON_STALE_DAYS` で閾値調整可
@@ -703,6 +710,10 @@ AGENTS.md 標準、OpenAI Codex、Claude Code Skills・Subagents・Hooks、GitHu
 
 ## 🇺🇸 Roadmap
 
+### In development: v1.17.0-dev (2026-09-13)
+
+Adds mechanical goal/evidence checks, session-specific records, install/upgrade failure propagation, quality checks on the exact release commit, and aligned bilingual terminology, autonomous loading and guarantee boundaries. Isolated runtime regressions are included in CI. Stable tagging and publication remain separate; the latest published stable version is v1.16.0. See the [Unreleased changelog](CHANGELOG.md#unreleased).
+
 This roadmap is a public document sharing the direction of Axiarch's
 development.\
 Priorities and scope will be adjusted based on actual usage feedback and
@@ -712,11 +723,11 @@ enterprise adoption needs.
 
 ### 🎯 Strategic Focus — Concentrate on Three Primary Agents (2026-05-15)
 
-- **Production-validated primary targets**: Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment
+- Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
 - **Primary targets**: OpenAI Codex / Claude Code / Google Antigravity
 - **Extended compatibility**: Cursor / GitHub Copilot / Windsurf are unverified pointer-only auxiliary targets with no operation guarantee
-- **Codex**: Primary target with `.codex/hooks.json`, PostToolUse diff guard, and `update_plan` integration; validated through real operational use (dogfooding), with no operation guarantee for every environment
-- **Claude Code**: Primary target with the hook-reinforcement model and Task tools integration; validated through real operational use (dogfooding), with no operation guarantee for every environment
+- **Codex**: Primary target with `.codex/hooks.json`, PostToolUse diff guard, and `update_plan` integration; unverified in practical use, with no operation guarantee
+- **Claude Code**: Primary target with the hook-reinforcement model and Task tools integration; unverified in practical use, with no operation guarantee
 - **Antigravity**: Production-validated agent-first IDE target; the clearest platform for explaining Axiarch as a quality floor for long-running autonomous work
 - **Market strategy document**: Axiarch-specific strategy lives in `MARKET_STRATEGY.md`, not in adopter-facing `axiarch-rules/{lang}/blueprint/`
 
@@ -1076,7 +1087,8 @@ functional evaluation report"). Structurally resolves the design-vs-reality gap
   fire returns full reminder + writes timestamp; subsequent fires within TTL
   (default 30 min) with no violations return short-circuit `[AXIARCH REMINDER]`; any
   violation forces full reminder. `AXIARCH_REMINDER_TTL_SECONDS=0` disables.
-  **Token impact: ~24k → ~3k (87% reduction in long sessions)**
+  Shortens repeated reminders; it does not establish a current total-token reduction rate.
+  Savings depend on the task and reminder frequency.
 - **Check C — Stale Lesson Detection** — Detects any `core/010` lesson dated
   `>180 days` ago as `🚨 [VIOLATION-C]`. Threshold tunable via
   `AXIARCH_LESSON_STALE_DAYS`

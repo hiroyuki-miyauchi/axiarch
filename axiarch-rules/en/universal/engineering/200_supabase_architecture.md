@@ -538,7 +538,7 @@
 ## 11. Backend Governance
 
 ### Rule 11.1: The Data Residency Protocol (Rule 26.1)
--   **Law**: PII and legal docs must physically reside in specified regions (e.g., Japan) per GDPR/Global Privacy Laws.
+-   **Law**: Establish storage and cross-border transfer requirements from data classes, contracts and applicable jurisdictions, then select suitable regions. Japanese language alone does not mandate storage in Japan. Supabase region selection controls location; it does not prove regulatory compliance. See [official data-residency guidance](https://supabase.com/docs/guides/platform/regions).
 -   **Action**: Design Multi-region Read/Local Write architectures considering future Data Localization requirements.
 
 ### Rule 11.2: The Audit Bypass Anti-Pattern (Server Action Mandate)

@@ -40,7 +40,7 @@
 ## §1. Scope and Precedence
 
 - Rule 320.1: This file is the source of truth for selecting and governing programming languages, query languages, IaC languages, operational scripting languages, and container, build, or configuration definitions.
-- Rule 320.2: Framework- and platform-specific rules in `300_web_frontend.md`, `400_mobile_flutter.md`, `410_native_platforms.md`, `420_react_native.md`, and cloud-specific sources of truth take precedence for their domains.
+- Rule 320.2: Framework- and platform-specific rules in `axiarch-rules/{lang}/universal/engineering/300_web_frontend.md`, `axiarch-rules/{lang}/universal/engineering/400_mobile_flutter.md`, `axiarch-rules/{lang}/universal/engineering/410_native_platforms.md`, `axiarch-rules/{lang}/universal/engineering/420_react_native.md`, and cloud-specific sources of truth take precedence for their domains.
 - Rule 320.3: When a generic convention conflicts with an official language convention, prefer the language-native convention unless it weakens security or an established project contract. A blanket `kebab-case` rule for all files is prohibited.
 - Rule 320.4: MUST defines only a minimum outcome needed for interoperability, safety, law or contract, or prevention of irrecoverable harm; SHOULD defines the normal default; MAY defines an optional enhancement. When an outcome can be assured without mandating one implementation, specify the verifiable outcome rather than the method. A Blueprint may impose stricter requirements.
 - Rule 320.5: Do not adopt a language on popularity alone. Evaluate existing assets, operators, regulation, performance, safety, ecosystem, hiring, vendor lock-in, and retirement cost together.
@@ -179,7 +179,7 @@ Production code must satisfy all of the following regardless of language.
 
 - Rule 320.14: TypeScript uses `strict` as the baseline. New projects SHOULD enable `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
 - Rule 320.15: Do not use `any`, `@ts-ignore`, or lint disables as permanent solutions. Prefer `unknown`, narrowing, and explicit schemas.
-- Rule 320.16: `300_web_frontend.md` is the source of truth for framework rendering, accessibility, bundle, and browser verification.
+- Rule 320.16: `axiarch-rules/{lang}/universal/engineering/300_web_frontend.md` is the source of truth for framework rendering, accessibility, bundle, and browser verification.
 - Rule 320.17: When frontend and backend use different languages, use generated contract types or schemas rather than manually duplicated DTOs.
 
 ## §6. Backend and Business-Automation Language Profiles
@@ -212,7 +212,7 @@ A production Node.js service uses only an Active LTS or Maintenance LTS release 
 
 ## §7. Mobile and Client Language Profiles
 
-- Rule 320.23: `410_native_platforms.md` is the source of truth for Swift and Kotlin, `400_mobile_flutter.md` for Dart, and `420_react_native.md` for React Native. Treat React Native as a framework joining a TypeScript or JavaScript layer to Swift and Kotlin native layers, not as a language.
+- Rule 320.23: `axiarch-rules/{lang}/universal/engineering/410_native_platforms.md` is the source of truth for Swift and Kotlin, `axiarch-rules/{lang}/universal/engineering/400_mobile_flutter.md` for Dart, and `axiarch-rules/{lang}/universal/engineering/420_react_native.md` for React Native. Treat React Native as a framework joining a TypeScript or JavaScript layer to Swift and Kotlin native layers, not as a language.
 - Rule 320.24: Swift applies Strict Concurrency, Sendable, actor isolation, SwiftLint or SwiftFormat, and Swift Testing or XCTest.
 - Rule 320.25: Kotlin applies null safety, structured coroutines, ktlint, detekt, compiler warnings as errors, and JUnit or equivalent.
 - Rule 320.26: Dart applies null safety, `dart format`, `dart analyze --fatal-infos`, and unit, widget, and integration tests.

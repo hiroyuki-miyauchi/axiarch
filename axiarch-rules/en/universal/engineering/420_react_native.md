@@ -37,7 +37,7 @@
 ## §1. Scope and Source-of-Truth Boundaries
 
 - Rule 420.1: This file is the framework-specific source of truth for React Native apps, brownfield integrations, React Native libraries, and native modules.
-- Rule 420.2: Inherit TypeScript and JavaScript language quality from `320_programming_language_governance.md` §5 and native Swift and Kotlin implementation rules from `410_native_platforms.md`. Do not automatically apply Web DOM-specific rules to React Native.
+- Rule 420.2: Inherit TypeScript and JavaScript language quality from `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` §5 and native Swift and Kotlin implementation rules from `axiarch-rules/{lang}/universal/engineering/410_native_platforms.md`. Do not automatically apply Web DOM-specific rules to React Native.
 - Rule 420.3: `security/000_security_privacy.md` takes precedence for security, `quality/000_qa_testing.md` for test layers, and `product/700_appstore_compliance.md` for store review.
 - Rule 420.4: Do not interpret one codebase as one behavior. Independently assure UX, permissions, lifecycle, background execution, and release artifacts on iOS and Android.
 

@@ -1,5 +1,7 @@
 # Axiarch Development Rules (マスターインデックス)
 
+> 適用範囲は `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1に従う。必須以外は任意。文書の言語は法域を決めない。`{lang}` はProject Native Languageで選ぶ。本文中の `universal/` と `blueprint/` は `axiarch-rules/{lang}/` 起点、`core/` 等のドメイン略記は表が指定する層を起点とする。曖昧な参照は実際のパスを確認し、同名ファイルを推測で選ばない。
+
 > [!IMPORTANT]
 > **Axiarchの3層ガバナンス・アーキテクチャ**
 > 本フォルダ（`axiarch-rules/`）は、Axiarch（アクシアーク）フレームワークの統治ルールを格納する。
@@ -118,7 +120,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。ただし、全環境での動作保証まではしません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
+> Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 
 1.  **コピー (Copy)**: 最小必須は `AXIARCH.md`、`AGENTS.md` アダプター、`axiarch-rules/`、`axiarch-harness/` です。安全アップグレードを使う場合は `axiarch-manifest.json` と `axiarch-scripts/` もコピーします。`axiarch-prompts/` は任意です。
     ```bash

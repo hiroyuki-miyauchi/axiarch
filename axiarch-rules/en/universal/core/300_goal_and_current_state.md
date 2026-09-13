@@ -5,14 +5,14 @@
 > Revised: 2026-09-10
 
 > [!IMPORTANT]
-> **Level 1 Priority: Absolute Compliance**
-> An agent **boots with zero memory every time**. Whatever is not handed over at boot may as well not exist.
-> The MUST requirements in this file exist to prevent wrong deliverables and duplicated work, and take precedence over speed of starting.
+> **Mandatory Within Applicable Scope**
+> **Check available context at start or resume**. Do not assume handover implicitly; reconcile available records against the actual state.
+> The MUST requirements in this file aim to reduce the risk of wrong deliverables and duplicated work, and take precedence over speed of starting.
 
 > [!CAUTION]
 > **Primary Directive**
-> "**A drifted goal is a total loss. A drifted current state accumulates duplication and rework.** The smarter the agent, the farther it flies; the farther it flies, the more the initial error is amplified at the point of impact."
-> This file is canonical for **"the discipline of fixing the goal (where to) and the current state (where we are) and confirming they are not drifted, before delegating work."** Which rules to load is delegated to `LOADING_PROTOCOL.md`, evidence formats to `AXIARCH.md` §7, and approval gates to `AXIARCH.md` §6.2 (see the §1.2 responsibility boundary table).
+> "**Goal drift can undermine the value of the result; current-state drift can cause duplication and rework.** The smarter the agent, the farther it flies; the farther it flies, the more the initial error is amplified at the point of impact."
+> This file is canonical for **"the discipline of fixing the goal (where to) and the current state (where we are) and confirming they are not drifted, before delegating work."** Which rules to load is delegated to `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, evidence formats to `AXIARCH.md` §7, and approval gates to `AXIARCH.md` §6.2 (see the §1.2 responsibility boundary table).
 
 ---
 
@@ -23,7 +23,7 @@
   - §1.2. Responsibility Boundary Table (Adjacent Rules)
   - §1.3. Core Principles and RFC 2119 Terms
 - §2. The Boot Triad (the core of this file)
-  - §2.1. Zero-Memory Boot as a Structural Premise
+  - §2.1. Explicit Context at Start and Resume
   - §2.2. Do Not Start Until All Three Are Present
   - §2.3. Triad Principle — Goal and Current State Alone Are Not Enough
 - §3. Making the Goal Explicit
@@ -41,7 +41,7 @@
   - §4.6. What Must Never Be Written into the Current State
 - §5. The Autonomy-Distance Scaling Law
 - §6. Two Classes of Drift and Their Detection
-  - §6.1. Goal Drift — the Total-Loss Class
+  - §6.1. Goal Drift — Risk to Result Value
   - §6.2. Current-State Drift — the Duplication and Rework Class
   - §6.3. Duplication Check Before Starting
   - §6.4. Duty to Report Drift and Stop Early
@@ -69,16 +69,16 @@
 
 | Area | Canonical source | Boundary with this file |
 |:--|:--|:--|
-| Which rules to load, and in what order | `LOADING_PROTOCOL.md` | This file defines only what is needed *after* the norms |
+| Which rules to load, and in what order | `axiarch-rules/{lang}/LOADING_PROTOCOL.md` | This file defines only what is needed *after* the norms |
 | Evidence document formats, native task sync | `AXIARCH.md` §7 | This file defines the **content** to record; §7 the **container and format** |
 | Task classification, role passes, audit verdict | `AXIARCH.md` §8 / `axiarch-harness/` | This file covers only the preconditions for starting |
 | Approval gates and stop points for irreversible acts | `AXIARCH.md` §6.2 | This file governs "agreement on interpretation"; §6.2 "permission to execute" |
-| Ban on unverified completion reports, fact-based reporting | `core/000_core_mindset.md` | This file governs the freshness of the state such reports rest on |
+| Ban on unverified completion reports, fact-based reporting | `axiarch-rules/en/universal/core/000_core_mindset.md` | This file governs the freshness of the state such reports rest on |
 | Writing the spec first (Blueprint First) | `AXIARCH.md` §6.7 | This file covers goals of any size, not only major changes |
-| Means of verifying completion criteria (test layers) | `quality/000_qa_testing.md` | This file governs only how "what counts as done" is written |
-| Failure accounting and run summaries for machine jobs | `engineering/700_batch_backfill_operations.md` | 700 counts after the run; this file governs the premises before it |
-| Branch and pull-request discipline | `engineering/600_git_workflow.md` | This file covers only the duty to consult them as shared state |
-| Business objectives, KPIs, OKRs | `product/000_product_strategy.md` | Business goals belong to product; this file covers task-level goals |
+| Means of verifying completion criteria (test layers) | `axiarch-rules/en/universal/quality/000_qa_testing.md` | This file governs only how "what counts as done" is written |
+| Failure accounting and run summaries for machine jobs | `axiarch-rules/en/universal/engineering/700_batch_backfill_operations.md` | 700 counts after the run; this file governs the premises before it |
+| Branch and pull-request discipline | `axiarch-rules/en/universal/engineering/600_git_workflow.md` | This file covers only the duty to consult them as shared state |
+| Business objectives, KPIs, OKRs | `axiarch-rules/en/universal/product/000_product_strategy.md` | Business goals belong to product; this file covers task-level goals |
 
 ### §1.3. Core Principles and RFC 2119 Terms
 
@@ -86,22 +86,22 @@
 -   **Goal**: the state in which the work can be judged complete, expressed as a set of verifiable completion criteria.
 -   **Current state**: the present state of the work object — what is done, what is in progress, what is untouched, and what was discarded.
 -   **Norms**: how the work must be done — safety, quality, legal, and design constraints. The Universal rule set itself.
--   **Autonomy distance**: the gap between goal and current state, understood as the product of step count, elapsed time, irreversibility, and blast radius.
+-   **Autonomy distance**: the gap between goal and current state, estimated jointly from step count, elapsed time, irreversibility and blast radius, not a literal product or performance prediction.
 
 ---
 
 ## §2. The Boot Triad (the core of this file)
 
-### §2.1. Zero-Memory Boot as a Structural Premise
+### §2.1. Explicit Context at Start and Resume
 
--   **Rule 300.2.1 (Zero-memory boot)**: Design and operate on the premise that an agent holds only the information handed to it at boot (MUST). Prior sessions, verbal agreements, and context living in someone's head **do not exist unless they are handed over**.
--   **Law**: this is a structural property, not a capability gap. However capable the model becomes, **context that was never handed over is not reconstructed**. The expectation that "it is smart, so it will infer" converts directly into incidents.
+-   **Rule 300.2.1 (Handover verification)**: Check the context and records available at start or resume (MUST). Do not assume prior agreements or human knowledge are implicitly shared. Inherited context may be reused after checking its basis and freshness; read accessible files yourself. This does not assert zero memory at every start or require re-reading the whole library.
+-   **Law**: Capability alone cannot verify an unavailable agreement. Do not invent missing context; follow the continuation and re-reading conditions in LOADING_PROTOCOL.
 -   **Rule 300.2.2 (No implicit shared knowledge)**: Never omit an explicit goal or current state on the grounds of "I said it before" or "it is common knowledge on this team" (MUST NOT).
 
 ### §2.2. Do Not Start Until All Three Are Present
 
 -   **Rule 300.2.3 (Boot triad)**: An agent **must not begin implementation, modification, or any irreversible action** until all three of the following are present (MUST NOT):
-    1.  **Norms** — the rules to comply with (loaded per `LOADING_PROTOCOL.md`)
+    1.  **Norms** — the rules to comply with (loaded per `axiarch-rules/{lang}/LOADING_PROTOCOL.md`)
     2.  **Goal** — verifiable completion criteria (§3)
     3.  **Current state** — the present state of the target (§4)
 -   **Rule 300.2.4 (Behavior when something is missing)**: When any of the three is missing, the agent **must not fill the gap by guessing and proceed** (MUST NOT). The required order of action is:
@@ -148,7 +148,7 @@
 ### §3.5. The Goal Restatement Gate
 
 -   **Rule 300.3.9 (Restatement)**: For work whose autonomy distance (§5) exceeds the threshold, **restate the interpretation of the goal in your own words once before starting** (MUST). The restatement must include the completion criteria, the non-goals, and the assumptions made.
--   **Law**: the cost of detecting drift is **lowest before starting and highest after completion**. One round trip immediately before a long autonomous run is the highest-return check available.
+-   **Law**: early checking can reduce rework. Restatement does not itself require re-approval: continue within explicit authorized scope and ask only about unresolved intent or approval boundaries.
 -   **Rule 300.3.10 (When restatement may be skipped)**: Restatement may be skipped for work of short distance whose result is easily discarded (MAY). The criterion for skipping is distance, not the requester's level of expertise.
 
 ---
@@ -201,10 +201,13 @@
 -   **Rule 300.4.10 (No secrets)**: Credentials, access tokens, private keys, passwords, and connection strings must never be written into the current state (MUST NOT). Where a reference is needed, record **only the name of the store** that holds them.
 -   **Rule 300.4.11 (No production data)**: Actual production personal data must never be pasted into failure examples, reproduction steps, or investigation notes (MUST NOT). Express them as identifiers, counts, categories, or masked values.
 -   **Rule 300.4.12 (Assume the widest audience)**: Write shared current state on the assumption that **the widest set of people and agents able to read that location will read it** (MUST). Consolidation widens visibility, so **consolidation and access control must be designed together** (MUST).
--   **Rule 300.4.13 (Retention)**: Personal data held in the current state must have a defined retention period and be deleted or anonymized when it expires (MUST). Classification, retention, and deletion are canonical in `security/100_data_governance.md`.
+-   **Rule 300.4.13 (Retention)**: Personal data held in the current state must have a defined retention period and be deleted or anonymized when it expires (MUST). Classification, retention, and deletion are canonical in `axiarch-rules/en/universal/security/100_data_governance.md`.
 -   **Law**: consolidating current state raises productivity, but **gathering it in one place simultaneously widens the blast radius of a leak**. "Put everything here and it gets smarter" is, inverted, "if this leaks, everything leaks." The benefit of consolidation and the risk of concentration must always be evaluated as a pair.
 
 ---
+
+
+Use D1–D5 for distance (formerly distance L1–L5), M1–M5 for maturity (formerly maturity L1–L5), and H0–H4 for harness task classification (legacy L0–L4). There is no numeric conversion between them. High maturity never removes approval requirements. H0 needs only purpose and reference scope; H1 needs a short record; H2+ requires structured evidence. Restatement communicates interpretation; it does not require renewed approval for already authorized implementation. Storage and checks are defined in `axiarch-harness/en/TASK_STATE_PROTOCOL.md`.
 
 ## §5. The Autonomy-Distance Scaling Law
 
@@ -214,11 +217,11 @@
 
 | Distance | Guide | Goal requirement | Current-state requirement | Pre-start confirmation |
 |:--|:--|:--|:--|:--|
-| **L1** | A single obvious change, easily discarded | Verbal level is sufficient | State of the target file only | Not required |
-| **L2** | Multiple files; may affect existing behavior | Completion criteria written down | State of the related area | Not required (judgeable from the result) |
-| **L3** | Involves design judgment; regression risk | Criteria plus non-goals | Four states recorded | **One restatement** |
-| **L4** | Long autonomous run; wide reach | Criteria plus non-goals plus assumptions | Four states plus freshness reconciliation | **Restatement plus plan presentation** |
-| **L5** | Irreversible, production-affecting, or sensitive | All of the above, documented | The above plus a shared-state check | **Restatement, plan, and approval gate** |
+| **D1** | A single obvious change, easily discarded | Verbal level is sufficient | State of the target file only | Not required |
+| **D2** | Multiple files; may affect existing behavior | Completion criteria written down | State of the related area | Not required (judgeable from the result) |
+| **D3** | Involves design judgment; regression risk | Criteria plus non-goals | Four states recorded | **One restatement** |
+| **D4** | Long autonomous run; wide reach | Criteria plus non-goals plus assumptions | Four states plus freshness reconciliation | **Restatement plus plan presentation** |
+| **D5** | Irreversible, production-affecting, or sensitive | All of the above, documented | The above plus a shared-state check | **Restatement, plan, and approval gate** |
 
 -   **Rule 300.5.3 (Re-evaluating distance)**: When facts discovered during the work raise the distance, **satisfy the requirements of the higher tier from that point on** (MUST). "We already started" is not a reason to continue.
 
@@ -226,11 +229,11 @@
 
 ## §6. Two Classes of Drift and Their Detection
 
-### §6.1. Goal Drift — the Total-Loss Class
+### §6.1. Goal Drift — Risk to Result Value
 
--   **Rule 300.6.1 (Definition of goal drift)**: Goal drift is the state in which **the receiver worked correctly toward a different destination**. However high the quality of the deliverable, it becomes wholly unnecessary.
+-   **Rule 300.6.1 (Definition of goal drift)**: Goal drift is the state in which **the receiver worked correctly toward a different destination**. Even a high-quality deliverable may be unusable for the intended goal.
 -   **Signs**: completion criteria not written in observable form; vague terms used on their own; no restatement performed; the request admits more than one reading.
--   **Detection**: pre-start restatement (§3.5) is the only inexpensive means of detection. Detecting it after completion means the damage is already fixed.
+-   **Detection**: use pre-start restatement (§3.5), criterion reconciliation and intermediate reviews for early detection. Detection after completion may involve more rework.
 
 ### §6.2. Current-State Drift — the Duplication and Rework Class
 
@@ -247,10 +250,10 @@
 
 -   **Rule 300.6.5 (Never continue silently)**: When the detected drift **changes the deliverable or invalidates work already done**, stop the work at that point and report it to the requester (MUST). Drift that does not change the deliverable should be recorded and reported together at completion (SHOULD). In either case, continuing on the assumption that "it is probably fine" after detecting drift is forbidden (MUST NOT).
 -   **Rule 300.6.6 (Report early)**: Report as soon as it becomes clear that a completion criterion cannot be met (MUST). It must not be concealed until the end of the work. **The worse the news, the more its value depends on arriving early.**
--   **Rule 300.6.7 (No silent failure)**: Drift, failures, and skips must never be made to disappear by leaving them out of both the record and the report (MUST NOT). Counting discipline for machine execution is canonical in `engineering/700_batch_backfill_operations.md`.
+-   **Rule 300.6.7 (No silent failure)**: Drift, failures, and skips must never be made to disappear by leaving them out of both the record and the report (MUST NOT). Counting discipline for machine execution is canonical in `axiarch-rules/en/universal/engineering/700_batch_backfill_operations.md`.
 -   **Rule 300.6.8 (Detect staleness)**: Current-state items whose last reconciliation is older than a defined interval must be **treated as unconfirmed** (MUST). The threshold is set per project.
--   **Rule 300.6.9 (Recurrence prevention)**: For drift that actually occurred, identify the cause (a vague goal, a missing current state, or a skipped confirmation) and record it as a lesson per `CRYSTALLIZATION_PROTOCOL.md` (MUST). **When the same cause produces drift twice, promote it into a project-specific rule** (SHOULD).
--   **Law**: drift cannot be eliminated. What can be eliminated is **repeating the same drift**.
+-   **Rule 300.6.9 (Recurrence prevention)**: For drift that actually occurred, identify the cause (a vague goal, a missing current state, or a skipped confirmation) and record it as a lesson per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` (MUST). **When the same cause produces drift twice, promote it into a project-specific rule** (SHOULD).
+-   **Law**: detect drift, record causes and re-check conditions, and reduce recurrence risk; complete prevention is not guaranteed.
 
 ---
 
@@ -278,7 +281,7 @@
 | # | Anti-pattern | Why it is dangerous |
 |:--|:--|:--|
 | 1 | Using only vague terms as completion criteria | With no destination, the work overshoots or undershoots |
-| 2 | Omitting context because "I said it before" | The receiver booted with zero memory; it does not exist |
+| 2 | Omitting context because "I said it before" | The receiver has not been shown to hold or access that context |
 | 3 | Treating conversation history as the source of truth | Truncation loses the oldest — and most important — agreements first |
 | 4 | Reporting a recorded state as fact without reconciling | A stale snapshot is presented as the present, misleading decisions |
 | 5 | Handing over only the norms of the three | The agent carefully builds the wrong thing, destination unknown |
@@ -301,29 +304,38 @@
 
 | Stage | State | Criteria |
 |:--|:--|:--|
-| **L1: Verbal** | Work is handed over only by speech or chat | No durable record of the current state exists |
-| **L2: Recorded** | Goal and current state survive as documents | But completion criteria are vague and freshness is never checked |
-| **L3: Verifiable** | Criteria are verifiable and the four states are held | Pre-start duplication checks and restatement are in operation |
-| **L4: Synchronized** | Shared state is consolidated and concurrent work does not collide | Freshness reconciliation is habitual and discards are recorded |
-| **L5: Scaled** | Requirements rise automatically with autonomy distance | Distance estimation and re-evaluation function as a mechanism |
+| **M1: Verbal** | Work is handed over only by speech or chat | No durable record of the current state exists |
+| **M2: Recorded** | Goal and current state survive as documents | But completion criteria are vague and freshness is never checked |
+| **M3: Verifiable** | Criteria are verifiable and the four states are held | Pre-start duplication checks and restatement are in operation |
+| **M4: Synchronized** | Shared state is consolidated and concurrent work does not collide | Freshness reconciliation is habitual and discards are recorded |
+| **M5: Scaled** | Requirements rise automatically with autonomy distance | Distance estimation and re-evaluation function as a mechanism |
 
 ---
 
+## Appendix A: Reverse Index
+
+| Keyword | Section | Execution reference |
+|:--|:--|:--|
+| Goals and restatement | §2–3 | `axiarch-rules/{lang}/LOADING_PROTOCOL.md` |
+| State, evidence and freshness | §4, §8 | `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` |
+| Distance D, maturity M, harness H | §5, §10 | `axiarch-harness/{lang}/EXECUTION_HARNESS_PROTOCOL.md` |
+| Concurrent sessions | §7 | `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` |
+
 **Cross-Reference:**
 
--   `LOADING_PROTOCOL.md` — the loading order for norms (canonical for satisfying the first element of the triad)
--   `core/000_core_mindset.md` — ban on unverified completion reports, fact-based reporting (the parent principle for §4.4 and §8)
--   `core/100_governance.md` — constitutional authority and separation of layer responsibilities (the basis for this file's placement)
--   `core/200_language_protocol.md` — the choice of language in which goal and current state are written
--   `CRYSTALLIZATION_PROTOCOL.md` — turning drift into lessons and promoting them into project rules (canonical for §6.9)
--   `security/000_security_privacy.md` — handling of secrets (the parent principle for §4.6)
--   `security/100_data_governance.md` — classification, retention, and deletion of personal data (canonical for §4.6)
--   `quality/000_qa_testing.md` — the means of verifying completion criteria (canonical for test layer definitions)
--   `engineering/600_git_workflow.md` — branch and pull-request operation (the principal embodiment of shared state)
--   `engineering/700_batch_backfill_operations.md` — run summaries and failure accounting for machine jobs (the current state after a run)
--   `engineering/710_data_reconciliation.md` — the discipline of continuously verifying record against reality (the data-side counterpart of §4.4)
--   `product/000_product_strategy.md` — business objectives and metric governance (canonical for business goals)
--   `design/000_design_ux.md` — UI design that shows the user where they are and where they are going (the same principle on the human side)
+-   `axiarch-rules/{lang}/LOADING_PROTOCOL.md` — the loading order for norms (canonical for satisfying the first element of the triad)
+-   `axiarch-rules/en/universal/core/000_core_mindset.md` — ban on unverified completion reports, fact-based reporting (the parent principle for §4.4 and §8)
+-   `axiarch-rules/en/universal/core/100_governance.md` — constitutional authority and separation of layer responsibilities (the basis for this file's placement)
+-   `axiarch-rules/en/universal/core/200_language_protocol.md` — the choice of language in which goal and current state are written
+-   `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` — turning drift into lessons and promoting them into project rules (canonical for §6.9)
+-   `axiarch-rules/en/universal/security/000_security_privacy.md` — handling of secrets (the parent principle for §4.6)
+-   `axiarch-rules/en/universal/security/100_data_governance.md` — classification, retention, and deletion of personal data (canonical for §4.6)
+-   `axiarch-rules/en/universal/quality/000_qa_testing.md` — the means of verifying completion criteria (canonical for test layer definitions)
+-   `axiarch-rules/en/universal/engineering/600_git_workflow.md` — branch and pull-request operation (the principal embodiment of shared state)
+-   `axiarch-rules/en/universal/engineering/700_batch_backfill_operations.md` — run summaries and failure accounting for machine jobs (the current state after a run)
+-   `axiarch-rules/en/universal/engineering/710_data_reconciliation.md` — the discipline of continuously verifying record against reality (the data-side counterpart of §4.4)
+-   `axiarch-rules/en/universal/product/000_product_strategy.md` — business objectives and metric governance (canonical for business goals)
+-   `axiarch-rules/en/universal/design/000_design_ux.md` — UI design that shows the user where they are and where they are going (the same principle on the human side)
 
 ---
 

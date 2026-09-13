@@ -3,13 +3,9 @@
 # Axiarch Task State Lifecycle Helper
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
-# Keeps the AXIARCH.md process documents as "current task" working files
-# instead of ever-growing append-only logs.
-#
-# Responsibilities:
-#   - Create or refresh task.md / implementation_plan.md / walkthrough.md
-#   - Archive changed previous copies before refresh
-#   - Preserve legacy append behaviour when AXIARCH_PROCESS_DOC_MODE=append
+# Stores Markdown per session and structured current state per task.
+# Existing root evidence and legacy .axiarch/process-doc-history/ are preserved.
+# Public lifecycle and validation are implemented by axiarch_state.py.
 #
 # Native task/plan UI note:
 #   This script manages durable Markdown evidence only. It cannot write into
@@ -25,6 +21,7 @@ set -euo pipefail
 PROJECT_DIR=""
 MODE="session-start"
 PRINT_SUMMARY=true
+STATE_ARGS=()
 
 usage() {
   cat <<'USAGE'
@@ -32,22 +29,24 @@ Usage:
   bash axiarch-scripts/axiarch-task-state.sh [--project DIR] [--mode session-start|ensure|status] [--quiet]
 
 Modes:
-  session-start: archive changed previous docs, then refresh current docs unless
-                 AXIARCH_PROCESS_DOC_MODE=append is set.
-  ensure:        preserve existing docs and create only missing docs.
-  status:        report whether process docs exist.
+  session-start: create isolated session evidence or resume its existing binding.
+  new/resume:    explicitly create a task or resume --task ID (with --session ID).
+  ensure:        ensure isolated evidence; never rotate shared root documents.
+  status:        list shared task records without modifying them.
+  privacy-check: inspect managed-artifact Git exclusions/tracking without changes.
+  publish:       --input JSON --expected-revision N --session ID (compare and swap).
+  check:         --task ID --phase structure|readiness|completion.
+  path:          resolve --session ID to its Markdown directory.
+  snapshot:      --input project-relative-file returns path and SHA-256.
+  Options: --task ID --session ID --owner NAME --import-legacy
+  Details: axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md
 
 Environment:
   AXIARCH_PROCESS_DOC_MODE=current|append
-    current (default): archive changed previous docs, then refresh current docs.
-    append: keep existing docs, only create missing docs.
+    current|append: accepted for compatibility; both preserve root documents.
 
-  AXIARCH_PROCESS_DOC_ARCHIVE=1|0
-    1 (default): copy changed previous docs to .axiarch/process-doc-history/.
-    0: refresh without archiving. Use only when history is intentionally unnecessary.
-
-  AXIARCH_PROCESS_DOC_HISTORY_DIR=.axiarch/process-doc-history
-    Relative or absolute archive root.
+  AXIARCH_PROCESS_DOC_ARCHIVE / AXIARCH_PROCESS_DOC_HISTORY_DIR
+    Legacy settings retained as accepted inputs; automatic root rotation is retired.
 
   AXIARCH_PROCESS_DOC_LANG=auto|ja|en
     auto (default): detect Project Native Language from AXIARCH.md, then AGENTS.md fallback.
@@ -79,6 +78,15 @@ while [[ $# -gt 0 ]]; do
       PRINT_SUMMARY=false
       shift
       ;;
+    --task|--session|--owner|--phase|--input|--expected-revision)
+      [[ $# -ge 2 ]] || { printf 'Missing value for %s\n' "$1" >&2; exit 2; }
+      STATE_ARGS+=("$1" "$2")
+      shift 2
+      ;;
+    --import-legacy)
+      STATE_ARGS+=("$1")
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -91,6 +99,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ -n "${PROJECT_DIR}" && ! -d "${PROJECT_DIR}" ]]; then
+  printf 'Project directory does not exist: %s\n' "${PROJECT_DIR}" >&2
+  exit 2
+fi
 if [[ -z "${PROJECT_DIR}" ]]; then
   PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 fi
@@ -101,13 +113,10 @@ fi
 
 PROCESS_DOC_MODE="${AXIARCH_PROCESS_DOC_MODE:-current}"
 ARCHIVE_ENABLED="${AXIARCH_PROCESS_DOC_ARCHIVE:-1}"
-HISTORY_ROOT="${AXIARCH_PROCESS_DOC_HISTORY_DIR:-.axiarch/process-doc-history}"
 PROCESS_DOC_LANG="${AXIARCH_PROCESS_DOC_LANG:-auto}"
-STATE_DIR="${PROJECT_DIR}/.axiarch/process-doc-state"
-STATE_FILE="${STATE_DIR}/last-current.sha256"
 
 case "${MODE}" in
-  session-start|ensure|status) ;;
+  session-start|new|resume|ensure|status|publish|check|path|snapshot|render|privacy-check) ;;
   *)
     printf 'Unsupported mode: %s\n' "${MODE}" >&2
     exit 2
@@ -152,126 +161,39 @@ detect_project_native_language() {
     return 0
   fi
 
-  local protocol_file lang_line
-  for protocol_file in "${PROJECT_DIR}/AXIARCH.md" "${PROJECT_DIR}/AGENTS.md"; do
-    [[ -f "${protocol_file}" ]] || continue
-    lang_line="$(grep -iE "Project Native Language" "${protocol_file}" 2>/dev/null | head -1 || true)"
-    if [[ -n "${lang_line}" ]]; then
-      local line_lower config_part default_part
-      line_lower="$(printf '%s\n' "${lang_line}" | tr '[:upper:]' '[:lower:]')"
-      config_part="${line_lower%%default:*}"
-      default_part=""
-      if [[ "${line_lower}" == *"default:"* ]]; then
-        default_part="${line_lower#*default:}"
-      fi
-
-      if [[ "${config_part}" == *"english"* && "${config_part}" != *"japanese"* ]]; then
-        printf 'en'
-        return 0
-      fi
-      if [[ "${config_part}" == *"japanese"* && "${config_part}" != *"english"* ]]; then
-        printf 'ja'
-        return 0
-      fi
-      if [[ "${default_part}" == *"english"* && "${default_part}" != *"japanese"* ]]; then
-        printf 'en'
-        return 0
-      fi
-      if [[ "${default_part}" == *"japanese"* && "${default_part}" != *"english"* ]]; then
-        printf 'ja'
-        return 0
-      fi
-    fi
-  done
-
-  if [[ -d "${PROJECT_DIR}/axiarch-rules/en" && ! -d "${PROJECT_DIR}/axiarch-rules/ja" ]]; then
-    printf 'en'
-  else
-    printf 'ja'
-  fi
+  python3 "$(dirname "${BASH_SOURCE[0]}")/axiarch_state.py" --project "$PROJECT_DIR" --mode language
 }
 
-if ! PROCESS_DOC_LANG_RESOLVED="$(detect_project_native_language)"; then
-  exit 2
+command -v python3 >/dev/null 2>&1 || { printf 'Python 3 required; existing evidence preserved.\n' >&2; exit 2; }
+PROCESS_DOC_LANG_RESOLVED=ja
+# Read-only status/check operations do not need to generate language-specific docs.
+case "$MODE" in
+  session-start|new|resume|ensure|render)
+    if ! PROCESS_DOC_LANG_RESOLVED="$(detect_project_native_language)"; then exit 2; fi
+    ;;
+esac
+
+# Existing template functions below are only a renderer into a fresh staging dir.
+# All public operations use the locked, atomic, session-scoped store.
+if [[ "${MODE}" != "render" ]]; then
+  command -v python3 >/dev/null 2>&1 || { printf 'Python 3 required; existing evidence preserved.\n' >&2; exit 2; }
+  if [[ "${PRINT_SUMMARY}" != "true" ]]; then STATE_ARGS+=(--quiet); fi
+  exec python3 "$(dirname "${BASH_SOURCE[0]}")/axiarch_state.py" \
+    --project "${PROJECT_DIR}" --lang "${PROCESS_DOC_LANG_RESOLVED}" --mode "${MODE}" "${STATE_ARGS[@]+"${STATE_ARGS[@]}"}"
 fi
 
 docs=(task.md implementation_plan.md walkthrough.md)
 
+# Internal rendering must never overwrite even a partially prepared directory.
+for doc in "${docs[@]}"; do
+  if [[ -e "${PROJECT_DIR}/${doc}" || -L "${PROJECT_DIR}/${doc}" ]]; then
+    printf 'Template destination already exists: %s\n' "${doc}" >&2
+    exit 2
+  fi
+done
+
 doc_path() {
   printf '%s/%s' "${PROJECT_DIR}" "$1"
-}
-
-has_any_doc_content() {
-  local doc
-  for doc in "${docs[@]}"; do
-    local path
-    path="$(doc_path "${doc}")"
-    if [[ -s "${path}" ]]; then
-      return 0
-    fi
-  done
-  return 1
-}
-
-hash_current_docs() {
-  local doc path
-  local hash_command=()
-  if command -v shasum >/dev/null 2>&1; then
-    hash_command=(shasum -a 256)
-  elif command -v sha256sum >/dev/null 2>&1; then
-    hash_command=(sha256sum)
-  else
-    printf 'Neither shasum nor sha256sum is available; cannot hash process docs.\n' >&2
-    return 1
-  fi
-  {
-    for doc in "${docs[@]}"; do
-      path="$(doc_path "${doc}")"
-      printf '%s\n' "--- ${doc} ---"
-      if [[ -f "${path}" ]]; then
-        cat "${path}"
-      fi
-      printf '\n'
-    done
-  } | "${hash_command[@]}" | awk '{print $1}'
-}
-
-resolve_history_root() {
-  if [[ "${HISTORY_ROOT}" = /* ]]; then
-    printf '%s' "${HISTORY_ROOT}"
-  else
-    printf '%s/%s' "${PROJECT_DIR}" "${HISTORY_ROOT}"
-  fi
-}
-
-archive_docs_if_changed() {
-  [[ "${ARCHIVE_ENABLED}" == "1" ]] || return 0
-  has_any_doc_content || return 0
-
-  local current_hash previous_hash
-  current_hash="$(hash_current_docs)"
-  previous_hash=""
-  if [[ -f "${STATE_FILE}" ]]; then
-    previous_hash="$(head -1 "${STATE_FILE}" 2>/dev/null | tr -d '[:space:]')"
-  fi
-  if [[ -n "${previous_hash}" && "${current_hash}" == "${previous_hash}" ]]; then
-    return 0
-  fi
-
-  local archive_root archive_dir timestamp doc path
-  archive_root="$(resolve_history_root)"
-  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
-  archive_dir="${archive_root}/${timestamp}-$$"
-  mkdir -p "${archive_dir}"
-
-  for doc in "${docs[@]}"; do
-    path="$(doc_path "${doc}")"
-    if [[ -f "${path}" ]]; then
-      cp -p "${path}" "${archive_dir}/${doc}"
-    fi
-  done
-
-  printf '%s' "${archive_dir}"
 }
 
 write_task_md_ja() {
@@ -280,7 +202,7 @@ write_task_md_ja() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-このファイルは現在タスクの作業状態だけを記録する。過去タスクの内容は `.axiarch/process-doc-history/` に退避される。
+このファイルはセッション固有の証跡。共有現在値はタスクの `state.json` を正本とする。
 
 ## 現在のタスク
 
@@ -302,6 +224,8 @@ write_task_md_ja() {
 - [ ] 関連しうるがロードしないファイルと理由を明記した
 
 ## ゴール（完了条件）
+
+`axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` と `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` を参照。ID・担当・状態・確認対象・時刻・証拠は `state.json` と対応させる。
 
 | # | 完了条件 | 検証方法 | 判定 |
 |:--|:--|:--|:--|
@@ -329,7 +253,7 @@ Markdown証跡だけでは、CodexやClaude Codeのネイティブなタスク�
 |:--|:--|
 | Codex | `update_plan` で短い計画を作成し、進捗ごとに `pending` / `in_progress` / `completed` を更新する |
 | Claude Code | `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を使用する。古いSDK等でTask toolsがない場合のみ `TodoWrite` にフォールバックする |
-| その他 | ネイティブ機能がない場合は本Markdown証跡をSSOTとして扱う |
+| その他 | ネイティブ機能がなければ理由を記録。現在値の正本はタスクの `state.json`、説明とロード履歴は本Markdownに保持する |
 
 ## サブタスク
 
@@ -347,7 +271,7 @@ write_task_md_en() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-This file records only the current task state. Previous task content is archived under `.axiarch/process-doc-history/`.
+This is session-specific evidence. The task state.json is the shared current-state authority.
 
 ## Current Task
 
@@ -369,6 +293,8 @@ This file records only the current task state. Previous task content is archived
 - [ ] Recorded relevant-but-not-loaded files and reasons
 
 ## Goal (Completion Criteria)
+
+See `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` and `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md`. Match IDs, owners, state, target, check time and evidence to `state.json`.
 
 | # | Completion criterion | How it is verified | Status |
 |:--|:--|:--|:--|
@@ -396,7 +322,7 @@ Markdown evidence alone does not update Codex or Claude Code native task/plan pa
 |:--|:--|
 | Codex | Create a short plan with `update_plan`, then update each step as `pending`, `in_progress`, or `completed` |
 | Claude Code | Use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`; fall back to `TodoWrite` only in older runtimes where Task tools are unavailable |
-| Other | Treat this Markdown evidence as the SSOT when no native task-state feature exists |
+| Other | Record unavailable native tools. Task `state.json` remains authoritative for current state; keep explanations and load history in this Markdown |
 
 ## Subtasks
 
@@ -586,41 +512,5 @@ ensure_missing_docs_only() {
   [[ -f "$(doc_path walkthrough.md)" ]] || write_walkthrough_md
 }
 
-refresh_current_docs() {
-  local archive_dir
-  archive_dir="$(archive_docs_if_changed)"
-  write_task_md
-  write_implementation_plan_md
-  write_walkthrough_md
-  mkdir -p "${STATE_DIR}"
-  hash_current_docs > "${STATE_FILE}"
-  printf '%s' "${archive_dir}"
-}
-
-if [[ "${MODE}" == "status" ]]; then
-  if has_any_doc_content; then
-    "${PRINT_SUMMARY}" && printf '[AXIARCH TASK STATE] process docs exist. mode=%s\n' "${PROCESS_DOC_MODE}"
-  else
-    "${PRINT_SUMMARY}" && printf '[AXIARCH TASK STATE] process docs are missing or empty. mode=%s\n' "${PROCESS_DOC_MODE}"
-  fi
-  exit 0
-fi
-
-summary=""
-if [[ "${MODE}" == "ensure" ]]; then
-  ensure_missing_docs_only
-  summary="[AXIARCH TASK STATE] ensure mode: created only missing process docs. Existing task.md / implementation_plan.md / walkthrough.md were preserved."
-elif [[ "${PROCESS_DOC_MODE}" == "append" ]]; then
-  ensure_missing_docs_only
-  summary="[AXIARCH TASK STATE] append mode: ensured missing process docs only. Existing task.md / implementation_plan.md / walkthrough.md were preserved."
-else
-  archived_to="$(refresh_current_docs)"
-  if [[ -n "${archived_to}" ]]; then
-    summary="[AXIARCH TASK STATE] current mode: archived previous process docs to ${archived_to}, then refreshed task.md / implementation_plan.md / walkthrough.md for the current task."
-  else
-    summary="[AXIARCH TASK STATE] current mode: refreshed task.md / implementation_plan.md / walkthrough.md for the current task. No changed previous docs needed archiving."
-  fi
-fi
-
-"${PRINT_SUMMARY}" && printf '%s\n' "${summary}"
+ensure_missing_docs_only
 exit 0

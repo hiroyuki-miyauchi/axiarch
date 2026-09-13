@@ -49,7 +49,7 @@
 | 29 | [CBOM (Cryptographic Bill of Materials)](#29-cbom-cryptographic-bill-of-materials) |
 | 30 | [Multi-Ecosystem Dependency Management](#30-multi-ecosystem-dependency-management) |
 | 31 | [Package Publishing Security and Workload Identity](#31-package-publishing-security-and-workload-identity) |
-| 32 | [GitHub Dependency Review Integration](#32-github-dependency-review-integration) |
+| 32 | [GitHub Dependency Review Integration](#32-dependency-change-review-integration) |
 | 33 | [OSS Legal Risk Management](#33-oss-legal-risk-management) |
 | 34 | [Zero-Day Dependency Response Playbook](#34-zero-day-dependency-response-playbook) |
 | 35 | [AI-Generated Code License Risk](#35-ai-generated-code-license-risk) |
@@ -890,7 +890,7 @@ flowchart TD
 - **Rule**: Immediately remove compromised package versions from lockfile
 - **Rule**: Use SBOM to identify impact scope across released builds
 - **Rule**: Immediately revoke potentially leaked credentials via `npm token revoke`
-- **Rule**: Record post-mortem results in lessons log (`core/010_project_lessons_log.md`)
+- **Rule**: Record post-mortem results in lessons log (`axiarch-rules/en/blueprint/core/010_project_lessons_log.md`)
 - **Rule**: Migrate publishing tokens from long-lived to OIDC Trusted Publishing to reduce token theft risk
 - **Rule**: Enforce 2FA/WebAuthn for maintainer accounts to prevent phishing-based account takeover
 - **Rule**: Consider network-isolated CI builds to counter self-replicating malware (Shai-Hulud type)
@@ -1924,7 +1924,7 @@ With Google A2A, Anthropic MCP, and Microsoft AutoGen standardizing agent-to-age
 - **Rule**: When upgrading agentic AI frameworks (LangGraph, CrewAI, etc.), verify the impact on agent autonomous decision logic in a staging environment
 - **Rule**: Include A2A SDKs, agent definitions, and tool manifests in the release inventory and verify signatures or attestations through trust policy when the distribution channel provides them. For unsigned formats, compensate with source, digest, review, and allowlist evidence
 
-→ Cross-reference: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §Supply Chain, §36 Slopsquatting Defense, §43 RDD Defense, [`000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLM Security
+→ Cross-reference: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §Supply Chain, §36 Slopsquatting Defense, §43 RDD Defense, [`axiarch-rules/{lang}/universal/security/000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLM Security
 
 ---
 
@@ -1994,7 +1994,7 @@ R: Functional unit (user request count, transaction count, etc.)
 - **Rule**: Renovate's weekly grouping PRs (see §15) MUST be operated with a design that also contributes to batching CI energy consumption from dependency updates
 - **Rule**: Add "Maintainer sustainability (Green Flag)" as a reference metric to health metrics during OSS package selection (see §12)
 
-→ Cross-reference: §13 Bundle Size & Performance Impact, §39 Dependency Minimization Principle, [`600_cloud_finops.md`](../operations/600_cloud_finops.md) §GreenOps
+→ Cross-reference: §13 Bundle Size & Performance Impact, §39 Dependency Minimization Principle, [`axiarch-rules/{lang}/universal/operations/600_cloud_finops.md`](../operations/600_cloud_finops.md) §GreenOps
 
 ---
 

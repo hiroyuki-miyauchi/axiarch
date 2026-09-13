@@ -40,7 +40,7 @@
 ## §1. 適用範囲と優先順位
 
 - Rule 320.1: 本ファイルは、プログラミング言語、クエリ言語、IaC言語、運用スクリプト、container／build／configuration定義の選定と横断品質の正本である。
-- Rule 320.2: フレームワークやプラットフォーム固有の詳細は、`300_web_frontend.md`、`400_mobile_flutter.md`、`410_native_platforms.md`、`420_react_native.md`、クラウド別正本を優先する。
+- Rule 320.2: フレームワークやプラットフォーム固有の詳細は、`axiarch-rules/{lang}/universal/engineering/300_web_frontend.md`、`axiarch-rules/{lang}/universal/engineering/400_mobile_flutter.md`、`axiarch-rules/{lang}/universal/engineering/410_native_platforms.md`、`axiarch-rules/{lang}/universal/engineering/420_react_native.md`、クラウド別正本を優先する。
 - Rule 320.3: 汎用規則と公式言語慣習が衝突するときは、安全性と既存プロジェクト規約を損なわない範囲で言語ネイティブ規約を優先する。全ファイルへの一律 `kebab-case` 適用は禁止する。
 - Rule 320.4: MUST／必須は相互運用性、安全性、法令・契約、回復不能な損害を避ける最低成果に限定し、SHOULD／推奨は通常の既定、MAY／任意は選択可能な強化を表す。特定の実装方法を強制しなくても成果を保証できる場合、方法ではなく検証可能な成果を規定する。プロジェクトはより厳格なBlueprintを定義してよい。
 - Rule 320.5: 言語の人気だけで採用しない。既存資産、運用者、規制、性能、安全性、ライブラリエコシステム、採用市場、ベンダーロックイン、廃止費用を同時評価する。
@@ -179,7 +179,7 @@ productionコードは、言語にかかわらず次を満たす。
 
 - Rule 320.14: TypeScriptでは `strict` を基線とし、`noUncheckedIndexedAccess` と `exactOptionalPropertyTypes` を新規プロジェクトでSHOULDとする。
 - Rule 320.15: `any`、`@ts-ignore`、lint disableは恒久解決にしない。`unknown`、narrowing、明示schemaを優先する。
-- Rule 320.16: framework固有のレンダリング、accessibility、bundle、browser検証は `300_web_frontend.md` を正本とする。
+- Rule 320.16: framework固有のレンダリング、accessibility、bundle、browser検証は `axiarch-rules/{lang}/universal/engineering/300_web_frontend.md` を正本とする。
 - Rule 320.17: frontendとbackendが異なる言語でも、生成された契約型またはschemaを介し、手作業でDTOを複製しない。
 
 ## §6. バックエンド・業務自動化言語プロファイル
@@ -212,7 +212,7 @@ Node.jsのproduction serviceはActive LTSまたはMaintenance LTSだけを使い
 
 ## §7. モバイル・クライアント言語プロファイル
 
-- Rule 320.23: SwiftとKotlinの詳細は `410_native_platforms.md`、Dartは `400_mobile_flutter.md`、React Nativeは `420_react_native.md` を正本とする。React Nativeは言語ではなく、TypeScript／JavaScript層とSwift／Kotlin native層を結ぶframeworkとして扱う。
+- Rule 320.23: SwiftとKotlinの詳細は `axiarch-rules/{lang}/universal/engineering/410_native_platforms.md`、Dartは `axiarch-rules/{lang}/universal/engineering/400_mobile_flutter.md`、React Nativeは `axiarch-rules/{lang}/universal/engineering/420_react_native.md` を正本とする。React Nativeは言語ではなく、TypeScript／JavaScript層とSwift／Kotlin native層を結ぶframeworkとして扱う。
 - Rule 320.24: SwiftはStrict Concurrency、Sendable、Actor分離、SwiftLint/SwiftFormat、Swift TestingまたはXCTestを適用する。
 - Rule 320.25: Kotlinはnull安全、構造化coroutine、ktlint、detekt、compiler warnings-as-errors、JUnit等を適用する。
 - Rule 320.26: Dartはnull安全、`dart format`、`dart analyze --fatal-infos`、unit・widget・integration testを適用する。

@@ -10,11 +10,14 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rules](https://img.shields.io/badge/Universal_Rules-55_files-green.svg)](#-universal-rules-55-files--jaen)
 [![Languages](https://img.shields.io/badge/Languages-🇯🇵_🇺🇸_Bilingual-orange.svg)](#-同梱内容--whats-included)
-[![Production Validated](https://img.shields.io/badge/Production_Validated-Antigravity_Codex_Claude_Code-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
+[![Production Validated](https://img.shields.io/badge/Production_Validated-Antigravity-green.svg)](#-aiエージェント互換性--ai-agent-compatibility) [![Extended](https://img.shields.io/badge/Extended-Pointer_Only_No_Guarantee-yellow.svg)](#-aiエージェント互換性--ai-agent-compatibility)
 
 [日本語](#-axiarchアクシアークとは) ・ [English](#-what-is-axiarch-ax-ee-ark)
 
 </div>
+
+> 開発版: `1.17.0-dev`。公開済みの最新安定版は `1.16.0`。以下のタグ固定の導入例は安定版を対象とします。開発版の確認には、このチェックアウトをレビューしたうえでローカルソースから導入・更新してください。[次期版の変更履歴](CHANGELOG.md#unreleased)
+> Development version: `1.17.0-dev`; latest published stable: `1.16.0`. Tag-pinned installation examples below target the stable release. To evaluate development changes, review this checkout and install or upgrade from its local source. [Upcoming changes](CHANGELOG.md#unreleased)
 
 ---
 
@@ -27,7 +30,7 @@ v1.12.0では、これに加えて **ハーネスエンジニアリング（Harn
 
 > **AGENTS.md オープン標準との関係**: Axiarch は、広く普及した [`AGENTS.md`](https://agents.md/) 標準（多くのコーディングエージェントが読む共通フォーマット）と**競合せず共存**します。`AGENTS.md` / `CLAUDE.md` / `.cursor/rules` 等の各ツール固有ファイルは、いずれも正本 `AXIARCH.md` を指す**薄いアダプター**として配布されます。これは「同じルールを複数フォーマットで二重管理する」という採用先最大の摩擦を避けるための設計です。`AGENTS.md` を入口として読むエージェントは、そのアダプター経由で `AXIARCH.md`（3層 + ハーネス + 結晶化の正本）へ到達します。`AGENTS.md` 標準のディレクトリ階層オーバーライド（nearest-file）に相当するプロジェクト固有の差分は、Blueprint 層（可変）で表現します。
 
-Axiarch は [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)、[Claude Code](https://www.anthropic.com/claude-code)、[Google Antigravity](https://antigravity.google/) を主対象に据えた AIエージェントガバナンス層です。Codex は v1.8.2+ の `.codex/hooks.json` ネイティブ統合、Claude Code は v1.4.0+ の `UserPromptSubmit` hook / v1.5.5+ `PreToolUse` 物理遮断 / v1.6.0+ Reminder TTL / v1.8.0+ Check D Task Boundary Detection を備えます。v1.9.0 では `PostToolUse` diff guard、v1.11.0 では現在タスク用Markdown証跡ローテーションとCodex/Claude Codeネイティブタスク状態同期ルールを追加しています。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。Antigravity を最初の実証対象として検証し、Codex・Claude Code も本リポジトリ自体の開発を含む実運用で継続使用しています。ただし、全環境での動作保証まではしません。Cursor、GitHub Copilot、Windsurf は Markdown ルール接続の入口を用意した拡張互換候補として扱い、検証済みまたは動作保証済みとは扱いません。
+AxiarchはAIエージェントの品質の底上げを支えるガバナンス層です。AXIARCH.mdを正本とし、選択したエージェントのアダプターから参照します。Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 
 ### 設計思想
 
@@ -83,7 +86,7 @@ v1.12.0 also introduces explicit **Harness Engineering**. This is not a fourth r
 
 > **Relationship to the AGENTS.md open standard**: Axiarch **coexists with, rather than competes against,** the widely adopted [`AGENTS.md`](https://agents.md/) standard (the common format many coding agents read). Tool-native files such as `AGENTS.md` / `CLAUDE.md` / `.cursor/rules` are all distributed as **thin adapters** that point to the canonical `AXIARCH.md`. This avoids the biggest adopter friction — maintaining the same rules duplicated across multiple formats. An agent that reads `AGENTS.md` as its entrypoint reaches `AXIARCH.md` (the canonical source for the three layers + harness + crystallization) through that adapter. Project-specific deltas — analogous to the `AGENTS.md` standard's nearest-file directory override — are expressed in the mutable Blueprint layer.
 
-Axiarch focuses its first-class support strategy on [OpenAI Codex](https://developers.openai.com/codex/guides/agents-md), [Claude Code](https://www.anthropic.com/claude-code), and [Google Antigravity](https://antigravity.google/). In the v1.12.0 line, `AXIARCH.md` becomes the canonical entrypoint, while `AGENTS.md` and tool-native files are thin adapters that point to it. v1.11.0 adds current-task Markdown evidence rotation plus explicit native task-state sync rules for Codex and Claude Code. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding): Antigravity was validated first, and Codex and Claude Code are used continuously in real operation, including building this repository itself, with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are treated as extended pointer-only compatibility candidates through Markdown pointer files, not as verified platforms.
+Axiarch uses AXIARCH.md as its canonical protocol and provides optional agent adapters. Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
 
 ### Core Design Philosophy
 
@@ -134,8 +137,8 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 
 | 位置づけ / Role | Agent | Native Config | Canonical Entry |
 |:----------------|:------|:--------------|:----------|
-| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（全環境保証なし） / Production-validated primary (no operation guarantee for every environment) | **OpenAI Codex** | `AGENTS.md` adapter + `.codex/hooks.json` | `AXIARCH.md` |
-| ✅ **Production-Validated Primary** — 実運用で稼働確認済み（全環境保証なし） / Production-validated primary (no operation guarantee for every environment) | **Claude Code** | `CLAUDE.md` adapter + `.claude/settings.json` (4 hooks) | `AXIARCH.md` |
+| 未実証・動作保証なし / Unverified compatibility candidate | **OpenAI Codex** | `AGENTS.md` adapter + `.codex/hooks.json` | `AXIARCH.md` |
+| 未実証・動作保証なし / Unverified compatibility candidate | **Claude Code** | `CLAUDE.md` adapter + `.claude/settings.json` (4 hooks) | `AXIARCH.md` |
 | ✅ **Production-Validated Primary** — 実運用で稼働確認済み / Production-validated primary | **Google Antigravity** | `.agents/rules/prompt_pointer.md` adapter | `AXIARCH.md` |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **Cursor** | `.cursor/rules/*.mdc` adapter | `AXIARCH.md` |
 | ⚠️ **Extended Pointer Only** — 拡張ポインターのみ（未検証・動作保証なし） / Extended pointer only (unverified, no operation guarantee) | **GitHub Copilot** | `.github/copilot-instructions.md` adapter | `AXIARCH.md` |
@@ -148,9 +151,9 @@ Axiarch focuses its first-class support strategy on [OpenAI Codex](https://devel
 > **EN**: Each AI agent has its **own native configuration directory** (e.g., `.cursor/rules/` for Cursor, `.github/copilot-instructions.md` for Copilot). The Axiarch source of truth is `AXIARCH.md`; `AGENTS.md` and tool-native files are thin adapters that point to it. They are NOT replacements for tool-specific setup.
 
 > [!IMPORTANT]
-> **JA**: 主対象は **[OpenAI Codex](https://developers.openai.com/codex/guides/agents-md)** / **[Claude Code](https://www.anthropic.com/claude-code)** / **[Google Antigravity](https://antigravity.google/)** です。主対象の **Google Antigravity** / **OpenAI Codex** / **Claude Code** は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。ただし、全環境での動作保証まではしません。Cursor / GitHub Copilot / Windsurf は拡張互換候補としてポインター設定を用意していますが、検証済みまたは動作保証済みとは扱いません。
+> Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 >
-> **EN**: The primary targets are **OpenAI Codex**, **Claude Code**, and **Google Antigravity**. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf have pointer files as extended compatibility candidates, but they are not presented as verified or operation-guaranteed platforms.
+> Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
 
 > [!TIP]
 > **JA**: フォルダ名 `axiarch-rules/` は出自を反映していますが、ルールファイル自体は純粋なMarkdownであり、ツール固有の実行時依存はありません。
@@ -200,6 +203,7 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 | File | JA | EN |
 |:-----|:---|:---|
 | `axiarch-harness/{lang}/EXECUTION_HARNESS_PROTOCOL.md` | タスクレベルと実行ライフサイクル | Task levels and execution lifecycle |
+| `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` | セッション・タスク記録、証拠と検査段階 | Session/task records, evidence and validation phases |
 | `axiarch-harness/{lang}/AUDIT_GATE_PROTOCOL.md` | 監査Verdictと修正ループ | Audit verdicts and fix loop |
 | `axiarch-harness/{lang}/ROLE_PASS_PROTOCOL.md` | Planner / Implementer / Reviewer / QA / Docs / Release Safetyの役割パス | Planner / Implementer / Reviewer / QA / Docs / Release Safety role passes |
 | `axiarch-harness/{lang}/EVIDENCE_PACKET_PROTOCOL.md` | 完了時の証跡パケット | Closeout evidence packet |
@@ -214,8 +218,8 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 
 | Category | Files | JA | EN |
 |:---------|:------|:---|:---|
-| Core & Mindset | 2 | 開発哲学、主要方針、**ゴールと現在値の起動時契約** | Development philosophy, primary directive, **goal & current-state boot contract** |
-| Product & Business | 9 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
+| Core & Mindset | 4 | 開発哲学、主要方針、**ゴールと現在値の起動時契約** | Development philosophy, primary directive, **goal & current-state boot contract** |
+| Product & Business | 10 | プロダクト戦略、市場検証、GTM、収益、価格、グロース、ブランド、ASO、IR | Product strategy, market validation, GTM, revenue, pricing, growth, brand, ASO, IR |
 | Design & UX | 1 | デザインシステム、A11y | Design system, accessibility |
 | Engineering | 18 | コード品質(141§)、API、Supabase、**プログラミング言語ガバナンス**、Web、CMS、Flutter、Native、**React Native**、Firebase、AWS、**クラウド・アプリケーションプラットフォーム統治**、**Microsoft Azure**、**Git Workflow**、**バッチ・バックフィル・失敗計数**、**データ整合・リコンシリエーション**、**キャッシュ規律**、**データコントラクト** | Code quality (141§), API, Supabase, **programming language governance**, Web, CMS, Flutter, Native, **React Native**, Firebase, AWS, **cloud and application platform governance**, **Microsoft Azure**, **Git Workflow**, **batch/backfill & failure accounting**, **data reconciliation**, **caching discipline**, **data contracts** |
 | AI & Data | 2 | AIエンジニアリング、データ分析 | AI Engineering, Data Analytics |
@@ -303,9 +307,9 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 ## ⚡ クイックスタート / Quick Start
 
 > [!IMPORTANT]
-> **JA**: `main` ブランチの `init.sh` は Axiarch v1.16.0 の安定版を既定で導入し、配布refは `tags/v1.16.0` に固定されます。最新の `main` を明示的に追いたい場合だけ、`AXIARCH_REF=heads/main` を右辺の `bash` に渡してください。v1.11.2以前のタグには `AXIARCH.md` と `axiarch-harness/` が存在しないため、旧AGENTS.md入口のlegacy installとして扱います。
+> JA: 未公開の変更は確認済みのローカルソースから導入します。公開済みタグを使う場合は、同じタグの `init.sh` をファイルとして実行し、選択用の標準入力を確保してください。現行installerが必要とするPython補助ファイルのない旧sourceは適用前に停止します。古い導入先は再導入せず、Safe Upgradeで独自状態を保持して移行します。
 >
-> **EN**: The `main`-branch `init.sh` installs the stable Axiarch v1.16.0 release by default and pins the distribution ref to `tags/v1.16.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when you intentionally want to follow the latest `main`. Tags at v1.11.2 or earlier do not contain `AXIARCH.md` or `axiarch-harness/`, so they are handled as legacy installs using the old AGENTS.md entrypoint.
+> EN: Install unreleased changes from a reviewed local checkout. For a published tag, run the installer from that same tag as a file so stdin remains available for choices. The current installer stops before applying an older source without its required Python helpers. Existing adopters migrate through Safe Upgrade while retaining their project state.
 
 ### 必須ファイル一覧 / Required Files
 
@@ -321,7 +325,7 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 | ファイル / File | 必須？ / Required? | 説明 / Description |
 |:---------------|:-------------------|:-------------------|
 | `AXIARCH.md` | ✅ **必須** / **Required** | Axiarch正本入口 / Canonical Axiarch entrypoint |
-| `AGENTS.md` | ✅ **必須** / **Required** | AGENTS標準を読む環境向けの薄いアダプター / Thin adapter for AGENTS.md readers |
+| `AGENTS.md` | AGENTS対応環境で選択 / Selected for AGENTS readers | AGENTS標準を読む環境向けの薄いアダプター / Thin adapter for AGENTS.md readers |
 | `axiarch-rules/` | ✅ **必須** / **Required** | ルール本体（Universal + Blueprint） / Rule definitions |
 | `axiarch-harness/` | ✅ **必須** / **Required** | ハーネスエンジニアリングの実装。実行、監査、証跡、人間承認、サブエージェント委任の手順 / Harness Engineering implementation for execution, audit, evidence, human approval, and delegation protocols |
 | `axiarch-manifest.json` | 🔷 **任意（安全アップグレード推奨）** / **Optional (recommended for safe upgrades)** | Axiarch本体ファイル、Axiarch共有Blueprint、プロジェクト固有Blueprint、任意ファイル、本体リポジトリ専用ファイルの所有境界を定義するアップグレード用マニフェスト / Upgrade ownership manifest separating Axiarch-owned files, Axiarch-shared Blueprint rules, project-owned Blueprint state, optional files, and source-repository-only files |
@@ -333,7 +337,7 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 | `CLAUDE.md` | 🔶 **Claude Code のみ** / **Claude Code only** | Claude Code固有のポインター。`init.sh` で自動コピー / Claude Code-specific pointer. Auto-copied by `init.sh` |
 | `.claude/settings.json` | 🔶 **Claude Code hook利用時のみ** / **Claude Code hook use only** | 4 hooks（SessionStart / UserPromptSubmit / PreToolUse(Write) / PostToolUse(Edit, MultiEdit, Write)）のhook設定。`init.sh` で自動コピー / Four-hook config (SessionStart / UserPromptSubmit / PreToolUse with Write matcher / PostToolUse for Edit, MultiEdit, Write). Auto-copied by `init.sh` |
 | `.claude/memory/MEMORY.md` | 🔷 **Claude Code memory利用時のみ** / **Claude Code memory use only** | 任意のMemory Persistenceテンプレート。`AXIARCH.md` を正本境界として、実際に起きた再発リスク低減の教訓だけを短く記録 / Optional Memory Persistence template. Keeps `AXIARCH.md` as the canonical boundary and stores only short notes from actual repeated issues |
-| `axiarch-scripts/` | 🔶 **Hook・診断・安全アップグレード利用時のみ必要** / **Required only for hooks, diagnostics, or safe upgrades** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / PostToolUse / SessionStart hook 外出しスクリプト群 + `axiarch-upgrade.sh`。Hookを有効にする場合、同梱診断を実行する場合、またはSafe Upgrade Wizardを使う場合に必要です。それ以外の最小運用では任意です（`check-axiarch-health.sh` で全プロトコル遵守を **16 段階診断**（`--quiet` flag 対応、v1.11.0では現在タスク文書ローテーション、ネイティブタスク状態同期、v1.10.0+由来の本体リリース整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの必須/任意境界、Claude Memory正本境界、中核ファイルのGit追跡状態も検査）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、token 約 87% 削減） + **Check D Task Boundary Detection**（v1.8.0+）+ ネイティブタスク状態reminder、`axiarch-protect-antifull.sh` で §6 hook遮断、`axiarch-diff-guard.sh` で大きな差分の事後検出、`axiarch-init-task-md.sh` と `axiarch-task-state.sh` で3つの現在タスク文書を自動bootstrap/archive、`axiarch-upgrade.sh` でマニフェストベースの対話式アップグレード、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic, hook, and safe-upgrade scripts. Required when hooks are enabled, when bundled diagnostics are run, or when the Safe Upgrade Wizard is used. Optional for minimal operation otherwise (`check-axiarch-health.sh` 16-stage compliance with `--quiet` plus v1.11.0 current-task document rotation, native task-state sync, v1.10.0+ source-release parity, Safe Upgrade Wizard manifest wiring and exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, README/llms/scripts README required/optional boundary checks, Claude Memory canonical boundary, and source release-file Git tracking, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection + native task-state reminder, `axiarch-protect-antifull.sh` §6 hook block, `axiarch-diff-guard.sh` large-diff post-use detection, `axiarch-init-task-md.sh` and `axiarch-task-state.sh` current-task document bootstrap/archive, `axiarch-upgrade.sh` manifest-based upgrade wizard, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
+| `axiarch-scripts/` | 🔶 **Hook・診断・安全アップグレード利用時のみ必要** / **Required only for hooks, diagnostics, or safe upgrades** | 診断・ヘルスチェックスクリプト集 + UserPromptSubmit / PreToolUse / PostToolUse / SessionStart hook 外出しスクリプト群 + `axiarch-upgrade.sh`。Hookを有効にする場合、同梱診断を実行する場合、またはSafe Upgrade Wizardを使う場合に必要です。それ以外の最小運用では任意です（`check-axiarch-health.sh` で構造・記録の整合を **16 段階診断**（`--quiet` flag 対応、v1.11.0ではセッション別タスク記録、ネイティブタスク状態同期、v1.10.0+由来の本体リリース整合、Safe Upgrade Wizard manifest配線・exclude処理・source-only既定skipとinteractive明示override・対話選択肢重複排除・`replace-if-local-unchanged` 実行時保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡、Blueprint INDEXの共有Operations登録と版数、safe upgrade promptのREADME/llms/rules索引、README/llms/scripts READMEの必須/任意境界、Claude Memory正本境界、中核ファイルのGit追跡状態も検査）、`axiarch-boot-reminder.sh` で動的違反検出 (Check A/B/C) + **TTL 二段階出力**（v1.6.0+、繰り返す補足を短縮） + **Check D Task Boundary Detection**（v1.8.0+）+ ネイティブタスク状態reminder、`axiarch-protect-antifull.sh` で §6 hook遮断、`axiarch-diff-guard.sh` で大きな差分の事後検出、`axiarch-init-task-md.sh` と `axiarch-task-state.sh` で3つの現在タスク文書を自動session bootstrap、`axiarch-upgrade.sh` でマニフェストベースの対話式アップグレード、`check-git-config-clean.sh` で `.git/config` 健全性チェック）。`init.sh` で自動コピー、**pre-commit hook installer 任意導入対応**（v1.6.0+）/ Diagnostic, hook, and safe-upgrade scripts. Required when hooks are enabled, when bundled diagnostics are run, or when the Safe Upgrade Wizard is used. Optional for minimal operation otherwise (`check-axiarch-health.sh` 16-stage structural diagnostics with `--quiet` plus v1.11.0 session-specific task records, native task-state sync, v1.10.0+ source-release parity, Safe Upgrade Wizard manifest wiring and exclude handling, source-only default skip with explicit interactive override, deduplicated interactive choices, `replace-if-local-unchanged` runtime protection, type-conflict review logging, upgrade metadata version normalization, fallback core Blueprint discovery, optional prompt evidence hashing, Blueprint INDEX shared Operations registration and version metadata, safe-upgrade prompt indexing across README, llms, and rules indexes, README/llms/scripts README required/optional boundary checks, Claude Memory canonical boundary, and source release-file Git tracking, `axiarch-boot-reminder.sh` dynamic violations (A/B/C) + two-stage TTL + Check D task-boundary detection + native task-state reminder, `axiarch-protect-antifull.sh` §6 hook block, `axiarch-diff-guard.sh` large-diff post-use detection, `axiarch-init-task-md.sh` and `axiarch-task-state.sh` current-task document session bootstrap, `axiarch-upgrade.sh` manifest-based upgrade wizard, `check-git-config-clean.sh` for `.git/config` integrity). Auto-copied by `init.sh` with optional pre-commit hook installer (v1.6.0+) |
 | `axiarch-prompts/` | 🔷 **任意** / **Optional** | プロンプトテンプレート集 / Prompt template library |
 | `init.sh` | 🔷 **任意（推奨）** / **Optional (Recommended)** | 対話式セットアップスクリプト。言語/エージェント選択、Project Native Language自動設定、ファイルコピー、次のステップを自動化 / Interactive setup script. Automates language/agent selection, Project Native Language configuration, file copy, and next-step guidance |
 | `CHANGELOG.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
@@ -360,8 +364,13 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh
-bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.16.0 --dry-run
+axiarch_bootstrap_dir="$(mktemp -d)" &&
+curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh \
+  -o "$axiarch_bootstrap_dir/download.part" &&
+mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
+# 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.16.0 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
 bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --agent codex --safe-only --apply
@@ -396,16 +405,20 @@ bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --interactive
 
 ### 🛡️ Codex / Claude Code Hook補強機構 / Hook Reinforcement Mechanism (v1.11.0 — 4 hooks + TTL + Task Boundary + Diff Guard + Native Task State)
 
-> **JA**: Codex / Claude Code 採用プロジェクトでは、`.codex/hooks.json` または `.claude/settings.json` を導入した場合に、**4 種類のフック**が AXIARCH.md プロトコルの**「Reminder + Physical Block + Bootstrap + Diff Guard」補強**を担います。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、Anti-Full-Overwrite 違反、`task.md` 記録忘却、大きくなりすぎた差分の見落としを、対応環境では検出しやすくします。**v1.6.0+ では TTL 二段階出力（default 30 分）で token 約 87% 削減**（24k → 3k）。**v1.8.0+ では Check D Task Boundary Detection** を追加し、現プロンプトの domain keyword と必須トリオ（task.md / implementation_plan.md / walkthrough.md）を機械比較。**v1.9.0+ では PostToolUse diff guard** により、Edit / MultiEdit / Write 後の差分規模を warn / block できます。**v1.11.0+ では `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用にローテーションし、Codex `update_plan` と Claude Code `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` の併用を明示します。**
+> **JA**: Codex / Claude Code 採用プロジェクトでは、`.codex/hooks.json` または `.claude/settings.json` を導入した場合に、**4 種類のフック**が AXIARCH.md プロトコルの**「Reminder + Physical Block + Bootstrap + Diff Guard」補強**を担います。AI が「軽い会話だから」と LOADING_PROTOCOL をスキップする問題、Anti-Full-Overwrite 違反、`task.md` 記録忘却、大きくなりすぎた差分の見落としを、対応環境では検出しやすくします。v1.6.0+のTTL二段階出力（既定30分）は繰り返す補足を短くします。現行の全体トークン使用量の削減率は検証しておらず、効果は作業と再表示の頻度に依存します。**v1.8.0+ では Check D Task Boundary Detection** を追加し、現プロンプトの domain keyword と必須トリオ（task.md / implementation_plan.md / walkthrough.md）を機械比較。**v1.9.0+ では PostToolUse diff guard** により、Edit / MultiEdit / Write 後の差分規模を warn / block できます。現在の実装は3文書をセッション別に保持し、共有現在値はタスクJSONで管理します。Codex `update_plan` と Claude Code `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` は利用可能な場合に併用します。
 >
-> **EN**: Codex / Claude Code adopter projects can enable `.codex/hooks.json` or `.claude/settings.json`, each containing **four hooks** that reinforce the AXIARCH.md protocol through **Reminder + Physical Block + Bootstrap + Diff Guard**. In supported environments, this makes it easier to detect skipped LOADING_PROTOCOL steps on "casual" prompts, Anti-Full-Overwrite violations, missing task.md recording, and large diff growth. **v1.6.0+ two-stage TTL** (default 30 min) reduces token cost ~87% (24k → 3k). **v1.8.0+ Check D Task Boundary Detection** mechanically compares current-prompt domain keywords against the mandatory trio (task.md / implementation_plan.md / walkthrough.md). **v1.9.0+ PostToolUse diff guard** can warn or block after Edit / MultiEdit / Write when the diff exceeds configured thresholds. **v1.11.0+ rotates `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task docs and explicitly requires Codex `update_plan` plus Claude Code `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` when available.**
+> **EN**: Codex / Claude Code adopter projects can enable `.codex/hooks.json` or `.claude/settings.json`, each containing **four hooks** that reinforce the AXIARCH.md protocol through **Reminder + Physical Block + Bootstrap + Diff Guard**. In supported environments, this makes it easier to detect skipped LOADING_PROTOCOL steps on "casual" prompts, Anti-Full-Overwrite violations, missing task.md recording, and large diff growth. Two-stage TTL (default 30 min) shortens repeated reminders. No current total-token reduction rate is established; savings depend on the task and reminder frequency. **v1.8.0+ Check D Task Boundary Detection** mechanically compares current-prompt domain keywords against the mandatory trio (task.md / implementation_plan.md / walkthrough.md). **v1.9.0+ PostToolUse diff guard** can warn or block after Edit / MultiEdit / Write when the diff exceeds configured thresholds. The current implementation preserves the three documents per session and manages shared current state in task JSON. Use Codex `update_plan` and Claude Code `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` when available.
 
 | フック / Hook | 発火タイミング / Fires when | 役割 / Role | スクリプト / Script |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 / Conversation start | 3つの現在タスク文書をbootstrap/archive + AXIARCH.md reminder 注入 / Bootstrap/archive three current-task docs + inject AXIARCH.md reminder | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
+| `SessionStart` | 会話開始時 / Conversation start | 3つの現在タスク文書をsession bootstrap + AXIARCH.md reminder 注入 / Bootstrap per session three current-task docs + inject AXIARCH.md reminder | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
 | `UserPromptSubmit` | 毎プロンプト送信時 / Every user prompt | system reminder（事実陳述 + 動的違反検出 A/B/C + **v1.6.0+ TTL 短縮版** + **v1.8.0+ Check D Task Boundary Detection**）注入 / Inject factual reminder + dynamic violations A/B/C + v1.6.0+ TTL short-circuit + **v1.8.0+ Check D task-boundary detection** | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 直前 / Before Write tool | 対応環境で既存ファイル全面書き換えを遮断（§6） / Blocks overwrite on existing files in supported environments (§6) | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 / After file-editing tools | git diff の変更行数・変更ファイル数を測定し、閾値超過時に warn / block / Measures changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
+
+差分フックは初回コミット前も計測し、失敗を未確認として通知します。blockは呼出し側への停止要求であり、適用済み編集を取り消したり、以降の全操作を遮断したりする保証ではありません。計測と互換性の詳細は [スクリプト説明](axiarch-scripts/README.md#axiarch-diff-guardsh) を参照してください。
+
+The diff hook also measures unborn branches and reports failures as unassessed. Block requests a pause from the caller; it does not undo edits or guarantee blocking every subsequent operation. See the [script contract](axiarch-scripts/README.md#axiarch-diff-guardsh) for measurement and compatibility details.
 
 | ファイル / File | 役割 / Role | コミット / Commit |
 |:----------------|:------------|:------------------|
@@ -447,11 +460,17 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 > **EN**: Use `init.sh` for an interactive setup that selects language/agent, writes the selected Project Native Language into `AXIARCH.md`, and copies required files. It can be used instead of manual setup.
 
 ```bash
-# 推奨: init.sh で自動セットアップ / Recommended: Auto-setup with init.sh
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
+# 手元の確認済みソースで新規導入 / Fresh install from a reviewed local checkout
+bash /path/to/axiarch/init.sh /path/to/your/project
 
 # 安定版タグ固定 / Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.16.0 bash
+axiarch_bootstrap_dir="$(mktemp -d)" &&
+curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
+  -o "$axiarch_bootstrap_dir/download.part" &&
+mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/init.sh"
+# 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
+test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.16.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness
@@ -557,7 +576,7 @@ cp .windsurfrules /path/to/your/project/
 ```text
 your-project/
  ├── AXIARCH.md                   ← 必須：正本入口 / Required: Canonical Protocol
- ├── AGENTS.md                    ← 必須：AGENTS標準向けアダプター / Required: AGENTS adapter
+ ├── AGENTS.md                    ← AGENTS標準利用時のアダプター / Adapter for AGENTS readers
  ├── axiarch-manifest.json         ← 任意：安全アップグレード用マニフェスト / Optional: safe-upgrade manifest
  ├── .codex/                      ← Codex のみ / Codex only
  │    └── hooks.json              ← Codex hook補強設定 / Codex hook-reinforcement config
@@ -726,3 +745,75 @@ The goal extends beyond personal use: to contribute to the global adoption of AI
 **JA**: バグ報告や機能リクエストは [GitHub Issues](https://github.com/hiroyuki-miyauchi/axiarch/issues) をご利用ください。
 
 **EN**: For bug reports and feature requests, use [GitHub Issues](https://github.com/hiroyuki-miyauchi/axiarch/issues).
+
+## 実行記録・更新結果・保証範囲 / Runtime evidence, upgrade outcomes and guarantees
+
+この節の追加実装はUnreleasedです。既存のv1.16.0配布へ適用済みという意味ではありません。承認済みのリリースまたは確認したローカルソースから導入・更新してください。
+The additions in this section are unreleased; they are not already included in the published v1.16.0 distribution. Adopt them from an approved release or a reviewed local source.
+
+ゴール・現在値の内容は `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md`、保存と検査の手順は [日本語の実行契約](axiarch-harness/ja/TASK_STATE_PROTOCOL.md) を正本とします。自律距離D1–D5、成熟度M1–M5、ハーネスH0–H4（旧L0–L4）は別の軸で、数値の自動対応はありません。H0の読み取りに記録作成や完了検査を強制せず、H2以上で準備・完了を分けて検査します。
+
+Goal/current-state content is governed by `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md`; storage and checks by the [English execution contract](axiarch-harness/en/TASK_STATE_PROTOCOL.md). Distance D1–D5, maturity M1–M5 and harness H0–H4 (legacy L0–L4) are separate axes without numeric conversion. H0 read-only work needs no task creation/completion gate; H2+ separates readiness from completion.
+
+| 機構 / Mechanism | 実際にできること / Actual boundary |
+|:--|:--|
+| PreToolUse `Write` | 対応runtimeがhookを発火・尊重する場合、既存pathへのWriteを拒否。新規作成は許可。設定済みallowlistは例外 / Reject existing-path Write on runtimes that invoke and honor the hook; new paths and configured allowlists are allowed |
+| Shell・Edit・外部API / Shell, Edit, external APIs | Write hookの対象外。これらの操作全体を遮断しない / Outside the Write hook; not comprehensively blocked |
+| SessionStart・補足 / SessionStart and reminder | 記録先・規則への誘導、キーワードによる見直し候補。遵守・理解はAIに依存 / Evidence/rule routing and heuristic review hints; understanding and compliance depend on the agent |
+| PostToolUse差分検出 / Diff guard | 編集後の閾値検出。既に行われた編集の取消しを保証しない / Post-edit threshold signal, not guaranteed rollback |
+| health・完了検査 / Health and completion | 構造・記録・ハッシュ・時刻の整合。意味理解・証拠の十分性・全操作の安全性は保証しない / Structural and recorded consistency, hashes and timestamps; no proof of understanding, evidence sufficiency or all-operation safety |
+
+差分ガードはGit環境上書きと外部変換フィルターを診断から切り離し、不足オブジェクトを自動取得しません。フィルターを使う環境では通常Gitと件数が異なる場合があり、`--no-lazy-fetch` 非対応のGitでは未確認を通知します。設定の保持、対象の選び方、互換性は [差分ガードの説明](axiarch-scripts/README.md#axiarch-diff-guardsh) を参照してください。
+
+The diff guard isolates inherited Git overrides and external conversion filters, and does not lazily download missing objects. Counts may differ from ordinary Git in filtered repositories; Git without `--no-lazy-fetch` produces an unassessed notice. See [diff guard documentation](axiarch-scripts/README.md#axiarch-diff-guardsh) for retained settings, target selection and compatibility.
+
+healthもGit取得失敗を0件や同期済みへ置き換えません。既存リポジトリのGitが `--no-lazy-fetch` に非対応の場合も診断失敗になります。取得済み参照との比較、Git管理外・初回コミット前の扱いは [Git診断の範囲](axiarch-scripts/README.md#git診断の範囲--git-observation-scope) を参照してください。
+
+Health also rejects failed Git queries instead of inventing zero counts or synchronization. An existing repository with Git that lacks `--no-lazy-fetch` fails diagnostics. See [Git observation scope](axiarch-scripts/README.md#git診断の範囲--git-observation-scope) for local-reference comparisons and non-Git/unborn handling.
+
+更新された補助ツールにはPython 3とPOSIXローカルファイルシステムが必要です。新規導入は `init.sh` が補助スクリプトを配布します。既存導入先はSafe Upgradeのdry-runを確認し、scriptsとharness、core/300、LOADING_PROTOCOLを更新し、mixed/reviewのAXIARCH.md・hook・索引は利用先設定を残して差分適用してください。単独ダウンロードした新しいupgrade scriptは、展開したsourceからPython補助を読み込めます。古いsourceに補助が無ければ適用前に停止します。
+
+The updated helpers require Python 3 and a POSIX local filesystem. `init.sh` distributes them on fresh installs. Existing adopters should review a Safe Upgrade dry-run, update scripts/harness/core/300/LOADING_PROTOCOL, and reconcile mixed/review AXIARCH.md, hooks and indexes while retaining local settings. A standalone new upgrade launcher can load its Python helpers from the extracted source; missing helpers stop application before changes.
+
+リモート取得はcurlとtarも必要です。HTTP失敗・時間切れ・不正アーカイブと曖昧なJSONは適用前に停止します。wgetだけの環境は確認済みローカルソースを使ってください。詳細とサイズ・時間の上限、真正性を保証しない範囲は [取得・入力検査](axiarch-scripts/README.md#取得入力検査の境界--download-and-input-validation-boundary) を参照してください。
+
+Remote retrieval also requires curl and tar. HTTP failures, deadlines, invalid archives and ambiguous JSON stop before application. Use a reviewed local source in wget-only environments. See [download and input validation](axiarch-scripts/README.md#取得入力検査の境界--download-and-input-validation-boundary) for size/time limits and the authenticity boundary.
+
+hook診断は導入済みの両設定について、イベント・対象操作・同期の呼出し先を突合します。独自wrapper等は勝手に実行・置換せず未確認として非0終了になります。対応形式と実動作を保証しない範囲は [hook宣言の検査](axiarch-scripts/README.md#hook宣言の静的検査--static-hook-declaration-checks) を参照してください。
+
+Hook diagnostics correlate events, matched operations and synchronous invocations in both installed configurations. Custom wrappers are neither executed nor replaced; unassessed declarations produce a nonzero result. See [static hook checks](axiarch-scripts/README.md#hook宣言の静的検査--static-hook-declaration-checks) for supported forms and runtime limits.
+
+既存のルート3文書、過去の退避記録、プロジェクト仕様・教訓・独自ファイルは保持します。`--mode new --task ID --session ID --import-legacy` で旧記録をコピーし、以降は表示されたセッション固有の文書を編集します。同じセッションの再開は `--mode resume`。共有JSONは `publish --expected-revision` で更新し、競合時は再読込して突合します。`AXIARCH_PROCESS_DOC_MODE=current|append` はどちらも旧記録を保持します。
+
+Root evidence, historical archives, project specifications, lessons and custom files are retained. Import old evidence with `--mode new --task ID --session ID --import-legacy`, then edit the displayed session-specific documents. Resume with `--mode resume`; publish shared JSON with `publish --expected-revision`, rereading and reconciling conflicts. Both `AXIARCH_PROCESS_DOC_MODE=current|append` preserve legacy evidence.
+
+管理記録のGit除外・保存権限・異常通知と保持の扱いは [実行記録の保護](axiarch-harness/ja/TASK_STATE_PROTOCOL.md#実行記録の保護) を参照。新しいscriptsで導入・適用する更新・セッション再開を行うと除外設定を補完します。Git管理済みの記録は自動で除去せず検知し、バックアップ・診断ログを自動匿名化済みと扱いません。
+
+See [runtime artifact protection](axiarch-harness/en/TASK_STATE_PROTOCOL.md#runtime-artifact-protection) for exclusions, permissions, notification and retention. Installation, applied upgrades or session resume with the updated scripts supplement local exclusions. Already tracked records are detected without automatic removal; backups and diagnostic logs are not automatically anonymized.
+
+| upgrade終了値 / Exit code | 意味 / Meaning |
+|:--|:--|
+| 0 | dry-run・不適用、または適用全件完了＋診断成功。ログのmodeも区別する / Preview/no application, or complete application and passed diagnosis; inspect mode too |
+| 1 | source取得など起動処理の失敗 / Source retrieval or startup failure |
+| 2 | 入力・前提条件の不備、適用前停止 / Invalid input or missing prerequisites |
+| 3 | 診断成功だが保留・競合あり / Diagnosis passed, with pending work or conflicts |
+| 4 | 診断失敗または診断不能 / Diagnosis failed or unavailable |
+| 5 | 事前パス検査、ファイル適用または記録処理の失敗 / Path preflight, application or recording failure |
+| 6 | 同一導入先の更新が実行中。後から再実行 / Another upgrade is using this target; retry later |
+| 130 / 143 | 割込み / 終了シグナルによる中断。結果記録も確認する / Interrupted by INT / TERM; inspect the retained outcome |
+
+適用ごとの `.axiarch/upgrades/{run_id}/` に途中状態、actions.log、置換前backup、result.jsonを残します。`.axiarch/upgrade-result.json` が直近結果です。強制終了でin_progressが残った場合も成功とは扱いません。`.axiarch/version.json` のversionは最後に指定範囲の全件を確認できた版数（初回未確認はnull）、requestedVersionは試みた版数です。`confirmedScope` / `requestedScope` と結果の `selection` に言語・エージェント・任意プロンプトの選択を残します。選択外の言語やアダプターまで更新済みとは扱わず、applicationStatusとhealthStatusも必ず併読します。変更済み・比較元不明ファイルは保留し、`--base-source` または既知ハッシュで保護します。再実行は保持された差分とbackupを確認して行います。
+
+Each `.axiarch/upgrades/{run_id}/` retains in-progress status, actions.log, pre-replacement backups and result.json; `.axiarch/upgrade-result.json` is the latest result. An interrupted in_progress run is not success. In `.axiarch/version.json`, version is the last completely confirmed version within the selected scope (null if none), while requestedVersion is attempted. `confirmedScope` / `requestedScope` and result `selection` record language, agent and optional prompt selection. Do not infer that unselected languages or adapters were updated; also read applicationStatus and healthStatus. Modified/unknown-base files are deferred and protected using `--base-source` or known hashes. Review retained diffs/backups before retrying.
+
+同じOSユーザー・同じ導入先への更新は、計画・対話・適用・診断・結果保存を通じて排他制御する。ロックはOSの一時領域に保持し、dry-runやEOFでは導入先を変更しない。ロックファイル自体は消さず、プロセス終了時にロックを解放する。自己更新中も開始時のPython補助を使用する。中断後に適用済みハッシュが残っていれば再実行の比較元として使う。SIGKILL・電源断ではin_progressが残りうるため、記録と実体を突合する。同一ローカル環境の協調するスクリプトが対象であり、別ユーザー・別ホスト・外部writerとの排他は保証しない。
+
+For the same OS user and target, a lock covers planning, interaction, application, diagnosis and outcome recording. The OS temporary directory holds the lock, so dry-run/EOF do not change the adopter. Keep the lock file in place; process exit releases its lock. A private copy of the starting Python helpers finishes self-updates. Retained applied-file hashes remain valid bases for retries after interruption. SIGKILL or power loss can leave in_progress records; reconcile them with actual files. This coordinates cooperating scripts in one local environment, not other users, hosts or external writers.
+
+プレビューでも、対象・更新元・比較元の範囲外を参照するパスやシンボリックリンクは事前に拒否する。事前検査の失敗時は導入先へ結果ファイルを新規作成せず、終了コードと標準エラーを返す。適用を始めた後は結果ファイルを残す。今回と同一内容で変更不要だったファイルも、更新元との一致を確認して次回の比較元へ登録する。
+
+Preflight rejects paths escaping the declared target/source/base or traversing symlinks, including previews. Preflight failures return an exit code and stderr without creating adopter outcome files; runs that start application retain outcomes. Files already identical to upstream also become verified comparison bases for later upgrades.
+
+CIは一時導入先で `python3 -m unittest discover -s tests -p 'test_*.py' -v` を実行します。main pushのrelease workflowが同じcommitのlint workflowを呼び出し、Markdown・ShellCheck・構造health・日英対称性・Linux/macOSの実動作テストが全て成功してから署名tag・公開へ進みます。既存の署名鍵検証、版数整合、tagだけ残った場合の同じrevisionでの復旧と公開済みno-opを保持します。手動操作・workflow自体の改変まで防ぐ境界ではありません。仕組みは [GitHubのworkflow構文](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_iduses) に基づきます。
+
+CI runs the temporary-adopter suite above. The main-push release workflow calls the lint workflow at the same commit and waits for Markdown, ShellCheck, structural health, bilingual symmetry and Linux/macOS behavioral tests before signed tags and publishing. Signing trust, version consistency, same-revision tag-only recovery and already-published no-op remain intact. This does not prevent manual publication or modification of the workflows themselves. See the linked GitHub workflow syntax for same-commit reuse and needs semantics.

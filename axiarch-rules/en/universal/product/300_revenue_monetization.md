@@ -1336,13 +1336,9 @@
     - **Rationale**: By making security enhancement a "benefit" rather than an
       "obligation" for users, you promote voluntary improvement of security
       levels.
-- **The 180-Day Expiration Protocol (Financial Regulations Avoidance)**:
-  - **Law**: To avoid prepaid payment instrument deposit obligations (over 10M
-    yen), recommend setting self-issued point expiration to **180 days (6
-    months) from issuance**.
-  - **Action**: Expire points via nightly batch processing with advance
-    notifications (30 days, 7 days before). Issuance of non-expiring points is
-    prohibited in principle.
+- Expiration of points and prepaid value:
+  - Determine applicable rules from issuance model, paid/free status, transfer/refund rights, outstanding balances and target jurisdictions. Do not impose a universal 180-day regulatory-avoidance recipe or equate calendar months with days.
+  - Align expiry, notices, processing and refunds with customer terms; record current local primary sources and the applicability decision in Blueprint. A regional reference for Japan is the [FSA prepaid-value guidance](https://www.fsa.go.jp/policy/prepaid/).
 
 ## 5. Ad Management Strategy
 

@@ -39,3 +39,7 @@ An Evidence Packet makes the closeout reproducible: what changed, what was verif
 An Evidence Packet is not a long activity log.
 It should be short, concrete, and sufficient for the user to make the next decision.
 Closeout without evidence is prohibited.
+
+## Goal and evidence linkage
+
+`axiarch-rules/en/universal/core/300_goal_and_current_state.md` governs content; use the IDs, owners, four states, targets, timestamps and evidence in [TASK_STATE_PROTOCOL.md](./TASK_STATE_PROTOCOL.md). H0/H1 stay lightweight. H2+ separates readiness from completion and audits evidence for every criterion. Structural health alone is not task completion.

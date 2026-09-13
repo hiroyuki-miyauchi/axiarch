@@ -166,7 +166,7 @@ manifest側の広域Project State globは `blueprint/*/[0-9][0-9][0-9]_*.md` に
 
 ### Rule
 
-manifestを読めないfallback経路でも、所有境界はmanifestと同等に近づける。`core/000`、`core/010`、テンプレート、`core/020_governance_rules.md` のようなAxiarch共有Blueprintなど、明示分類済みファイルは既存分類を維持する。明示分類されていない追加の `core/{NNN}_*.md` はProject Stateとして保持対象にする。任意promptは必須ではないが、適用した場合は `.axiarch/files.sha256` にhashを残す。
+現行版はPython 3でmanifestを読み、jqの有無で対象を変えない。JSONや型が不正なら適用前に停止する。`files` キーがない旧manifestだけ既定の所有境界を使う。明示分類済みファイルは既存分類を維持し、実在する全フォルダの `axiarch-rules/{lang}/blueprint/{folder}/{NNN}_*.md`（000〜999）の追加ファイルをProject Stateとして保持する。任意promptは必須ではなく、選択言語だけを対象にし、適用したファイルのhashを `.axiarch/files.sha256` に残す。
 
 ### Enforcement
 
@@ -264,9 +264,11 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`--apply` と `--interactive` �
 
 ### Rule
 
-Safe Upgrade Wizardの確認入力は、標準入力がEOFになっても失敗終了にしない。EOFは空入力として扱い、既定値に倒す。`--apply` の最終確認では既定Nとして `APPLY=false` / `DRY_RUN=true` に戻し、`--interactive` の最終確認でも既定Nとしてdry-run扱いにする。非対話で実際に適用する場合は、直前のdry-run結果を確認し、人間がapply実行を明示承認した上で `--yes` を明示する。
+Safe Upgrade Wizardの確認入力はEOFを空入力として扱い、既定Nで不適用（`APPLY=false`）にする。明示した `--dry-run` は `--apply` の指定順や対話回答で解除しない。非対話の適用は事前の差分確認とユーザーの承認範囲に基づき `--yes` を使い、既存の承認を取り直す手続きにしない。
 
 ### Enforcement
+
+2026-09-11の実動作回帰では、`--interactive --apply` でも最終確認を省略しないことを追加した。`--yes` の明示がないEOFは必ず不適用へ戻す。`tests/test_runtime.py` は実スクリプトで対象ファイルの不変を確認する。
 
 `axiarch-scripts/axiarch-upgrade.sh` の確認入力は `read -r answer || answer=""` と `read -r choice || choice=""` でEOFを空入力化する。`check-axiarch-health.sh` Check 15 は、Safe Upgrade WizardがEOF-safeな確認入力defaultを持つことを検査する。
 
@@ -363,3 +365,5 @@ tagだけ存在してReleaseが欠ける部分失敗を復旧するときは、�
 ### Reference
 
 `.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`
+
+2026-09-11補足: main pushではrelease.ymlが同一commitのlint.ymlをworkflow_callで実行し、needs成功後のみ署名・公開へ進む。実動作テストはLinux/macOSの隔離導入先で実行する。構造health・準備・完了は別判定で、更新の部分適用・診断失敗はversionを進めず非0で報告する。実装契約は `axiarch-harness/ja/TASK_STATE_PROTOCOL.md` とREADMEの更新結果表を参照。

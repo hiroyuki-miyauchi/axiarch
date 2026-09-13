@@ -6,8 +6,9 @@
 # =============================================================================
 
 set -euo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 
-AXIARCH_VERSION="1.16.0"
+AXIARCH_VERSION="1.17.0-dev"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -35,20 +36,24 @@ BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 print_header() {
   echo ""
   echo -e "${BOLD}${CYAN}🏰 Axiarch installer v${AXIARCH_VERSION} — Quick Setup${RESET}"
-  echo -e "${CYAN}   Installing: Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}${RESET}"
+  if $IS_REMOTE; then
+    printf '%b%s%b\n' "${CYAN}" "   Requested source: ${AXIARCH_REF} (source version not yet checked)" "${RESET}"
+  else
+    printf '%b%s%b\n' "${CYAN}" "   Local source: ${SOURCE_DIR} (source version not yet checked)" "${RESET}"
+  fi
   echo -e "${CYAN}   Constitution-Driven AI Agent Governance Framework${RESET}"
   echo -e "${CYAN}   ${REPO_URL}${RESET}"
   echo ""
 }
 
-print_step()    { echo -e "${BOLD}${BLUE}[Step $1]${RESET} $2"; }
-print_success() { echo -e "${GREEN}✅ $1${RESET}"; }
-print_warn()    { echo -e "${YELLOW}⚠️  $1${RESET}"; }
-print_error()   { echo -e "${RED}❌ $1${RESET}"; }
-print_info()    { echo -e "   ${CYAN}→${RESET} $1"; }
+print_step()    { printf '%b%s%b%s\n' "${BOLD}${BLUE}" "[Step $1]" "${RESET} " "$2"; }
+print_success() { printf '%b%s%b\n' "${GREEN}✅ " "$1" "${RESET}"; }
+print_warn()    { printf '%b%s%b\n' "${YELLOW}⚠️  " "$1" "${RESET}"; }
+print_error()   { printf '%b%s%b\n' "${RED}❌ " "$1" "${RESET}"; }
+print_info()    { printf '%b%s\n' "   ${CYAN}→${RESET} " "$1"; }
 
-# --- Detect if running via curl (remote) or locally ---
-# When piped via curl, the script dir is /tmp; local usage sets SOURCE_DIR.
+# --- Use an adjacent checkout when present; a standalone launcher downloads it. ---
+# Run as a file so standard input remains available for interactive choices.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo "REMOTE")"
 IS_REMOTE=false
 if [[ "$SCRIPT_DIR" == "REMOTE" ]] || [[ ! -f "$SCRIPT_DIR/AXIARCH.md" ]]; then
@@ -57,8 +62,16 @@ else
   SOURCE_DIR="$SCRIPT_DIR"
 fi
 
-# --- Require a target directory argument when running remotely ---
+# --- Default to the current directory when no target argument is supplied. ---
 TARGET_DIR="${1:-$(pwd)}"
+TMP_DIR=""
+STAGE_DIR=""
+cleanup() {
+  [[ -z "$TMP_DIR" ]] || rm -rf "$TMP_DIR"
+  [[ -z "$STAGE_DIR" ]] || rm -rf "$STAGE_DIR"
+  return 0
+}
+trap cleanup EXIT
 
 # =============================================================================
 # STEP 0: Prerequisites check
@@ -73,8 +86,10 @@ check_prerequisites() {
   command -v rm    &>/dev/null || missing+=("rm")
   command -v mkdir &>/dev/null || missing+=("mkdir")
   command -v mv    &>/dev/null || missing+=("mv")
+  command -v python3 &>/dev/null || missing+=("python3")
+  command -v mktemp &>/dev/null || missing+=("mktemp")
   if $IS_REMOTE; then
-    command -v curl &>/dev/null || command -v wget &>/dev/null || missing+=("curl or wget")
+    command -v curl &>/dev/null || missing+=("curl (HTTPS-only source download)")
     command -v mktemp &>/dev/null || missing+=("mktemp")
     command -v tar  &>/dev/null || missing+=("tar")
   fi
@@ -89,11 +104,10 @@ check_prerequisites() {
 # =============================================================================
 check_existing_install() {
   local existing_markers=()
-  local reinstall_choice
 
-  [[ -e "$TARGET_DIR/axiarch-rules" ]] && existing_markers+=("axiarch-rules/")
-  [[ -e "$TARGET_DIR/axiarch-manifest.json" ]] && existing_markers+=("axiarch-manifest.json")
-  [[ -e "$TARGET_DIR/.axiarch/version.json" ]] && existing_markers+=(".axiarch/version.json")
+  [[ -e "$TARGET_DIR/axiarch-rules" || -L "$TARGET_DIR/axiarch-rules" ]] && existing_markers+=("axiarch-rules/")
+  [[ -e "$TARGET_DIR/axiarch-manifest.json" || -L "$TARGET_DIR/axiarch-manifest.json" ]] && existing_markers+=("axiarch-manifest.json")
+  [[ -e "$TARGET_DIR/.axiarch/version.json" || -L "$TARGET_DIR/.axiarch/version.json" ]] && existing_markers+=(".axiarch/version.json")
 
   [[ ${#existing_markers[@]} -eq 0 ]] && return 0
 
@@ -101,22 +115,14 @@ check_existing_install() {
   print_info "For existing projects, use Safe Upgrade Wizard instead of full install."
   print_info "If the helper already exists in the project, preview with:"
   print_info "  bash axiarch-scripts/axiarch-upgrade.sh --to v${AXIARCH_VERSION} --dry-run"
-  print_info "If the helper is not installed yet, bootstrap it temporarily with:"
-  print_info "  curl -sSL ${RAW_BASE_URL}/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh"
-  print_info "  bash /tmp/axiarch-upgrade.sh --target \"${TARGET_DIR}\" --to v${AXIARCH_VERSION} --dry-run"
-  print_info "The installer is for fresh setup and may overwrite shared Axiarch Core files."
-  echo ""
-  read -rp "Continue full installer anyway? / それでも通常インストールを続行しますか？ [y/N]: " reinstall_choice || reinstall_choice=""
-  reinstall_choice="${reinstall_choice:-N}"
-  case "$reinstall_choice" in
-    y|Y|yes|YES)
-      print_warn "Continuing full installer by explicit operator choice."
-      ;;
-    *)
-      print_info "Stopped before file copy. Use Safe Upgrade Wizard from the project root."
-      exit 0
-      ;;
-  esac
+  print_info "If the helper is not installed yet, download to a private temporary directory:"
+  print_info '  axiarch_bootstrap_dir="$(mktemp -d)" &&'
+  print_info "  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 $(printf '%q' "${RAW_BASE_URL}/axiarch-scripts/axiarch-upgrade.sh") -o \"\$axiarch_bootstrap_dir/download.part\" &&"
+  print_info '  mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"'
+  print_info "Review the downloaded helper and its source before executing the preview:"
+  print_info "  test -n \"\$axiarch_bootstrap_dir\" && bash \"\$axiarch_bootstrap_dir/axiarch-upgrade.sh\" --target $(printf '%q' "$TARGET_DIR") --to v${AXIARCH_VERSION} --dry-run"
+  print_error "Existing installation preserved. Use Safe Upgrade Wizard; full reinstall is not supported."
+  exit 3
 }
 
 # =============================================================================
@@ -162,8 +168,8 @@ select_language_dirs() {
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) OpenAI Codex — Production-validated primary ✅ (dogfooding-validated, no full-environment guarantee; AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
-  echo "  2) Claude Code — Production-validated primary ✅ (dogfooding-validated, no full-environment guarantee; CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
+  echo "  1) OpenAI Codex — Unverified primary candidate (no operation guarantee; AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
+  echo "  2) Claude Code — Unverified primary candidate (no operation guarantee; CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
   echo "  3) Google Antigravity — Production-validated primary ✅ (.agents/rules/prompt_pointer.md adapter → AXIARCH.md)"
   echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee; .cursor/rules/axiarch.mdc adapter → AXIARCH.md)"
   echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee; .github/copilot-instructions.md adapter → AXIARCH.md)"
@@ -180,14 +186,15 @@ select_agent() {
   SETUP_COPILOT=false
   SETUP_WINDSURF=false
   AGENT_LABEL="Universal"
+  AGENT_ID="universal"
 
   case "$agent_choice" in
-    1) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex" ;;
-    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code" ;;
-    3) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity" ;;
-    4) SETUP_CURSOR=true; AGENT_LABEL="Cursor" ;;
-    5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot" ;;
-    6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf" ;;
+    1) SETUP_CODEX=true; AGENT_LABEL="OpenAI Codex"; AGENT_ID="codex" ;;
+    2) SETUP_CLAUDE=true; AGENT_LABEL="Claude Code"; AGENT_ID="claude" ;;
+    3) SETUP_ANTIGRAVITY=true; AGENT_LABEL="Google Antigravity"; AGENT_ID="antigravity" ;;
+    4) SETUP_CURSOR=true; AGENT_LABEL="Cursor"; AGENT_ID="cursor" ;;
+    5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot"; AGENT_ID="copilot" ;;
+    6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf"; AGENT_ID="windsurf" ;;
     7) AGENT_LABEL="Other / Universal" ;;
     *) print_warn "無効な選択。Universal設定を使用します。" ;;
   esac
@@ -210,9 +217,7 @@ select_prompts() {
     COPY_PROMPTS=true
     print_success "Prompt library will be copied."
     # Offer Claude Code slash-command generation only when Claude Code is the agent.
-    # Project-level native slash commands are a verified Claude Code mechanism;
-    # Codex custom prompts are global-only/deprecated and Antigravity workflows are
-    # not authoritatively project-file based, so we do not generate for them.
+    # This optional file adapter targets Claude; file generation is not a runtime validation.
     if $SETUP_CLAUDE; then
       echo ""
       echo "  Claude Code 向けに /axiarch-* slash command を生成できます（コピペ不要で呼び出し可能）。"
@@ -234,14 +239,14 @@ select_prompts() {
 # =============================================================================
 # STEP 3.5 (v1.6.0+): Optional pre-commit hook installation
 # Installs `bash axiarch-scripts/check-axiarch-health.sh --quiet` into .git/hooks/pre-commit
-# so axiarch protocol violations (4 hooks wired, threshold breaches, etc.) are
-# caught before commits land.
+# to check the automated health subset when Git invokes this hook.
 # =============================================================================
 select_precommit() {
   echo ""
   echo -e "${BOLD}Pre-commit hook 自動 install / Pre-commit hook auto-install (任意 / Optional):${RESET}"
-  echo "  Installs: bash axiarch-scripts/check-axiarch-health.sh --quiet → .git/hooks/pre-commit"
-  echo "  Effect: blocks commits when axiarch protocol violations are detected"
+  echo "  Candidate: bash axiarch-scripts/check-axiarch-health.sh --quiet → .git/hooks/pre-commit"
+  echo "  When installed and invoked, a failed automated health check stops that commit."
+  echo "  This does not prove rule understanding or the safety of all changes."
   echo "  Existing pre-commit / lefthook / pre-commit-framework setups are detected & preserved"
   echo ""
   read -rp "Install? / インストールしますか？ [y/N]: " pc_choice
@@ -249,80 +254,99 @@ select_precommit() {
   INSTALL_PRECOMMIT=false
   if [[ "$pc_choice" =~ ^[Yy]$ ]]; then
     INSTALL_PRECOMMIT=true
-    print_success "Pre-commit hook will be installed (after file copy)."
+    print_info "Pre-commit installation requested; existing hook/tooling checks determine the result."
   else
     print_info "Skipping pre-commit hook installation."
   fi
 }
 
-install_precommit_hook() {
-  $INSTALL_PRECOMMIT || return 0
+# AXIARCH_DOWNLOAD_BEGIN
+# Standalone bootstraps carry the same small download boundary; regression tests
+# compare this block so init and upgrade cannot silently diverge.
+download_source_archive() {
+  python3 - "$1" "$2" "${AXIARCH_DOWNLOAD_TIMEOUT_SECONDS:-120}" <<'AXIARCH_DOWNLOAD_PY'
+import gzip
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import time
+import unicodedata
+from pathlib import Path
 
-  local git_dir="${TARGET_DIR}/.git"
-  if [[ ! -d "${git_dir}" ]]; then
-    print_warn "Pre-commit install skipped: ${TARGET_DIR} is not a git repository."
-    return 0
-  fi
-
-  # Detect lefthook / pre-commit-framework / husky and warn (do not break their setup)
-  if [[ -f "${TARGET_DIR}/lefthook.yml" ]] || [[ -f "${TARGET_DIR}/.lefthook.yml" ]]; then
-    print_warn "lefthook detected — please add axiarch check to lefthook.yml manually:"
-    print_info "  pre-commit:"
-    print_info "    commands:"
-    print_info "      axiarch:"
-    print_info "        run: bash axiarch-scripts/check-axiarch-health.sh --quiet"
-    return 0
-  fi
-  if [[ -f "${TARGET_DIR}/.pre-commit-config.yaml" ]]; then
-    print_warn ".pre-commit-config.yaml detected — please add axiarch check as a local hook manually."
-    return 0
-  fi
-  if [[ -d "${TARGET_DIR}/.husky" ]]; then
-    print_warn ".husky/ detected — please add 'bash axiarch-scripts/check-axiarch-health.sh --quiet' to .husky/pre-commit manually."
-    return 0
-  fi
-
-  local hook_path="${git_dir}/hooks/pre-commit"
-  local marker="# === axiarch pre-commit hook (auto-installed by init.sh) ==="
-  local axiarch_block
-  axiarch_block=$(cat <<'PRECOMMIT'
-
-# === axiarch pre-commit hook (auto-installed by init.sh) ===
-# Blocks commits when axiarch protocol violations are detected.
-# Set AXIARCH_PRECOMMIT_SKIP=1 to bypass for one commit.
-if [[ -z "${AXIARCH_PRECOMMIT_SKIP:-}" ]] && [[ -x "axiarch-scripts/check-axiarch-health.sh" ]]; then
-  bash axiarch-scripts/check-axiarch-health.sh --quiet || {
-    echo ""
-    echo "❌ axiarch pre-commit hook blocked the commit."
-    echo "   Run: bash axiarch-scripts/check-axiarch-health.sh   (full output)"
-    echo "   Bypass once: AXIARCH_PRECOMMIT_SKIP=1 git commit ..."
-    exit 1
-  }
-fi
-# === axiarch pre-commit hook end ===
-PRECOMMIT
-)
-
-  if [[ -f "${hook_path}" ]]; then
-    if grep -qF "${marker}" "${hook_path}" 2>/dev/null; then
-      print_info "Pre-commit hook already contains axiarch block — skipping."
-      return 0
-    fi
-    # Append to existing pre-commit hook (do not overwrite user logic)
-    printf '%s\n' "${axiarch_block}" >> "${hook_path}"
-    chmod +x "${hook_path}"
-    print_success "Appended axiarch block to existing ${hook_path}"
-  else
-    # Create new pre-commit hook
-    cat > "${hook_path}" <<'NEWHOOK'
-#!/usr/bin/env bash
-set -uo pipefail
-NEWHOOK
-    printf '%s\n' "${axiarch_block}" >> "${hook_path}"
-    chmod +x "${hook_path}"
-    print_success "Created ${hook_path} with axiarch block"
-  fi
+try:
+    url, destination, value = sys.argv[1:]
+    if not re.fullmatch(r'[0-9]{1,3}', value) or not 1 <= int(value) <= 600:
+        raise ValueError('AXIARCH_DOWNLOAD_TIMEOUT_SECONDS must be 1-600')
+    seconds = int(value)
+    if not shutil.which('curl'):
+        raise ValueError('curl is required for HTTPS-only source downloads; use a reviewed local source otherwise')
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.axiarch-download-', dir=destination.parent) as temporary:
+        compressed = Path(temporary) / 'source.tar.gz'
+        with compressed.open('wb') as output:
+            subprocess.run(['curl', '--fail', '--silent', '--show-error', '--location',
+                            '--proto', '=https', '--proto-redir', '=https', '--max-redirs', '5',
+                            '--connect-timeout', str(min(seconds, 15)), '--max-time', str(seconds),
+                            '--max-filesize', str(64 * 1024 * 1024), url],
+                           stdout=output, check=True, timeout=seconds)
+        if compressed.stat().st_size > 64 * 1024 * 1024:
+            raise ValueError('compressed source archive exceeds 64 MiB')
+        deadline = time.monotonic() + seconds
+        archive_path = Path(temporary) / 'source.tar'
+        # Fully decompress before inspection, including the gzip checksum/trailer.
+        # This bounds large metadata as well as file bodies before tar parsing.
+        total = 0
+        with gzip.open(compressed, 'rb') as source, archive_path.open('wb') as output:
+            while True:
+                if time.monotonic() >= deadline:
+                    raise ValueError('source extraction timed out')
+                chunk = source.read(1024 * 1024)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > 512 * 1024 * 1024:
+                    raise ValueError('expanded source archive exceeds 512 MiB')
+                output.write(chunk)
+        seen, roots, count = set(), set(), 0
+        with tarfile.open(archive_path, 'r:') as archive:
+            for member in archive:
+                count += 1
+                if count > 10000 or time.monotonic() >= deadline:
+                    raise ValueError('source archive entry/time limit exceeded')
+                name = member.name
+                if (name.startswith('/') or '\\' in name
+                        or any(ord(c) < 32 or ord(c) == 127 for c in name)):
+                    raise ValueError('unsafe source archive path')
+                parts = name.rstrip('/').split('/')
+                if any(part in ('', '.', '..') for part in parts):
+                    raise ValueError('unsafe source archive path')
+                roots.add(parts[0])
+                if len(roots) != 1 or not (member.isdir() or member.isfile()):
+                    raise ValueError('source archive must have one root and only regular files/directories')
+                key = unicodedata.normalize('NFC', '/'.join(parts)).casefold()
+                if key in seen:
+                    raise ValueError('duplicate or case/Unicode-colliding source archive path')
+                seen.add(key)
+                if member.size < 0 or member.size > 64 * 1024 * 1024:
+                    raise ValueError('source archive member exceeds 64 MiB')
+        if not count:
+            raise ValueError('empty source archive')
+        destination.mkdir(mode=0o700)
+        subprocess.run(['tar', '-xf', str(archive_path), '-C', str(destination), '--strip-components=1'],
+                       check=True, timeout=max(0, deadline - time.monotonic()))
+except subprocess.TimeoutExpired:
+    print('Source preparation failed: download/extraction timed out; no installation applied.', file=sys.stderr)
+    sys.exit(1)
+except (OSError, ValueError, EOFError, tarfile.TarError, subprocess.CalledProcessError) as error:
+    print('Source preparation failed: ' + str(error), file=sys.stderr)
+    sys.exit(1)
+AXIARCH_DOWNLOAD_PY
 }
+# AXIARCH_DOWNLOAD_END
 
 # =============================================================================
 # STEP 4: Download or locate source files
@@ -331,14 +355,9 @@ prepare_source() {
   if $IS_REMOTE; then
     print_step "4" "Downloading Axiarch ${INSTALL_LABEL} from ${AXIARCH_REF}..."
     TMP_DIR="$(mktemp -d)"
-    trap 'rm -rf "$TMP_DIR"' EXIT
 
-    if command -v curl &>/dev/null; then
-      curl -sSL "$TARBALL_URL" | tar -xz -C "$TMP_DIR" --strip-components=1
-    else
-      wget -qO- "$TARBALL_URL" | tar -xz -C "$TMP_DIR" --strip-components=1
-    fi
-    SOURCE_DIR="$TMP_DIR"
+    SOURCE_DIR="$TMP_DIR/source"
+    download_source_archive "$TARBALL_URL" "$SOURCE_DIR"
     print_success "Downloaded to temporary directory."
   else
     print_step "4" "Using local Axiarch source: ${SOURCE_DIR}"
@@ -348,21 +367,10 @@ prepare_source() {
 set_project_native_language() {
   local protocol_file="$1"
   local language="$2"
-  local tmp_file="${protocol_file}.tmp.$$"
-
-  [[ -f "$protocol_file" ]] || return 1
-  grep -qE "^Project Native Language:" "$protocol_file" 2>/dev/null || return 2
-
-  awk -v language="$language" '
-    BEGIN { updated = 0 }
-    /^Project Native Language:/ && updated == 0 {
-      print "Project Native Language: " language
-      updated = 1
-      next
-    }
-    { print }
-  ' "$protocol_file" > "$tmp_file"
-  mv "$tmp_file" "$protocol_file"
+  local selected
+  [[ "$language" == "English" ]] && selected=en || selected=ja
+  python3 "$SOURCE_DIR/axiarch-scripts/axiarch_setup.py" configure-language \
+    --target "$(dirname "$protocol_file")" --lang "$selected"
 }
 
 # =============================================================================
@@ -371,36 +379,19 @@ set_project_native_language() {
 copy_files() {
   print_step "5" "Copying files to: ${TARGET_DIR}"
 
-  # Ensure target exists
+  # Target is an isolated staging directory; the real adopter is checked later.
   mkdir -p "$TARGET_DIR"
 
-  # === Required for current releases: AXIARCH.md canonical protocol ===
-  if [[ -f "$SOURCE_DIR/AXIARCH.md" ]]; then
-    cp "$SOURCE_DIR/AXIARCH.md" "$TARGET_DIR/AXIARCH.md"
-    print_info "Copied: AXIARCH.md"
+  # Source paths were preflighted; any copy failure stops before adopter writes.
+  cp "$SOURCE_DIR/AXIARCH.md" "$TARGET_DIR/AXIARCH.md"
+  print_info "Copied: AXIARCH.md"
+  cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
+  print_info "Copied: AGENTS.md"
+  if set_project_native_language "$TARGET_DIR/AXIARCH.md" "$PROJECT_NATIVE_LANGUAGE"; then
+    print_info "Configured: AXIARCH.md Project Native Language = ${PROJECT_NATIVE_LANGUAGE}"
   else
-    print_warn "AXIARCH.md not found in source ref ${AXIARCH_REF}; using legacy AGENTS.md entrypoint for this pinned release."
-  fi
-
-  # === Required: AGENTS.md adapter or legacy entrypoint ===
-  if [[ -f "$SOURCE_DIR/AGENTS.md" ]]; then
-    cp "$SOURCE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
-    print_info "Copied: AGENTS.md"
-  else
-    print_error "AGENTS.md not found in source ref ${AXIARCH_REF}; cannot continue."
-    exit 1
-  fi
-
-  if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
-    if set_project_native_language "$TARGET_DIR/AXIARCH.md" "$PROJECT_NATIVE_LANGUAGE"; then
-      print_info "Configured: AXIARCH.md Project Native Language = ${PROJECT_NATIVE_LANGUAGE}"
-    else
-      print_warn "Could not configure Project Native Language in AXIARCH.md; please verify manually."
-    fi
-  elif set_project_native_language "$TARGET_DIR/AGENTS.md" "$PROJECT_NATIVE_LANGUAGE"; then
-    print_info "Configured: AGENTS.md Project Native Language = ${PROJECT_NATIVE_LANGUAGE} (legacy pinned release)"
-  else
-    print_warn "Could not configure Project Native Language in AGENTS.md; please verify manually."
+    print_error "Cannot configure an unambiguous Project Native Language; no installation applied."
+    return 3
   fi
 
   # === Recommended: upgrade ownership manifest ===
@@ -443,7 +434,8 @@ copy_files() {
       print_info "Copied: axiarch-harness/ (ja + en)"
     fi
   else
-    print_warn "axiarch-harness/ not found in source ref ${AXIARCH_REF}; skipping for this legacy pinned release."
+    print_error "Required axiarch-harness/ disappeared during preparation; no installation applied."
+    return 3
   fi
 
   # === Optional: axiarch-prompts/ ===
@@ -462,8 +454,7 @@ copy_files() {
 
   # === Utility scripts (recommended; required when hook configs are installed) ===
   if [[ -d "$SOURCE_DIR/axiarch-scripts" ]]; then
-    mkdir -p "$TARGET_DIR/axiarch-scripts"
-    cp -R "$SOURCE_DIR/axiarch-scripts/." "$TARGET_DIR/axiarch-scripts/"
+    python3 -c 'import shutil,sys; shutil.copytree(sys.argv[1],sys.argv[2],ignore=shutil.ignore_patterns("__pycache__","*.pyc"))' "$SOURCE_DIR/axiarch-scripts" "$TARGET_DIR/axiarch-scripts"
     chmod +x "$TARGET_DIR/axiarch-scripts/"*.sh 2>/dev/null || true
     print_info "Copied: axiarch-scripts/ (hooks: axiarch-boot-reminder.sh, axiarch-protect-antifull.sh, axiarch-init-task-md.sh, axiarch-task-state.sh, axiarch-diff-guard.sh; upgrade: axiarch-upgrade.sh; prompts-install: axiarch-prompts-install.sh; diagnostics: check-axiarch-health.sh, check-git-config-clean.sh)"
   fi
@@ -472,30 +463,27 @@ copy_files() {
   if ${GEN_PROMPT_COMMANDS:-false} && [[ -x "$TARGET_DIR/axiarch-scripts/axiarch-prompts-install.sh" ]]; then
     ( cd "$TARGET_DIR" && bash axiarch-scripts/axiarch-prompts-install.sh --lang "${LANG_CODE}" ) \
       && print_info "Generated: .claude/commands/axiarch-* (Claude Code slash commands)" \
-      || print_warn "Slash command generation reported an issue; run 'bash axiarch-scripts/axiarch-prompts-install.sh' manually to inspect."
+      || { print_error "Slash command staging failed; no installation applied."; return 3; }
   fi
 
   # === Agent-specific setup: install selected agent's native config ===
   if $SETUP_ANTIGRAVITY; then
     mkdir -p "$TARGET_DIR/.agents/rules"
     cp "$SOURCE_DIR/.agents/rules/prompt_pointer.md" \
-       "$TARGET_DIR/.agents/rules/prompt_pointer.md" 2>/dev/null || \
-      print_warn ".agents/rules/prompt_pointer.md not found — skipping."
+       "$TARGET_DIR/.agents/rules/prompt_pointer.md"
     print_info "Copied: .agents/rules/prompt_pointer.md (Antigravity)"
   fi
 
   if $SETUP_CURSOR; then
     mkdir -p "$TARGET_DIR/.cursor/rules"
     cp "$SOURCE_DIR/.cursor/rules/axiarch.mdc" \
-       "$TARGET_DIR/.cursor/rules/axiarch.mdc" 2>/dev/null || \
-      print_warn ".cursor/rules/axiarch.mdc not found — skipping."
+       "$TARGET_DIR/.cursor/rules/axiarch.mdc"
     print_info "Copied: .cursor/rules/axiarch.mdc (Cursor)"
   fi
 
   if $SETUP_CLAUDE; then
     cp "$SOURCE_DIR/CLAUDE.md" \
-       "$TARGET_DIR/CLAUDE.md" 2>/dev/null || \
-      print_warn "CLAUDE.md not found — skipping."
+       "$TARGET_DIR/CLAUDE.md"
     print_info "Copied: CLAUDE.md (Claude Code)"
 
     # === Claude Code: hook reinforcement ===
@@ -505,14 +493,7 @@ copy_files() {
          "$TARGET_DIR/.claude/settings.json"
       print_info "Copied: .claude/settings.json (hook reinforcement)"
 
-      # === Validate JSON syntax (best-effort, jq optional) ===
-      if command -v jq &>/dev/null; then
-        if jq . "$TARGET_DIR/.claude/settings.json" >/dev/null 2>&1; then
-          print_info "Validated: .claude/settings.json (valid JSON)"
-        else
-          print_warn ".claude/settings.json — JSON parse failed; please verify before launching Claude Code"
-        fi
-      fi
+      # JSON syntax was validated during source preflight.
     fi
 
     # === Claude Code: optional memory persistence template ===
@@ -536,29 +517,20 @@ copy_files() {
          "$TARGET_DIR/.codex/hooks.json"
       print_info "Copied: .codex/hooks.json (hook reinforcement)"
 
-      # === Validate JSON syntax (best-effort, jq optional) ===
-      if command -v jq &>/dev/null; then
-        if jq . "$TARGET_DIR/.codex/hooks.json" >/dev/null 2>&1; then
-          print_info "Validated: .codex/hooks.json (valid JSON)"
-        else
-          print_warn ".codex/hooks.json — JSON parse failed; please verify before launching Codex"
-        fi
-      fi
+      # JSON syntax was validated during source preflight.
     fi
   fi
 
   if $SETUP_COPILOT; then
     mkdir -p "$TARGET_DIR/.github"
     cp "$SOURCE_DIR/.github/copilot-instructions.md" \
-       "$TARGET_DIR/.github/copilot-instructions.md" 2>/dev/null || \
-      print_warn ".github/copilot-instructions.md not found — skipping."
+       "$TARGET_DIR/.github/copilot-instructions.md"
     print_info "Copied: .github/copilot-instructions.md (GitHub Copilot)"
   fi
 
   if $SETUP_WINDSURF; then
     cp "$SOURCE_DIR/.windsurfrules" \
-       "$TARGET_DIR/.windsurfrules" 2>/dev/null || \
-      print_warn ".windsurfrules not found — skipping."
+       "$TARGET_DIR/.windsurfrules"
     print_info "Copied: .windsurfrules (Windsurf)"
   fi
 
@@ -587,65 +559,9 @@ copy_files() {
 }
 
 # =============================================================================
-# STEP 5.5: Post-copy script syntax validation
-# =============================================================================
-validate_distributed_scripts() {
-  [[ -d "$TARGET_DIR/axiarch-scripts" ]] || return 0
-
-  print_step "5.5" "Validating distributed shell scripts..."
-
-  local scripts=(
-    "axiarch-boot-reminder.sh"
-    "axiarch-protect-antifull.sh"
-    "axiarch-init-task-md.sh"
-    "axiarch-task-state.sh"
-    "axiarch-diff-guard.sh"
-    "axiarch-upgrade.sh"
-    "check-axiarch-health.sh"
-    "check-git-config-clean.sh"
-  )
-
-  local script_path
-  for script_name in "${scripts[@]}"; do
-    script_path="$TARGET_DIR/axiarch-scripts/${script_name}"
-    [[ -f "${script_path}" ]] || continue
-    if bash -n "${script_path}" >/dev/null 2>&1; then
-      print_info "Validated: axiarch-scripts/${script_name}"
-    else
-      print_warn "Syntax validation failed: axiarch-scripts/${script_name}"
-    fi
-  done
-}
-
-# =============================================================================
-# STEP 5.6: Install metadata
-# =============================================================================
-write_install_metadata() {
-  local meta_dir="${TARGET_DIR}/.axiarch"
-  local installed_at
-
-  mkdir -p "${meta_dir}"
-  installed_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  cat > "${meta_dir}/version.json" <<EOF
-{
-  "version": "${INSTALL_LABEL}",
-  "installerVersion": "${AXIARCH_VERSION}",
-  "sourceRef": "${AXIARCH_REF}",
-  "installedAt": "${installed_at}",
-  "agent": "${AGENT_LABEL}",
-  "language": "${LANG_CODE}"
-}
-EOF
-  print_info "Wrote: .axiarch/version.json"
-}
-
-# =============================================================================
 # STEP 6: Post-setup instructions
 # =============================================================================
 print_next_steps() {
-  local REMOVE_UNUSED_LANG="ja"
-  if [[ "$LANG_CODE" == "ja" ]]; then REMOVE_UNUSED_LANG="en"; fi
-
   echo ""
   echo -e "${BOLD}${GREEN}🎉 Axiarch setup complete!${RESET}"
   echo ""
@@ -653,8 +569,6 @@ print_next_steps() {
   echo ""
   if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
     echo -e "  ${CYAN}1.${RESET} ${BOLD}AXIARCH.md${RESET} Project Native Language is set to ${BOLD}${PROJECT_NATIVE_LANGUAGE}${RESET}"
-  else
-    echo -e "  ${CYAN}1.${RESET} ${BOLD}AGENTS.md${RESET} Project Native Language is set to ${BOLD}${PROJECT_NATIVE_LANGUAGE}${RESET} (legacy pinned release)"
   fi
 
   local step=2
@@ -664,8 +578,6 @@ print_next_steps() {
   elif [[ "$AGENT_LABEL" == "OpenAI Codex" ]]; then
     if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
       echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md → AXIARCH.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured"
-    else
-      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured (legacy pinned release)"
     fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Cursor" ]]; then
@@ -674,8 +586,6 @@ print_next_steps() {
   elif [[ "$AGENT_LABEL" == "Claude Code" ]]; then
     if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
       echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md → AXIARCH.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured"
-    else
-      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured (legacy pinned release)"
     fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "GitHub Copilot" ]]; then
@@ -693,7 +603,7 @@ print_next_steps() {
   if [[ "$SETUP_CODEX" == "true" || "$SETUP_CLAUDE" == "true" ]]; then
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended for Codex / Claude Code):${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
-    echo -e "         (16-stage diagnostic: 4-hook wiring, AI adherence, crystallization, AXIARCH physical-block, diff guard, more)"
+    echo -e "         (16-stage diagnostic: 4-hook wiring, record consistency, crystallization, hook configuration, diff guard, more)"
   else
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Optional diagnostic:${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
@@ -706,6 +616,7 @@ print_next_steps() {
   echo -e "         (manifest-based upgrade preview: safe groups selected, project Blueprint state preserved)"
   step=$((step + 1))
   echo ""
+  echo "  Diagnostics check files and wiring, not AI understanding or agent runtime behavior."
   echo -e "  ${CYAN}${step}.${RESET} Start developing — the Constitution is now available to your AI agent."
   echo ""
   echo -e "  ${CYAN}Docs:${RESET}  ${REPO_URL}"
@@ -714,10 +625,73 @@ print_next_steps() {
   echo ""
 }
 
+stage_and_install() {
+  local actual_target="$TARGET_DIR"
+  local helper="$SOURCE_DIR/axiarch-scripts/axiarch_setup.py"
+  if [[ ! -f "$helper" ]]; then
+    print_error "Selected source lacks setup helpers; use the installer shipped with that source. No files applied."
+    return 2
+  fi
+  local required=(AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-rules axiarch-harness axiarch-scripts)
+  required+=(axiarch-scripts/check-axiarch-health.sh axiarch-scripts/axiarch_state.py
+    axiarch-scripts/axiarch_upgrade.py axiarch-scripts/axiarch_inspect.py axiarch-scripts/axiarch_setup.py
+    axiarch-scripts/axiarch_hook.py axiarch-scripts/axiarch_diff.py)
+  local lang
+  for lang in ja en; do
+    if $KEEP_BOTH_LANGS || [[ "$lang" == "$LANG_CODE" ]]; then
+      required+=("axiarch-rules/$lang/LOADING_PROTOCOL.md" "axiarch-harness/$lang/TASK_STATE_PROTOCOL.md")
+      $COPY_PROMPTS && required+=("axiarch-prompts/$lang")
+    fi
+  done
+  $SETUP_CODEX && required+=(.codex/hooks.json)
+  $SETUP_CLAUDE && required+=(CLAUDE.md .claude/settings.json)
+  if $SETUP_CLAUDE && [[ -e "$SOURCE_DIR/.claude/memory/MEMORY.md" || -L "$SOURCE_DIR/.claude/memory/MEMORY.md" ]]; then
+    required+=(.claude/memory/MEMORY.md)
+  fi
+  $SETUP_ANTIGRAVITY && required+=(.agents/rules/prompt_pointer.md)
+  $SETUP_CURSOR && required+=(.cursor/rules/axiarch.mdc)
+  $SETUP_COPILOT && required+=(.github/copilot-instructions.md)
+  $SETUP_WINDSURF && required+=(.windsurfrules)
+  $COPY_PROMPTS && required+=(axiarch-prompts)
+  python3 "$helper" check-source --source "$SOURCE_DIR" --paths "${required[@]}"
+  # Use the actual source version. A local checkout is not proof of a remote tag.
+  INSTALL_LABEL="$(python3 "$SOURCE_DIR/axiarch-scripts/axiarch_upgrade.py" manifest --source "$SOURCE_DIR" --format version)"
+  STAGE_DIR="$(mktemp -d)"
+  TARGET_DIR="$STAGE_DIR"
+  print_info "Preparing files in isolated staging; no adopter files have been copied yet."
+  copy_files
+  TARGET_DIR="$actual_target"
+  local languages="both" source_ref="$AXIARCH_REF"
+  $KEEP_BOTH_LANGS || languages="$LANG_CODE"
+  $IS_REMOTE || source_ref="local-source"
+  local args=(--target "$TARGET_DIR" --stage "$STAGE_DIR" --version "$INSTALL_LABEL"
+    --source-ref "$source_ref" --agent "$AGENT_ID" --lang "$LANG_CODE" --languages "$languages")
+  $COPY_PROMPTS && args+=(--with-prompts)
+  $INSTALL_PRECOMMIT && args+=(--precommit)
+  local rc=0
+  python3 "$helper" install "${args[@]}" || rc=$?
+  if [[ "$rc" -ne 0 ]]; then
+    print_error "Setup not confirmed (exit=$rc). Existing files were preserved; inspect any .axiarch/install-result.json and install-health.log."
+    return "$rc"
+  fi
+}
+
 # =============================================================================
 # Main
 # =============================================================================
 main() {
+  if [[ "$AXIARCH_REF" =~ [[:cntrl:]] || "$TARGET_DIR" =~ [[:cntrl:]] ]]; then
+    print_error 'Control characters are not supported in the source reference or target path.'
+    return 2
+  fi
+  if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo 'Usage: bash init.sh [target-directory] (fresh setup; existing projects use axiarch-scripts/axiarch-upgrade.sh)'
+    return 0
+  fi
+  if [[ $# -gt 1 || "${1:-}" == -* ]]; then
+    print_error 'Expected one target directory. For upgrade previews use axiarch-scripts/axiarch-upgrade.sh --dry-run.'
+    return 2
+  fi
   print_header
   check_prerequisites
   check_existing_install
@@ -727,10 +701,7 @@ main() {
   select_prompts
   select_precommit
   prepare_source
-  copy_files
-  validate_distributed_scripts
-  write_install_metadata
-  install_precommit_hook
+  stage_and_install
   print_next_steps
 }
 

@@ -8,13 +8,13 @@
 
 ## 🚨 初動プロトコル（BOOT SEQUENCE PROTOCOL）🚨
 
-会話の開始時（新規チャット、またはコンテキストリセット後）は、**必ず以下の3原則に従い、ルールの実際のロードが完了するまで作業を開始してはならない。**
+会話開始時やコンテキストリセット後は、修正前に次の原則に従う。対象ルールを選ぶための読取・探索は先に行ってよい。小さな作業には下記のH0/H1例外を適用する。
 
-1. **Stop & Wait**: いきなり修正や監査を始めないこと。ルールを先に読み込み、理解してから行動する。
+1. **Stop & Wait**: 修正や監査の判定を出す前に、関連するルールを読む。構成探索や初期観察を禁止するものではない。
 
-2. **No Hallucination（幻覚の禁止）**: ユーザーから明確なコードやファイル構成が提示される**前に**、推測で勝手に「ロード済みルール一覧」「プロジェクト構成」「技術スタック概要」などを生成して出力することを**固く禁ずる**。実際にファイルを読み込む前のいかなる「事前知識の提示」もハルシネーション（幻覚）と見なす。
+2. No Hallucination（読込の捏造禁止）: AIが利用可能なツールで自らファイルと構成を確認する。ユーザーによる再提示を待つ必要はない。読込ツールが完了し、返された対象範囲を確認する前に「ロード済み」と出力しない。省略された出力や検索結果を全文読了と扱わない。
 
-3. **Exact Match Only**: 余計なテキストや独自の解釈は一切追加せず、実際にツールで読み込んだ内容「のみ」を根拠として用いること。
+3. 根拠と判断の区別: 実ファイル、ツール結果、ユーザーの明示内容を事実の根拠とする。分析・推論は根拠と分けて示してよく、架空のファイル・構成・実行結果を確認済みとして記載しない。
 
 ---
 
@@ -24,8 +24,8 @@
 
 | フック / Hook | 発火タイミング | 役割 | 外出しスクリプト |
 |:--|:--|:--|:--|
-| `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、`AXIARCH.md` reminder を注入。既存内容は `axiarch-task-state.sh` により `.axiarch/process-doc-history/` へ退避 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
-| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（事実陳述 + 動的違反検出）注入で `AXIARCH.md` / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
+| `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、`AXIARCH.md` reminder を注入。`axiarch-task-state.sh` がセッションIDに対応した専用文書を用意し、既存ルート文書を保持 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
+| `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（定型補足 + 見直し候補の検出）注入で `AXIARCH.md` / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
 | `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
 | `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
 
@@ -33,7 +33,11 @@
 
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
-> Antigravity / Cursor / Copilot / Windsurf は固有のロード機構またはポインター機構（例: Antigravity は `.agents/rules/` 自動読み込み）を持つため、Claude Code / Codex 用の本フック群は標準必須ではない。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みである。Antigravity を最初の実証対象とし、Codex・Claude Code も本リポジトリ自体の開発を含む実運用で継続使用している。ただし、全環境での動作保証まではしない。Cursor / Copilot / Windsurf は拡張ポインターのみで動作保証しない。
+起動・補足の入力解析と出力は `axiarch-scripts/axiarch_hook.py` を使う。不正・曖昧なセッション入力から作業記録を作らず、未解決として警告する。補足のTTLキャッシュは表示頻度だけを制御し、異常時は完全表示へ戻す。ファイルの存在、キャッシュ時刻、補足の表示は実ロードや完了の証明ではない。詳細は `axiarch-scripts/README.md`。
+
+差分フックは `axiarch-scripts/axiarch_diff.py` で初回コミット前も計測し、失敗を `DIFF GUARD UNASSESSED` と区別する。warnは通知、blockは呼出し側への停止要求であり、編集済み内容の取消しや以降の全操作の遮断は保証しない。healthは配線・記録の構造を検査し、フックの実際の発火やAIの意味理解を証明しない。
+
+> Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 
 ### 🧭 ネイティブタスク・プラン状態同期（v1.11.0+）
 
@@ -41,15 +45,15 @@
 
 | 層 | 責務 |
 |:--|:--|
-| Markdown証跡 | ロード履歴、計画、変更確認を永続的に残す。新規セッション時は `axiarch-task-state.sh` が過去内容を `.axiarch/process-doc-history/` へ退避し、`Project Native Language` に合わせた現在タスク用テンプレートへ更新する |
+| Markdown証跡 | ロード履歴、計画、変更確認を永続的に残す。`axiarch-task-state.sh` はセッション別文書を `Project Native Language` で生成し、同一セッションの再開では保持する |
 | ネイティブ状態 | エージェントUIのタスク・プラン表示。Codexでは `update_plan`、Claude Codeでは `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を使って、作業中に逐次更新する |
 
 運用原則:
 
-1. Codexでは複数ステップの作業を開始した時点で `update_plan` を呼び、作業中は `in_progress` を1件だけ維持する。
+1. Codexでは利用可能な場合、複数ステップの作業を開始した時点で `update_plan` を呼び、作業中は `in_progress` を1件だけ維持する。
 2. Claude CodeではTask toolsが使える場合、`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を優先する。古いSDKや非interactive実行でTask toolsがない場合のみ `TodoWrite` にフォールバックする。
 3. Markdownファイルを書いたことをもって、ネイティブUIが更新されたと表現してはならない。ネイティブUI更新は該当ツール呼び出しが行われた場合のみ完了とみなす。
-4. `AXIARCH_PROCESS_DOC_MODE=append` が明示されていない限り、3ファイルは現在タスク用として扱い、過去内容の無制限追記を避ける。テンプレート言語は既定で `AXIARCH.md` の `Project Native Language` から判定し、旧導入先では `AGENTS.md` をフォールバックとして参照する。必要な場合だけ `AXIARCH_PROCESS_DOC_LANG=ja|en` で明示する。
+4. `AXIARCH_PROCESS_DOC_MODE=current|append` はどちらも既存記録を保持する互換入力であり、記録先と再開はタスクID・セッションIDで区別する。3文書へ無関係な別タスクを追記しない。テンプレート言語は既定で `AXIARCH.md` の `Project Native Language` から判定し、旧導入先では `AGENTS.md` をフォールバックとして参照する。必要な場合だけ `AXIARCH_PROCESS_DOC_LANG=ja|en` で明示する。
 
 ### 🔍 フック診断
 
@@ -84,7 +88,7 @@
 | 階級 | 対象 | 性質 |
 |:------------|:-------------|:---------|
 | **Class S（Universal）** | `axiarch-rules/{lang}/universal/` | プロジェクトを超えた普遍的ルール。Read-Only。 |
-| **Class A（Blueprint）** | `axiarch-rules/{lang}/blueprint/` | プロジェクト固有の仕様・設計・教訓。更新可能。**基本フォルダ構成は「初期フォルダ」であり、閉じた集合ではない。** 既存フォルダに分類できない新ドメインがある場合は、ユーザー承認のうえで新規フォルダを追加できる（AIは提案までで、独断作成は禁止）。その前提のうえで、初期フォルダは次の8つ: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリにロード分類される：① **Project Overview**（`core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ファイル。初期フォルダ対応表を優先し、必要時はユーザー承認済みフォルダも含めて自律判断）、③ **Domain Rules**（各ドメインのルールファイル）、④ **Templates**（`core/` 等のテンプレートファイル） |
+| **Class A（Blueprint）** | `axiarch-rules/{lang}/blueprint/` | プロジェクト固有の仕様・設計・教訓。更新可能。**基本フォルダ構成は「初期フォルダ」であり、閉じた集合ではない。** 既存フォルダに分類できない新ドメインがある場合は、ユーザー承認のうえで新規フォルダを追加できる（AIは提案までで、独断作成は禁止）。その前提のうえで、初期フォルダは次の8つ: **`core/`**（概要・教訓インデックス・テンプレート）・`security/`（セキュリティ）・`engineering/`（エンジニアリング）・`design/`（デザイン）・`quality/`（QA・テスト）・`operations/`（運用）・`product/`（ビジネス）・`ai/`（AI）。内容に応じて以下の4カテゴリにロード分類される：① **Project Overview**（`axiarch-rules/{lang}/blueprint/core/000_project_overview.md`）、② **Lessons Index**（`core/010_project_lessons_log.md` + 各ドメインフォルダ内の `{NNN}_{topic}.md` 形式の昇華ファイル。初期フォルダ対応表を優先し、必要時はユーザー承認済みフォルダも含めて自律判断）、③ **Domain Rules**（各ドメインのルールファイル）、④ **Templates**（`core/` 等のテンプレートファイル） |
 
 Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリから、ロードすべきファイルを列挙せよ。
 
@@ -102,9 +106,11 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 | `i18n` | `product/` (国際化・翻訳ルールを参照) | `product/` |
 | `finops` | `operations/` (FinOps・クラウドコストルールを参照) | `operations/` |
 | `testing` | `quality/` | `quality/` |
-| `other` | —（タスク内容に応じて自律判断） | `core/`（Project Overview + Lessons を必ずロード） |
+| `other` | —（タスク内容に応じて自律判断） | `core/`（H2以上はProject Overviewと関連するLessons。H0/H1は必要範囲のみ） |
 
 ---
+
+参照パスの解決: Universal文書内の `domain/NNN_topic.md` は同じ言語のUniversalルート、Blueprint文書内では同じ言語のBlueprintルートを基準とする。層をまたぐ参照は `axiarch-rules/{lang}/blueprint/` などリポジトリ相対の完全なパスで示す。索引や表が別の基準フォルダを明示している場合はその基準を使う。例示・テンプレートは実在や必須導入を意味しない。ロード前にはファイルの実在を確認し、実読込の記録には解決後のパスを残す。
 
 ## Step 3: ファイル読み込み
 
@@ -113,7 +119,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 ### 🚨【厳守命令】手抜き（サボり）と幻覚の絶対禁止 🚨
 
 - INDEX.mdの要約や概要だけで「読んだ」と見なすことは**一切禁止**する。
-- 「ファイルを直接開く」とは、`view_file`等のツールでファイルの内容を**実際に取得完了すること**を意味する。
+- 「ファイルを直接開く」とは、利用可能なファイル読込ツール等のツールでファイルの内容を**実際に取得完了すること**を意味する。
 - **🚨 ロード完了主張の禁止（ハルシネーション対策）**: ツールがファイル内容を返し、AIがそれを完全に読み終える**前**に、「把握しました」「読み込み完了しました」「ロード済みです」など、実ロード完了を示すテキストをユーザーへ先行して出力することは**ハルシネーション（幻覚）であり、いかなる場合も絶対禁止**とする。進行状況を述べる場合も、実際に読んだ内容と一致する範囲に限定し、ロード済み証跡として扱ってはならない。
 - 上記は自律ロード・ユーザー指示によるロードを問わず、**全てのルールファイル参照時に強制適用**される。
 
@@ -133,7 +139,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 ## Step 4: 自己検証（省略不可）
 
-**ルールロード完了後、以下の自己検証チェックリストをtask.mdに記録せよ。1つでも「該当するのにロードしていない」項目があれば、作業を中断して追加ロードせよ。**
+H2以上は実際に読んだパスと範囲をセッション固有のtask.mdに記録する。H0は永続記録不要、H1は短い記録で足りる。適用ルールが未読なら、依存する修正や判定の前に読む。
 
 ```markdown
 ## ロード自己検証
@@ -147,39 +153,40 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 ```
 
 > **ロード完了の定義**: 以下の条件の全てを満たすこと。
-> 1. `blueprint/core/000_project_overview.md` が `view_file` で直接開かれていること（タスクタイプ `other` または**初回ロード**時は必須。他タスクタイプでもロードを推奨）。**「初回ロード」とは、会話開始後（新規チャット/コンテキストリセット後）の最初のルールロードを指す。**
-> 2. Step 1 で特定したタスクタイプに対応するドメインルールファイルが `view_file` で直接開かれていること。
-> 3. ロードしたファイルのリストが task.md に記録されていること。
+> 1. `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` を直接開く（H2以上で、タスクタイプ `other` または初回の適用ルール読込時は必須）。H0/H1は判断に必要な場合のみ読む。引き継ぎ済みの実読込内容は下記の継続条件に従って利用する。
+> 2. Step 1 で特定したタスクタイプに対応するドメインルールファイルが 利用可能なファイル読込ツール で直接開かれていること。
+> 3. H2以上では実際に読んだパスと範囲をセッション固有のtask.mdへ記録する。H0/H1では下記の軽量例外を満たすこと。
 >
 > ①②③ のいずれかでも欠けていれば、作業を中断して追加ロードすること。
-> ※ `000_project_overview.md` がテンプレート初期状態の場合（`[Project Name]` が未記入）、ロードは完了とみなすが、ユーザーに設定を促すこと。
+> ※ プロジェクト概要がテンプレート初期状態なら「テンプレートを読んだ」と記録し、そこにある架空のスタックを現プロジェクトの事実としない。設定可能な事実はAIが調査し、作業に不可欠な人間の意図だけを確認する。Axiarch本体の監査では配布例であることを明記する。
 
 ### Session 跨ぎ時の Re-load 判定基準（v1.6.0+）
 
-「全文 load = サボり禁止」の原則と「context budget の現実的制約」のトレードオフを明示的に解消するための判定基準。
+実ファイルを読む義務と、必要な節だけを選択する最小ロード原則を両立する基準。全文ロードを意味しない。
 
 | 状況 | Re-load 範囲 | 根拠 |
 |:--|:--|:--|
-| **新規 session（新規チャット/コンテキストリセット直後）** | full BOOT SEQUENCE 必須（Step 1-4 すべて）+ `task.md` ロード履歴の検証 | memory 継承不能、AXIARCH.md / LOADING_PROTOCOL のロード履歴記録義務 |
-| **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクタイプに対応する追加ドメインファイルのみ load。既 load 済の Universal Rules / Blueprint は再 load 不要 | `axiarch-rules/{lang}/INDEX.md` → タスクタイプ → 対応フォルダ の関係は不変 |
-| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + 🚨 [VIOLATION-D] を発火 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias リスク低減 |
-| **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴と現在の会話コンテキストを照合し、実ロード済みと判断できないファイルは再 load。ただし `[AXIARCH BOOT]` reminder の TTL 期限切れ時（v1.6.0+ default 30 分）は full re-verification | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
+| **新規 session（新規チャット/コンテキストリセット直後）** | 適用範囲のStep 1–4を実施（H0/H1例外と下記の継続条件を適用） | 引き継ぎを仮定せず、利用可能な内容と実読込証跡を照合する |
+| **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクに必要な追加ファイルをload。内容が変わっていない実読込済み範囲は再load不要 | 現在のINDEXと実フォルダから追加の適用範囲を確認する |
+| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + [LOAD REVIEW] を表示。追加読込の要否は実際のタスク範囲で判断 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias リスク低減 |
+| **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴と現在の会話コンテキストを照合し、実ロード済みと判断できないファイルは再 load。TTLは補足の表示頻度を制御するだけであり、期限切れだけで読込済み範囲を無効にしない | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
+| 参照した規則・Blueprint・索引が変更された | 判断に関わる変更箇所と参照先を再読込。タスクタイプが同じでも古い内容で続行しない | 記録した読込時点と現在の内容の差を確認する |
 
 > **判定の運用原則**:
 > - **task.md のロード履歴はロード候補と証跡の Single Source of Truth として参照**する。ただし、履歴に file 名があるだけで現在のAIが内容を把握済みとは見なさない。現在コンテキスト上で実ロード済みと説明できない場合は再 load 必須。
 > - 「session 跨ぎ後の memory 継承による省略」は、同一作業継続でロード済み証跡と現在コンテキストの対応が明確な場合に限り許容する。**省略した事実と根拠を task.md に明示的に記録**する（例: 「Continued from prior session; AXIARCH.md / axiarch-rules/{lang}/INDEX.md re-verification skipped because loaded content remains available in current context per LOADING_PROTOCOL Step 4 session-continuation rule」）。
-> - **疑わしい時は full re-load**。context budget の節約より、ハルシネーションリスク低減が優先（AXIARCH.md / LOADING_PROTOCOL のBOOT SEQUENCE）。
+> - **疑わしい時は該当する範囲を再読込**。context budget の節約より、ハルシネーションリスク低減が優先（AXIARCH.md / LOADING_PROTOCOL のBOOT SEQUENCE）。
 
 > **本基準が解決する問題（v1.6.0 改善背景）**:
-> 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により緩和する。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、token cost を約 87% 削減しつつ遵守率を維持しやすくする。
+> 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により緩和する。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、重複ロードの削減を図る。削減率や遵守率を保証するものではない。
 
 > **v1.8.0 改善 — Check D Task Boundary Detection**:
-> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断してサボる」問題が判明（confirmation bias）。v1.8.0 で `axiarch-boot-reminder.sh` に Check D を追加：
+> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断して追加確認を省略する」問題が判明（confirmation bias）。v1.8.0 で `axiarch-boot-reminder.sh` に Check D を追加：
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
 > 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
 > 3. **AXIARCH現在タスク必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
-> 4. **差異検出時**: `🚨 [VIOLATION-D]` flag + **TTL bypass**（短縮版を抑制し full reminder を再発火）
+> 4. **差異検出時**: `[LOAD REVIEW]` flag + **TTL bypass**（短縮版を抑制し full reminder を再発火）
 >
 > これにより AI の「タスクタイプ不変」自己判断だけに依存せず、**hook 側で task boundary 候補を検出**して rule 再 load を促す構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。
 >
@@ -187,9 +194,17 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 ---
 
+## ゴール・現在値のロードと検査
+
+H0/L0の読み取りのみではStep 4のtask.md永続記録を必須としない。H1/L1は短い記録で足りる。
+
+変更前に `universal/core/300_goal_and_current_state.md` を直接ロードする。H0（旧L0）の読み取りは目的と参照対象の確認のみ、H1は短い記録、H2以上は `axiarch-harness/ja/TASK_STATE_PROTOCOL.md` に従う。補足hookのキーワード差分は分類の見直し候補であり、違反確定ではない。AIが調べられる事実は自ら確認する。
+
+`AXIARCH_PROCESS_DOC_MODE=current|append` は既存文書を保持する互換入力。新規・再開はタスクIDとセッションIDで区別する。health既定の構造検査、`--phase readiness`、`--phase completion` を使い分け、未達成のdraftを完了として扱わない。
+
 ## Step 5: 作業開始
 
-**上記Step 1–4が完了するまで、コードの修正や分析を開始してはならない。**
+必要な実ファイル・節の読込と自己検証が済んでから修正へ進む。構成探索や読込対象の判定はその前に行ってよい。H0/H1の軽量例外は上記のとおりで、利用不能な任意ツールの導入待ちを着手条件にしない。
 
 ---
 
@@ -201,7 +216,7 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 
 1. **タスク分類**: `security` + `architecture`
 2. **INDEX.md読み込み** → Security & Privacy カテゴリ + Architecture カテゴリを特定
-3. **セキュリティルールファイルを直接開く** → 目次から §12 (RLS) と §24 (DBセキュリティ) を特定 → ロード
+3. `axiarch-rules/ja/universal/security/000_security_privacy.md` を直接開く → 現在の目次からRLSとDBセキュリティに関する節を特定 → 該当範囲をロード
 4. **アーキテクチャルールファイルを直接開く** → RLS関連セクションをロード
 5. **task.md にロード自己検証を記録**
 6. **作業開始**
@@ -225,5 +240,5 @@ Step 1で特定したタスクタイプに対応するINDEX.mdのカテゴリか
 3. 「把握しました。RLSポリシーを確認します」
    ← ⚠️ セキュリティルールファイルを開いていない！
 4. 自分の知識だけで修正を開始
-   ← ❌ サボり確定。Step 3–4を完全にスキップしている。
+   ← ❌ 必要な読込が未確認。Step 3–4を完全にスキップしている。
 ```

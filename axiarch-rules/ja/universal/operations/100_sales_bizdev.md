@@ -49,7 +49,7 @@
 - [Part XXVII. ポストセールス収益最適化](#part-xxvii-ポストセールス収益最適化)
 - [Part XXVIII. 営業コンプライアンス & データ倫理](#part-xxviii-営業コンプライアンス--データ倫理)
 - [Part XXIX. 成熟度モデル（5段階）](#part-xxix-成熟度モデル5段階)
-- [Part XXX. Appendix: 逆引き索引・アンチパターン・クロスリファレンス](#part-xxx-appendix-逆引き索引アンチパターンクロスリファレンス)
+- [Part XXXIII. Appendix: 逆引き索引・アンチパターン・クロスリファレンス](#part-xxxiii-appendix-逆引き索引アンチパターンクロスリファレンス)
 
 ---
 

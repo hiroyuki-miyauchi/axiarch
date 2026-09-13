@@ -781,7 +781,7 @@
 ### 14.1. App Store Connect ローカライズ
 
 - **対応言語**: 40+ 言語、Title / Subtitle / Description / Keywords / Screenshots を言語別に登録。
-- **Required**: ターゲット市場（日本・米国・EU・中国・東南アジア）は Day 1 から完全ローカライズ。
+- **Required**: 実際の配信対象市場・必須言語・審査条件に基づき、初日から必要な表示と主要操作を提供し検証する。例示した市場すべてへの展開を必須としない。
 - **Anti-Pattern**: 機械翻訳を貼るだけ → リジェクト要因（Apple Reviewer がチェックする）
 
 ### 14.2. Google Play ローカライズ
