@@ -4,6 +4,8 @@
 > This protocol is the detailed lesson-crystallization procedure loaded from `AXIARCH.md`.
 > The AI MUST execute this autonomously when recording lessons.
 
+Path bases: category shorthand such as `core/` is relative to `axiarch-rules/en/blueprint/`; `universal/` and `blueprint/` are relative to `axiarch-rules/en/`. Record resolved paths and make Markdown links relative to the record file. Example numbered filenames do not imply existing or mandatory files.
+
 ---
 
 ## 📑 Table of Contents
@@ -109,7 +111,7 @@ Determine the lesson's domain and identify the corresponding Blueprint folder.
 | Operations | `operations/` | `operations/{NNN}_operations_rules.md` |
 | Core & Governance | `core/` | `core/{NNN}_governance_rules.md` (`010` is fixed as the index. `020_` is only a first-candidate example; choose after checking unused numbers in the target folder.) |
 
-> **How to determine `{NNN}` (Contextual Numbering)**: The AI checks existing files in the target folder, then numbers by a simple guideline: (1) **recommended style** = gaps of about 5–10 near related topics, leaving room (e.g., `010`, `020`); (2) **in practice** = if no gap is available, use an interstitial number (e.g., `011`, `015`). Either is valid as long as it is an unused number from `000`–`999` in the target folder. Prioritize avoiding exhaustion (i.e., simply use an available number) over strictly enforcing fixed gaps. This matches the Sparse Numbering style recommendation in `universal/core/100_governance.md` §8.1.
+> **How to determine `{NNN}` (Contextual Numbering)**: The AI checks existing files in the target folder, then numbers by a simple guideline: (1) **recommended style** = gaps of about 5–10 near related topics, leaving room (e.g., `010`, `020`); (2) **in practice** = if no gap is available, use an interstitial number (e.g., `011`, `015`). Either is valid as long as it is an unused number from `000`–`999` in the target folder. Prioritize avoiding exhaustion (i.e., simply use an available number) over strictly enforcing fixed gaps. This matches the Sparse Numbering style recommendation in `axiarch-rules/en/universal/core/100_governance.md` §8.1.
 > All files including crystallized files may use any available number from `000`–`999`. **Do not include `lessons_` in the file name**. Use only topic names describing the content.
 
 > **Folder Extensibility**: The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first, and proposals must clearly distinguish actual folder names from examples.

@@ -262,7 +262,7 @@ Use D1–D5 for distance (formerly distance L1–L5), M1–M5 for maturity (form
 -   **Rule 300.7.1 (Consolidation)**: When multiple agents or multiple people work concurrently, the current state must be **consolidated in a single referenceable location** (MUST). The internal state of an individual session is invisible to others and therefore does not constitute shared state.
 -   **Rule 300.7.2 (Check others' work before starting)**: Before starting, confirm that **no one else has work in progress in the same area** (MUST). What to check includes in-progress tasks, unmerged changes, and proposals awaiting review.
 -   **Rule 300.7.3 (Declare boundary-crossing changes in advance)**: When making changes beyond your own scope — to shared assets, common foundations, or another owner's area — **declare it before starting** (MUST).
--   **Law**: the most expensive accident in concurrent work is not the collision itself, but **both parties finishing without noticing the collision**. One side is then always thrown away.
+-   **Law**: the most expensive accident in concurrent work is not the collision itself, but **both parties finishing without noticing the collision**. Some work may need reconciliation or discarding.
 -   **Rule 300.7.4 (Current state at handover)**: When handing work to someone else, pass the four states (§4.1) and the assumptions made, stated explicitly (MUST). "Over to you" is not a handover.
 
 ---
@@ -291,7 +291,7 @@ Use D1–D5 for distance (formerly distance L1–L5), M1–M5 for maturity (form
 | 9 | Rounding partial achievement up to full completion | Remaining work is not handed on and fails downstream |
 | 10 | Not recording discarded options | The same option is re-proposed and the same debate repeats |
 | 11 | Omitting non-goals and mixing in "while I am here" changes | Review load and regression risk rise together |
-| 12 | Starting without checking for concurrent work | Both parties finish and one side is necessarily thrown away |
+| 12 | Starting without checking for concurrent work | Both parties finish and some work may need reconciliation or discarding |
 | 13 | Not updating the current state when pausing | The next session is forced into a full re-investigation |
 | 14 | Designing state that can live only in one product | The discipline collapses wherever that product is unavailable |
 | 15 | Asking the requester what could have been looked up | Constant confirmation burdens the requester and hollows out the check |
@@ -307,7 +307,7 @@ Use D1–D5 for distance (formerly distance L1–L5), M1–M5 for maturity (form
 | **M1: Verbal** | Work is handed over only by speech or chat | No durable record of the current state exists |
 | **M2: Recorded** | Goal and current state survive as documents | But completion criteria are vague and freshness is never checked |
 | **M3: Verifiable** | Criteria are verifiable and the four states are held | Pre-start duplication checks and restatement are in operation |
-| **M4: Synchronized** | Shared state is consolidated and concurrent work does not collide | Freshness reconciliation is habitual and discards are recorded |
+| **M4: Synchronized** | Shared state is consolidated, with concurrent conflicts detected and reconciled | Freshness reconciliation is habitual and discards are recorded |
 | **M5: Scaled** | Requirements rise automatically with autonomy distance | Distance estimation and re-evaluation function as a mechanism |
 
 ---

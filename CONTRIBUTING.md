@@ -71,18 +71,19 @@ Axiarchの全ドキュメントは日英バイリンガルです。ドキュメ�
 
 過去事例（v1.5.4 中間 commit）: 開発側で得た「hook format 変更時の運用ルール」を `core/010` に結晶化追加した結果、採用先 noise になる問題が発生。v1.5.5 で revert し、本ガイドを明文化した。
 
-#### 採用先で削除推奨されるファイル（README の必須ファイル表参照）
+#### 本体管理文書と配布時の表示
 
-- `CHANGELOG.md` / `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md` / `LICENSE` / `NOTICE`
-- これらは axiarch 本体の repository 管理用であり、採用先では不要。
+- 本体の `CHANGELOG.md` / `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md` は導入には任意。採用先の同名ファイルを削除・置換しない。
+- Axiarchの `LICENSE` / `NOTICE` は `axiarch-rules/LICENSE` / `axiarch-rules/NOTICE` に同内容を同梱する。ルートの正本を改定した場合は配布用コピーも同期する。採用先のルートのライセンス・表示は保持する。
+- [Apache License 2.0 §4](https://www.apache.org/licenses/LICENSE-2.0) に従い、再配布時はライセンスと該当する帰属表示を保持し、変更したファイルの変更を明示する。これらの表示を「不要」として一律削除しない。
 
 #### 採用先で書き換えられる template（axiarch 本体では placeholder 形式を保つ）
 
 - `AXIARCH.md` の Project Native Language 設定行
 - `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` の sample 値
-- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
+- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md`
 
-axiarch 本体では実値ではなく **template 形式** を維持する。`init.sh` が採用先で動的に書き換える設計。
+axiarch 本体では実値ではなく **template 形式** を維持する。`init.sh` が設定するのはProject Native Languageなどの導入設定であり、架空のスタックや仕様を実プロジェクトの事実へ自動変換しない。採用先では実ファイルと合意を確認してBlueprintを更新する。
 
 ---
 
@@ -157,15 +158,16 @@ All Axiarch documentation is bilingual (JA/EN). When modifying or adding documen
 
 Past incident (v1.5.4 interim commit): A maintainer-side lesson on "hook format change operations" was crystallised into `core/010`, becoming adopter noise. v1.5.5 reverted this and documented the policy here.
 
-#### Files recommended for deletion in adopter projects (see Required Files table in README)
+#### Source Management Documents and Distribution Notices
 
-- `CHANGELOG.md` / `CONTRIBUTING.md` / `SECURITY.md` / `CODE_OF_CONDUCT.md` / `LICENSE` / `NOTICE`
-- These are axiarch core repository management files and not needed in adopter projects.
+- Source `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md` and `CODE_OF_CONDUCT.md` are optional for installation. Do not delete or replace the adopter's files with these names.
+- Identical copies of Axiarch's `LICENSE` and `NOTICE` ship as `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE`. Synchronize distribution copies when the root originals change. Preserve adopter-root licenses and notices.
+- Follow [Apache License 2.0 §4](https://www.apache.org/licenses/LICENSE-2.0) when redistributing: retain the license and applicable attribution notices, and identify modified files as changed. Do not classify these notices as universally unnecessary or delete them indiscriminately.
 
 #### Templates rewritten in adopter projects (keep placeholder form in axiarch core)
 
 - Project Native Language setting line in `AXIARCH.md`
 - Sample values in `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`
-- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `999_project_specific_template.md`
+- `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md` / `axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md`
 
-In axiarch core, maintain **template form** rather than concrete values. `init.sh` rewrites these dynamically in adopter projects.
+In axiarch core, maintain **template form** rather than concrete values. `init.sh` sets installation configuration such as Project Native Language; it does not transform fictional stacks or specifications into verified project facts. Adopters update Blueprint from inspected files and agreed decisions.

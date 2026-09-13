@@ -91,6 +91,18 @@
   },
   "files": [
     {
+      "path": "axiarch-rules/LICENSE",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
+      "path": "axiarch-rules/NOTICE",
+      "group": "core_protocol",
+      "owner": "axiarch",
+      "policy": "replace-if-local-unchanged"
+    },
+    {
       "path": "AXIARCH.md",
       "group": "core_protocol",
       "owner": "mixed",

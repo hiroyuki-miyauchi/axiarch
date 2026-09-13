@@ -344,7 +344,7 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 | `CONTRIBUTING.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
 | `SECURITY.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
 | `CODE_OF_CONDUCT.md` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
-| `LICENSE` / `NOTICE` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
+| `axiarch-rules/LICENSE` / `axiarch-rules/NOTICE` | 配布時に保持 / Retain with distribution | Axiarchのライセンス・帰属表示。採用先ルートの同名ファイルを置換しない / Axiarch license and attribution; do not replace adopter-root files |
 | `.github/` | ❌ 不要 / Not needed | Issue/PRテンプレート。リポジトリ管理用 / Issue/PR templates. For this repo only |
 | `.gitignore` | ❌ 不要 / Not needed | リポジトリ管理用 / For this repo only |
 

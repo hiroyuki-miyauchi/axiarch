@@ -21,9 +21,34 @@ release history, not current canonical numbering.
 
 ## [Unreleased]
 
+- 内部copy補助で、不正な子孫パスを検出する前に部分コピーし、失敗表示後も終了0となった漏れを修正。通常の更新と更新元・利用先・比較元の事前検査を共通化し、コピー失敗を終了5へ伝達する。隔離環境で異常入力の無変更拒否、部分書込・結果記録・版数保留・修復後の再実行を検証し、日英で内部補助と更新全体の保証範囲を分ける。
+- Fix internal copy partially applying files before rejecting invalid descendants and returning 0 after reporting failure. Share source/adopter/base preflight with the public upgrade path and propagate copy failures as exit 5. Add isolated rejection-without-write, partial-write, outcome/version and repair/retry regressions; distinguish helper and whole-upgrade guarantees in both languages.
+
+- 状態管理の回帰試験で、起動時間をロック待ちと誤判定していた3秒制限を分離。起動の監視上限は15秒、実際のロック拒否は開始合図後の3秒とし、FIFO・ハードリンク・他writerの拒否理由も検査する。
+- Separate state-test startup from lock rejection timing. Allow a 15-second startup watchdog, retain the three-second deadline after the real lock-attempt handshake, and assert rejection reasons for FIFOs, hardlinks and competing writers.
+
+- 大文字小文字・Unicodeの表記差で保持対象を別名から更新できた漏れを修正。配布パスと子孫・親フォルダの衝突を適用前に拒否し、導入元・直接copyにも検査を接続する。隔離回帰と再実行を追加し、日英の互換性・復旧説明、旧Blueprintの確認済み版数の説明を同期する。
+- Reject case/canonical-Unicode distribution aliases that could update preserved files through alternate names. Check selections, descendants and parent directories before application, including installation sources and direct copy. Add isolated rejection/retry regressions and align bilingual portability, recovery and confirmed-version guidance in the older Blueprint.
+
+- 正常なフック起動・再開を4秒で打ち切っていた回帰試験の監視上限を15秒へ調整。改修前の検査でも4秒を超える正常完了を確認したためで、FIFO拒否の専用3秒検査と出力・既存記録保持の検証は維持する。
+- Give end-to-end hook regression tests a 15-second watchdog after observing valid bootstrap exceed the previous four-second limit even with the prior path check. Retain the dedicated three-second FIFO rejection test and all output/preservation assertions.
+
+- 更新のワイルドカード展開で改行入りの名前が別パスへ分割され、指定外ファイルまで正常終了で更新された不備を修正。元の名前を検査し、旧Blueprint探索・Unicode行区切りも保護する。適用前の拒否時に利用先を変更しない回帰と復旧後の再実行を追加。配布検査の終了値説明と、日英のセキュリティ・QA索引の古い構成数を訂正する。
+- Fix wildcard expansion splitting newline-bearing names into separate paths and updating unselected files with a successful exit. Validate original names, preserve legacy Blueprint discovery boundaries and reject Unicode line separators. Add unchanged-adopter and repair/retry regressions; correct preflight exit-code guidance and stale bilingual security/QA structure counts.
+
+- 配布境界の追加監査で、manifestや展開後の対象にGit内部情報・ローカル管理記録を含められた漏れを修正。導入・更新前にプロジェクト全体と予約パスを拒否し、初期導入の必須ファイル／ディレクトリ型を検査する。日英の異常通知・復旧手順と隔離回帰を追加し、既存記録の削除や内容の自動匿名化は行わない。
+- Close distribution-boundary gaps that allowed manifests or expanded selections to include Git internals and local managed records. Reject whole-project/reserved paths before application and validate required installation file/directory types. Add bilingual failure/recovery guidance and isolated regressions without deleting existing records or claiming automatic content redaction.
+
 開発版: `1.17.0-dev`（2026-09-13）。ゴールと証拠、セッション分離、導入・更新の失敗通知、品質検査と公開経路、日英ガバナンス整合の改善を次期版へまとめる。公開済みの最新安定版は `1.16.0`。本節は正式リリース・タグの公開を意味しない。
 
 Development version: `1.17.0-dev` (2026-09-13), collecting goal/evidence checks, session isolation, install/upgrade failure reporting, release quality gates and bilingual governance alignment. The latest published stable version remains `1.16.0`; this section does not announce a published release or tag.
+
+- 追加整合性監査で、要約を読込完了と扱う経路、Gitハッシュ・署名・履歴保全の過剰保証、任意ツールの一律必須化、フォークの自動上書き、2桁番号の旧検査例を修正。日英の参照・権限・教訓の分別を正本へ接続し、3桁000–999とGit受信フック例を隔離実行で検証する。
+- The additional consistency audit corrects summary-only loading claims, overstatements about Git hashes/signatures/history, mandatory optional tools, automatic fork overwrites and obsolete two-digit checks. Align bilingual references, authority and lesson routing with canonical protocols; execute three-digit 000–999 and Git receive-hook examples in isolation.
+- ライセンス・帰属表示を `axiarch-rules/LICENSE` / `axiarch-rules/NOTICE` として導入・更新へ接続し、利用先ルートの独自ファイルを保持する。配布コピーの不一致と曖昧な番号付きファイル参照を検出する。個人情報の同意年齢・権利要求・侵害通知・保存期間は法域と用途の確認へ改め、一律期限の自動計算や不要な個人情報の記録を要求しない。
+- Deliver attribution and license copies under `axiarch-rules/` while preserving adopter root files; detect copy drift and ambiguous numbered-file references. Base privacy consent, rights requests, breach notification and retention on verified jurisdiction and purpose, without universal deadline calculators or unnecessary personal-data logging.
+- セッション一覧にタスクの目的を表示する `--mode sessions` を追加し、statusにもgoalを表示。内部ID・保存先・再開手順を維持し、ローカル記録をGit配布物から除外する境界を日英で説明する。
+- Add goal-based `--mode sessions` listings and include the goal in status. Preserve internal IDs, storage paths and resumption, documenting the exclusion of local evidence from Git distribution in both languages.
 
 - 開発版のhealthで未公開タグの導入例を要求していた不整合を修正。開発版と履歴上の安定版を別々に突合し、安定版の公開検査とUnreleasedの公開スキップを隔離試験で確認する。
 - Correct development health checks that required unpublished installation tags. Validate build and recorded stable versions separately; retain isolated checks for stable publication and Unreleased publication skipping.

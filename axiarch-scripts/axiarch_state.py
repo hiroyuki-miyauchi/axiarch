@@ -41,10 +41,16 @@ def identifier(value):
     return value
 
 
+def has_control_characters(value):
+    # Include Unicode line separators recognized by str.splitlines(), so names
+    # cannot create extra records in line-oriented manifests, hashes or logs.
+    return any(ord(char) < 32 or ord(char) == 127 or char in '\x85\u2028\u2029' for char in value)
+
+
 def inside(root, relative):
     if not isinstance(relative, str) or not relative or Path(relative).is_absolute():
         raise ValueError("expected a project-relative path")
-    if any(ord(char) < 32 or ord(char) == 127 for char in relative):
+    if has_control_characters(relative):
         raise ValueError("control characters are not supported in paths")
     path = root / relative
     if ".." in Path(relative).parts or any(p.is_symlink() for p in (path, *path.parents) if p != root.parent):
@@ -468,7 +474,7 @@ def resolve_ids(args, root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=".")
-    parser.add_argument("--mode", choices=["session-start", "new", "resume", "ensure", "status", "publish", "check", "path", "snapshot", "language", "privacy-check"], default="status")
+    parser.add_argument("--mode", choices=["session-start", "new", "resume", "ensure", "status", "sessions", "publish", "check", "path", "snapshot", "language", "privacy-check"], default="status")
     parser.add_argument("--task")
     parser.add_argument("--session")
     parser.add_argument("--owner", default="")
@@ -579,9 +585,30 @@ def main():
                 errors.append("task ID/path mismatch")
             if errors:
                 raise ValueError(f"{path}: " + "; ".join(errors))
-            print(json.dumps({k: record[k] for k in ("task_id", "owner", "phase", "revision", "updated_at")}, ensure_ascii=False))
+            print(json.dumps({k: record[k] for k in ("goal", "task_id", "owner", "phase", "revision", "updated_at")}, ensure_ascii=False))
         if not records and not args.quiet:
             print("No managed tasks; legacy root documents are preserved.")
+        return
+    if args.mode == "sessions":
+        session_root = inside(root, ".axiarch/sessions")
+        directories = sorted(session_root.iterdir()) if session_root.exists() else []
+        for directory in directories:
+            identifier(directory.name)
+            binding = read_json(inside(root, f".axiarch/sessions/{directory.name}/binding.json"))
+            if not isinstance(binding, dict) or binding.get("session_id") != directory.name:
+                raise ValueError("session ID/binding path mismatch")
+            bound_task = identifier(binding.get("task_id"))
+            state = read_json(inside(root, f".axiarch/tasks/{bound_task}/state.json"))
+            errors = validate(state, root, "structure")
+            if state.get("task_id") != bound_task:
+                errors.append("task ID/path mismatch")
+            if errors:
+                raise ValueError("; ".join(errors))
+            print(json.dumps({"goal": state["goal"], "session_id": directory.name,
+                              "task_id": bound_task, "owner": state["owner"], "phase": state["phase"],
+                              "docs": f".axiarch/sessions/{directory.name}"}, ensure_ascii=False))
+        if not directories and not args.quiet:
+            print("No managed sessions; legacy root documents are preserved.")
         return
     if args.mode == "path":
         if not sid or not inside(root, f".axiarch/sessions/{sid}/binding.json").is_file():

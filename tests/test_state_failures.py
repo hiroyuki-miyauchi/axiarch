@@ -15,6 +15,8 @@ from unittest.mock import patch
 
 import test_runtime as runtime
 
+STARTUP_TIMEOUT = 15  # Interpreter/bootstrap watchdog, not the lock deadline.
+
 
 class StateFailureTests(unittest.TestCase):
     setUp = runtime.RuntimeTests.setUp
@@ -32,17 +34,42 @@ class StateFailureTests(unittest.TestCase):
         module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
         return module
 
-    def bounded_new(self):
-        process = subprocess.Popen(['bash', str(runtime.SCRIPTS / 'axiarch-task-state.sh'),
-                                    '--project', str(self.target), '--mode', 'new', '--task', 'new', '--session', 'new'],
-                                   env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    def bounded_new(self, expected_error='task lock must be a regular file'):
+        # Signal immediately before the real lock attempt, so interpreter and
+        # CLI startup are not mistaken for blocking on a FIFO or another writer.
+        probe = '''import sys
+sys.path.insert(0, sys.argv[1])
+import axiarch_state
+original = axiarch_state.locked
+def ready(root):
+    print('LOCK_READY', flush=True)
+    sys.stdin.read(1)
+    return original(root)
+axiarch_state.locked = ready
+sys.argv = ['state', '--project', sys.argv[2], '--mode', 'new', '--task', 'new', '--session', 'new']
+try:
+    axiarch_state.main()
+except (ValueError, OSError) as error:
+    print(str(error), file=sys.stderr)
+    sys.exit(2)
+'''
+        process = subprocess.Popen([sys.executable, '-c', probe, str(runtime.SCRIPTS), str(self.target)],
+                                   env=self.env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
                                    start_new_session=True)
         try:
-            out, err = process.communicate(timeout=3)
-        except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGKILL); process.communicate()
-            self.fail('state lock waited for an unsupported file')
+            ready, _, _ = select.select([process.stdout], [], [], STARTUP_TIMEOUT)
+            self.assertTrue(ready, 'state probe did not reach the lock boundary')
+            self.assertEqual(process.stdout.readline().strip(), 'LOCK_READY')
+            try:
+                out, err = process.communicate('x', timeout=3)
+            except subprocess.TimeoutExpired:
+                self.fail('state lock did not reject the blocked or unsupported lock within three seconds')
+        finally:
+            if process.poll() is None:
+                os.killpg(process.pid, signal.SIGKILL)
+            process.communicate()
         self.assertEqual(process.returncode, 2, out + err)
+        self.assertIn(expected_error, err)
         self.assertFalse((self.target / '.axiarch/tasks/new/state.json').exists())
 
     def test_fifo_and_hardlinked_lock_are_rejected_without_waiting(self):
@@ -61,8 +88,10 @@ class StateFailureTests(unittest.TestCase):
         process = subprocess.Popen([sys.executable, '-c', code, str(self.target / '.axiarch/task-state.lock')],
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
+            ready, _, _ = select.select([process.stdout], [], [], STARTUP_TIMEOUT)
+            self.assertTrue(ready, 'competing writer did not start')
             self.assertEqual(process.stdout.readline().strip(), 'locked')
-            self.bounded_new()
+            self.bounded_new('task state is busy')
             self.assertEqual(self.state_file().read_bytes(), old)
         finally:
             process.communicate('', timeout=3)
@@ -187,7 +216,7 @@ class StateFailureTests(unittest.TestCase):
                                     '--task', 't1', '--session', 's1'], env=self.env, stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
         try:
-            ready, _, _ = select.select([process.stdout], [], [], 3)
+            ready, _, _ = select.select([process.stdout], [], [], STARTUP_TIMEOUT)
             self.assertTrue(ready, 'renderer did not start')
             self.assertEqual(process.stdout.readline().strip(), 'RENDER_WAIT')
         finally:

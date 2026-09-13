@@ -17,7 +17,7 @@ import tempfile
 
 sys.dont_write_bytecode = True
 from axiarch_state import atomic, digest, inside, native_language, language_settings, markdown_source_lines, protect_artifacts, privacy_check, read_json
-from axiarch_upgrade import upgrade_lock_path
+from axiarch_upgrade import upgrade_lock_path, distribution_path, DistributionNames
 
 MARKER = '<!-- AXIARCH_GENERATED_COMMAND: do not edit; regenerate via axiarch-scripts/axiarch-prompts-install.sh -->'
 HASH_KEY = 'axiarch-generated-sha256: '
@@ -153,11 +153,23 @@ def prompts(args):
 
 def check_source(args):
     root = Path(args.source).resolve(strict=True)
-    for rel in args.paths:
+    names = DistributionNames()
+    for rel in args.paths + args.files + args.directories:
+        names.add(rel)
+    for rel in args.files:
+        if not checked(root, rel).is_file():
+            raise ValueError(f'required distribution file missing or wrong type: {rel}')
+    for rel in args.directories:
+        if not checked(root, rel).is_dir():
+            raise ValueError(f'required distribution directory missing or wrong type: {rel}')
+    for rel in dict.fromkeys(args.paths + args.files + args.directories):
+        distribution_path(rel)
         path = checked(root, rel)
         if not path.exists():
             raise ValueError(f'required distribution path missing: {rel}')
         for child in [path] + (list(path.rglob('*')) if path.is_dir() else []):
+            names.add(child.relative_to(root).as_posix())
+            distribution_path(child.relative_to(root).as_posix())
             checked(root, child.relative_to(root).as_posix())
             if not child.is_file() and not child.is_dir():
                 raise ValueError(f'unsupported distribution entry: {child}')
@@ -211,8 +223,11 @@ def install(args):
         if root.exists() and not root.is_dir():
             raise ValueError('target must be a directory')
         files, directories = [], []
+        names = DistributionNames()
         for p in sorted(stage.rglob('*')):
             rel = p.relative_to(stage).as_posix()
+            names.add(rel)
+            distribution_path(rel)
             src, dst = checked(stage, rel), checked(root, rel)
             if src.is_dir():
                 if dst.exists() and not dst.is_dir():
@@ -293,6 +308,8 @@ def main():
     for name in ('clean', 'dry-run', 'precommit', 'with-prompts'):
         parser.add_argument('--' + name, action='store_true')
     parser.add_argument('--paths', nargs='*', default=[])
+    parser.add_argument('--files', nargs='*', default=[])
+    parser.add_argument('--directories', nargs='*', default=[])
     args = parser.parse_args()
     if args.mode == 'install' and (not args.stage or not args.version or args.lang == 'auto'):
         parser.error('install requires --stage, --version and explicit --lang')

@@ -63,8 +63,8 @@ your-project/
 | File | Description |
 |---|---|
 | [README.md](./README.md) | Link collection to all rule modules. Includes setup and initialization guide. |
-| [compliance_matrix.md](./compliance_matrix.md) | Compliance matrix proving which rule files cover each user requirement. Defines the separation between Universal (immutable) and Blueprint (mutable). |
-| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | The 5-step rule loading protocol that the AI MUST execute at the start of any conversation. |
+| [compliance_matrix.md](./compliance_matrix.md) | Tracks requirements and corresponding rule files; does not prove runtime behavior or adherence. Defines the separation between Universal (immutable) and Blueprint (mutable). |
+| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | Five steps for reading applicable clauses, with lightweight H0/H1 handling. |
 | [CRYSTALLIZATION_PROTOCOL.md](./CRYSTALLIZATION_PROTOCOL.md) | The protocol for the AI to autonomously record and organize (crystallize) lessons upon task completion. |
 
 ---
@@ -163,7 +163,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | Security & privacy. **22-section architecture**. Zero Trust 7 pillars (NIST 800-207), authentication/authorization (FIDO2/Social Login/Session management), API security (BOLA/BFLA/SSRF prevention), supply chain security (SBOM/SLSA), AI/LLM security (OWASP LLM Top 10 2025), container security (Pod Security Standards/image signing), file upload security, cryptographic policy (prohibited algorithms/PQC readiness), OWASP Top 10 2025 mapping, GraphQL, secrets management, client-side security, bot/DDoS defense, vendor management, incident response, security governance. Quick Reference Index (Appendix A). |
+| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | Security & privacy. See the linked table of contents and index for the current structure. Zero Trust 7 pillars (NIST 800-207), authentication/authorization (FIDO2/Social Login/Session management), API security (BOLA/BFLA/SSRF prevention), supply chain security (SBOM/SLSA), AI/LLM security (OWASP LLM Top 10 2025), container security (Pod Security Standards/image signing), file upload security, cryptographic policy (prohibited algorithms/PQC readiness), OWASP Top 10 2025 mapping, GraphQL, secrets management, client-side security, bot/DDoS defense, vendor management, incident response, security governance. Quick Reference Index (Appendix A). |
 | 100 | [100_data_governance.md](./universal/security/100_data_governance.md) | Legal, governance & data strategy. **45-section architecture**. Global regulation map (GDPR/CCPA/EU AI Act + Global Privacy Laws), 2025-2027 timeline, cross-border transfer, consent management, data governance maturity model, RegTech automation, quantum cryptographic agility. Quick Reference Index. |
 | 200 | [200_oss_compliance.md](./universal/security/200_oss_compliance.md) | License & dependency management. **63 sections, 299 rules, 40+ code snippets**. Three-tier license classification, SBOM (CycloneDX 1.6/SPDX 3.0), supply chain security (SLSA v1.2 Build and Source Tracks, Sigstore), SCA tool integration, automated update strategy, maturity model. Quick Reference Index. |
 | 300 | [300_ip_due_diligence.md](./universal/security/300_ip_due_diligence.md) | IP strategy & due diligence. **50-section, 10-part architecture**. IP ownership, patent strategy, trade secrets, trademarks, copyright, AI-generated IP, exit strategy, DD operations, governance, compliance. Quick Reference Index. |
@@ -178,7 +178,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QA & testing strategy. **41-section, 12-part architecture**. Testing philosophy, test types (static/unit/integration/contract/E2E/VRT/performance/property-based/mutation/a11y), **layered assertion requirements (§8.6: what unit/composite/integration layers must each guarantee, mandatory failure-path testing, static analysis as the lowest layer, batch/backfill testing via engineering/700)**, security, test quality, CI/CD, release, domain-specific, resilience, AI-driven testing, data & API quality, compliance & observability, 5-level testing maturity model. Quick Reference Index. |
+| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QA & testing strategy. See the linked table of contents and index for the current structure. Testing philosophy, test types (static/unit/integration/contract/E2E/VRT/performance/property-based/mutation/a11y), **layered assertion requirements (§8.6: what unit/composite/integration layers must each guarantee, mandatory failure-path testing, static analysis as the lowest layer, batch/backfill testing via engineering/700)**, security, test quality, CI/CD, release, domain-specific, resilience, AI-driven testing, data & API quality, compliance & observability, 5-level testing maturity model. Quick Reference Index. |
 
 ### 📐 Blueprint Rules (Project-Specific)
 

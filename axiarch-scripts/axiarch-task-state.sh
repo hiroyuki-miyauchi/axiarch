@@ -33,6 +33,7 @@ Modes:
   new/resume:    explicitly create a task or resume --task ID (with --session ID).
   ensure:        ensure isolated evidence; never rotate shared root documents.
   status:        list shared task records without modifying them.
+  sessions:      list session evidence by task goal, preserving internal IDs.
   privacy-check: inspect managed-artifact Git exclusions/tracking without changes.
   publish:       --input JSON --expected-revision N --session ID (compare and swap).
   check:         --task ID --phase structure|readiness|completion.
@@ -116,7 +117,7 @@ ARCHIVE_ENABLED="${AXIARCH_PROCESS_DOC_ARCHIVE:-1}"
 PROCESS_DOC_LANG="${AXIARCH_PROCESS_DOC_LANG:-auto}"
 
 case "${MODE}" in
-  session-start|new|resume|ensure|status|publish|check|path|snapshot|render|privacy-check) ;;
+  session-start|new|resume|ensure|status|sessions|publish|check|path|snapshot|render|privacy-check) ;;
   *)
     printf 'Unsupported mode: %s\n' "${MODE}" >&2
     exit 2

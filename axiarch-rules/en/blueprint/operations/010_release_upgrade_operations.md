@@ -74,7 +74,7 @@ Dry-runs must be limited to planning and diff inspection; they must not write co
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` reports conflicts only during dry-run and writes `.axiarch/conflicts/` only during `--apply`. With `--source`, it records the source manifest `axiarchVersion` in `.axiarch/version.json`.
+`axiarch-scripts/axiarch-upgrade.sh` reports conflicts only during dry-run and writes `.axiarch/conflicts/` only during `--apply`. It records the source manifest `axiarchVersion` as `requestedVersion` in `.axiarch/version.json`, updating confirmed `version` and `confirmedScope` only after the selected application and diagnostics both succeed. Partial or failed runs retain the previous confirmed version; reconcile the exit code with the current run record (details: `axiarch-scripts/README.md`).
 
 ### Reference
 
@@ -122,7 +122,7 @@ Do not automatically delete local-only files during directory updates. Instead, 
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` checks target-side files missing from the source before directory updates and prints them as `STALE-LOCAL`. It also records them in `ACTION_LOG`, but that log is persisted only when `--apply` writes `.axiarch/upgrade-report.md`.
+`axiarch-scripts/axiarch-upgrade.sh` reports and preserves target-side files missing from the source as `STALE-LOCAL` before directory updates. During `--apply`, actions are persisted to `.axiarch/upgrades/{run_id}/actions.log` and result JSON. Retain an old `.axiarch/upgrade-report.md` as history; it is not the destination for new results. See `axiarch-scripts/README.md` for the current record and exit-code contract.
 
 ### Reference
 
@@ -170,7 +170,7 @@ The current helper reads manifests with Python 3 independently of jq. Malformed 
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` fallback discovery scans `core` in addition to the other initial Blueprint folders. `write_upgrade_metadata` includes `axiarch-prompts/` in hash evidence when it exists. `check-axiarch-health.sh` Check 15 verifies fallback core Blueprint discovery and optional prompt evidence wiring.
+Only legacy manifests use fallback discovery in `axiarch-scripts/axiarch-upgrade.sh`, which scans actual Blueprint folders rather than a fixed initial list. `finalize` in `axiarch-scripts/axiarch_upgrade.py` records comparison hashes for replaced files and files verified byte-identical to upstream. Selected optional prompts use the same conditions; deferred custom edits do not become known bases. Combine structure-health wiring checks with behavioral regressions in `tests/test_runtime.py`.
 
 ### Reference
 
@@ -190,11 +190,11 @@ The manifest defined this policy as "update automatically only when local owners
 
 ### Rule
 
-`replace-if-local-unchanged` updates automatically only when the target is missing, or when a base from `--from`, `--from-ref`, or `--base-source` exists and matches the target. If the target differs and no base is available, if the matching path is missing from the base, or if the target differs from the base, fall back to review. During review, record the `no-base-diff`, `base-missing`, or `base-mismatch` reason label in the upgrade report.
+`replace-if-local-unchanged` may update a missing target, a target matching its base, or a target matching the corresponding known hash in `.axiarch/files.sha256` from a previous application or verification. Files already byte-identical to upstream remain unchanged. Differences not confirmed against a known base require review, preserving later custom edits on retries. Record `no-base-diff`, `base-missing`, `base-mismatch`, or the helper's `local-modified-or-unknown` reason. Follow §2, §4 and `axiarch-scripts/README.md` for record and version handling.
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` performs this policy through `copy_replace_if_local_unchanged`. Both `safe-only` and `update-all` route this policy through the dedicated check instead of unconditional `copy_path`. `check-axiarch-health.sh` Check 15 verifies that this runtime branch and its reason labels exist.
+`copy_replace_if_local_unchanged` in `axiarch-scripts/axiarch-upgrade.sh` and `copy_files` in `axiarch-scripts/axiarch_upgrade.py` decide per file. The presence of a hash record alone does not authorize an update; compare actual file contents. Structure health checks the wiring, while `tests/test_runtime.py` exercises partial-run retries and preservation of subsequent custom edits.
 
 ### Reference
 

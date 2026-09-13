@@ -407,6 +407,12 @@ add_item() {
   local policy="$4"
   local agents="${5:-all}"
 
+  # Check original filesystem names before later newline-delimited transport.
+  if [[ "${path}" =~ [[:cntrl:]] ]]; then
+    print_err 'Control characters are not supported in selected paths.'
+    exit 5
+  fi
+
   if [[ "${path}" == "axiarch-prompts" && "${WITH_PROMPTS}" != "true" && "${INTERACTIVE}" != "true" ]]; then
     return 0
   fi
@@ -507,21 +513,19 @@ expand_manifest_glob() {
   local excludes="${6:-}"
   local root
   local match
-  local list_file
+  local matches
 
   for root in "${PROJECT_DIR}" "${SOURCE_DIR}"; do
     [[ -d "${root}" ]] || continue
-    list_file="$(mktemp)"
-    (cd "${root}" && compgen -G "${pattern}" || true) > "${list_file}"
-    sort -u "${list_file}" -o "${list_file}"
+    matches="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" expand-glob \
+      --source "${root}" --path "${pattern}")"
     while IFS= read -r match; do
       [[ -z "${match}" ]] && continue
       if path_is_excluded "${match}" "${excludes}"; then
         continue
       fi
       add_resolved_item "${group}" "${match}" "${owner}" "${policy}" "${agents}" "${excludes}"
-    done < "${list_file}"
-    rm -f "${list_file}"
+    done <<< "${matches}"
   done
 }
 
@@ -612,6 +616,8 @@ register_manifest_defaults() {
   add_item "core_protocol" "AXIARCH.md" "mixed" "review" "all"
   add_item "pointer_files" "AGENTS.md" "mixed" "review" "codex,agents-md,universal"
   add_item "core_protocol" "axiarch-manifest.json" "axiarch" "replace" "all"
+  add_item "core_protocol" "axiarch-rules/LICENSE" "axiarch" "replace-if-local-unchanged" "all"
+  add_item "core_protocol" "axiarch-rules/NOTICE" "axiarch" "replace-if-local-unchanged" "all"
   add_item "execution_harness" "axiarch-harness/README.md" "axiarch" "replace" "all"
   add_localized_item "execution_harness" "axiarch-harness/{lang}" "axiarch" "replace"
   add_localized_item "core_protocol" "axiarch-rules/{lang}/LOADING_PROTOCOL.md" "axiarch" "replace"
@@ -643,9 +649,9 @@ register_manifest_defaults() {
   local readme_path
   while IFS= read -r lang; do
     if [[ -d "${SOURCE_DIR}/axiarch-rules/${lang}/blueprint" ]]; then
-      while IFS= read -r readme_path; do
+      while IFS= read -r -d '' readme_path; do
         add_item "blueprint_templates" "${readme_path#${SOURCE_DIR}/}" "axiarch" "replace-if-local-unchanged" "all"
-      done < <(find "${SOURCE_DIR}/axiarch-rules/${lang}/blueprint" -mindepth 2 -maxdepth 2 -type f -name README.md | sort)
+      done < <(find "${SOURCE_DIR}/axiarch-rules/${lang}/blueprint" -mindepth 2 -maxdepth 2 -type f -name README.md -print0)
     fi
     add_item "blueprint_templates" "axiarch-rules/${lang}/blueprint/operations/010_release_upgrade_operations.md" "axiarch" "replace-if-local-unchanged" "all"
   done <<EOF
@@ -691,8 +697,8 @@ discover_project_blueprint_files() {
     [[ -d "${root}/axiarch-rules" ]] || continue
     list_file="$(mktemp)"
     # Discover actual folders instead of fixing the initial eight categories forever.
-    find "${root}/axiarch-rules" -type f -path '*/blueprint/*/[0-9][0-9][0-9]_*.md' > "${list_file}"
-    while IFS= read -r file; do
+    find "${root}/axiarch-rules" -type f -path '*/blueprint/*/[0-9][0-9][0-9]_*.md' -print0 > "${list_file}"
+    while IFS= read -r -d '' file; do
       rel="${file#${root}/}"
       lang="${rel#axiarch-rules/}"; lang="${lang%%/*}"
       if selected_langs | grep -Fxq "${lang}"; then

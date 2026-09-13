@@ -27,6 +27,8 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 
 ## Core Architecture
 
+Distributions retain `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE` without replacing adopter-root notices. Local task/session evidence is excluded from Git distribution. `axiarch-task-state.sh --mode sessions` displays the canonical goal for each session; internal IDs and resumption paths stay stable.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Layer 1: Universal (Immutable Constitution)                 │

@@ -38,10 +38,13 @@ class HookStateTests(unittest.TestCase):
                                    env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    text=True, start_new_session=True)
         try:
-            output, error = process.communicate(payload, timeout=4)
+            # End-to-end hang watchdog, not a four-second startup SLA: normal
+            # bootstrap spans several interpreters, filesystem syncs and Git
+            # checks. The direct FIFO rejection test retains its 3s deadline.
+            output, error = process.communicate(payload, timeout=15)
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGKILL); process.communicate()
-            self.fail('hook hung on an unsupported input')
+            self.fail('hook exceeded the end-to-end test deadline')
         self.assertEqual(process.returncode, 0, error)
         return json.loads(output)['hookSpecificOutput']['additionalContext'], error
 

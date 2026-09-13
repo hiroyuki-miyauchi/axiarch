@@ -16,6 +16,10 @@ The content authority is `axiarch-rules/en/universal/core/300_goal_and_current_s
 
 Session IDs come from CLI, `AXIARCH_SESSION_ID`, `CODEX_THREAD_ID`, or hook `session_id` / `sessionId`. Task IDs come from CLI or `AXIARCH_TASK_ID`. Startup without identity generates and prints new IDs; it never selects another session implicitly. Reuse the printed IDs on the next invocation. IDs are not credentials.
 
+UUID folder names are internal keys for collision avoidance and resumption, not work titles. `--mode status` and `--mode sessions` display the canonical task `goal` first. Session listings read bindings and task state directly without duplicating a title registry. Do not manually rename existing folders and break their references. For a new explicit session ID, a unique ASCII name such as `audit-2026-09-13-agent-a` is also supported; the example date and task are not prescribed values.
+
+Session documents, shared task state and history are local records excluded from Git distribution. Use `privacy-check` to inspect tracking and exclusions; ignore rules do not remove already tracked files or historical commits. Summarize sanitized public changes in `CHANGELOG.md` or another reviewed shared document, without copying internal IDs or raw logs.
+
 Restarting the same session does not modify its documents. Use a new session ID for another task. Joining an existing task from another session uses `resume --task`; read shared state and the previous owner's evidence before continuing. Each session edits only its own documents. Historical load records do not prove that a new AI has read those files.
 
 An incomplete existing session stops before creating a new task record. A binding whose shared state.json is missing does not silently become a new task. Inspect remaining documents, history and backups to recover; explicitly choose new task/session IDs when starting different work.
@@ -42,6 +46,7 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task upgrade-audit --ses
 # Resume the same task/session, preserving its documents
 bash axiarch-scripts/axiarch-task-state.sh --mode resume --task upgrade-audit --session agent-a
 bash axiarch-scripts/axiarch-task-state.sh --mode status
+bash axiarch-scripts/axiarch-task-state.sh --mode sessions
 bash axiarch-scripts/axiarch-task-state.sh --mode path --session agent-a
 # Copy legacy root evidence into a new session without moving or deleting the originals
 bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --session agent-b --import-legacy
@@ -68,6 +73,14 @@ Use `publish` instead of overwriting shared state directly. Python 3 standard-li
 The task lock must be a regular file owned by the current execution user with a link count of one. FIFOs, links and foreign ownership are rejected without waiting. Atomic replacement applies per JSON file, not to simultaneous commitment of tasks, sessions and root pointers. If updating current state fails after history was saved, the old state.json remains; retry can reuse identical history.
 
 ## Runtime artifact protection
+
+The upgrade shell's `check-paths` and Python helper's `copy` apply the same preflight to the selected source, adopter and base trees. Reject control characters, symlinks, special files, reserved paths and name aliases before copying. Copy-time I/O failures return 5, while earlier successful copies remain. Use `axiarch-scripts/axiarch-upgrade.sh` for the overall lock, protection policy, diagnosis and outcome records. Internal `copy` exit 0 alone does not mean the upgrade is complete; the shell's aggregation/finalization handles pending REVIEW and TYPE-CONFLICT outcomes.
+
+Compare distribution names using casefold and NFD canonical Unicode normalization. Reject differently spelled aliases among selections, parent directories and expanded descendants before application, so an alternate name cannot update a preserved path. Compare the selected scope across source, adopter and base; apply the same name check to installation sources and staged payloads. This conservative portability constraint also applies on case-sensitive hosts. Ordinary Unicode names and spaces remain supported. Do not automatically merge case-only renames: retain original data, align the distribution copy and manifest spelling, preview, then retry. Renaming adopter files must remain within owner authorization. This check does not identify every shared physical object, such as hardlinks.
+
+Upgrade wildcard expansion validates original filenames before converting them to line-delimited selections. Paths containing control characters or Unicode line separators (NEL, LINE SEPARATOR, PARAGRAPH SEPARATOR) are rejected. Legacy manifest Blueprint discovery also preserves filename boundaries to avoid splitting a name into different paths or log records. Ordinary spaces, non-ASCII names, explicit hidden-file selections and exclusions remain supported. Review rejected names in a dedicated distribution source; do not automatically rename or delete adopter records.
+
+An upstream manifest does not acquire ownership of Git internals or local managed records. Installation/upgrade payloads cannot select the whole project `.` or contain `.git` / `.axiarch` path components, including case variants. Upgrades inspect expanded selections and descendants; installation checks distribution folders and staged payloads. Dedicated lifecycle operations create/update managed records. Do not delete existing records to bypass a refusal: prepare a distribution-only source, or review upgrade exclusions where applicable. This checks path boundaries, not secret content under other filenames, and performs no automatic redaction.
 
 `axiarch-rules/en/universal/core/300_goal_and_current_state.md` §4.6 remains authoritative for secrets and personal data in state. Fresh installation, applied upgrades and session creation/resume supplement `.axiarch/.gitignore` with exclusions for managed records: the tasks, sessions, upgrades, conflicts, process-doc-history and process-doc-state directories, plus task-state.lock, privacy.lock, upgrade-result.json, install-result.json and install-health.log, all under `.axiarch/`. Existing policy and the root `.gitignore` are preserved; custom negations that defeat protection in a Git worktree fail diagnosis. Dry-runs and read-only checks do not modify the policy.
 

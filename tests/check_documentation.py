@@ -83,6 +83,8 @@ def inspect(root):
             current = re.split(r'^## \[(?!Unreleased\])', current, maxsplit=1, flags=re.M)[0]
         for number, line in prose_lines(current):
             for target in re.findall(r'`([^`\n]+\.md)`', line):
+                if re.fullmatch(r'[0-9]{3}_[a-z][a-z0-9_]*\.md', target):
+                    problems.append(f'{path.relative_to(root)}:{number}: ambiguous numbered filename: {target}; include its directory')
                 # Domain-relative references use the language/layer of the rule.
                 # Explicit examples are illustrative paths, not required files.
                 if re.match(r'^(core|design|engineering|operations|product|quality|security|ai)/', target):
@@ -123,6 +125,13 @@ def inspect(root):
     for lang in ('ja', 'en'):
         for path in sorted((root / 'axiarch-prompts' / lang).rglob('*.md')):
             problems.extend(f'{path.relative_to(root)}: {issue}' for issue in inspect_prompt(path.read_text()))
+    if (root / 'init.sh').is_file():
+        for name in ('LICENSE', 'NOTICE'):
+            original, distributed = root / name, root / 'axiarch-rules' / name
+            if not original.is_file() or not distributed.is_file():
+                problems.append(f'axiarch-rules/{name}: missing source/distribution notice')
+            elif original.read_bytes() != distributed.read_bytes():
+                problems.append(f'axiarch-rules/{name}: distribution notice differs from source')
     for lang in ("ja", "en"):
         for layer in ("universal", "blueprint"):
             for folder in (root / "axiarch-rules" / lang / layer).glob("*/"):

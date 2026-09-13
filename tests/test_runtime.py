@@ -87,6 +87,31 @@ class RuntimeTests(unittest.TestCase):
         self.state("--mode", "resume", "--task", "absent", expected=2)
         self.state("--mode", "session-start", "--session", "s1", "--task", "t2", expected=2)
 
+    def test_session_listing_uses_goal_without_renaming_or_writing(self):
+        self.boot()
+        self.publish(self.candidate())
+        self.boot("s2", "t1", mode="resume")
+        before = self.tree_bytes()
+        rows = [json.loads(row) for row in self.state("--mode", "sessions").stdout.splitlines()]
+        self.assertEqual([row["session_id"] for row in rows], ["s1", "s2"])
+        self.assertTrue(all(row["goal"] == "Preserve adopter data" for row in rows))
+        self.assertEqual(rows[0]["docs"], ".axiarch/sessions/s1")
+        status = json.loads(self.state("--mode", "status").stdout)
+        self.assertEqual(status["goal"], "Preserve adopter data")
+        self.assertEqual(before, self.tree_bytes())
+
+    def test_session_listing_rejects_invalid_binding_and_external_link(self):
+        self.boot()
+        binding = self.session_docs() / "binding.json"
+        valid = binding.read_bytes()
+        binding.write_text('{"session_id":"s1","task_id":"../outside"}')
+        self.state("--mode", "sessions", expected=2)
+        binding.unlink()
+        outside = self.root / "outside.json"; outside.write_bytes(valid)
+        binding.symlink_to(outside)
+        self.state("--mode", "sessions", expected=2)
+        self.assertEqual(outside.read_bytes(), valid)
+
     def test_concurrent_sessions_and_compare_and_swap(self):
         def start(i):
             for attempt in range(20):

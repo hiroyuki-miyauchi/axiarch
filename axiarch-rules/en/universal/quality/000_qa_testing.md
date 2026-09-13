@@ -12,7 +12,7 @@
 > Quality is not the responsibility of a specific team, but a **shared responsibility of all engineers (Quality-as-a-Shared-Responsibility)**.
 > Language scope: TypeScript and JavaScript commands and tools are web-profile examples. Apply the same verification categories to every language, with concrete gates following the language-native rules in `engineering/320_programming_language_governance.md`.
 > Universal application contract: Named tools, test ratios, coverage thresholds, execution times, cadences, and team structures are reference profiles or Blueprint parameters unless they are official platform constraints or safety floors for irrecoverable risk. The Project Blueprint chooses concrete values from product risk, architecture, users, regulation, change frequency, and historical defects. It may not omit the outcomes of static, behavioral, boundary, failure-path, and release-artifact verification.
-> **42-Part, 130+ Section Architecture.**
+> Select applicable sections using this document's table of contents and quick reference index. Do not limit loading by an advertised section count.
 
 ---
 

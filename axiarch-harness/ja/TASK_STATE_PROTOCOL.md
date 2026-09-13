@@ -16,6 +16,10 @@
 
 セッションIDはCLI、`AXIARCH_SESSION_ID`、`CODEX_THREAD_ID`、hookの `session_id` / `sessionId` を使用できる。タスクIDはCLIまたは `AXIARCH_TASK_ID`。IDが無い起動は新規IDを生成して出力する。自動的に他セッションを選ばない。次回は出力IDを指定する。IDは認証情報ではない。
 
+UUID形式のフォルダ名は衝突回避と再開に使う内部キーであり、作業名ではない。`--mode status` と `--mode sessions` は正本の `goal` を先頭に表示し、作業の目的で識別する。sessions一覧はbindingとタスク正本から都度読み、別の名称台帳を作らない。既存フォルダの手動改名は参照を壊すため行わない。新規IDを明示する場合は `audit-2026-09-13-agent-a` のような作業に合うASCII名も使えるが、既存IDと重複させない。例の作業名・日付は固定値ではない。
+
+セッション文書・共有タスク・履歴はローカル管理記録で、Git配布物に含めない。`privacy-check` で追跡状態と除外設定を確認する。除外設定はすでに追跡されたファイルや過去の履歴を消さない。公開用の変更説明は機密情報を除いて `CHANGELOG.md` 等へ整理し、内部IDや生ログをそのまま転載しない。
+
 同一セッションの再起動は既存文書を変更しない。別タスクには新しいセッションIDを使う。同じタスクへ別セッションから参加するときは `resume --task` を指定し、共通状態と以前の担当の証跡を読んで引き継ぐ。各セッションは自分の文書だけを編集する。Markdown中のロード履歴は新しいAIによる読み込みを証明しない。
 
 既存セッションが不完全なら、先に新しいタスク状態を作らず停止する。bindingがあるのに共有state.jsonが消えている場合も新規タスクとして再生成しない。残る文書・history・バックアップを確認して復旧し、別タスクを開始する場合は新しいタスク／セッションIDを明示する。
@@ -42,6 +46,7 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task upgrade-audit --ses
 # 同じ作業の再開。既存セッションなら3文書もそのまま保持する
 bash axiarch-scripts/axiarch-task-state.sh --mode resume --task upgrade-audit --session agent-a
 bash axiarch-scripts/axiarch-task-state.sh --mode status
+bash axiarch-scripts/axiarch-task-state.sh --mode sessions
 bash axiarch-scripts/axiarch-task-state.sh --mode path --session agent-a
 # 旧共有文書を新規セッションへコピー。元ファイルは移動・削除しない
 bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --session agent-b --import-legacy
@@ -68,6 +73,14 @@ bash axiarch-scripts/axiarch-task-state.sh --mode publish --session agent-a --in
 タスクロックは同じ実行ユーザーが所有し、ハードリンク数1の通常ファイルに限る。FIFO・リンク・所有者不一致は待たず拒否する。原子的な置換は各JSONファイル単位であり、タスク・セッション・互換ポインター全体の同時確定を保証しない。historyの保存後に現在値の更新が失敗した場合は旧state.jsonを保持し、同じ内容のhistoryを使って再実行できる。
 
 ## 実行記録の保護
+
+更新シェルの `check-paths` とPython補助の `copy` は、更新元・利用先・比較元の選択範囲に同じ事前検査を適用する。制御文字・リンク・特殊ファイル・予約パス・別名衝突はコピー前に拒否する。コピー中のI/O失敗は終了5で示すが、先に成功したファイルは残る。全体の排他・保護設定・診断・結果記録は `axiarch-scripts/axiarch-upgrade.sh` を使う。内部 `copy` 単体の終了0は更新全体の完了を表さず、REVIEWやTYPE-CONFLICTの保留判定はシェルの集計・確定処理が担う。
+
+配布パスの識別では、大文字・小文字とUnicodeの正規等価な表記差をcasefoldとNFDで比較する。選択パス、親フォルダ、展開した子孫で別表記が衝突する場合は、保持対象を別名から更新しないよう適用前に拒否する。更新元・利用先・比較元の選択範囲で比較し、初期導入元と準備済みpayloadにも同じ名前検査を使う。これは移植性のための保守的な制約で、大小文字を区別するOSでも拒否する。通常の日本語・空白は使用できる。大文字小文字だけの改名を自動マージせず、元データを保全して配布用コピーとmanifestの表記を揃え、dry-run後に再実行する。利用先の改名は所有者の許可範囲で行う。ハードリンク等の全ての同一実体を識別する検査ではない。
+
+更新のワイルドカード展開は、元のファイル名を検査してから行単位の選択へ変換する。改行・制御文字・Unicodeの行区切り（NEL、LINE SEPARATOR、PARAGRAPH SEPARATOR）を含むパスは拒否する。旧manifestのBlueprint探索でも名前の境界を保持し、別パスへの分割や操作ログへの混入を避ける。通常の空白・日本語名、隠しファイルの明示選択、除外設定は使用できる。拒否された名前は配布専用ソース側で確認し、利用先の記録を自動改名・削除しない。
+
+配布元のmanifestはGit内部情報やローカル管理記録の所有権を取得しない。導入・更新のpayloadとしてプロジェクト全体の `.`、パス中の `.git` / `.axiarch`（大文字小文字の違いを含む）を受け付けない。更新では展開後の選択パスとその子孫も検査する。初期導入では配布フォルダと準備済みpayloadを検査する。管理記録の正規生成・更新は各専用処理で行い、この拒否を回避するために既存記録を削除しない。混在する場合は配布専用のソースを用意し、更新では必要な除外設定をレビューする。これはパスの境界検査であり、別名ファイルの内容に含まれる秘密を自動検知・匿名化するものではない。
 
 状態の秘密・個人データ制約は `axiarch-rules/ja/universal/core/300_goal_and_current_state.md` §4.6を正本とする。初期導入・適用する更新・セッション生成／再開時は、`.axiarch/.gitignore` に管理記録の除外を補完する。対象はtasks、sessions、upgrades、conflicts、process-doc-history、process-doc-stateの各ディレクトリ、task-state.lock、privacy.lock、upgrade-result.json、install-result.json、install-health.logである（すべて `.axiarch/` 配下）。既存の除外内容とルートの `.gitignore` を保持し、Git管理下で独自ルールの否定指定が保護を打ち消す場合は診断失敗とする。dry-runと読取診断は変更しない。
 

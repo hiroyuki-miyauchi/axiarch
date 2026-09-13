@@ -57,6 +57,8 @@ Read-only subagent delegation is not a Human Approval Gate action by itself. Whe
 
 ## Quick Start
 
+Distributed Axiarch license and attribution are retained in `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE`; adopter-root notices stay project-owned. Local session evidence is excluded from Git. Use `axiarch-task-state.sh --mode sessions` to list work by its canonical goal while preserving internal session IDs.
+
 Use a reviewed local checkout for unreleased changes. For a published tag, use the installer from that same tag and run it as a file so stdin remains available for choices. The current installer requires its matching Python helpers; older sources without them stop before application. Existing adopters use the Safe Upgrade Wizard rather than reinstalling.
 
 ```bash

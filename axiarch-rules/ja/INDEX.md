@@ -56,7 +56,7 @@ your-project/
  ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
  │    ├── README.md                    ← 索引・使い方ガイド
  │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（16 段階、`--quiet` 対応、v1.9+ diff guard、v1.11.0現在タスクセッション別文書・ネイティブタスク状態同期・v1.10.0+由来の本体リリース整合・ROADMAP Current Stable／正規AI-facing header／CHANGELOG compare ref／Actions immutable SHA厳密一致と日英完了release entry・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査・Claude Memory正本境界検査・Check 16 reminder境界検査）
- │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + ネイティブタスク状態reminder v1.11.0+）
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（記録の見直し候補検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + ネイティブタスク状態reminder v1.11.0+）
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（現在タスク文書の自動初期化、v1.5.5+ / v1.11.0+）
  │    ├── axiarch-task-state.sh        ← task.md / implementation_plan.md / walkthrough.md のsession-specific補助（v1.11.0）
@@ -71,8 +71,8 @@ your-project/
 | ファイル | 説明 |
 |---|---|
 | [README.md](./README.md) | 全ルールモジュールへのリンク集。導入手順・初期セットアップガイドを含む。 |
-| [compliance_matrix.md](./compliance_matrix.md) | ユーザーの要望がどのルールファイルでカバーされているかを証明する要件対照表。Universal（不変）と Blueprint（可変）の責務分離を定義。 |
-| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | AIが対話開始時に必ず実行すべき5ステップのルールロード手順。 |
+| [compliance_matrix.md](./compliance_matrix.md) | 要望と対応するルールファイルを追跡する要件対照表。実動作や遵守の証明ではない。Universal（不変）と Blueprint（可変）の責務分離を定義。 |
+| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | 適用範囲に応じて関連条項を読む5ステップの手順。H0/H1は軽量適用。 |
 | [CRYSTALLIZATION_PROTOCOL.md](./CRYSTALLIZATION_PROTOCOL.md) | AIがタスク完了時に教訓を自律的に記録・整理（結晶化）するためのプロトコル。 |
 
 ---
@@ -173,7 +173,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | セキュリティとプライバシー。**22セクション構成**。ゼロトラスト7柱（NIST 800-207準拠）、認証・認可（FIDO2/Social Login/Session管理）、APIセキュリティ（BOLA/BFLA/SSRF防止）、サプライチェーン（SBOM/SLSA）、AI/LLMセキュリティ（OWASP LLM Top 10 2025）、コンテナセキュリティ（Pod Security Standards/イメージ署名）、暗号化ポリシー（PQC準備）、OWASP Top 10 2025、GraphQL、シークレット管理、クライアントサイドセキュリティ、ボット/DDoS防御、セキュリティガバナンス。逆引き索引付き。 |
+| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | セキュリティとプライバシー。詳細構成はリンク先の目次・索引を参照。ゼロトラスト7柱（NIST 800-207準拠）、認証・認可（FIDO2/Social Login/Session管理）、APIセキュリティ（BOLA/BFLA/SSRF防止）、サプライチェーン（SBOM/SLSA）、AI/LLMセキュリティ（OWASP LLM Top 10 2025）、コンテナセキュリティ（Pod Security Standards/イメージ署名）、暗号化ポリシー（PQC準備）、OWASP Top 10 2025、GraphQL、シークレット管理、クライアントサイドセキュリティ、ボット/DDoS防御、セキュリティガバナンス。逆引き索引付き。 |
 | 100 | [100_data_governance.md](./universal/security/100_data_governance.md) | 法務・ガバナンス・データ戦略。**45セクション構成**。グローバル規制マッピング（GDPR/CCPA/EU AI Act等14法）・2025-2027タイムライン・越境移転・同意管理・データガバナンス成熟度・RegTech自動化・量子暗号アジリティ。逆引き索引付き。 |
 | 200 | [200_oss_compliance.md](./universal/security/200_oss_compliance.md) | ライセンスと依存関係管理。**63セクション・299ルール・40+コードスニペット**。ライセンス三層分類・SBOM（CycloneDX 1.6/SPDX 3.0）・サプライチェーンセキュリティ（SLSA v1.2 Build / Source Tracks、Sigstore）・SCAツール統合・自動更新戦略・成熟度モデル。逆引き索引付き。 |
 | 300 | [300_ip_due_diligence.md](./universal/security/300_ip_due_diligence.md) | 知的財産とExit戦略。**50セクション・10パート構成**。IP所有権・特許戦略・営業秘密・商標・著作権・AI生成物IP・Exit戦略・DD実務・ガバナンス・コンプライアンス。逆引き索引付き。 |
@@ -188,7 +188,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QAとテスト戦略。**41セクション・12パート構成**。テスト哲学、テスト種別（静的/ユニット/統合/コントラクト/E2E/VRT/パフォーマンス/Property-Based/ミューテーション/a11y）、**テスト層別の必須アサーション観点（§8.6: unit/複合/結合の各層が保証すべきこと・失敗系パステスト義務・静的解析最下層・バッチ/バックフィルテストは engineering/700 参照）**、セキュリティ、テスト品質、CI/CD、リリース、ドメイン固有、レジリエンス、AI駆動テスト、データ&API品質、コンプライアンス&可観測性、成熟度モデル5段階。逆引き索引付き。 |
+| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QAとテスト戦略。詳細構成はリンク先の目次・索引を参照。テスト哲学、テスト種別（静的/ユニット/統合/コントラクト/E2E/VRT/パフォーマンス/Property-Based/ミューテーション/a11y）、**テスト層別の必須アサーション観点（§8.6: unit/複合/結合の各層が保証すべきこと・失敗系パステスト義務・静的解析最下層・バッチ/バックフィルテストは engineering/700 参照）**、セキュリティ、テスト品質、CI/CD、リリース、ドメイン固有、レジリエンス、AI駆動テスト、データ&API品質、コンプライアンス&可観測性、成熟度モデル5段階。逆引き索引付き。 |
 
 ---
 

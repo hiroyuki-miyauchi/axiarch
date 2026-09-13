@@ -185,7 +185,7 @@ H2以上は実際に読んだパスと範囲をセッション固有のtask.md�
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
 > 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
-> 3. **AXIARCH現在タスク必須トリオ全 3 ファイル**（`task.md` / `implementation_plan.md` / `walkthrough.md`）を full-text grep し、既存 domain keyword を抽出。プラン側に書かれた domain context も漏れなく捕捉
+> 3. 解決済みセッションの3文書（`task.md` / `implementation_plan.md` / `walkthrough.md`）のうち存在するファイルを full-text grep し、既存 domain keyword を抽出。プランや結果記録も比較対象に含めるが、文脈の完全な把握や実読込の確認ではない
 > 4. **差異検出時**: `[LOAD REVIEW]` flag + **TTL bypass**（短縮版を抑制し full reminder を再発火）
 >
 > これにより AI の「タスクタイプ不変」自己判断だけに依存せず、**hook 側で task boundary 候補を検出**して rule 再 load を促す構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。

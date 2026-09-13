@@ -8,7 +8,7 @@
 > **Level 1 Priority: Absolute Compliance**
 > Security and legal compliance are the **highest priority**.
 > They take precedence over user convenience, development speed, and profitability.
-> **40 Parts / 170+ Sections architecture. Revision date: 2026-07-23**
+> Select applicable sections using this document's table of contents and quick reference index. Do not limit loading by an advertised section count.
 
 > [!CAUTION]
 > **Primary Directive**

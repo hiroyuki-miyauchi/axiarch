@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **This file is a Universal Rule (Immutable). Editing is prohibited unless an explicit "Amend Constitution" instruction is given.**
-> Last Updated: 2026-03-24
+> Last Updated: 2026-09-13
 
 > [!IMPORTANT]
 > **Primary Directive**
@@ -14,6 +14,8 @@
 > **Legal & Security > User Experience**
 > Legal compliance **always takes priority** over user convenience, development velocity, and revenue.
 > Features with legal risk must not be provided even if users desire them.
+
+Legal maps, future schedules and statistics here are reference candidates, not a complete current legal register. The document revision date does not mean every item was reverified. Before implementing an obligation, verify scope, roles, effective and compliance dates and exceptions from primary sources; record the assessment date and basis in Blueprint. Do not fill unknown dates with assumed defaults.
 
 ---
 
@@ -80,13 +82,13 @@
 
 | This File (61) Scope | Other Files' Scope |
 |:---------------------|:-------------------|
-| Legal obligations, reporting thresholds, deadlines | `60` Technical security implementation |
-| Cookie consent legal requirements & classification | `60` §4.12 CMP technical implementation |
-| License fundamentals & UGC rights | `62` License management details |
-| Contractor IP & anti-social forces exclusion | `63` Patent & DD strategy |
-| Data breach legal notification obligations | `60` §10.7 Technical IR procedures |
-| ESG & sustainability reporting | `11` FinOps (cost aspects) |
-| Antitrust & DMA | `35` API gateway controls |
+| Legal obligations, reporting thresholds, deadlines | `security/000_security_privacy.md` Technical security implementation |
+| Cookie consent legal requirements & classification | `security/000_security_privacy.md` §4.12 CMP technical implementation |
+| License fundamentals & UGC rights | `security/200_oss_compliance.md` License management details |
+| Contractor IP & anti-social forces exclusion | `security/300_ip_due_diligence.md` Patent & DD strategy |
+| Data breach legal notification obligations | `security/000_security_privacy.md` §10.7 Technical IR procedures |
+| ESG & sustainability reporting | `operations/600_cloud_finops.md` FinOps (cost aspects) |
+| Antitrust & DMA | `engineering/100_api_integration.md` API gateway controls |
 
 ---
 
@@ -97,7 +99,7 @@
 | Regulation | Jurisdiction | Effective | Key Obligations | Max Penalty |
 |:-----------|:------------|:----------|:---------------|:-----------|
 | **GDPR** | EU/EEA | 2018 | Consent management, DPO, DPIA, data subject rights | 4% global revenue or €20M |
-| **APPI** (Amended) | Japan | 2022 (2027 amendment expected) | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
+| **APPI** (Amended) | Japan | 2022; verify subsequent amendments | Pseudonymized/anonymized processing, cross-border restrictions, breach reporting | ¥100M for legal entities |
 | **CCPA/CPRA** | California, US | 2020/2023 | Opt-out rights, sensitive PI, ADMT regulation | $7,500/violation (intentional) |
 | **EU AI Act** | EU | 2024 (phased) | Risk classification, high-risk AI conformity, GPAI obligations | 7% global revenue or €35M |
 | **DSA/DMA** | EU | 2022/2024 | Platform transparency, gatekeeper obligations | 6% global revenue |
@@ -131,7 +133,7 @@
 | **2026.1** | Vietnam PDPD enforcement |
 | **2026.1** | New US state laws effective (Kentucky, Rhode Island, Indiana, etc.) |
 | **2026.4** | EU: Cross-border GDPR enforcement regulation enters into force (EU 2025/2518) |
-| **2026.6** | Colorado AI Act (CAIA): High-risk AI system regulation effective |
+| **2027.1** | Colorado SB26-189: covered ADMT requirements begin; see §3.7 |
 | **2026.7** | Connecticut: Neural Data added to sensitive data categories |
 | **2026.8** | EU AI Act: High-risk AI (Annex III) obligations, transparency obligations (Art.50), AI sandbox establishment obligations take effect. **Note: Deferral proposal pending** (see note below) |
 | **2026.8** | California AI Transparency Act (CAITA): AI-generated content transparency obligations effective |
@@ -144,7 +146,7 @@
 | **2026.1** | California SB 446: 30-day data breach notification obligation (AG notification 15 days) |
 | **2026.3** | COPPA 2.0 (KIDS Act): Protection scope expanded to under-17 (Senate passed) |
 | **2026.5** | CIRCIA: Critical infrastructure 72-hour reporting / ransomware payment 24-hour reporting effective (delayed from original 2025.10) |
-| **2027** | Global Privacy Laws Amendment Act expected effective (administrative monetary penalty, biometric data regulation, etc.) |
+| **2027** | Review enacted regional amendments and their actual effective dates; no single global Privacy Laws Amendment Act exists |
 | **2027.4** | EU: Cross-border GDPR enforcement regulation (EU 2025/2518) fully applicable (15-month investigation deadlines, etc.) |
 | **2027.8** | EU AI Act: High-risk AI (product safety legislation: medical devices, aviation, etc.) |
 | **2025.8** | UK Arbitration Act 2025 effective: Changes to arbitrator immunity and governing law |
@@ -216,81 +218,31 @@
 -   **UK Adequacy Extension**: EU-UK adequacy decision extended to **December 2031** (draft decision 2025.10). European Commission confirmed adequacy following DUAA impact assessment.
 
 ### 3.5. Data Processing Standards
--   **Pseudonymized Information**: Processed so individuals cannot be identified without combining other information. Relaxed internal analysis use. Third-party provision prohibited in principle.
--   **Anonymized Information**: Processed so re-identification is impossible. Third-party provision allowed without consent. Processing standards, publication obligations, and re-identification prohibition must be strictly observed.
--   **Usage Guide**: Internal analysis/product improvement → Pseudonymized / External provision/open data → Anonymized.
+
+Pseudonymisation reduces linkability to an individual; it does not by itself establish anonymisation or permission to share data. Assess anonymisation against the recipient's and holder's reasonably available information and re-identification risk. A processing label alone does not remove data protection obligations.
+
+Determine processing and disclosure conditions by purpose, recipient and jurisdiction. Do not import one country's statutory categories as universal rules or automatically turn internal analytics data into open data. See the [EDPB distinction](https://www.edpb.europa.eu/topics/ai-and-technology/anonymisation-pseudonymisation_en).
 
 ### 3.6. DSAR Automation Workflow
 
-| Step | Processing | Automation Level |
-|:-----|:----------|:----------------|
-| **1. Intake** | Centralized intake via web form / API / email | Fully automated |
-| **2. Identity Verification** | Tiered authentication (logged in → immediate / unauthenticated → email + ID verification) | Semi-automated |
-| **3. Data Search** | Automated PII search across all data stores (DB, S3, logs, backups) | Fully automated |
-| **4. Review & Redaction** | Automated third-party PII masking + human review | Semi-automated |
-| **5. Response Preparation** | Auto-packaging in compliant format (JSON/CSV/PDF) | Fully automated |
-| **6. Delivery** | Auto-delivery of encrypted download link | Fully automated |
-| **7. Audit Log** | Immutable log of all operations (tamper-proof) | Fully automated |
+Link each access, deletion or other data-subject request to an intake ID, identity verification, scope, applicable law and request type, trigger, deadline, exceptions/extensions, owner and response evidence. Automation is optional; managed manual processing may provide equivalent traceability.
 
--   **SLA Management**: Auto-track statutory deadlines per request type with alerts firing 5 days before deadline:
-    -   GDPR: **30 days** (extension +60 days with justification notification)
-    -   CCPA/CPRA: **45 days** (extension +45 days)
-    -   Global Privacy Laws: **30 days** (obligation to respond promptly)
--   **Anti-Pattern**: Relying on CS team manual email handling for DSARs will fail at scale.
+Even when automated, an authenticated session alone does not authorize disclosure of all data. Match verification to the request, review scope and third-party redaction, and deliver through authorized channels. Distinguish sending from receipt.
+
+Do not convert statutory calendar months to fixed 30-day durations. Unsupported jurisdictions and unassessed requests must not silently default to 30 days: retain an unassessed status and alert the owner. Separate numeric deadlines from qualitative timing obligations and internal targets. Verify the applicable primary source when applying the rule.
 
 #### 3.6.1. DSAR API Design Pattern
 
-```typescript
-// DSAR Intake API Endpoint Design
-interface DSARRequest {
-  requestType: 'access' | 'deletion' | 'correction' | 'portability' | 'opt-out';
-  subjectId: string;         // User ID or email
-  jurisdiction: 'GDPR' | 'CCPA' | 'Global Privacy Laws' | 'LGPD' | 'PIPA';
-  verificationMethod: 'authenticated' | 'email' | 'id_document';
-  requestedAt: string;       // ISO 8601
-}
-
-interface DSARResponse {
-  requestId: string;         // UUID v4
-  status: 'received' | 'verified' | 'processing' | 'completed' | 'rejected';
-  deadlineAt: string;        // Auto-calculated per jurisdiction
-  estimatedCompletionAt: string;
-}
-
-// Auto-calculate statutory deadlines
-const DSAR_DEADLINES: Record<string, number> = {
-  'GDPR': 30,    // 30 days (extendable +60 days)
-  'CCPA': 45,    // 45 days (extendable +45 days)
-  'Global Privacy Laws': 30,    // 30 days
-  'LGPD': 15,    // 15 days
-  'PIPA': 10,    // 10 days
-};
-
-function calculateDeadline(jurisdiction: string, requestedAt: Date): Date {
-  const days = DSAR_DEADLINES[jurisdiction] ?? 30;
-  const deadline = new Date(requestedAt);
-  deadline.setDate(deadline.getDate() + days);
-  return deadline;
-}
-```
-
--   **Mandate**: DSAR API must record all operations as immutable logs, preserving audit trails.
+An optional API retains a request ID and `unassessed` / `verified` / `processing` / `completed` / `rejected` states. Keep `deadlineAt` null until its basis is checked, with the assessing owner, time, basis and recheck condition. Unknown applicability or deadlines are not success; escalate to authorized recipients. Avoid copying secrets or subject data into evidence; retain minimal references to access-controlled records.
 
 ### 3.7. Automated Decision-Making & Profiling
--   **Law**: GDPR Art.22 guarantees the right to object to **fully automated decision-making** with legal or similarly significant effects. CCPA/CPRA enforces ADMT regulation from 2026.1.
--   **Requirements**:
-    -   **Pre-disclosure** of automated decision existence, logic involved, and anticipated outcomes
-    -   Guarantee users' **right to request human review**
-    -   **Opt-out right**: CCPA/CPRA adds opt-out rights for profiling-based automated decisions
--   **CCPA ADMT Rules (2026.1 effective)**:
-    -   Targets technology that "substantially replaces human decision-making"
-    -   New processing activities must complete risk assessment **before** initiation
-    -   Pre-existing activities must complete risk assessment by **2027.12.31**
--   **Colorado AI Act (2026.6 effective)**:
-    -   Targets AI systems making "consequential decisions" (financial, housing, insurance, healthcare, education, employment, etc.)
-    -   Deployers: Must build and maintain risk management programs aligned with NIST AI RMF or ISO 42001
-    -   Deployers: Complete impact assessment before deployment + annual updates (or within 90 days of substantial modifications)
-    -   Consumer disclosure obligation: Notify that AI is involved in decision-making and provide appeal methods
+
+Assess decision impact, whether processing is solely automated or includes meaningful human involvement, and the relevant individuals, businesses and jurisdictions. Implement applicable explanation, disclosure, human reconsideration, appeal and opt-out requirements, recording exceptions and rationale. Verify GDPR scope and conditions against [EDPB rights guidance](https://www.edpb.europa.eu/sme/be-compliant/respect-individuals-rights_en).
+
+California's January 2026 regulation effective date differs from the January 2027 ADMT compliance start. Risk assessments and audits have separate scope and phased deadlines. Check each applicable obligation against the [CPPA final-regulation announcement](https://cppa.ca.gov/announcements/2025/20250923.html).
+
+Colorado's SB26-189 repeals and reenacts the earlier SB24-205 framework, with covered ADMT requirements starting in January 2027. Do not implement the superseded June 2026 schedule as current requirements; verify consequential decisions, developer/deployer roles and exceptions against the [enacted-law summary](https://leg.colorado.gov/bills/sb26-189).
+
 -   **Implementation Pattern**:
 
 ```typescript
@@ -654,13 +606,15 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 ## §7. Children & Vulnerable Persons Data Protection
 
 ### 7.1. Age Gate
--   **Rule 7.1.1**: Services with billing must implement age verification (date of birth entry).
--   **Rule 7.1.2**: Technically prevent circumvention of age verification.
+
+- **Rule 7.1.1**: Determine the need and assurance level for age checks from functionality, intended ages, jurisdictions and risks. Billing alone does not universally require collecting dates of birth; assess whether an age band or eligibility check suffices.
+- **Rule 7.1.2**: Test plausible bypass paths and define rechecks, restrictions and detection. Do not guarantee complete bypass prevention, and minimize identity-verification data.
 
 ### 7.2. Parental Consent
--   **Law**: Processing personal data of users under legal age (Japan: 18, EU: 16 with member state variations 13-16, US COPPA: 13) requires parental consent.
--   **Action**: Mandatory consent checkbox, timestamp & IP logging, VPC for users under 13.
--   **India DPDP Act (2026.11)**: Verifiable Parental Consent and consent manager registration become mandatory.
+
+- **Law**: Distinguish age of majority, contractual capacity, lawful basis for processing and capacity to consent. Do not apply a universal under-18 parental-consent rule to all processing. Establish the applicable law and processing context.
+- **Applicability**: GDPR consent for online services offered to children and COPPA coverage/exceptions are distinct. Record applicable conditions in Blueprint using current primary sources such as the [EDPB consent guide](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en) and [FTC COPPA guide](https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions).
+- **Action**: Where consent is required, provide suitable identity/parental verification and withdrawal. A checkbox alone is not verifiable parental consent. Define evidence purposes, minimum fields, retention and access; do not collect IP addresses or birth dates unconditionally. For additional jurisdictions, verify implementation phases, coverage and exceptions; do not hard-code projected dates as settled obligations.
 
 ### 7.3. Age-Appropriate Design
 -   **Rule 7.3.1**: Apply **Privacy by Default** at the highest level for services accessible to children.
@@ -951,19 +905,15 @@ SELECT cron.schedule(
 
 ### 12.4. Jurisdiction-Specific Data Retention Period Template
 
-| Data Category | GDPR (EU) | CCPA/CPRA (CA) | Applicable Regional Law | Common Recommendation |
-|:-------------|:----------|:--------------|:-----------|:---------------------|
-| **Customer Account Info** | Until purpose achieved + 3 years post-deletion | Disclosure obligation: 12 months | Until purpose achieved | **Max 3 years** post-deletion |
-| **Transaction/Payment Data** | Statutory period (tax: 7 years) | Statutory period | Statutory period (tax: 7 years) | **Per statutory period** |
-| **Marketing Consent** | Until revocation + 3 years evidence | Immediate stop after opt-out | Until revocation | Evidence for **5 years** |
-| **Access Logs** | Legitimate interest period (recommended: 6 months) | No requirement | Recommended: 1 year | **6 months to 1 year** |
-| **CCTV/Surveillance** | 72 hours to 30 days (varies by country) | No requirement | No requirement | **Max 30 days** |
-| **Employee Data** | 3-10 years post-employment (varies) | Reasonable period post-employment | 3 years post-resignation (Labor Standards Act) | **Per statutory period** |
-| **Health Data** | HIPAA: 6 years / GDPR: until purpose achieved | No requirement | Global Privacy Laws + Medical Law | **Per statutory period** |
-| **Children's Data** | COPPA/GDPR: promptly delete after purpose achieved | COPPA: reasonable period | Global Privacy Laws: same | **Delete in shortest period** |
+For each data class, record purpose, lawful basis, retention trigger, period or decision criteria, deletion/anonymization, legal holds, owner and review date. Do not assume one retention period across GDPR, CCPA/CPRA or regional law; assess subject requests, contracts and relevant tax/health obligations separately.
 
--   **Mandate**: Above is a template. Define specific values in Blueprint.
--   **CCPA/CPRA Disclosure Obligation**: Privacy policies must **publicly disclose** specific retention periods for each category.
+| Example class | Decisions to establish |
+|:--|:--|
+| Accounts and transactions | Purpose, contract end and applicable statutory retention |
+| Consent and notice evidence | Minimum proof and basis for retaining it |
+| Logs, images, employee and children’s data | Necessity, jurisdiction, access and transparency |
+
+Do not apply generic three- or seven-year defaults to real data. Avoid unsupported long retention, and disclose periods or decision criteria as applicable law requires. If preservation duties conflict with deletion requests, record the scope and rationale under §12.4.1.
 
 #### 12.4.1. Litigation Hold
 -   **Definition**: Legal obligation to **immediately suspend** routine deletion of relevant data when litigation, investigation, or regulatory action is reasonably anticipated.
@@ -1041,39 +991,35 @@ SELECT cron.schedule(
 ## §14. Data Breach Legal Notification
 
 ### 14.1. Legal Basis
--   **Law**: GDPR Art.33/34, amended Global Privacy Laws Art.26 etc. mandate supervisory authority reporting and user notification upon personal data breaches.
+-   **Law**: Determine authority reporting and individual notification separately from applicable law, organizational role and risk (§14.4); not every incident has the same recipients or deadline.
 -   **Cross-Reference**: `security/000_security_privacy.md` §10.7, `operations/500_incident_response.md` §3
 
 ### 14.2. 5-Phase Flow
 
-| Phase | Deadline | Owner | Action |
-|:------|:---------|:------|:-------|
-| **1. Detection** | Immediate | Monitoring System | Anomaly detection → immediate notification |
-| **2. Initial Response** | Within **1 hour** of detection | Technical Lead | Identify & block breach path, scope investigation, evidence preservation |
-| **3. Preliminary Report** | Within **72 hours** of detection | Legal | Submit preliminary report to supervisory authority |
-| **4. User Notification** | **Simultaneous** with preliminary report | CS/Operations | Notify affected users |
-| **5. Post-Incident** | Within **30 days** of detection | All Teams | Submit final report, Post-Mortem, prevention measures |
+These are response stages, not universal statutory deadlines. Define owners and internal targets in Blueprint while separately tracking each covered obligation, trigger and recipient under §14.4.
+
+| Stage | Required action |
+|:--|:--|
+| Detection | Record the event and awareness time; alert owners through authorized channels |
+| Initial response | Contain the incident, investigate scope and preserve minimal evidence |
+| Authority reporting | Determine applicability, trigger and preliminary/final deadlines; retain submission results |
+| Individual/contractual notices | Assess conditions, timing and content separately from authority reporting |
+| Follow-up | Record supplemental reports, cause analysis, corrective actions and verification |
 
 ### 14.3. Reporting Thresholds
--   Personal data breach of **1,000+ records**
--   Includes special category personal information
--   Potential for financial harm
--   Breach caused by unauthorized access
+
+Do not decide reporting is unnecessary from record counts alone. Check jurisdiction, organizational role, data types, risk to individuals, processor duties and contracts. Do not apply one jurisdiction’s population threshold worldwide; promptly escalate unresolved applicability to the responsible legal reviewer.
 
 ### 14.4. Jurisdiction-Specific Notification Deadlines
 
-| Jurisdiction | Authority Notification | User Notification | Notes |
-|:-------------|:----------------------|:-----------------|:------|
-| **GDPR** | Within **72 hours** | "Without undue delay" for high-risk | Amendment proposes **96-hour** relaxation |
-| **Global Privacy Laws** | Preliminary: **3-5 days** / Final: **30 days** | Mandatory individual notification | 2027 amendment may change |
-| **CCPA/CPRA** | No explicit statutory deadline | "Most expedient means" | State AG report for 500+ records |
-| **CA SB 446** | AG notification: **15 days** (500+ records) | **30 days** | **Effective 2026.1**. Clarifies previous "most expedient means" to 30 days |
-| **New York** | NYDFS notification obligation | **30 days** | **Effective 2024.12**. From 2025.3, "medical information" and "health insurance information" added to PI definition |
-| **COPPA** | Promptly notify FTC | Notify parents | Immediate response for children's data |
-| **NIS2** | Initial: **24 hours** / Detailed: **72 hours** | Service user notification | Critical infrastructure operators |
-| **CIRCIA** | **72 hours** (ransomware payment: 24 hours) | — | Critical infrastructure. **Effective 2026.5** (delayed from original 2025.10) |
+Verify deadlines against primary sources at application time, distinguishing recipients, triggers, preliminary/final reports and exceptions. These examples are not a fixed global deadline table.
 
--   **Mandate**: When spanning multiple jurisdictions, design IR flow based on the **most stringent deadline**.
+| Example scope | Conditions to establish |
+|:--|:--|
+| GDPR | For reportable controller breaches, notify within 72 hours after awareness; communicate to individuals without undue delay when high risk applies. Processors notify controllers without undue delay. Check exceptions and reasons for delay ([EDPB](https://www.edpb.europa.eu/sme/assess-the-risks/data-breaches_en)) |
+| Other countries, states, sectors and contracts | Establish covered entities, data, implementation phase, individuals/authorities/controllers to notify, and each trigger and deadline. Do not treat proposed rules as current obligations or reuse another jurisdiction’s 72-hour value |
+
+Track each obligation separately, rather than collapsing them into a single shortest duration. Plan internal response to meet the earliest verified deadline; unresolved applicability is neither indefinite waiting nor an exemption from notification.
 
 ### 14.5. GDPR Fine Statistics & Enforcement Trends (2025-2026)
 -   **Cumulative Fines**: Total GDPR fines since enforcement reached **€7.1B** (as of early 2026). Over 60% imposed since 2023.
@@ -1099,52 +1045,33 @@ SELECT cron.schedule(
 
 | Scenario | Assumed Impact | Key Training Areas |
 |:--------|:--------------|:------------------|
-| **Ransomware Attack**: Customer DB encrypted | 500K PII potential exposure | 72h notification decision, ransom payment deliberation, law enforcement coordination |
+| **Ransomware Attack**: Customer DB encrypted | 500K PII potential exposure | assessment of applicable reporting obligations, ransom payment deliberation, law enforcement coordination |
 | **Vendor-Originated Breach**: Tier 1 vendor's Sub-Processor hacked | Fourth-party data leak | Vendor notification clause activation, responsibility delineation, cascading notifications |
 | **Insider Threat**: Employee exfiltrates customer data | Intentional breach | Forensic preservation, disciplinary procedures, authority reporting |
-| **Cross-Border Incident**: Affects EU + Japan + US customers | 3-jurisdiction simultaneous response | Shortest deadline (GDPR 72h) based IR flow |
+| **Cross-Border Incident**: Affects EU + Japan + US customers | 3-jurisdiction simultaneous response | IR flow tracking conditions, triggers and deadlines per jurisdiction |
 
 #### 14.6.3. Cross-Border Incident Coordination Checklist
 -   [ ] Identify affected jurisdictions (based on data subject locations)
 -   [ ] Identify **shortest notification deadline** per jurisdiction (§14.4 reference)
 -   [ ] Identify Lead Supervisory Authority
--   [ ] Prepare statutory notification formats per jurisdiction (GDPR: Art.33/34, Global Privacy Laws: PPC format)
+-   [ ] Prepare statutory notification formats per jurisdiction (GDPR: Art.33/34; other jurisdictions: the competent authority’s format)
 -   [ ] Pre-select external law firms (local jurisdictions) and confirm emergency contact arrangements
 -   [ ] Prepare multi-language affected party notification templates in advance
 
-#### 14.6.4. IR Runbook Code Template
+#### 14.6.4. IR Runbook Record Template
 
-```typescript
-// --- Incident Response Runbook: Notification Deadline Calculator ---
-import { differenceInHours, addHours, format } from 'date-fns';
+Optional notification tooling should consume a verified obligation register, not hard-coded global legal deadlines.
 
-interface JurisdictionDeadline {
-  jurisdiction: string;
-  regulation: string;
-  deadlineHours: number;
-  authority: string;
-  notificationUrl: string;
-}
+| Required input | Meaning |
+|:--|:--|
+| Obligation ID and owner | Unique incident/obligation mapping and responsible reviewer |
+| Basis and checked time | Primary source and assessment of coverage, exceptions and effective date |
+| Trigger and time | Each jurisdiction’s awareness or other starting event and time zone |
+| Deadline, recipient and report kind | Verified deadline or a qualitative timing requirement plus internal response target |
+| Status and evidence | Unassessed / action required / submitted / receipt confirmed, with result references |
 
-const NOTIFICATION_DEADLINES: JurisdictionDeadline[] = [
-  { jurisdiction: 'EU/EEA', regulation: 'GDPR Art.33', deadlineHours: 72, authority: 'Lead DPA', notificationUrl: '' },
-  { jurisdiction: 'Japan', regulation: 'APPI', deadlineHours: 72, authority: 'PPC', notificationUrl: 'https://www.ppc.go.jp/personalinfo/legal/leakAction/' },
-  { jurisdiction: 'US-CA', regulation: 'CCPA/SB446', deadlineHours: 720, authority: 'CA AG', notificationUrl: '' },
-  { jurisdiction: 'Australia', regulation: 'Privacy Act (NDB)', deadlineHours: 720, authority: 'OAIC', notificationUrl: '' },
-  { jurisdiction: 'US-Federal', regulation: 'CIRCIA', deadlineHours: 72, authority: 'CISA', notificationUrl: '' },
-];
+Missing, expired or ambiguous inputs remain unassessed and alert the owner; do not display zero-item success or exemption. A calculation is not proof of submission or receipt. External sending uses authorized recipients and channels; do not forward raw logs or personal data.
 
-function calculateDeadlines(discoveryTime: Date) {
-  return NOTIFICATION_DEADLINES.map(d => ({
-    ...d,
-    deadline: addHours(discoveryTime, d.deadlineHours),
-    formattedDeadline: format(addHours(discoveryTime, d.deadlineHours), 'yyyy-MM-dd HH:mm (zzz)'),
-    remainingHours: d.deadlineHours - differenceInHours(new Date(), discoveryTime),
-  })).sort((a, b) => a.deadlineHours - b.deadlineHours);
-}
-```
-
--   **Mandate**: Integrate the above deadline calculation logic into IR tools to **automatically compute notification deadlines across all jurisdictions** upon incident discovery, highlighting the jurisdiction with the shortest deadline.
 -   **Cross-Reference**: §14.4 (Jurisdiction-Specific Notification Deadlines), `operations/500_incident_response.md` (Incident Runbooks)
 -   [ ] Assess cross-border data transfer existence and destination country surveillance law risks
 -   [ ] Full IR timeline recording (preserve audit logs as evidence)
@@ -1710,7 +1637,7 @@ jobs:
 | Jurisdiction | Legislation | Effective | Approach | Key Requirements |
 |:------------|:-----------|:----------|:---------|:----------------|
 | **EU** | AI Act | Phased (2025.2-2027.8) | Risk-based | Risk classification, conformity assessment, GPAI obligations |
-| **Colorado** | AI Act (CAIA) | 2026.6 | High-risk AI only | Impact assessment, risk management, consumer disclosure |
+| **Colorado** | SB26-189 | 2027.1 | Covered ADMT / consequential decisions | Technical documentation, notice and human review; verify scope in §3.7 |
 | **California** | CAITA (SB 942) | 2026.8 | Transparency-focused | AI-generated content watermarking & labeling |
 | **California** | SB 53 | 2026.1 | Frontier models | Revenue >$500M developers must publish risk management framework |
 | **Texas** | RAIGA | 2026 | High-impact AI | Documentation, transparency, red-teaming |
@@ -2203,7 +2130,7 @@ const SIMILARITY_THRESHOLDS = {
 |:---------------|:------------|:--------|:-------------------------|:-----------------|
 | **DPIA** | GDPR Art.35 | High-risk data processing | Privacy risk & impact on data subjects | On processing change + annual review |
 | **TIA** | GDPR Art.44-49 + CNIL | Cross-border data transfer | Legal protection level in destination country | At least annually + on significant changes |
-| **AI Impact Assessment** | EU AI Act / Colorado AI Act | High-risk AI systems | AI safety, impact on rights, bias | Pre-deployment + annual (or 90 days after significant changes) |
+| **AI Impact Assessment** | Applicable AI / data protection law | Verify covered systems and processing | Safety, rights and bias | Determine timing and reassessment triggers from each applicable obligation |
 | **CCPA Risk Assessment** | CCPA/CPRA (effective 2026.1) | ADMT use, profiling | Balance of consumer benefits and privacy invasion risk | Before new processing + annual |
 | **Ethics Impact Assessment** | §40 (this file) | Ethics review trigger applies | Fairness, transparency, social impact | Before feature release |
 
@@ -2264,7 +2191,7 @@ function determineRequiredAssessments(
 
 | Evaluation Category | Evaluation Items | Importance |
 |:-------------------|:-----------------|:-----------|
-| **Regulatory Coverage** | Scope of supported regulations (GDPR/CCPA/Global Privacy Laws/AI Act, etc.) | Required |
+| **Regulatory Coverage** | Scope of supported regulations (GDPR/CCPA/Applicable regional privacy laws/AI Act, etc.) | Required |
 | **Auto-Tracking** | Automatic regulatory change detection and alerting | Required |
 | **Integration** | Interoperability with existing tools (SIEM, GRC, CMP, etc.) | Important |
 | **Reporting** | Auto-generation of board reports and regulatory authority submissions | Important |
@@ -2475,7 +2402,7 @@ const cryptoConfig: CryptoConfig = {
 | Keyword | Reference Section |
 |:--------|:-----------------|
 | GDPR / Digital Omnibus | §2.1, §2.3, §3.4, §4.7, §6.2.1, §6.2.2, §16.2 |
-| Global Privacy Laws / Personal Information Protection / 2027 Amendment | §2.1, §3.5, §6.1, §6.1.6 |
+| Applicable regional privacy laws / Personal Information Protection / 2027 Amendment | §2.1, §3.5, §6.1, §6.1.6 |
 | CCPA / CPRA / ADMT | §2.1, §3.6, §3.7, §6.3.1, §6.3.2 |
 | EU AI Act / Phased Enforcement | §2.1, §2.3, §11.1-11.4, §25, §31 |
 | DSA / DMA | §2.1, §6.2.3, §15.3, §24.1 |
@@ -2590,7 +2517,7 @@ const cryptoConfig: CryptoConfig = {
 | Digital Contract / Smart Contract / eIDAS / MiCA | §39 |
 | Australia ADM Transparency Obligation / POLA Act | §39.3 |
 | eDiscovery AI / TAR / CAL / AI-Generated Evidence / Shadow AI | §19.3 |
-| IR Runbook / Notification Deadline Calculator / Incident Response Automation | §14.6.4 |
+| IR Runbook / Verified Notification Obligations / Incident Response Automation | §14.6.4 |
 | Privacy by Design / PbD / GDPR Art.25 / LINDDUN | §36 |
 | PbD Checklist / Privacy Review Gates | §36.2, §36.3 |
 | PET / Differential Privacy / k-Anonymization / Tokenization | §36.4, §16.4 |
@@ -2602,7 +2529,7 @@ const cryptoConfig: CryptoConfig = {
 | CMMC / Defense Industry / NIST SP 800-171 / CUI | §30.5 |
 | Federal Preemption / AI Litigation Task Force | §6.3.2 |
 | Oregon Precise Geolocation / Sensitive Data | §6.3.2 |
-| Global Privacy Laws Administrative Penalties / AI Development Relaxation / 2026 Bill | §6.1.6 |
+| Applicable regional privacy laws Administrative Penalties / AI Development Relaxation / 2026 Bill | §6.1.6 |
 | EU AI Act Enforcement Deferral / 2027.12 / Annex III | §2.3, §11.2 |
 | Data Ethics Board / Ethics Review / FAST Principles / Newspaper Test | §40 |
 | Ethical Risk Assessment / Ethics Triggers | §40.2, §40.3 |

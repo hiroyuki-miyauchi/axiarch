@@ -92,6 +92,14 @@ Installation, upgrades and health share strict JSON decoding, rejecting duplicat
 
 ### 主な選択肢 / Main Choices
 
+配布範囲の検査では、プロジェクト全体の `.` と `.git` / `.axiarch` の管理領域を予約パスとして拒否する。詳細は [実行記録の保護](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md#実行記録の保護)。引数入力の不備は終了2、manifest・展開結果・選択パスの検査拒否は適用前に終了5、初期導入の配布検査は終了3となり、利用先へ結果ファイルを作らない。終了5だけでは適用前の拒否と適用中の失敗を区別できないため、端末診断と当該実行の記録の有無・状態を確認する。以前の実行結果を今回の結果と取り違えない。自動処理は終了値を受け取り、通知が必要なら機密を除いた診断へ接続する。初期導入は必須項目をファイルとディレクトリに分けて検査し、NOTICE等がディレクトリでも正常としない。対応するinstaller・Python補助一式を使い、既存導入先の内部記録を配布物へ混ぜない。
+
+Distribution checks reject the whole-project `.` selection and reserved `.git` / `.axiarch` components; see [Runtime artifact protection](../axiarch-harness/en/TASK_STATE_PROTOCOL.md#runtime-artifact-protection). Argument errors exit 2; invalid manifests, expansions and selected paths exit 5 before application; installation source checks exit 3, without creating adopter outcome files. Exit 5 alone does not distinguish preflight rejection from apply failure: inspect diagnostics and the presence/status of the current run record, without treating a previous result as current. Automation should capture the status and route sanitized diagnostics to authorized notifications when needed. Installation distinguishes required files from directories, so a directory named NOTICE does not pass. Use the matching installer and Python helpers, keeping adopter internal records out of distributions.
+
+Unreleasedの配布物は `axiarch-rules/LICENSE` と `axiarch-rules/NOTICE` を保持する。利用先ルートのLICENSE／NOTICEは変更しない。旧導入先では確認済み更新元のスクリプトでdry-runし、中核プロトコルのreview-eachでこの2ファイルを確認・適用する。変更済みまたは比較元不明のコピーは保留されるため、独自の帰属表示を失わないよう差分を判断する。初期導入は配布コピーが欠けた更新元を適用前に拒否する。ソース管理の正本はルートのLICENSE／NOTICEで、CIは配布コピーとの一致を検査する。
+
+Unreleased distributions retain `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE` without modifying adopter root notices. For older adopters, run a dry-run using the reviewed source's upgrade script, then review and apply these files in the Core Protocol group. Modified or unknown-base copies remain pending for review; retain adopter attribution when resolving differences. Installation rejects sources missing either copy before application. Root LICENSE/NOTICE are the source-maintenance authority; CI checks equality with distributed copies.
+
 | 選択肢 / Choice | 用途 / Purpose |
 |:--|:--|
 | `preserve（保持・上書きしない）` | `blueprint/core/000_project_overview.md` や `blueprint/core/010_project_lessons_log.md` など、採用先プロジェクト固有状態を維持 |
@@ -130,7 +138,7 @@ Upgrade results use per-run JSON, action/health logs and backups. Legacy reports
 
 The official Axiarch health diagnostic. One-shot 16-stage check covering hook configuration when installed, recorded adherence signals, crystallization threshold (count + time-axis), the verifiable subset of AXIARCH.md protocols, the v1.5.5 physical-block / bootstrap hooks, the v1.6.0 sublimated-files index, the v1.8.0 task-boundary detection wiring, the v1.9.0 PostToolUse diff guard, v1.10.0 release metadata parity and Safe Upgrade Wizard checks including exact ROADMAP Current Stable, canonical AI-facing headers, the CHANGELOG compare ref, immutable GitHub Actions SHAs, signed-tag workflow, exact ja/en relative paths, completed ja/en release entries, and the SECURITY private-reporting boundary, v1.11.0 session-specific task records, native task-state sync, ja/en numbered-heading parity, Claude Memory canonical-boundary checks, and Check 16 reminder invariants including Language First, Execution Harness, and the read-only subagent/security-scan delegation boundary. If Claude Code / Codex hook settings are absent, the diagnostic treats the hook layer as optional and not installed rather than failing only on hook absence. `--quiet` flag for pre-commit usage.
 
-言語・mobile・platform統治については、日英`320_programming_language_governance.md`、`420_react_native.md`、`520_cloud_application_platforms.md`、`530_azure_cloud.md`のsection数、Rule連番、必須成果、INDEX／README／compliance／公開digest導線、Universal件数を検証する。これらの新設正本がGit追跡外のままrelease候補になることもblockする。Provider profileがSupabase固定SSOT、Firestore一律禁止、全project固定plan、TypeScript固定へ逆戻りしていないことも回帰検査する。
+言語・mobile・platform統治については、日英`axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md`、`axiarch-rules/{lang}/universal/engineering/420_react_native.md`、`axiarch-rules/{lang}/universal/engineering/520_cloud_application_platforms.md`、`axiarch-rules/{lang}/universal/engineering/530_azure_cloud.md`のsection数、Rule連番、必須成果、INDEX／README／compliance／公開digest導線、Universal件数を検証する。これらの新設正本がGit追跡外のままrelease候補になることもblockする。Provider profileがSupabase固定SSOT、Firestore一律禁止、全project固定plan、TypeScript固定へ逆戻りしていないことも回帰検査する。
 
 For language, mobile, and platform governance, the diagnostic verifies section counts, consecutive Rule IDs, required outcomes, INDEX/README/compliance/public-digest links, Universal counts, and Git tracking for the ja/en 320, 420, 520, and 530 rules. It blocks a release candidate while a new canonical rule remains untracked, and guards provider profiles against regressions to a fixed Supabase SSOT, universal Firestore prohibition, one billing plan for every project, or TypeScript-only compute.
 
@@ -486,6 +494,10 @@ Optional command generation uses `axiarch-scripts/axiarch_setup.py` through `axi
 - [Claude Code Hooks (公式 / official)](https://code.claude.com/docs/en/hooks)
 
 ## 更新結果と実動作検証 / Outcomes and behavioral verification
+
+更新には `axiarch-scripts/axiarch-upgrade.sh` を使う。内部Python補助の `copy` は共通の事前検査とコピー失敗の終了5を持つが、全体の排他・診断・版数確定を単独では行わない。終了0だけで更新完了を判定しない。部分書込と再実行の境界は [実行記録の保護](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md#実行記録の保護) を参照。
+
+Use `axiarch-scripts/axiarch-upgrade.sh` for upgrades. The internal Python `copy` helper shares preflight checks and returns 5 for copy failures, but does not provide the overall lock, diagnosis or version confirmation by itself. Its exit 0 alone is not an upgrade-completion verdict. See [runtime artifact protection](../axiarch-harness/en/TASK_STATE_PROTOCOL.md#runtime-artifact-protection) for partial-write and retry boundaries.
 
 管理記録の誤コミットを抑えるため、適用する導入・更新とセッション起動は `.axiarch/.gitignore` を補完する。既存内容を保持し、Git管理済み・除外漏れは診断失敗とする。保存権限、保持・共有、通知の契約は [実行記録の保護](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md#実行記録の保護) を参照。過去記録は自動削除・untrackしない。導入・更新後の保護検査失敗も終了4となり、正常確認済みの版数へ進めない。適用前の保護設定失敗は導入3、更新5、セッション2となる（導入側のロック競合は6）。補完済みの除外設定だけが残ることがある。
 

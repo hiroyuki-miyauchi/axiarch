@@ -74,7 +74,7 @@ dry-runは計画と差分確認に限定し、競合ファイルなどの成果�
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` はdry-run時の競合を報告だけに留め、`--apply` 時だけ `.axiarch/conflicts/` を書く。`--source` 指定時はsource manifestの `axiarchVersion` を `.axiarch/version.json` に反映する。
+`axiarch-scripts/axiarch-upgrade.sh` はdry-run時の競合を報告だけに留め、`--apply` 時だけ `.axiarch/conflicts/` を書く。source manifestの `axiarchVersion` は `.axiarch/version.json` の `requestedVersion` に記録し、選択範囲の適用と診断が全て成功した場合だけ確認済みの `version` と `confirmedScope` を更新する。部分適用・失敗時は前回の確認済み版数を保持し、終了コードと今回の結果記録を突合する（詳細: `axiarch-scripts/README.md`）。
 
 ### Reference
 
@@ -122,7 +122,7 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`--interactive` のグループ�
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` はディレクトリ更新前にsource側に存在しないtarget側ファイルを検出し、`STALE-LOCAL` として表示する。`ACTION_LOG` へも記録するが、永続化されるのは `--apply` で `.axiarch/upgrade-report.md` を書く場合のみとする。
+`axiarch-scripts/axiarch-upgrade.sh` はディレクトリ更新前にsource側に存在しないtarget側ファイルを検出し、`STALE-LOCAL` として表示・保持する。`--apply` 時の記録は `.axiarch/upgrades/{run_id}/actions.log` と結果JSONへ保存する。旧 `.axiarch/upgrade-report.md` は過去の記録として保持し、新しい結果の保存先にはしない。記録・終了値の現行契約は `axiarch-scripts/README.md` を参照する。
 
 ### Reference
 
@@ -170,7 +170,7 @@ manifest側の広域Project State globは `blueprint/*/[0-9][0-9][0-9]_*.md` に
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` のfallback discoveryは `core` を含むBlueprint初期フォルダを探索する。`write_upgrade_metadata` は `axiarch-prompts/` が存在する場合、hash証跡に含める。`check-axiarch-health.sh` Check 15 は、fallback core Blueprint検出と任意prompt証跡化の実装配線を検査する。
+`axiarch-scripts/axiarch-upgrade.sh` は旧manifestの場合だけ、初期分類に固定せず実在するBlueprintフォルダを探索する。`axiarch-scripts/axiarch_upgrade.py` の `finalize` は、上書き適用したファイルと更新元とのバイト一致を確認したファイルを比較用hashへ登録する。任意promptも選択範囲に限り同じ条件を使い、保留した独自編集を比較元として認定しない。構造healthの配線検査と `tests/test_runtime.py` の実行回帰を併用する。
 
 ### Reference
 
@@ -190,11 +190,11 @@ manifestでは「ローカル所有が曖昧でない場合のみ自動更新し
 
 ### Rule
 
-`replace-if-local-unchanged` は、targetが存在しない場合、または `--from` / `--from-ref` / `--base-source` で得たbaseとtargetが一致する場合のみ自動更新する。baseがない状態でtargetに差分がある場合、base側に対象パスが存在しない場合、またはbaseとtargetが一致しない場合はreviewへ倒す。review時は `no-base-diff` / `base-missing` / `base-mismatch` のreasonラベルをupgrade reportへ残す。
+`replace-if-local-unchanged` は、targetが存在しない場合、比較元の内容と一致する場合、または過去の適用等で記録した `.axiarch/files.sha256` の該当hashと一致する場合に更新できる。更新元と既にバイト一致するファイルは変更しない。既知の比較元で確認できない差分はreviewとし、再実行時に後から加わった独自変更を上書きしない。`no-base-diff` / `base-missing` / `base-mismatch` または補助の `local-modified-or-unknown` を記録する。記録・版数の扱いは本書§2・§4と `axiarch-scripts/README.md` に従う。
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` は `copy_replace_if_local_unchanged` で専用判定を行う。`safe-only` と `update-all` の両方でこのpolicyを無条件の `copy_path` に流さない。`check-axiarch-health.sh` Check 15 は、この専用分岐とreasonラベルが存在することを検査する。
+`axiarch-scripts/axiarch-upgrade.sh` の `copy_replace_if_local_unchanged` と `axiarch-scripts/axiarch_upgrade.py` の `copy_files` がファイル単位で判定する。hash記録が存在するだけでは更新を許可せず、実ファイルの内容を照合する。構造healthは配線を調べ、`tests/test_runtime.py` が部分適用後の再実行と、その後の独自編集の保持を実行検証する。
 
 ### Reference
 

@@ -352,6 +352,10 @@ When older Axiarch releases expressed a rule more strictly, preserve the stricte
 従来の全文 `AGENTS.md` 本文から `AXIARCH.md` 正本へ移行する目的は、正本の集約であり、旧プロトコルの弱体化ではない。
 古いAxiarchリリースでより厳しく表現されていたルールは、`AXIARCH.md` がレビュー済みの置換境界を明示していない限り、より厳しい解釈を保持する。
 
+Reviewed replacement boundary: §1 and §3 define mandatory scope and optional adoption. Optional examples do not become obligations through older wording. Direct loading requires the applicable rule text, not a summary-only initialization. Git hashes, signatures, hooks and health checks support bounded verification; they do not guarantee author identity, complete understanding or safety of every operation. Apply the corrected contracts in `axiarch-rules/{lang}/universal/core/100_governance.md` and `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md`.
+
+レビュー済みの置換境界: §1・§3の適用範囲と任意採用を基準とし、旧表現から任意の例示を必須へ戻さない。直接ロードには適用する規則本文が必要で、要約だけの初期化では足りない。Gitハッシュ・署名・フック・healthは限定された検証を補助し、作者の身元、完全な意味理解、全操作の安全性を保証しない。修正済みの `axiarch-rules/{lang}/universal/core/100_governance.md` と `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` の契約を適用する。
+
 Preserved invariants:
 
 | Invariant | English requirement | 日本語要件 |

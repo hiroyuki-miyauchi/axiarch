@@ -183,7 +183,7 @@ Load completeness concerns applicable sections, not every file in the library.
 >
 > 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
 > 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.
-> 3. **Full-text greps the AXIARCH current-task mandatory trio** — `task.md` / `implementation_plan.md` / `walkthrough.md` — for previously-known domain keywords. Captures domain context from the plan and walkthrough, not just task.md's load-history table
+> 3. Full-text greps existing files among the resolved session's `task.md` / `implementation_plan.md` / `walkthrough.md` for known domain keywords. Plans and results contribute comparison hints, not complete context understanding or proof of actual reading
 > 4. **On mismatch**: emits `[LOAD REVIEW]` flag + **TTL bypass** (suppresses short-circuit, re-emits the full reminder)
 >
 > The result: the system no longer depends only on the AI's "task type unchanged" self-judgment. Keyword differences are review candidates, not proof of missing reads. A keyword match does not prove that a rule was loaded either. Disable via `AXIARCH_TASK_BOUNDARY_DETECT=0`; override the keyword set via `AXIARCH_TASK_DOMAIN_KEYWORDS`.

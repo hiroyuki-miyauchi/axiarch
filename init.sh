@@ -632,7 +632,9 @@ stage_and_install() {
     print_error "Selected source lacks setup helpers; use the installer shipped with that source. No files applied."
     return 2
   fi
-  local required=(AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-rules axiarch-harness axiarch-scripts)
+  local required=(AXIARCH.md AGENTS.md axiarch-manifest.json)
+  local required_dirs=(axiarch-rules axiarch-harness axiarch-scripts)
+  required+=(axiarch-rules/LICENSE axiarch-rules/NOTICE)
   required+=(axiarch-scripts/check-axiarch-health.sh axiarch-scripts/axiarch_state.py
     axiarch-scripts/axiarch_upgrade.py axiarch-scripts/axiarch_inspect.py axiarch-scripts/axiarch_setup.py
     axiarch-scripts/axiarch_hook.py axiarch-scripts/axiarch_diff.py)
@@ -640,7 +642,7 @@ stage_and_install() {
   for lang in ja en; do
     if $KEEP_BOTH_LANGS || [[ "$lang" == "$LANG_CODE" ]]; then
       required+=("axiarch-rules/$lang/LOADING_PROTOCOL.md" "axiarch-harness/$lang/TASK_STATE_PROTOCOL.md")
-      $COPY_PROMPTS && required+=("axiarch-prompts/$lang")
+      $COPY_PROMPTS && required_dirs+=("axiarch-prompts/$lang")
     fi
   done
   $SETUP_CODEX && required+=(.codex/hooks.json)
@@ -652,8 +654,9 @@ stage_and_install() {
   $SETUP_CURSOR && required+=(.cursor/rules/axiarch.mdc)
   $SETUP_COPILOT && required+=(.github/copilot-instructions.md)
   $SETUP_WINDSURF && required+=(.windsurfrules)
-  $COPY_PROMPTS && required+=(axiarch-prompts)
-  python3 "$helper" check-source --source "$SOURCE_DIR" --paths "${required[@]}"
+  $COPY_PROMPTS && required_dirs+=(axiarch-prompts)
+  python3 "$helper" check-source --source "$SOURCE_DIR" --files "${required[@]}" \
+    --directories "${required_dirs[@]}" --paths "${required[@]}" "${required_dirs[@]}"
   # Use the actual source version. A local checkout is not proof of a remote tag.
   INSTALL_LABEL="$(python3 "$SOURCE_DIR/axiarch-scripts/axiarch_upgrade.py" manifest --source "$SOURCE_DIR" --format version)"
   STAGE_DIR="$(mktemp -d)"

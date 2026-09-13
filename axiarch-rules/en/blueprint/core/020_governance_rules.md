@@ -8,7 +8,7 @@
 > [!IMPORTANT]
 > **Domain**: Governance
 > **Location**: `blueprint/core/020_governance_rules.md`
-> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `universal/core/100_governance.md`
+> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `axiarch-rules/en/universal/core/100_governance.md`
 > **4 recorded lessons.**
 
 ---
@@ -69,17 +69,17 @@ Same-day setup follow-up: behavioral tests reproduced optional generation overwr
 
 | Keyword | Section | Related Rule |
 |:---------|:------------|:---------|
-| AXIARCH.md, AGENTS.md, canonical entrypoint | Lessons — Project Initialization Lesson | `universal/core/100_governance.md` |
-| Language First, silent degradation, Check 16 | Lessons — Silent degradation of a strict rule during canonicalization | `universal/core/100_governance.md` |
-| subagent, Deep Security Scan, Human Approval Gate, fanout | Lessons — Avoid conflating read-only subagent / security-scan fanout with the Human Approval Gate | `universal/core/000_core_mindset.md`, `universal/core/100_governance.md` |
-| candidates, validation, guarantees, diagnostics, bilingual | Lessons — Separate records, candidates, validation and guarantees | `universal/core/100_governance.md` |
+| AXIARCH.md, AGENTS.md, canonical entrypoint | Lessons — Project Initialization Lesson | `axiarch-rules/en/universal/core/100_governance.md` |
+| Language First, silent degradation, Check 16 | Lessons — Silent degradation of a strict rule during canonicalization | `axiarch-rules/en/universal/core/100_governance.md` |
+| subagent, Deep Security Scan, Human Approval Gate, fanout | Lessons — Avoid conflating read-only subagent / security-scan fanout with the Human Approval Gate | `universal/core/000_core_mindset.md`, `axiarch-rules/en/universal/core/100_governance.md` |
+| candidates, validation, guarantees, diagnostics, bilingual | Lessons — Separate records, candidates, validation and guarantees | `axiarch-rules/en/universal/core/100_governance.md` |
 
 ### Cross-References
 
 | Related File | Relationship |
 |:-----------|:-----|
 | `universal/core/000_core_mindset.md` | Higher-level principles for agent autonomy, authority, and approval boundaries |
-| `universal/core/100_governance.md` | Higher-level principles for Axiarch rule operations and amendment control |
+| `axiarch-rules/en/universal/core/100_governance.md` | Higher-level principles for Axiarch rule operations and amendment control |
 | `core/010_project_lessons_log.md` | Index (crystallization origin) |
 | `AXIARCH.md` | Canonical entrypoint for execution, delegation, and approval boundaries |
 | `axiarch-harness/{ja,en}/` | Execution Harness operational protocols |

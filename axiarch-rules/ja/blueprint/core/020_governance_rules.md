@@ -8,7 +8,7 @@
 > [!IMPORTANT]
 > **Domain**: ガバナンス
 > **Location**: `blueprint/core/020_governance_rules.md`
-> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `universal/core/100_governance.md`
+> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `axiarch-rules/ja/universal/core/100_governance.md`
 > **4 recorded lessons.**
 
 ---
@@ -69,17 +69,17 @@ Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-script
 
 | Keyword | Section | Related Rule |
 |:---------|:------------|:---------|
-| AXIARCH.md, AGENTS.md, 正本入口 | 教訓 — プロジェクト開始時の教訓 | `universal/core/100_governance.md` |
-| Language First, silent degradation, Check 16 | 教訓 — 正本化リファクタによる厳格ルールの暗黙的劣化 | `universal/core/100_governance.md` |
-| subagent, Deep Security Scan, Human Approval Gate, fanout | 教訓 — 読み取り専用 subagent / security-scan fanout と人間承認ゲートの混同を避ける | `universal/core/000_core_mindset.md`, `universal/core/100_governance.md` |
-| 候補、実証、保証、診断、日英 | 教訓 — 記録・候補・実証・保証を混同しない | `universal/core/100_governance.md` |
+| AXIARCH.md, AGENTS.md, 正本入口 | 教訓 — プロジェクト開始時の教訓 | `axiarch-rules/ja/universal/core/100_governance.md` |
+| Language First, silent degradation, Check 16 | 教訓 — 正本化リファクタによる厳格ルールの暗黙的劣化 | `axiarch-rules/ja/universal/core/100_governance.md` |
+| subagent, Deep Security Scan, Human Approval Gate, fanout | 教訓 — 読み取り専用 subagent / security-scan fanout と人間承認ゲートの混同を避ける | `universal/core/000_core_mindset.md`, `axiarch-rules/ja/universal/core/100_governance.md` |
+| 候補、実証、保証、診断、日英 | 教訓 — 記録・候補・実証・保証を混同しない | `axiarch-rules/ja/universal/core/100_governance.md` |
 
 ### クロスリファレンス
 
 | Related File | Relationship |
 |:-----------|:-----|
 | `universal/core/000_core_mindset.md` | Agentic AI の自律度、権限、承認境界の上位原則 |
-| `universal/core/100_governance.md` | Axiarch ルール運用と改正統制の上位原則 |
+| `axiarch-rules/ja/universal/core/100_governance.md` | Axiarch ルール運用と改正統制の上位原則 |
 | `core/010_project_lessons_log.md` | Index（結晶化元） |
 | `AXIARCH.md` | 実行・委任・承認境界の正本入口 |
 | `axiarch-harness/{ja,en}/` | Execution Harness の運用プロトコル |

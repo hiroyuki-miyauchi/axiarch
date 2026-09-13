@@ -179,6 +179,8 @@
 
 ### 2.8. Commit Body & Trailer Standards（コミット本文・トレイラー標準）
 
+本節の文字数、トレイラー、署名表記は採用した規約内での例。DCOやAI帰属の方式は固有方針で決め、不要なIssue・人物・メールアドレスを作らない。必須なのは変更理由・実際の関与と根拠の追跡可能性であり、特定のトレイラー書式ではない。
+
 - **Subject Line（件名）**:
     - 50 文字以内、命令形（`Add`, `Fix`, `Refactor`）、末尾ピリオドなし。
     - フォーマット: `type(scope): subject`（§2.0 参照）
@@ -192,9 +194,9 @@
     | `Closes: #123` | Issue 自動クローズ | `Closes: #123` |
     | `BREAKING CHANGE: <desc>` | 破壊的変更（SemVer major bump トリガー） | `BREAKING CHANGE: API v2 endpoints removed` |
     | `Co-Authored-By: Name <email>` | 共同執筆者の帰属（AI Agent 含む） | `Co-Authored-By: Claude <noreply@anthropic.com>` |
-    | `Signed-off-by: Name <email>` | DCO サインオフ（OSS プロジェクト必須） | `git commit -s` で自動付与 |
+    | `Signed-off-by: Name <email>` | DCO サインオフ（DCOを採用した場合） | `git commit -s` で自動付与 |
 - **AI Pair-Programming Attribution（AI ペアプロ帰属義務）**:
-    - AI Agent（Claude / Copilot / Codex 等）が **コードを生成または修正に関与した** すべてのコミットには `Co-Authored-By:` トレイラーを **必須付与**。
+    - AI Agent（Claude / Copilot / Codex 等）が **コードを生成または修正に関与した** 場合は、採用した方針に従って実際の関与を記録する。`Co-Authored-By:` は方式の一例で、架空の帰属を付けない。
     - 用途: 後の監査・脆弱性追跡（§8.7 AI-Generated Code Provenance との連携）。
     - 例: `Co-Authored-By: Claude <noreply@anthropic.com>` / `Co-Authored-By: GitHub Copilot <copilot@github.com>`
 - **アンチパターン禁止**:
@@ -225,8 +227,8 @@
 
 ### 2.10. Conventional Commit Validation（コミットメッセージ検証）
 
-- **Law**: §2.0 で定めた Type の遵守は **commitlint で機械的に強制**する。手動レビューに頼らない。
-- **Required Setup（commitlint）**:
+- **適用範囲**: 以下はConventional CommitsとNode.jsの検証系を採用した場合の任意の実装例。必要な制約はBlueprintで定め、commitlint・Husky・特定のAction導入を全プロジェクトの必須条件にしない。同等の検査や、規模に応じたレビューを利用できる。
+- **導入例（commitlint）**:
 
     ```bash
     npm install --save-dev @commitlint/cli @commitlint/config-conventional
@@ -510,7 +512,7 @@ git worktree repair <moved-worktree-path>
 
 ### 7.1. Commit & Tag Signing（コミット・タグ署名）
 
-- **Law**: SemVer minor 以上の本番リポジトリでは **全コミットおよび全タグの署名を必須化**。
+- **Law**: 法令・契約・脅威モデル・固有ルールに基づいて署名方針を定め、対象コミット・タグで署名と検証を実施する。版数だけで全リポジトリの署名必須条件を決めない。
 - **Signing Methods**:
 
     | 方式 | 推奨 | 設定 |
