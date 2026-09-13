@@ -184,5 +184,5 @@ SRE、インシデント管理、運用要件。
 ---
 
 **Last Updated**: 2026-07-24
-**Version**: v1.16.0 — プログラミング言語、React Native、クラウド・アプリケーションプラットフォーム、Microsoft Azureの汎用ガバナンス正本を追加。言語・framework・SDK・BaaS・managed runtime・multi-service releaseを、front／back／mobile／infra／enterpriseを横断する成果契約、team ownership、供給網、互換性、運用、FinOps、退出戦略へ接続し、既存のハーネスエンジニアリングによる計画・実行・監査・証跡・人間承認サイクルへ統合した。Universalルールは50→54ファイル、Engineeringは14→18ファイル。
+**Version**: v1.17.0 — ゴールと証拠、セッション別記録、更新結果と確定版数、同一commitの品質検査と署名公開、日英の自律ロード・参照・保証範囲を整合。ハーネスエンジニアリングの計画・実行・監査・証跡・承認へ接続し、既存の固有状態を保持して更新する。
 **Structure**: Domain-based subdirectories (8 initial domains; approved additions supported)

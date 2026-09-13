@@ -36,7 +36,7 @@
 **Context:** #46 で AGENTS.md を AXIARCH.md へ正本化した際、旧 §2「Language First」が §6.10 の弱い1行（owner-facing 文書のみ列挙）に格下げされ、AI 応答面（見出し・要約・ラベル・箇条書き・表）への強制力と違反条項が消失していた（採用先から「指定言語対応が弱くなった」と報告）。
 **Problem:** 大規模な正本化・統合では、強い旧ルールが silent に劣化しても気づきにくい。さらに復元時、正本（AXIARCH.md）と reminder だけ直しても、AI 向けダイジェスト（llms.txt / llms-full.txt）や ROADMAP の ja/en ミラーなど周辺 surface に旧表現が取り残されやすい。
 **Solution/Rule:** (1) §6.10 非劣化原則に基づき、置換境界を明示しない限り旧来の厳しい解釈を保持する。(2) 復元は「正本 + reminder + AI 向けダイジェスト + ja/en ミラー」の全 surface で同期する。(3) 復元した不変条項は health-check の専用 Check（例: Check 16）で grep ガードし、将来の silent な削除/劣化を EXIT_CODE=1 で検出して再発リスクを下げる。
-**Reference:** #46 / v1.13.1 / AXIARCH.md §6.10 / axiarch-scripts/check-axiarch-health.sh Check 16
+**Reference:** #46 / v1.13.1 / AXIARCH.md §7.10 / axiarch-scripts/check-axiarch-health.sh Check 16
 
 ---
 
@@ -45,7 +45,7 @@
 **Context:** Codex が「正式な Codex Security Deep Security Scan はサブエージェント明示許可が必要」と判断し、ユーザーが deep scan / exhaustive review を求めているにもかかわらず、読み取り専用 fanout を追加承認待ち扱いにして停止するリスクが確認された。
 **Problem:** Human Approval Gate は stage、commit、push、deploy、DB適用、本番変更、課金増、機微境界などの高リスク操作を止めるためのものだが、サブエージェントや scan tool を使うという理由だけで読み取り専用調査まで止めると、Execution Harness の role pass / audit / verification が実行されず、かえって品質保証が弱くなる。
 **Solution/Rule:** 読み取り専用の role pass、audit、security scan、bounded subagent delegation は、ユーザーがその調査を求めており、file write / remote mutation / production access / install / auth / cost / sensitive data retrieval を伴わない限り、追加の「サブエージェント明示許可」を待たずに実行してよい。Codex Security Deep Security Scan などの名前付き workflow が明示された場合、必要な読み取り専用 worker fanout はその要求に含まれる。委任機能が runtime にない場合は、正式 Deep Security Scan 実行済みと主張せず、通常 scan またはメインエージェント順次 role pass へ fallback する。
-**Reference:** AXIARCH.md §6.2 / §9, `axiarch-harness/{ja,en}/SUBAGENT_DELEGATION_PROTOCOL.md`, `axiarch-harness/{ja,en}/HUMAN_APPROVAL_GATE.md`, Codex Security `deep-security-scan/SKILL.md`
+**Reference:** AXIARCH.md §7.2 / §10, `axiarch-harness/{ja,en}/SUBAGENT_DELEGATION_PROTOCOL.md`, `axiarch-harness/{ja,en}/HUMAN_APPROVAL_GATE.md`, Codex Security `deep-security-scan/SKILL.md`
 
 ---
 
@@ -55,7 +55,7 @@ Target Folder: blueprint/core/
 Context: Axiarch全体一貫性の監査で、英語教訓の診断漏れ、補足による未読の断定、全3エージェント実証済みという合格条件、未配線の見出し参照を確認した。
 Problem: 文言だけを固定する検査は、誤った仕様を合格条件として温存しうる。ファイルの存在、候補検索、実際の読込、結果の検証は別の事実である。
 Solution/Rule: 診断は確認対象と判定可能な範囲を明示し、現在の所有者説明と実行結果へ突合する。テンプレート、ヒューリスティック、アダプターの存在を完了・実証の証拠にしない。既存の文字列検査に隔離した実動作・負例テストを組み合わせ、日英と追加カテゴリを同じ導線で検査する。
-Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-scripts/axiarch_inspect.py`, `AXIARCH.md` §0.1
+Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-scripts/axiarch_inspect.py`, `AXIARCH.md` §1.1
 
 追補（同日の再監査）: 構造検査が過去の完了記録にも現在の鮮度を要求していたこと、更新の中断後に適用済みハッシュより古いbaseを優先して再実行を妨げることを負例で確認した。現在の判断に使う証拠の突合と履歴の形式検査を分け、再実行・同時実行・自己更新も実入力で検証する。既存教訓への補足であり、件数を水増ししない。参照: `axiarch-scripts/axiarch_state.py`、`axiarch-scripts/axiarch_upgrade.py`、`tests/test_runtime.py`。
 

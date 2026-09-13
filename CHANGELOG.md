@@ -1,7 +1,7 @@
 # Changelog
 
-> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §0.1。
-> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §0.1.
+> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §1.1。
+> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §1.1.
 
 All notable changes to this project will be documented in this file.
 
@@ -19,7 +19,12 @@ release history, not current canonical numbering.
 
 ---
 
-## [Unreleased]
+## [1.17.0] — 2026-09-13
+
+- AXIARCH.mdの章を1から始め、設定は1章、実証範囲は1.1節へ整理。日英の現行参照を同期する。ファイル配置の000–999番号と過去リリース当時の章番号は保持する。
+- Start AXIARCH.md chapters at 1, with configuration in chapter 1 and validation scope in section 1.1; align current references in both languages. Preserve file-placement prefixes 000–999 and section numbers in historical release descriptions.
+- Dependabotの文書検査Action v24.2.0、Release作成Action v3.0.3の保守更新を取り込み、commit SHA固定を維持する。
+- Incorporate Dependabot maintenance updates for markdownlint-cli2-action v24.2.0 and action-gh-release v3.0.3 while retaining immutable commit pins.
 
 - macOSの一部環境で導入案内の `mktemp -d` が指定したTMPDIRよりOS既定の保存先を優先する差異に対応。日英の導入・更新例とAI向け説明で保存先を明示し、空白入りパス、専用フォルダ権限、部分取得の隔離を実行回帰で確認する。
 - Use explicit temporary-path templates in installation/update examples and AI-facing guidance because some macOS environments prefer the OS default over TMPDIR for bare `mktemp -d`. Exercise paths containing spaces, private directory permissions and partial-download isolation in runtime regressions.
@@ -45,9 +50,9 @@ release history, not current canonical numbering.
 - 配布境界の追加監査で、manifestや展開後の対象にGit内部情報・ローカル管理記録を含められた漏れを修正。導入・更新前にプロジェクト全体と予約パスを拒否し、初期導入の必須ファイル／ディレクトリ型を検査する。日英の異常通知・復旧手順と隔離回帰を追加し、既存記録の削除や内容の自動匿名化は行わない。
 - Close distribution-boundary gaps that allowed manifests or expanded selections to include Git internals and local managed records. Reject whole-project/reserved paths before application and validate required installation file/directory types. Add bilingual failure/recovery guidance and isolated regressions without deleting existing records or claiming automatic content redaction.
 
-開発版: `1.17.0-dev`（2026-09-13）。ゴールと証拠、セッション分離、導入・更新の失敗通知、品質検査と公開経路、日英ガバナンス整合の改善を次期版へまとめる。公開済みの最新安定版は `1.16.0`。本節は正式リリース・タグの公開を意味しない。
+v1.17.0は、ゴールと証拠、セッション分離、導入・更新の失敗通知、品質検査と公開経路、日英ガバナンス整合をまとめたリリースです。既存導入先は自動更新されないため、更新元と適用差分を確認してください。
 
-Development version: `1.17.0-dev` (2026-09-13), collecting goal/evidence checks, session isolation, install/upgrade failure reporting, release quality gates and bilingual governance alignment. The latest published stable version remains `1.16.0`; this section does not announce a published release or tag.
+v1.17.0 brings together goal/evidence checks, session isolation, install/upgrade failure reporting, release quality gates and bilingual governance alignment. Existing adopters are not updated automatically; review the source and proposed changes before upgrading.
 
 - 追加整合性監査で、要約を読込完了と扱う経路、Gitハッシュ・署名・履歴保全の過剰保証、任意ツールの一律必須化、フォークの自動上書き、2桁番号の旧検査例を修正。日英の参照・権限・教訓の分別を正本へ接続し、3桁000–999とGit受信フック例を隔離実行で検証する。
 - The additional consistency audit corrects summary-only loading claims, overstatements about Git hashes/signatures/history, mandatory optional tools, automatic fork overwrites and obsolete two-digit checks. Align bilingual references, authority and lesson routing with canonical protocols; execute three-digit 000–999 and Git receive-hook examples in isolation.
@@ -1280,4 +1285,4 @@ Built from hundreds of AI-assisted development sessions on Google Antigravity du
 [1.1.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0
 
-[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...HEAD
+[1.17.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...v1.17.0

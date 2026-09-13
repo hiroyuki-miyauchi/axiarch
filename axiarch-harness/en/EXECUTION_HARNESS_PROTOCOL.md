@@ -18,7 +18,7 @@ Legacy harness L0–L4 maps to H0–H4 only. Distance D1–D5 and maturity M1–
 | H3 | Cross-domain design changes, rule changes, distribution script changes | Canonical plan or Blueprint, role passes, ja/en parity, health checks |
 | H4 | DB apply, stage, commit, push, deploy, release, tag, destructive operations, security boundary changes | Human approval before and after implementation; no autonomous execution |
 
-When `AXIARCH.md` §8 states that "the harness is mandatory procedure for non-trivial work," that "non-trivial" boundary begins at **H2**. H0/H1 (questions, read-only checks, minor documentation edits) do not require the full harness; H2 and above require plan, implementation, verification, and the audit gate (plus the additional H3/H4 requirements).
+When `AXIARCH.md` §9 states that "the harness is mandatory procedure for non-trivial work," that "non-trivial" boundary begins at **H2**. H0/H1 (questions, read-only checks, minor documentation edits) do not require the full harness; H2 and above require plan, implementation, verification, and the audit gate (plus the additional H3/H4 requirements).
 
 ## Standard Lifecycle
 

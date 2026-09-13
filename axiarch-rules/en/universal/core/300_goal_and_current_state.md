@@ -12,7 +12,7 @@
 > [!CAUTION]
 > **Primary Directive**
 > "**Goal drift can undermine the value of the result; current-state drift can cause duplication and rework.** The smarter the agent, the farther it flies; the farther it flies, the more the initial error is amplified at the point of impact."
-> This file is canonical for **"the discipline of fixing the goal (where to) and the current state (where we are) and confirming they are not drifted, before delegating work."** Which rules to load is delegated to `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, evidence formats to `AXIARCH.md` §7, and approval gates to `AXIARCH.md` §6.2 (see the §1.2 responsibility boundary table).
+> This file is canonical for **"the discipline of fixing the goal (where to) and the current state (where we are) and confirming they are not drifted, before delegating work."** Which rules to load is delegated to `axiarch-rules/{lang}/LOADING_PROTOCOL.md`, evidence formats to `AXIARCH.md` §8, and approval gates to `AXIARCH.md` §7.2 (see the §1.2 responsibility boundary table).
 
 ---
 
@@ -70,11 +70,11 @@
 | Area | Canonical source | Boundary with this file |
 |:--|:--|:--|
 | Which rules to load, and in what order | `axiarch-rules/{lang}/LOADING_PROTOCOL.md` | This file defines only what is needed *after* the norms |
-| Evidence document formats, native task sync | `AXIARCH.md` §7 | This file defines the **content** to record; §7 the **container and format** |
-| Task classification, role passes, audit verdict | `AXIARCH.md` §8 / `axiarch-harness/` | This file covers only the preconditions for starting |
-| Approval gates and stop points for irreversible acts | `AXIARCH.md` §6.2 | This file governs "agreement on interpretation"; §6.2 "permission to execute" |
+| Evidence document formats, native task sync | `AXIARCH.md` §8 | This file defines the **content** to record; §8 the **container and format** |
+| Task classification, role passes, audit verdict | `AXIARCH.md` §9 / `axiarch-harness/` | This file covers only the preconditions for starting |
+| Approval gates and stop points for irreversible acts | `AXIARCH.md` §7.2 | This file governs "agreement on interpretation"; §7.2 "permission to execute" |
 | Ban on unverified completion reports, fact-based reporting | `axiarch-rules/en/universal/core/000_core_mindset.md` | This file governs the freshness of the state such reports rest on |
-| Writing the spec first (Blueprint First) | `AXIARCH.md` §6.7 | This file covers goals of any size, not only major changes |
+| Writing the spec first (Blueprint First) | `AXIARCH.md` §7.7 | This file covers goals of any size, not only major changes |
 | Means of verifying completion criteria (test layers) | `axiarch-rules/en/universal/quality/000_qa_testing.md` | This file governs only how "what counts as done" is written |
 | Failure accounting and run summaries for machine jobs | `axiarch-rules/en/universal/engineering/700_batch_backfill_operations.md` | 700 counts after the run; this file governs the premises before it |
 | Branch and pull-request discipline | `axiarch-rules/en/universal/engineering/600_git_workflow.md` | This file covers only the duty to consult them as shared state |

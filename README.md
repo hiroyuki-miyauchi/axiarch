@@ -16,8 +16,8 @@
 
 </div>
 
-> 開発版: `1.17.0-dev`。公開済みの最新安定版は `1.16.0`。以下のタグ固定の導入例は安定版を対象とします。開発版の確認には、このチェックアウトをレビューしたうえでローカルソースから導入・更新してください。[次期版の変更履歴](CHANGELOG.md#unreleased)
-> Development version: `1.17.0-dev`; latest published stable: `1.16.0`. Tag-pinned installation examples below target the stable release. To evaluate development changes, review this checkout and install or upgrade from its local source. [Upcoming changes](CHANGELOG.md#unreleased)
+> 安定版: `1.17.0`。以下の導入・更新例はこの版のタグを参照します。既存の導入先はdry-runで差分を確認し、固有状態を保持して更新してください。[v1.17.0の変更履歴](CHANGELOG.md#1170--2026-09-13)
+> Stable release: `1.17.0`. Installation and upgrade examples below reference this version. Existing adopters should review a dry-run and preserve project-specific state when upgrading. [v1.17.0 changes](CHANGELOG.md#1170--2026-09-13)
 
 ---
 
@@ -361,29 +361,29 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 
 ```bash
 # 変更計画だけ確認 / Preview the plan only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.16.0 --dry-run
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.17.0 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --agent codex --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --safe-only --apply
 
 # 非対話CI等で人間承認済みの計画を反映 / Apply a human-approved reviewed plan non-interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --safe-only --apply --yes
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --apply --yes
 
 # 任意プロンプトも明示的に含めて確認 / Preview with optional prompts explicitly included
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --safe-only --with-prompts --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --with-prompts --dry-run
 
 # グループごとに対話選択 / Choose each group interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --interactive
 ```
 
 | 選択肢 / Choice | 意味 / Meaning |
@@ -468,11 +468,11 @@ bash /path/to/axiarch/init.sh /path/to/your/project
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/init.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/init.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.16.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
+test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.17.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness
@@ -750,8 +750,8 @@ The goal extends beyond personal use: to contribute to the global adoption of AI
 
 ## 実行記録・更新結果・保証範囲 / Runtime evidence, upgrade outcomes and guarantees
 
-この節の追加実装はUnreleasedです。既存のv1.16.0配布へ適用済みという意味ではありません。承認済みのリリースまたは確認したローカルソースから導入・更新してください。
-The additions in this section are unreleased; they are not already included in the published v1.16.0 distribution. Adopt them from an approved release or a reviewed local source.
+この節の追加実装はv1.17.0に含まれます。既存のv1.16.0導入先は自動更新されません。v1.17.0のソースからdry-runで差分を確認し、固有状態を保持して更新してください。
+The additions in this section are included in v1.17.0. Existing v1.16.0 adopters are not updated automatically; review a dry-run using the v1.17.0 source and preserve project-specific state when applying changes.
 
 ゴール・現在値の内容は `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md`、保存と検査の手順は [日本語の実行契約](axiarch-harness/ja/TASK_STATE_PROTOCOL.md) を正本とします。自律距離D1–D5、成熟度M1–M5、ハーネスH0–H4（旧L0–L4）は別の軸で、数値の自動対応はありません。H0の読み取りに記録作成や完了検査を強制せず、H2以上で準備・完了を分けて検査します。
 
