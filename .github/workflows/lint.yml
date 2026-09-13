@@ -197,7 +197,7 @@ jobs:
           distribution: Ubuntu-24.04
           wsl-version: '2'
           use-cache: 'false'
-          additional-packages: python3 git software-properties-common
+          additional-packages: python3 git jq software-properties-common
           wsl-shell-user: axiarch-ci
       - name: WSLのGit診断機能を準備
         shell: pwsh
@@ -214,6 +214,9 @@ jobs:
           axiarch_ci_expected_sha='${{ github.sha }}'
           [[ "$axiarch_ci_expected_sha" =~ ^[0-9a-f]{40}$ ]]
           export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
+          # jq is required by the release-metadata regression, although it is
+          # optional for ordinary adopter operation. Do not silently skip it.
+          command -v bash python3 git jq
           uname -a
           python3 --version
           git --version
