@@ -160,6 +160,8 @@ def main():
     if mode == 'off' or os.environ.get('AXIARCH_DIFF_GUARD_ALLOW') == '1':
         return 0
     try:
+        if os.environ.get('AXIARCH_DIFF_INPUT_ERROR'):
+            raise ValueError('hook input or active project unresolved; no alternate checkout inspected')
         if mode not in ('warn', 'block'):
             mode = 'warn'
             raise ValueError('AXIARCH_DIFF_GUARD_MODE must be warn, block or off')

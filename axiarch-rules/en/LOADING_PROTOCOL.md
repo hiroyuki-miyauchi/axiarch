@@ -26,16 +26,18 @@ At conversation start or context reset, follow these principles before changes. 
 |:--|:--|:--|:--|
 | `SessionStart` | Conversation begins | Auto-bootstraps `task.md` / `implementation_plan.md` / `walkthrough.md` as current-task files and injects an `AXIARCH.md` reminder. `axiarch-task-state.sh` resolves isolated documents by session ID and preserves existing root documents | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
 | `UserPromptSubmit` | Every user prompt submission | Injects a system reminder (static reminder + heuristic review hints) that keeps `AXIARCH.md` / BOOT SEQUENCE in scope | `axiarch-scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | Just before a `Write` tool call | Blocks full-overwrite of existing files in supported environments (§6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
-| `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | After file-editing tools | Measures git diff changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
+| `PreToolUse` (Claude: `Write`; Codex: `apply_patch`) | Before the configured editing tool | Blocks full-overwrite of existing files in supported environments (§7.6 ANTI-FULL-OVERWRITE). Whitelist via `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` | `axiarch-scripts/axiarch-protect-antifull.sh` |
+| `PostToolUse` (Claude: `Edit` / `MultiEdit` / `Write`; Codex: `apply_patch`) | After file-editing tools | Measures git diff changed lines and files, then warns or blocks above thresholds | `axiarch-scripts/axiarch-diff-guard.sh` |
 
-**Removing or disabling any of these four hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular adds a physical-block layer in addition to reminders (references: arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It reduces the risk of §6 violations that reminder-only enforcement may miss.
+**Removing or disabling any of these four hooks is a constitution-amending destructive change** requiring explicit owner approval. The `PreToolUse` hook in particular adds a physical-block layer in addition to reminders (references: arXiv:2503.18666 AgentSpec and arXiv:2502.15851 Control Illusion). It reduces the risk of §7.6 violations that reminder-only enforcement may miss.
 
 When the hooks are not present, the AI MUST self-enforce the BOOT SEQUENCE 3 principles autonomously.
 
 The diff hook uses `axiarch-scripts/axiarch_diff.py`, includes unborn branches and reports failed measurement as `DIFF GUARD UNASSESSED`. Warn is a notice; block requests a pause from the caller. Neither undoes edits nor guarantees that every subsequent operation is blocked. Health checks configuration and record structure, not actual hook firing or AI understanding.
 
 > Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
+
+Codex checks existing add/move destinations; Claude checks existing Write targets. Ordinary diff edits remain allowed. See `axiarch-scripts/AGENT_COMPATIBILITY.md` for trust setup, worktrees, language and verification boundaries.
 
 ### 🧭 Native Task & Plan State Sync (v1.11.0+)
 

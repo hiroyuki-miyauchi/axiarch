@@ -12,6 +12,7 @@ import sys
 
 sys.dont_write_bytecode = True
 from axiarch_state import inside, read_json, markdown_prose_lines
+from axiarch_hook import codex_command
 
 
 HOOK_CONTRACTS = {
@@ -48,6 +49,9 @@ def declared_script(handler, root, script):
     command = handler.get('command')
     if not isinstance(command, str) or any(ord(c) < 32 or ord(c) == 127 for c in command):
         return False
+    if command == codex_command(script) and 'args' not in handler:
+        path = inside(root, 'axiarch-scripts/' + script)
+        return path.is_file() and os.access(path, os.R_OK)
     if 'args' in handler:
         args = handler['args']
         if not isinstance(args, list) or any(not isinstance(arg, str) for arg in args):
@@ -90,6 +94,8 @@ def inspect_hooks(root, event=None):
         data = read_json(inside(root, relative))
         for name in events:
             script, targets = HOOK_CONTRACTS[name]
+            if relative == '.codex/hooks.json' and name in ('PreToolUse', 'PostToolUse'):
+                targets = ('apply_patch',)
             issues, covered = [], set()
             if data.get('disableAllHooks', False) is not False:
                 issues.append('hooks disabled or disableAllHooks is not a boolean false')
@@ -107,7 +113,11 @@ def inspect_hooks(root, event=None):
                         issues.append(f'group {index}: malformed matcher/handler')
                         continue
                     if any(declared_script(h, root, script) for h in group['hooks']):
-                        covered.update(declared_matches(matcher, name, targets))
+                        matches = declared_matches(matcher, name, targets)
+                        if relative == '.codex/hooks.json' and name in ('PreToolUse', 'PostToolUse'):
+                            if declared_matches(matcher, name, ('Edit', 'Write')):
+                                matches.add('apply_patch')
+                        covered.update(matches)
             missing = set(targets) - covered
             if missing:
                 issues.append('unconfirmed direct synchronous declaration for ' + ', '.join(sorted(missing)))

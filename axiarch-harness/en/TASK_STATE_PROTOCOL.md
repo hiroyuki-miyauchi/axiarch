@@ -20,6 +20,8 @@ UUID folder names are internal keys for collision avoidance and resumption, not 
 
 Session documents, shared task state and history are local records excluded from Git distribution. Use `privacy-check` to inspect tracking and exclusions; ignore rules do not remove already tracked files or historical commits. Summarize sanitized public changes in `CHANGELOG.md` or another reviewed shared document, without copying internal IDs or raw logs.
 
+When hook input provides `cwd`, records and reminders resolve the nearest `AXIARCH.md` above that working directory. The active worktree takes precedence over an environment variable pointing at the starting checkout. An unresolved project warns without bootstrapping another checkout. See `axiarch-scripts/AGENT_COMPATIBILITY.md` for product-specific conditions.
+
 Restarting the same session does not modify its documents. Use a new session ID for another task. Joining an existing task from another session uses `resume --task`; read shared state and the previous owner's evidence before continuing. Each session edits only its own documents. Historical load records do not prove that a new AI has read those files.
 
 An incomplete existing session stops before creating a new task record. A binding whose shared state.json is missing does not silently become a new task. Inspect remaining documents, history and backups to recover; explicitly choose new task/session IDs when starting different work.

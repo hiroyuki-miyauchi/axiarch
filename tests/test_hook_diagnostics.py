@@ -48,7 +48,9 @@ class HookDiagnosticTests(unittest.TestCase):
         self.assertNotEqual(self.health().returncode, 0)
 
     def test_posttool_command_must_belong_to_each_required_matcher(self):
-        self.fixture(); data = copy.deepcopy(self.original)
+        self.fixture()
+        self.config = self.target / '.claude/settings.json'
+        data = json.loads(self.config.read_text())
         for entry in data['hooks']['PostToolUse'][1:]:
             entry['hooks'][0]['command'] = 'true'
         self.write_config(data)

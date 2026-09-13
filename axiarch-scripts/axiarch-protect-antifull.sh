@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Axiarch §6 ANTI-FULL-OVERWRITE Enforcement (PreToolUse hook)
+# Axiarch §7.6 ANTI-FULL-OVERWRITE Enforcement (PreToolUse hook)
 # https://github.com/hiroyuki-miyauchi/axiarch
 #
 # Physically blocks Write tool calls that target existing files, directing the
-# AI to use Edit (diff-based) instead. This reduces the known §6
+# AI to use Edit (diff-based) instead. This reduces the known §7.6
 # ANTI-FULL-OVERWRITE violation pattern that reminder-only enforcement cannot
 # reliably stop.
 #
@@ -14,10 +14,11 @@
 #   - exit code 2 + stderr message: also blocks the tool
 #
 # Decision logic:
-#   1. Tool is not "Write" → allow (exit 0, no output)
-#   2. malformed input or empty/missing Write path → stop (exit 2)
-#   3. file_path does not exist on disk → creation, allow
-#   4. file_path exists → DENY with §6 violation message
+#   1. apply_patch → inspect add/move destinations; focused updates remain allowed
+#   2. Tool is not Write/apply_patch → allow (exit 0, no output)
+#   3. malformed input or empty/missing Write path → stop (exit 2)
+#   4. file_path does not exist on disk → creation, allow
+#   5. file_path exists → DENY with §7.6 violation message
 #
 # Whitelist support (future-friendly):
 #   `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` (one path/glob per line) bypasses the
@@ -68,8 +69,11 @@ try:
     value = data.get("tool_name") if sys.argv[1] == "tool" else data.get("tool_input", {}).get("file_path")
     if not isinstance(value, str) or not value or "\x00" in value: raise ValueError("nonempty string required")
     if sys.argv[1] != "tool":
+        base = data.get("cwd", os.path.abspath(sys.argv[2]))
+        if not isinstance(base, str) or not base or "\x00" in base or not os.path.isabs(base) or not os.path.isdir(base):
+            raise ValueError("absolute available cwd required")
         # Preserve symlink/.. filesystem semantics for the existence check.
-        value = os.path.join(os.path.abspath(sys.argv[2]), value)
+        value = os.path.join(base, value)
         if sys.argv[1] == "canonical": value = os.path.realpath(value)
     # A sentinel preserves trailing newlines through Bash command substitution.
     sys.stdout.write(value + ".")
@@ -80,6 +84,16 @@ except (ValueError, TypeError, AttributeError):
 }
 TOOL_NAME="$(decode_field tool)" || exit 2
 TOOL_NAME="${TOOL_NAME%.}"
+
+if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "apply_patch" ]]; then
+  PROJECT_DIR=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" project --project "$PROJECT_DIR") || exit 2
+  PROJECT_DIR="${PROJECT_DIR%.}"
+fi
+
+if [[ "${TOOL_NAME}" == "apply_patch" ]]; then
+  printf '%s' "$INPUT" | python3 "$HOOK_HELPER" protect-patch --project "$PROJECT_DIR"
+  exit $?
+fi
 
 # -----------------------------------------------------------------------------
 # Allow: tool is not Write
@@ -105,13 +119,16 @@ fi
 # Whitelist: bypass when matched in .claude/axiarch-overwrite-allow.txt or .codex/...
 # -----------------------------------------------------------------------------
 ALLOW_FILE=""
-if [[ -f "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
+if [[ "${AXIARCH_HOOK_AGENT:-}" == "codex" ]]; then
+  ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
+elif [[ -f "${PROJECT_DIR}/.claude/settings.json" || -f "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
   ALLOW_FILE="${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt"
 elif [[ -f "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" ]]; then
+  # Legacy standalone Write guards without an installed Claude configuration.
   ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
 fi
 
-if [[ -n "${ALLOW_FILE}" ]]; then
+if [[ -n "${ALLOW_FILE}" && -f "${ALLOW_FILE}" ]]; then
   MATCH_PATH="$(decode_field canonical)" || exit 2
   MATCH_PATH="${MATCH_PATH%.}"
   while IFS= read -r pattern || [[ -n "${pattern}" ]]; do
@@ -131,7 +148,7 @@ if [[ -n "${ALLOW_FILE}" ]]; then
 fi
 
 # -----------------------------------------------------------------------------
-# Deny: existing file + Write tool = potential §6 ANTI-FULL-OVERWRITE violation
+# Deny: existing file + Write tool = potential §7.6 ANTI-FULL-OVERWRITE violation
 # -----------------------------------------------------------------------------
 REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的に全面書き換えが必要な場合はユーザー明示承認のうえで .claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt にパスを追加してください。"
 REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). If full overwrite is genuinely needed, ask the user for explicit approval and add the path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."

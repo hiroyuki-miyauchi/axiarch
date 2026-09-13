@@ -2500,7 +2500,7 @@ if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_info "If warnings appeared above, review them before treating the project state as fully clean"
   print_info "Checked: selected files, hook configuration, recorded references, and requested evidence phase. Not every operation or protocol clause is verified."
   print_info "Manual review needed: AXIARCH §7.1, §7.3, §7.5, §7.9 (see Out of Scope above)"
-  print_info "PreToolUse checks the configured Write boundary only; actual hook invocation and agent compliance depend on the runtime."
+  print_info "PreToolUse checks configured Write/apply_patch boundaries only; actual hook invocation, trust and agent compliance depend on the runtime."
 else
   print_warn "Some checks failed/warned — see above for which protocol needs attention"
   print_info "Common misconception: \`permissions.allow Bash(echo *)\` is NOT required"
