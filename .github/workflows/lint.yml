@@ -143,6 +143,9 @@ jobs:
           check_pair "Execution Harness" "axiarch-harness/ja" "axiarch-harness/en"
           check_pair "Prompt Library" "axiarch-prompts/ja" "axiarch-prompts/en" "true"
 
+      - name: リリース説明と比較リンクの検査
+        run: python3 tests/release_notes.py
+
       - name: Summary
         run: |
           echo ""

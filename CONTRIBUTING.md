@@ -50,6 +50,7 @@ Axiarchの全ドキュメントは日英バイリンガルです。ドキュメ�
 
 ### リリース安全性
 
+- 本文の必須内容、版の選び方、公開後訂正、検証と復旧の手順は [RELEASING.md](RELEASING.md) に従う。過去版の監査・訂正は [RELEASE_AUDIT.md](RELEASE_AUDIT.md) を参照する。
 - 正式版ではCHANGELOG、installer、manifest、ROADMAP、README、llms、配布ref、日英indexを同一SemVerへ同期する
 - 自動releaseは専用の非対話SSH秘密鍵を`AXIARCH_RELEASE_SSH_PRIVATE_KEY` GitHub Actions secretから読み込み、`AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS` repository variableの現行・退役公開鍵registryで検証して署名付きannotated tagだけを公開する。secret値をrepository、Issue、PR、logへ記載しない
 - release変更を統合する前に、署名secret、公開鍵registry、rotation owner、失効・rollback手順をrepository ownerが外部設定として確認する
@@ -137,6 +138,7 @@ All Axiarch documentation is bilingual (JA/EN). When modifying or adding documen
 
 ### Release Safety
 
+- Follow [RELEASING.md](RELEASING.md) for note content, version selection, published-body corrections, verification and recovery. Historical findings and corrections are in [RELEASE_AUDIT.md](RELEASE_AUDIT.md).
 - For a stable release, synchronize CHANGELOG, installer, manifest, ROADMAP, README, llms, distribution refs, and bilingual indexes to the same SemVer
 - Automated release reads a dedicated non-interactive SSH private key from the `AXIARCH_RELEASE_SSH_PRIVATE_KEY` GitHub Actions secret, validates it against current and retired public keys in the `AXIARCH_RELEASE_SSH_ALLOWED_SIGNERS` repository variable, and publishes only signed annotated tags. Never place the secret value in the repository, Issues, pull requests, or logs
 - Before integrating a release change, the repository owner verifies the signing secret, public-key registry, rotation owner, revocation path, and rollback procedure as external configuration

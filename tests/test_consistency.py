@@ -146,7 +146,14 @@ class ConsistencyTests(unittest.TestCase):
         workflow = (ROOT / '.github/workflows/release.yml').read_text()
         step = workflow.split('      - name: Extract latest version from CHANGELOG.md\n', 1)[1]
         script = textwrap.dedent(step.split('        run: |\n', 1)[1].split('\n      - name:', 1)[0])
-        (self.root / 'CHANGELOG.md').write_text('## [Unreleased]\n\n## [1.0.0]\n')
+        (self.root / 'tests').mkdir(exist_ok=True)
+        shutil.copy2(ROOT / 'tests/release_notes.py', self.root / 'tests/release_notes.py')
+        (self.root / 'axiarch-scripts').mkdir(exist_ok=True)
+        shutil.copy2(SCRIPTS / 'axiarch_state.py', self.root / 'axiarch-scripts/axiarch_state.py')
+        (self.root / 'CHANGELOG.md').write_text(
+            '## [Unreleased]\n\n## [1.0.0] — 2026-01-01\n\n'
+            '[1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0\n'
+            '[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.0.0...HEAD\n')
         output = self.root / 'github-output'
         result = subprocess.run(['bash', '-c', script], cwd=self.root,
                                 env=dict(self.env, GITHUB_OUTPUT=str(output)),

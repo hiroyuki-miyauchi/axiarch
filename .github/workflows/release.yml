@@ -41,13 +41,12 @@ jobs:
 
           # CHANGELOG.md の最初のリリース見出しだけを正とする。
           # 先頭が [Unreleased] の場合、下位の既存versionを誤って再タグ化しない。
-          FIRST_HEADING=$(grep -m1 -E '^## \[(Unreleased|[0-9]+\.[0-9]+\.[0-9]+)\]' CHANGELOG.md || true)
-          if echo "$FIRST_HEADING" | grep -q '^## \[Unreleased\]'; then
+          VERSION=$(python3 tests/release_notes.py --latest)
+          if [ "$VERSION" = "Unreleased" ]; then
             echo "Top changelog section is Unreleased. Skipping tag creation."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          VERSION=$(echo "$FIRST_HEADING" | sed -E 's/^## \[([0-9]+\.[0-9]+\.[0-9]+)\].*/\1/')
           if [ -z "$VERSION" ]; then
             echo "No version found in CHANGELOG.md"
             exit 1
@@ -348,14 +347,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 該当バージョンのセクションだけ抽出（次の ## [ の直前まで）。
-          # GNU固有の head -n -1 を避け、ローカル検証でも同じ結果にする。
+          # CIと同じ構造検査・抽出を使い、参照定義を含む独立した本文を作る。
           NOTES_FILE="${RUNNER_TEMP}/axiarch-release-notes.md"
-          awk -v heading="## [${VERSION}]" '
-            index($0, heading) == 1 { capture = 1 }
-            capture && /^## \[/ && index($0, heading) != 1 { exit }
-            capture { print }
-          ' CHANGELOG.md > "$NOTES_FILE"
+          python3 tests/release_notes.py --version "$VERSION" --output "$NOTES_FILE"
           if [ ! -s "$NOTES_FILE" ]; then
             echo "Release notes extraction produced an empty file for $VERSION"
             exit 1
@@ -397,6 +391,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_ALREADY_EXISTS: ${{ steps.check_release.outputs.exists }}
         run: |
           set -euo pipefail
 
@@ -413,6 +408,17 @@ jobs:
 
           RELEASE_JSON="${RUNNER_TEMP}/axiarch-release-final.json"
           gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" > "$RELEASE_JSON"
+          if [ "$RELEASE_ALREADY_EXISTS" = "false" ]; then
+            python3 - "$RUNNER_TEMP" <<'PY'
+          import json, sys
+          from pathlib import Path
+          root = Path(sys.argv[1])
+          expected = (root / 'axiarch-release-notes.md').read_text().strip()
+          actual = json.loads((root / 'axiarch-release-final.json').read_text()).get('body')
+          if not isinstance(actual, str) or actual.replace('\r\n', '\n').strip() != expected:
+              raise SystemExit('Published release body differs from the reviewed notes')
+          PY
+          fi
           if [ "$(jq -r '.tag_name // empty' "$RELEASE_JSON")" != "$TAG" ] \
             || [ "$(jq -r '.draft' "$RELEASE_JSON")" != "false" ] \
             || [ "$(jq -r '.prerelease' "$RELEASE_JSON")" != "false" ]; then
