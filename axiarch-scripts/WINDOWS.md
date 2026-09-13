@@ -41,7 +41,7 @@ Gitの差分・追跡診断は `--no-lazy-fetch` に対応するGitを必要と�
 
 ### 改行・検査・移行の限界
 
-Axiarch本体の `.gitattributes` は実行ファイルをLFに保ち、Windows GitのCRLF変換によるBashの誤動作を抑えます。この設定は本体専用で、利用先の `.gitattributes` を置換しません。WSLのプロジェクトはLinux Gitで管理します。Windows Gitも使う場合は、既存属性をレビューしてAxiarchの `.sh`・`.py` 等をLFに保つ設定を統合し、再度疎通を確認してください。既存ファイルを一括変換・削除して直したことにはしません。
+Axiarch本体の `.gitattributes` は実行ファイルをLFに保ち、Windows GitのCRLF変換によるBashの誤動作を抑えます。この設定は本体専用で、通常の導入・更新では利用先へ配布・置換しません。source-onlyファイルの明示的な適用選択は別途レビューが必要です。WSLのプロジェクトはLinux Gitで管理します。Windows Gitも使う場合は、既存属性をレビューしてAxiarchの `.sh`・`.py` 等をLFに保つ設定を統合し、再度疎通を確認してください。既存ファイルを一括変換・削除して直したことにはしません。
 
 CIはWindows Server 2025上のnative Python/Git Bashで非対応時の終了コード・対象無変更・UTF-8/LFを検査し、同じコミットをWSL 2 Ubuntu 24.04のLinuxファイルシステムへ取得して一般ユーザーで全回帰を実行します。セットアップ用ActionはSHA固定です。このジョブもPRとリリース前の共通qualityに含まれ、失敗を任意扱いで無視しません。
 
@@ -80,7 +80,7 @@ Do not automatically copy credentials/personal settings between Windows and WSL,
 
 ### Line endings and validation boundaries
 
-The source repository's `.gitattributes` keeps executable source in LF format. It is source-only and does not replace adopter attributes. Use Linux Git for WSL projects. If Windows Git is also used, review and merge appropriate LF rules for Axiarch's scripts into existing attributes, then verify the combination separately. Do not mass-convert or delete existing files as an implicit repair.
+The source repository's `.gitattributes` keeps executable source in LF format. Normal installation and upgrade flows do not distribute this source-only policy or replace adopter attributes. Explicitly selecting source-only files for application requires separate review. Use Linux Git for WSL projects. If Windows Git is also used, review and merge appropriate LF rules for Axiarch's scripts into existing attributes, then verify the combination separately. Do not mass-convert or delete existing files as an implicit repair.
 
 The Windows Server 2025 CI job checks native Python/Git Bash rejection, unchanged targets and UTF-8/LF source, then checks out the same commit into the WSL 2 Ubuntu 24.04 Linux filesystem and runs all regressions as a non-root user. The setup action is pinned to a commit SHA. This job is part of the shared PR/pre-release quality gate, with no ignored failure.
 
