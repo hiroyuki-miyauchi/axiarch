@@ -10,6 +10,7 @@ import test_setup as setup
 
 class GitHealthTests(unittest.TestCase):
     run_cmd = runtime.RuntimeTests.run_cmd
+    git = runtime.RuntimeTests.git
     install_source = setup.SetupTests.install_source
     state = runtime.RuntimeTests.state
     boot = runtime.RuntimeTests.boot
@@ -23,9 +24,6 @@ class GitHealthTests(unittest.TestCase):
         self.git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
                  '-c', 'commit.gpgsign=false', 'commit', '-qm', 'fixture')
         self.git('update-ref', 'refs/remotes/origin/main', 'HEAD')
-
-    def git(self, *args):
-        return self.run_cmd(['git', *args])
 
     def health(self, expected=0, extra=None):
         return self.run_cmd(['bash', self.target / 'axiarch-scripts/check-axiarch-health.sh', self.target],

@@ -161,5 +161,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: 実行対象コミットの確認
         run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: テスト環境の記録
+        run: |
+          git --version
+          python3 --version
+          python3 -c 'import platform; print(platform.platform())'
       - name: 実動作テスト
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v

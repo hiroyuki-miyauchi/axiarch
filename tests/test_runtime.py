@@ -16,10 +16,29 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "axiarch-scripts"
 
 
+def cleanup_fixture(temporary):
+    try:
+        temporary.cleanup()
+    except OSError as error:
+        # Preserve the failure and report bounded metadata, never file contents
+        # or files reached through symlinks outside this synthetic fixture.
+        entries = []
+        for directory, folders, files in os.walk(temporary.name, followlinks=False):
+            for name in sorted(folders + files):
+                entries.append(os.path.relpath(os.path.join(directory, name), temporary.name))
+                if len(entries) == 100:
+                    break
+            if len(entries) == 100:
+                break
+        print('FIXTURE_CLEANUP_ERROR ' + json.dumps(
+            {'errno': error.errno, 'remaining_paths': entries, 'limit': 100}), file=sys.stderr)
+        raise
+
+
 class RuntimeTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="axiarch-test-")
-        self.addCleanup(self.tmp.cleanup)
+        self.addCleanup(cleanup_fixture, self.tmp)
         self.root = Path(self.tmp.name).resolve()
         self.target = self.root / "adopter"
         self.target.mkdir()
@@ -33,6 +52,13 @@ class RuntimeTests(unittest.TestCase):
         if expected is not None:
             self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         return result
+
+    def git(self, *args, **kwargs):
+        # A commit can return while automatic maintenance still writes .git.
+        # Keep maintenance enabled but join it before inspecting or deleting
+        # fixtures. The gc fallback also covers older Git versions.
+        return self.run_cmd(['git', '-c', 'maintenance.autoDetach=false',
+                             '-c', 'gc.autoDetach=false', *args], **kwargs)
 
     def state(self, *args, **kwargs):
         return self.run_cmd(["bash", SCRIPTS / "axiarch-task-state.sh", "--project", self.target, *args], **kwargs)

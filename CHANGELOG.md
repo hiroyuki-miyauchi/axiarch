@@ -19,6 +19,17 @@ release history, not current canonical numbering.
 
 ---
 
+## [Unreleased]
+
+### 診断結果と再発対策 / Diagnostic outcome and regression prevention
+
+- テスト用Gitの自動保守がコミット終了後も動き、一時フォルダ削除と競合する不備を修正。Git 2.55.0で削除中の `Directory not empty` と残存するGitディレクトリを再現した。保守処理は無効化せず、テスト用コマンド内で終了まで待つ。利用者のGit設定は変更しない。
+- Fix automatic Git maintenance outliving fixture commits and racing temporary-directory cleanup. Reproduce `Directory not empty` and remaining Git directories with Git 2.55.0. Keep maintenance enabled and wait for it within fixture commands, without changing adopter Git configuration.
+- 実保守処理が終了してから戻ることを回帰テストで確認する。削除失敗は元の例外を伝え、残存パスを最大100件記録する。ファイル内容・リンク先は収集せず、CIにはGit・Python・OSの版を記録する。
+- Exercise real maintenance completion in a regression test. Cleanup failures still raise the original exception and report up to 100 remaining paths, without reading file contents or following links. Record Git, Python and OS versions in CI.
+- 検証の教訓: 異なる版での再実行成功は原因修正の証拠にならない。失敗環境の版と背景処理を照合し、修正前失敗・修正後成功を比較する。過去の失敗時には残存内容が保存されていなかったため、当時の全書き込みを事後に復元できるとは主張しない。
+- Verification lesson: a successful rerun on different versions is not evidence of a root-cause fix. Compare the failed toolchain and background work, then show failure before the correction and success afterward. The original failure did not retain directory contents, so this does not reconstruct every historical write.
+
 ## [1.17.0] — 2026-09-13
 
 - AXIARCH.mdの章を1から始め、設定は1章、実証範囲は1.1節へ整理。日英の現行参照を同期する。ファイル配置の000–999番号と過去リリース当時の章番号は保持する。
@@ -1286,3 +1297,4 @@ Built from hundreds of AI-assisted development sessions on Google Antigravity du
 [1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0
 
 [1.17.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...v1.17.0
+[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.17.0...HEAD
