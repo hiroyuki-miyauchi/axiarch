@@ -21,6 +21,9 @@ release history, not current canonical numbering.
 
 ## [Unreleased]
 
+- macOSの一部環境で導入案内の `mktemp -d` が指定したTMPDIRよりOS既定の保存先を優先する差異に対応。日英の導入・更新例とAI向け説明で保存先を明示し、空白入りパス、専用フォルダ権限、部分取得の隔離を実行回帰で確認する。
+- Use explicit temporary-path templates in installation/update examples and AI-facing guidance because some macOS environments prefer the OS default over TMPDIR for bare `mktemp -d`. Exercise paths containing spaces, private directory permissions and partial-download isolation in runtime regressions.
+
 - PRのUbuntu回帰で、読み取り専用healthからのmanifest検査がPythonキャッシュを書き込む不備を修正。診断子プロセスのキャッシュ生成を止め、直接実行する更新補助でもプロジェクト内モジュールのキャッシュ生成を止める。OS既定の保存先に依存しない正常・異常診断と直接検査の回帰を追加する。
 - Fix the Ubuntu PR regression where read-only health's manifest check wrote Python bytecode. Disable cache writes in diagnostic child interpreters and local-module cache writes in the directly invoked upgrade helper. Cover successful/failed diagnosis and direct checks without depending on the host's default cache location.
 

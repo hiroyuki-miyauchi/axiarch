@@ -364,7 +364,8 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
-axiarch_bootstrap_dir="$(mktemp -d)" &&
+# TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
+axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
   https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
@@ -464,7 +465,8 @@ bash /path/to/project/axiarch-scripts/check-axiarch-health.sh /path/to/project
 bash /path/to/axiarch/init.sh /path/to/your/project
 
 # 安定版タグ固定 / Pinned stable tag
-axiarch_bootstrap_dir="$(mktemp -d)" &&
+# TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
+axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
   https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&

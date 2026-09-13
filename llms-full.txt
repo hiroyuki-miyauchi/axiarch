@@ -470,7 +470,8 @@ Use a reviewed local checkout for unreleased changes. For a published tag, use t
 bash /path/to/axiarch/init.sh /path/to/your/project
 
 # Option 1b: Pinned stable tag
-axiarch_bootstrap_dir="$(mktemp -d)" &&
+# Use an explicit template under TMPDIR, defaulting to /tmp if unset or empty
+axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
   https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
@@ -490,7 +491,7 @@ cp -r axiarch-scripts /path/to/your/project/
 # Optional: cp -r axiarch-prompts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters without the helper can use the private temporary bootstrap procedure in [axiarch-scripts/README.md](axiarch-scripts/README.md#使い方--usage), review the downloaded helper, then run its dry-run preview. A temporary `axiarch_bootstrap_dir` created by `mktemp -d` keeps concurrent downloads separate; only a successful download is renamed to the executable file. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters without the helper can use the private temporary bootstrap procedure in [axiarch-scripts/README.md](axiarch-scripts/README.md#使い方--usage), review the downloaded helper, then run its dry-run preview. A temporary `axiarch_bootstrap_dir` created by `mktemp -d` with an explicit path template uses `TMPDIR` (or `/tmp` if unset or empty) on both macOS and Linux and keeps concurrent downloads separate; only a successful download is renamed to the executable file. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Language Support
 

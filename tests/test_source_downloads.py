@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import tarfile
 import time
 import unittest
@@ -171,8 +172,29 @@ class SourceDownloadTests(unittest.TestCase):
         self.assertEqual(bodies[0][1], bodies[1][1])
 
     def test_documented_bootstraps_isolate_partial_downloads(self):
-        self.prepare_download(); before = self.tree_bytes()
-        self.env['TMPDIR'] = str(self.root)
+        self.prepare_download()
+        self.check_documented_bootstraps()
+
+    def test_documented_bootstraps_respect_tmpdir_with_darwin_default_location(self):
+        self.prepare_download()
+        # Some Darwin versions prefer the OS user temp directory over TMPDIR
+        # when mktemp receives no template. Keep that fallback inside the fixture.
+        fallback = self.root / 'host-temp'; fallback.mkdir()
+        real_mktemp = shutil.which('mktemp')
+        self.assertIsNotNone(real_mktemp)
+        shim = self.bin / 'mktemp'
+        shim.write_text('#!/usr/bin/env python3\n'
+                        'import subprocess,sys\n'
+                        'args=sys.argv[1:]\n'
+                        f'if args==["-d"]: args.append({str(fallback / "tmp.XXXXXXXX")!r})\n'
+                        f'sys.exit(subprocess.call([{real_mktemp!r}, *args]))\n')
+        shim.chmod(0o755)
+        self.check_documented_bootstraps()
+
+    def check_documented_bootstraps(self):
+        before = self.tree_bytes()
+        temporary = self.root / 'custom temporary directory'; temporary.mkdir()
+        self.env['TMPDIR'] = str(temporary)
         directories = set()
         for name in ('README.md', 'axiarch-scripts/README.md', 'llms.txt', 'llms-full.txt'):
             snippets = re.findall(r'^axiarch_bootstrap_dir=.*?^mv .*?$',
@@ -187,7 +209,8 @@ class SourceDownloadTests(unittest.TestCase):
                         directory = Path(result.stdout.strip())
                         self.assertNotIn(directory, directories)
                         directories.add(directory)
-                        self.assertEqual(directory.parent.resolve(), self.root.resolve())
+                        self.assertEqual(directory.parent.resolve(), temporary.resolve())
+                        self.assertEqual(stat.S_IMODE(directory.stat().st_mode), 0o700)
                         scripts = list(directory.glob('*.sh'))
                         if mode == 'ok':
                             self.assertEqual(len(scripts), 1)
