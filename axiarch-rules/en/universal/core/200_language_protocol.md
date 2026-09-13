@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > **Primary Directive**
 > Communicate decisions and results in the language appropriate to the audience and output.
-> - Core principle: The project-root `AXIARCH.md` §0 defines the authority for AI response-language precedence. Follow the latest explicit user instruction, then `Project Native Language` as the default. English is correct for an adopter that selects English.
+> - Core principle: The project-root `AXIARCH.md` §1 defines the authority for AI response-language precedence. Follow the latest explicit user instruction, then `Project Native Language` as the default. English is correct for an adopter that selects English.
 > - Scope: User-visible plans, concise decision rationale, reports and questions, plus audience-facing UI and documentation. This does not require disclosure or inspection of private internal reasoning.
 > - Technical notation: Preserve required original code identifiers, APIs, logs, package names and quotations. A different language alone is not a violation; assess the output's configuration and context.
 
@@ -107,7 +107,7 @@ L1–L3 here classify language usage; they are independent of autonomy distance 
 
 ### 1.4. Language Negotiation Strategy
 
-- **Rule 74.7**: For product UI, prioritize the user’s current explicit selection. The following is a resolution example within supported locales; AI response precedence remains in `AXIARCH.md` §0. Geographic inference is optional: review its purpose and authorization, and do not collect precise location just to select language:
+- **Rule 74.7**: For product UI, prioritize the user’s current explicit selection. The following is a resolution example within supported locales; AI response precedence remains in `AXIARCH.md` §1. Geographic inference is optional: review its purpose and authorization, and do not collect precise location just to select language:
 
 ```
 1. Current explicit user selection
@@ -616,7 +616,7 @@ export default function GlobalError() {
 
 ### 11.1. AI Agent Language Compliance Mandate
 
-- **Rule 74.110**: User-visible plans, concise rationale, reports and questions use the language resolved under `AXIARCH.md` §0. This does not prescribe the language or disclosure of private internal reasoning.
+- **Rule 74.110**: User-visible plans, concise rationale, reports and questions use the language resolved under `AXIARCH.md` §1. This does not prescribe the language or disclosure of private internal reasoning.
 - **Rule 74.111**: Work-record language and location follow Rule 74.23. Do not require records for H0 or the H2+ three-document procedure for H1.
 - **Rule 74.112**: Report and ask questions through ordinary responses or available interaction features. Do not require a product-specific tool such as `notify_user`, or infer external-send authorization from language rules.
 - **Rule 74.113**: Correct a mismatch with the required output language after accounting for explicit instructions, quotations and code. English alone is not evidence of a violation.
@@ -633,7 +633,7 @@ export default function GlobalError() {
 ### 11.3. Prompts & System Instructions
 
 - **Rule 74.116**: User-facing AI systems (chatbots, AI assistants, etc.) MUST include **language specification** in system prompts
-- **Rule 74.117**: AI responses follow `AXIARCH.md` §0. A quotation or source document in another language is not an explicit instruction to change response language.
+- **Rule 74.117**: AI responses follow `AXIARCH.md` §1. A quotation or source document in another language is not an explicit instruction to change response language.
 - **Rule 74.118**: Implement **fallback mechanisms** for AI responses returned in unintended languages
 
 ### 11.4. RAG & Knowledge Base Multilingual Support

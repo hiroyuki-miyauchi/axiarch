@@ -31,7 +31,7 @@ When recording or promoting lessons, directly consult `axiarch-rules/{lang}/CRYS
 Also inspect `axiarch-manifest.json`, `axiarch-scripts/axiarch-upgrade.sh`, `axiarch-scripts/axiarch_upgrade.py`, and `axiarch-scripts/README.md` for ownership boundaries, diagnostics and exit codes. Read the applicable Git sections in `axiarch-rules/{lang}/universal/engineering/000_engineering_standards.md`, installation records in `.axiarch/version.json` and `.axiarch/upgrade-result.json`, and relevant Blueprint records. Record absent files as not installed.
 If a legacy adopter lacks the upgrade engine, obtain the complete Axiarch source pinned to the requested tag or commit in a unique temporary directory. The shell script alone lacks required Python helpers. Run that source's `axiarch-scripts/axiarch-upgrade.sh` with explicit `--source` and `--target`; do not replace adopter files to bootstrap the helper.
 
-An example pinned source is `https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/tags/v1.16.0.tar.gz`. Resolve the actual version or commit from the request; do not assume unreleased features are present in an older tag.
+An example pinned source is `https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/tags/v1.17.0.tar.gz`. Resolve the actual version or commit from the request; do not assume unreleased features are present in an older tag.
 
 # Phase 1: Upgrade Scope Resolution
 

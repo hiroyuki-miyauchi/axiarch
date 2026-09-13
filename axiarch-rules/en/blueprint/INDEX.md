@@ -183,5 +183,5 @@ Follow Steps 1–6 in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`. No new
 ---
 
 **Last Updated**: 2026-07-24
-**Version**: v1.16.0 — Adds reusable governance sources of truth for programming languages, React Native, cloud and application platforms, and Microsoft Azure. Connects languages, frameworks, SDKs, BaaS, managed runtimes, and multi-service releases across frontend, backend, mobile, infrastructure, and enterprise use to outcome contracts, team ownership, supply-chain controls, compatibility, operations, FinOps, and exit strategy, integrated with the existing Harness Engineering cycle for planning, execution, audit, evidence, and human approval. Universal rules increase from 50 to 54 files and Engineering from 14 to 18 files.
+**Version**: v1.17.0 — Aligns goal/evidence records, session isolation, upgrade outcomes and confirmed versions, same-commit quality gates and signed publication, plus bilingual loading, references and guarantee boundaries. Connects these contracts to Harness Engineering for planning, execution, audit, evidence and approval; upgrades preserve project-specific state.
 **Structure**: Domain-based subdirectories (8 initial domains; approved additions supported)

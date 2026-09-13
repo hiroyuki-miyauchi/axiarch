@@ -1,19 +1,18 @@
 # Axiarch Roadmap
 
-> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §0.1。
-> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §0.1.
+> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §1.1。
+> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §1.1.
 
-> **現在の安定版 / Current Stable**: v1.16.0 Polyglot & Cloud Governance Expansion\
-> 次期開発版 / Next development: v1.17.0-dev — ゴール・証拠・実行手順の整合 / goal, evidence and runtime consistency（未公開 / unreleased）\
+> **現在の安定版 / Current Stable**: v1.17.0 Goal, Evidence & Runtime Consistency\
 > **ステータス / Status**: Actively Maintained
 
 ---
 
 ## 🇯🇵 ロードマップ
 
-### 開発中: v1.17.0-dev（2026-09-13）
+### ✅ v1.17.0 — ゴール・証拠・実行手順の整合（2026-09-13）
 
-ゴールと証拠の機械検査、セッションごとの記録、導入・更新の失敗伝播、同じコミットの品質検査を通す公開経路、日英の用語・自律ロード・保証範囲を整備した。隔離回帰テストをCIの検査対象へ追加している。正式版のタグ・公開は別途行い、公開済み安定版はv1.16.0を維持する。詳細は [Unreleasedの変更履歴](CHANGELOG.md#unreleased) を参照する。
+ゴールと証拠の機械検査、セッションごとの記録、導入・更新の失敗伝播、同じコミットの品質検査を通す公開経路、日英の用語・自律ロード・保証範囲を整備した。隔離回帰テストをCIの検査対象へ追加している。既存導入先はdry-runで差分を確認して更新する。詳細は [v1.17.0の変更履歴](CHANGELOG.md#1170--2026-09-13) を参照する。
 
 このロードマップはAxiarchの開発方向性を共有するための公開文書です。\
 優先度・スコープは実際の使用フィードバックと企業採用ニーズに基づいて調整されます。
@@ -710,9 +709,9 @@ AGENTS.md 標準、OpenAI Codex、Claude Code Skills・Subagents・Hooks、GitHu
 
 ## 🇺🇸 Roadmap
 
-### In development: v1.17.0-dev (2026-09-13)
+### ✅ v1.17.0 — Goal, Evidence & Runtime Consistency (2026-09-13)
 
-Adds mechanical goal/evidence checks, session-specific records, install/upgrade failure propagation, quality checks on the exact release commit, and aligned bilingual terminology, autonomous loading and guarantee boundaries. Isolated runtime regressions are included in CI. Stable tagging and publication remain separate; the latest published stable version is v1.16.0. See the [Unreleased changelog](CHANGELOG.md#unreleased).
+Adds mechanical goal/evidence checks, session-specific records, install/upgrade failure propagation, quality checks on the exact release commit, and aligned bilingual terminology, autonomous loading and guarantee boundaries. Isolated runtime regressions are included in CI. Existing adopters should review a dry-run before upgrading. See the [v1.17.0 changelog](CHANGELOG.md#1170--2026-09-13).
 
 This roadmap is a public document sharing the direction of Axiarch's
 development.\

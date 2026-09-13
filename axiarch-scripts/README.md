@@ -51,33 +51,33 @@ Directory exclusions include descendants. Conflicting policies or ownership for 
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.16.0 --dry-run
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.17.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --interactive
 ```
 
 ### 取得・入力検査の境界 / Download and input validation boundary
 
-この段落の追加処理はUnreleasedです。初期導入と更新のリモート取得はcurl・Python 3・tarを必要とし、HTTPSとHTTPSへのリダイレクトに限定します。wgetへの自動切替は行いません。curlを使わない環境では確認済みローカルソースを指定します。`AXIARCH_DOWNLOAD_TIMEOUT_SECONDS` は1–600秒、既定120秒で、取得と展開にそれぞれ適用します。複数の更新元を取得する場合、呼出し全体の時間上限ではありません。
+この段落の追加処理はv1.17.0に含まれます。初期導入と更新のリモート取得はcurl・Python 3・tarを必要とし、HTTPSとHTTPSへのリダイレクトに限定します。wgetへの自動切替は行いません。curlを使わない環境では確認済みローカルソースを指定します。`AXIARCH_DOWNLOAD_TIMEOUT_SECONDS` は1–600秒、既定120秒で、取得と展開にそれぞれ適用します。複数の更新元を取得する場合、呼出し全体の時間上限ではありません。
 
-These additions are unreleased. Remote installation and upgrade retrieval require curl, Python 3 and tar, with HTTPS-only transfers and redirects. There is no automatic wget fallback; use a reviewed local source when curl is unavailable. `AXIARCH_DOWNLOAD_TIMEOUT_SECONDS` accepts 1–600 seconds, default 120, separately for retrieval and extraction. It is not a whole-command deadline when multiple sources are retrieved.
+These additions are included in v1.17.0. Remote installation and upgrade retrieval require curl, Python 3 and tar, with HTTPS-only transfers and redirects. There is no automatic wget fallback; use a reviewed local source when curl is unavailable. `AXIARCH_DOWNLOAD_TIMEOUT_SECONDS` accepts 1–600 seconds, default 120, separately for retrieval and extraction. It is not a whole-command deadline when multiple sources are retrieved.
 
 HTTP失敗・時間切れ・破損gzipを適用前に拒否します。圧縮64 MiB、展開tar 512 MiB、1項目64 MiB、10,000項目を上限とし、絶対パス・親参照・制御文字・リンク・特殊ファイル・重複や大文字小文字／Unicodeで衝突する同一パス・複数ルートを拒否します。異常は端末と非0終了で示し、成功表示や利用先への適用へ進めません。適用前の失敗では利用先に結果記録を作らず、自動処理側で終了値を受け取り、必要なら機密情報を除いた診断を保持します。
 
@@ -97,9 +97,9 @@ Installation, upgrades and health share strict JSON decoding, rejecting duplicat
 
 Distribution checks reject the whole-project `.` selection and reserved `.git` / `.axiarch` components; see [Runtime artifact protection](../axiarch-harness/en/TASK_STATE_PROTOCOL.md#runtime-artifact-protection). Argument errors exit 2; invalid manifests, expansions and selected paths exit 5 before application; installation source checks exit 3, without creating adopter outcome files. Exit 5 alone does not distinguish preflight rejection from apply failure: inspect diagnostics and the presence/status of the current run record, without treating a previous result as current. Automation should capture the status and route sanitized diagnostics to authorized notifications when needed. Installation distinguishes required files from directories, so a directory named NOTICE does not pass. Use the matching installer and Python helpers, keeping adopter internal records out of distributions.
 
-Unreleasedの配布物は `axiarch-rules/LICENSE` と `axiarch-rules/NOTICE` を保持する。利用先ルートのLICENSE／NOTICEは変更しない。旧導入先では確認済み更新元のスクリプトでdry-runし、中核プロトコルのreview-eachでこの2ファイルを確認・適用する。変更済みまたは比較元不明のコピーは保留されるため、独自の帰属表示を失わないよう差分を判断する。初期導入は配布コピーが欠けた更新元を適用前に拒否する。ソース管理の正本はルートのLICENSE／NOTICEで、CIは配布コピーとの一致を検査する。
+v1.17.0以降の配布物は `axiarch-rules/LICENSE` と `axiarch-rules/NOTICE` を保持する。利用先ルートのLICENSE／NOTICEは変更しない。旧導入先では確認済み更新元のスクリプトでdry-runし、中核プロトコルのreview-eachでこの2ファイルを確認・適用する。変更済みまたは比較元不明のコピーは保留されるため、独自の帰属表示を失わないよう差分を判断する。初期導入は配布コピーが欠けた更新元を適用前に拒否する。ソース管理の正本はルートのLICENSE／NOTICEで、CIは配布コピーとの一致を検査する。
 
-Unreleased distributions retain `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE` without modifying adopter root notices. For older adopters, run a dry-run using the reviewed source's upgrade script, then review and apply these files in the Core Protocol group. Modified or unknown-base copies remain pending for review; retain adopter attribution when resolving differences. Installation rejects sources missing either copy before application. Root LICENSE/NOTICE are the source-maintenance authority; CI checks equality with distributed copies.
+Distributions from v1.17.0 retain `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE` without modifying adopter root notices. For older adopters, run a dry-run using the reviewed source's upgrade script, then review and apply these files in the Core Protocol group. Modified or unknown-base copies remain pending for review; retain adopter attribution when resolving differences. Installation rejects sources missing either copy before application. Root LICENSE/NOTICE are the source-maintenance authority; CI checks equality with distributed copies.
 
 | 選択肢 / Choice | 用途 / Purpose |
 |:--|:--|
@@ -203,8 +203,9 @@ For source development builds (`-dev`), installer and manifest must agree on the
 
 ### Out of Scope（外部検証困難・人間レビュー必須） / Manual Review Required
 
-`§0 AI Self-Completion` / `§3 Database Integrity` / `§5 Existing Functionality Protection` / `§7 Role & Behavior` は意味的判断が必要なため自動化対象外。
-**v1.5.5 で `§6 Anti-Full-Overwrite` は PreToolUse hook の物理遮断（Check 11）により、既存ファイルへの `Write` 上書きリスクを構造的に下げられるようになった**。
+`AXIARCH.md` §7.1（AI自己完結）、§7.3（DB整合性）、§7.5（既存機能保護）、§7.9（役割・振る舞い）は意味的判断を含み、自動診断だけでは遵守を確認できません。§7.6（差分編集と全文上書き禁止）は、対応するPreToolUse hookが起動する場合に既存ファイルへの `Write` を拒否します（Check 11）。
+
+`AXIARCH.md` sections 7.1, 7.3, 7.5 and 7.9 require semantic review; diagnostics alone cannot establish compliance. For section 7.6, the configured PreToolUse hook rejects `Write` to existing files when the supporting hook runs (Check 11).
 
 ### Exit Code
 
@@ -358,9 +359,9 @@ bash axiarch-scripts/axiarch-diff-guard.sh
 
 ## hook宣言の静的検査 / Static hook declaration checks
 
-Unreleasedのhealthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
+v1.17.0のhealthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
 
-Unreleased health uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
+Health in v1.17.0 uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
 
 対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはstartup・resume・clear・compact・forkを含む宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
 
@@ -515,9 +516,9 @@ See the linked README for exit codes, version semantics, legacy migration and ho
 
 追加の読取診断 / Additional read-only inspection:
 
-`python3 axiarch-scripts/axiarch_inspect.py --project PATH` は両言語の実教訓を検査します。引用・コード内テンプレートを除外し、タグ不足、無効日付、件数・経過日、存在しない格納先を報告します。`--mode blueprint-files` は初期8分類以外も含む000–999の実ファイル候補を表示します。配置や語句の一致を読了・理解・完了と扱いません。この追加実装はUnreleasedです。
+`python3 axiarch-scripts/axiarch_inspect.py --project PATH` は両言語の実教訓を検査します。引用・コード内テンプレートを除外し、タグ不足、無効日付、件数・経過日、存在しない格納先を報告します。`--mode blueprint-files` は初期8分類以外も含む000–999の実ファイル候補を表示します。配置や語句の一致を読了・理解・完了と扱いません。この追加実装はv1.17.0に含まれます。
 
-`python3 axiarch-scripts/axiarch_inspect.py --project PATH` inspects real lessons in both installed languages, excluding quoted/fenced templates, and reports missing tags, invalid dates, count/age triggers and missing target folders. `--mode blueprint-files` discovers 000–999 candidates in actual folders, including additional categories. Neither placement nor keywords prove reading, understanding or completion. These additions are unreleased.
+`python3 axiarch-scripts/axiarch_inspect.py --project PATH` inspects real lessons in both installed languages, excluding quoted/fenced templates, and reports missing tags, invalid dates, count/age triggers and missing target folders. `--mode blueprint-files` discovers 000–999 candidates in actual folders, including additional categories. Neither placement nor keywords prove reading, understanding or completion. These additions are included in v1.17.0.
 
 コード例内のコメント記号で後続の教訓やリンクを隠さず、未閉鎖の実コメント内を実記録として数えません。通常のリンク検査はコードスパン内のリンク構文例を除外し、別途行う具体的なルールパスの検査はコード表記の参照も対象にします。任意のMarkdown描画や意味の検証ではありません。
 

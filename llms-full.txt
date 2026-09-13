@@ -1,8 +1,8 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Current Release: 1.17.0-dev | Latest Stable: 1.16.0 | License: Apache 2.0
-> Development snapshot; 1.17.0 has not been tagged or published. Stable installation examples target 1.16.0.
+> Current Release: 1.17.0 | Latest Stable: 1.17.0 | License: Apache 2.0
+> Installation examples target v1.17.0; existing adopters must review and apply an upgrade to receive its changes.
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that reduces the risk of quality
@@ -473,11 +473,11 @@ bash /path/to/axiarch/init.sh /path/to/your/project
 # Use an explicit template under TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/init.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/init.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.16.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
+test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.17.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
 
 # Option 2: Manual copy
 cp AXIARCH.md /path/to/your/project/
@@ -491,7 +491,7 @@ cp -r axiarch-scripts /path/to/your/project/
 # Optional: cp -r axiarch-prompts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters without the helper can use the private temporary bootstrap procedure in [axiarch-scripts/README.md](axiarch-scripts/README.md#使い方--usage), review the downloaded helper, then run its dry-run preview. A temporary `axiarch_bootstrap_dir` created by `mktemp -d` with an explicit path template uses `TMPDIR` (or `/tmp` if unset or empty) on both macOS and Linux and keeps concurrent downloads separate; only a successful download is renamed to the executable file. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters without the helper can use the private temporary bootstrap procedure in [axiarch-scripts/README.md](axiarch-scripts/README.md#使い方--usage), review the downloaded helper, then run its dry-run preview. A temporary `axiarch_bootstrap_dir` created by `mktemp -d` with an explicit path template uses `TMPDIR` (or `/tmp` if unset or empty) on both macOS and Linux and keeps concurrent downloads separate; only a successful download is renamed to the executable file. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Language Support
 
@@ -511,5 +511,5 @@ language directories is optional when a project is fixed to one language.
 - Discussions: https://github.com/hiroyuki-miyauchi/axiarch/discussions
 - Releases: https://github.com/hiroyuki-miyauchi/axiarch/releases
 
-Unreleased additions (not yet in the published stable package). Runtime evidence contract: axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md. Directly load core/300 before implementation. D1–D5 distance, M1–M5 maturity and H0–H4 harness classification are separate axes. Session Markdown lives in .axiarch/sessions/{session_id}/; shared state in .axiarch/tasks/{task_id}/state.json. Root legacy evidence is preserved. Python 3 helpers validate structure, readiness and completion separately; health is not proof of semantic understanding or all-operation safety. Upgrade outcomes use per-run result.json, nonzero failure/partial status and last-confirmed version metadata. Release calls the same-commit quality workflow and requires all checks to pass before signed publication. See README runtime/upgrade guarantees for migration and hook coverage.
-以下は未公開の追加実装（公開済み安定版へ適用済みではない）。実行契約は axiarch-harness/ja/TASK_STATE_PROTOCOL.md。core/300を実装前に直接ロード。距離D・成熟度M・ハーネスHを区別し、セッション別証跡と共有現在値を分離。旧記録を保持し、構造・準備・完了を別検査する。healthは意味理解や全操作の安全性の証明ではない。更新失敗・保留は非0と結果記録で伝え、releaseは同一commitの品質検査成功を必須とする。
+Included in v1.17.0; existing adopters receive these changes only after an explicit upgrade. Runtime evidence contract: axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md. Directly load core/300 before implementation. D1–D5 distance, M1–M5 maturity and H0–H4 harness classification are separate axes. Session Markdown lives in .axiarch/sessions/{session_id}/; shared state in .axiarch/tasks/{task_id}/state.json. Root legacy evidence is preserved. Python 3 helpers validate structure, readiness and completion separately; health is not proof of semantic understanding or all-operation safety. Upgrade outcomes use per-run result.json, nonzero failure/partial status and last-confirmed version metadata. Release calls the same-commit quality workflow and requires all checks to pass before signed publication. See README runtime/upgrade guarantees for migration and hook coverage.
+以下はv1.17.0に含まれる追加実装。既存導入先への反映には明示的な更新が必要。実行契約は axiarch-harness/ja/TASK_STATE_PROTOCOL.md。core/300を実装前に直接ロード。距離D・成熟度M・ハーネスHを区別し、セッション別証跡と共有現在値を分離。旧記録を保持し、構造・準備・完了を別検査する。healthは意味理解や全操作の安全性の証明ではない。更新失敗・保留は非0と結果記録で伝え、releaseは同一commitの品質検査成功を必須とする。

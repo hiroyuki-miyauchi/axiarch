@@ -11,7 +11,7 @@
 #
 # Diagnoses Axiarch enforcement health across 16 verifiable stages spanning
 # the Hook layer, LOADING_PROTOCOL, CRYSTALLIZATION_PROTOCOL, AXIARCH.md
-# protocols (Project Configuration, §6.2, §6.4, §6.6, §7, §9 — verifiable subset), the v1.5.5
+# protocols (Project Configuration, §7.2, §7.4, §7.6, §8, §10 — verifiable subset), the v1.5.5
 # physical-block / bootstrap hooks, the v1.6.0 sublimated-file guide, and the
 # v1.8.0 task-boundary detection:
 #
@@ -19,10 +19,10 @@
 #   Check 5    LOADING_PROTOCOL Step 4 — task.md adherence
 #   Check 6    CRYSTALLIZATION_PROTOCOL §5 — count threshold (3+) + time-axis (>180d, v1.6.0+)
 #   Check 7    AXIARCH process documentation — task docs presence
-#   Check 8    AXIARCH §6.2 Human Approval and Deployment Ban — push hygiene
-#   Check 9    AXIARCH §6.4 SSOT Sync and Branch Discipline — main parity
-#   Check 10   AXIARCH §0 Project Configuration — Project Native Language configuration
-#   Check 11   AXIARCH §6.6 Diff-Based Editing and Anti-Full-Overwrite — PreToolUse hook physical block (v1.5.5+)
+#   Check 8    AXIARCH §7.2 Human Approval and Deployment Ban — push hygiene
+#   Check 9    AXIARCH §7.4 SSOT Sync and Branch Discipline — main parity
+#   Check 10   AXIARCH §1 Project Configuration — Project Native Language configuration
+#   Check 11   AXIARCH §7.6 Diff-Based Editing and Anti-Full-Overwrite — PreToolUse hook physical block (v1.5.5+)
 #   Check 12   Bootstrap — SessionStart hook wiring (task.md auto-init, v1.5.5+)
 #   Check 13   Sublimated files index — APPEND candidates (v1.6.0+)
 #   Check 14   Task boundary detection — Check D wiring in axiarch-boot-reminder.sh (v1.8.0+)
@@ -30,8 +30,8 @@
 #   Check 16   Reminder invariant clauses — Language First + Execution Harness + read-only delegation retained in axiarch-boot-reminder.sh (ja/en, v1.13.1+)
 #
 # Out of Scope (semantic judgment required, manual review):
-#   AXIARCH §6.1 AI Self-Completion / §6.3 Database Integrity / §6.5 Existing Functionality Protection
-#   AXIARCH §6.9 Role and Behavior
+#   AXIARCH §7.1 AI Self-Completion / §7.3 Database Integrity / §7.5 Existing Functionality Protection
+#   AXIARCH §7.9 Role and Behavior
 #
 # Designed to detect the "AI adherence gap" early and force tool-based remediation
 # instead of leaving users to manually debug.
@@ -248,7 +248,7 @@ fi
 # =============================================================================
 # Check 7: AXIARCH.md Process Documentation (task docs)
 # =============================================================================
-print_section "Check 7: AXIARCH §7 Documentation and Native Task State (task docs)"
+print_section "Check 7: AXIARCH §8 Documentation and Native Task State (task docs)"
 
 DOCS_OK=0
 PROCESS_DOCS_MISSING=()
@@ -281,7 +281,7 @@ fi
 # =============================================================================
 # Check 8: AXIARCH.md Deployment Ban (force-push / direct main commits)
 # =============================================================================
-print_section "Check 8: AXIARCH §6.2 Local Git context and reflog review hints"
+print_section "Check 8: AXIARCH §7.2 Local Git context and reflog review hints"
 
 GIT_CONTEXT=none
 GIT_PROBE_DIR="$(cd "${PROJECT_DIR}" && pwd -P)"
@@ -339,7 +339,7 @@ fi
 # =============================================================================
 # Check 9: AXIARCH.md SSOT Sync (main parity)
 # =============================================================================
-print_section "Check 9: AXIARCH §6.4 Local origin/main comparison (remote freshness unverified)"
+print_section "Check 9: AXIARCH §7.4 Local origin/main comparison (remote freshness unverified)"
 
 if [[ "${GIT_CONTEXT}" == ready && "${GIT_BRANCH_OK}" == true ]]; then
   REF_STATUS=0
@@ -384,7 +384,7 @@ fi
 # =============================================================================
 # Check 10: Project Native Language configuration (not document-language proof)
 # =============================================================================
-print_section "Check 10: AXIARCH §0 Project Native Language configuration"
+print_section "Check 10: AXIARCH §1 Project Native Language configuration"
 
 # Use the same parser as startup and optional command generation. In particular,
 # fenced/commented examples are not settings and ambiguous values are not success.
@@ -410,7 +410,7 @@ fi
 # =============================================================================
 # Check 11: Physical Block — PreToolUse hook wiring (v1.5.5+)
 # =============================================================================
-print_section "Check 11: AXIARCH §6.6 Write hook declarations"
+print_section "Check 11: AXIARCH §7.6 Write hook declarations"
 check_hook_declarations PreToolUse
 
 # =============================================================================
@@ -2485,11 +2485,11 @@ fi
 # =============================================================================
 print_section "Out of Scope (Manual Review Required)"
 print_info "These protocols are not externally verifiable and require human review:"
-print_info "  - AXIARCH §6.1 AI Self-Completion Mandate"
-print_info "  - AXIARCH §6.3 Database Integrity (manual SQL detection)"
-print_info "  - AXIARCH §6.5 Existing Functionality Protection"
-print_info "  - AXIARCH §6.9 Role and Behavior"
-print_info "(AXIARCH §6.6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Check 11)"
+print_info "  - AXIARCH §7.1 AI Self-Completion Mandate"
+print_info "  - AXIARCH §7.3 Database Integrity (manual SQL detection)"
+print_info "  - AXIARCH §7.5 Existing Functionality Protection"
+print_info "  - AXIARCH §7.9 Role and Behavior"
+print_info "(AXIARCH §7.6 Anti-Full-Overwrite gained physical block in v1.5.5 — see Check 11)"
 
 # =============================================================================
 # Summary
@@ -2499,7 +2499,7 @@ if [[ "${EXIT_CODE}" -eq 0 ]]; then
   print_pass "No blocking automated check failures across hook + crystallization + AXIARCH protocols"
   print_info "If warnings appeared above, review them before treating the project state as fully clean"
   print_info "Checked: selected files, hook configuration, recorded references, and requested evidence phase. Not every operation or protocol clause is verified."
-  print_info "Manual review needed: AXIARCH §6.1, §6.3, §6.5, §6.9 (see Out of Scope above)"
+  print_info "Manual review needed: AXIARCH §7.1, §7.3, §7.5, §7.9 (see Out of Scope above)"
   print_info "PreToolUse checks the configured Write boundary only; actual hook invocation and agent compliance depend on the runtime."
 else
   print_warn "Some checks failed/warned — see above for which protocol needs attention"

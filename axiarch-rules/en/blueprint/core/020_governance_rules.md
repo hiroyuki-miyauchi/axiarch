@@ -36,7 +36,7 @@
 **Context:** When #46 canonicalized AGENTS.md into AXIARCH.md, the old §2 "Language First" was downgraded to a weak single §6.10 row (listing owner-facing documents only), losing its binding on the agent response surface (headings, summaries, labels, lists, tables) and its violation clause (an adopter reported "native-language adherence weakened").
 **Problem:** Large canonicalizations/merges can silently degrade a strong prior rule without anyone noticing. During restoration, fixing only the canonical file (AXIARCH.md) and the reminder leaves the old wording stranded in peripheral surfaces such as the AI-facing digests (llms.txt / llms-full.txt) and the ja/en mirrors in ROADMAP.
 **Solution/Rule:** (1) Under the §6.10 non-degradation principle, preserve the stricter older interpretation unless a replacement boundary is explicitly introduced. (2) Restore across ALL surfaces — canonical + reminder + AI-facing digests + ja/en mirrors. (3) Guard the restored invariant with a dedicated health-check (e.g., Check 16) that greps for it, so future silent removal/degradation is caught with EXIT_CODE=1.
-**Reference:** #46 / v1.13.1 / AXIARCH.md §6.10 / axiarch-scripts/check-axiarch-health.sh Check 16
+**Reference:** #46 / v1.13.1 / AXIARCH.md §7.10 / axiarch-scripts/check-axiarch-health.sh Check 16
 
 ---
 
@@ -45,7 +45,7 @@
 **Context:** Codex can incorrectly decide that a formal Codex Security Deep Security Scan requires separate explicit subagent permission, stopping even when the user has requested a deep scan or exhaustive review and the fanout is read-only.
 **Problem:** The Human Approval Gate exists to stop high-risk actions such as stage, commit, push, deploy, DB apply, production mutation, increased billing, and sensitive-boundary changes. Treating subagent or scan-tool usage itself as approval-gated blocks read-only research, role passes, audits, and verification, which weakens the Execution Harness instead of making it safer.
 **Solution/Rule:** Read-only role passes, audits, security scans, and bounded subagent delegation may run without waiting for additional "explicit subagent permission" when the user requested that investigation and the workflow does not involve file writes, remote mutation, production access, install/auth, cost increase, or sensitive-data retrieval. When a named workflow such as Codex Security Deep Security Scan is explicitly invoked, its required read-only worker fanout is included in that request. If delegation is unavailable in the runtime, do not claim that the formal Deep Security Scan ran; fall back to the ordinary scan or main-agent sequential role passes.
-**Reference:** AXIARCH.md §6.2 / §9, `axiarch-harness/{ja,en}/SUBAGENT_DELEGATION_PROTOCOL.md`, `axiarch-harness/{ja,en}/HUMAN_APPROVAL_GATE.md`, Codex Security `deep-security-scan/SKILL.md`
+**Reference:** AXIARCH.md §7.2 / §10, `axiarch-harness/{ja,en}/SUBAGENT_DELEGATION_PROTOCOL.md`, `axiarch-harness/{ja,en}/HUMAN_APPROVAL_GATE.md`, Codex Security `deep-security-scan/SKILL.md`
 
 ---
 
@@ -55,7 +55,7 @@ Target Folder: blueprint/core/
 Context: The Axiarch consistency audit found missed English lessons, reminders asserting unread rules, a health condition requiring all three agents to be called validated, and broken heading references.
 Problem: Wording-only checks can preserve a false specification as a passing condition. File presence, candidate discovery, actual reading and result verification are different facts.
 Solution/Rule: State what diagnostics inspected and can decide; reconcile claims with the current owner-provided status and execution evidence. Do not use templates, heuristics or adapter presence as completion or practical-validation evidence. Pair wording checks with isolated behavioral and negative tests, covering both languages and additional categories through the same workflow.
-Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-scripts/axiarch_inspect.py`, `AXIARCH.md` §0.1
+Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-scripts/axiarch_inspect.py`, `AXIARCH.md` §1.1
 
 Same-day follow-up: negative tests found structure checks requiring current freshness from historical completions, and retry logic favoring an older base over recorded applied hashes after interruption. Separate current-evidence reconciliation from historical shape checks; exercise retries, concurrent execution and self-updates with actual inputs. This supplements the existing lesson without inflating its count. References: `axiarch-scripts/axiarch_state.py`, `axiarch-scripts/axiarch_upgrade.py`, `tests/test_runtime.py`.
 
