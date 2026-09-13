@@ -39,6 +39,10 @@
 
 set -euo pipefail
 
+# Keep all diagnostic child interpreters read-only, including startup imports
+# and hosts that redirect caches outside the project.
+export PYTHONDONTWRITEBYTECODE=1
+
 # Observation is tied to PROJECT_DIR, never an inherited alternate repository
 # or index. These overrides affect only this process and its diagnostics.
 while IFS= read -r git_env_name; do

@@ -113,10 +113,30 @@ class HookDiagnosticTests(unittest.TestCase):
             path = sys.executable if tool == 'python3' else shutil.which(tool)
             if path: (binaries / tool).symlink_to(path)
         self.env['PATH'] = str(binaries); self.env.pop('PYTHONDONTWRITEBYTECODE', None)
+        # Apple Python can redirect caches outside the adopter by default.
+        # Observe an explicit isolated cache location on every platform.
+        cache = self.root / 'bytecode'
+        self.env['PYTHONPYCACHEPREFIX'] = str(cache)
         before = self.tree_bytes(); self.health(expected=0)
+        self.assertFalse(cache.exists(), 'read-only health created Python bytecode')
         self.assertEqual(self.tree_bytes(), before)
         data = copy.deepcopy(self.original); del data['hooks']['PreToolUse']; self.write_config(data)
+        before = self.tree_bytes()
         self.assertNotEqual(self.health().returncode, 0)
+        self.assertFalse(cache.exists(), 'failed health created Python bytecode')
+        self.assertEqual(self.tree_bytes(), before)
+
+    def test_upgrade_manifest_check_does_not_create_source_bytecode(self):
+        self.fixture()
+        self.env.pop('PYTHONDONTWRITEBYTECODE', None)
+        before = self.tree_bytes()
+        self.run_cmd([sys.executable, '-X', 'pycache_prefix=',
+                      self.source / 'axiarch-scripts/axiarch_upgrade.py',
+                      'manifest', '--source', self.source, '--format', 'check'])
+        after = self.tree_bytes()
+        # List added paths before comparing contents to keep failures readable.
+        self.assertEqual(sorted(after), sorted(before))
+        self.assertEqual(after, before)
 
     def test_exec_form_and_unconditional_matchers_are_supported(self):
         self.fixture(); data = copy.deepcopy(self.original)

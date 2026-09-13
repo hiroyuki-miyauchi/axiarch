@@ -21,6 +21,9 @@ release history, not current canonical numbering.
 
 ## [Unreleased]
 
+- PRのUbuntu回帰で、読み取り専用healthからのmanifest検査がPythonキャッシュを書き込む不備を修正。診断子プロセスのキャッシュ生成を止め、直接実行する更新補助でもプロジェクト内モジュールのキャッシュ生成を止める。OS既定の保存先に依存しない正常・異常診断と直接検査の回帰を追加する。
+- Fix the Ubuntu PR regression where read-only health's manifest check wrote Python bytecode. Disable cache writes in diagnostic child interpreters and local-module cache writes in the directly invoked upgrade helper. Cover successful/failed diagnosis and direct checks without depending on the host's default cache location.
+
 - 内部copy補助で、不正な子孫パスを検出する前に部分コピーし、失敗表示後も終了0となった漏れを修正。通常の更新と更新元・利用先・比較元の事前検査を共通化し、コピー失敗を終了5へ伝達する。隔離環境で異常入力の無変更拒否、部分書込・結果記録・版数保留・修復後の再実行を検証し、日英で内部補助と更新全体の保証範囲を分ける。
 - Fix internal copy partially applying files before rejecting invalid descendants and returning 0 after reporting failure. Share source/adopter/base preflight with the public upgrade path and propagate copy failures as exit 5. Add isolated rejection-without-write, partial-write, outcome/version and repair/retry regressions; distinguish helper and whole-upgrade guarantees in both languages.
 

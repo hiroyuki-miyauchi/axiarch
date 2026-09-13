@@ -16,6 +16,7 @@ import sys
 import tempfile
 import unicodedata
 
+sys.dont_write_bytecode = True
 from axiarch_state import atomic, digest, identifier, inside, read_json, protect_artifacts, has_control_characters
 
 
