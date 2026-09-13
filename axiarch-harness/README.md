@@ -26,6 +26,7 @@ axiarch-harness/
  ├── ja/
  │   ├── EXECUTION_HARNESS_PROTOCOL.md
  │   ├── AUDIT_GATE_PROTOCOL.md
+ │   ├── TASK_STATE_PROTOCOL.md
  │   ├── ROLE_PASS_PROTOCOL.md
  │   ├── EVIDENCE_PACKET_PROTOCOL.md
  │   ├── HUMAN_APPROVAL_GATE.md
@@ -33,6 +34,7 @@ axiarch-harness/
  └── en/
      ├── EXECUTION_HARNESS_PROTOCOL.md
      ├── AUDIT_GATE_PROTOCOL.md
+     ├── TASK_STATE_PROTOCOL.md
      ├── ROLE_PASS_PROTOCOL.md
      ├── EVIDENCE_PACKET_PROTOCOL.md
      ├── HUMAN_APPROVAL_GATE.md
@@ -69,3 +71,5 @@ axiarch-harness/
 | `EVIDENCE_PACKET_PROTOCOL.md` | Required closeout evidence, loaded rules, verification, approval status, and crystallization result | 完了時証跡、ロード済みルール、検証、承認状態、結晶化結果 |
 | `HUMAN_APPROVAL_GATE.md` | Actions that require explicit human approval | 明示的な人間承認が必要な操作 |
 | `SUBAGENT_DELEGATION_PROTOCOL.md` | Optional subagent delegation, read-only delegation boundary, and fallback to main-agent sequential execution | 任意のサブエージェント委任、読み取り専用委任境界、メインエージェント順次実行フォールバック |
+
+| `TASK_STATE_PROTOCOL.md` | Session/task IDs, evidence schema, atomic publication and validation phases | セッション・タスクID、証拠スキーマ、原子的更新、検査段階 |

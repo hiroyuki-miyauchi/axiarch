@@ -5,7 +5,7 @@
 
 > [!NOTE]
 > **The correct initial state is that no domain rule files exist here other than this README.**
-> Domain rule files are generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `CRYSTALLIZATION_PROTOCOL.md`.
+> Domain rule files are generated when lessons accumulated through real-world practice reach the threshold (3 entries), following `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 > Pre-populating seed files is prohibited as it violates the YAGNI principle.
 
 ## Corresponding Universal Rules

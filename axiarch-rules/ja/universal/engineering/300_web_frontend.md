@@ -1322,7 +1322,7 @@ async function processLargeDataset(items: Item[]) {
 
 ### §153. Privacy-First Tracking
 
-- **Rule 33.154**: Cookie同意バナーを法域に応じて実装する（GDPR: オプトイン / 日本: オプトアウト）
+- **Rule 33.154**: Cookie等の同意・通知・拒否・第三者提供を、適用法域と実際のデータフローで判定する。日本を一律オプトアウトと扱わない。[個人情報保護委員会FAQ](https://www.ppc.go.jp/personalinfo/faq/APPI_QA/)を含む対象法域の一次資料で確認する。
 - **Consent Management**: ユーザーの同意状態に基づきトラッキングスクリプトのロードを制御する
 
 ### §155b. The Post-Privacy Sandbox Tracking Strategy

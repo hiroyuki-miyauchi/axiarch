@@ -88,7 +88,7 @@
     4.  **Transparency**: "Silence breeds distrust" — communicate status continuously even without progress
     5.  **Blameless Culture**: Focus on system improvement, not individual blame
 
--   **Cross-Reference**: `000_core_mindset.md` (Priority hierarchy), `operations/400_site_reliability.md` §4 (SLI/SLO)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/core/000_core_mindset.md` (Priority hierarchy), `operations/400_site_reliability.md` §4 (SLI/SLO)
 
 ### §2. Framework Compliance
 
@@ -1151,7 +1151,7 @@
 -   **Supply Chain Disruption Countermeasures**:
     - Alternative route assessment for semiconductor/hardware supply chains
     - Geopolitical risk assessment of software licenses (products from sanctioned countries)
--   **Cross-Reference**: `800_internationalization.md` (Data Sovereignty), `security/100_data_governance.md`
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md` (Data Sovereignty), `security/100_data_governance.md`
 
 ---
 
@@ -2343,7 +2343,7 @@
 
 | Referenced Rule | Related Topics |
 |:---------------|:--------------|
-| `000_core_mindset.md` | Priority Hierarchy |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | Priority Hierarchy |
 | `engineering/510_aws_cloud.md` | Multi-Region, Cost Management |
 | `ai/000_ai_engineering.md` | AI Guardrails, AI Implementation |
 | `operations/400_site_reliability.md` | SLI/SLO, RPO/RTO, Chaos Engineering, Observability, FinOps |
@@ -2351,5 +2351,5 @@
 | `security/100_data_governance.md` | GDPR/Global Privacy Laws/DORA Notification Obligations, Data Sovereignty, Legal Response, APRA CPS 230 |
 | `security/200_oss_compliance.md` | SBOM, SCA, Supply Chain Security |
 | `quality/000_qa_testing.md` | Resilience Testing, Penetration Testing |
-| `800_internationalization.md` | Data Sovereignty, Multi-Region Deployment |
+| `axiarch-rules/{lang}/universal/product/800_internationalization.md` | Data Sovereignty, Multi-Region Deployment |
 | `core/100_governance.md` | Rule Authority, Governance |

@@ -1,23 +1,9 @@
 # Project Lessons Log
 
 This file is an **index plus a temporary accumulation point for unsorted** critical lessons, anti-patterns, and newly established operational rules obtained through project development. It is NOT a place to accumulate all lessons forever. Once 3 or more lessons of the same domain accumulate, they are crystallized into a proper rule file in the corresponding Blueprint folder, and only a reference link remains here.
-Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomously manages this file.
+Based on `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomously manages this file.
 
-> [!IMPORTANT]
-> **Auto-Crystallization Protocol**
->
-> This file functions as a **lesson index and temporary accumulation point**.
-> When lessons of the **same domain reach 3 or more**, the AI autonomously:
->
-> 1. Creates a proper project rule file in the **corresponding Blueprint domain folder**
->    e.g., DB & Auth lessons → `engineering/{NNN}_database_auth.md`
->    e.g., Security lessons → `security/{NNN}_security_policy.md`
-> 2. Moves the relevant lessons to the new file
-> 3. Adds a reference link to this index
->
-> **Design Philosophy**: Lessons are Co-located with rules in the same folder. Consolidating everything here is NOT the intent.
-> The AI applies this protocol during task work and organizes lessons into domain-specific structures. When judgment is required, the operator decides.
-> See `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for details.
+> The canonical procedure for classification, deduplication, searching existing rules, count/age promotion and index updates is `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`. Read and update an appropriate existing rule when available. This log temporarily holds unsorted lessons; placement alone does not load content. Updates depend on agent adherence; diagnostics inspect recorded structure and thresholds.
 
 ---
 
@@ -33,13 +19,12 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 ## Separated Domain Files
 
 > [!NOTE]
-> When 3+ lessons of the same domain accumulate, the AI automatically creates a domain-specific file.
-> The link list below is updated automatically.
+> The agent updates this table when promoting lessons. No script automatically creates or updates these rule files.
 
 | # | Domain | File | Count |
 |:--|:-------|:-----|:------|
 | 1 | Operations | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 13 |
-| 2 | Governance | [core/020_governance_rules.md](./020_governance_rules.md) | 3 |
+| 2 | Governance | [core/020_governance_rules.md](./020_governance_rules.md) | 4 |
 
 <!-- AUTO-CRYSTALLIZATION: When creating a domain file, add a row to the table above -->
 <!-- Example: | 1 | DB & Auth | `engineering/010_database_auth.md` | 3 | -->
@@ -51,10 +36,11 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 > [!TIP]
 > **Lesson Entry Format**
 > When adding a new lesson, use the format below.
-> **Always include a `Domain:` tag.** This is the classification key for auto-separation.
+> **Always include `Domain:` and `Target Folder:` tags.** This is the classification key for auto-separation.
 >
 > ### [YYYY-MM-DD] Lesson Title
 > **Domain:** DB & Auth / Security / Architecture / Quality / Design / Operations / Governance / Performance / Other
+> **Target Folder:** blueprint/{existing-target-folder}/
 > **Context:** The situation or background where the problem occurred
 > **Problem:** The specific issue or failure
 > **Solution/Rule:** The solution, or the rule established to reduce recurrence risk
@@ -85,13 +71,13 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 | FinOps | Cloud costs, resource efficiency | `operations/600_cloud_finops` |
 
 > [!NOTE]
-> The numbers in the "Related Universal Rules" column (e.g., `engineering/200_...`) are the numbers of the referenced Universal rules. The numbering of the Blueprint file created when crystallizing a lesson is decided by context per `CRYSTALLIZATION_PROTOCOL.md` and is NOT bound to these numbers (use any available 000–999 within the folder).
+> The numbers in the "Related Universal Rules" column (e.g., `engineering/200_...`) are the numbers of the referenced Universal rules. The numbering of the Blueprint file created when crystallizing a lesson is decided by context per `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` and is NOT bound to these numbers (use any available 000–999 within the folder).
 
 ### Cross-Reference (Related Universal Rules)
 
 | Category | Related Universal Rule |
 |:---------|:---------------------|
-| Crystallization Process | `CRYSTALLIZATION_PROTOCOL.md` |
+| Crystallization Process | `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` |
 | Core Principle Violations | `core/000_core_mindset` |
 | Security Lessons | `security/000_security_privacy` |
 | Performance Lessons | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
@@ -108,4 +94,4 @@ Based on `CRYSTALLIZATION_PROTOCOL.md` loaded from `AXIARCH.md`, the AI autonomo
 > "Crystallized Rule File Template" section of `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`.
 >
 > The inline template previously listed here has been retired to reduce structural drift risk.
-> **Always treat `CRYSTALLIZATION_PROTOCOL.md` as the Single Source of Truth for templates.**
+> **Always treat `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` as the Single Source of Truth for templates.**

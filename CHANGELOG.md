@@ -1,5 +1,8 @@
 # Changelog
 
+> 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §0.1。
+> Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §0.1.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -13,6 +16,106 @@ Historical entries preserve the labels and file roles that were active at the
 time of each release. From v1.12.0 onward, the active Axiarch source of truth is
 `AXIARCH.md`; earlier `AGENTS.md` / Protocol 0-9 references in this file are
 release history, not current canonical numbering.
+
+---
+
+## [Unreleased]
+
+- macOSの一部環境で導入案内の `mktemp -d` が指定したTMPDIRよりOS既定の保存先を優先する差異に対応。日英の導入・更新例とAI向け説明で保存先を明示し、空白入りパス、専用フォルダ権限、部分取得の隔離を実行回帰で確認する。
+- Use explicit temporary-path templates in installation/update examples and AI-facing guidance because some macOS environments prefer the OS default over TMPDIR for bare `mktemp -d`. Exercise paths containing spaces, private directory permissions and partial-download isolation in runtime regressions.
+
+- PRのUbuntu回帰で、読み取り専用healthからのmanifest検査がPythonキャッシュを書き込む不備を修正。診断子プロセスのキャッシュ生成を止め、直接実行する更新補助でもプロジェクト内モジュールのキャッシュ生成を止める。OS既定の保存先に依存しない正常・異常診断と直接検査の回帰を追加する。
+- Fix the Ubuntu PR regression where read-only health's manifest check wrote Python bytecode. Disable cache writes in diagnostic child interpreters and local-module cache writes in the directly invoked upgrade helper. Cover successful/failed diagnosis and direct checks without depending on the host's default cache location.
+
+- 内部copy補助で、不正な子孫パスを検出する前に部分コピーし、失敗表示後も終了0となった漏れを修正。通常の更新と更新元・利用先・比較元の事前検査を共通化し、コピー失敗を終了5へ伝達する。隔離環境で異常入力の無変更拒否、部分書込・結果記録・版数保留・修復後の再実行を検証し、日英で内部補助と更新全体の保証範囲を分ける。
+- Fix internal copy partially applying files before rejecting invalid descendants and returning 0 after reporting failure. Share source/adopter/base preflight with the public upgrade path and propagate copy failures as exit 5. Add isolated rejection-without-write, partial-write, outcome/version and repair/retry regressions; distinguish helper and whole-upgrade guarantees in both languages.
+
+- 状態管理の回帰試験で、起動時間をロック待ちと誤判定していた3秒制限を分離。起動の監視上限は15秒、実際のロック拒否は開始合図後の3秒とし、FIFO・ハードリンク・他writerの拒否理由も検査する。
+- Separate state-test startup from lock rejection timing. Allow a 15-second startup watchdog, retain the three-second deadline after the real lock-attempt handshake, and assert rejection reasons for FIFOs, hardlinks and competing writers.
+
+- 大文字小文字・Unicodeの表記差で保持対象を別名から更新できた漏れを修正。配布パスと子孫・親フォルダの衝突を適用前に拒否し、導入元・直接copyにも検査を接続する。隔離回帰と再実行を追加し、日英の互換性・復旧説明、旧Blueprintの確認済み版数の説明を同期する。
+- Reject case/canonical-Unicode distribution aliases that could update preserved files through alternate names. Check selections, descendants and parent directories before application, including installation sources and direct copy. Add isolated rejection/retry regressions and align bilingual portability, recovery and confirmed-version guidance in the older Blueprint.
+
+- 正常なフック起動・再開を4秒で打ち切っていた回帰試験の監視上限を15秒へ調整。改修前の検査でも4秒を超える正常完了を確認したためで、FIFO拒否の専用3秒検査と出力・既存記録保持の検証は維持する。
+- Give end-to-end hook regression tests a 15-second watchdog after observing valid bootstrap exceed the previous four-second limit even with the prior path check. Retain the dedicated three-second FIFO rejection test and all output/preservation assertions.
+
+- 更新のワイルドカード展開で改行入りの名前が別パスへ分割され、指定外ファイルまで正常終了で更新された不備を修正。元の名前を検査し、旧Blueprint探索・Unicode行区切りも保護する。適用前の拒否時に利用先を変更しない回帰と復旧後の再実行を追加。配布検査の終了値説明と、日英のセキュリティ・QA索引の古い構成数を訂正する。
+- Fix wildcard expansion splitting newline-bearing names into separate paths and updating unselected files with a successful exit. Validate original names, preserve legacy Blueprint discovery boundaries and reject Unicode line separators. Add unchanged-adopter and repair/retry regressions; correct preflight exit-code guidance and stale bilingual security/QA structure counts.
+
+- 配布境界の追加監査で、manifestや展開後の対象にGit内部情報・ローカル管理記録を含められた漏れを修正。導入・更新前にプロジェクト全体と予約パスを拒否し、初期導入の必須ファイル／ディレクトリ型を検査する。日英の異常通知・復旧手順と隔離回帰を追加し、既存記録の削除や内容の自動匿名化は行わない。
+- Close distribution-boundary gaps that allowed manifests or expanded selections to include Git internals and local managed records. Reject whole-project/reserved paths before application and validate required installation file/directory types. Add bilingual failure/recovery guidance and isolated regressions without deleting existing records or claiming automatic content redaction.
+
+開発版: `1.17.0-dev`（2026-09-13）。ゴールと証拠、セッション分離、導入・更新の失敗通知、品質検査と公開経路、日英ガバナンス整合の改善を次期版へまとめる。公開済みの最新安定版は `1.16.0`。本節は正式リリース・タグの公開を意味しない。
+
+Development version: `1.17.0-dev` (2026-09-13), collecting goal/evidence checks, session isolation, install/upgrade failure reporting, release quality gates and bilingual governance alignment. The latest published stable version remains `1.16.0`; this section does not announce a published release or tag.
+
+- 追加整合性監査で、要約を読込完了と扱う経路、Gitハッシュ・署名・履歴保全の過剰保証、任意ツールの一律必須化、フォークの自動上書き、2桁番号の旧検査例を修正。日英の参照・権限・教訓の分別を正本へ接続し、3桁000–999とGit受信フック例を隔離実行で検証する。
+- The additional consistency audit corrects summary-only loading claims, overstatements about Git hashes/signatures/history, mandatory optional tools, automatic fork overwrites and obsolete two-digit checks. Align bilingual references, authority and lesson routing with canonical protocols; execute three-digit 000–999 and Git receive-hook examples in isolation.
+- ライセンス・帰属表示を `axiarch-rules/LICENSE` / `axiarch-rules/NOTICE` として導入・更新へ接続し、利用先ルートの独自ファイルを保持する。配布コピーの不一致と曖昧な番号付きファイル参照を検出する。個人情報の同意年齢・権利要求・侵害通知・保存期間は法域と用途の確認へ改め、一律期限の自動計算や不要な個人情報の記録を要求しない。
+- Deliver attribution and license copies under `axiarch-rules/` while preserving adopter root files; detect copy drift and ambiguous numbered-file references. Base privacy consent, rights requests, breach notification and retention on verified jurisdiction and purpose, without universal deadline calculators or unnecessary personal-data logging.
+- セッション一覧にタスクの目的を表示する `--mode sessions` を追加し、statusにもgoalを表示。内部ID・保存先・再開手順を維持し、ローカル記録をGit配布物から除外する境界を日英で説明する。
+- Add goal-based `--mode sessions` listings and include the goal in status. Preserve internal IDs, storage paths and resumption, documenting the exclusion of local evidence from Git distribution in both languages.
+
+- 開発版のhealthで未公開タグの導入例を要求していた不整合を修正。開発版と履歴上の安定版を別々に突合し、安定版の公開検査とUnreleasedの公開スキップを隔離試験で確認する。
+- Correct development health checks that required unpublished installation tags. Validate build and recorded stable versions separately; retain isolated checks for stable publication and Unreleased publication skipping.
+
+- 設定・教訓・参照のコード例とコメントの読取境界を共通化。言語変更は値以外の空白・末尾注記・改行を保持し、曖昧な記法を含む値では書換せず停止する。閉じていない実コメントと複数行のコードスパンを含む隔離回帰試験を追加した。
+- Share code/comment boundaries across settings, lessons and references. Language changes preserve surrounding whitespace, trailing notes and line endings, stopping without writes on ambiguous value markup. Add isolated regressions covering unclosed real comments and multiline code spans.
+
+- 起動・生成・healthの言語設定パーサーを共通化し、例示・重複・不明設定の扱いを統一。コード枠内のコメント記号で後続設定が隠れる問題を修正し、healthの文字種による言語適合表示を廃止する。
+- 日英の言語規則をユーザー指定・既定言語・表示ロケール・技術表記へ整合させ、任意検知・通知の承認境界、言語成熟度LM、実装されていない検査例を明確化する。
+- Align language parsing across startup, generation and health; correct literal comment tokens inside code examples, reject ambiguous settings and remove character-script compliance claims.
+- Align both language rules with explicit instructions, defaults, display locales and technical notation; clarify optional detection, authorized notifications, language maturity LM and illustrative checks that are not bundled.
+
+- 差分診断のGit環境上書きを切り離し、local/include/worktreeの変換フィルターを診断中だけ無効化。不足オブジェクトの自動取得を抑止し、設定確認不能を未確認として通知する。通常Git表示との違いと旧Gitの互換性を日英で明記し、隔離回帰テストを追加。
+- Isolate diff diagnostics from inherited Git overrides; disable local/included/worktree conversion filters only during observation. Suppress lazy object downloads and report unavailable configuration checks as unassessed. Document differences from ordinary Git output and older-Git compatibility in both languages, with isolated regressions.
+- healthのGit取得失敗を0件・同期済みへ変換する経路を修正。対象作業ツリー・detached HEAD・初回コミット前・ローカル参照の欠落と、診断不能を区別し、リモート鮮度やpush承認を保証しない表示へ変更。
+- Stop turning failed health Git queries into zero counts or synchronized claims. Distinguish the selected worktree, detached/unborn HEAD and absent local refs from diagnostic failures; explicitly avoid guarantees of remote freshness or push authorization.
+
+- hook診断を両設定・各イベント・対象操作と呼出し先の対応へ統一し、先頭以外の宣言も検査。欠落・無効化・非同期・未確認形式を成功扱いせず、任意commandの実行や設定の書換えを行わない隔離回帰を追加した。
+- Correlate hook events, matched operations and script invocations in both configurations, including declarations after other hooks. Missing, disabled, asynchronous or unassessed declarations no longer pass; isolated regressions verify that diagnostics do not execute arbitrary commands or rewrite settings.
+
+- 初期導入・更新・healthのJSON検査を共通化し、取得のHTTP失敗・時間切れ・不正アーカイブを適用前に拒否。curlによるHTTPS限定取得、専用一時ディレクトリの案内、準備状態に即した表示と隔離回帰テストを追加した。wgetのみの環境は確認済みローカルソースを利用する。
+- Share strict JSON validation across setup, upgrade and health; stop on HTTP failures, deadlines and invalid archives before application. Add curl-based HTTPS-only retrieval, private temporary bootstrap guidance, accurate preparation messages and isolated regressions. Wget-only environments use a reviewed local source.
+
+- 管理記録のGit除外を導入・更新・起動へ接続し、既存設定を保持して追跡済み・除外漏れを検知。更新記録と導入ログの権限、競合コピーの原子的な保存、manifest制御文字と表示の扱いを修正し、異常通知と自動保護の限界を日英で明記した。
+- Connect private artifact exclusions to install, upgrade and startup while preserving existing policy and detecting tracked/unignored records. Restrict new run/log permissions, replace compatibility conflicts atomically, reject manifest controls and preserve literal display text; document notification and protection limits in both languages.
+
+- タスク生成の通常失敗で新規記録を取り消し、既存記録と読取専用の旧文書を保持。異常なロック・不完全なタスク・JSON数値オーバーフローを拒否し、強制終了と再開を隔離テストで検証した。
+- Task generation now rolls back new records on ordinary failures while preserving existing work and read-only legacy documents. Invalid locks, incomplete tasks and JSON numeric overflow are rejected, with isolated forced-termination and resume regressions.
+- 差分ガードの初回コミット前・未追跡ファイル・閾値処理を修正し、Git計測失敗を未確認として通知。日英の事後フック保証範囲・依存関係を更新し、隔離回帰テストを追加。
+- Corrected diff measurement for unborn branches, untracked files and thresholds; failed Git observations are explicitly unassessed. Updated bilingual post-use hook scope and dependencies with isolated regressions.
+
+### Runtime and framework consistency / 実行導線と全体一貫性
+
+- 起動・補足フックのセッション入力・JSON出力を共通化。曖昧なIDから記録を作らず、長文・Unicodeと不正TTLを扱い、表示用キャッシュのリンクや特殊ファイルを保持して完全表示へ戻す。共有JSONの重複・非通常ファイルと再開時の文書欠落を拒否し、補助ファイルを導入・診断に接続。
+- Share startup/reminder identity parsing and context JSON; preserve records on ambiguous IDs, decode long Unicode prompts and handle invalid TTLs. Preserve linked or special cache entries and use full reminders. Reject ambiguous/non-regular state JSON and missing resume documents; include the helper in installation and health checks.
+- 起動・補足・Writeの生入力をBashへの格納前に検証し、不正なNULを含むJSONの暗黙的な変形を拒否する。3フックともPython補助を含むscripts一式で更新する。
+- Validate raw startup/reminder/Write input before storing it in Bash, rejecting silent repair of JSON containing raw NUL bytes. All three hooks require the complete scripts bundle, including Python helpers.
+- 現行のトークン削減率を断定する説明を修正。過去v1.6.0の削減率記録はリリース当時の説明で、現在の全体使用量の実測・保証ではない。core/300に残るsecurity参照も完全なパスに統一。
+- Qualify token-saving claims: historical v1.6.0 figures are not measurements or guarantees of current total usage. Expand the remaining core/300 security references to full paths.
+
+- フックのJSONエスケープによる既存Write拒否の迂回を修正し、不正入力を許可扱いしない。初期導入・作業記録・任意生成の言語読取を共通化。不完全セッションや共有状態消失時の暗黙的なタスク再生成を停止し、中核参照の省略パスを明確化。
+- Decode hook JSON paths correctly and stop on malformed input. Share language-setting parsing across initial setup, session documents and optional commands; stop implicit task recreation after incomplete sessions or missing shared state, and make core reference paths explicit.
+
+- フックはリンクと親パスを実際の解決順序で確認し、例外許可は実体パスで照合する。制御文字を含む拒否応答も正しいJSONにし、関連研究の評価とAxiarch自身の検証範囲を区別した。
+- Check hook paths using filesystem symlink/parent resolution and match exceptions against physical paths. Emit valid denial JSON for control characters and distinguish related research evaluations from Axiarch's own evidence.
+
+- manifestの親子・重複・除外指定による保持境界のすり抜けを修正し、特殊ファイル・コマンド名衝突・曖昧な言語指定を検出。日英の任意プロンプトを正本参照と条件付き着手へ整理し、現行の更新・教訓運用に合わせた。コード枠内の指示も文書回帰検査に追加。
+- Enforce manifest ownership across parent/child selections, duplicates and exclusions; detect special files, command-name collisions and ambiguous language settings. Align Japanese and English optional prompts with canonical loading, conditional startup, current upgrades and lesson handling; check instructions inside fenced prompt bodies.
+
+- 初期導入を一時領域で準備し、独自設定との衝突・診断失敗を成功扱いしないよう修正。明示dry-run、日英prompt選択、壊れたmanifestの停止、任意生成物の編集保護を追加し、CLIと説明を対応させた。
+- Stage fresh installs and distinguish collisions and failed diagnosis from success. Honor explicit dry-runs and prompt language selection, reject malformed manifests, protect edited optional commands, and align CLI behavior with documentation.
+
+- 追加回帰監査で、過去記録の構造と現在の鮮度を分離し、タスク接続の不整合、更新元欠落、管理領域のリンク、自己更新・多重更新・中断復帰、コード囲み内の教訓誤検出を修正。未解決セッションの共有文書誤参照と新旧呼称・再ロード条件も整理。
+- Follow-up regressions separate historical structure from current freshness and cover invalid task bindings, missing sources, linked metadata, self/concurrent/interrupted upgrades and fenced lesson examples. Unresolved sessions no longer borrow shared evidence; level names and reload conditions are aligned.
+
+- ゴール・現在値と実行記録を接続し、構造・準備・完了の検査を分離。セッション固有の文書、共有状態の更新競合検知、証拠付き完了判定を追加。
+- 更新の適用・保留・診断失敗と版数を分離し、隔離した実動作テストと同一コミットのリリース品質ゲートを追加。
+- 3層、必須／任意、実際のロード、教訓の分類・昇華・索引更新、拡張フォルダ、採番、参照先、日英の適用範囲を整合。実証済みはGoogle Antigravityのみと訂正。
+- Connect goals and evidence to execution; separate structure, readiness and completion, isolate session records and detect shared-state update conflicts.
+- Distinguish applied, pending and diagnostic upgrade outcomes; gate signed releases on the same commit’s quality checks and isolated runtime regressions.
+- Align the three layers, mandatory/optional scope, actual reading, lesson lifecycle, extensible folders, numbering, references and localized applicability. Only Google Antigravity is practically validated; other agents remain unverified.
 
 ---
 
@@ -1176,3 +1279,5 @@ Built from hundreds of AI-assisted development sessions on Google Antigravity du
 [1.2.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0
+
+[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...HEAD

@@ -49,7 +49,7 @@
 | 29 | [CBOM（Cryptographic Bill of Materials）](#29-cbomcryptographic-bill-of-materials) |
 | 30 | [マルチエコシステム依存関係管理](#30-マルチエコシステム依存関係管理) |
 | 31 | [パッケージ公開セキュリティとWorkload Identity](#31-パッケージ公開セキュリティとworkload-identity) |
-| 32 | [GitHub Dependency Review統合](#32-github-dependency-review統合) |
+| 32 | [GitHub Dependency Review統合](#32-依存関係変更レビュー統合) |
 | 33 | [OSS法的リスクマネジメント](#33-oss法的リスクマネジメント) |
 | 34 | [ゼロデイ依存関係対応プレイブック](#34-ゼロデイ依存関係対応プレイブック) |
 | 35 | [AI生成コードのライセンスリスク](#35-ai生成コードのライセンスリスク) |
@@ -79,7 +79,7 @@
 | **59** | [**NIS2指令：適用性とソフトウェア供給網**](#59-nis2指令適用性とソフトウェア供給網) |
 | **60** | [**AI IDE統合型リアルタイムSCA**](#60-ai-ide統合型リアルタイムsca) |
 | **61** | [**SBOM Federation（OCI Artifact参考パターン）**](#61-sbom-federationoci-artifact参考パターン) |
-| **62** | [**ML BOM（Machine Learning Bill of Materials）**](#62-ml-bombmachine-learning-bill-of-materials) |
+| **62** | [**ML BOM（Machine Learning Bill of Materials）**](#62-ml-bommachine-learning-bill-of-materials) |
 | **63** | [**依存関係SLO / Error Budget管理**](#63-依存関係slo--error-budget管理) |
 | A | [Appendix A: 逆引き索引](#appendix-a-逆引き索引) |
 | B | [Appendix B: 差分サマリー](#appendix-b-差分サマリー) |
@@ -895,7 +895,7 @@ flowchart TD
 - **ルール**: 侵害パッケージのバージョンをロックファイルから即座に排除する
 - **ルール**: SBOMを使用してリリース済みビルドへの影響範囲を特定する
 - **ルール**: `npm token revoke` 等で漏洩した可能性のある認証情報を即座に無効化する
-- **ルール**: ポストモーテムの結果を教訓ログ（`core/010_project_lessons_log.md`）に記録する
+- **ルール**: ポストモーテムの結果を教訓ログ（`axiarch-rules/ja/blueprint/core/010_project_lessons_log.md`）に記録する
 - **ルール**: publishing tokenを長期トークンからOIDC Trusted Publishingへ移行し、窃取リスクを低減する
 - **ルール**: メンテナアカウントの2FA/WebAuthnを必須化し、phishing攻撃によるアカウント乗っ取りを防止する
 - **ルール**: 自己複製型マルウェア（Shai-Hulud型）への対策として、CIでネットワーク隔離ビルドを検討する
@@ -1955,7 +1955,7 @@ deny_patterns:
 - **ルール**: Agentic AIフレームワーク（LangGraph・CrewAI等）のアップグレード時は、エージェントの自律判断ロジックへの影響をステージング環境で検証する
 - **ルール**: A2A SDK、agent definition、tool manifestをrelease inventoryへ含め、配布channelが署名・attestationを提供する場合はtrust policyで検証する。未署名formatはsource、digest、review、allowlistで補完する
 
-→ クロスリファレンス: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §サプライチェーン、§36 Slopsquatting対策、§43 RDD対策、[`000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLMセキュリティ
+→ クロスリファレンス: [`ai/000_ai_engineering.md`](../ai/000_ai_engineering.md) §サプライチェーン、§36 Slopsquatting対策、§43 RDD対策、[`axiarch-rules/{lang}/universal/security/000_security_privacy.md`](../security/000_security_privacy.md) §AI/LLMセキュリティ
 
 ---
 
@@ -2025,7 +2025,7 @@ R: 機能単位（ユーザーリクエスト数、トランザクション数�
 - **ルール**: Renovateの週次グルーピングPR（§15参照）は、依存更新によるCI消費エネルギーのバッチ効率化にも貢献する設計で運用する
 - **ルール**: OSSパッケージ選定時（§12参照）のヘルスメトリクスに「メンテナの持続可能性（Green Flag）」を参考指標として加える
 
-→ クロスリファレンス: §13 バンドルサイズ・パフォーマンス影響、§39 依存関係最小化原則、[`600_cloud_finops.md`](../operations/600_cloud_finops.md) §GreenOps
+→ クロスリファレンス: §13 バンドルサイズ・パフォーマンス影響、§39 依存関係最小化原則、[`axiarch-rules/{lang}/universal/operations/600_cloud_finops.md`](../operations/600_cloud_finops.md) §GreenOps
 
 ---
 

@@ -1,5 +1,7 @@
 # Axiarch Rules — マスター索引
 
+> 適用範囲は `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1に従う。必須以外は任意。文書の言語は法域を決めない。`{lang}` はProject Native Languageで選ぶ。本文中の `universal/` と `blueprint/` は `axiarch-rules/{lang}/` 起点、`core/` 等のドメイン略記は表が指定する層を起点とする。曖昧な参照は実際のパスを確認し、同名ファイルを推測で選ばない。
+
 > [!NOTE]
 > **このファイルは `axiarch-rules/` ディレクトリ全体の詳細索引です。**
 > 各ルールファイルの役割・概要を記載しています。
@@ -53,11 +55,11 @@ your-project/
  │    └── en/
  ├── axiarch-scripts/                  ← 推奨：診断・ヘルスチェックスクリプト集 + hook 外出しスクリプト群
  │    ├── README.md                    ← 索引・使い方ガイド
- │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（16 段階、`--quiet` 対応、v1.9+ diff guard、v1.11.0現在タスク文書ローテーション・ネイティブタスク状態同期・v1.10.0+由来の本体リリース整合・ROADMAP Current Stable／正規AI-facing header／CHANGELOG compare ref／Actions immutable SHA厳密一致と日英完了release entry・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査・Claude Memory正本境界検査・Check 16 reminder境界検査）
- │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（動的違反検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + ネイティブタスク状態reminder v1.11.0+）
+ │    ├── check-axiarch-health.sh      ← Axiarch 全プロトコル健全性診断（16 段階、`--quiet` 対応、v1.9+ diff guard、v1.11.0現在タスクセッション別文書・ネイティブタスク状態同期・v1.10.0+由来の本体リリース整合・ROADMAP Current Stable／正規AI-facing header／CHANGELOG compare ref／Actions immutable SHA厳密一致と日英完了release entry・Safe Upgrade manifest/exclude・source-only既定skip/interactive明示override・対話選択肢重複排除・本体リポジトリ専用ファイル分類・replace-if-local-unchanged保護・型不一致review・upgrade metadata版数正規化・fallback core Blueprint検出・任意prompt証跡・Blueprint INDEX版数・prompt索引・README/llms/scripts README境界検査・Claude Memory正本境界検査・Check 16 reminder境界検査）
+ │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook の外出しスクリプト（記録の見直し候補検出 A/B/C + TTL 二段階出力 v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + ネイティブタスク状態reminder v1.11.0+）
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook の外出しスクリプト（§6 物理遮断、v1.5.5+）
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook の外出しスクリプト（現在タスク文書の自動初期化、v1.5.5+ / v1.11.0+）
- │    ├── axiarch-task-state.sh        ← task.md / implementation_plan.md / walkthrough.md のarchive-before-refresh補助（v1.11.0）
+ │    ├── axiarch-task-state.sh        ← task.md / implementation_plan.md / walkthrough.md のsession-specific補助（v1.11.0）
  │    ├── axiarch-diff-guard.sh        ← PostToolUse hook の外出しスクリプト（diff guard、v1.9.0）
  │    ├── axiarch-upgrade.sh           ← Safe Upgrade Wizard（対話式・グループ別アップグレード）
  │    └── check-git-config-clean.sh    ← worktree管理情報・branch config整合チェック
@@ -69,8 +71,8 @@ your-project/
 | ファイル | 説明 |
 |---|---|
 | [README.md](./README.md) | 全ルールモジュールへのリンク集。導入手順・初期セットアップガイドを含む。 |
-| [compliance_matrix.md](./compliance_matrix.md) | ユーザーの要望がどのルールファイルでカバーされているかを証明する要件対照表。Universal（不変）と Blueprint（可変）の責務分離を定義。 |
-| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | AIが対話開始時に必ず実行すべき5ステップのルールロード手順。 |
+| [compliance_matrix.md](./compliance_matrix.md) | 要望と対応するルールファイルを追跡する要件対照表。実動作や遵守の証明ではない。Universal（不変）と Blueprint（可変）の責務分離を定義。 |
+| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | 適用範囲に応じて関連条項を読む5ステップの手順。H0/H1は軽量適用。 |
 | [CRYSTALLIZATION_PROTOCOL.md](./CRYSTALLIZATION_PROTOCOL.md) | AIがタスク完了時に教訓を自律的に記録・整理（結晶化）するためのプロトコル。 |
 
 ---
@@ -87,7 +89,8 @@ your-project/
 |---|---|---|
 | 000 | [000_core_mindset.md](./universal/core/000_core_mindset.md) | **最上位の行動原則（Rev.14・46セクション構成（§1.1〜§1.35, §9.1〜§9.11））。** 優先順位の階層（セキュリティ > UX > 収益性 > DX）、ゼロ・トレランス、Headless First、SSOT原則、対症療法の禁止、Observability-First、Resilience by Design、Cost as First-Class Citizen、Cognitive Load Minimization、§1.10 Security-by-Design、§1.11 AI-Augmented Engineering、§1.12 Privacy-by-Architecture、§1.13 Accessibility-by-Design、**§1.14 Post-Quantum Readiness、§1.15 Regulatory Agility、§1.16 Developer Wellbeing、§1.17 Technology Governance**、**§1.18 SBOM & Supply Chain Security、§1.19 AI-Native Test Strategy、§1.20 Evaluation-Driven Development、§1.21 Feature Flag & Progressive Delivery、§1.22 Platform Reliability Engineering、§1.23 Developer Experience as Product、§1.24 Responsible AI Disclosure、§1.25 Data Architecture Sovereignty、§1.26 API Design Governance、§1.27 Green Software Engineering、§1.28 Incident Response & Business Continuity、§1.29 AI Regulatory Compliance Governance、§1.30 Ethical Engineering & Societal Impact、§1.31 Type Safety as Foundation、§1.32 Compositional Architecture、§1.33 Inversion Thinking & Pre-Mortem、§1.34 YAGNI Discipline & Rule of Three、§1.35 Strong Opinions, Weakly Held / Disagree & Commit**、Git/デプロイ禁止プロトコル、既存機能保護、Agentic AI時代プロトコル（§9.1〜§9.11、Model Governance / Agentic Workflow Design Patterns / AI Cost Governance / Computer Use Agent Safety を含む）など、全ルールの基盤。 |
 | 100 | [100_governance.md](./universal/core/100_governance.md) | 憲法の権威と不変性。憲法定義・基本原則、改正プロトコル、AI エージェント権限制御、監査・可観測性、マルチプロジェクト連邦制。 |
-| 200 | [200_language_protocol.md](./universal/core/200_language_protocol.md) | 言語プロトコル。三層言語モデル、コード言語規約、ドキュメント言語戦略、AIエージェント通信言語プロトコル。 |
+| 200 | [200_language_protocol.md](./universal/core/200_language_protocol.md) | 言語プロトコル。出力先・ユーザー指定・既定言語、技術表記、言語用途分類、任意検知と保証範囲、セッション記録の実行契約。 |
+| 300 | [300_goal_and_current_state.md](./universal/core/300_goal_and_current_state.md) | ゴールと現在値のプロトコル。**10セクション構成**。開始・再開時に**利用可能な文脈と引き継ぎを確認する**前提のもと、着手前に「規範・ゴール・現在値」の**起動時3点契約**を成立させる正本。3点セット原則（ゴールと現在値だけを与えると**正しい目的地へ危険な経路で到達する**ため規範は同格・衝突時は規範優先）、ゴールの明文化（検証可能な完了条件＋検証手段の併記・**曖昧語の単独禁止**・非ゴール明記・完了条件の凍結と明示的変更・部分達成の分離報告・**ゴール復唱ゲート**）、現在値の保持（**完了/進行中/未着手/破棄の4状態**を機械可読に・**会話履歴を正本にしない**・器の性質要件5項目＝単一性/追記性/帰属性/接続性/可読性の製品非依存規定・**鮮度検証義務**（スナップショットを実体と突合・未突合の明示）・破棄の記録）、**自律距離のスケーリング則**（知能が上がるほど飛距離が伸び初期誤差が着弾点で増幅するためゴール・現在値の精度要求は**上がる**。D1-D5 で復唱/計画提示/承認ゲートを段階化）、ずれの2分類（**ゴールずれ=成果価値の損失リスク**／**現在値ずれ=重複・手戻り型**）と兆候・検知、着手前の重複確認と既存優先、共有現在値（並行作業の集約・他作業確認・境界越え変更の事前宣言・引き継ぎ義務）、**現在値に書いてはならないもの**（資格情報・本番個人データの禁止／集約とアクセス制御の同時設計／保持期間）、**ずれの通知義務と早期停止**（黙って続行しない・悪い知らせほど早く・沈黙の失敗禁止・鮮度切れは未確認扱い・結晶化による再発防止）、検証義務、アンチパターン17選・成熟度M1-M5。逆引き索引・クロスリファレンス付き。 |
 
 #### product/: 事業戦略・収益・成長・国際化
 
@@ -170,7 +173,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | セキュリティとプライバシー。**22セクション構成**。ゼロトラスト7柱（NIST 800-207準拠）、認証・認可（FIDO2/Social Login/Session管理）、APIセキュリティ（BOLA/BFLA/SSRF防止）、サプライチェーン（SBOM/SLSA）、AI/LLMセキュリティ（OWASP LLM Top 10 2025）、コンテナセキュリティ（Pod Security Standards/イメージ署名）、暗号化ポリシー（PQC準備）、OWASP Top 10 2025、GraphQL、シークレット管理、クライアントサイドセキュリティ、ボット/DDoS防御、セキュリティガバナンス。逆引き索引付き。 |
+| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | セキュリティとプライバシー。詳細構成はリンク先の目次・索引を参照。ゼロトラスト7柱（NIST 800-207準拠）、認証・認可（FIDO2/Social Login/Session管理）、APIセキュリティ（BOLA/BFLA/SSRF防止）、サプライチェーン（SBOM/SLSA）、AI/LLMセキュリティ（OWASP LLM Top 10 2025）、コンテナセキュリティ（Pod Security Standards/イメージ署名）、暗号化ポリシー（PQC準備）、OWASP Top 10 2025、GraphQL、シークレット管理、クライアントサイドセキュリティ、ボット/DDoS防御、セキュリティガバナンス。逆引き索引付き。 |
 | 100 | [100_data_governance.md](./universal/security/100_data_governance.md) | 法務・ガバナンス・データ戦略。**45セクション構成**。グローバル規制マッピング（GDPR/CCPA/EU AI Act等14法）・2025-2027タイムライン・越境移転・同意管理・データガバナンス成熟度・RegTech自動化・量子暗号アジリティ。逆引き索引付き。 |
 | 200 | [200_oss_compliance.md](./universal/security/200_oss_compliance.md) | ライセンスと依存関係管理。**63セクション・299ルール・40+コードスニペット**。ライセンス三層分類・SBOM（CycloneDX 1.6/SPDX 3.0）・サプライチェーンセキュリティ（SLSA v1.2 Build / Source Tracks、Sigstore）・SCAツール統合・自動更新戦略・成熟度モデル。逆引き索引付き。 |
 | 300 | [300_ip_due_diligence.md](./universal/security/300_ip_due_diligence.md) | 知的財産とExit戦略。**50セクション・10パート構成**。IP所有権・特許戦略・営業秘密・商標・著作権・AI生成物IP・Exit戦略・DD実務・ガバナンス・コンプライアンス。逆引き索引付き。 |
@@ -185,7 +188,7 @@ your-project/
 
 | # | ファイル | 概要 |
 |---|---|---|
-| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QAとテスト戦略。**41セクション・12パート構成**。テスト哲学、テスト種別（静的/ユニット/統合/コントラクト/E2E/VRT/パフォーマンス/Property-Based/ミューテーション/a11y）、**テスト層別の必須アサーション観点（§8.6: unit/複合/結合の各層が保証すべきこと・失敗系パステスト義務・静的解析最下層・バッチ/バックフィルテストは engineering/700 参照）**、セキュリティ、テスト品質、CI/CD、リリース、ドメイン固有、レジリエンス、AI駆動テスト、データ&API品質、コンプライアンス&可観測性、成熟度モデル5段階。逆引き索引付き。 |
+| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QAとテスト戦略。詳細構成はリンク先の目次・索引を参照。テスト哲学、テスト種別（静的/ユニット/統合/コントラクト/E2E/VRT/パフォーマンス/Property-Based/ミューテーション/a11y）、**テスト層別の必須アサーション観点（§8.6: unit/複合/結合の各層が保証すべきこと・失敗系パステスト義務・静的解析最下層・バッチ/バックフィルテストは engineering/700 参照）**、セキュリティ、テスト品質、CI/CD、リリース、ドメイン固有、レジリエンス、AI駆動テスト、データ&API品質、コンプライアンス&可観測性、成熟度モデル5段階。逆引き索引付き。 |
 
 ---
 
@@ -213,3 +216,5 @@ your-project/
 | `../../axiarch-prompts/ja/operate/` | インシデント・参入系プロンプト（`onboarding_audit.md`、`incident_response.md`）。 |
 
 ---
+
+実行時のID・セッション・証拠契約: [TASK_STATE_PROTOCOL.md](../../axiarch-harness/ja/TASK_STATE_PROTOCOL.md)。自律距離D1–D5、成熟度M1–M5、ハーネスH0–H4（旧L0–L4）は別の軸。

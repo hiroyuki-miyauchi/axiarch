@@ -8,7 +8,7 @@
 > **Level 1 Priority: Absolute Compliance**
 > Security and legal compliance are the **highest priority**.
 > They take precedence over user convenience, development speed, and profitability.
-> **40 Parts / 170+ Sections architecture. Revision date: 2026-07-23**
+> Select applicable sections using this document's table of contents and quick reference index. Do not limit loading by an advertised section count.
 
 > [!CAUTION]
 > **Primary Directive**
@@ -254,11 +254,11 @@
 
 > [!NOTE]
 > This section is an **overview** of authentication and authorization. The authoritative deep-dives are split out (to avoid duplicate definitions, only the essentials are kept here):
-> - Authentication credentials, passkeys, MFA, passwordless → [`400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
-> - OAuth 2.1 / OIDC, external account federation, SSO, token management → [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
-> - Step-up / re-authentication, OTP, sensitive-operation protection, sessions → [`420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
-> - Fine-grained authorization (RBAC/ABAC/ReBAC, policy engines, PDP/PEP, multi-tenancy) → [`430_authorization_and_access_control.md`](./430_authorization_and_access_control.md)
-> - Non-human / workload identity (SPIFFE/SPIRE, M2M) and AI-agent authentication/delegation (OBO, Token Exchange, MCP/XAA) → [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md)
+> - Authentication credentials, passkeys, MFA, passwordless → [`axiarch-rules/{lang}/universal/security/400_authentication_and_passkeys.md`](./400_authentication_and_passkeys.md)
+> - OAuth 2.1 / OIDC, external account federation, SSO, token management → [`axiarch-rules/{lang}/universal/security/410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md)
+> - Step-up / re-authentication, OTP, sensitive-operation protection, sessions → [`axiarch-rules/{lang}/universal/security/420_step_up_auth_and_sensitive_operations.md`](./420_step_up_auth_and_sensitive_operations.md)
+> - Fine-grained authorization (RBAC/ABAC/ReBAC, policy engines, PDP/PEP, multi-tenancy) → [`axiarch-rules/{lang}/universal/security/430_authorization_and_access_control.md`](./430_authorization_and_access_control.md)
+> - Non-human / workload identity (SPIFFE/SPIRE, M2M) and AI-agent authentication/delegation (OBO, Token Exchange, MCP/XAA) → [`axiarch-rules/{lang}/universal/security/440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md)
 
 ### 4.1. Credential Hygiene
 
@@ -656,7 +656,7 @@ When a security audit must identify a person, do not emit a raw `userId` to gene
 | Law | Region | Consent Requirements | Deletion Right | Notification Period |
 |:----|:-------|:--------------------|:-------------|:-------------------|
 | **GDPR** | EU/EEA | Explicit opt-in | Yes (Right to be Forgotten) | Within 72 hours |
-| **Global Privacy Laws** | Japan | Purpose publication/notification | Yes (Disclosure/Correction/Cessation) | Promptly |
+| **APPI (Japan)** | Japan | Purpose publication/notification | Yes (Disclosure/Correction/Cessation) | Promptly |
 | **CCPA/CPRA** | California | Opt-out right | Yes (Deletion right) | Within 45 days |
 | **LGPD** | Brazil | Explicit consent | Yes | Reasonable period |
 | **PIPA** | South Korea | Explicit consent | Yes | Without delay |
@@ -1685,7 +1685,7 @@ async function llmGateway(req: GatewayRequest): Promise<string> {
 ### 18.3. MCP (Model Context Protocol) Security
 
 > [!NOTE]
-> This subsection is an **overview** of MCP security. The authoritative deep-dive for both the consumer (host/client) and builder (server) sides is [`450_mcp_security.md`](./450_mcp_security.md) (token-passthrough prohibition, Origin/DNS-rebinding defense, rug-pull/tool-poisoning detection, human approval, execution isolation). MCP authorization lives in [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11.
+> This subsection is an **overview** of MCP security. The authoritative deep-dive for both the consumer (host/client) and builder (server) sides is [`axiarch-rules/{lang}/universal/security/450_mcp_security.md`](./450_mcp_security.md) (token-passthrough prohibition, Origin/DNS-rebinding defense, rug-pull/tool-poisoning detection, human approval, execution isolation). MCP authorization lives in [`axiarch-rules/{lang}/universal/security/440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11.
 
 -   **Law**: Apply the following security controls to AI agent integration with external tools/data via MCP.
 -   **Action**:
@@ -3621,7 +3621,7 @@ interface AISystemRecord {
 ---
 
 > **Cross-References (Related Rule Files)**:
-> - `000_core_mindset.md` — Priority hierarchy, zero tolerance
+> - `axiarch-rules/{lang}/universal/core/000_core_mindset.md` — Priority hierarchy, zero tolerance
 > - `engineering/000_engineering_standards.md` — CI/CD, coding standards
 > - `engineering/100_api_integration.md` — API design, CORS governance
 > - `engineering/200_supabase_architecture.md` — RLS, Auth, Vault, Connection Pooling

@@ -38,7 +38,7 @@
 - [Part XIX. Data-Driven Brand Intelligence 2.0](#part-xix-data-driven-brand-intelligence-20)
 - [Part XX. Brand Compliance Automation & CI/CD](#part-xx-brand-compliance-automation--cicd)
 - [Part XXI. Brand & Platform Economy](#part-xxi-brand--platform-economy)
-- [Part XXII. Appendix: Quick Reference & Cross-References](#part-xxii-appendix)
+- [Part XXII. Appendix: Quick Reference & Cross-References](#part-xxii-appendix-quick-reference--cross-references)
 
 ---
 

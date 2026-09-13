@@ -66,7 +66,7 @@
 
 ### Rule 66.003: フィッシング耐性の優先
 - **Law**: Tier 4 以上の重要操作では、フィッシング耐性のある要素（**Passkey/FIDO2/WebAuthn、ハードウェアキー**）での再認証を**最優先**とする。SMS OTP を Tier 4 以上の唯一の要素とすることは**禁止**（SIM スワップ・SS7 脆弱性のため。§14 参照）。
-- **Cross-Reference**: `000_security_privacy.md §4.2`, `400_authentication_and_passkeys.md`（Passkey 詳細）
+- **Cross-Reference**: `000_security_privacy.md §4.2`, `axiarch-rules/{lang}/universal/security/400_authentication_and_passkeys.md`（Passkey 詳細）
 
 ---
 
@@ -139,7 +139,7 @@ function assertStepUpSatisfied(
 ```
 
 - **Anti-Pattern**: `acr`/`amr`/`auth_time` を ID トークンから読まず、アプリ独自の「最後にログインした時刻」フラグのみで鮮度判定する（IdP の真正な認証イベントと乖離し、改ざん・stale 化のリスク）。
-- **Cross-Reference**: `410_federated_identity_and_oauth.md`（OIDC/OAuth 詳細）
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/security/410_federated_identity_and_oauth.md`（OIDC/OAuth 詳細）
 
 ---
 
@@ -656,7 +656,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 
 ### Rule 66.350: リスクシグナルのプライバシー保護
 - **Law**: デバイスフィンガープリント・位置・行動バイオメトリクス等のリスクシグナルは PII/機微情報を含み得る。収集目的の限定・最小化・保持期限・同意（適用法域に応じ）を遵守する（`000_security_privacy.md §7`）。
-- **Cross-Reference**: `100_data_governance.md`
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/security/100_data_governance.md`
 
 ---
 

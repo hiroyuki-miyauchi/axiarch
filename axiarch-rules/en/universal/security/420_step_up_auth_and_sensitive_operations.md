@@ -66,7 +66,7 @@
 
 ### Rule 66.003: Prefer Phishing Resistance
 - **Law**: For Tier 4+ sensitive operations, **prioritize** re-authentication with phishing-resistant factors (**Passkey/FIDO2/WebAuthn, hardware keys**). Using SMS OTP as the sole factor for Tier 4+ is **prohibited** (due to SIM-swap and SS7 weaknesses; see §14).
-- **Cross-Reference**: `000_security_privacy.md §4.2`, `400_authentication_and_passkeys.md` (Passkey details)
+- **Cross-Reference**: `000_security_privacy.md §4.2`, `axiarch-rules/{lang}/universal/security/400_authentication_and_passkeys.md` (Passkey details)
 
 ---
 
@@ -139,7 +139,7 @@ function assertStepUpSatisfied(
 ```
 
 - **Anti-Pattern**: Not reading `acr`/`amr`/`auth_time` from the ID token and judging freshness only by an app-local "last login time" flag (it diverges from the IdP's authentic authentication event and risks tampering/staleness).
-- **Cross-Reference**: `410_federated_identity_and_oauth.md` (OIDC/OAuth details)
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/security/410_federated_identity_and_oauth.md` (OIDC/OAuth details)
 
 ---
 
@@ -656,7 +656,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 
 ### Rule 66.350: Privacy Protection for Risk Signals
 - **Law**: Risk signals such as device fingerprints, location, and behavioral biometrics may contain PII/sensitive information. Observe purpose limitation, minimization, retention limits, and consent (as applicable per jurisdiction) for collection (`000_security_privacy.md §7`).
-- **Cross-Reference**: `100_data_governance.md`
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/security/100_data_governance.md`
 
 ---
 

@@ -1,7 +1,8 @@
 # Axiarch (AX-ee-ark) — Full Specification
 
 > Constitution-Driven AI Agent Governance Framework
-> Current Release: 1.16.0 | Latest Stable: 1.16.0 | License: Apache 2.0
+> Current Release: 1.17.0-dev | Latest Stable: 1.16.0 | License: Apache 2.0
+> Development snapshot; 1.17.0 has not been tagged or published. Stable installation examples target 1.16.0.
 > Repository: https://github.com/hiroyuki-miyauchi/axiarch
 
 Axiarch is an open-source governance framework that reduces the risk of quality
@@ -11,7 +12,7 @@ security, operations, business, AI, and governance work through a multi-layer
 constitutional architecture, making consistent output quality easier to maintain
 across agents and operator skill levels.
 
-OpenAI Codex, Claude Code, and Google Antigravity are primary targets. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding); Antigravity was validated first, and Codex and Claude Code are used continuously in real operation, including building this repository itself. v1.11.0 adds current-task Markdown evidence rotation plus native task-state sync rules for Codex and Claude Code. There is no operation guarantee for every environment. Cursor, GitHub Copilot, Windsurf, Aider, and other tools remain extended pointer-only or unverified candidates through Markdown pointer files, with no operation guarantee.
+Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee. Native task/plan tools are used only when available; Markdown evidence does not update their UI by itself.
 
 ## What Problem Does Axiarch Solve?
 
@@ -26,12 +27,14 @@ v1.12.0 adds explicit Harness Engineering: not a fourth rule layer, but the oper
 
 ## Core Architecture
 
+Distributions retain `axiarch-rules/LICENSE` and `axiarch-rules/NOTICE` without replacing adopter-root notices. Local task/session evidence is excluded from Git distribution. `axiarch-task-state.sh --mode sessions` displays the canonical goal for each session; internal IDs and resumption paths stay stable.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Layer 1: Universal (Immutable Constitution)                 │
 │ ├─ AXIARCH.md (Canonical Protocol)                          │
 │ ├─ AGENTS.md / CLAUDE.md / tool pointers (thin adapters)     │
-│ └─ Universal Rules (54 files / Immutable Governance Rules)   │
+│ └─ Universal Rules (55 files / Immutable Governance Rules)   │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2: Blueprint (Mutable Project State)                  │
 │ └─ Project Overview, Feature Specs, Lessons Log             │
@@ -155,7 +158,7 @@ same folder as related rule files for maximum context efficiency.
 
 All Universal rules are immutable ("Constitution"). 3,000+ standards spanning engineering, product, security, operations, AI, business, QA, FinOps, and governance.
 
-### core/ — Foundation Philosophy (3 files)
+### core/ — Foundation Philosophy (4 files)
 - **000_core_mindset.md**: Core behavioral principles. Priority hierarchy
   (Security > UX > Profitability > DX), strict tolerance, Headless First,
   SSOT, band-aid ban, Git/deploy protocols, regression risk reduction.
@@ -163,6 +166,18 @@ All Universal rules are immutable ("Constitution"). 3,000+ standards spanning en
   AI agent authority control, multi-project federation.
 - **200_language_protocol.md**: Three-layer language model, code/document
   language conventions, AI communication protocol.
+- **300_goal_and_current_state.md**: 10 sections. The boot triad (norms +
+  goal + current state) required before work starts, on the premise that
+  an agent boots with zero memory; verifiable completion criteria and a
+  ban on standalone vague terms, non-goals, the goal restatement gate,
+  four-state machine-readable current state (done / in progress / not
+  started / discarded) with product-independent container properties and
+  a freshness-reconciliation duty, the autonomy-distance scaling law
+  (D1-D5), goal drift vs current-state drift, a ban on writing credentials
+  or production personal data into shared state (consolidation and access
+  control designed together, retention), the duty to stop and report drift
+  early with no silent failure, recurrence prevention via crystallization,
+  shared state for concurrent work, 17 anti-patterns.
 
 ### product/ — Business & Growth (10 files)
 - **000_product_strategy.md**: MVP→PMF, monetization, unit economics,
@@ -436,8 +451,8 @@ Optional reusable prompt templates organized by role:
 
 | Agent | Status | Native Config |
 |:------|:-------|:-------------|
-| OpenAI Codex | ✅ Production-validated primary; validated through real operational use (dogfooding), no operation guarantee for every environment | `AGENTS.md` adapter → `AXIARCH.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
-| Claude Code | ✅ Production-validated primary; validated through real operational use (dogfooding), no operation guarantee for every environment | `CLAUDE.md` adapter → `AXIARCH.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
+| OpenAI Codex | Unverified primary candidate; unverified in practical operation, no operation guarantee | `AGENTS.md` adapter → `AXIARCH.md` + `.codex/hooks.json` (4 hooks including PostToolUse diff guard); use `update_plan` for native plan state |
+| Claude Code | Unverified primary candidate; unverified in practical operation, no operation guarantee | `CLAUDE.md` adapter → `AXIARCH.md` + `.claude/settings.json` (4 hooks: SessionStart / UserPromptSubmit / PreToolUse / PostToolUse); use Task tools (`TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`) when available |
 | Google Antigravity | ✅ Production-validated primary | `.agents/rules/prompt_pointer.md` adapter → `AXIARCH.md` |
 | Cursor | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.cursor/rules/axiarch.mdc` adapter → `AXIARCH.md` |
 | GitHub Copilot | ⚠️ Extended pointer-only candidate; unverified, no operation guarantee | `.github/copilot-instructions.md` adapter → `AXIARCH.md` |
@@ -448,14 +463,21 @@ Optional reusable prompt templates organized by role:
 
 ## Quick Start
 
-Note: the main-branch installer installs the stable Axiarch v1.16.0 release by default and pins the distribution ref to `tags/v1.16.0`. Pass `AXIARCH_REF=heads/main` to the right-hand `bash` process only when intentionally following the latest `main`. Tags at v1.11.2 or earlier are treated as legacy installs because they do not contain `AXIARCH.md` or `axiarch-harness/`.
+Use a reviewed local checkout for unreleased changes. For a published tag, use the installer from that same tag and run it as a file so stdin remains available for choices. The current installer requires its matching Python helpers; older sources without them stop before application. Existing adopters use the Safe Upgrade Wizard rather than reinstalling.
 
 ```bash
 # Option 1: Interactive setup (recommended)
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | bash
+bash /path/to/axiarch/init.sh /path/to/your/project
 
 # Option 1b: Pinned stable tag
-curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/main/init.sh | AXIARCH_REF=tags/v1.16.0 bash
+# Use an explicit template under TMPDIR, defaulting to /tmp if unset or empty
+axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
+curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/init.sh \
+  -o "$axiarch_bootstrap_dir/download.part" &&
+mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/init.sh"
+# 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
+test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.16.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
 
 # Option 2: Manual copy
 cp AXIARCH.md /path/to/your/project/
@@ -469,12 +491,12 @@ cp -r axiarch-scripts /path/to/your/project/
 # Optional: cp -r axiarch-prompts /path/to/your/project/
 ```
 
-Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters that do not yet have the helper can bootstrap a stable helper temporarily with `curl -sSL https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.16.0/axiarch-scripts/axiarch-upgrade.sh -o /tmp/axiarch-upgrade.sh` and then run `bash /tmp/axiarch-upgrade.sh --target "$(pwd)" --to v1.16.0 --dry-run`. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
+Existing adopter projects can preview a selective upgrade with `bash axiarch-scripts/axiarch-upgrade.sh --to v1.16.0 --dry-run` when pinning the current stable release, or with `--to main --ref heads/main` when intentionally following the latest mainline. Older adopters without the helper can use the private temporary bootstrap procedure in [axiarch-scripts/README.md](axiarch-scripts/README.md#使い方--usage), review the downloaded helper, then run its dry-run preview. A temporary `axiarch_bootstrap_dir` created by `mktemp -d` with an explicit path template uses `TMPDIR` (or `/tmp` if unset or empty) on both macOS and Linux and keeps concurrent downloads separate; only a successful download is renamed to the executable file. The wizard preserves project-owned Blueprint state by default, keeps manifest-listed Axiarch-shared Blueprint rules reviewable for README/INDEX consistency, keeps source-repository-only files skipped by default unless explicitly selected in `--interactive`, and lets ambiguous groups be reviewed interactively with deduplicated action choices. In the Axiarch source repository, Check 15 also verifies the Claude Memory canonical boundary and source release-file Git tracking for current core release files, including `AXIARCH.md`, `axiarch-harness/`, and `axiarch-task-state.sh`; adopter projects skip that source-only tracking check.
 
 ## Language Support
 
-Available in both languages: Japanese (authoritative) and English (symmetric counterpart).
-All 54 Universal Rules and core Blueprint starter files are available in both languages.
+Available in both languages: Japanese and English (normative counterparts; the project selects its primary language).
+All 55 Universal Rules and core Blueprint starter files are available in both languages.
 The optional prompt library (`axiarch-prompts/`) is also available in JA/EN.
 The init.sh setup script handles language and agent selection; deleting unused
 language directories is optional when a project is fixed to one language.
@@ -488,3 +510,6 @@ language directories is optional when a project is fixed to one language.
 - Issues: https://github.com/hiroyuki-miyauchi/axiarch/issues
 - Discussions: https://github.com/hiroyuki-miyauchi/axiarch/discussions
 - Releases: https://github.com/hiroyuki-miyauchi/axiarch/releases
+
+Unreleased additions (not yet in the published stable package). Runtime evidence contract: axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md. Directly load core/300 before implementation. D1–D5 distance, M1–M5 maturity and H0–H4 harness classification are separate axes. Session Markdown lives in .axiarch/sessions/{session_id}/; shared state in .axiarch/tasks/{task_id}/state.json. Root legacy evidence is preserved. Python 3 helpers validate structure, readiness and completion separately; health is not proof of semantic understanding or all-operation safety. Upgrade outcomes use per-run result.json, nonzero failure/partial status and last-confirmed version metadata. Release calls the same-commit quality workflow and requires all checks to pass before signed publication. See README runtime/upgrade guarantees for migration and hook coverage.
+以下は未公開の追加実装（公開済み安定版へ適用済みではない）。実行契約は axiarch-harness/ja/TASK_STATE_PROTOCOL.md。core/300を実装前に直接ロード。距離D・成熟度M・ハーネスHを区別し、セッション別証跡と共有現在値を分離。旧記録を保持し、構造・準備・完了を別検査する。healthは意味理解や全操作の安全性の証明ではない。更新失敗・保留は非0と結果記録で伝え、releaseは同一commitの品質検査成功を必須とする。

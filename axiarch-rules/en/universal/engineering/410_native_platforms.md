@@ -1347,7 +1347,7 @@ abstract class NativeAuthApi {
 
 ### §106. React Native Integration
 
-- **Dedicated Source of Truth**: Follow `420_react_native.md` for the overall React Native architecture, tests, CI, OTA, and team governance
+- **Dedicated Source of Truth**: Follow `axiarch-rules/{lang}/universal/engineering/420_react_native.md` for the overall React Native architecture, tests, CI, OTA, and team governance
 - **New Architecture**: Default to Turbo Native Modules, Fabric Native Components, and typed Codegen specs
 - **Native Responsibility**: Implement OS-specific APIs in Kotlin or Swift and maintain JS, iOS, and Android owners plus a compatibility matrix
 - **Boundary Verification**: Assure nullability, errors, threads, lifecycle, cancellation, and size limits through Codegen contracts and tests on both operating systems

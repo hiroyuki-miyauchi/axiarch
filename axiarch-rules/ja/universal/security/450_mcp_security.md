@@ -8,12 +8,12 @@
 > **Primary Directive（主要方針）**
 > 「MCP は LLM に外部世界への手足を与える。ツール説明・ツール結果・リソースは**信頼できない入力**として扱い、トークンは**透過させず**、破壊的操作には**人間の承認**を挟め。」
 > MCP（Model Context Protocol）を**使う側（host / client / エージェント）**と**作る側（server builder）**の双方は、本ファイルの最新安定版ベストプラクティスに準拠しなければならない。
-> 認証・認可は `000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
+> 認証・認可は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
 
 > [!NOTE]
-> 本ファイルは `000_security_privacy.md` §18.3（MCPセキュリティ概要）・§18.6（Tool Poisoning）の**実装深掘り版**であり、**MCP に固有のセキュリティ実装の正本**です。
-> 汎用 LLM 脅威（prompt injection・出力処理・excessive agency）は [`000_security_privacy.md`](./000_security_privacy.md) §17 が正本。
-> MCP 認可の**認証/委任の技術詳細**（OAuth 2.1ベース・OBO・Resource Indicators）は [`440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11 が正本（本ファイルは MCP サーバー実装側のガードを深掘り）。
+> 本ファイルは `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3（MCPセキュリティ概要）・§18.6（Tool Poisoning）の**実装深掘り版**であり、**MCP に固有のセキュリティ実装の正本**です。
+> 汎用 LLM 脅威（prompt injection・出力処理・excessive agency）は [`axiarch-rules/{lang}/universal/security/000_security_privacy.md`](./000_security_privacy.md) §17 が正本。
+> MCP 認可の**認証/委任の技術詳細**（OAuth 2.1ベース・OBO・Resource Indicators）は [`axiarch-rules/{lang}/universal/security/440_workload_and_agent_identity.md`](./440_workload_and_agent_identity.md) §10/§11 が正本（本ファイルは MCP サーバー実装側のガードを深掘り）。
 > AIエージェントの**権限設計・自律度・人間承認ゲート**は [`core/000_core_mindset.md`](../core/000_core_mindset.md) §9 が正本。
 
 > [!NOTE]
@@ -137,6 +137,8 @@
 
 ---
 
+<a id="4-作る側-mcp-認可oauth-21-resource-server"></a>
+
 ## §4. 作る側①: MCP 認可（OAuth 2.1 Resource Server）
 
 > **参考規格**: MCP 仕様 2025-11-25（Authorization）, OAuth 2.1 (draft-13), RFC 8707, RFC 9728, RFC 8414, RFC 7591, RFC 9449 (DPoP)
@@ -173,27 +175,31 @@
 
 ---
 
+<a id="5-作る側-入力バリデーションと間接プロンプトインジェクション"></a>
+
 ## §5. 作る側②: 入力バリデーションと間接プロンプトインジェクション
 
-> **参考規格**: `000_security_privacy.md` §17.1（Prompt Injection）, §17.10（出力処理）, OWASP LLM01/LLM05
+> **参考規格**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1（Prompt Injection）, §17.10（出力処理）, OWASP LLM01/LLM05
 
 ### 5.1. ツール入力の厳格バリデーション
 
 -   **Law**: MCP サーバーは、ツール呼び出しの入力を**スキーマ（JSON Schema 等）で厳格に検証**する。型・範囲・列挙・長さ・形式を強制し、未知フィールドを拒否（fail-closed）する。
--   **Rule 69.5.1**: ツール入力を**信頼できない外部入力**として扱い、インジェクション対策（SQL/コマンド/パス/SSRF/テンプレート）を施さなければならない（MUST）。LLM が生成したパラメータも例外なく検証対象とする（`000_security_privacy.md` §17.10 と整合）。
+-   **Rule 69.5.1**: ツール入力を**信頼できない外部入力**として扱い、インジェクション対策（SQL/コマンド/パス/SSRF/テンプレート）を施さなければならない（MUST）。LLM が生成したパラメータも例外なく検証対象とする（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.10 と整合）。
 -   **Action**: ファイルパス・URL・コマンドはパラメータ化／許可リストで制限し、文字列連結によるシェル/SQL 実行を禁止する。出力（ツール結果）も**サニタイズ**してから返し、HTML/SQL/制御文字の意図せぬ実行を防ぐ。
 
 ### 5.2. 間接プロンプトインジェクション（コンテンツ経由）
 
 -   **Law**: ツールが返す**外部コンテンツ（取得したファイル・Web ページ・DB レコード・リソース本文）**には、LLM への悪性命令が埋め込まれている前提で扱う（**間接プロンプトインジェクション**）。サーバーは攻撃文字列を生成・拡幅する経路にならないよう設計する。
--   **Rule 69.5.2**: ツール説明・リソース・プロンプトテンプレートに、第三者由来の文字列をそのまま埋め込む場合、**注入される前提**で出所を分離・ラベル付けし、可能なら無害化（命令的トークンの中和・引用化）する（SHOULD）。汎用の prompt injection 防御は `000_security_privacy.md` §17.1 を正本とする。
+-   **Rule 69.5.2**: ツール説明・リソース・プロンプトテンプレートに、第三者由来の文字列をそのまま埋め込む場合、**注入される前提**で出所を分離・ラベル付けし、可能なら無害化（命令的トークンの中和・引用化）する（SHOULD）。汎用の prompt injection 防御は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1 を正本とする。
 -   **Cross-Reference**: 防御の最終責任は使う側（§13.1）と分担する。サーバーは「攻撃の発射台にならない」、クライアントは「結果を信頼しない」の両輪。
 
 ---
 
+<a id="6-作る側-ツール定義の健全性annotations--output-schema"></a>
+
 ## §6. 作る側③: ツール定義の健全性（annotations / output schema）
 
-> **参考規格**: MCP 仕様 2025-11-25（Tools / Tool Annotations）, `000_security_privacy.md` §18.6
+> **参考規格**: MCP 仕様 2025-11-25（Tools / Tool Annotations）, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6
 
 ### 6.1. ツール annotations の正しい付与
 
@@ -216,10 +222,12 @@
 
 ### 6.3. hidden instruction の排除
 
--   **Law**: ツール名・ツール説明・パラメータ説明・リソース本文に、**LLM への隠し命令（hidden instructions）**を埋め込んではならない。自サーバーが Tool Poisoning（`000_security_privacy.md` §18.6）の発射台にならないよう、定義文をレビューする。
+-   **Law**: ツール名・ツール説明・パラメータ説明・リソース本文に、**LLM への隠し命令（hidden instructions）**を埋め込んではならない。自サーバーが Tool Poisoning（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6）の発射台にならないよう、定義文をレビューする。
 -   **Action**: ツール定義は機械可読でバージョン管理し、変更を監査する。動的に説明文を書き換える設計（後述の rug pull の温床）を避け、変更時は明示バージョンを上げる（§9.2）。
 
 ---
+
+<a id="7-作る側-トランスポート安全origindns-リバインディングセッション"></a>
 
 ## §7. 作る側④: トランスポート安全（Origin/DNS リバインディング/セッション）
 
@@ -239,9 +247,11 @@
 
 ---
 
+<a id="8-作る側-実行隔離最小権限シークレット監査"></a>
+
 ## §8. 作る側⑤: 実行隔離・最小権限・シークレット・監査
 
-> **参考規格**: MCP 仕様 2025-11-25（Local Server）, `core/000_core_mindset.md` §9, `000_security_privacy.md` §21/§25
+> **参考規格**: MCP 仕様 2025-11-25（Local Server）, `core/000_core_mindset.md` §9, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21/§25
 
 ### 8.1. ツール実行のサンドボックス化と最小権限
 
@@ -250,14 +260,16 @@
 
 ### 8.2. シークレット管理とレート制限
 
--   **Law**: サーバー内のシークレット（上流 API キー・DB クレデンシャル）は、ツール説明・ログ・エラー・ツール結果に**漏らさない**。シークレットマネージャ/環境分離で管理する（`000_security_privacy.md` §21 が正本）。
--   **Rule 69.8.2**: ツール呼び出しに**レート制限・タイムアウト・リソース上限**を設け、unbounded consumption（暴走・コスト爆発）を防ぐ（MUST、`000_security_privacy.md` §17.8 と整合）。
+-   **Law**: サーバー内のシークレット（上流 API キー・DB クレデンシャル）は、ツール説明・ログ・エラー・ツール結果に**漏らさない**。シークレットマネージャ/環境分離で管理する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21 が正本）。
+-   **Rule 69.8.2**: ツール呼び出しに**レート制限・タイムアウト・リソース上限**を設け、unbounded consumption（暴走・コスト爆発）を防ぐ（MUST、`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.8 と整合）。
 
 ### 8.3. 不変監査ログ
 
--   **Rule 69.8.3**: 全ツール呼び出しを、**`tool_name` / `input`（PII マスキング後）/ `output_hash` / 認証主体（`sub`/`act`）/ `audience` / `timestamp`** を含む構造化ログで記録する（MUST）。ログは改ざん不能（追記専用）で保持する（`000_security_privacy.md` §25、`core/000_core_mindset.md` §9 の MCP Governance と整合）。
+-   **Rule 69.8.3**: 全ツール呼び出しを、**`tool_name` / `input`（PII マスキング後）/ `output_hash` / 認証主体（`sub`/`act`）/ `audience` / `timestamp`** を含む構造化ログで記録する（MUST）。ログは改ざん不能（追記専用）で保持する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25、`core/000_core_mindset.md` §9 の MCP Governance と整合）。
 
 ---
+
+<a id="9-作る側-サプライチェーン署名rug-pullsbom"></a>
 
 ## §9. 作る側⑥: サプライチェーン（署名・rug pull・SBOM）
 
@@ -266,7 +278,7 @@
 ### 9.1. 配布物の署名と検証可能性
 
 -   **Law**: MCP サーバーの配布物（バイナリ/パッケージ/ツール定義）は**デジタル署名**し、利用側が**完全性を検証**できるようにする。署名なしの未検証サーバーを既定で導入させない。
--   **Rule 69.9.1**: ツール定義ファイル（JSON/YAML）に署名を付与し、起動時に改ざんを検証して、不一致なら起動を拒否する（SHOULD、`000_security_privacy.md` §18.6 と整合）。
+-   **Rule 69.9.1**: ツール定義ファイル（JSON/YAML）に署名を付与し、起動時に改ざんを検証して、不一致なら起動を拒否する（SHOULD、`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6 と整合）。
 
 ### 9.2. rug pull（後発の悪性化）への配慮
 
@@ -278,13 +290,15 @@
 
 ---
 
+<a id="10-使う側-サーバー検証許可リスト信頼境界"></a>
+
 ## §10. 使う側①: サーバー検証・許可リスト・信頼境界
 
-> **参考規格**: MCP 仕様 2025-11-25, `000_security_privacy.md` §18.3, `core/000_core_mindset.md` §9
+> **参考規格**: MCP 仕様 2025-11-25, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3, `core/000_core_mindset.md` §9
 
 ### 10.1. サーバーの vetting と許可リスト
 
--   **Law**: ホスト/クライアントは、接続先 MCP サーバーを**正式なセキュリティ評価（vetting）**にかけ、**承認済みホワイトリスト（allowlist）**に限定して接続する（`000_security_privacy.md` §18.3 と整合）。任意のサーバーへ無検証で接続しない。
+-   **Law**: ホスト/クライアントは、接続先 MCP サーバーを**正式なセキュリティ評価（vetting）**にかけ、**承認済みホワイトリスト（allowlist）**に限定して接続する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3 と整合）。任意のサーバーへ無検証で接続しない。
 -   **Rule 69.10.1**: ローカル（stdio）サーバーの**ワンクリック導入**を提供するクライアントは、実行前に**起動コマンドの全文（引数含む・省略なし）を提示**し、明示的なユーザー承認を得なければならない（MUST、§12）。`sudo`/`rm -rf`/ネットワーク操作/ホームディレクトリ・SSH 鍵アクセス等の危険パターンを警告表示する。
 
 ### 10.2. クライアント側 SSRF 防御（メタデータ取得）
@@ -298,9 +312,11 @@
 
 ---
 
+<a id="11-使う側-ツール定義のピン留めと-rug-pull--tool-poisoning-検知"></a>
+
 ## §11. 使う側②: ツール定義のピン留めと rug pull / tool poisoning 検知
 
-> **参考規格**: MCP 仕様 2025-11-25, `000_security_privacy.md` §18.6, CVE-2025-54136
+> **参考規格**: MCP 仕様 2025-11-25, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6, CVE-2025-54136
 
 ### 11.1. ツール定義のハッシュピン留め
 
@@ -309,7 +325,7 @@
 
 ### 11.2. tool poisoning（隠し命令）検知
 
--   **Law**: ツール説明・パラメータ説明に埋め込まれた**隠し命令（tool poisoning）**を前提に、定義文を**人間がレビュー**する。AI による定義レビューは不十分（被攻撃対象と同一）であり、人間レビューを併用する（`000_security_privacy.md` §18.6 と整合）。
+-   **Law**: ツール説明・パラメータ説明に埋め込まれた**隠し命令（tool poisoning）**を前提に、定義文を**人間がレビュー**する。AI による定義レビューは不十分（被攻撃対象と同一）であり、人間レビューを併用する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.6 と整合）。
 -   **Action**: tool shadowing（同名ツールの差し替え）にも備え、複数サーバーが提供する同名/類似ツールの衝突を検知・警告する。
 
 ### 11.3. annotations を過信しない
@@ -317,6 +333,8 @@
 -   **Rule 69.11.2**: クライアントは、サーバーが申告した annotations（`readOnlyHint` 等）を**強制保証として信頼してはならない**（MUST NOT）。annotations は UX ヒントに過ぎず（§6.1）、実際の破壊性は**サーバー側の認可・ホスト側の HITL**（§12）で別途担保する。
 
 ---
+
+<a id="12-使う側-人間承認hitlsampling--elicitation"></a>
 
 ## §12. 使う側③: 人間承認（HITL）・sampling / elicitation
 
@@ -340,13 +358,15 @@
 
 ---
 
+<a id="13-使う側-信頼しない前提とクレデンシャル規律"></a>
+
 ## §13. 使う側④: 信頼しない前提とクレデンシャル規律
 
-> **参考規格**: `000_security_privacy.md` §17.1, `440` §10, MCP 仕様 2025-11-25
+> **参考規格**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1, `440` §10, MCP 仕様 2025-11-25
 
 ### 13.1. ツール説明・ツール結果・リソースを信頼しない
 
--   **Law**: クライアント/ホストは、**ツール説明・ツール結果・リソース本文を「信頼できない入力」**として扱う。これらに含まれうる間接プロンプトインジェクション（§5.2）を前提に、LLM へ渡す際は出所分離・ラベル付け・命令中和を行う（汎用防御は `000_security_privacy.md` §17.1 が正本）。
+-   **Law**: クライアント/ホストは、**ツール説明・ツール結果・リソース本文を「信頼できない入力」**として扱う。これらに含まれうる間接プロンプトインジェクション（§5.2）を前提に、LLM へ渡す際は出所分離・ラベル付け・命令中和を行う（汎用防御は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §17.1 が正本）。
 -   **Rule 69.13.1**: ツール結果を**そのまま次のツール呼び出しの引数や高権限操作のトリガにしない**（MUST）。結果由来のアクションは、可逆性・権限に応じて HITL（§12）を経由させる。
 
 ### 13.2. クレデンシャル規律（サーバーへ渡さない）
@@ -360,7 +380,7 @@
 
 ### 14.1. ツール呼び出しの監査と異常検知
 
--   **Action**: MCP サーバー/クライアントごとに、ツール呼び出しの正常パターン（頻度・対象ツール・引数分布・時間帯）をベースライン化し、逸脱を検知する（`000_security_privacy.md` §3.3 ITDR と連携）。
+-   **Action**: MCP サーバー/クライアントごとに、ツール呼び出しの正常パターン（頻度・対象ツール・引数分布・時間帯）をベースライン化し、逸脱を検知する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3 ITDR と連携）。
 -   **計測対象**:
     -   ツール定義ハッシュの変化（rug pull 検知発火）、annotations の変更。
     -   token passthrough 試行、audience 不一致による拒否、未承認サーバーへの接続試行。
@@ -389,7 +409,7 @@
 
 ### 15.4. プライバシー
 
--   **Action**: ツールへ渡すデータは**目的内・最小限**に限定する（`000_security_privacy.md` §7.2 データ最小化）。ツール入力/結果/監査ログ内の PII はマスキングし、外部サーバーへの不要な PII 送信を遮断する。
+-   **Action**: ツールへ渡すデータは**目的内・最小限**に限定する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 データ最小化）。ツール入力/結果/監査ログ内の PII はマスキングし、外部サーバーへの不要な PII 送信を遮断する。
 
 ---
 
@@ -492,7 +512,7 @@ export function verifyToolDefinitions(serverVersion: string, currentTools: unkno
 ## §17. アンチパターン集（20件）
 
 > [!CAUTION]
-> 以下はいずれも本ファイルで**禁止または重大リスク**。発見時は `000_security_privacy.md` の Zero Tolerance Protocol に従い即時是正する。
+> 以下はいずれも本ファイルで**禁止または重大リスク**。発見時は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` の Zero Tolerance Protocol に従い即時是正する。
 
 | # | アンチパターン | リスク | 正しい対応 |
 |:--|:-------------|:------|:----------|

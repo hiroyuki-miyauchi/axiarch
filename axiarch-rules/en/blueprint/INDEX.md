@@ -59,7 +59,7 @@ Project overview, lessons index, and templates.
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | Template for adding project-specific rule files. |
 
 > [!NOTE]
-> `000_project_overview.md` and `010_project_lessons_log.md` are `core/`-only. Other folders have no `000` file in the initial state; the user adds one when needed (`000` is not required).
+> `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` and `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` are `core/`-only. Other folders have no `000` file in the initial state; the user adds one when needed (`000` is not required).
 
 ---
 
@@ -131,22 +131,21 @@ Strategies for generating next-generation "value".
 3. Rewrite `core/000_project_overview.md` with your project's content
 
 ### Adding Feature Specs (Blueprint First)
-1. **Copy `core/998_feature_spec_template.md`**
+1. Create the needed feature specification; using `core/998_feature_spec_template.md` is recommended, while an equivalent record is acceptable
 2. Place it in the relevant domain folder (e.g., `product/020_feature_payment.md` *Note: Use any available number from 000 to 999; there are no domain-specific numbering bands.*)
 3. **Write §3 Acceptance Criteria first** — do NOT write code while this section is empty
 4. Fill in remaining sections (data model, API design, test strategy, etc.)
 5. **Add an entry to the relevant folder section in this INDEX.md**
 
 ### Adding Project-Specific Rules
-1. Copy `core/999_project_specific_template.md`
+1. Use `core/999_project_specific_template.md` as a reference; copying the template itself is optional
 2. Place it in the corresponding folder with a number (e.g., `security/010_security_policy.md` *Note: Use any available number from 000 to 999; there are no domain-specific numbering bands.*)
 3. Fill each template section with project-specific content
 4. **Add an entry to the relevant folder section in this INDEX.md**
 
 ### Recording Lessons (Crystallization)
-- Append to `core/010_project_lessons_log.md` at task completion or when key decisions are made
-- When 3+ lessons of the same domain accumulate, the AI creates a proper rule file in the corresponding existing or user-approved domain folder
-- See `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` for detailed procedures
+
+Follow Steps 1–6 in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`. No new lesson is required when there is no new practical finding. Check Universal duplication and existing Blueprint destinations first; use the central log only when no suitable existing file exists. Inspect both count and age thresholds; update this INDEX and central-log references upon promotion.
 
 ---
 
@@ -185,4 +184,4 @@ Strategies for generating next-generation "value".
 
 **Last Updated**: 2026-07-24
 **Version**: v1.16.0 — Adds reusable governance sources of truth for programming languages, React Native, cloud and application platforms, and Microsoft Azure. Connects languages, frameworks, SDKs, BaaS, managed runtimes, and multi-service releases across frontend, backend, mobile, infrastructure, and enterprise use to outcome contracts, team ownership, supply-chain controls, compatibility, operations, FinOps, and exit strategy, integrated with the existing Harness Engineering cycle for planning, execution, audit, evidence, and human approval. Universal rules increase from 50 to 54 files and Engineering from 14 to 18 files.
-**Structure**: Domain-based initial subdirectories (8 initial domains, extensible with user approval)
+**Structure**: Domain-based subdirectories (8 initial domains; approved additions supported)

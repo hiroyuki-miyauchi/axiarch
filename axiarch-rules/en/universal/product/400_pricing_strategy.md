@@ -2358,7 +2358,7 @@ Dimension 4 — Ambient AI (Always-On Environments)
 | **EU AI Liability Directive** | 2027-2028 | Clarification of liability for AI-driven pricing decisions | 🔴 High |
 | **EU Digital Fairness Act (full enactment)** | 2028-2030 | Complete Drip Pricing ban, legally mandated Subscription UX standards | 🔴 High |
 | **US Federal Auto-Renewal Law (unification)** | 2026-2028 | Federal unification of state auto-renewal laws (CA CARL as potential nationwide standard) | 🟡 Medium |
-| **APAC AI Governance Framework** | 2027 onward | Harmonized AI regulation across Japan, Korea, Singapore | 🟡 Medium |
+| APAC AI regulatory developments (watchlist) | No assumed common effective date | Verify enacted rules in each jurisdiction before pricing or cost assumptions | Requires verification |
 | **ISO 42001 AI Management System** | 2026 onward | Third-party AI system certification mandated in some industries | 🟡 Medium |
 | **India Digital Competition Bill (DCB)** | 2026-2027 | Platform conduct & pricing transparency obligations for the India market | 🟡 Medium |
 | **Brazil LGPD AI Pricing Regulation** | 2027 onward | ANPD regulation of personal data use in AI pricing algorithms | 🟡 Medium |
@@ -2620,4 +2620,4 @@ Legal Basis for Prohibition:
 
 > **End of Document**
 > Version: 2026-04-27 v5.1 | 17 Parts | 180+ Sections | 350+ Rules | 95 Anti-Patterns
-> Cross-reference: `300_revenue_monetization.md` | `000_core_mindset.md` | `100_market_validation.md` | `200_go_to_market.md` | `000_ai_engineering.md`
+> Cross-reference: `axiarch-rules/{lang}/universal/product/300_revenue_monetization.md` | `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | `axiarch-rules/{lang}/universal/product/100_market_validation.md` | `axiarch-rules/{lang}/universal/product/200_go_to_market.md` | `axiarch-rules/{lang}/universal/ai/000_ai_engineering.md`

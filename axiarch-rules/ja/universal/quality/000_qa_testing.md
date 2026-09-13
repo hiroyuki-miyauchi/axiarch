@@ -12,7 +12,7 @@
 > 品質は特定チームの責任ではなく、全エンジニアの**共有責任（Quality-as-a-Shared-Responsibility）**である。
 > 言語scope: TypeScript / JavaScriptのcommandとtoolはWebプロファイルの例である。全言語へは同じ検証カテゴリを適用し、具体的gateは `engineering/320_programming_language_governance.md` の言語ネイティブ規約に従う。
 > Universal適用契約: named tool、test比率、coverage閾値、実行時間、cadence、team構造は、公式platform制約または回復不能なriskへの安全下限でない限りreference profileまたはBlueprint parameterである。Project Blueprintはproduct risk、architecture、利用者、規制、変更頻度、過去defectから具体値を選ぶ。static、behavior、境界、失敗系、release artifactの検証成果自体は省略しない。
-> **42パート・130+セクション構成。**
+> 適用する節は、本書の目次と末尾の逆引き索引から選択する。構成の数字だけで読込範囲を限定しない。
 
 ---
 

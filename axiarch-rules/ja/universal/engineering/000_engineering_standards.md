@@ -10,7 +10,7 @@
 > すべてのエンジニアリング判断はスピードよりも正確性・セキュリティ・保守性を優先しなければならない。
 > **セキュリティ > 正確性 > 保守性 > パフォーマンス > 開発速度** の優先順位を厳守せよ。
 > この文書はエンジニアリング品質と標準に関するすべての設計判断の最上位基準である。
-> 言語scope: 本書のTypeScript / JavaScript / Web固有のツール名と例は該当ecosystemだけへ適用する。言語横断の選定、命名、toolchain、品質gate、所有、廃止は `320_programming_language_governance.md` を正本とし、別ecosystemへツール名をそのまま強制しない。
+> 言語scope: 本書のTypeScript / JavaScript / Web固有のツール名と例は該当ecosystemだけへ適用する。言語横断の選定、命名、toolchain、品質gate、所有、廃止は `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` を正本とし、別ecosystemへツール名をそのまま強制しない。
 > Universal適用契約: 製品名、VCS機能名、役職名、人数、比率、期限、頻度、閾値は、公式platform制約、法令・契約、または回復不能な安全上の下限でない限り参考実装またはBlueprint parameterである。Project Blueprintはrisk、規模、規制、利用者影響から具体値と同等手段を定め、検証可能な成果、owner、例外証跡を省略してはならない。
 > **22パート・141セクション構成。**
 
@@ -29,7 +29,7 @@
 | VII | バグリスク低減ポリシー | §7.0 – §7.3 | 4 |
 | VIII | 継続的学習と検証 | §8.0 – §8.2 | 3 |
 | IX | 互換性とテスト | §9.0 – §9.5 | 6 |
-| X | CI/Deploy & 補助規約 (※ pure git は `600_git_workflow.md` へ移動) | §10.1, §10.2, §10.4 – §10.6 | 5 |
+| X | CI/Deploy & 補助規約 (※ pure git は `axiarch-rules/{lang}/universal/engineering/600_git_workflow.md` へ移動) | §10.1, §10.2, §10.4 – §10.6 | 5 |
 | XI | ドキュメント運用 | §11.0 – §11.2 | 3 |
 | XII | エンジニアリング品質プロトコル | §12.1 – §12.12 | 12 |
 | XIII | 高度アーキテクチャ原則 | §13.1 – §13.15 | 15 |
@@ -51,7 +51,7 @@
 ### 1.0. 命名規約と構造原則 (Naming & Structural Foundations)
 *   **The Consolidated Naming Convention**:
     *   **Files & Directories**: 公式style guide、formatter、framework generator、既存リポジトリ規約に従います。TypeScript / JavaScript Webでは `kebab-case` を既定とし、Pythonのmodule、Dart package、Java / Kotlin / C#の型ファイル、Terraform resource等へ一律適用しません。OS間の互換性のため、大文字小文字だけで区別する名前は全言語で禁止します。
-    *   **Symbols**: component、class、function、package等のsymbol名は言語ネイティブ規約を優先します。言語別の正本は `320_programming_language_governance.md` を参照します。
+    *   **Symbols**: component、class、function、package等のsymbol名は言語ネイティブ規約を優先します。言語別の正本は `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` を参照します。
     *   **The Barrel File Ban**: TypeScript / JavaScriptでは、`index.ts` による無制限の再エクスポートを原則禁止します。言語公式のpackage/module入口は、循環参照、公開API、Tree Shakingまたはlink時影響を検証した場合に使用できます。
 *   **UI/Logic Consistency (完全統一)**:
     *   **原則**: 「似ているが違う」はプロ意識の欠如であり、バグです。すべての機能（削除、編集、一覧）において、UIとロジックは統合されていなければなりません。
@@ -459,7 +459,7 @@
 *   変更受入を申請する前に、作成者は「未処理警告なし」「runtime errorなし」「不要・機密logなし」を自己検証し、結果をPull Request、Merge Request、change recordまたは同等の証跡へ残します。
 
 ### 9.3. Testing Strategy Mix Protocol（テスト構成決定）
-*   **Context**: テストは「多ければいい」ものでも、全systemへ同じ比率を当てるものでもありません。変更risk、architecture、failure cost、実行時間、過去defectに基づき、`quality/000_qa_testing.md`と`320_programming_language_governance.md`から適切なstatic、unit、integration、contract、E2E、non-functional testを選びます。
+*   **Context**: テストは「多ければいい」ものでも、全systemへ同じ比率を当てるものでもありません。変更risk、architecture、failure cost、実行時間、過去defectに基づき、`quality/000_qa_testing.md`と`axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md`から適切なstatic、unit、integration、contract、E2E、non-functional testを選びます。
 *   **Web UI向けTesting Trophy参考profile**:
     | レイヤー | 比率 | 説明 | ツール例 |
     |:--------|:-----|:----|:--------|
@@ -572,7 +572,7 @@
 *   **The Red Button Checklist**: 本番変更は、適用されるLegal、Security、FinOps、Data、reliabilityのriskをmachine-readable gateまたは追跡可能な承認へ変換します。毎回の手動指差し確認を唯一の方式にしません。
 *   **Omnichannel Check**: 複数clientをproduct契約に含む場合、共有domain／API contractとclient固有UXを別々に検証します。Web以外を要件としないsystemへomnichannelを強制しません。
 *   **Deployment Safety Protocol**:
-    *   **Primary Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`000_core_mindset.md` の Rule 8.1 を参照。
+    *   **Primary Directive: The AI Git Ban**: AIによるGit操作の厳格な禁止については、`axiarch-rules/{lang}/universal/core/000_core_mindset.md` の Rule 8.1 を参照。
     *   **The Automated Deployment Mandate (CD First)**: 再現可能で監査可能なpipelineを既定とし、artifact digest、approval、段階配信、rollbackを記録します。手動break-glassは全面禁止せず、最小権限、二者統制または事後独立review、完全log、期限付きcredential、再自動化を要求します。
     *   **The Architectural Preservation Protocol**: 中核境界はownership、protected path、review policy、contract test等で保護します。`@preservation_level CRITICAL` headerは任意の実装例です。
 *   **セキュリティ**: 機密情報をcommitせず、CIでrepositoryと履歴をsecret scannerまたは同等統制により検証します。TruffleHogは実装例です。
@@ -628,7 +628,7 @@
 ## Part XII: エンジニアリング品質プロトコル (Engineering Quality Protocols)
 
 ### 12.1. The Zero-Warning Lint Protocol
-*   **Law**: CI全通過の真の意味は、言語ネイティブなformatter、linter、type checkerまたはcompilerの警告数0です。`npm run lint` はTypeScript / JavaScriptの一例にすぎません。必須ゲートは `320_programming_language_governance.md` に従い、未使用symbolは削除してください。
+*   **Law**: CI全通過の真の意味は、言語ネイティブなformatter、linter、type checkerまたはcompilerの警告数0です。`npm run lint` はTypeScript / JavaScriptの一例にすぎません。必須ゲートは `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` に従い、未使用symbolは削除してください。
 
 ### 12.2. The Clean Import Protocol
 *   **Law**: import / use / includeは言語公式の配置規則に従い、依存関係を静的に追跡できる形を既定とします。遅延読み込み、plugin、循環参照回避等の動的importは、境界、失敗処理、testを明示した場合だけ許可します。
@@ -749,7 +749,7 @@
 *   **RLS Awareness**: Row Level Securityを使用するデータベースでは、権限不足はエラーではなく「0行に影響」として返されることを常に念頭に置いてください。
 
 ### 13.6. The Type Safety & Integrity Protocol（型安全性と誠実性）
-この節はTypeScript固有の追加基準です。全言語共通の型・境界契約は `320_programming_language_governance.md` を正本とします。
+この節はTypeScript固有の追加基準です。全言語共通の型・境界契約は `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` を正本とします。
 *   **Zero `as any` Policy**: `as any` や `as never` を用いて型エラーを黙殺する行為は「バグの埋め込み」です。ESLint `@typescript-eslint/no-explicit-any` を `error` に設定し、CIで物理的にブロックしてください。
 *   **Root Cause Resolution**: 型エラーが発生した場合は、キャストではなく「型定義の修正」「DTOの再設計」「ジェネリクスの適用」で**根本原因**を解消してください。
 *   **Type Bridge Mandate**: 自動生成型に不足がある場合は、`database-extensions.ts` に拡張型を定義し、Mapped Typeで型衝突を防いでください。

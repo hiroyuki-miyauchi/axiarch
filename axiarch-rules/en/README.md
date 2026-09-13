@@ -1,5 +1,7 @@
 # Axiarch Development Rules (Master Index)
 
+> Apply `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1: items outside mandatory applicable constraints are optional. Document language does not determine jurisdiction. Resolve `{lang}` from Project Native Language. `universal/` and `blueprint/` start at `axiarch-rules/{lang}/`; domain shorthand such as `core/` starts at the layer named by its table. Resolve ambiguous references to real paths rather than guessing among equal names.
+
 > [!IMPORTANT]
 > **The Three-Layer Governance Architecture**
 > This folder (`axiarch-rules/`) contains the governance rules of the Axiarch framework.
@@ -25,6 +27,7 @@
 
 #### Core & Mindset
 *   **000. Core Philosophy & Mindset** ([🇯🇵](../ja/universal/core/000_core_mindset.md) / [🇺🇸](./universal/core/000_core_mindset.md))
+*   **001. Goal & Current-State Protocol** ([🇯🇵](../ja/universal/core/300_goal_and_current_state.md) / [🇺🇸](./universal/core/300_goal_and_current_state.md))
 
 #### Business & Growth
 *   **100. Product & Business Strategy** ([🇯🇵](../ja/universal/product/000_product_strategy.md) / [🇺🇸](./universal/product/000_product_strategy.md))
@@ -44,7 +47,7 @@
 *   **300. Engineering Standards** ([🇯🇵](../ja/universal/engineering/000_engineering_standards.md) / [🇺🇸](./universal/engineering/000_engineering_standards.md))
 *   **301. API Integration** ([🇯🇵](../ja/universal/engineering/100_api_integration.md) / [🇺🇸](./universal/engineering/100_api_integration.md))
 *   **320. Supabase & PostgreSQL** ([🇯🇵](../ja/universal/engineering/200_supabase_architecture.md) / [🇺🇸](./universal/engineering/200_supabase_architecture.md))
-*   **320. Programming Language Governance** ([🇯🇵](../ja/universal/engineering/320_programming_language_governance.md) / [🇺🇸](./universal/engineering/320_programming_language_governance.md))
+*   **321. Programming Language Governance** ([🇯🇵](../ja/universal/engineering/320_programming_language_governance.md) / [🇺🇸](./universal/engineering/320_programming_language_governance.md))
 *   **340. Web Frontend (Next.js)** ([🇯🇵](../ja/universal/engineering/300_web_frontend.md) / [🇺🇸](./universal/engineering/300_web_frontend.md))
 *   **341. Headless CMS** ([🇯🇵](../ja/universal/engineering/310_headless_cms.md) / [🇺🇸](./universal/engineering/310_headless_cms.md))
 *   **342. Mobile (Flutter)** ([🇯🇵](../ja/universal/engineering/400_mobile_flutter.md) / [🇺🇸](./universal/engineering/400_mobile_flutter.md))
@@ -54,6 +57,11 @@
 *   **361. AWS Cloud** ([🇯🇵](../ja/universal/engineering/510_aws_cloud.md) / [🇺🇸](./universal/engineering/510_aws_cloud.md))
 *   **362. Cloud & Application Platform Governance** ([🇯🇵](../ja/universal/engineering/520_cloud_application_platforms.md) / [🇺🇸](./universal/engineering/520_cloud_application_platforms.md))
 *   **363. Microsoft Azure Cloud** ([🇯🇵](../ja/universal/engineering/530_azure_cloud.md) / [🇺🇸](./universal/engineering/530_azure_cloud.md))
+*   **380. Git Workflow & Repository Hygiene** ([🇯🇵](../ja/universal/engineering/600_git_workflow.md) / [🇺🇸](./universal/engineering/600_git_workflow.md))
+*   **381. Batch, Backfill & Failure Accounting** ([🇯🇵](../ja/universal/engineering/700_batch_backfill_operations.md) / [🇺🇸](./universal/engineering/700_batch_backfill_operations.md))
+*   **382. Data Reconciliation & Invariants** ([🇯🇵](../ja/universal/engineering/710_data_reconciliation.md) / [🇺🇸](./universal/engineering/710_data_reconciliation.md))
+*   **383. Caching Discipline** ([🇯🇵](../ja/universal/engineering/730_caching_discipline.md) / [🇺🇸](./universal/engineering/730_caching_discipline.md))
+*   **384. Data Contracts & Schema Evolution** ([🇯🇵](../ja/universal/engineering/740_data_contracts.md) / [🇺🇸](./universal/engineering/740_data_contracts.md))
 
 #### AI & Data
 *   **400. AI Engineering** ([🇯🇵](../ja/universal/ai/000_ai_engineering.md) / [🇺🇸](./universal/ai/000_ai_engineering.md))
@@ -67,12 +75,19 @@
 *   **510. Sales & Business Development** ([🇯🇵](../ja/universal/operations/100_sales_bizdev.md) / [🇺🇸](./universal/operations/100_sales_bizdev.md))
 *   **520. HR & Organization** ([🇯🇵](../ja/universal/operations/200_hr_organization.md) / [🇺🇸](./universal/operations/200_hr_organization.md))
 *   **530. Partnership & Ecosystem** ([🇯🇵](../ja/universal/operations/700_partnership_ecosystem.md) / [🇺🇸](./universal/operations/700_partnership_ecosystem.md))
+*   **540. Capacity Planning & Scale Cliffs** ([🇯🇵](../ja/universal/operations/650_capacity_planning.md) / [🇺🇸](./universal/operations/650_capacity_planning.md))
 
 #### Security & Legal
 *   **600. Security & Privacy** ([🇯🇵](../ja/universal/security/000_security_privacy.md) / [🇺🇸](./universal/security/000_security_privacy.md))
 *   **601. Data Governance** ([🇯🇵](../ja/universal/security/100_data_governance.md) / [🇺🇸](./universal/security/100_data_governance.md))
 *   **602. OSS Compliance** ([🇯🇵](../ja/universal/security/200_oss_compliance.md) / [🇺🇸](./universal/security/200_oss_compliance.md))
 *   **603. IP & Due Diligence** ([🇯🇵](../ja/universal/security/300_ip_due_diligence.md) / [🇺🇸](./universal/security/300_ip_due_diligence.md))
+*   **604. Authentication & Passkeys** ([🇯🇵](../ja/universal/security/400_authentication_and_passkeys.md) / [🇺🇸](./universal/security/400_authentication_and_passkeys.md))
+*   **605. Federated Identity & OAuth/OIDC** ([🇯🇵](../ja/universal/security/410_federated_identity_and_oauth.md) / [🇺🇸](./universal/security/410_federated_identity_and_oauth.md))
+*   **606. Step-Up Auth & Sensitive Operations** ([🇯🇵](../ja/universal/security/420_step_up_auth_and_sensitive_operations.md) / [🇺🇸](./universal/security/420_step_up_auth_and_sensitive_operations.md))
+*   **607. Authorization & Access Control** ([🇯🇵](../ja/universal/security/430_authorization_and_access_control.md) / [🇺🇸](./universal/security/430_authorization_and_access_control.md))
+*   **608. Workload & Agent Identity** ([🇯🇵](../ja/universal/security/440_workload_and_agent_identity.md) / [🇺🇸](./universal/security/440_workload_and_agent_identity.md))
+*   **609. MCP Security** ([🇯🇵](../ja/universal/security/450_mcp_security.md) / [🇺🇸](./universal/security/450_mcp_security.md))
 
 #### Testing, QA & FinOps
 *   **700. QA & Testing** ([🇯🇵](../ja/universal/quality/000_qa_testing.md) / [🇺🇸](./universal/quality/000_qa_testing.md))
@@ -105,7 +120,7 @@
 ## 🚀 Axiarch Setup & Initialization
 
 > [!NOTE]
-> This framework's primary targets are OpenAI Codex, Claude Code, and Google Antigravity. Google Antigravity, OpenAI Codex, and Claude Code are all validated through real operational use (dogfooding), with no operation guarantee for every environment. Cursor, GitHub Copilot, and Windsurf are extended pointer candidates, not verified or operation-guaranteed platforms.
+> Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
 
 1.  **Copy**: The minimal required setup is `AXIARCH.md`, the `AGENTS.md` adapter, `axiarch-rules/`, and `axiarch-harness/`. Copy `axiarch-manifest.json` and `axiarch-scripts/` when you want safe-upgrade support. `axiarch-prompts/` is optional.
     ```bash

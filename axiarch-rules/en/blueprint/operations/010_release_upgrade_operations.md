@@ -74,7 +74,7 @@ Dry-runs must be limited to planning and diff inspection; they must not write co
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` reports conflicts only during dry-run and writes `.axiarch/conflicts/` only during `--apply`. With `--source`, it records the source manifest `axiarchVersion` in `.axiarch/version.json`.
+`axiarch-scripts/axiarch-upgrade.sh` reports conflicts only during dry-run and writes `.axiarch/conflicts/` only during `--apply`. It records the source manifest `axiarchVersion` as `requestedVersion` in `.axiarch/version.json`, updating confirmed `version` and `confirmedScope` only after the selected application and diagnostics both succeed. Partial or failed runs retain the previous confirmed version; reconcile the exit code with the current run record (details: `axiarch-scripts/README.md`).
 
 ### Reference
 
@@ -122,7 +122,7 @@ Do not automatically delete local-only files during directory updates. Instead, 
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` checks target-side files missing from the source before directory updates and prints them as `STALE-LOCAL`. It also records them in `ACTION_LOG`, but that log is persisted only when `--apply` writes `.axiarch/upgrade-report.md`.
+`axiarch-scripts/axiarch-upgrade.sh` reports and preserves target-side files missing from the source as `STALE-LOCAL` before directory updates. During `--apply`, actions are persisted to `.axiarch/upgrades/{run_id}/actions.log` and result JSON. Retain an old `.axiarch/upgrade-report.md` as history; it is not the destination for new results. See `axiarch-scripts/README.md` for the current record and exit-code contract.
 
 ### Reference
 
@@ -166,11 +166,11 @@ The manifest's broad Project State glob covers additional numbered files under `
 
 ### Rule
 
-When the manifest cannot be read, fallback ownership boundaries should stay as close to the manifest as practical. Explicitly classified files such as `core/000`, `core/010`, templates, and Axiarch-shared Blueprint files like `core/020_governance_rules.md` keep their existing classifications, while additional `core/{NNN}_*.md` files that are not explicitly classified are treated as Project State. Optional prompts remain optional, but when they are applied, `.axiarch/files.sha256` must include their hashes.
+The current helper reads manifests with Python 3 independently of jq. Malformed JSON or field types stop before application. Only a legacy manifest without the `files` key uses fallback ownership boundaries. Explicitly classified files retain their ownership; additional `axiarch-rules/{lang}/blueprint/{folder}/{NNN}_*.md` files are Project State across actual folders and 000–999. Optional prompts remain optional; selected languages alone are updated and applied file hashes are recorded in `.axiarch/files.sha256`.
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` fallback discovery scans `core` in addition to the other initial Blueprint folders. `write_upgrade_metadata` includes `axiarch-prompts/` in hash evidence when it exists. `check-axiarch-health.sh` Check 15 verifies fallback core Blueprint discovery and optional prompt evidence wiring.
+Only legacy manifests use fallback discovery in `axiarch-scripts/axiarch-upgrade.sh`, which scans actual Blueprint folders rather than a fixed initial list. `finalize` in `axiarch-scripts/axiarch_upgrade.py` records comparison hashes for replaced files and files verified byte-identical to upstream. Selected optional prompts use the same conditions; deferred custom edits do not become known bases. Combine structure-health wiring checks with behavioral regressions in `tests/test_runtime.py`.
 
 ### Reference
 
@@ -190,11 +190,11 @@ The manifest defined this policy as "update automatically only when local owners
 
 ### Rule
 
-`replace-if-local-unchanged` updates automatically only when the target is missing, or when a base from `--from`, `--from-ref`, or `--base-source` exists and matches the target. If the target differs and no base is available, if the matching path is missing from the base, or if the target differs from the base, fall back to review. During review, record the `no-base-diff`, `base-missing`, or `base-mismatch` reason label in the upgrade report.
+`replace-if-local-unchanged` may update a missing target, a target matching its base, or a target matching the corresponding known hash in `.axiarch/files.sha256` from a previous application or verification. Files already byte-identical to upstream remain unchanged. Differences not confirmed against a known base require review, preserving later custom edits on retries. Record `no-base-diff`, `base-missing`, `base-mismatch`, or the helper's `local-modified-or-unknown` reason. Follow §2, §4 and `axiarch-scripts/README.md` for record and version handling.
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` performs this policy through `copy_replace_if_local_unchanged`. Both `safe-only` and `update-all` route this policy through the dedicated check instead of unconditional `copy_path`. `check-axiarch-health.sh` Check 15 verifies that this runtime branch and its reason labels exist.
+`copy_replace_if_local_unchanged` in `axiarch-scripts/axiarch-upgrade.sh` and `copy_files` in `axiarch-scripts/axiarch_upgrade.py` decide per file. The presence of a hash record alone does not authorize an update; compare actual file contents. Structure health checks the wiring, while `tests/test_runtime.py` exercises partial-run retries and preservation of subsequent custom edits.
 
 ### Reference
 
@@ -264,9 +264,11 @@ With `set -euo pipefail`, `read -r answer` or `read -r choice` exited on EOF bef
 
 ### Rule
 
-Safe Upgrade Wizard confirmation prompts must not fail only because stdin reaches EOF. Treat EOF as empty input and fall back to the default. For final `--apply` confirmation, default N must set `APPLY=false` and `DRY_RUN=true`. For the final `--interactive` confirmation, default N must also keep dry-run behavior. Non-interactive application must use explicit `--yes` only after the dry-run output has been reviewed and the human owner has explicitly approved apply.
+Safe Upgrade Wizard confirmation prompts treat EOF as empty input and default to no application (`APPLY=false`). An explicit `--dry-run` cannot be overridden by `--apply`, option order or interactive answers. Non-interactive application uses `--yes` within the owner's authorized scope after reviewing the preview. Existing authorization need not be requested again.
 
 ### Enforcement
+
+The 2026-09-11 behavioral regression also checks that `--interactive --apply` never bypasses final confirmation. EOF without explicit `--yes` always returns to no application. `tests/test_runtime.py` executes the real script and checks target bytes remain unchanged.
 
 `axiarch-scripts/axiarch-upgrade.sh` handles confirmation input with `read -r answer || answer=""` and `read -r choice || choice=""`. `check-axiarch-health.sh` Check 15 verifies that the Safe Upgrade Wizard has EOF-safe confirmation defaults.
 
@@ -363,3 +365,5 @@ Pin external GitHub Actions to reviewed immutable commit SHAs or container diges
 ### Reference
 
 `.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`
+
+2026-09-11 addendum: on main push, release.yml invokes lint.yml via workflow_call at the same commit and requires successful needs before signing/publishing. Behavioral tests run on isolated Linux/macOS adopters. Structure, readiness and completion are separate verdicts; partial upgrades and failed diagnosis preserve the confirmed version and return nonzero. See `axiarch-harness/en/TASK_STATE_PROTOCOL.md` and the README outcome table.

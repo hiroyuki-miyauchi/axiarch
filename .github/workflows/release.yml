@@ -6,14 +6,23 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: axiarch-release-main
   cancel-in-progress: false
 
 jobs:
+  quality:
+    uses: ./.github/workflows/lint.yml
+    permissions:
+      contents: read
+
   tag-and-release:
+    needs: quality
+    if: ${{ success() && needs.quality.result == 'success' }}
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -21,6 +30,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: 検査済みコミットとの一致確認
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
 
       - name: Extract latest version from CHANGELOG.md
         id: version
@@ -76,10 +88,14 @@ jobs:
             exit 1
           fi
 
-          grep -Fq "Axiarch v${RELEASE_VERSION} の安定版" README.md
-          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" README.md
-          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" llms.txt
-          grep -Fq "stable Axiarch v${RELEASE_VERSION} release" llms-full.txt
+          # Verify executable distribution examples, not changeable marketing prose.
+          for INSTALL_GUIDE in README.md llms.txt llms-full.txt; do
+            if ! grep -Fq "axiarch/v${RELEASE_VERSION}/init.sh" "$INSTALL_GUIDE" \
+              || ! grep -Fq "AXIARCH_REF=tags/v${RELEASE_VERSION} bash \"\$axiarch_bootstrap_dir/init.sh\"" "$INSTALL_GUIDE"; then
+              echo "Pinned installer version mismatch: $INSTALL_GUIDE"
+              exit 1
+            fi
+          done
 
           PREVIOUS_VERSION=$(awk -v current="$RELEASE_VERSION" '
             /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
@@ -128,15 +144,16 @@ jobs:
             fi
           done
 
-          for RAW_HELPER_FILE in \
-            axiarch-scripts/README.md \
+          # Prompt bootstrap needs the whole pinned source, including Python helpers.
+          for SOURCE_GUIDE in \
             axiarch-prompts/ja/develop/safe_upgrade_execute.md \
             axiarch-prompts/en/develop/safe_upgrade_execute.md; do
-            if ! grep -Fq "/axiarch/v${RELEASE_VERSION}/axiarch-scripts/axiarch-upgrade.sh" "$RAW_HELPER_FILE"; then
-              echo "Tag-pinned helper mismatch: $RAW_HELPER_FILE does not pin v${RELEASE_VERSION}"
+            if ! grep -Fq "/axiarch/archive/refs/tags/v${RELEASE_VERSION}.tar.gz" "$SOURCE_GUIDE"; then
+              echo "Tag-pinned source mismatch: $SOURCE_GUIDE does not pin v${RELEASE_VERSION}"
               exit 1
             fi
           done
+          grep -Fq "/axiarch/v${RELEASE_VERSION}/axiarch-scripts/axiarch-upgrade.sh" axiarch-scripts/README.md
 
           for BLUEPRINT_INDEX in \
             axiarch-rules/ja/blueprint/INDEX.md \

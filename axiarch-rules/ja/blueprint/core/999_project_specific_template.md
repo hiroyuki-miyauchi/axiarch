@@ -83,7 +83,7 @@
 
 > [!IMPORTANT]
 > **採番は衝突回避のみ・予約帯なし**: 番号はフォルダ内 000〜999 の空き番号で衝突を避けるためだけのものです。番号帯域の予約はなく、`000` の使用も必須ではありません。プロジェクト固有ルールも機能仕様書も、同じフォルダ内で空き番号として採番してください。
-> **`core/` での既存利用番号**: `core/` では `000_project_overview.md`・`010_project_lessons_log.md`・`998_feature_spec_template.md`・`999_project_specific_template.md` が既に使用済みのため、これらを避けてください。これは `core/` 固有の事情であり、他フォルダには適用されません（他フォルダの `000` も空いており、必要時に使用可能です）。
+> **`core/` での既存利用番号**: `core/` では `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`・`axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`・`axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md`・`axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md` が既に使用済みのため、これらを避けてください。これは `core/` 固有の事情であり、他フォルダには適用されません（他フォルダの `000` も空いており、必要時に使用可能です）。
 
 | フォルダ | 使用可能番号 | 用途例 |
 |:--------|:------------|:------|

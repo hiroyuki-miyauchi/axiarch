@@ -9,11 +9,11 @@
 > "Non-human identities outnumber humans many times over and are compromised faster and harder than humans — give them no standing credentials; default to short-lived, scoped, revocable."
 > Authentication and delegation for service accounts, API keys, CI/CD credentials, workloads, and AI agents must
 > conform to the current stable best practices in this file.
-> Authentication and authorization follow the priority order in `000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
+> Authentication and authorization follow the priority order in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 (Legal & Security > UX > Revenue > DX).
 
 > [!NOTE]
-> This file is the **deep-dive** of `000_security_privacy.md` §3.2 (Non-Human Identity Management) and §18 (Agentic AI / MCP), and is the **canonical source for authentication and delegation of non-human identities (NHI) and AI agents**.
-> The canonical source for **human-facing** OAuth/OIDC and token exchange is [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md) (M2M and delegation belong here).
+> This file is the **deep-dive** of `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.2 (Non-Human Identity Management) and §18 (Agentic AI / MCP), and is the **canonical source for authentication and delegation of non-human identities (NHI) and AI agents**.
+> The canonical source for **human-facing** OAuth/OIDC and token exchange is [`axiarch-rules/{lang}/universal/security/410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md) (M2M and delegation belong here).
 > The canonical source for AI agent **permission design, autonomy levels, and delegation maturity** is [`core/000_core_mindset.md`](../core/000_core_mindset.md) §9 (this file is the technical deep-dive of authentication/delegation).
 
 > [!NOTE]
@@ -80,7 +80,7 @@
 
 ## §2. Non-Human Identity (NHI) Governance
 
-> **Reference**: `000_security_privacy.md` §3.2, NIST SP 800-207
+> **Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.2, NIST SP 800-207
 
 ### 2.1. Assume NHIs Outnumber Humans Many Times Over
 
@@ -104,7 +104,7 @@
 
 -   **Rule 68.2.3**: Maintain a **machine-readable** NHI inventory (derived from API/IaC), holding owner, scope, last-used time, and expiry as attributes (MUST).
 -   **Rule 68.2.4**: Automatically detect NHIs unused for a period, or whose owner has left/changed roles, as **orphaned**, and route them into a deactivation flow (MUST).
--   **Rule 68.2.5**: Pre-establish a path to **bulk-revoke NHIs** by owner, issuer, or scope during a leak/incident (MUST). Align with `000_security_privacy.md` §6.7 Panic Button.
+-   **Rule 68.2.5**: Pre-establish a path to **bulk-revoke NHIs** by owner, issuer, or scope during a leak/incident (MUST). Align with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.7 Panic Button.
 -   **Rule 68.2.6**: Periodically audit NHIs holding broad permissions (`*` / `admin` / unscoped) and shrink them to least privilege.
 
 ---
@@ -130,7 +130,7 @@
 ### 3.3. Secretless / Zero Standing Privilege
 
 -   **Law**: Design workloads to be **secretless** (hold no static secrets) wherever possible. Derive authentication from runtime attestation (SPIFFE / cloud metadata / OIDC).
--   **Cross-Reference**: §6 (Short-Lived Credentials), `000_security_privacy.md` §21.3 (Dynamic Secrets)
+-   **Cross-Reference**: §6 (Short-Lived Credentials), `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21.3 (Dynamic Secrets)
 
 ---
 
@@ -155,7 +155,7 @@
 
 -   **Rule 68.4.1**: The cloud-side trust policy MUST, in addition to the IdP `iss`, **bind `sub` / `aud` / claims such as repository, branch, and environment with the minimum scope** (MUST). Unverified `aud` or wildcard `sub` is prohibited.
 -   **Rule 68.4.2**: For GitHub Actions OIDC, include the **repository and (as needed) branch/environment/tag** in the trust condition to structurally prevent role assumption from forks or arbitrary repositories.
--   **Cross-Reference**: `000_security_privacy.md` §19.3 (CI/CD OIDC), `engineering/500_firebase_gcp.md` (WIF implementation detail)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §19.3 (CI/CD OIDC), `engineering/500_firebase_gcp.md` (WIF implementation detail)
 
 ---
 
@@ -171,7 +171,7 @@
 
 ### 5.2. API Key Discipline
 
--   **Law**: When adopting API keys, satisfy the following (aligned with `000_security_privacy.md` §4.8).
+-   **Law**: When adopting API keys, satisfy the following (aligned with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.8).
 -   **Action**:
     1.  **Prefix**: Add a prefix that identifies type/environment (e.g. `sk_live_` / `pk_test_`).
     2.  **Hashed storage**: Do not store the key body in plaintext; store a SHA-256 (or similar) hash. Compare in constant time.
@@ -183,7 +183,7 @@
 
 ## §6. Short-Lived Credentials, STS, Zero Standing Privilege
 
-> **Reference**: NIST SP 800-207, `000_security_privacy.md` §21.3
+> **Reference**: NIST SP 800-207, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21.3
 
 ### 6.1. TTL Management and Auto-Renewal
 
@@ -200,13 +200,13 @@
 
 -   **Law**: As a rule, prohibit newly introducing static/long-lived secrets; migrate to **dynamic/short-lived secrets** (STS / Vault dynamic secrets / WIF).
 -   **Rule 68.6.1**: Minimize permanently valid permissions (**standing privilege**) and adopt a Just-in-Time model that **issues on demand and auto-revokes on task completion** (SHOULD; MUST for privileged NHIs).
--   **Cross-Reference**: `000_security_privacy.md` §21 (Secrets Management), §3.4 (PAM / JIT)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21 (Secrets Management), §3.4 (PAM / JIT)
 
 ---
 
 ## §7. AI Agent Identity Principles (Tier-0)
 
-> **Reference**: `core/000_core_mindset.md` §9, `000_security_privacy.md` §18, OAuth 2.1 (draft), RFC 8693
+> **Reference**: `core/000_core_mindset.md` §9, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18, OAuth 2.1 (draft), RFC 8693
 >
 > **★Future-critical core**: From this section onward (§7–§11) is the core of AI agent authentication/delegation, including emerging / draft areas from 2025–2026.
 
@@ -254,7 +254,7 @@
 
 ## §9. Delegation Chain Limits & Loop Prevention
 
-> **Reference**: `000_security_privacy.md` §18.4 (A2A), `core/000_core_mindset.md` §9.6 (Multi-Agent Orchestration)
+> **Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.4 (A2A), `core/000_core_mindset.md` §9.6 (Multi-Agent Orchestration)
 
 ### 9.1. Depth Limits for Multi-Hop Delegation
 
@@ -265,7 +265,7 @@
 ### 9.2. Loop Prevention
 
 -   **Rule 68.9.3**: Detect **re-appearance of the same identity (cycles)** in a delegation chain and reject loops (A→B→A) (MUST). Align with Agentic Loop Detection in `core/000_core_mindset.md` §9.6.
--   **Action**: Implement a dual guard of timeout and maximum delegation count to prevent infinite delegation (Infinite Delegation Loop, `000_security_privacy.md` §18.4).
+-   **Action**: Implement a dual guard of timeout and maximum delegation count to prevent infinite delegation (Infinite Delegation Loop, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.4).
 
 ---
 
@@ -281,11 +281,11 @@
 -   **Action**:
     1.  The MCP client (agent) treats the MCP server as a **Resource Server** and authorizes with a scoped, short-lived token obtained from the AS.
     2.  Use **resource indicators (RFC 8707)** to name the target MCP server as the `audience`, preventing token misuse (Confused Deputy).
-    3.  Propagate user context per the §8 OBO delegation, retaining the "human + agent" dual identity (aligned with the privilege-escalation prevention in `000_security_privacy.md` §18.3).
+    3.  Propagate user context per the §8 OBO delegation, retaining the "human + agent" dual identity (aligned with the privilege-escalation prevention in `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3).
 
 ### 10.2. MCP-Specific Guards
 
--   **Rule 68.10.1**: Restrict MCP servers to an approved allowlist (`000_security_privacy.md` §18.3) and combine signature verification with human review against tool-definition tampering (Tool Poisoning, §18.6).
+-   **Rule 68.10.1**: Restrict MCP servers to an approved allowlist (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3) and combine signature verification with human review against tool-definition tampering (Tool Poisoning, §18.6).
 -   **Rule 68.10.2**: MCP tokens MUST also follow the Tier-0 principles (§7.2): **short-lived, scoped, revocable**.
 
 ---
@@ -309,13 +309,13 @@
 
 ## §12. Auditing & Delegation Chain Traceability
 
-> **Reference**: `000_security_privacy.md` §25 (Immutable Logs), RFC 8693 (`act` claim)
+> **Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25 (Immutable Logs), RFC 8693 (`act` claim)
 
 ### 12.1. Full Traceability of the Delegation Chain
 
 -   **Law**: Record the entire delegation chain "human → agent → (sub-agent →) resource" in a form a human can trace and verify after the fact.
 -   **Rule 68.12.1**: Each access/operation log MUST include the **effective principal (`sub`), executing actor (`act` chain), target resource (`audience`), scope, and token issuance/revocation events** (MUST).
--   **Rule 68.12.2**: Retain NHI/agent audit logs as **tamper-evident (immutable, append-only)** (`000_security_privacy.md` §25), and mask PII per §7.4.
+-   **Rule 68.12.2**: Retain NHI/agent audit logs as **tamper-evident (immutable, append-only)** (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25), and mask PII per §7.4.
 
 ### 12.2. Correlation and Reconstruction
 
@@ -327,7 +327,7 @@
 
 ### 13.1. Behavioral Baselines for NHIs/Agents
 
--   **Action**: Baseline normal usage patterns per NHI/agent (call frequency, target APIs, time-of-day, destinations) and detect deviations (in concert with `000_security_privacy.md` §3.3 ITDR).
+-   **Action**: Baseline normal usage patterns per NHI/agent (call frequency, target APIs, time-of-day, destinations) and detect deviations (in concert with `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3 ITDR).
 -   **Metrics to measure**:
     -   Token issue/renew/revoke rates; Token Exchange (OBO) firing counts.
     -   Delegation-depth distribution; depth-cap hits; loop-detection firings.
@@ -360,11 +360,11 @@
 
 ### 15.1. Continuous Verification (Zero Trust)
 
--   **Law**: Holding a token does not equal trust. Verify NHI/agent access each time against `audience`/`scope`/sender-constraint/context (workload attestation, risk score) (NIST SP 800-207, `000_security_privacy.md` §2.4 Identity-First Zero Trust).
+-   **Law**: Holding a token does not equal trust. Verify NHI/agent access each time against `audience`/`scope`/sender-constraint/context (workload attestation, risk score) (NIST SP 800-207, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §2.4 Identity-First Zero Trust).
 
 ### 15.2. Privacy
 
--   **Action**: When an agent accesses on behalf of a human, restrict the data passed through OBO delegation to **purpose-bound and minimal** (`000_security_privacy.md` §7.2 Data Minimization). Mask PII in delegation tokens and audit logs, and take care that a human cannot be directly identified from the correlation id.
+-   **Action**: When an agent accesses on behalf of a human, restrict the data passed through OBO delegation to **purpose-bound and minimal** (`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 Data Minimization). Mask PII in delegation tokens and audit logs, and take care that a human cannot be directly identified from the correlation id.
 
 ---
 
@@ -482,7 +482,7 @@ jobs:
 ## §17. Anti-Patterns (20)
 
 > [!CAUTION]
-> Each of the following is **prohibited or a serious risk** in this file. On discovery, remediate immediately per the Zero Tolerance Protocol in `000_security_privacy.md`.
+> Each of the following is **prohibited or a serious risk** in this file. On discovery, remediate immediately per the Zero Tolerance Protocol in `axiarch-rules/{lang}/universal/security/000_security_privacy.md`.
 
 | # | Anti-Pattern | Risk | Correct Approach |
 |:--|:-------------|:-----|:-----------------|

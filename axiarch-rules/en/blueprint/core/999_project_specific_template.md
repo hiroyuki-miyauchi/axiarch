@@ -83,7 +83,7 @@
 
 > [!IMPORTANT]
 > **Numbering only avoids collisions — no reserved bands**: The number merely avoids collisions among available numbers from 000 to 999 within a folder. There are no reserved numbering bands, and using `000` is not required. Both project-specific rules and feature specs use the same available-number scheme within each folder.
-> **Numbers already used in core/**: In `core/`, `000_project_overview.md`, `010_project_lessons_log.md`, `998_feature_spec_template.md`, and `999_project_specific_template.md` are already used, so avoid those. This is specific to `core/` and does not apply to other folders (their `000` is also free and may be used when needed).
+> **Numbers already used in core/**: In `core/`, `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`, `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, `axiarch-rules/{lang}/blueprint/core/998_feature_spec_template.md`, and `axiarch-rules/{lang}/blueprint/core/999_project_specific_template.md` are already used, so avoid those. This is specific to `core/` and does not apply to other folders (their `000` is also free and may be used when needed).
 
 | Folder | Available Numbers | Examples |
 |:--------|:------------|:------|

@@ -1,5 +1,7 @@
 # Axiarch Development Rules (マスターインデックス)
 
+> 適用範囲は `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1に従う。必須以外は任意。文書の言語は法域を決めない。`{lang}` はProject Native Languageで選ぶ。本文中の `universal/` と `blueprint/` は `axiarch-rules/{lang}/` 起点、`core/` 等のドメイン略記は表が指定する層を起点とする。曖昧な参照は実際のパスを確認し、同名ファイルを推測で選ばない。
+
 > [!IMPORTANT]
 > **Axiarchの3層ガバナンス・アーキテクチャ**
 > 本フォルダ（`axiarch-rules/`）は、Axiarch（アクシアーク）フレームワークの統治ルールを格納する。
@@ -25,6 +27,7 @@
 
 #### Core & Mindset
 *   **000. Core Philosophy & Mindset** ([🇯🇵](./universal/core/000_core_mindset.md) / [🇺🇸](../en/universal/core/000_core_mindset.md))
+*   **001. Goal & Current-State Protocol** ([🇯🇵](./universal/core/300_goal_and_current_state.md) / [🇺🇸](../en/universal/core/300_goal_and_current_state.md))
 
 #### Business & Growth
 *   **100. Product & Business Strategy** ([🇯🇵](./universal/product/000_product_strategy.md) / [🇺🇸](../en/universal/product/000_product_strategy.md))
@@ -44,7 +47,7 @@
 *   **300. Engineering Standards** ([🇯🇵](./universal/engineering/000_engineering_standards.md) / [🇺🇸](../en/universal/engineering/000_engineering_standards.md))
 *   **301. API Integration** ([🇯🇵](./universal/engineering/100_api_integration.md) / [🇺🇸](../en/universal/engineering/100_api_integration.md))
 *   **320. Supabase & PostgreSQL** ([🇯🇵](./universal/engineering/200_supabase_architecture.md) / [🇺🇸](../en/universal/engineering/200_supabase_architecture.md))
-*   **320. Programming Language Governance** ([🇯🇵](./universal/engineering/320_programming_language_governance.md) / [🇺🇸](../en/universal/engineering/320_programming_language_governance.md))
+*   **321. Programming Language Governance** ([🇯🇵](./universal/engineering/320_programming_language_governance.md) / [🇺🇸](../en/universal/engineering/320_programming_language_governance.md))
 *   **340. Web Frontend (Next.js)** ([🇯🇵](./universal/engineering/300_web_frontend.md) / [🇺🇸](../en/universal/engineering/300_web_frontend.md))
 *   **341. Headless CMS** ([🇯🇵](./universal/engineering/310_headless_cms.md) / [🇺🇸](../en/universal/engineering/310_headless_cms.md))
 *   **342. Mobile (Flutter)** ([🇯🇵](./universal/engineering/400_mobile_flutter.md) / [🇺🇸](../en/universal/engineering/400_mobile_flutter.md))
@@ -54,6 +57,11 @@
 *   **361. AWS Cloud** ([🇯🇵](./universal/engineering/510_aws_cloud.md) / [🇺🇸](../en/universal/engineering/510_aws_cloud.md))
 *   **362. Cloud & Application Platform Governance** ([🇯🇵](./universal/engineering/520_cloud_application_platforms.md) / [🇺🇸](../en/universal/engineering/520_cloud_application_platforms.md))
 *   **363. Microsoft Azure Cloud** ([🇯🇵](./universal/engineering/530_azure_cloud.md) / [🇺🇸](../en/universal/engineering/530_azure_cloud.md))
+*   **380. Git Workflow & Repository Hygiene** ([🇯🇵](./universal/engineering/600_git_workflow.md) / [🇺🇸](../en/universal/engineering/600_git_workflow.md))
+*   **381. Batch, Backfill & Failure Accounting** ([🇯🇵](./universal/engineering/700_batch_backfill_operations.md) / [🇺🇸](../en/universal/engineering/700_batch_backfill_operations.md))
+*   **382. Data Reconciliation & Invariants** ([🇯🇵](./universal/engineering/710_data_reconciliation.md) / [🇺🇸](../en/universal/engineering/710_data_reconciliation.md))
+*   **383. Caching Discipline** ([🇯🇵](./universal/engineering/730_caching_discipline.md) / [🇺🇸](../en/universal/engineering/730_caching_discipline.md))
+*   **384. Data Contracts & Schema Evolution** ([🇯🇵](./universal/engineering/740_data_contracts.md) / [🇺🇸](../en/universal/engineering/740_data_contracts.md))
 
 #### AI & Data
 *   **400. AI Engineering** ([🇯🇵](./universal/ai/000_ai_engineering.md) / [🇺🇸](../en/universal/ai/000_ai_engineering.md))
@@ -67,12 +75,19 @@
 *   **510. Sales & Business Development** ([🇯🇵](./universal/operations/100_sales_bizdev.md) / [🇺🇸](../en/universal/operations/100_sales_bizdev.md))
 *   **520. HR & Organization** ([🇯🇵](./universal/operations/200_hr_organization.md) / [🇺🇸](../en/universal/operations/200_hr_organization.md))
 *   **530. Partnership & Ecosystem** ([🇯🇵](./universal/operations/700_partnership_ecosystem.md) / [🇺🇸](../en/universal/operations/700_partnership_ecosystem.md))
+*   **540. Capacity Planning & Scale Cliffs** ([🇯🇵](./universal/operations/650_capacity_planning.md) / [🇺🇸](../en/universal/operations/650_capacity_planning.md))
 
 #### Security & Legal
 *   **600. Security & Privacy** ([🇯🇵](./universal/security/000_security_privacy.md) / [🇺🇸](../en/universal/security/000_security_privacy.md))
 *   **601. Data Governance** ([🇯🇵](./universal/security/100_data_governance.md) / [🇺🇸](../en/universal/security/100_data_governance.md))
 *   **602. OSS Compliance** ([🇯🇵](./universal/security/200_oss_compliance.md) / [🇺🇸](../en/universal/security/200_oss_compliance.md))
 *   **603. IP & Due Diligence** ([🇯🇵](./universal/security/300_ip_due_diligence.md) / [🇺🇸](../en/universal/security/300_ip_due_diligence.md))
+*   **604. Authentication & Passkeys** ([🇯🇵](./universal/security/400_authentication_and_passkeys.md) / [🇺🇸](../en/universal/security/400_authentication_and_passkeys.md))
+*   **605. Federated Identity & OAuth/OIDC** ([🇯🇵](./universal/security/410_federated_identity_and_oauth.md) / [🇺🇸](../en/universal/security/410_federated_identity_and_oauth.md))
+*   **606. Step-Up Auth & Sensitive Operations** ([🇯🇵](./universal/security/420_step_up_auth_and_sensitive_operations.md) / [🇺🇸](../en/universal/security/420_step_up_auth_and_sensitive_operations.md))
+*   **607. Authorization & Access Control** ([🇯🇵](./universal/security/430_authorization_and_access_control.md) / [🇺🇸](../en/universal/security/430_authorization_and_access_control.md))
+*   **608. Workload & Agent Identity** ([🇯🇵](./universal/security/440_workload_and_agent_identity.md) / [🇺🇸](../en/universal/security/440_workload_and_agent_identity.md))
+*   **609. MCP Security** ([🇯🇵](./universal/security/450_mcp_security.md) / [🇺🇸](../en/universal/security/450_mcp_security.md))
 
 #### Testing, QA & FinOps
 *   **700. QA & Testing** ([🇯🇵](./universal/quality/000_qa_testing.md) / [🇺🇸](../en/universal/quality/000_qa_testing.md))
@@ -105,7 +120,7 @@
 ## 🚀 Axiarch セットアップ & 初期化
 
 > [!NOTE]
-> 本フレームワークの主対象は OpenAI Codex / Claude Code / Google Antigravity です。主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みです。ただし、全環境での動作保証まではしません。Cursor、GitHub Copilot、Windsurf は拡張ポインター候補であり、検証済みまたは動作保証済みとは扱いません。
+> Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 
 1.  **コピー (Copy)**: 最小必須は `AXIARCH.md`、`AGENTS.md` アダプター、`axiarch-rules/`、`axiarch-harness/` です。安全アップグレードを使う場合は `axiarch-manifest.json` と `axiarch-scripts/` もコピーします。`axiarch-prompts/` は任意です。
     ```bash

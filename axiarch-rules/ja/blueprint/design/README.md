@@ -5,7 +5,7 @@
 
 > [!NOTE]
 > **初期状態では、このREADME以外のドメインルールファイルが未生成であることが正しい設計です。**
-> ドメインルールファイルは `CRYSTALLIZATION_PROTOCOL.md` に従い、実務で蓄積された教訓が閾値（3件）に達した時点で生成されます。
+> ドメインルールファイルは `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` に従い、実務で蓄積された教訓が閾値（3件）に達した時点で生成されます。
 > シードファイルの事前配置は YAGNI 原則に反するため禁止です。
 
 ## 対応 Universal ルール

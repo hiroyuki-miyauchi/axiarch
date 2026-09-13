@@ -39,3 +39,7 @@ Evidence Packetは、作業完了時に「何を変え、何を確認し、何�
 Evidence Packetは長文の作業日誌ではない。
 ユーザーが次の判断をできるだけの情報を、短く具体的にまとめる。
 証跡なき完了報告は禁止する。
+
+## ゴールと証拠の接続
+
+`axiarch-rules/ja/universal/core/300_goal_and_current_state.md` を内容の正本とし、[TASK_STATE_PROTOCOL.md](./TASK_STATE_PROTOCOL.md) のID・担当・4状態・確認対象・時刻・証拠を使う。H0/H1は軽量適用。H2以上は準備検査と完了検査を分離し、全条件の証拠を監査する。構造healthの成功だけで完了としない。

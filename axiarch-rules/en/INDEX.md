@@ -1,5 +1,7 @@
 # Axiarch Rules — Master Index
 
+> Apply `axiarch-rules/{lang}/universal/core/100_governance.md` §1.1: items outside mandatory applicable constraints are optional. Document language does not determine jurisdiction. Resolve `{lang}` from Project Native Language. `universal/` and `blueprint/` start at `axiarch-rules/{lang}/`; domain shorthand such as `core/` starts at the layer named by its table. Resolve ambiguous references to real paths rather than guessing among equal names.
+
 > [!NOTE]
 > **This file is the detailed index for the entire `axiarch-rules/` directory.**
 > It describes the role and summary of each rule file.
@@ -49,7 +51,7 @@ your-project/
  │    ├── axiarch-boot-reminder.sh     ← UserPromptSubmit hook externalized (dynamic violations A/B/C + two-stage TTL v1.6.0+ + Check D Task Boundary Detection v1.8.0+ + native task-state reminder v1.11.0+)
  │    ├── axiarch-protect-antifull.sh  ← PreToolUse hook externalized script (§6 physical block, v1.5.5+)
  │    ├── axiarch-init-task-md.sh      ← SessionStart hook externalized script (current-task docs auto-bootstrap, v1.5.5+ / v1.11.0+)
- │    ├── axiarch-task-state.sh        ← archive-before-refresh helper for task.md / implementation_plan.md / walkthrough.md (v1.11.0)
+ │    ├── axiarch-task-state.sh        ← session-specific helper for task.md / implementation_plan.md / walkthrough.md (v1.11.0)
  │    ├── axiarch-diff-guard.sh        ← PostToolUse hook externalized script (diff guard, v1.9.0)
  │    ├── axiarch-upgrade.sh           ← Safe Upgrade Wizard (interactive group-based upgrades)
  │    └── check-git-config-clean.sh    ← worktree metadata and branch-config integrity
@@ -61,8 +63,8 @@ your-project/
 | File | Description |
 |---|---|
 | [README.md](./README.md) | Link collection to all rule modules. Includes setup and initialization guide. |
-| [compliance_matrix.md](./compliance_matrix.md) | Compliance matrix proving which rule files cover each user requirement. Defines the separation between Universal (immutable) and Blueprint (mutable). |
-| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | The 5-step rule loading protocol that the AI MUST execute at the start of any conversation. |
+| [compliance_matrix.md](./compliance_matrix.md) | Tracks requirements and corresponding rule files; does not prove runtime behavior or adherence. Defines the separation between Universal (immutable) and Blueprint (mutable). |
+| [LOADING_PROTOCOL.md](./LOADING_PROTOCOL.md) | Five steps for reading applicable clauses, with lightweight H0/H1 handling. |
 | [CRYSTALLIZATION_PROTOCOL.md](./CRYSTALLIZATION_PROTOCOL.md) | The protocol for the AI to autonomously record and organize (crystallize) lessons upon task completion. |
 
 ---
@@ -77,7 +79,8 @@ your-project/
 |---|---|---|
 | 000 | [000_core_mindset.md](./universal/core/000_core_mindset.md) | **Core behavioral principles (Rev.14 · 46 Sections; §1.1–§1.35, §9.1–§9.11).** Priority hierarchy (Security > UX > Profitability > DX), Zero Tolerance, Headless First, SSOT principle, band-aid solution ban, Observability-First, Resilience by Design, Cost as First-Class Citizen, Cognitive Load Minimization, §1.10 Security-by-Design, §1.11 AI-Augmented Engineering, §1.12 Privacy-by-Architecture, §1.13 Accessibility-by-Design, **§1.14 Post-Quantum Readiness, §1.15 Regulatory Agility, §1.16 Developer Wellbeing, §1.17 Technology Governance**, **§1.18 SBOM & Supply Chain Security, §1.19 AI-Native Test Strategy, §1.20 Evaluation-Driven Development, §1.21 Feature Flag & Progressive Delivery, §1.22 Platform Reliability Engineering, §1.23 Developer Experience as Product, §1.24 Responsible AI Disclosure, §1.25 Data Architecture Sovereignty, §1.26 API Design Governance, §1.27 Green Software Engineering, §1.28 Incident Response & Business Continuity, §1.29 AI Regulatory Compliance Governance, §1.30 Ethical Engineering & Societal Impact, §1.31 Type Safety as Foundation, §1.32 Compositional Architecture, §1.33 Inversion Thinking & Pre-Mortem, §1.34 YAGNI Discipline & Rule of Three, §1.35 Strong Opinions, Weakly Held / Disagree & Commit**, Git/deployment ban protocol, existing functionality protection, Agentic AI Era Protocol (§9.1–§9.11, including Model Governance / Agentic Workflow Design Patterns / AI Cost Governance / Computer Use Agent Safety). Foundation of all rules. |
 | 100 | [100_governance.md](./universal/core/100_governance.md) | Constitutional authority and immutability. Constitution definition, core principles, amendment protocol, AI Agent authority control, auditing & observability, multi-project federation. |
-| 200 | [200_language_protocol.md](./universal/core/200_language_protocol.md) | Language protocol. Three-layer language model, code language conventions, document language strategy, AI Agent communication language protocol. |
+| 200 | [200_language_protocol.md](./universal/core/200_language_protocol.md) | Language protocol. Audience, explicit instruction and defaults, technical notation, usage categories, optional detection limits and session evidence contract. |
+| 300 | [300_goal_and_current_state.md](./universal/core/300_goal_and_current_state.md) | Goal and current-state protocol. **10 sections.** Canonical for establishing the **boot triad** — norms, goal, current state — before work starts, with **explicit verification of available context and handover at start or resume**. Triad principle (norms are co-equal because goal + state alone lets a capable agent **reach the right destination by a dangerous route**; norms prevail on conflict), explicit goals (verifiable completion criteria with stated means of verification, **ban on standalone vague terms**, non-goals, frozen criteria with explicit change, separate reporting of partial achievement, **goal restatement gate**), holding current state (**four states — done / in progress / not started / discarded** — machine-readable, **conversation history is not the source of truth**, five product-independent container properties: singularity / append-ness / attribution / linkage / readability, **freshness verification duty** (reconcile the snapshot against reality, mark the unreconciled), recording discards), the **autonomy-distance scaling law** (rising capability *raises* the precision required of goal and state, since a longer flight amplifies initial angular error; D1–D5 stages restatement / plan presentation / approval gate), two drift classes (**goal drift = risk to result value**, **current-state drift = duplication and rework**) with signs and detection, pre-start duplication checks and preferring the existing, shared current state (consolidation, checking others' work, declaring boundary-crossing changes, handover duties), **what must never be written into the current state** (no credentials or production personal data; consolidation and access control designed together; retention), **duty to report drift and stop early** (never continue silently, bad news early, no silent failure, stale items treated as unconfirmed, recurrence prevention via crystallization), verification duties, 17 anti-patterns, maturity M1–M5. Includes reverse index and cross-references. |
 
 #### product/: Business & Growth
 
@@ -160,7 +163,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | Security & privacy. **22-section architecture**. Zero Trust 7 pillars (NIST 800-207), authentication/authorization (FIDO2/Social Login/Session management), API security (BOLA/BFLA/SSRF prevention), supply chain security (SBOM/SLSA), AI/LLM security (OWASP LLM Top 10 2025), container security (Pod Security Standards/image signing), file upload security, cryptographic policy (prohibited algorithms/PQC readiness), OWASP Top 10 2025 mapping, GraphQL, secrets management, client-side security, bot/DDoS defense, vendor management, incident response, security governance. Quick Reference Index (Appendix A). |
+| 000 | [000_security_privacy.md](./universal/security/000_security_privacy.md) | Security & privacy. See the linked table of contents and index for the current structure. Zero Trust 7 pillars (NIST 800-207), authentication/authorization (FIDO2/Social Login/Session management), API security (BOLA/BFLA/SSRF prevention), supply chain security (SBOM/SLSA), AI/LLM security (OWASP LLM Top 10 2025), container security (Pod Security Standards/image signing), file upload security, cryptographic policy (prohibited algorithms/PQC readiness), OWASP Top 10 2025 mapping, GraphQL, secrets management, client-side security, bot/DDoS defense, vendor management, incident response, security governance. Quick Reference Index (Appendix A). |
 | 100 | [100_data_governance.md](./universal/security/100_data_governance.md) | Legal, governance & data strategy. **45-section architecture**. Global regulation map (GDPR/CCPA/EU AI Act + Global Privacy Laws), 2025-2027 timeline, cross-border transfer, consent management, data governance maturity model, RegTech automation, quantum cryptographic agility. Quick Reference Index. |
 | 200 | [200_oss_compliance.md](./universal/security/200_oss_compliance.md) | License & dependency management. **63 sections, 299 rules, 40+ code snippets**. Three-tier license classification, SBOM (CycloneDX 1.6/SPDX 3.0), supply chain security (SLSA v1.2 Build and Source Tracks, Sigstore), SCA tool integration, automated update strategy, maturity model. Quick Reference Index. |
 | 300 | [300_ip_due_diligence.md](./universal/security/300_ip_due_diligence.md) | IP strategy & due diligence. **50-section, 10-part architecture**. IP ownership, patent strategy, trade secrets, trademarks, copyright, AI-generated IP, exit strategy, DD operations, governance, compliance. Quick Reference Index. |
@@ -175,7 +178,7 @@ your-project/
 
 | # | File | Summary |
 |---|---|---|
-| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QA & testing strategy. **41-section, 12-part architecture**. Testing philosophy, test types (static/unit/integration/contract/E2E/VRT/performance/property-based/mutation/a11y), **layered assertion requirements (§8.6: what unit/composite/integration layers must each guarantee, mandatory failure-path testing, static analysis as the lowest layer, batch/backfill testing via engineering/700)**, security, test quality, CI/CD, release, domain-specific, resilience, AI-driven testing, data & API quality, compliance & observability, 5-level testing maturity model. Quick Reference Index. |
+| 000 | [000_qa_testing.md](./universal/quality/000_qa_testing.md) | QA & testing strategy. See the linked table of contents and index for the current structure. Testing philosophy, test types (static/unit/integration/contract/E2E/VRT/performance/property-based/mutation/a11y), **layered assertion requirements (§8.6: what unit/composite/integration layers must each guarantee, mandatory failure-path testing, static analysis as the lowest layer, batch/backfill testing via engineering/700)**, security, test quality, CI/CD, release, domain-specific, resilience, AI-driven testing, data & API quality, compliance & observability, 5-level testing maturity model. Quick Reference Index. |
 
 ### 📐 Blueprint Rules (Project-Specific)
 
@@ -199,3 +202,5 @@ your-project/
 | `../../axiarch-prompts/en/audit/` | Quality & integrity audit prompts (`fullstack_qa_audit.md`, `api_architecture_audit.md`, `data_integrity_audit.md`, `system_integrity_audit.md`, `deep_optimization_audit.md`). |
 | `../../axiarch-prompts/en/govern/` | Compliance & governance prompts (`governance_auditor.md`, `constitution_compliance_audit.md`, `compliance_inspector_audit.md`, `blueprint_governance_audit.md`, `localization_audit.md`). |
 | `../../axiarch-prompts/en/operate/` | Incident response & onboarding prompts (`onboarding_audit.md`, `incident_response.md`). |
+
+Executable ID/session/evidence contract: [TASK_STATE_PROTOCOL.md](../../axiarch-harness/en/TASK_STATE_PROTOCOL.md). Autonomy distance D1–D5, maturity M1–M5 and harness H0–H4 (legacy L0–L4) are separate axes.

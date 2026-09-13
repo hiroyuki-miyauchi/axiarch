@@ -562,7 +562,7 @@
 ## 11. バックエンド・ガバナンス (Backend Governance)
 
 ### Rule 11.1: The Data Residency Protocol (Rule 26.1)
--   **Law**: 特定の個人情報（PII）や法的文書は、準拠法（GDPR/APPI等）に基づき、特定のリージョン（例: 日本国内）に物理的に存在することを保証しなければならない場合があります。
+-   **Law**: データ種別・契約・適用法域から保存先と越境移転条件を確認し、適切なリージョンを選ぶ。日本語利用だけで日本保存を必須としない。Supabaseのリージョン選択は所在地制御であり、法令遵守の証明ではない。[公式の所在地説明](https://supabase.com/docs/guides/platform/regions)。
 -   **Action**: ストレージバケットやDBインスタンスのリージョン設計時に、将来の「データローカライゼーション要件」を考慮した構成（Multi-region Read/Local Write）を検討し、文書化してください。
 
 ### Rule 11.2: The Audit Bypass Anti-Pattern (Server Action Mandate)

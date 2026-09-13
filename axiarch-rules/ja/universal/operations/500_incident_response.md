@@ -88,7 +88,7 @@
     4.  **Transparency（透明性）**: 「沈黙は不信を生む」— 進捗がなくても状況を伝え続ける
     5.  **Blameless Culture（非難なき文化）**: 個人の責任追及ではなくシステム改善に集中する
 
--   **Cross-Reference**: `000_core_mindset.md` (優先順位の階層), `operations/400_site_reliability.md` §4 (SLI/SLO)
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/core/000_core_mindset.md` (優先順位の階層), `operations/400_site_reliability.md` §4 (SLI/SLO)
 
 ### §2. フレームワーク準拠
 
@@ -1151,7 +1151,7 @@
 -   **サプライチェーン分断対策**:
     - 半導体・ハードウェアサプライチェーンの代替ルート評価
     - ソフトウェアライセンスの地政学的リスク評価（制裁対象国の企業製品）
--   **Cross-Reference**: `800_internationalization.md` (データ主権), `security/100_data_governance.md`
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md` (データ主権), `security/100_data_governance.md`
 
 ---
 
@@ -2346,7 +2346,7 @@
 
 | 参照先ルール | 関連トピック |
 |:-----------|:-----------|
-| `000_core_mindset.md` | 優先順位の階層 |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | 優先順位の階層 |
 | `engineering/510_aws_cloud.md` | マルチリージョン, コスト管理 |
 | `ai/000_ai_engineering.md` | AIガードレール, AI実装 |
 | `operations/400_site_reliability.md` | SLI/SLO, RPO/RTO, カオスエンジニアリング, 可観測性, FinOps |
@@ -2354,5 +2354,5 @@
 | `security/100_data_governance.md` | GDPR/Global Privacy Laws/DORA通知義務, データ主権, 法的対応, APRA CPS 230 |
 | `security/200_oss_compliance.md` | SBOM, SCA, サプライチェーンセキュリティ |
 | `quality/000_qa_testing.md` | レジリエンステスト, ペネトレーションテスト |
-| `800_internationalization.md` | データ主権, 多地域展開 |
+| `axiarch-rules/{lang}/universal/product/800_internationalization.md` | データ主権, 多地域展開 |
 | `core/100_governance.md` | ルール権限, ガバナンス |

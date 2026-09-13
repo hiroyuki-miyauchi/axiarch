@@ -8,7 +8,7 @@
 ## 結論
 
 Axiarch の主戦場は、Google Antigravity、OpenAI Codex、Claude Code の3系統に集中する。
-主対象の Google Antigravity・OpenAI Codex・Claude Code は、いずれも実運用（ドッグフーディング）で稼働を確認済みとする。Antigravity を最初の実証対象とし、Codex・Claude Code も本リポジトリ自体の開発を含む実運用で継続使用している。ただし、全環境での動作保証まではしない。
+Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 
 Cursor、GitHub Copilot、Windsurf は、未検証の拡張ポインター候補として扱う。検証済みまたは主対象のように見える表現は避け、ポインター設定と Markdown 互換性に基づく補助対象として位置づける。動作保証はしない。
 
@@ -44,8 +44,8 @@ Axiarch が注力すべき市場は「より賢いプロンプト」ではなく
 | 対象 | 市場上の意味 | Axiarch の接続点 | 戦略上の扱い |
 |:-----|:-------------|:-----------------|:-------------|
 | Google Antigravity | editor、terminal、browser に直接アクセスする agent-first IDE として、長い自律タスクの需要が強い | `.agents/rules/prompt_pointer.md`、Axiarchのルールロード、実運用知見 | 実運用（ドッグフーディング）で稼働確認済みの主対象（最初の実証対象）。agent-first時代の品質床として訴求する |
-| OpenAI Codex | `AGENTS.md` をプロジェクト指示として扱い、hook も公式に持つエージェント環境 | `AGENTS.md`、`.codex/hooks.json`、Axiarch診断、作業文書3点セット、`update_plan` | 実運用（ドッグフーディング）で稼働確認済みの主対象。ただし全環境での動作保証はしない |
-| Claude Code | `CLAUDE.md`、memory、hooks、skills、subagents により、継続的な指示、支援ファイル、専門コンテキスト、実行前後の制御を組み合わせられる環境 | `CLAUDE.md`、`.claude/settings.json`、UserPromptSubmit、PreToolUse、SessionStart、Task tools、optional skills/subagents | 実運用（ドッグフーディング）で稼働確認済みの主対象。ただし全環境での動作保証はしない |
+| OpenAI Codex | `AGENTS.md` をプロジェクト指示として扱い、hook も公式に持つエージェント環境 | `AGENTS.md`、`.codex/hooks.json`、Axiarch診断、作業文書3点セット、`update_plan` | 未実証の対応候補。動作保証なし |
+| Claude Code | `CLAUDE.md`、memory、hooks、skills、subagents により、継続的な指示、支援ファイル、専門コンテキスト、実行前後の制御を組み合わせられる環境 | `CLAUDE.md`、`.claude/settings.json`、UserPromptSubmit、PreToolUse、SessionStart、Task tools、optional skills/subagents | 未実証の対応候補。動作保証なし |
 
 ## 拡張互換の扱い
 
@@ -95,9 +95,9 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 ## 戦略優先順位
 
 1. Google Antigravity、Codex、Claude Code の主対象3系統を README、ROADMAP、llms 系文書で一貫させる。
-2. 実運用（ドッグフーディング）で稼働確認済みの主対象として扱うのは Google Antigravity・OpenAI Codex・Claude Code の3つとする。ただし、全プロジェクト環境での動作保証とは表現しない。
-3. Codex は「主対象、ネイティブ統合対応、release gate検証対象、`update_plan` 連携対象」として扱う。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証済みとは表現しない。
-4. Claude Code は「主対象、hook補強モデルとTask tools連携対象」として扱う。実運用（ドッグフーディング）で稼働確認済みだが、全環境での動作保証済みとは表現しない。
+2. Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
+3. Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
+4. Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 5. Cursor、GitHub Copilot、Windsurf は「拡張ポインター候補」とし、過度に前面へ出さない。
 6. Compatibility Matrix では、検証済みの意味を「実運用稼働確認済み」と「全環境での動作保証ではない」に分け、検証日、検証項目、検証範囲を記録する。
 7. `axiarch-rules/{lang}/blueprint/` に Axiarch 本体の市場戦略を入れない責務分離を維持する。
@@ -107,9 +107,9 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 - README の互換性表を、主対象と拡張互換に分ける。
 - ROADMAP に主対象3系統への集中方針を追記する。
 - llms.txt と llms-full.txt を README と同じ市場表現へ同期する。
-- Antigravity・Codex・Claude Code の表現を「Production-validated primary / real operational use (dogfooding) / no operation guarantee for every environment」に統一する。
+- Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 - Cursor、GitHub Copilot、Windsurf の表現を「Extended pointer-only candidate / no operation guarantee」に統一する。
-- docs と script 表示で、Antigravity・Codex・Claude Code を実運用（ドッグフーディング）で稼働確認済みのステータスにそろえる（全環境保証はしない境界も併記）。
+- Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 - ROADMAP と MARKET_STRATEGY の市場調査節は、一次情報で確認できた範囲と推測を分け、過度な「防止」「唯一」「実現」表現を避ける。
 
 ## 60日アクション
@@ -142,7 +142,7 @@ Axiarch は、AI coding agent のための Constitution-Driven Governance Layer 
 ## 成功指標
 
 - README、ROADMAP、llms 系文書で主対象3系統の表現が一致している。
-- Google Antigravity・Codex・Claude Code が、いずれも実運用（ドッグフーディング）で稼働確認済みの主対象として説明されている（全環境保証はしない境界つき）。
+Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
 - Codex と Claude Code が「期待互換」ではなく、主対象として説明されている。
 - Cursor、GitHub Copilot、Windsurf が検証済みまたは動作保証済みのように見えない。
 - `init.sh` の選択肢と README の互換性表に矛盾がない。

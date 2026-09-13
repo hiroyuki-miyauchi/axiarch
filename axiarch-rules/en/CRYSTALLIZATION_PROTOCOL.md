@@ -4,6 +4,8 @@
 > This protocol is the detailed lesson-crystallization procedure loaded from `AXIARCH.md`.
 > The AI MUST execute this autonomously when recording lessons.
 
+Path bases: category shorthand such as `core/` is relative to `axiarch-rules/en/blueprint/`; `universal/` and `blueprint/` are relative to `axiarch-rules/en/`. Record resolved paths and make Markdown links relative to the record file. Example numbered filenames do not imply existing or mandatory files.
+
 ---
 
 ## 📑 Table of Contents
@@ -47,7 +49,7 @@ This protocol defines the procedure for separating lessons into the appropriate 
 
 **Design Philosophy: Co-location Principle**
 Lessons are placed in the **same folder** as the rule files they relate to.
-When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks, `security/` for Security tasks), it finds both rules AND historical lessons there — improving context efficiency.
+When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks, `security/` for Security tasks), it finds both rules AND historical lessons there as candidates; co-location does not mean their content has been loaded.
 
 ---
 
@@ -63,12 +65,12 @@ When AI loads any domain folder (e.g., `engineering/` for DB/Architecture tasks,
 ├────────────────────────────────────────────────────────────────┤
 │  Step 2: DEDUP CHECK (Universal Dedup Check)                   │
 │  Check if similar rule already exists in universal/            │
-│  ├── Exists → Skip (dedup). Done.                              │
+│  ├── Exists → Skip duplicate → Step 5                              │
 │  └── Not found → Proceed to Step 3                             │
 ├────────────────────────────────────────────────────────────────┤
 │  Step 3: SEARCH (Search Existing Files)                        │
 │  Does a domain file exist in the target Blueprint folder?      │
-│  ├── YES → Append to it. Done.                                 │
+│  ├── YES → Read, append → Steps 5–6                                 │
 │  └── NO  → Proceed to Step 4                                   │
 ├────────────────────────────────────────────────────────────────┤
 │  Step 4: ACCUMULATE (Temporary Accumulation)                   │
@@ -109,7 +111,7 @@ Determine the lesson's domain and identify the corresponding Blueprint folder.
 | Operations | `operations/` | `operations/{NNN}_operations_rules.md` |
 | Core & Governance | `core/` | `core/{NNN}_governance_rules.md` (`010` is fixed as the index. `020_` is only a first-candidate example; choose after checking unused numbers in the target folder.) |
 
-> **How to determine `{NNN}` (Contextual Numbering)**: The AI checks existing files in the target folder, then numbers by a simple guideline: (1) **recommended style** = gaps of about 5–10 near related topics, leaving room (e.g., `010`, `020`); (2) **in practice** = if no gap is available, use an interstitial number (e.g., `011`, `015`). Either is valid as long as it is an unused number from `000`–`999` in the target folder. Prioritize avoiding exhaustion (i.e., simply use an available number) over strictly enforcing fixed gaps. This matches the Sparse Numbering style recommendation in `universal/core/100_governance.md` §8.1.
+> **How to determine `{NNN}` (Contextual Numbering)**: The AI checks existing files in the target folder, then numbers by a simple guideline: (1) **recommended style** = gaps of about 5–10 near related topics, leaving room (e.g., `010`, `020`); (2) **in practice** = if no gap is available, use an interstitial number (e.g., `011`, `015`). Either is valid as long as it is an unused number from `000`–`999` in the target folder. Prioritize avoiding exhaustion (i.e., simply use an available number) over strictly enforcing fixed gaps. This matches the Sparse Numbering style recommendation in `axiarch-rules/en/universal/core/100_governance.md` §8.1.
 > All files including crystallized files may use any available number from `000`–`999`. **Do not include `lessons_` in the file name**. Use only topic names describing the content.
 
 > **Folder Extensibility**: The 8 folders above are pre-provisioned as the initial structure, but this is **NOT a closed list**. If lessons accumulate for a domain not covered by the mapping table above, the AI MAY **propose** a new folder to the user (autonomous creation is prohibited). However, classification into existing folders should always be prioritized first, and proposals must clearly distinguish actual folder names from examples.
@@ -121,14 +123,14 @@ Determine the lesson's domain and identify the corresponding Blueprint folder.
 Before recording, check whether a **similar rule already exists** in `universal/` under the corresponding domain folder. Universal is the "Constitution" — content already covered there does NOT need to be duplicated in Blueprint.
 
 **Decision Criteria:**
-- Similar rule exists in Universal → **Do NOT record** (dedup). Done.
+- If Universal covers the same rule with no new project context, skip the duplicate; still run Step 5 for pending lessons in this task.
 - Not in Universal, or project-specific context needed → **Proceed to Step 3**
 
 ---
 
 ### Step 3: SEARCH (Search Existing Files)
 
-If a rule file for the same domain already exists in the **Blueprint folder identified in Step 1**, append to that file.
+If a rule file for the same domain already exists in the **Blueprint folder identified in Step 1**, read its relevant content, append only new project-specific evidence, then continue to Steps 5–6.
 
 **Search Examples:**
 - DB-related lesson → search within `blueprint/engineering/`
@@ -168,9 +170,9 @@ Lessons in `core/010_project_lessons_log.md` (central index) MUST be promoted to
 **Why the Time-Axis Trigger?** Once existing sublimated files become comprehensive enough to absorb new lessons, the count trigger fires less often, and individual lessons can sit in `core/010` indefinitely. Threshold tunable via `AXIARCH_LESSON_STALE_DAYS` (default 180; `0` disables Check C).
 
 > [!CAUTION]
-> **🚨 "Just appended" is NOT completion — Step 5 MUST run before declaring task done**
+> **🚨 "Just appended" is NOT completion — Step 5 MUST run before closing lesson-recording work**
 >
-> A common past failure: AI assumes "I appended to `core/010`, crystallization done" and never executes Step 5 — letting 3+ same-domain lessons accumulate without promotion. **Step 4 (ACCUMULATE) alone is NOT completion.** Before returning the final response of every task, AI MUST execute Step 5 (THRESHOLD CHECK), and if **either** (a) 3+ unsorted lessons in any domain **or** (b) any lesson dated 180+ days ago exists, **promote them to a dedicated Blueprint file BEFORE declaring task completion**.
+> A common past failure: AI assumes "I appended to `core/010`, crystallization done" and never executes Step 5 — letting 3+ same-domain lessons accumulate without promotion. **Step 4 (ACCUMULATE) alone is NOT completion.** For tasks that create or update lessons, AI MUST execute Step 5 before final completion (THRESHOLD CHECK), and if **either** (a) 3+ unsorted lessons in any domain **or** (b) any lesson dated 180+ days ago exists, **promote them to a dedicated Blueprint file BEFORE declaring task completion**.
 >
 > Violations are externally detectable via `bash axiarch-scripts/check-axiarch-health.sh` Check 6. Declaring task completion while either threshold is breached = **protocol violation**.
 
@@ -195,9 +197,11 @@ Leave only a reference link in core/010:
 
 ---
 
+Inspection covers both installed languages without automatically translating or duplicating adopter lessons. Quoted/fenced templates are excluded; real entries require a date, Domain and Target Folder. Preserve the original date rather than resetting age to evade the threshold. If promotion needs an unresolved folder decision, record the pending reason and resume condition; do not claim promotion is complete. H0 read-only work does not require lesson updates or global log cleanup.
+
 ### Step 6: UPDATE INDEX
 
-Update the "Separated Domain Files" table in `core/010_project_lessons_log.md`.
+Update the central lessons index, `axiarch-rules/{lang}/blueprint/INDEX.md`, and the changed file’s TOC/reverse index when new files or sections require it. Keep source-distributed rules bilingual; do not fabricate translations of adopter-owned project state.
 
 ---
 
@@ -216,7 +220,7 @@ Update the "Separated Domain Files" table in `core/010_project_lessons_log.md`.
 > Created: {YYYY-MM-DD}
 
 > [!IMPORTANT]
-> **Domain**: {domain}
+> **Domain**: {domain from the initial mapping or an approved additional category}
 > **Location**: `blueprint/{folder}/{NNN}_{topic}.md`
 > **Related Universal Rules**: `universal/{domain}/{rule_file_1}.md`, `universal/{domain}/{rule_file_2}.md`
 > **{N} sections.**
@@ -303,7 +307,7 @@ Update the "Separated Domain Files" table in `core/010_project_lessons_log.md`.
 | 5 | **Body Sections** `## Part {N}:` or `## §{N}.` | `##` for major sections, `###` for subsections | `## Part I: Code Quality and Clean Code`, `## §1. Primary Directive & Priorities` |
 | 6 | **`## Appendix A: Quick Reference`** | Keyword → Section → Related Rule reverse lookup table | `| Keyword | Section | Related Rule |` |
 
-**Litmus Test**: "When placed alongside Universal files like `000_engineering_standards.md` or `200_language_protocol.md`, does this file look structurally consistent?" → If not, align it.
+**Litmus Test**: "When placed alongside Universal files like `axiarch-rules/{lang}/universal/engineering/000_engineering_standards.md` or `axiarch-rules/{lang}/universal/core/200_language_protocol.md`, does this file look structurally consistent?" → If not, align it.
 
 ---
 

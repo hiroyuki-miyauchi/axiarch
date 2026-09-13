@@ -1204,7 +1204,7 @@ switch (section.type) {
 - **Rule 34.58**: 翻訳はCMS内ワークフローまたはTMS（Translation Management System）統合で管理する
 - AI翻訳は下訳としてのみ使用し、人間レビューを義務付ける
 - **Translation Memory**: 過去の翻訳資産を蓄積・再利用する仕組みを構築する
-- **Cross-Reference**: `800_internationalization.md`（グローバル展開）、`core/200_language_protocol.md`（言語プロトコル）
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md`（グローバル展開）、`core/200_language_protocol.md`（言語プロトコル）
 
 ---
 
@@ -1844,7 +1844,7 @@ Content Published
 - 翻訳品質をMQMフレームワークで定量評価する
 - **評価軸**: 正確性（Accuracy）、流暢さ（Fluency）、用語一貫性（Terminology）、スタイル（Style）
 - **閾値設定**: Tier 2以上ではMQMスコア95点以上を公開基準とする
-- **Cross-Reference**: `800_internationalization.md`（グローバル展開）、`core/200_language_protocol.md`（言語プロトコル）
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md`（グローバル展開）、`core/200_language_protocol.md`（言語プロトコル）
 
 ---
 

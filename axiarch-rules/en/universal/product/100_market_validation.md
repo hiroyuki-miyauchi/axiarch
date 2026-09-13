@@ -581,7 +581,7 @@ Smoke Test Success Criteria (Standard Values):
 
 ### 6.6. Pre-PMF Pricing Validation Protocol
 
-- **Rule 11.058**: Even during the PMF phase, do not defer pricing as "we'll decide later." Conduct **initial price sensitivity validation**. Detailed pricing strategy is delegated to `400_pricing_strategy.md`, but the minimum pre-PMF validation is defined in this section
+- **Rule 11.058**: Even during the PMF phase, do not defer pricing as "we'll decide later." Conduct **initial price sensitivity validation**. Detailed pricing strategy is delegated to `axiarch-rules/{lang}/universal/product/400_pricing_strategy.md`, but the minimum pre-PMF validation is defined in this section
 
 - **Rule 11.059**: Pre-PMF pricing validation in 3 steps
 
@@ -1123,7 +1123,7 @@ Required Conditions (AND):
 | Monthly Churn | ≤ 5% (B2C) / ≤ 3% (B2B) |
 | Burn Multiple | ≤ 2.0 |
 
-- **Rule 11.074**: If Unit Economics fall below criteria, treat as "Revenue PMF Not Achieved" and mandate pricing strategy review (`400_pricing_strategy.md` reference)
+- **Rule 11.074**: If Unit Economics fall below criteria, treat as "Revenue PMF Not Achieved" and mandate pricing strategy review (`axiarch-rules/{lang}/universal/product/400_pricing_strategy.md` reference)
 
 ---
 
@@ -1682,7 +1682,7 @@ loi_protocol:
 
 ### 14.4. Design Partner → Paying Customer Conversion Process
 
-- **Rule 11.133**: Define the standard process for converting Design Partners (`000_product_strategy.md` §2.5 reference) to paying customers
+- **Rule 11.133**: Define the standard process for converting Design Partners (`axiarch-rules/{lang}/universal/product/000_product_strategy.md` §2.5 reference) to paying customers
 
 ```
 Step 1: Value Demonstration (2-4 weeks)

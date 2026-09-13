@@ -781,7 +781,7 @@ These four layers are **defense-in-depth, not duplicates**. All MUST be respecte
 ### 14.1. App Store Connect Localization
 
 - **Supported Languages**: 40+, Title / Subtitle / Description / Keywords / Screenshots per language.
-- **Required**: Target markets (Japan / US / EU / China / SEA) MUST have full Day-1 localization.
+- **Required**: Define actual launch markets, required languages and review obligations; verify necessary disclosures and core flows before launch. Example regions are not a mandate to launch in every market.
 - **Anti-Pattern**: Pasting machine translation as-is → rejection trigger (Apple Reviewer checks).
 
 ### 14.2. Google Play Localization

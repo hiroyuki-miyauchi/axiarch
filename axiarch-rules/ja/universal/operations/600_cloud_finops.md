@@ -80,7 +80,7 @@
     4.  **コスト最適化** — 上記3つを担保した上での最適化
     5.  **サステナビリティ** — コスト最適化とカーボン削減の両立
 
--   **Cross-Reference**: `000_core_mindset.md`（優先順位の階層）
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/core/000_core_mindset.md`（優先順位の階層）
 
 ### §2. FinOps Foundation Framework 2026
 
@@ -2126,7 +2126,7 @@
 
 | 関連ルールファイル | 関連セクション |
 |:----------------|:-----------|
-| `000_core_mindset.md` | 優先順位階層（Security > UX > Revenue > DX） |
+| `axiarch-rules/{lang}/universal/core/000_core_mindset.md` | 優先順位階層（Security > UX > Revenue > DX） |
 | `product/300_revenue_monetization.md` | FinOps、ユニットエコノミクス、決済コスト |
 | `engineering/000_engineering_standards.md` | CI/CD、コーディング規約 |
 | `engineering/200_supabase_architecture.md` | DBコスト管理 |

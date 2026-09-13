@@ -64,6 +64,7 @@
 | **国際化・多言語対応** | `universal/product/800_internationalization.md` | "ICU MessageFormat", "BiDi/RTL" |
 | **ガバナンス・ルール管理** | `universal/core/100_governance.md` | "SSOTアーキテクチャ", "改正プロセス" |
 | **言語プロトコル** | `universal/core/200_language_protocol.md` | "ゼロトレランス", "プロジェクト言語ファースト" |
+| **ゴールと現在値・エージェント起動時契約** | `universal/core/300_goal_and_current_state.md` | "起動時3点契約", "自律距離のスケーリング則", "現在値に書いてはならないもの" |
 
 ## 2. Layer 2: Blueprint Rules (動的成長する固有仕様)
 **Mutable / 積極提案・更新推奨**

@@ -32,7 +32,7 @@ SOURCE_AXIARCH_VERSION=""
 TARGET_LANG="both"
 TARGET_AGENT="universal"
 WITH_PROMPTS=false
-DRY_RUN=true
+EXPLICIT_DRY_RUN=false
 APPLY=false
 SAFE_ONLY=false
 INTERACTIVE=false
@@ -47,11 +47,18 @@ ITEM_AGENTS=()
 GROUP_ACTIONS=""
 ACTION_LOG=""
 MANIFEST_GROUPS=""
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+FORCE_COPY=false
+HEALTH_RC=127
+APPLY_STARTED=false
+APPLY_FINISHED=false
+HELPER_DIR="${SCRIPT_DIR}"
+HELPER_SNAPSHOT=""
+export PYTHONDONTWRITEBYTECODE=1
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 RESET='\033[0m'
@@ -61,10 +68,10 @@ print_header() {
   printf '%b\n\n' "${CYAN}Coreは更新し、Project Stateは既定で保持します。 / Updates Core while preserving Project State by default.${RESET}"
 }
 
-print_info() { printf '%b\n' "${CYAN}→${RESET} $1"; }
-print_ok() { printf '%b\n' "${GREEN}OK${RESET} $1"; }
-print_warn() { printf '%b\n' "${YELLOW}WARN${RESET} $1"; }
-print_err() { printf '%b\n' "${RED}ERROR${RESET} $1" >&2; }
+print_info() { printf '%b%s\n' "${CYAN}→${RESET} " "$1"; }
+print_ok() { printf '%b%s\n' "${GREEN}OK${RESET} " "$1"; }
+print_warn() { printf '%b%s\n' "${YELLOW}WARN${RESET} " "$1"; }
+print_err() { printf '%b%s\n' "${RED}ERROR${RESET} " "$1" >&2; }
 
 usage() {
   cat <<'USAGE'
@@ -97,22 +104,39 @@ USAGE
 }
 
 cleanup() {
+  if [[ "${APPLY_STARTED}" == "true" && "${APPLY_FINISHED}" != "true" ]]; then
+    set +e
+    append_log "APPLY-FAIL interrupted-before-finalization"
+    write_upgrade_metadata
+  fi
   if [[ -n "${TMP_DIR}" && -d "${TMP_DIR}" ]]; then
     rm -rf "${TMP_DIR}"
   fi
+  if [[ -n "${HELPER_SNAPSHOT}" && -d "${HELPER_SNAPSHOT}" ]]; then
+    rm -rf "${HELPER_SNAPSHOT}"
+  fi
 }
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 require_arg() {
   local name="$1"
   local value="${2:-}"
   if [[ -z "${value}" ]]; then
     print_err "${name} requires a value."
-    exit 1
+    exit 2
   fi
 }
 
 parse_args() {
+  local argument
+  for argument in "$@"; do
+    if [[ "${argument}" =~ [[:cntrl:]] ]]; then
+      print_err 'Control characters are not supported in upgrade arguments.'
+      exit 2
+    fi
+  done
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --target)
@@ -165,7 +189,7 @@ parse_args() {
         shift
         ;;
       --dry-run)
-        DRY_RUN=true
+        EXPLICIT_DRY_RUN=true
         APPLY=false
         shift
         ;;
@@ -179,7 +203,6 @@ parse_args() {
         ;;
       --apply)
         APPLY=true
-        DRY_RUN=false
         shift
         ;;
       --yes|-y)
@@ -193,7 +216,7 @@ parse_args() {
       *)
         print_err "Unknown option: $1"
         usage
-        exit 1
+        exit 2
         ;;
     esac
   done
@@ -202,14 +225,14 @@ parse_args() {
     ja|en|both) ;;
     *)
       print_err "--lang must be ja, en, or both."
-      exit 1
+      exit 2
       ;;
   esac
   case "${TARGET_AGENT}" in
     universal|codex|claude|antigravity|cursor|copilot|windsurf|all) ;;
     *)
       print_err "--agent must be universal, codex, claude, antigravity, cursor, copilot, windsurf, or all."
-      exit 1
+      exit 2
       ;;
   esac
 }
@@ -226,20 +249,100 @@ archive_ref_for_version() {
   fi
 }
 
+# AXIARCH_DOWNLOAD_BEGIN
+# Standalone bootstraps carry the same small download boundary; regression tests
+# compare this block so init and upgrade cannot silently diverge.
+download_source_archive() {
+  python3 - "$1" "$2" "${AXIARCH_DOWNLOAD_TIMEOUT_SECONDS:-120}" <<'AXIARCH_DOWNLOAD_PY'
+import gzip
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import time
+import unicodedata
+from pathlib import Path
+
+try:
+    url, destination, value = sys.argv[1:]
+    if not re.fullmatch(r'[0-9]{1,3}', value) or not 1 <= int(value) <= 600:
+        raise ValueError('AXIARCH_DOWNLOAD_TIMEOUT_SECONDS must be 1-600')
+    seconds = int(value)
+    if not shutil.which('curl'):
+        raise ValueError('curl is required for HTTPS-only source downloads; use a reviewed local source otherwise')
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='.axiarch-download-', dir=destination.parent) as temporary:
+        compressed = Path(temporary) / 'source.tar.gz'
+        with compressed.open('wb') as output:
+            subprocess.run(['curl', '--fail', '--silent', '--show-error', '--location',
+                            '--proto', '=https', '--proto-redir', '=https', '--max-redirs', '5',
+                            '--connect-timeout', str(min(seconds, 15)), '--max-time', str(seconds),
+                            '--max-filesize', str(64 * 1024 * 1024), url],
+                           stdout=output, check=True, timeout=seconds)
+        if compressed.stat().st_size > 64 * 1024 * 1024:
+            raise ValueError('compressed source archive exceeds 64 MiB')
+        deadline = time.monotonic() + seconds
+        archive_path = Path(temporary) / 'source.tar'
+        # Fully decompress before inspection, including the gzip checksum/trailer.
+        # This bounds large metadata as well as file bodies before tar parsing.
+        total = 0
+        with gzip.open(compressed, 'rb') as source, archive_path.open('wb') as output:
+            while True:
+                if time.monotonic() >= deadline:
+                    raise ValueError('source extraction timed out')
+                chunk = source.read(1024 * 1024)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > 512 * 1024 * 1024:
+                    raise ValueError('expanded source archive exceeds 512 MiB')
+                output.write(chunk)
+        seen, roots, count = set(), set(), 0
+        with tarfile.open(archive_path, 'r:') as archive:
+            for member in archive:
+                count += 1
+                if count > 10000 or time.monotonic() >= deadline:
+                    raise ValueError('source archive entry/time limit exceeded')
+                name = member.name
+                if (name.startswith('/') or '\\' in name
+                        or any(ord(c) < 32 or ord(c) == 127 for c in name)):
+                    raise ValueError('unsafe source archive path')
+                parts = name.rstrip('/').split('/')
+                if any(part in ('', '.', '..') for part in parts):
+                    raise ValueError('unsafe source archive path')
+                roots.add(parts[0])
+                if len(roots) != 1 or not (member.isdir() or member.isfile()):
+                    raise ValueError('source archive must have one root and only regular files/directories')
+                key = unicodedata.normalize('NFC', '/'.join(parts)).casefold()
+                if key in seen:
+                    raise ValueError('duplicate or case/Unicode-colliding source archive path')
+                seen.add(key)
+                if member.size < 0 or member.size > 64 * 1024 * 1024:
+                    raise ValueError('source archive member exceeds 64 MiB')
+        if not count:
+            raise ValueError('empty source archive')
+        destination.mkdir(mode=0o700)
+        subprocess.run(['tar', '-xf', str(archive_path), '-C', str(destination), '--strip-components=1'],
+                       check=True, timeout=max(0, deadline - time.monotonic()))
+except subprocess.TimeoutExpired:
+    print('Source preparation failed: download/extraction timed out; no installation applied.', file=sys.stderr)
+    sys.exit(1)
+except (OSError, ValueError, EOFError, tarfile.TarError, subprocess.CalledProcessError) as error:
+    print('Source preparation failed: ' + str(error), file=sys.stderr)
+    sys.exit(1)
+AXIARCH_DOWNLOAD_PY
+}
+# AXIARCH_DOWNLOAD_END
+
 download_archive() {
   local ref="$1"
   local destination="$2"
   local url="${REPO_URL}/archive/refs/${ref}.tar.gz"
 
-  mkdir -p "${destination}"
-  if command -v curl >/dev/null 2>&1; then
-    curl -sSL "${url}" | tar -xz -C "${destination}" --strip-components=1
-  elif command -v wget >/dev/null 2>&1; then
-    wget -qO- "${url}" | tar -xz -C "${destination}" --strip-components=1
-  else
-    print_err "curl or wget is required to download Axiarch source."
-    exit 1
-  fi
+  download_source_archive "${url}" "${destination}"
 }
 
 resolve_sources() {
@@ -260,19 +363,6 @@ resolve_sources() {
   if [[ ! -f "${SOURCE_DIR}/axiarch-manifest.json" ]]; then
     print_err "Axiarch source is missing axiarch-manifest.json: ${SOURCE_DIR}"
     exit 1
-  fi
-  if command -v jq >/dev/null 2>&1; then
-    SOURCE_AXIARCH_VERSION="$(jq -r '.axiarchVersion // empty' "${SOURCE_DIR}/axiarch-manifest.json" 2>/dev/null || true)"
-  else
-    SOURCE_AXIARCH_VERSION="$(awk '
-      /"axiarchVersion"[[:space:]]*:/ {
-        line = $0
-        sub(/^.*"axiarchVersion"[[:space:]]*:[[:space:]]*"/, "", line)
-        sub(/".*$/, "", line)
-        print line
-        exit
-      }
-    ' "${SOURCE_DIR}/axiarch-manifest.json")"
   fi
 
   if [[ -n "${BASE_SOURCE_DIR}" ]]; then
@@ -316,6 +406,12 @@ add_item() {
   local owner="$3"
   local policy="$4"
   local agents="${5:-all}"
+
+  # Check original filesystem names before later newline-delimited transport.
+  if [[ "${path}" =~ [[:cntrl:]] ]]; then
+    print_err 'Control characters are not supported in selected paths.'
+    exit 5
+  fi
 
   if [[ "${path}" == "axiarch-prompts" && "${WITH_PROMPTS}" != "true" && "${INTERACTIVE}" != "true" ]]; then
     return 0
@@ -374,6 +470,11 @@ add_item_once_full() {
   i=0
   while [[ ${i} -lt ${#ITEM_PATHS[@]} ]]; do
     if [[ "${ITEM_PATHS[$i]}" == "${path}" ]]; then
+      if [[ "${ITEM_GROUPS[$i]}" != "$group" || "${ITEM_OWNERS[$i]}" != "$owner" ||
+            "${ITEM_POLICIES[$i]}" != "$policy" || "${ITEM_AGENTS[$i]}" != "$agents" ]]; then
+        printf 'Conflicting manifest selection: %s\n' "$path" >&2
+        exit 5
+      fi
       return 0
     fi
     i=$((i + 1))
@@ -384,15 +485,20 @@ add_item_once_full() {
 path_is_excluded() {
   local path="$1"
   local excludes="${2:-}"
-  local pattern
+  local pattern candidate
 
   [[ -z "${excludes}" ]] && return 1
 
   while IFS= read -r pattern; do
     [[ -z "${pattern}" ]] && continue
-    if [[ "${path}" == ${pattern} ]]; then
-      return 0
-    fi
+    candidate="$path"
+    while :; do
+      # Excluding a directory also excludes files below it.
+      # shellcheck disable=SC2053
+      [[ "$candidate" == $pattern ]] && return 0
+      [[ "$candidate" == */* ]] || break
+      candidate="${candidate%/*}"
+    done
   done < <(printf '%s\n' "${excludes}" | tr '|' '\n')
 
   return 1
@@ -407,22 +513,34 @@ expand_manifest_glob() {
   local excludes="${6:-}"
   local root
   local match
-  local list_file
+  local matches
 
   for root in "${PROJECT_DIR}" "${SOURCE_DIR}"; do
     [[ -d "${root}" ]] || continue
-    list_file="$(mktemp)"
-    (cd "${root}" && compgen -G "${pattern}" || true) > "${list_file}"
-    sort -u "${list_file}" -o "${list_file}"
+    matches="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" expand-glob \
+      --source "${root}" --path "${pattern}")"
     while IFS= read -r match; do
       [[ -z "${match}" ]] && continue
       if path_is_excluded "${match}" "${excludes}"; then
         continue
       fi
-      add_item_once_full "${group}" "${match}" "${owner}" "${policy}" "${agents}"
-    done < "${list_file}"
-    rm -f "${list_file}"
+      add_resolved_item "${group}" "${match}" "${owner}" "${policy}" "${agents}" "${excludes}"
+    done <<< "${matches}"
   done
+}
+
+add_resolved_item() {
+  local group="$1" path="$2" owner="$3" policy="$4" agents="$5" excludes="$6"
+  local paths child
+  if [[ -n "$excludes" && ( -d "$SOURCE_DIR/$path" || -d "$PROJECT_DIR/$path" ) ]]; then
+    paths="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" expand-selected --source "$SOURCE_DIR" \
+      --target "$PROJECT_DIR" --path "$path" --exclude "$excludes")"
+    while IFS= read -r child; do
+      [[ -z "$child" ]] || add_item_once_full "$group" "$child" "$owner" "$policy" "$agents"
+    done <<< "$paths"
+  else
+    add_item_once_full "$group" "$path" "$owner" "$policy" "$agents"
+  fi
 }
 
 add_manifest_path() {
@@ -442,7 +560,7 @@ add_manifest_path() {
       expand_manifest_glob "${group}" "${path}" "${owner}" "${policy}" "${agents}" "${excludes}"
       ;;
     *)
-      add_item_once_full "${group}" "${path}" "${owner}" "${policy}" "${agents}"
+      add_resolved_item "${group}" "${path}" "${owner}" "${policy}" "${agents}" "${excludes}"
       ;;
   esac
 }
@@ -457,6 +575,15 @@ add_manifest_entry() {
   local lang
   local localized_excludes
 
+  if [[ "$path" == "axiarch-prompts" ]]; then
+    if [[ "$WITH_PROMPTS" == "true" || "$INTERACTIVE" == "true" ]]; then
+      [[ ! -f "$SOURCE_DIR/axiarch-prompts/README.md" ]] || add_manifest_path "$group" "axiarch-prompts/README.md" "$owner" "$policy" "$agents" "$excludes"
+      while IFS= read -r lang; do
+        add_manifest_path "$group" "axiarch-prompts/$lang" "$owner" "$policy" "$agents" "$excludes"
+      done <<< "$(selected_langs)"
+    fi
+    return 0
+  fi
   if [[ "${path}" == *"{lang}"* ]]; then
     while IFS= read -r lang; do
       localized_excludes="${excludes//\{lang\}/${lang}}"
@@ -469,40 +596,28 @@ EOF
   fi
 }
 
-load_manifest_group_metadata() {
-  local manifest="$1"
-  MANIFEST_GROUPS="$(jq -r '.groups[]? | [.id, (.label // ""), (.labelJa // ""), (.defaultAction // ""), (.risk // "")] | @tsv' "${manifest}")"
-}
-
 register_manifest_items() {
-  local manifest="${SOURCE_DIR}/axiarch-manifest.json"
-  local group
-  local path
-  local owner
-  local policy
-  local agents
-  local excludes
-
-  if command -v jq >/dev/null 2>&1 && jq -e '.files | type == "array"' "${manifest}" >/dev/null 2>&1; then
-    load_manifest_group_metadata "${manifest}"
-    while IFS=$'\t' read -r group path owner policy agents excludes; do
-      [[ -z "${group}" || -z "${path}" ]] && continue
-      owner="${owner:-mixed}"
-      policy="${policy:-review}"
-      agents="${agents:-all}"
-      excludes="${excludes:-}"
-      add_manifest_entry "${group}" "${path}" "${owner}" "${policy}" "${agents}" "${excludes}"
-    done < <(jq -r '.files[] | [.group, .path, (.owner // "mixed"), (.policy // "review"), ((.agents // ["all"]) | join(",")), ((.exclude // []) | join("|"))] | @tsv' "${manifest}")
-  else
-    print_warn "jq unavailable or manifest unreadable; falling back to embedded manifest defaults."
+  local group path owner policy agents excludes rows
+  SOURCE_AXIARCH_VERSION="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" manifest --source "${SOURCE_DIR}" --format version)"
+  MANIFEST_GROUPS="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" manifest --source "${SOURCE_DIR}" --format groups)"
+  rows="$(python3 "${HELPER_DIR}/axiarch_upgrade.py" manifest --source "${SOURCE_DIR}" --format files)"
+  if [[ "$rows" == "LEGACY" ]]; then
+    print_warn "Legacy manifest without files; using embedded ownership defaults."
     register_manifest_defaults
+    return 0
   fi
+  while IFS=$'\t' read -r group path owner policy agents excludes; do
+    [[ -z "${group}" ]] && continue
+    add_manifest_entry "$group" "$path" "$owner" "$policy" "$agents" "$excludes"
+  done <<< "$rows"
 }
 
 register_manifest_defaults() {
   add_item "core_protocol" "AXIARCH.md" "mixed" "review" "all"
   add_item "pointer_files" "AGENTS.md" "mixed" "review" "codex,agents-md,universal"
   add_item "core_protocol" "axiarch-manifest.json" "axiarch" "replace" "all"
+  add_item "core_protocol" "axiarch-rules/LICENSE" "axiarch" "replace-if-local-unchanged" "all"
+  add_item "core_protocol" "axiarch-rules/NOTICE" "axiarch" "replace-if-local-unchanged" "all"
   add_item "execution_harness" "axiarch-harness/README.md" "axiarch" "replace" "all"
   add_localized_item "execution_harness" "axiarch-harness/{lang}" "axiarch" "replace"
   add_localized_item "core_protocol" "axiarch-rules/{lang}/LOADING_PROTOCOL.md" "axiarch" "replace"
@@ -531,13 +646,13 @@ register_manifest_defaults() {
   add_localized_item "blueprint_project_state" "axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md" "project" "preserve"
 
   local lang
-  local dir
   local readme_path
   while IFS= read -r lang; do
-    for dir in core ai design engineering operations product quality security; do
-      readme_path="axiarch-rules/${lang}/blueprint/${dir}/README.md"
-      add_item "blueprint_templates" "${readme_path}" "axiarch" "replace-if-local-unchanged" "all"
-    done
+    if [[ -d "${SOURCE_DIR}/axiarch-rules/${lang}/blueprint" ]]; then
+      while IFS= read -r -d '' readme_path; do
+        add_item "blueprint_templates" "${readme_path#${SOURCE_DIR}/}" "axiarch" "replace-if-local-unchanged" "all"
+      done < <(find "${SOURCE_DIR}/axiarch-rules/${lang}/blueprint" -mindepth 2 -maxdepth 2 -type f -name README.md -print0)
+    fi
     add_item "blueprint_templates" "axiarch-rules/${lang}/blueprint/operations/010_release_upgrade_operations.md" "axiarch" "replace-if-local-unchanged" "all"
   done <<EOF
 $(selected_langs)
@@ -545,8 +660,9 @@ EOF
 
   discover_project_blueprint_files
 
-  add_item "prompts" "axiarch-prompts" "axiarch" "optional" "all"
+  add_manifest_entry "prompts" "axiarch-prompts" "axiarch" "optional" "all"
 
+  add_item "source_docs" "tests" "axiarch-source" "skip" "all"
   add_item "source_docs" "README.md" "axiarch-source" "skip" "all"
   add_item "source_docs" "init.sh" "axiarch-source" "skip" "all"
   add_item "source_docs" "ROADMAP.md" "axiarch-source" "skip" "all"
@@ -572,28 +688,25 @@ EOF
 
 discover_project_blueprint_files() {
   local lang
-  local domain
   local root
   local file
   local rel
   local list_file
 
-  while IFS= read -r lang; do
-    for domain in core ai design engineering operations product quality security; do
-      for root in "${PROJECT_DIR}" "${SOURCE_DIR}"; do
-        [[ -d "${root}/axiarch-rules/${lang}/blueprint/${domain}" ]] || continue
-        list_file="$(mktemp)"
-        find "${root}/axiarch-rules/${lang}/blueprint/${domain}" -maxdepth 1 -type f -name '[0-9][0-9][0-9]_*.md' > "${list_file}"
-        while IFS= read -r file; do
-          rel="${file#${root}/}"
-          add_item_once "blueprint_project_state" "${rel}" "project" "preserve"
-        done < "${list_file}"
-        rm -f "${list_file}"
-      done
-    done
-  done <<EOF
-$(selected_langs)
-EOF
+  for root in "${PROJECT_DIR}" "${SOURCE_DIR}"; do
+    [[ -d "${root}/axiarch-rules" ]] || continue
+    list_file="$(mktemp)"
+    # Discover actual folders instead of fixing the initial eight categories forever.
+    find "${root}/axiarch-rules" -type f -path '*/blueprint/*/[0-9][0-9][0-9]_*.md' -print0 > "${list_file}"
+    while IFS= read -r -d '' file; do
+      rel="${file#${root}/}"
+      lang="${rel#axiarch-rules/}"; lang="${lang%%/*}"
+      if selected_langs | grep -Fxq "${lang}"; then
+        add_item_once "blueprint_project_state" "${rel}" "project" "preserve"
+      fi
+    done < "${list_file}"
+    rm -f "${list_file}"
+  done
 }
 
 default_group_ids() {
@@ -878,7 +991,7 @@ choose_group_action() {
   local action
   default_action="$(group_default_action "${group}")"
 
-  printf '\n%b\n' "${BOLD}$(group_label "${group}")${RESET}"
+    printf '\n%b%s%b\n' "${BOLD}" "$(group_label "${group}")" "${RESET}"
   printf 'risk=%s, default=%s\n' "$(group_risk "${group}")" "${default_action}"
 
   if [[ "${group}" == "blueprint_project_state" ]]; then
@@ -941,6 +1054,9 @@ collect_interactive_choices() {
 append_log() {
   ACTION_LOG="${ACTION_LOG}$1
 "
+  if [[ "${APPLY_STARTED}" == "true" ]]; then
+    printf '%s\n' "$1" >> "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/actions.log"
+  fi
 }
 
 report_local_only_files() {
@@ -1006,21 +1122,17 @@ copy_path() {
 
   report_local_only_files "${rel}"
 
-  if [[ "${APPLY}" != "true" ]]; then
-    print_info "DRY-RUN update: ${rel}"
-    append_log "DRY-RUN update ${rel}"
-    return 0
+  local copy_output
+  local copy_args=()
+  [[ "${FORCE_COPY}" == "true" ]] && copy_args+=(--force)
+  [[ "${APPLY}" == "true" ]] && copy_args+=(--apply)
+  if ! copy_output=$(python3 "${HELPER_DIR}/axiarch_upgrade.py" copy --source "${SOURCE_DIR}" \
+    --target "${PROJECT_DIR}" --base "${BASE_SOURCE_DIR}" --path "${rel}" \
+    --run-id "${RUN_ID}" "${copy_args[@]+"${copy_args[@]}"}"); then
+    append_log "APPLY-FAIL ${rel}"
   fi
-
-  if [[ -d "${src}" ]]; then
-    mkdir -p "${dst}"
-    cp -R "${src}/." "${dst}/"
-  else
-    mkdir -p "$(dirname "${dst}")"
-    cp "${src}" "${dst}"
-  fi
-  print_ok "updated: ${rel}"
-  append_log "UPDATE ${rel}"
+  printf '%s\n' "${copy_output}"
+  while IFS= read -r line; do append_log "${line}"; done <<< "${copy_output}"
 }
 
 copy_replace_if_local_unchanged() {
@@ -1058,6 +1170,13 @@ copy_replace_if_local_unchanged() {
     fi
   fi
 
+  # A previous partial run can be newer than --base-source. The shared copy
+  # helper verifies its recorded applied hash and still defers unknown edits.
+  if [[ -f "${PROJECT_DIR}/.axiarch/files.sha256" ]]; then
+    copy_path "${rel}"
+    return 0
+  fi
+
   printf 'REVIEW  %s  replace-if-local-unchanged:%s（ローカル変更の可能性あり）\n' "${rel}" "${reason}"
   append_log "REVIEW replace-if-local-unchanged ${reason} ${rel}"
 }
@@ -1067,7 +1186,7 @@ show_diff() {
   local src="${SOURCE_DIR}/${rel}"
   local dst="${PROJECT_DIR}/${rel}"
 
-  printf '\n%b\n' "${BOLD}Diff: ${rel}${RESET}"
+  printf '\n%b%s%b\n' "${BOLD}" "Diff: ${rel}" "${RESET}"
   if [[ ! -e "${src}" ]]; then
     print_warn "source missing: ${rel}"
   elif [[ ! -e "${dst}" ]]; then
@@ -1095,6 +1214,11 @@ try_merge_path() {
     append_log "MERGE-SKIP unsupported ${rel}"
     return 0
   fi
+  if ! python3 "${HELPER_DIR}/axiarch_upgrade.py" check-merge --source "${SOURCE_DIR}" \
+    --target "${PROJECT_DIR}" --base "${BASE_SOURCE_DIR}" --path "${rel}" --run-id "${RUN_ID}"; then
+    append_log "MERGE-FAIL unsafe-path ${rel}"
+    return 0
+  fi
 
   tmp="$(mktemp)"
   set +e
@@ -1104,17 +1228,30 @@ try_merge_path() {
 
   if [[ ${rc} -eq 0 ]]; then
     if [[ "${APPLY}" == "true" ]]; then
-      cp "${tmp}" "${dst}"
+      mkdir -p "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/backup/$(dirname "${rel}")"
+      cp -p "${dst}" "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/backup/${rel}"
+      local merge_tmp
+      merge_tmp="$(mktemp "${dst}.merge.XXXXXX")"
+      cat "${tmp}" > "${merge_tmp}"
+      chmod --reference="${dst}" "${merge_tmp}" 2>/dev/null || chmod "$(stat -f %Lp "${dst}")" "${merge_tmp}"
+      mv "${merge_tmp}" "${dst}"
       print_ok "merged: ${rel}"
       append_log "MERGE ${rel}"
     else
       print_info "DRY-RUN clean merge: ${rel}"
       append_log "DRY-RUN merge ${rel}"
     fi
-  elif [[ ${rc} -eq 1 ]]; then
+  elif [[ ${rc} -gt 0 && ${rc} -lt 128 ]]; then
     if [[ "${APPLY}" == "true" ]]; then
+      mkdir -p "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/conflicts/$(dirname "${rel}")"
+      cp "${tmp}" "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/conflicts/${rel}"
       mkdir -p "${PROJECT_DIR}/.axiarch/conflicts/$(dirname "${rel}")"
-      cp "${tmp}" "${PROJECT_DIR}/.axiarch/conflicts/${rel}"
+      # Replace the compatibility copy atomically with a private file. Never
+      # truncate a pre-existing hardlink to an unrelated adopter file.
+      local conflict_tmp
+      conflict_tmp="$(mktemp "${PROJECT_DIR}/.axiarch/conflicts/${rel}.XXXXXX")"
+      cat "${tmp}" > "${conflict_tmp}"
+      mv "${conflict_tmp}" "${PROJECT_DIR}/.axiarch/conflicts/${rel}"
       print_warn "merge conflict: ${rel} -> .axiarch/conflicts/${rel}"
       append_log "CONFLICT ${rel}"
     else
@@ -1144,7 +1281,7 @@ review_file_action() {
     choice="${choice:-1}"
     case "${choice}" in
       1) append_log "KEEP ${rel}"; return 0 ;;
-      2) copy_path "${rel}"; return 0 ;;
+      2) FORCE_COPY=true; copy_path "${rel}"; FORCE_COPY=false; return 0 ;;
       3) try_merge_path "${rel}"; return 0 ;;
       4) show_diff "${rel}" ;;
       5) append_log "SKIP ${rel}"; return 0 ;;
@@ -1165,7 +1302,7 @@ execute_item() {
   status="$(path_status "${rel}")"
   action="$(get_group_action "${group}")"
 
-  if [[ "${status}" == "unchanged" || "${status}" == "missing" ]]; then
+  if [[ "${status}" == "unchanged" ]]; then
     append_log "UNCHANGED ${rel}"
     return 0
   fi
@@ -1185,6 +1322,11 @@ execute_item() {
     fi
   fi
 
+  if [[ "${status}" == "missing" && "${policy}" != "optional" ]]; then
+    append_log "WARN source missing ${rel}"
+    return 0
+  fi
+
   case "${action}" in
     skip)
       printf 'SKIP    %s\n' "${rel}"
@@ -1199,7 +1341,7 @@ execute_item() {
         copy_path "${rel}"
       elif [[ "${owner}" == "axiarch" && "${policy}" == "replace-if-local-unchanged" ]]; then
         copy_replace_if_local_unchanged "${rel}"
-      elif [[ "${owner}" == "axiarch" && "${policy}" == "optional" && "${rel}" == "axiarch-prompts" && "${WITH_PROMPTS}" == "true" ]]; then
+      elif [[ "${owner}" == "axiarch" && "${policy}" == "optional" && "${rel}" == axiarch-prompts/* && "${WITH_PROMPTS}" == "true" ]]; then
         copy_path "${rel}"
       else
         printf 'REVIEW  %s  safe-only excluded（安全更新対象外）\n' "${rel}"
@@ -1246,15 +1388,20 @@ EOF
 
 confirm_apply_if_needed() {
   local answer
+  # An explicit preview remains a preview regardless of option order or answers.
+  if [[ "${EXPLICIT_DRY_RUN}" == "true" ]]; then
+    APPLY=false
+    return 0
+  fi
   if [[ "${APPLY}" == "true" ]]; then
-    if [[ "${YES}" == "true" || "${INTERACTIVE}" == "true" ]]; then
+    if [[ "${YES}" == "true" ]]; then
       return 0
     fi
     printf 'Apply selected changes?（選択した変更を反映しますか？） [y/N]: '
     read -r answer || answer=""
     case "${answer}" in
       y|Y|yes|YES) return 0 ;;
-      *) APPLY=false; DRY_RUN=true; return 0 ;;
+      *) APPLY=false; return 0 ;;
     esac
   fi
 
@@ -1262,8 +1409,8 @@ confirm_apply_if_needed() {
     printf 'Apply selected changes now?（選択した変更を今すぐ反映しますか？） [y/N]: '
     read -r answer || answer=""
     case "${answer}" in
-      y|Y|yes|YES) APPLY=true; DRY_RUN=false ;;
-      *) APPLY=false; DRY_RUN=true ;;
+      y|Y|yes|YES) APPLY=true ;;
+      *) APPLY=false ;;
     esac
   fi
 }
@@ -1316,71 +1463,63 @@ resolve_upgrade_version_label() {
 }
 
 write_upgrade_metadata() {
-  local meta_dir="${PROJECT_DIR}/.axiarch"
-  local version_label
-  local now
-  local report_path
-  local sha_path
-  local rel
-  local target
-  local version_json
-  local source_ref_json
-  local agent_json
-  local language_json
-
   [[ "${APPLY}" == "true" ]] || return 0
-
-  mkdir -p "${meta_dir}"
-  now="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  version_label="$(resolve_upgrade_version_label)"
-  version_json="$(json_escape "${version_label}")"
-  source_ref_json="$(json_escape "${TO_REF:-local}")"
-  agent_json="$(json_escape "${TARGET_AGENT}")"
-  language_json="$(json_escape "${TARGET_LANG}")"
-  cat > "${meta_dir}/version.json" <<EOF
-{
-  "version": "${version_json}",
-  "sourceRef": "${source_ref_json}",
-  "upgradedAt": "${now}",
-  "agent": "${agent_json}",
-  "language": "${language_json}"
-}
-EOF
-
-  report_path="${meta_dir}/upgrade-report.md"
-  {
-    printf '%s\n\n' '# Axiarch Upgrade Report'
-    printf '%s\n' "- Version: \`${version_label}\`"
-    printf '%s\n' "- Source: \`${SOURCE_DIR}\`"
-    printf '%s\n' "- Agent: \`${TARGET_AGENT}\`"
-    printf '%s\n' "- Language: \`${TARGET_LANG}\`"
-    printf '%s\n\n' "- Upgraded at: \`${now}\`"
-    printf '%s\n\n' '## Actions'
-    printf '```text\n%s```\n' "${ACTION_LOG}"
-  } > "${report_path}"
-
-  sha_path="${meta_dir}/files.sha256"
-  : > "${sha_path}"
-  for rel in AXIARCH.md AGENTS.md axiarch-manifest.json axiarch-harness axiarch-scripts axiarch-rules axiarch-prompts; do
-    target="${PROJECT_DIR}/${rel}"
-    [[ -e "${target}" ]] || continue
-    if [[ -d "${target}" ]]; then
-      find "${target}" -type f -print0 | while IFS= read -r -d '' file; do
-        printf '%s  %s\n' "$(sha256_file "${file}")" "${file#${PROJECT_DIR}/}" >> "${sha_path}"
-      done
-    else
-      printf '%s  %s\n' "$(sha256_file "${target}")" "${rel}" >> "${sha_path}"
-    fi
-  done
-
-  print_ok "wrote upgrade metadata: .axiarch/version.json"
+  local run_dir="${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}"
+  mkdir -p "${run_dir}"
+  printf '%s' "${ACTION_LOG}" > "${run_dir}/actions.log"
+  local result_rc=0
+  local selection_args=(--lang "${TARGET_LANG}" --agent "${TARGET_AGENT}")
+  [[ "${WITH_PROMPTS}" != "true" ]] || selection_args+=(--with-prompts)
+  python3 "${HELPER_DIR}/axiarch_upgrade.py" finalize --target "${PROJECT_DIR}" \
+    --run-id "${RUN_ID}" --version "$(resolve_upgrade_version_label)" \
+    --source "${SOURCE_DIR}" --source-ref "${TO_REF:-local}" --log "${run_dir}/actions.log" --health "${HEALTH_RC}" "${selection_args[@]}" \
+    > "${run_dir}/summary.json" || result_rc=$?
+  printf 'Upgrade result: exit=%s; .axiarch/upgrades/%s/result.json\n' "${result_rc}" "${RUN_ID}"
+  APPLY_FINISHED=true
+  return "${result_rc}"
 }
 
 main() {
   parse_args "$@"
-  print_header
+  if [[ "${PROJECT_DIR}" =~ [[:cntrl:]] ]]; then
+    print_err 'Control characters are not supported in the upgrade project path.'
+    return 2
+  fi
+  command -v python3 >/dev/null 2>&1 || { print_err 'Python 3 required; no changes applied.'; return 2; }
   resolve_sources
+  if [[ ! -f "${HELPER_DIR}/axiarch_upgrade.py" || ! -f "${HELPER_DIR}/axiarch_state.py" ]]; then
+    HELPER_DIR="${SOURCE_DIR}/axiarch-scripts"
+  fi
+  if [[ ! -f "${HELPER_DIR}/axiarch_upgrade.py" || ! -f "${HELPER_DIR}/axiarch_state.py" ]]; then
+    print_err 'Upgrade Python helpers missing from launcher and source; no changes applied.'
+    return 2
+  fi
+  if [[ -z "${AXIARCH_UPGRADE_LOCK_FD:-}" ]]; then
+    local locked_rc=0
+    local resolved_args=(--source "${SOURCE_DIR}")
+    [[ -z "${BASE_SOURCE_DIR}" ]] || resolved_args+=(--base-source "${BASE_SOURCE_DIR}")
+    # Keep choices and confirmation inside one lock. Resolve downloaded archives
+    # once and keep them alive until the child has finished.
+    python3 "${HELPER_DIR}/axiarch_upgrade.py" run-locked --target "${PROJECT_DIR}" -- \
+      bash "${BASH_SOURCE[0]}" "$@" "${resolved_args[@]}" || locked_rc=$?
+    return "${locked_rc}"
+  fi
+  python3 "${HELPER_DIR}/axiarch_upgrade.py" check-lock --target "${PROJECT_DIR}"
+  # A scripts upgrade can replace this helper in the adopter. Finish the entire
+  # run using the same implementation that began it.
+  HELPER_SNAPSHOT="$(mktemp -d)"
+  cp "${HELPER_DIR}/axiarch_upgrade.py" "${HELPER_DIR}/axiarch_state.py" "${HELPER_SNAPSHOT}/"
+  HELPER_DIR="${HELPER_SNAPSHOT}"
+  print_header
   register_manifest_items
+  if [[ ${#ITEM_PATHS[@]} -eq 0 ]]; then
+    print_info "No paths selected; no files or version metadata changed."
+    return 0
+  fi
+  # Guard before status/diff reads as well as writes. Manifest paths must not
+  # make a preview read outside its declared source, base or adopter roots.
+  printf '%s\n' "${ITEM_PATHS[@]}" | python3 "${HELPER_DIR}/axiarch_upgrade.py" check-paths \
+    --target "${PROJECT_DIR}" --source "${SOURCE_DIR}" --base "${BASE_SOURCE_DIR}"
   set_default_actions
   print_plan_summary
   if [[ "${INTERACTIVE}" == "true" ]]; then
@@ -1389,17 +1528,32 @@ main() {
   confirm_apply_if_needed
   if [[ "${APPLY}" == "true" ]]; then
     print_info "Applying selected changes."
+    local selection_args=(--lang "${TARGET_LANG}" --agent "${TARGET_AGENT}")
+    [[ "${WITH_PROMPTS}" != "true" ]] || selection_args+=(--with-prompts)
+    python3 "${HELPER_DIR}/axiarch_upgrade.py" begin --target "${PROJECT_DIR}" \
+      --run-id "${RUN_ID}" --version "$(resolve_upgrade_version_label)" "${selection_args[@]}"
+    APPLY_STARTED=true
   else
     print_info "Dry-run mode. No files will be changed."
   fi
   execute_plan
-  write_upgrade_metadata
-  if [[ "${APPLY}" == "true" && -x "${PROJECT_DIR}/axiarch-scripts/check-axiarch-health.sh" ]]; then
+  if [[ "${APPLY}" == "true" && -f "${PROJECT_DIR}/axiarch-scripts/check-axiarch-health.sh" ]]; then
     print_info "Running health check."
-    bash "${PROJECT_DIR}/axiarch-scripts/check-axiarch-health.sh" --quiet || {
-      print_warn "health check reported issues. Run full output: bash axiarch-scripts/check-axiarch-health.sh"
-    }
+    HEALTH_RC=0
+    bash "${PROJECT_DIR}/axiarch-scripts/check-axiarch-health.sh" "${PROJECT_DIR}" \
+      > "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/health.log" 2>&1 || HEALTH_RC=$?
+    print_info "Health result=${HEALTH_RC}; .axiarch/upgrades/${RUN_ID}/health.log"
   fi
+  if [[ "${APPLY}" == "true" ]]; then
+    local privacy_rc=0
+    python3 "${HELPER_DIR}/axiarch_state.py" --project "${PROJECT_DIR}" --mode privacy-check \
+      >> "${PROJECT_DIR}/.axiarch/upgrades/${RUN_ID}/health.log" 2>&1 || privacy_rc=$?
+    if [[ "${privacy_rc}" -ne 0 ]]; then
+      print_err 'Private artifact check failed; inspect the local health log before sharing.'
+      [[ "${HEALTH_RC}" -ne 0 ]] || HEALTH_RC="${privacy_rc}"
+    fi
+  fi
+  write_upgrade_metadata
 }
 
 main "$@"

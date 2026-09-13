@@ -64,6 +64,7 @@ This matrix proves which rule files cover the user's comprehensive requests (pro
 | **Internationalization & Localization** | `universal/product/800_internationalization.md` | "ICU MessageFormat", "BiDi/RTL" |
 | **Governance & Rule Management** | `universal/core/100_governance.md` | "SSOT Architecture", "Amendment Process" |
 | **Language Protocol** | `universal/core/200_language_protocol.md` | "Zero Tolerance", "Project Language-First" |
+| **Goal & Current State / Agent Boot Contract** | `universal/core/300_goal_and_current_state.md` | "Boot Triad", "Autonomy-Distance Scaling Law", "What must never be written into the current state" |
 
 ## 2. Layer 2: Blueprint Rules (Mutable Project State)
 **Mutable**

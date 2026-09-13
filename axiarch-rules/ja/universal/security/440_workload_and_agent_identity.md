@@ -9,11 +9,11 @@
 > 「非人間IDは人間の数十倍存在し、人間より速く強く侵害される — standing credential を持たせるな、短命・スコープ付き・失効可能を既定とせよ。」
 > サービスアカウント・APIキー・CI/CDクレデンシャル・ワークロード・AIエージェントの認証と委任は、
 > 本ファイルの最新安定版ベストプラクティスに準拠しなければならない。
-> 認証・認可は `000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
+> 認証・認可は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §1 の優先順位（Legal & Security > UX > Revenue > DX）に従う。
 
 > [!NOTE]
-> 本ファイルは `000_security_privacy.md` §3.2（非人間ID管理）・§18（Agentic AI / MCP）の**深掘り版**であり、非人間ID（NHI）とAIエージェントの**認証・委任の正本**です。
-> 人間向けの OAuth/OIDC・トークン交換の正本は [`410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md) に集約しています（M2M・委任は本ファイルへ）。
+> 本ファイルは `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.2（非人間ID管理）・§18（Agentic AI / MCP）の**深掘り版**であり、非人間ID（NHI）とAIエージェントの**認証・委任の正本**です。
+> 人間向けの OAuth/OIDC・トークン交換の正本は [`axiarch-rules/{lang}/universal/security/410_federated_identity_and_oauth.md`](./410_federated_identity_and_oauth.md) に集約しています（M2M・委任は本ファイルへ）。
 > AIエージェントの**権限設計・自律度・委任成熟度**は [`core/000_core_mindset.md`](../core/000_core_mindset.md) §9 が正本です（本ファイルは認証/委任の技術深掘り）。
 
 > [!NOTE]
@@ -80,7 +80,7 @@
 
 ## §2. 非人間ID（NHI）ガバナンス
 
-> **参考規格**: `000_security_privacy.md` §3.2, NIST SP 800-207
+> **参考規格**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.2, NIST SP 800-207
 
 ### 2.1. NHI は人間の数十倍規模である前提
 
@@ -104,7 +104,7 @@
 
 -   **Rule 68.2.3**: NHI インベントリを**機械可読**（API/IaC由来）で維持し、所有者・スコープ・最終利用時刻・有効期限を属性として保持する（MUST）。
 -   **Rule 68.2.4**: 一定期間未使用の NHI、所有者が退職/異動した NHI を **orphaned** として自動検出し、無効化フローに乗せる（MUST）。
--   **Rule 68.2.5**: 漏洩・インシデント時に、所有者・発行元・スコープを軸に **NHI を一括失効（bulk revocation）**できる経路を事前に用意する（MUST）。`000_security_privacy.md` §6.7 Panic Button と整合させる。
+-   **Rule 68.2.5**: 漏洩・インシデント時に、所有者・発行元・スコープを軸に **NHI を一括失効（bulk revocation）**できる経路を事前に用意する（MUST）。`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §6.7 Panic Button と整合させる。
 -   **Rule 68.2.6**: 広範な権限（`*` / `admin` / unscoped）を持つ NHI を定期監査し、最小権限へ縮小する。
 
 ---
@@ -130,7 +130,7 @@
 ### 3.3. Secretless / Zero Standing Privilege
 
 -   **Law**: ワークロードは可能な限り **secretless**（静的シークレットを保持しない）で設計する。認証は実行環境のアテステーション（SPIFFE / クラウドメタデータ / OIDC）から導出する。
--   **Cross-Reference**: §6（短命クレデンシャル）, `000_security_privacy.md` §21.3（動的シークレット）
+-   **Cross-Reference**: §6（短命クレデンシャル）, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21.3（動的シークレット）
 
 ---
 
@@ -155,7 +155,7 @@
 
 -   **Rule 68.4.1**: クラウド側の信頼ポリシーは、IdP の `iss` に加えて **`sub` / `aud` / リポジトリ・ブランチ・環境などのクレームを最小スコープで束縛**しなければならない（MUST）。`aud` 無検証・`sub` ワイルドカードは禁止。
 -   **Rule 68.4.2**: GitHub Actions OIDC では、信頼条件に **リポジトリと（必要に応じ）ブランチ/環境/タグ**を含め、フォークや任意リポジトリからのロール引受を構造的に防止する。
--   **Cross-Reference**: `000_security_privacy.md` §19.3（CI/CD OIDC）, `engineering/500_firebase_gcp.md`（WIF 実装詳細）
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §19.3（CI/CD OIDC）, `engineering/500_firebase_gcp.md`（WIF 実装詳細）
 
 ---
 
@@ -171,7 +171,7 @@
 
 ### 5.2. APIキーの規律
 
--   **Law**: APIキーを採用する場合、以下を満たす（`000_security_privacy.md` §4.8 と整合）。
+-   **Law**: APIキーを採用する場合、以下を満たす（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §4.8 と整合）。
 -   **Action**:
     1.  **プレフィックス**: 種別・環境を識別できるプレフィックス（例: `sk_live_` / `pk_test_`）を付与する。
     2.  **ハッシュ保存**: キー本体は平文保存せず、SHA-256 等でハッシュ化して保存する。照合は定数時間比較で行う。
@@ -183,7 +183,7 @@
 
 ## §6. 短命クレデンシャル・STS・Zero Standing Privilege
 
-> **参考規格**: NIST SP 800-207, `000_security_privacy.md` §21.3
+> **参考規格**: NIST SP 800-207, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21.3
 
 ### 6.1. TTL 管理と自動更新
 
@@ -200,13 +200,13 @@
 
 -   **Law**: 静的・長命シークレットの新規導入を原則禁止し、**動的・短命シークレット**（STS / Vault dynamic secrets / WIF）へ移行する。
 -   **Rule 68.6.1**: 恒常的に有効な権限（**standing privilege**）を最小化し、**必要時に発行・タスク完了後に自動失効**する Just-in-Time モデルを採用する（SHOULD、特権 NHI は MUST）。
--   **Cross-Reference**: `000_security_privacy.md` §21（シークレットマネジメント）, §3.4（PAM / JIT）
+-   **Cross-Reference**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §21（シークレットマネジメント）, §3.4（PAM / JIT）
 
 ---
 
 ## §7. AIエージェントのアイデンティティ原則（Tier-0）
 
-> **参考規格**: `core/000_core_mindset.md` §9, `000_security_privacy.md` §18, OAuth 2.1 (draft), RFC 8693
+> **参考規格**: `core/000_core_mindset.md` §9, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18, OAuth 2.1 (draft), RFC 8693
 >
 > **★将来性の核**: 本節以降（§7–§11）は AIエージェント認証・委任の中核であり、2025–2026 の新興/ドラフト領域を含む。
 
@@ -254,7 +254,7 @@
 
 ## §9. 委任チェーンの制限とループ防止
 
-> **参考規格**: `000_security_privacy.md` §18.4 (A2A), `core/000_core_mindset.md` §9.6 (Multi-Agent Orchestration)
+> **参考規格**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.4 (A2A), `core/000_core_mindset.md` §9.6 (Multi-Agent Orchestration)
 
 ### 9.1. 多段委任の深さ制限
 
@@ -265,7 +265,7 @@
 ### 9.2. ループ防止
 
 -   **Rule 68.9.3**: 委任チェーンに**同一アイデンティティの再出現（循環）を検知**し、ループ（A→B→A）を拒否する。`core/000_core_mindset.md` §9.6 の Agentic Loop Detection と整合させる。
--   **Action**: タイムアウトと最大委任回数の二重ガードを実装し、無限委任（Infinite Delegation Loop、`000_security_privacy.md` §18.4）を防止する。
+-   **Action**: タイムアウトと最大委任回数の二重ガードを実装し、無限委任（Infinite Delegation Loop、`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.4）を防止する。
 
 ---
 
@@ -281,11 +281,11 @@
 -   **Action**:
     1.  MCP クライアント（エージェント）は MCP サーバーを **Resource Server** として扱い、AS から取得したスコープ付き短命トークンで認可する。
     2.  **resource indicators（RFC 8707）**で対象 MCP サーバーを `audience` として明示し、トークンの転用（Confused Deputy）を防止する。
-    3.  ユーザーコンテキストの伝搬は§8 の OBO 委任に従い、「人 + エージェント」の二重身元を保つ（`000_security_privacy.md` §18.3 の権限昇格防止と整合）。
+    3.  ユーザーコンテキストの伝搬は§8 の OBO 委任に従い、「人 + エージェント」の二重身元を保つ（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3 の権限昇格防止と整合）。
 
 ### 10.2. MCP 固有のガード
 
--   **Rule 68.10.1**: MCP サーバーは承認済みホワイトリストに限定し（`000_security_privacy.md` §18.3）、ツール定義の改ざん（Tool Poisoning、§18.6）に対し署名検証・人間レビューを併用する。
+-   **Rule 68.10.1**: MCP サーバーは承認済みホワイトリストに限定し（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §18.3）、ツール定義の改ざん（Tool Poisoning、§18.6）に対し署名検証・人間レビューを併用する。
 -   **Rule 68.10.2**: MCP トークンも Tier-0 原則（§7.2）に従い、**短命・スコープ付き・失効可能**でなければならない（MUST）。
 
 ---
@@ -309,13 +309,13 @@
 
 ## §12. 監査と委任チェーンの追跡可能性
 
-> **参考規格**: `000_security_privacy.md` §25（不変ログ）, RFC 8693（`act` クレーム）
+> **参考規格**: `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25（不変ログ）, RFC 8693（`act` クレーム）
 
 ### 12.1. 委任チェーンの完全な追跡可能性
 
 -   **Law**: 「人 → エージェント → （サブエージェント →）リソース」の委任チェーン全体を、後から人間が追跡・検証できる形で記録する。
 -   **Rule 68.12.1**: 各アクセス/操作のログには、**実権限者（`sub`）・実行アクター（`act` チェーン）・対象リソース（`audience`）・スコープ・トークン発行/失効イベント**を含めなければならない（MUST）。
--   **Rule 68.12.2**: NHI/エージェントの監査ログは**改ざん不能（不変・追記専用）**で保持し（`000_security_privacy.md` §25）、PII は §7.4 に従いマスキングする。
+-   **Rule 68.12.2**: NHI/エージェントの監査ログは**改ざん不能（不変・追記専用）**で保持し（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §25）、PII は §7.4 に従いマスキングする。
 
 ### 12.2. 相関と再構成
 
@@ -327,7 +327,7 @@
 
 ### 13.1. NHI/エージェントの行動ベースライン
 
--   **Action**: NHI/エージェントごとに正常な利用パターン（呼び出し頻度・対象API・時間帯・送信先）をベースライン化し、逸脱を検知する（`000_security_privacy.md` §3.3 ITDR と連携）。
+-   **Action**: NHI/エージェントごとに正常な利用パターン（呼び出し頻度・対象API・時間帯・送信先）をベースライン化し、逸脱を検知する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §3.3 ITDR と連携）。
 -   **計測対象**:
     -   トークン発行/更新/失効レート、Token Exchange（OBO）発火数。
     -   委任深度の分布、深度上限ヒット数、ループ検知発火数。
@@ -360,11 +360,11 @@
 
 ### 15.1. 継続的検証（Zero Trust）
 
--   **Law**: トークン保持＝信頼ではない。NHI/エージェントのアクセスは、毎回 `audience`/`scope`/sender-constraint/コンテキスト（ワークロードアテステーション・リスクスコア）で都度検証する（NIST SP 800-207, `000_security_privacy.md` §2.4 Identity-First Zero Trust）。
+-   **Law**: トークン保持＝信頼ではない。NHI/エージェントのアクセスは、毎回 `audience`/`scope`/sender-constraint/コンテキスト（ワークロードアテステーション・リスクスコア）で都度検証する（NIST SP 800-207, `axiarch-rules/{lang}/universal/security/000_security_privacy.md` §2.4 Identity-First Zero Trust）。
 
 ### 15.2. プライバシー
 
--   **Action**: エージェントが人間の代理でアクセスする場合、OBO 委任で渡るデータを**目的内・最小限**に限定する（`000_security_privacy.md` §7.2 データ最小化）。委任トークン・監査ログ内の PII はマスキングし、相関IDで人間を直接特定できないよう配慮する。
+-   **Action**: エージェントが人間の代理でアクセスする場合、OBO 委任で渡るデータを**目的内・最小限**に限定する（`axiarch-rules/{lang}/universal/security/000_security_privacy.md` §7.2 データ最小化）。委任トークン・監査ログ内の PII はマスキングし、相関IDで人間を直接特定できないよう配慮する。
 
 ---
 
@@ -482,7 +482,7 @@ jobs:
 ## §17. アンチパターン集（20件）
 
 > [!CAUTION]
-> 以下はいずれも本ファイルで**禁止または重大リスク**。発見時は `000_security_privacy.md` の Zero Tolerance Protocol に従い即時是正する。
+> 以下はいずれも本ファイルで**禁止または重大リスク**。発見時は `axiarch-rules/{lang}/universal/security/000_security_privacy.md` の Zero Tolerance Protocol に従い即時是正する。
 
 | # | アンチパターン | リスク | 正しい対応 |
 |:--|:-------------|:------|:----------|

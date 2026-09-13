@@ -8,8 +8,8 @@
 > [!IMPORTANT]
 > **Domain**: ガバナンス
 > **Location**: `blueprint/core/020_governance_rules.md`
-> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `universal/core/100_governance.md`
-> **3 sections.**
+> **Related Universal Rules**: `universal/core/000_core_mindset.md`, `axiarch-rules/ja/universal/core/100_governance.md`
+> **4 recorded lessons.**
 
 ---
 
@@ -17,7 +17,7 @@
 
 | セクション | 内容 | セクション数 |
 |:---------|:-----|:--:|
-| 教訓 | 結晶化されたルール・教訓 | 3 |
+| 教訓 | 結晶化されたルール・教訓 | 4 |
 | Appendix A | 逆引き索引 & クロスリファレンス | 1 |
 
 ---
@@ -49,22 +49,37 @@
 
 ---
 
+### [2026-09-11] 記録・候補・実証・保証を混同しない
+Domain: ガバナンス
+Target Folder: blueprint/core/
+Context: Axiarch全体一貫性の監査で、英語教訓の診断漏れ、補足による未読の断定、全3エージェント実証済みという合格条件、未配線の見出し参照を確認した。
+Problem: 文言だけを固定する検査は、誤った仕様を合格条件として温存しうる。ファイルの存在、候補検索、実際の読込、結果の検証は別の事実である。
+Solution/Rule: 診断は確認対象と判定可能な範囲を明示し、現在の所有者説明と実行結果へ突合する。テンプレート、ヒューリスティック、アダプターの存在を完了・実証の証拠にしない。既存の文字列検査に隔離した実動作・負例テストを組み合わせ、日英と追加カテゴリを同じ導線で検査する。
+Reference: `tests/test_consistency.py`, `tests/test_runtime.py`, `axiarch-scripts/axiarch_inspect.py`, `AXIARCH.md` §0.1
+
+追補（同日の再監査）: 構造検査が過去の完了記録にも現在の鮮度を要求していたこと、更新の中断後に適用済みハッシュより古いbaseを優先して再実行を妨げることを負例で確認した。現在の判断に使う証拠の突合と履歴の形式検査を分け、再実行・同時実行・自己更新も実入力で検証する。既存教訓への補足であり、件数を水増ししない。参照: `axiarch-scripts/axiarch_state.py`、`axiarch-scripts/axiarch_upgrade.py`、`tests/test_runtime.py`。
+
+---
+
+同日の導入経路の追補: 任意生成処理が独自コマンドを上書きし、明示dry-runが後続の引数で解除されることを実動作で確認した。「任意」「安全」「確認済み」という名称だけを根拠にせず、衝突・空入力・選択範囲・エラー後の記録まで検証する。旧生成物は推測で所有判定せず、内容確認を経て移行する。参照: `tests/test_setup.py`、`axiarch-scripts/axiarch_setup.py`。
+
 ## Appendix A: 逆引き索引 & クロスリファレンス
 
 ### 逆引き索引（Keyword → Section）
 
 | Keyword | Section | Related Rule |
 |:---------|:------------|:---------|
-| AXIARCH.md, AGENTS.md, 正本入口 | 教訓 — プロジェクト開始時の教訓 | `universal/core/100_governance.md` |
-| Language First, silent degradation, Check 16 | 教訓 — 正本化リファクタによる厳格ルールの暗黙的劣化 | `universal/core/100_governance.md` |
-| subagent, Deep Security Scan, Human Approval Gate, fanout | 教訓 — 読み取り専用 subagent / security-scan fanout と人間承認ゲートの混同を避ける | `universal/core/000_core_mindset.md`, `universal/core/100_governance.md` |
+| AXIARCH.md, AGENTS.md, 正本入口 | 教訓 — プロジェクト開始時の教訓 | `axiarch-rules/ja/universal/core/100_governance.md` |
+| Language First, silent degradation, Check 16 | 教訓 — 正本化リファクタによる厳格ルールの暗黙的劣化 | `axiarch-rules/ja/universal/core/100_governance.md` |
+| subagent, Deep Security Scan, Human Approval Gate, fanout | 教訓 — 読み取り専用 subagent / security-scan fanout と人間承認ゲートの混同を避ける | `universal/core/000_core_mindset.md`, `axiarch-rules/ja/universal/core/100_governance.md` |
+| 候補、実証、保証、診断、日英 | 教訓 — 記録・候補・実証・保証を混同しない | `axiarch-rules/ja/universal/core/100_governance.md` |
 
 ### クロスリファレンス
 
 | Related File | Relationship |
 |:-----------|:-----|
 | `universal/core/000_core_mindset.md` | Agentic AI の自律度、権限、承認境界の上位原則 |
-| `universal/core/100_governance.md` | Axiarch ルール運用と改正統制の上位原則 |
+| `axiarch-rules/ja/universal/core/100_governance.md` | Axiarch ルール運用と改正統制の上位原則 |
 | `core/010_project_lessons_log.md` | Index（結晶化元） |
 | `AXIARCH.md` | 実行・委任・承認境界の正本入口 |
 | `axiarch-harness/{ja,en}/` | Execution Harness の運用プロトコル |

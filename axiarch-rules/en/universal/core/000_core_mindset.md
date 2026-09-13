@@ -966,7 +966,7 @@ With AI-generated code exceeding 50% of all code from 2026 onward, **test strate
 
 *   **Regulatory Change Management**:
     *   AI regulations evolve rapidly. Track and reflect the latest developments via the following process:
-        *   **Quarterly Review**: Track AI regulatory developments in major jurisdictions (EU, US, China, Japan) quarterly; record in `ai_compliance_tracker.md` under `axiarch-rules/{lang}/blueprint/`.
+        *   **Quarterly Review**: Track AI regulatory developments in major jurisdictions (EU, US, China, Japan) quarterly; record in the relevant record in an existing/approved category under `axiarch-rules/{lang}/blueprint/` (choose an unused 000–999 prefix if a new file is needed).
         *   **Impact Assessment**: Evaluate the impact of regulatory changes on the system within 60 days; record the response plan as an ADR.
         *   **Legal Review Trigger**: Legal review is mandatory when adding any new high-risk AI feature.
 

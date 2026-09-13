@@ -1204,7 +1204,7 @@ switch (section.type) {
 - **Rule 34.58**: Manage translations through CMS internal workflow or TMS (Translation Management System) integration
 - Use AI translation only as first drafts with mandatory human review
 - **Translation Memory**: Build a system to accumulate and reuse past translation assets
-- **Cross-Reference**: `800_internationalization.md` (Global Expansion), `core/200_language_protocol.md` (Language Protocol)
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md` (Global Expansion), `core/200_language_protocol.md` (Language Protocol)
 
 ---
 
@@ -1844,7 +1844,7 @@ Content Published
 - Quantitatively evaluate translation quality using the MQM framework
 - **Evaluation Axes**: Accuracy, Fluency, Terminology, Style
 - **Threshold Setting**: Require MQM score of 95+ for publication at Tier 2 and above
-- **Cross-Reference**: `800_internationalization.md` (Global Expansion), `core/200_language_protocol.md` (Language Protocol)
+- **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md` (Global Expansion), `core/200_language_protocol.md` (Language Protocol)
 
 ---
 

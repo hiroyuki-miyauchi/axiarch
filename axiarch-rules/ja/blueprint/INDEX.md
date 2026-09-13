@@ -54,12 +54,12 @@ blueprint/
 |:--------|:----|
 | [core/000_project_overview.md](core/000_project_overview.md) | プロジェクトビジョン・技術スタック・不変の原則 |
 | [core/010_project_lessons_log.md](core/010_project_lessons_log.md) | 教訓インデックス + 未分類教訓の蓄積。Crystallizationの起点。 |
-| [core/020_governance_rules.md](core/020_governance_rules.md) | ガバナンス教訓の昇華ルール。正本入口、Language First非劣化、読み取り専用subagent/security-scan委任境界。 |
+| [core/020_governance_rules.md](core/020_governance_rules.md) | ガバナンス教訓の昇華ルール。正本入口、Language First非劣化、読み取り専用subagent/security-scan委任境界、記録・候補・実証・保証の区別。 |
 | [core/998_feature_spec_template.md](core/998_feature_spec_template.md) | **機能仕様テンプレート（Blueprint Firstの核）**。対応ドメインフォルダにコピーして使用。 |
 | [core/999_project_specific_template.md](core/999_project_specific_template.md) | プロジェクト固有ルールファイル追加時のテンプレート。 |
 
 > [!NOTE]
-> `000_project_overview.md` と `010_project_lessons_log.md` は `core/` 専用です。他フォルダの `000` ファイルは初期状態では存在せず、必要時にユーザーが追加します（`000` は必須ではありません）。
+> `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` と `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` は `core/` 専用です。他フォルダの `000` ファイルは初期状態では存在せず、必要時に権限範囲内で追加できます（`000` は必須ではありません）。
 
 ---
 
@@ -132,22 +132,21 @@ SRE、インシデント管理、運用要件。
 3. `core/000_project_overview.md` をプロジェクトの内容に書き換える
 
 ### 機能仕様の追加（Blueprint First の実践）
-1. **`core/998_feature_spec_template.md` をコピーする**
+1. 必要な機能仕様を作る。`core/998_feature_spec_template.md` の利用は推奨であり、同等の仕様記録でもよい
 2. 対応するドメインフォルダに配置する（例: `product/020_feature_payment.md` ※特定の番号帯域縛りはなく、フォルダ内で000〜999の空き番を使用する）
 3. **§3 受け入れ条件（Acceptance Criteria）を最優先で記述する** — このセクションが空の状態でコードを書いてはならない
-4. 残りのセクション（データモデル、API設計、テスト戦略等）を埋める
+4. 残りのセクションは適用範囲に応じて記入する。非該当の項目を必須扱いしない
 5. **このファイル（INDEX.md）の該当フォルダセクションにエントリを追記する**
 
 ### プロジェクト固有ルールの追加
-1. `core/999_project_specific_template.md` をコピーする
+1. `core/999_project_specific_template.md` を参考に、必要な固有ルールを作る（テンプレートのコピー自体は任意）
 2. 対応するフォルダ内に番号付きで配置する（例: `security/010_security_policy.md` ※特定の番号帯域縛りはなく、フォルダ内で000〜999の空き番を使用する）
 3. テンプレートの各セクションをプロジェクト固有の内容で埋める
 4. **このファイル（INDEX.md）の該当フォルダセクションにエントリを追記する**
 
 ### 教訓の記録（Crystallization）
-- 作業完了時や重要な決定時に `core/010_project_lessons_log.md` に追記する
-- 同一ドメインの教訓が3件以上に達したら、AIが既存またはユーザー承認済みの対応フォルダに正式プロジェクトルールファイル（`{NNN}_{topic}.md`）を作成し教訓を昇華・移動する
-- 詳細手順は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を参照
+
+`axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` のStep 1–6を適用する。実務で得た新しい知見がなければ新規教訓は不要。既存Universalとの重複とBlueprintの追記先を先に確認し、適切な既存ファイルがない場合だけ中央ログへ蓄積する。件数と経過日の両閾値を確認し、昇華時は本INDEXと中央ログの参照先も更新する。
 
 ---
 
@@ -186,4 +185,4 @@ SRE、インシデント管理、運用要件。
 
 **Last Updated**: 2026-07-24
 **Version**: v1.16.0 — プログラミング言語、React Native、クラウド・アプリケーションプラットフォーム、Microsoft Azureの汎用ガバナンス正本を追加。言語・framework・SDK・BaaS・managed runtime・multi-service releaseを、front／back／mobile／infra／enterpriseを横断する成果契約、team ownership、供給網、互換性、運用、FinOps、退出戦略へ接続し、既存のハーネスエンジニアリングによる計画・実行・監査・証跡・人間承認サイクルへ統合した。Universalルールは50→54ファイル、Engineeringは14→18ファイル。
-**Structure**: Domain-based subdirectories (8 domains, 1:1 with Universal)
+**Structure**: Domain-based subdirectories (8 initial domains; approved additions supported)

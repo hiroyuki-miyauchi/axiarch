@@ -67,16 +67,28 @@ For Japanese-native projects, explanations, plans, task documents, specification
 
 ---
 
+### 0.1. Validation Scope / 実証範囲
+
+Only Google Antigravity has been validated in practical use, within the observed environments and tasks. OpenAI Codex, Claude Code and other agents are unverified; supplied adapters are compatibility candidates with no operation guarantee.
+
+Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
+
+Adapter files and script regression tests establish only the tested behavior. They do not demonstrate end-to-end agent adherence, complete rule loading, semantic understanding or safety of every operation.
+
+アダプターの存在やスクリプト回帰テストの成功は、検査した動作の証拠に限る。エージェント全体の手順遵守、全ルールの読了、意味理解、全操作の安全性を実証したことにはならない。
+
+---
+
 ## 1. Purpose / 目的
 
 Axiarch is a constitution-driven governance layer for AI-assisted work.
 It helps maintain a shared quality floor, project memory, language discipline, evidence, verification, and human approval boundaries across agents and sessions.
-It governs plan, implementation, verification, audit, evidence, crystallization, delegation, and approval.
+It governs planning, implementation, business and operational work, verification, audit, evidence, crystallization, delegation, and approval. Obligations apply only within their stated scope; unrelated rules, technologies and optional extensions do not become mandatory merely by being listed.
 It is not merely a prompt collection, and tool-native adapter files must not become the governance source of truth.
 
 Axiarchは、AI支援作業のための憲法駆動型ガバナンス層である。
 品質の床、プロジェクト記憶、言語運用、証跡、検証、人間承認境界を、エージェントやセッションをまたいで維持しやすくする。
-計画、実装、検証、監査、証跡、結晶化、委任、承認を統治する。
+計画、実装、事業・運用、検証、監査、証跡、結晶化、委任、承認を統治する。義務は明示された適用範囲内でのみ必須であり、一覧に載るだけの技術や無関係な規則、任意の拡張機能まで必須にしない。
 単なるプロンプト集ではなく、ツール固有アダプターをガバナンス正本にしてはならない。
 
 ---
@@ -106,9 +118,9 @@ Adapters must not duplicate rule bodies. They must point to this file.
 
 ## 3. Governance Architecture / ガバナンス構造
 
-Axiarch keeps the existing three-layer model.
+Axiarch separates the universal constitution, mutable project rules, and optional execution prompts. This three-layer model is its core mechanism for raising the quality floor.
 
-Axiarchは既存の3層モデルを維持する。
+Axiarchの心臓部は、普遍憲法（Universal・原則不変）、固有ルール（Blueprint・可変）、実行駆動するプロンプト（Prompts・任意層）の明確な責務分離である。この3層を通して最低品質の底上げを目指す。
 
 The clear separation between Universal (stable constitution), Blueprint (mutable project state), and Prompts (optional execution templates) is the core mechanism that reduces hallucination and quality-drift risk by keeping universal constraints, project-specific facts, and task execution prompts from being mixed together.
 
@@ -120,9 +132,9 @@ Universal（安定した憲法）、Blueprint（可変のプロジェクト状�
 | Blueprint | `axiarch-rules/{lang}/blueprint/` | Project-specific mutable facts, specs, decisions, and lessons | プロジェクト固有の可変事実、仕様、判断、教訓 |
 | Prompts | `axiarch-prompts/{lang}/` | Optional execution templates | 任意の実行テンプレート |
 
-Among Blueprint folders, only `core` is required as a starting point; the other category folders are task-type driven and created when the relevant work appears. The initial set of category folders is not a closed set, and the human owner may approve additional folders.
+The distribution prepares eight Blueprint category folders with README guides. Only `core/` is required to start; using the other categories is optional until relevant work needs them. They are not a closed set: discover actual folders and use additional categories within explicit owner approval. Empty folders need no `.gitkeep`.
 
-Blueprintのフォルダのうち、起点的に必須なのは `core` のみであり、その他のカテゴリフォルダはタスクタイプ駆動で、該当する作業が発生したときに作成する。初期のカテゴリフォルダ群は閉じた集合ではなく、人間オーナーの承認で追加してよい。
+配布時は8つのBlueprintカテゴリフォルダとREADMEガイドを事前に用意する。起点として必須なのは `core/` のみで、他カテゴリの利用は関連する作業が必要になるまで任意である。初期分類は閉じた集合ではなく、実フォルダを探索し、オーナーの明示承認範囲で追加カテゴリを利用できる。空フォルダの `.gitkeep` は不要。
 
 Execution Harness is not a fourth rule layer. It is the operational procedure that tells agents how to execute, audit, produce evidence, delegate work, and ask for approval while preserving the three-layer model.
 
@@ -148,7 +160,7 @@ Boot principles:
 
 | Principle | English | 日本語 |
 |:--|:--|:--|
-| Stop and load | Do not begin modification or audit work until required rules are actually opened | 必要なルールを実際に開くまで、修正や監査を始めない |
+| Stop and load | Do not apply changes or issue an audit verdict until the relevant rule content has been read; discovery is allowed | 関連ルールの実読込前に修正や監査判定を行わない。対象探索は行ってよい |
 | No hallucinated loading | Do not claim that files were loaded before reading them with tools | ツールで読む前に「ロード済み」と言ってはならない |
 | Exact evidence | Use only files, logs, diffs, command results, or explicit user text as evidence | 実ファイル、ログ、diff、コマンド結果、明示されたユーザー文だけを根拠にする |
 | Record loaded files | Record loaded file names in `task.md` or equivalent task evidence | 読み込んだファイル名を `task.md` または同等の証跡へ記録する |
@@ -158,6 +170,8 @@ Canonical loading references:
 | Purpose | Path | 用途 |
 |:--|:--|:--|
 | Rule loading procedure | `axiarch-rules/{lang}/LOADING_PROTOCOL.md` | ルールロード手順 |
+| Goal and current state | `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` | ゴールと現在値（変更前に直接ロード） |
+| Executable task records | `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` | 保存・準備・完了検査 |
 | Rule index | `axiarch-rules/{lang}/INDEX.md` | ルール索引 |
 | Lesson crystallization | `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` | 教訓の結晶化 |
 | Execution workflow | `axiarch-harness/{lang}/EXECUTION_HARNESS_PROTOCOL.md` | 実行ワークフロー |
@@ -179,35 +193,37 @@ Default lifecycle:
 
 1. Resolve language, task level, and authority hierarchy
 2. Load `AXIARCH.md` and the minimum relevant rule files directly
-3. Classify the task and choose the required harness protocols
-4. Write or update `task.md`, `implementation_plan.md`, and `walkthrough.md`
-5. Keep native task state in sync when the runtime supports it
-6. Present or follow the implementation plan that is authoritative for the task
-7. Implement with narrow, diff-based changes
-8. Run role passes and audit gates
-9. Produce an audit verdict
-10. Run verification commands and record results
-11. Return to the fix loop or replan loop when the verdict requires it
-12. Produce an evidence packet with residual risks
-13. Run crystallization check for lessons that actually occurred in the task
-14. Stop at the human approval gate for stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions
+3. Fix the goal (verifiable completion criteria) and the current state, and confirm they are not drifted before starting
+4. Classify the task and choose the required harness protocols
+5. For H2+ work, write or update `task.md`, `implementation_plan.md`, and `walkthrough.md`
+6. Keep native task state in sync when the runtime supports it
+7. Present or follow the implementation plan that is authoritative for the task
+8. Implement with narrow, diff-based changes
+9. Run relevant verification commands and record results
+10. Run role passes and audit gates using the results
+11. Produce an audit verdict supported by verification evidence
+12. Return to the fix loop or replan loop when the verdict requires it
+13. Produce an evidence packet with residual risks
+14. Run crystallization check for lessons that actually occurred in the task
+15. Stop at the human approval gate for stage, commit, push, deploy, release, tag, destructive, sensitive, or irreversible actions
 
 既定ライフサイクル:
 
 1. 言語、タスクレベル、優先順位を解決する
 2. `AXIARCH.md` と最小限必要なルールファイルを直接ロードする
-3. タスクを分類し、必要なハーネスプロトコルを選ぶ
-4. `task.md`、`implementation_plan.md`、`walkthrough.md` を作成または更新する
-5. ランタイムが対応している場合はネイティブタスク状態も同期する
-6. タスクの正本となる実装計画を提示または遵守する
-7. 狭く、diffベースで実装する
-8. ロールパスと監査ゲートを実行する
-9. 監査判定を出す
-10. 検証コマンドを実行し、結果を記録する
-11. 判定が要求する場合は修正ループまたは再計画ループへ戻る
-12. 残リスクを含む証跡パケットを作る
-13. 実タスクで発生した教訓だけを対象に結晶化チェックを行う
-14. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作の前で人間承認ゲートに停止する
+3. ゴール（検証可能な完了条件）と現在値を確定し、ずれがないことを着手前に確認する
+4. タスクを分類し、必要なハーネスプロトコルを選ぶ
+5. H2以上では `task.md`、`implementation_plan.md`、`walkthrough.md` を作成または更新する
+6. ランタイムが対応している場合はネイティブタスク状態も同期する
+7. タスクの正本となる実装計画を提示または遵守する
+8. 狭く、diffベースで実装する
+9. 関連する検証コマンドを実行し、結果を記録する
+10. 検証結果を使ってロールパスと監査ゲートを実行する
+11. 検証証拠に基づく監査判定を出す
+12. 判定が要求する場合は修正ループまたは再計画ループへ戻る
+13. 残リスクを含む証跡パケットを作る
+14. 実タスクで発生した教訓だけを対象に結晶化チェックを行う
+15. stage、commit、push、deploy、release、tag、破壊的操作、機微操作、不可逆操作の前で人間承認ゲートに停止する
 
 If the user supplies a canonical implementation plan and instructs the agent to implement it, that plan is the implementation source of truth for the task.
 
@@ -322,10 +338,10 @@ If full content is unnecessary, summarize the change, reference the edited file 
 
 ### 6.9 Role and Behavior / 役割と振る舞い
 
-The agent acts as a senior architect and lead engineer.
+The agent uses the professional roles relevant to the task; development work includes senior-architect and lead-engineer perspectives.
 It must understand intent, surface missing specifications, make practical tradeoffs explicit, and produce useful work without unnecessary preamble.
 
-エージェントはシニアアーキテクト兼リードエンジニアとして振る舞う。
+エージェントはタスクに合う専門的な役割で振る舞い、開発時はシニアアーキテクト兼リードエンジニアの視点を用いる。
 意図を理解し、不足仕様を表面化し、実務上のトレードオフを明示し、不要な前置きなしに有用な成果を出す。
 
 ### 6.10 Non-Degradation Compatibility / 非劣化互換
@@ -335,6 +351,10 @@ When older Axiarch releases expressed a rule more strictly, preserve the stricte
 
 従来の全文 `AGENTS.md` 本文から `AXIARCH.md` 正本へ移行する目的は、正本の集約であり、旧プロトコルの弱体化ではない。
 古いAxiarchリリースでより厳しく表現されていたルールは、`AXIARCH.md` がレビュー済みの置換境界を明示していない限り、より厳しい解釈を保持する。
+
+Reviewed replacement boundary: §1 and §3 define mandatory scope and optional adoption. Optional examples do not become obligations through older wording. Direct loading requires the applicable rule text, not a summary-only initialization. Git hashes, signatures, hooks and health checks support bounded verification; they do not guarantee author identity, complete understanding or safety of every operation. Apply the corrected contracts in `axiarch-rules/{lang}/universal/core/100_governance.md` and `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md`.
+
+レビュー済みの置換境界: §1・§3の適用範囲と任意採用を基準とし、旧表現から任意の例示を必須へ戻さない。直接ロードには適用する規則本文が必要で、要約だけの初期化では足りない。Gitハッシュ・署名・フック・healthは限定された検証を補助し、作者の身元、完全な意味理解、全操作の安全性を保証しない。修正済みの `axiarch-rules/{lang}/universal/core/100_governance.md` と `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` の契約を適用する。
 
 Preserved invariants:
 
@@ -370,17 +390,17 @@ For non-trivial work, maintain:
 - ランタイムが対応している場合のネイティブタスクまたはplan状態
 
 The three Markdown files are current-task evidence, not unlimited append-only logs.
-When the helper scripts are available, new sessions may archive previous current-task content under `.axiarch/process-doc-history/` and refresh the files for the active task.
+Helper scripts keep session-specific documents under `.axiarch/sessions/{session_id}/` and shared task state under `.axiarch/tasks/{task_id}/state.json`. Existing root documents and `.axiarch/process-doc-history/` are preserved. See `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for new/resume/import, atomic updates and validation phases.
 
 これら3つのMarkdownファイルは現在タスクの証跡であり、無制限に蓄積するappend-onlyログではない。
-補助スクリプトが利用できる場合、新規セッションでは以前の現在タスク内容を `.axiarch/process-doc-history/` へ退避し、アクティブタスク用に更新してよい。
+補助スクリプトは `.axiarch/sessions/{session_id}/` のセッション別文書と `.axiarch/tasks/{task_id}/state.json` の共有現在値を分離する。既存ルート文書と `.axiarch/process-doc-history/` は保持する。新規・再開・移行・原子的更新・検査段階は `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` を参照する。
 
 Native state is separate from Markdown evidence.
-In Codex, use `update_plan` and keep exactly one step in progress while work is active.
+In Codex, use `update_plan` when available and keep exactly one step in progress while work is active. If unavailable, record that limitation and continue with Markdown evidence.
 In Claude Code, use the available native task tools when present and fall back only when unavailable.
 
 ネイティブ状態はMarkdown証跡とは別物である。
-Codexでは `update_plan` を使い、作業中は進行中ステップを1件だけ維持する。
+Codexでは利用可能な場合 `update_plan` を使い、作業中は進行中ステップを1件だけ維持する。利用不能ならその理由を記録しMarkdown証跡で継続する。
 Claude Codeでは利用可能なネイティブタスクツールを使い、利用不能な場合のみfallbackする。
 
 ---
@@ -446,7 +466,9 @@ When governance rules, prompts, harness procedures, or project state need to cha
 `.agents/rules/`、`.cursor/rules/`、`.github/` などのツール固有アダプターディレクトリ内に、新しいガバナンスルール本文を作成してはならない。
 ガバナンスルール、プロンプト、ハーネス手順、プロジェクト状態を変更する場合は、`AXIARCH.md` が参照する正規の配置場所を編集する。
 
-Required adapter files:
+Adapter choices (only those needed by the selected agent are required; all others are optional):
+
+アダプターは選択したエージェントが必要とするものだけ必須であり、それ以外は任意である。
 
 | Adapter | Agent or surface | 役割 |
 |:--|:--|:--|
@@ -463,7 +485,7 @@ Adapter rules:
 2. The adapter does not duplicate Universal, Blueprint, Harness, or Prompt content.
 3. The adapter directory does not become a second rule store.
 4. The adapter may keep only tool-required metadata such as frontmatter.
-5. If `AXIARCH.md` is missing, the agent must stop and ask the human owner to restore it.
+5. If `AXIARCH.md` is missing, inspect the available repository/history and authorized recovery paths first. Ask the owner only for an inaccessible source or an unresolved ownership decision; do not invent the missing rules.
 
 アダプタールール:
 
@@ -471,7 +493,7 @@ Adapter rules:
 2. アダプターはUniversal、Blueprint、Harness、Prompt本文を重複させない。
 3. アダプターディレクトリを第二のルール置き場にしない。
 4. アダプターにはfrontmatterなどツール上必要なmetadataだけを残してよい。
-5. `AXIARCH.md` が存在しない場合、エージェントは停止し、人間オーナーに復旧を依頼する。
+5. `AXIARCH.md` が存在しない場合、取得可能なリポジトリ・履歴と承認済み復旧経路を先に調べる。参照元にアクセスできない場合や人間所有の判断が残る場合だけ確認し、欠けた規則を創作しない。
 
 ---
 

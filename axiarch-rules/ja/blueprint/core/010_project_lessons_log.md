@@ -1,23 +1,9 @@
 # Project Lessons Log (プロジェクト教訓ログ)
 
 このファイルは、プロジェクト開発を通じて得られた重要な教訓、アンチパターン、および新たに確立された運用ルールの **索引兼・未分類の一時蓄積所** です。全教訓をここに蓄積し続ける場所ではありません。同一ドメインの教訓が3件以上に達した時点で、対応する Blueprint フォルダへ正式ルールファイルとして昇華し、本ファイルには参照リンクのみを残します。
-`AXIARCH.md` からロードされる `CRYSTALLIZATION_PROTOCOL.md` に基づき、AIが自律的にこのファイルを管理します。
+`AXIARCH.md` からロードされる `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` に基づき、AIが自律的にこのファイルを管理します。
 
-> [!IMPORTANT]
-> **Auto-Crystallization Protocol（自動結晶化プロトコル）**
->
-> このファイルは **教訓のインデックス兼一時蓄積場所** として機能します。
-> 同一ドメインの教訓が **3件以上** 蓄積された場合、AIは自律的に以下を実行します：
->
-> 1. ドメインに対応した Blueprint フォルダ内に正式プロジェクトルールファイルを昇華作成
->    例: DB・認証の教訓 → `engineering/{NNN}_database_auth.md`
->    例: セキュリティの教訓 → `security/{NNN}_security_policy.md`
-> 2. 該当する教訓を新ファイルに移動
-> 3. このファイルにドメインファイルへの参照リンクを追記
->
-> **設計哲学**: 教訓はルールと同じフォルダに Co-locate する。このファイルへの集約は行わない。
-> AIは作業時にこのプロトコルを適用し、ドメイン別構造へ整理する。必要な場合は操縦者（ユーザー）の判断を仰ぐ。
-> 詳細は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を参照。
+> 実務で得た教訓の記録・分類・重複確認・既存ルール検索・件数／経過日による昇華・索引更新は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を正本とする。既存の適切なルールがある場合は、読んだうえでそこへ差分を追記する。このログは未整理の一時置き場であり、ファイル配置だけでは読込済みにならない。更新はAIの手順遵守に依存し、診断は記録の構造と閾値を確認する。
 
 ---
 
@@ -33,13 +19,12 @@
 ## 分離済みドメインファイル一覧 (Separated Domain Files)
 
 > [!NOTE]
-> 同一ドメインの教訓が3件以上蓄積されると、AIが自動的にドメイン別ファイルを作成します。
-> 以下のリンク一覧は自動的に更新されます。
+> 昇華時にAIが手順に従ってこの表を更新します。スクリプトが自動作成する表ではありません。
 
 | # | ドメイン | ファイル | 教訓数 |
 |:--|:--------|:--------|:-------|
 | 1 | 運用 | [operations/010_release_upgrade_operations.md](../operations/010_release_upgrade_operations.md) | 13 |
-| 2 | ガバナンス | [core/020_governance_rules.md](./020_governance_rules.md) | 3 |
+| 2 | ガバナンス | [core/020_governance_rules.md](./020_governance_rules.md) | 4 |
 
 <!-- AUTO-CRYSTALLIZATION: ドメインファイル作成時、上の表に行を追加してください -->
 <!-- 例: | 1 | DB・認証 | `engineering/010_database_auth.md` | 3 | -->
@@ -51,10 +36,11 @@
 > [!TIP]
 > **教訓の追加形式**
 > 新しい教訓を追加する際は、以下のフォーマットを使用してください。
-> **必ず `Domain:` タグを付けること。** これが自動分離の判定基準になります。
+> **必ず `Domain:` と `Target Folder:` タグを付けること。** これが自動分離の判定基準になります。
 >
 > ### [YYYY-MM-DD] 教訓のタイトル
 > **Domain:** DB・認証 / セキュリティ / アーキテクチャ / 品質 / デザイン / 運用 / ガバナンス / パフォーマンス / その他
+> **Target Folder:** blueprint/{実在する対象フォルダ}/
 > **Context:** 問題が発生した状況や背景
 > **Problem:** 具体的な問題点や失敗内容
 > **Solution/Rule:** 解決策、または再発リスク低減のために制定されたルール
@@ -85,13 +71,13 @@
 | FinOps | クラウドコスト、リソース効率 | `operations/600_cloud_finops` |
 
 > [!NOTE]
-> 「関連 Universal ルール」列の番号（例: `engineering/200_...`）は参照先 Universal ルールの番号です。教訓を昇華して作成する Blueprint ファイルの採番は `CRYSTALLIZATION_PROTOCOL.md` に従って文脈で決定し、この番号には拘束されません（フォルダ内 000〜999 の空き番号を使用）。
+> 「関連 Universal ルール」列の番号（例: `engineering/200_...`）は参照先 Universal ルールの番号です。教訓を昇華して作成する Blueprint ファイルの採番は `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` に従って文脈で決定し、この番号には拘束されません（フォルダ内 000〜999 の空き番号を使用）。
 
 ### クロスリファレンス（関連 Universal ルール）
 
 | カテゴリ | 関連 Universal ルール |
 |---|---|
-| 教訓の結晶化プロセス | `CRYSTALLIZATION_PROTOCOL.md` |
+| 教訓の結晶化プロセス | `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` |
 | コア原則違反の教訓 | `core/000_core_mindset` |
 | セキュリティ教訓 | `security/000_security_privacy` |
 | パフォーマンス教訓 | `engineering/000_engineering_standards`, `quality/000_qa_testing` |
@@ -108,4 +94,4 @@
 > 「Crystallized Rule File Template」セクションに記載された**公式テンプレート**に従うこと。
 >
 > このファイルにテンプレートを二重管理すると CRYSTALLIZATION_PROTOCOL.md との乖離リスクが生じるため廃止。
-> **常に `CRYSTALLIZATION_PROTOCOL.md` を Single Source of Truth とすること。**
+> **常に `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md` を Single Source of Truth とすること。**

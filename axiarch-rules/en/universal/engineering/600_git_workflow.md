@@ -179,6 +179,8 @@ The invariants in this file are history integrity, change traceability, ownershi
 
 ### 2.8. Commit Body & Trailer Standards
 
+Lengths, trailers and sign-off notation in this section are examples within an adopted convention. Define DCO and AI-attribution methods in project policy; do not invent issues, people or email addresses. Traceable rationale, actual contributions and evidence are required, not a particular trailer syntax.
+
 - **Subject Line**:
     - ≤50 characters, imperative mood (`Add`, `Fix`, `Refactor`), no trailing period.
     - Format: `type(scope): subject` (see §2.0)
@@ -192,9 +194,9 @@ The invariants in this file are history integrity, change traceability, ownershi
     | `Closes: #123` | Auto-close issue | `Closes: #123` |
     | `BREAKING CHANGE: <desc>` | Breaking change (triggers SemVer major bump) | `BREAKING CHANGE: API v2 endpoints removed` |
     | `Co-Authored-By: Name <email>` | Co-author attribution (incl. AI Agents) | `Co-Authored-By: Claude <noreply@anthropic.com>` |
-    | `Signed-off-by: Name <email>` | DCO sign-off (mandatory for OSS) | Auto-added via `git commit -s` |
+    | `Signed-off-by: Name <email>` | DCO sign-off (when DCO is adopted) | Auto-added via `git commit -s` |
 - **AI Pair-Programming Attribution Mandate**:
-    - Every commit where an AI Agent (Claude / Copilot / Codex / etc.) **generated or modified code** MUST include a `Co-Authored-By:` trailer.
+    - When an AI agent generated or modified code, record actual involvement under the adopted attribution policy. `Co-Authored-By:` is one option; do not invent attribution.
     - Purpose: post-hoc auditing and vulnerability tracking (synergy with §8.7 AI-Generated Code Provenance).
     - Example: `Co-Authored-By: Claude <noreply@anthropic.com>` / `Co-Authored-By: GitHub Copilot <copilot@github.com>`
 - **Anti-Pattern Prohibitions**:
@@ -225,8 +227,8 @@ The invariants in this file are history integrity, change traceability, ownershi
 
 ### 2.10. Conventional Commit Validation
 
-- **Law**: Compliance with §2.0 types MUST be enforced **mechanically via commitlint**. Do not rely on manual review.
-- **Required Setup (commitlint)**:
+- **Applicability**: The following is an optional implementation for adopters using Conventional Commits and Node.js validation. Define necessary constraints in Blueprint; commitlint, Husky and a particular Action are not universal prerequisites. Equivalent validation or proportionate review may be used.
+- **Setup Example (commitlint)**:
 
     ```bash
     npm install --save-dev @commitlint/cli @commitlint/config-conventional
@@ -510,7 +512,7 @@ git worktree repair <moved-worktree-path>
 
 ### 7.1. Commit & Tag Signing
 
-- **Law**: Production repos at SemVer minor+ MUST require **signed commits and signed tags**.
+- **Law**: Define signing policy from applicable law, contracts, threat models and project rules; sign and verify the covered commits and tags. Version numbers alone do not make signing mandatory for every repository.
 - **Signing Methods**:
 
     | Method | Recommendation | Configuration |

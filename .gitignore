@@ -72,11 +72,22 @@ Desktop.ini
 .codex/hooks.local.json
 
 # Axiarch per-task working documents (regenerated per session, never committed)
+.axiarch/.gitignore
 task.md
 implementation_plan.md
 walkthrough.md
 .axiarch/process-doc-history/
 .axiarch/process-doc-state/
+.axiarch/tasks/
+.axiarch/sessions/
+.axiarch/task-state.lock
+.axiarch/upgrades/
+.axiarch/upgrade-result.json
+.axiarch/conflicts/
+.axiarch/privacy.lock
+.axiarch/install-result.json
+.axiarch/install-health.log
+__pycache__/
 
 # Social preview (uploaded via GitHub Settings, not committed)
 social-preview.png

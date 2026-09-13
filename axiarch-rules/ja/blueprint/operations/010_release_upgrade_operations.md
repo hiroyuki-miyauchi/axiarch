@@ -74,7 +74,7 @@ dry-runは計画と差分確認に限定し、競合ファイルなどの成果�
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` はdry-run時の競合を報告だけに留め、`--apply` 時だけ `.axiarch/conflicts/` を書く。`--source` 指定時はsource manifestの `axiarchVersion` を `.axiarch/version.json` に反映する。
+`axiarch-scripts/axiarch-upgrade.sh` はdry-run時の競合を報告だけに留め、`--apply` 時だけ `.axiarch/conflicts/` を書く。source manifestの `axiarchVersion` は `.axiarch/version.json` の `requestedVersion` に記録し、選択範囲の適用と診断が全て成功した場合だけ確認済みの `version` と `confirmedScope` を更新する。部分適用・失敗時は前回の確認済み版数を保持し、終了コードと今回の結果記録を突合する（詳細: `axiarch-scripts/README.md`）。
 
 ### Reference
 
@@ -122,7 +122,7 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`--interactive` のグループ�
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` はディレクトリ更新前にsource側に存在しないtarget側ファイルを検出し、`STALE-LOCAL` として表示する。`ACTION_LOG` へも記録するが、永続化されるのは `--apply` で `.axiarch/upgrade-report.md` を書く場合のみとする。
+`axiarch-scripts/axiarch-upgrade.sh` はディレクトリ更新前にsource側に存在しないtarget側ファイルを検出し、`STALE-LOCAL` として表示・保持する。`--apply` 時の記録は `.axiarch/upgrades/{run_id}/actions.log` と結果JSONへ保存する。旧 `.axiarch/upgrade-report.md` は過去の記録として保持し、新しい結果の保存先にはしない。記録・終了値の現行契約は `axiarch-scripts/README.md` を参照する。
 
 ### Reference
 
@@ -166,11 +166,11 @@ manifest側の広域Project State globは `blueprint/*/[0-9][0-9][0-9]_*.md` に
 
 ### Rule
 
-manifestを読めないfallback経路でも、所有境界はmanifestと同等に近づける。`core/000`、`core/010`、テンプレート、`core/020_governance_rules.md` のようなAxiarch共有Blueprintなど、明示分類済みファイルは既存分類を維持する。明示分類されていない追加の `core/{NNN}_*.md` はProject Stateとして保持対象にする。任意promptは必須ではないが、適用した場合は `.axiarch/files.sha256` にhashを残す。
+現行版はPython 3でmanifestを読み、jqの有無で対象を変えない。JSONや型が不正なら適用前に停止する。`files` キーがない旧manifestだけ既定の所有境界を使う。明示分類済みファイルは既存分類を維持し、実在する全フォルダの `axiarch-rules/{lang}/blueprint/{folder}/{NNN}_*.md`（000〜999）の追加ファイルをProject Stateとして保持する。任意promptは必須ではなく、選択言語だけを対象にし、適用したファイルのhashを `.axiarch/files.sha256` に残す。
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` のfallback discoveryは `core` を含むBlueprint初期フォルダを探索する。`write_upgrade_metadata` は `axiarch-prompts/` が存在する場合、hash証跡に含める。`check-axiarch-health.sh` Check 15 は、fallback core Blueprint検出と任意prompt証跡化の実装配線を検査する。
+`axiarch-scripts/axiarch-upgrade.sh` は旧manifestの場合だけ、初期分類に固定せず実在するBlueprintフォルダを探索する。`axiarch-scripts/axiarch_upgrade.py` の `finalize` は、上書き適用したファイルと更新元とのバイト一致を確認したファイルを比較用hashへ登録する。任意promptも選択範囲に限り同じ条件を使い、保留した独自編集を比較元として認定しない。構造healthの配線検査と `tests/test_runtime.py` の実行回帰を併用する。
 
 ### Reference
 
@@ -190,11 +190,11 @@ manifestでは「ローカル所有が曖昧でない場合のみ自動更新し
 
 ### Rule
 
-`replace-if-local-unchanged` は、targetが存在しない場合、または `--from` / `--from-ref` / `--base-source` で得たbaseとtargetが一致する場合のみ自動更新する。baseがない状態でtargetに差分がある場合、base側に対象パスが存在しない場合、またはbaseとtargetが一致しない場合はreviewへ倒す。review時は `no-base-diff` / `base-missing` / `base-mismatch` のreasonラベルをupgrade reportへ残す。
+`replace-if-local-unchanged` は、targetが存在しない場合、比較元の内容と一致する場合、または過去の適用等で記録した `.axiarch/files.sha256` の該当hashと一致する場合に更新できる。更新元と既にバイト一致するファイルは変更しない。既知の比較元で確認できない差分はreviewとし、再実行時に後から加わった独自変更を上書きしない。`no-base-diff` / `base-missing` / `base-mismatch` または補助の `local-modified-or-unknown` を記録する。記録・版数の扱いは本書§2・§4と `axiarch-scripts/README.md` に従う。
 
 ### Enforcement
 
-`axiarch-scripts/axiarch-upgrade.sh` は `copy_replace_if_local_unchanged` で専用判定を行う。`safe-only` と `update-all` の両方でこのpolicyを無条件の `copy_path` に流さない。`check-axiarch-health.sh` Check 15 は、この専用分岐とreasonラベルが存在することを検査する。
+`axiarch-scripts/axiarch-upgrade.sh` の `copy_replace_if_local_unchanged` と `axiarch-scripts/axiarch_upgrade.py` の `copy_files` がファイル単位で判定する。hash記録が存在するだけでは更新を許可せず、実ファイルの内容を照合する。構造healthは配線を調べ、`tests/test_runtime.py` が部分適用後の再実行と、その後の独自編集の保持を実行検証する。
 
 ### Reference
 
@@ -264,9 +264,11 @@ v1.10.0 Safe Upgrade Wizardの追加監査で、`--apply` と `--interactive` �
 
 ### Rule
 
-Safe Upgrade Wizardの確認入力は、標準入力がEOFになっても失敗終了にしない。EOFは空入力として扱い、既定値に倒す。`--apply` の最終確認では既定Nとして `APPLY=false` / `DRY_RUN=true` に戻し、`--interactive` の最終確認でも既定Nとしてdry-run扱いにする。非対話で実際に適用する場合は、直前のdry-run結果を確認し、人間がapply実行を明示承認した上で `--yes` を明示する。
+Safe Upgrade Wizardの確認入力はEOFを空入力として扱い、既定Nで不適用（`APPLY=false`）にする。明示した `--dry-run` は `--apply` の指定順や対話回答で解除しない。非対話の適用は事前の差分確認とユーザーの承認範囲に基づき `--yes` を使い、既存の承認を取り直す手続きにしない。
 
 ### Enforcement
+
+2026-09-11の実動作回帰では、`--interactive --apply` でも最終確認を省略しないことを追加した。`--yes` の明示がないEOFは必ず不適用へ戻す。`tests/test_runtime.py` は実スクリプトで対象ファイルの不変を確認する。
 
 `axiarch-scripts/axiarch-upgrade.sh` の確認入力は `read -r answer || answer=""` と `read -r choice || choice=""` でEOFを空入力化する。`check-axiarch-health.sh` Check 15 は、Safe Upgrade WizardがEOF-safeな確認入力defaultを持つことを検査する。
 
@@ -363,3 +365,5 @@ tagだけ存在してReleaseが欠ける部分失敗を復旧するときは、�
 ### Reference
 
 `.github/workflows/release.yml`, `.github/workflows/lint.yml`, `CHANGELOG.md`, `ROADMAP.md`, `init.sh`, `axiarch-manifest.json`, `llms-full.txt`, `axiarch-scripts/check-axiarch-health.sh`
+
+2026-09-11補足: main pushではrelease.ymlが同一commitのlint.ymlをworkflow_callで実行し、needs成功後のみ署名・公開へ進む。実動作テストはLinux/macOSの隔離導入先で実行する。構造health・準備・完了は別判定で、更新の部分適用・診断失敗はversionを進めず非0で報告する。実装契約は `axiarch-harness/ja/TASK_STATE_PROTOCOL.md` とREADMEの更新結果表を参照。

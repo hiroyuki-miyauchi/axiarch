@@ -40,3 +40,7 @@ Audit Gateは、実装後またはレビュー後に「このまま進めてよ�
 3. 同じ検証を再実行する。
 4. `walkthrough.md` に修正後の結果を記録する。
 5. それでも解消しない場合は、残リスクと選択肢を示して人間判断へ回す。
+
+## ゴールと証拠の接続
+
+`axiarch-rules/ja/universal/core/300_goal_and_current_state.md` を内容の正本とし、[TASK_STATE_PROTOCOL.md](./TASK_STATE_PROTOCOL.md) のID・担当・4状態・確認対象・時刻・証拠を使う。H0/H1は軽量適用。H2以上は準備検査と完了検査を分離し、全条件の証拠を監査する。構造healthの成功だけで完了としない。
