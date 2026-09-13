@@ -171,6 +171,16 @@ class AgentCompatibilityTests(unittest.TestCase):
         allow.unlink(); allow.symlink_to(self.target / '.claude/axiarch-overwrite-allow.txt')
         self.patch('*** Add File: existing.txt\n+new', expected=2)
 
+    def test_patch_line_boundaries_match_native_lf_and_crlf_only(self):
+        self.guard_fixture()
+        for separator in ('\v', '\f', '\r', '\x1c', '\x1d', '\x1e', '\x85', '\u2028', '\u2029'):
+            with self.subTest(separator=repr(separator)):
+                name = 'existing' + separator + '+suffix'
+                path = self.target / name; path.write_text('keep\n')
+                self.patch('*** Add File: ' + name + '\n+replacement', expected=2)
+                self.assertEqual(path.read_text(), 'keep\n')
+        self.patch('*** Add File: new.txt\r\n+new\r')
+
     def test_claude_relative_paths_follow_event_cwd(self):
         self.guard_fixture()
         cwd = self.target / 'nested'; (cwd / 'existing.txt').write_text('keep')

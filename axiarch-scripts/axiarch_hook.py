@@ -64,7 +64,11 @@ def patch_destinations(data, project):
     patch = value.get('command') if isinstance(value, dict) else None
     if not isinstance(patch, str) or '\x00' in patch:
         raise ValueError('apply_patch requires tool_input.command patch text')
-    lines = patch.strip().splitlines()
+    # Native Rust str::lines splits LF/CRLF only. Python splitlines also splits
+    # NEL, vertical tab and Unicode separators that may be part of a filename;
+    # treating them as patch boundaries could miss an existing destination.
+    lines = [line[:-1] if line.endswith('\r') else line
+             for line in patch.strip().split('\n')]
     if len(lines) < 3 or lines[0] != '*** Begin Patch' or lines[-1] != '*** End Patch':
         raise ValueError('unsupported apply_patch envelope')
     kind = None

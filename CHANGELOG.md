@@ -29,6 +29,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 - Codexのサブフォルダ起動時のhook未発見、apply_patchの新規作成形式による既存ファイル保護漏れ、Claude Codeの作業コピー移動後の記録・差分の参照先ずれを修正。通常の差分編集は維持し、解決不能な作業先や未知のpatchは未確認として扱う。
 - Fix Codex hook discovery from subdirectories, missing protection for apply_patch add/move destinations, and Claude Code records/diff checks pointing at the starting checkout after worktree changes. Preserve focused edits and report unresolved projects or unknown patch syntax.
+- 特殊な改行文字を含むファイル名でも、Codex本体と同じLF/CRLFの行分割で既存宛先を検査。Pythonの広い行分割による見逃しを実差分処理で再現し、回帰へ追加。
+- Match Codex's native LF/CRLF parsing when checking destinations containing other line-separator characters. Reproduce the missed existing-file check caused by Python's broader line splitting and add regression coverage.
 - 3製品×日英×言語フォルダ構成の実導入・healthと、言語別更新・記録保持・公式イベント形式の回帰を追加。製品の信頼設定、移行手順、POSIX対応範囲、実務未実証の限界を日英で明記。 Claude Memoryテンプレートの英訳漏れを補い、この配布パスが製品のauto memory自動読込先ではないことも明記。
 - Add real installation/health coverage across three agents, Japanese/English and both/single language trees, plus language-scoped upgrade, record-preservation and native-event regressions. Document trust, migration, POSIX scope and practical-validation limits in both languages. Complete missing English guidance in the Claude memory template and clarify that its distributed path is not the product's auto-loaded memory location.
 
