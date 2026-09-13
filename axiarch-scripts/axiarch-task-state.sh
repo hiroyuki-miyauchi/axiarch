@@ -219,7 +219,7 @@ write_task_md_ja() {
 
 ## ロード自己検証
 
-- [ ] `blueprint/core/000_project_overview.md` を直接開いた
+- [ ] `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` を直接開いた
 - [ ] タスクタイプに対応するUniversal/Blueprintを直接開いた
 - [ ] 実際に読んだファイルだけを上の表に記録した
 - [ ] 関連しうるがロードしないファイルと理由を明記した
@@ -248,9 +248,9 @@ write_task_md_ja() {
 
 ## ネイティブタスク状態
 
-Markdown証跡だけでは、CodexやClaude Codeのネイティブなタスク・プラン表示欄は更新されない。対応ランタイムでは、ここへの記録と並行して以下を実行する。
+Markdown証跡だけでは、CodexやClaude Codeのネイティブなタスク・プラン表示欄は更新されない。利用可能な機能だけを以下に従って併用する。使えない場合は理由を記録し、`axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` の同等のセッション記録で進める。
 
-| ランタイム | 必須アクション |
+| ランタイム | 利用可能な場合の操作 |
 |:--|:--|
 | Codex | `update_plan` で短い計画を作成し、進捗ごとに `pending` / `in_progress` / `completed` を更新する |
 | Claude Code | `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` を使用する。古いSDK等でTask toolsがない場合のみ `TodoWrite` にフォールバックする |
@@ -288,7 +288,7 @@ This is session-specific evidence. The task state.json is the shared current-sta
 
 ## Load Self-Verification
 
-- [ ] Directly opened `blueprint/core/000_project_overview.md`
+- [ ] Directly opened `axiarch-rules/{lang}/blueprint/core/000_project_overview.md`
 - [ ] Directly opened task-relevant Universal/Blueprint files
 - [ ] Recorded only files actually opened
 - [ ] Recorded relevant-but-not-loaded files and reasons
@@ -317,9 +317,9 @@ See `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md` and `axi
 
 ## Native Task State
 
-Markdown evidence alone does not update Codex or Claude Code native task/plan panels. In supported runtimes, update native state in parallel.
+Markdown evidence alone does not update Codex or Claude Code native task/plan panels. Use the capabilities below only when available. Otherwise record the reason and continue with equivalent session records under `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md`.
 
-| Runtime | Required Action |
+| Runtime | Action When Available |
 |:--|:--|
 | Codex | Create a short plan with `update_plan`, then update each step as `pending`, `in_progress`, or `completed` |
 | Claude Code | Use `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet`; fall back to `TodoWrite` only in older runtimes where Task tools are unavailable |
@@ -349,7 +349,7 @@ write_implementation_plan_md_ja() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-このファイルは現在タスクの実装計画だけを記録する。過去計画は `.axiarch/process-doc-history/` を参照する。
+このファイルはこのセッションの実装計画を記録する。過去の作業は `bash axiarch-scripts/axiarch-task-state.sh --mode sessions` で目的と保存先を確認する。保存・引継ぎの契約は `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` を参照する。
 
 ## 目的
 
@@ -361,7 +361,7 @@ _(何を達成するか)_
 |:--|:--|
 | スコープ | _(変更対象と対象外)_ |
 | 既存保護 | _(既存機能への影響と保護方針)_ |
-| ネイティブ計画 | Codexは `update_plan`、Claude Codeは `TaskCreate` / `TaskUpdate` で同じ進捗を表示する |
+| ネイティブ計画 | 利用可能な計画機能で進捗を同期する。利用できない場合は理由を記録し、同等のセッション記録で進める |
 | 検証 | _(実行する検証)_ |
 
 ## 変更予定ファイル
@@ -388,7 +388,7 @@ write_implementation_plan_md_en() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-This file records only the current task implementation plan. See `.axiarch/process-doc-history/` for previous plans.
+This file records this session's implementation plan. Find previous work by goal and location with `bash axiarch-scripts/axiarch-task-state.sh --mode sessions`. See `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for storage and handoff rules.
 
 ## Objective
 
@@ -400,7 +400,7 @@ _(what this task will achieve)_
 |:--|:--|
 | Scope | _(in scope and out of scope)_ |
 | Existing Safety | _(impact on existing functionality and protection approach)_ |
-| Native Plan | Codex uses `update_plan`; Claude Code uses `TaskCreate` / `TaskUpdate` to show the same progress |
+| Native Plan | Synchronize progress using available planning tools; if unavailable, record why and continue with equivalent session records |
 | Verification | _(checks to run)_ |
 
 ## Planned Files
@@ -435,7 +435,7 @@ write_walkthrough_md_ja() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-このファイルは現在タスクの確認結果だけを記録する。過去ウォークスルーは `.axiarch/process-doc-history/` を参照する。
+このファイルはこのセッションの確認結果を記録する。過去の作業は `bash axiarch-scripts/axiarch-task-state.sh --mode sessions` で目的と保存先を確認する。保存・引継ぎの契約は `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` を参照する。
 
 ## 確認観点
 
@@ -443,7 +443,7 @@ write_walkthrough_md_ja() {
 |:--|:--|
 | スコープ | _(変更が目的に閉じているか)_ |
 | 整合性 | _(日英・README・INDEX・scriptの整合)_ |
-| ネイティブ状態 | Codex `update_plan` または Claude Code Task tools の利用をMarkdown証跡と矛盾させない |
+| ネイティブ状態 | 利用可能な計画機能と記録を突合する。利用不能の場合は理由と代替記録を確認する |
 | 検証 | _(実行結果)_ |
 
 ## 変更内容
@@ -470,7 +470,7 @@ write_walkthrough_md_en() {
 
 <!-- AXIARCH_PROCESS_DOC: current-task-only -->
 
-This file records only the current task walkthrough. See `.axiarch/process-doc-history/` for previous walkthroughs.
+This file records this session's verification results. Find previous work by goal and location with `bash axiarch-scripts/axiarch-task-state.sh --mode sessions`. See `axiarch-harness/{lang}/TASK_STATE_PROTOCOL.md` for storage and handoff rules.
 
 ## Review Points
 
@@ -478,7 +478,7 @@ This file records only the current task walkthrough. See `.axiarch/process-doc-h
 |:--|:--|
 | Scope | _(scope is bounded to the objective)_ |
 | Consistency | _(language, README, INDEX, and script consistency)_ |
-| Native State | Keep Codex `update_plan` or Claude Code Task tools consistent with Markdown evidence |
+| Native State | Reconcile available planning tools with records; if unavailable, verify the reason and equivalent records |
 | Verification | _(results)_ |
 
 ## Changes
