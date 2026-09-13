@@ -4,7 +4,6 @@ import argparse
 import ast
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import os
@@ -16,7 +15,7 @@ import sys
 import tempfile
 
 sys.dont_write_bytecode = True
-from axiarch_state import atomic, digest, inside, native_language, language_settings, markdown_source_lines, protect_artifacts, privacy_check, read_json
+from axiarch_state import atomic, digest, inside, native_language, language_settings, markdown_source_lines, protect_artifacts, privacy_check, read_json, fcntl
 from axiarch_upgrade import upgrade_lock_path, distribution_path, DistributionNames
 
 MARKER = '<!-- AXIARCH_GENERATED_COMMAND: do not edit; regenerate via axiarch-scripts/axiarch-prompts-install.sh -->'

@@ -2,7 +2,6 @@
 """File-level safe copying and machine-readable upgrade outcome records."""
 import argparse
 from datetime import datetime, timezone
-import fcntl
 import fnmatch
 import glob
 import hashlib
@@ -17,7 +16,7 @@ import tempfile
 import unicodedata
 
 sys.dont_write_bytecode = True
-from axiarch_state import atomic, digest, identifier, inside, read_json, protect_artifacts, has_control_characters
+from axiarch_state import atomic, digest, identifier, inside, read_json, protect_artifacts, has_control_characters, fcntl
 
 
 def distribution_path(relative):

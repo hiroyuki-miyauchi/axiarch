@@ -1,0 +1,9 @@
+# Keep executable source readable by Bash/Python after a Windows Git checkout.
+# Adopter repositories retain their own attributes; these are source policies.
+*.sh text eol=lf
+*.py text eol=lf
+*.ps1 text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.gitattributes text eol=lf

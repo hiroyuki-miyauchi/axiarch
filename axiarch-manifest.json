@@ -402,6 +402,12 @@
       "policy": "skip"
     },
     {
+      "path": ".gitattributes",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
       "path": ".markdownlint-cli2.jsonc",
       "group": "source_docs",
       "owner": "axiarch-source",

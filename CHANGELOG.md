@@ -27,6 +27,10 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- Windowsの補助ツール実行条件を明確化。ネイティブWindows Python・Git Bash単独では導入・更新の変更前に終了2で停止し、WSL 2内のLinux Pythonを案内する。本体の実行ファイルをLF形式で維持する `.gitattributes` を追加し、利用先の属性設定は上書きしない。
+- Clarify Windows helper requirements. Native Windows Python and Git Bash alone exit 2 before installation/upgrade changes, with guidance to use Linux Python inside WSL 2. Add source-only `.gitattributes` to keep executable files in LF format without overwriting adopter attributes.
+- Windowsランナーでの非対応環境の拒否とWSL 2・Ubuntu 24.04・一般ユーザーによる全回帰を共通品質検査へ追加。リリースも同じコミットのWindows検査成功を必要とする。日英のWindows手順に環境・改行・移行・製品実証の限界を記載する。
+- Add Windows-runner checks for unsupported native execution and full regressions under WSL 2, Ubuntu 24.04 and a non-root user to shared quality checks. Releases also require these checks on the same commit. Document environment selection, line endings, migration and product-validation limits in Japanese and English.
 - Codexのサブフォルダ起動時のhook未発見、apply_patchの新規作成形式による既存ファイル保護漏れ、Claude Codeの作業コピー移動後の記録・差分の参照先ずれを修正。通常の差分編集は維持し、解決不能な作業先や未知のpatchは未確認として扱う。
 - Fix Codex hook discovery from subdirectories, missing protection for apply_patch add/move destinations, and Claude Code records/diff checks pointing at the starting checkout after worktree changes. Preserve focused edits and report unresolved projects or unknown patch syntax.
 - 特殊な改行文字を含むファイル名でも、Codex本体と同じLF/CRLFの行分割で既存宛先を検査。Pythonの広い行分割による見逃しを実差分処理で再現し、回帰へ追加。
@@ -41,6 +45,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 診断結果と再発対策 / Diagnostic outcome and regression prevention
 
+- Windows確認の教訓: Bashの存在だけではPOSIX Python・排他制御・ファイルシステムの前提を満たさない。変更前の環境検査、Windows実機ランナーでのLF検査、Linuxファイルシステム上のWSL 2回帰を組み合わせる。製品自身のWindows対応とAxiarchの全工程実証を混同しない。
+- Windows verification lesson: Bash availability does not establish POSIX Python, locking or filesystem support. Combine pre-mutation platform checks, LF checks on a Windows runner and WSL 2 regressions on a Linux filesystem. Product-level Windows support is not end-to-end Axiarch validation.
 - 検証の教訓: Claude由来のツール名や起動時環境変数を別製品・作業コピーへそのまま適用しない。Codexの実差分処理で既存Add Fileの上書きとパス空白の解釈を確認し、公式入力形式・現在の作業場所・実healthを組み合わせて再発を検査する。自動テストと実製品全工程の実証は分ける。
 - Verification lesson: do not assume Claude tool names or startup environment variables apply unchanged to another product or worktree. Exercise Codex's native Add File overwrite and path-whitespace behavior, then regress documented event inputs, the active directory and real health together. Separate automated tests from full product validation.
 

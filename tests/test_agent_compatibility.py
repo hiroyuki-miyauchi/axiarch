@@ -119,8 +119,13 @@ class AgentCompatibilityTests(unittest.TestCase):
             for lang, lang_choice in [('ja', 1), ('en', 2)]:
                 with self.subTest(agent=agent, language=lang):
                     self.target = self.root / f'upgrade-{agent}-{lang}'
+                    self.target.mkdir()
+                    attributes = self.target / '.gitattributes'
+                    attributes.write_bytes(b'project-data/*.csv text eol=crlf\n')
                     self.run_cmd(['bash', self.source / 'init.sh', self.target], cwd=self.root,
                                  text=f'{lang_choice}\n2\n{choice}\nn\nn\n')
+                    self.assertEqual(attributes.read_bytes(), b'project-data/*.csv text eol=crlf\n')
+                    self.assertTrue((self.target / 'axiarch-scripts/WINDOWS.md').is_file())
                     spec = self.target / f'axiarch-rules/{lang}/blueprint/core/000_project_overview.md'
                     spec.write_text('# Adopted project / 利用先の仕様\n')
                     custom = self.target / 'project-only.txt'; custom.write_text('keep private local state\n')
@@ -132,6 +137,7 @@ class AgentCompatibilityTests(unittest.TestCase):
                     self.run_cmd([*command, '--apply', '--yes'], expected=3)
                     self.assertEqual(spec.read_text(), '# Adopted project / 利用先の仕様\n')
                     self.assertEqual(custom.read_text(), 'keep private local state\n')
+                    self.assertEqual(attributes.read_bytes(), b'project-data/*.csv text eol=crlf\n')
                     self.assertFalse((self.target / ('axiarch-rules/en' if lang == 'ja' else 'axiarch-rules/ja')).exists())
                     result = json.loads((self.target / '.axiarch/upgrade-result.json').read_text())
                     self.assertEqual(result['health']['status'], 'passed')

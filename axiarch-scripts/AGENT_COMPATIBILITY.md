@@ -36,7 +36,7 @@ Claude Codeでは `CLAUDE_PROJECT_DIR` が起動時の場所を指したまま�
 
 2026-09-14の監査では公式仕様、ローカルCLIの版表示（Codex 0.153.4、Claude Code 2.1.167）、隔離した12通りの導入構成と実health、公式形式のイベント入力によるスクリプト実行、Codex本体の差分適用処理を照合します。これはモデル推論・実製品UI・権限設定まで含む全工程の実証ではありません。Google Antigravityは従来確認した環境・実務の範囲で実証済みです。Codex・Claude Codeの実務実証と動作保証は引き続き主張しません。
 
-補助スクリプトはBash、Python 3、POSIXファイルシステムを前提とし、CIはUbuntu・macOSです。ネイティブWindows/PowerShellやWSLとWindows側ツールの混在は検証対象外です。Windowsでは同じWSL環境内に製品・Bash・Python・プロジェクトを揃え、別途疎通を確認してください。設定を配っただけで全OS対応とはみなしません。
+補助スクリプトはBash、Python 3、POSIXファイルシステムを前提とします。CIはUbuntu・macOSに加え、Windowsランナー上でネイティブPythonの安全な拒否とWSL 2内の実動作を検査します。ネイティブWindows PythonやGit Bash単独での実行は非対応です。Windowsでは製品の実行環境・Bash・Python・プロジェクトをWSL 2内に揃えます。製品のWindows UIやWSL/Windows混在までは実証していません。対応範囲・移行・改行の扱いは [Windows手順](WINDOWS.md) を参照してください。
 
 保護フックは設定された対応ツール経路だけを検査します。シェル・MCP・別ツールからの書き換え、差分形式による実質的全面置換、競合による検査後の変更まで網羅しません。Codexの未知のpatch形式や前後空白で解釈が変わるパスは、未確認のまま許可せず終了2とします。削除の是非は承認手順が担います。許可リストは権限そのものではなく記録済み承認を実行へ反映する設定です。差分フックのblockは編集後の停止要求であり、編集を取り消しません。healthは構造・記録の整合性検査で、完全なルール読了、意味理解、翻訳の正確性、全操作の安全性を証明しません。
 
@@ -72,7 +72,7 @@ Startup reminders do not prove loading. Record actual read ranges and synchroniz
 
 The 2026-09-14 audit compares official documentation, local CLI version output (Codex 0.153.4 and Claude Code 2.1.167), twelve isolated installation configurations with real health diagnostics, script execution using documented event payloads, and the native Codex patch engine. It is not end-to-end validation of model reasoning, product UI or permission settings. Antigravity's prior practical validation remains limited to the environments and tasks exercised. Codex and Claude Code remain unvalidated in practice, with no operation guarantee.
 
-Helpers require Bash, Python 3 and POSIX filesystem behavior; CI uses Ubuntu and macOS. Native Windows/PowerShell and mixed Windows/WSL execution are outside the tested scope. On Windows, keep the product, Bash, Python and project in the same WSL environment and verify it separately. Shipping configuration is not evidence of all-OS compatibility.
+Helpers require Bash, Python 3 and POSIX filesystem behavior. Alongside Ubuntu/macOS, CI runs native Python rejection checks and WSL 2 runtime regressions on a Windows runner. Native Windows Python and Git Bash alone are unsupported. Keep the agent execution environment, Bash, Python and project inside WSL 2. Windows product UIs and mixed Windows/WSL execution remain unvalidated. See the [Windows guide](WINDOWS.md) for scope, migration and line endings.
 
 Guards inspect only configured supported tool paths. Shell/MCP/other writes, effective full rewrites expressed as update hunks, and races after inspection are not comprehensively covered. Unknown Codex patch syntax and ambiguous padded paths exit 2 rather than granting unassessed permission. Deletion decisions still follow approval rules. Allowlists implement recorded approval; they do not establish authorization themselves. Post-edit blocking requests a pause without undoing edits. Health checks structural and record consistency, not complete loading, understanding, translation accuracy or safety of every operation.
 

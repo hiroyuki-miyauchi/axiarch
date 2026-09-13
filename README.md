@@ -779,6 +779,10 @@ Health also rejects failed Git queries instead of inventing zero counts or synch
 
 The updated helpers require Python 3 and a POSIX local filesystem. `init.sh` distributes them on fresh installs. Existing adopters should review a Safe Upgrade dry-run, update scripts/harness/core/300/LOADING_PROTOCOL, and reconcile mixed/review AXIARCH.md, hooks and indexes while retaining local settings. A standalone new upgrade launcher can load its Python helpers from the extracted source; missing helpers stop application before changes.
 
+WindowsではWSL 2内のLinux Python・Bash・プロジェクトを使用します。ネイティブWindows PythonやGit Bash単独は非対応で、導入・更新は対象を変更する前に停止します。製品側の実行環境設定、Linux側への配置、検証範囲は [Windows手順](axiarch-scripts/WINDOWS.md) を参照してください。
+
+On Windows, use Linux Python, Bash and a project inside WSL 2. Native Windows Python and Git Bash alone are unsupported; installation and upgrades stop before target changes. See the [Windows guide](axiarch-scripts/WINDOWS.md) for agent environment settings, Linux storage and verification boundaries.
+
 リモート取得はcurlとtarも必要です。HTTP失敗・時間切れ・不正アーカイブと曖昧なJSONは適用前に停止します。wgetだけの環境は確認済みローカルソースを使ってください。詳細とサイズ・時間の上限、真正性を保証しない範囲は [取得・入力検査](axiarch-scripts/README.md#取得入力検査の境界--download-and-input-validation-boundary) を参照してください。
 
 Remote retrieval also requires curl and tar. HTTP failures, deadlines, invalid archives and ambiguous JSON stop before application. Use a reviewed local source in wget-only environments. See [download and input validation](axiarch-scripts/README.md#取得入力検査の境界--download-and-input-validation-boundary) for size/time limits and the authenticity boundary.

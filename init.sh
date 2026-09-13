@@ -97,6 +97,19 @@ check_prerequisites() {
     print_error "Missing required tools: ${missing[*]}"
     exit 1
   fi
+  # The standalone launcher must reject Windows Python before downloading a
+  # source or preparing the target; Bash alone does not provide POSIX locking.
+  python3 - <<'AXIARCH_PLATFORM_PY'
+import os, sys
+if os.name != 'posix':
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2; native Windows Python/Git Bash is unsupported. / WindowsではWSL 2内で実行してください。', file=sys.stderr)
+    sys.exit(2)
+try:
+    import fcntl
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: POSIX Python with fcntl required. / POSIX対応のPythonが必要です。', file=sys.stderr)
+    sys.exit(2)
+AXIARCH_PLATFORM_PY
 }
 
 # =============================================================================

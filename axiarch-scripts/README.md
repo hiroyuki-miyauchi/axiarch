@@ -18,6 +18,10 @@
 
 See [agent compatibility](AGENT_COMPATIBILITY.md) for entrypoints, trust, worktrees, language and OS verification boundaries.
 
+Windowsの補助ツールはWSL 2内で実行します。ネイティブPython・Git Bash単独は非対応です。[Windows手順](WINDOWS.md) に前提条件・CI範囲・既存導入先の扱いを記載しています。
+
+Run helpers inside WSL 2 on Windows; native Python and Git Bash alone are unsupported. See the [Windows guide](WINDOWS.md) for prerequisites, CI boundaries and existing installations.
+
 ## 📋 配布スクリプト一覧 / Available Scripts
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |

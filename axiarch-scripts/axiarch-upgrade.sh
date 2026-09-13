@@ -1486,6 +1486,19 @@ main() {
     return 2
   fi
   command -v python3 >/dev/null 2>&1 || { print_err 'Python 3 required; no changes applied.'; return 2; }
+  # A standalone upgrade launcher has no adjacent helper yet. Check the Python
+  # runtime before downloading sources, acquiring locks or changing the target.
+  python3 - <<'AXIARCH_PLATFORM_PY'
+import os, sys
+if os.name != 'posix':
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2; native Windows Python/Git Bash is unsupported. / WindowsではWSL 2内で実行してください。', file=sys.stderr)
+    sys.exit(2)
+try:
+    import fcntl
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: POSIX Python with fcntl required. / POSIX対応のPythonが必要です。', file=sys.stderr)
+    sys.exit(2)
+AXIARCH_PLATFORM_PY
   resolve_sources
   if [[ ! -f "${HELPER_DIR}/axiarch_upgrade.py" || ! -f "${HELPER_DIR}/axiarch_state.py" ]]; then
     HELPER_DIR="${SOURCE_DIR}/axiarch-scripts"

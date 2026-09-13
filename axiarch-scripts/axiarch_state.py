@@ -5,21 +5,34 @@ The schema checks claims and file snapshots, not the meaning of those claims.
 See axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md for the public contract.
 """
 
+import os
+import sys
+
+# Validate before importing POSIX-only modules or touching project state.
+try:
+    if os.name != 'posix':
+        raise ImportError('POSIX Python required')
+    import fcntl
+    if not all(hasattr(os, name) for name in ('O_NOFOLLOW', 'O_NONBLOCK', 'getuid')):
+        raise ImportError('POSIX file APIs required')
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2 on Windows; '
+          'native Windows Python/Git Bash cannot run these POSIX helpers. No project changes applied. / '
+          'WindowsではWSL 2内のLinux Pythonを使用してください。対象は変更していません。', file=sys.stderr)
+    raise SystemExit(2)
+
 import argparse
 import copy
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 import re
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
 import uuid
 

@@ -135,7 +135,7 @@ class ReleaseNotesTests(unittest.TestCase):
 
     def test_source_only_release_files_are_not_default_adopter_payload(self):
         manifest = json.loads((ROOT / 'axiarch-manifest.json').read_text())
-        for path in ('RELEASING.md', 'RELEASE_AUDIT.md', 'tests'):
+        for path in ('RELEASING.md', 'RELEASE_AUDIT.md', 'tests', '.gitattributes'):
             entry = next(e for e in manifest['files'] if e['path'] == path)
             self.assertEqual((entry['group'], entry['owner'], entry['policy']),
                              ('source_docs', 'axiarch-source', 'skip'))

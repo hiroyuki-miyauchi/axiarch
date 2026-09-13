@@ -165,6 +165,9 @@ def main():
         if mode not in ('warn', 'block'):
             mode = 'warn'
             raise ValueError('AXIARCH_DIFF_GUARD_MODE must be warn, block or off')
+        if os.name != 'posix':
+            raise ValueError('AXIARCH_PLATFORM_UNSUPPORTED: use Linux Python inside WSL 2. '
+                             'WindowsではWSL 2内のLinux Pythonを使用してください。')
         max_lines = threshold('AXIARCH_DIFF_GUARD_MAX_LINES', 400)
         max_files = threshold('AXIARCH_DIFF_GUARD_MAX_FILES', 20)
         include = os.environ.get('AXIARCH_DIFF_GUARD_INCLUDE_UNTRACKED', '1')
