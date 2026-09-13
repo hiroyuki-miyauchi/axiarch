@@ -17,9 +17,20 @@ time of each release. From v1.12.0 onward, the active Axiarch source of truth is
 `AXIARCH.md`; earlier `AGENTS.md` / Protocol 0-9 references in this file are
 release history, not current canonical numbering.
 
+全公開版の配布物・版数・説明の再監査と訂正は [RELEASE_AUDIT.md](RELEASE_AUDIT.md) を参照してください。旧版の100%互換・強制遵守・性能・実証範囲の断定は、そのまま現行の保証として使用しません。本文だけの訂正と配布コードの変更は [RELEASING.md](RELEASING.md) に従って区別します。
+
+See the release audit for all-version artifact checks, metadata mismatches and description corrections. Historical absolute compatibility, enforcement, performance and validation claims are not current guarantees. The releasing guide distinguishes prose corrections from changes to distributed code.
+
 ---
 
 ## [Unreleased]
+
+### 変更 / Changed
+
+- 公開済み30版を再監査し、v1.17.0の説明を成果・互換性・移行・検証へ整理。旧版のinstaller版数、main取得、署名の導入時期、非互換minor、実証範囲、v1.15.0の新設5規則の説明漏れを訂正台帳へ記録する。タグと配布済みコードは変更しない。
+- Audit all 30 published releases, reorganize v1.17.0 around outcomes/migration/verification and record historical version, source-pinning, signing, incompatible-minor and validation issues, plus the five omitted v1.15.0 rules. Preserve tags and distributed code.
+- リリース本文の構造・日英記入・比較リンク・抽出を同じ検査へ接続。コード枠・コメントの見出しを除外し、重複・未記入・別版混入を回帰検査する。単なる非空判定では説明の不足を捉えられなかったためで、検査は意味や翻訳の十分性の証明とはしない。scripts READMEのセッション分離の導入版をv1.17.0へ訂正する。
+- Share note structure, bilingual presence, comparison-link and extraction checks; regress duplicate/empty entries, example headings and adjacent-version leakage. Nonempty extraction alone missed insufficient descriptions; the new checks are not semantic or translation proof. Correct the scripts README's session-isolation introduction version to v1.17.0.
 
 ### 診断結果と再発対策 / Diagnostic outcome and regression prevention
 
@@ -32,106 +43,73 @@ release history, not current canonical numbering.
 
 ## [1.17.0] — 2026-09-13
 
-- AXIARCH.mdの章を1から始め、設定は1章、実証範囲は1.1節へ整理。日英の現行参照を同期する。ファイル配置の000–999番号と過去リリース当時の章番号は保持する。
-- Start AXIARCH.md chapters at 1, with configuration in chapter 1 and validation scope in section 1.1; align current references in both languages. Preserve file-placement prefixes 000–999 and section numbers in historical release descriptions.
-- Dependabotの文書検査Action v24.2.0、Release作成Action v3.0.3の保守更新を取り込み、commit SHA固定を維持する。
-- Incorporate Dependabot maintenance updates for markdownlint-cli2-action v24.2.0 and action-gh-release v3.0.3 while retaining immutable commit pins.
+### 概要 / Overview
 
-- macOSの一部環境で導入案内の `mktemp -d` が指定したTMPDIRよりOS既定の保存先を優先する差異に対応。日英の導入・更新例とAI向け説明で保存先を明示し、空白入りパス、専用フォルダ権限、部分取得の隔離を実行回帰で確認する。
-- Use explicit temporary-path templates in installation/update examples and AI-facing guidance because some macOS environments prefer the OS default over TMPDIR for bare `mktemp -d`. Exercise paths containing spaces, private directory permissions and partial-download isolation in runtime regressions.
+ゴール・証拠・実行手順の整合。v1.16.0の言語・クラウド規則の拡充に続き、今回は「定めたルールを、起動・作業記録・検証・更新・公開でどう扱うか」を整えた。完了条件と証拠を結び、並行セッションの記録を分け、診断できない状態を成功と表示する経路を修正した。普遍憲法（Universal）・固有ルール（Blueprint）・任意プロンプトの3層によって、AI作業の最低品質を底上げするためのリリースである。
 
-- PRのUbuntu回帰で、読み取り専用healthからのmanifest検査がPythonキャッシュを書き込む不備を修正。診断子プロセスのキャッシュ生成を止め、直接実行する更新補助でもプロジェクト内モジュールのキャッシュ生成を止める。OS既定の保存先に依存しない正常・異常診断と直接検査の回帰を追加する。
-- Fix the Ubuntu PR regression where read-only health's manifest check wrote Python bytecode. Disable cache writes in diagnostic child interpreters and local-module cache writes in the directly invoked upgrade helper. Cover successful/failed diagnosis and direct checks without depending on the host's default cache location.
+Goal, Evidence & Runtime Consistency. After v1.16.0 expanded language and cloud governance, this release connects the rules to startup, task records, verification, upgrades and publication. It links completion criteria to evidence, separates concurrent session records and stops presenting unavailable diagnostics as success. Universal rules, project-specific Blueprint rules and optional prompts remain the three layers used to raise the baseline quality of AI-assisted work.
 
-- 内部copy補助で、不正な子孫パスを検出する前に部分コピーし、失敗表示後も終了0となった漏れを修正。通常の更新と更新元・利用先・比較元の事前検査を共通化し、コピー失敗を終了5へ伝達する。隔離環境で異常入力の無変更拒否、部分書込・結果記録・版数保留・修復後の再実行を検証し、日英で内部補助と更新全体の保証範囲を分ける。
-- Fix internal copy partially applying files before rejecting invalid descendants and returning 0 after reporting failure. Share source/adopter/base preflight with the public upgrade path and propagate copy failures as exit 5. Add isolated rejection-without-write, partial-write, outcome/version and repair/retry regressions; distinguish helper and whole-upgrade guarantees in both languages.
+### 追加 / Added
 
-- 状態管理の回帰試験で、起動時間をロック待ちと誤判定していた3秒制限を分離。起動の監視上限は15秒、実際のロック拒否は開始合図後の3秒とし、FIFO・ハードリンク・他writerの拒否理由も検査する。
-- Separate state-test startup from lock rejection timing. Allow a 15-second startup watchdog, retain the three-second deadline after the real lock-attempt handshake, and assert rejection reasons for FIFOs, hardlinks and competing writers.
+- ゴールと現在値の規則 `axiarch-rules/{ja,en}/universal/core/300_goal_and_current_state.md`、保存・検査契約 `axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md`、`axiarch-scripts/axiarch-task-state.sh` を追加。タスク・担当・完了条件・確認対象・時刻・証拠を対応させ、4状態と履歴を保持する。完了の記録には対象・証拠のSHA-256照合が必要となる。
+- Adds the goal/current-state rule, task-state protocol and task-state CLI at the paths above. Tasks, owners, criteria, verification targets, timestamps and evidence are linked through four states and retained revisions. Recording completion requires SHA-256 checks of the target and evidence.
+- `.axiarch/tasks/{task_id}/` を共有状態、`.axiarch/sessions/{session_id}/` をセッション別文書として分離。新規作業・同じ作業の再開・別セッションの参加を区別し、排他制御と世代番号によって競合更新を拒否する。`--mode status` / `--mode sessions` は目的を表示する。
+- Separates shared task state from session documents, distinguishes new work from resumption and participation, and rejects conflicting updates using locks and revision checks. Status and session listings display the task goal.
+- Ubuntu・macOSの隔離環境で導入・更新・フック・記録処理を実行する回帰テストをCIへ追加。同じコミットの品質検査を通った後に、既存の署名付きタグ・Release作成へ進む。
+- Adds isolated Ubuntu/macOS runtime regressions for installation, upgrades, hooks and task records. The release path now requires successful quality checks on the same commit before signed tagging and publication.
 
-- 大文字小文字・Unicodeの表記差で保持対象を別名から更新できた漏れを修正。配布パスと子孫・親フォルダの衝突を適用前に拒否し、導入元・直接copyにも検査を接続する。隔離回帰と再実行を追加し、日英の互換性・復旧説明、旧Blueprintの確認済み版数の説明を同期する。
-- Reject case/canonical-Unicode distribution aliases that could update preserved files through alternate names. Check selections, descendants and parent directories before application, including installation sources and direct copy. Add isolated rejection/retry regressions and align bilingual portability, recovery and confirmed-version guidance in the older Blueprint.
+### 変更 / Changed
 
-- 正常なフック起動・再開を4秒で打ち切っていた回帰試験の監視上限を15秒へ調整。改修前の検査でも4秒を超える正常完了を確認したためで、FIFO拒否の専用3秒検査と出力・既存記録保持の検証は維持する。
-- Give end-to-end hook regression tests a 15-second watchdog after observing valid bootstrap exceed the previous four-second limit even with the prior path check. Retain the dedicated three-second FIFO rejection test and all output/preservation assertions.
+- healthを構造・準備・完了へ分離。構造検査は作業開始時の未達成を許容し、準備検査は目的・条件・検証方法を確認し、完了検査は未記入・証拠なしの完了・状態の矛盾を拒否する。H0の読取に永続記録は不要、H1は短い記録で足りる。
+- Separates structural health, readiness and completion. Unfinished work is allowed during structural checks; readiness requires a goal, criteria and verification methods; completion rejects missing evidence and contradictory records. H0 reads need no durable task record, and H1 needs only a short record.
+- 日英の起動・再ロード・教訓の分類と昇華・索引・任意プロンプトを正本へ接続。実際に読んだ範囲だけをロード済みと記録し、AIが確認できる事実をユーザーへ聞き直さない。自律距離D、成熟度M、ハーネスHを区別し、Blueprintの追加フォルダと各フォルダの000–999採番を扱う。AXIARCH.mdの章は1から始まり、実証範囲は§1.1へ移る。
+- Aligns bilingual loading, reloading, lesson classification/promotion, indexes and optional prompts with the canonical protocols. Records only actual reads, requires agents to inspect accessible facts themselves, distinguishes autonomy distance D, maturity M and harness H, supports additional Blueprint folders and local 000–999 numbering, and starts AXIARCH.md chapters at 1, with validation scope in §1.1.
+- 言語設定・コード例・コメント・教訓・参照の読取境界を共通化。選択言語を生成物へ反映し、設定の重複や不明値を停止する。日本語固有の要件を英語版へそのまま移さず、法域・用途・採用環境で判断する規則へそろえた。
+- Shares parsing boundaries for language settings, examples, comments, lessons and references. Generated files honor the selected language; ambiguous settings stop processing. English guidance uses jurisdiction, purpose and deployment context instead of inheriting Japan-specific assumptions.
 
-- 更新のワイルドカード展開で改行入りの名前が別パスへ分割され、指定外ファイルまで正常終了で更新された不備を修正。元の名前を検査し、旧Blueprint探索・Unicode行区切りも保護する。適用前の拒否時に利用先を変更しない回帰と復旧後の再実行を追加。配布検査の終了値説明と、日英のセキュリティ・QA索引の古い構成数を訂正する。
-- Fix wildcard expansion splitting newline-bearing names into separate paths and updating unselected files with a successful exit. Validate original names, preserve legacy Blueprint discovery boundaries and reject Unicode line separators. Add unchanged-adopter and repair/retry regressions; correct preflight exit-code guidance and stale bilingual security/QA structure counts.
+### 修正 / Fixed
 
-- 配布境界の追加監査で、manifestや展開後の対象にGit内部情報・ローカル管理記録を含められた漏れを修正。導入・更新前にプロジェクト全体と予約パスを拒否し、初期導入の必須ファイル／ディレクトリ型を検査する。日英の異常通知・復旧手順と隔離回帰を追加し、既存記録の削除や内容の自動匿名化は行わない。
-- Close distribution-boundary gaps that allowed manifests or expanded selections to include Git internals and local managed records. Reject whole-project/reserved paths before application and validate required installation file/directory types. Add bilingual failure/recovery guidance and isolated regressions without deleting existing records or claiming automatic content redaction.
+- 導入・更新が診断失敗や部分適用を成功と扱う経路を修正。適用結果・診断・保留・競合を別々に記録し、不完全な更新では前回の確認済み版数を保持する。dry-run、EOFでの未適用、独自ファイル・Blueprint・教訓の保持、マージ競合・中断後の再実行を検証する。
+- Fixes installation/upgrade paths that reported diagnostic failure or partial application as success. Applied changes, diagnosis, pending work and conflicts are recorded separately; incomplete upgrades retain the last confirmed version. Regressions cover dry-runs, EOF cancellation, local files/Blueprint/lessons, merge conflicts and recovery.
+- 配布manifestの所有境界、欠落元、型不一致、リンク・特殊ファイル・予約パス、大小文字／Unicodeの別名、改行によるパス分割を事前検査。copy中の失敗は終了5へ伝え、成功済みの部分適用も記録する。HTTPS取得・不正JSON／アーカイブ・一時保存先の扱いを見直す。
+- Preflights manifest ownership, missing sources, type conflicts, links, special/reserved paths, case/Unicode aliases and newline-split names. Copy failures propagate as exit 5 while retaining partial-application records. Hardens HTTPS retrieval, invalid JSON/archive handling and temporary storage.
+- 既存ファイルへのWrite拒否をJSONエスケープやリンクで回避できた不備を修正。フックの設定・イベント・対象操作・呼出し先を対応させ、起動成功を読了の証明にしない。Git診断失敗・初回コミット前・detached HEAD・未追跡差分を区別し、診断中の外部フィルターや自動取得を抑制する。
+- Fixes escaped-path and symlink bypasses of existing-file Write refusal. Correlates hook configuration, events, operations and scripts without claiming that startup proves reading. Distinguishes failed Git diagnostics, unborn/detached states and untracked changes, and suppresses diagnostic-time external filters and lazy fetches.
+- 管理記録のGit除外、更新記録・ログの権限、異常ロック・不完全セッションの拒否、通常生成失敗の後片付けを整備。読み取り専用診断によるPythonキャッシュ書込を止め、ライセンス・帰属表示を利用先のルートファイルを置換せず配布する。CI Actionの保守更新はSHA固定を維持する。
+- Adds exclusions for local records, restricted permissions for new logs, invalid-lock/incomplete-session rejection and cleanup after ordinary generation failures. Stops read-only diagnostics from writing Python caches, distributes license/attribution copies without replacing adopter root files, and retains immutable SHA pins for CI maintenance updates.
 
-v1.17.0は、ゴールと証拠、セッション分離、導入・更新の失敗通知、品質検査と公開経路、日英ガバナンス整合をまとめたリリースです。既存導入先は自動更新されないため、更新元と適用差分を確認してください。
+### 互換性と更新 / Compatibility and upgrade
 
-v1.17.0 brings together goal/evidence checks, session isolation, install/upgrade failure reporting, release quality gates and bilingual governance alignment. Existing adopters are not updated automatically; review the source and proposed changes before upgrading.
+既存導入先へ自動適用されない。v1.17.0は追加機能と不具合修正を含むminor版だが、旧挙動に依存する自動処理には調整が必要であり、無変更での互換性を保証しない。
 
-- 追加整合性監査で、要約を読込完了と扱う経路、Gitハッシュ・署名・履歴保全の過剰保証、任意ツールの一律必須化、フォークの自動上書き、2桁番号の旧検査例を修正。日英の参照・権限・教訓の分別を正本へ接続し、3桁000–999とGit受信フック例を隔離実行で検証する。
-- The additional consistency audit corrects summary-only loading claims, overstatements about Git hashes/signatures/history, mandatory optional tools, automatic fork overwrites and obsolete two-digit checks. Align bilingual references, authority and lesson routing with canonical protocols; execute three-digit 000–999 and Git receive-hook examples in isolation.
-- ライセンス・帰属表示を `axiarch-rules/LICENSE` / `axiarch-rules/NOTICE` として導入・更新へ接続し、利用先ルートの独自ファイルを保持する。配布コピーの不一致と曖昧な番号付きファイル参照を検出する。個人情報の同意年齢・権利要求・侵害通知・保存期間は法域と用途の確認へ改め、一律期限の自動計算や不要な個人情報の記録を要求しない。
-- Deliver attribution and license copies under `axiarch-rules/` while preserving adopter root files; detect copy drift and ambiguous numbered-file references. Base privacy consent, rights requests, breach notification and retention on verified jurisdiction and purpose, without universal deadline calculators or unnecessary personal-data logging.
-- セッション一覧にタスクの目的を表示する `--mode sessions` を追加し、statusにもgoalを表示。内部ID・保存先・再開手順を維持し、ローカル記録をGit配布物から除外する境界を日英で説明する。
-- Add goal-based `--mode sessions` listings and include the goal in status. Preserve internal IDs, storage paths and resumption, documenting the exclusion of local evidence from Git distribution in both languages.
+Existing adopters are not updated automatically. v1.17.0 is a minor release containing additions and fixes, but automation relying on previous behavior may need changes; the version number is not a guarantee of unchanged compatibility.
 
-- 開発版のhealthで未公開タグの導入例を要求していた不整合を修正。開発版と履歴上の安定版を別々に突合し、安定版の公開検査とUnreleasedの公開スキップを隔離試験で確認する。
-- Correct development health checks that required unpublished installation tags. Validate build and recorded stable versions separately; retain isolated checks for stable publication and Unreleased publication skipping.
+| 対象 / Surface | 必要な対応 / Required action |
+|:--|:--|
+| 旧ルートの作業文書 / Legacy root records | そのまま保持する。セッションの文書へ移す場合は `--import-legacy` でコピーし、元を残す。`current` / `append` は互換入力として受理するが、共有文書を自動置換・退避しない。 / Preserve originals; use explicit import to copy them into a new session. Legacy mode values no longer rotate shared files. |
+| 更新を呼ぶCI・監視 / Upgrade automation | 終了0でもdry-run・不適用があるためmodeを確認する。終了3は保留・競合、4は診断失敗、5はパス・適用・記録の失敗、6は更新中の競合。詳細は [版固定の終了値一覧](https://github.com/hiroyuki-miyauchi/axiarch/blob/v1.17.0/README.md#実行記録更新結果保証範囲--runtime-evidence-upgrade-outcomes-and-guarantees) を参照する。 / Inspect mode even on exit 0; handle pending work (3), diagnosis failure (4), path/application/record failures (5) and concurrent upgrades (6) as documented in the pinned contract. |
+| フック・任意scripts / Hooks and scripts | Python 3等の前提を確認し、Python補助を含むscripts一式と設定を対応させて更新する。個別のshファイルだけを差し替えない。 / Check prerequisites and update the scripts bundle together with matching hook configuration. |
+| ローカル記録 / Local records | `.axiarch/` 配下のセッション・タスク・復旧記録はGit配布しない。除外設定は追跡済みファイルや過去履歴を消さないため `--mode privacy-check` で確認する。 / Keep records local and check tracking; ignore rules do not remove tracked files or history. |
 
-- 設定・教訓・参照のコード例とコメントの読取境界を共通化。言語変更は値以外の空白・末尾注記・改行を保持し、曖昧な記法を含む値では書換せず停止する。閉じていない実コメントと複数行のコードスパンを含む隔離回帰試験を追加した。
-- Share code/comment boundaries across settings, lessons and references. Language changes preserve surrounding whitespace, trailing notes and line endings, stopping without writes on ambiguous value markup. Add isolated regressions covering unclosed real comments and multiline code spans.
+更新元v1.17.0を取得・確認し、その版の更新補助で対象プロジェクトへのdry-runを行う。続いて差分と保留項目を確認し、承認された範囲だけ適用する。旧導入先の補助スクリプトで新しい修正が有効になるとは限らないため、取得・実行の具体例は [v1.17.0の更新手順](https://github.com/hiroyuki-miyauchi/axiarch/blob/v1.17.0/axiarch-scripts/README.md#使い方--usage) を使う。更新後は構造health、選択タスクの準備・完了検査、プロジェクト固有テストを実行し、`.axiarch/upgrade-result.json` と確認済みの範囲・版数を照合する。
 
-- 起動・生成・healthの言語設定パーサーを共通化し、例示・重複・不明設定の扱いを統一。コード枠内のコメント記号で後続設定が隠れる問題を修正し、healthの文字種による言語適合表示を廃止する。
-- 日英の言語規則をユーザー指定・既定言語・表示ロケール・技術表記へ整合させ、任意検知・通知の承認境界、言語成熟度LM、実装されていない検査例を明確化する。
-- Align language parsing across startup, generation and health; correct literal comment tokens inside code examples, reject ambiguous settings and remove character-script compliance claims.
-- Align both language rules with explicit instructions, defaults, display locales and technical notation; clarify optional detection, authorized notifications, language maturity LM and illustrative checks that are not bundled.
+Fetch and review the v1.17.0 source, then use that version's helper to preview the target project. Review changes and pending items before applying the authorized scope. An older installed helper does not acquire these fixes merely by selecting a newer source; use the pinned upgrade instructions above. After applying, run structural health, relevant task checks and project tests, and reconcile the outcome record with the confirmed version and scope.
 
-- 差分診断のGit環境上書きを切り離し、local/include/worktreeの変換フィルターを診断中だけ無効化。不足オブジェクトの自動取得を抑止し、設定確認不能を未確認として通知する。通常Git表示との違いと旧Gitの互換性を日英で明記し、隔離回帰テストを追加。
-- Isolate diff diagnostics from inherited Git overrides; disable local/included/worktree conversion filters only during observation. Suppress lazy object downloads and report unavailable configuration checks as unassessed. Document differences from ordinary Git output and older-Git compatibility in both languages, with isolated regressions.
-- healthのGit取得失敗を0件・同期済みへ変換する経路を修正。対象作業ツリー・detached HEAD・初回コミット前・ローカル参照の欠落と、診断不能を区別し、リモート鮮度やpush承認を保証しない表示へ変更。
-- Stop turning failed health Git queries into zero counts or synchronized claims. Distinguish the selected worktree, detached/unborn HEAD and absent local refs from diagnostic failures; explicitly avoid guarantees of remote freshness or push authorization.
+### 検証と限界 / Verification and limits
 
-- hook診断を両設定・各イベント・対象操作と呼出し先の対応へ統一し、先頭以外の宣言も検査。欠落・無効化・非同期・未確認形式を成功扱いせず、任意commandの実行や設定の書換えを行わない隔離回帰を追加した。
-- Correlate hook events, matched operations and script invocations in both configurations, including declarations after other hooks. Missing, disabled, asynchronous or unassessed declarations no longer pass; isolated regressions verify that diagnostics do not execute arbitrary commands or rewrite settings.
+- 公開対象は [89dee831](https://github.com/hiroyuki-miyauchi/axiarch/commit/89dee831f2b9d0538a4e73a1009368e17c856e2f)。[公開時CI](https://github.com/hiroyuki-miyauchi/axiarch/actions/runs/34764501646/attempts/2) でUbuntu・macOS各255件の実動作回帰、Markdown、ShellCheck、日英整合の検査が成功した。署名付きタグの検証、公開tar.gzの270ファイル照合、公開配布物からの日英新規導入・health・dry-runを確認した。
+- The release targets commit 89dee831. The linked publication CI passed 255 runtime tests on each of Ubuntu and macOS, plus Markdown, ShellCheck and bilingual checks. Tag signature verification, comparison of 270 tarball files, and Japanese/English installation, health and dry-run checks used the published source.
+- 同CIの初回macOS実行では一時フォルダ削除が失敗し、同じコミットの再実行で公開した。原因となるGitの背景保守と削除の競合への修正は公開後の [PR #65](https://github.com/hiroyuki-miyauchi/axiarch/pull/65) にあり、v1.17.0には含まれない。再実行成功を原因修正と扱わない。
+- The first macOS attempt failed during temporary-directory cleanup; publication followed a successful rerun of the same commit. The Git background-maintenance cleanup fix in PR #65 was merged afterward and is not included in v1.17.0. A successful rerun is not a root-cause fix.
+- healthは記録・構造の整合検査であり、AIの理解、証拠の十分性、全操作の安全、法的適合を証明しない。フックは設定された対象操作に限り、外部通知は自動送信しない。実務実証済みはGoogle Antigravityのみ。Codex・Claude Code等のアダプターと回帰テストを、各製品での実務実証や動作保証へ読み替えない。
+- Health checks record/structural consistency, not AI understanding, evidence sufficiency, universal safety or legal compliance. Hooks cover configured operations; external notifications are not sent automatically. Only Google Antigravity is practically validated. Adapter code and isolated tests do not establish real-world validation or operation guarantees for Codex, Claude Code or other agents.
 
-- 初期導入・更新・healthのJSON検査を共通化し、取得のHTTP失敗・時間切れ・不正アーカイブを適用前に拒否。curlによるHTTPS限定取得、専用一時ディレクトリの案内、準備状態に即した表示と隔離回帰テストを追加した。wgetのみの環境は確認済みローカルソースを利用する。
-- Share strict JSON validation across setup, upgrade and health; stop on HTTP failures, deadlines and invalid archives before application. Add curl-based HTTPS-only retrieval, private temporary bootstrap guidance, accurate preparation messages and isolated regressions. Wget-only environments use a reviewed local source.
+### 比較と関連情報 / References
 
-- 管理記録のGit除外を導入・更新・起動へ接続し、既存設定を保持して追跡済み・除外漏れを検知。更新記録と導入ログの権限、競合コピーの原子的な保存、manifest制御文字と表示の扱いを修正し、異常通知と自動保護の限界を日英で明記した。
-- Connect private artifact exclusions to install, upgrade and startup while preserving existing policy and detecting tracked/unignored records. Restrict new run/log permissions, replace compatibility conflicts atomically, reject manifest controls and preserve literal display text; document notification and protection limits in both languages.
-
-- タスク生成の通常失敗で新規記録を取り消し、既存記録と読取専用の旧文書を保持。異常なロック・不完全なタスク・JSON数値オーバーフローを拒否し、強制終了と再開を隔離テストで検証した。
-- Task generation now rolls back new records on ordinary failures while preserving existing work and read-only legacy documents. Invalid locks, incomplete tasks and JSON numeric overflow are rejected, with isolated forced-termination and resume regressions.
-- 差分ガードの初回コミット前・未追跡ファイル・閾値処理を修正し、Git計測失敗を未確認として通知。日英の事後フック保証範囲・依存関係を更新し、隔離回帰テストを追加。
-- Corrected diff measurement for unborn branches, untracked files and thresholds; failed Git observations are explicitly unassessed. Updated bilingual post-use hook scope and dependencies with isolated regressions.
-
-### Runtime and framework consistency / 実行導線と全体一貫性
-
-- 起動・補足フックのセッション入力・JSON出力を共通化。曖昧なIDから記録を作らず、長文・Unicodeと不正TTLを扱い、表示用キャッシュのリンクや特殊ファイルを保持して完全表示へ戻す。共有JSONの重複・非通常ファイルと再開時の文書欠落を拒否し、補助ファイルを導入・診断に接続。
-- Share startup/reminder identity parsing and context JSON; preserve records on ambiguous IDs, decode long Unicode prompts and handle invalid TTLs. Preserve linked or special cache entries and use full reminders. Reject ambiguous/non-regular state JSON and missing resume documents; include the helper in installation and health checks.
-- 起動・補足・Writeの生入力をBashへの格納前に検証し、不正なNULを含むJSONの暗黙的な変形を拒否する。3フックともPython補助を含むscripts一式で更新する。
-- Validate raw startup/reminder/Write input before storing it in Bash, rejecting silent repair of JSON containing raw NUL bytes. All three hooks require the complete scripts bundle, including Python helpers.
-- 現行のトークン削減率を断定する説明を修正。過去v1.6.0の削減率記録はリリース当時の説明で、現在の全体使用量の実測・保証ではない。core/300に残るsecurity参照も完全なパスに統一。
-- Qualify token-saving claims: historical v1.6.0 figures are not measurements or guarantees of current total usage. Expand the remaining core/300 security references to full paths.
-
-- フックのJSONエスケープによる既存Write拒否の迂回を修正し、不正入力を許可扱いしない。初期導入・作業記録・任意生成の言語読取を共通化。不完全セッションや共有状態消失時の暗黙的なタスク再生成を停止し、中核参照の省略パスを明確化。
-- Decode hook JSON paths correctly and stop on malformed input. Share language-setting parsing across initial setup, session documents and optional commands; stop implicit task recreation after incomplete sessions or missing shared state, and make core reference paths explicit.
-
-- フックはリンクと親パスを実際の解決順序で確認し、例外許可は実体パスで照合する。制御文字を含む拒否応答も正しいJSONにし、関連研究の評価とAxiarch自身の検証範囲を区別した。
-- Check hook paths using filesystem symlink/parent resolution and match exceptions against physical paths. Emit valid denial JSON for control characters and distinguish related research evaluations from Axiarch's own evidence.
-
-- manifestの親子・重複・除外指定による保持境界のすり抜けを修正し、特殊ファイル・コマンド名衝突・曖昧な言語指定を検出。日英の任意プロンプトを正本参照と条件付き着手へ整理し、現行の更新・教訓運用に合わせた。コード枠内の指示も文書回帰検査に追加。
-- Enforce manifest ownership across parent/child selections, duplicates and exclusions; detect special files, command-name collisions and ambiguous language settings. Align Japanese and English optional prompts with canonical loading, conditional startup, current upgrades and lesson handling; check instructions inside fenced prompt bodies.
-
-- 初期導入を一時領域で準備し、独自設定との衝突・診断失敗を成功扱いしないよう修正。明示dry-run、日英prompt選択、壊れたmanifestの停止、任意生成物の編集保護を追加し、CLIと説明を対応させた。
-- Stage fresh installs and distinguish collisions and failed diagnosis from success. Honor explicit dry-runs and prompt language selection, reject malformed manifests, protect edited optional commands, and align CLI behavior with documentation.
-
-- 追加回帰監査で、過去記録の構造と現在の鮮度を分離し、タスク接続の不整合、更新元欠落、管理領域のリンク、自己更新・多重更新・中断復帰、コード囲み内の教訓誤検出を修正。未解決セッションの共有文書誤参照と新旧呼称・再ロード条件も整理。
-- Follow-up regressions separate historical structure from current freshness and cover invalid task bindings, missing sources, linked metadata, self/concurrent/interrupted upgrades and fenced lesson examples. Unresolved sessions no longer borrow shared evidence; level names and reload conditions are aligned.
-
-- ゴール・現在値と実行記録を接続し、構造・準備・完了の検査を分離。セッション固有の文書、共有状態の更新競合検知、証拠付き完了判定を追加。
-- 更新の適用・保留・診断失敗と版数を分離し、隔離した実動作テストと同一コミットのリリース品質ゲートを追加。
-- 3層、必須／任意、実際のロード、教訓の分類・昇華・索引更新、拡張フォルダ、採番、参照先、日英の適用範囲を整合。実証済みはGoogle Antigravityのみと訂正。
-- Connect goals and evidence to execution; separate structure, readiness and completion, isolate session records and detect shared-state update conflicts.
-- Distinguish applied, pending and diagnostic upgrade outcomes; gate signed releases on the same commit’s quality checks and isolated runtime regressions.
-- Align the three layers, mandatory/optional scope, actual reading, lesson lifecycle, extensible folders, numbering, references and localized applicability. Only Google Antigravity is practically validated; other agents remain unverified.
+- [v1.16.0からの全差分 / Full comparison](https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...v1.17.0): 191ファイル変更。 / 191 files changed.
+- [中核・実行の改定 / Core and runtime changes (PR #63)](https://github.com/hiroyuki-miyauchi/axiarch/pull/63)、[正式化と章番号・依存更新 / Finalization, numbering and dependencies (PR #64)](https://github.com/hiroyuki-miyauchi/axiarch/pull/64)。
+- 説明改訂: 2026-09-14。タグと配布コードは変更していない。上記の公開後修正への言及は追補であり、未公開変更をこの版の実装に含めない。公開日時は2026-09-13 UTC（日本時間9月14日）で、元の版見出しの日付を維持する。
+- Notes revised 2026-09-14 without changing the tag or source. Post-publication references are addenda, not code included in this version. Publication occurred on September 13 UTC (September 14 in Japan); the original release-heading date is retained.
 
 ---
 

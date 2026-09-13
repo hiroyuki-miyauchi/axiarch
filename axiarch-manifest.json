@@ -330,6 +330,18 @@
       "policy": "skip"
     },
     {
+      "path": "RELEASING.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": "RELEASE_AUDIT.md",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
       "path": "CONTRIBUTING.md",
       "group": "source_docs",
       "owner": "axiarch-source",
