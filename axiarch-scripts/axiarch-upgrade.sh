@@ -1479,12 +1479,7 @@ write_upgrade_metadata() {
   return "${result_rc}"
 }
 
-main() {
-  parse_args "$@"
-  if [[ "${PROJECT_DIR}" =~ [[:cntrl:]] ]]; then
-    print_err 'Control characters are not supported in the upgrade project path.'
-    return 2
-  fi
+check_platform() {
   command -v python3 >/dev/null 2>&1 || { print_err 'Python 3 required; no changes applied.'; return 2; }
   # A standalone upgrade launcher has no adjacent helper yet. Check the Python
   # runtime before downloading sources, acquiring locks or changing the target.
@@ -1499,6 +1494,21 @@ except ImportError:
     print('AXIARCH_PLATFORM_UNSUPPORTED: POSIX Python with fcntl required. / POSIX対応のPythonが必要です。', file=sys.stderr)
     sys.exit(2)
 AXIARCH_PLATFORM_PY
+}
+
+main() {
+  # Keep help available without Python; diagnose native Windows before Bash
+  # applies locale-sensitive classification to Unicode arguments.
+  if [[ $# -eq 1 && ( "$1" == '--help' || "$1" == '-h' ) ]]; then
+    parse_args "$@"
+    return 0
+  fi
+  check_platform
+  parse_args "$@"
+  if [[ "${PROJECT_DIR}" =~ [[:cntrl:]] ]]; then
+    print_err 'Control characters are not supported in the upgrade project path.'
+    return 2
+  fi
   resolve_sources
   if [[ ! -f "${HELPER_DIR}/axiarch_upgrade.py" || ! -f "${HELPER_DIR}/axiarch_state.py" ]]; then
     HELPER_DIR="${SOURCE_DIR}/axiarch-scripts"

@@ -701,10 +701,6 @@ stage_and_install() {
 # Main
 # =============================================================================
 main() {
-  if [[ "$AXIARCH_REF" =~ [[:cntrl:]] || "$TARGET_DIR" =~ [[:cntrl:]] ]]; then
-    print_error 'Control characters are not supported in the source reference or target path.'
-    return 2
-  fi
   if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
     echo 'Usage: bash init.sh [target-directory] (fresh setup; existing projects use axiarch-scripts/axiarch-upgrade.sh)'
     return 0
@@ -713,8 +709,14 @@ main() {
     print_error 'Expected one target directory. For upgrade previews use axiarch-scripts/axiarch-upgrade.sh --dry-run.'
     return 2
   fi
-  print_header
+  # Reject unsupported runtimes before locale-sensitive path classification.
+  # Git Bash on native Windows can classify Unicode path bytes differently.
   check_prerequisites
+  if [[ "$AXIARCH_REF" =~ [[:cntrl:]] || "$TARGET_DIR" =~ [[:cntrl:]] ]]; then
+    print_error 'Control characters are not supported in the source reference or target path.'
+    return 2
+  fi
+  print_header
   check_existing_install
   select_language
   select_language_dirs

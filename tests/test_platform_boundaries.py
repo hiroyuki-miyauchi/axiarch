@@ -46,7 +46,7 @@ class PlatformBoundaryTests(unittest.TestCase):
                     command = [sys.executable, '-c', code, SCRIPTS, SCRIPTS / script]
                 result = self.run_process(command)
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-                self.assertIn('AXIARCH_PLATFORM_UNSUPPORTED', result.stderr)
+                self.assertIn('AXIARCH_PLATFORM_UNSUPPORTED', result.stderr, result.stdout + result.stderr)
                 self.assertNotIn('Traceback', result.stderr)
                 self.assertEqual(self.snapshot(), before)
 
@@ -87,7 +87,7 @@ class PlatformBoundaryTests(unittest.TestCase):
                     'axiarch-platform-test', wrappers.as_posix(), script.as_posix(),
                     *[a.as_posix() if isinstance(a, Path) else a for a in args]])
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
-                self.assertIn('AXIARCH_PLATFORM_UNSUPPORTED', result.stderr)
+                self.assertIn('AXIARCH_PLATFORM_UNSUPPORTED', result.stderr, result.stdout + result.stderr)
                 self.assertNotIn('Traceback', result.stderr)
                 self.assertNotIn('setup complete!', result.stdout)
                 self.assertEqual(self.snapshot(), before)
