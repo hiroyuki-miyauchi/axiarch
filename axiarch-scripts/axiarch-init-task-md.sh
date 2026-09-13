@@ -41,6 +41,14 @@ INPUT_WARNING=""
 if [[ ! -t 0 ]] && ! INPUT=$(python3 "$HOOK_HELPER" normalize); then
   INPUT_WARNING="Invalid hook JSON; see stderr for the parsing error"
 fi
+if [[ -z "$INPUT_WARNING" ]]; then
+  if ACTIVE_PROJECT=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" project --project "$PROJECT_DIR"); then
+    PROJECT_DIR="${ACTIVE_PROJECT%.}"
+    TASK_STATE_SCRIPT="${PROJECT_DIR}/axiarch-scripts/axiarch-task-state.sh"
+  else
+    INPUT_WARNING="Hook working project unresolved; original checkout was not substituted"
+  fi
+fi
 if ! SESSION_ID=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" session); then
   INPUT_WARNING="Invalid hook identity; see stderr for the parsing error"
   SESSION_ID=""

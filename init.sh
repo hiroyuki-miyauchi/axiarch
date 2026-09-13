@@ -158,7 +158,7 @@ select_language_dirs() {
   case "$lang_dir_choice" in
     1) KEEP_BOTH_LANGS=true; print_success "Keeping both language directories." ;;
     2) KEEP_BOTH_LANGS=false; print_success "Single-language cleanup will be applied." ;;
-    *) print_warn "無効な選択。両言語を保持します。"; KEEP_BOTH_LANGS=true ;;
+    *) print_warn "無効な選択。両言語を保持します。 / Invalid choice; keeping both languages."; KEEP_BOTH_LANGS=true ;;
   esac
 }
 
@@ -168,9 +168,9 @@ select_language_dirs() {
 select_agent() {
   echo ""
   echo -e "${BOLD}AIエージェント / AI Agent:${RESET}"
-  echo "  1) OpenAI Codex — Unverified primary candidate (no operation guarantee; AGENTS.md adapter → AXIARCH.md + .codex/hooks.json)"
-  echo "  2) Claude Code — Unverified primary candidate (no operation guarantee; CLAUDE.md adapter → AXIARCH.md + .claude/settings.json)"
-  echo "  3) Google Antigravity — Production-validated primary ✅ (.agents/rules/prompt_pointer.md adapter → AXIARCH.md)"
+  echo "  1) OpenAI Codex — Unverified primary candidate / 実務未実証・動作保証なし (no operation guarantee; AGENTS.md → AXIARCH.md + .codex/hooks.json)"
+  echo "  2) Claude Code — Unverified primary candidate / 実務未実証・動作保証なし (no operation guarantee; CLAUDE.md → AXIARCH.md + .claude/settings.json)"
+  echo "  3) Google Antigravity — Production-validated primary / 確認した環境・実務の範囲で実証 (within exercised environments/tasks; .agents/rules/prompt_pointer.md → AXIARCH.md)"
   echo "  4) Cursor — Extended pointer only ⚠️ (unverified, no guarantee; .cursor/rules/axiarch.mdc adapter → AXIARCH.md)"
   echo "  5) GitHub Copilot — Extended pointer only ⚠️ (unverified, no guarantee; .github/copilot-instructions.md adapter → AXIARCH.md)"
   echo "  6) Windsurf — Extended pointer only ⚠️ (unverified, no guarantee; .windsurfrules adapter → AXIARCH.md)"
@@ -196,7 +196,7 @@ select_agent() {
     5) SETUP_COPILOT=true; AGENT_LABEL="GitHub Copilot"; AGENT_ID="copilot" ;;
     6) SETUP_WINDSURF=true; AGENT_LABEL="Windsurf"; AGENT_ID="windsurf" ;;
     7) AGENT_LABEL="Other / Universal" ;;
-    *) print_warn "無効な選択。Universal設定を使用します。" ;;
+    *) print_warn "無効な選択。Universal設定を使用します。 / Invalid choice; using Universal settings." ;;
   esac
   print_success "Agent: ${AGENT_LABEL}"
 }
@@ -573,26 +573,26 @@ print_next_steps() {
 
   local step=2
   if [[ "$AGENT_LABEL" == "Google Antigravity" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md → AXIARCH.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.agents/rules/prompt_pointer.md → AXIARCH.md${RESET} — configuration files installed / 設定ファイルを配置"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "OpenAI Codex" ]]; then
     if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
-      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md → AXIARCH.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — auto-configured"
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}AGENTS.md → AXIARCH.md${RESET} + ${BOLD}.codex/hooks.json${RESET} — configuration files installed / 設定ファイルを配置"
     fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Cursor" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc → AXIARCH.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.cursor/rules/axiarch.mdc → AXIARCH.md${RESET} — configuration files installed / 設定ファイルを配置"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Claude Code" ]]; then
     if [[ -f "$TARGET_DIR/AXIARCH.md" ]]; then
-      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md → AXIARCH.md${RESET} + ${BOLD}.claude/settings.json${RESET} — auto-configured"
+      echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}CLAUDE.md → AXIARCH.md${RESET} + ${BOLD}.claude/settings.json${RESET} — configuration files installed / 設定ファイルを配置"
     fi
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "GitHub Copilot" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md → AXIARCH.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.github/copilot-instructions.md → AXIARCH.md${RESET} — configuration files installed / 設定ファイルを配置"
     step=$((step + 1))
   elif [[ "$AGENT_LABEL" == "Windsurf" ]]; then
-    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.windsurfrules → AXIARCH.md${RESET} — auto-configured"
+    echo -e "  ${CYAN}${step}.${RESET} ✅ ${BOLD}.windsurfrules → AXIARCH.md${RESET} — configuration files installed / 設定ファイルを配置"
     step=$((step + 1))
   fi
 
@@ -604,11 +604,16 @@ print_next_steps() {
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Verify hook wiring (recommended for Codex / Claude Code):${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
     echo -e "         (16-stage diagnostic: 4-hook wiring, record consistency, crystallization, hook configuration, diff guard, more)"
+    echo "       → /hooks で有効化・信頼状態を確認 / Review activation and trust in /hooks"
+    if [[ "$SETUP_CODEX" == "true" ]]; then
+      echo "         Codex: 新規・変更済みhookの信頼登録が必要 / New or changed hook definitions require trust review"
+    fi
   else
     echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Optional diagnostic:${RESET}"
     echo -e "       → ${BOLD}bash axiarch-scripts/check-axiarch-health.sh${RESET}"
     echo -e "         (hook checks become strict only when .codex/hooks.json or .claude/settings.json is installed)"
   fi
+  echo "       → axiarch-scripts/AGENT_COMPATIBILITY.md: 日英・製品・OSの確認範囲 / Language, product and OS verification scope"
   step=$((step + 1))
   echo ""
   echo -e "  ${CYAN}${step}.${RESET} ${BOLD}Plan future upgrades safely (optional):${RESET}"

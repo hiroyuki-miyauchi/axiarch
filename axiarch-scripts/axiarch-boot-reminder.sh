@@ -70,6 +70,15 @@ fi
 if [[ ! -t 0 ]] && ! INPUT=$(python3 "$HOOK_HELPER" normalize); then
   INPUT_WARNING=" [HOOK INPUT WARNING] Invalid raw JSON; input was not inspected. / 不正なJSON入力は検査できていません。"
 fi
+if [[ -z "$INPUT_WARNING" ]]; then
+  if ACTIVE_PROJECT=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" project --project "$PROJECT_DIR"); then
+    PROJECT_DIR="${ACTIVE_PROJECT%.}"
+  else
+    printf '%s\n' '[HOOK INPUT WARNING] Working project unresolved; no other checkout was inspected. / 作業先を特定できず、別の作業コピーは検査していません。' |
+      python3 "$HOOK_HELPER" emit --event UserPromptSubmit
+    exit 0
+  fi
+fi
 
 # -----------------------------------------------------------------------------
 # Static base reminder (bilingual; identical to the inline reminder previously

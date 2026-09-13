@@ -14,14 +14,18 @@
 
 ---
 
+製品別の入口・信頼設定・作業コピー・日英・OSの検証範囲は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+
+See [agent compatibility](AGENT_COMPATIBILITY.md) for entrypoints, trust, worktrees, language and OS verification boundaries.
+
 ## 📋 配布スクリプト一覧 / Available Scripts
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
 | [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarchの構造・記録の健全性診断**（16 段階、`--quiet` 対応、v1.11.0でルートのタスク文書生成、v1.17.0でセッション別タスク記録、ネイティブタスク状態同期、v1.10.0+由来のリリース整合とROADMAP Current Stable・正規AI-facing header・CHANGELOG compare ref・Actions immutable SHA厳密一致・署名tag経路・日英完了release entry、Blueprint INDEX版数、safe upgrade実行promptのREADME/llms/rules索引、source-only既定skipとinteractive明示override、対話選択肢重複排除、本体リポジトリ専用ファイル分類、README/llms/scripts READMEの必須/任意境界、ハーネスエンジニアリング入口保持、ja/en相対path・番号見出しparity、SECURITY private reporting境界、Claude Memory正本境界、AXIARCH.md・axiarch-harness・中核ファイルのGit追跡状態、AXIARCH.md mixed/review所有境界、fallback core Blueprint検出、任意prompt証跡、`replace-if-local-unchanged` 実行時保護、型不一致review検査を追加） / Structure and record health diagnostic (16-stage, `--quiet` support; v1.11.0 adds session-specific task records, native state sync, v1.10.0+ release parity with exact ROADMAP Current Stable, canonical AI-facing headers, the CHANGELOG compare ref, immutable Actions SHAs, the signed-tag path, and completed ja/en release entries, Blueprint INDEX version metadata, safe-upgrade execution prompt indexing across README, llms, and rules indexes, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, required/optional boundary checks for README, llms, and scripts README, Harness Engineering entrypoint retention, ja/en relative-path and numbered-heading parity, the SECURITY private-reporting boundary, Claude Memory canonical boundary, source release-file Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, fallback core Blueprint discovery, optional prompt evidence checks, `replace-if-local-unchanged` runtime protection, and type-conflict review checks) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
 | [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターンの見直し候補 (A/B/C/D) + TTL 内 + 候補なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); review hints A/B/C/D, short-circuits within TTL when no hint is detected | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
-| [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
-| [`axiarch-diff-guard.sh`](#axiarch-diff-guardsh) | **PostToolUse hook の外出しスクリプト**。Edit / MultiEdit / Write 後のgit diff規模を測定し、閾値超過時に warn / block / Externalized PostToolUse hook; measures git diff size after Edit / MultiEdit / Write and warns or blocks above thresholds | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§7.6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
+| [`axiarch-diff-guard.sh`](#axiarch-diff-guardsh) | **PostToolUse hook の外出しスクリプト**。ClaudeのEdit / MultiEdit / Write、Codexのapply_patch後のgit diff規模を測定し、閾値超過時に warn / block / Externalized PostToolUse hook; measures git diff size after Claude Edit / MultiEdit / Write or Codex apply_patch and warns or blocks above thresholds | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-init-task-md.sh`](#axiarch-init-task-mdsh) | **SessionStart hook の外出しスクリプト**。会話開始時に3つの現在タスク文書を自動ブートストラップ / Externalized SessionStart hook; auto-bootstraps the three current-task docs on session start | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-task-state.sh`](#axiarch-task-statesh) | **現在タスク文書ライフサイクル補助**。`task.md` / `implementation_plan.md` / `walkthrough.md` をセッション別に保持 / Current-task document lifecycle helper; session-specific storage for `task.md` / `implementation_plan.md` / `walkthrough.md` | `axiarch-init-task-md.sh` から呼び出し / Called by `axiarch-init-task-md.sh` |
 | [`axiarch-upgrade.sh`](#axiarch-upgradesh) | **Safe Upgrade Wizard**。`axiarch-manifest.json` に基づき、Axiarch本体・プロジェクト固有Blueprint・任意ファイルをグループ単位で更新判断 / Manifest-based safe upgrade wizard; groups Axiarch-owned files, project Blueprint state, and optional files | 既存プロジェクトへ必要分だけアップグレードしたい時 / When upgrading only the needed parts of an existing adopter project |
@@ -266,17 +270,21 @@ bash axiarch-scripts/axiarch-boot-reminder.sh | jq .
 
 ### 概要 / Overview
 
-`.claude/settings.json` または `.codex/hooks.json` の `PreToolUse` hook（`Write` matcher）から呼ばれるスクリプト。対応runtimeがhookを呼び出して結果を尊重する場合、既存ファイルへの `Write` を `decision:"block"` JSON + exit code 2 で拒否する。Shell・Edit・外部APIによる変更はこのhookの対象外である。
+`.claude/settings.json` または `.codex/hooks.json` の `PreToolUse` hook（Claude: `Write`、Codex: `apply_patch`）から呼ばれるスクリプト。対応runtimeがhookを呼び出して結果を尊重する場合、既存ファイルへの `Write` を `decision:"block"` JSON + exit code 2 で拒否する。Shell・Edit・外部APIによる変更はこのhookの対象外である。
 
 A PreToolUse hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. When the runtime invokes and honors the hook, existing-file `Write` calls are rejected with decision:"block" JSON and exit 2. Shell, Edit and external API changes are outside this hook's scope.
 
-Python 3でJSONを解釈し、jqの有無に左右されず引用符・日本語・改行を含むパスを扱います。不正JSON、重複キー、Writeのパス欠落、Python 3不足は終了2で停止し、許可とは扱いません。通常の新規作成とWrite以外の正しいイベントは許可します。この判定は呼び出されたフックの入力に対するもので、全操作の安全性の保証ではありません。
+Python 3でJSONを解釈し、jqの有無に左右されず引用符・日本語・改行を含むパスを扱います。不正JSON、重複キー、Writeのパス欠落、Python 3不足は終了2で停止し、許可とは扱いません。通常の新規作成とWrite/apply_patch以外の正しいイベントは許可します。この判定は呼び出されたフックの入力に対するもので、全操作の安全性の保証ではありません。
 
-Python 3 decodes JSON consistently with or without jq, including quoted, Unicode and newline-containing paths. Malformed JSON, duplicate keys, a missing Write path or unavailable Python 3 stop with exit 2 rather than granting permission. Ordinary new-file creation and valid non-Write events pass. The decision applies only to the supplied hook event, not all-operation safety.
+Python 3 decodes JSON consistently with or without jq, including quoted, Unicode and newline-containing paths. Malformed JSON, duplicate keys, a missing Write path or unavailable Python 3 stop with exit 2 rather than granting permission. Ordinary new-file creation and valid non-Write/non-apply_patch events pass. The decision applies only to the supplied hook event, not all-operation safety.
 
 入力は `axiarch-scripts/axiarch_hook.py` と `axiarch-scripts/axiarch_state.py` でBashへの格納前に検証します。生のNUL文字を含む不正JSONが、取り込み時に変形されて許可されることを避けます。補助ファイルが欠落した場合も終了2です。Writeフックもscripts一式で更新してください。
 
 `axiarch-scripts/axiarch_hook.py` and `axiarch-scripts/axiarch_state.py` validate raw input before Bash stores it, so invalid JSON containing raw NUL bytes is not silently repaired and allowed. Missing helpers also return exit 2. Update the Write guard with the complete scripts bundle.
+
+Claude設定がある環境ではWriteはClaudeの許可リストだけを使います。旧単独Write呼び出しのCodex許可リストfallbackは保持します。Codexの `apply_patch` は既存の新規作成・移動先を拒否し、通常のUpdate File差分を許可します。delete/addの組み合わせも適用前の実体と突合します。未知のpatch形式は終了2です。専用のCodex許可リストを使い、Claudeの例外は流用しません。詳しい契約は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+
+When Claude settings are installed, Write uses only the Claude allowlist; the legacy standalone Write fallback remains. Codex `apply_patch` checks add/move destinations against the original filesystem, including delete/add pairs, and permits ordinary Update File diffs. Unknown syntax exits 2. It uses the Codex allowlist without borrowing Claude exceptions. See [agent compatibility](AGENT_COMPATIBILITY.md).
 
 ### Whitelist サポート / Whitelist Support
 

@@ -27,12 +27,20 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- Codexのサブフォルダ起動時のhook未発見、apply_patchの新規作成形式による既存ファイル保護漏れ、Claude Codeの作業コピー移動後の記録・差分の参照先ずれを修正。通常の差分編集は維持し、解決不能な作業先や未知のpatchは未確認として扱う。
+- Fix Codex hook discovery from subdirectories, missing protection for apply_patch add/move destinations, and Claude Code records/diff checks pointing at the starting checkout after worktree changes. Preserve focused edits and report unresolved projects or unknown patch syntax.
+- 3製品×日英×言語フォルダ構成の実導入・healthと、言語別更新・記録保持・公式イベント形式の回帰を追加。製品の信頼設定、移行手順、POSIX対応範囲、実務未実証の限界を日英で明記。 Claude Memoryテンプレートの英訳漏れを補い、この配布パスが製品のauto memory自動読込先ではないことも明記。
+- Add real installation/health coverage across three agents, Japanese/English and both/single language trees, plus language-scoped upgrade, record-preservation and native-event regressions. Document trust, migration, POSIX scope and practical-validation limits in both languages. Complete missing English guidance in the Claude memory template and clarify that its distributed path is not the product's auto-loaded memory location.
+
 - 公開済み30版を再監査し、v1.17.0の説明を成果・互換性・移行・検証へ整理。旧版のinstaller版数、main取得、署名の導入時期、非互換minor、実証範囲、v1.15.0の新設5規則の説明漏れを訂正台帳へ記録する。タグと配布済みコードは変更しない。
 - Audit all 30 published releases, reorganize v1.17.0 around outcomes/migration/verification and record historical version, source-pinning, signing, incompatible-minor and validation issues, plus the five omitted v1.15.0 rules. Preserve tags and distributed code.
 - リリース本文の構造・日英記入・比較リンク・抽出を同じ検査へ接続。コード枠・コメントの見出しを除外し、重複・未記入・別版混入を回帰検査する。単なる非空判定では説明の不足を捉えられなかったためで、検査は意味や翻訳の十分性の証明とはしない。scripts READMEのセッション分離の導入版をv1.17.0へ訂正する。
 - Share note structure, bilingual presence, comparison-link and extraction checks; regress duplicate/empty entries, example headings and adjacent-version leakage. Nonempty extraction alone missed insufficient descriptions; the new checks are not semantic or translation proof. Correct the scripts README's session-isolation introduction version to v1.17.0.
 
 ### 診断結果と再発対策 / Diagnostic outcome and regression prevention
+
+- 検証の教訓: Claude由来のツール名や起動時環境変数を別製品・作業コピーへそのまま適用しない。Codexの実差分処理で既存Add Fileの上書きとパス空白の解釈を確認し、公式入力形式・現在の作業場所・実healthを組み合わせて再発を検査する。自動テストと実製品全工程の実証は分ける。
+- Verification lesson: do not assume Claude tool names or startup environment variables apply unchanged to another product or worktree. Exercise Codex's native Add File overwrite and path-whitespace behavior, then regress documented event inputs, the active directory and real health together. Separate automated tests from full product validation.
 
 - テスト用Gitの自動保守がコミット終了後も動き、一時フォルダ削除と競合する不備を修正。Git 2.55.0で削除中の `Directory not empty` と残存するGitディレクトリを再現した。保守処理は無効化せず、テスト用コマンド内で終了まで待つ。利用者のGit設定は変更しない。
 - Fix automatic Git maintenance outliving fixture commits and racing temporary-directory cleanup. Reproduce `Directory not empty` and remaining Git directories with Git 2.55.0. Keep maintenance enabled and wait for it within fixture commands, without changing adopter Git configuration.

@@ -2,11 +2,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write",
+        "matcher": "apply_patch",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-protect-antifull.sh\""
+            "command": "axiarch_root=\"$PWD\"; while [ ! -f \"$axiarch_root/AXIARCH.md\" ]; do [ \"$axiarch_root\" != / ] || { printf \"%s\\n\" \"Axiarch hook: project root unresolved / 正本の場所を特定できません\" >&2; exit 2; }; axiarch_root=${axiarch_root%/*}; [ -n \"$axiarch_root\" ] || axiarch_root=/; done; CLAUDE_PROJECT_DIR=\"$axiarch_root\" AXIARCH_HOOK_AGENT=codex bash \"$axiarch_root/axiarch-scripts/axiarch-protect-antifull.sh\""
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-init-task-md.sh\""
+            "command": "axiarch_root=\"$PWD\"; while [ ! -f \"$axiarch_root/AXIARCH.md\" ]; do [ \"$axiarch_root\" != / ] || { printf \"%s\\n\" \"Axiarch hook: project root unresolved / 正本の場所を特定できません\" >&2; exit 2; }; axiarch_root=${axiarch_root%/*}; [ -n \"$axiarch_root\" ] || axiarch_root=/; done; CLAUDE_PROJECT_DIR=\"$axiarch_root\" AXIARCH_HOOK_AGENT=codex bash \"$axiarch_root/axiarch-scripts/axiarch-init-task-md.sh\""
           }
         ]
       }
@@ -26,36 +26,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-boot-reminder.sh\""
+            "command": "axiarch_root=\"$PWD\"; while [ ! -f \"$axiarch_root/AXIARCH.md\" ]; do [ \"$axiarch_root\" != / ] || { printf \"%s\\n\" \"Axiarch hook: project root unresolved / 正本の場所を特定できません\" >&2; exit 2; }; axiarch_root=${axiarch_root%/*}; [ -n \"$axiarch_root\" ] || axiarch_root=/; done; CLAUDE_PROJECT_DIR=\"$axiarch_root\" AXIARCH_HOOK_AGENT=codex bash \"$axiarch_root/axiarch-scripts/axiarch-boot-reminder.sh\""
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit",
+        "matcher": "apply_patch",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-diff-guard.sh\""
-          }
-        ]
-      },
-      {
-        "matcher": "MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-diff-guard.sh\""
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/axiarch-scripts/axiarch-diff-guard.sh\""
+            "command": "axiarch_root=\"$PWD\"; while [ ! -f \"$axiarch_root/AXIARCH.md\" ]; do [ \"$axiarch_root\" != / ] || { printf \"%s\\n\" \"Axiarch hook: project root unresolved / 正本の場所を特定できません\" >&2; exit 2; }; axiarch_root=${axiarch_root%/*}; [ -n \"$axiarch_root\" ] || axiarch_root=/; done; CLAUDE_PROJECT_DIR=\"$axiarch_root\" AXIARCH_HOOK_AGENT=codex bash \"$axiarch_root/axiarch-scripts/axiarch-diff-guard.sh\""
           }
         ]
       }

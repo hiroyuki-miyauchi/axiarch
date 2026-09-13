@@ -26,10 +26,10 @@
 |:--|:--|:--|:--|
 | `SessionStart` | 会話開始時 | `task.md` / `implementation_plan.md` / `walkthrough.md` を現在タスク用に自動ブートストラップし、`AXIARCH.md` reminder を注入。`axiarch-task-state.sh` がセッションIDに対応した専用文書を用意し、既存ルート文書を保持 | `axiarch-scripts/axiarch-init-task-md.sh` + `axiarch-scripts/axiarch-task-state.sh` |
 | `UserPromptSubmit` | 毎ユーザープロンプト送信時 | system reminder（定型補足 + 見直し候補の検出）注入で `AXIARCH.md` / BOOT SEQUENCE 暗黙実行を継続補強 | `axiarch-scripts/axiarch-boot-reminder.sh` |
-| `PreToolUse` (matcher: `Write`) | `Write` tool 呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
-| `PostToolUse` (matcher: `Edit` / `MultiEdit` / `Write`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
+| `PreToolUse` (Claude: `Write`; Codex: `apply_patch`) | 対象編集tool呼び出し直前 | 対応環境で既存ファイルへの全面書き換えを遮断（§7.6 ANTI-FULL-OVERWRITE）。`.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で whitelist 可 | `axiarch-scripts/axiarch-protect-antifull.sh` |
+| `PostToolUse` (Claude: `Edit` / `MultiEdit` / `Write`; Codex: `apply_patch`) | ファイル編集後 | git diffの変更行数・変更ファイル数を測定し、閾値超過時に warn / block | `axiarch-scripts/axiarch-diff-guard.sh` |
 
-**この 4 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は **Reminder に加えて Physical Block も使う** 補強機構（参考: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防ぎきれない §6 違反のリスクを下げる。
+**この 4 フックの削除・無効化は「憲法改正」レベルの破壊的変更**であり、オーナーの明示的承認が必要である。特に `PreToolUse` は **Reminder に加えて Physical Block も使う** 補強機構（参考: arXiv:2503.18666 AgentSpec、arXiv:2502.15851 Control Illusion）であり、reminder のみでは防ぎきれない §7.6 違反のリスクを下げる。
 
 フックが配置されていない環境では、AI 自身が自律的に上記 BOOT SEQUENCE 3 原則を遵守すること。
 
@@ -38,6 +38,8 @@
 差分フックは `axiarch-scripts/axiarch_diff.py` で初回コミット前も計測し、失敗を `DIFF GUARD UNASSESSED` と区別する。warnは通知、blockは呼出し側への停止要求であり、編集済み内容の取消しや以降の全操作の遮断は保証しない。healthは配線・記録の構造を検査し、フックの実際の発火やAIの意味理解を証明しない。
 
 > Google Antigravityのみ実務で実証済みです（確認した環境・作業の範囲）。OpenAI Codex・Claude Code・その他のエージェントは未実証で、対応設定は動作を見込むための接続候補であり、動作保証はありません。
+
+Codexは新規作成・移動先の既存判定、ClaudeはWriteの既存判定を行い、通常の差分編集を許可する。製品の信頼設定、作業コピー、日英と検証限界は `axiarch-scripts/AGENT_COMPATIBILITY.md` を参照する。
 
 ### 🧭 ネイティブタスク・プラン状態同期（v1.11.0+）
 

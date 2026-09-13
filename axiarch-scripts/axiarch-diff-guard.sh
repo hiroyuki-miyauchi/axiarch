@@ -28,10 +28,6 @@ if [[ "${MODE}" == "off" || "${AXIARCH_DIFF_GUARD_ALLOW:-}" == "1" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Only drain an actual pipe. Interactive checks must not wait for manual EOF.
-if [[ ! -t 0 ]]; then
-  cat >/dev/null
-fi
 if ! command -v python3 >/dev/null 2>&1 || [[ ! -f "${SCRIPT_DIR}/axiarch_diff.py" ]]; then
   REASON='[DIFF GUARD UNASSESSED] Python 3 / axiarch-scripts/axiarch_diff.py unavailable. 差分は未確認です。'
   if [[ "${MODE}" == "block" ]]; then
@@ -40,5 +36,17 @@ if ! command -v python3 >/dev/null 2>&1 || [[ ! -f "${SCRIPT_DIR}/axiarch_diff.p
   fi
   printf '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"%s"}}\n' "${REASON}"
   exit 0
+fi
+# Read the active checkout from the event: Claude's project environment can
+# still point to its starting checkout after entering a worktree.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
+INPUT=""
+if [[ ! -t 0 ]]; then
+  INPUT=$(python3 "$SCRIPT_DIR/axiarch_hook.py" normalize) || export AXIARCH_DIFF_INPUT_ERROR=1
+fi
+if ACTIVE_PROJECT=$(printf '%s' "$INPUT" | python3 "$SCRIPT_DIR/axiarch_hook.py" project --project "$PROJECT_DIR"); then
+  export CLAUDE_PROJECT_DIR="${ACTIVE_PROJECT%.}"
+else
+  export AXIARCH_DIFF_INPUT_ERROR=1
 fi
 exec python3 "${SCRIPT_DIR}/axiarch_diff.py"
