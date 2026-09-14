@@ -217,7 +217,7 @@ For source development builds (`-dev`), installer and manifest must agree on the
 
 ### Exit Code
 
-- `0` — ブロッキング失敗なし。警告が出た場合は人間レビュー対象 / No blocking automated failures. Review any warnings manually
+- `0` — ブロッキング失敗なし。警告はAIが確認可能な証拠を調べ、アクセスできない情報や承認など人間の判断が必要な事項だけを確認する / No blocking automated failures. The agent investigates accessible warning evidence and asks only about inaccessible information or decisions reserved for the owner
 - `1` — 構造・診断失敗または指定phase不成立 / Structural, diagnostic or requested-phase failure
 
 ### Git診断の範囲 / Git observation scope
@@ -266,6 +266,10 @@ Input and context JSON use the Python 3 helper `axiarch-scripts/axiarch_hook.py`
 表示間隔は0–2147483647秒の10進整数で、先頭の0も10進として扱います。0は短縮を無効化。不正な値、読めないキャッシュ、リンク・FIFO等では完全な補足を返します。キャッシュは所有者を確認した通常ファイルだけ読み、一時ファイルから原子的に更新します。プロジェクトとセッション別の一時キャッシュは作業状態や読了の証拠ではなく、削除しても次の補足が完全表示になるだけです。
 
 TTL is a decimal integer from 0 to 2147483647 seconds, including leading zeros; 0 disables shortening. Invalid values, inaccessible caches, links or FIFOs fall back to full context. Only owner-checked regular files are read, and writes use an atomic temporary-file replacement. This project/session cache controls verbosity only; deleting it merely causes a full reminder, and it never proves loading or task completion.
+
+「完全な補足」はAxiarchのTTL短縮を行わず生成する本文を指し、製品側の全文受領を意味しません。受領が不明な場合は [補足の受領確認](#補足の受領確認--checking-reminder-delivery) に従います。
+
+A full reminder means the text generated without Axiarch's TTL shortening; it does not establish complete delivery by the product. Follow [delivery checks](#補足の受領確認--checking-reminder-delivery) when receipt is uncertain.
 
 ### 使い方 / Usage
 
@@ -419,13 +423,33 @@ Missing required declarations, `disableAllHooks` and unassessed forms produce a 
 
 Only the two project configuration files are inspected. User settings, managed policy, CLI overrides, runtime adoption and actual firing are outside this check. Async hooks cannot block an action, and settings precedence affects runtime behavior, so a declaration pass is not proof of execution or safety. See the [Claude Code reference](https://code.claude.com/docs/en/hooks). Other agents remain unverified compatibility candidates.
 
+## 補足の受領確認 / Checking reminder delivery
+
+設定の存在、スクリプトのJSON出力、製品側の受領、AIによる正本の実読込は別の確認対象です。healthや単独実行の終了0を、後続のすべての確認の代わりにしません。次は2026-09-14時点の公式仕様との照合であり、製品UI・認証済みモデル推論を含む実証ではありません。
+
+Configuration presence, JSON emitted by a script, product delivery and the agent's actual reading of canonical files are separate checks. Neither health nor a standalone exit 0 establishes all of them. The following reflects official documentation reviewed on 2026-09-14, not product-UI or authenticated-model validation.
+
+| 製品 / Product | 確認点 / Check |
+|---|---|
+| Codex | 長いhook出力は保存先付きの短い表示へ置き換わる場合がある。案内された保存先が利用できる場合だけ内容を確認する。上限変更・無制限化で読了を代用しない / Large output may become a shortened preview with a saved-file reference. Inspect that file when available; changing or removing limits does not establish reading. [公式仕様 / Reference](https://learn.chatgpt.com/docs/hooks#large-hook-output) |
+| Claude Code | 同期のUserPromptSubmit command hookが時間切れになると、出力が破棄されても依頼は処理されうる。対象イベントの診断ログで発火・終了・受領を確認する / A timed-out synchronous UserPromptSubmit command hook can lose its output while the prompt continues. Inspect diagnostics for that event's invocation, completion and delivery. [公式仕様 / Reference](https://code.claude.com/docs/en/hooks#userpromptsubmit) |
+| Antigravity | 現行の配布入口は `.agents/rules/prompt_pointer.md`。Rulesで適用状態を確認し、指示先のルート `AXIARCH.md` を実際に読む。他製品用hookの成功を受領証拠にしない / Check the distributed pointer's activation in Rules and actually read root `AXIARCH.md`; another product's hook success is not delivery evidence. [公式仕様 / Reference](https://antigravity.google/docs/ide/rules/) |
+
+受領を確認できない場合、AIは対象の製品・作業先・セッション・イベントに範囲を絞り、取得可能な設定と診断を自ら調べます。会話やログ全体を無加工で転載・外部送信せず、確認した範囲と未確認の理由を記録します。実装前の必要な正本は直接読み、既存記録は [TASK_STATE_PROTOCOL.md](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md) の読み取り専用 `--mode path --session <ID>` 等で確認します。受領確認だけの目的で、ID未指定のSessionStartを再実行して別の記録を作りません。H0に記録生成・修復の全工程を要求しません。
+
+When delivery is uncertain, the agent inspects accessible configuration and diagnostics for the relevant product, project, session and event. Record the inspected scope and uncertainty without copying entire conversations or raw logs into external messages. Read applicable canonical files before implementation, and inspect existing records through read-only commands such as `--mode path --session <ID>` in [TASK_STATE_PROTOCOL.md](../axiarch-harness/en/TASK_STATE_PROTOCOL.md). Do not rerun SessionStart without an ID merely to check delivery and thereby create unrelated records. H0 does not require a full record-creation or repair workflow.
+
+時間制限・出力上限・非同期化・フック無効化・信頼設定を、自動で緩めて成功扱いにしません。設定変更が必要なら既存の承認範囲と独自設定を確認し、対象の差分をレビューして再検証します。設定調整は必須の導入手順ではなく、確認した原因に応じた選択です。確認不能でも未確認を保ち、アクセスできない情報や承認など人間の判断が必要な事項が残る場合だけ質問します。
+
+Do not automatically relax timeouts, output limits, synchronous execution, hook activation or trust settings to report success. If a configuration change is needed, preserve local customization, check existing authorization, review the affected diff and verify it again. Tuning is an optional response to an established cause, not a mandatory installation step. Keep unresolved delivery unverified and ask only when inaccessible information or a human-owned decision remains.
+
 ## `axiarch-init-task-md.sh`
 
 ### 概要 / Overview
 
-`.claude/settings.json` または `.codex/hooks.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に `axiarch-task-state.sh` へ委譲し、セッション固有の `task.md` / `implementation_plan.md` / `walkthrough.md` を用意する。同じセッションの再開と既存ルート文書は保持する。起動に成功した場合は AXIARCH.md とネイティブタスク状態同期の reminder および実際の記録先を `additionalContext` で示し、失敗した場合は警告する。
+`.claude/settings.json` または `.codex/hooks.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に `axiarch-task-state.sh` へ委譲し、セッション固有の `task.md` / `implementation_plan.md` / `walkthrough.md` を用意する。同じセッションの再開と既存ルート文書は保持する。起動に成功した場合は AXIARCH.md とネイティブタスク状態同期の reminder および実際の記録先を `additionalContext` で示し、失敗した場合は警告する。製品側の受領は上の手順で別途確認する。
 
-Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, delegates to `axiarch-task-state.sh` and prepares `task.md` / `implementation_plan.md` / `walkthrough.md` as session-specific documents, preserving same-session resumes and legacy root files. Successful initialization injects the protocol reminder and actual record location; initialization failure emits a warning.
+Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, delegates to `axiarch-task-state.sh` and prepares `task.md` / `implementation_plan.md` / `walkthrough.md` as session-specific documents, preserving same-session resumes and legacy root files. Successful initialization outputs the protocol reminder and actual record location; initialization failure emits a warning. Product delivery is a separate check described above.
 
 起動・補足フックは共通補助でセッションIDを解決します。不正JSON、重複キー、競合するsession_id／sessionId、不正なIDを新規作業とは解釈しません。起動時は記録を作らず警告し、補足時はセッション未解決として扱います。環境変数があっても入力IDを検証します。正しい空入力は旧呼出しとの互換を保ち、解決できるIDがなければ新規IDを生成します。優先順位は [実行契約](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md) に従い、継承したCodexのIDで別製品のネイティブIDを隠しません。Python 3や共通補助がない場合は、確認できていないことを示す短い警告を返します。
 

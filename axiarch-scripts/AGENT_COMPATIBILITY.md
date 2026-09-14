@@ -30,6 +30,8 @@ Codex・Claude Codeのネイティブイベントには、そのセッション�
 
 Codex/Claudeの作業範囲の補足検査は、既知の日英語彙と全角表記を同じラベルへ照合します。独自のPOSIX正規表現指定は任意で、既定語彙を置換します。異常時は未確認と通知し、語彙一致を読了証明にしません。詳細と移行条件は [scripts README](README.md#axiarch-boot-remindersh) を参照してください。この補足をAntigravityへ自動注入する構成ではありません。
 
+補足が見えない・省略された・時間切れになった場合は、[補足の受領確認](README.md#補足の受領確認--checking-reminder-delivery) に従います。宣言・生成・製品側受領・実読込を区別し、AIが確認可能な情報を先に調べます。設定の緩和や別セッションの新規作成を自動の復旧方法にしません。
+
 1. 利用先の `AXIARCH.md`、adapter、hook設定、任意の許可リストを確認し、既存仕様・記録を保持します。
 2. `axiarch-scripts/axiarch-upgrade.sh --dry-run` で対象言語と製品を選びます。3製品の設定を共存させる場合は `--agent all` を指定できますが、他製品のadapterも含むため差分を確認します。
 3. 更新候補の `REVIEW` / 競合を確認します。今回のhookコマンド変更も既存の独自設定を無条件に置換しません。旧版を比較元にしたreview-eachでのマージ、または設定内のAxiarch handlerだけのレビュー済み差分で反映します。古いhandlerを残して重複追加しません。
@@ -86,6 +88,8 @@ Startup reminders do not prove loading. Record actual read ranges and synchroniz
 ### Updating and checking
 
 Codex/Claude scope hints map known Japanese/English aliases and fullwidth notation to shared labels. Optional custom POSIX expressions replace the defaults. Inspection failures are reported as unassessed; keyword matches do not prove reading. See the [scripts README](README.md#axiarch-boot-remindersh) for details and migration. This reminder is not automatically injected into Antigravity.
+
+For missing, shortened or timed-out context, follow [reminder delivery checks](README.md#補足の受領確認--checking-reminder-delivery). Distinguish declaration, generation, product delivery and actual reading; the agent investigates accessible evidence first. Relaxing settings or creating a different session is not an automatic recovery method.
 
 1. Inspect and preserve local canonical settings, adapters, hook configurations, allowlists, specifications and records.
 2. Preview with `axiarch-scripts/axiarch-upgrade.sh --dry-run`, selecting the language and agent. `--agent all` can install coexisting adapters but also includes other products, so review its scope.
