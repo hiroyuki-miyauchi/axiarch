@@ -2454,7 +2454,7 @@ else
 fi
 
 # Executable goal/state contract is part of the structural gate, not completion.
-for helper in axiarch_state.py axiarch_upgrade.py axiarch_inspect.py axiarch_setup.py axiarch_hook.py axiarch_diff.py; do
+for helper in axiarch_state.py axiarch_upgrade.py axiarch_inspect.py axiarch_setup.py axiarch_hook.py axiarch_diff.py axiarch_scope.py; do
   if [[ ! -f "${PROJECT_DIR}/axiarch-scripts/${helper}" ]]; then
     print_fail "Missing runtime helper: ${helper}"
     EXIT_CODE=1

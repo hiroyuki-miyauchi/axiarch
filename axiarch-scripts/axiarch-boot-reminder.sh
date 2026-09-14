@@ -26,7 +26,7 @@
 #   - Reads current user prompt from stdin (Claude Code passes JSON payload)
 #   - Extracts domain keywords (security/architecture/ui_design/api/performance/etc.)
 #   - Compares against the AXIARCH current-task mandatory trio (task.md / implementation_plan.md
-#     / walkthrough.md) — full-text grep, not just task.md's load-history table
+#     / walkthrough.md) — shared keyword matching, not just the load-history table
 #   - On mismatch: LOAD REVIEW + force full reminder (override TTL short-circuit)
 #   - Addresses the "AI judges 'same session, no re-load needed' and misses a relevant rule" issue
 #     identified by adopter feedback. Provides a heuristic scope-change hint, not proof of a violation.
@@ -41,7 +41,7 @@
 #
 #   Shorter repeated context; total-token savings depend on the actual workload.
 #
-# Python 3 and the distributed axiarch_hook.py helper are required; no jq needed.
+# Python 3 and the distributed axiarch_hook.py / axiarch_scope.py helpers are required; no jq needed.
 # =============================================================================
 
 set -uo pipefail
@@ -133,7 +133,9 @@ fi
 # load history. Forces full reminder (TTL bypass) when a new task type is detected,
 # reviewing the "AI judges 'same session, no re-load needed' and misses a relevant rule" loophole.
 #
-# Domain keywords (extensible via AXIARCH_TASK_DOMAIN_KEYWORDS env var):
+# Built-in JA/EN aliases live in axiarch_scope.py. AXIARCH_TASK_DOMAIN_KEYWORDS
+# remains an optional POSIX ERE override; invalid expressions are unassessed.
+# Stable English labels include:
 #   security / rls / auth / authn / authz / encryption / vulnerability
 #   architecture / migration / schema / refactor / restructure
 #   performance / optimization / cache / latency
@@ -145,67 +147,14 @@ fi
 #   deploy / release / push / pr / commit / merge / tag
 # -----------------------------------------------------------------------------
 if [[ "${AXIARCH_TASK_BOUNDARY_DETECT:-1}" == "1" ]] && [[ -n "${INPUT}" ]]; then
-  # Decode complete prompt text consistently, including Unicode escapes.
-  CURRENT_PROMPT=""
-  if ! CURRENT_PROMPT=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" prompt); then
-    VIOLATIONS="${VIOLATIONS} [HOOK INPUT WARNING] Invalid prompt; see stderr. Prompt keywords were not inspected. / 入力が不正なためキーワードを検査していません。"
-    CURRENT_PROMPT=""
-  fi
-
-  if [[ -n "${CURRENT_PROMPT}" ]]; then
-    # Default domain keyword set (lowercased, regex-friendly)
-    DOMAIN_KEYWORDS_DEFAULT="security|rls|auth|authn|authz|encryption|vulnerability|architecture|migration|schema|refactor|restructure|performance|optimization|cache|latency|ui_design|ui|ux|accessibility|a11y|layout|api|endpoint|rest|graphql|contract|i18n|localization|translation|finops|cost|billing|testing|qa|e2e|unit|deploy|release|push|pr|commit|merge|tag"
-    DOMAIN_KEYWORDS="${AXIARCH_TASK_DOMAIN_KEYWORDS:-${DOMAIN_KEYWORDS_DEFAULT}}"
-
-    # Extract domains from current prompt (whole-word match, case-insensitive, dedupe, sort).
-    # -w (word match) prevents "ui_design" from greedily consuming "ui" — both
-    # are matched independently when present as whole words.
-    CURRENT_DOMAINS=$(printf '%s' "${CURRENT_PROMPT}" \
-      | grep -oiwE "(${DOMAIN_KEYWORDS})" \
-      | tr '[:upper:]' '[:lower:]' \
-      | sort -u | tr '\n' ',' | sed 's/,$//')
-
-    # Extract previously-known domains from the AXIARCH current-task mandatory trio:
-    #   task.md, implementation_plan.md, walkthrough.md
-    # Rationale: domain context often lives in implementation_plan.md (the plan
-    # written during task analysis) and walkthrough.md (the diff narrative),
-    # not just task.md's load-history table. Reading only task.md misses
-    # plan-side domains and produces false-positive LOAD REVIEW for tasks
-    # whose plan is already consistent with the current prompt.
-    # Scan strategy: full-text grep over all 3 files (each is small per-task
-    # ephemeral doc), dedupe + sort.
-    PREV_DOMAINS=""
-    PREV_SOURCES=""
-    for fname in task.md implementation_plan.md walkthrough.md; do
-      [[ -n "${DOC_DIR}" ]] || continue
-      fpath="${DOC_DIR}/${fname}"
-      [[ -f "${fpath}" ]] || continue
-      file_domains=$(grep -oiwE "(${DOMAIN_KEYWORDS})" "${fpath}" 2>/dev/null \
-        | tr '[:upper:]' '[:lower:]' | sort -u)
-      if [[ -n "${file_domains}" ]]; then
-        PREV_DOMAINS+="${file_domains}"$'\n'
-        PREV_SOURCES+="${fname} "
-      fi
-    done
-    PREV_DOMAINS=$(printf '%s' "${PREV_DOMAINS}" | sort -u | tr '\n' ',' | sed 's/,$//')
-
-    # Compare: domain shift detected if current ∋ keyword AND keyword ∉ previous
-    if [[ -n "${CURRENT_DOMAINS}" ]]; then
-      NEW_DOMAINS=""
-      IFS=',' read -ra CUR_ARR <<< "${CURRENT_DOMAINS}"
-      for kw in "${CUR_ARR[@]}"; do
-        [[ -z "${kw}" ]] && continue
-        if [[ -z "${PREV_DOMAINS}" ]] || ! printf '%s' ",${PREV_DOMAINS}," | grep -qF ",${kw},"; then
-          NEW_DOMAINS+="${kw} "
-        fi
-      done
-      NEW_DOMAINS=$(printf '%s' "${NEW_DOMAINS}" | sed 's/[[:space:]]*$//')
-      if [[ -n "${NEW_DOMAINS}" ]]; then
-        SCANNED_SOURCES=$(printf '%s' "${PREV_SOURCES}" | sed 's/[[:space:]]*$//')
-        [[ -z "${SCANNED_SOURCES}" ]] && SCANNED_SOURCES="(none)"
-        VIOLATIONS="${VIOLATIONS} [LOAD REVIEW] New prompt keywords (${NEW_DOMAINS}) are absent from recorded context (${SCANNED_SOURCES}). This is a task-scope review hint, not proof of a missing load. Load additional rules only if the actual task needs them. / 新しいキーワード (${NEW_DOMAINS}) は分類の見直し候補です。未ロードや違反の証明ではありません。実際の作業に関連する場合だけ追加ロードし、実読込した範囲を記録してください。"
-      fi
-    fi
+  # Match documented JA/EN aliases and preserve optional POSIX ERE overrides.
+  # Pass a session only after its binding resolved; never borrow root evidence.
+  SCOPE_ARGS=(--project "$PROJECT_DIR")
+  [[ -n "$DOC_DIR" ]] && SCOPE_ARGS+=(--session "$SESSION_ID")
+  if SCOPE_REPORT=$(printf '%s' "$INPUT" | python3 "$PROJECT_DIR/axiarch-scripts/axiarch_scope.py" "${SCOPE_ARGS[@]}" 2>&1); then
+    VIOLATIONS+="${SCOPE_REPORT}"
+  else
+    VIOLATIONS+=" [SCOPE REVIEW UNASSESSED] ${SCOPE_REPORT}. Scope keywords were not confirmed; inspect the helper, custom expression and session documents. / 話題の補助検査は未確認です。補助ファイル・独自設定・セッション文書を確認してください。"
   fi
 fi
 

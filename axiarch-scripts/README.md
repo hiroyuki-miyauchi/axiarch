@@ -241,6 +241,18 @@ Reflog messages are neither complete push history nor approval evidence; `origin
 - **Check A**: 解決済みセッションの `.axiarch/sessions/{session_id}/task.md` に識別可能なロード履歴行がない場合の見直し候補。未読を断定しない
 - **Check B / C**: `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` の実教訓の件数・経過日等を調べる。閾値は分類・昇華の見直し候補であり、違反の証明ではない
 
+Check Dは `axiarch-scripts/axiarch_scope.py` の既知の日英語彙で、現在の依頼と解決済みセッションの3文書を照合します。例えば「認証」と `authentication` を同じラベルとして扱い、全角英数字も正規化するため、表記や言語の切替だけを新しい話題にしにくくします。全言語の意味理解ではなく、登録されていない言い換え・否定・文脈は判断できません。候補が出た場合だけ実タスクとの関連を確認し、不要なルール読込やユーザーへの確認を要求しないでください。
+
+Check D uses known Japanese/English aliases in `axiarch-scripts/axiarch_scope.py` to compare the current request with the resolved session's three documents. Equivalent terms such as the Japanese word for authentication and `authentication` share a label, and fullwidth Latin characters are normalized. Changing language or notation alone is therefore less likely to produce a new-topic hint. This is not semantic understanding across languages: unlisted paraphrases, negation and context remain unassessed. Review relevance to the actual task rather than demanding unnecessary rule loading or user checks.
+
+`AXIARCH_TASK_BOUNDARY_DETECT=0` でこの補助検査を無効化できます。`AXIARCH_TASK_DOMAIN_KEYWORDS` を指定すると既定語彙を置換し、従来どおりgrepのPOSIX拡張正規表現・単語境界で照合します（例: `client-[[:digit:]]+`）。独自パターンの一致内容には個人情報が含まれうるため、通知には値や依頼本文を出しません。不正な式、検査の時間切れ、解決済み文書のリンク・特殊ファイル・読取不能、補助ファイル欠落は `SCOPE REVIEW UNASSESSED` とし、TTL内でも完全な補足を表示します。フック自体は警告として終了0を保ちます。記録未作成のH0に文書を要求せず、共有ルート文書を別セッションの証拠として使いません。
+
+Set `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable this optional hint. `AXIARCH_TASK_DOMAIN_KEYWORDS` replaces the built-in aliases and retains grep's POSIX extended regular expressions and word boundaries, for example `client-[[:digit:]]+`. Custom matches can contain personal data, so notifications do not echo matched values or prompt text. Invalid expressions, inspection timeouts, linked/special/unreadable resolved documents or a missing helper produce `SCOPE REVIEW UNASSESSED` and force the full reminder even within the TTL. The hook remains a non-blocking warning with exit 0. H0 work without records does not require documents, and shared root documents are not borrowed as another session's evidence.
+
+更新は `axiarch-scripts/` 一式で適用します。healthは `axiarch_scope.py` の欠落を診断失敗とし、フックは既存文書や独自設定を自動修復しません。語彙の候補一致やhealth成功を、読了・意味理解・作業完了の証明には使いません。
+
+Update the complete `axiarch-scripts/` bundle. Health reports a missing `axiarch_scope.py` as a diagnostic failure; hooks do not repair existing documents or custom settings automatically. Keyword matches and passing health checks do not prove reading, understanding or task completion.
+
 Checks A/D use the resolved session; B/C inspect actual entries in installed lesson logs. Missing history rows or threshold matches prompt review rather than proving missed reading or a protocol violation.
 
 入力とJSON応答はPython 3の共通補助 `axiarch-scripts/axiarch_hook.py` で処理します。jqなしでもUnicodeエスケープと長文を同じように解析します。解析失敗は見直し警告であり、未読や手順違反の証明とは扱いません。既存Writeの拒否とは異なり、この補足フックは終了0で情報を返します。

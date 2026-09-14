@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- 作業範囲の補足検査を日英の既知語彙・全角表記へ対応。日本語の話題を見落とすケースと、言語切替だけで新しい話題と判定するケースを修正する。独自POSIX正規表現の互換と無効化設定を保持し、一致した依頼本文は通知へ出さない。不正設定・読取不能は未確認として完全な補足へ戻す。補助ファイルの欠落検査、両製品の回帰と日英の移行・保証範囲を追加する。
+- Extend scope hints to known Japanese/English aliases and fullwidth notation, fixing missed Japanese topics and false new-topic hints on language changes. Preserve custom POSIX expression and disable settings without echoing matched prompt content. Invalid configuration or unreadable records produce an unassessed result and a full reminder. Add helper-presence diagnostics, regressions for both agents, and bilingual migration and verification boundaries.
 - Claudeの全面置換拒否メッセージも、既存の明示承認範囲を確認して不足時だけ質問する日英の案内へ揃える。拒否判定自体は維持する。
 - Align the bilingual Claude full-replacement denial message with checking existing explicit authorization and asking only when it is missing. Preserve the denial decision itself.
 - Claude/Codexの上書き許可リストの検査差を修正。リンクされたファイル・親フォルダ、ハードリンク、他の所有者、特殊ファイル、不正UTF-8、NULを例外許可として扱わず、内容を漏らさず終了2で通知する。Claudeの壊れた設定をCodexの例外で補わない。正当なglob・日本語・CRLFを維持し、例外不要の新規作成や差分編集は許可する。設定を自動変更しない移行手順と隔離回帰を日英で追加する。
