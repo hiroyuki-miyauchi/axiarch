@@ -411,9 +411,13 @@ v1.17.0のhealthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い�
 
 Health in v1.17.0 uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
 
-対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはstartup・resume・clear・compact・forkを含む宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
+対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはCodexではstartup・resume・clear・compact、Claude Codeではこれらにforkを加えた宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
 
-Supported forms are a direct bundled-script invocation or a single script invoked through `bash`, either a shell string or command plus args. Matchers support omitted/empty/all forms, simple names separated by `|`, and grouped or anchored versions of those names. SessionStart declarations cover startup, resume, clear, compact and fork. Complex regex, inline code, custom wrappers, conditional or asynchronous required calls remain unassessed; the diagnostic never runs them to find out what they do.
+Supported forms are a direct bundled-script invocation or a single script invoked through `bash`, either a shell string or command plus args. Matchers support omitted/empty/all forms, simple names separated by `|`, and grouped or anchored versions of those names. SessionStart declarations cover startup, resume, clear and compact for Codex; Claude Code additionally requires fork. Complex regex, inline code, custom wrappers, conditional or asynchronous required calls remain unassessed; the diagnostic never runs them to find out what they do.
+
+起動条件は2026-09-14時点の [Codex公式仕様](https://learn.chatgpt.com/docs/hooks) と [Claude Code公式仕様](https://code.claude.com/docs/en/hooks) に対応します。診断スクリプトを更新すると製品別の判定になります。既定の全件指定は引き続き有効で、既存の独自matcherを書き換える必要はありません。
+
+Startup sources follow the [Codex reference](https://learn.chatgpt.com/docs/hooks) and [Claude Code reference](https://code.claude.com/docs/en/hooks) reviewed on 2026-09-14. Updating the diagnostic script applies the product-specific checks. Default match-all declarations remain valid; existing custom matchers do not need to be rewritten.
 
 必要な宣言の欠落、`disableAllHooks`、未確認形式はhealthの非0終了へ接続します。JSONや独自設定を自動修正・削除しません。旧inline設定やwrapper利用先では、実際の呼出しをレビューして配布形式と整合させるか、未確認を残した追加証拠を別途用意してください。診断を通すために独自設定を無条件で置換してはなりません。hook宣言の検査にjqは不要で、他の診断項目の依存条件は変わりません。
 

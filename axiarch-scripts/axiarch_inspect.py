@@ -17,7 +17,7 @@ from axiarch_hook import codex_command
 
 HOOK_CONTRACTS = {
     'UserPromptSubmit': ('axiarch-boot-reminder.sh', ('prompt',)),
-    'SessionStart': ('axiarch-init-task-md.sh', ('startup', 'resume', 'clear', 'compact', 'fork')),
+    'SessionStart': ('axiarch-init-task-md.sh', ('startup', 'resume', 'clear', 'compact')),
     'PreToolUse': ('axiarch-protect-antifull.sh', ('Write',)),
     'PostToolUse': ('axiarch-diff-guard.sh', ('Edit', 'MultiEdit', 'Write')),
 }
@@ -94,6 +94,8 @@ def inspect_hooks(root, event=None):
         data = read_json(inside(root, relative))
         for name in events:
             script, targets = HOOK_CONTRACTS[name]
+            if relative == '.claude/settings.json' and name == 'SessionStart':
+                targets = (*targets, 'fork')
             if relative == '.codex/hooks.json' and name in ('PreToolUse', 'PostToolUse'):
                 targets = ('apply_patch',)
             issues, covered = [], set()

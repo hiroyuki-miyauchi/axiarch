@@ -158,6 +158,57 @@ class HookDiagnosticTests(unittest.TestCase):
         (self.target / 'axiarch-scripts/axiarch-protect-antifull.sh').unlink()
         self.assertNotEqual(self.health().returncode, 0)
 
+    def test_session_start_sources_are_agent_specific_in_both_languages(self):
+        self.fixture()
+        sources = {
+            '.codex/hooks.json': ['startup', 'resume', 'clear', 'compact'],
+            '.claude/settings.json': ['startup', 'resume', 'clear', 'compact', 'fork'],
+        }
+        for relative, values in sources.items():
+            path = self.target / relative; data = json.loads(path.read_text())
+            data['hooks']['SessionStart'][0]['matcher'] = '^(' + '|'.join(values) + ')$'
+            path.write_text(json.dumps(data))
+        canonical = self.target / 'AXIARCH.md'; original = canonical.read_text()
+        for language in ('Japanese', 'English'):
+            with self.subTest(language=language):
+                canonical.write_text(original.replace(
+                    'Project Native Language: [Japanese | English] (Default: Japanese)',
+                    'Project Native Language: ' + language))
+                before = self.tree_bytes()
+                result = self.run_cmd(['python3', self.target / 'axiarch-scripts/axiarch_inspect.py',
+                                      '--project', self.target, '--mode', 'hooks',
+                                      '--event', 'SessionStart', '--json'])
+                reports = {row['path']: row for row in json.loads(result.stdout)}
+                for relative, values in sources.items():
+                    self.assertEqual(reports[relative]['covered'], sorted(values))
+                    self.assertEqual(reports[relative]['issues'], [])
+                self.health(expected=0)
+                self.assertEqual(self.tree_bytes(), before)
+
+    def test_session_start_missing_native_sources_remain_unconfirmed(self):
+        self.fixture()
+        paths = ('.codex/hooks.json', '.claude/settings.json')
+        originals = {p: (self.target / p).read_bytes() for p in paths}
+        cases = [('.codex/hooks.json', 'startup|clear|compact', 'resume'),
+                 ('.claude/settings.json', 'startup|resume|clear|compact', 'fork'),
+                 ('.codex/hooks.json', 'fork', 'startup')]
+        for relative, matcher, missing in cases:
+            with self.subTest(agent=relative, matcher=matcher):
+                for path, content in originals.items():
+                    (self.target / path).write_bytes(content)
+                path = self.target / relative; data = json.loads(path.read_text())
+                data['hooks']['SessionStart'][0]['matcher'] = matcher
+                path.write_text(json.dumps(data))
+                before = self.tree_bytes()
+                result = self.run_cmd(['python3', self.target / 'axiarch-scripts/axiarch_inspect.py',
+                                      '--project', self.target, '--mode', 'hooks',
+                                      '--event', 'SessionStart', '--json'], expected=1)
+                reports = {row['path']: row for row in json.loads(result.stdout)}
+                self.assertIn(missing, ' '.join(reports[relative]['issues']))
+                self.assertEqual(reports[next(p for p in paths if p != relative)]['issues'], [])
+                self.health(expected=1)
+                self.assertEqual(self.tree_bytes(), before)
+
     def test_initial_install_records_failed_hook_diagnosis(self):
         self.fixture(); data = copy.deepcopy(self.original); del data['hooks']['PreToolUse']
         self.write_config(data)

@@ -65,6 +65,9 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 - リリース本文の構造・日英記入・比較リンク・抽出を同じ検査へ接続。コード枠・コメントの見出しを除外し、重複・未記入・別版混入を回帰検査する。単なる非空判定では説明の不足を捉えられなかったためで、検査は意味や翻訳の十分性の証明とはしない。scripts READMEのセッション分離の導入版をv1.17.0へ訂正する。
 - Share note structure, bilingual presence, comparison-link and extraction checks; regress duplicate/empty entries, example headings and adjacent-version leakage. Nonempty extraction alone missed insufficient descriptions; the new checks are not semantic or translation proof. Correct the scripts README's session-isolation introduction version to v1.17.0.
 
+- CodexのSessionStart診断がClaude固有のforkを要求する誤判定を修正。Codexの4起動条件とClaudeの5条件を分け、日英の実health・不足条件の検出・設定を変更しないことを回帰検査する。独自matcherや既定の全件指定は保持する。
+- Fix SessionStart diagnostics incorrectly requiring Claude-specific fork coverage from Codex. Distinguish four Codex sources from five Claude sources, with bilingual real-health regressions for valid and missing sources and unchanged adopter files. Preserve custom matchers and default match-all declarations.
+
 ### 診断結果と再発対策 / Diagnostic outcome and regression prevention
 
 - Windows確認の教訓: Bashの存在だけではPOSIX Python・排他制御・ファイルシステムの前提を満たさない。変更前の環境検査、Windows実機ランナーでのLF検査、Linuxファイルシステム上のWSL 2回帰を組み合わせる。製品自身のWindows対応とAxiarchの全工程実証を混同しない。
