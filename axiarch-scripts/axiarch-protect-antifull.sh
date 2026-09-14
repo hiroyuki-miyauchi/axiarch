@@ -118,25 +118,24 @@ fi
 # -----------------------------------------------------------------------------
 # Whitelist: bypass when matched in .claude/axiarch-overwrite-allow.txt or .codex/...
 # -----------------------------------------------------------------------------
-ALLOW_FILE=""
+ALLOW_AGENT="claude"
 if [[ "${AXIARCH_HOOK_AGENT:-}" == "codex" ]]; then
-  ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
-elif [[ -f "${PROJECT_DIR}/.claude/settings.json" || -f "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
-  ALLOW_FILE="${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt"
-elif [[ -f "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" ]]; then
+  ALLOW_AGENT="codex"
+elif [[ -e "${PROJECT_DIR}/.claude/settings.json" || -L "${PROJECT_DIR}/.claude/settings.json" ||
+        -e "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" || -L "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
+  ALLOW_AGENT="claude"
+elif [[ -e "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" || -L "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" ]]; then
   # Legacy standalone Write guards without an installed Claude configuration.
-  ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
+  ALLOW_AGENT="codex"
 fi
 
-if [[ -n "${ALLOW_FILE}" && -f "${ALLOW_FILE}" ]]; then
+# Validate the entire file before matching; process substitution would lose the
+# reader's failure status. Keep Bash glob semantics for legacy Write callers.
+ALLOW_PATTERNS="$(python3 "$HOOK_HELPER" allow-patterns --project "$PROJECT_DIR" --agent "$ALLOW_AGENT")" || exit 2
+if [[ -n "${ALLOW_PATTERNS}" ]]; then
   MATCH_PATH="$(decode_field canonical)" || exit 2
   MATCH_PATH="${MATCH_PATH%.}"
   while IFS= read -r pattern || [[ -n "${pattern}" ]]; do
-    # Skip empty lines and comments
-    [[ -z "${pattern}" || "${pattern}" =~ ^[[:space:]]*# ]] && continue
-    # Trim leading/trailing whitespace
-    pattern="$(printf '%s' "${pattern}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
-    [[ -z "${pattern}" ]] && continue
     # Relative allow patterns are explicitly relative to this project.
     [[ "$pattern" == /* ]] || pattern="$PROJECT_DIR/$pattern"
     # Glob match (case-sensitive)
@@ -144,7 +143,7 @@ if [[ -n "${ALLOW_FILE}" && -f "${ALLOW_FILE}" ]]; then
     if [[ "${MATCH_PATH}" == ${pattern} ]]; then
       exit 0
     fi
-  done < "${ALLOW_FILE}"
+  done <<< "${ALLOW_PATTERNS}"
 fi
 
 # -----------------------------------------------------------------------------

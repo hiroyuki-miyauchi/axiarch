@@ -51,6 +51,8 @@ Codex・Claude Codeのネイティブイベントには、そのセッション�
 
 ### 検証した範囲と保証しない範囲
 
+Claude/Codexの任意の上書き許可リストは、リンク・所有者・通常ファイル・UTF-8・NULの共通検査を通してから利用します。壊れた例外設定で別製品の許可へ切り替えず、新規作成・差分編集には例外を要求しません。形式と旧設定の移行は [scripts READMEの許可リスト手順](README.md#whitelist-サポート--whitelist-support) を参照してください。Antigravityに同じフックが自動適用される意味ではありません。
+
 2026-09-14の監査では公式仕様、ローカルCLIの版表示（Codex 0.153.4、Claude Code 2.1.167）、隔離した12通りの導入構成と実health、公式形式のイベント入力によるスクリプト実行、Codex本体の差分適用処理を照合します。これはモデル推論・実製品UI・権限設定まで含む全工程の実証ではありません。Google Antigravityは従来確認した環境・実務の範囲で実証済みです。Codex・Claude Codeの実務実証と動作保証は引き続き主張しません。
 
 補助スクリプトはBash、Python 3、POSIXファイルシステムを前提とします。CIはUbuntu・macOSに加え、Windowsランナー上でネイティブPythonの安全な拒否とWSL 2内の実動作を検査します。ネイティブWindows PythonやGit Bash単独での実行は非対応です。Windowsでは製品の実行環境・Bash・Python・プロジェクトをWSL 2内に揃えます。製品のWindows UIやWSL/Windows混在までは実証していません。対応範囲・移行・改行の扱いは [Windows手順](WINDOWS.md) を参照してください。
@@ -103,6 +105,8 @@ Selecting an additional agent does not itself apply its configuration. A default
 If the new language's `LOADING_PROTOCOL.md` remains pending review, diagnosis reports `Goal/state contract missing for en` (or `ja`) and upgrade exits 4. Preview safe-owned core additions with the same source and language plus `--safe-only --dry-run`; replace `--dry-run` with `--apply` when applying that selection. If `lesson log unavailable` remains, prepare `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, the overview and index from the actual existing project state. Do not discard lessons or fabricate specifications to pass a check. Even after a successful diagnosis on retry, pending mixed settings or indexes produce a partial result with exit 3. Inspect the result and remaining differences; do not replace adopter settings merely to obtain a confirmed version.
 
 ### Verification boundaries
+
+Optional Claude/Codex overwrite lists share link, ownership, regular-file, UTF-8 and NUL checks before use. Damaged exception settings do not switch to another agent's permission; new-file creation and focused edits need no exception. See the [scripts README allowlist instructions](README.md#whitelist-サポート--whitelist-support) for format and migration. This does not mean the same hooks run automatically in Antigravity.
 
 The 2026-09-14 audit compares official documentation, local CLI version output (Codex 0.153.4 and Claude Code 2.1.167), twelve isolated installation configurations with real health diagnostics, script execution using documented event payloads, and the native Codex patch engine. It is not end-to-end validation of model reasoning, product UI or permission settings. Antigravity's prior practical validation remains limited to the environments and tasks exercised. Codex and Claude Code remain unvalidated in practice, with no operation guarantee.
 

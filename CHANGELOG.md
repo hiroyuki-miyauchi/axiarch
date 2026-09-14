@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- Claude/Codexの上書き許可リストの検査差を修正。リンクされたファイル・親フォルダ、ハードリンク、他の所有者、特殊ファイル、不正UTF-8、NULを例外許可として扱わず、内容を漏らさず終了2で通知する。Claudeの壊れた設定をCodexの例外で補わない。正当なglob・日本語・CRLFを維持し、例外不要の新規作成や差分編集は許可する。設定を自動変更しない移行手順と隔離回帰を日英で追加する。
+- Align Claude/Codex overwrite-list checks. Linked files or parents, hardlinks, other owners, special files, invalid UTF-8 and NUL cannot grant exceptions; report exit 2 without exposing contents. Damaged Claude settings do not borrow Codex exceptions. Preserve valid globs, Unicode and CRLF, and allow new-file creation or focused edits without exceptions. Add isolated regressions and bilingual migration guidance without automatically modifying adopter settings.
 - 製品追加後の設定共存・セッション保持、日英の追加時に中核ファイルが保留となる診断失敗と再実行、任意コマンドの言語切替時の編集保護を実動作回帰へ追加。配布言語と応答言語の違い、固有Blueprintの準備、既定REVIEWの反映方法を日英で補足する。
 - Add runtime regressions for coexisting adapters and retained sessions after agent addition, diagnosis failure and recovery when language additions leave core files pending, and edit protection during optional-command language changes. Clarify distribution versus response language, local Blueprint preparation and applying default REVIEW items in Japanese and English.
 - 別AIをCodexのシェルから起動した際、継承したセッションIDで別作業を再開する不備を修正。起動・補足では入力IDを先に検証し、意図的なAxiarch指定を除き製品自身のIDを優先する。不正入力を環境変数で隠さず警告し、旧記録は保持する。日英の優先順位・移行手順と回帰を追加する。

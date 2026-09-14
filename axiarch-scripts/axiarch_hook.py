@@ -12,7 +12,7 @@ import tempfile
 import time
 
 sys.dont_write_bytecode = True
-from axiarch_state import identifier, strict_json
+from axiarch_state import identifier, inside, strict_json
 
 
 def codex_command(script):
@@ -102,18 +102,43 @@ def patch_destinations(data, project):
     return destinations
 
 
+def read_allowlist(project, agent):
+    """Read a reviewed local exception file in full before granting permission.
+
+    No linked configuration, shared inode, special file or partial decoding.
+    This is a pre-operation check, not protection against concurrent writers.
+    """
+    if agent not in ('claude', 'codex'):
+        raise ValueError('allowlist agent required')
+    try:
+        allow = inside(Path(project).resolve(), f'.{agent}/axiarch-overwrite-allow.txt')
+        if not allow.exists():
+            return []
+        fd = os.open(allow, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd, 'rb') as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+                raise ValueError('private regular file required')
+            value = stream.read().decode('utf-8')
+        if '\x00' in value:
+            raise ValueError('NUL in allowlist')
+        # LF/CRLF only: Unicode separators may be literal filename characters.
+        return [line.strip() for line in value.split('\n')
+                if line.strip() and not line.lstrip().startswith('#')]
+    except (OSError, ValueError) as error:
+        # Do not echo permission-file contents or unrelated link destinations.
+        raise ValueError(f'{agent} overwrite allowlist invalid or unreadable; exception not granted / '
+                         '上書き許可リストを確認できません。例外は許可されません') from error
+
+
 def protect_patch(data, project):
     import fnmatch
-    allow = Path(project) / '.codex/axiarch-overwrite-allow.txt'
-    patterns = []
-    if allow.exists() or allow.is_symlink():
-        fd = os.open(allow, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
-        with os.fdopen(fd) as stream:
-            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
-                raise ValueError('overwrite allowlist must be a regular file')
-            patterns = [line.strip() for line in stream if line.strip() and not line.lstrip().startswith('#')]
-    for path in patch_destinations(data, project):
-        if os.path.lexists(path) and not any(fnmatch.fnmatchcase(os.path.realpath(path),
+    existing = [path for path in patch_destinations(data, project) if os.path.lexists(path)]
+    if not existing:
+        return 0  # Creation and focused updates need no overwrite exception.
+    patterns = read_allowlist(project, 'codex')
+    for path in existing:
+        if not any(fnmatch.fnmatchcase(os.path.realpath(path),
                 os.path.join(os.path.realpath(project), pattern)) for pattern in patterns):
             reason = ('AXIARCH.md Anti-Full-Overwrite: apply_patch add/move destination already exists; '
                       'use a focused Update File diff. / 新規作成・移動先が既存です。差分編集を使ってください。 '
@@ -193,15 +218,20 @@ def use_short(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('normalize', 'session', 'prompt', 'emit', 'cache', 'protect-patch', 'project'))
+    parser.add_argument('mode', choices=('normalize', 'session', 'prompt', 'emit', 'cache', 'protect-patch', 'project', 'allow-patterns'))
     parser.add_argument('--event', choices=('SessionStart', 'UserPromptSubmit'))
     parser.add_argument('--project', default='')
     parser.add_argument('--session', default='')
     parser.add_argument('--ttl', default='1800')
     parser.add_argument('--force-full', action='store_true')
+    parser.add_argument('--agent', choices=('claude', 'codex'))
     args = parser.parse_args()
     if args.mode == 'cache':
         print('true' if use_short(args) else 'false')
+        return
+    if args.mode == 'allow-patterns':
+        for pattern in read_allowlist(args.project, args.agent):
+            print(pattern)
         return
     text = sys.stdin.read()
     if args.mode == 'emit':
