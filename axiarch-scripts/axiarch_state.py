@@ -96,7 +96,22 @@ def strict_json(text):
             raise ValueError('JSON number exceeds finite runtime range')
         return parsed
 
-    return json.loads(text, object_pairs_hook=unique, parse_constant=invalid_constant, parse_float=finite_float)
+    data = json.loads(text, object_pairs_hook=unique, parse_constant=invalid_constant, parse_float=finite_float)
+    # JSON's grammar permits isolated UTF-16 surrogates. They cannot be carried
+    # as Unicode scalar values across UTF-8 files and native agent interfaces.
+    # Check decoded keys and nested values without normalizing valid strings.
+    pending = [data]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, str):
+            if re.search(r'[\ud800-\udfff]', value):
+                raise ValueError('JSON contains an unpaired Unicode surrogate')
+        elif isinstance(value, dict):
+            pending.extend(value.keys())
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+    return data
 
 
 def read_json(path):
@@ -209,7 +224,7 @@ def native_language(root):
             continue
         if not path.is_file():
             raise ValueError('language protocol must be a regular file: ' + name)
-        settings = language_settings(path.read_text())
+        settings = language_settings(path.read_text(encoding='utf-8'))
         if len(settings) > 1:
             raise ValueError('ambiguous Project Native Language; resolve the canonical setting or specify a language')
         if settings:
@@ -263,7 +278,7 @@ def privacy_check(root):
         if not meta.exists():
             return 'No managed artifacts or Git worktree; tracking unassessed.'
         policy = inside(root, '.axiarch/.gitignore')
-        if not policy.is_file() or not set(PRIVATE_PATTERNS) <= set(policy.read_text().splitlines()):
+        if not policy.is_file() or not set(PRIVATE_PATTERNS) <= set(policy.read_text(encoding='utf-8').splitlines()):
             raise ValueError('private artifact exclusions missing; run session resume or an approved install/upgrade')
         return 'Local exclusion policy present; no Git worktree, so index tracking is unassessed.'
     paths = ['.axiarch/' + name for name in PRIVATE_DIRS + PRIVATE_FILES]
@@ -705,7 +720,7 @@ def check_docs(root, sid, tid):
         errors.append("completion evidence session is not bound to this task")
     for name in DOCS:
         path = inside(root, f".axiarch/sessions/{sid}/{name}")
-        if not path.is_file() or not path.read_text().strip() or PLACEHOLDER.search(path.read_text()):
+        if not path.is_file() or not path.read_text(encoding='utf-8').strip() or PLACEHOLDER.search(path.read_text(encoding='utf-8')):
             errors.append(f"{name}: missing, empty or remaining template")
     return errors
 

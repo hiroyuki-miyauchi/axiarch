@@ -95,9 +95,21 @@ HTTP failures, timeouts and corrupt gzip stop before application. Limits are 64 
 
 These checks do not establish distribution authenticity, code safety or operation on every OS. Pinning a tag is not signature verification. Archive checks are not a complete disk quota; depending on curl, compressed size may be checked after retrieval. Use a reviewed source and remove the private temporary directory after inspecting its contents and confirming it is no longer needed. Previously published launchers do not gain this new behavior retroactively.
 
-初期導入・更新・healthは同じ厳密なJSON読取を使い、重複キー・NaN・無限大と数値オーバーフローを拒否します。manifestの版数・型・所有区分も検査します。healthは導入済みのClaude/Codex両設定のJSONを確認し、異常時は残りの検査を実行せず失敗を返します。個別のhook宣言も両設定について検査します。JSON合格は全エージェントの実行確認ではありません。
+初期導入・更新・healthは同じ厳密なJSON読取を使い、重複キー・NaN・無限大と数値オーバーフローを拒否します。キー・値・入れ子の配列にもUnicodeとして表せない単独サロゲートを許可しません。manifestの版数・型・所有区分も検査します。healthは導入済みのClaude/Codex両設定のJSONを確認し、異常時は残りの検査を実行せず失敗を返します。個別のhook宣言も両設定について検査します。JSON合格は全エージェントの実行確認ではありません。
 
-Installation, upgrades and health share strict JSON decoding, rejecting duplicate keys, NaN, infinity and numeric overflow. Manifest version, types and ownership are also validated. Health checks JSON in both installed Claude/Codex configurations and stops with failure before subsequent checks on invalid input. Individual hook declarations are checked in both configurations; valid JSON is not proof that every agent executes the hooks.
+Installation, upgrades and health share strict JSON decoding, rejecting duplicate keys, NaN, infinity and numeric overflow. Unpaired surrogates that do not represent Unicode scalar values are rejected in keys, values and nested arrays as well. Manifest version, types and ownership are also validated. Health checks JSON in both installed Claude/Codex configurations and stops with failure before subsequent checks on invalid input. Individual hook declarations are checked in both configurations; valid JSON is not proof that every agent executes the hooks.
+
+起動・補足・保護フックと作業範囲CLIは、標準入力のバイト列をUTF-8として厳密に読みます。`PYTHONIOENCODING` の置換・別文字コード指定で壊れた入力を修復したり、日本語を別の文字列へ変えたりしません。正常な日本語・英語・絵文字と正規化形式は保持します。端末全体の文字コード設定を変更する機能ではありません。この制約は [RFC 8259 §8](https://www.rfc-editor.org/rfc/rfc8259#section-8) の相互運用性に基づくAxiarchの入力契約です。単独サロゲートはJSON文法上表現できても受理しません。
+
+Startup, reminder and protection hooks and the scope CLI decode stdin bytes strictly as UTF-8. Replacement or alternate decoding selected by `PYTHONIOENCODING` cannot repair damaged input or reinterpret Japanese text. Valid Japanese, English, emoji and normalization forms are preserved. This does not configure terminal-wide encoding. The restriction is Axiarch's input contract for the interoperability described in [RFC 8259 §8](https://www.rfc-editor.org/rfc/rfc8259#section-8); unpaired surrogates are rejected even though the JSON grammar can express them.
+
+言語設定・プロンプト・作業証跡・比較用記録もUTF-8で読み、OSの既定文字コードへ依存しません。UTF-8以外で保存された旧文書は自動変換しません。元の文字コードと内容を確認し、原本を保全してレビュー済みのUTF-8版を適用してください。
+
+Language settings, prompts, task evidence and comparison records are also read as UTF-8 rather than using the OS default encoding. Older documents saved in another encoding are not converted automatically. Confirm the original encoding and content, preserve the originals and apply a reviewed UTF-8 version.
+
+文字の検査に失敗すると、起動・補足は既存の警告経路を使い、作業記録を新規生成しません。保護フックは新規作成の入力でも終了2で拒否します。正常な新規作成は引き続き許可します。Unicode診断は入力本文を転載しません。古いJSON記録や設定に単独サロゲートがあれば共通CLIも失敗します。元の記録を保持し、生成元・バックアップと照合して意図した値を復旧してください。文字の削除・置換で検査だけを通す自動修復は行いません。Antigravity等でも共通記録CLIには同じ制約を適用しますが、フックの自動適用を意味しません。
+
+On invalid character input, startup/reminder hooks use their existing warning paths without creating work records. Protection hooks exit 2 even for a new-file request with invalid input; valid creation remains allowed. Unicode diagnostics do not echo payload contents. Shared CLIs also reject old JSON records or settings containing unpaired surrogates. Preserve the originals and recover intended values from the producer or reviewed backups. No automatic character deletion or replacement is performed merely to pass validation. The shared record CLI applies the same restriction for Antigravity and other agents; it does not imply automatic hook execution there.
 
 ### 主な選択肢 / Main Choices
 

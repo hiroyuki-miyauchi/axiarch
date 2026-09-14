@@ -175,6 +175,16 @@ def protect_patch(data, project):
     return 0
 
 
+def read_utf8_stdin():
+    """Read the wire bytes strictly, regardless of stdio decoding preferences."""
+    try:
+        return sys.stdin.buffer.read().decode('utf-8')
+    except UnicodeDecodeError:
+        # Neither replacement nor surrogateescape may silently repair input.
+        # Do not expose bytes or nearby user text through an exception excerpt.
+        raise ValueError('hook input must be valid UTF-8') from None
+
+
 def payload(text):
     data = strict_json(text) if text.strip() else {}
     if not isinstance(data, dict):
@@ -257,7 +267,7 @@ def main():
         for pattern in read_allowlist(args.project, args.agent):
             print(pattern)
         return
-    text = sys.stdin.read()
+    text = read_utf8_stdin()
     if args.mode == 'emit':
         if not args.event:
             raise ValueError('event required for context output')

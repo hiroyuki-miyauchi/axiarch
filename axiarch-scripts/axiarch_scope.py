@@ -10,7 +10,7 @@ import sys
 import unicodedata
 
 sys.dont_write_bytecode = True
-from axiarch_hook import payload
+from axiarch_hook import payload, read_utf8_stdin
 from axiarch_state import identifier, inside
 
 # Existing English labels identify topics. Japanese phrases and selected
@@ -119,7 +119,7 @@ def main():
     if os.name != 'posix':
         raise ValueError('POSIX Python required; use Linux Python inside WSL 2 on Windows')
     root = Path(args.project).resolve(strict=True)
-    print(review(payload(sys.stdin.read()), root, args.session), end='')
+    print(review(payload(read_utf8_stdin()), root, args.session), end='')
 
 
 if __name__ == '__main__':

@@ -67,7 +67,7 @@ def owned(content):
 
 
 def render(prompt, rel, lang):
-    title = next((line[2:].strip() for line in prompt.read_text().splitlines() if line.startswith('# ')), 'Axiarch prompt')
+    title = next((line[2:].strip() for line in prompt.read_text(encoding='utf-8').splitlines() if line.startswith('# ')), 'Axiarch prompt')
     protocol = f'axiarch-rules/{lang}/LOADING_PROTOCOL.md'
     if lang == 'ja':
         body = (f'正本プロンプト `{rel}` を実際に読み、適用範囲に応じた手順を実行してください。\n'
@@ -242,7 +242,7 @@ def install(args):
         for src, _, rel in files:
             if rel.startswith('axiarch-scripts/') and src.suffix in ('.sh', '.py'):
                 if src.suffix == '.py':
-                    ast.parse(src.read_text())
+                    ast.parse(src.read_text(encoding='utf-8'))
                 elif subprocess.run(['bash', '-n', str(src)], check=False).returncode:
                     raise ValueError(f'shell syntax failure: {rel}')
         hook, hook_status = precommit_plan(root) if args.precommit else (None, 'not_selected')

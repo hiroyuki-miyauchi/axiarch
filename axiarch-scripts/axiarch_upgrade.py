@@ -260,7 +260,7 @@ def copy_files(args):
     installed = {}
     hashes = inside(target, ".axiarch/files.sha256")
     if hashes.is_file():
-        for line in hashes.read_text().splitlines():
+        for line in hashes.read_text(encoding='utf-8').splitlines():
             if "  " in line:
                 value, name = line.split("  ", 1)
                 installed[name] = value
@@ -326,7 +326,7 @@ def finalize(args):
     root = Path(args.target).resolve()
     metadata_paths(root, args.run_id)
     meta = inside(root, ".axiarch")
-    lines = Path(args.log).read_text().splitlines()
+    lines = Path(args.log).read_text(encoding='utf-8').splitlines()
     pending = [s for s in lines if s.startswith(("REVIEW ", "KEEP ", "MERGE-SKIP ", "DIFF "))
                or (s.startswith("SKIP ") and not s.startswith(("SKIP source-only ", "SKIP optional ")))]
     conflicts = [s for s in lines if s.startswith(("TYPE-CONFLICT ", "CONFLICT "))]
@@ -349,7 +349,7 @@ def finalize(args):
     hashes = {}
     hash_path = meta / "files.sha256"
     if hash_path.exists():
-        for line in hash_path.read_text().splitlines():
+        for line in hash_path.read_text(encoding='utf-8').splitlines():
             if "  " in line:
                 sha, name = line.split("  ", 1)
                 hashes[name] = sha

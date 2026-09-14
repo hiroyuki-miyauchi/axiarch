@@ -27,6 +27,10 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- 不正UTF-8を別の文字列へ変換して受理するフック入力処理を修正。標準入力を厳密なUTF-8として読み、共通JSONではキー・入れ子の値も単独サロゲートを拒否する。正常な日英・絵文字・正規化形式を保持し、不正入力で記録を作らず本文を転載しない。両製品の実handler・共通CLI・文字コード設定の回帰と日英の復旧手順を追加する。
+- Fix hook input silently accepting invalid UTF-8 after reinterpretation. Decode stdin strictly as UTF-8 and reject unpaired surrogates in shared JSON, including keys and nested values. Preserve valid Japanese/English, emoji and normalization forms; invalid input creates no records and is not echoed. Add native-handler, shared-CLI and stdio-setting regressions with bilingual recovery guidance.
+- 言語設定・プロンプト・作業証跡・比較用記録のUTF-8読込を明示し、非UTF-8のOS既定設定で正常な文書が読めない不備を修正。UTF-8モードを無効にした環境でも日英の言語判定・コマンド生成を検査する。旧文書の文字コードを自動変換しない。
+- Read language settings, prompts, task evidence and comparison records explicitly as UTF-8, fixing failures on valid documents under non-UTF-8 OS defaults. Regress Japanese/English language resolution and command generation with UTF-8 mode disabled, without automatically converting existing documents.
 - 日英のLOADING_PROTOCOLとスクリプト内のコメントに残る旧grep方式・task.mdのみの比較・欠落文書の読み飛ばしという説明を、現行の話題検知と未確認通知へ同期。任意設定と既存セッション異常の通知を区別し、3製品の適用範囲を明記する。実行処理や設定値は変更しない。
 - Align both LOADING_PROTOCOL editions and script comments with current bilingual topic comparison and unassessed diagnostics, replacing obsolete descriptions of grep-only matching, task.md-only comparison and skipping missing documents. Distinguish optional hints from existing-session warnings and clarify agent scope. Executable behavior and settings are unchanged.
 - 補足の生成と製品側受領・実読込を区別する日英の確認手順を追加。Codexの長い出力、Claudeの時間切れ、AntigravityのRules入口を説明し、設定緩和や別セッション生成による見かけの復旧を避ける。health警告を日本語だけ人間レビュー対象としていた説明も、AIの自力確認を優先する原則へ揃える。実行スクリプトや既定設定は変更しない。
