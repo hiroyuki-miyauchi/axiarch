@@ -16,6 +16,10 @@
 
 set -euo pipefail
 
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

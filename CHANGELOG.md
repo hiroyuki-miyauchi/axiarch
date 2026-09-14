@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- シェル入口の子PythonをUTF-8モード・UTF-8入出力で実行し、継承した文字コード設定による日本語パス・プロンプト・作業名の文字化けを修正。文字置換で既存ファイルのWrite保護を誤って許可するケースを含め、日英の導入・起動・再開・保護・更新を隔離テストで確認する。設定は実行プロセス内のみで、既存記録の自動変換や製品の動作保証は行わない。
+- Run child Python from shell entrypoints with UTF-8 mode and UTF-8 I/O, fixing Unicode path, prompt and task-name corruption from inherited encoding settings. Cover Japanese/English installation, startup, resumption, protection and upgrades in isolated regressions, including incorrect Write permission after filename replacement. Settings remain process-local; existing records are not converted and agent operation is not guaranteed.
 - 不正UTF-8を別の文字列へ変換して受理するフック入力処理を修正。標準入力を厳密なUTF-8として読み、共通JSONではキー・入れ子の値も単独サロゲートを拒否する。正常な日英・絵文字・正規化形式を保持し、不正入力で記録を作らず本文を転載しない。両製品の実handler・共通CLI・文字コード設定の回帰と日英の復旧手順を追加する。
 - Fix hook input silently accepting invalid UTF-8 after reinterpretation. Decode stdin strictly as UTF-8 and reject unpaired surrogates in shared JSON, including keys and nested values. Preserve valid Japanese/English, emoji and normalization forms; invalid input creates no records and is not echoed. Add native-handler, shared-CLI and stdio-setting regressions with bilingual recovery guidance.
 - 言語設定・プロンプト・作業証跡・比較用記録のUTF-8読込を明示し、非UTF-8のOS既定設定で正常な文書が読めない不備を修正。UTF-8モードを無効にした環境でも日英の言語判定・コマンド生成を検査する。旧文書の文字コードを自動変換しない。

@@ -6,6 +6,10 @@
 # =============================================================================
 
 set -euo pipefail
+
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 export PYTHONDONTWRITEBYTECODE=1
 
 AXIARCH_VERSION="1.17.0"

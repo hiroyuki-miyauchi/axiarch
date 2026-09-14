@@ -107,6 +107,14 @@ Startup, reminder and protection hooks and the scope CLI decode stdin bytes stri
 
 Language settings, prompts, task evidence and comparison records are also read as UTF-8 rather than using the OS default encoding. Older documents saved in another encoding are not converted automatically. Confirm the original encoding and content, preserve the originals and apply a reviewed UTF-8 version.
 
+利用者向けのシェル入口は、子Pythonの `PYTHONUTF8=1` と `PYTHONIOENCODING=utf-8` を指定します。継承したASCII・Latin-1・文字置換の設定やCロケールに左右されず、パス・プロンプト・許可リスト・診断をUTF-8で受け渡すためです。文字置換によって日本語名の既存ファイルを別名として調べ、Writeを許可する誤判定も抑えます。不正な入力を修復する指定ではありません。変更は実行中のシェルと子プロセス内に限り、呼出し元の環境や保存済みファイル、製品の信頼設定は変更しません。
+
+Public shell entrypoints set `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8` for child Python processes. Paths, prompts, allowlists and diagnostics use UTF-8 regardless of inherited ASCII, Latin-1, replacement settings or the C locale. This also addresses Write checks incorrectly allowing an existing Unicode filename after character replacement turns it into a different path. Invalid input is not repaired. These settings affect only the running shell and its children, leaving the caller's environment, stored files and product trust settings unchanged.
+
+更新時は、使用する `axiarch-scripts/` のシェル入口を一緒に反映してください。初期導入には更新済みの `init.sh` を使います。Python補助を直接組み込む独自連携は、UTF-8の実行・入出力契約を呼出し側で指定する必要があります。端末側の表示設定やWindowsネイティブの動作保証を追加する変更ではありません。
+
+When upgrading, apply the shell entrypoints in the selected `axiarch-scripts/` together; use the updated `init.sh` for initial installation. Custom integrations invoking internal Python helpers directly must configure their UTF-8 execution and I/O contract at the caller. This change does not configure terminal rendering or add native Windows support.
+
 文字の検査に失敗すると、起動・補足は既存の警告経路を使い、作業記録を新規生成しません。保護フックは新規作成の入力でも終了2で拒否します。正常な新規作成は引き続き許可します。Unicode診断は入力本文を転載しません。古いJSON記録や設定に単独サロゲートがあれば共通CLIも失敗します。元の記録を保持し、生成元・バックアップと照合して意図した値を復旧してください。文字の削除・置換で検査だけを通す自動修復は行いません。Antigravity等でも共通記録CLIには同じ制約を適用しますが、フックの自動適用を意味しません。
 
 On invalid character input, startup/reminder hooks use their existing warning paths without creating work records. Protection hooks exit 2 even for a new-file request with invalid input; valid creation remains allowed. Unicode diagnostics do not echo payload contents. Shared CLIs also reject old JSON records or settings containing unpaired surrogates. Preserve the originals and recover intended values from the producer or reviewed backups. No automatic character deletion or replacement is performed merely to pass validation. The shared record CLI applies the same restriction for Antigravity and other agents; it does not imply automatic hook execution there.

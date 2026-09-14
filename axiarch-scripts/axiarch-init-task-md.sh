@@ -21,6 +21,10 @@
 
 set -uo pipefail
 
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+
 # -----------------------------------------------------------------------------
 # Resolve project directory
 # -----------------------------------------------------------------------------
