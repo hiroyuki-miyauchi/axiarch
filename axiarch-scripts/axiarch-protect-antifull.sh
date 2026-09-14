@@ -149,8 +149,8 @@ fi
 # -----------------------------------------------------------------------------
 # Deny: existing file + Write tool = potential §7.6 ANTI-FULL-OVERWRITE violation
 # -----------------------------------------------------------------------------
-REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的に全面書き換えが必要な場合はユーザー明示承認のうえで .claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt にパスを追加してください。"
-REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). If full overwrite is genuinely needed, ask the user for explicit approval and add the path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
+REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的な全面置換には記録されたユーザー明示承認が必要です。既存の承認範囲を確認し、不足する場合だけ承認を求め、.claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt に承認済みパスを追加してください。"
+REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). Intentional full replacement requires recorded explicit user approval. Check the existing authorization scope, ask only when approval is missing, and add the approved path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
 
 # Emit JSON output for hook contract (decision: block + reason)
 REASON_FULL="${REASON_JA} / ${REASON_EN}"

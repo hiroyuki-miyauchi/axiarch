@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- Claudeの全面置換拒否メッセージも、既存の明示承認範囲を確認して不足時だけ質問する日英の案内へ揃える。拒否判定自体は維持する。
+- Align the bilingual Claude full-replacement denial message with checking existing explicit authorization and asking only when it is missing. Preserve the denial decision itself.
 - Claude/Codexの上書き許可リストの検査差を修正。リンクされたファイル・親フォルダ、ハードリンク、他の所有者、特殊ファイル、不正UTF-8、NULを例外許可として扱わず、内容を漏らさず終了2で通知する。Claudeの壊れた設定をCodexの例外で補わない。正当なglob・日本語・CRLFを維持し、例外不要の新規作成や差分編集は許可する。設定を自動変更しない移行手順と隔離回帰を日英で追加する。
 - Align Claude/Codex overwrite-list checks. Linked files or parents, hardlinks, other owners, special files, invalid UTF-8 and NUL cannot grant exceptions; report exit 2 without exposing contents. Damaged Claude settings do not borrow Codex exceptions. Preserve valid globs, Unicode and CRLF, and allow new-file creation or focused edits without exceptions. Add isolated regressions and bilingual migration guidance without automatically modifying adopter settings.
 - 製品追加後の設定共存・セッション保持、日英の追加時に中核ファイルが保留となる診断失敗と再実行、任意コマンドの言語切替時の編集保護を実動作回帰へ追加。配布言語と応答言語の違い、固有Blueprintの準備、既定REVIEWの反映方法を日英で補足する。
