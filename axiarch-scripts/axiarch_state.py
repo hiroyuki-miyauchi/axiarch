@@ -473,6 +473,8 @@ def resolve_ids(args, root):
         binding = inside(root, f".axiarch/sessions/{sid}/binding.json")
         if binding.exists():
             record = read_json(binding)
+            if not isinstance(record, dict):
+                raise ValueError("session binding must be an object")
             if record.get("session_id") != sid:
                 raise ValueError("session ID/binding path mismatch")
             bound = identifier(record["task_id"])
@@ -626,6 +628,15 @@ def main():
     if args.mode == "path":
         if not sid or not inside(root, f".axiarch/sessions/{sid}/binding.json").is_file():
             raise ValueError("known session ID required")
+        # A usable binding points to a structurally valid shared task. Looking
+        # up old evidence is not a fresh completion claim: do not rehash it or
+        # impose current timestamps just to locate the session documents.
+        record = read_json(inside(root, f".axiarch/tasks/{tid}/state.json"))
+        errors = validate(record, root, "structure")
+        if isinstance(record, dict) and record.get("task_id") != tid:
+            errors.append("task ID/path mismatch")
+        if errors:
+            raise ValueError("invalid bound task state: " + "; ".join(errors))
         print(inside(root, f".axiarch/sessions/{sid}"))
         return
     if not tid:

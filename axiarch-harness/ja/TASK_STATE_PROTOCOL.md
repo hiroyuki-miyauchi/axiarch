@@ -58,6 +58,10 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --
 
 ## 構造化レコード
 
+`--mode path --session <ID>` は読み取り専用で、bindingと参照先の共有 `state.json` の形式・ID対応を確認してから記録先を返す。欠落・不正・不一致は終了2とし、既存記録を生成し直さない。これは構造の確認であり、過去の証拠ハッシュや確認時刻の鮮度を再評価する完了検査ではない。Markdownの内容・読了も証明しない。
+
+Codex/Claudeの補足フックは、選択した既存セッションの解決失敗を `TASK STATE WARNING` として日英で通知し、短縮表示のTTL内でも完全な補足へ戻す。任意の作業範囲検知を無効化しても、この異常通知は隠さない。保存されたJSONや解析エラーの生内容は補足へ転載しない。未作成のセッションは異常とせず、H0の読取だけに記録生成・修復を必須としない。既存証拠を再利用するときは、binding、共有状態、履歴を直接確認して復旧し、元記録を自動移動・削除・上書きしない。Antigravityやフック未対応環境は同じCLIで記録先を確認できるが、同じ通知が自動注入される意味ではない。
+
 `schema_version=1`。タスクに `task_id`、`revision`（整数）、`owner`、`goal`、`phase`（draft / active / complete）、`max_age_seconds`（正の秒数、既定86400）、`criteria` 配列を持つ。
 
 各完了条件は一意な `id`、`owner`、`description`、`verification`、`state`、`verified`、`target`、`checked_at`、`evidence` を持つ。状態は `not_started`（未着手）、`in_progress`（進行中）、`done`（完了）、`discarded`（破棄）。破棄には `reason` が必要で、完了条件の達成の代用にはできない。条件変更・除外は合意と理由を計画へ記録する。

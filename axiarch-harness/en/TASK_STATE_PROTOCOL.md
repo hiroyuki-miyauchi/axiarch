@@ -58,6 +58,10 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --
 
 ## Structured record
 
+`--mode path --session <ID>` is read-only and checks the binding, referenced shared `state.json` structure and matching IDs before returning the document location. Missing, invalid or mismatched records exit 2 without regenerating existing state. This is structural inspection, not a fresh completion check of historical evidence hashes or timestamps. It does not prove Markdown contents or reading.
+
+Codex/Claude reminders report resolution failure for the selected existing session as bilingual `TASK STATE WARNING` and restore the full reminder even within the short-display TTL. Disabling optional scope detection does not suppress this anomaly. Stored JSON and raw parser diagnostics are not copied into the reminder. An uncreated session is not an anomaly, and H0 reading needs no record creation or repair gate. Before reusing existing evidence, inspect the binding, shared state and history directly and reconcile them without automatically moving, deleting or replacing originals. Antigravity or environments without hooks can use the same CLI to resolve records; this does not mean the same reminder is automatically injected.
+
 `schema_version=1`. Each task has `task_id`, integer `revision`, `owner`, `goal`, `phase` (draft / active / complete), positive `max_age_seconds` (default 86400) and a `criteria` array.
 
 Each criterion has a unique `id`, `owner`, `description`, `verification`, `state`, `verified`, `target`, `checked_at` and `evidence`. States are `not_started`, `in_progress`, `done`, `discarded`. Discarded requires `reason` and never substitutes for meeting a completion criterion. Record agreement and rationale for changed/removed criteria in the plan.

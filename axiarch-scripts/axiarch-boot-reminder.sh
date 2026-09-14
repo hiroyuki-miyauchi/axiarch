@@ -103,8 +103,13 @@ elif ! SESSION_ID=$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" session); then
 fi
 DOC_DIR=""
 if [[ -n "${SESSION_ID}" ]]; then
-  RESOLVED_DOC_DIR=$(bash "${PROJECT_DIR}/axiarch-scripts/axiarch-task-state.sh" --project "${PROJECT_DIR}" --mode path --session "${SESSION_ID}" 2>/dev/null) || RESOLVED_DOC_DIR=""
-  if [[ -n "${RESOLVED_DOC_DIR}" ]]; then DOC_DIR="${RESOLVED_DOC_DIR}"; fi
+  if RESOLVED_DOC_DIR=$(bash "${PROJECT_DIR}/axiarch-scripts/axiarch-task-state.sh" --project "${PROJECT_DIR}" --mode path --session "${SESSION_ID}" 2>/dev/null); then
+    DOC_DIR="${RESOLVED_DOC_DIR}"
+  elif [[ -e "${PROJECT_DIR}/.axiarch/sessions/${SESSION_ID}" || -L "${PROJECT_DIR}/.axiarch/sessions/${SESSION_ID}" ]]; then
+    # An absent new session is normal for H0; damaged existing records are not
+    # silently downgraded to that case. Do not echo stored JSON/parser details.
+    VIOLATIONS+=" [TASK STATE WARNING] Existing session context could not be resolved. Inspect its binding and shared task state before reusing that evidence; existing records were not changed. H0 needs no task-record repair gate. / 既存セッションの記録先を確認できません。この証拠を再利用する前にbindingと共有タスク状態を確認してください。既存記録は変更していません。H0の読取に記録修復を必須としません。"
+  fi
 fi
 
 # -----------------------------------------------------------------------------

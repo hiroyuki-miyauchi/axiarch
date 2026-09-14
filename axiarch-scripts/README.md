@@ -255,6 +255,10 @@ Update the complete `axiarch-scripts/` bundle. Health reports a missing `axiarch
 
 Checks A/D use the resolved session; B/C inspect actual entries in installed lesson logs. Missing history rows or threshold matches prompt review rather than proving missed reading or a protocol violation.
 
+既存セッションのbindingや共有状態が解決できない場合は `TASK STATE WARNING` として完全な補足を表示します。未記録のH0とは区別し、任意の語彙検知を無効化しても異常を隠しません。記録を自動修復せず、過去の証拠の参照を現在の完了判定と混同しません。復旧とCLIの契約は [記録先の確認](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md#構造化レコード) を参照してください。更新はscripts一式で適用します。
+
+An unresolved binding or shared state for an existing session produces `TASK STATE WARNING` and the full reminder. This is distinct from unrecorded H0 work; disabling optional keyword hints does not hide the anomaly. Records are not repaired automatically, and locating historical evidence is not a current completion claim. See [record location checks](../axiarch-harness/en/TASK_STATE_PROTOCOL.md#structured-record) for recovery and the CLI contract. Apply updates as a complete scripts bundle.
+
 入力とJSON応答はPython 3の共通補助 `axiarch-scripts/axiarch_hook.py` で処理します。jqなしでもUnicodeエスケープと長文を同じように解析します。解析失敗は見直し警告であり、未読や手順違反の証明とは扱いません。既存Writeの拒否とは異なり、この補足フックは終了0で情報を返します。
 
 Input and context JSON use the Python 3 helper `axiarch-scripts/axiarch_hook.py`. Unicode escapes and long prompts are decoded consistently without jq. Parsing failures produce review warnings, not proof of missed reading or rule violations. This informational hook returns exit 0; the existing-file Write guard has a separate blocking contract.
