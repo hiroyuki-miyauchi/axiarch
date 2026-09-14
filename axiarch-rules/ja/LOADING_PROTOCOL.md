@@ -170,7 +170,7 @@ H2以上は実際に読んだパスと範囲をセッション固有のtask.md�
 |:--|:--|:--|
 | **新規 session（新規チャット/コンテキストリセット直後）** | 適用範囲のStep 1–4を実施（H0/H1例外と下記の継続条件を適用） | 引き継ぎを仮定せず、利用可能な内容と実読込証跡を照合する |
 | **同一 session 内タスク切替（タスクタイプ変更あり）** | 新タスクに必要な追加ファイルをload。内容が変わっていない実読込済み範囲は再load不要 | 現在のINDEXと実フォルダから追加の適用範囲を確認する |
-| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。**ただし v1.8.0+ Check D（Task Boundary Detection）が AI 自己判断をバックアップ** — `axiarch-boot-reminder.sh` が現プロンプト domain keyword と task.md ロード履歴を機械比較し、新 keyword 検出時に full reminder + [LOAD REVIEW] を表示。追加読込の要否は実際のタスク範囲で判断 | YAGNI 原則 + context budget 保護 + Check D による confirmation bias リスク低減 |
+| **同一 session 内タスク継続（タスクタイプ不変）** | 追加 load 不要。既 load context を継続使用。任意のCheck Dは、依頼と解決済みセッションの3文書を語彙で照合し、新しい話題の候補を通知する。追加読込の要否は実際のタスク範囲で判断 | YAGNI 原則 + context budget 保護。語彙一致は読了証明ではない |
 | **長時間 session 中断後再開（compaction trigger 等）** | `task.md` ロード履歴と現在の会話コンテキストを照合し、実ロード済みと判断できないファイルは再 load。TTLは補足の表示頻度を制御するだけであり、期限切れだけで読込済み範囲を無効にしない | `axiarch-boot-reminder.sh` TTL state、Memory in LLMs 系の serial position effect 対策 |
 | 参照した規則・Blueprint・索引が変更された | 判断に関わる変更箇所と参照先を再読込。タスクタイプが同じでも古い内容で続行しない | 記録した読込時点と現在の内容の差を確認する |
 
@@ -182,17 +182,17 @@ H2以上は実際に読んだパスと範囲をセッション固有のtask.md�
 > **本基準が解決する問題（v1.6.0 改善背景）**:
 > 「全 30+ ファイル毎セッション load = context 破綻、現実的妥協で部分 load」という従来の運用乖離を、明示的な「省略可能な範囲」のルール化により緩和する。reminder TTL（`axiarch-boot-reminder.sh`）と組み合わせることで、重複ロードの削減を図る。削減率や遵守率を保証するものではない。
 
-> **v1.8.0 改善 — Check D Task Boundary Detection**:
-> 採用先フィードバックで「同一 session 内でも実際のタスクは異なるのに、AI が『session 継続中だから rule 再 load 不要』と判断して追加確認を省略する」問題が判明（confirmation bias）。v1.8.0 で `axiarch-boot-reminder.sh` に Check D を追加：
+> **Check D — 導入背景と現行の照合手順**:
+> v1.8.0で追加した話題検知は、同一セッションでも変化する作業範囲の見直しを補助する。現行の `axiarch-scripts/axiarch-boot-reminder.sh` は、次の処理を `axiarch-scripts/axiarch_scope.py` に委譲する：
 >
 > 1. UserPromptSubmit hook の stdin から現プロンプト JSON を読む
-> 2. プロンプト内の domain keyword（security / architecture / ui_design / api / performance / push / commit / migration 等）を whole-word match (`grep -oiwE`) で抽出
-> 3. 解決済みセッションの3文書（`task.md` / `implementation_plan.md` / `walkthrough.md`）のうち存在するファイルを full-text grep し、既存 domain keyword を抽出。プランや結果記録も比較対象に含めるが、文脈の完全な把握や実読込の確認ではない
-> 4. **差異検出時**: `[LOAD REVIEW]` flag + **TTL bypass**（短縮版を抑制し full reminder を再発火）
+> 2. 既知の日英語彙・全角表記を共通の話題ラベルへ対応付ける
+> 3. 解決済みセッションの `.axiarch/sessions/{session_id}/` 内にある3文書（`task.md` / `implementation_plan.md` / `walkthrough.md`）を同じ方法で照合する。文書が欠落・読取不能なら、残りだけで確認済みとしない。未作成のH0セッションには文書生成を要求しない
+> 4. 新しい話題の候補は `[LOAD REVIEW]`、補助検査の失敗は `[SCOPE REVIEW UNASSESSED]` として通知し、TTL短縮を抑制する。既存セッション自体の解決失敗は、別途 `TASK STATE WARNING` として通知する
 >
-> これにより AI の「タスクタイプ不変」自己判断だけに依存せず、**hook 側で task boundary 候補を検出**して rule 再 load を促す構造になる。`AXIARCH_TASK_BOUNDARY_DETECT=0` で無効化可能（採用先カスタマイズ用）。`AXIARCH_TASK_DOMAIN_KEYWORDS` で keyword 集合をオーバーライド可能。
+> `AXIARCH_TASK_BOUNDARY_DETECT=0` は任意の話題検知だけを無効化し、既存セッションの解決失敗を隠さない。`AXIARCH_TASK_DOMAIN_KEYWORDS` は既定の日英語彙を置換する任意のPOSIX正規表現指定で、この指定時に従来のgrep照合を使う。設定・通知・秘密情報の扱い・更新方法の詳細は [axiarch-scripts/README.md](../../axiarch-scripts/README.md#axiarch-boot-remindersh) を参照する。
 >
-> **3 ファイル全検査の意義**: domain context は `task.md` のロード履歴だけでなく、`implementation_plan.md` の方針記述や `walkthrough.md` の差分 narrative にも書かれる。task.md だけ参照すると、プラン側に明確に書かれた domain を見落として false positive が頻発する。3 ファイル全部を「タスク文脈の確認対象」とすることで、AI が現実に管理しているタスク context をミラーリングする。
+> 3文書は見直し候補を得るための比較対象であり、文脈の完全な把握や実読込の証明ではない。未登録の言い換え・否定・意味は判断できないため、AIは実際の依頼に照らして追加ロードの要否を判断する。このhook補助はCodex/Claudeの配布構成が対象で、Antigravityでは同じ通知が自動注入されるものではない。
 
 ---
 

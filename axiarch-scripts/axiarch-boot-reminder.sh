@@ -134,9 +134,9 @@ fi
 
 # -----------------------------------------------------------------------------
 # Check D (v1.8.0+): Task boundary detection
-# Detects mismatch between current prompt's domain keywords and task.md's recorded
-# load history. Forces full reminder (TTL bypass) when a new task type is detected,
-# reviewing the "AI judges 'same session, no re-load needed' and misses a relevant rule" loophole.
+# Compares current prompt keywords with all three resolved session documents.
+# New-topic hints or unavailable inspection bypass TTL shortening; neither
+# keyword matches nor stored text prove actual reading or semantic task coverage.
 #
 # Built-in JA/EN aliases live in axiarch_scope.py. AXIARCH_TASK_DOMAIN_KEYWORDS
 # remains an optional POSIX ERE override; invalid expressions are unassessed.

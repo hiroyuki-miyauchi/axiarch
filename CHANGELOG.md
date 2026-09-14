@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- 日英のLOADING_PROTOCOLとスクリプト内のコメントに残る旧grep方式・task.mdのみの比較・欠落文書の読み飛ばしという説明を、現行の話題検知と未確認通知へ同期。任意設定と既存セッション異常の通知を区別し、3製品の適用範囲を明記する。実行処理や設定値は変更しない。
+- Align both LOADING_PROTOCOL editions and script comments with current bilingual topic comparison and unassessed diagnostics, replacing obsolete descriptions of grep-only matching, task.md-only comparison and skipping missing documents. Distinguish optional hints from existing-session warnings and clarify agent scope. Executable behavior and settings are unchanged.
 - 補足の生成と製品側受領・実読込を区別する日英の確認手順を追加。Codexの長い出力、Claudeの時間切れ、AntigravityのRules入口を説明し、設定緩和や別セッション生成による見かけの復旧を避ける。health警告を日本語だけ人間レビュー対象としていた説明も、AIの自力確認を優先する原則へ揃える。実行スクリプトや既定設定は変更しない。
 - Add bilingual checks separating generated reminders, product delivery and actual reading, covering large Codex output, Claude timeouts and the Antigravity Rules entrypoint. Avoid automatic setting relaxation or unrelated session creation as apparent recovery. Align the Japanese health-warning guidance with agent-led inspection. Runtime scripts and default settings are unchanged.
 - セッションの記録先解決で、参照先の共有タスクの欠落・不正・ID不一致を検査する。既存記録の解決失敗が短縮補足で隠れる問題を修正し、日英の未確認通知へ接続する。未記録H0・過去の証拠参照・復旧後の再開と別セッション保持を維持し、旧記録を自動再生成しない。両製品のフックと共通CLIの隔離回帰を追加する。
