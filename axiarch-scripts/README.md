@@ -298,9 +298,17 @@ Python 3 decodes JSON consistently with or without jq, including quoted, Unicode
 
 `axiarch-scripts/axiarch_hook.py` and `axiarch-scripts/axiarch_state.py` validate raw input before Bash stores it, so invalid JSON containing raw NUL bytes is not silently repaired and allowed. Missing helpers also return exit 2. Update the Write guard with the complete scripts bundle.
 
-Claude設定がある環境ではWriteはClaudeの許可リストだけを使います。旧単独Write呼び出しのCodex許可リストfallbackは保持します。Codexの `apply_patch` は既存の新規作成・移動先を拒否し、通常のUpdate File差分を許可します。delete/addの組み合わせも適用前の実体と突合します。未知のpatch形式は終了2です。専用のCodex許可リストを使い、Claudeの例外は流用しません。詳しい契約は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+Claudeのネイティブ `PreToolUse` / `Write` は、ローカル設定の有無によらずClaudeの許可リストだけを使います。イベント名が不正・別イベントの場合、既存ファイルの置換を終了2で拒否し、入力値を通知へ転載しません。イベント名を持たない旧呼び出しも、Claude設定・Claude許可リスト（壊れたリンク等を含む）または明示した `AXIARCH_HOOK_AGENT=claude` があればClaudeを選びます。継承した `AXIARCH_HOOK_AGENT=codex` でこの選択を置き換えません。これらがすべてない旧単独Write呼び出しに限り、Codex許可リストfallbackを保持します。
 
-When Claude settings are installed, Write uses only the Claude allowlist; the legacy standalone Write fallback remains. Codex `apply_patch` checks add/move destinations against the original filesystem, including delete/add pairs, and permits ordinary Update File diffs. Unknown syntax exits 2. It uses the Codex allowlist without borrowing Claude exceptions. See [agent compatibility](AGENT_COMPATIBILITY.md).
+Native Claude `PreToolUse` / `Write` uses only the Claude allowlist even without local settings. An invalid or different event name rejects an existing-file replacement with exit 2 without echoing the supplied value. Legacy calls without an event name also select Claude when Claude settings, a Claude allowlist (including damaged links), or explicit `AXIARCH_HOOK_AGENT=claude` exists. An inherited `AXIARCH_HOOK_AGENT=codex` cannot replace that selection. The Codex fallback remains only for standalone legacy Write calls without any of that Claude context.
+
+Codexの `apply_patch` は既存の新規作成・移動先を拒否し、通常のUpdate File差分を許可します。delete/addの組み合わせも適用前の実体と突合します。未知のpatch形式は終了2です。専用のCodex許可リストを使い、Claudeの例外は流用しません。詳しい契約は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+
+Codex `apply_patch` checks add/move destinations against the original filesystem, including delete/add pairs, and permits ordinary Update File diffs. Unknown syntax exits 2. It uses the Codex allowlist without borrowing Claude exceptions. See [agent compatibility](AGENT_COMPATIBILITY.md).
+
+旧呼び出しでCodexのリストをClaudeにも流用していた場合は、承認済みの対象を確認し、Claude側の通常ファイルへ必要な項目だけ設定します。環境変数自体は上書き承認の証拠ではありません。修正は `axiarch-scripts/` 一式で反映し、既存リストの自動コピー・移動・削除は行いません。新規作成や通常の差分編集には上書き例外を要求しません。
+
+If a legacy caller borrowed Codex entries for Claude, review the approved scope and configure only the necessary entries in a regular Claude allowlist. An environment hint is not evidence of overwrite approval. Apply the complete `axiarch-scripts/` bundle; existing lists are not automatically copied, moved or deleted. New-file creation and ordinary focused edits need no overwrite exception.
 
 ### Whitelist サポート / Whitelist Support
 

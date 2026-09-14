@@ -118,16 +118,9 @@ fi
 # -----------------------------------------------------------------------------
 # Whitelist: bypass when matched in .claude/axiarch-overwrite-allow.txt or .codex/...
 # -----------------------------------------------------------------------------
-ALLOW_AGENT="claude"
-if [[ "${AXIARCH_HOOK_AGENT:-}" == "codex" ]]; then
-  ALLOW_AGENT="codex"
-elif [[ -e "${PROJECT_DIR}/.claude/settings.json" || -L "${PROJECT_DIR}/.claude/settings.json" ||
-        -e "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" || -L "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
-  ALLOW_AGENT="claude"
-elif [[ -e "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" || -L "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" ]]; then
-  # Legacy standalone Write guards without an installed Claude configuration.
-  ALLOW_AGENT="codex"
-fi
+# Native Claude metadata and local Claude context take precedence over inherited
+# agent hints. Only the metadata-free standalone interface has a Codex fallback.
+ALLOW_AGENT="$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" write-agent --project "$PROJECT_DIR")" || exit 2
 
 # Validate the entire file before matching; process substitution would lose the
 # reader's failure status. Keep Bash glob semantics for legacy Write callers.

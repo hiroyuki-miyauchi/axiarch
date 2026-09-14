@@ -102,6 +102,30 @@ def patch_destinations(data, project):
     return destinations
 
 
+def write_agent(data, project):
+    """Route Write exceptions without borrowing another native agent's scope.
+
+    The old standalone Write interface predates native apply_patch support.
+    Retain its Codex fallback only without native metadata or Claude context.
+    Environment hints are not authorization to replace installed permissions.
+    """
+    if data.get('tool_name') != 'Write':
+        raise ValueError('Write event required for allowlist selection')
+    if 'hook_event_name' in data:
+        if data['hook_event_name'] != 'PreToolUse':
+            raise ValueError('invalid Write hook event; exception not granted')
+        return 'claude'
+    root = Path(project)
+    if os.environ.get('AXIARCH_HOOK_AGENT') == 'claude' or any(
+            os.path.lexists(root / name) for name in
+            ('.claude/settings.json', '.claude/axiarch-overwrite-allow.txt')):
+        return 'claude'
+    if os.environ.get('AXIARCH_HOOK_AGENT') == 'codex' or os.path.lexists(
+            root / '.codex/axiarch-overwrite-allow.txt'):
+        return 'codex'
+    return 'claude'
+
+
 def read_allowlist(project, agent):
     """Read a reviewed local exception file in full before granting permission.
 
@@ -218,7 +242,7 @@ def use_short(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('normalize', 'session', 'prompt', 'emit', 'cache', 'protect-patch', 'project', 'allow-patterns'))
+    parser.add_argument('mode', choices=('normalize', 'session', 'prompt', 'emit', 'cache', 'protect-patch', 'project', 'allow-patterns', 'write-agent'))
     parser.add_argument('--event', choices=('SessionStart', 'UserPromptSubmit'))
     parser.add_argument('--project', default='')
     parser.add_argument('--session', default='')
@@ -240,6 +264,9 @@ def main():
         print(json.dumps({'hookSpecificOutput': {'hookEventName': args.event, 'additionalContext': text}}))
         return
     data = payload(text)
+    if args.mode == 'write-agent':
+        print(write_agent(data, args.project))
+        return
     if args.mode == 'project':
         # Bash command substitution discards trailing newlines; preserve the
         # exact path through a final sentinel removed by each shell caller.

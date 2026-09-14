@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- ClaudeのWriteが継承したCodex指定によって他製品の上書き許可を使う問題を修正。ネイティブイベント・Claude設定・許可リスト・明示Claude指定を優先し、不正イベントは既存ファイルの置換を拒否する。対象を限定した旧単独Writeの互換、新規作成、製品ごとの承認済みパスを保持し、日英の移行手順と隔離回帰を追加する。
+- Fix Claude Write borrowing Codex overwrite exceptions through an inherited agent hint. Prioritize native events and Claude settings, allowlists or explicit selection; invalid events reject existing-file replacement. Preserve the bounded legacy standalone Write fallback, new-file creation and each agent's approved paths, with bilingual migration guidance and isolated regressions.
 - 作業範囲の補足検査を日英の既知語彙・全角表記へ対応。日本語の話題を見落とすケースと、言語切替だけで新しい話題と判定するケースを修正する。独自POSIX正規表現の互換と無効化設定を保持し、一致した依頼本文は通知へ出さない。不正設定・読取不能は未確認として完全な補足へ戻す。補助ファイルの欠落検査、両製品の回帰と日英の移行・保証範囲を追加する。
 - Extend scope hints to known Japanese/English aliases and fullwidth notation, fixing missed Japanese topics and false new-topic hints on language changes. Preserve custom POSIX expression and disable settings without echoing matched prompt content. Invalid configuration or unreadable records produce an unassessed result and a full reminder. Add helper-presence diagnostics, regressions for both agents, and bilingual migration and verification boundaries.
 - Claudeの全面置換拒否メッセージも、既存の明示承認範囲を確認して不足時だけ質問する日英の案内へ揃える。拒否判定自体は維持する。

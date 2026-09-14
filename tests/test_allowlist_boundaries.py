@@ -116,6 +116,89 @@ class AllowlistBoundaryTests(unittest.TestCase):
                 self.guard(agent, 'generated/日本語 1.txt', 0)
         self.assertEqual(target.read_text(), 'keep\n')
 
+    def test_inherited_codex_hint_cannot_replace_installed_claude_permission(self):
+        for lang, name in [('Japanese', '日本語.txt'), ('English', 'existing.txt')]:
+            with self.subTest(lang=lang):
+                self.target = self.root / lang; self.target.mkdir()
+                self.guard_fixture()
+                (self.target / 'AXIARCH.md').write_text('Project Native Language: ' + lang + '\n')
+                (self.target / name).write_text('keep\n')
+                (self.target / '.codex/axiarch-overwrite-allow.txt').write_text(name + '\n')
+                before = self.tree_bytes()
+                for filename, expected in [(name, 2), ('new.txt', 0)]:
+                    self.configured_hook('claude', 'PreToolUse', dict(cwd=str(self.target),
+                        tool_name='Write', tool_input={'file_path': filename}), expected=expected,
+                        extra={'AXIARCH_HOOK_AGENT': 'codex'})
+                self.assertEqual(self.tree_bytes(), before)
+
+    def test_each_native_agent_keeps_its_own_approved_paths_with_opposite_hint(self):
+        self.guard_fixture()
+        for agent in ('claude', 'codex'):
+            (self.target / (agent + '.txt')).write_text('keep\n')
+            (self.target / f'.{agent}/axiarch-overwrite-allow.txt').write_text(agent + '.txt\n')
+        before = self.tree_bytes()
+        for agent, other in [('claude', 'codex'), ('codex', 'claude')]:
+            for filename, expected in [(agent + '.txt', 0), (other + '.txt', 2)]:
+                with self.subTest(agent=agent, filename=filename):
+                    value = {'file_path': filename} if agent == 'claude' else {'command':
+                        '*** Begin Patch\n*** Add File: ' + filename + '\n+replacement\n*** End Patch'}
+                    self.configured_hook(agent, 'PreToolUse', dict(cwd=str(self.target),
+                        tool_name='Write' if agent == 'claude' else 'apply_patch', tool_input=value),
+                        expected=expected, extra={'AXIARCH_HOOK_AGENT': other})
+        self.assertEqual(self.tree_bytes(), before)
+
+    def test_inherited_hint_cannot_hide_invalid_claude_allowlist_without_settings(self):
+        for kind in ('broken-link', 'fifo', 'directory', 'invalid-utf8', 'nul'):
+            with self.subTest(kind=kind):
+                self.target = self.root / kind; self.target.mkdir(); self.guard_fixture()
+                (self.target / '.claude/settings.json').unlink()
+                (self.target / 'existing.txt').write_text('keep\n')
+                (self.target / '.codex/axiarch-overwrite-allow.txt').write_text('existing.txt\n')
+                allow = self.target / '.claude/axiarch-overwrite-allow.txt'
+                if kind == 'broken-link': allow.symlink_to(self.root / 'missing')
+                elif kind == 'fifo': os.mkfifo(allow)
+                elif kind == 'directory': allow.mkdir()
+                else: allow.write_bytes(b'PRIVATE_LIST_MARKER\n' + (b'\xff' if kind == 'invalid-utf8' else b'\x00'))
+                before = self.tree_bytes()
+                result = self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-protect-antifull.sh'],
+                    text=json.dumps(dict(cwd=str(self.target), tool_name='Write',
+                                         tool_input={'file_path': 'existing.txt'})), expected=2,
+                    env=dict(self.env, CLAUDE_PROJECT_DIR=str(self.target), AXIARCH_HOOK_AGENT='codex'))
+                self.assertNotIn('PRIVATE_LIST_MARKER', result.stdout + result.stderr)
+                self.assertEqual(self.tree_bytes(), before)
+
+    def test_standalone_write_keeps_legacy_fallback_but_respects_explicit_claude(self):
+        self.guard_fixture()
+        (self.target / '.claude/settings.json').unlink()
+        (self.target / '.codex/axiarch-overwrite-allow.txt').write_text('existing.txt\n')
+        (self.target / 'existing.txt').write_text('keep\n')
+        before = self.tree_bytes()
+        for hint, expected in [('', 0), ('codex', 0), ('claude', 2)]:
+            with self.subTest(hint=hint):
+                self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-protect-antifull.sh'],
+                    text=json.dumps(dict(cwd=str(self.target), tool_name='Write',
+                                         tool_input={'file_path': 'existing.txt'})), expected=expected,
+                    env=dict(self.env, CLAUDE_PROJECT_DIR=str(self.target), AXIARCH_HOOK_AGENT=hint))
+        self.assertEqual(self.tree_bytes(), before)
+
+        # Native Claude Write remains Claude even with only a global hook or
+        # after local settings disappear. Unknown event data is not permission.
+        for event in ('PreToolUse', 'PostToolUse', None, {}, 'PRIVATE_EVENT_MARKER'):
+            with self.subTest(event=event):
+                result = self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-protect-antifull.sh'],
+                    text=json.dumps(dict(cwd=str(self.target), hook_event_name=event, tool_name='Write',
+                                         tool_input={'file_path': 'existing.txt'})), expected=2,
+                    env=dict(self.env, CLAUDE_PROJECT_DIR=str(self.target), AXIARCH_HOOK_AGENT='codex'))
+                self.assertNotIn('PRIVATE_EVENT_MARKER', result.stdout + result.stderr)
+        self.assertEqual(self.tree_bytes(), before)
+        (self.target / '.claude/axiarch-overwrite-allow.txt').write_text('existing.txt\n')
+        before = self.tree_bytes()
+        self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-protect-antifull.sh'],
+            text=json.dumps(dict(cwd=str(self.target), hook_event_name='PreToolUse', tool_name='Write',
+                                 tool_input={'file_path': 'existing.txt'})),
+            env=dict(self.env, CLAUDE_PROJECT_DIR=str(self.target), AXIARCH_HOOK_AGENT='codex'))
+        self.assertEqual(self.tree_bytes(), before)
+
 
 if __name__ == '__main__':
     unittest.main()

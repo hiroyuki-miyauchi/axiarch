@@ -53,7 +53,7 @@ Codex/Claudeの作業範囲の補足検査は、既知の日英語彙と全角�
 
 ### 検証した範囲と保証しない範囲
 
-Claude/Codexの任意の上書き許可リストは、リンク・所有者・通常ファイル・UTF-8・NULの共通検査を通してから利用します。壊れた例外設定で別製品の許可へ切り替えず、新規作成・差分編集には例外を要求しません。形式と旧設定の移行は [scripts READMEの許可リスト手順](README.md#whitelist-サポート--whitelist-support) を参照してください。Antigravityに同じフックが自動適用される意味ではありません。
+Claude/Codexの任意の上書き許可リストは、リンク・所有者・通常ファイル・UTF-8・NULの共通検査を通してから利用します。壊れた例外設定で別製品の許可へ切り替えず、新規作成・差分編集には例外を要求しません。ClaudeのネイティブWriteや既存のClaude設定を、継承した製品指定でCodexの許可へ切り替えません。形式と旧設定の移行は [scripts READMEの許可リスト手順](README.md#whitelist-サポート--whitelist-support) を参照してください。Antigravityに同じフックが自動適用される意味ではありません。
 
 2026-09-14の監査では公式仕様、ローカルCLIの版表示（Codex 0.153.4、Claude Code 2.1.167）、隔離した12通りの導入構成と実health、公式形式のイベント入力によるスクリプト実行、Codex本体の差分適用処理を照合します。これはモデル推論・実製品UI・権限設定まで含む全工程の実証ではありません。Google Antigravityは従来確認した環境・実務の範囲で実証済みです。Codex・Claude Codeの実務実証と動作保証は引き続き主張しません。
 
@@ -110,7 +110,7 @@ If the new language's `LOADING_PROTOCOL.md` remains pending review, diagnosis re
 
 ### Verification boundaries
 
-Optional Claude/Codex overwrite lists share link, ownership, regular-file, UTF-8 and NUL checks before use. Damaged exception settings do not switch to another agent's permission; new-file creation and focused edits need no exception. See the [scripts README allowlist instructions](README.md#whitelist-サポート--whitelist-support) for format and migration. This does not mean the same hooks run automatically in Antigravity.
+Optional Claude/Codex overwrite lists share link, ownership, regular-file, UTF-8 and NUL checks before use. Damaged exception settings do not switch to another agent's permission; new-file creation and focused edits need no exception. An inherited agent hint cannot switch native Claude Write or existing Claude context to Codex permissions. See the [scripts README allowlist instructions](README.md#whitelist-サポート--whitelist-support) for format and migration. This does not mean the same hooks run automatically in Antigravity.
 
 The 2026-09-14 audit compares official documentation, local CLI version output (Codex 0.153.4 and Claude Code 2.1.167), twelve isolated installation configurations with real health diagnostics, script execution using documented event payloads, and the native Codex patch engine. It is not end-to-end validation of model reasoning, product UI or permission settings. Antigravity's prior practical validation remains limited to the environments and tasks exercised. Codex and Claude Code remain unvalidated in practice, with no operation guarantee.
 
