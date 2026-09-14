@@ -27,6 +27,8 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ### 変更 / Changed
 
+- 製品追加後の設定共存・セッション保持、日英の追加時に中核ファイルが保留となる診断失敗と再実行、任意コマンドの言語切替時の編集保護を実動作回帰へ追加。配布言語と応答言語の違い、固有Blueprintの準備、既定REVIEWの反映方法を日英で補足する。
+- Add runtime regressions for coexisting adapters and retained sessions after agent addition, diagnosis failure and recovery when language additions leave core files pending, and edit protection during optional-command language changes. Clarify distribution versus response language, local Blueprint preparation and applying default REVIEW items in Japanese and English.
 - 別AIをCodexのシェルから起動した際、継承したセッションIDで別作業を再開する不備を修正。起動・補足では入力IDを先に検証し、意図的なAxiarch指定を除き製品自身のIDを優先する。不正入力を環境変数で隠さず警告し、旧記録は保持する。日英の優先順位・移行手順と回帰を追加する。
 - Fix another agent launched from a Codex shell resuming the parent's work records. Startup/reminder hooks validate native IDs first and prefer them over inherited runtime IDs unless an intentional Axiarch override is supplied. Environment variables cannot hide invalid input; existing records remain intact. Add bilingual precedence/migration guidance and regressions.
 - 英語版harnessに抜けていた「ネイティブ計画ツールが利用できない場合」の代替手順を補う。既存承認の範囲確認と不足時の停止を正本・harness・起動補足でそろえ、通常の差分修正まで再承認を要求する曖昧さを解消。起動補足はAIの読了を強制・証明する機構ではないことを明確にする。

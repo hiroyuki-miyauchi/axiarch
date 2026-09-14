@@ -36,6 +36,19 @@ Codex・Claude Codeのネイティブイベントには、そのセッション�
 
 以前の環境変数優先で作られた記録は、自動で移動・改名・結合しません。`axiarch-scripts/axiarch-task-state.sh --mode sessions` で目的とbindingを確認します。継続するタスクへは、`--mode resume --task <確認したタスクID> --session <新しい書き手のID>` で参加し、元の証跡を保持します。hookから以前の同一セッションを意図的に再開する必要がある場合だけ、その起動に `AXIARCH_SESSION_ID` を指定します。複数の書き手で共用しません。
 
+### 言語の追加・切替と任意コマンド
+
+`axiarch-scripts/axiarch-upgrade.sh --lang en` は英語の配布ファイルを選ぶ指定です。`AXIARCH.md` の `Project Native Language` を英語へ変更する指定ではありません。`--lang ja` も同様で、既存の言語フォルダを削除しません。
+
+1. 追加する言語を選んでdry-runし、必要な更新を適用します。プロンプト集も必要な場合だけ `--with-prompts` を付けます。`REVIEW`、保留、競合は結果記録で確認します。
+2. 更新は利用先の仕様・教訓を自動翻訳せず、未導入言語の `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` 等も配布例で補いません。追加言語を主に使う前に、既存の実仕様・教訓を根拠として必要なBlueprintと索引を整えます。構造healthの成功だけを新言語の準備完了としません。
+3. プロジェクトの既定応答言語を変える依頼がある場合に、`AXIARCH.md` の設定行を差分で変更します。一時的な翻訳依頼だけでは変更しません。既存セッションの再開は記録を保持するため、言語が自動的に書き換わるものではありません。
+4. Claudeの任意コマンドも切り替える場合は、導入済みの正本を対象に `bash axiarch-scripts/axiarch-prompts-install.sh --lang en --dry-run` で確認し、同じ指定から `--dry-run` を外して再生成します。日本語は `--lang ja`。再生成はコマンドを1つの選択言語へそろえる操作で、言語別コマンドを同時に増やしません。編集済み・競合する独自コマンドは保持して終了3となるため、差分を確認してから再実行します。Codex・Antigravityは任意プロンプトの正本を直接参照できます。
+
+製品の追加も選択だけでは適用されません。`--agent all` の既定実行では必要なadapterが `REVIEW` として残る場合があります。`--interactive` で対象ファイルを確認して反映するか、レビュー済みの差分を統合します。既存handlerを変更する場合は製品の信頼状態も再確認します。
+
+新しい言語の `LOADING_PROTOCOL.md` がレビュー待ちのままの場合、`Goal/state contract missing for en`（または `ja`）で診断が失敗し、更新は終了4となります。同じ更新元・言語を指定した `--safe-only --dry-run` で中核ファイルの追加を確認し、適用する場合は `--dry-run` を `--apply` へ変更します。中核を補っても `lesson log unavailable` が出る場合は、追加言語の `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`、概要、索引を既存の実状態から整えます。検査を通すために教訓を捨てたり、架空の仕様で埋めたりしません。再実行で診断が成功してもmixed設定・索引等の `REVIEW` があれば終了3の部分更新です。結果記録と残る差分を確認し、版数の確認だけを目的に利用先の設定を置換しないでください。
+
 ### 検証した範囲と保証しない範囲
 
 2026-09-14の監査では公式仕様、ローカルCLIの版表示（Codex 0.153.4、Claude Code 2.1.167）、隔離した12通りの導入構成と実health、公式形式のイベント入力によるスクリプト実行、Codex本体の差分適用処理を照合します。これはモデル推論・実製品UI・権限設定まで含む全工程の実証ではありません。Google Antigravityは従来確認した環境・実務の範囲で実証済みです。Codex・Claude Codeの実務実証と動作保証は引き続き主張しません。
@@ -75,6 +88,19 @@ Startup reminders do not prove loading. Record actual read ranges and synchroniz
 5. Start a new product session in an isolated project and verify entrypoint discovery, creation, focused edits, existing-file protection, resumption and selected-language records. Record the product version, OS and observations.
 
 Records created under the earlier environment-first behavior are not moved, renamed or merged automatically. Inspect goals and bindings with `axiarch-scripts/axiarch-task-state.sh --mode sessions`. Join continuing work using `--mode resume --task <inspected-task-id> --session <new-writer-id>` and retain the original evidence. Set `AXIARCH_SESSION_ID` for a particular hook launch only when intentionally resuming the same previous session; do not share it across writers.
+
+### Adding or switching languages and optional commands
+
+`axiarch-scripts/axiarch-upgrade.sh --lang en` selects English distribution files; it does not change `Project Native Language` in `AXIARCH.md`. The same applies to `--lang ja`. Neither option removes an existing language tree.
+
+1. Preview the additional language and apply the needed updates. Add `--with-prompts` only when the optional library is wanted. Inspect `REVIEW`, pending items and conflicts in the result record.
+2. Upgrade does not translate adopter specifications or lessons, or populate missing project-owned files such as `axiarch-rules/{lang}/blueprint/core/000_project_overview.md` with reference examples. Before using the additional language as primary, prepare the necessary Blueprint files and indexes from the existing actual project state. A passing structure health check alone does not establish readiness in that language.
+3. Change the setting line in `AXIARCH.md` through a focused edit when a change of project default is requested. A temporary translation request does not require this. Resuming a session preserves its records rather than automatically translating them.
+4. To switch optional Claude commands, preview the installed canonical library with `bash axiarch-scripts/axiarch-prompts-install.sh --lang en --dry-run`, then repeat without `--dry-run` to regenerate. Use `--lang ja` for Japanese. Regeneration selects one command language; it does not add simultaneous language-specific copies. Edited or conflicting custom commands remain intact with exit 3; review their differences before retrying. Codex and Antigravity can read the canonical optional prompts directly.
+
+Selecting an additional agent does not itself apply its configuration. A default `--agent all` run may leave required adapters as `REVIEW`. Use `--interactive` to review and apply the relevant files, or integrate reviewed diffs. Recheck product trust when existing handlers change.
+
+If the new language's `LOADING_PROTOCOL.md` remains pending review, diagnosis reports `Goal/state contract missing for en` (or `ja`) and upgrade exits 4. Preview safe-owned core additions with the same source and language plus `--safe-only --dry-run`; replace `--dry-run` with `--apply` when applying that selection. If `lesson log unavailable` remains, prepare `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md`, the overview and index from the actual existing project state. Do not discard lessons or fabricate specifications to pass a check. Even after a successful diagnosis on retry, pending mixed settings or indexes produce a partial result with exit 3. Inspect the result and remaining differences; do not replace adopter settings merely to obtain a confirmed version.
 
 ### Verification boundaries
 

@@ -493,6 +493,10 @@ Fresh installation leaves the target unchanged until all input is available; EOF
 
 An explicit upgrade `--dry-run` remains read-only regardless of option order or interactive answers. `--lang en --with-prompts` selects English prompts and the shared README without deleting or updating Japanese files. Confirmed versions cover only the selected scope.
 
+言語・製品の追加は、配布対象の選択、設定の適用、固有Blueprintの準備、応答言語と任意コマンドの切替を区別します。中核ファイルのレビュー待ちによる診断失敗からの復旧を含め、[互換性・移行手順](AGENT_COMPATIBILITY.md) を参照してください。
+
+Adding a language or agent separates distribution selection, configuration application, local Blueprint preparation, response language and optional command regeneration. See the [compatibility and migration guide](AGENT_COMPATIBILITY.md), including recovery when pending core files cause diagnosis to fail.
+
 任意のコマンド生成は `axiarch-scripts/axiarch-prompts-install.sh` から `axiarch-scripts/axiarch_setup.py` を使用し、導入先にある正本だけを参照します。再生成・削除は未編集の生成物のみ。独自・編集済み・旧形式のファイルは保持して終了3、引数不正は2、同時更新中は6です。導入・更新・生成は同一導入先の協調ロックを共用し、ファイル単位で原子的に書き込みます。全ファイルを一括で元に戻す取引や、直接書き込む別ツールまでの排他は保証しません。
 
 Optional command generation uses `axiarch-scripts/axiarch_setup.py` through `axiarch-scripts/axiarch-prompts-install.sh` and points only to installed canonical files. Regeneration/cleanup changes only unmodified generated output. Custom, edited or legacy files are preserved with exit 3; invalid arguments exit 2 and a busy target exits 6. Install, upgrade and generation share a cooperative target lock and atomic per-file writes, not an all-files rollback transaction or exclusion of unrelated direct writers.

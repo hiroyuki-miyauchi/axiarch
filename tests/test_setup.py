@@ -68,6 +68,34 @@ class SetupTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.tree_bytes(), before)
 
+    def test_prompt_language_switch_preserves_edits_and_replaces_only_generated_output(self):
+        self.prompt_fixture()
+        japanese = self.target / 'axiarch-prompts/ja/develop/demo.md'
+        japanese.parent.mkdir(parents=True); japanese.write_text('# 日本語の作業\n')
+        protocol = self.target / 'axiarch-rules/ja/LOADING_PROTOCOL.md'
+        protocol.parent.mkdir(parents=True); protocol.write_text('# 読込手順\n')
+        custom = self.commands / 'my-command.md'; custom.write_text('利用先のコマンド\n')
+        command = self.commands / 'axiarch-demo.md'
+        native = (self.target / 'AXIARCH.md').read_bytes()
+        self.prompts('--lang', 'en')
+        for lang in ('ja', 'en'):
+            generated = command.read_bytes()
+            before = self.tree_bytes()
+            self.prompts('--lang', lang, '--dry-run')
+            self.assertEqual(self.tree_bytes(), before)
+            command.write_bytes(generated + b'\nLocal instructions\n')
+            edited = self.tree_bytes()
+            self.prompts('--lang', lang, expected=3)
+            self.assertEqual(self.tree_bytes(), edited)
+            command.write_bytes(generated)  # Restore this synthetic fixture's unedited generation.
+            self.prompts('--lang', lang)
+            body = command.read_text()
+            self.assertIn(f'axiarch-prompts/{lang}/develop/demo.md', body)
+            self.assertIn(f'axiarch-rules/{lang}/LOADING_PROTOCOL.md', body)
+            self.assertIn('ユーザーからの追加入力' if lang == 'ja' else 'User-provided input', body)
+            self.assertEqual(custom.read_text(), '利用先のコマンド\n')
+            self.assertEqual((self.target / 'AXIARCH.md').read_bytes(), native)
+
     def test_prompt_generation_requires_installed_canonical_prompt(self):
         before = self.tree_bytes()
         result = self.prompts('--source', ROOT, '--lang', 'en', expected=None)
