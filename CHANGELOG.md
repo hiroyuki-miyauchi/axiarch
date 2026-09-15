@@ -83,14 +83,14 @@ Building on v1.17.0's goal, evidence and session management, this minor release 
 
 ### 検証と限界 / Verification and limits
 
-- 公開前の実装コミットc68c881では、隔離実動作テスト332件をUbuntu・macOS・Windows上のWSL 2で実行し、各331件成功・対象外1件スキップ。Windowsネイティブ診断は5件中4件成功・対象外1件スキップ。ShellCheck、Markdown、日英・参照整合も成功した。版数反映後のコミットは別途同じCIで検査し、マージ後の公開はそのコミットの品質検査成功を条件とする。
-- Implementation commit c68c881 ran 332 isolated runtime tests on Ubuntu, macOS and WSL 2 on Windows, with 331 passes and one platform-specific skip each. Native Windows diagnostics passed four of five tests with one platform-specific skip. ShellCheck, Markdown and bilingual/reference checks also passed. The versioned candidate is checked separately by the same CI; publication after merge requires successful quality checks on that commit.
+- 公開候補の実装コミット44fdefeでは、追加監査の修正を含む隔離実動作テスト365件をUbuntu・macOS・Windows上のWSL 2で実行し、各364件成功・対象外1件スキップ。Windowsネイティブ診断は5件中4件成功・対象外1件スキップ。全6ジョブが成功し、ShellCheck、Markdown、日英・参照整合も確認した。検証対象には、任意コマンドの不正UTF-8保護、初期導入・更新の確定前照合、独自変更の保持と復旧を含む。この記録は44fdefeの証拠であり、後続の説明修正やマージ後の公開コミットは同じCIで別途検査する。
+- Candidate implementation commit 44fdefe ran 365 isolated runtime tests, including the additional audit fixes, on Ubuntu, macOS and WSL 2 on Windows, with 364 passes and one platform-specific skip each. Native Windows diagnostics passed four of five tests with one platform-specific skip. All six jobs passed, including ShellCheck, Markdown and bilingual/reference checks. Coverage includes invalid UTF-8 protection for optional commands, fresh-install and upgrade finalization checks, and local-change preservation and recovery. This evidence applies to 44fdefe; later documentation revisions and the post-merge publication commit require their own checks through the same CI.
 - Google Antigravityのみ、従来確認した実務環境・作業の範囲で実証済み。Codex・Claude Codeは接続候補の自動回帰を検査しているが、実製品の全工程実証・動作保証ではない。フックは対応イベントの限定操作を検査し、補足の受領・実読込・意味理解や任意シェル操作までは保証しない。healthとリリース文書検査は構造の整合を調べるもので、品質・安全性・翻訳の完全性の証明ではない。
 - Only Antigravity is practically validated within the previously observed environments and tasks. Codex and Claude Code adapter regressions are not end-to-end product validation or an operation guarantee. Hooks cover bounded operations on supported events, not reminder delivery, reading, semantic understanding or arbitrary shell activity. Health and release-note checks assess structure rather than proving quality, safety or translation completeness.
 
 ### 比較と関連情報 / References
 
-- [v1.17.0からの比較][1.18.0]、[変更と検査のPR #68](https://github.com/hiroyuki-miyauchi/axiarch/pull/68)、[実装コミットのCI結果](https://github.com/hiroyuki-miyauchi/axiarch/actions/runs/34835045740) を参照する。比較先タグは公開時に作成される。
+- [v1.17.0からの比較][1.18.0]、[変更と検査のPR #68](https://github.com/hiroyuki-miyauchi/axiarch/pull/68)、[実装コミット44fdefeのCI結果](https://github.com/hiroyuki-miyauchi/axiarch/actions/runs/34968361553) を参照する。比較先タグは公開時に作成される。
 - Review the version comparison, PR #68 and implementation CI results above. The comparison's destination tag is created at publication.
 - 全30公開版の説明・配布物の再監査は [訂正台帳](RELEASE_AUDIT.md) を参照。v1.17.0等の説明訂正は本文の追記であり、この版のコード変更が旧タグに含まれることを意味しない。既存タグと配布済みコードは変更しない。
 - See the audit ledger for the review of all 30 prior published releases. Earlier release-description corrections are prose addenda, not evidence that this version's code exists in old tags. Existing tags and distributed code remain unchanged.

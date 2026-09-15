@@ -22,6 +22,12 @@ Windowsの補助ツールはWSL 2内で実行します。ネイティブPython�
 
 Run helpers inside WSL 2 on Windows; native Python and Git Bash alone are unsupported. See the [Windows guide](WINDOWS.md) for prerequisites, CI boundaries and existing installations.
 
+## ファイル名の使い分け / File naming
+
+この配布では、シェルのコマンド入口は `axiarch-task-state.sh` のようなハイフン区切り、Python補助は `axiarch_state.py` のようなアンダースコア区切りにしています。Python補助は `from axiarch_state import ...` のように相互に読み込むため、通常のimport構文で扱えるモジュール名を使います。ハイフンを含むファイルもパス指定で実行できますが、通常のimport構文ではその名前を指定できません。見た目を揃えるための改名は行わず、既存の呼出し・import・配布参照を維持します。これはAxiarch補助ツールの命名方針であり、利用先の全ファイルに同じ形式を強制する規則ではありません。
+
+This distribution uses hyphenated shell entrypoints such as `axiarch-task-state.sh` and underscored Python helpers such as `axiarch_state.py`. Python helpers import one another with statements such as `from axiarch_state import ...`, so their module names must work with ordinary import syntax. A hyphenated file can be executed by path, but its name cannot be used in that import syntax. Preserve existing calls, imports and distribution references instead of renaming files for visual uniformity. This convention applies to Axiarch helpers, not to every file in adopter projects.
+
 ## 📋 配布スクリプト一覧 / Available Scripts
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
