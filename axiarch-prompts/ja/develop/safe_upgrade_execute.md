@@ -31,7 +31,7 @@ Universal（Class S）の普遍憲法、Blueprint（Class A）の固有ルール
 追加で `axiarch-manifest.json`、`axiarch-scripts/axiarch-upgrade.sh`、`axiarch-scripts/axiarch_upgrade.py`、`axiarch-scripts/README.md` を確認し、所有境界と診断・終了コードを把握します。Git手順は `axiarch-rules/{lang}/universal/engineering/000_engineering_standards.md` の該当節、導入状態は `.axiarch/version.json` と `.axiarch/upgrade-result.json`、関連するBlueprintを確認します。存在しないファイルは未導入として記録します。
 旧導入先で更新エンジンが不足する場合は、ユーザー指定のタグまたはコミットに固定したAxiarchソース一式を一意な一時ディレクトリへ取得します。シェル単体では必要なPython補助ファイルが不足します。取得したソースの `axiarch-scripts/axiarch-upgrade.sh` を `--source` と `--target` の明示指定で実行し、採用先の既存ファイルを先に置き換えません。
 
-固定版ソースの取得元例は `https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/tags/v1.17.0.tar.gz` です。実行する版・コミットは依頼に合わせて確定し、Unreleasedの機能が過去のタグに含まれると仮定しません。
+固定版ソースの取得元例は `https://github.com/hiroyuki-miyauchi/axiarch/archive/refs/tags/v1.18.0.tar.gz` です。実行する版・コミットは依頼に合わせて確定し、Unreleasedの機能が過去のタグに含まれると仮定しません。
 
 # Phase 1: Upgrade Scope Resolution (更新スコープの確定)
 

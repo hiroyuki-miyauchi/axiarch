@@ -68,6 +68,46 @@ class HookStateTests(unittest.TestCase):
         self.assertIn('[HOOK INPUT WARNING]', context)
         self.assertIn('docs=unresolved', context)
 
+    def test_environment_identity_never_hides_invalid_native_identity(self):
+        for extra in ({'CODEX_THREAD_ID': 'parent'}, {'AXIARCH_SESSION_ID': 'intentional'}):
+            for payload in ('{"session_id":"s1","sessionId":"s2"}',
+                            '{"session_id":true}', '{"session_id":"bad\\n"}'):
+                with self.subTest(extra=extra, payload=payload):
+                    before = self.tree_bytes()
+                    context, _ = self.hook('axiarch-init-task-md.sh', payload, extra=extra)
+                    self.assertIn('[TASK STATE WARNING]', context)
+                    self.assertEqual(self.tree_bytes(), before)
+                    context, _ = self.hook('axiarch-boot-reminder.sh', payload, extra=extra)
+                    self.assertIn('[HOOK INPUT WARNING]', context)
+                    self.assertIn('docs=unresolved', context)
+                    self.assertEqual(self.tree_bytes(), before)
+
+    def test_identity_overrides_and_legacy_fallback_preserve_existing_records(self):
+        for payload, extra, selected in (
+                ('{"session_id":"native"}', {'CODEX_THREAD_ID': 'bad\\n'}, 'native'),
+                ('{"session_id":"native"}', {'AXIARCH_SESSION_ID': 'intentional',
+                                              'CODEX_THREAD_ID': 'parent'}, 'intentional'),
+                ('', {'CODEX_THREAD_ID': 'legacy'}, 'legacy'),
+                ('', {'AXIARCH_SESSION_ID': 'explicit', 'CODEX_THREAD_ID': 'parent'}, 'explicit')):
+            with self.subTest(selected=selected):
+                context, _ = self.hook('axiarch-init-task-md.sh', payload, extra=extra)
+                self.assertNotIn('WARNING', context)
+                docs = self.target / '.axiarch/sessions' / selected
+                self.assertTrue(docs.is_dir(), context)
+                (docs / 'task.md').write_text('keep the selected session')
+                before = self.tree_bytes()
+                self.hook('axiarch-init-task-md.sh', payload, extra=extra)
+                context, _ = self.hook('axiarch-boot-reminder.sh', payload, extra=extra)
+                self.assertIn('docs=' + str(docs), context)
+                self.assertEqual(self.tree_bytes(), before)
+
+    def test_invalid_explicit_override_is_not_replaced_by_native_identity(self):
+        before = self.tree_bytes()
+        context, _ = self.hook('axiarch-init-task-md.sh', '{"session_id":"valid"}',
+                               extra={'AXIARCH_SESSION_ID': 'invalid/id'})
+        self.assertIn('[TASK STATE WARNING]', context)
+        self.assertEqual(self.tree_bytes(), before)
+
     def test_empty_startup_and_valid_alias_resume_remain_supported(self):
         context, _ = self.hook('axiarch-init-task-md.sh', '')
         self.assertIn('[AXIARCH TASK STATE]', context)

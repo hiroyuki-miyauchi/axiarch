@@ -16,7 +16,7 @@ Legacy harness L0–L4 maps to H0–H4 only. Distance D1–D5 and maturity M1–
 | H1 | Documentation tweaks, pointer cleanup, evidence updates | Update plan and walkthrough briefly; inspect the diff |
 | H2 | Small code changes, localized spec updates | Plan, implement, verify, and audit |
 | H3 | Cross-domain design changes, rule changes, distribution script changes | Canonical plan or Blueprint, role passes, ja/en parity, health checks |
-| H4 | DB apply, stage, commit, push, deploy, release, tag, destructive operations, security boundary changes | Human approval before and after implementation; no autonomous execution |
+| H4 | DB apply, stage, commit, push, deploy, release, tag, destructive operations, security boundary changes | Verify explicit approval for each applicable action using HUMAN_APPROVAL_GATE.md; pause before actions outside that approval |
 
 When `AXIARCH.md` §9 states that "the harness is mandatory procedure for non-trivial work," that "non-trivial" boundary begins at **H2**. H0/H1 (questions, read-only checks, minor documentation edits) do not require the full harness; H2 and above require plan, implementation, verification, and the audit gate (plus the additional H3/H4 requirements).
 
@@ -26,14 +26,14 @@ When `AXIARCH.md` §9 states that "the harness is mandatory procedure for non-tr
 2. Resolve language and task level.
 3. Directly open the required rules and harness files.
 4. Sync `task.md`, `implementation_plan.md`, and `walkthrough.md` to the current task.
-5. In Codex, also use `update_plan`; in Claude Code, also use Task tools.
+5. When available, also use `update_plan` in Codex and Task tools in Claude Code. Record unavailable capabilities and continue with equivalent session records.
 6. Compare existing behavior with the canonical plan.
 7. Implement with focused diff-based changes.
 8. Run relevant verification, record the results, then use that evidence for role passes.
 9. Use the Audit Gate to decide `PASS` / `PASS_WITH_NOTES` / `NEEDS_FIX` / `NEEDS_REPLAN` / `NEEDS_HUMAN` / `BLOCKED` / `CRYSTALLIZE_ONLY`.
 10. Return `NEEDS_FIX` items to the fix loop and `NEEDS_REPLAN` items to the Plan Gate.
 11. Summarize verification in an Evidence Packet.
-12. Stop at the Human Approval Gate for stage, commit, push, deploy, release, tag, destructive, or sensitive actions.
+12. Apply [HUMAN_APPROVAL_GATE.md](./HUMAN_APPROVAL_GATE.md) to stage, commit, push, deploy, release, tag, destructive, or sensitive actions; pause if the required approval is missing.
 13. Check crystallization only for lessons that actually occurred during the task.
 
 ## Handling an Implementation Plan

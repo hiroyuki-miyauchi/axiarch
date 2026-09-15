@@ -171,3 +171,63 @@ jobs:
           python3 -c 'import platform; print(platform.platform())'
       - name: 実動作テスト
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+  windows-compatibility:
+    name: "Windows native診断とWSL 2実動作回帰"
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Windows nativeと改行の検証
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected checkout SHA' }
+          python --version
+          git --version
+          python -c "import os,platform; assert os.name == 'nt'; print(platform.platform())"
+          python -m unittest discover -s tests -p 'test_platform_boundaries.py' -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: WSL 2 Ubuntuを準備
+        uses: Vampire/setup-wsl@d1da7f2c0322a5ee4f24975344f67fc0f5baf364 # v7.0.0
+        with:
+          distribution: Ubuntu-24.04
+          wsl-version: '2'
+          use-cache: 'false'
+          additional-packages: python3 git jq software-properties-common
+          wsl-shell-user: axiarch-ci
+      - name: WSLのGit診断機能を準備
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Ubuntu 24.04's original Git lacks --no-lazy-fetch. The Git project
+          # documents this PPA for current Ubuntu packages; CI only, not adopters.
+          wsl --distribution Ubuntu-24.04 --user root --exec bash -c 'set -euo pipefail; if ! git --no-lazy-fetch --version >/dev/null 2>&1; then add-apt-repository -y ppa:git-core/ppa; apt-get update; DEBIAN_FRONTEND=noninteractive apt-get install -y git; fi; git --no-lazy-fetch --version'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Windows上のWSL 2で同一コミットを検証
+        shell: wsl-bash {0}
+        run: |
+          set -euo pipefail
+          axiarch_ci_expected_sha='${{ github.sha }}'
+          [[ "$axiarch_ci_expected_sha" =~ ^[0-9a-f]{40}$ ]]
+          export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
+          # jq is required by the release-metadata regression, although it is
+          # optional for ordinary adopter operation. Do not silently skip it.
+          command -v bash python3 git jq
+          uname -a
+          python3 --version
+          git --version
+          python3 -c 'import os,platform; assert os.name == "posix"; assert os.getuid() != 0; assert "wsl2" in platform.release().lower(); print(platform.platform())'
+          # Test on the Linux filesystem. Do not normalize away the Windows
+          # checkout: the preceding native job already checks its LF bytes.
+          axiarch_wsl_test_root=$(mktemp -d /tmp/axiarch-wsl-ci.XXXXXX)
+          trap 'rm -rf -- "$axiarch_wsl_test_root"' EXIT
+          git -c safe.directory="$PWD" -c core.autocrlf=false clone --no-hardlinks --no-checkout . "$axiarch_wsl_test_root/source"
+          git -C "$axiarch_wsl_test_root/source" checkout --detach "$axiarch_ci_expected_sha"
+          cd "$axiarch_wsl_test_root/source"
+          test "$(git rev-parse HEAD)" = "$axiarch_ci_expected_sha"
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          bash axiarch-scripts/check-axiarch-health.sh --quiet

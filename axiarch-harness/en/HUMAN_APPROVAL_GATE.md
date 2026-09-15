@@ -5,6 +5,8 @@
 The Human Approval Gate stops the agent before actions it must not perform autonomously.
 Approval to implement is separate from approval to publish, destroy, spend, or mutate data.
 
+Explicit approval remains valid for the actions, scope and conditions it covers during the task. Check existing instructions first; when they cover the intended action, record that basis and proceed without asking for the same approval again. A general implementation request does not authorize a separate publication action. Pause immediately before an action whose target, scope or impact falls outside the approval. If approval is missing, first finish independent investigation, fixes and verification, then present concrete changes and residual risks for the decision.
+
 ## Actions Requiring Explicit Approval
 
 - `git add` or any other staging operation
@@ -24,7 +26,7 @@ Approval to implement is separate from approval to publish, destroy, spend, or m
 ## Read-Only Actions Not Requiring Explicit Approval
 
 The actions below are not Human Approval Gate blockers by themselves.
-If any action above becomes part of the workflow, stop at that point.
+If an action above becomes part of the workflow and its approval is missing, pause before that action.
 
 - Read-only research over the repository, working tree, or already-provided context
 - Read-only role passes, audits, reviews, and verification
@@ -33,7 +35,7 @@ If any action above becomes part of the workflow, stop at that point.
 - Summaries of test output, logs, diffs, and documentation consistency
 
 Do not stop for additional human approval solely because a subagent or scan tool is used.
-Stop only when moving into approval-required actions such as file writes, stage, commit, push, deploy, DB apply, production data mutation, external service configuration, increased billing, or sensitive-data retrieval.
+Pause when moving into actions whose required approval is missing, such as stage, commit, push, deploy, DB apply, production data mutation, external service configuration, increased billing, or sensitive-data retrieval. Ordinary focused edits within the requested scope do not require another approval merely because they write files. Explicit approval remains necessary for the listed actions, including full overwrites, deletion, sensitive boundaries and Universal changes.
 
 ## How to Ask
 

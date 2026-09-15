@@ -1,6 +1,6 @@
 {
   "manifestVersion": 1,
-  "axiarchVersion": "1.17.0",
+  "axiarchVersion": "1.18.0",
   "description": "Axiarch upgrade ownership manifest. Axiarch Core can be updated; Project State must be preserved unless the operator explicitly reviews and accepts a change.",
   "groups": [
     {
@@ -397,6 +397,12 @@
     },
     {
       "path": ".gitignore",
+      "group": "source_docs",
+      "owner": "axiarch-source",
+      "policy": "skip"
+    },
+    {
+      "path": ".gitattributes",
       "group": "source_docs",
       "owner": "axiarch-source",
       "policy": "skip"

@@ -14,7 +14,7 @@
 | `--mode status` | `.axiarch/tasks/` を読み、全担当の共通参照一覧を表示。複製した索引は正本にしない |
 | ルートの3文書 | 旧導入先の記録を保持。存在しない場合だけ共通参照ポインターを生成 |
 
-セッションIDはCLI、`AXIARCH_SESSION_ID`、`CODEX_THREAD_ID`、hookの `session_id` / `sessionId` を使用できる。タスクIDはCLIまたは `AXIARCH_TASK_ID`。IDが無い起動は新規IDを生成して出力する。自動的に他セッションを選ばない。次回は出力IDを指定する。IDは認証情報ではない。
+直接CLIのセッションIDは `--session`、`AXIARCH_SESSION_ID`、`CODEX_THREAD_ID` の順に解決する。hookは入力の `session_id` / `sessionId` を先に検証し、両方がある場合は一致を必要とする。その上で `AXIARCH_SESSION_ID` の意図的な指定、入力ID、最後に `CODEX_THREAD_ID` の順で選ぶ。親プロセスから継承したCodexのIDで別製品の入力IDを隠さず、環境変数があっても不正な入力IDを無視しない。タスクIDはCLIまたは `AXIARCH_TASK_ID`。IDが無い起動は新規IDを生成して出力する。自動的に他セッションを選ばない。次回は出力IDを指定する。IDは認証情報ではない。
 
 UUID形式のフォルダ名は衝突回避と再開に使う内部キーであり、作業名ではない。`--mode status` と `--mode sessions` は正本の `goal` を先頭に表示し、作業の目的で識別する。sessions一覧はbindingとタスク正本から都度読み、別の名称台帳を作らない。既存フォルダの手動改名は参照を壊すため行わない。新規IDを明示する場合は `audit-2026-09-13-agent-a` のような作業に合うASCII名も使えるが、既存IDと重複させない。例の作業名・日付は固定値ではない。
 
@@ -58,6 +58,10 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --
 
 ## 構造化レコード
 
+`--mode path --session <ID>` は読み取り専用で、bindingと参照先の共有 `state.json` の形式・ID対応を確認してから記録先を返す。欠落・不正・不一致は終了2とし、既存記録を生成し直さない。これは構造の確認であり、過去の証拠ハッシュや確認時刻の鮮度を再評価する完了検査ではない。Markdownの内容・読了も証明しない。
+
+Codex/Claudeの補足フックは、選択した既存セッションの解決失敗を `TASK STATE WARNING` として日英で通知し、短縮表示のTTL内でも完全な補足へ戻す。任意の作業範囲検知を無効化しても、この異常通知は隠さない。保存されたJSONや解析エラーの生内容は補足へ転載しない。未作成のセッションは異常とせず、H0の読取だけに記録生成・修復を必須としない。既存証拠を再利用するときは、binding、共有状態、履歴を直接確認して復旧し、元記録を自動移動・削除・上書きしない。Antigravityやフック未対応環境は同じCLIで記録先を確認できるが、同じ通知が自動注入される意味ではない。
+
 `schema_version=1`。タスクに `task_id`、`revision`（整数）、`owner`、`goal`、`phase`（draft / active / complete）、`max_age_seconds`（正の秒数、既定86400）、`criteria` 配列を持つ。
 
 各完了条件は一意な `id`、`owner`、`description`、`verification`、`state`、`verified`、`target`、`checked_at`、`evidence` を持つ。状態は `not_started`（未着手）、`in_progress`（進行中）、`done`（完了）、`discarded`（破棄）。破棄には `reason` が必要で、完了条件の達成の代用にはできない。条件変更・除外は合意と理由を計画へ記録する。
@@ -75,6 +79,8 @@ bash axiarch-scripts/axiarch-task-state.sh --mode publish --session agent-a --in
 タスクロックは同じ実行ユーザーが所有し、ハードリンク数1の通常ファイルに限る。FIFO・リンク・所有者不一致は待たず拒否する。原子的な置換は各JSONファイル単位であり、タスク・セッション・互換ポインター全体の同時確定を保証しない。historyの保存後に現在値の更新が失敗した場合は旧state.jsonを保持し、同じ内容のhistoryを使って再実行できる。
 
 ## 実行記録の保護
+
+初期導入・更新の確定時は配布ファイルを準備済み配布物・更新元と再照合し、診断中の変更を正常版数や比較元として扱わない。保留・確認不能の結果と復旧手順は `axiarch-scripts/README.md` の「初期導入と任意生成の結果」を参照する。
 
 更新シェルの `check-paths` とPython補助の `copy` は、更新元・利用先・比較元の選択範囲に同じ事前検査を適用する。制御文字・リンク・特殊ファイル・予約パス・別名衝突はコピー前に拒否する。コピー中のI/O失敗は終了5で示すが、先に成功したファイルは残る。全体の排他・保護設定・診断・結果記録は `axiarch-scripts/axiarch-upgrade.sh` を使う。内部 `copy` 単体の終了0は更新全体の完了を表さず、REVIEWやTYPE-CONFLICTの保留判定はシェルの集計・確定処理が担う。
 

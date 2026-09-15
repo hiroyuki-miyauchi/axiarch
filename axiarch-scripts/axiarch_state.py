@@ -5,21 +5,34 @@ The schema checks claims and file snapshots, not the meaning of those claims.
 See axiarch-harness/{ja,en}/TASK_STATE_PROTOCOL.md for the public contract.
 """
 
+import os
+import sys
+
+# Validate before importing POSIX-only modules or touching project state.
+try:
+    if os.name != 'posix':
+        raise ImportError('POSIX Python required')
+    import fcntl
+    if not all(hasattr(os, name) for name in ('O_NOFOLLOW', 'O_NONBLOCK', 'getuid')):
+        raise ImportError('POSIX file APIs required')
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2 on Windows; '
+          'native Windows Python/Git Bash cannot run these POSIX helpers. No project changes applied. / '
+          'WindowsではWSL 2内のLinux Pythonを使用してください。対象は変更していません。', file=sys.stderr)
+    raise SystemExit(2)
+
 import argparse
 import copy
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 import re
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
 import uuid
 
@@ -83,7 +96,22 @@ def strict_json(text):
             raise ValueError('JSON number exceeds finite runtime range')
         return parsed
 
-    return json.loads(text, object_pairs_hook=unique, parse_constant=invalid_constant, parse_float=finite_float)
+    data = json.loads(text, object_pairs_hook=unique, parse_constant=invalid_constant, parse_float=finite_float)
+    # JSON's grammar permits isolated UTF-16 surrogates. They cannot be carried
+    # as Unicode scalar values across UTF-8 files and native agent interfaces.
+    # Check decoded keys and nested values without normalizing valid strings.
+    pending = [data]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, str):
+            if re.search(r'[\ud800-\udfff]', value):
+                raise ValueError('JSON contains an unpaired Unicode surrogate')
+        elif isinstance(value, dict):
+            pending.extend(value.keys())
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+    return data
 
 
 def read_json(path):
@@ -196,7 +224,7 @@ def native_language(root):
             continue
         if not path.is_file():
             raise ValueError('language protocol must be a regular file: ' + name)
-        settings = language_settings(path.read_text())
+        settings = language_settings(path.read_text(encoding='utf-8'))
         if len(settings) > 1:
             raise ValueError('ambiguous Project Native Language; resolve the canonical setting or specify a language')
         if settings:
@@ -250,7 +278,7 @@ def privacy_check(root):
         if not meta.exists():
             return 'No managed artifacts or Git worktree; tracking unassessed.'
         policy = inside(root, '.axiarch/.gitignore')
-        if not policy.is_file() or not set(PRIVATE_PATTERNS) <= set(policy.read_text().splitlines()):
+        if not policy.is_file() or not set(PRIVATE_PATTERNS) <= set(policy.read_text(encoding='utf-8').splitlines()):
             raise ValueError('private artifact exclusions missing; run session resume or an approved install/upgrade')
         return 'Local exclusion policy present; no Git worktree, so index tracking is unassessed.'
     paths = ['.axiarch/' + name for name in PRIVATE_DIRS + PRIVATE_FILES]
@@ -460,6 +488,8 @@ def resolve_ids(args, root):
         binding = inside(root, f".axiarch/sessions/{sid}/binding.json")
         if binding.exists():
             record = read_json(binding)
+            if not isinstance(record, dict):
+                raise ValueError("session binding must be an object")
             if record.get("session_id") != sid:
                 raise ValueError("session ID/binding path mismatch")
             bound = identifier(record["task_id"])
@@ -613,6 +643,15 @@ def main():
     if args.mode == "path":
         if not sid or not inside(root, f".axiarch/sessions/{sid}/binding.json").is_file():
             raise ValueError("known session ID required")
+        # A usable binding points to a structurally valid shared task. Looking
+        # up old evidence is not a fresh completion claim: do not rehash it or
+        # impose current timestamps just to locate the session documents.
+        record = read_json(inside(root, f".axiarch/tasks/{tid}/state.json"))
+        errors = validate(record, root, "structure")
+        if isinstance(record, dict) and record.get("task_id") != tid:
+            errors.append("task ID/path mismatch")
+        if errors:
+            raise ValueError("invalid bound task state: " + "; ".join(errors))
         print(inside(root, f".axiarch/sessions/{sid}"))
         return
     if not tid:
@@ -681,7 +720,7 @@ def check_docs(root, sid, tid):
         errors.append("completion evidence session is not bound to this task")
     for name in DOCS:
         path = inside(root, f".axiarch/sessions/{sid}/{name}")
-        if not path.is_file() or not path.read_text().strip() or PLACEHOLDER.search(path.read_text()):
+        if not path.is_file() or not path.read_text(encoding='utf-8').strip() or PLACEHOLDER.search(path.read_text(encoding='utf-8')):
             errors.append(f"{name}: missing, empty or remaining template")
     return errors
 

@@ -2,6 +2,10 @@
 # Optional Claude command file adapter. Runtime behavior is not agent-validated.
 # Requires Python 3; reads installed canonical prompts in the target project.
 set -euo pipefail
+
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 for arg in "$@"; do
   if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then

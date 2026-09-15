@@ -4,7 +4,6 @@ import argparse
 import ast
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import os
@@ -16,7 +15,7 @@ import sys
 import tempfile
 
 sys.dont_write_bytecode = True
-from axiarch_state import atomic, digest, inside, native_language, language_settings, markdown_source_lines, protect_artifacts, privacy_check, read_json
+from axiarch_state import atomic, digest, inside, native_language, language_settings, markdown_source_lines, protect_artifacts, privacy_check, read_json, fcntl
 from axiarch_upgrade import upgrade_lock_path, distribution_path, DistributionNames
 
 MARKER = '<!-- AXIARCH_GENERATED_COMMAND: do not edit; regenerate via axiarch-scripts/axiarch-prompts-install.sh -->'
@@ -58,7 +57,12 @@ def write_bytes(path, content, mode=0o644):
 
 
 def owned(content):
-    text = content.decode('utf-8', errors='replace')
+    # Lossy decoding can make altered bytes match an earlier generated hash.
+    # Unreadable existing commands must remain outside the replacement plan.
+    try:
+        text = content.decode('utf-8')
+    except UnicodeDecodeError:
+        return False
     lines = text.splitlines(keepends=True)
     hashes = [line for line in lines if line.startswith(HASH_KEY)]
     if not text.startswith('---\n') or len(hashes) != 1 or '\n' + MARKER + '\n' not in text:
@@ -68,7 +72,7 @@ def owned(content):
 
 
 def render(prompt, rel, lang):
-    title = next((line[2:].strip() for line in prompt.read_text().splitlines() if line.startswith('# ')), 'Axiarch prompt')
+    title = next((line[2:].strip() for line in prompt.read_text(encoding='utf-8').splitlines() if line.startswith('# ')), 'Axiarch prompt')
     protocol = f'axiarch-rules/{lang}/LOADING_PROTOCOL.md'
     if lang == 'ja':
         body = (f'正本プロンプト `{rel}` を実際に読み、適用範囲に応じた手順を実行してください。\n'
@@ -243,7 +247,7 @@ def install(args):
         for src, _, rel in files:
             if rel.startswith('axiarch-scripts/') and src.suffix in ('.sh', '.py'):
                 if src.suffix == '.py':
-                    ast.parse(src.read_text())
+                    ast.parse(src.read_text(encoding='utf-8'))
                 elif subprocess.run(['bash', '-n', str(src)], check=False).returncode:
                     raise ValueError(f'shell syntax failure: {rel}')
         hook, hook_status = precommit_plan(root) if args.precommit else (None, 'not_selected')
@@ -282,6 +286,23 @@ def install(args):
             except (OSError, ValueError) as exc:
                 result['health'].update(status='failed', exit_code=health.returncode or 2,
                                         script_exit_code=health.returncode, privacy_error=str(exc)); rc = 4
+            # The diagnostic's exit code does not establish that the payload
+            # still matches. Recheck even files already present at installation.
+            hashes, pending, failed = {}, [], []
+            for _, _, rel in files:
+                try:
+                    sha = digest(checked(stage, rel))
+                    if digest(checked(root, rel)) != sha:
+                        pending.append(f'REVIEW changed-before-finalization {rel}')
+                    else:
+                        hashes[rel] = sha
+                except (OSError, ValueError):
+                    failed.append(f'APPLY-FAIL verification-unavailable {rel}')
+            write_bytes(meta / 'files.sha256', ''.join(
+                f'{sha}  {rel}\n' for rel, sha in sorted(hashes.items())).encode())
+            result.update(pending=pending, failed=failed,
+                          application='failed' if failed else 'partial' if pending else 'complete')
+            rc = 5 if failed else 4 if rc else 3 if pending else 0
             if rc == 0:
                 version.update(version=args.version, confirmedScope=scope)
         except (OSError, ValueError) as exc:

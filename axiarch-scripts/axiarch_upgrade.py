@@ -2,7 +2,6 @@
 """File-level safe copying and machine-readable upgrade outcome records."""
 import argparse
 from datetime import datetime, timezone
-import fcntl
 import fnmatch
 import glob
 import hashlib
@@ -17,7 +16,7 @@ import tempfile
 import unicodedata
 
 sys.dont_write_bytecode = True
-from axiarch_state import atomic, digest, identifier, inside, read_json, protect_artifacts, has_control_characters
+from axiarch_state import atomic, digest, identifier, inside, read_json, protect_artifacts, has_control_characters, fcntl
 
 
 def distribution_path(relative):
@@ -261,7 +260,7 @@ def copy_files(args):
     installed = {}
     hashes = inside(target, ".axiarch/files.sha256")
     if hashes.is_file():
-        for line in hashes.read_text().splitlines():
+        for line in hashes.read_text(encoding='utf-8').splitlines():
             if "  " in line:
                 value, name = line.split("  ", 1)
                 installed[name] = value
@@ -327,7 +326,49 @@ def finalize(args):
     root = Path(args.target).resolve()
     metadata_paths(root, args.run_id)
     meta = inside(root, ".axiarch")
-    lines = Path(args.log).read_text().splitlines()
+    lines = Path(args.log).read_text(encoding='utf-8').splitlines()
+    # Applied files and byte-identical upstream files become known bases.
+    # Never bless deferred local edits (including inside unchanged directories).
+    hashes = {}
+    hash_path = meta / "files.sha256"
+    if hash_path.exists():
+        for line in hash_path.read_text(encoding='utf-8').splitlines():
+            if "  " in line:
+                sha, name = line.split("  ", 1)
+                hashes[name] = sha
+    # Diagnostics run after copying and may change files. Reconcile against
+    # source before confirming a version or trusting bytes for a later update.
+    for line in tuple(lines):
+        if not line.startswith(("UPDATE ", "UNCHANGED ")):
+            continue
+        rel = line.split(" ", 1)[1]
+        try:
+            source_root = Path(args.source).resolve()
+            source = inside(source_root, rel)
+            target = inside(root, rel)
+            if source.is_dir():
+                if line.startswith("UPDATE ") or not target.is_dir():
+                    raise ValueError('unexpected directory at finalization')
+                candidates = sorted(source.rglob("*"))
+            else:
+                candidates = [source]
+        except (OSError, ValueError):
+            lines.append(f"APPLY-FAIL verification-unavailable {rel}")
+            continue
+        for candidate in candidates:
+            name = candidate.relative_to(source_root).as_posix()
+            try:
+                candidate = inside(source_root, name)
+                if candidate.is_dir():
+                    continue
+                sha = digest(candidate)
+                if digest(inside(root, name)) != sha:
+                    lines.append(f"REVIEW changed-before-finalization {name}")
+                    continue
+                hashes[name] = sha
+            except (OSError, ValueError):
+                # Keep the last known base and report only the relative path.
+                lines.append(f"APPLY-FAIL verification-unavailable {name}")
     pending = [s for s in lines if s.startswith(("REVIEW ", "KEEP ", "MERGE-SKIP ", "DIFF "))
                or (s.startswith("SKIP ") and not s.startswith(("SKIP source-only ", "SKIP optional ")))]
     conflicts = [s for s in lines if s.startswith(("TYPE-CONFLICT ", "CONFLICT "))]
@@ -345,31 +386,6 @@ def finalize(args):
               "application": application, "health": {"status": health, "exit_code": args.health},
               "pending": pending, "conflicts": conflicts, "failed": failed, "actions": lines,
               "exit_code": rc, "finished_at": datetime.now(timezone.utc).isoformat()}
-    # Applied files and byte-identical upstream files become known bases.
-    # Never bless deferred local edits (including inside unchanged directories).
-    hashes = {}
-    hash_path = meta / "files.sha256"
-    if hash_path.exists():
-        for line in hash_path.read_text().splitlines():
-            if "  " in line:
-                sha, name = line.split("  ", 1)
-                hashes[name] = sha
-    for line in lines:
-        if line.startswith("UPDATE "):
-            rel = line[7:]
-            hashes[rel] = digest(inside(root, rel))
-        elif line.startswith("UNCHANGED "):
-            rel = line[10:]
-            source_root = Path(args.source).resolve()
-            source = inside(source_root, rel)
-            candidates = source.rglob("*") if source.is_dir() else [source]
-            for candidate in candidates:
-                name = candidate.relative_to(source_root).as_posix()
-                candidate = inside(source_root, name)
-                if candidate.is_file():
-                    sha = digest(candidate)
-                    if digest(inside(root, name)) == sha:
-                        hashes[name] = sha
     fd, tmp = tempfile.mkstemp(prefix=".hashes-", dir=meta)
     with os.fdopen(fd, "w") as stream:
         for rel, sha in sorted(hashes.items()):

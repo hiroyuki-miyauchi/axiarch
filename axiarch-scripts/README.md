@@ -18,11 +18,21 @@
 
 See [agent compatibility](AGENT_COMPATIBILITY.md) for entrypoints, trust, worktrees, language and OS verification boundaries.
 
+Windowsの補助ツールはWSL 2内で実行します。ネイティブPython・Git Bash単独は非対応です。[Windows手順](WINDOWS.md) に前提条件・CI範囲・既存導入先の扱いを記載しています。
+
+Run helpers inside WSL 2 on Windows; native Python and Git Bash alone are unsupported. See the [Windows guide](WINDOWS.md) for prerequisites, CI boundaries and existing installations.
+
+## ファイル名の使い分け / File naming
+
+この配布では、シェルのコマンド入口は `axiarch-task-state.sh` のようなハイフン区切り、Python補助は `axiarch_state.py` のようなアンダースコア区切りにしています。Python補助は `from axiarch_state import ...` のように相互に読み込むため、通常のimport構文で扱えるモジュール名を使います。ハイフンを含むファイルもパス指定で実行できますが、通常のimport構文ではその名前を指定できません。見た目を揃えるための改名は行わず、既存の呼出し・import・配布参照を維持します。これはAxiarch補助ツールの命名方針であり、利用先の全ファイルに同じ形式を強制する規則ではありません。
+
+This distribution uses hyphenated shell entrypoints such as `axiarch-task-state.sh` and underscored Python helpers such as `axiarch_state.py`. Python helpers import one another with statements such as `from axiarch_state import ...`, so their module names must work with ordinary import syntax. A hyphenated file can be executed by path, but its name cannot be used in that import syntax. Preserve existing calls, imports and distribution references instead of renaming files for visual uniformity. This convention applies to Axiarch helpers, not to every file in adopter projects.
+
 ## 📋 配布スクリプト一覧 / Available Scripts
 
 | スクリプト / Script | 目的 / Purpose | 主な使用場面 / When to use |
 |:--|:--|:--|
-| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarchの構造・記録の健全性診断**（16 段階、`--quiet` 対応、v1.11.0でルートのタスク文書生成、v1.17.0でセッション別タスク記録、ネイティブタスク状態同期、v1.10.0+由来のリリース整合とROADMAP Current Stable・正規AI-facing header・CHANGELOG compare ref・Actions immutable SHA厳密一致・署名tag経路・日英完了release entry、Blueprint INDEX版数、safe upgrade実行promptのREADME/llms/rules索引、source-only既定skipとinteractive明示override、対話選択肢重複排除、本体リポジトリ専用ファイル分類、README/llms/scripts READMEの必須/任意境界、ハーネスエンジニアリング入口保持、ja/en相対path・番号見出しparity、SECURITY private reporting境界、Claude Memory正本境界、AXIARCH.md・axiarch-harness・中核ファイルのGit追跡状態、AXIARCH.md mixed/review所有境界、fallback core Blueprint検出、任意prompt証跡、`replace-if-local-unchanged` 実行時保護、型不一致review検査を追加） / Structure and record health diagnostic (16-stage, `--quiet` support; v1.11.0 adds session-specific task records, native state sync, v1.10.0+ release parity with exact ROADMAP Current Stable, canonical AI-facing headers, the CHANGELOG compare ref, immutable Actions SHAs, the signed-tag path, and completed ja/en release entries, Blueprint INDEX version metadata, safe-upgrade execution prompt indexing across README, llms, and rules indexes, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, required/optional boundary checks for README, llms, and scripts README, Harness Engineering entrypoint retention, ja/en relative-path and numbered-heading parity, the SECURITY private-reporting boundary, Claude Memory canonical boundary, source release-file Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, fallback core Blueprint discovery, optional prompt evidence checks, `replace-if-local-unchanged` runtime protection, and type-conflict review checks) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
+| [`check-axiarch-health.sh`](#check-axiarch-healthsh) | **Axiarchの構造・記録の健全性診断**（16 段階、`--quiet` 対応、v1.11.0でルートのタスク文書生成、v1.17.0でセッション別タスク記録、ネイティブタスク状態同期、v1.10.0+由来のリリース整合とROADMAP Current Stable・正規AI-facing header・CHANGELOG compare ref・Actions immutable SHA厳密一致・署名tag経路・日英完了release entry、Blueprint INDEX版数、safe upgrade実行promptのREADME/llms/rules索引、source-only既定skipとinteractive明示override、対話選択肢重複排除、本体リポジトリ専用ファイル分類、README/llms/scripts READMEの必須/任意境界、ハーネスエンジニアリング入口保持、ja/en相対path・番号見出しparity、SECURITY private reporting境界、Claude Memory正本境界、AXIARCH.md・axiarch-harness・中核ファイルのGit追跡状態、AXIARCH.md mixed/review所有境界、fallback core Blueprint検出、任意prompt証跡、`replace-if-local-unchanged` 実行時保護、型不一致review検査を追加） / Structure and record health diagnostic (16-stage, `--quiet` support; v1.11.0 adds root task documents; v1.17.0 adds session-specific task records and native state sync, v1.10.0+ release parity with exact ROADMAP Current Stable, canonical AI-facing headers, the CHANGELOG compare ref, immutable Actions SHAs, the signed-tag path, and completed ja/en release entries, Blueprint INDEX version metadata, safe-upgrade execution prompt indexing across README, llms, and rules indexes, source-only default skip with explicit interactive override, deduplicated interactive choices, source-repository-only file classification, required/optional boundary checks for README, llms, and scripts README, Harness Engineering entrypoint retention, ja/en relative-path and numbered-heading parity, the SECURITY private-reporting boundary, Claude Memory canonical boundary, source release-file Git tracking for AXIARCH.md, axiarch-harness, and core files, AXIARCH.md mixed/review ownership boundary, fallback core Blueprint discovery, optional prompt evidence checks, `replace-if-local-unchanged` runtime protection, and type-conflict review checks) | 「フックが動いていない気がする」「結晶化されていない」「タスク切替で再 load 漏れ」と感じた時 / When you suspect protocol violations or task-boundary misses |
 | [`axiarch-boot-reminder.sh`](#axiarch-boot-remindersh) | **UserPromptSubmit hook の外出しスクリプト**（v1.6.0+ TTL 二段階出力 + v1.8.0+ Check D Task Boundary Detection）。毎ターンの見直し候補 (A/B/C/D) + TTL 内 + 候補なしなら短縮版 / Externalized hook script (v1.6.0+ two-stage TTL + v1.8.0+ Check D task-boundary); review hints A/B/C/D, short-circuits within TTL when no hint is detected | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-protect-antifull.sh`](#axiarch-protect-antifullsh) | **PreToolUse hook の外出しスクリプト**。`Write` tool の既存ファイル上書きを物理遮断（§7.6 ANTI-FULL-OVERWRITE）/ Externalized PreToolUse hook; physically blocks `Write` tool calls targeting existing files | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
 | [`axiarch-diff-guard.sh`](#axiarch-diff-guardsh) | **PostToolUse hook の外出しスクリプト**。ClaudeのEdit / MultiEdit / Write、Codexのapply_patch後のgit diff規模を測定し、閾値超過時に warn / block / Externalized PostToolUse hook; measures git diff size after Claude Edit / MultiEdit / Write or Codex apply_patch and warns or blocks above thresholds | `init.sh` 経由で `.claude/settings.json` や `.codex/hooks.json` に自動配線される / Auto-wired by `init.sh` |
@@ -55,26 +65,26 @@ Directory exclusions include descendants. Conflicting policies or ownership for 
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/axiarch-scripts/axiarch-upgrade.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.18.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.17.0 --dry-run
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.18.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --interactive
 ```
 
 ### 取得・入力検査の境界 / Download and input validation boundary
@@ -91,9 +101,29 @@ HTTP failures, timeouts and corrupt gzip stop before application. Limits are 64 
 
 These checks do not establish distribution authenticity, code safety or operation on every OS. Pinning a tag is not signature verification. Archive checks are not a complete disk quota; depending on curl, compressed size may be checked after retrieval. Use a reviewed source and remove the private temporary directory after inspecting its contents and confirming it is no longer needed. Previously published launchers do not gain this new behavior retroactively.
 
-初期導入・更新・healthは同じ厳密なJSON読取を使い、重複キー・NaN・無限大と数値オーバーフローを拒否します。manifestの版数・型・所有区分も検査します。healthは導入済みのClaude/Codex両設定のJSONを確認し、異常時は残りの検査を実行せず失敗を返します。個別のhook宣言も両設定について検査します。JSON合格は全エージェントの実行確認ではありません。
+初期導入・更新・healthは同じ厳密なJSON読取を使い、重複キー・NaN・無限大と数値オーバーフローを拒否します。キー・値・入れ子の配列にもUnicodeとして表せない単独サロゲートを許可しません。manifestの版数・型・所有区分も検査します。healthは導入済みのClaude/Codex両設定のJSONを確認し、異常時は残りの検査を実行せず失敗を返します。個別のhook宣言も両設定について検査します。JSON合格は全エージェントの実行確認ではありません。
 
-Installation, upgrades and health share strict JSON decoding, rejecting duplicate keys, NaN, infinity and numeric overflow. Manifest version, types and ownership are also validated. Health checks JSON in both installed Claude/Codex configurations and stops with failure before subsequent checks on invalid input. Individual hook declarations are checked in both configurations; valid JSON is not proof that every agent executes the hooks.
+Installation, upgrades and health share strict JSON decoding, rejecting duplicate keys, NaN, infinity and numeric overflow. Unpaired surrogates that do not represent Unicode scalar values are rejected in keys, values and nested arrays as well. Manifest version, types and ownership are also validated. Health checks JSON in both installed Claude/Codex configurations and stops with failure before subsequent checks on invalid input. Individual hook declarations are checked in both configurations; valid JSON is not proof that every agent executes the hooks.
+
+起動・補足・保護フックと作業範囲CLIは、標準入力のバイト列をUTF-8として厳密に読みます。`PYTHONIOENCODING` の置換・別文字コード指定で壊れた入力を修復したり、日本語を別の文字列へ変えたりしません。正常な日本語・英語・絵文字と正規化形式は保持します。端末全体の文字コード設定を変更する機能ではありません。この制約は [RFC 8259 §8](https://www.rfc-editor.org/rfc/rfc8259#section-8) の相互運用性に基づくAxiarchの入力契約です。単独サロゲートはJSON文法上表現できても受理しません。
+
+Startup, reminder and protection hooks and the scope CLI decode stdin bytes strictly as UTF-8. Replacement or alternate decoding selected by `PYTHONIOENCODING` cannot repair damaged input or reinterpret Japanese text. Valid Japanese, English, emoji and normalization forms are preserved. This does not configure terminal-wide encoding. The restriction is Axiarch's input contract for the interoperability described in [RFC 8259 §8](https://www.rfc-editor.org/rfc/rfc8259#section-8); unpaired surrogates are rejected even though the JSON grammar can express them.
+
+言語設定・プロンプト・作業証跡・比較用記録もUTF-8で読み、OSの既定文字コードへ依存しません。UTF-8以外で保存された旧文書は自動変換しません。元の文字コードと内容を確認し、原本を保全してレビュー済みのUTF-8版を適用してください。
+
+Language settings, prompts, task evidence and comparison records are also read as UTF-8 rather than using the OS default encoding. Older documents saved in another encoding are not converted automatically. Confirm the original encoding and content, preserve the originals and apply a reviewed UTF-8 version.
+
+利用者向けのシェル入口は、子Pythonの `PYTHONUTF8=1` と `PYTHONIOENCODING=utf-8` を指定します。継承したASCII・Latin-1・文字置換の設定やCロケールに左右されず、パス・プロンプト・許可リスト・診断をUTF-8で受け渡すためです。文字置換によって日本語名の既存ファイルを別名として調べ、Writeを許可する誤判定も抑えます。不正な入力を修復する指定ではありません。変更は実行中のシェルと子プロセス内に限り、呼出し元の環境や保存済みファイル、製品の信頼設定は変更しません。
+
+Public shell entrypoints set `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8` for child Python processes. Paths, prompts, allowlists and diagnostics use UTF-8 regardless of inherited ASCII, Latin-1, replacement settings or the C locale. This also addresses Write checks incorrectly allowing an existing Unicode filename after character replacement turns it into a different path. Invalid input is not repaired. These settings affect only the running shell and its children, leaving the caller's environment, stored files and product trust settings unchanged.
+
+更新時は、使用する `axiarch-scripts/` のシェル入口を一緒に反映してください。初期導入には更新済みの `init.sh` を使います。Python補助を直接組み込む独自連携は、UTF-8の実行・入出力契約を呼出し側で指定する必要があります。端末側の表示設定やWindowsネイティブの動作保証を追加する変更ではありません。
+
+When upgrading, apply the shell entrypoints in the selected `axiarch-scripts/` together; use the updated `init.sh` for initial installation. Custom integrations invoking internal Python helpers directly must configure their UTF-8 execution and I/O contract at the caller. This change does not configure terminal rendering or add native Windows support.
+
+文字の検査に失敗すると、起動・補足は既存の警告経路を使い、作業記録を新規生成しません。保護フックは新規作成の入力でも終了2で拒否します。正常な新規作成は引き続き許可します。Unicode診断は入力本文を転載しません。古いJSON記録や設定に単独サロゲートがあれば共通CLIも失敗します。元の記録を保持し、生成元・バックアップと照合して意図した値を復旧してください。文字の削除・置換で検査だけを通す自動修復は行いません。Antigravity等でも共通記録CLIには同じ制約を適用しますが、フックの自動適用を意味しません。
+
+On invalid character input, startup/reminder hooks use their existing warning paths without creating work records. Protection hooks exit 2 even for a new-file request with invalid input; valid creation remains allowed. Unicode diagnostics do not echo payload contents. Shared CLIs also reject old JSON records or settings containing unpaired surrogates. Preserve the originals and recover intended values from the producer or reviewed backups. No automatic character deletion or replacement is performed merely to pass validation. The shared record CLI applies the same restriction for Antigravity and other agents; it does not imply automatic hook execution there.
 
 ### 主な選択肢 / Main Choices
 
@@ -213,7 +243,7 @@ For source development builds (`-dev`), installer and manifest must agree on the
 
 ### Exit Code
 
-- `0` — ブロッキング失敗なし。警告が出た場合は人間レビュー対象 / No blocking automated failures. Review any warnings manually
+- `0` — ブロッキング失敗なし。警告はAIが確認可能な証拠を調べ、アクセスできない情報や承認など人間の判断が必要な事項だけを確認する / No blocking automated failures. The agent investigates accessible warning evidence and asks only about inaccessible information or decisions reserved for the owner
 - `1` — 構造・診断失敗または指定phase不成立 / Structural, diagnostic or requested-phase failure
 
 ### Git診断の範囲 / Git observation scope
@@ -237,7 +267,23 @@ Reflog messages are neither complete push history nor approval evidence; `origin
 - **Check A**: 解決済みセッションの `.axiarch/sessions/{session_id}/task.md` に識別可能なロード履歴行がない場合の見直し候補。未読を断定しない
 - **Check B / C**: `axiarch-rules/{lang}/blueprint/core/010_project_lessons_log.md` の実教訓の件数・経過日等を調べる。閾値は分類・昇華の見直し候補であり、違反の証明ではない
 
+Check Dは `axiarch-scripts/axiarch_scope.py` の既知の日英語彙で、現在の依頼と解決済みセッションの3文書を照合します。例えば「認証」と `authentication` を同じラベルとして扱い、全角英数字も正規化するため、表記や言語の切替だけを新しい話題にしにくくします。全言語の意味理解ではなく、登録されていない言い換え・否定・文脈は判断できません。候補が出た場合だけ実タスクとの関連を確認し、不要なルール読込やユーザーへの確認を要求しないでください。
+
+Check D uses known Japanese/English aliases in `axiarch-scripts/axiarch_scope.py` to compare the current request with the resolved session's three documents. Equivalent terms such as the Japanese word for authentication and `authentication` share a label, and fullwidth Latin characters are normalized. Changing language or notation alone is therefore less likely to produce a new-topic hint. This is not semantic understanding across languages: unlisted paraphrases, negation and context remain unassessed. Review relevance to the actual task rather than demanding unnecessary rule loading or user checks.
+
+`AXIARCH_TASK_BOUNDARY_DETECT=0` でこの補助検査を無効化できます。`AXIARCH_TASK_DOMAIN_KEYWORDS` を指定すると既定語彙を置換し、従来どおりgrepのPOSIX拡張正規表現・単語境界で照合します（例: `client-[[:digit:]]+`）。独自パターンの一致内容には個人情報が含まれうるため、通知には値や依頼本文を出しません。不正な式、検査の時間切れ、解決済み文書のリンク・特殊ファイル・読取不能、補助ファイル欠落は `SCOPE REVIEW UNASSESSED` とし、TTL内でも完全な補足を表示します。フック自体は警告として終了0を保ちます。記録未作成のH0に文書を要求せず、共有ルート文書を別セッションの証拠として使いません。
+
+Set `AXIARCH_TASK_BOUNDARY_DETECT=0` to disable this optional hint. `AXIARCH_TASK_DOMAIN_KEYWORDS` replaces the built-in aliases and retains grep's POSIX extended regular expressions and word boundaries, for example `client-[[:digit:]]+`. Custom matches can contain personal data, so notifications do not echo matched values or prompt text. Invalid expressions, inspection timeouts, linked/special/unreadable resolved documents or a missing helper produce `SCOPE REVIEW UNASSESSED` and force the full reminder even within the TTL. The hook remains a non-blocking warning with exit 0. H0 work without records does not require documents, and shared root documents are not borrowed as another session's evidence.
+
+更新は `axiarch-scripts/` 一式で適用します。healthは `axiarch_scope.py` の欠落を診断失敗とし、フックは既存文書や独自設定を自動修復しません。語彙の候補一致やhealth成功を、読了・意味理解・作業完了の証明には使いません。
+
+Update the complete `axiarch-scripts/` bundle. Health reports a missing `axiarch_scope.py` as a diagnostic failure; hooks do not repair existing documents or custom settings automatically. Keyword matches and passing health checks do not prove reading, understanding or task completion.
+
 Checks A/D use the resolved session; B/C inspect actual entries in installed lesson logs. Missing history rows or threshold matches prompt review rather than proving missed reading or a protocol violation.
+
+既存セッションのbindingや共有状態が解決できない場合は `TASK STATE WARNING` として完全な補足を表示します。未記録のH0とは区別し、任意の語彙検知を無効化しても異常を隠しません。記録を自動修復せず、過去の証拠の参照を現在の完了判定と混同しません。復旧とCLIの契約は [記録先の確認](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md#構造化レコード) を参照してください。更新はscripts一式で適用します。
+
+An unresolved binding or shared state for an existing session produces `TASK STATE WARNING` and the full reminder. This is distinct from unrecorded H0 work; disabling optional keyword hints does not hide the anomaly. Records are not repaired automatically, and locating historical evidence is not a current completion claim. See [record location checks](../axiarch-harness/en/TASK_STATE_PROTOCOL.md#structured-record) for recovery and the CLI contract. Apply updates as a complete scripts bundle.
 
 入力とJSON応答はPython 3の共通補助 `axiarch-scripts/axiarch_hook.py` で処理します。jqなしでもUnicodeエスケープと長文を同じように解析します。解析失敗は見直し警告であり、未読や手順違反の証明とは扱いません。既存Writeの拒否とは異なり、この補足フックは終了0で情報を返します。
 
@@ -246,6 +292,10 @@ Input and context JSON use the Python 3 helper `axiarch-scripts/axiarch_hook.py`
 表示間隔は0–2147483647秒の10進整数で、先頭の0も10進として扱います。0は短縮を無効化。不正な値、読めないキャッシュ、リンク・FIFO等では完全な補足を返します。キャッシュは所有者を確認した通常ファイルだけ読み、一時ファイルから原子的に更新します。プロジェクトとセッション別の一時キャッシュは作業状態や読了の証拠ではなく、削除しても次の補足が完全表示になるだけです。
 
 TTL is a decimal integer from 0 to 2147483647 seconds, including leading zeros; 0 disables shortening. Invalid values, inaccessible caches, links or FIFOs fall back to full context. Only owner-checked regular files are read, and writes use an atomic temporary-file replacement. This project/session cache controls verbosity only; deleting it merely causes a full reminder, and it never proves loading or task completion.
+
+「完全な補足」はAxiarchのTTL短縮を行わず生成する本文を指し、製品側の全文受領を意味しません。受領が不明な場合は [補足の受領確認](#補足の受領確認--checking-reminder-delivery) に従います。
+
+A full reminder means the text generated without Axiarch's TTL shortening; it does not establish complete delivery by the product. Follow [delivery checks](#補足の受領確認--checking-reminder-delivery) when receipt is uncertain.
 
 ### 使い方 / Usage
 
@@ -282,15 +332,31 @@ Python 3 decodes JSON consistently with or without jq, including quoted, Unicode
 
 `axiarch-scripts/axiarch_hook.py` and `axiarch-scripts/axiarch_state.py` validate raw input before Bash stores it, so invalid JSON containing raw NUL bytes is not silently repaired and allowed. Missing helpers also return exit 2. Update the Write guard with the complete scripts bundle.
 
-Claude設定がある環境ではWriteはClaudeの許可リストだけを使います。旧単独Write呼び出しのCodex許可リストfallbackは保持します。Codexの `apply_patch` は既存の新規作成・移動先を拒否し、通常のUpdate File差分を許可します。delete/addの組み合わせも適用前の実体と突合します。未知のpatch形式は終了2です。専用のCodex許可リストを使い、Claudeの例外は流用しません。詳しい契約は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+Claudeのネイティブ `PreToolUse` / `Write` は、ローカル設定の有無によらずClaudeの許可リストだけを使います。イベント名が不正・別イベントの場合、既存ファイルの置換を終了2で拒否し、入力値を通知へ転載しません。イベント名を持たない旧呼び出しも、Claude設定・Claude許可リスト（壊れたリンク等を含む）または明示した `AXIARCH_HOOK_AGENT=claude` があればClaudeを選びます。継承した `AXIARCH_HOOK_AGENT=codex` でこの選択を置き換えません。これらがすべてない旧単独Write呼び出しに限り、Codex許可リストfallbackを保持します。
 
-When Claude settings are installed, Write uses only the Claude allowlist; the legacy standalone Write fallback remains. Codex `apply_patch` checks add/move destinations against the original filesystem, including delete/add pairs, and permits ordinary Update File diffs. Unknown syntax exits 2. It uses the Codex allowlist without borrowing Claude exceptions. See [agent compatibility](AGENT_COMPATIBILITY.md).
+Native Claude `PreToolUse` / `Write` uses only the Claude allowlist even without local settings. An invalid or different event name rejects an existing-file replacement with exit 2 without echoing the supplied value. Legacy calls without an event name also select Claude when Claude settings, a Claude allowlist (including damaged links), or explicit `AXIARCH_HOOK_AGENT=claude` exists. An inherited `AXIARCH_HOOK_AGENT=codex` cannot replace that selection. The Codex fallback remains only for standalone legacy Write calls without any of that Claude context.
+
+Codexの `apply_patch` は既存の新規作成・移動先を拒否し、通常のUpdate File差分を許可します。delete/addの組み合わせも適用前の実体と突合します。未知のpatch形式は終了2です。専用のCodex許可リストを使い、Claudeの例外は流用しません。詳しい契約は [エージェント互換性](AGENT_COMPATIBILITY.md) を参照してください。
+
+Codex `apply_patch` checks add/move destinations against the original filesystem, including delete/add pairs, and permits ordinary Update File diffs. Unknown syntax exits 2. It uses the Codex allowlist without borrowing Claude exceptions. See [agent compatibility](AGENT_COMPATIBILITY.md).
+
+旧呼び出しでCodexのリストをClaudeにも流用していた場合は、承認済みの対象を確認し、Claude側の通常ファイルへ必要な項目だけ設定します。環境変数自体は上書き承認の証拠ではありません。修正は `axiarch-scripts/` 一式で反映し、既存リストの自動コピー・移動・削除は行いません。新規作成や通常の差分編集には上書き例外を要求しません。
+
+If a legacy caller borrowed Codex entries for Claude, review the approved scope and configure only the necessary entries in a regular Claude allowlist. An environment hint is not evidence of overwrite approval. Apply the complete `axiarch-scripts/` bundle; existing lists are not automatically copied, moved or deleted. New-file creation and ordinary focused edits need no overwrite exception.
 
 ### Whitelist サポート / Whitelist Support
 
 `.claude/axiarch-overwrite-allow.txt` または `.codex/axiarch-overwrite-allow.txt` で 1 行 1 path/glob 形式で whitelist を定義可能（自動生成 build artefact 等の正当な full-overwrite 用 escape hatch）。コメント (`#`) と空行はスキップ。
 
 `.claude/axiarch-overwrite-allow.txt` or `.codex/axiarch-overwrite-allow.txt` supports one-path-per-line glob whitelist (escape hatch for legitimate full-overwrite cases like autogenerated artefacts). Comments (`#`) and empty lines are skipped.
+
+許可リストは任意です。使う場合は、親フォルダを含めシンボリックリンクでない場所に、実行ユーザー所有・ハードリンクなしの通常ファイルを配置します。UTF-8のLF/CRLF形式を使い、NULを含めないでください。既存宛先の置換時に全内容を読み取り、不正・読み取り不能なら例外を許可せず、内容を出力しない日英のエラーと終了2を返します。不正なClaudeのリストをCodexの例外で補いません。例外を必要としない新規作成・通常の差分編集は維持します。ClaudeのWriteはBash glob、Codexのapply_patchはPython fnmatchで照合するため、Bash固有の文字クラスはCodexへ流用できません。
+
+Allowlists are optional. When used, keep them in a location without symlinks, including parent directories, as regular files owned by the executing user with no hardlinks. Use UTF-8 with LF/CRLF and no NUL bytes. Before replacing an existing destination, the guard reads the complete list; invalid or unreadable lists grant no exception and produce a bilingual error with exit 2 without printing their contents. A damaged Claude list does not borrow Codex exceptions. New-file creation and ordinary focused edits require no exception and remain available. Claude Write matches Bash globs; Codex apply_patch uses Python fnmatch, so Bash-specific character classes are not portable to Codex.
+
+従来リンクで共有していた許可リストは、承認済みの対象と内容を確認して、使用する各製品の通常ファイルへ移します。親フォルダがリンクの場合は、その設定配置も確認してください。更新やフックは既存リストを自動削除・置換・権限変更しません。変更が必要な場合も、現在の承認範囲を確認し、不足する場合だけ承認を求めます。適用前の確認であり、同一ユーザーの別プロセスによる同時変更や、全操作の安全性を保証する仕組みではありません。
+
+If an older installation shares a list through links, review its approved scope and contents and migrate it to a regular file for each selected agent. Review configuration placement when a parent directory is linked. Upgrade and hooks do not automatically delete, replace or change permissions on existing lists. Check the current authorization scope for required changes and request approval only when it is missing. These pre-operation checks do not guarantee protection from concurrent changes by another same-user process or the safety of every operation.
 
 相対パスのパターンは実体のプロジェクトルートを基準にします。既存判定はリンクと `..` の実際のファイルシステム上の解決順序に従い、壊れたリンクも既存として拒否します。例外パターンはリンクを解決した実体パスと照合するため、許可フォルダから外部を指すリンクは外部の許可にはなりません。絶対パターンも実体パスで指定してください。改行を含む例外パターンは1行1項目の形式では指定できません。判定から実際の書込までに他プロセスがパスを変更する競合は、このフックだけでは防げません。
 
@@ -367,13 +433,17 @@ bash axiarch-scripts/axiarch-diff-guard.sh
 
 ## hook宣言の静的検査 / Static hook declaration checks
 
-v1.17.0のhealthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
+hook宣言の検査基盤はv1.17.0で導入しました。以下はv1.18.0の製品別起動条件の修正を含む現行仕様です。healthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
 
-Health in v1.17.0 uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
+Hook declaration checking was introduced in v1.17.0. The following describes current behavior, including v1.18.0 agent-specific startup-source fixes. Health uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
 
-対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはstartup・resume・clear・compact・forkを含む宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
+対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはCodexではstartup・resume・clear・compact、Claude Codeではこれらにforkを加えた宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
 
-Supported forms are a direct bundled-script invocation or a single script invoked through `bash`, either a shell string or command plus args. Matchers support omitted/empty/all forms, simple names separated by `|`, and grouped or anchored versions of those names. SessionStart declarations cover startup, resume, clear, compact and fork. Complex regex, inline code, custom wrappers, conditional or asynchronous required calls remain unassessed; the diagnostic never runs them to find out what they do.
+Supported forms are a direct bundled-script invocation or a single script invoked through `bash`, either a shell string or command plus args. Matchers support omitted/empty/all forms, simple names separated by `|`, and grouped or anchored versions of those names. SessionStart declarations cover startup, resume, clear and compact for Codex; Claude Code additionally requires fork. Complex regex, inline code, custom wrappers, conditional or asynchronous required calls remain unassessed; the diagnostic never runs them to find out what they do.
+
+起動条件は2026-09-14時点の [Codex公式仕様](https://learn.chatgpt.com/docs/hooks) と [Claude Code公式仕様](https://code.claude.com/docs/en/hooks) に対応します。診断スクリプトを更新すると製品別の判定になります。既定の全件指定は引き続き有効で、既存の独自matcherを書き換える必要はありません。
+
+Startup sources follow the [Codex reference](https://learn.chatgpt.com/docs/hooks) and [Claude Code reference](https://code.claude.com/docs/en/hooks) reviewed on 2026-09-14. Updating the diagnostic script applies the product-specific checks. Default match-all declarations remain valid; existing custom matchers do not need to be rewritten.
 
 必要な宣言の欠落、`disableAllHooks`、未確認形式はhealthの非0終了へ接続します。JSONや独自設定を自動修正・削除しません。旧inline設定やwrapper利用先では、実際の呼出しをレビューして配布形式と整合させるか、未確認を残した追加証拠を別途用意してください。診断を通すために独自設定を無条件で置換してはなりません。hook宣言の検査にjqは不要で、他の診断項目の依存条件は変わりません。
 
@@ -383,17 +453,37 @@ Missing required declarations, `disableAllHooks` and unassessed forms produce a 
 
 Only the two project configuration files are inspected. User settings, managed policy, CLI overrides, runtime adoption and actual firing are outside this check. Async hooks cannot block an action, and settings precedence affects runtime behavior, so a declaration pass is not proof of execution or safety. See the [Claude Code reference](https://code.claude.com/docs/en/hooks). Other agents remain unverified compatibility candidates.
 
+## 補足の受領確認 / Checking reminder delivery
+
+設定の存在、スクリプトのJSON出力、製品側の受領、AIによる正本の実読込は別の確認対象です。healthや単独実行の終了0を、後続のすべての確認の代わりにしません。次は2026-09-14時点の公式仕様との照合であり、製品UI・認証済みモデル推論を含む実証ではありません。
+
+Configuration presence, JSON emitted by a script, product delivery and the agent's actual reading of canonical files are separate checks. Neither health nor a standalone exit 0 establishes all of them. The following reflects official documentation reviewed on 2026-09-14, not product-UI or authenticated-model validation.
+
+| 製品 / Product | 確認点 / Check |
+|---|---|
+| Codex | 長いhook出力は保存先付きの短い表示へ置き換わる場合がある。案内された保存先が利用できる場合だけ内容を確認する。上限変更・無制限化で読了を代用しない / Large output may become a shortened preview with a saved-file reference. Inspect that file when available; changing or removing limits does not establish reading. [公式仕様 / Reference](https://learn.chatgpt.com/docs/hooks#large-hook-output) |
+| Claude Code | 同期のUserPromptSubmit command hookが時間切れになると、出力が破棄されても依頼は処理されうる。対象イベントの診断ログで発火・終了・受領を確認する / A timed-out synchronous UserPromptSubmit command hook can lose its output while the prompt continues. Inspect diagnostics for that event's invocation, completion and delivery. [公式仕様 / Reference](https://code.claude.com/docs/en/hooks#userpromptsubmit) |
+| Antigravity | 現行の配布入口は `.agents/rules/prompt_pointer.md`。Rulesで適用状態を確認し、指示先のルート `AXIARCH.md` を実際に読む。他製品用hookの成功を受領証拠にしない / Check the distributed pointer's activation in Rules and actually read root `AXIARCH.md`; another product's hook success is not delivery evidence. [公式仕様 / Reference](https://antigravity.google/docs/ide/rules/) |
+
+受領を確認できない場合、AIは対象の製品・作業先・セッション・イベントに範囲を絞り、取得可能な設定と診断を自ら調べます。会話やログ全体を無加工で転載・外部送信せず、確認した範囲と未確認の理由を記録します。実装前の必要な正本は直接読み、既存記録は [TASK_STATE_PROTOCOL.md](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md) の読み取り専用 `--mode path --session <ID>` 等で確認します。受領確認だけの目的で、ID未指定のSessionStartを再実行して別の記録を作りません。H0に記録生成・修復の全工程を要求しません。
+
+When delivery is uncertain, the agent inspects accessible configuration and diagnostics for the relevant product, project, session and event. Record the inspected scope and uncertainty without copying entire conversations or raw logs into external messages. Read applicable canonical files before implementation, and inspect existing records through read-only commands such as `--mode path --session <ID>` in [TASK_STATE_PROTOCOL.md](../axiarch-harness/en/TASK_STATE_PROTOCOL.md). Do not rerun SessionStart without an ID merely to check delivery and thereby create unrelated records. H0 does not require a full record-creation or repair workflow.
+
+時間制限・出力上限・非同期化・フック無効化・信頼設定を、自動で緩めて成功扱いにしません。設定変更が必要なら既存の承認範囲と独自設定を確認し、対象の差分をレビューして再検証します。設定調整は必須の導入手順ではなく、確認した原因に応じた選択です。確認不能でも未確認を保ち、アクセスできない情報や承認など人間の判断が必要な事項が残る場合だけ質問します。
+
+Do not automatically relax timeouts, output limits, synchronous execution, hook activation or trust settings to report success. If a configuration change is needed, preserve local customization, check existing authorization, review the affected diff and verify it again. Tuning is an optional response to an established cause, not a mandatory installation step. Keep unresolved delivery unverified and ask only when inaccessible information or a human-owned decision remains.
+
 ## `axiarch-init-task-md.sh`
 
 ### 概要 / Overview
 
-`.claude/settings.json` または `.codex/hooks.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に `axiarch-task-state.sh` へ委譲し、セッション固有の `task.md` / `implementation_plan.md` / `walkthrough.md` を用意する。同じセッションの再開と既存ルート文書は保持する。起動に成功した場合は AXIARCH.md とネイティブタスク状態同期の reminder および実際の記録先を `additionalContext` で示し、失敗した場合は警告する。
+`.claude/settings.json` または `.codex/hooks.json` の `SessionStart` hook から呼ばれる外出しスクリプト。会話開始時に `axiarch-task-state.sh` へ委譲し、セッション固有の `task.md` / `implementation_plan.md` / `walkthrough.md` を用意する。同じセッションの再開と既存ルート文書は保持する。起動に成功した場合は AXIARCH.md とネイティブタスク状態同期の reminder および実際の記録先を `additionalContext` で示し、失敗した場合は警告する。製品側の受領は上の手順で別途確認する。
 
-Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, delegates to `axiarch-task-state.sh` and prepares `task.md` / `implementation_plan.md` / `walkthrough.md` as session-specific documents, preserving same-session resumes and legacy root files. Successful initialization injects the protocol reminder and actual record location; initialization failure emits a warning.
+Externalized SessionStart hook script invoked from `.claude/settings.json` or `.codex/hooks.json`. On session start, delegates to `axiarch-task-state.sh` and prepares `task.md` / `implementation_plan.md` / `walkthrough.md` as session-specific documents, preserving same-session resumes and legacy root files. Successful initialization outputs the protocol reminder and actual record location; initialization failure emits a warning. Product delivery is a separate check described above.
 
-起動・補足フックは共通補助でセッションIDを解決します。不正JSON、重複キー、競合するsession_id／sessionId、不正なIDを新規作業とは解釈しません。起動時は記録を作らず警告し、補足時はセッション未解決として扱います。正しい空入力は旧呼出しとの互換を保ち、IDなし起動として新規IDを生成します。明示環境変数のIDは入力内IDより優先します。Python 3や共通補助がない場合は、確認できていないことを示す短い警告を返します。
+起動・補足フックは共通補助でセッションIDを解決します。不正JSON、重複キー、競合するsession_id／sessionId、不正なIDを新規作業とは解釈しません。起動時は記録を作らず警告し、補足時はセッション未解決として扱います。環境変数があっても入力IDを検証します。正しい空入力は旧呼出しとの互換を保ち、解決できるIDがなければ新規IDを生成します。優先順位は [実行契約](../axiarch-harness/ja/TASK_STATE_PROTOCOL.md) に従い、継承したCodexのIDで別製品のネイティブIDを隠しません。Python 3や共通補助がない場合は、確認できていないことを示す短い警告を返します。
 
-Startup and reminder hooks share session-ID resolution. Invalid JSON, duplicate keys, conflicting session_id/sessionId fields and invalid IDs do not imply new work: startup preserves records and warns, while reminders leave the session unresolved. Empty input remains a supported legacy invocation that generates fresh IDs on startup. Explicit environment IDs take precedence over payload IDs. Missing Python 3 or helpers produces a short warning without claiming successful inspection.
+Startup and reminder hooks share session-ID resolution. Invalid JSON, duplicate keys, conflicting session_id/sessionId fields and invalid IDs do not imply new work: startup preserves records and warns, while reminders leave the session unresolved. Input IDs are validated even when environment variables are present. Empty input remains supported and generates fresh IDs when no identity can be resolved. Precedence follows the [execution contract](../axiarch-harness/en/TASK_STATE_PROTOCOL.md); inherited Codex identity never hides another product's native ID. Missing Python 3 or helpers produces a short warning without claiming successful inspection.
 
 ### 使い方 / Usage
 
@@ -481,17 +571,37 @@ bash axiarch-scripts/check-git-config-clean.sh --full-clean
 
 ## 初期導入と任意生成の結果 / Setup and optional generation outcomes
 
-初期導入は全入力が揃うまで対象を書き換えず、EOFでは適用しません。適用後の構造診断が成功した場合だけ確認済み版数を記録します。`.axiarch/install-result.json` は適用結果・診断結果・選択範囲、`install-health.log` は診断出力です。診断失敗は終了4で版数未確認、衝突など適用前の停止は3、適用中の失敗は5、同時更新中は6。入力・不足ツール・準備失敗は1または2です。中断時はin_progressが残る場合があり、成功を意味しません。記録とファイルを確認しSafe Upgradeで復旧します。既存pre-commitやhook管理ツールには追記せず、手動統合が必要な旨を記録します。
+初期導入は全入力が揃うまで対象を書き換えず、EOFでは適用しません。適用後の構造診断と配布ファイルの再照合が成功した場合だけ確認済み版数を記録します。`.axiarch/install-result.json` は適用結果・診断結果・選択範囲、`install-health.log` は診断出力です。診断失敗は終了4で版数未確認、衝突など適用前の停止または確定時の内容不一致は3、適用・照合不能の失敗は5、同時更新中は6。入力・不足ツール・準備失敗は1または2です。中断時はin_progressが残る場合があり、成功を意味しません。記録とファイルを確認しSafe Upgradeで復旧します。既存pre-commitやhook管理ツールには追記せず、手動統合が必要な旨を記録します。
 
-Fresh installation leaves the target unchanged until all input is available; EOF never approves application. Only a passing post-install structure diagnosis confirms a version. `.axiarch/install-result.json` separates application, diagnosis and selection, and `install-health.log` stores output. Exit 4 means failed diagnosis with an unconfirmed version; 3 means a pre-application stop, 5 an application failure, and 6 another writer. Input, prerequisites or preparation may exit 1 or 2. Interruption may leave in_progress, which is not success; inspect the result and files before repairing through Safe Upgrade. Existing pre-commit hooks/managers remain untouched and require manual integration.
+Fresh installation leaves the target unchanged until all input is available; EOF never approves application. Only a passing post-install structure diagnosis and payload reconciliation confirm a version. `.axiarch/install-result.json` separates application, diagnosis and selection, and `install-health.log` stores output. Exit 4 means failed diagnosis with an unconfirmed version; 3 means a pre-application stop or a finalization content mismatch, 5 an application or unavailable-comparison failure, and 6 another writer. Input, prerequisites or preparation may exit 1 or 2. Interruption may leave in_progress, which is not success; inspect the result and files before repairing through Safe Upgrade. Existing pre-commit hooks/managers remain untouched and require manual integration.
+
+初期導入も、言語・製品設定を反映した準備済み配布物と診断後に再照合します。内容不一致は `pending` に `REVIEW changed-before-finalization` を記録しpartial、消失・リンク化などの照合不能は `failed` に `APPLY-FAIL verification-unavailable` を記録しfailedとします。版数は未確認のまま、一致した配布ファイルだけを比較元ハッシュへ残します。既存の同内容ファイルも検査対象です。診断失敗が重なれば、照合不能5、診断失敗4、内容不一致3の順で終了コードを選び、両方の結果を保持します。変更内容やリンク先の本文は結果JSONへ転載しません。残った独自変更を削除せず、結果・差分を確認してSafe Upgradeで対象を選び復旧してください。
+
+Fresh installs also recheck against the staged payload after language and agent configuration. Content mismatches add `REVIEW changed-before-finalization` to `pending` and mark application partial; missing files, symlinks or other unavailable comparisons add `APPLY-FAIL verification-unavailable` to `failed` and mark application failed. The version remains unconfirmed and only matching distribution files remain in the baseline hashes. Identical pre-existing files are included. When diagnosis also fails, exit precedence is unavailable comparison 5, diagnosis failure 4, then content mismatch 3; retain both results. Do not echo changed content or linked file bodies into result JSON. Preserve remaining local changes and review results and differences before selecting recovery paths through Safe Upgrade.
 
 更新の `--dry-run` は `--apply` の指定順や対話回答に関係なく非変更です。`--lang en --with-prompts` は英語のプロンプトと共通READMEだけを対象にし、日本語を削除・更新しません。確認済み版数は選択した範囲に限ります。
 
 An explicit upgrade `--dry-run` remains read-only regardless of option order or interactive answers. `--lang en --with-prompts` selects English prompts and the shared README without deleting or updating Japanese files. Confirmed versions cover only the selected scope.
 
+更新の確定時には、`UPDATE` と `UNCHANGED` に記録された配布ファイルを更新元と再照合します。診断中などに内容が変わった場合は `REVIEW changed-before-finalization` を結果JSONへ追加し、適用をpartial、診断が成功していれば終了3とします。消失・リンク化などで照合できない場合は `APPLY-FAIL verification-unavailable` と適用failed・終了5を記録します。診断結果は別に保持します。いずれも確認済み版数を進めず、不一致の内容を次回更新の比較元ハッシュへ登録しません。一致した他ファイルの適用と比較元は保持します。
+
+At upgrade finalization, recheck distribution files recorded as `UPDATE` or `UNCHANGED` against the source. Changed content adds `REVIEW changed-before-finalization` to result JSON, marks application partial and returns exit 3 when diagnosis passed. Missing files, symlinks or other unavailable comparisons add `APPLY-FAIL verification-unavailable`, mark application failed and return exit 5. Diagnosis remains a separate result. Neither case advances the confirmed version or registers mismatched bytes as a baseline for later updates; successful matching files and their baselines remain applied.
+
+結果JSONの `actions` / `pending` / `failed` は確定時照合の所見も含み、コピー時の `actions.log` より後の判定です。原本・バックアップ・差分を確認し、承認範囲で復旧してから再実行してください。診断コマンドは読み取り専用に保つことを推奨します。この照合はファイル単位の観測であり、全ファイルの同時確定、更新元の真正性、照合後の別プロセスによる書換を保証しません。
+
+Result JSON `actions` / `pending` / `failed` includes finalization findings made after the copy-time `actions.log`. Review originals, backups and differences, restore within the authorized scope and retry. Keep diagnostic commands read-only where possible. Comparisons observe individual files; they do not establish an atomic all-file snapshot, source authenticity or protection from another process changing files after verification.
+
+言語・製品の追加は、配布対象の選択、設定の適用、固有Blueprintの準備、応答言語と任意コマンドの切替を区別します。中核ファイルのレビュー待ちによる診断失敗からの復旧を含め、[互換性・移行手順](AGENT_COMPATIBILITY.md) を参照してください。
+
+Adding a language or agent separates distribution selection, configuration application, local Blueprint preparation, response language and optional command regeneration. See the [compatibility and migration guide](AGENT_COMPATIBILITY.md), including recovery when pending core files cause diagnosis to fail.
+
 任意のコマンド生成は `axiarch-scripts/axiarch-prompts-install.sh` から `axiarch-scripts/axiarch_setup.py` を使用し、導入先にある正本だけを参照します。再生成・削除は未編集の生成物のみ。独自・編集済み・旧形式のファイルは保持して終了3、引数不正は2、同時更新中は6です。導入・更新・生成は同一導入先の協調ロックを共用し、ファイル単位で原子的に書き込みます。全ファイルを一括で元に戻す取引や、直接書き込む別ツールまでの排他は保証しません。
 
 Optional command generation uses `axiarch-scripts/axiarch_setup.py` through `axiarch-scripts/axiarch-prompts-install.sh` and points only to installed canonical files. Regeneration/cleanup changes only unmodified generated output. Custom, edited or legacy files are preserved with exit 3; invalid arguments exit 2 and a busy target exits 6. Install, upgrade and generation share a cooperative target lock and atomic per-file writes, not an all-files rollback transaction or exclusion of unrelated direct writers.
+
+生成物判定はUTF-8のバイト列を置換せずに読み、生成時のハッシュと照合します。不正UTF-8の既存ファイルを未編集の生成物とは認めません。生成マーカーが残る破損ファイルがあれば、再生成・`--clean`・各`--dry-run`とも終了3で全変更を保留し、本文は通知へ転載しません。原本を保持し、元の文字コード・編集内容を確認してレビュー済みのファイルを戻すか、利用先の承認範囲で別名へ退避してから再実行してください。正常なUTF-8の置換文字（U+FFFD）そのものは禁止せず、自動変換・削除もしません。ハッシュは内容の変更検査であり、署名や作成者の権限の証明ではありません。
+
+Generated-output checks decode UTF-8 bytes without substitution before comparing the recorded hash. Invalid UTF-8 never qualifies as unmodified generated output. A damaged file retaining the generated marker stops regeneration, `--clean` and their `--dry-run` variants with exit 3 before any changes; diagnostics do not echo file contents. Preserve the original, review its encoding and edits, then restore a reviewed file or move it aside within the adopter's authorization before retrying. A valid UTF-8 replacement character (U+FFFD) is allowed; files are not automatically transcoded or deleted. The hash checks content changes, not signatures or author authorization.
 
 ---
 
@@ -536,6 +646,18 @@ Literal comment tokens in code examples do not hide later lessons or links, and 
 
 Use the commands above for local reference checks and the full regression suite. Checks cover local links/headings, bilingual paths, per-folder prefix collisions, obsolete validation claims, and canonical references and known unconditional-wait/full-rule-loading instructions inside fenced prompts. They do not certify external-link availability or semantic correctness.
 
+
+文書参照検査はAxiarch本体の管理者向けです。Markdownと `llms.txt` / `llms-full.txt` の本文はUTF-8として読み、同じ実行中は読み取り結果を再利用します。文書と祖先フォルダのシンボリックリンク、ハードリンクされた文書、特殊ファイルを本文読込前に拒否し、ライセンス比較も同じ読取境界を使います。不正UTF-8や読取不能は本文・外部リンク先を転載せず非0終了で通知し、FIFOの書込側を待ちません。元ファイルの変換・削除は行わず、必要なら確認済みの通常ファイルから配布用ソースを準備してください。
+
+Document reference checks are maintainer tools for Axiarch itself. Markdown and llms.txt/llms-full.txt bodies are decoded as UTF-8 and reused within the inspection. Reject symbolic links in documents or ancestor directories, hardlinked documents and special files before reading their contents; notice comparisons use the same boundary. Invalid UTF-8 or unreadable inputs produce nonzero diagnostics without echoing source contents or external link destinations, and FIFOs do not wait for a writer. Sources are not converted or deleted; prepare distribution source from reviewed regular files when necessary.
+
+CLIの標準出力・標準エラーはプロセス内でUTF-8に揃えます。Pythonのファイル名処理まで非UTF-8に設定した環境で解釈不能な名前がある場合は終了2で案内し、`PYTHONUTF8=1 python3 tests/check_documentation.py` で再検査できます。本文の構造・参照異常は終了1です。この検査は外部URL全体の到達性、意味理解、同権限プロセスによる任意の並行書換まで隔離・保証するものではありません。利用先の必須の導入手順を追加しません。
+
+The CLI configures stdout and stderr as UTF-8 within its process. If a non-UTF-8 Python filesystem configuration cannot represent a filename, exit 2 explains how to retry with `PYTHONUTF8=1 python3 tests/check_documentation.py`; document/reference problems exit 1. This does not establish external URL availability, semantic understanding or isolation from arbitrary concurrent writes by equally privileged processes, and adds no mandatory adopter setup step.
+
+リンクの解析失敗、ローカル参照の不正UTF-8・制御文字、循環リンクや読取エラーは、問題箇所を診断して終了1とします。他の参照の検査は継続し、不正な文字列を置換して別ファイルの存在確認を通すことはしません。正常な日本語・UTF-8のURL符号化・見出し参照は維持します。診断中の非表示文字とGitHubの現行・旧ログ命令記号は表示用に変換し、ファイル名による端末制御や注釈への混入を抑えます。元ファイルは改名しません。これは既知のログ記法への対処であり、任意のログ閲覧製品や外部URL全体の検証を保証しません。
+
+Link parse failures, invalid UTF-8 or control characters in local references, cyclic links and target read errors produce exit 1 diagnostics while inspection of other references continues. Invalid encodings are not replaced to match a different existing file. Valid Unicode paths, UTF-8 URL encoding and heading references remain supported. Nonprinting characters and current/legacy GitHub log command markers are escaped for display to reduce terminal control and annotation injection through filenames; source files are not renamed. This addresses known log syntax, not every log viewer or external URL validity.
 
 旧教訓ログは更新時に上書きしません。新しい診断でTarget Folder不足・古い日付・認識できない旧形式が出た場合は、元の内容と日付を保持して分類先を補完するか、CRYSTALLIZATION_PROTOCOLに沿って昇華します。既存の引用テンプレートは実教訓として数えません。新フォルダは既存分類で収まらない場合に承認範囲を確認し、空フォルダ用.gitkeepは追加しません。
 

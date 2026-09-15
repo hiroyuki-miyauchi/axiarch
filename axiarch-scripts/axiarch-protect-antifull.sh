@@ -31,6 +31,10 @@
 
 set -uo pipefail
 
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+
 # -----------------------------------------------------------------------------
 # Resolve project directory
 # -----------------------------------------------------------------------------
@@ -118,25 +122,17 @@ fi
 # -----------------------------------------------------------------------------
 # Whitelist: bypass when matched in .claude/axiarch-overwrite-allow.txt or .codex/...
 # -----------------------------------------------------------------------------
-ALLOW_FILE=""
-if [[ "${AXIARCH_HOOK_AGENT:-}" == "codex" ]]; then
-  ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
-elif [[ -f "${PROJECT_DIR}/.claude/settings.json" || -f "${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt" ]]; then
-  ALLOW_FILE="${PROJECT_DIR}/.claude/axiarch-overwrite-allow.txt"
-elif [[ -f "${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt" ]]; then
-  # Legacy standalone Write guards without an installed Claude configuration.
-  ALLOW_FILE="${PROJECT_DIR}/.codex/axiarch-overwrite-allow.txt"
-fi
+# Native Claude metadata and local Claude context take precedence over inherited
+# agent hints. Only the metadata-free standalone interface has a Codex fallback.
+ALLOW_AGENT="$(printf '%s' "$INPUT" | python3 "$HOOK_HELPER" write-agent --project "$PROJECT_DIR")" || exit 2
 
-if [[ -n "${ALLOW_FILE}" && -f "${ALLOW_FILE}" ]]; then
+# Validate the entire file before matching; process substitution would lose the
+# reader's failure status. Keep Bash glob semantics for legacy Write callers.
+ALLOW_PATTERNS="$(python3 "$HOOK_HELPER" allow-patterns --project "$PROJECT_DIR" --agent "$ALLOW_AGENT")" || exit 2
+if [[ -n "${ALLOW_PATTERNS}" ]]; then
   MATCH_PATH="$(decode_field canonical)" || exit 2
   MATCH_PATH="${MATCH_PATH%.}"
   while IFS= read -r pattern || [[ -n "${pattern}" ]]; do
-    # Skip empty lines and comments
-    [[ -z "${pattern}" || "${pattern}" =~ ^[[:space:]]*# ]] && continue
-    # Trim leading/trailing whitespace
-    pattern="$(printf '%s' "${pattern}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
-    [[ -z "${pattern}" ]] && continue
     # Relative allow patterns are explicitly relative to this project.
     [[ "$pattern" == /* ]] || pattern="$PROJECT_DIR/$pattern"
     # Glob match (case-sensitive)
@@ -144,14 +140,14 @@ if [[ -n "${ALLOW_FILE}" && -f "${ALLOW_FILE}" ]]; then
     if [[ "${MATCH_PATH}" == ${pattern} ]]; then
       exit 0
     fi
-  done < "${ALLOW_FILE}"
+  done <<< "${ALLOW_PATTERNS}"
 fi
 
 # -----------------------------------------------------------------------------
 # Deny: existing file + Write tool = potential §7.6 ANTI-FULL-OVERWRITE violation
 # -----------------------------------------------------------------------------
-REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的に全面書き換えが必要な場合はユーザー明示承認のうえで .claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt にパスを追加してください。"
-REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). If full overwrite is genuinely needed, ask the user for explicit approval and add the path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
+REASON_JA="AXIARCH.md Anti-Full-Overwrite: 既存ファイル '${FILE_PATH}' を Write tool で全面書き換えしようとしています。差分編集には Edit tool を使用してください。意図的な全面置換には記録されたユーザー明示承認が必要です。既存の承認範囲を確認し、不足する場合だけ承認を求め、.claude/axiarch-overwrite-allow.txt または .codex/axiarch-overwrite-allow.txt に承認済みパスを追加してください。"
+REASON_EN="AXIARCH.md Anti-Full-Overwrite: file '${FILE_PATH}' already exists; the AI must use Edit (diff-based) instead of Write (full overwrite). Intentional full replacement requires recorded explicit user approval. Check the existing authorization scope, ask only when approval is missing, and add the approved path to .claude/axiarch-overwrite-allow.txt or .codex/axiarch-overwrite-allow.txt."
 
 # Emit JSON output for hook contract (decision: block + reason)
 REASON_FULL="${REASON_JA} / ${REASON_EN}"

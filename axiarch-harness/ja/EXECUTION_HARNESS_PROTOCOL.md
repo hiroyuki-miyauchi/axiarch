@@ -16,7 +16,7 @@
 | H1 | ドキュメント微修正、ポインター整理、証跡更新 | 計画とwalkthroughを短く更新し、差分を確認 |
 | H2 | 小規模コード修正、局所的な仕様更新 | 実装計画、実装、検証、監査ゲート |
 | H3 | 複数領域の設計変更、ルール変更、配布スクリプト変更 | Blueprintまたは正本計画、役割パス、ja/en parity、health確認 |
-| H4 | DB適用、stage、commit、push、deploy、release、tag、破壊的操作、セキュリティ境界変更 | 実装前後の人間承認ゲート。自律実行禁止 |
+| H4 | DB適用、stage、commit、push、deploy、release、tag、破壊的操作、セキュリティ境界変更 | HUMAN_APPROVAL_GATE.mdに従い対象操作の明示承認を確認。承認範囲外の操作前に停止 |
 
 `AXIARCH.md` §9 が「ハーネスは非自明な作業における必須手順」と定めるとき、その「非自明」は **H2 以上**を指す。H0/H1（質問回答・読み取り・軽微なドキュメント修正）はハーネス全工程を要さず、H2 以上で実装計画・実装・検証・監査ゲート（および H3/H4 の追加要件）が必須になる。
 
@@ -33,7 +33,7 @@
 9. Audit Gateで `PASS` / `PASS_WITH_NOTES` / `NEEDS_FIX` / `NEEDS_REPLAN` / `NEEDS_HUMAN` / `BLOCKED` / `CRYSTALLIZE_ONLY` を判定する。
 10. `NEEDS_FIX` は修正ループへ、`NEEDS_REPLAN` はPlan Gateへ戻す。
 11. 検証結果をEvidence Packetにまとめる。
-12. stage、commit、push、deploy、release、tag、破壊的操作はHuman Approval Gateで停止する。
+12. stage、commit、push、deploy、release、tag、破壊的操作、機微操作に [HUMAN_APPROVAL_GATE.md](./HUMAN_APPROVAL_GATE.md) を適用し、必要な承認がない場合に停止する。
 13. 実際に発生した教訓だけをCrystallization対象として確認する。
 
 ## 実装計画の扱い

@@ -14,7 +14,7 @@ The content authority is `axiarch-rules/en/universal/core/300_goal_and_current_s
 | `--mode status` | Reads `.axiarch/tasks/` as a shared view of all owners; no duplicated index authority |
 | Three root documents | Preserve legacy evidence; create shared-reference pointers only when absent |
 
-Session IDs come from CLI, `AXIARCH_SESSION_ID`, `CODEX_THREAD_ID`, or hook `session_id` / `sessionId`. Task IDs come from CLI or `AXIARCH_TASK_ID`. Startup without identity generates and prints new IDs; it never selects another session implicitly. Reuse the printed IDs on the next invocation. IDs are not credentials.
+Direct CLI calls resolve session IDs from `--session`, then `AXIARCH_SESSION_ID`, then `CODEX_THREAD_ID`. Hooks first validate supplied `session_id` / `sessionId` fields and require them to agree when both are present. Selection then prefers an intentional `AXIARCH_SESSION_ID` override, followed by the native input ID, with `CODEX_THREAD_ID` only as a fallback. An inherited Codex parent ID must not hide another product's native identity, and environment variables never suppress invalid input-ID errors. Task IDs come from CLI or `AXIARCH_TASK_ID`. Startup without identity generates and prints new IDs; it never selects another session implicitly. Reuse the printed IDs on the next invocation. IDs are not credentials.
 
 UUID folder names are internal keys for collision avoidance and resumption, not work titles. `--mode status` and `--mode sessions` display the canonical task `goal` first. Session listings read bindings and task state directly without duplicating a title registry. Do not manually rename existing folders and break their references. For a new explicit session ID, a unique ASCII name such as `audit-2026-09-13-agent-a` is also supported; the example date and task are not prescribed values.
 
@@ -58,6 +58,10 @@ bash axiarch-scripts/axiarch-task-state.sh --mode new --task migration-review --
 
 ## Structured record
 
+`--mode path --session <ID>` is read-only and checks the binding, referenced shared `state.json` structure and matching IDs before returning the document location. Missing, invalid or mismatched records exit 2 without regenerating existing state. This is structural inspection, not a fresh completion check of historical evidence hashes or timestamps. It does not prove Markdown contents or reading.
+
+Codex/Claude reminders report resolution failure for the selected existing session as bilingual `TASK STATE WARNING` and restore the full reminder even within the short-display TTL. Disabling optional scope detection does not suppress this anomaly. Stored JSON and raw parser diagnostics are not copied into the reminder. An uncreated session is not an anomaly, and H0 reading needs no record creation or repair gate. Before reusing existing evidence, inspect the binding, shared state and history directly and reconcile them without automatically moving, deleting or replacing originals. Antigravity or environments without hooks can use the same CLI to resolve records; this does not mean the same reminder is automatically injected.
+
 `schema_version=1`. Each task has `task_id`, integer `revision`, `owner`, `goal`, `phase` (draft / active / complete), positive `max_age_seconds` (default 86400) and a `criteria` array.
 
 Each criterion has a unique `id`, `owner`, `description`, `verification`, `state`, `verified`, `target`, `checked_at` and `evidence`. States are `not_started`, `in_progress`, `done`, `discarded`. Discarded requires `reason` and never substitutes for meeting a completion criterion. Record agreement and rationale for changed/removed criteria in the plan.
@@ -75,6 +79,8 @@ Use `publish` instead of overwriting shared state directly. Python 3 standard-li
 The task lock must be a regular file owned by the current execution user with a link count of one. FIFOs, links and foreign ownership are rejected without waiting. Atomic replacement applies per JSON file, not to simultaneous commitment of tasks, sessions and root pointers. If updating current state fails after history was saved, the old state.json remains; retry can reuse identical history.
 
 ## Runtime artifact protection
+
+Install and upgrade finalization rechecks distribution files against the staged payload or update source; changes during diagnosis do not become confirmed versions or update baselines. See “Setup and optional generation outcomes” in `axiarch-scripts/README.md` for pending/unavailable results and recovery.
 
 The upgrade shell's `check-paths` and Python helper's `copy` apply the same preflight to the selected source, adopter and base trees. Reject control characters, symlinks, special files, reserved paths and name aliases before copying. Copy-time I/O failures return 5, while earlier successful copies remain. Use `axiarch-scripts/axiarch-upgrade.sh` for the overall lock, protection policy, diagnosis and outcome records. Internal `copy` exit 0 alone does not mean the upgrade is complete; the shell's aggregation/finalization handles pending REVIEW and TYPE-CONFLICT outcomes.
 

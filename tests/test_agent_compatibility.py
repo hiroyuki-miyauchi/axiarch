@@ -113,14 +113,41 @@ class AgentCompatibilityTests(unittest.TestCase):
             self.assertEqual(config['hooks'][event][0]['hooks'][0]['command'], codex_command(script))
             self.assertEqual(len(config['hooks'][event]), 1)
 
+    def test_native_sessions_do_not_borrow_inherited_codex_parent_records(self):
+        self.guard_fixture()
+        inherited = {'CODEX_THREAD_ID': 'parent'}
+        self.configured_hook('codex', 'SessionStart', dict(session_id='parent'), extra=inherited)
+        parent = self.target / '.axiarch/sessions/parent/task.md'
+        parent.write_text('preserve the previous parent binding')
+        for agent in ('codex', 'claude'):
+            with self.subTest(agent=agent):
+                payload = dict(session_id=agent + '-native', cwd=str(self.target / 'nested'))
+                result = self.configured_hook(agent, 'SessionStart', payload, extra=inherited)
+                docs = self.target / '.axiarch/sessions' / payload['session_id']
+                self.assertTrue(docs.is_dir(), result.stdout)
+                (docs / 'task.md').write_text('independent ' + agent)
+                before = self.tree_bytes()
+                self.configured_hook(agent, 'SessionStart', dict(payload, source='resume'), extra=inherited)
+                result = self.configured_hook(agent, 'UserPromptSubmit', dict(payload, prompt='continue'),
+                                              extra=inherited)
+                context = json.loads(result.stdout)['hookSpecificOutput']['additionalContext']
+                self.assertIn('docs=' + str(docs), context)
+                self.assertEqual(self.tree_bytes(), before)
+        self.assertEqual(parent.read_text(), 'preserve the previous parent binding')
+
     def test_three_agent_language_upgrades_preserve_local_state_and_report_pending(self):
         self.install_source()
         for agent, choice in [('codex', 1), ('claude', 2), ('antigravity', 3)]:
             for lang, lang_choice in [('ja', 1), ('en', 2)]:
                 with self.subTest(agent=agent, language=lang):
                     self.target = self.root / f'upgrade-{agent}-{lang}'
+                    self.target.mkdir()
+                    attributes = self.target / '.gitattributes'
+                    attributes.write_bytes(b'project-data/*.csv text eol=crlf\n')
                     self.run_cmd(['bash', self.source / 'init.sh', self.target], cwd=self.root,
                                  text=f'{lang_choice}\n2\n{choice}\nn\nn\n')
+                    self.assertEqual(attributes.read_bytes(), b'project-data/*.csv text eol=crlf\n')
+                    self.assertTrue((self.target / 'axiarch-scripts/WINDOWS.md').is_file())
                     spec = self.target / f'axiarch-rules/{lang}/blueprint/core/000_project_overview.md'
                     spec.write_text('# Adopted project / 利用先の仕様\n')
                     custom = self.target / 'project-only.txt'; custom.write_text('keep private local state\n')
@@ -132,10 +159,111 @@ class AgentCompatibilityTests(unittest.TestCase):
                     self.run_cmd([*command, '--apply', '--yes'], expected=3)
                     self.assertEqual(spec.read_text(), '# Adopted project / 利用先の仕様\n')
                     self.assertEqual(custom.read_text(), 'keep private local state\n')
+                    self.assertEqual(attributes.read_bytes(), b'project-data/*.csv text eol=crlf\n')
                     self.assertFalse((self.target / ('axiarch-rules/en' if lang == 'ja' else 'axiarch-rules/ja')).exists())
                     result = json.loads((self.target / '.axiarch/upgrade-result.json').read_text())
                     self.assertEqual(result['health']['status'], 'passed')
                     self.assertEqual(result['application'], 'partial')
+
+    def test_reviewed_agent_addition_keeps_existing_sessions_and_adapters(self):
+        self.install_source()
+        for choice, lang, lang_choice in [(1, 'ja', 1), (2, 'en', 2), (3, 'en', 2)]:
+            with self.subTest(starting_agent=choice, language=lang):
+                self.target = self.root / f'coexist-{choice}'
+                answers = f'{lang_choice}\n2\n{choice}\ny\n' + ('n\n' if choice == 2 else '') + 'n\n'
+                self.run_cmd(['bash', self.source / 'init.sh', self.target], text=answers, cwd=self.root)
+                state_command = ['bash', self.target / 'axiarch-scripts/axiarch-task-state.sh',
+                                 '--project', self.target, '--mode', 'session-start', '--session', 'previous']
+                self.run_cmd(state_command)
+                old = self.target / '.axiarch/sessions/previous/task.md'
+                old.write_text('保存する作業 / Work to retain\n')
+                protected = [p for p in self.target.rglob('*') if p.is_file() and (
+                    '.axiarch' not in p.parts or '/.axiarch/sessions/' in str(p) or '/.axiarch/tasks/' in str(p))]
+                before = {p: p.read_bytes() for p in protected}
+                command = ['bash', self.source / 'axiarch-scripts/axiarch-upgrade.sh', '--source', self.source,
+                           '--target', self.target, '--lang', lang, '--agent', 'all']
+                preview = self.tree_bytes()
+                self.run_cmd([*command, '--dry-run'])
+                self.assertEqual(self.tree_bytes(), preview)
+                # Keep the adopter's configured setting; approve only the two adapter groups.
+                answers = '4\n2\n2\n1\ny\n'
+                result = self.run_cmd([*command, '--interactive', '--apply'], text=answers, expected=None)
+                self.assertIn(result.returncode, (0, 3), result.stdout + result.stderr)
+                report = json.loads((self.target / '.axiarch/upgrade-result.json').read_text())
+                self.assertEqual(report['health']['status'], 'passed')
+                for path, content in before.items():
+                    self.assertEqual(path.read_bytes(), content, str(path))
+                self.assertTrue((self.target / '.agents/rules/prompt_pointer.md').is_file())
+                self.assertTrue((self.target / 'CLAUDE.md').is_file())
+                for agent in ('codex', 'claude'):
+                    payload = dict(session_id=agent + '-joined', cwd=str(self.target), source='startup')
+                    result = self.configured_hook(agent, 'SessionStart', payload)
+                    self.assertNotIn('[TASK STATE WARNING]', result.stdout)
+                    docs = self.target / '.axiarch/sessions' / payload['session_id'] / 'task.md'
+                    self.assertIn('タスク' if lang == 'ja' else 'Task', docs.read_text())
+                    self.configured_hook(agent, 'SessionStart', dict(payload, source='resume'))
+                self.assertEqual(old.read_text(), '保存する作業 / Work to retain\n')
+
+    def test_added_language_preserves_project_language_and_requires_local_blueprint(self):
+        self.install_source()
+        for lang, choice, other in [('ja', 1, 'en'), ('en', 2, 'ja')]:
+            with self.subTest(language=lang):
+                self.target = self.root / f'language-addition-{lang}'
+                self.run_cmd(['bash', self.source / 'init.sh', self.target],
+                             text=f'{choice}\n2\n1\ny\nn\n', cwd=self.root)
+                native = (self.target / 'AXIARCH.md').read_bytes()
+                blueprint = self.target / f'axiarch-rules/{lang}/blueprint/core/000_project_overview.md'
+                blueprint.write_text('# 利用先の実仕様 / Actual adopter specification\n')
+                lessons = blueprint.with_name('010_project_lessons_log.md')
+                lessons.write_text('# 教訓 / Lessons\n\n記録なし / No recorded lessons.\n')
+                before = {p: p.read_bytes() for p in self.target.rglob('*')
+                          if p.is_file() and '.axiarch' not in p.parts}
+                command = ['bash', self.source / 'axiarch-scripts/axiarch-upgrade.sh', '--source', self.source,
+                           '--target', self.target, '--lang', other, '--agent', 'codex', '--with-prompts']
+                preview = self.tree_bytes(); self.run_cmd([*command, '--dry-run'])
+                self.assertEqual(self.tree_bytes(), preview)
+                self.run_cmd([*command, '--apply', '--yes'], expected=4)
+                report = json.loads((self.target / '.axiarch/upgrade-result.json').read_text())
+                self.assertEqual(report['health']['status'], 'failed')
+                version = json.loads((self.target / '.axiarch/version.json').read_text())
+                self.assertEqual(version['confirmedScope']['languages'], lang)
+                self.assertEqual(version['requestedScope']['languages'], other)
+                self.assertEqual(version['healthStatus'], 'failed')
+                logs = list((self.target / '.axiarch/upgrades').glob('*/health.log'))
+                self.assertTrue(any(f'Goal/state contract missing for {other}' in p.read_text() for p in logs))
+                preview = self.tree_bytes()
+                self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-prompts-install.sh',
+                              '--target', self.target, '--lang', other], expected=3)
+                self.assertEqual(self.tree_bytes(), preview)
+                # Safe-owned core files can be added without overwriting mixed project settings.
+                self.run_cmd([*command, '--safe-only', '--apply', '--yes'], expected=4)
+                for path, content in before.items():
+                    self.assertEqual(path.read_bytes(), content, str(path))
+                self.assertEqual((self.target / 'AXIARCH.md').read_bytes(), native)
+                self.assertTrue((self.target / f'axiarch-rules/{other}/LOADING_PROTOCOL.md').is_file())
+                # Project-owned rules are never fabricated from the reference product on upgrade.
+                self.assertFalse((self.target / f'axiarch-rules/{other}/blueprint/core/000_project_overview.md').exists())
+                logs = list((self.target / '.axiarch/upgrades').glob('*/health.log'))
+                self.assertTrue(any('lesson log unavailable' in p.read_text() for p in logs))
+                # The adopter prepares the new language from its actual bilingual fixture state.
+                added = self.target / f'axiarch-rules/{other}/blueprint'
+                (added / 'core/000_project_overview.md').write_bytes(blueprint.read_bytes())
+                (added / 'core/010_project_lessons_log.md').write_bytes(lessons.read_bytes())
+                (added / 'INDEX.md').write_text('# Blueprint\n\n[Overview](core/000_project_overview.md)\n'
+                                              '[Lessons](core/010_project_lessons_log.md)\n')
+                self.run_cmd([*command, '--safe-only', '--apply', '--yes'], expected=3)
+                self.assertEqual((added / 'core/000_project_overview.md').read_bytes(), blueprint.read_bytes())
+                self.assertEqual((added / 'core/010_project_lessons_log.md').read_bytes(), lessons.read_bytes())
+                self.run_cmd(['bash', self.target / 'axiarch-scripts/axiarch-prompts-install.sh',
+                              '--target', self.target, '--lang', other])
+                commands = list((self.target / '.claude/commands').glob('axiarch-*.md'))
+                self.assertTrue(commands)
+                for path in commands:
+                    self.assertIn(f'axiarch-prompts/{other}/', path.read_text())
+                    self.assertIn(f'axiarch-rules/{other}/LOADING_PROTOCOL.md', path.read_text())
+                report = json.loads((self.target / '.axiarch/upgrade-result.json').read_text())
+                self.assertEqual(report['application'], 'partial')
+                self.assertEqual(report['health']['status'], 'passed')
 
     def test_codex_patch_preserves_existing_files_and_allows_diff_and_creation(self):
         self.guard_fixture()

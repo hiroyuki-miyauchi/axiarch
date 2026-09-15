@@ -168,7 +168,7 @@ Load completeness concerns applicable sections, not every file in the library.
 |:--|:--|:--|
 | **New session (new chat / post context reset)** | Apply Steps 1–4 within scope, including H0/H1 exceptions and continuation criteria below | Do not assume inheritance; reconcile available content with direct-read evidence |
 | **Same session, task type changed** | Load additional applicable files. Unchanged content already read and still available need not be reloaded | Inspect the current INDEX and actual folders for added scope |
-| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. **In v1.8.0+, Check D (Task Boundary Detection) backs up the AI's self-judgment** — `axiarch-boot-reminder.sh` mechanically compares current-prompt domain keywords against task.md load history and emits a full reminder + [LOAD REVIEW] when a new keyword is detected | YAGNI + context-budget protection + Check D reduces confirmation-bias risk |
+| **Same session, task continues (no type change)** | No additional load required. Continue using already-loaded context. Optional Check D compares request keywords with the resolved session's three documents and reports potential new topics. Decide additional reading from the actual task scope | YAGNI + context-budget protection. Keyword matches do not prove reading |
 | **Long session resumed after pause (e.g. compaction trigger)** | Compare load history with available content; reread uncertain sections. TTL controls reminder display only and does not invalidate previously read content by itself | Reminder display state is separate from actual available context |
 | Previously read rules, Blueprint or index changed | Reread affected sections and relevant references even if the task type is unchanged | Compare the read snapshot with the current content |
 
@@ -180,17 +180,17 @@ Load completeness concerns applicable sections, not every file in the library.
 > **Problem this addresses (v1.6.0 background)**:
 > The historical operational gap — "loading 30+ files every session = context blow-out, so we partially load in practice" — is now explicitly codified into "what may be skipped, and when." Combined with the reminder TTL (`axiarch-boot-reminder.sh`), this can reduce repeated context loading; savings depend on the task and are not guaranteed.
 
-> **v1.8.0 improvement — Check D Task Boundary Detection**:
-> Adopter feedback revealed a problem: "Even within the same session, actual tasks differ, yet the AI judges 'session is continuing, no re-load needed' and skips an applicable read" (confirmation bias). v1.8.0 adds Check D to `axiarch-boot-reminder.sh`:
+> **Check D — Background and current comparison procedure**:
+> Introduced in v1.8.0, topic detection helps review scope changes within a session. The current `axiarch-scripts/axiarch-boot-reminder.sh` delegates the following processing to `axiarch-scripts/axiarch_scope.py`:
 >
 > 1. Reads the current user prompt (JSON payload) from the UserPromptSubmit hook's stdin
-> 2. Extracts domain keywords from the prompt via whole-word match (`grep -oiwE`) — security / architecture / ui_design / api / performance / push / commit / migration / etc.
-> 3. Full-text greps existing files among the resolved session's `task.md` / `implementation_plan.md` / `walkthrough.md` for known domain keywords. Plans and results contribute comparison hints, not complete context understanding or proof of actual reading
-> 4. **On mismatch**: emits `[LOAD REVIEW]` flag + **TTL bypass** (suppresses short-circuit, re-emits the full reminder)
+> 2. Maps known Japanese/English aliases and fullwidth notation to shared topic labels
+> 3. Applies the same comparison to the three documents (`task.md` / `implementation_plan.md` / `walkthrough.md`) under the resolved `.axiarch/sessions/{session_id}/`. Missing or unreadable documents are not silently ignored to report successful inspection. An uncreated H0 session does not require document generation
+> 4. Reports potential new topics as `[LOAD REVIEW]` and failed inspection as `[SCOPE REVIEW UNASSESSED]`, bypassing TTL shortening. Failure to resolve an existing session is separately reported as `TASK STATE WARNING`
 >
-> The result: the system no longer depends only on the AI's "task type unchanged" self-judgment. Keyword differences are review candidates, not proof of missing reads. A keyword match does not prove that a rule was loaded either. Disable via `AXIARCH_TASK_BOUNDARY_DETECT=0`; override the keyword set via `AXIARCH_TASK_DOMAIN_KEYWORDS`.
+> `AXIARCH_TASK_BOUNDARY_DETECT=0` disables only optional topic detection; it does not hide existing-session resolution failures. Optional `AXIARCH_TASK_DOMAIN_KEYWORDS` replaces the built-in bilingual aliases with a POSIX regular expression, using the legacy grep comparison for that override. See [axiarch-scripts/README.md](../../axiarch-scripts/README.md#axiarch-boot-remindersh) for settings, diagnostics, handling of sensitive values and updates.
 >
-> **Why scan all 3 files**: domain context is recorded not only in `task.md`'s load-history table but also in `implementation_plan.md` (the strategy section) and `walkthrough.md` (the diff narrative). Reading only `task.md` causes frequent false positives because the plan often already covers the prompt's domain. Treating all 3 files as task-context evidence mirrors the AI's actual working state.
+> The three documents provide comparison hints, not complete context understanding or proof of actual reading. Unlisted paraphrases, negation and meaning remain unassessed, so the agent decides additional reading from the actual request. This hook helper belongs to the distributed Codex/Claude configurations; it does not automatically inject the same diagnostics into Antigravity.
 
 ---
 

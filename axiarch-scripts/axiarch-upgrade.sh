@@ -16,6 +16,10 @@
 
 set -euo pipefail
 
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -82,7 +86,7 @@ Options:
   --target DIR        Adopter project directory. Default: current directory.
   --source DIR        Local Axiarch source directory to upgrade from.
   --to VERSION        Target Axiarch version label, e.g. v1.13.1 or main.
-  --ref REF           GitHub archive ref, e.g. tags/v1.17.0 or heads/main.
+  --ref REF           GitHub archive ref, e.g. tags/v1.18.0 or heads/main.
   --from VERSION      Optional base version for replace-if checks and 3-way merge.
   --from-ref REF      Optional base archive ref for replace-if checks and 3-way merge.
   --base-source DIR   Optional local base Axiarch source for replace-if checks and 3-way merge.
@@ -97,8 +101,8 @@ Options:
   --help              Show this help.
 
 Examples:
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
-  bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --safe-only --apply
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --dry-run
+  bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --agent codex --safe-only --apply
   bash axiarch-scripts/axiarch-upgrade.sh --source /path/to/axiarch --interactive
 USAGE
 }
@@ -1479,13 +1483,36 @@ write_upgrade_metadata() {
   return "${result_rc}"
 }
 
+check_platform() {
+  command -v python3 >/dev/null 2>&1 || { print_err 'Python 3 required; no changes applied.'; return 2; }
+  # A standalone upgrade launcher has no adjacent helper yet. Check the Python
+  # runtime before downloading sources, acquiring locks or changing the target.
+  python3 - <<'AXIARCH_PLATFORM_PY'
+import os, sys
+if os.name != 'posix':
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2; native Windows Python/Git Bash is unsupported. / WindowsではWSL 2内で実行してください。', file=sys.stderr)
+    sys.exit(2)
+try:
+    import fcntl
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: POSIX Python with fcntl required. / POSIX対応のPythonが必要です。', file=sys.stderr)
+    sys.exit(2)
+AXIARCH_PLATFORM_PY
+}
+
 main() {
+  # Keep help available without Python; diagnose native Windows before Bash
+  # applies locale-sensitive classification to Unicode arguments.
+  if [[ $# -eq 1 && ( "$1" == '--help' || "$1" == '-h' ) ]]; then
+    parse_args "$@"
+    return 0
+  fi
+  check_platform
   parse_args "$@"
   if [[ "${PROJECT_DIR}" =~ [[:cntrl:]] ]]; then
     print_err 'Control characters are not supported in the upgrade project path.'
     return 2
   fi
-  command -v python3 >/dev/null 2>&1 || { print_err 'Python 3 required; no changes applied.'; return 2; }
   resolve_sources
   if [[ ! -f "${HELPER_DIR}/axiarch_upgrade.py" || ! -f "${HELPER_DIR}/axiarch_state.py" ]]; then
     HELPER_DIR="${SOURCE_DIR}/axiarch-scripts"

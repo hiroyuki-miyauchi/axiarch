@@ -16,8 +16,11 @@
 
 </div>
 
-> 安定版: `1.17.0`。以下の導入・更新例はこの版のタグを参照します。既存の導入先はdry-runで差分を確認し、固有状態を保持して更新してください。[v1.17.0の変更履歴](CHANGELOG.md#1170--2026-09-13)
-> Stable release: `1.17.0`. Installation and upgrade examples below reference this version. Existing adopters should review a dry-run and preserve project-specific state when upgrading. [v1.17.0 changes](CHANGELOG.md#1170--2026-09-13)
+> 版数とタグ参照はこのソースの公開対象版を示します。未マージのリリース準備ブランチでは未公開の場合があります。導入前に [公開済みRelease](https://github.com/hiroyuki-miyauchi/axiarch/releases/latest) を確認してください。
+> Version metadata and tag references identify this source's intended release. They may be unpublished on an unmerged release-preparation branch; check the published Release before installation.
+
+> 安定版: `1.18.0`。以下の導入・更新例はこの版のタグを参照します。既存の導入先はdry-runで差分を確認し、固有状態を保持して更新してください。[v1.18.0の変更履歴](CHANGELOG.md#1180--2026-09-15)
+> Stable release: `1.18.0`. Installation and upgrade examples below reference this version. Existing adopters should review a dry-run and preserve project-specific state when upgrading. [v1.18.0 changes](CHANGELOG.md#1180--2026-09-15)
 
 ---
 
@@ -361,29 +364,29 @@ Microsoft Azureのlanding zone、Microsoft Entra、Azure Policy、IaC、managed 
 
 ```bash
 # 変更計画だけ確認 / Preview the plan only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / When the helper is not installed yet
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/axiarch-scripts/axiarch-upgrade.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.18.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.17.0 --dry-run
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.18.0 --dry-run
 
 # Codex向けの安全更新だけ反映 / Apply only safe Codex-oriented updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --agent codex --safe-only --apply
 
 # 非対話CI等で人間承認済みの計画を反映 / Apply a human-approved reviewed plan non-interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --apply --yes
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --safe-only --apply --yes
 
 # 任意プロンプトも明示的に含めて確認 / Preview with optional prompts explicitly included
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --with-prompts --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --safe-only --with-prompts --dry-run
 
 # グループごとに対話選択 / Choose each group interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --interactive
 ```
 
 | 選択肢 / Choice | 意味 / Meaning |
@@ -470,11 +473,11 @@ bash /path/to/axiarch/init.sh /path/to/your/project
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/init.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.18.0/init.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/init.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.17.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
+test -n "$axiarch_bootstrap_dir" && AXIARCH_REF=tags/v1.18.0 bash "$axiarch_bootstrap_dir/init.sh" /path/to/your/project
 
 # または手動でコピー / Or copy manually:
 # 必須の正本・アダプター・ルール・harnessをコピー / Copy the required canonical entry, adapter, rules, and harness
@@ -752,8 +755,8 @@ The goal extends beyond personal use: to contribute to the global adoption of AI
 
 ## 実行記録・更新結果・保証範囲 / Runtime evidence, upgrade outcomes and guarantees
 
-この節の追加実装はv1.17.0に含まれます。既存のv1.16.0導入先は自動更新されません。v1.17.0のソースからdry-runで差分を確認し、固有状態を保持して更新してください。
-The additions in this section are included in v1.17.0. Existing v1.16.0 adopters are not updated automatically; review a dry-run using the v1.17.0 source and preserve project-specific state when applying changes.
+記録・更新結果の基盤はv1.17.0で導入しました。この節は現在のソースを説明し、v1.18.0のWindows実行条件・エージェント別保護等の修正も含みます。版ごとの差分は [CHANGELOG.md](CHANGELOG.md) を確認してください。旧導入先は自動更新されません。公開済みの更新先を選んでdry-runし、固有状態を保持して適用してください。
+The record and upgrade-outcome foundation was introduced in v1.17.0. This section describes the current source, including v1.18.0 Windows execution requirements and agent-specific protection fixes. Consult the changelog for version-specific changes. Older adopters are not updated automatically; select a published target, review a dry-run and preserve project-specific state when applying changes.
 
 ゴール・現在値の内容は `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md`、保存と検査の手順は [日本語の実行契約](axiarch-harness/ja/TASK_STATE_PROTOCOL.md) を正本とします。自律距離D1–D5、成熟度M1–M5、ハーネスH0–H4（旧L0–L4）は別の軸で、数値の自動対応はありません。H0の読み取りに記録作成や完了検査を強制せず、H2以上で準備・完了を分けて検査します。
 
@@ -762,7 +765,8 @@ Goal/current-state content is governed by `axiarch-rules/{lang}/universal/core/3
 | 機構 / Mechanism | 実際にできること / Actual boundary |
 |:--|:--|
 | PreToolUse `Write` | 対応runtimeがhookを発火・尊重する場合、既存pathへのWriteを拒否。新規作成は許可。設定済みallowlistは例外 / Reject existing-path Write on runtimes that invoke and honor the hook; new paths and configured allowlists are allowed |
-| Shell・Edit・外部API / Shell, Edit, external APIs | Write hookの対象外。これらの操作全体を遮断しない / Outside the Write hook; not comprehensively blocked |
+| PreToolUse `apply_patch`（Codex） | v1.18.0でAdd File・Move toの既存宛先検査を追加。対応イベントを製品が発火・尊重する場合に限定。通常のUpdate差分は許可し、未知の形式は未確認として拒否 / v1.18.0 adds checks for existing Add File and Move to destinations when the product invokes and honors the event; focused Update hunks remain allowed and unknown syntax is rejected as unassessed |
+| Shell・Edit・外部API / Shell, Edit, external APIs | 上記のWrite／apply_patch検査の対象外。これらの操作全体を遮断しない / Outside the Write/apply_patch checks above; not comprehensively blocked |
 | SessionStart・補足 / SessionStart and reminder | 記録先・規則への誘導、キーワードによる見直し候補。遵守・理解はAIに依存 / Evidence/rule routing and heuristic review hints; understanding and compliance depend on the agent |
 | PostToolUse差分検出 / Diff guard | 編集後の閾値検出。既に行われた編集の取消しを保証しない / Post-edit threshold signal, not guaranteed rollback |
 | health・完了検査 / Health and completion | 構造・記録・ハッシュ・時刻の整合。意味理解・証拠の十分性・全操作の安全性は保証しない / Structural and recorded consistency, hashes and timestamps; no proof of understanding, evidence sufficiency or all-operation safety |
@@ -778,6 +782,10 @@ Health also rejects failed Git queries instead of inventing zero counts or synch
 更新された補助ツールにはPython 3とPOSIXローカルファイルシステムが必要です。新規導入は `init.sh` が補助スクリプトを配布します。既存導入先はSafe Upgradeのdry-runを確認し、scriptsとharness、core/300、LOADING_PROTOCOLを更新し、mixed/reviewのAXIARCH.md・hook・索引は利用先設定を残して差分適用してください。単独ダウンロードした新しいupgrade scriptは、展開したsourceからPython補助を読み込めます。古いsourceに補助が無ければ適用前に停止します。
 
 The updated helpers require Python 3 and a POSIX local filesystem. `init.sh` distributes them on fresh installs. Existing adopters should review a Safe Upgrade dry-run, update scripts/harness/core/300/LOADING_PROTOCOL, and reconcile mixed/review AXIARCH.md, hooks and indexes while retaining local settings. A standalone new upgrade launcher can load its Python helpers from the extracted source; missing helpers stop application before changes.
+
+WindowsではWSL 2内のLinux Python・Bash・プロジェクトを使用します。ネイティブWindows PythonやGit Bash単独は非対応で、導入・更新は対象を変更する前に停止します。製品側の実行環境設定、Linux側への配置、検証範囲は [Windows手順](axiarch-scripts/WINDOWS.md) を参照してください。
+
+On Windows, use Linux Python, Bash and a project inside WSL 2. Native Windows Python and Git Bash alone are unsupported; installation and upgrades stop before target changes. See the [Windows guide](axiarch-scripts/WINDOWS.md) for agent environment settings, Linux storage and verification boundaries.
 
 リモート取得はcurlとtarも必要です。HTTP失敗・時間切れ・不正アーカイブと曖昧なJSONは適用前に停止します。wgetだけの環境は確認済みローカルソースを使ってください。詳細とサイズ・時間の上限、真正性を保証しない範囲は [取得・入力検査](axiarch-scripts/README.md#取得入力検査の境界--download-and-input-validation-boundary) を参照してください。
 

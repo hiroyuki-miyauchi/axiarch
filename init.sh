@@ -6,9 +6,13 @@
 # =============================================================================
 
 set -euo pipefail
+
+# Keep child Python paths and stdio UTF-8, independent of inherited locale settings.
+# This affects this script and its children only; raw malformed input stays invalid.
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 export PYTHONDONTWRITEBYTECODE=1
 
-AXIARCH_VERSION="1.17.0"
+AXIARCH_VERSION="1.18.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
@@ -97,6 +101,19 @@ check_prerequisites() {
     print_error "Missing required tools: ${missing[*]}"
     exit 1
   fi
+  # The standalone launcher must reject Windows Python before downloading a
+  # source or preparing the target; Bash alone does not provide POSIX locking.
+  python3 - <<'AXIARCH_PLATFORM_PY'
+import os, sys
+if os.name != 'posix':
+    print('AXIARCH_PLATFORM_UNSUPPORTED: Use Linux Python inside WSL 2; native Windows Python/Git Bash is unsupported. / WindowsではWSL 2内で実行してください。', file=sys.stderr)
+    sys.exit(2)
+try:
+    import fcntl
+except ImportError:
+    print('AXIARCH_PLATFORM_UNSUPPORTED: POSIX Python with fcntl required. / POSIX対応のPythonが必要です。', file=sys.stderr)
+    sys.exit(2)
+AXIARCH_PLATFORM_PY
 }
 
 # =============================================================================
@@ -688,10 +705,6 @@ stage_and_install() {
 # Main
 # =============================================================================
 main() {
-  if [[ "$AXIARCH_REF" =~ [[:cntrl:]] || "$TARGET_DIR" =~ [[:cntrl:]] ]]; then
-    print_error 'Control characters are not supported in the source reference or target path.'
-    return 2
-  fi
   if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
     echo 'Usage: bash init.sh [target-directory] (fresh setup; existing projects use axiarch-scripts/axiarch-upgrade.sh)'
     return 0
@@ -700,8 +713,14 @@ main() {
     print_error 'Expected one target directory. For upgrade previews use axiarch-scripts/axiarch-upgrade.sh --dry-run.'
     return 2
   fi
-  print_header
+  # Reject unsupported runtimes before locale-sensitive path classification.
+  # Git Bash on native Windows can classify Unicode path bytes differently.
   check_prerequisites
+  if [[ "$AXIARCH_REF" =~ [[:cntrl:]] || "$TARGET_DIR" =~ [[:cntrl:]] ]]; then
+    print_error 'Control characters are not supported in the source reference or target path.'
+    return 2
+  fi
+  print_header
   check_existing_install
   select_language
   select_language_dirs
