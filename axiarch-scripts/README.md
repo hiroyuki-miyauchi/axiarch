@@ -633,6 +633,10 @@ CLIの標準出力・標準エラーはプロセス内でUTF-8に揃えます。
 
 The CLI configures stdout and stderr as UTF-8 within its process. If a non-UTF-8 Python filesystem configuration cannot represent a filename, exit 2 explains how to retry with `PYTHONUTF8=1 python3 tests/check_documentation.py`; document/reference problems exit 1. This does not establish external URL availability, semantic understanding or isolation from arbitrary concurrent writes by equally privileged processes, and adds no mandatory adopter setup step.
 
+リンクの解析失敗、ローカル参照の不正UTF-8・制御文字、循環リンクや読取エラーは、問題箇所を診断して終了1とします。他の参照の検査は継続し、不正な文字列を置換して別ファイルの存在確認を通すことはしません。正常な日本語・UTF-8のURL符号化・見出し参照は維持します。診断中の非表示文字とGitHubの現行・旧ログ命令記号は表示用に変換し、ファイル名による端末制御や注釈への混入を抑えます。元ファイルは改名しません。これは既知のログ記法への対処であり、任意のログ閲覧製品や外部URL全体の検証を保証しません。
+
+Link parse failures, invalid UTF-8 or control characters in local references, cyclic links and target read errors produce exit 1 diagnostics while inspection of other references continues. Invalid encodings are not replaced to match a different existing file. Valid Unicode paths, UTF-8 URL encoding and heading references remain supported. Nonprinting characters and current/legacy GitHub log command markers are escaped for display to reduce terminal control and annotation injection through filenames; source files are not renamed. This addresses known log syntax, not every log viewer or external URL validity.
+
 旧教訓ログは更新時に上書きしません。新しい診断でTarget Folder不足・古い日付・認識できない旧形式が出た場合は、元の内容と日付を保持して分類先を補完するか、CRYSTALLIZATION_PROTOCOLに沿って昇華します。既存の引用テンプレートは実教訓として数えません。新フォルダは既存分類で収まらない場合に承認範囲を確認し、空フォルダ用.gitkeepは追加しません。
 
 Existing lesson logs are preserved during upgrades. Resolve missing Target Folder tags, age triggers or unrecognized legacy formats by retaining original content/dates and classifying or promoting the actual lessons through CRYSTALLIZATION_PROTOCOL. Quoted templates are not real entries. Additional folders follow the approved scope; no .gitkeep is needed.

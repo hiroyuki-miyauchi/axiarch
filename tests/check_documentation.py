@@ -119,7 +119,18 @@ def inspect_prompt(text):
     return issues
 
 
+def diagnostic_text(message):
+    """Keep each issue on one inert display line, including untrusted filenames."""
+    visible = ''.join(char if char.isprintable() else ascii(char)[1:-1] for char in message)
+    # Both current and legacy GitHub runner command markers are log syntax.
+    return visible.replace('::', r'\x3a\x3a').replace('##[', r'\x23\x23[')
+
+
 def inspect(root):
+    return [diagnostic_text(issue) for issue in inspect_sources(root)]
+
+
+def inspect_sources(root):
     root = root.resolve()
     problems = []
     contents = {}
@@ -175,13 +186,36 @@ def inspect(root):
                 destinations.append(reference[1])
             for target in destinations:
                 target = target.strip("<>")
-                parts = urlsplit(target)
+                try:
+                    if any(unicodedata.category(c) in ('Cc', 'Zl', 'Zp') for c in target):
+                        raise ValueError('control character in link')
+                    parts = urlsplit(target)
+                except ValueError:
+                    problems.append(f'{path.relative_to(root)}:{number}: invalid link syntax or encoding')
+                    continue
                 if parts.scheme or parts.netloc or any(c in target for c in "{}*"):
                     continue
-                destination = (path.parent / unquote(parts.path)).resolve() if parts.path else path.resolve()
-                if not destination.exists():
+                try:
+                    decoded_path = unquote(parts.path, errors='strict')
+                    fragment = unquote(parts.fragment, errors='strict')
+                    if any(unicodedata.category(c) in ('Cc', 'Zl', 'Zp') for c in decoded_path + fragment):
+                        raise ValueError('control character in local link')
+                except ValueError:
+                    problems.append(f'{path.relative_to(root)}:{number}: invalid link syntax or encoding')
+                    continue
+                try:
+                    destination = (path.parent / decoded_path).resolve(strict=True) if decoded_path else path.resolve(strict=True)
+                    exists = destination.exists()
+                except UnicodeError:
+                    raise  # Keep the CLI's filesystem-codec retry guidance.
+                except FileNotFoundError:
+                    exists = False
+                except (OSError, RuntimeError, ValueError):
+                    problems.append(f'{path.relative_to(root)}:{number}: unreadable link target')
+                    continue
+                if not exists:
                     problems.append(f"{path.relative_to(root)}:{number}: missing path: {target}")
-                elif parts.fragment and destination in by_path and unquote(parts.fragment) not in by_path[destination]:
+                elif fragment and destination in by_path and fragment not in by_path[destination]:
                     problems.append(f"{path.relative_to(root)}:{number}: missing anchor: {target}")
     for tree in ("axiarch-rules", "axiarch-harness", "axiarch-prompts"):
         sets = [{p.relative_to(root / tree / lang).as_posix() for p in (root / tree / lang).rglob("*.md")}

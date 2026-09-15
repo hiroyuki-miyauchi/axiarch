@@ -51,6 +51,8 @@ Building on v1.17.0's goal, evidence and session management, this minor release 
 
 ### 修正 / Fixed
 
+- 文書の不正URL・NUL・循環参照で検査が例外終了する問題と、不正UTF-8のURLを別文字へ置換して存在確認を通す問題を修正。後続参照の検査を継続し、診断中の制御文字とGitHubのログ命令記号を表示用へ変換する。正常な日英参照と既存の読取保護を回帰検査し、導入先の実行処理は変更しない。
+- Fix documentation checks aborting on malformed URLs, NULs and cyclic references, and incorrectly matching a different file after replacing invalid UTF-8 in URLs. Continue checking subsequent references and escape control characters and GitHub log command markers in diagnostics. Add regressions for valid multilingual references and existing read protections without changing adopter runtime behavior.
 - 管理者向け文書検査がリンク先の外部文書を読む問題、FIFOで待ち続ける問題、OS既定の文字コードで日英文書を読めない問題を修正。通常のUTF-8ファイルを安全に読み、リンク・特殊ファイル・不正文字コードを本文の転載なしで通知する。日本語の診断出力と、ファイル名の文字コードが非対応の場合の再検査手順も整備する。隔離した異常系回帰を追加し、導入先の実行処理は変更しない。
 - Fix maintainer documentation checks reading externally linked documents, waiting on FIFOs and failing on valid bilingual text under non-UTF-8 OS defaults. Safely read regular UTF-8 sources and report links, special files and invalid encodings without echoing contents. Preserve Japanese diagnostic output and provide a retry path for incompatible filename encodings. Add isolated boundary regressions without changing adopter runtime behavior.
 - 現行READMEのWindows・保護説明を一括でv1.17.0の機能とする記述を修正し、Codexのapply_patch検査範囲を表へ追加。AI向け日英案内の英語README見出しリンクと省略した規則パスを修正し、llms.txt／llms-full.txtもローカル参照検査へ含める。欠落先・古い見出し・具体的な規則パスを回帰検査する。
