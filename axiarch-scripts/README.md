@@ -59,26 +59,26 @@ Directory exclusions include descendants. Conflicting policies or ownership for 
 
 ```bash
 # 変更計画だけ確認 / Preview only
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --dry-run
 
 # 古い採用先で helper が未導入の場合 / Bootstrap the helper temporarily when it is not installed yet
 # TMPDIR（未指定・空なら/tmp）内に専用領域を作成 / Use TMPDIR, defaulting to /tmp if unset or empty
 axiarch_bootstrap_dir="$(mktemp -d "${TMPDIR:-/tmp}/axiarch-bootstrap.XXXXXXXX")" &&
 curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 120 \
-  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.17.0/axiarch-scripts/axiarch-upgrade.sh \
+  https://raw.githubusercontent.com/hiroyuki-miyauchi/axiarch/v1.18.0/axiarch-scripts/axiarch-upgrade.sh \
   -o "$axiarch_bootstrap_dir/download.part" &&
 mv "$axiarch_bootstrap_dir/download.part" "$axiarch_bootstrap_dir/axiarch-upgrade.sh"
 # 取得成功と内容・提供元を確認後に実行 / Run after checking successful download, contents and source
-test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.17.0 --dry-run
+test -n "$axiarch_bootstrap_dir" && bash "$axiarch_bootstrap_dir/axiarch-upgrade.sh" --target "$(pwd)" --to v1.18.0 --dry-run
 
 # Axiarch所有の安全更新だけ反映 / Apply only low-risk Axiarch-owned updates
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --safe-only --apply
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --safe-only --apply
 
 # Codex向けに必要なものだけ対象化 / Scope to Codex-oriented files
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --agent codex --dry-run
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --agent codex --dry-run
 
 # グループごとに対話選択 / Choose group actions interactively
-bash axiarch-scripts/axiarch-upgrade.sh --to v1.17.0 --interactive
+bash axiarch-scripts/axiarch-upgrade.sh --to v1.18.0 --interactive
 ```
 
 ### 取得・入力検査の境界 / Download and input validation boundary

@@ -23,70 +23,67 @@ See the release audit for all-version artifact checks, metadata mismatches and d
 
 ---
 
-## [Unreleased]
+## [1.18.0] — 2026-09-15
+
+### 概要 / Overview
+
+v1.17.0のゴール・証拠・セッション管理を引き継ぎ、Windows上のWSL 2で補助スクリプトを検査する経路と、複数エージェント・日英の導入／運用回帰を追加した。Codex・Claude Codeのフックが別の作業先や他製品の設定を参照する問題、Unicode入力による記録・既存ファイル保護の不備を修正する。互換機能追加と不具合修正のminor版であり、既存の保存形式と正本の配置は維持する。
+
+Building on v1.17.0's goal, evidence and session management, this minor release adds a WSL 2 verification path on Windows and broader multi-agent, Japanese/English installation and operation regressions. It fixes Codex and Claude Code hooks using the wrong checkout or another agent's settings, plus Unicode handling that could corrupt records or weaken existing-file protection. Existing record formats and canonical paths remain unchanged.
+
+### 追加 / Added
+
+- Windowsの実行条件と移行手順を [Windowsガイド](axiarch-scripts/WINDOWS.md) に集約。Windowsランナーのネイティブ非対応環境診断と、WSL 2・Ubuntu 24.04・一般ユーザーによる全回帰を共通CIへ追加し、公開経路も同じコミットの成功を必要とする。
+- Add a Windows execution and migration guide, native unsupported-environment diagnostics on a Windows runner, and the full regression suite under WSL 2 with Ubuntu 24.04 as a non-root user. The release path requires these shared checks to pass on the same commit.
+- [エージェント互換性ガイド](axiarch-scripts/AGENT_COMPATIBILITY.md) と、3製品×日英×片言語／両言語の導入・診断回帰を追加。言語追加、製品設定の共存、任意コマンドの言語切替、既存記録の保持も検査する。
+- Add an agent compatibility guide and installation/diagnostic coverage for three agents, Japanese/English and single/dual language trees. Cover language additions, coexisting agent settings, optional-command language changes and preservation of existing records.
+- リリース説明の7項目・日英記入・比較リンク・抽出を共通検査へ接続。コード枠やコメント内の見出し、空欄、重複、別版本文の混入を回帰検査する。
+- Add shared checks for seven release-note sections, bilingual presence, comparison links and extraction, with regressions for example headings, empty or duplicate sections and leakage from adjacent versions.
 
 ### 変更 / Changed
 
-- シェル入口の子PythonをUTF-8モード・UTF-8入出力で実行し、継承した文字コード設定による日本語パス・プロンプト・作業名の文字化けを修正。文字置換で既存ファイルのWrite保護を誤って許可するケースを含め、日英の導入・起動・再開・保護・更新を隔離テストで確認する。設定は実行プロセス内のみで、既存記録の自動変換や製品の動作保証は行わない。
-- Run child Python from shell entrypoints with UTF-8 mode and UTF-8 I/O, fixing Unicode path, prompt and task-name corruption from inherited encoding settings. Cover Japanese/English installation, startup, resumption, protection and upgrades in isolated regressions, including incorrect Write permission after filename replacement. Settings remain process-local; existing records are not converted and agent operation is not guaranteed.
-- 不正UTF-8を別の文字列へ変換して受理するフック入力処理を修正。標準入力を厳密なUTF-8として読み、共通JSONではキー・入れ子の値も単独サロゲートを拒否する。正常な日英・絵文字・正規化形式を保持し、不正入力で記録を作らず本文を転載しない。両製品の実handler・共通CLI・文字コード設定の回帰と日英の復旧手順を追加する。
-- Fix hook input silently accepting invalid UTF-8 after reinterpretation. Decode stdin strictly as UTF-8 and reject unpaired surrogates in shared JSON, including keys and nested values. Preserve valid Japanese/English, emoji and normalization forms; invalid input creates no records and is not echoed. Add native-handler, shared-CLI and stdio-setting regressions with bilingual recovery guidance.
-- 言語設定・プロンプト・作業証跡・比較用記録のUTF-8読込を明示し、非UTF-8のOS既定設定で正常な文書が読めない不備を修正。UTF-8モードを無効にした環境でも日英の言語判定・コマンド生成を検査する。旧文書の文字コードを自動変換しない。
-- Read language settings, prompts, task evidence and comparison records explicitly as UTF-8, fixing failures on valid documents under non-UTF-8 OS defaults. Regress Japanese/English language resolution and command generation with UTF-8 mode disabled, without automatically converting existing documents.
-- 日英のLOADING_PROTOCOLとスクリプト内のコメントに残る旧grep方式・task.mdのみの比較・欠落文書の読み飛ばしという説明を、現行の話題検知と未確認通知へ同期。任意設定と既存セッション異常の通知を区別し、3製品の適用範囲を明記する。実行処理や設定値は変更しない。
-- Align both LOADING_PROTOCOL editions and script comments with current bilingual topic comparison and unassessed diagnostics, replacing obsolete descriptions of grep-only matching, task.md-only comparison and skipping missing documents. Distinguish optional hints from existing-session warnings and clarify agent scope. Executable behavior and settings are unchanged.
-- 補足の生成と製品側受領・実読込を区別する日英の確認手順を追加。Codexの長い出力、Claudeの時間切れ、AntigravityのRules入口を説明し、設定緩和や別セッション生成による見かけの復旧を避ける。health警告を日本語だけ人間レビュー対象としていた説明も、AIの自力確認を優先する原則へ揃える。実行スクリプトや既定設定は変更しない。
-- Add bilingual checks separating generated reminders, product delivery and actual reading, covering large Codex output, Claude timeouts and the Antigravity Rules entrypoint. Avoid automatic setting relaxation or unrelated session creation as apparent recovery. Align the Japanese health-warning guidance with agent-led inspection. Runtime scripts and default settings are unchanged.
-- セッションの記録先解決で、参照先の共有タスクの欠落・不正・ID不一致を検査する。既存記録の解決失敗が短縮補足で隠れる問題を修正し、日英の未確認通知へ接続する。未記録H0・過去の証拠参照・復旧後の再開と別セッション保持を維持し、旧記録を自動再生成しない。両製品のフックと共通CLIの隔離回帰を追加する。
-- Validate missing, malformed or mismatched shared tasks when resolving session locations. Surface existing-record resolution failures through bilingual warnings instead of hiding them in shortened reminders. Preserve unrecorded H0 work, historical evidence lookup, recovery and other sessions without automatically regenerating old records. Add isolated regressions for both agents' hooks and the shared CLI.
-- ClaudeのWriteが継承したCodex指定によって他製品の上書き許可を使う問題を修正。ネイティブイベント・Claude設定・許可リスト・明示Claude指定を優先し、不正イベントは既存ファイルの置換を拒否する。対象を限定した旧単独Writeの互換、新規作成、製品ごとの承認済みパスを保持し、日英の移行手順と隔離回帰を追加する。
-- Fix Claude Write borrowing Codex overwrite exceptions through an inherited agent hint. Prioritize native events and Claude settings, allowlists or explicit selection; invalid events reject existing-file replacement. Preserve the bounded legacy standalone Write fallback, new-file creation and each agent's approved paths, with bilingual migration guidance and isolated regressions.
-- 作業範囲の補足検査を日英の既知語彙・全角表記へ対応。日本語の話題を見落とすケースと、言語切替だけで新しい話題と判定するケースを修正する。独自POSIX正規表現の互換と無効化設定を保持し、一致した依頼本文は通知へ出さない。不正設定・読取不能は未確認として完全な補足へ戻す。補助ファイルの欠落検査、両製品の回帰と日英の移行・保証範囲を追加する。
-- Extend scope hints to known Japanese/English aliases and fullwidth notation, fixing missed Japanese topics and false new-topic hints on language changes. Preserve custom POSIX expression and disable settings without echoing matched prompt content. Invalid configuration or unreadable records produce an unassessed result and a full reminder. Add helper-presence diagnostics, regressions for both agents, and bilingual migration and verification boundaries.
-- Claudeの全面置換拒否メッセージも、既存の明示承認範囲を確認して不足時だけ質問する日英の案内へ揃える。拒否判定自体は維持する。
-- Align the bilingual Claude full-replacement denial message with checking existing explicit authorization and asking only when it is missing. Preserve the denial decision itself.
-- Claude/Codexの上書き許可リストの検査差を修正。リンクされたファイル・親フォルダ、ハードリンク、他の所有者、特殊ファイル、不正UTF-8、NULを例外許可として扱わず、内容を漏らさず終了2で通知する。Claudeの壊れた設定をCodexの例外で補わない。正当なglob・日本語・CRLFを維持し、例外不要の新規作成や差分編集は許可する。設定を自動変更しない移行手順と隔離回帰を日英で追加する。
-- Align Claude/Codex overwrite-list checks. Linked files or parents, hardlinks, other owners, special files, invalid UTF-8 and NUL cannot grant exceptions; report exit 2 without exposing contents. Damaged Claude settings do not borrow Codex exceptions. Preserve valid globs, Unicode and CRLF, and allow new-file creation or focused edits without exceptions. Add isolated regressions and bilingual migration guidance without automatically modifying adopter settings.
-- 製品追加後の設定共存・セッション保持、日英の追加時に中核ファイルが保留となる診断失敗と再実行、任意コマンドの言語切替時の編集保護を実動作回帰へ追加。配布言語と応答言語の違い、固有Blueprintの準備、既定REVIEWの反映方法を日英で補足する。
-- Add runtime regressions for coexisting adapters and retained sessions after agent addition, diagnosis failure and recovery when language additions leave core files pending, and edit protection during optional-command language changes. Clarify distribution versus response language, local Blueprint preparation and applying default REVIEW items in Japanese and English.
-- 別AIをCodexのシェルから起動した際、継承したセッションIDで別作業を再開する不備を修正。起動・補足では入力IDを先に検証し、意図的なAxiarch指定を除き製品自身のIDを優先する。不正入力を環境変数で隠さず警告し、旧記録は保持する。日英の優先順位・移行手順と回帰を追加する。
-- Fix another agent launched from a Codex shell resuming the parent's work records. Startup/reminder hooks validate native IDs first and prefer them over inherited runtime IDs unless an intentional Axiarch override is supplied. Environment variables cannot hide invalid input; existing records remain intact. Add bilingual precedence/migration guidance and regressions.
-- 英語版harnessに抜けていた「ネイティブ計画ツールが利用できない場合」の代替手順を補う。既存承認の範囲確認と不足時の停止を正本・harness・起動補足でそろえ、通常の差分修正まで再承認を要求する曖昧さを解消。起動補足はAIの読了を強制・証明する機構ではないことを明確にする。
-- Restore the English harness fallback when native planning tools are unavailable. Align canonical lifecycle, harness and reminders around existing approval scope and pausing when approval is missing; remove ambiguity that demanded repeated approval for ordinary focused edits. Clarify that startup reminders neither enforce nor prove the agent's reading.
-- 日英の生成タスク・計画・結果テンプレートも同じ代替手順へ接続。古い自動退避先だけを過去記録の保存先として案内せず、sessions一覧と記録契約から確認する。新規生成の案内を修正し、再開時の既存文書は保持する。
-- Connect generated Japanese/English task, plan and walkthrough templates to the same fallback. Locate previous work through the session listing and record contract instead of directing all history to the retired archive location. Update newly generated guidance while preserving documents on resume.
-- Windowsの補助ツール実行条件を明確化。ネイティブWindows Python・Git Bash単独では導入・更新の変更前に終了2で停止し、WSL 2内のLinux Pythonを案内する。本体の実行ファイルをLF形式で維持する `.gitattributes` を追加し、利用先の属性設定は上書きしない。
-- Clarify Windows helper requirements. Native Windows Python and Git Bash alone exit 2 before installation/upgrade changes, with guidance to use Linux Python inside WSL 2. Add source-only `.gitattributes` to keep executable files in LF format without overwriting adopter attributes.
-- Windowsランナーでの非対応環境の拒否とWSL 2・Ubuntu 24.04・一般ユーザーによる全回帰を共通品質検査へ追加。リリースも同じコミットのWindows検査成功を必要とする。日英のWindows手順に環境・改行・移行・製品実証の限界を記載する。
-- Add Windows-runner checks for unsupported native execution and full regressions under WSL 2, Ubuntu 24.04 and a non-root user to shared quality checks. Releases also require these checks on the same commit. Document environment selection, line endings, migration and product-validation limits in Japanese and English.
-- Codexのサブフォルダ起動時のhook未発見、apply_patchの新規作成形式による既存ファイル保護漏れ、Claude Codeの作業コピー移動後の記録・差分の参照先ずれを修正。通常の差分編集は維持し、解決不能な作業先や未知のpatchは未確認として扱う。
-- Fix Codex hook discovery from subdirectories, missing protection for apply_patch add/move destinations, and Claude Code records/diff checks pointing at the starting checkout after worktree changes. Preserve focused edits and report unresolved projects or unknown patch syntax.
-- 特殊な改行文字を含むファイル名でも、Codex本体と同じLF/CRLFの行分割で既存宛先を検査。Pythonの広い行分割による見逃しを実差分処理で再現し、回帰へ追加。
-- Match Codex's native LF/CRLF parsing when checking destinations containing other line-separator characters. Reproduce the missed existing-file check caused by Python's broader line splitting and add regression coverage.
-- 3製品×日英×言語フォルダ構成の実導入・healthと、言語別更新・記録保持・公式イベント形式の回帰を追加。製品の信頼設定、移行手順、POSIX対応範囲、実務未実証の限界を日英で明記。 Claude Memoryテンプレートの英訳漏れを補い、この配布パスが製品のauto memory自動読込先ではないことも明記。
-- Add real installation/health coverage across three agents, Japanese/English and both/single language trees, plus language-scoped upgrade, record-preservation and native-event regressions. Document trust, migration, POSIX scope and practical-validation limits in both languages. Complete missing English guidance in the Claude memory template and clarify that its distributed path is not the product's auto-loaded memory location.
+- 全シェル入口で子PythonのUTF-8モードと入出力をプロセス内だけに設定。設定・プロンプト・証拠・比較記録もUTF-8で読む。入力の不正UTF-8やJSONの単独サロゲートを別文字へ置換して受理せず、内容を転載せずに通知する。
+- Configure child Python UTF-8 mode and I/O within each shell process, and read settings, prompts, evidence and comparison records explicitly as UTF-8. Reject invalid UTF-8 and unpaired JSON surrogates instead of accepting substituted text, without echoing rejected input.
+- 起動・補足は製品の入力IDを検証し、意図的なAxiarch指定を除いて継承したCodex IDより優先する。既存セッションの共有タスク欠落・不正・ID不一致を未確認として通知し、旧記録を自動再生成しない。話題の補足検査は日英の既知語彙と全角表記に対応する。
+- Validate native session IDs and prefer them over inherited Codex IDs unless an intentional Axiarch override applies. Report missing, malformed or mismatched shared tasks as unassessed without regenerating records. Scope hints recognize known Japanese/English aliases and fullwidth forms.
+- 日英のロード手順・生成テンプレート・承認境界を同期。既存承認の範囲を先に確認し、計画ツールが使えない場合はMarkdownで継続する。補足の生成、製品側での受領、AIによる実読込を区別し、任意層と必須手順を混同しない。
+- Align bilingual loading procedures, generated templates and approval boundaries. Check existing authorization first and use Markdown when native planning tools are unavailable. Distinguish reminder generation, product delivery and actual reading, and keep optional layers separate from mandatory procedures.
 
-- 公開済み30版を再監査し、v1.17.0の説明を成果・互換性・移行・検証へ整理。旧版のinstaller版数、main取得、署名の導入時期、非互換minor、実証範囲、v1.15.0の新設5規則の説明漏れを訂正台帳へ記録する。タグと配布済みコードは変更しない。
-- Audit all 30 published releases, reorganize v1.17.0 around outcomes/migration/verification and record historical version, source-pinning, signing, incompatible-minor and validation issues, plus the five omitted v1.15.0 rules. Preserve tags and distributed code.
-- リリース本文の構造・日英記入・比較リンク・抽出を同じ検査へ接続。コード枠・コメントの見出しを除外し、重複・未記入・別版混入を回帰検査する。単なる非空判定では説明の不足を捉えられなかったためで、検査は意味や翻訳の十分性の証明とはしない。scripts READMEのセッション分離の導入版をv1.17.0へ訂正する。
-- Share note structure, bilingual presence, comparison-link and extraction checks; regress duplicate/empty entries, example headings and adjacent-version leakage. Nonempty extraction alone missed insufficient descriptions; the new checks are not semantic or translation proof. Correct the scripts README's session-isolation introduction version to v1.17.0.
+### 修正 / Fixed
 
-- CodexのSessionStart診断がClaude固有のforkを要求する誤判定を修正。Codexの4起動条件とClaudeの5条件を分け、日英の実health・不足条件の検出・設定を変更しないことを回帰検査する。独自matcherや既定の全件指定は保持する。
-- Fix SessionStart diagnostics incorrectly requiring Claude-specific fork coverage from Codex. Distinguish four Codex sources from five Claude sources, with bilingual real-health regressions for valid and missing sources and unchanged adopter files. Preserve custom matchers and default match-all declarations.
+- Codexのサブフォルダ起動でのフック発見と、apply_patchのAdd File／移動先による既存ファイル保護漏れを修正。空白・特殊な行区切りを含むパスも実差分処理の挙動へ合わせる。Claudeの作業コピー移動後も、現在の作業先で記録と差分を解決する。
+- Fix Codex hook discovery from subdirectories and existing-file protection for apply_patch Add File and move destinations, matching native path handling for whitespace and special line separators. Resolve Claude records and differences against the current checkout after worktree changes.
+- ClaudeのWriteが継承したCodex設定の例外許可を借りる問題を修正。両製品の許可リストではリンク・別所有者・特殊ファイル・不正文字コード等を拒否する。正当な承認済みパス、新規作成、通常の差分編集は維持する。
+- Fix Claude Write borrowing exceptions from inherited Codex settings. Align both agents' allowlist checks for linked or foreign-owned files, special files and invalid encodings while preserving valid approved paths, new-file creation and focused edits.
+- CodexのSessionStartにClaude固有のfork条件を要求する誤診断、英語版の計画ツール代替手順とClaude Memory説明の欠落、旧ロード方式を説明するコメントを修正する。
+- Fix SessionStart diagnostics requiring Claude-only fork coverage from Codex, missing English planning fallback and Claude memory guidance, and comments describing obsolete loading behavior.
+- テスト用Git保守処理が一時領域の削除と競合する不備を修正。保守終了をコマンド内で待ち、失敗時は元の例外と最大100件の残存パスを記録する。利用者のGit設定は変更せず、ファイル内容やリンク先は収集しない。
+- Fix fixture Git maintenance racing temporary-directory cleanup by waiting for maintenance within the command. Preserve the original failure and report up to 100 remaining paths without collecting file contents, following links or changing adopter Git settings.
 
-### 診断結果と再発対策 / Diagnostic outcome and regression prevention
+### 互換性と更新 / Compatibility and upgrade
 
-- Windows確認の教訓: Bashの存在だけではPOSIX Python・排他制御・ファイルシステムの前提を満たさない。変更前の環境検査、Windows実機ランナーでのLF検査、Linuxファイルシステム上のWSL 2回帰を組み合わせる。製品自身のWindows対応とAxiarchの全工程実証を混同しない。
-- Windows verification lesson: Bash availability does not establish POSIX Python, locking or filesystem support. Combine pre-mutation platform checks, LF checks on a Windows runner and WSL 2 regressions on a Linux filesystem. Product-level Windows support is not end-to-end Axiarch validation.
-- 検証の教訓: Claude由来のツール名や起動時環境変数を別製品・作業コピーへそのまま適用しない。Codexの実差分処理で既存Add Fileの上書きとパス空白の解釈を確認し、公式入力形式・現在の作業場所・実healthを組み合わせて再発を検査する。自動テストと実製品全工程の実証は分ける。
-- Verification lesson: do not assume Claude tool names or startup environment variables apply unchanged to another product or worktree. Exercise Codex's native Add File overwrite and path-whitespace behavior, then regress documented event inputs, the active directory and real health together. Separate automated tests from full product validation.
+- 更新前に差分を確認し、変更済み設定・独自Blueprint・教訓・セッション記録を保持する。[更新手順](axiarch-scripts/README.md#使い方--usage) に従い、公開後のv1.18.0を指定してdry-runし、対象を選んで適用する。旧helperしかない場合は確認済みの次版ソースを使用する。保留・競合・診断失敗は結果記録と非0終了で確認し、未反映を成功扱いしない。
+- Review a dry-run against v1.18.0 after publication and apply selected changes using the upgrade guide. Preserve modified settings, local Blueprint rules, lessons and sessions. Use reviewed new-version source when the installed helper is older; inspect result records and nonzero exits for pending changes, conflicts or diagnostic failures.
+- Windowsの補助ツールはWSL 2内のLinux PythonとLinuxファイルシステムを使用する。ネイティブWindows Python・Git Bash単独は対応済み環境ではなく、変更前に終了2で停止する。LF維持の属性は本体ソース用で、導入先の属性設定を上書きしない。
+- Run Windows helpers with Linux Python and a Linux filesystem inside WSL 2. Native Windows Python and Git Bash alone are unsupported and exit 2 before mutations. Source LF attributes do not overwrite adopter attributes.
+- 公開CLI・記録形式の破壊的変更はない。不正入力や他製品の例外に依存していた処理は拒否されるため、ガイドに沿って自製品の設定と承認範囲を確認する。既存記録の文字コード変換・ID改名・例外追加を自動で行わない。プロンプト・追加アダプター等の任意層は必要なものだけ選ぶ。
+- Public CLI and record formats have no breaking changes. Flows relying on malformed input or another agent's exceptions are rejected; review the correct agent settings and authorization using the guides. Existing records are not transcoded or renamed and exceptions are not added automatically. Install optional prompts and additional adapters only when needed.
 
-- テスト用Gitの自動保守がコミット終了後も動き、一時フォルダ削除と競合する不備を修正。Git 2.55.0で削除中の `Directory not empty` と残存するGitディレクトリを再現した。保守処理は無効化せず、テスト用コマンド内で終了まで待つ。利用者のGit設定は変更しない。
-- Fix automatic Git maintenance outliving fixture commits and racing temporary-directory cleanup. Reproduce `Directory not empty` and remaining Git directories with Git 2.55.0. Keep maintenance enabled and wait for it within fixture commands, without changing adopter Git configuration.
-- 実保守処理が終了してから戻ることを回帰テストで確認する。削除失敗は元の例外を伝え、残存パスを最大100件記録する。ファイル内容・リンク先は収集せず、CIにはGit・Python・OSの版を記録する。
-- Exercise real maintenance completion in a regression test. Cleanup failures still raise the original exception and report up to 100 remaining paths, without reading file contents or following links. Record Git, Python and OS versions in CI.
-- 検証の教訓: 異なる版での再実行成功は原因修正の証拠にならない。失敗環境の版と背景処理を照合し、修正前失敗・修正後成功を比較する。過去の失敗時には残存内容が保存されていなかったため、当時の全書き込みを事後に復元できるとは主張しない。
-- Verification lesson: a successful rerun on different versions is not evidence of a root-cause fix. Compare the failed toolchain and background work, then show failure before the correction and success afterward. The original failure did not retain directory contents, so this does not reconstruct every historical write.
+### 検証と限界 / Verification and limits
+
+- 公開前の実装コミットc68c881では、隔離実動作テスト332件をUbuntu・macOS・Windows上のWSL 2で実行し、各331件成功・対象外1件スキップ。Windowsネイティブ診断は5件中4件成功・対象外1件スキップ。ShellCheck、Markdown、日英・参照整合も成功した。版数反映後のコミットは別途同じCIで検査し、マージ後の公開はそのコミットの品質検査成功を条件とする。
+- Implementation commit c68c881 ran 332 isolated runtime tests on Ubuntu, macOS and WSL 2 on Windows, with 331 passes and one platform-specific skip each. Native Windows diagnostics passed four of five tests with one platform-specific skip. ShellCheck, Markdown and bilingual/reference checks also passed. The versioned candidate is checked separately by the same CI; publication after merge requires successful quality checks on that commit.
+- Google Antigravityのみ、従来確認した実務環境・作業の範囲で実証済み。Codex・Claude Codeは接続候補の自動回帰を検査しているが、実製品の全工程実証・動作保証ではない。フックは対応イベントの限定操作を検査し、補足の受領・実読込・意味理解や任意シェル操作までは保証しない。healthとリリース文書検査は構造の整合を調べるもので、品質・安全性・翻訳の完全性の証明ではない。
+- Only Antigravity is practically validated within the previously observed environments and tasks. Codex and Claude Code adapter regressions are not end-to-end product validation or an operation guarantee. Hooks cover bounded operations on supported events, not reminder delivery, reading, semantic understanding or arbitrary shell activity. Health and release-note checks assess structure rather than proving quality, safety or translation completeness.
+
+### 比較と関連情報 / References
+
+- [v1.17.0からの比較][1.18.0]、[変更と検査のPR #68](https://github.com/hiroyuki-miyauchi/axiarch/pull/68)、[実装コミットのCI結果](https://github.com/hiroyuki-miyauchi/axiarch/actions/runs/34835045740) を参照する。比較先タグは公開時に作成される。
+- Review the version comparison, PR #68 and implementation CI results above. The comparison's destination tag is created at publication.
+- 全30公開版の説明・配布物の再監査は [訂正台帳](RELEASE_AUDIT.md) を参照。v1.17.0等の説明訂正は本文の追記であり、この版のコード変更が旧タグに含まれることを意味しない。既存タグと配布済みコードは変更しない。
+- See the audit ledger for the review of all 30 prior published releases. Earlier release-description corrections are prose addenda, not evidence that this version's code exists in old tags. Existing tags and distributed code remain unchanged.
+
+---
 
 ## [1.17.0] — 2026-09-13
 
@@ -1322,4 +1319,4 @@ Built from hundreds of AI-assisted development sessions on Google Antigravity du
 [1.0.0]: https://github.com/hiroyuki-miyauchi/axiarch/releases/tag/v1.0.0
 
 [1.17.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.16.0...v1.17.0
-[Unreleased]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.17.0...HEAD
+[1.18.0]: https://github.com/hiroyuki-miyauchi/axiarch/compare/v1.17.0...v1.18.0

@@ -3,12 +3,19 @@
 > 検証状況の訂正: 過去のv1.15.0にある3エージェント実証済みという表現は現行の根拠としません。現在はGoogle Antigravityのみ実証済みで、Codex・Claude Code等は未実証・動作保証なしです。正本は `AXIARCH.md` §1.1。
 > Validation correction: historical v1.15.0 claims about all three agents are superseded. Only Antigravity is practically validated; Codex, Claude Code and others are unverified with no operation guarantee. See `AXIARCH.md` §1.1.
 
-> **現在の安定版 / Current Stable**: v1.17.0 Goal, Evidence & Runtime Consistency\
+> 版数とタグ参照はこのソースの公開対象版を示します。未マージのリリース準備ブランチでは未公開の場合があります。導入前に [公開済みRelease](https://github.com/hiroyuki-miyauchi/axiarch/releases/latest) を確認してください。
+> Version metadata and tag references identify this source's intended release. They may be unpublished on an unmerged release-preparation branch; check the published Release before installation.
+
+> **現在の安定版 / Current Stable**: v1.18.0 Cross-Agent, Unicode & WSL Verification\
 > **ステータス / Status**: Actively Maintained
 
 ---
 
 ## 🇯🇵 ロードマップ
+
+### ✅ v1.18.0 — 複数エージェント・Unicode・WSL検査（2026-09-15）
+
+WSL 2の実行条件とWindowsランナー検査、3製品と日英の導入回帰を追加。フックの作業先・セッションID・上書き例外の分離、Unicode入出力、ロード説明を修正した。製品の全工程実証を意味しない。更新手順と検証範囲は [v1.18.0の変更履歴](CHANGELOG.md#1180--2026-09-15) を参照する。
 
 ### ✅ v1.17.0 — ゴール・証拠・実行手順の整合（2026-09-13）
 
@@ -708,6 +715,10 @@ AGENTS.md 標準、OpenAI Codex、Claude Code Skills・Subagents・Hooks、GitHu
 ---
 
 ## 🇺🇸 Roadmap
+
+### ✅ v1.18.0 — Cross-Agent, Unicode & WSL Verification (2026-09-15)
+
+Adds WSL 2 execution guidance, Windows-runner checks and bilingual installation regressions across three agents. Fixes hook checkout/session selection, overwrite exception isolation, Unicode I/O and loading guidance. This is not end-to-end product validation. See [v1.18.0 changes](CHANGELOG.md#1180--2026-09-15) for migration and verification limits.
 
 ### ✅ v1.17.0 — Goal, Evidence & Runtime Consistency (2026-09-13)
 

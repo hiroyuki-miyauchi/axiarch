@@ -182,6 +182,6 @@ Follow Steps 1–6 in `axiarch-rules/{lang}/CRYSTALLIZATION_PROTOCOL.md`. No new
 
 ---
 
-**Last Updated**: 2026-07-24
-**Version**: v1.17.0 — Aligns goal/evidence records, session isolation, upgrade outcomes and confirmed versions, same-commit quality gates and signed publication, plus bilingual loading, references and guarantee boundaries. Connects these contracts to Harness Engineering for planning, execution, audit, evidence and approval; upgrades preserve project-specific state.
+**Last Updated**: 2026-09-15
+**Version**: v1.18.0 — Adds WSL 2 verification, multi-agent bilingual installation coverage, UTF-8 I/O and session/existing-file protection fixes. Preserve local Blueprint state and existing records during upgrades. Connects these contracts to Harness Engineering for planning, execution, audit, evidence and approval; upgrades preserve project-specific state.
 **Structure**: Domain-based subdirectories (8 initial domains; approved additions supported)

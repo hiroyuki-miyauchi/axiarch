@@ -13,6 +13,10 @@ This is the maintainer procedure for Axiarch itself, not an additional requireme
 - [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html)を適用する。v1.3.0・v1.8.0等の過去の番号付けは、今後の非互換minor公開を正当化する前例にしない。
 - Apply SemVer; historical incompatible minor releases are not precedents for future version selection.
 
+リリース準備ブランチでは対象版のメタデータ・日付・タグ参照を揃えるが、GitへのpushやPR作成を公開済みとは扱わない。版見出しの日付はリリース対象日の記録で、GitHubのpublished_atとは別に確認する。マージ・タグ・公開の承認範囲を確認し、公開前の導入は既存の公開タグまたは明示的に選んだ候補コミットを使う。
+
+Release-preparation branches align the target version, date and tag references; a push or PR is not publication. The section date records the intended release date and is checked separately from GitHub's published_at. Confirm authorization for merging, tagging and publication. Before publication, installations use an existing published tag or an explicitly selected candidate commit.
+
 ## CHANGELOGに必要な内容 / Required changelog content
 
 v1.17.0以降の公開節は次の見出しを使用する。追加・変更・修正が無い欄は日英で「該当なし」と説明できる。Unreleasedは準備中の記録なので、この完成書式を要求しない。旧版の書式は改変せず、訂正を追記として区別する。

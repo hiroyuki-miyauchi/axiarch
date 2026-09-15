@@ -12,7 +12,7 @@ set -euo pipefail
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 export PYTHONDONTWRITEBYTECODE=1
 
-AXIARCH_VERSION="1.17.0"
+AXIARCH_VERSION="1.18.0"
 REPO_URL="https://github.com/hiroyuki-miyauchi/axiarch"
 if [[ "$AXIARCH_VERSION" == *"-dev"* ]]; then
   DEFAULT_AXIARCH_REF="heads/main"
