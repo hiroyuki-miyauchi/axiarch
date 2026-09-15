@@ -625,6 +625,14 @@ Literal comment tokens in code examples do not hide later lessons or links, and 
 Use the commands above for local reference checks and the full regression suite. Checks cover local links/headings, bilingual paths, per-folder prefix collisions, obsolete validation claims, and canonical references and known unconditional-wait/full-rule-loading instructions inside fenced prompts. They do not certify external-link availability or semantic correctness.
 
 
+文書参照検査はAxiarch本体の管理者向けです。Markdownと `llms.txt` / `llms-full.txt` の本文はUTF-8として読み、同じ実行中は読み取り結果を再利用します。文書と祖先フォルダのシンボリックリンク、ハードリンクされた文書、特殊ファイルを本文読込前に拒否し、ライセンス比較も同じ読取境界を使います。不正UTF-8や読取不能は本文・外部リンク先を転載せず非0終了で通知し、FIFOの書込側を待ちません。元ファイルの変換・削除は行わず、必要なら確認済みの通常ファイルから配布用ソースを準備してください。
+
+Document reference checks are maintainer tools for Axiarch itself. Markdown and llms.txt/llms-full.txt bodies are decoded as UTF-8 and reused within the inspection. Reject symbolic links in documents or ancestor directories, hardlinked documents and special files before reading their contents; notice comparisons use the same boundary. Invalid UTF-8 or unreadable inputs produce nonzero diagnostics without echoing source contents or external link destinations, and FIFOs do not wait for a writer. Sources are not converted or deleted; prepare distribution source from reviewed regular files when necessary.
+
+CLIの標準出力・標準エラーはプロセス内でUTF-8に揃えます。Pythonのファイル名処理まで非UTF-8に設定した環境で解釈不能な名前がある場合は終了2で案内し、`PYTHONUTF8=1 python3 tests/check_documentation.py` で再検査できます。本文の構造・参照異常は終了1です。この検査は外部URL全体の到達性、意味理解、同権限プロセスによる任意の並行書換まで隔離・保証するものではありません。利用先の必須の導入手順を追加しません。
+
+The CLI configures stdout and stderr as UTF-8 within its process. If a non-UTF-8 Python filesystem configuration cannot represent a filename, exit 2 explains how to retry with `PYTHONUTF8=1 python3 tests/check_documentation.py`; document/reference problems exit 1. This does not establish external URL availability, semantic understanding or isolation from arbitrary concurrent writes by equally privileged processes, and adds no mandatory adopter setup step.
+
 旧教訓ログは更新時に上書きしません。新しい診断でTarget Folder不足・古い日付・認識できない旧形式が出た場合は、元の内容と日付を保持して分類先を補完するか、CRYSTALLIZATION_PROTOCOLに沿って昇華します。既存の引用テンプレートは実教訓として数えません。新フォルダは既存分類で収まらない場合に承認範囲を確認し、空フォルダ用.gitkeepは追加しません。
 
 Existing lesson logs are preserved during upgrades. Resolve missing Target Folder tags, age triggers or unrecognized legacy formats by retaining original content/dates and classifying or promoting the actual lessons through CRYSTALLIZATION_PROTOCOL. Quoted templates are not real entries. Additional folders follow the approved scope; no .gitkeep is needed.
