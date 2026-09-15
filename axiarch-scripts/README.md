@@ -573,6 +573,14 @@ Fresh installation leaves the target unchanged until all input is available; EOF
 
 An explicit upgrade `--dry-run` remains read-only regardless of option order or interactive answers. `--lang en --with-prompts` selects English prompts and the shared README without deleting or updating Japanese files. Confirmed versions cover only the selected scope.
 
+更新の確定時には、`UPDATE` と `UNCHANGED` に記録された配布ファイルを更新元と再照合します。診断中などに内容が変わった場合は `REVIEW changed-before-finalization` を結果JSONへ追加し、適用をpartial、診断が成功していれば終了3とします。消失・リンク化などで照合できない場合は `APPLY-FAIL verification-unavailable` と適用failed・終了5を記録します。診断結果は別に保持します。いずれも確認済み版数を進めず、不一致の内容を次回更新の比較元ハッシュへ登録しません。一致した他ファイルの適用と比較元は保持します。
+
+At upgrade finalization, recheck distribution files recorded as `UPDATE` or `UNCHANGED` against the source. Changed content adds `REVIEW changed-before-finalization` to result JSON, marks application partial and returns exit 3 when diagnosis passed. Missing files, symlinks or other unavailable comparisons add `APPLY-FAIL verification-unavailable`, mark application failed and return exit 5. Diagnosis remains a separate result. Neither case advances the confirmed version or registers mismatched bytes as a baseline for later updates; successful matching files and their baselines remain applied.
+
+結果JSONの `actions` / `pending` / `failed` は確定時照合の所見も含み、コピー時の `actions.log` より後の判定です。原本・バックアップ・差分を確認し、承認範囲で復旧してから再実行してください。診断コマンドは読み取り専用に保つことを推奨します。この照合はファイル単位の観測であり、全ファイルの同時確定、更新元の真正性、照合後の別プロセスによる書換を保証しません。
+
+Result JSON `actions` / `pending` / `failed` includes finalization findings made after the copy-time `actions.log`. Review originals, backups and differences, restore within the authorized scope and retry. Keep diagnostic commands read-only where possible. Comparisons observe individual files; they do not establish an atomic all-file snapshot, source authenticity or protection from another process changing files after verification.
+
 言語・製品の追加は、配布対象の選択、設定の適用、固有Blueprintの準備、応答言語と任意コマンドの切替を区別します。中核ファイルのレビュー待ちによる診断失敗からの復旧を含め、[互換性・移行手順](AGENT_COMPATIBILITY.md) を参照してください。
 
 Adding a language or agent separates distribution selection, configuration application, local Blueprint preparation, response language and optional command regeneration. See the [compatibility and migration guide](AGENT_COMPATIBILITY.md), including recovery when pending core files cause diagnosis to fail.
