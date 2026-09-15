@@ -51,6 +51,8 @@ Building on v1.17.0's goal, evidence and session management, this minor release 
 
 ### 修正 / Fixed
 
+- 任意Claudeコマンドの生成物判定で、不正UTF-8を置換して未編集扱いにし、破損した既存ファイルを再生成・削除しうる保護漏れを修正。置換なしで照合し、不正な既存生成物は保持して終了3とする。日英の再生成・clean・プレビュー・正常なUTF-8・編集済みファイル・確認後の再実行を隔離環境で検査する。
+- Fix optional Claude command ownership checks treating altered invalid UTF-8 as unmodified generated output after replacement, allowing regeneration or deletion. Compare without substitution and preserve invalid existing generated files with exit 3. Cover bilingual regeneration, cleanup, previews, valid UTF-8, edited files and retry after review in isolated tests.
 - 文書の不正URL・NUL・循環参照で検査が例外終了する問題と、不正UTF-8のURLを別文字へ置換して存在確認を通す問題を修正。後続参照の検査を継続し、診断中の制御文字とGitHubのログ命令記号を表示用へ変換する。正常な日英参照と既存の読取保護を回帰検査し、導入先の実行処理は変更しない。
 - Fix documentation checks aborting on malformed URLs, NULs and cyclic references, and incorrectly matching a different file after replacing invalid UTF-8 in URLs. Continue checking subsequent references and escape control characters and GitHub log command markers in diagnostics. Add regressions for valid multilingual references and existing read protections without changing adopter runtime behavior.
 - 管理者向け文書検査がリンク先の外部文書を読む問題、FIFOで待ち続ける問題、OS既定の文字コードで日英文書を読めない問題を修正。通常のUTF-8ファイルを安全に読み、リンク・特殊ファイル・不正文字コードを本文の転載なしで通知する。日本語の診断出力と、ファイル名の文字コードが非対応の場合の再検査手順も整備する。隔離した異常系回帰を追加し、導入先の実行処理は変更しない。

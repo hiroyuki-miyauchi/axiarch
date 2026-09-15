@@ -57,7 +57,12 @@ def write_bytes(path, content, mode=0o644):
 
 
 def owned(content):
-    text = content.decode('utf-8', errors='replace')
+    # Lossy decoding can make altered bytes match an earlier generated hash.
+    # Unreadable existing commands must remain outside the replacement plan.
+    try:
+        text = content.decode('utf-8')
+    except UnicodeDecodeError:
+        return False
     lines = text.splitlines(keepends=True)
     hashes = [line for line in lines if line.startswith(HASH_KEY)]
     if not text.startswith('---\n') or len(hashes) != 1 or '\n' + MARKER + '\n' not in text:

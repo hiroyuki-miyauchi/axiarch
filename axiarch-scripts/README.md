@@ -581,6 +581,10 @@ Adding a language or agent separates distribution selection, configuration appli
 
 Optional command generation uses `axiarch-scripts/axiarch_setup.py` through `axiarch-scripts/axiarch-prompts-install.sh` and points only to installed canonical files. Regeneration/cleanup changes only unmodified generated output. Custom, edited or legacy files are preserved with exit 3; invalid arguments exit 2 and a busy target exits 6. Install, upgrade and generation share a cooperative target lock and atomic per-file writes, not an all-files rollback transaction or exclusion of unrelated direct writers.
 
+生成物判定はUTF-8のバイト列を置換せずに読み、生成時のハッシュと照合します。不正UTF-8の既存ファイルを未編集の生成物とは認めません。生成マーカーが残る破損ファイルがあれば、再生成・`--clean`・各`--dry-run`とも終了3で全変更を保留し、本文は通知へ転載しません。原本を保持し、元の文字コード・編集内容を確認してレビュー済みのファイルを戻すか、利用先の承認範囲で別名へ退避してから再実行してください。正常なUTF-8の置換文字（U+FFFD）そのものは禁止せず、自動変換・削除もしません。ハッシュは内容の変更検査であり、署名や作成者の権限の証明ではありません。
+
+Generated-output checks decode UTF-8 bytes without substitution before comparing the recorded hash. Invalid UTF-8 never qualifies as unmodified generated output. A damaged file retaining the generated marker stops regeneration, `--clean` and their `--dry-run` variants with exit 3 before any changes; diagnostics do not echo file contents. Preserve the original, review its encoding and edits, then restore a reviewed file or move it aside within the adopter's authorization before retrying. A valid UTF-8 replacement character (U+FFFD) is allowed; files are not automatically transcoded or deleted. The hash checks content changes, not signatures or author authorization.
+
 ---
 
 ## 関連ドキュメント / Related Documentation
