@@ -80,7 +80,7 @@ The task lock must be a regular file owned by the current execution user with a 
 
 ## Runtime artifact protection
 
-Upgrade finalization rechecks updated and unchanged distribution files against the source; changes during diagnosis do not become confirmed versions or update baselines. See “Setup and optional generation outcomes” in `axiarch-scripts/README.md` for pending/unavailable results and recovery.
+Install and upgrade finalization rechecks distribution files against the staged payload or update source; changes during diagnosis do not become confirmed versions or update baselines. See “Setup and optional generation outcomes” in `axiarch-scripts/README.md` for pending/unavailable results and recovery.
 
 The upgrade shell's `check-paths` and Python helper's `copy` apply the same preflight to the selected source, adopter and base trees. Reject control characters, symlinks, special files, reserved paths and name aliases before copying. Copy-time I/O failures return 5, while earlier successful copies remain. Use `axiarch-scripts/axiarch-upgrade.sh` for the overall lock, protection policy, diagnosis and outcome records. Internal `copy` exit 0 alone does not mean the upgrade is complete; the shell's aggregation/finalization handles pending REVIEW and TYPE-CONFLICT outcomes.
 

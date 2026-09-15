@@ -51,6 +51,8 @@ Building on v1.17.0's goal, evidence and session management, this minor release 
 
 ### 修正 / Fixed
 
+- 初期導入でも診断後に配布物を再照合し、変更・消失・リンク化したファイルがあれば版数を確定しない。診断結果と保留・失敗を分離し、一致するファイルだけ比較元へ残す。既存の同内容ファイル、独自変更の後続更新での保持、復旧、診断失敗との併発を隔離回帰で検査する。
+- Reconcile fresh-install payloads after diagnosis as well: changed, missing or linked files leave the version unconfirmed. Separate diagnostic results from pending/failed application and retain only matching baseline hashes. Isolated regressions cover identical pre-existing files, local-change preservation in later upgrades, recovery and concurrent diagnostic failure.
 - 更新後の診断中に変更された内容を、正常な配布物・次回更新の比較元として登録する不備を修正。コピー済み／変更なしのファイルを確定前に更新元と照合し、不一致は保留、消失・リンク化など確認不能は失敗として記録する。確認済み版数と既存比較元を保持し、独自変更の後続更新での保持・復旧・再実行を回帰検査する。
 - Fix finalization accepting content changed during post-upgrade diagnosis as a completed distribution and future update baseline. Recheck updated and unchanged files against the source; record mismatches as pending and unavailable comparisons, including missing files or symlinks, as failures. Preserve confirmed versions and previous baselines, with regressions for retaining local edits in later upgrades, recovery and retry.
 - 任意Claudeコマンドの生成物判定で、不正UTF-8を置換して未編集扱いにし、破損した既存ファイルを再生成・削除しうる保護漏れを修正。置換なしで照合し、不正な既存生成物は保持して終了3とする。日英の再生成・clean・プレビュー・正常なUTF-8・編集済みファイル・確認後の再実行を隔離環境で検査する。
