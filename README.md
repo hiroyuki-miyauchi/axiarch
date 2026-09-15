@@ -755,8 +755,8 @@ The goal extends beyond personal use: to contribute to the global adoption of AI
 
 ## 実行記録・更新結果・保証範囲 / Runtime evidence, upgrade outcomes and guarantees
 
-この節の追加実装はv1.17.0に含まれます。既存のv1.16.0導入先は自動更新されません。v1.17.0のソースからdry-runで差分を確認し、固有状態を保持して更新してください。
-The additions in this section are included in v1.17.0. Existing v1.16.0 adopters are not updated automatically; review a dry-run using the v1.17.0 source and preserve project-specific state when applying changes.
+記録・更新結果の基盤はv1.17.0で導入しました。この節は現在のソースを説明し、v1.18.0のWindows実行条件・エージェント別保護等の修正も含みます。版ごとの差分は [CHANGELOG.md](CHANGELOG.md) を確認してください。旧導入先は自動更新されません。公開済みの更新先を選んでdry-runし、固有状態を保持して適用してください。
+The record and upgrade-outcome foundation was introduced in v1.17.0. This section describes the current source, including v1.18.0 Windows execution requirements and agent-specific protection fixes. Consult the changelog for version-specific changes. Older adopters are not updated automatically; select a published target, review a dry-run and preserve project-specific state when applying changes.
 
 ゴール・現在値の内容は `axiarch-rules/{lang}/universal/core/300_goal_and_current_state.md`、保存と検査の手順は [日本語の実行契約](axiarch-harness/ja/TASK_STATE_PROTOCOL.md) を正本とします。自律距離D1–D5、成熟度M1–M5、ハーネスH0–H4（旧L0–L4）は別の軸で、数値の自動対応はありません。H0の読み取りに記録作成や完了検査を強制せず、H2以上で準備・完了を分けて検査します。
 
@@ -765,7 +765,8 @@ Goal/current-state content is governed by `axiarch-rules/{lang}/universal/core/3
 | 機構 / Mechanism | 実際にできること / Actual boundary |
 |:--|:--|
 | PreToolUse `Write` | 対応runtimeがhookを発火・尊重する場合、既存pathへのWriteを拒否。新規作成は許可。設定済みallowlistは例外 / Reject existing-path Write on runtimes that invoke and honor the hook; new paths and configured allowlists are allowed |
-| Shell・Edit・外部API / Shell, Edit, external APIs | Write hookの対象外。これらの操作全体を遮断しない / Outside the Write hook; not comprehensively blocked |
+| PreToolUse `apply_patch`（Codex） | v1.18.0でAdd File・Move toの既存宛先検査を追加。対応イベントを製品が発火・尊重する場合に限定。通常のUpdate差分は許可し、未知の形式は未確認として拒否 / v1.18.0 adds checks for existing Add File and Move to destinations when the product invokes and honors the event; focused Update hunks remain allowed and unknown syntax is rejected as unassessed |
+| Shell・Edit・外部API / Shell, Edit, external APIs | 上記のWrite／apply_patch検査の対象外。これらの操作全体を遮断しない / Outside the Write/apply_patch checks above; not comprehensively blocked |
 | SessionStart・補足 / SessionStart and reminder | 記録先・規則への誘導、キーワードによる見直し候補。遵守・理解はAIに依存 / Evidence/rule routing and heuristic review hints; understanding and compliance depend on the agent |
 | PostToolUse差分検出 / Diff guard | 編集後の閾値検出。既に行われた編集の取消しを保証しない / Post-edit threshold signal, not guaranteed rollback |
 | health・完了検査 / Health and completion | 構造・記録・ハッシュ・時刻の整合。意味理解・証拠の十分性・全操作の安全性は保証しない / Structural and recorded consistency, hashes and timestamps; no proof of understanding, evidence sufficiency or all-operation safety |

@@ -427,9 +427,9 @@ bash axiarch-scripts/axiarch-diff-guard.sh
 
 ## hook宣言の静的検査 / Static hook declaration checks
 
-v1.17.0のhealthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
+hook宣言の検査基盤はv1.17.0で導入しました。以下はv1.18.0の製品別起動条件の修正を含む現行仕様です。healthは `axiarch-scripts/axiarch_inspect.py --mode hooks` を使い、Check 3・11・12・15で両方の導入済み設定を検査します。イベント、対象操作、`type=command`、同期の呼出し先を同じ宣言内で結び付けます。独自hookが先頭にあっても、その後のAxiarch宣言を確認します。両設定がない場合は任意層の未導入として扱います。
 
-Health in v1.17.0 uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
+Hook declaration checking was introduced in v1.17.0. The following describes current behavior, including v1.18.0 agent-specific startup-source fixes. Health uses `axiarch-scripts/axiarch_inspect.py --mode hooks` in Checks 3, 11, 12 and 15 for both installed configurations. Each event, matched operation, `type=command` and synchronous script invocation must belong to the same declaration. Additional hooks before Axiarch hooks do not hide them. If neither configuration exists, the optional layer is treated as not installed.
 
 対応する形式は、配布スクリプトの直接実行または `bash` による単一スクリプト呼出し（shell文字列またはcommandとargsの形式）です。対象操作は省略・空・全件指定、単純な名前と `|` の組合せ、これらを括弧やアンカーで囲んだ形式を確認します。SessionStartはCodexではstartup・resume・clear・compact、Claude Codeではこれらにforkを加えた宣言を確認します。複雑な正規表現、inline処理、独自wrapper、条件付き・非同期の必須呼出しは、実行して確かめず未確認とします。
 

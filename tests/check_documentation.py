@@ -1,4 +1,4 @@
-"""Offline source checks for local Markdown references and bilingual paths.
+"""Offline reference checks for Markdown, AI text entrypoints and bilingual paths.
 
 Checks inline/image/reference links, concrete inline rule paths and ATX headings used here, not a full
 Markdown renderer, external link availability or correctness of rule meaning.
@@ -41,6 +41,12 @@ def anchors(text):
 
 def source_documents(root):
     yield from sorted(root.glob("*.md"))
+    # These published AI entrypoints contain Markdown links and rule paths too.
+    # Do not glob arbitrary .txt files: logs and examples are not guidance.
+    for name in ('llms.txt', 'llms-full.txt'):
+        path = root / name
+        if path.is_file():
+            yield path
     for folder in ("axiarch-rules", "axiarch-harness", "axiarch-prompts", "axiarch-scripts"):
         yield from sorted((root / folder).rglob("*.md"))
 

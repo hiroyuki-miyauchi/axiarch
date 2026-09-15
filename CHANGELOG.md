@@ -51,6 +51,8 @@ Building on v1.17.0's goal, evidence and session management, this minor release 
 
 ### 修正 / Fixed
 
+- 現行READMEのWindows・保護説明を一括でv1.17.0の機能とする記述を修正し、Codexのapply_patch検査範囲を表へ追加。AI向け日英案内の英語README見出しリンクと省略した規則パスを修正し、llms.txt／llms-full.txtもローカル参照検査へ含める。欠落先・古い見出し・具体的な規則パスを回帰検査する。
+- Correct current Windows/protection guidance incorrectly attributed wholesale to v1.17.0 and add Codex apply_patch coverage to the boundary table. Fix the English README heading link and abbreviated rule paths in AI-facing bilingual guidance, and include llms.txt/llms-full.txt in local reference checks with regressions for missing targets, stale headings and concrete rule paths.
 - Codexのサブフォルダ起動でのフック発見と、apply_patchのAdd File／移動先による既存ファイル保護漏れを修正。空白・特殊な行区切りを含むパスも実差分処理の挙動へ合わせる。Claudeの作業コピー移動後も、現在の作業先で記録と差分を解決する。
 - Fix Codex hook discovery from subdirectories and existing-file protection for apply_patch Add File and move destinations, matching native path handling for whitespace and special line separators. Resolve Claude records and differences against the current checkout after worktree changes.
 - ClaudeのWriteが継承したCodex設定の例外許可を借りる問題を修正。両製品の許可リストではリンク・別所有者・特殊ファイル・不正文字コード等を拒否する。正当な承認済みパス、新規作成、通常の差分編集は維持する。
