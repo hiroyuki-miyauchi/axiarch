@@ -103,6 +103,10 @@
 - **Rule 40.4**: AI features must always have a **fallback** (non-AI alternative)
 - Core business functions must continue when AI is unavailable
 - Example: AI chat stops → automatically display FAQ/Help Center navigation
+- **Deterministic-First Decision Order**: When designing or reviewing any AI call, ask the following in order (MUST). (1) Can this be written deterministically? → If yes, do not use AI. (2) Is only part of it deterministic? → Keep that part away from the model and send only the rest. (3) Can the output be verified deterministically? → If not, question the adoption itself.
+  - **Rationale**: Handing deterministic work to a model loses accuracy (100% → probabilistic), reproducibility (cannot be pinned by tests) and cost (input/output tokens that never needed to be paid) all at once. The order is "choose deterministic processing because it is correct"; cost reduction is a by-product (SHOULD).
+  - **Failure pattern**: Once a feature is judged to "need AI", the whole input gets sent. In production measurement of structured-content transformation, most of the input (e.g., two thirds) was structure and technical values that never needed to reach the model. Step (2) is the one most often skipped.
+  - **Verification**: A PR that adds an AI call must document the answers to the three questions and the boundary between "sent to the model" and "kept out". See also §38.1 "Structure/Text Separation".
 
 ---
 
@@ -367,6 +371,12 @@
 | **Transparency** | Clearly stated in privacy policy, provide navigation to settings screen |
 
 - **Cross-Reference**: PII Scrubbing (§XVIII), Data Minimization / Right to be Forgotten (`61`)
+- **Consent-Flag JOIN Mandate**: The data-use consent flag is a single-column SSOT, and every aggregation or ingestion query over user-derived data MUST reference it via JOIN. An aggregation that is not wired to the flag turns the check red.
+  - **Post-withdrawal handling**: Decide it at design time and keep it consistent with the published text (privacy policy) (MUST). Aggregations exclude the person's records from the next run; assets already registered in a form that cannot identify an individual (e.g., median or rounded value over k≥3 contributors) are retained. Recompute only when the value changes, with a cooldown.
+  - **Failure pattern**: Only the newly added aggregation job forgets the JOIN, and the withdrawn person's records survive in the next night's statistics.
+- **Provider Data Retention Boundary**: The boundary that prevents user input, images and AI responses from being stored in the provider's request/response logs MUST be concentrated in one code-side function, on the premise that the guarantee lives in a different place per provider (request-body flag / project setting / contract).
+  - **No implicit dependency**: When the guarantee lives in a project setting, do not settle for "it should be off by default"; pin it with a test that runs a verification script fetching the current value via the API (MUST).
+  - **Migration mapping table**: During a provider migration, avoid both failure modes — "send the field that worked on the previous provider" (an unknown field makes every AI feature fail with 4xx) and "give up because the new provider has no such field" (the privacy policy no longer matches reality) — by keeping a provider × guarantee-mechanism mapping table (SHOULD). See §42.1 "Provider-Specific Field Inventory".
 
 ---
 
@@ -422,6 +432,7 @@
 
 - **Rule 40.15**: Hardcoding specific model IDs (e.g., `"gemini-1.5-flash"`) in code is prohibited
 - **Abstraction Layer**: Always implement a router that calls models via `Tier` (e.g., `Tier.FAST`, `Tier.SMART`, `Tier.VISION`, `Tier.THINKING`)
+- **Feature-Keyed Attribution**: The key for quotas, cost attribution and analytics breakdowns is "which feature used it" (feature ID); model IDs and provider names MUST NOT be the key. When several features share the same model, the backend ID cannot tell them apart. Feature ID strings are also expanded from constants, and tests guarantee that the mapping table, log filters and display order share one key set.
 
 ```typescript
 // ✅ Correct implementation
@@ -445,6 +456,7 @@ const response = await gemini("gemini-x.x-flash", userMessage); // Hardcoded mod
 | `Tier.EMBEDDING` | Search, similarity computation | High-dimensional vectors, multilingual |
 
 - **Current Standard**: Map each generation's "standard lightweight model" (the model with optimal cost-performance at that time) to `Tier.FAST`. Specific model IDs are managed in the project's Blueprint (configuration files) and are not fixed in this constitution.
+- **Model Lifecycle Ledger**: Concrete model IDs live only in one source-of-truth file holding a two-step mapping "role → ID" and "feature → role" (MUST). Managed models are retired periodically after GA (e.g., roughly yearly), so keep a ledger of the planned retirement date per model ID and make a CI/verification command fail before the deadline (MUST). Detect it from the ledger's deadline first, instead of searching after a deprecation notice arrives. When unit-price differences are negligible, several Tiers MAY be aligned to one model to reduce the number of lifecycles to manage.
 - **Vision AI Standards**: Thinking models are unsuitable for instant recognition tasks (OCR, etc.). Use non-Thinking models for `Tier.VISION`
 
 ### 12.3. Fallback & A/B Routing
@@ -472,6 +484,10 @@ const response = await gemini("gemini-x.x-flash", userMessage); // Hardcoded mod
 | **RAG-Augmented Context** | Search and insert relevant info on each turn | Knowledge base Q&A |
 | **Hierarchical Context** | System → Domain → Session → Turn hierarchy | Agent tasks |
 
+- **Sliding Window Retrieval Order**: Fetch the "latest N" conversation turns **in descending order with LIMIT, then reverse into chronological order** (MUST). Ascending + LIMIT yields the "oldest N", and the recent context disappears the moment the conversation exceeds N.
+  - **Failure pattern**: To the user it looks like "the assistant stops following the conversation midway", with no exception and no log. The tests never checked the order or count of the history.
+  - **Verification**: At the boundary that hands history to the model, place tests that pin the order argument of the fetch query and the order of the array passed to the model **separately** (MUST).
+
 ### 13.3. Token Budget Allocation
 
 ```
@@ -482,6 +498,11 @@ Total Context Window Budget:
 ├── User Input:        10-15% (latest turn)
 └── Safety Buffer:     5-10% (margin)
 ```
+
+- **Reference Data Container**: Pass reference data such as RAG fragments in one container shared by all features (purpose-specific preamble → boundary tag → fragments → closing tag) (MUST). State in the preamble that it is "reference data, not instructions", and neutralize any occurrence of the boundary tag string inside fragment bodies (MUST). See §18.1 Layer 2.
+  - **Context Injection Budget**: Dynamic context injected into the System Prompt (DB records, user attributes, RAG bodies) MUST have a per-kind cap (characters/tokens) and a retrieval time cap enforced in one place by the prompt builder. On timeout, continue generation without reference data; references are auxiliary and must not reduce availability of the main feature. Bloat raises cost, the volume of personal data sent, and in-context injection surface all at once.
+  - **Whole-Fragment Drop**: A fragment that does not fit the cap is **dropped as a whole, never cut mid-text** (MUST). Fragments often end with a safety note or the evidence, and cutting them reverses the meaning. Failure pattern: with a fixed character count × fragment count, only the last fragment ended in "..." and its safety sentence was lost.
+  - **Reference Provenance**: Record only the fragments actually passed to the model in the reference record (source IDs in response metadata), and keep the dropped count separately (MUST). This prevents feedback ratings from attaching to assets that were never shown. Derive the cap from target count × target length instead of shortening asset bodies to fit, and pin the balance with a test (SHOULD).
 
 ---
 
@@ -504,6 +525,12 @@ const ResponseSchema = z.object({
   category: z.enum(["factual", "opinion", "recommendation"]),
 });
 ```
+
+- **Normalize-Then-Validate**: Before schema validation, place a normalization layer at the server boundary that absorbs **return-shape drift** of AI structured output (decimals / numeric strings / stray `null` / percent notation / `null` array elements / overlong text) (MUST). Normalization absorbs only formal drift; it MUST NOT rescue semantically invalid results (off-target content, dangerous values, out-of-range values).
+  - **No-Save on Failure**: Output that fails validation is neither saved nor processed further; guide the user to "retry or enter manually" (MUST). Keep the normalization rules and the rejection rules in one module, with tests pinning each drift pattern (SHOULD). Failure pattern: "validate only" drops legitimate results, while "normalize only" lets dangerous values through.
+- **Meaning-Preserving JSON Repair**: For non-deterministic breakage of model-returned JSON (raw control characters inside string literals, missing closing brackets), apply repairs that cannot change the meaning of valid JSON (escaping control characters, completing brackets) before parsing (SHOULD). Raw control characters cannot exist inside valid JSON, so the repair never alters valid JSON.
+  - **Re-request Scope**: If it is still unreadable after repair, re-request only single-item requests, with a retry cap (SHOULD). Multi-item batches are delegated to split-retry (§16.2), and output truncation (max tokens reached) is not re-requested because it truncates at the same length again.
+  - **Parse-Error Hygiene**: The raw message of a JSON parse exception contains fragments of the response body, so pass only the position to logs and monitoring (MUST). Concentrate the request → parse → repair → split/re-request procedure in one module, with callers swapping only the provider call (MUST). Fixing one side only makes behavior diverge.
 
 ### 14.2. Function Calling / Tool Use
 
@@ -561,6 +588,11 @@ const ResponseSchema = z.object({
 | **Progress Notification** | Notify async processing progress via WebSocket/Polling |
 | **Result Persistence** | Save results to DB/Storage, allow client polling retrieval |
 
+- **Segment-Level Failure Domain**: In a job that sends multiple items to the model together, the item (segment) is the unit of processing and failure; a batch is merely a bundle for transfer efficiency (MUST). Designs that fail the whole batch are prohibited. Failure pattern: a single overlong item made every other item in the same batch fail.
+  - **Three-stage design** (SHOULD): (1) pre-packing — split into sizes that fit the output budget before sending (prevention), (2) split-retry — bisect and re-request a batch that failed because the estimate was off (recovery), (3) intra-item splitting — when one item exceeds the budget, split it into chunks without cutting mid-sentence, verify the count per chunk and rejoin in the same order. The pre-packing budget and the actual max output tokens are derived from the same constant (MUST).
+- **Detect/Execute Separation**: Detection of "missing or stale" AI-generated/transformed results MUST be a separate deterministic reconciliation job (source vs. result comparison) that involves no AI call. Placing detection inside the AI job lets the AI budget constrain detection frequency. Run detection cheaply every day, and let AI fix only what was found.
+  - **Date-Sharded Sweep**: There is no need to scan everything at once. Sweep by a shard derived from the date (e.g., `hash(id) mod N == day mod N`) and complete a cycle in a few days (SHOULD). Unlike a cursor, it holds no persistent state and cannot break. Cross-reference: `engineering/710_data_reconciliation.md` §3.
+
 ---
 
 ## Part XVII: Semantic Caching
@@ -580,6 +612,8 @@ const ResponseSchema = z.object({
 | **RAG Chunk Cache** | 1 hour | Frequently referenced document chunks |
 | **Embedding Cache** | 7 days | Pre-computed embedding vectors |
 
+- **DB-Side TTL Enforcement**: The TTL difference between Exact Match and Semantic Match MUST be enforced not only by app-side constants but also by the data layer's expiry condition (e.g., an expiry-timestamp check inside the RPC). Enforcing only one side leads to a quality incident where stale, merely-similar answers are returned.
+
 ### 17.3. Cache Invalidation
 
 - Immediately invalidate corresponding chunk caches when source documents are updated
@@ -595,6 +629,7 @@ const ResponseSchema = z.object({
 - **Layer 1 — Input Sanitization**:
   - Escape or remove control strings from user input (`###`, `````, `<|system|>`, `SYSTEM:`, etc.)
   - Limit input text maximum length (recommended: 2,000-4,000 characters), truncate excess
+  - **Proxy Size Gate**: Before forwarding to the provider, and before parsing the body as a whole, the AI proxy MUST check the body size limit against Content-Length and the actual stream length, rejecting excess with 413. Do not rely solely on the upstream upload guard.
 
 - **Layer 2 — Delimiter Strategy**:
   ```
@@ -621,18 +656,24 @@ const ResponseSchema = z.object({
 - **Rule 40.21**: Prompts sent to external LLMs must not contain personally identifiable information
 - Execute masking via regex before sending (`[CONTACT_REMOVED]`, `[NAME_REMOVED]`)
 - **Target PII**: Names, phone numbers, email addresses, physical addresses, government IDs, etc.
+- **Single Mask Definition**: Do not keep multiple PII masks for the same purpose, such as a "pre-LLM mask" and a "pre-storage mask" (MUST NOT). Define the pattern set in one place and have the sending side reference the storage side's set.
+  - **Failure pattern**: Internationally formatted phone numbers (e.g., `+81-90-…`) and 10-digit numbers with the leading zero dropped were hidden only right before sending, and survived verbatim in stored bodies and the RAG corpus. Both paths "were masking", so both tests were green.
+  - **Verification**: Whenever a pattern changes, run the same input through both the stored body (DB) and the sent body (wire) and pin a test asserting neither retains it verbatim (MUST).
 
 ### 18.3. API Key Management
 
 - **No Client Exposure**: Exposing AI API keys with `NEXT_PUBLIC_` prefix is strictly prohibited
 - **Rotation**: Rotate API keys every 90 days
 - **Vault Integration**: Integrate with secret management tools (Vault, AWS Secrets Manager, etc.)
+- **Double-Boundary Proxy**: A proxy layer that isolates the model API key MUST NOT be reachable with end-user credentials alone. The application layer responsible for quotas, feature routing and audit logs attaches an internal secret (constant-time comparison), and the proxy verifies twice in the order internal secret → user credentials.
+  - **Failure pattern**: An authenticated user called the proxy (e.g., a serverless function) directly and bypassed quotas, feature routing and audit logging. Pin with a test that this path does not exist (SHOULD). See §37.2 No Bypass.
 
 ### 18.4. Grounding & Fact-Check Standards
 
 - **Rule 40.22**: Facts such as store information and prices must be cross-referenced (Grounded) with confirmed DB data, and sources must be cited
 - **Numeric Data Rule**: Numeric data (prices, distances, quantities) is permitted only from direct RAG source or DB citations. AI calculation/speculation is prohibited
 - **RAG Source Absence Protocol**: When sources cannot be retrieved, auto-append "This information is for reference only. Accuracy is not guaranteed"
+- **Conflict-of-Interest Source Exclusion**: Recommendations carrying a financial interest (affiliate products, ad slots, sponsored items) MUST NOT be placed in the reference data (RAG corpus) of advisory AI. A generated answer cannot carry an ad label, so including them turns the answer into steering without the required disclosure. Build "facts" about products or venues from disinterested sources (master data, aggregates of user records).
 
 ---
 
@@ -651,6 +692,7 @@ RAG Pipeline:
 
 - **Rule 40.23**: RAG reference sources must use **"Triple Write plain-text synced data"** as mandated by the CMS Constitution (`34`)
 - **Rationale**: Noisy data full of HTML tags wastes tokens and degrades response accuracy
+- **Consumer-Side Source Hygiene**: When an editor's HTML mirror is used as the source for AI processing, strip editor-only elements (custom elements, attributes stringified as `[object Object]`) on the consuming side before hashing and sending (MUST). Do not touch the editor's serialization. Failure pattern: thousands of characters with nothing to translate reached the model and kept failing validation.
 
 ### 19.3. Embedding Model Selection
 
@@ -666,6 +708,10 @@ RAG Pipeline:
 - **Vector DB Selection**: pgvector (PostgreSQL integration), Pinecone, Weaviate, Qdrant, etc.
 - **Metadata Filtering**: Combine vector search with metadata filters for precise retrieval
 - **Periodic Index Updates**: Incremental index updates triggered by source document changes
+- **Status over Deletion**: Knowledge turned into assets in a non-identifying form represents source events (author deletion, operator unpublishing, parent unpublishing, new version, falling out of the statistics window) **as a status, not as deletion** (MUST). Distinguish at least `live / source_deleted / source_unpublished / quarantined / superseded / aged_out`, and define per status whether it is searchable (`quarantined` and `superseded` are excluded) and which note is passed to the AI.
+  - **Freshness Annotation**: Every asset carries the point in time of its information (`observed_at`); attach notes such as "(as of YYYY-MM)" or "(original post deleted)" when referencing, and apply a small ranking penalty by age and status (SHOULD). "Old" is a reason to annotate, not to delete.
+  - **Tombstone Ledger**: The only exception for deletion is a legal reason, and even then keep the body hash in a tombstone ledger so that ingestion and restores do not re-register it. Ship the ledger with backups as well (MUST).
+  - **Double Filter**: Drop excluded statuses in both the search RPC and the secondary sort, and apply the same status filter on paths that fetch directly without going through search (MUST). Return from quarantine restores the pre-quarantine status; close the manual bypass of flipping `source_deleted` back to `live` (SHOULD). Cross-reference: `security/100_data_governance.md` §12.2.
 
 ---
 
@@ -710,6 +756,9 @@ RAG Pipeline:
 
 - Filter by category, date range, document type, etc. during search to narrow search space
 - **Pre-Filter vs Post-Filter**: For large datasets, recommend Pre-Filter (before search) for performance advantage
+- **Per-Feature Retrieval Profile**: The RAG routing table holds, per feature, not only "which shelf (namespace) to query" but also "how to query it" (threshold, top-k, timeout) (MUST). Guideline: advice and answer generation prioritize precision (high threshold, few results); suggestions prioritize recall (low threshold, many results, keyword search combined); auxiliary context (features that work without it) uses a high threshold, 1–2 results and a short timeout; operator-facing generation (articles, SEO copy) uses retrieval for fact-checking and "never writes what is absent from the assets as if it were asset content".
+  - **One-Hop Fallback**: When a shelf-restricted search returns zero results, fall back only one hop, to the neighboring shelf defined in the routing table (MUST). Unlimited expansion to all shelves is prohibited (MUST NOT) because it causes quality collapse (e.g., a medical consultation pulling venue chit-chat) and dissolves privacy boundaries.
+  - **Verification**: Hold the per-feature shelf assignment in a table whose exhaustiveness is enforced by types, not a switch whose `default:` silently falls through to the generic shelf; generate the table from the shelf ledger and check it (SHOULD).
 
 ---
 
@@ -731,6 +780,9 @@ RAG Pipeline:
 - **Top-K → Rerank → Top-N**: Retrieve Top-K (e.g., 20) in initial search, narrow to Top-N (e.g., 5) via reranking
 - **Cost/Accuracy Tradeoff**: Cross-Encoder offers optimal balance of accuracy and cost for production
 - **Latency Budget**: Target keeping additional latency from reranking under 100ms
+- **Sybil-Resistant Feedback Loop**: A feedback loop that returns usage counts and helpfulness of referenced knowledge to the search ranking MUST have the server decide the reference IDs and place them in the output metadata; values persisted via the client are never the primary input of the aggregation. Any value that passes through the client can be forged.
+  - **Aggregation discipline** (MUST): count usage as 1 per "knowledge × user"; the helpfulness sample is the number of users with a floor (e.g., 3; one user saving many records is still one sample); include only records from the AI path; keep the re-ranking weight small and bounded. As a result a single user cannot move the ranking, and collusion stays within the weight's range.
+  - **Metric design**: Derive helpfulness from numbers that need neither body text nor personal columns, such as "the difference between the AI estimate and the user's confirmed value" (SHOULD). Feedback updates do not invalidate the search cache; let ranking changes catch up through the cache TTL (SHOULD). See §27.3 Feedback Loops.
 
 ---
 
@@ -971,6 +1023,9 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 | **Tone/Style Enforcement** | Ensure tone/style consistency | Rule-based + LLM |
 | **URL Whitelist** | Restrict external URLs | Domain whitelist |
 
+- **Multilingual Guardrail Vocabulary**: The output guardrail vocabulary (assertive phrasing, terms of prohibited domains) MUST be held in one SSOT covering not only the product's display language but also the languages the model may mix into its replies (at least English). Separate files or implementations per language are prohibited (MUST NOT). Failure pattern: only the display language's banned terms existed, and assertive phrasing mixed in English passed through. Guardrail tests include mixed-language output samples (SHOULD).
+- **Safety Settings SSOT**: Model safety categories and block thresholds MUST be defined as a constant in one place and attached to every generation request at the proxy boundary, never relying on unset defaults that change per model generation. Per-feature inline settings are prohibited.
+
 ### 31.4. Guardrail Operations
 
 - **Rule 40.32**: Continuously monitor guardrail trigger rates and review monthly
@@ -1021,6 +1076,8 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 
 - Prohibit AI from providing investment advice or financial product recommendations
 - Auto-append "Please make investment decisions at your own risk. Consult a financial advisor"
+- **Schema-Level Exclusion (common to 33.1–33.3)**: An AI feature that could touch a licensed profession's exclusive work MUST (a) state the prohibited acts in the prompt (diagnosis, treatment, medication or prognosis judgments, tax judgments, legal judgments, claiming to be a licensed professional), (b) omit from the output schema any field representing them (e.g., `diagnosis_by_ai`, `recommended_treatment`, `suggested_dosage`, `tax_advice`, `is_deductible`), and (c) always show on screen that "this is a transcription read by AI, not a judgment".
+  - **Verification**: Compliance is not satisfied by a declaration (configuration value) alone; a test MUST literally match the prohibition wording in the prompt body. Failure pattern: the profile carried a compliance declaration, the prompt had no prohibition wording, and the check allowed it.
 
 ### 33.4. Reporting Functionality
 
@@ -1047,6 +1104,8 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 
 - Implement Circuit Breaker that auto-pauses AI functions when error rate exceeds threshold (e.g., 10%)
 - **Half-Open**: After a set period, allow small request volume through to confirm recovery
+- **Zero Budget = Immediate Stop**: An AI budget cap (daily or monthly) of 0 MUST be interpreted as "stop immediately", not "no limit". Evaluate it at the execution boundary before the provider is reached, state the meaning of 0 in the admin UI, and keep the manual kill switch and the budget kill switch semantically aligned (SHOULD).
+  - **Failure pattern**: Right after 0 was set as an emergency stop, "only the first request got through" (confusing `>` with `>=` in the cap comparison, first count not yet reflected) and a charge occurred. Pin the first-request leak with a regression test (MUST).
 
 ### 34.4. Graceful Degradation
 
@@ -1096,13 +1155,24 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 | **Vector DB** | Storage + query count | Cache utilization, unnecessary data removal |
 | **Inference Infra** | Compute time | Edge Runtime, cold start avoidance |
 
+- **Query-Side Cost Discipline**:
+  - **Conditional RAG Lookup**: Run an auxiliary RAG lookup (one the feature works without) only when the input carries a signal that a hit is likely (keyword, hint, classification), and do not pay the embedding cost on requests with no such prospect (SHOULD). Try embedding-free matching first (exact match, direct ID lookup) and semantic search last (SHOULD).
+  - **Billing-Unit Estimation**: In reservation-based cost control (reserving an upper-bound estimate from the budget before the call), align the estimate with the provider's billing unit (text = tokens, images = tiles/images, audio and video = seconds) (MUST). Treating the JSON-serialized byte length uniformly as a token count is prohibited (MUST NOT). Failure pattern: an image's base64 byte length was treated as tokens, a single read reserved 40% of the daily budget, and every AI feature for every user went fail-closed.
+  - **Unknown → Maximum**: An input whose type cannot be determined (unknown MIME, spoofed) falls to the maximum of all type estimates and the byte length (MUST). Falling to the minimum lets type spoofing shrink the reservation. "Safe side" is a direction, not a quantity — an oversized safe-side estimate exhausts the budget and becomes an availability hole that stops every feature.
+  - **Idempotent Embedding Ingest**: Make corpus ingestion idempotent via a partial unique index on the normalized body hash, and count a unique-constraint violation as "already exists" (MUST). Concurrent cron and manual runs then cannot double-register or double-bill. When statistics are narrated into text and embedded, cover only closed periods (e.g., up to the previous month) and round the counts (MUST). Including the current period changes the hash on every refresh, causing embedding re-billing, orphaned reference IDs and a permanently firing mass-change guard. Throttle re-proposal of aggregate-derived candidates with aggregate-key hash × cooldown (SHOULD).
+
 ### 36.3. AI Cost Monitoring & Alerting Protocol
 
 - **Rule 40.39**: Mandate the following cost monitoring framework
   1. **Usage Tracking Table**: Aggregate daily/monthly token consumption in `ai_usage_tracking` table
+     - **Measured Tokens Mandate**: Every call that incurs metered cost MUST take the actual input/output token counts from the response metadata and record them in the usage history. User-facing fixed point deductions and call counts are billing UX, not a substitute for cost measurement. An implementation without measured tokens disables cost anomaly detection and the Circuit Breaker — it is "FinOps theater" and is prohibited without exception (MUST NOT)
   2. **Budget Alert**: Auto-fire Slack/email alerts when monthly budget reaches **80%**
   3. **Cost Attribution**: Enable AI usage cost attribution by user/feature/tier
+     - **Typed Feature ID**: Every cost-incurring AI execution boundary (proxy call, breaker decision, model selection) MUST take the feature ID as a type-level required argument. Never revert it to optional. The only exception is a non-billed path that never reaches the provider (health checks, etc.), with the reason stated in code. When adding a feature ID, update the value list, feature flags, defaults and display labels together, and verify by test that it is not missing from the admin ON/OFF controls (MUST). Failure pattern: the bypass "feature unspecified, therefore not subject to the stop"
   4. **FinOps Dashboard**: Visualize cost trends, per-user costs, cache hit rates
+  5. **Two-Layer Hard Limit**: Hold a short-term (daily spike) cap and a cumulative (monthly) cap, and automatically degrade or stop when either threshold is reached (MUST)
+  6. **Operational Visibility**: Show the cap values, degradation threshold, stop threshold and current breaker state not only on the settings page but on the screen operators look at every day, so "which cap will stop us now" is visible on one screen (MUST). Failure pattern: the monthly kill switch was implemented, but the admin UI showed only the daily cap, delaying detection and explanation of the monthly overrun. When adding or changing a cap, update the DTO, validation, defaults, settings UI, display and legacy-settings compatibility test together (SHOULD)
+  7. **Bounded Concurrency**: Bound the parallelism of AI calls with a constant (MUST). Beyond rate limits, in reservation-based cost control unlimited parallelism stacks up one upper-bound estimate per concurrent call, squeezes the daily budget and makes unrelated AI features fail-closed
 
 ---
 
@@ -1124,11 +1194,16 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
   1. **Atomic Counting**: Record counts within transactions on successful API calls
   2. **Graceful Denial**: Notify users with friendly UI like "You've reached today's usage limit"
   3. **No Bypass**: Prohibit direct client API calls, physically preventing metering bypass
+  4. **Usage-Log Write Verification**: The usage log (count, tokens, feature ID, model) is the single source of truth for quotas, FinOps and audit; always inspect the insert result and, on failure, record it in the audit log and propagate to the caller (MUST). Even when the provider returns no usage metadata, record "one call" with zero tokens (MUST). Failure pattern: swallowed insert failures caused quota undercounting and a gap in the cost audit
+  5. **Degradation Does Not Swallow Ledger Errors**: Even an auxiliary feature that degrades to an empty array, `null` or fixed text MUST NOT fold "usage log write failed" into the same handling as "no AI result". Degrade the UX, but re-throw the ledger failure before falling back
+  6. **Reservation-Based Quota**: "COUNT actuals → compare with cap → execute → record" has a check-then-act race. Make it atomic with a dedicated reservation table (with TTL) plus an RPC that counts actuals + active reservations in one transaction and performs a conditional INSERT (advisory xact lock) (MUST). Never mix reservation rows into the FinOps source of truth (the actuals log) (MUST NOT) — a cleanup failure would permanently consume a paying user's quota. Reserve at the gate → delete the reservation on success, with TTL expiry as the backstop on failure; choose explicitly, and record, whether an RPC failure is fail-open or fail-closed (MUST)
 
 ### 37.3. Over-Limit Strategy
 
 - Flexible overage handling via point billing (pay-as-you-go)
 - Display countdown to next reset
+- **Quota Reset Discipline**: The quota period is anchored to the contract's billing period, falling back to the calendar month only when there is no contract or the period is invalid (MUST). An administrator's goodwill reset never deletes usage logs; it appends to a reset ledger (timestamp, target, reason), and aggregation counts only usage "since the latest reset within the same period" as current usage (MUST). The ledger's reason field is an admin-facing audit note and MUST NOT be exposed through user-facing DTOs, screens or ordinary users' SELECT policies.
+  - **Operation**: Fix the reset to a one-shot reset across all AI features and do not offer per-feature partial resets (SHOULD) — partial relief complicates the explanation and breeds disputes. Return "limit reached" not as a technical error but as a usage-state notice containing the remaining count for the current period and the next reset date (MUST). Do not reimplement the remaining-count calculation per screen; align the usage log, admin screen, user screen and every AI Action's cap check on the same definition (MUST).
 
 ---
 
@@ -1139,6 +1214,9 @@ Input → [Input Guard] → [LLM Processing] → [Output Guard] → Output
 - **Remove unnecessary modifiers/redundant expressions**: Periodically review and optimize system prompts
 - **Abbreviation Strategy**: Replace frequently occurring patterns with shortened expressions
 - **Strict Field Selection Application**: Minimize fields during RAG retrieval to reduce prompt tokens
+- **Structure/Text Separation**: When transforming structured data (rich-text JSON, menus, link arrays, etc.) with AI (translation, summarization, rewriting), structure, IDs, URLs, enum values, numbers, timestamps and amounts MUST NOT be sent to the model. Extract only the natural-language text on the app side, simplify the model's contract to "return a string array of the same length in the same order", and put the results back into the skeleton. Since the structure never reaches the model, the path by which structure gets broken ceases to exist.
+  - **Rationale**: (a) regenerating structure is what models break most easily, and once broken the renderer cannot read the body; (b) structure eats the output budget and the body gets cut off midway; (c) tokens are wasted on both input and output. In production measurement about two thirds of what was sent was structure and technical values. Verify the output (count, types, structure) deterministically (MUST). See §1.3 "Deterministic-First Decision Order".
+- **Principle-Based Eligibility**: Decide "is this a processing target" by a principle derived from the target's nature (e.g., a string containing no characters of the source locale is not prose), not by enumerating key names (deny lists, allow lists) (MUST). The canonical rule is "Principle over Enumeration" in `engineering/000_engineering_standards.md`.
 
 ### 38.2. Cache ROI Calculation
 
@@ -1178,6 +1256,11 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 - **AI Data Entry Confirmation Protocol**: Prohibit AI-extracted data direct DB writes (Auto-Save). Always follow "Draft → Confirm → Save" flow
 - **OCR Output PII Scrubbing**: Do not save PII outside service purposes as structured data; discard or mask
 - **Cross-Reference**: PII Scrubbing (§XVIII), Data Minimization (`60`, `61`)
+- **Shared Pipeline + Feature Profile**: Features of the same kind (several OCR / image analysis / classification features) MUST keep the overall procedure (auth → consent for external transmission → file inspection → rate limit → quota lookup and reservation (released in finally) → model → JSON repair and parse → schema validation → audit (summary only) and observability) in one SSOT, and declare only the feature-specific differences (feature ID, specialized prompt, output schema, quota, audit kind, whether knowledge is referenced, compliance declaration) as a profile. The entry point is a "thin layer that only points at a profile"; consent, rate limiting and quotas are never written in the entry point.
+  - **Failure pattern**: Duplicating the procedure per feature produces, one at a time, a missing consent gate, an uncounted quota and asymmetric auditing. Split only the differences; keep one set of defenses.
+  - **Specialized over Universal**: A universal prompt (handling several classifications in one) generates fields that are never stored and wastes input and output tokens. Feature-specialized prompts are more accurate and cheaper (SHOULD).
+  - **Profile Addition Check**: Everything that must be in place when one profile is added (registration in the feature ID ledger, model routing, inclusion in quota aggregation, audit evidence, failure-rate anomaly detection, the paired metrics "reads" and "saves", the RAG asset declaration) is pinned mechanically by tests (MUST).
+  - **No Raw Asset**: The raw text read by AI (receipts, statements, etc.) is personal data and is never turned into an asset. Assetization is limited to k-anonymous aggregates with zero personal columns (e.g., k≥10); when a feature does not reference knowledge, declare the reason (do not create dead configuration that is listed in the table but never wired) (SHOULD).
 
 ---
 
@@ -1224,6 +1307,7 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 ### 41.4. Prompt Regression Testing
 
 - Conduct regression tests using "Golden Datasets" on every change to prevent quality degradation
+- **Placeholder Binding**: Placeholder expansion for prompt templates MUST be centralized in a builder function in the same module as the template definition. Ad-hoc `replace()` calls at call sites are prohibited. Failure pattern: old placeholder names and the new template drifted apart, and the AI answered without ever receiving the context it needed. On every template change, verify by test that every context is actually injected and no unexpanded `{{...}}` remains (MUST).
 
 ---
 
@@ -1239,6 +1323,9 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 | **Step 4: Full Rollout** | Deploy to all users | — |
 
 - **Instant Rollback**: Control immediate switch back to old model at each step via environment variable (`AI_MODEL_VERSION`)
+- **Provider-Specific Field Inventory**: When migrating an external provider (model platform, payments, email, storage, etc.), inventory every request field, option and contract clause specific to the old provider, one by one, as "what is the equivalent on the new provider / if none, where does the guarantee move to" (MUST). The absence of an equivalent and the absence of a need for the guarantee are different things.
+  - **Measure where the guarantee moved**: When a guarantee moves to "the other side's settings" (project settings, admin console), create a check that measures that setting value at the same time as the migration (MUST). "It is off by default, so it's fine" is not acceptable (MUST NOT). See §9.1 "Provider Data Retention Boundary".
+  - **Re-review published statements**: Facts written in the privacy policy and consent dialogs are re-reviewed, together with their evidence, on every provider migration (MUST). An evidence comment goes stale even if it was written in the previous commit.
 
 ---
 
@@ -1279,6 +1366,7 @@ Cache ROI = Monthly Cache Savings / Monthly Cache Infrastructure Cost
 
 - **Rule 40.45**: Adopt OpenTelemetry GenAI Semantic Conventions for AI feature observability
 - **Tracing Targets**: Prompts, models, token usage, latency, errors, guardrail triggers
+- **Exception Body Hygiene**: For exceptions involving the AI provider, image analysis, user input or RAG context, `error.message` MUST NOT be sent as-is to the logger or error tracking. A provider's error body may contain prompt fragments, user input or image analysis results. Route through a dedicated helper and keep only classification information such as the type name, error code and HTTP status.
 
 ### 45.2. Monitoring Dashboards
 
@@ -1529,6 +1617,8 @@ Agentic RAG Loop:
   - RAG injection (intentional insertion of malicious documents) countermeasures
   - Search scope restriction via metadata filtering
   - **Rule 40.52**: Restrict document ingestion to vector DBs to approved pipelines only; prohibit direct ingestion from unverified sources
+  - **Namespace Ledger**: The shelves (namespaces) of a RAG corpus have a ledger as their source of truth, and the ingestion platform rejects writes to any shelf not in the ledger (MUST). Pin by test that the ledger set and the app constants match exactly and that raw shelf-name literals in ingestion code are zero
+  - **Source-Based Approval Tier**: The approval tier (automatic / bulk approval / aggregate only / per item) is decided by the nature of the source, not the shelf (MUST): operator-published and not generated → automatic; user-derived and LLM-generated → bulk approval (structurally eliminating one-by-one manual checks while still inserting human review); records about individuals or specific animals → k-anonymous aggregates only; facts about non-person subjects such as products or venues → a minimum contributor count plus approval so that no string unique to one person gets in. Sources of different tiers may share one shelf. Prefer per-item real-risk judgment over a blanket "aggregate only" rule per table (SHOULD)
 
 ### 50.10. LLM09:2025 — Misinformation
 
@@ -1548,6 +1638,8 @@ Agentic RAG Loop:
   - Token/API call cap settings
   - Anomalous consumption detection alerts
   - **Rule 40.53**: Limit maximum output tokens per single LLM API request (default: 4,096 tokens)
+  - **Explicit Generation Parameters**: State max output tokens, reasoning depth (thinking level) and temperature on every call; silently adopting provider, proxy or SDK defaults is prohibited (MUST NOT). When omitted, a default applies silently and the cause of cost growth and truncation cannot be traced later. Write the rationale next to the constant, and keep generation parameters in one cross-feature SSOT, never duplicated per use case (MUST). Failure pattern: separate constants per use case, one was fixed and behavior diverged
+  - **Thinking + Output Budget**: On APIs where reasoning (thinking) tokens share the output budget, pin the reasoning depth to the minimum for mechanical transformation tasks (translation, formatting, classification) (SHOULD). Left alone, reasoning eats the budget and the result is cut off midway (measured: output stopped a few tokens short of the cap and every field of one entity failed at once)
 
 ### 50.12. OWASP LLM Mitigation Implementation Checklist
 

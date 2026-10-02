@@ -1200,6 +1200,7 @@ class AppDatabase extends _$AppDatabase {
 - **Law**: ログインユーザーのリクエストでは**API Key (`x-api-key`) を送信せず、`Authorization: Bearer <token>`のみ**を送信
 - **理由**: アプリバイナリ内へのAPI Key埋め込みリスクを低減する
 - トークンのリフレッシュはDioインターセプターで自動処理
+- **補足（Tier は契約 SSOT から導出）**: Bearer による本人確認が通ることと、有料／全量データ相当の API Tier を持つことは別軸である。Tier は認証状態ではなく契約 SSOT（サブスクリプション／プラン定義）から導出し、ログイン済みという事実だけで特権 Tier を付与してはならない（MUST NOT）。ログインだけで有料レーンを開くと、無料ユーザーが Enterprise 相当のデータへ到達する。`engineering/100_api_integration.md` §43.2 の注記と整合させる。
 
 ### §101. Error Handling & Retry
 

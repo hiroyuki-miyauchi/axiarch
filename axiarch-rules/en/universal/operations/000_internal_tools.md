@@ -324,11 +324,13 @@ interface CommandPaletteItem {
 
 - **Rule 50.046**: Always display "Last Updated" timestamp and "Updated By" on data display screens
 - Show a Stale Indicator for data older than 5 minutes, prompting manual refresh
+- **Dual Dates & Freshness Indicator**: Admin lists and detail headers for content with a scheduled or publication date show the publication (scheduled) date and the last-updated date side by side (MUST) — operators care about "when was this last touched" as much as "when does it go live". Items not updated for a set period (e.g. 3 months) are visually flagged as stale with a warning color or similar to prompt an update (SHOULD). The threshold is set per content type
 
 ### 5.8. Zero Jargon
 
 - **Rule 50.047**: Do not use technical jargon in admin panel labels/messages. Displaying raw DB column names or API names is prohibited
 - Example: ❌ `is_active` → ✅ `Account Status: Active`
+- **Change-Impact Help Text**: Every setting carries help text that explains not the meaning of the value but "what happens when it is changed (scope of impact, when it takes effect, whether it can be undone)" (MUST). A setting whose meaning is clear but whose impact is not is a breeding ground for mis-operation
 
 ### 5.9. Admin Design System
 
@@ -708,6 +710,7 @@ interface AuditLogEntry {
   - Registration date, last login date
   - Status (active/disabled/suspended/deleted)
   - Custom attributes
+- **Axis-Column-Filter Parity**: When a feature introduces a new branching axis (specialty, plan, channel), expose a column and a filter for it in the operator list at the same time (SHOULD) — if the axis stays missing from the fetched columns after its introduction, operators cannot notice anomalies per axis. Validate filter values against the ledger and do not filter on values absent from it, and record the filter conditions in the list-view audit log
 
 ### 11.2. Impersonation / Masquerade
 

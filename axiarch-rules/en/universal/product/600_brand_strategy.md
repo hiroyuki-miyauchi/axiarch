@@ -277,6 +277,8 @@ Example:
 | **Imagery Style** | Photo / illustration / screenshot tone | Annual review |
 | **Motion** | Micro-animation principles | Annual review |
 
+- **Official Imagery Standard**: For official images managed by the operator, define per use (hero, list thumbnail, catalog, in-body, OGP) the minimum resolution, recommended resolution, and aspect ratio (MUST; values are set in the Blueprint). Selection guide (SHOULD): prefer natural light, compositions where the subject is the focus, and simple backgrounds, and unify the color tone with the brand's tone. Heavy filters or retouching that diverge from the real thing, and unauthorized reuse from other services, are prohibited (MUST NOT). Failure pattern: with no per-use minimum resolution, a small list image was reused as a hero, rendered blurry, and damaged brand value
+
 ### 3.2. Logo Usage Guidelines (Brand Safety)
 
 - **Rule 14.021**: The following rules are absolute for logo usage
@@ -348,6 +350,7 @@ Prohibited:
 
 - **Law**: Dark Mode is NOT "color inversion." Background, text, border, shadow, and image brightness must each be controlled individually at the Semantic Token layer
 - **Prohibition**: Hardcoded color codes (`#ffffff`, `rgb(0,0,0)`) in UI are prohibited. All colors must be specified via tokens
+- **Dark Mode Asset Policy**: Provide both light and dark versions of the logo and switch by theme (MUST). Do not alter photos per theme (MUST NOT; keep their natural look). Make illustrations and icons follow the theme via `currentColor` or CSS filters (SHOULD). Persist the theme choice locally and propagate it via cookie at SSR to prevent the first-paint flash (a brief render in the wrong theme) (SHOULD)
 
 ### 3.6. Accessibility-First Visual Design
 
@@ -401,6 +404,9 @@ Product UI
 - **Law**: Designer changes Figma → token JSON auto-updates → code reflects changes. This unidirectional flow must be maintained
 - **Prohibition**: Developers adding color values independently in CSS ("shadow tokens") is prohibited. All values must originate from Figma Variables
 - **Audit**: Quarterly scan of all CSS color/font values to verify 0 off-token values
+- **Hex Literal Drift**: In a design where brand colors are injected from settings at runtime, a hex literal inside the UI is a "drift point that does not follow theme changes". New UI references colors only through token variables and semantic utilities (MUST)
+- **Legitimate Exceptions**: A hex value may be kept only where a third-party brand guide fixes the color (an external service's logo SVG, etc.), for chart data-series colors, and in inline styles of email HTML, where CSS variables are not resolved (MAY). State the reason for each exception in a code comment (SHOULD). The canonical rule is "Legitimate exceptions and detection procedure" in `engineering/300_web_frontend.md`.
+- **Audit Procedure**: Run the audit as "search every hex pattern → exclude known legitimate locations (token definition files, the theme admin screen, sanitizer allowlists, etc.) → review everything that remains", and make the completion condition zero findings or every finding annotated as an exception (MUST). Failure pattern: a grep without exclusions was flooded with legitimate exceptions, and the real drift points were buried and missed
 
 ---
 
@@ -450,6 +456,9 @@ Bad button copy:
 ❌ "Click here" (describes the action, not the value)
 ❌ ALL CAPS everywhere (feels aggressive)
 ```
+
+- **UI Vocabulary Matrix**: Define the product's standard UI vocabulary in one place as a matrix of "category (actions, states, confirmations, labels, empty states) × NG expression × standard expression × notes" and treat it as the SSOT (MUST). Do not allow synonymous variation ("Send" / "Submit" / a transliterated loanword). Accept established loanwords (e.g., "login"), reword unestablished ones, and record each decision in the matrix's notes column (SHOULD). Failure pattern: the same action was labeled three different ways across screens and users took them for different features
+- **Confirmation Uses Action Names**: Confirmation dialog options use action names ("Delete" / "Cancel") instead of Yes/No, and the question names the concrete act, as in "Really delete X?" (MUST)
 
 ### 4.4. Error Message Design Protocol
 
@@ -506,6 +515,8 @@ Bad example:
 | **Confirmation** | State the consequence | "This cannot be undone. Delete?" |
 | **Success** | Give achievement feeling | "Saved ✓" |
 
+- **Prohibited Expression Registry**: Register and maintain prohibited UI expressions as a table of "category → NG example → reason → replacement" (MUST). Minimum categories: commanding tone, exposed technical terms, untranslated residue, excessive loanwords, negative phrasing that makes users feel at fault ("Failed" → "Could not complete"), vague phrasing that gives neither cause nor remedy, and phrasing too casual for the audience ("Yay, success!" in a business product). The registry feeds review checklists and lint, and every addition is registered together with its replacement (SHOULD). Failure pattern: an NG expression flagged in one review reappeared on another screen, and without a lookup table the same comment was repeated
+
 ### 4.8. Multi-Language Copy Governance
 
 - **Rule 14.037**: Manage multi-language copy quality with the following criteria
@@ -519,6 +530,7 @@ Bad example:
 
 - **Law**: Taglines and Brand Promise must go through Transcreation. Direct translation is prohibited
 - **Mandate**: Maintain a glossary per language to ensure translator consistency
+- **Locale Style Guide Table**: Define a notation-rule table for UI copy per target locale (MUST): long-vowel / transliteration rules for loanwords (e.g., "サーバー" vs. "サーバ" in Japanese), acceptance criteria for loanwords, digit script (half-width Arabic numerals), unit and currency formats (e.g., unifying "1,980円" vs. "¥1980"), date-time formats, and the script used for brackets and punctuation. The table is the shared input for translators, implementers, reviewers, and lint, and reviews check against it (SHOULD). Failure pattern: a glossary existed but no notation rules, so long-vowel usage and currency formats were mixed within one screen
 
 ---
 
@@ -856,6 +868,7 @@ Naming Process:
 - **Rule 14.051**: Maintain a Brand Book accessible to all teams
   - Minimum contents: Voice/Tone, Color, Typography, Logo Usage, Imagery
   - Synced with Figma Brand Kit so the "latest version" is always available
+  - **Service Name Notation**: Document the usage contexts of the official notation (the paired form), the short form, and the English form of the service name, plus prohibited variants (with domain suffix, camel case or all caps, phonetic substitutions) (MUST). Fix the subject prefix of automated emails, `publisher.name` / `Organization.name` in structured data, and OGP `site_name` to the official notation and reference them in code from a single constant (MUST). Name inconsistency directly affects SEO, GEO, and email authentication (brand-impersonation judgments)
 
 ### 9.3. Third-Party Brand Usage Policy
 
@@ -1051,6 +1064,9 @@ Brand Crisis Definition:
 4. Actionable: Present concrete improvement / response steps
 5. Accountable: Continue monitoring the situation after response
 ```
+
+- **Crisis Tone Standards**: Define tone standards for each phase of outage, breach, and recovery (MUST): during a service outage, calm and explanatory ("Some features are currently unavailable"; excessive self-deprecation is prohibited); for a data breach, honest and concrete (vague phrasing that parks the matter under "details are under investigation" is prohibited); for the recovery report, factual and grateful ("Service has been restored. We apologize for the inconvenience"; celebratory tone and emoji are prohibited). Crisis copy fails in three recognizable ways: saying too much, saying too little, and sounding too jubilant
+- **Pre-Approved Templates**: Prepare per-situation templates in advance and have them reviewed by the technical lead and, where needed, legal before publication (MUST). Failure pattern: with no templates, copy improvised mid-outage amplified user anxiety through excessive apology and a vague outlook
 
 ### 12.3. Crisis Severity Escalation Matrix
 

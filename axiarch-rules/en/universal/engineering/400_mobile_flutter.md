@@ -1106,6 +1106,7 @@ class AppDatabase extends _$AppDatabase {
 - **Law**: For authenticated user requests, **do not send API Key (`x-api-key`); send only `Authorization: Bearer <token>`**
 - **Rationale**: Reduces the risk of embedding API Keys in the app binary
 - Token refresh handled automatically by Dio interceptor
+- **Supplement (Tier is derived from the contract SSOT)**: Passing identity verification via Bearer and holding a paid or full-data API tier are separate axes. Derive the tier from the contract SSOT (subscription or plan definition), not from authentication state, and never grant a privileged tier merely because the user is logged in (MUST NOT). Opening the paid lane on login alone lets free users reach Enterprise-equivalent data. Keep this consistent with the note in `engineering/100_api_integration.md` §43.2.
 
 ### §101. Error Handling & Retry
 

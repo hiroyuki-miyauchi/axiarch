@@ -167,6 +167,11 @@ view_product           // action_object is non-standard (use object_action)
   4. Is PII absent?
   5. Is debouncing applied to prevent duplicate firing?
 - **Automated Validation**: Integrate schema validation in CI/CD pipeline; block violations at PR level
+- **Guarantee Layer in Acceptance Criteria**: When an acceptance criterion says "do not record / do not send / do not store", the AC itself MUST state which layer (client / receiving endpoint / DB) guarantees it. Client-side suppression exists for cost and precision, not as a guarantee, and a same-origin check can be spoofed from anything that is not a browser.
+  - **Single Pure Predicate**: Concentrate the exclusion decision in one pure function instead of hand-listing it per endpoint (MUST). Route Handlers and Server Actions alike take external input as arguments; the risk is the same. Failure pattern: when the rule is listed per endpoint, the next endpoint forgets to list it.
+  - **Write-Path Ratchet**: Enumerate by scan every "path that writes a client-supplied value into the record table" as the denominator, and place a ratchet test asserting every path passes the predicate (MUST). On every fix, inventory the sibling paths (endpoints of the same kind). Measure over-correction (surfaces that should still be recorded keep being recorded) with the same test, not only the attack side (MUST).
+- **External Party Ledger Shape**: A ledger identifying external parties (referrers, crawlers, payment providers, social networks) MUST hold, as a triple, the aggregation key, the display name and the set of match conditions (host names, UA, etc.). The canonical rule is "Rule 740.2.1a" in `engineering/740_data_contracts.md`.
+- **Non-Production Exclusion**: For the rule that production measurement and monitoring identifiers never reach non-production environments, and that exclusion is closed on three axes, see §6.2 "Three-Axis Exclusion".
 
 ---
 
@@ -309,6 +314,7 @@ view_product           // action_object is non-standard (use object_action)
   - IP addresses (without anonymization)
   - Date of birth, credit card information
 - **Hashing**: Use salted SHA-256 hash IDs when user identification is needed
+- **Keyed Visitor Hash**: A visitor key recorded without consent is a daily-rotating keyed HMAC over date + IP + UA, and the raw IP/UA are never stored (MUST). Derive the key from a secret with a purpose label; in an environment without the secret, use a process-lifetime random key. Never fall back to a publicly known fixed salt (MUST NOT) — the input space (IP × UA) is small, and a fixed salt makes it reversible. Cross-reference: `security/000_security_privacy.md` §7.4.
 - **Validation**: Auto-run PII pattern scans (email regex, etc.) in CI pipeline
 
 ### 6.2. Consent Management
@@ -316,6 +322,7 @@ view_product           // action_object is non-standard (use object_action)
 - **GDPR / Global Privacy Laws / CCPA**: Strictly respect user consent status
 - **Explicit Consent**: Analytics cookies/tracking require **opt-in** (implicit consent prohibited)
 - **Script Control**: Do not load analytics scripts without consent (implement Consent Mode)
+- **Stored Choice as Default**: In a regime whose default is "granted", read the stored explicit choice synchronously and declare it as **the default itself** before the measurement tag loads (MUST). Relying on the framework's effect order (sending an update afterwards) lets the first hit of someone who refused go out as granted. If the stored value is unreadable or corrupt, ignore it and return to the regional default (SHOULD). Verify by executing the generated script and pinning the sequence of commands passed to the tag (SHOULD). Match the probe to the delivery form (a plain SSR `<script>` or a string inside the hydration payload) and do not misjudge a difference in delivery form as a defect.
 - **GPC**: Respect browser Global Privacy Control signals for universal opt-out
 
 ```javascript
@@ -327,6 +334,13 @@ if (consentStatus === 'granted') {
   loadPrivacyFirstCounter();
 }
 ```
+
+- **Three-Axis Exclusion**: Close the exclusion of external measurement (tags, beacons) and error tracking on three axes: path (operator surfaces, personal areas) / environment (non-production deployments, CI, E2E builds) / actor (automation browsers, iframes, operators' devices) (MUST). One axis alone leaks through the other two. Do not use the UA as the primary criterion (automation tools present a real-device UA). Failure pattern: operator surfaces were excluded by path, but CI stood up from a seed containing the production measurement ID kept sending to production analytics for months, and the majority of measured traffic was CI-generated.
+  - **Destination Identifiers Are Not Seed Data**: Identifiers that decide the destination of an external service (measurement ID, container ID, error-tracking DSN, webhook target) MUST NOT be distributed to seeds, non-production environments or E2E builds even though they are not secrets. The criterion is not "is it harmful if leaked" but "can an environment holding this value impersonate production and write to the outside". Decide "is this production" from deployment-level values only, never mixing request-level values (they get baked into static output). Cross-reference: `engineering/520_cloud_application_platforms.md` Rule 520.18 / 520.30.
+  - **Attempt Logging + Zero Assert**: Verify exclusion not only by blocking (aborting requests to the measurement domain) but by recording attempts and asserting zero (MUST). Blocking alone erases the "fact that a send was attempted" and a regression passes green. Keep the negative side (excluded surfaces do not send) and the positive side (public surfaces do send) as a pair. Also run a daily detector that fires when a non-production host name or environment appears in the measurement platform, and detect upward deviations (e.g., above 1.3×) as well as downward ones (SHOULD).
+  - **Per-Navigation Gate**: Concentrate the measurement tag mount in one client gate and evaluate it against the current path on every navigation (MUST). A first-request-only decision breaks on SPA navigation (stop with an opt-out flag when navigating into an operator surface; when an operator surface is opened directly and then navigates to a public surface, read consent only there).
+- **Pre-Hydration Consent Discipline**: When controlling an SDK by consent, confirm three points (MUST). (1) Share the definition of the effective consent state with the one existing consent resolver; never redefine it per SDK. (2) If SDK initialization runs before consent can be read (hydration, async fetch), provide a synchronously readable copy (e.g., a server-rendered attribute) and read it before initializing — an httpOnly cookie cannot be read by scripts. (3) The "effective state" before the stored consent has been read is only the jurisdiction's default; even in a jurisdiction whose default is "granted", it MUST NOT be interpreted as "consented" for recording, sending or overwriting.
+  - **No Beacon Before Consent Is Read**: Do not send a beacon before the stored consent state has been read (MUST). The effective state before reading is the regional regime's default, so an identifier would be issued to someone who already refused. On withdrawal, delete the identifier (cookie) on the spot without waiting for the next navigation (MUST). In an opt-in region without consent, send no beacon at all, hashed measurement included. Failure pattern: a path was measured in which the first few seconds of a person who refused were recorded and sent.
 
 ### 6.3. Post-Cookie Era Measurement Strategy
 
@@ -340,6 +354,9 @@ if (consentStatus === 'granted') {
 - **Data Clean Rooms**: Use data clean rooms (Google Ads Data Hub, etc.) for ad platform data matching
 - **IPA**: Monitor Interoperable Private Attribution as an emerging industry standard for privacy-preserving attribution
 - **Deterministic Matching**: Focus investment on login-ID-based cross-platform measurement
+- **Consent-Independent Baseline**: Never rely solely on external measurement that depends on a consent gate (MUST NOT). Run consent-independent first-party measurement in parallel (page views, visitors, sessions, sources, landing pages, devices; no column that identifies a person), and show both side by side per day in the admin screen with the gap and its reasons. Failure pattern: the only evidence for doubting the external tool was inside the external tool.
+  - **Gap Metrics**: Fix the metrics that explain the gap (SHOULD): consent rate = consented visitors ÷ first-party visitors (the ceiling the external tool can count in principle), capture rate = external users ÷ first-party visitors, estimated block rate = 1 − external users ÷ consented visitors. Attach fixed notes on date boundaries, bot exclusion, and over-counting of cookieless visitors in period uniques.
+  - **Step vs Slope**: Read a sudden change in a metric as the product "real traffic × measured population" (MUST). Line up consent-independent metrics (search console clicks, first-party measurement, server logs, billing) over the same period and look for a step in the ratio. A step means the measurement side; a gradual slope means the evaluation side. For a spike, suspect a measurement change first (consent default, exclusions, environment) — what looks "newly increased" is sometimes "previously invisible". Example: on the day the consent default changed, external users fell to one third while search clicks rose. See §9.3 Anomaly Detection.
 
 ### 6.4. Data Minimization Principle
 
@@ -416,12 +433,15 @@ if (consentStatus === 'granted') {
 - **Metric Ownership**: Assign a responsible owner to each KPI
 - **Definition Uniqueness**: Prohibit the same metric operating under multiple definitions (SSOT principle)
 - **Change Management**: Require PR-based review for metric formula/definition changes
+- **Taxonomy Extension**: When adding a value to a statistical classification axis (enum), update the DB CHECK constraint, the aggregation function's bucketing targets and the app-side constants in one change unit (MUST). Tests read the "latest migration" to check that the three agree, not a fixed file (SHOULD). Do not reclassify historical rows (SHOULD). State in the dashboard and the definitions document that, for the period before the change, the new class was "not counted" rather than "absent", and compare across the change date as the sum with the class it moved out of (MUST). Failure pattern: zero rows before the effective date were read as "there was no demand".
+- **Population Mixing Ban**: Never mix populations of differing nature (measurability, billing party) into one metric such as "impressions" (MUST). Mixing makes derived metrics such as CTR meaningless. Do not count a container's intersection or mount as an "impression"; keep delivery results (filled / unfilled) as a separate aggregation.
 - **Vanity Metric Elimination**: Periodically inventory and remove "vanity metrics" that drive no action
 
 ### 9.3. Metric Reliability
 
 - **Data Freshness**: Explicitly state each metric's data update lag (real-time / daily / weekly)
 - **Precision Display**: Accompany sampling-based metrics with sample size and confidence intervals
+- **Comparison Consistency**: When two or more measured values are placed side by side to compare or argue, the aggregation window (period) and the aggregation axis (device, segment, unit) MUST match. If they cannot be matched, state the window and axis for each value and do not present them as a comparison. Failure pattern: "slot A 4% versus slot B 97%" was written, but the former was all devices combined and the latter desktop only. Numbers placed in lessons logs, audit reports, alert bodies and PR descriptions carry their source (table / query / period) and are reproducible by re-aggregation (SHOULD).
 - **Anomaly Detection**: Auto-alert when metric values exceed ±3σ from historical average
 
 ---
@@ -434,6 +454,13 @@ if (consentStatus === 'granted') {
 - **Schema-Based Metrics**: `IS NOT NULL` checks must reference real columns. Validation against DB type definitions is mandatory
 - **DTO-UI Alignment**: When adding DTO fields, update UI destructuring. `NaN`/`undefined`/`null` display is a bug
 - **Distinct Denominator**: Apply `distinct` processing to funnel denominators. `total > 0` guard is mandatory
+- **No Fixed Verdicts**: State values shown on operations and monitoring screens ("handled", "ACTIVE", "SAFE", "running normally") come only from measurement or mechanical derivation from an SSOT; hard-coded booleans and fixed wording are prohibited (MUST NOT). Stop their reappearance with a source-contract test. The items that assert "safe" most confidently are the ones nobody measures. Failure pattern: a fixed value went uncorrected for weeks, and items across several tabs were hard-coded.
+  - **Bidirectional Reconciliation**: Reconcile in both directions (MUST). One direction misses either "the implementation was removed but the display remains" (over-reporting) or "the implementation was added but the display does not show it" (under-reporting). Judge by "actual use", not "declaration". A display that makes things look worse than reality is as harmful as one that makes them look better (it diverts effort to already-handled items and hides the truly unhandled ones).
+  - **Unmeasured Is Not Green**: Never show what could not be measured as green (MUST). Show `unmeasured` as its own bucket, and have a pure function produce the overall verdict by listing "items needing action". Separate fetch failure from zero results (`unavailable` / `loadFailed`). Keep live network measurements in a fetch unit separate from DB aggregation so one's delay does not drag the other down (SHOULD).
+  - **Per-Type Aggregation**: Aggregations over a typed dimension (alert_type, etc.) count per type, and each heading shows only its own type (MUST). Pin exhaustiveness with types. Failure pattern: typed criticals were shown as a total under "defended", and the owner requested an investigation as a security event.
+  - **Zero vs Unreadable**: In a data store with row-level access control, an unauthorized read returns "zero rows, success", not a denial error. Aggregation and monitoring code distinguishes "zero" from "could not read": when an expected minimum (e.g., known scheduled runs) is zero, warn as a suspected permission or wiring problem instead of treating it as a normal zero (MUST). When showing "of N total", count N through a path that can see every row.
+- **Canonical Tracked Key**: The canonical form of a tracked key (path, etc.) lives in one function that both the write side (every beacon) and the read side (aggregations, screen queries) pass through (MUST). Never hand-build public paths by string concatenation. Match historical mixed forms in both old and new forms instead of discarding them. Failure pattern: a trailing-slash setting made all real data `/x/`, the read side matched `/x`, zero rows matched and every card showed 0.
+  - **Three-Stage Reconciliation**: A report that "nothing is being measured" is diagnosed only after counts are reconciled across three stages — raw data → aggregation table → screen query (MUST). Most of the time the cause is the read side's match condition, not the measurement. Test the read side by having the mock record the query arguments (column and value) rather than the return value (SHOULD).
 
 ### 10.2. Dashboard UX Standards
 
@@ -441,6 +468,7 @@ if (consentStatus === 'granted') {
 - **5-Second Rule**: System health must be judgeable within 5 seconds of viewing the dashboard
 - **Drill-down**: All metric values must be clickable to navigate to detail views
 - **Last Updated Timestamp**: Always display the last update timestamp for users to assess data freshness
+- **Unmeasurable Scope Disclosure**: Traffic-source and intent screens state on screen what cannot be measured (clients that send no referrer, API access and in-app browsers blend into "direct") and which items are estimates (intent inferred from the landing-page type) (SHOULD). Keep the classification ledger (referrer host → service name) on the app side and store the raw host in the DB so historical data becomes correct automatically (§2.4 "External Party Ledger Shape").
 
 ### 10.3. Dashboard Operations
 
@@ -638,6 +666,8 @@ request_count          // missing namespace
 | **DEBUG** | Development-time debug information | ❌ (dev only) |
 | **TRACE** | Detailed trace-level information | ❌ (special debug only) |
 
+- **Control-Flow Exceptions Are Not Errors**: When a framework expresses control flow such as redirects, 404s or dynamic-rendering switches as exceptions, the instrumentation layer MUST NOT classify them as errors. The canonical rule is "Control-Flow Exceptions Are Not Errors" in `operations/400_site_reliability.md`.
+
 ### 15.3. Log PII Prevention
 
 - **Law**: Outputting PII (email, name, phone, credit card) in logs is **strictly prohibited**
@@ -818,6 +848,10 @@ request_count          // missing namespace
 - **Graduated Severity**: P1 (Critical) → P2 (High) → P3 (Medium) → P4 (Low)
 - **Actionability**: Every alert must include a "what to do next" Runbook link
 - **Noise Reduction**: Group and suppress same-cause alerts (Deduplication / Inhibition)
+- **Resolve Only When Evaluated**: An auto-resolving alert is closed only on a run in which it could actually be evaluated (MUST). Closing it on a run where the data source was unreadable or the run was cut short records "could not evaluate" as "recovered".
+  - **Flush After All Evaluations**: Place the notification flush (sending unsent criticals and persistent warns) after every evaluation in the same run (MUST). Placed before evaluation, it escalates with stale counts and reports an alert about to be closed as "ongoing". A flush failure stays in the job's success verdict; deferring it must not silence it.
+  - **Readable Body**: Write into the alert body how to read it, e.g., "the count is the total over the last N days at evaluation time and remains until it leaves the window even after the fix", so the recipient does not go hunting for an already-fixed hole (SHOULD). When several alerts (aggregate / per-dimension) sit on the same metric, write the definition in one vocabulary, state in each body "which shape of anomaly this net catches", and give the triage order instead of asserting a cause (MUST).
+  - **Both Directions**: Detection of downward deviations (silence, drops) does not see upward ones (contamination, spikes). Place both (SHOULD).
 
 ### 22.2. Multi-Window Multi-Burn-Rate
 
@@ -964,6 +998,7 @@ request_count          // missing namespace
 ### 26.1. Pipeline Health Monitoring
 
 - **Freshness**: Monitor elapsed time since last data update. Alert on SLA violations
+- **Source Existence First**: Before building or fixing a detection, aggregation or monitoring system, count the source table's production row count and freshness first (`count(*)` / `max(created_at)`) (MUST). The canonical rule is "Rule 710.8.6" in `engineering/710_data_reconciliation.md`.
 - **Volume**: Auto-detect abnormal record/row count fluctuations (spikes and drops)
 - **Schema Changes**: Auto-detect column additions, deletions, and type changes with impact analysis
 - **Job Success Rate**: Dashboard visualization of ETL/ELT job success/failure rates

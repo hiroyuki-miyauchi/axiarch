@@ -609,6 +609,8 @@ The numeric values below are an onboarding reference profile. Distributions vary
 - **Rule**: Review machine-generated changes to locks, checksums, wrappers, version catalogs, provider selections, and similar resolution data, showing additions, removals, source, version, integrity, and lifecycle-script changes
 - **Rule**: Pin the package manager, runtime, compiler, SDK, and wrapper under the support policy and detect resolution differences across development, CI, and release
 - **Rule**: Treat install and build scripts as executable capabilities and apply default denial or a minimal allowlist, network and filesystem restrictions, or a reviewed exception
+- **Rule**: The package manager version that generates, updates, or verifies the lockfile matches the version CI and release use. Even with the same lock format, a manager version difference changes how optional and platform-specific transitives are pruned, producing "green locally, every CI job dead on frozen install with Missing from lock." Accept "verified locally" as evidence only when it ran on the same version as CI; a successful install or dry-run on the older version that broke the lock is void (a broken instrument cannot measure its own breakage). When the environment does not meet the required version, do not bypass the requirement; invoke the correct version temporarily (e.g., `npx -y <pm>@<CI version>`), and make installs on an older version fail on the spot through an `engines`-style declaration with strict enforcement (detail: `engineering/000_engineering_standards.md` §4.2)
+- **Rule**: CI places one lightweight preflight that checks only "manifest ↔ lock consistency" before the downstream jobs that actually install dependencies, so a broken lock fails without taking those jobs down with it. The check runs by default; skipping it is allowed only for changes mechanically proven not to touch the lock (fail-closed). A dry-run that installs nothing does not launch lifecycle scripts (e.g., `--ignore-scripts`): in an environment without node_modules (CI, fresh clone, worktree) the script exits 127 and the check itself misfires. Confirm with a positive control that a broken lock is detected even without scripts
 
 | Example ecosystem | Example resolution source | Example CI invariant |
 |:------------------|:--------------------------|:---------------------|
@@ -775,6 +777,7 @@ monorepo-root/
 - **Rule**: For a vulnerable transitive dependency, evaluate direct-dependency updates, upstream fixes, alternatives, feature disablement, and an expiring override or patch in risk and compatibility order, then verify reachability and the actually deployed version
 - **Rule**: Evaluate dependency depth, duplication, fan-out, native binaries, install scripts, and maintainer concentration as compound risk; do not decide adoption from one fixed depth
 - **Rule**: Record the introduction path, owner, and used capability through replaceable mechanisms such as `npm explain`, `go mod why`, Gradle dependency insight, or `cargo tree`
+- **Rule**: Trace each SCA finding one by one along its dependency path (`<pm> ls <pkg> --all` or equivalent) and classify it as "fixed by raising the parent (lock update only)," "no upstream fix," or "does not reach the production artifact" before acting. "Ignore it because it is a dev dependency" is allowed only after tracing the path confirms it does not enter the production artifact. For what cannot be fixed, do not leave it idle: record the exploitation path (which operation executes that code) and "what would fix it (the upstream change)," keep monitoring, and use that as the basis for VEX (§28)
 
 ### 19.2 Override-Based Forced Resolution
 
@@ -787,8 +790,13 @@ monorepo-root/
 }
 ```
 
+> [!NOTE]
+> Proviso: the `>=2.0.1` in the example above is a minimal illustration that assumes 2.0.1 is the fixed version. If the override's lower bound names the vulnerable version itself (e.g., `>=1.15.0` when 1.15.0 is vulnerable), that version satisfies the bound, resolution does not change, and the override has no effect (in practice the scanner finding stayed open unnoticed). Set the bound at or above the fixed version (e.g., `^2.0.1`), and express the intended resolution range rather than pinning a single version. After applying, confirm both that the dependency tree (`npm ls <pkg>` or equivalent) shows the safe version on every chain and that the scanner reports zero on production dependencies (e.g., `npm audit --omit=dev` with zero HIGH or above), and remove the override once upstream has fixed it.
+
 > [!CAUTION]
 > An `overrides`-style forced resolution is temporary risk treatment. Record its owner, rationale, compatibility tests, upstream link, expiry, and removal criteria, and resolve the root cause within the Blueprint SLA.
+
+- **Auto-Fix Suggestion Discipline**: A vulnerability scanner's automatic fix proposal (`npm audit fix`, `pip-audit --fix`, bot PRs, etc.) is a constraint solution that ignores production impact. Before running it, inspect the details (direct vs. transitive, affected version range, whether the proposal is a major bump or a downgrade), and **treat a major-downgrade proposal as a danger signal that is never applied as-is** (failure pattern: a proposal to roll the framework back several generations in exchange for one vulnerability). Bump direct dependencies explicitly to the fixed version; fix transitive dependencies surgically with a minimal-range floor via `overrides` / `resolutions` / constraint equivalents. After the fix, confirm both the dependency tree and a zero-finding scan
 
 ---
 
@@ -1459,6 +1467,7 @@ In addition to CI-time SCA (build-time scanning), Runtime SCA continuously monit
 - **Rule**: Actively use `node:` scheme built-in modules
 - **Rule**: Prohibit devDependencies leaking into production builds
 - **Rule**: Run `depcheck` quarterly to remove unused dependencies
+- **Rule**: External CLIs used only for migrations, linting, or local operations (DB CLIs, IaC tools, etc.) do not go into the application's dependency manifest or lockfile. Including them mixes the responsibilities of the application dependency tree, CI install, unused-dependency detection, and audit, so an advisory on the CLI package fails the application's own audit. Supply them in CI through a setup action pinned to a commit SHA or a container image digest, and locally as an externally installed binary registered as such in unused-dependency detection. After separating them, run SCA, unused-dependency detection, and the checks that use that CLI (migration checks etc.) to confirm the operational checks still work
 
 ```bash
 # Detect unused dependencies

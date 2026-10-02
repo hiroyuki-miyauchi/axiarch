@@ -611,6 +611,8 @@ jobs:
 - **ルール**: lock、checksum、wrapper、version catalog、provider selection等のmachine-generated差分をreviewし、追加・削除・source・version・integrity・lifecycle scriptの変化を表示する
 - **ルール**: package manager、runtime、compiler、SDK、wrapperはsupport policyに従いpinし、開発、CI、releaseの解決差を検出する
 - **ルール**: install／build scriptは実行能力として扱い、既定拒否または最小allowlist、network／filesystem制限、review済み例外のいずれかを適用する
+- **ルール**: lockfileを生成・更新・検証するpackage managerのversionは、CI／releaseが使うversionと一致させる。同じlock形式でもmanager版差でoptional／platform別transitiveの刈り込みが変わり、「localでは緑、CIのfrozen installはMissing from lockで全job即死」が起きる。「localで検証した」はCIと同版で実行したときだけ証拠として認め、壊した側の古い版でのinstall／dry-run成功は無効とする（壊れた測定器は自分の壊れを測れない）。要求versionを満たさない環境では迂回せず一時的に正しい版を呼び出し（例: `npx -y <pm>@<CI版>`）、`engines`相当の宣言とstrict適用で古い版でのinstallをその場でerrorにする（詳細: `engineering/000_engineering_standards.md` §4.2）
+- **ルール**: CIは依存を実際に入れる後段jobの前に「manifest ↔ lockの整合」だけを検査する軽量preflightを1箇所に置き、壊れたlockを後段jobの巻き添えなしで落とす。検査の既定は「実行する」であり、省略はlockに触れていないことを機械的に証明できた変更に限る（fail-closed）。依存を入れないdry-runではlifecycle scriptを起動しない（例: `--ignore-scripts`）。node_modulesの無い環境（CI・新規clone・worktree）でscriptがexit 127を返し検査自体が誤爆する。壊れたlockはscript無しでも検出できることを陽性対照で確認する
 
 | ecosystem例 | resolution source例 | CIの不変条件例 |
 |:------------|:--------------------|:---------------|
@@ -780,6 +782,7 @@ monorepo-root/
 - **ルール**: 推移依存の脆弱性は、直接依存update、upstream修正、代替、機能無効化、期限付きoverride／patchの順にriskと互換性を評価し、到達可能性と実配布versionを検証する
 - **ルール**: dependency depth、重複、fan-out、native binary、install script、maintainer集中を複合riskとして評価し、固定階層数だけで採否を決めない
 - **ルール**: `npm explain`、`go mod why`、Gradle dependency insight、`cargo tree`等の交換可能な手段で、導入経路、owner、利用機能を記録する
+- **ルール**: SCAの指摘は依存元の経路（`<pm> ls <pkg> --all`相当）を1件ずつ辿り、「親を上げれば直る（lock更新のみ）」「upstreamに修正が無い」「本番成果物に到達しない」に分類してから対応する。「開発依存だから無視」は経路を辿って本番成果物に入らないことを確かめた場合にだけ許す。直せない分は放置せず、悪用経路（どの操作で当該codeが動くか）と「何が来れば直るか（upstreamの修正）」を記録して監視を続け、VEX（§28）の根拠にする
 
 ### 19.2 `overrides` による強制解決
 
@@ -792,8 +795,13 @@ monorepo-root/
 }
 ```
 
+> [!NOTE]
+> 但し書き: 上の例の`>=2.0.1`は「2.0.1が修正版である」ことを前提にした最小例である。overrideの下限に脆弱版そのものを書くと（例: 脆弱版が1.15.0のとき`>=1.15.0`）、その版自身が下限を満たすため解決は変わらず効果が無い（実際にscannerの指摘が消えないまま放置された）。下限は修正版以上（例: `^2.0.1`）とし、単一versionの固定ではなく解決範囲の意図を明示する。適用後は依存tree（`npm ls <pkg>`相当）で全chainに安全版が入ったことと、scannerが本番依存で0件（例: `npm audit --omit=dev`でHIGH以上0）になったことの両方を確認し、upstreamが修正されたらoverrideを除去する。
+
 > [!CAUTION]
 > `overrides`等の強制解決は一時的なrisk処理である。owner、導入理由、互換性test、upstream link、期限、削除条件を記録し、Blueprint SLA内にroot causeを解消する。
+
+- **Auto-Fix Suggestion Discipline**: 脆弱性scannerの自動修正提案（`npm audit fix`、`pip-audit --fix`、bot PR等）は制約解であり本番影響を考慮しない。実行前に詳細（direct／transitive、影響version range、提案がmajor bumpかdowngradeか）を確認し、**major downgrade提案は危険信号としてそのまま適用しない**（失敗パターン: 1件の脆弱性と引き換えにframeworkを数世代前へ戻す提案が出た）。direct依存は修正済み版へ明示的にbumpし、transitive依存は`overrides`／`resolutions`／constraint相当で最小範囲の床を設定して外科的に直す。修正後は依存treeとscanner 0件の両方を確認する
 
 ---
 
@@ -1490,6 +1498,7 @@ CI-time SCA（ビルド時スキャン）に加え、本番環境で実際にロ
 - **ルール**: 「node: スキーム」のビルトインモジュールを積極活用する
 - **ルール**: devDependenciesのプロダクションビルドへの混入を禁止する
 - **ルール**: 四半期ごとに `depcheck` を実行し、未使用の依存関係を除去する
+- **ルール**: migration・lint・local運用にだけ使う外部CLI（DB CLI、IaC tool等）はapplicationの依存manifest／lockfileに入れない。入れるとapplication依存tree、CI install、未使用依存検出、auditの責務が混ざり、CLI packageのadvisoryがapplication本体のauditを落とす。供給はCIではcommit SHAでpinしたsetup action／container image digest、localでは外部install済みbinaryとし、未使用依存検出では外部binaryとして登録する。分離後はSCA・未使用依存検出・当該CLIを使う検査（migration check等）を通し、運用検査が動くことを確認する
 
 ```bash
 # 未使用依存の検出

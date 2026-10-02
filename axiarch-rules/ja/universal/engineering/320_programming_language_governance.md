@@ -295,6 +295,10 @@ precompileとruntime compileのどちらでも、build host、compiler cache、r
 
 - Rule 320.42: HTTPはOpenAPIまたはJSON Schema、RPCはProtocol Buffers等、eventはAsyncAPIまたはregistry schema、data productはdata contractを正本とする。
 - Rule 320.43: 生成可能な型を手作業で各言語へ複製しない。generator versionとschema digestをpinし、生成差分をCIで検証する。
+  - **Non-Importable Output Reconciliation**: SSOT の値が import できない媒体（SQL migration、DB 行、YAML、生成ファイル、静的解析のためリテラルを要求する設定値）へ出ていく箇所を棚卸しし、それぞれに「出力先をテキストとして読み、SSOT の値を含む／一致することを検査するテスト」を置く（MUST）。正本は `engineering/000_engineering_standards.md` の「Non-Importable Output Reconciliation」。
+  - **No Volatile-Name Targeting**: 出力先はタイムスタンプ等の可変名で名指しせず、suffix 一致等で 1 本に特定し、0 本・2 本以上なら検査を失敗させる（MUST）。名指しは改名で黙って素通りする。SQL の `||` 連結や改行分割で 1 文が複数リテラルに割れる場合は隣接リテラルを畳んでから比較する（SHOULD）。
+  - **Literal Residue Annotation**: 静的解析制約でリテラルを残す場合は近接コメントで対応 SSOT を示し、複数箇所にあるならコメント↔リテラル値を突合する verify を CI に置く（SHOULD）。
+  - **Mirror Artifact Atomicity**: 別ランタイム向けに生成するミラー定数は、生成物（複数ファイルなら全て）を同一コミットに含め、セルフレビューで「再生成 → 作業ツリーが clean」を確認する（MUST）。失敗パターン: 同じ領域で 2 度目の取り残しが起き、CI が連続して落ちた。
 - Rule 320.44: contractにはowner、version、compatibility mode、deprecation期間、error model、pagination、idempotency、PII分類を含める。
 - Rule 320.45: binary、timezone、decimal、64-bit integer、null、enum未知値、Unicode、orderingの言語差をcontract testで検証する。
 - Rule 320.46: internal package共有よりservice/data contractを優先し、組織境界を越える実装詳細の結合を避ける。

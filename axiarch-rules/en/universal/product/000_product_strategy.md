@@ -426,6 +426,7 @@
 *   **Usage Limit & Enforcement Protocol (Tier-based Limit Implementation)**:
     *   **Law**: Feature limits per subscription tier MUST be enforced on **both UI and backend**.
     *   **Server-Side Enforcement (SSOT)**: Limit validation MUST be done on Server Actions / RPC / DB Trigger side. Client-side-only limits risk being bypassed.
+    *   **Single-Path Write Closure**: When a business constraint such as a plan limit, registration count, or seat count is enforced inside an RPC/Server Action, remove every other write path to the same table (direct INSERT/UPDATE GRANTs, RLS policies) or close it with an equivalent constraint (MUST). "It is validated on the server" alone can be bypassed by writing to the table directly. Include a negative test that attempts a direct INSERT in the session of a user who has reached the limit and confirms it is rejected (MUST). Based on an actual incident where the limit check existed only in the RPC and was bypassed by direct writes. See `engineering/200_supabase_architecture.md` Rule 11.2.
     *   **Guard Centralization**: Limit check logic must be centralized in `src/lib/guards/subscription-guard.ts` etc. DRY violation prevention.
     *   **Positive Upsell Messaging**: Turn limit-exceeded events into upgrade opportunities: "Free plan is limited to 1 item. Upgrade to Pro for unlimited."
 *   **AI Credits Economy (AI-Native Billing Model)**:
@@ -595,6 +596,7 @@
     *   **DB First**: All legal documents MUST be saved in `site_settings` table or dedicated `fixed_pages` table.
     *   **Admin UI**: Standard implementation of a mechanism allowing non-engineers to immediately edit and publish via admin panel without developer involvement.
     *   **Risk**: A state where deployment wait occurs on the day of legal changes is "failure" in corporate compliance management.
+    *   **Migration Procedure (moving from hardcode to DB)**: When moving legal text from hardcode to a DB column, make the new column nullable with a DEFAULT so rollback is safe, and make the `fallback` in the code-side `settings?.text ?? fallback` the same text as before the migration (MUST). This prevents an empty string or another language from being shown during the ordering lag between the migration and the application deployment. Update every layer, migration / fetch specification / types / validation schema / component, in the same PR, and bridge the wait for type regeneration with an explicit type bridge (SHOULD). Detect "make it dynamic later" comments (e.g., `TODO.*site_settings`) mechanically to flush leftovers.
 
 ### 7.3. Global Compliance
 *   Refer to `security/100_data_governance.md` for GDPR / CCPA / EU AI Act compliance details.
@@ -1104,6 +1106,10 @@ Define specific thresholds (N, M) in the project-specific Blueprint.
 | Overall posting frequency | 5 per 24 hours | Queue excess submissions |
 | New account restriction | 2 posts within 72 hours of registration | Linked with Progressive Trust (§14.5) |
 | Bot detection | CAPTCHA/challenge auth required | Block submission on failure |
+*   **Anonymous UGC Opening Checklist (evidence / rate limit / concentration)**:
+    *   When opening a feature that allows anonymous submissions, in the same change unit put in place (a) evidence that is not discarded even without an actor (pseudonymized IP, device key, etc.), (b) a rate limit on body submissions, and (c) fail-closed bot verification (a failed check does not pass) (MUST). If the audit logger discards "no authenticated user", the evidence for anonymous features is structurally lost in full (measured: zero audit rows for anonymous submissions over the entire period). Fail-open is effectively no defense and leaves only the false comfort of "handled".
+    *   Never make authentication the only defense against abuse (MUST NOT). Requiring authentication for high-value UGC is an owner-approval decision; build the default from bot countermeasures + rate limits + concentration detection (SHOULD).
+    *   Coordinated submissions by recruited humans are not stopped by bot verification. Keep separate concentration detection (short-term counts against the same target, runs of top scores, share of visitors who viewed only a single page) (SHOULD).
 
 ---
 

@@ -318,6 +318,7 @@ export function middleware(request) {
 
 - **Quality Monitoring**: Monthly baseline management via BLEU/COMET scores
 - **Data Privacy**: PII removal/anonymization mandatory before sending to translation APIs
+- **UGC Translation Separation**: When extending translation to user-generated content, decide three points separately from operator content (MUST): (1) the source language is not fixed; the configuration side decides the translation direction from the source, (2) publication conditions (approval, deletion, parent entity publication) are referenced through the same visibility rules, (3) the source is the primary text, so pass both source and translation to the public surface and switch on the spot on the viewer side instead of "replacing with the translation" (it does not depend on the viewing locale, so it may be called inside the cache). Where language-pair constants are scattered across the service, contract "zero constants in the sync path" by test before fixing (SHOULD). The misconception that "the translation base built for operator content can be reused as-is" produces a fixed source language and mismatched publication conditions.
 
 ### Section 18: Global Content Governance
 
@@ -421,6 +422,7 @@ font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-ser
 - **Ruby**: `<ruby>`/`<rt>` elements. `<rp>` fallback
 - **Emphasis Marks**: Use `text-emphasis` property (not underlines)
 - **Fullwidth/Halfwidth Normalization**: NFKC normalization
+- **Per-Locale Notation Rule Table**: For each target locale, define the notation rules for UI copy (long-vowel marks in loanwords, acceptance criteria for loanwords, digit script, unit and currency format, date/time format, bracket and punctuation script) as a table and make it the shared input for translators, implementers, review, and lint (MUST). Reviews check against the table (SHOULD). Example: in Japanese, treat "サーバー (with long-vowel mark)" and "1,980円 (half-width digits + Japanese unit)" as correct and "サーバ" and "¥1980" as incorrect. Without the table, notation drifts within one screen and judgments change from review to review. See `product/600_brand_strategy.md` §4.8 for details.
 - **CJK Line Breaking**: `word-break: auto-phrase` (Chrome 130+). Fallback `overflow-wrap: anywhere`
 
 ### Section 29: Multi-Script Support
@@ -476,6 +478,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 - **Locale Priority Chain**: User setting > Accept-Language > Geo-IP > Default (en)
 - **Locale Persistence**: Server-side storage (Cookie + DB)
 - **Locale Switcher UI**: Accessible from all pages. Language names in native script (English, Español, العربية)
+- **Locale Switching Is a System Capability**: Once a locale switcher is placed in a component shared by all pages, the product has promised that every user-visible page and component follows the switch (MUST). "This page is not supported yet" is a defect, not a specification. Reviews, type checks, and lint that look only at the default locale cannot detect it (default-language text written directly in source works correctly in the default locale), so include in the acceptance criteria a verification that actually opens the non-default locale (MUST). Partial support that translates only some attributes reduces readability below no support, so never tolerate a mix of languages among labels, placeholders, and helper text within one screen (MUST NOT). Decide single-locale exceptions by "can the user choose a language on that screen", never by the look of URL paths or directory names (MUST). When adding a new page or component, add keys to the dictionaries of every supported locale at the same time; adding to only one is unfinished (MUST). A failure where type checks and lint pass yet many default-language UI strings remain on non-default-locale screens has been measured in practice.
 - **BCP 47 Compliance**: `ja-JP`, `en-US`, `ar-SA` format
 - **Unicode Locale Extension**: `-u-` subtag (RFC 6067) for locale-specific settings (calendar, numbering system, currency, etc.)
 
@@ -507,6 +510,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 
 - **Terms of Service / Privacy Policy**: Must be provided in target country language (GDPR Article 12, etc.)
 - **Consent Mechanisms**: EU: explicit opt-in (TCF 2.2), US: opt-out (GPP), Japan: Global Privacy Laws compliant
+- **Fail-Closed Regime Resolution**: Because the default consent state for device information (analytics, ads, notifications) is set by law per visitor region, declare the region-to-regime mapping inside a single function (SHOULD). When the location cannot be determined, fall to the strict side (opt-in) in production (MUST); local/preview may use the lenient side. Normalize the location decision on the server (edge), re-attach it as an internal header, and unconditionally strip any client-supplied header of the same name (MUST). Honor a stored explicit refusal regardless of regime (MUST). A market decision that conflicts with the Universal blanket rule MUST be declared explicitly as an exception in the Blueprint, with primary-source rationale and review conditions. A uniform strict default across all regions has caused a large loss of the analytics population in practice. See `security/100_data_governance.md` §4.4 for details.
 - **Age Restrictions**: Country-specific minimum age management
 - → See `security/100_data_governance.md`
 
@@ -516,6 +520,7 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 - **Holiday Calendar**: Maintain country-specific holiday DB. Reflect in marketing/notification schedules
 - **Seasonality**: Account for hemisphere season reversal
 - **Calendar Notes**: Japanese Rokuyo, Chinese Lunar New Year, etc.
+- **Data-Driven Switching of Time-Limited Themes and Copy**: Never hardcode dates for seasonal or event-based theme/copy switching; hold start and end times (with explicit timezone) as admin-panel or flag data (MUST). Revert automatically to the default outside the period, and never cause layout shift on switching. Automatically suppress loud promotions and push notifications during culturally or personally sensitive periods (mourning-related periods, around anniversaries the user registered, etc.) (SHOULD), and avoid strongly religious expressions, treating events as seasonal occasions (SHOULD). Hardcoded dates and forgetting to revert after the period are typical operational accidents.
 
 ---
 
@@ -632,6 +637,9 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 <link rel="alternate" hreflang="en" href="https://example.com/en/page" />
 <link rel="alternate" hreflang="x-default" href="https://example.com/en/page" />
 ```
+- **Layered Coverage Map**: For the non-default-locale public surface, keep a table that confirms coverage per layer and fill it on every change and audit (MUST): (1) UI strings (full key parity in message files + the remaining count of hardcoded strings that bypass the translation function), (2) application of DB content (both single items and listings; listings apply in bulk with no N+1), (3) metadata (title/description/og:locale; the default falls to the default language when the locale is omitted, so a forgotten argument creates asymmetry), (4) hreflang and sitemap (head declarations and the sitemap are 1:1 and synchronized in the same commit), (5) `inLanguage` in JSON-LD (every page falls to the default language unless the caller passes it; embedded UGC takes the language of the content itself), (6) the absolute-URL base (with the site URL unset, canonical/hreflang become deployment-specific URLs; insert a fallback to the stable domain). Each layer being correct while coverage is asymmetric across layers (detail pages applied, listings unwired; message files perfect, many hardcoded strings left) is what "half-done multilingual support" actually is.
+- **Self-Referential Canonical for Non-Default Locales**: The canonical of a non-default locale MUST be self-referential. Pointing at the default locale declares the page a duplicate of itself, and that surface is not indexed.
+- **Coverage of Operator-Entered Text**: Text operators enter from the admin panel (navigation, footer, site settings) is rarely regarded as content and slips out of coverage. Enumerate the DB columns that appear on the public surface and count "where the translation goes" and "where it is read" as pairs (MUST). For site-wide brand copy, make message files the source of truth for non-default locales and do not create per-language DB columns (SHOULD). When moving UI strings to the translation function, migrate the default-language key values as exact matches of the current displayed copy and confirm zero display degradation before writing other languages (SHOULD).
 
 ### Section 53: GEO (AI Search Optimization) Multilingual Support
 
@@ -645,6 +653,8 @@ CREATE TABLE events (start_at TIMESTAMPTZ DEFAULT NOW());
 - **Headless CMS Integration**: Language-variant management
 - **Fallback**: `fr-CA` → `fr` → `en`
 - **Content Freshness Sync**: Auto-detect translation staleness when source is updated
+- **Detection Separated from the Generation Job**: Detect "missing", "stale", and "failed" derivatives (translations, embeddings, summaries) as a pure function that uses no generative AI (reconciling source rows against derivative rows), separated from the generation job (MUST). Co-locating them lets the generation budget bind the detection frequency. Do not scan everything every time; sweep in shards determined by the date, completing a cycle every few days (stateless, so it cannot break) (SHOULD).
+- **Staleness Invisible in Status**: Staleness from a changed source never appears in the status column; the status stays `translated` and the SLO stays green. Changes that bypass the save path (migrations, bulk SQL) always leave this shape, so detection by recomputing the source hash is mandatory (MUST). Recompute the hash by calling the same function the write side uses (MUST); reimplementing the normalization yields false diffs from whitespace-class differences alone. "Stale while green" has actually happened in production.
 - → See `engineering/310_headless_cms.md`
 
 ### Section 55: Multilingual SEO Technical Debt Management
@@ -689,6 +699,8 @@ Never switch languages mid-response.
 - **Cross-Lingual Search**: Design for retrieving documents in languages different from the query
 - **Language-Specific Chunking**: CJK character-based, Western languages word-based
 - **Language-Aware Reranking**: Penalize documents in different languages from query
+- **One Copy in the Source Language**: Keep RAG knowledge as one copy in the source language and never double-manage assets per language (MUST). Base cross-lingual retrieval on the shared space of a multilingual embedding, and monitor the weakness relative to same-language retrieval by measurement, placing a per-language zero-result rate in the health check (MUST). Never assert "good enough" by guesswork. Answer generation may be cross-lingual (context in the source language + question in another language → answer in that language); there is no need to translate the knowledge before passing it.
+- **Derived Translations in Cost-Effectiveness Order**: Generate derived-language rows with the existing translation engine (source-hash diff), and instead of translating everything, derive in cost-effectiveness order starting from the top helpfulness scores of the feedback loop (SHOULD). Treat derived rows as the same hash lineage as the source and sum quality scores across languages. Duplicating assets per language lets quality improvements land on only one side and forks the lineage.
 - → See `ai/000_ai_engineering.md`
 
 ### Section 59: Multilingual AI-Generated Content Quality Assurance
@@ -722,6 +734,9 @@ Never switch languages mid-response.
 
 - **Real-Time AI Translation Pipeline**: Source text → PII removal → AI translation → Auto quality scoring → Below threshold: human review → TM registration & deploy
 - **Translation Cache**: Prevent duplicate translation API calls for identical text
+- **Diff Translation by Source Hash**: Decide what to machine-translate by the hash of the normalized source-language value (source hash), and call the translation API only when "no translation exists" or "the source hash changed" (MUST). Zero duplicate translation calls for the same hash is the success metric. Never overwrite a human-edited translation with AI; when the source changes, keep it as `stale` (needs re-check) (MUST). Hold the manual-protection flag and the status in separate columns. Distinguish at minimum `pending / translated / stale / manual / failed` as translation-row states, and apply only `translated / manual` on the public surface (SHOULD). The set of translatable fields is owned by an application-side constant and kept in sync with DB constraints, migrations, and tests (MUST).
+- **Never Pass Structure to the Model**: For AI translation of structured content (JSON, rich text), keep the structure on the application side, pass only an array of translatable strings to the model, and receive them back in the same order (MUST). Passing the structure consumes most of the output budget on structure and opens a path for the model to break it (measured: most of structured fields were structure and technical values). Before sending, replace PII (phone, email, postal code) and technical values (URLs, `src`/`href`/`style`/`script`, etc.) with DNT placeholders and pin the restoration by test (MUST). When the number of returned strings does not match the slots in the skeleton, fail that whole field and never apply partially (MUST NOT). Applying a shifted array puts a different translation into a different paragraph, and mixed-language body text reaches the public surface.
+- **The Segment Is the Failure Unit**: In a job that sends several items to an LLM together, the item (segment) is the unit of processing and failure; the batch is merely bundling for transfer efficiency (MUST). Designs that fail the whole batch are prohibited. Use three tiers: pre-packing (split to fit the output budget) → split retry (re-request a failed batch in halves) → intra-item splitting (split into chunks without cutting mid-sentence, reconcile counts per chunk, and rejoin), and derive the pre-packing budget and the actual `max_output_tokens` from the same constant (MUST). A production incident has occurred where one over-long field turned everything else `failed`. See `ai/000_ai_engineering.md` §16.2 for details.
 
 ### Section 62: Agentic AI Translation Agents
 
@@ -807,6 +822,8 @@ npx messageformat-validator locales/**/*.json
 - **Form Input Testing**: IME, RTL, fullwidth/halfwidth mixed input testing
 - **Date/Currency Display Testing**: Locale-specific format accuracy
 - **Timezone Testing**: Event time display before/after DST transitions
+- **Round-Trip Verification of Derived-Data Wiring**: Because local environments normally hold zero derived rows (translations, etc.) and cannot observe whether the wiring works, fix the verification procedure as a round trip: insert verification seeds → check both the default and non-default surfaces (including that no default-language text leaks into the non-default surface) → delete the seeds by identifier (SHOULD). Without seeds, a missing wire passes while green.
+- **Deep Localization QA**: In QA for the target locale, beyond scanning for residual character types, include in the acceptance items (a) an input → save → display round trip of environment-dependent characters, extended ideographs, and combining characters, (b) wrapping and overflow with long text containing no spaces (character count according to the language's characteristics), and (c) actually triggering every validation schema's error and confirming the language of the displayed message (SHOULD). A validation message shown in the default language is a defect.
 
 ### Section 71: LLMs.txt & AI Search Multilingual Testing
 

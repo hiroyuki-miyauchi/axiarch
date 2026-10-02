@@ -121,6 +121,7 @@ L1–L3 here classify language usage; they are independent of autonomy distance 
 
 - **Rule 74.8**: Language negotiation is unnecessary for a product that offers only one locale. One default language does not imply that the product offers only one locale.
 - **Rule 74.9**: Ensure UI state preservation during language switching (form input values, scroll position, modal state)
+- **Rule 74.9C**: The moment a language switcher is placed in a shared component on every page, the product has promised that every user-visible page and component follows the switch. "This page is not supported yet" is a defect, not a specification. Reviews, type checks, and lint that look only at the default locale cannot detect it (default-language strings hardcoded in source work correctly in the default locale), so acceptance criteria MUST include actually opening the screen in a non-default locale. Partial support that translates only some attributes reduces readability below no support at all, so a screen that mixes languages across labels, placeholders, and helper text MUST NOT be tolerated. Judge single-locale exceptions by "can the user choose a language on this screen", not by the look of the URL path. For new pages and components, add keys to the dictionaries of every supported locale at the same time; adding to only one is incomplete (MUST). Failure pattern: type checks and lint passed, yet the non-default-locale contact page still showed dozens of default-language UI strings. See [product/800_internationalization.md](../product/800_internationalization.md) Section 34 for details
 - **Rule 74.9A**: Locale-aware Service Worker prefetching and caching is an optional optimization, selected after assessing existing features and expected benefit.
 - **Rule 74.9B**: Treat language, time zone and calendar as separate settings. If Temporal is adopted, `Temporal.Now.zonedDateTimeISO(timeZone)` returns the ISO calendar; apply `withCalendar()` to the result when another calendar is needed. Do not infer a region or time zone solely from language. Verify runtime support ([official documentation](https://tc39.es/proposal-temporal/docs/now.html)).
 
@@ -532,6 +533,8 @@ throw new AppError(
 );
 ```
 
+- **Rule 74.81A**: Do NOT pass a caught exception's `message` straight into the user-facing field (`message` / `detail` / `error`) of an API / Server Action response (MUST NOT). It leaks DB names, function names, SQL state codes, and internal paths, and its language is not guaranteed either. Record the exception details as structured server-side logs and return an error code plus a fixed, localized message to the client (MUST). If details are exposed in development only, always go through an environment check. Failure pattern: the shortcut `message: error.message` showed users an English DB error containing the constraint name and table name verbatim
+
 ### 8.3. Error Code System
 
 - **Rule 74.82**: Error codes use **English SCREAMING_SNAKE_CASE** (`AUTH_INVALID_TOKEN`, `QUOTA_EXCEEDED`)
@@ -568,6 +571,7 @@ export default function GlobalError() {
 - **Rule 74.90**: **Internal API** (consumed by frontend) error message `detail` / `message` fields are in the **Project Native Language**
 - **Rule 74.91**: **External public API** (`/api/v1/*` for third parties) remains in **English**
 - **Rule 74.92**: Verify during PR review that error response function parameters match the target language
+- **Rule 74.92A**: Inspect the arguments of shared response helpers (`detail` / `message`) at every call site individually (MUST). Even when the helper's title dictionary is translated, the arguments are hand-written per route and residue is likely. Places that return the framework response directly without the shared helper (off-path handlers such as webhooks and cron) fall outside the benefit of centralization, so include them as priority scan targets (MUST). Route groups cloned from a template chain the same residue, so when creating from a template make copy replacement a checklist item (MUST). Failure pattern: the UI layer was fully localized, but the webhook handler bypassed the response helper and kept returning fixed English copy (the two-layer blind spot)
 
 ### 9.2. GraphQL/gRPC
 
@@ -785,6 +789,7 @@ error.network.timeout     → "Connection timed out"
 
 - **Rule 74.150**: For multilingual content version management, the authoritative language version is treated as the "source of truth," with other language versions positioned as derivatives
 - **Rule 74.151**: When the authoritative version is updated, automatically flag other language versions as "translation update required"
+- **Rule 74.151A**: Settings entered by operators through the admin UI or CMS (site-name taglines, labels, notes, etc.) are "default-locale-only values" unless they carry a locale dimension. The fallback order `operatorValue || dictionary` never consults the dictionary as long as a value exists, so the default language leaks into non-default locales. In non-default locales prefer the dictionary and use the operator value only in the default locale, or add per-locale columns (MUST). Fixed copy returned by server processing (Actions / Services) is likewise a single-locale value; swap it for the dictionary on the display side according to locale, and prefer returning error codes rather than copy (SHOULD). Failure pattern: because a site-settings value existed, the dictionary was never consulted in the non-default locale and only the header copy stayed in the default language
 
 ### 14.4. Translation Memory & Term Base Integration
 
@@ -815,6 +820,7 @@ error.network.timeout     → "Connection timed out"
 
 - **Rule 74.161**: For multilingual sites, set `hreflang` attributes accurately on all pages (→ see [product/800_internationalization.md](../product/800_internationalization.md) Part X)
 - **Rule 74.162**: `robots.txt` is language-independent (written in English)
+- **Rule 74.162A**: For a non-default locale's public surface, verify coverage per layer in a table (UI strings; DB content on both detail and list views; locale passed to metadata; hreflang and sitemap synchronized in the same commit; JSON-LD `inLanguage`; the absolute-URL base) and fill it in on every change and audit (MUST). The canonical of a non-default locale MUST be self-referential; pointing it at the default locale declares the page a duplicate and it is not indexed. Text operators enter through the admin UI (navigation, footer, site settings) is rarely regarded as content and slips out of coverage, so enumerate the DB columns that appear on the public surface and count "where the translation goes in" and "where it is read out" as pairs (MUST). Failure pattern: every layer was built correctly, yet coverage was asymmetric per layer (detail pages applied, lists unwired; message files complete, hundreds of hardcoded strings remaining), which read as "half-done multilingual support". See [product/800_internationalization.md](../product/800_internationalization.md) Section 52 International SEO for the coverage map
 
 ---
 
@@ -924,6 +930,13 @@ Is the text displayed to users?
   - `title` / `description` properties
   - Email templates
   - Notification messages
+  - Fallback values (the `|| 'Error'` in a status-to-title dictionary, etc.), empty-state text, and `throw new Error()` messages that can reach the client
+  - Off-path handlers that return the framework response directly without the shared helper (webhooks, cron), and route groups cloned from a template
+  - Raw values returned by client-side follow-up fetches ("load more", tab switches, search via Server Actions / APIs). Applying translation only to the SSR initial render reverts to the default language the moment the user interacts. Put the application choke point inside a Server Action that can read the locale from the request context, grep every call site by the fetch function's name, judge each one as "applied / proper nouns only, not needed", and confirm zero remaining
+  - Exception surfaces (not-found / error / global-error). The soft-404 is a high-frequency surface exposed on every unmatched URL in a non-default locale. Only the last line of defense that stands outside the translation provider falls back to static multilingual side-by-side text, with the design constraint stated in a comment
+  - The formatting layer for dates, quotation marks, and separators. Even with strings translated, template concatenation that injects year-month notation or middle dots produces mixed-language output. Keep the locale version of the formatting function as the SSOT and have the default locale delegate byte-for-byte to the existing notation
+  - A second-round deep scan: Service / Action return values, `aria-label`, `confirm()` arguments, and dynamic display via CSS `uppercase` (scanning string literals alone is insufficient)
+- **Rule 74.181A**: When adding a fallback to a component, trace back whether the caller is already injecting a default value (MUST). Centralize default-copy injection on "the side that knows the message", and never create a **dead fallback** where the caller always passes a default-language constant via `??` so the component's `message || t(...)` never fires (tests stay green but it never works). Detect sibling-gaps, where a locale-aware function exists but some surfaces have not adopted it, by grepping the function name and enumerating every adopting surface (SHOULD). Failure pattern: residue of the "the implementation exists but a surface is missed" kind was extracted in 4 separate audits as follow-up fetches, exception surfaces, the formatting layer, and dead fallbacks
 
 ### 18.2. Scan Exclusion Configuration
 
@@ -942,6 +955,7 @@ Is the text displayed to users?
 - **Rule 74.184**: Automated glossary consistency check for newly added strings is recommended
 - **Rule 74.185**: Recurring scans for residual placeholder text are optional. If adopted, record an impact-based frequency in project rules.
 - **Rule 74.185A**: Automatically post translation-coverage summaries to PRs only within a workflow authorized for the destination, content and permissions.
+- **Rule 74.185B**: Split the language-quality scan (residue of non-target languages, hardcoded strings, glossary mismatches, prohibited expressions, placeholders) by severity per item: Critical blocks the merge, Warning stays a PR comment (fix by the next sprint) (SHOULD). Exclude brand names, technical terms (`API`, `URL`, `ID`, etc.), and code comments via an allowlist, and never block on character script alone (MUST; per Rule 74.183).
 
 ### 18.4. ESLint / Biome Custom Rules
 
@@ -966,6 +980,7 @@ module.exports = {
   - **Glossary compliance rate**: Match rate with standardized expressions registered in the glossary
   - **Untranslated string count**: Trend of untranslated strings detected by CI
 - **Rule 74.187A**: Visualize translation diffs in PRs so reviewers can easily verify language changes
+- **Rule 74.187B**: Metrics that regress silently through new code once achieved, such as the untranslated string count, become a ratchet (non-return valve) gate in CI that compares against the "previous baseline" and fails the moment it worsens (SHOULD). A one-off "reached zero" report cannot sustain it. Derive the scan targets from "the set of the codebase (directories, AST, types)" rather than "a list naming target files" (MUST); a named list misses targets added later. Permit loosening the baseline only when the PR states the reason (MUST), and report violations with file names so the fixer can navigate directly (SHOULD). Failure pattern: operating on a named target list, residue in newly added pages sat outside the check and kept growing. See [quality/000_qa_testing.md](../quality/000_qa_testing.md) §19 for details
 
 ---
 

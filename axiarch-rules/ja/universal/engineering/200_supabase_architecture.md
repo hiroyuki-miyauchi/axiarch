@@ -113,6 +113,9 @@
     -   **PII Exclusion**: `admin_notes`, `phone_number`, `email` 等のPIIや内部管理フィールド（`deleted_at`, `internal_memo`）がブラウザへ到達するリスクを設計上低減してください。
     -   **Payload Minimization**: 不要なフィールドの送信は、ネットワーク帯域の浪費と、将来のデータ漏洩リスクの二重の問題を引き起こします。
 -   **Rationale**: SD 0.2（Trinity DTO Mandate）が定義するDTO化義務の具体的な境界線として、クライアントコンポーネントへのデータ受け渡しを物理的な遮断点として確立します。Raw Entityの直接送信は、意図しないPII漏洩の最大のリスク源です。
+-   **Two-Key Lock & Serialization Boundary**:
+    -   **Two-Key Lock**: 「管理者しか見ない」経路も含め、DB読み出しは例外なくDTO mapperを通し、SELECT列allowlistとDTO出力allowlistの両方をopt-inしなければ新列が外へ出ない構造を維持します（MUST）。正本は `engineering/300_web_frontend.md` の「Two-Key Lock」。
+    -   **Runtime Serialization**: Server→Client境界、`data-*`属性、JSON-LD、hydration payloadへ渡したobjectは、型が公開型でもclient側が使わなくても、実行時に存在する全enumerable fieldがserializeされます。機微列を持つadmin DTOは境界の前に公開射影へ変換し、表示対象へpruneしてから埋め込み、`JSON.stringify(projection)`に機微値・削除済み要素のmetaが現れないことをテストで固定します（MUST）。正本は `engineering/300_web_frontend.md` の「Two-Key Lock」。
 
 ### Core Laws
 -   **Explicit Authority (Single Source of Truth)**: データ領域ごとに権威ある保存先と所有者を一つ定義します。PostgreSQL、外部CMS、オブジェクトストレージ、構成リポジトリ等の併用は、領域境界・同期方向・競合解決・障害時挙動が明文化されている場合に許可します。意図しない二重権威は禁止します。
@@ -120,6 +123,8 @@
 -   **Migration Immutability Law (Sanctuary)**:
     -   **Law**: 共有環境へ適用済み、または他者が依存するマイグレーションは不変とし、修正は新規マイグレーションで行います。
     -   **Private Draft**: 未適用かつ作成者だけが保持するドラフトは、レビュー前に限り履歴を明確に保って修正できます。
+    -   **Append-Only After Merge**: default branchへ入ったmigrationは追記専用とし、修正は必ず新versionのfileで行います（MUST）。同一versionの本文がブランチ間で分岐すると、「未適用versionだけ適用する」運用では先にマージされた本文が既適用として記録され、後からマージされた本文はfileだけ更新されて本番へ永久に届きません。この故障はgit merge、lint、testのいずれにも現れません。
+    -   **Mechanical Detection**: default branch上のmigration改変は機械的に検出し、比較対象はHEADではなくindex（staged）を優先します（HEAD比較はpre-commit時点の改変を1commit遅れて検出します）。「スタック関係だから順序は保証される」を根拠にせず、祖先関係は`git merge-base --is-ancestor`等で実測します。運用約束（マージゲート・手順書）だけに依存する棄却は、構造的な除去を別途検討します（SHOULD）。
 
 ---
 
@@ -143,7 +148,11 @@
 -   **Law**: 設定はaccess pattern、constraint、更新単位、検索、履歴、schema evolutionから表現を選びます。独立してquery・join・制約・権限管理する属性はrelational column／tableを優先し、一つのbounded aggregateとして読み書きする可変構造はJSONBを選べます。
 -   **JSONB Contract**: JSONBにはowner、versioned schema、runtime validation、size limit、default、unknown-field policy、migration／backfill、index方針を定義します。型なしのcatch-all blob、無制限成長、秘密情報の混在は禁止します。
 -   **Promotion Trigger**: 頻繁なfilter／join、強いDB constraint、field-level authorization、独立lifecycle、hot-update contentionが必要になった属性はcolumnまたは関連tableへ昇格します。
+-   **Sibling Consistency**: 同種の属性が既に専用columnとして存在するなら、新しい同種属性もcolumnにします。同種dataがcolumnとJSONB内fieldに分散すると検索・型安全性・保守性が同時に劣化し、「migrationが面倒」はJSONBを選ぶ理由になりません（MUST NOT）。
+-   **Aggregation Columns**: AI解析結果等のうち集計・検索に使う値は通常columnへ保存し、詳細は参考metadataとしてJSONに留めます。JSONの値を集計対象へ昇格するときはmigrationで専用columnを足してから行い、読み戻しは正位置を最優先して旧互換keyは正位置が無い場合のfallbackに限定します（SHOULD）。
 -   **Migration**: relational schemaまたはJSON contractのbreaking changeはmigrationとしてversion管理し、old/new reader互換、backfill、rollback／forward-fixを検証します。
+-   **Promotion Procedure**: JSON属性のcolumn昇格は (1) 新column追加（JSONは維持）→ (2) backfill → (3) 読み取り切替 → (4) 書き込み切替（移行期間中はJSON keyも同時書き込み）→ (5) 全行の移行完了を確認してJSON key削除、の順で行い、各段階で生成型の再生成・全DTO／取得仕様の参照更新・JSON key削除後の動作検証をchecklist化します（MUST）。最も事故が多いのは削除後の参照残りです。
+-   **Non-Promotion Criteria**: 表示制御・UI設定のみに使う属性、外部APIの生response、構造が安定していないprototype段階の属性は昇格しない条件として明文化します（SHOULD）。昇格判断にはWHERE／JOIN／GROUP BY頻度、NOT NULL／UNIQUE要否、財務・法務・権限logicでの使用、構造の安定期間を記録し、閾値はBlueprintで決めます。
 
 ### Rule 2.1: Integrity & Ownership
 -   **RLS Strict Default**: exposed schemaとuntrusted client accessでは行レベルセキュリティ（RLS）を標準境界とします。`service_role`等のbypass credentialはclientへ渡さず、server-sideの限定workloadだけに最小scope、監査、rotationを伴って許可します。maintenance、migration、system jobまでRLS経由へ一律強制せず、各privileged pathの認可境界を明示します。
@@ -155,6 +164,7 @@
         2.  **Revocation**: 失効がcache、JWT、replicaへ反映される上限を定義する。
         3.  **Inheritance**: 親子継承を使う場合は循環、越境、confused deputy、削除時挙動をnegative testする。
 -   **PII Encryption**: data classificationとthreat modelに応じて、provider encryption、application／field-level encryption、tokenization等を選び、key ownership、rotation、searchability、backup／restoreを設計します。Vaultやpgcryptoは候補であり一律既定ではありません。
+-   **Searchable vs Encrypted Columns**: application-level暗号化を列単位で適用する場合、絞込・並替・集計に使う列（種別・日付・金額等）は平文に残し、自由記述・氏名・識別番号など検索不要の機微列だけを暗号化します（MUST）。暗号化列はSQLで検索できないため、後から検索要件が出た列を暗号化していると機能不能になります。暗号化対象列・対象JSON keyの一覧はcode上のSSOT定数で管理し、書込・読出・移行の全経路が同じ一覧を参照します（MUST）。鍵は環境変数／secret storeで管理し、本番で未設定なら起動時に失敗させます。
 
 ### Rule 2.2: Schema & Type Standards
 -   **Schema Separation**: exposed API、internal data、extension object、audit／administrationのtrust boundaryをschemaとgrantで分離します。schema名を`public`／`extensions`／`admin`へ固定せず、既存extension locationとprovider supportを確認してmigrationします。
@@ -163,15 +173,18 @@
     -   **Identity**: key typeはglobal uniqueness、sortability、offline生成、replication、privacy、storage costから選びます。連番が適合する場合は`IDENTITY`を`SERIAL`より優先します。
     -   **Money**: exactな金額・会計計算にはsmallest-unit integerまたは精度・丸めを明示した`numeric`／`decimal`を用います。近似値が許容される測定値までfloatを禁止しません。
     -   **Boolean**: `NULL`が未知／未評価としてdomain上必要かを決めます。二値なら`NOT NULL`と意図したdefault、三値なら意味・query・migrationをdata contractへ記録します。
+    -   **Conditional Presence**: 設備・サービス・対応可否のように「条件付きで可」が現実に存在する属性はBooleanで表さず、`status`（可／条件付き／不可）と`note`（条件の補足）を持つ構造にします（SHOULD）。Boolean化は「条件付き」を可か不可へ黙って倒し、表示と実態が乖離します。Booleanからの移行は`true→可`／`false→不可`へ機械変換し、「条件付き」は人手または明示ruleでのみ付与し、UI・検索・APIは3値を区別して扱います（MUST）。
 
 ### Rule 2.3: Type Safety Protocol (The Bridge)
 -   **Generated Contract**: 採用SDK／言語で公式生成が利用可能なら、schema revisionから型またはclient contractを再現可能に生成し、生成元digestとdriftをCIで検証します。TypeScriptの`database.types.ts`は一例です。
 -   **Boundary Validation**: compile-time typeだけに依存せず、untrusted input、database result、event、external APIを言語nativeまたは承認済みruntime validatorで検証します。
 -   **Adapter Law**: generated typeをdomain typeへ変換するadapterはnullability、decimal、timestamp、enum未知値、JSON、64-bit integerを明示します。Mapped Type、intersection、class、code generation等のHowを一律禁止・強制せず、type testとruntime testで安全性を証明します。
+-   **Free-Text Value Domain**: DB側にenum／CHECKを持たない文字列列の許容値は、app層に単一の定数SSOT（literal型）を置き、生産側・消費側の双方がそれを参照します（MUST）。文字列literalの散在はtypoが実行時まで顕在化しないため禁止し、SSOTの不変条件（一意性・命名規則・必須entry）は単体テストで固定します（SHOULD）。
 
 ### Rule 2.4: The New Table Checklist (Creation Protocol)
 -   **Law**: 新規テーブルは適用項目を満たし、非該当項目は理由を記録します。
     - [ ] **Exposure & Grants**: exposed schemaかを明示し、roleごとのtable／column privilegeを最小化したか？
+    - [ ] **Grant Triad**: policy・関数EXECUTE・table自体のGRANTの3点を揃えたか？ 既定権限（default privileges）を絞った環境では、後から作ったtableにbypass roleへも自動GRANTが付かず、policyはGRANTの代わりになりません。`SECURITY INVOKER`のRPCは呼び手のtable権限で落ちるため、EXECUTEを配っただけでは書けません。「特権roleに表GRANTが無い公開schemaのtable＝空集合」を補集合ratchetとしてDB testで固定し、実際に行が入る挙動で検査する（SHOULD）。
     - [ ] **RLS & Policy**: exposed schemaまたはuntrusted client pathではRLSを有効化し、必要な`anon`／`authenticated`等の操作だけをpositive／negative testしたか？ RLS bypass roleへ冗長なpolicyを作成しない。
     - [ ] **Integrity & Index**: PK、FK、unique、check、nullabilityと、実query／join／delete costに必要なindexを確認したか？ 全FKへの機械的一律indexを前提にしない。
     - [ ] **Contract**: 採用言語のgenerated type／schema client／API contractを更新し、driftを検証したか？
@@ -181,6 +194,7 @@
 -   **Law**: データアクセスコード（Query/Mutation/DTO）を新規作成・変更する際は、参照する全カラムが実際のDBスキーマに存在し、型・制約が一致することを事前に検証しなければなりません。
 -   **Action**:
     1.  **Column Existence**: `.select('column_name')` や `.not('column', 'is', null)` を書く前に、自動生成型定義ファイル（`database.types.ts` 等）の `Row` 型で**カラムの実在を確認**してください。「たぶん存在する」は禁止です。
+    1b. **Mechanical Column Check**: query／filter／sortで文字列literalとして書いた列名・key名は、生成型があっても型検査の外側にあります。data access層のliteral列名は生成schema型と機械照合するテストを置き（MUST）、新設した検査は実在しない列名へ書き換えて赤化することを確認してから採用します（MUST）。赤化しない検査は存在しないのと同じです。同種の誤りは1箇所を写して増えるため、複数箇所に並んでいる前提で探します（SHOULD）。
     2.  **FK Name Verification**: 外部キー名（`user_id`, `owner_id` 等）はテーブルごとに異なります。デフォルト名を仮定せず、各テーブルの実際のFK名を型定義で確認してください。
     3.  **RPC vs Column Distinction**: RPC関数（例: `get_point_balance`）はカラムではありません。`.select()` で直接取得できないため、元テーブルからの集計やRPC呼び出しとして正しく実装してください。
     4.  **Array Empty Check**: 配列型カラム（`text[]`, `jsonb[]` 等）の「存在チェック」は `.not('column', 'is', null)` だけでは不十分です。空配列 `{}` も除外するために `.neq('column', '{}')` を追加してください。
@@ -193,6 +207,9 @@
     | FK名が実テーブル定義と一致する | Relationships セクションの確認 |
     | 配列型カラムの空チェックが正しい | `.neq('column', '{}')` の追加 |
     | nullable/optional が DB定義と一致する | 自動生成型との突合 |
+    | literal列名が生成型と機械照合されている | 機械照合テスト＋変異（実在しない列名）で赤化確認 |
+-   **No Derived Projections**: form形状や論理key定義から物理列listを機械導出してはなりません（MUST NOT）。nestして保存されるkeyは「存在しない列」になり、実DBでは1列の誤りでrequest全体が拒否されます。物理列listは明示literalで宣言し、`satisfies (keyof Row)[]`相当で存在しない列がcompile errorになるよう型で固定し、論理key↔物理列の対応は冪等な正規化関数1本に集約します（MUST）。DB clientをmockした単体テストは列の実在を構造的に検証できないため、「全論理keyが（実列∪nest宣言）に含まれる」ことを機械検証し、実DB（local・本番相当seed）への実SELECTを正・負両方で検証手順に含めます（MUST）。mock test緑≠実DB動作。
+-   **DB-Enforced Value Set**: CHECK制約・policy内literal・enumがDBで強制する値集合はapp側定数のSSOTであり、値集合を変えるmigrationには定数・validation schema・DTO union・UI選択肢の更新を同一変更に含めます（MUST）。code側とSQL側の集合差を双方向で機械検出するverify scriptをpre-commitまたはCIで強制し、手動実行の同期scriptをdrift防止と見なしません（MUST）。詳細は `engineering/000_engineering_standards.md` §10.6 を参照。
 -   **Rationale**: スキーマと実装の乖離（Schema-Reality Gap）は、本番環境でのみ顕在化する「サイレントバグ」の主因です。型定義ファイルを「絶対的な真実」として扱い、推測による実装を排除することで、この種のバグをゼロにします。
 
 ### Rule 2.18: The Automated Data Retention Protocol（自動データ保持期間プロトコル）
@@ -229,12 +246,15 @@
 
 ### Rule 3.0.1: The RLS Helper Functions Registry (RLS Utility)
 -   **Helper Isolation**: RLS ポリシー内で対象テーブルを再参照すると無限再帰（`42P17`）が発生し得ます。複雑な認可は、まず `SECURITY INVOKER`、security-barrier view、claim、または単純化したpolicyで解決し、所有者権限が本当に必要な最小境界だけを `SECURITY DEFINER` 関数へ分離してください。
+-   **Plan-Time Privilege Check**: policy式が参照する全tableは、行の分岐に関係なくplan時に権限検査されます。当該roleが読めないtableをpolicyの分岐に含めると、その分岐と無関係な行の読取まで`permission denied`で落ちます（PostgreSQLで実測）。親の公開状態を子で確かめる必要があるなら、識別子を`<親id>:<子id>`の複合keyにしてroleが読めるtableだけを参照し（SHOULD）、policy変更時は該当roleで無関係な読取が落ちないことをテストします（MUST）。
 -   **The Qualified Schema Mandate (RPC Security)**:
 -   **Law**: `SECURITY DEFINER`はprivilege boundaryとして扱い、安全な`search_path`、schema完全修飾、最小`EXECUTE` grant、入力validation、negative testを必須とする。`SET search_path = ''`を選ぶ場合はbuilt-inを含む参照を完全修飾し、利用extensionとの互換性をtestする。
 -   **Registry Standards**:
         -   helper名、引数、返却、owner、volatility、security mode、利用policyをinventory化する。
         -   `is_admin()`や`is_owner(resource_id)`は例であり、固定schema、role名、関数名をUniversalへ持ち込まない。
         -   **Requirement**: ヘルパー関数は `SECURITY INVOKER` を既定とします。`SECURITY DEFINER` を採用する場合は、権限昇格が必要な理由、返却可能な情報、呼び出し可能role、RLS迂回範囲をレビューし、`SET search_path = ''`、完全修飾参照、`PUBLIC`からの`EXECUTE`取消、許可roleへの明示grant、負の権限テストを必須とします。
+-   **Literal-Free Policies & Helper Migration**: policy本文にemail・uuid・単一role名のliteralを埋めません（MUST NOT）。ownerのemailが変わるとmutationが「権限なし」で静かに死にます。`pg_policies`をemail／uuid／`role = '...'`のpatternで走査し、hitはSSOT helper経由へ書き直します。helper導入migrationでは旧hard-coded policyを名指し`DROP POLICY IF EXISTS`で削除し、再CREATEと同一migrationに含めます（MUST）。advisorは「policy個別の許可集合差」を検出しないため、旧policyが生きていても警告は出ません。app側の許可role集合とSQL helperの集合はCIで機械比較します（SHOULD）。
+-   **Anon-Evaluated Helpers**: 公開SELECT policyはhelper不使用のpure public policyとし、admin readは別policyへ分離します（SHOULD）。anonが評価するpolicyでhelperを参照するなら、anonのEXECUTE有無をHTTP smokeで確認し、「HTTP 200だが内部で空配列fallback」を成功扱いしません。
 
 ### Rule 3.0.2: The Privileged Access RLS Protocol
 -   **Context**: 運用者による訂正が必要なデータでも、全policyへ恒久的な管理者バイパスを追加すると、侵害時の影響と内部不正の範囲が全データへ拡大します。
@@ -273,6 +293,7 @@
       AND created_at > (now() - interval '1 hour') -- 作成後1時間以内のみ
     );
     ```
+    -   **Rationale (Time Limit)**: 公開済みUGC（レビュー・投稿・コメント）の本人による編集・削除を作成からの期間で制限する目的は、評価集計の整合性と「炎上後の隠滅」等の事後改竄防止です。期間経過後は訂正申請または運営承認付きの論理削除へ切り替えます（SHOULD）。期間はBlueprintで決めます。
 -   **Heirarchical Access (Parent Check)**:
     ```sql
     -- "child_resource_select_policy"
@@ -311,15 +332,18 @@
 -   **Law**: 同一commandの`PERMISSIVE` policyは`OR`で結合されるため、個々のpolicyだけでなくcombined effective accessをreviewする。複数policy自体を脆弱性と断定しない。
 -   **Action**: 既存policy inventoryと依存consumerを確認し、重複・shadowed・過剰許可だけを同一migrationで修正する。安全性を証明せず先に`DROP`して可用性を壊してはならない。
 -   **Verification**: `pg_policies`等のmachine-readable inventory、role別positive／negative test、representative plan、rollbackをevidenceにする。policy数に固定targetを置かない。
+-   **Broad-Policy Consolidation & In-Migration Assert**: 既存の許可policyと同じrole×actionを包含する広いpolicy（例: `FOR ALL`）を追加するmigrationは、重複する既存policyを同一migration内でDROPまたは統合します（MUST）。「残っていても無害」は誤りで、二重評価costとadvisor警告を発火します。統合migrationは末尾で不変条件（匿名roleが管理者判定関数をEXECUTEできない、対象(table, command, role)のpolicy本数）を`DO`ブロック等でassertし、失敗時はmigration自体を失敗させます（SHOULD）。
 
 ### Rule 3.4: RLS Lifecycle Management Protocol
 -   **Create-Verify-Retire**:
     1.  **Before Change**: policy、role、grant、bypass identity、consumerをinventoryし、期待するeffective accessをtest case化する。
+        -   **Column Distribution Changes**: 列の値分布を変える変更（NULL固定・既定値変更）では、その列を参照するpolicy式をgrepして同一PRで直します（MUST）。挿入経路は「匿名／ログイン × NULL／他人」の4象限でtest固定し、policy内で文字列IDを型castするなら書式guard＋桁上限を付けて破損1行で全読取がabortしないようにします。
     2.  **Apply Safely**: transactional DDLの可否とlockを確認し、過剰許可windowと正規access遮断の双方を避けるexpand／contract順序を選ぶ。
     3.  **After Change**: provider advisor、catalog diff、role別test、application flow、query planを確認し、旧policyは依存が消えた証拠を得てretireする。
 -   **Naming Convention**: teamが一意性、table、command、intentを識別できるversioned conventionをBlueprintで決める。自然言語名や特定formatをUniversalで禁止・固定しない。
 -   **Rollback**: policy変更とrollbackはimmutable migrationで管理し、policy名をcatalogから解決して意図しない対象を変更しない。
 -   **Change Checklist**: catalogから取得したpolicy identifierと定義、期待するeffective access、依存consumer、migration順序、rollback、advisor所見をmachine-readable evidenceへ残す。入力方法やpolicy数ではなく、識別子の正確性と検証結果をgateにする。
+-   **Enum Branch Coverage**: `entity_type`等の列挙で分岐する読取policyへ値を追加する変更は、app定数・DB CHECK制約・policy分岐・設定registry・保存hook・公開面・管理UIを同一変更で揃えます（MUST）。特にpolicy分岐の追加漏れは、書き込みが特権roleで成功するため読み口だけが0件になり、HTTP 200・例外なし・logなしで縮退します。CHECK制約を正として各層の被覆を補集合（正にあって層に無い値）で検査するテストを置き、追加時に自動で赤くなるようratchetします（MUST）。
 -   **Strictification Guardrail**: 緩い`PERMISSIVE` policyが残れば厳格policy追加だけではeffective accessを狭められない。transaction、lock、availability、rollbackを評価し、旧policyのreplace／dropと新policyの作成を、過剰許可windowを生まない順序で実施する。
 
 ### Rule 3.5: Public Read Protocol (Anti-Vault Paradox)
@@ -328,6 +352,8 @@
     1.  **Public Read**: 明示的にpublic分類したdataだけを、field minimization、scraping／abuse、cache、rate、future schema evolutionを評価して公開する。`USING (true)`は意図した全row公開契約とnegative testがある場合の候補である。
     2.  **Strict Write**: 書き込み（`INSERT/UPDATE/DELETE`）は引き続き厳格にロック。
     3.  **Separation**: readとwriteのactor、row、column、rateを別contractとしてtestする。
+    4.  **Projection = Grant**: 匿名／公開roleが読む射影の列集合とDB側の列単位GRANTは完全一致させ、「appは一部列しか読まない」設計でもtable全体のGRANTを禁止します（MUST）。appの射影は権限境界ではなく、Data APIを直接叩けば列GRANTが残る限り漏れます。公開値だけで足りる処理（CORS、CSP、redirect、OGP）は公開env resolverだけを読み、server secretを含むenv resolverを公開経路へ巻き込みません（MUST）。
+    5.  **Explicit Public Predicate**: sitemap・公開feed等の公開crawl経路のdata取得は、`status = published`等の公開条件をapp側でも明示し、policyの管理者分岐に依存しません（MUST）。DB側はpublic read policyとadmin read policyを分離し、公開経路でadmin helperの評価を発生させません（SHOULD）。HTTP 200で空listはfeedの失敗であり、生成時のserver log（DB error・空配列fallback）まで確認します。
 
 ---
 
@@ -337,13 +363,19 @@
 -   **FK Indexing**: FKのindexはjoin、parent update／delete、cardinality、write amplification、table size、query planから判断する。全FKへ一律作成せず、必要なcomposite／partial indexを実queryから設計する。
 -   **Naming Convention**: index名は一意性、table、column／expression、predicateを追跡できるproject conventionで管理する。`idx_<table>_<column>`は例である。
 -   **Lifecycle**: usage statistic、query plan、write cost、constraint support、seasonal traffic、standby／replicaを十分な観測期間で評価し、作成・reindex・削除をonline impactとrollback付きで行う。
+-   **Verification (Usable vs Used)**: 索引・最適化の是正は、実際に流れるquery形（WHERE句の演算子、wildcard位置、locale別の最頻語・最短語）で実行計画を取り、索引が本当に使われることを実測してから「解消した」と主張します（MUST）。小規模tableではplannerが全走査を選ぶため、「使えるか」の判定には`enable_seqscan=off`相当で全走査を抑止した計画を用い、「使うか」と区別します（SHOULD）。「索引は張られている」と「主要経路が索引で走る」は別命題で、`show_trgm`等の補助関数が値を返すことは索引利用の証拠になりません。是正の適用範囲と未達範囲はmigration commentと報告に明記し、有効範囲のある索引は撤去しません（MUST）。
+-   **Advisor Semantics**: 「未索引のFK」と「未使用の索引」の警告は構造的に相互変換関係にあり、両方を同時にゼロにする目標を置いてはなりません（MUST NOT）。追加直後の索引は使用統計が溜まるまで「未使用」に見えるため、warm-up猶予（例: 30日）を置いてから削除候補にし、長期（例: 90日以上）zero scanのものを一括削除対象とします（SHOULD）。PK／unique制約のbacking indexは制約が依存するため削除できません。ゼロ警告監査の達成基準は「WARN／ERROR = 0、INFOは文書化された判断」です。
 
 ### Rule 4.2: Japanese Search Optimization
 -   locale、tokenization、typo tolerance、ranking、highlight、update latency、extension supportを評価し、PostgreSQL native FTS、`pg_trgm`、PGroonga、外部search等を選ぶ。CJK対応を単一extensionへ固定しない。
+-   **N-gram Lower Bound**: 部分一致索引（`pg_trgm`等のn-gram系）には索引化できる最小文字数の下限があり、対象localeの最頻query（CJKの1〜2文字語等）が下限未満なら、索引を張っても主要経路は未解消です。localeの代表語で実測し、未達範囲を明記します（MUST）。
 
 ### Rule 4.3: Scalability Strategy
 -   **Bounded Query**: public／untrusted／collection queryはfield、row、time、scan、costをboundedにする。`select('*')`は明示的な小規模contractなら許容でき、pagination方式はconsistencyとconsumer UXから選ぶ。
+-   **Counter over Count**: rate limit・日次上限等の受付上限を「対象期間の行数を数える」で判定してはなりません（MUST NOT）。正本は `engineering/100_api_integration.md` の「Counter over Count」。
 -   **Filter Placement**: authoritative filterは可能な限りdata sourceへpush downする。application-side filterがpresentation-onlyか、page completeness／countを壊さないことをcontract testする。
+    -   **Post-Query Filter Symptoms**: limit／offsetやcursorでpage分割するqueryでは、結果を絞る条件を取得後にapplication側で適用してはなりません（MUST NOT）。`count`がfilter前の全件を返す、一致すべきrecordが次pageへ漏れる、途中pageが0件になる、の3症状がPost-Query Filterの典型で、contract testで再現・防止します（SHOULD）。条件は必ずdata sourceへ押し下げ、`count`と`page`が同じ述語で計算されるようにします（MUST）。
+    -   **Unsupported Predicates**: SDK／query builderが表現できない述語（tagのAND一致、多対多の全件一致等）は、先に対象ID集合をsubquery／RPC／別queryで解決してから`IN (...)`で本queryへ渡すか、view／RPC／検索索引などpaging前の集合側で解決します（SHOULD）。presentation-onlyのfilterは例外ですが、count／page完全性へ影響しないことをテストで示します（MUST）。
 -   **Scale Controls**: partition、replica、archive、cache、materializationをrow数だけで決めず、table／index size、growth、vacuum、lock、query plan、RPO／RTO、lag、costから選ぶ。
 -   **Connection Pooling（接続プール最適化）**:
     -   **Law**: runtime concurrency、connection lifetime、prepared statement、transaction／session semantics、database capacityからdirect、transaction pool、session poolを選ぶ。
@@ -358,6 +390,7 @@
     1.  **State Model**: pending、confirmed、failed、conflicted、offlineを明示し、duplicate submitを防ぐ。
     2.  **Recovery**: rollback、reconciliation、retry、user-visible errorをdomain riskに応じて設計し、toast等の特定UIを強制しない。
     3.  **High-Risk Action**: 金銭、削除、権限変更等はserver confirmation、step-up、undo／compensationを優先する。
+    4.  **Local State Completeness**: 更新APIの戻り値でlocal stateを上書きする際、戻り値は一覧取得時のDTOと同じ形とは限りません（JOIN・集計由来の項目が欠ける）。欠落しうる項目は既存値を引き継ぐか、更新APIを一覧と同じ射影で返す設計にし、無条件上書きを禁止します（MUST NOT）。作成・削除・移動の後は直接対象だけでなく、依存する派生data（件数、集計、親entityのsummary）も再取得または再計算します（MUST）。片方だけの更新は「保存したのに数字が変わらない」として利用者に届きます。正本は `engineering/300_web_frontend.md` の「Optimistic Update Integrity」。
 
 ---
 
@@ -370,6 +403,7 @@
         -   **Law**: メール通知は即時送信せず、ジョブキューを介して数分〜数十分遅延させてください。
         -   **Logic**: 送信直前に「アプリ内で既読になっているか」をチェックし、既読の場合はメール送信をスキップします。
         -   **Outcome**: 「既にアプリで確認した内容のメールが後から届く」というUX劣化を防ぎ、メール爆撃による離脱を回避します。
+    -   **Single Trigger Across Channels**: 同一の出来事を複数channel（app内、Push、メール等）へ通知する場合、契機は「通知の永続recordが新規作成された」という単一eventに統一し、upsertの戻り値で新規行だけを送出します（MUST）。正本は `operations/300_customer_experience.md` の「Single Trigger Across Channels」。
 
 ### Rule 5.1: The RLS-by-Default Enforcement Protocol（2025年新標準）
 -   **Law**: 2025年のSupabaseアップデートにより、新規テーブルには**RLSがデフォルトで有効**となります。この挙動を前提に、テーブル作成直後にポリシーを定義する運用を徹底しなければなりません。
@@ -395,6 +429,8 @@
     -   **Public**: 店舗写真、アバター。CDNキャッシュ最大化。
     -   **Private**: 請求書、個人書類。**Signed URL** と厳格なRLSチェックが必須。
     -   **Content Classes**: bucket／prefix／policyの分離はpublicity、tenant、retention、malware、billingから決め、広告等の固定分類をUniversalへ置かない。
+    -   **Private Reference Storage**: 機微添付（医療・証明書・PIIを含む書類）は`public=false`の専用bucketに置き、DBには永続公開URLでなく`bucket://path`形式のprivate参照を保存し、表示用の署名URLはその場で発行します（MUST）。正本は `security/000_security_privacy.md` の「Private Reference Storage」。
+    -   **Storage Fix Triple Check**: upload／書き込み経路の権限を通す是正は単独では機能を完成させません。(1) 保存される値の形式、(2) その値を表示へ変換する経路、(3) その値を受理する書き込み経路の認可guard（他者の資産pathの転載防止・自prefix限定）を同一変更で実code確認し（MUST）、同じ保存形式を持つ兄弟table／経路を機械列挙して対称に適用します（MUST）。正本は `engineering/000_engineering_standards.md` の「Storage Fix Triple Check」。
 -   **User Upload Hygiene**: metadata、GPS／EXIF、malware、content type、dimensions、sizeをserver-trusted validationで検査する。client-side処理だけをsecurity boundaryにしない。
 -   **The Signed Upload URL Mandate (Direct-to-Storage Pattern)**:
     -   **Law**: large／untrusted uploadではdirect-to-storageを候補に、app server proxyとのauthorization、inspection、transform、egress、timeout、streaming trade-offを比較する。一律禁止しない。
@@ -417,6 +453,7 @@
     1.  **On-the-Fly Resize**: `supabase.storage.from('bucket').getPublicUrl('image.png', { transform: { width: 300, height: 200 } })` でサーバーサイドリサイズを活用。各デバイスに最適なサイズを配信し、帯域を節約してください。
     2.  **Format Conversion**: WebP、AVIF、JPEG等をcontentとclient supportからnegotiateし、固定削減率を前提にしない。
     3.  **CDN Cache**: Publicバケットのファイルは自動的にグローバルCDNでキャッシュされます。`Cache-Control` ヘッダーを適切に設定し、キャッシュヒット率を最大化してください。Privateバケットはユーザーごとの権限チェックが入るため、キャッシュヒット率は低下します。
+        -   **Delivery-Layer-First Diagnosis**: 「画像が遅い／毎回取得される」の調査はcomponent最適化より先に配信層を実測します（MUST）: 変換（resize／format）が実際に効いているか、`Cache-Control`の実header、CDNのhit／miss状態。正本は `engineering/300_web_frontend.md` の「Delivery-Layer-First Diagnosis」。
     4.  **File Size Limits**: use case、plan、memory、inspection、egressからbucket／request上限を設定し、current provider limitを実装時に確認する。
     5.  **MIME Type Validation**: `allowedMimeTypes` でアップロード許可するファイルタイプを制限してください。画像バケットに`.exe`や`.js`がアップロードされることはセキュリティインシデントです。
 
@@ -429,12 +466,15 @@
 -   **Migration Timestamp Hygiene**:
     -   **Context**: 手動作成ファイルのタイムスタンプが「未来」だと、自動生成ファイルの順序が狂います。
     -   **Action**: 承認済みmigration toolまたはledger inspectionで最新versionと依存順序を確認し、衝突、重複、未来時刻、clock skewを検出してください。特定shell commandだけを正本にしません。
+    -   **Post-Merge Version Check**: 基幹branchを取り込んだ直後とpush前に、migration directory全体でversion（timestamp等の順序key）の重複が無いことを機械検査し、重複があればpushを拒否します（MUST）。file名全体の差分検知では「説明名が違う同一version」を捕捉できないため、version部分だけを抽出して比較します。衝突時はまだ共有環境へ適用されていない側だけを新versionへ採番し直し、基幹branchへ入ったversionは動かしません（MUST NOT）。共有DBのresetや他人のmigration履歴の削除で解消してはなりません。
 -   **Atomic Migration**: `DROP POLICY` と `CREATE POLICY` は同一ファイル内で完了させ、セキュリティ空白期間を作らないこと。
 -   **Ghost Table Defense**: 
     -   **Law**: 存在しないテーブルへの `ALTER` や `CREATE POLICY` はマイグレーションエラー (`42P01`) を引き起こします。
     -   **Action (Schema Preconditions)**: migration作成時にsource schema、依存関係、期待する型と制約を検証し、存在しなければfail closedで停止します。`IF EXISTS`や`DO $$`による条件付き実行は、意図的に複数の既知schema versionを受け入れる互換migrationに限定し、想定外driftを隠してはなりません。
     -   **Column-Level Verification (Schema-Reality突合義務)**: マイグレーション作成前およびDTO設計時は、テーブルの存在だけでなく**カラムの存在・型・制約も`information_schema.columns`で確認**してください。存在しない`example_field`等を推測でDTOへ定義することはSchema-Reality乖離の主因であり禁止です。
 -   **Schema Source Reconciliation**: migration ledgerとversion管理されたschemaを正本とし、remote catalogはdrift検知と適用前確認に使用します。不一致があれば適用を止め、承認されたreconciliation migrationで解消します。
+-   **History Audit Semantics (Latest Wins)**: migration・IaC差分・設定変更logのように履歴を積み上げて状態を作る成果物の監査で、履歴全体を平坦にgrepして件数を数え、それを現在状態として報告してはなりません（MUST NOT）。同一objectの再定義は「最新が勝つ」ため分母が膨張しfalse positive／negativeを生みます。現在状態の正本は実環境のcatalog（`pg_proc`、`information_schema`、provider advisor等）であり、履歴だけで監査する場合は時系列に並べobject単位で最新宣言を抽出してから判定します（MUST）。隣接行grepは定義本体に挟まれた属性を取りこぼすため、監査agentの主張が履歴grep由来なら最新の是正migrationを直接読んで再検証します。
+-   **Unverified Migration Quarantine**: 自動適用されるmigration directoryは「置いた時点で本番へ向かう」と見なし、local適用・型再生成・テスト完了前のmigrationを置いてはなりません（MUST NOT）。未検証の設計は実装計画文書に留め、検証込みの単独PRで入れます（MUST）。原子性・上限・解放・TTL・権限を含むRPCはlocal DBで実証してから置きます。
 
 ### Rule 7.2: Connectivity & CI/CD Protocol
 -   **Runner Connectivity**: CI provider名や固定network仮定に依存せず、実効DNS、IPv4／IPv6、direct／pooler endpoint、transaction mode、TLS、egress policyを検証します。migration、dump、長時間transactionなどsession semanticsを要する操作は、現行公式文書と実効設定に適合する承認済み接続経路を選びます。
@@ -447,6 +487,7 @@
 ### Rule 7.4: Migration Idempotency Protocol
 -   **Mandate**: schema migrationはledgerとchecksumで順序付きexactly-once適用し、適用済みfileを変更しない。retry対象のseed／backfillだけを冪等化し、`IF NOT EXISTS`で想定外driftを隠さない。
 -   **Implementation**: expected source／target schema、transaction境界、partial failure時のforward-fix、clean rebuildとupgrade pathを検証する。
+-   **Generated Contract Provenance & Gate Consistency**: 生成物（型定義・schema snapshot・client）に「本番から生成されていること」と「未適用の変更を反映していること」を同時に要求するgateは、変更が本番へ届く前のPRでは両立しません。gateを追加するときは他のgateと同時に満たせる状態が存在するかを確認します（MUST）。この矛盾は列を増やさないmigration（policy・GRANT・trigger・CHECKのみ）では表面化しないため、「今まで通っていた」を配線の正しさの根拠にしません。生成物の正規の生成元はPRごとの隔離DB（preview branch）を優先し（SHOULD）、local生成物（本番に無いtableが混入）や手合成物で代用しません。本番先行適用を選ぶ場合は旧codeが動いている前提で後方互換（関数引数のDEFAULT、NOT NULL列のDEFAULT、既存行DMLゼロ）を実測し、drift検知の赤化や新cronのmissed alert等の運用上の含意を明記します。migrationを含むbranchはlocal DBの適用履歴が線形であるため、先行するmigration branchの上へ直列にstackします。正本は `quality/000_qa_testing.md` の「Generated Contract Provenance」。
 
 ### Rule 7.5: Cache Reload Protocol
 -   **Context**: マイグレーション適用後、接続プールやORMのスキーマキャッシュが古い状態を保持する場合がある。
@@ -458,6 +499,7 @@
     1. production incidentで標準経路がRTOを満たせない場合だけ、対象、operator、approver、reason、query、timestamp、backup／rollback、影響を記録して最小変更を許可します。
     2. 実行後は同じincident window内でmigration ledger、schema、runbook、evidenceをreconcileし、drift checkとpost-incident reviewを完了します。
     3. ad-hoc readもPII、負荷、lock、監査要件を満たすread-only roleと安全なquery budgetで行います。
+    4. **Ad-hoc Object Containment**: 調査・補修のために本番DBへ一時的に作る関数・view・tableは、API露出schema（`public`等）に作成してはなりません（MUST NOT）。session終了で消える一時schema（PostgreSQLなら`pg_temp`）またはCTE、API非公開の作業用schemaに作成します（MUST）。公開schemaに置いた瞬間にdefault privilegesで匿名roleへEXECUTE／SELECTが継承され、viewは所有者権限で基表のRLSを素通りし、Security Advisor・型生成drift検査・schema diffが赤くなってcode起因でないCI失敗を生みます。「後でDROPする」は検査・安全性の観点では削除されていないものとして扱い、やむを得ず置いた場合は作成→削除の時間帯と対象を監査記録に残し、削除後にdrift検査を再実行します（SHOULD）。検査失敗の切り分けではcode差分だけでなくDB logの接続元（console／CLI／MCP）と対象objectの作成時刻を照合します。手作業のdata是正は事前にbackup表へ退避しmarkerを残します（MUST）。
 
 ### Rule 7.7: The Expand-Contract Migration Protocol（ゼロダウンタイム・スキーマ変更）
 -   **Law**: live consumerとdeploy skewがある破壊的変更は、expand-contractまたは同等のbackward-compatible migrationを用い、availability target、lock budget、data volume、rollbackに合わせて段階化する。
@@ -466,18 +508,23 @@
     2.  **Migrate**: checkpoint付きbounded backfillとreconciliationを行う。dual writeはbest-effort実装を禁止し、transaction、trigger、outbox、CDC等でordering、idempotency、partial failureを証明できる場合だけ使う。
     3.  **Contract**: telemetry、consumer inventory、query logs、generated contract、rollback windowがexit criteriaを満たした後に旧構造を廃止する。固定1週間や単一`grep`を証拠にしない。
 -   **Exception**: offline maintenanceがavailability targetを満たす小規模／isolated systemでは、backup、downtime承認、restore testを伴うdirect migrationを選べる。
+-   **Privilege Contraction Ordering**: DBとappのdeployが並行する環境では、権限を狭める変更（REVOKE／RLS強化）は「新しい権限＋古いapp code」の窓を必ず生むものとして評価し、その窓で正当な書き込みが失敗しないかを問います（MUST）。失敗するなら、REVOKEではなくserver側で値を既定へ強制上書きする方式（trigger／server default）を選びます（SHOULD）。書き込みは成功し続け、攻撃者の指定値だけが捨てられ、deploy順に依存しません。倒す先は安全側（要moderation・最小tier）にし（MUST）、利用者の正当な経路が無い操作は順序問題が無いので素直にREVOKEします。「マージ前にappを先にdeployする」という運用約束だけで守る是正は、それ自体が新しい危険です。
 
 ### Rule 7.8: The Data-Aware Defense Protocol（データ依存防衛プロトコル）
 -   **Law**: migrationは実dataのdistribution、duplicate、NULL、invalid value、volume、lock、concurrent writeをpreflightし、clean rebuildとproduction-like upgradeの双方で検証する。全DMLへ同一conflict処理を強制しない。
 -   **Action**:
     1.  **Precondition Query**: count／sample／constraint candidateをread-onlyで計測し、閾値超過時は停止する。
     2.  **Intentional Conflict Semantics**: insert／updateごとにfail、ignore、merge、upsertをbusiness contractから選び、`ON CONFLICT`でerrorを隠さない。
+        -   **SDK-Inexpressible Conflicts**: client SDK／ORMがDB nativeの競合解決（条件付きunique index上のupsert等）を表現できない場合は、(a) select→update／fallthrough insertの2-stepに分解して競合時の許容挙動（片方失敗を再SELECTで吸収できる用途か）を明記するか、(b) 厳密な原子性・高頻度が要るならDB関数へ寄せるかを選び記録します（MUST）。2-stepを原子的なupsertと同一視して高頻度counterに使ってはなりません（MUST NOT）。
     3.  **Constraint Rollout**: duplicate remediation、quarantine、`NOT VALID`／validate、online index等をdata loss、lock、rollbackから選び、cleanupを同一fileへ無条件に埋め込まない。
+    4.  **Unpredicated Unique Arbiter**: `ON CONFLICT (列)`形式のupsert（特に述語を指定できないAPI層経由）の衝突対象は、本番環境で述語（`WHERE`）を持たないUNIQUE制約／一意indexに裏付けられていなければなりません（MUST）。部分一意indexはarbiterとして推論されず実行時に必ず失敗するため、「本番のみ500になる時限バグ」になります。新しいupsert対象を追加するPRは本番のindex定義（`pg_indexes`等）を実測して裏付けを確認し証跡に残します（MUST）。local／CIのschemaが通ることは本番の証明になりません（schema drift）。UNIQUE制約は元々NULL重複を許すため、NULL複数許容のための部分化は不要であることを設計判断に含めます。
+    5.  **Delta-Based In-Migration Check**: migration内に埋め込む巻き添え検出は「絶対量」（1件以上残っていること）ではなく「前後差」（適用前後の件数比較、`CREATE TEMP TABLE ... ON COMMIT DROP`等）で書きます（MUST）。migrationはseedより先に走るため、空tableを前提にできない検証は新規DBでだけ落ちます。検査条件は動作条件と字句levelで一致させ（UPDATEが明示listなら検査も明示list）（MUST）、migrationは「空DBへのclean適用」と「実dataを仕込んだ適用」の両方で試します（MUST）。本番だけdataがある種類のmigrationはlocalでno-opになるため、その事実を冒頭commentに書きます（SHOULD）。
 
 ### Rule 7.9: The Migration Static Analysis Guard（マイグレーション静的解析ガード）
 -   **Law**: migration riskをCIで自動検査し、block、manual review、timed executionへ分類する。local hookはfast feedbackの候補であり、enforceable remote gateを正本とする。
 -   **Action**:
     1.  **Detection**: destructive DDL、table rewrite、unbounded DML、long lock、non-concurrent index、volatile default、permission widening、missing rollback／preconditionをASTまたはreview可能なheuristicで検出する。
+        -   **Committed-Migration Mutation & Untracked Coverage**: default branch上に既に存在するmigration fileの改変をdetectionに含め（§0 Core Laws参照）、local self-checkはstaged・未追跡（`git ls-files --others --exclude-standard`）・CI差分の3経路を重複排除して同じ検査関数へ流します（MUST）。成功報告では追加したfileが実際に「検査済み」として列挙されたかを確認し、「No files to check」の緑を成功にしません。見逃しは目視で補わずguard自体を直します。
     2.  **False Positive Safety**: `UPDATE`、`INSERT`、constraintを構文だけで一律拒否せず、expected row count、WHERE、conflict semantics、preflight、maintenance windowを評価する。
     3.  **Exception**: bypassは理由、approver、owner、expiry、execution window、post-checkを持つtime-bound exceptionとし、暗黙の`--no-verify`でremote gateを回避しない。
 
@@ -501,12 +548,17 @@
     - [ ] 必要なprivileged accessが最小scopeで動作し、通常userへ拡大していないか
     - [ ] 一般ユーザーは自分のデータのみ閲覧・操作可能か
     - [ ] row-invariant helperのplan warningをtriageし、optimization前後の認可結果が同じか
+    - [ ] **Branch-Level Policy Read**: `entity_type`等の多態で分岐するpolicy・判定関数を分岐ごとにguardの有無で読んだか？ `USING (true)`の有無だけを数える構造検査は分岐内部の素通しを見逃す。同型の分岐が並ぶ中で1つだけ短い分岐を要注意patternとする。
 
 ### Rule 8.4: RLS Post-Change Verification Protocol
 -   **Verification Scope**: RLSポリシー変更後は以下を必ず確認:
     1.  **Security Advisor**: 各所見をrisk-basedに解消または期限付き例外化し、ゼロ件だけを安全性の証明にしない。
+        -   **Query Cadence**: advisor／linterの警告baselineは、専用の是正作業時だけでなくschema変更を含むすべての変更単位（PR）ごとにsecurity・performance双方を再照会し、警告の増分ゼロを完了条件にします（MUST）。専用作業の翌日の通常変更が退行を持ち込みます。
+        -   **Exception Grounds**: 例外台帳に「別経路で同じ行を読めるので新たな能力は生じない」と書くときは、その別経路が正しい（意図した絞りが効いている）ことを確かめてから書きます（MUST）。例外の根拠が別の欠陥に依存すると、欠陥を塞いだ時点で例外が無根拠になります。根拠となる経路・検査名を併記し、その検査が変わったら再評価します（SHOULD）。
+        -   **Data-Count Independence**: 「現時点で該当dataが0件」「2経路の件数が一致」は設計の正しさの証拠ではありません（MUST NOT）。条件の違いは該当dataが存在する状態でしか数字に現れず、管理者が1件作った瞬間に崩れます。露出検査は本番dataに依存せず、非公開dataを1件作った状態でも赤くなる形（挙動検査＋fixture）で書きます（MUST）。
     2.  **Functional Test**: capability matrixのactor、operation、tenant、row／column scopeを検証。
     3.  **Performance**: safe environmentまたはproduction-safe方法でplanを確認し、sequential scan自体ではなくdata volumeとlatency／costを評価する。
+    4.  **Effective Privilege Reproof**: 認可・権限（関数EXECUTE権・列権限・行policy）に関する所見は、是正前に対象環境のcatalogをread-onlyで照会して実効権限を確定します（MUST）。migration fileのGRANT／REVOKE文の静的追跡は、手動修正や見落としで実態と乖離するため単独の根拠にしません（MUST NOT）。偽陽性（実態では未付与）に拙速なREVOKE／変更migrationを書かず、真陽性だけをpreview環境＋advisor再照会を伴う変更へ回します。所見が意図的挙動をbugと誤判定していないかを既存テスト・設計commentで裏取りし、是正でテストが赤化したら「テストが欠陥を固定化しているのか、所見が意図を誤判定しているのか」を先に判定します（MUST）。stack例（PostgreSQL）: `has_function_privilege`／`has_column_privilege`／`pg_policy`の`polroles`・`polqual`。SELECTのみで、PII実dataは読みません。
 -   **Risk-Based Coverage**: 変更したresourceに加え、依存view／function／job、public／authenticated／operator flow、cross-tenant denial、cached responseをimpact graphから選んで検証する。固定table名やrouteをUniversalへ持ち込まない。
 -   **Emergency Recovery**: tested rollback、traffic isolation、feature flag、または対象resource／actor／timeを限定したbreak-glassで復旧する。可用性回復のために全rowを`USING (true)`で公開してはならない。
 -   **Detection Symptoms (障害兆候)**:
@@ -523,6 +575,7 @@
 -   **Tenant-Aware Boundary**:
     -   **Law**: multi-tenant要件がある場合、tenant identity、scope、inheritance、override、uniqueness、RLS、billing、deletionをcontract化する。将来の可能性だけで全schemaをtenant化しない。
     -   **Naming**: `site_`、`account_`、`system_`等は例であり、resource type、scope、ownerを識別できるproject conventionをBlueprintで決める。
+-   **Default-Value Change Protocol**: 列の既定値を変える（Opt-In→Opt-Out等）migrationでは、その表へINSERTするtrigger／関数の列listを実定義（`pg_get_functiondef`）で確認し、列が明示指定されていればdefaultは効かないことを前提にtrigger側も更新します（MUST）。既存行のbackfillは「本人が明示的に操作した行」を監査logで機械判定して除外し、操作履歴の無い行だけを更新します（MUST）。toggle系mutationは将来の既定値変更に備えて必ず監査logを残します（SHOULD）。既定値変更時はUIの取得失敗fallback（`?? false`等）・toast文言・説明文を同時に棚卸しし、旧既定が残らないようにします（MUST）。内部rule番号（Rule X.Y等）をユーザー向け文言・error messageに露出させません（MUST NOT）。
 
 ### Rule 9.2: Static Page Ban (CMS Sovereignty)
 -   legal／policy contentはowner、review、version、effective date、locale、approval、retention、rollback、availabilityを満たす管理方式を選ぶ。version管理されたstatic content、CMS、document systemはいずれも候補であり、runtime CMS依存を一律強制しない。
@@ -570,6 +623,7 @@
 -   **Action**: 
     1. **Trusted Boundary**: 特権操作、PII、金銭、権限変更、複数entityの整合性が関わる書き込みは、server-side command boundaryまたはtransactional DB functionへ集約し、actorとdecisionを監査します。
     2. **Direct Client Writes**: RLSとschema validationで安全に表現できる低リスク操作はdirect client writeを許容できます。negative test、rate limit、idempotency、必要な監査を証明します。
+    3. **Single-Path Limit Enforcement**: plan上限・頭数・座席数などの業務制約をRPC／server command内で判定する場合、同じ表への他の書込経路（直接INSERT／UPDATEのGRANT・RLS policy）を撤去するか同等の制約で塞ぎます（MUST）。「server側で検証している」だけでは、table直書きで迂回できます。上限に達したユーザーのsessionで直接INSERTを試み、拒否されることをnegative testに含めます（MUST）。
 
 ### Rule 11.3: The RLS Best Practices Protocol (ポリシー衛生)
 -   **Law 1: No Redundant Bypass Policy**: `service_role` credentialで接続するrequestはRLSをbypassするため、`TO service_role` policyを認可controlと誤認しない。管理者／system accessはuser-scoped RLS、限定RPC、専用role、service boundary等から最小権限の方式を選ぶ。
@@ -598,14 +652,19 @@
 -   **Action**:
     1.  **Human Admin**: MFA、短命session、role／tenant scope、RLS、step-up authorizationを維持し、許可された操作だけを実行します。
     2.  **System Job**: workload identity、専用DB role、限定RPC等、job単位の最小権限を優先します。bypass credentialが不可避ならserver-side secret、network restriction、rotation、監査、狭いcode pathを必須とします。
+    2b. **Machine-Invocation Readiness**: user session前提の共有基盤（AI proxy・内部API等）を新設・利用する際は、「機械呼出（cron／backfill／webhook）から呼ばれ得るか」を設計時に必ず問います（MUST）。呼ばれ得るならsystem invocation経路（専用資格情報＋timing-safe検証＋actor nullの監査記録＋専用rate-limit bucket）を最初から用意します。呼出側と検証側に別々に配る委託secretの認証連鎖は、両側の実環境で実呼出の成功応答を得るまで「未完了」として扱い、env設定済みの目視確認を完了根拠にしません（MUST）。非同期pipelineの「処理済み」報告は、処理関数のresolveではなく成果物（DB行等）の実在確認を根拠にします（MUST）。
+    2c. **No Platform-Key Equality Auth**: platformが注入する鍵（service role key等）との一致比較を機械認証に使ってはなりません（MUST NOT）。鍵形式移行・rotationで沈黙破綻します。機械認証は自前管理の専用tokenを両側に配ります。
     3.  **Authorization Test**: positive／negative／cross-tenant testとactor-aware auditで、readとwriteの必要範囲を別々に証明します。
+    4.  **Auth-State Decision Path**: 認証状態を確定するserver側の基幹判定（ログイン済み判定、role検証、OAuth callback、認証済みユーザーのredirect）は、行レベル認可の「拒否」を「record不在（未登録）」と同一視してはなりません（MUST NOT）。両者を区別できない実装は、ログイン→拒否→ログアウト→ログインの無限loopや強制ログアウトを生みます。この判定経路にはRLS helperの失敗に依存しない最小権限の取得経路（限定RPC、専用role、または対象column・rowを限定した特権読み取り）を用意し（SHOULD）、取得結果は内部のrouting／認可判定にのみ使いclientへ返しません（MUST）。認可helper関数自体が`Permission Denied`になり得る構成（`SECURITY INVOKER`で権限の無いtableを参照等）は、認証flow全体のnegative test（未ログイン／一般ユーザー／管理者）で検出します（MUST）。
 
 ### Rule 11.7: The Silent RLS Failure Detection Protocol (RLSサイレント失敗検知)
 -   **Law**: mutation結果は、使用SDK、request option、policy、対象rowの有無でresponseが変わるため、business contractに基づいて成功条件を明示的に検証します。0行または空responseだけからRLS拒否と断定しません。
 -   **Action**:
     1.  **Contract Check**: exactly-one更新ならaffected rowまたはreturned identifierを検証し、zero-or-one削除等の正当な0件契約とは区別します。
+        -   **Batch Row Accounting**: 一括更新・importではaffected rows = 0をerrorでなくても成功に計上せず、`failed`（理由: not_found）として計数します（MUST）。多くのDB clientは0行一致で例外を投げません。per-rowの存在確認はID集合をchunk化した一括照会（`IN`）で行い、存在確認自体が失敗したら書込前に中断して「何も変更していない」ことを明示します（MUST）。optional列だらけの入力を一括upsertへ安易に置換すると「渡さなかった列を触らない」UPDATE意味論が壊れNOT NULL列で落ちるため、行別の成否計上が必要な限り書込はper-rowを維持します（MUST NOT）。影響行数を返さない手続き（`RETURNS void`のRPC等）を呼んだ後は対象行を読み直してから成功応答・監査行を書き、自動解消・自動更新は読取時点の状態（状態・最終発生時刻・回数）を条件付き更新に含め、更新結果のID件数だけを集計します（MUST）。読んだidだけで更新すると、その間の人手操作・再発・削除を巻き込みます。
     2.  **Diagnostic**: 0件時はnot found、concurrent change、filter mismatch、authorization denialを情報漏洩しないerror contractで切り分けます。
     3.  **Safe Logging**: operation、resource class、request／trace ID、結果分類を記録し、不要なPIIやraw credentialを出力しません。
+    4.  **Zero-Volume Signal (Write & Read)**: 計測・監査系の書き込みは失敗をwarnで流さず、「来訪はあるのに記録0件が続く」状態そのものを信号にする監視を置きます（MUST）。行レベル認可を持つstoreでは未許可の読み取りは「拒否error」ではなく「0行成功」で返るため、FinOps dashboard・監視・health checkが誤ったclient種別で保護tableを照会すると「cost zero」「攻撃0件」「異常なし」という最悪の沈黙誤表示になります（MUST NOT）。保護tableの集計・監視・cron・管理集計は認可済み境界（cron認証／管理者確認）を通過した上で特権経路で行うことを実装規約にし、集計・監視codeは「0件」と「読めていない」を区別して、期待される最低件数（既知の定期実行等）が0のときは正常0ではなく権限／配線疑いとして警告します（MUST）。兄弟経路が特権clientなのに1つだけ非特権という外れ値をgrepで洗い（SHOULD）、新規cron／管理集計はrole偽装testで「そのclientでは0行／権限error」「特権でのみ成功」を実証し、RLS検証に「特権経路で実dataが見える」正方向assertionも含めます（MUST）。
 -   **Diagnostic**: 「保存成功なのにリロードすると元に戻る」→ **RLSサイレント失敗を疑え**。
 
 ### Rule 11.8: The RPC Scope Limitation Protocol（RPCスコープ制限）
@@ -614,6 +673,7 @@
     1.  **Database Candidate**: set-based処理、constraintに近い認可、単一transactionの複数table更新はRPC候補とし、明示したinput／output、権限、timeout、lock、testを持たせます。
     2.  **Service Candidate**: 外部I/O、長時間workflow、human approval、retry orchestrationは言語非依存のapplication／workflow boundaryへ置き、outbox等でDB commitとの整合性を保ちます。
     3.  **Operability**: 選択した境界に型またはschema contract、trace、負荷試験、versioning、owner、rollbackを備えます。
+    4.  **Message Boundary**: DB関数が返すユーザー向け固定文言は関数の宣言blockで定数化し、SQL commentで「何のSSOTか」とTS側定数との境界の違いを明記します（SHOULD）。例外詳細（`SQLERRM`相当）はserver／DB logへ寄せ、応答には低情報量の固定文言だけを返します（MUST）。ユーザー向け（localizeされる）messageと、webhook／Edge／OpenAPI向けの低情報量wire文言は別SSOTに分け、他runtimeへは生成mirrorで供給します（SHOULD）。PL/pgSQL等でenum定数を宣言するときは明示cast（`'value'::schema.enum_type`）にしてlint警告を残しません。
 -   **Rationale**: 責務配置は特定frameworkや言語ではなく、整合性とfailure boundaryの証拠で判断します。
 
 ### Rule 11.9: The Ghost Migration Ban（ゴーストマイグレーション禁止）
@@ -623,6 +683,7 @@
     2.  **No Dashboard Edits**: DB管理画面からの通常時の直接変更は禁止します。緊急break-glass時はactor、approval、query、resultを記録し、直後にmigration ledgerとversion管理artifactをreconcileします。
     3.  **Schema Consistency Protocol**: ローカル環境のスキーマがマイグレーションファイルと乖離（汚染）した場合は、DB再構築（`supabase db reset` 等）を躊躇してはなりません。常にマイグレーションファイルをSource of Truth（正）として扱い、ローカルDBを従とします。
     4.  **Verification**: マイグレーション適用後は、ローカルスキーマとリモートスキーマの差分がゼロであることを確認してください。差分がある場合はゴーストマイグレーションの存在を疑います。
+    5.  **Out-of-Band Object Intake**: 緊急backupを含め、いかなるtable／functionもmigration経由で作成し、同一migrationでRLS有効化＋policy（deny-allでも`USING(false) WITH CHECK(false)`等で明示）＋必要なREVOKE／GRANTを付与します（MUST）。公開schemaの全tableは既定で露出し、名前prefix（`_`等）はaccess controlではありません。既存のout-of-band objectをmigrationへ取り込むときはDDLだけでなくpolicy／FORCE RLS／grantの3層をcatalog実照会で再現します（MUST）。code参照0件のtableは「dead-by-codeでもlive-by-DB」であり得るため、row count／policies／anon grants／FKを実照会し、即時の非破壊hardening（REVOKE＋admin-only policy＋末尾assert）と承認後のDROPを別commitに分けます（MUST）。初期GRANTでanon／authenticatedに付いたwrite権限は、policyがservice／admin限定かつapp経路がbypass clientのみのtableからREVOKEし（SHOULD）、migration末尾で不変条件を`RAISE EXCEPTION`でassertします。SECURITY DEFINERのREVOKE／GRANT監査grepはcase-insensitiveで行います。
 -   **Rationale**: マイグレーションファイルに記録されない変更は、チーム間での再現不能、CI/CD障害、本番環境との不整合を引き起こします。「全ての変更は記録される」という原則は、スキーマの信頼性を支える基盤です。
 
 ## 12. マイグレーションと特権操作 (Migrations & Privileged Operations)
@@ -693,6 +754,9 @@
     2.  **No Blind Optimization**: 「`service_role` で十分だから」という理由でユーザーJWT向けのポリシーを削除しないでください。Server Action等がユーザーJWTを使用している場合、そのポリシーの削除は正規アクセスのサイレントな遮断を引き起こします。
     3.  **Identity Matrix**: 複雑なテーブルに対しては、「テーブル × 操作 × 使用IDENTITY」のマトリクスを作成し、全てのアクセスパターンが少なくとも1つのRLSポリシーでカバーされていることを確認してください。
     4.  **Post-Change Verification**: ポリシーを変更・削除した後は、影響を受ける全てのUIフロー（管理画面の編集・保存、ユーザー向けの閲覧等）を実際に操作して動作を確認してください。
+    5.  **Scripts & Low-Frequency Jobs**: 権限の剥奪（GRANT／REVOKE・policy削除・key無効化）を含む是正は、対象を読んでいる全経路をapp codeだけでなくscript・定期job・同期処理・運用toolまで洗います（MUST）。実行頻度の低いjobほど発覚が遅い（週次なら最大7日）ため、低頻度jobを壊しうる変更をmergeしたらその場で手動実行して確かめます（MUST）。`optional`／`ignoreErrors`の類は吸収する条件を実装で確かめてから頼り（名前が広く聞こえても「table不存在」しか見ていないことがある）、権限errorまで吸収する拡張はしません（MUST NOT）。読めない表を「空だった」と読んで同期先から静かに消すのが最悪の結果です。
+    6.  **Per-Function Role Reading & Severity**: app層guardの弱点を認可bypassと判定する前に、取得経路の実効role（anon／authenticated／bypass）と対象tableのRLS本文を突合してからseverityを確定します（MUST）。同一file内でも関数ごとにclient種別が違う（読み取りはsession、更新はbypass）のが普通で、1箇所を見て影響を判断すると誤ります。`SET ROLE`でのDB実測は「その権限なら失敗する」しか示さず、実際にどの権限で呼ばれるかはcodeで確かめ、codeのcomment（「全行NULL」等）は陳腐化するので前提はその場で測り直します。DEFINER化する前に旧実装の各queryがどのroleで走っていたかを1本ずつ確認します（MUST）: RLSで常に0行だったqueryは死んだcodeではなく可視境界であり、DEFINERへ移すと生き返って情報を出します。pgTAPはcatalogだけでなく`set local role anon`で関数を実際に呼び返却keyを検査します。管理専用面の読取は書き込みと同じservice-only境界から行います（SHOULD）。session clientではRLSとappの管理者判定の集合差が「0行成功」として現れます。
+    7.  **Context Propagation**: DB client・接続・transaction文脈を引数で受け取る関数は、内部のsubqueryやhelper呼び出しにも同じ文脈を渡し、内部で別の（特に高権限の）clientを生成してはなりません（MUST NOT）。正本は `engineering/000_engineering_standards.md` の「Context Propagation Mandate」。
 -   **Rationale**: RLSポリシーの「最適化」による不用意な削除は、セキュリティホールではなく「正規アクセスの不可視化」を招きます。特に管理画面がServer Action（ユーザーJWTコンテキスト）を使用している場合、service_roleで十分だと思ってJWT向けポリシーを削除すると、管理者のCRUD操作がサイレントに拒否されます。
 
 ### Rule 2.8: The Idempotent Migration Protocol（冪等マイグレーション義務）
@@ -701,6 +765,7 @@
     1.  **DDL Drift Detection**: `IF NOT EXISTS`等は期待済み状態だけに限定し、object definitionの不一致を別途assertします。
     2.  **DML Retry Safety**: seed／backfillは意図したconflict semantics、checkpoint、reconciliationを持たせます。
     3.  **Object Replacement Safety**: function、trigger、policyのreplace／drop-createはdependency、permission、availability、transaction境界を検証します。
+        -   **Re-grant after DROP**: deny-by-default化後に関数をDROP＋CREATEするmigrationはGRANTを再宣言します（MUST）。DROPは権限も落とすため、再作成だけでは呼び出し可能roleが黙って消えます。
     4.  **History Integrity**: migration ledger、checksum、clean rebuild、upgrade testをCI evidenceにします。
 
 ### Rule 2.9: The Read-Write Privilege Symmetry（読み書き権限の対称性）
@@ -708,8 +773,11 @@
 -   **Action**:
     1.  **Capability Matrix**: screen／job／APIごとにread fields、write fields、row scope、actor identityをmatrix化し、欠落と過剰権限を同時に検査します。
     2.  **DTO Synchronization**: edit DTOとmutation schemaの意図した差分をversioned contractとしてtestします。readに出せないsecret／internal fieldをwrite権限へ合わせて露出しません。
+    2b. **Hidden-Column Parity**: server側で特権client（RLS／列GRANTをbypassする資格情報）で読んだ値を公開DTOへ変換する経路は、DB側の露出制限を迂回します。DBで匿名から隠した列はDTO側でも落とし、2つの台帳（DB側の期待集合とDTO定数）を綴りの照合ではなく挙動で突合するテスト（DB側の期待集合を読み込んでDTO出力に残らないことをassert）を置きます（MUST）。逆向き（DTOに追加したがDB台帳に無い）だけ赤くなる片方向の突合は両方向にします（SHOULD）。server専用の値は公開DTOから読まず、server-onlyの読み口を分けて必要列だけselectします（MUST）。Server Action（`'use server'`）のexportは全て匿名から呼べる公開endpointと見なし、「内部でしか呼んでいない」を防御にしません（MUST）。
     3.  **Scoped Admin Gateway**: 管理操作はresource／operationを限定したgatewayまたはRPCで表現し、table全体のRLS bypassや全面開放を避けます。
     4.  **Post-Update Verification**: 重要mutationはauthorized viewからversion／identifier／expected fieldを再取得し、PIIを含まないtraceで整合を確認します。
+    5.  **Verification-Only Privileged Read**: 匿名には見せられないが内部照合にだけ必要な値（preview用password、招待token、内部flag等）をRLSが正しく拒否する場合、その正当な拒否を回避する唯一の許容手段は「server側の検証専用読み取り」です（MAY）。この読み取りは (a) 対象columnを明示列挙し、(b) 結果を真偽値等の判定結果に還元してからのみ後段へ渡し、(c) 取得した生値をclientへ返却しません（MUST）。専用関数に閉じ込め通常のdata取得経路と共有せず（SHOULD）、code reviewでは「特権clientの戻り値がresponseに到達していないか」を確認項目にします。
+    6.  **Read-Then-Save Round-Trip**: 編集UIが「読んだ値を全項目そのまま送り返す」設計のとき、読み出しDTOが供給していないfield（列名とDTO名が違う派生field、raw castでundefinedのまま）は初期値（空配列・空文字）で上書きされ、無関係な項目を保存するたびに消えます。更新payloadの契約は`undefined = 変更なし`と`空値 = 空にする`を区別し、formはDTOが供給しない項目を送りません（MUST）。form送信key一覧とDTO供給key一覧の突合で往復整合を機械検査し、書き込みを有効化する前に読み出し側を先に整えます（MUST）。詳細は `engineering/000_engineering_standards.md` §13.5 を参照。
 -   **Rationale**: 必要なread-backが不足すると不透明な保存失敗に見えますが、解決策は権限の全面対称化ではありません。最小権限を保ったcapability contractと明示的verificationで整合を証明します。
 
 ### Rule 2.10: The RLS Policy Composition Protocol
@@ -754,6 +822,7 @@
     1.  **Consistency**: denormalized owner／tenant keyを使う場合はFK、trigger、generated value、write boundaryでdriftを防ぐ。
     2.  **Performance**: `EXISTS`、join、helper、claimをpositive／negative／cross-tenant testとplanで比較する。
     3.  **Privilege**: cross-table checkはまずinvoker semanticsで表現し、`SECURITY DEFINER`は本当にelevationが必要な最小境界だけにする。
+    4.  **Derived Visibility Inheritance**: 公開可否（下書き・非表示・公開予定日・削除済み）が親entityにある場合、子・翻訳・中間（junction）・集計・派生tableの読取policyは親の可視性判定を自分で持ちます（MUST）。親tableが匿名に0件を返すことを派生tableの安全の根拠にしてはなりません（MUST NOT）。中間tableの`USING (true)`は「親に紐づく関係」そのものを配るため、どちらの親の可視性も継ぎます（MUST）。露出はapp画面には現れない（画面は親を先に引く）ため、検査は本体tableではなく匿名roleで到達できる全tableを横断して直接叩きます（MUST）。
 
 ### Rule 2.16: The Brittle Table Reference Prohibition（動的テーブル参照禁止）
 -   **Law**: dynamic SQLはstatic SQLで表現できないmetadata-driven operationだけに限定し、identifier quoting、allowlist、parameter binding、least privilege、test、auditを必須とする。
@@ -832,6 +901,7 @@
 -   **Action**:
     1.  **Local Serve**: `supabase functions serve`はmanaged CLIの候補であり、current runtime、env、network、auth差を記録する。
     2.  **Shared Code**: shared package、workspace、provider推奨directoryをownershipとversioningから選び、固定pathに依存しない。
+    2b. **Cross-Runtime Constant Sync**: 異なるruntime（NodeとDeno、Webとnative、appとDB関数等）の間で直接の相対importによる共有をしてはなりません（MUST NOT）。bundlerの解決範囲外で本番buildだけが失敗します。定数・schemaの共有はSSOTからの自動生成で行い（MUST）、生成物に`@generated — DO NOT EDIT`headerを付け、deploy前に同期scriptを実行し、CIで「生成→`git diff --exit-code`」のdrift検出gateを置きます。trigger pathにはSSOT source自体を含めます。手動の「SYNC RULE」commentは人的missを防げません。
     3.  **Dependencies**: runtimeが対応するmanifest／lock／integrity mechanismでdirect・transitive versionを再現可能にする。
 
 ---
@@ -854,6 +924,7 @@
     1.  **RLS Enforcement**: Postgres Changesは自動的にRLSポリシーを通過するため、RLSが正しく設定されていればセキュリティは担保されます。ただし、`USING (true)` のテーブルは全データが全ユーザーにブロードキャストされる点に注意してください。
     2.  **Channel Granularity**: チャネル名は細粒度（例: `room:${roomId}`）に設計してください。1つの「全体チャネル」に全イベントを流すと、全クライアントが全イベントを受信し帯域を浪費します。
     3.  **Connection Budget**: 契約planと実効quotaを公式資料・設定から確認し、peak user、tab／device、reconnect storm、headroomをcapacity testします。consumer lifecycle終了時はSDKに適したunsubscribe／cleanupを行います。
+        -   **Adoption Criterion**: Realtime購読の採用は、dataの更新周期と「気づくまでの許容遅延」を比較し、即時性の価値が常時接続のcost（接続数、fan-out、再接続嵐、課金）に見合う場合に限ります（SHOULD）。正本は `engineering/300_web_frontend.md` の「Adoption Criterion」。
     4.  **Event Rate Control**: 高頻度eventはUX latency、loss tolerance、message size、provider quotaからthrottle、debounce、sampling、aggregationを選び、固定間隔をUniversalへ置きません。
     5.  **Lifecycle Cleanup**: React unmountに限らず、component、view、process、socket、background transitionの所有権境界でsubscriptionを解除し、再接続時の重複listenerをtestします。
         ```typescript
@@ -897,6 +968,8 @@
     2.  **Idempotent Jobs**: Cronジョブ内のSQLは冪等に設計してください。ジョブの重複実行（前回が完了する前に次回が開始）を想定し、ロック機構（`pg_advisory_lock`）の活用を推奨します。
     3.  **Monitoring**: start／finish、duration、attempt、checkpoint、affected count、resultを監視し、SLOとriskに応じたalert／review cadenceを定義します。
     4.  **Resource Guard**: 大量処理は測定したlock、WAL、replication lag、latency、memory、timeoutに基づくbounded batchとbackpressureを使用し、固定batch sizeをUniversalへ置きません。
+    5.  **Order-Independent Safety**: 「集約してから消す」「backupしてから消す」のように順序に安全性が依存する処理は、schedulerのjob順序に委ねず、消去関数自身が前処理（集約・退避）を呼んでからDELETEする構造にします（MUST）。順序は運用で崩れますが、関数の中の順序は崩れません。前処理の対象範囲（lookback）は固定日数ではなく「これから消える行」を母集合に含める形にし、実行が飛んでも取りこぼしません（SHOULD）。「毎日動いている限り」表に出ない欠陥です。
+    6.  **Operational Calendar Day**: 日次のdedup key・集計の暦日は、運用者の判断単位となるtimezoneで切ります（MUST）。UTCで切ると現地の未明の事象が前日keyへ吸収され「通知済み」で握りつぶされます。日付つきdedup keyに持続条件（N時間以上）を掛けるときは、日付を剥がした「系列」で束ねます。
 
 ### Rule 15.2: The Message Queue Protocol (pgmq / Supabase Queues)
 -   **Law**: latency、failure isolation、durability、ordering、throughput、delivery semanticsが非同期境界を必要とする処理では、Supabase Queues、別broker、workflow engine等を能力比較して選びます。短い同期処理や強いtransaction整合性を無条件にqueue化しません。
@@ -941,6 +1014,7 @@
     2.  **Index Advisor**: Supabase Dashboardの **Index Advisor** を活用し、推奨インデックスの提案を定期的に確認してください。提案されたインデックスを盲目的に適用するのではなく、書き込みパフォーマンスへの影響も考慮して判断してください。
     3.  **Connection Monitoring**: active／idle／waiting connection、pool saturation、queue time、reserved headroomをcapacity modelとSLOからalert化します。
     4.  **Table Maintenance**: dead tuple、vacuum lag、wraparound、table／index bloat、write rateを観測し、provider-managed autovacuumを尊重しつつ測定根拠とrunbookに従ってtuning／maintenanceします。
+    5.  **Index Bloat & I/O-First Triage**: 挿入即削除・保持期間つきの高churnなqueue的tableでは、autovacuumが正常でも索引は単調に膨らみます。VACUUMは死tupleを再利用可能にするだけでbtreeのpage数は減らず、索引を縮める手段は再構築（`REINDEX`相当）だけなので保守計画に組み込みます（MUST）。性能調査は「行数の多いtable」からではなく、disk読み取りblock数（`pg_statio_user_tables.heap_blks_read`等）の降順から入り（SHOULD）、数百行のtableが全I/Oの大半を占めうることを前提にします。`idx_scan = 0`の索引は削除候補であるだけでなく、挿入・削除のたびに維持costを払う純負債です。累積統計は前回reset時点からの値なので、期間を確認せずに絶対値を語りません（MUST）。
 
 ### Rule 16.2: The Supabase Monitoring Checklist
 -   **Law**: Dashboard、API、metrics export、log／trace drainから、database、disk、API、Auth、Functions、Realtime、Storageのgolden signals、quota headroom、growth、security anomalyを監視します。threshold、window、cadence、owner、escalationはSLO、forecast、contract plan、incident historyからBlueprintで定義します。
@@ -1042,6 +1116,7 @@
     4.  **Key Rotation**: 漏洩疑いでは検知serviceによる自動失効に依存せず、即時revoke／rotate、consumer更新、log／data access調査、incident evidence保存を行います。
     5.  **JWT Verification**: API keyとJWT signing keyを混同しません。外部serviceはcurrent JWKS／asymmetric signing contract、issuer、audience、expiry、key rotationを検証し、共有high-privilege API keyをtoken verificationへ流用しません。
     6.  **Data API Exposure**: Data APIを使わないarchitectureでは無効化またはexposed schemaを限定します。使う場合は新tableの自動公開を仮定せず、exposure、grant、RLSをmigrationとtestで管理します。
+    7.  **Automation Survival Check**: 権限を縮小する変更（列レベルGRANT、RLS、API露出、scope縮小）を入れるときは、同じ権限主体で動く全ての自動化（同期・検証・監視・backup script）の互換性を同一変更で確認します（MUST）。`select('*')`相当の全列取得は列レベルGRANT後に恒久失敗します。権限縮小後の自動化の失敗は「本番は健全だがjobだけ止まり続ける」静かな故障になるため、対象scriptの取得列も権限変更と同じSSOT（計画file）から導きます（SHOULD）。
 
 ### Rule 18.2: The PKCE & MFA Implementation Protocol
 -   **Law**: 認証フローにおいて、**PKCE（Proof Key for Code Exchange）** を標準とし、高セキュリティが求められるアプリケーションでは**MFA（Multi-Factor Authentication）** を実装しなければなりません。
@@ -1104,6 +1179,9 @@
         ```
     2.  **Role Impersonation**: テスト内で `SET LOCAL role = 'anon'` / `'authenticated'` / `'service_role'` を使用し、各ロールでのアクセス可否を検証してください。
     3.  **Negative Testing**: ポリシーが「拒否すべきアクセスを正しく拒否している」ことの検証（ネガティブテスト）を必ず含めてください。「許可すべき操作が通る」ことだけでは不十分です。
+    3b. **Paired Assertions (No Over-Remediation)**: 認可・露出の検査は「拒否されるべきものが拒否される」と「許可されるべきものが通る」を必ず対で置きます（MUST）。遮断側だけの検査は「全部REVOKE／DROPした過剰是正」を緑にし、DROPしただけでCREATEし忘れた状態を検出できません。policy本数・許可列集合など固定できるものは固定して減った側でも赤くし（SHOULD）、是正PRは「攻撃が塞がれた」だけでなく「正当な操作（一般ユーザーの自分の行更新・公開画面の読取）が壊れていない」を同じ検査で示します（MUST）。
+    3c. **Structure + Behavior**: 境界の検査は構造（一覧に入っている／GRANTが無い）と挙動（実際に拒否される）を併置します（MUST）。構造だけだと「条件を書いたのに効いていない」を、挙動だけだと「dataが無い環境で緑」を見逃します。挙動probeは期待する拒否理由（認可なら`insufficient_privilege`＝42501）だけを「守られた」と数え、`EXCEPTION WHEN OTHERS`で全例外を成功扱いにしません（MUST）。NOT NULL違反や型errorで落ちただけの列が「守られた」に化けます。判定できなかった対象は別集合に記録して空で固定し、退避先へ入った要素は赤くします。anonとauthenticatedは別々に測り（MUST）、検証用の一時表へ書く前にROLEを元に戻します。role切替test内で一時表を使うなら`GRANT SELECT`を出し、一時表への42501とpolicyの42501を見分けられるようにします。
+    3d. **Payload & Fixture Discipline**: 許容値（role・状態・列挙）を廃止するときは、実装ではなくテストのpayloadをgrepしてその値を使う攻撃テストを先に棚卸しします（MUST）。正常系は赤くなって気づけますが、攻撃側は緑のまま静かに無意味化します。攻撃テストのpayloadは対象の防御層より手前の層（CHECK制約・型・NOT NULL）が拒否しない値を選び（MUST）、検査が何を測っているか疑わしいときは守りを外して同じ検査を走らせます（SHOULD）。test fixtureのmigration等は名指しでcopyせずdirectoryごと写し、廃止はapp側の許容集合とDB側の関数定義・CHECKの両方向にratchetを張ります（MUST）。
     4.  **CI Integration**: pgTAPテストを CI/CD パイプライン（GitHub Actions等）に統合し、マイグレーション適用後に自動実行してください。
 
 ### Rule 19.2: The Edge Functions Testing Protocol
@@ -1119,6 +1197,7 @@
 -   **Action**:
     1.  **Boundary Value Testing**: NULL入力、空文字列、極端に大きな数値、不正なUUIDなどの境界値に対する関数の挙動をテストしてください。
     2.  **Permission Testing**: `SECURITY DEFINER` 関数は、意図しない権限昇格が起きていないか検証してください。`anon` ロールから呼び出した場合に、本来アクセスできないデータを返していないか確認してください。
+    2b. **Behavior over Existence**: guardは存在ではなく挙動で検査します（MUST）。「triggerが張られている」「policyが存在する」だけの検査は中身が空でも通ります。実際に非特権roleへ切り替えて（`SET LOCAL ROLE`）値を送り、伏せられることを確かめます。role切替を入れ忘れると特権のまま実行され、特権分岐を通って「守られていないのに緑」になります（MUST）。
     3.  **Transaction Safety**: 関数内でエラーが発生した場合に、部分的なデータ変更が残らず適切にロールバックされることを確認してください。
     4.  **Seed Data**: test fixtureは承認済みseed file、factory、snapshot等で決定的に構築し、production dataや固定pathに依存しません。
 
@@ -1172,6 +1251,8 @@
         .select('id, title, author:profiles!inner(name)')
         ```
     4.  **Nesting Budget**: 固定階層数ではなく、実行計画、row fan-out、serialized payload、memory、timeout、egress budgetを測定して許容深度を決めます。budgetを超えるnested contractはview、RPC、複数取得、事前集約へ分解してください。
+    5.  **Write Filter Safety**: local／CIが受理し本番の下位component（DB proxy・API gateway・runtime）だけが拒否する構文が判明した場合、その構文はsource上で静的に禁止します（MUST）。localは通るため統合テストを何本足しても防波堤になりません。「読めるのに書けない」非対称（SELECTは通るがUPDATE／DELETEで拒否）は書き込みだけを0件で静かに終わらせ、例外が上がらない以上jobは成功を記録し続けます。stack例（PostgREST）: 書き込み（`update`／`delete`）のfilterは単項（`.eq`／`.is`／`.in`／`.lt`）のみとし、OR条件が必要なら`.or()`付きSELECTで対象idを確定してから`.in('id', ids)`で書き、SELECT〜UPDATE間の競合窓を塞ぐguard条件はUPDATE側にも残します。この検出を行単位grepで実装してはなりません（MUST NOT）: method chainは複数行にまたがり順序も入れ替わるため、ASTでchainを両方向に辿ります。定期実行の健全性は「実行された記録」ではなく副作用の実data（滞留行が無い・counterが進んでいる）で確かめます（MUST）。
+    6.  **Filter Syntax Sanitization**: query builderやREST filter言語（`.or()`等）に文字列としてuser入力を埋め込む場合、そのfilter言語の構文区切り文字（カンマ・括弧・dot等）をquery発行の直前で置換・削除します（MUST）。placeholder化されないfilter文字列はSQL同様にinjection面です。無害化はvalidation層とは別に、queryを組み立てる関数の内側で行い迂回経路を残しません（SHOULD）。
 
 ### Rule 21.3: The Pagination & Aggregate Protocol
 -   **Law**: 増加し得る、または上限を証明できないcollectionはbounded pagination、stream、export job等を実装します。小さく上限管理されたreference dataまで一律にpaginationを強制しません。
@@ -1179,7 +1260,11 @@
     1.  **Range Pagination**: `.range(from, to)` でオフセットベースのページネーションを実装してください。レスポンスヘッダー `Content-Range` で総件数を取得可能です。
     2.  **Count Option**: 総件数が必要な場合は `{ count: 'exact' }` オプションを使用してください。ただし、大量データのテーブルでは `count: 'estimated'` を推奨します（`exact` は全行スキャンが発生）。
     3.  **Cursor Pagination**: collectionの成長、深いpage、並行更新、安定順序が要件になる場合は、unique tie-breakerを含むKeyset Paginationを候補にします。固定行数を境界にせず、実行計画とconsistency testでoffset方式と比較してください。
+        -   **One-to-N Fetch Transition**: 取得回数が1回からN回へ変わる変更では、同一対象を複数回問い合わせても同じ行集合と順序が得られること（一意なtie-breakerを含む安定順序）を要件として明示します（MUST）。単一行取得でも同値tieの揺れはpage間の混在を生みます。paging入力（limit・offset・cursor）は全ての軸に上限とoverflow防御を掛け（MUST）、片方だけ潰す実装を「潰したつもり」にしません。server関数の引数は外部入力であり、型注釈は実行時に何も強制しません。総数などの集計値は切り出し後の配列長から数えず保存済みのscalar値から返し（MUST）、表示側のpagingはDOMを減らすだけで転送量は減らないため両者を別問題として扱います。
     4.  **Page Budget**: page sizeは実効provider limit、payload、client memory、latency SLO、egress、rate limitからBlueprintで決め、server-side maximumとtestで強制します。Universalに固定件数を埋め込みません。
+    5.  **Full-Scan Guard**: API／clientの既定行数上限（stack例: PostgRESTの`max-rows`既定1000）はerrorも警告も出さずに切り詰めるため、「全部返ってくるはず」の素のSELECTを集合判定・突合・集計の母集合取得や整合性検査の全件走査に使ってはなりません（MUST NOT）。全件走査は安定順序（PK）＋rangeのpaging loopで取得し、終端は「取得行数 < page size」で判定して総数の事前取得に依存しません（MUST）。切り詰めの可能性がある箇所には既定上限を超える行数でのpage境界回帰test（1page目満杯＋2page目1行で2page目の要素が集合に入る）を置きます（MUST）。開発環境の行数では構造的に検出できません。上限付き取得後のapp側filter（Post-Query Filter）はRule 4.3のとおり禁止です。
+    6.  **Aggregate over Capped Fetch**: 既定行数上限や明示`limit`の下で「全行を取って集計する」経路は上限到達時に沈黙して過少集計します。是正手段は集約の性質で選びます（MUST）: (a) 固定の集計（特定表・特定列のCOUNT／SUM／AVG／GROUP BY）→DB側集約へ移す、(b) 動的な対象表や多指標の複雑集計→集計logicは変えず安定順序の全件pagingに置換し、上限到達は無音ではなく警告付き打ち切りにする。DB側集約へ移す場合も単価・換算係数などのbusiness定数をSQLへ複製せず（MUST NOT）、DBは単位別の生集計（件数・token数）だけを返して換算はapp側SSOTで適用します。集約経路の数値型（bigint等）をclient側で安全に扱えるかを配線前に実応答で確認します（SHOULD）。
+    7.  **Bucket-Aware Limits**: scale崖対策で一覧queryに上限を足すときは、呼び出し側がその結果をどう分割・集約するかを必ず読みます（MUST）。単一上限は分割の前に効くため、消費側が結果を複数bucket（daily／weekly等）へ分けるなら高頻度bucketに占有され低頻度bucketが丸ごと消えます（型検査・既存testは検出不可）。消費側が複数bucketに分けるならbucketごとのquery＋bucketごとの上限にし（MUST）、bucket定義はSSOTから反復してfilter無しの集約経路に回帰testを追加します（SHOULD）。
 
 ---
 
@@ -1490,6 +1575,7 @@
         -   RLSポリシー内で他のRLS保護テーブルを参照する場合（再帰防止）
         -   Auth Trigger（`auth.users`へのINSERT後にプロフィール自動作成等）
         -   FDW外部テーブルのデータを公開APIに制限公開する場合（§27.2参照）
+    2b. **Identity-Judging Functions Stay INVOKER**: 判定軸が「呼び出し側が誰か」（`current_user`／`session_user`、呼び出しroleの特権有無）である関数は`SECURITY INVOKER`でなければなりません（MUST）。DEFINERにすると`current_user`が関数所有者になり、誰が呼んでも「特権書き手」と判定されguardが一切効きません。DEFINERは「呼び出し側に権限が無い資源へ触る」ためのもので、「呼び出し側が誰かを判定する」用途とは正反対です。既存の同型関数の実効設定（`pg_proc.prosecdef`等）を実測してから書き（SHOULD）、「他のguard関数に倣った」を根拠にしません。
     3.  **search_path必須設定**: `SECURITY DEFINER`関数では必ず`SET search_path = ''`を設定してください。これにより、攻撃者が`search_path`を操作してオブジェクトを偽装するリスクを低減します。
         ```sql
         CREATE OR REPLACE FUNCTION public.get_user_profile(user_id UUID)
@@ -1507,6 +1593,7 @@
         ```sql
         REVOKE EXECUTE ON FUNCTION internal.admin_operation FROM anon, authenticated;
         ```
+    4b. **Multi-Path Visibility Parity**: 同じdataを返す口が複数（RLS直読み・RPC・view・SECURITY DEFINER関数）あるとき、全経路に同じ絞りを入れ、検査も全経路を実際に叩きます（MUST）。RLSだけ直してDEFINER関数を残すのは是正ではありません。公開可否の判定は1つの判定関数に閉じ（MUST）、条件を複数箇所へ書き写すと公開条件を変えたときに古くなった側はerrorにならず黙って見え方だけがズレます。RLS内の`EXISTS (SELECT ... FROM parent)`は親のRLSが効きますがDEFINER関数内では効かず、同じSQLが同じ意味にならないため、条件を明示的に持つ判定関数を両方から呼びます（SHOULD）。
     5.  **Immutable / Stable / Volatile**: 関数の副作用レベルを正しく宣言してください。`IMMUTABLE`（副作用なし、同入力で同出力）→ `STABLE`（読み取りのみ）→ `VOLATILE`（書き込みあり）。PostgreSQLオプティマイザがこの宣言を利用してクエリを最適化します。
 
 ### Rule 31.2: The Trigger Design Protocol
@@ -1520,6 +1607,9 @@
     4.  **冪等性**: トリガー関数は**冪等**に設計してください。同一イベントが複数回発火しても安全な結果を返す設計が必須です。
     5.  **バージョン管理**: トリガーの作成・変更は必ず**マイグレーションファイル**で管理してください（§7参照）。ダッシュボードからの手動作成を禁止します。
     6.  **デバッグ**: `RAISE NOTICE`でトリガー内のデバッグ情報をログに出力してください。ログはSupabase Dashboardの「Logs > Postgres」で確認可能です。
+    7.  **Privilege Chain Decision**: trigger関数の入口は発火時にEXECUTE検査されませんが、本体から呼ばれる先の関数・tableは発火role（書き手）の権限で検査されます。書き手全員に内部関数のEXECUTEとschema USAGEを配ると到達面が逆に広がります。triggerが関数を呼ぶなら権限は「書き手全員」か「所有者」かを設計時に決めます（MUST）: 処理が「systemの責務」（派生状態の同期等）なら`SECURITY DEFINER`にし、setで`search_path`固定・default privilegesのEXECUTE継承を明示REVOKE・戻り値trigger型でAPI露出が無いことの確認を必須とします。逆に「書き手ごとに挙動が変わるべき処理」ならDEFINERにせず、書けるrole全員へEXECUTEを明示配布し、権限連鎖検査（ratchet）を緑にすることが仕様化になります。
+    8.  **Pre-Trigger Interference Survey**: 書き込み禁止trigger（append-only化・列免疫）を張る前に、その表を子とするFKの`ON DELETE`／`ON UPDATE` action（`pg_constraint.confdeltype`／`confupdtype`）と、所有者権限で走る`SECURITY DEFINER`保守jobを実照会します（MUST）。参照整合性actionはDBが自動発行する書き込みでapp codeのgrepに現れず、triggerは実行roleに関係なく発火するためauth userの削除や保持policyのDELETEを恒久的に失敗させます。append-only化は「正当な実行者がいる操作（保持policyのDELETE）→REVOKEのみ、trigger無し」「誰も正当に実行しない操作（UPDATE／TRUNCATE）→REVOKE＋`ENABLE ALWAYS`trigger」に分け（MUST）、例外flag（`current_setting`bypass）は抜け穴になるので採りません。`BYPASSRLS`相当のbypass credentialでもtable／列権限は効くため、REVOKEで守る前にsuperuserでない・対象表のownerでない・owner roleのmemberでない・parameter ACLが空・動的SQLを実行できるDEFINER関数にEXECUTEが無い、の5条件を実照会します。検査はcatalog状態だけでなく実行系（実際に削除／更新を試みる）で置きます（MUST）。
+    9.  **Column-List Trigger Coverage**: 削除連動・監査などをDB trigger 1か所へ畳む設計は、その1か所へ入ってくる全ての書き方（INSERT／UPDATEのSET列／upsertの`ON CONFLICT DO UPDATE`）を実測してから「漏れない」と言います（MUST）。列指定trigger（`UPDATE OF col`）はSETに載らない列で沈黙します。
 
 ---
 
@@ -1608,6 +1698,7 @@
         ```
     2.  **Privilege Boundary**: managed auth schemaのtriggerを採用する場合はcurrent provider supportを確認し、必要最小owner／grant、safe search path、failure testを設けます。`SECURITY DEFINER`は必要性を証明した例外です。
     3.  **Error Handling**: トリガー関数内でエラーが発生すると、元の認証操作自体がロールバックされます。`BEGIN...EXCEPTION`ブロックでエラーを適切にハンドリングし、認証フロー全体の失敗を防止してください。
+        -   **Exception-Handler Writes Vanish on Re-raise**: `EXCEPTION`handler内で失敗を記録tableへ書いてから`RAISE`で再送出すると、transactionごとrollbackされて記録は決して残りません（MUST NOT）。「記録も再送出も」は両立しません。失敗記録を残したいなら例外はそこで飲み込んで正常終了し、失敗は戻り値の番兵（sentinel）で表現するか、記録先を別transaction（別接続・外部log）にします（MUST）。EXCEPTION経路は必ずtestで踏み（依存tableの一時RENAME等で内部失敗を起こし、記録が残ること・番兵が返ることを実測）、踏まなければ矛盾は本番で最初に例外が出た日まで潜伏します（MUST）。
     4.  **Migration管理**: Auth Triggerの作成・変更は必ずマイグレーションファイルで管理してください（§7, §31.2参照）。
 
 ---
@@ -1861,6 +1952,7 @@
           changed_at TIMESTAMPTZ DEFAULT NOW()
         );
         ```
+        -   **Event-Ready Columns**: 監査log／変更履歴tableには、table名と行IDだけでなく、集約種別（`aggregate_type`）・集約ID・domain event名（`event_type`、`{集約}.{過去形動詞}`形式で辞書化）・event schema版（`event_version`）・before／after差分を持たせ、将来CDC／event storeへ変換できる粒度にします（SHOULD）。logは追記専用とし`event_id`を一意keyにして重複処理を防ぎ（MUST）、順序は`created_at`と版で決定可能にします。今すぐEvent Sourcingを導入することは要求せず、導入判断は書き込みQPS・状態遷移の複雑性・time travel要件など計測可能な指標で行い、小規模段階での導入は過剰設計として避けます（SHOULD）。相互参照: `engineering/000_engineering_standards.md` §14.4。
     3.  **JSONB使用基準**: JSONBは以下の場合に使用してください:
         -   スキーマが可変のメタデータ（Webhookペイロード等）
         -   頻繁なスキーマ変更が予想されるフィールド
@@ -1887,6 +1979,7 @@
     4.  **GitHub OAuth**: GitHubのDeveloper Settingsで「OAuth App」を作成し、Client IDとClient Secretを取得してください。
     5.  **シークレット管理**: Client SecretはSupabaseダッシュボードのProvider設定にのみ格納し、**コードにハードコードしない**。環境変数にも格納しない（Supabase側で管理される）。
     6.  **スコープ最小化**: 各プロバイダで要求するスコープ（権限）は必要最小限にしてください。過剰なスコープはユーザーの信頼を損ないます。
+    7.  **Redirect Allowlist Namespace**: 認証redirect・CORS・postMessage等の許可listで、host部にwildcardを置けるのは自社が名前空間を所有するdomain配下だけです（MUST）。PaaSの共有domain（例: `*.vercel.app`）は接頭辞・接尾辞を付けても第三者が満たせます。検査は危険な書き方を列挙せず「安全と言い切れる形」を定義してその補集合を違反にし（MUST）、消せない項目は理由と期限つきで宣言して期限切れと「解消したのに宣言が残っている」の両方を違反にします（SHOULD）。一致規則を確定できない変種（末尾slash・`/**`）は「重複」と読んで消さず保留し、管理console側の許可listはManagement API等で定期的に実測します。
 
 ### Rule 39.2: The SAML SSO & Mobile Deep Linking Protocol
 -   **Law**: enterprise SSOはcurrent provider control plane、API、CLI、IaC等の承認経路で再現・監査可能に設定し、mobile redirectはverified Universal Links／App Links等の安全なcallbackを優先します。
@@ -1931,6 +2024,7 @@
     3.  **Heterogeneous or Online Migration**: 異種engine、低停止時間、継続更新、大容量の場合は、検証済みETL、CDC、logical replication、bulk loader、段階的dual-runを比較します。toolやsize thresholdはbenchmarkとBlueprintで決めます。
     4.  **Security Reconciliation**: dump対象と復元挙動はoptionとversionで異なります。role、grant、RLS、Auth identity、secret、ownership、extensionを別inventoryで照合し、default denyを維持します。
     5.  **Validation and Cutover**: row countだけでなく、checksum／sample、constraint、sequence、permission、application contract、performance、RPO／RTO、rollback rehearsalをapproval evidenceに残します。
+    6.  **Default-Copy Replacement**: 管理画面で編集可能な文言の既定値を変更するときは、旧既定値の集合をaliasとして持ち、現在値が旧既定と一致する行だけを「未編集」とみなして新既定へ差し替えます（MUST）。正本は `engineering/700_batch_backfill_operations.md` の「Rule 700.3.2a」。
 
 ### Rule 40.2: The Seed Data Management Protocol
 -   **Law**: initial／reference／test dataはschema migrationと責務を分離し、version管理されたapproved seed artifact、factory、snapshot等で再現可能にします。`supabase/seed.sql`はCLI既定候補です。
@@ -1944,6 +2038,11 @@
         ```
     4.  **冪等性**: シードデータは`INSERT ... ON CONFLICT DO NOTHING`で冪等に記述してください。複数回実行してもエラーにならないようにします。
     5.  **環境別シード**: 開発用のダミーデータと本番用の初期マスタデータを分離し、環境変数やスクリプトで切り替えてください。本番シードは監査対象です。
+    6.  **Snapshot Parity Verification**: 本番（権威source）と一致させる方針のseed／snapshot／replicaは、生成済みsnapshot同士の比較や件数一致だけで完了扱いにしません（MUST NOT）。同期script自身が列を除外・加工していれば比較は循環し乖離を隠します。検証は権威sourceから独立に取得した全列との列単位raw比較＋安定hashの両方で行い（MUST）、同期対象外にする列は秘密値・認証値等の正当な理由があるものに限定して除外列名を検証出力へ明示します（MUST）。検証commandはCIまたは定期jobで再実行できる形に固定します（SHOULD）。
+    7.  **Sync Plan SSOT**: 同期・複製・検証の対象定義（対象table、削除順、conflict key、optional、filter種別、raw比較対象列、派生列の除外、runtime不変guard）は、同期処理本体と検証処理が同じ計画fileから読む単一のSSOTに置き、同期側と検証側に別々の配列を持ちません（MUST NOT）。別定義だと同期対象を追加したのに検証対象へ入れ忘れる、または検証だけが古い対象を見る事故が起きます。複数のseed／fixture fileが積層する環境の同一性検証は、期待状態を「設定に列挙された適用順の再現」として合成します（SHOULD）。
+    8.  **Safe-Value Convergence**: 初期値・安全上限・quota・feature flag・機能停止値を設定する列追加migrationは、migration単体の既存行UPDATEだけで完了扱いにしてはなりません（MUST NOT）。正本は `quality/000_qa_testing.md` の「Seed Re-application Convergence」。
+    9.  **Snapshot Freshness & Generator Purity**: 権威sourceから生成したseedは「その時点の写し」であり、権威sourceを是正してもseedは自動で直りません。本番側の一括是正後は再同期を実行し写しの鮮度を確認します（MUST）。生成seedに品質事象が出たら、生成logicを疑う前に (1) 権威sourceの現在値、(2) snapshotの生成時期（VCSでの初出commit）、(3) 同期jobの直近の成否、の3点を先に照合します（MUST）。忠実snapshot契約（raw比較）を持つ生成器にtrim・正規化・補正を追加してはならず（MUST NOT）、data清掃は権威source側で行い写しは再同期で追従させます。入口guard（trigger・制約）を追加すると過去の残骸が初めて可視化されるのは失敗ではなく価値であり、guard追加時はseed／fixtureの適用が通ることまで検証範囲に含めます（SHOULD）。
+    10. **Unified Masking for Production Reads**: 本番dataを手元やfileへ持ち出す経路はseed生成に限らず、本番へ問い合わせる全script（検証・往復比較・dump）を母数とし、同一の伏せ基準（機微列判定のSSOT）を必ず通します（MUST）。seedと検証で基準がずれると片方だけが`select *`で平文を漏らします。伏せ方はnullで潰すのではなく「非空なら固定の伏せ値、空／nullはそのまま」に正規化し（SHOULD）、値を持ち出さずに「値があったのに消えた」だけは検出できるようにします。行dumpの出力先はVCS無視規則で固定し、平文が手元fileに残る経路を塞ぎます（SHOULD）。
 
 ---
 
@@ -2040,6 +2139,9 @@
         $$ LANGUAGE plpgsql;
         ```
     4.  **RLS Complementarity**: Column-Level SecurityはRLSの**補完**であり、代替ではありません。RLS（どの行にアクセスできるか）+ CLS（どの列にアクセスできるか）の組み合わせで完全なデータ保護を実現してください。
+    5.  **Write Classification Ratchet**: table levelの書込GRANTは「後から足した列」も自動的に配ります。列を追加したら「利用者が書いてよい」か「serverが決める」かを申告するまで検査が赤くなる集合ratchetを置きます（MUST）。「blocklist以外を全部GRANT」のように否定で導出した許可は、名指ししなかった要素を再実行のたびに公開するため禁止です（MUST NOT）。特権列guardは「特権列の名指し」ではなく許可listの否定（許可listに無い列は全部保護）で書き（MUST）、名指しと許可listの両方に載っていない列が隙間になります。guardの危険度は形だけでは判定できないためGRANT（権限）と併せて見ます（MUST）。
+    6.  **Own-Row Column Grants & USING-only UPDATE Sweep**: user-owned tableのUPDATE policyが`USING`のみで`WITH CHECK`・列制限が無く、role／status／score／balance／tier／is_*／moderation／owner_id等の機微列を持つものを毎監査で列挙します（MUST）。RLSの`WITH CHECK`はNEW行しか参照できずOLD↔NEWの列不変条件を表現できないため、USING-onlyのUPDATE policy＋広いGRANTでは行所有者が「自分の行である限り」任意の機微列を書き換えられます。是正は性質で使い分けます（MUST）: 列不変条件（OLD↔NEW比較）→`SECURITY INVOKER`のBEFORE UPDATE triggerで`IS NOT DISTINCT FROM`検知し権限error、所有権付替防止→`WITH CHECK (USINGと同一述語)`、列可視性→列GRANT。「本人が自分の行を読める」tableはtable SELECTをREVOKEして本人向け列集合を列GRANTします（MUST）: 列GRANTは後から足した内部列を配らないため、新列が黙って本人へ露出しません。app側のSELECT spec／DTOが列を落としてもData APIを直接叩けば列GRANTが残る限り漏れるため、列可視性の防御leverは列GRANTでありDTOではありません。列REVOKE後はその列をserver側で読む全経路のroleを洗い、認可済み管理経路はservice role等へ寄せ、許可集合は両方向（許可列が読める／それ以外は読めない／内部列を名指し）でtest固定します（MUST）。投票countなど正当に増減する列や通常ユーザー編集列はtrigger対象外にします。
+    7.  **Role Narrowing over Decision Correctness**: tier・status・role・所有者ID・評価集計などserverが決めるべき値は、決め方が正しいことではなく「その列を書ける主体（role）を絞る」ことで守ります（MUST）。appと同じroleで書いている限り、DBは正当な書込とAPI直叩きを区別できません。守る列は名前の正規表現で拾わず書込可能列をtable単位の集合として固定し、権限判定はtable単位ではなく列単位（`has_any_column_privilege`相当）で確認します（SHOULD）。詳細は `security/430_authorization_and_access_control.md` §7.4 を参照。
 -   **Rationale**: RLSだけでは「アクセス可能な行の全カラム」が公開されます。給与データや個人番号など、同一テーブル内でも感度レベルが異なるカラムが存在する場合、Column-Level Securityにより列単位の精密なアクセス制御が可能になります。
 
 ---
@@ -2195,6 +2297,7 @@
         ```
     4.  **Deadlock Prevention**: 複数のAdvisory Lockを取得する場合は、常に同一の順序で取得してください。順序の不統一はデッドロックの原因です。
     5.  **Release & Failure**: session lockは明示unlockとfinally、connection loss、process crash、pool reuseをtestします。transaction lockはtransaction durationを短く保ち、external side effectをlock保持中へ安易に含めません。
+    6.  **Quota Reservation**: 「実績件数をCOUNTして上限と比較→実行→記録」の枠制御はcheck-then-actの競合を持ちます。原子化は専用の予約table（TTL付き）＋実績と有効予約を同一transactionで数えて条件付きINSERTするRPC（advisory xact lock）で行い（MUST）、予約行をFinOps正本（実績log）に混ぜません（MUST NOT）: cleanup失敗時に有料ユーザーの枠を恒久的に奪います。正本は `ai/000_ai_engineering.md` の「Reservation-Based Quota」。
 -   **Rationale**: Coordination mechanismごとにscope、lease、fencing、failure recoveryが異なります。Advisory Lockの強制ではなく、重複副作用とstale ownerを防ぐ検証可能な設計を要求します。
 
 ---
@@ -2215,6 +2318,7 @@
         ```
     2.  **Replay Window**: provider timestamp、clock skew、delivery retry、business latencyからfreshness windowを定め、event ID、nonce、signature version等と組み合わせます。固定5分をUniversal要件にしません。
     3.  **Idempotency Key**: provider event IDまたは正規化した冪等性キーをatomic unique constraint等で記録し、同一eventの副作用をexactly-onceと誤認しないよう処理状態とretryを設計します。
+    3b. **Boot & Verification Probe**: webhook受信endpointの本番readinessは「deploy済み」ではなく、わざと不正な署名でPOSTしてcleanな4xxが返ることで実証します（MUST）。4xxは「processが起動し署名検証codeまで到達した」証拠であり、5xxは必須設定（secret・接続先等）の欠落を意味します。起動時に必須設定をfail-closedで検証するendpointは、設定欠落時に全eventが5xxになり送信側は再送を続けるため障害が静かに進行することを前提に、5xx率のalertと必須設定の台帳（名前・環境・所有者）を持ちます（MUST）。必須設定の一覧はcodeとreadiness台帳の両方に記載し、環境追加時のcheck項目にします（SHOULD）。
     4.  **Failure Recovery**: delivery保証とbusiness criticalityに応じてdurable inbox、queue、DLQ、replay tool、alert、manual reconciliationを選び、受付と重い処理を分離します。
     5.  **Schema Evolution**: providerのevent type／API versionを検証し、unknown field tolerance、required field、adapter、contract fixture、deprecation migrationを設計します。受信側がprovider payloadへ任意のversionを追加できるとは仮定しません。
 -   **Rationale**: 署名なしのWebhookは「誰でも偽リクエストを送信可能」な攻撃面です。署名検証により認証されたリクエストのみを処理しやすくし、データの整合性とセキュリティを高めます。

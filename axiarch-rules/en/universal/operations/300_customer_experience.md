@@ -387,6 +387,7 @@
 -   **Progressive Disclosure**: Adopt design that introduces features progressively, not all at once.
 -   **Time-to-Value Benchmark**: Measure TTV by segment and continuously reduce it.
 -   **Onboarding Completion Correlation**: Analyze correlation between onboarding completion rate and 12-month retention rate, quantifying onboarding improvement impact on retention.
+-   **Aha Moment Validation**: The "Aha! Moment" is not decided by declaration; validate it by the retention gap between users who reached it and those who did not (e.g. at least 2x at D30) (MUST). If there is no gap, that step is not the Aha Moment. Define each activation milestone as a pair of "measurement method (which event / column decides it)" and "target completion rate", and place a threshold on step-to-step drop-off (e.g. 30%) to select priority improvement targets mechanically (SHOULD).
 
 ### 9.2. The Onboarding Checklist Standard
 -   **Law**: Provide interactive onboarding checklists to new users.
@@ -440,6 +441,11 @@
 -   **Tone**: Use warm tone; pressure language ("If you don't come back now...") is prohibited.
 -   **Measurement**: Measure Resurrection Rate at each step, continuously improving measure effectiveness.
 -   **A/B Testing**: Optimize re-engagement email subjects, content, and send timing via A/B testing.
+-   **The Sensitive Life-Event Suppression Protocol**: When an entity a user registers (a person, family member, pet, asset, ...) can undergo a sensitive life event (loss, bereavement, a major change of state), the product MUST have a **self-reported status** that represents it. Sending a promotional message at that moment is an incident that irreversibly destroys the user's trust.
+    -   On declaration, immediately stop everything tied to that entity: promotions, reminders, recommendations, seasonal notifications, and name insertion into personalized copy (MUST). Only legally required notices (terms changes, security notices) continue.
+    -   Do not delete the entity's data; preserve it in a viewable archived state (MUST). UI copy SHOULD use a "kept with care" tone rather than "delete".
+    -   Re-engagement of that user (the steps of this protocol, Win-Back) is prohibited for a period (e.g. 6 months), and the same applies when the event becomes known through a cancellation reason or a survey (MUST).
+    -   Transition into this status happens only by self-report; it MUST NOT be inferred automatically from age, inactivity, or behavioral data.
 
 ### 10.3. The Cancellation Flow Standard
 -   **Law**: Mandate cancellation procedures completable within **3 steps**.
@@ -498,6 +504,7 @@
 -   **Skip Button**: Always display "Skip" button; forced responses prohibited.
 -   **Auto-Close**: Auto-close after 10 seconds without response.
 -   **Non-Blocking**: Position on layer that doesn't obstruct main content interaction.
+-   **The Survey Operations Standard**: Beyond measurement definitions and technical implementation, write down the targeting criteria (minimum tenure, minimum usage count, exclusion of recent respondents) (MUST) — without "when, to whom, how often", data quality and response rates never stabilize and immature data unfit for decisions accumulates. Place dishonest-response exclusion rules on the data (e.g. display-to-answer under a few seconds, the same score repeated) to exclude or flag them, and keep a schema that stores time-to-answer (SHOULD). Define the reporting cycle (e.g. weekly flash / monthly trend and segments / quarterly summary with improvement actions) and its recipients (SHOULD). Thresholds are set in the Blueprint.
 
 ### 12.5. The Survey Data Schema Standard
 -   **Recommended Schema**: `id` (UUID), `user_id` (UUID, FK to user table), `survey_type` (TEXT: nps/csat/ces), `trigger_event` (TEXT), `score` (INT), `feedback_text` (TEXT, nullable), `segment` (TEXT), `plan_tier` (TEXT), `created_at` (TIMESTAMPTZ).
@@ -512,6 +519,7 @@
 ### 13.1. The Dynamic Form Runner
 -   **Law**: Standardize design where input forms (contact forms, etc.) are **dynamically generated from DB/CMS-defined schemas** rather than hardcoded.
 -   **Action**: Schema-Driven (form field definitions in DB JSONB or dedicated table); No Deploy for Forms (no code deploy required for form changes); Validation Sync (auto-generate frontend validation from DB schema); Anti-Bot/Spam Protection (CAPTCHA or challenge auth on all forms); PII Access Restriction (admin-only PII viewing); Smart Pre-fill (auto-fill known info for logged-in users).
+-   **Contact Identity Validation**: Do not rely on the browser's built-in `type="email"` (accepts `a@b`) / `type="tel"` (no validation) for contact fields (email, phone). The source of truth is a **server-side pure function** (syntax, reserved domains, disposable addresses, numbering-plan validation, length caps); the client lazy-loads the same function and shows the result first on blur (MUST). Rejections return `errorCode` + `errorField` and are rendered through the dictionary of the active locale. DNS checks (MX → A/AAAA) reject NXDOMAIN and no-record, while timeouts and SERVFAIL fail open with a warn (an external outage must not reject legitimate senders). A mailbox that passes format checks but does not exist is only discovered on send, so count bounces of the acknowledgment email daily, warn, and show "acknowledgment undelivered" on the inquiry list row. Suspect the "defined but never enforced" state where a validation rule declared in the schema is missing from the columns read at submit time, and reconcile the definition with the enforcement path
 
 ---
 
@@ -531,6 +539,8 @@
 | **Batch (Scheduled)** | — | Email digest (weekly, etc.) |
 
 -   **Unsubscribe**: Always provide one-click unsubscribe for marketing notifications.
+-   **Single Trigger Across Channels**: When one event is notified across several channels (in-app, push, email), unify the trigger on the single event "a persistent notification record was newly created" (MUST). Emit only newly inserted rows from the upsert's return value; updates and reruns do not resend. Channels MUST NOT fire from separate triggers (a hook in the publish flow, a cron, a screen action) — split triggers structurally produce "only one arrived" and "arrived twice". Copy templates SHOULD resolve from the same SSOT for every channel.
+-   **No List-Unsubscribe on Transactional Mail**: Do not attach `List-Unsubscribe` to individual replies or transactional mail (MUST NOT). If attached at all, its endpoint is a single fixed address independent of Reply-To, and a machine-read reply address (the ticket inbox, etc.) is never the receptacle for unsubscribe or complaints — in a real case the mail client's "Unsubscribe" turned an opt-out into "a reply from the customer", reopened the ticket, and counted as an SLA breach. Until a real receptacle exists (notification settings, an RFC 8058 https endpoint), do not claim one in the header.
 
 ### 14.3. The In-App Notification Classification Standard
 
@@ -541,6 +551,9 @@
 | **Banner (global)** | Maintenance notifications, etc. | Fixed at the top of the screen. Admin-controlled |
 
 -   **Locale Compliance**: All notification copy must read naturally in the target locale.
+-   **Seen/Read Two-Axis Model**: In-app notification state is held on two axes, "seen" and "read" (MUST). The badge count means "unread items newer than the last time the panel was opened (unseen)" and may be optimistically reset to 0 the moment the panel opens. Per-row unread marking stays until the row is tapped to navigate or its individual toggle is pressed; "opened the panel = read" is prohibited (MUST NOT). Always provide "mark all as read" and "mark as unread" (a reversible operation) (MUST). Prohibited patterns: everything read the moment the panel opens (the trace of what was not read disappears); clearing only the badge without per-row unread state (what was marked read comes back).
+-   **Count at the Source**: Do not count badges or totals inside a list fetched with a paging cap (MUST NOT). Let the DB / API count through the permission layer (RLS, etc.) and return it as `total` in the same round trip as the list (MUST) — counting inside the cap makes the over-cap branch (`99+` and the like) permanently unreachable in production while pure-function tests stay green. Do not fetch attached data such as read state without a limit (MUST NOT; the moment the row cap is exceeded, degradation runs in the "read turns back into unread" direction). Add a wiring test (DB/RPC level) that checks the cap and the source of the count in the same test (SHOULD).
+-   **No Ads in the Notification Surface**: The notification panel / center is a trust surface listing events about the user; do not place third-party ads or promotional slots there (MUST NOT). When operator announcements are needed, deliver them as a "system notification" kind within the notification context (SHOULD).
 
 ### 14.4. The Notification Frequency Control Protocol
 
@@ -548,6 +561,8 @@
 -   **Quiet Hours**: Marketing notifications during 21:00-8:00 are delayed until the next morning. Transactional notifications are exempt.
 -   **One-Click Unsubscribe**: Marketing notifications must include an unsubscribe link and support one-click opt-out in compliance with applicable laws such as CAN-SPAM.
 -   **Preference Center**: Provide ON/OFF controls per notification category: transactional, communication, marketing, and reminder.
+-   **Security Notifications Are Not Optional**: Even when the Preference Center offers ON/OFF per category, notifications about security and account safety (password change, suspicious login, authentication-factor change, etc.) are fixed ON and cannot be disabled by the user (MUST).
+-   **Invalid Destination Hygiene**: Delete a push / message destination identifier (device token, endpoint, etc.) immediately when the delivery service returns an invalid response (Gone / NotRegistered or equivalent) (MUST) — continuing to send to invalid destinations degrades the sender account's reputation and invites blocking (the hygiene counterpart of email bounce handling). The canonical rule is "Invalid Destination Hygiene" in `engineering/300_web_frontend.md`.
 
 ### 14.5. The Notification Category Matrix
 
@@ -570,6 +585,7 @@
 -   **Instant Acknowledgment**: Send receipt confirmation email immediately after inquiry submission.
 -   **SLA Display**: Include expected response time (SLA) in auto-reply.
 -   **No Silent Submission (Ghost Feature Prohibition)**: No feedback after form submission is strictly prohibited.
+-   **Thread Binding**: Every email about an inquiry (acknowledgment, operator notification, reply) carries a **ticket identifier** in the subject, and replies carry `In-Reply-To` / `References`, so that mail clients bind them into one conversation (MUST; the same convention as the inbound threading of major helpdesk products). The operator notification (Reply-To = the sender) and the sender's acknowledgment (Reply-To = the operator inbox) use **separate templates and separate Reply-To values**; editable templates may change only the wording, and the copy of the submitted content is always attached. Ticket number, tag, Reply-To resolution, and sender-address extraction live in one pure function shared by every path.
 
 ### 15.2. The Email Template Structure Protocol
 -   **Mandate**: All system emails require 5 elements: Subject (concise, ≤30 chars recommended), Greeting (personalized with user name), Body (purpose/result/next action), CTA (button format with URL fallback), Signature (service name, contact info, unsubscribe link with legal compliance).
@@ -581,6 +597,7 @@
 -   **Best Practice**: Security emails include "If you didn't request this, ignore this email"; links with explicit expiration ("Valid for 24 hours").
 -   **Send Retry**: Max 3 retries on failure; failures logged + admin notified.
 -   **Email Deliverability**: Measure monthly; maintain **≥ 98%**; monitor bounce rate and spam classification rate.
+-   **Copy Follows Configuration**: Copy such as "you can reply to this email" or "replies are recorded" switches from the same pure function that decides whether every setting and secret the feature needs is present, and MUST NOT say "you can" while unconfigured. Daily detection of paths where a missing setting silently disables the feature follows `operations/400_site_reliability.md` §69 (Fail-Fast Configuration Mandate).
 
 ---
 
@@ -591,12 +608,17 @@
 -   **Purpose-Based Separation**: Transaction (`noreply@{domain}`), Marketing (`news@{domain}`), Support replies (`support@{domain}`).
 -   **Free Email Prohibition**: System emails from free email addresses prohibited.
 -   **Reply-To Mandate**: Set support address as `Reply-To` even for `noreply@` senders.
+-   **Human-Replied Mail From Rule**: For conversations a human answers (acknowledgments, support replies), the From is not `noreply@`; send from an address on the sending domain that matches the public contact on the legal page (MUST) — clients that ignore Reply-To lose the reply, so the From itself must be reachable. Resolve the sender as a pure function in the order "environment variable → inbox setting in the admin panel → default support address → system sender", with only addresses on the sending domain as candidates (free-mail addresses fail DMARC). Public contact fields also hold URLs and phone numbers, so consider only the email-shaped ones and do not treat the rest as misconfiguration. A fallen-back sender setting (missing, off-domain) warns in the daily check and auto-resolves once the setting is fixed.
+-   **Display Name Consistency**: Do not vary the sender display name per touchpoint (acknowledgment / reply / notification); unify on one (MUST; addresses may still be split by role) — to the recipient they look like different parties. Match the sign-off in the body with the From display name, and attach the same display name to Reply-To.
 -   **Cross-Reference**: `security/000_security_privacy.md` — SPF/DKIM/DMARC
 
 ### 16.2. The Email Audit Schema Standard
 -   **Law**: Record all system email sends in an audit table.
 -   **Schema**: `id` (UUID), `recipient_email` (TEXT, masked: `a***z@...`), `template_type` (TEXT), `subject` (TEXT), `status` (sent/failed/bounced), `provider_id` (TEXT), `sent_at` (TIMESTAMPTZ), `error_detail` (TEXT).
 -   **PII Protection**: `recipient_email` stored masked. **Retention**: Defined by Blueprint (recommended: 1 year), auto-delete after.
+-   **Per-Recipient Rows**: The send ledger is **one row per recipient** (`recipient_role` = to / cc / bcc) and keeps, per recipient, the From (display name + address), Reply-To, subject, body (text version, truncated with a marker beyond the cap), and delivery state (MUST). The sender at the time stays known after settings change, and non-delivery to CC/BCC is visible per row. Secret-only mail (OTP, disclosures) does not write the body to the ledger. Pin with tests that every ledger writer (templated / raw / alert, ...) writes From and `recipient_role` on every path.
+-   **Bounce Attribution**: A provider's bounce / complaint event carries "the affected recipient". Among rows sharing the same message ID, mark **only the matching row** as undelivered and suppress only that recipient (MUST). When the recipient cannot be identified among several rows, do nothing and warn (false suppression is the "can never send again" kind of accident; a single-row fetch once failed on multiple rows and nobody was suppressed). Send-rate quota is consumed per recipient (To + CC), not per send.
+-   **Suppression Visibility**: Do not send to suppressed recipients, but never drop them silently (MUST). If To is suppressed, stop the whole send and return the reason; if only CC is suppressed, keep a `suppressed` row in the ledger and show a badge in the UI. Subject-access disclosures include the CC / Reply-To that appeared in the headers the person received, but not BCC, which is a third party's address they never saw.
 -   **Cross-Reference**: `security/100_data_governance.md` §3 — Email Compliance Protocol
 
 ---
@@ -644,6 +666,14 @@
 -   **Agent Identity Verification**: Multi-factor user identity verification before account changes (registered email confirmation + security question or in-app authentication).
 -   **Social Engineering Detection**: AI detects suspicious request patterns (sudden contact change requests, abnormal access patterns), triggering additional authentication.
 -   **Sensitive Operation Lock**: High-risk operations (account deletion, full data export) only via authenticated in-app flows, not support channel requests.
+-   **Inbound Binding Rules**: A short identifier that can be public in a subject line or on screen (a ticket number) is not authentication. A fallback path that binds inbound mail to an existing case by it is allowed only when the sender matches the registered address (MUST) — otherwise anyone who knows the ticket number can write into someone else's history, reopen it, and make the system notify administrators. Inbound bound by a hard-to-guess identifier (the addressed uuid) is accepted even from a different sender, but with a mismatch flag that surfaces in the notification and history (not rejected).
+    -   For inbound bursts (mass sending by third parties, auto-reply loops), keep separate per-window caps for notifications and for records on the same case, and neither notify nor record the excess. Fetch the body (external API) only after acceptance has been decided.
+    -   Only the system (webhook) writes inbound rows; that an admin action cannot create the "received from the other party" kind is enforced by both the app's permission set and a DB constraint (MUST; the app alone can be forged by calling the API directly).
+-   **Relay-by-Email Authorization**: A path that forwards received mail to a third party under the organization's name requires both (a) a case-scoped HMAC signature embedded in the address (derived from a secret with a purpose label) that matches, and (b) a sender who is a permission holder not suspended or withdrawn (MUST). The signature sits inside notification mail and can leak (forwarding, lost devices); the sender can be spoofed (the inbound data carries no SPF/DKIM verdict) — so if one breaks, the other still holds. Keep the decision in one pure function and make a change that relaxes a single condition turn a test red.
+    -   Without a secret, create no address and accept nothing. Never fall back to a fixed string (anyone can sign) or a per-process random value (cannot verify across instances; silent loss) (MUST NOT).
+    -   Always tell operators about a rejection (otherwise it disappears without reaching anywhere). Never auto-reply to the sender (with a spoofed From this becomes backscatter to an unrelated person) (MUST NOT).
+    -   Forward only the part the operator wrote, with quotations stripped; send nothing if only quotations remain. Rebuild the subject instead of reusing the inbound one. The idempotency key is the inbound message ID (unique index); 4xx does not trigger retries, and only 5xx and network failures are left to the provider's retry.
+    -   When the same logic lives in two runtimes (the web app and an edge function), do not "keep them in sync by comment"; add a parity test that imports both and feeds them the same input (MUST).
 
 ---
 

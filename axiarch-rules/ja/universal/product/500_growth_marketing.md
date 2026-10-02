@@ -110,6 +110,7 @@
     *   **Definition**: GEOとは、AIが学習・引用しやすい形式で情報を提供し、回答生成時の「信頼できる引用元（Primary Source）」として選ばれるための戦略です。
 *   **構造化データ (Structured Data)**:
     *   **JSON-LD**: 全てのパブリックページに `Schema.org`（JSON-LD）を実装し、Google検索結果でのリッチスニペット表示（レビュー、価格、FAQ）を狙います。
+    *   **注記（FAQリッチリザルトは時点情報）**: 上記「FAQ」のリッチスニペットは主要検索エンジンで終了済みであり、`FAQPage` の目的は検索結果のリッチ表示ではなくAI検索の回答抽出である。「リッチスニペットを狙う」という説明は誤解を生むため、`FAQPage` はAI向けの意味づけとして記述する（SHOULD）。対象型の現行の適格性は検索プラットフォームの一次資料で確認する。
     *   **The Essential Schemas Protocol (必須スキーマ一覧)**:
         *   **Law**: JSON-LDの実装にあたり、以下のスキーマタイプをページ種別に応じて積極的に採用してください。
         *   **Schemas**:
@@ -117,12 +118,24 @@
             |:--------|:-----|:---------------|
             | `Article` / `BlogPosting` | 記事ページ | `author`, `publisher`, `datePublished`, `dateModified` |
             | `BreadcrumbList` | 全ページ共通 | ページ階層構造 |
+            | `ItemList` | 一覧ページ（地域・カテゴリ・タグ・ランキング・検索結果） | `itemListElement`（各項目の `position` と `url`） |
             | `FAQPage` | Q&A形式コンテンツ | 質問と回答のペア |
             | `Product` | 商品・プランページ | `Offer`（価格）, 在庫状況 |
             | `Organization` | トップページ | ロゴ, SNSリンク (`sameAs`) |
             | `LocalBusiness` | 店舗・拠点ページ | `openingHoursSpecification`, `geo`, `address` |
             | `AggregateRating` | レビュー集約 | 平均評価, レビュー数 |
+        *   **但し書き（`Product` 行の適用条件）**: 上表の `Product` は、そのページで購入が完結し商品画像（`image`）等の必須項目を偽らずに満たせる場合に限る。SaaSの料金・プランページのように必須項目を満たせない場合は `Product` を出さず、`Service` + `offers` 等のリッチリザルト対象外の型で意味づけだけ残す（MUST）。必須項目を偽らずに満たせない型は出さない。対象型の適格性と必須項目は検索プラットフォームの一次資料で確認する。
+        *   **Listing Page Mandate**: 1:Nのエンティティ一覧ページ（地域・カテゴリ・タグ・ランキング・検索結果）は `BreadcrumbList` に加えて `ItemList` を出力し、一覧の中身を機械抽出可能にする（MUST）。パンくずだけでは「このページに何件あるか」をLLM・検索エンジンが構造化できない。一覧ルートのページファイルでJSON-LD出力の不在をgrepで検出する。意味的精度が必要なら `OfferCatalog` 等のサブタイプをリッチリザルト検証後に採用してよい（MAY）。詳細ページの構造化が済んでも一覧が抜けるのは典型である。
         *   **Type Safety**: `schema-dts` 等のライブラリを使用し、型安全にJSON-LDを構築してください。文字列結合や生オブジェクトでの構築は禁止です。
+        *   **Enum Value SSOT**: 構造化データの列挙値（`https://schema.org/{EnumName}` 形式・大文字小文字厳密）は文字列リテラルで書かず、`as const` の定数SSOTに集約して参照する（MUST）。型付きライブラリでも列挙値URLは文字列のため typo が通り、検索側は「知らない値」として黙って捨てる。新規スキーマ追加は「公式仕様ページ確認 → 列挙値を定数へ追加 → リッチリザルトテストで警告0件 → Search Console のカバレッジでエラー0件」の順で行う（MUST）。
+    *   **The Rich Result Eligibility Protocol（リッチリザルト適格性）**:
+        *   **Law**: 検索エンジンがリッチリザルト対象とする型（例: `Product`、`SoftwareApplication`、`SocialMediaPosting`）は、必須項目（例: `Product` は `image` と購入完結、`SoftwareApplication` は `aggregateRating` または `review`、`SocialMediaPosting` は `datePublished`）を偽らずに埋められるかを、型を選ぶ前に確認する（MUST）。埋められないなら出さず、対象外の型（`Service` + `offers`、`WebPage` 等）で意味づけだけ残す。「満たせないが出しておく」に価値は無く、残るのは「要件を満たしていない申告」だけである（実測例: 有効0件・無効25件でリッチリザルト0件）。迷ったら同業の本番HTMLを実測する（SHOULD）。
+        *   **Action**:
+            1.  **Type Ledger**: 出してよい型の分類（リッチリザルト対象／対象外／禁止）と型ごとの必須項目は1つの台帳（定数）に集約し、台帳に無い型が出力されたら違反にする（補集合＝違反）（MUST）。危険な型を名指しで弾く方式は次に増えた型を取りこぼす。
+            2.  **Mechanical Source Collection**: 検査対象ソースは手書き一覧ではなく `'@type'` 等の出現で機械的に収集し、除外だけを理由付きで持つ（MUST）。除外に書いたのに実在しないパスも違反にする。必須項目はトップレベルのエンティティにだけ要求し、`about`/`location` 等にネストした型には要求しない（MUST）。
+            3.  **Served Probe**: ソース検査は「書かれている型」しか見られない。配信されるJSON-LDはDB内容・ロケール・セクション構成で変わるため、本番URLを日次で取得し、型・必須項目・重複・パース不能を同じ純関数で判定して失敗をIssueに起票する（MUST）。
+            4.  **Spelling & Property Discipline**: JSON-LD内の `url`/`@id` は canonical と末尾スラッシュまで同じ綴りにする（MUST）。違うと別URLとして二重に数えられる。題名プロパティは型ごとに異なる（`Article`=`headline`、`Event`=`name`）ため、1つの分岐で複数の型に同じプロパティを付けない（MUST）。同じページに同じ一覧（`ItemList`）を2本出さず、集合の和を取って1本にする（MUST）。
+            5.  **Hierarchy & Co-location**: 階層を持つ一覧ページ（地域・カテゴリ・組織階層）は、一覧の `ItemList` だけでなくページ自身のエンティティ型（例: `AdministrativeArea` + `containedInPlace`）で親子関係を宣言する（SHOULD）。1ページに複数のJSON-LD `<script>` を独立して同居させてよく、単一 `mainEntity` に無理に統合しない（MAY）。データが無い任意プロパティは捏造せず省略する（MUST）。トップページには `Organization` と `SearchAction` 付き `WebSite` を出力する（SHOULD）。
     *   **The JSON-LD Performance Protocol（JSON-LD生成パフォーマンス義務）**:
         *   **Context**: JSON-LDは存在すれば良いというものではありません。AI Crawlerはレスポンス速度を重視しており、JSON-LD生成が遅いページはクロール深度が浅くなり、引用候補から外れるリスクがあります。
         *   **Law**: JSON-LD生成処理にはキャッシュ戦略を必ず適用し、以下のパフォーマンスターゲットを達成してください。
@@ -134,6 +147,7 @@
             1.  **Cache-First Response**: JSON-LD出力にはWARMキャッシュ（TTL 5分程度）を適用し、AI Crawlerへの応答を高速化してください。
             2.  **明示的なフィールド選択ification**: JSON-LD生成時のデータ取得は、必要最小限のフィールドのみを取得するように最適化してください。全カラムの取得は禁止です。
             3.  **Freshness Signal**: `dateModified` / `updated_at` をJSON-LDに含め、AIに「コンテンツの鮮度」を伝達してください（E-E-A-T Freshness Signalと連動）。
+                *   **Fallback Chain & Four-Channel Sync**: 全JSON-LD型で `dateModified = entity.updated_at || entity.created_at` のフォールバック連鎖を統一し、`created_at` の直書きを禁止する（MUST NOT）。`created_at` は作成時に固定される不変値であり、鮮度シグナルとして「常に古いコンテンツ」を発信し続ける。公開DTOに `updated_at` を必須フィールドとして昇格させ、JSON-LD `dateModified`・sitemap `lastmod`・`article:modified_time` meta・`Last-Modified` ヘッダの4チャネルを同一値で同期する（SHOULD）。構造化データ生成コードで `dateModified` が `created_at` を直接参照する行が0件であることを検証する。
     *   **The Direct Answer Protocol (アンサーファースト)**:
         *   **Context**: AI検索エンジン（SGE, Perplexity）は、ユーザーの質問に対する「直接的な回答」を抜粋します。
         *   **Action**: コンテンツは「結論を最初に（アンサーファースト）」「手順は番号付きリストで」「比較はテーブルで」記述することを強制します。「〜とは、〜のことである」という定義構文も有効です。
@@ -174,10 +188,17 @@
         *   **Law**: 記事や重要ページの公開・更新時に、**IndexNow API** を通じてBing / Yandex等の対応検索エンジンに即時通知してください。
         *   **Action**: IndexNow APIキーをサーバーサイドに設定し、コンテンツ公開・更新のイベントフックで自動通知を発火させる仕組みを構築してください。
     *   **URLの永続性 (URL Persistence)**: リニューアル時、旧URL（例: WordPressの `/archives/123`）からの301リダイレクトを必ず設定し、SEO評価（Link Juice）を継承します。
+    *   **The Managed Redirect Protocol（運用可能なリダイレクト管理）**:
+        *   **Law**: 運用中に追加・修正・停止が必要な移行URL（旧詳細URL等）のリダイレクトは、静的設定ではなく管理画面から編集できるデータストアを実行時SSOTにする（MUST）。少数の固定導線は静的設定に残せるが、同じ source を両方に重複定義しない。静的設定だけでは、運用中に見つかった旧URLを即時に追加・修正・停止できない。
+        *   **Safety Conditions (MUST)**: (a) 転送先は相対URLまたは同一originの絶対URLのみ（open redirect防止。`javascript:`/`data:`/`mailto:` 等は拒否）。(b) source と target が同一、または直接相互参照になる規則は保存前に拒否（ループ防止）。(c) 管理画面・API・フレームワーク内部・静的アセット・認証コールバックには lookup を実行しない（除外プレフィックスと拡張子を定数化）。(d) lookup 失敗時は redirect せず既存処理を継続する。(e) 実行時 lookup に高権限鍵を使わず、公開可能な列だけを読む。(f) 規則の作成・更新・削除は監査ログに記録し、削除は soft delete、有効期間で停止できる。既定ステータスは301とし、302/307/308は必要な場合のみ選べるようにしてUIで違いを説明する（SHOULD）。
+        *   **Measured Source Population**: 旧URLの規則は、実測した旧URLの母集団（旧 sitemap・アーカイブ・アクセスログ）に載っている文字列から作り、名称から slug を再構成しない（MUST）。旧 slug には誤綴り・重複・全角混在があり得る。規則を追加したら母集団に同じURLがあることを確認し（MUST）、無ければ誰もリンクしないURLである。母集団の全数を日次で照射するプローブを置き、取りこぼしが翌朝に赤で出るようにする（SHOULD）。是正は冪等な migration で行い、本番へ手作業SQLを打たない（MUST）。
+        *   **URL Key Normalization**: URLパスをキーにした完全一致照合（リダイレクト・canonical・キャッシュキー）は、パーセントエンコードの16進を小文字に揃える等の RFC 3986 正規化を通してから引く（MUST）。正本は `engineering/300_web_frontend.md` の「URL Key Normalization」。
     *   **The Pre-Launch Indexing Protocol (Sealed SEO)**:
         *   **Law**: 正式ドメインへの移行およびステークホルダーからの明示的な「Launch承認」があるまで、`robots: noindex` 設定を**厳正に解除してはなりません**。
         *   **Risk**: 未完成の状態でのインデックス登録は、ドメイン評価の毀損、重複コンテンツ、ブランドイメージの低下を招きます。
         *   **Action**: 開発・ステージング環境では、`next.config.js` や `middleware` でnoindex を強制し、本番かつ明示的承認後のみ解除するフローを構築してください。
+        *   **補足（noindex はAIクローラーに効かない）**: `noindex`（`X-Robots-Tag` / `meta robots`）は検索エンジン向けの標準であり、AIクローラーの公式オプトアウト手段は `robots.txt` の `Disallow` だけである。公開前の抑止は「検索インデックス」と「AI学習」を別の手段で行い（MUST）、検索エンジン（`*`）は `Allow` のまま＋`noindex`、AIクローラーは `Disallow: /` と分ける（両者を同じ設定にしてはならない: MUST NOT）。正本は `engineering/300_web_frontend.md` の「Rule 33.112a」。
+        *   **補足（Disallow と noindex の同居禁止）**: `noindex` を効かせたいURL（ログイン・登録・内部リンクされる認証ページ等）を `robots.txt` で `Disallow` してはならない（MUST）。正本は `engineering/300_web_frontend.md` の「Disallow vs noindex」。
     *   **The Hreflang Protocol (国際化URL戦略)**:
         *   **Context**: 将来の多言語展開に備え、SEOを損なわないURL設計を予約します。
         *   **Law**: 言語ごとにユニークなURL（例: `/en/products/tokyo`）を持つ**サブディレクトリ戦略**を採用してください。クエリパラメータ（`?lang=en`）やCookieによる言語切り替えはSEO上禁止です。
@@ -189,12 +210,16 @@
             1.  **許可コンテンツ**: 公開記事、公開ページ、FAQ等のパブリックコンテンツを列挙
             2.  **拒否コンテンツ**: 管理画面、ユーザー個人情報ページ、下書きコンテンツを明示的に除外
             3.  **動的更新**: コンテンツの公開・非公開に連動して `llms.txt` を自動的に再生成する仕組みを構築してください
+            4.  **Per-UA Sections**: サイト共通セクションの後に主要AIクローラーのUAごとのセクションを置き、各セクションに「許可パス」「推奨する構造化データの解釈経路（JSON-LD型）」「制限パスの再掲」「クロール礼儀・帰属ガイダンス」の4項目を自己完結で記す（SHOULD）。共通ルールだけでは、クローラー側が取り込める経路を一意に判断できず、保守的に低忠実度（テキストスクレイピング）に倒れる。
+            5.  **Additive Only**: UA別セクションはサイト共通の制限を緩めてはならない（MUST NOT）。緩和は `robots.txt` 側で行い、`llms.txt` はそれを反映するのみとする。
+            6.  **Last Updated**: `Last Updated:` 行を維持する（MUST）。AIクローラーは更新日で陳腐化を判定する。
         *   **Full Dump**: 必要に応じて `/llms-full.txt` に主要ページの全テキストコンテンツを平文で出力する完全版を提供し、LLMが深いコンテキストを取得できるようにしてください。
 *   **Core Web Vitals**:
     *   SEO順位に直結するため、**LCP, INP, CLS** のスコアを常に緑色（Good）に保ちます。
 *   **The SEO Integrity Protocol (Canonical & Internal Link)**:
     *   **Law**: 全ての公開ページにおいて、`generateMetadata` を用いた `canonical` URLのリターンを義務付けます。
     *   **Action**: ページ遷移時にパンくずリスト（Breadcrumbs）の階層構造をJSON-LDとして動的に生成し、クローラにサイト構造を正確に伝えてください。
+    *   **Canonical Construction**: canonical URLはテンプレートリテラルのハードコードではなく、ルート定義のSSOTヘルパー（`ROUTE_PATHS.X(slug)` 相当）から構築する（MUST）。複数パスで同一内容へ到達できる catch-all ルートは最低限、受信URLを自己 canonical に設定し（MUST）、想定外の深さは404にする深さ検証を併設する（SHOULD）。`robots` は404では `index:false, follow:false`、有効な公開ページでは `index:true, follow:true` を明示し、デフォルト推論に任せない（MUST）。「canonical を書く」ルールを満たしていても、ハードコードと catch-all の抜けで実質違反していた事例がある。`canonical:` を含む行でSSOTヘルパー参照が無いもの、動的ルートで `canonical` が無いものをgrepで検出する。
 *   **The Consent Mode v2 Protocol (Compliance Tracking)**:
     *   **Context**: 欧州経済領域 (EEA) や日本国内の法規制（改正Telecommunications Regulations等）への対応。
     *   **Law**: Google Consent Mode v2 を実装し、ユーザーの同意状態 (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`) に応じてタグの発火を動的に制御してください。
@@ -226,7 +251,14 @@
         | **アンサーファースト構造** | 見出し（H2/H3）を質問形式にし、直後に結論を配置 | AI検索エンジンが回答として抜粋しやすい |
         | **AIクローラー許可** | `robots.txt` でAIクローラー（GPTBot, Google-Extended等）を許可 | AIによるインデックスを確保 |
         | **自己完結コンテンツ** | ページ内の情報が外部リンクなしで回答可能 | AIが単独で引用できる情報密度 |
+        | **初期HTMLで本文と内部リンクが読める** | AIクローラーはJavaScriptを実行せず再訪もしないため、公開面の本文・内部リンクをクライアント側の遅延読込へ移さない。共通ブロックからリンクを削る前に、文脈の合う場所へSSRで置いてから削る（逆順禁止）。削ってよいかは canonical と sitemap で判定する | 遅延読込へ移したリンクはAIから見て「消えた」のと同じ。本文抽出はリンク密度でナビ・広告を落とすため、文脈の合う場所のリンクは本文を薄めない |
     *   **Action**: PRレビュー時にAI検索対応の観点チェックとして活用してください。SEO Launch Checklistと併用し、従来SEOとAI検索（GEO）の両面で品質を担保します。
+*   **The Declared-vs-Served Measurement Protocol（宣言と実配信の分離計測）**:
+    *   **Law**: 公開面の健全性（クローラー許可・llms.txt・許可境界・機械可読な入口・JSON-LD・流入）は、「宣言側（コードの純関数が出す設定）」と「実配信側（本番URLを取得した結果）」を別々に測る（MUST）。片方だけ直すと「robots は Allow だが proxy は 403」型のドリフトが起き、AI検索流入をゼロ化する。
+    *   **Action**:
+        1.  **Green Means Measured**: 判定の緑は「測った結果が良い」だけに使う（MUST）。測れなかった項目（外部API課金が要る引用率、bot UAを捨てる設計上取れない到達回数など）は `unmeasured` として別枠に出し、画面に「測っていない」と書く。
+        2.  **Shared Constants**: 検査用の台帳（クローラー一覧・参照元ホスト・型分類）は増やさず、実装が読む同じ定数を読む（SHOULD）。
+    *   **Anti-Pattern**: 測れなかった項目を緑に含める、または宣言だけを見て実配信を見ない健全性画面。インフラ側の宣言と実状態の継続reconcileは `operations/400_site_reliability.md` を参照。
 *   **The Author Profile Protocol (著者プロフィール基盤)**:
     *   **Context**: GoogleのE-E-A-T評価において、特にYMYL（Your Money Your Life）カテゴリでは著者の信頼性が検索順位に直結します。`Author Visibility Protocol` に加え、著者プロフィールページ自体の構造基準を定義します。
     *   **Law**: コラム・ブログ等のコンテンツ記事には、以下の要素を含む**著者プロフィール**を付与しなければなりません。
@@ -280,6 +312,7 @@
         | **画像検索** | 全画像に具体的 `alt` 属性 + 高解像度WebP/AVIF提供 + 画像サイトマップ | `ImageObject` |
         | **動画検索** | 動画にチャプター（`Clip`）マークアップ + サムネイル + トランスクリプト | `VideoObject` + `Clip` |
         | **Visual Search** | 商品画像はGoogle Merchant Centerガイドライン準拠の白背景・複数角度 | `Product` + `Offer` |
+    *   **Image Host Header Precondition**: 画像検索・画像サイトマップ・`ImageObject` を整える前に、画像配信ホストの応答ヘッダ（`x-robots-tag` 等）をクローラーUAで直接取得して確認する（MUST）。配信元が `noindex`（`none`）を返していれば上流の対策は全て無効で、ページHTMLだけ見ても気づけない。論点は同一ドメインかどうかではなく「応答ヘッダを自分で制御できるか」であり、制御できないマネージドストレージ／他社CDNから直接配る場合は、自ドメイン（サブドメイン可）の前段を挟んでヘッダを落とす（SHOULD）。画像サイトマップの `<image:loc>` は他ドメインでよい。画像ホストを分けたら Search Console にそのホストも登録する（SHOULD）。
 
 ### 2.3. Passage Ranking Protocol（パッセージランキング最適化）
 
@@ -360,6 +393,7 @@
         *   初回ログイン時に**ウェルカムメッセージ**（トースト等）を表示し、最初のアクションを促してください。
     *   **計測**: 以下のファネルをアナリティクスで追跡し、週次でモニタリングしてください。
         *   訪問 → 登録開始率 → 登録完了率 → 初回アクション率 → 7日後リテンション率
+    *   **Aha Moment Validation**: 「価値体験（Aha Moment）」は宣言で決めず、到達者と未到達者のリテンション差（例: D30で2倍以上）で検証する（MUST）。正本は `operations/300_customer_experience.md` の「Aha Moment Validation」。
 
 ## 4. リテンション戦略 (Retention Strategy)
 *   **習慣化 (Habit Formation)**:
@@ -379,6 +413,7 @@
 
     *   **Opt-out尊重**: 即座に配信停止できるUI/APIを義務付けてください。ワンクリックでのオプトアウトを実装してください。
     *   **Time Window**: 通知送信はユーザーのタイムゾーンに基づき、**朝8時〜夜9時**の範囲内に限定してください。深夜・早朝の送信は禁止です。
+    *   **Sensitive Life-Event Suppression**: 登録された人・家族・ペット・資産等に配慮を要するライフイベント（喪失・死別・重大な状態変化）が起こり得る場合、本人申告のステータスを持ち、申告と同時にそのエンティティに紐づく促進・リマインド・推薦・季節通知・名前差し込みを即時に全停止する（MUST）。法的義務のある通知のみ継続し、データは削除せず保全し、再誘導には猶予期間（例: 6か月）を置き、ステータス遷移は本人申告のみで自動推定しない（MUST）。この瞬間の不適切な通知は信頼を不可逆に壊すインシデントである。詳細は `operations/300_customer_experience.md` §10.2 を参照。
 *   **The Retention KPI Dashboard Standard（リテンション KPI ダッシュボード基準）**:
     *   **Context**: リテンション戦略を定量的に追跡するため、主要なリテンション指標を定義し、継続的にモニタリングする必要があります。「感覚」ではなく「データ」に基づくリテンション改善を推進してください。
     *   **Key Metrics**:
@@ -631,6 +666,7 @@
         1.  **Server-Side Generation**: Edge Function やサーバーサイドのOGP画像生成ライブラリを使用し、リクエスト時に動的にOGP画像を生成します。
         2.  **CDN Cache**: 生成コスト削減のため、CDNキャッシュ（例: `s-maxage=86400`）を適用し、同一ページへの繰り返しリクエストでは再生成を低減します。
         3.  **Fallback**: 動的生成に失敗した場合、サイト共通のデフォルトOGP画像にフォールバックし、空のOGPを避けます。
+        4.  **No Fabricated Metadata**: 「メタデータを明示する」型の要件（画像寸法・MIME type・更新日など）を実装するときは、その値を実際に持っているかを先に確かめる（MUST）。持っていないなら、要件を満たす手段は既定値の付与ではなくデータ経路の追加である。誤った値より値が無いほうが正しい（MUST）。消費側は実物を取得して実測できるが、宣言と実物の不一致は直せない。呼び出し側が実値を知っているときだけ渡せる口を用意し、既定では出さない。同じファイル内に「値があるときだけ出す」作法があるなら、それが正本である（SHOULD）。「既定値を必ず出す」実装は、値を持たない場所では100%の誤りになる（実測例: 公開画像の寸法宣言が全件不一致）。
 
 ### 9.2. Social Commerce Protocol（ソーシャルコマース）
 

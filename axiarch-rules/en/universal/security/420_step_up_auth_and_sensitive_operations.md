@@ -185,6 +185,7 @@ function assertStepUpSatisfied(
 
 ### Rule 66.031: Chain-of-Change Defense
 - **Law**: Immediately after an email change, provide "notification to the old email + a rollback grace period." For contact/password changes, concurrently trigger **global session revocation** (§24) and **operation notification** (§21), breaking the chain by which an attacker achieves full takeover via a single change.
+- **Granularity of Committing Operations (Selective Step-Up)**: Impose re-authentication / OTP step-up once per **committing operation** — persist, publish, delete, change privileges (MUST). Do not impose it separately on intermediate operations that complete inside the pre-commit editing screen (reordering, selection, preview) (SHOULD NOT). The criterion is "does this operation alone cause an irreversible external effect"; if not, the verification at final commit protects it. Failure pattern: requiring OTP even to reorder images in a draft drove users to a workaround (not using drafts at all), lowering safety in the end.
 
 ---
 
@@ -217,6 +218,7 @@ async function reauthenticateWithWebAuthn(): Promise<PublicKeyCredential> {
 
 ### Rule 66.041: Single-Use Binding of Re-authentication Challenges
 - **Law**: Bind the re-authentication challenge (WebAuthn challenge / OTP) to **one specific operation**. Scope the "stepped-up" state obtained on challenge success to the target object, operation type, and a short validity window (e.g., 5 min). Do not set a generic "stepped-up flag" and apply it across the whole session (this prevents a hole where one re-auth passes unrelated sensitive operations).
+- **Subject Binding**: On paths where both an Authorization header and a cookie session can take part in authentication, each verifying successfully is not enough: **confirm that both resolve to the same subject before consuming the OTP** (MUST). Verifying two credentials separately does not guarantee subject identity (failure pattern: a path emerged where the OTP's subject and the subject of a subsequent cookie-only collection function diverged). Prefer the explicit Authorization and then confirm it matches the cookie subject; reject on mismatch, and keep IDs, tokens, OTPs, and emails out of the warning log. Include "subject identity" in the binding conditions of the stepped-up state alongside "operation, target, window" (SHOULD).
 
 ---
 
@@ -285,6 +287,7 @@ async function requireStepUp(req: Request, op: SensitiveOp, targetId: string): P
 | **Very high** | Block + out-of-band notification + manual review/ITDR integration |
 
 - **Cross-Reference**: `000_security_privacy.md §3.3` (ITDR), `000_security_privacy.md §6.4` (Impossible Travel)
+- **Proof Obligation for fail-open**: A defensive gate made fail-open for availability (suspicious-IP blocking, breached-password lookup, new-device notification) can be silently disabled without anyone noticing. Proof against the real endpoint, cutting self-amplification, pinning snapshot order, and making swallowed errors observable follow `430_authorization_and_access_control.md §6.4` Rule 67.6.7.
 
 ---
 
@@ -363,6 +366,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
   - **Enumeration prevention**: do not distinguish "wrong code" / "user does not exist" / "OTP not issued"; return a unified error. Keep response time uniform as well.
   - **Expiry**: email/SMS OTPs are short-lived (e.g., 5-10 min). Invalid after expiry.
   - **Single use**: invalidate immediately after successful verification (replay prevention).
+- **AND Principle for Guards**: Authentication/authorization (who), rate limiting (how often), audit logging (traceability; mandatory for sensitive data), and bot checks (is it human; public surfaces only) are layers that defend different threat models and never substitute for one another. Evaluate mutation guards with AND (MUST). The inference "OTP/MFA/CAPTCHA exists, so no rate limit is needed" or "there is an audit log, so no rate limit is needed" is prohibited (MUST NOT): OTP confirms identity and the audit log is after-the-fact forensics; only a rate limit stops rapid mutations inside a verified session or mass operations from a compromised admin session. Put per-admin rate limits on admin operations keyed per administrator (one compromise must not drag in other admins), place the OTP-issuance rate limit before the OTP branch, and treat mutations that call external metered APIs (payments, AI, SMS) as more critical than internal DB mutations (MUST). Failure pattern: across four rounds of fixes, rate limits kept slipping through on the grounds of "there is an audit log" or "there is OTP."
 
 ### Rule 66.122: Enumeration Prevention Checklist (Cross-cutting)
 - **Law**: Account enumeration can occur across recovery, OTP, and lockout paths. Beyond OTP (§13), make **non-observability of user existence** a cross-cutting requirement. Satisfy the following on every path.
@@ -376,6 +380,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 
 - **Delay injection & uniformity**: per path, **keep response time uniform** (perform the heavy work present in the existence case — e.g., hash computation — equivalently in the non-existence case, or inject a fixed delay) to prevent timing-based enumeration. Also unify error code, HTTP status, and body.
 - **Cross-Reference**: `400_authentication_and_passkeys.md §9.6` (recovery enumeration prevention), `000_security_privacy.md §6.6` (brute force)
+- **Completion Screens and Notifications as State Oracles**: On anonymously reachable surfaces, limit completion screens and responses to "sent / will send / nothing to send (no input)," and show states such as send failure or suppression-list (bounced) hits only to operators (MUST). A display meant to be honest becomes a path for probing whether an arbitrary address exists or has bounced. Do not wire the `message` of an unknown exception caught client-side straight into the UI; put one sanitizing boundary that drops any wording containing internal vocabulary (token / secret / service_role / constraint / vendor names) to a per-operation fallback (MUST; a `result.error` the server deliberately returned is treated as already sanitized at that boundary). Do not copy raw actor/target IDs into notification or email bodies outside the audit ledger; carry only safe labels and presence/absence (MUST; a notification body is human-readable text that is hard to mask mechanically afterwards).
 
 ### Rule 66.121: Backup Codes
 - **Law**: Backup codes used to recover from MFA/OTP loss must be stored hashed (following the password-hashing discipline of `000_security_privacy.md §4.9`), single-use, displayed only once at generation, and old codes must be revoked en masse on regeneration.
@@ -448,6 +453,9 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 - **Law**: Decide step-up necessity and success/failure for sensitive operations **only on the server side**. Client-side decisions (UI button control, front-end conditionals) are merely UX hints and **must not be trusted as a security boundary**.
 - **Anti-Pattern**: Judging "is the user stepped up" in the front end and not re-verifying on the API side (the leading anti-pattern in §39).
 - **Cross-Reference**: `000_security_privacy.md §10.1` (BOLA/BFLA), §4.5 (centralized guard)
+- **Rule 66.171 (Consume the Decision)**: Decision functions for authorization, step-up, rate limiting, etc. MUST return success and failure as a discriminated union (`{ proceed: true } | { proceed: false, ... }`) so that the caller cannot type-check without inspecting `proceed`. The shape "return only on error," which falls through to the main operation on success, is prohibited (failure pattern: only the OTP issuance `error` was checked with no return, so a successful issuance flowed into INSERT/UPDATE/DELETE; 5 of 56 decision call sites "called but never looked"). An existence check (`if (!otp)`) is not verification; call the verification function and branch on its result.
+  - **Stub Ban**: An unimplemented/stub mutation returns an explicit error, never a `{ success: true }` no-op (MUST). It fabricates a false success and a false audit row. Even when the UI always passes correct values, stop server arguments server-side as external input.
+  - **Audit**: Mechanically enumerate the call sites of decision functions and detect those that do not branch on the return value. Consistent with `430_authorization_and_access_control.md §10.4`.
 
 ---
 
@@ -464,6 +472,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 - **Law**: Record all sensitive operations to an **immutable (append-only, tamper-evident)** audit log.
 - **Recorded items**: principal (user/NHI), operation type, target resource, execution time, result (success/failure), achieved step-up `acr`/`amr`, risk score, source IP/device, correlation ID.
 - **PII discipline**: do not include excessive PII in logs (per `000_security_privacy.md §7.4` masking).
+- **Scope Reinforcement**: Changes to user-visible identifiers (display name, email, username, avatar, bio) MUST all be included as sensitive operations in the audit log, to surface the reconnaissance pattern of impersonation preparation (rapid consecutive changes). Do not exempt anonymous mutations as "no auth, so nothing to record": correlate the same visitor with actor NULL + a session placeholder derived from a hash of IP and UA, and never store the raw IP in details. Audit writes for sensitive mutations may be fire-and-forget (record failures but do not block the user flow), except for operations under this rule's immutable-audit requirement (SHOULD).
 - **Cross-Reference**: `operations/000_internal_tools.md` (auditing admin operations), `000_security_privacy.md §4.6`
 
 ---
@@ -728,6 +737,7 @@ function verifyTotp(secret: Buffer, code: string, opts: { window?: number } = {}
 | 22 | Letting admin operations pass on a trusted device | Privileged ops via device theft | Tier 4-5 require step-up every time (§7) |
 | 23 | Breach revocation is "wipe everything" only, with no stages or recovery procedure | Over-revocation harms legitimate users / hard recovery | Staged revocation + trigger authority + audit + recovery procedure (§24 66.231) |
 | 24 | Reset/lockout responses leak user existence | Account enumeration | Unify responses and timing across paths (§13 66.122) |
+| 25 | Omitting rate limits because a strong front-line defense (OTP / CAPTCHA / audit log) exists | OTP confirms identity and the audit log is forensics; neither stops rapid mutations inside a verified session or mass operations by a compromised admin | Evaluate guards with AND (authZ ∧ rate limit ∧ audit ∧ bot check); per-admin rate limits and a rate limit on the OTP issuance path (§13 66.120) |
 
 ---
 

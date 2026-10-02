@@ -58,6 +58,8 @@ The invariants in this file are history integrity, change traceability, ownershi
 
 - **Principle**: Keep integration changes reviewable and measure unintegrated time and conflict risk. Select trunk-based development, release branches, stacked diffs, or another model in the Blueprint from the product's release model, regulatory obligations, multi-version maintenance, hardware or mobile review, and offline-development constraints.
 - **Short-Cycle Integration**: Short-lived branches and frequent integration are the normal default, but neither a daily cadence nor a fixed lifetime is a Universal requirement. A necessary long-lived branch has an owner, synchronization method, security-fix backport policy, and exit condition.
+- **Post-Merge Integration Gate**: Each change proposal's CI verifies only "its own branch + the base at that moment." When multiple changes merge around the same time, are stacked, or are squash-merged, re-run not only static checks but the build and the full test suite on the integrated trunk (MUST). Never use "both were green" as integration evidence; always be able to state what the green covered. Failure pattern: two PRs are green individually, merge in the same window, and production breaks because the co-resident state was never gated.
+    - Better still is a mechanism that tests "the tree that will be merged" before merging (a merge queue or equivalent); confirm the availability of any VCS/CI feature the design depends on in the actual UI/API, not from documentation, before designing around it (MUST). Details in §2.6 Integrated-State Verification / Conflict Resolution Contract.
 
 ### 1.1. Branch Naming Standard
 
@@ -75,6 +77,7 @@ The invariants in this file are history integrity, change traceability, ownershi
 
 - **Law**: Expose branch age, base divergence, unresolved conflicts, and security-patch delay. Require an owner and resolution plan when a branch exceeds the Blueprint's risk budget.
 - **Action**: Choose compatibility shims, branch by abstraction, feature flags, stacked diffs, staged migration, or another suitable technique to integrate or isolate incomplete work safely. Neither a fixed two-day limit nor feature flags are the only conforming method.
+- **Resume Check**: When resuming an uncommitted draft, a long-lived stash, or a dormant change proposal after time has passed, verify **that its premises still hold**, not that the diff reads cleanly (MUST). The file contents froze when written, but the concepts they depend on (provider names, contracts, constants, SSOTs) kept moving on the base. Search `git log <base> --grep` and the live code for each concept the draft depends on, and rewrite where it changed. Where an SSOT already exists, compare the draft's wording against it one-to-one (MUST) — SSOT comments usually record past mistakes, and if the draft repeats one, that is the answer. For published documents (terms, disclosures) this re-check is mandatory (MUST).
 
 ---
 
@@ -104,6 +107,7 @@ The invariants in this file are history integrity, change traceability, ownershi
 ### 2.1. Atomic Commits
 
 - **Law**: Each commit contains only "one logical change."
+- **Explicit Staging**: For commits made after an audit, a large refactor, or a formatter run, do not use `git add -A` / `git add .`; stage the intended files explicitly (MUST). Before committing, confirm with `git status` and `git diff --stat HEAD` that no read-only area (Universal rules, agent settings, generated artifacts, `node_modules/`) is included (MUST), and before pushing review the file count and content with `git log --stat -1` (SHOULD). Failure pattern: an audit commit sweeps in formatter side effects on a protected area and is pushed as an unintended Universal modification. If it was committed by mistake, recover with `git reset --soft HEAD~1` → `git restore --staged` the unintended paths → re-commit only the intended files, and fix the cause (formatter or lint-staged configuration) at the same time (SHOULD).
 
 ### 2.2. Pull Request Template Protocol
 
@@ -155,6 +159,7 @@ The invariants in this file are history integrity, change traceability, ownershi
 
 - **Law**: Reproduce formatter and lightweight-lint results deterministically in local tooling or CI, with CI as the authoritative gate. If a local hook auto-fixes content, it stays within the staged scope, preserves partial staging, and lets the user inspect the mutation. A hook itself is not mandatory for every project.
 - **Cross-References**: Framework selection → §9.3 Hooks Distribution. Commit-message hook (commitlint) → §2.10.
+- **Generated Artifact Formatter Parity**: When CI verifies generated-artifact freshness via "run the generator → `git diff --exit-code`", the generator must emit **byte-identical** output to the committed artifact after the formatting hook has been applied (MUST). The canonical rule is "Generated Artifact Formatter Parity" in `quality/000_qa_testing.md`.
 
 ### 2.6. Merge Strategy Mandate
 
@@ -163,6 +168,14 @@ The invariants in this file are history integrity, change traceability, ownershi
 - **Policy**: Declare the merge method per repository and do not mix methods chaotically on the same protected reference. Enforce it with hosting settings, server hooks, a merge bot, or an equivalent control.
 - **Local Rebase Discipline**:
     - A solely owned branch may be rebased. Rewriting a shared branch requires explicit agreement from every collaborator and a recovery point; normally prefer a merge or a new branch.
+- **Integrated-State Verification**:
+    - A change split across multiple branches is complete only when **the shippable form (all branches merged) has passed every gate at least once** (MUST). Branch splitting is a review unit, not a verification unit. Reachability chains that only exist after merging, gates that only act across branches, and guards that block legitimate code on another branch cannot, in principle, be detected on a single branch.
+    - Maintain stacked (dependent) branches by absorbing later commits on the base (MUST). When a commit lands on the base afterwards, propagate it to the dependent branches.
+    - Watch the width of guards that independent branches add to the same file. A token-level prohibition blocks legitimate code on another branch and ends up being loosened (SHOULD).
+- **Conflict Resolution Contract**:
+    - Judge the correctness of a conflict resolution by "do both intents survive?" (MUST). Write down the conditions the result must satisfy before resolving; "take the newer side" or "settle on one side" is not a resolution (MUST NOT). Confirm correctness not by the authority of the source but by measuring that elements from both sides (constant names, function-name occurrence counts) remain, plus self-tests.
+    - Before resolving conflicts or integrating, **measure the ancestry between branches mechanically** with `git merge-base --is-ancestor` or equivalent (MUST). Do not rely on how names look or on a remembered design. On the first integration no "already-resolved version" exists yet, so importing one from elsewhere is not the first move.
+    - For multi-branch merges, record the order, conflicting files, resolution policy, post-resolution verification conditions, and post-merge gates **as a runbook artifact** (SHOULD). When several branches grow the same file, enumerate those pairs and their correct resolution. Do not use an operation that integrates many branches at once (octopus merge or equivalent), because a conflict rolls back the already-resolved first half (SHOULD NOT).
 
 ### 2.7. Force-Push Protocol
 
@@ -276,6 +289,7 @@ Lengths, trailers and sign-off notation in this section are examples within an a
     2. Delete merged branches via `git branch -d <branch>`
     3. Clean up remote branches similarly (`git push origin --delete <branch>` or enable GitHub's auto-delete on merge)
 - **Continuity**: Make checking `git branch --merged` an **engineer's breathing**.
+- **Squash-Merge Aftercare**: In an environment using squash merge plus auto-delete on merge, a local branch with an upstream configured does not mean the remote branch exists. Before pushing follow-up changes to an existing change proposal, **query its actual state (open / merged) and head** (MUST). Read the output of `git push`: `* [new branch]` is not an update but the resurrection of a deleted branch (MUST) — it creates an orphan branch and a "fix that never reaches the base." For a follow-up to a squash-merged proposal, do not reuse the original branch; **recreate from the base and cherry-pick** (MUST). The original branch's common ancestor predates the merge, so the already-merged diff appears twice. Because the original commit SHAs never become ancestors of the base under squash merge, judge inclusion by **content**, not SHA.
 
 ### 3.1. Stale Remote Tracking References
 
@@ -328,6 +342,8 @@ git worktree repair <moved-worktree-path>
 ./axiarch-scripts/check-git-config-clean.sh --quiet # CI silent mode (exit 1 if dirty)
 ```
 
+- **Runtime-Scoped Health Checks**: A health check that inspects evidence produced only by a specific runtime (agent type, CI, OS) performs **an applicability check first** and passes silently in quiet mode where it does not apply (MUST). Separate "the configuration file exists" (an invariant; absence fails) from "an execution history exists" (runtime-dependent; environments that never produce it are out of scope). After fixing, confirm a quiet run exits 0 with no output. Failure pattern: persistent false positives erode trust in the whole check, and real warnings get ignored too.
+
 ### 4.3. Additional Caution for Concurrent Tools and AI Agents
 
 - **Context**: IDEs, AI agents, automation, and developers that concurrently modify repository metadata, branches, indexes, or worktrees can encounter support differences, locks, base confusion, or overwriting of unseen changes.
@@ -336,6 +352,12 @@ git worktree repair <moved-worktree-path>
     2. Serialize operations writing the same branch or index with a lock, queue, handoff, or equivalent
     3. Check status, worktree inventory, remote parity, and unpublished changes at task start, handoff, and completion
     4. Review dry-run output before repair and never delete active worktrees, branch refs, or unsaved changes automatically
+    5. Do not create multiple independent branches in one session and report "all gates green" while they are unpushed (MUST NOT). Before pushing, merge them in the recommended order on a throwaway branch and re-run tests and type checks on the integrated result (MUST). A successful auto-merge only proves that text was combined. When a conflict is found, decide the merge order and pre-resolve by rebasing the later branch onto the earlier one (SHOULD). If a branch cannot be pushed, record its name and the reason in the task log (MUST) — a branch nobody knows about is the same as no branch
+    6. View branch-specific changes with three-dot (`base...branch`) (MUST). Two-dot mixes the staleness of the base into the diff and shows regressions that do not exist
+    7. Git injects `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` and similar into the child-process environment when running hooks. Test fixtures and scripts that spawn `git` in a child process run in **an environment with `GIT_*` removed** (MUST). Setting `cwd` to a temporary directory is ignored when `GIT_DIR` is present: the shared `.git/config` gets `core.bare` rewritten, identity (`user.*`) is overwritten with a fake name, fixture commits leak into the object store, and remote-tracking refs point to the wrong place — and because the commit succeeds, it propagates silently. Sweep every isomorphic site with a repository-wide grep and make the sanitizer an SSOT. When "it passes locally but fails through the hook," suspect `env | grep ^GIT` first (SHOULD)
+    8. When several sessions (humans or AI) may act on the same working tree, treat uncommitted changes not as "safely parked" but as **liable to be swept into someone else's `git add -A`**. Do not leave them for long; stash them or move them to another worktree (SHOULD). Before committing, check not only `git status` but also **the contents of the previous commit (`git log -1 --stat`)** for files you did not intend (MUST). "It is safe because it is not committed" is a single-session assumption
+    9. Do not rewrite the shared `.git/config` while concurrent sessions are running. Even for an obviously wrong value, work around it with `--worktree` scope or a per-invocation `GIT_DIR` / `GIT_WORK_TREE`, and report the shared-config fix to the owner. Do not try `git stash` while Git is broken (the result cannot be confirmed and only a suspicion of lost changes remains) — keep a way to inspect the working tree without Git (`ls`, a source-integrity script)
+    10. A task in which an AI agent rewrites many files in a short time can trigger the endpoint security software's ransomware heuristics and block the whole development toolchain, including the shell and git. Notify the user before a mass change or split it into small units (SHOULD). When "`/bin/bash` or `rm` suddenly cannot run," suspect the security software's block first
 
 ### 4.4. Failure Pattern Documentation
 
@@ -348,6 +370,11 @@ git worktree repair <moved-worktree-path>
     | Worktree moved through file operations | registered path differs from actual path | run `git worktree repair` |
     | Config section remains after local branch deletion | `branch.<name>` key exists without a local ref | review and remove only that section |
     | Tool does not support a valid Git extension | reproducible unsupported-extension error | upgrade tool or Git, isolate, serialize, or use a time-bounded exception |
+    | A hook runs from a worktree using another checkout's definition (`core.hooksPath` is an absolute path) | The hook fails for a missing script or command unrelated to your diff | Check the effective path with `git config --get core.hooksPath`, then relativize and restore the target worktree's hook bootstrap in `--worktree` scope. Do not escape to `--no-verify` |
+    | A worktree right after `git worktree add` has no hook files (gitignored generated artifacts) | Git passes every hook silently without warning; the commit output ends with only `[branch sha] message` | Regenerate the hooks and confirm the files exist before committing. If a commit already slipped through, run the pre-commit-equivalent checks manually and record them |
+    | A test fixture launched from a hook inherits `GIT_DIR` and runs `git init` | `core.bare = true` in the shared `.git/config`, a faked author, and a misdirected `origin/<base>` occur silently | Unset `GIT_*` in the fixture (§4.3 item 7). Afterwards recompute with the §5.0 Post-Incident Triple Check, and build any reproduction in an isolated environment |
+
+- **CI Failure Triage Order**: When CI turns red, first separate "caused by my diff" from "environmental (a newly published advisory, an external service, lockfile drift, a false positive on another branch)" (MUST). When several change proposals go red at once, read the logs of one with no changes (docs-only, for example) first — the failure shown there is a "repository-wide check" unrelated to that proposal. An aggregate gate is not an independent failure, so reading its log first decomposes the problem in one step. Fix an environmental blocker on an independent branch as the top priority, and refresh the blocked proposals by rebase, not merge, so CI reruns in the new environment (MUST). Failure pattern: a false positive on one branch turns every other proposal red at once through a check that scans all history and all branches. When adding a check, record its **scan scope** (MUST), and treat a check that reads "all history, all branches" as a shared resource where one person's false positive stops everyone. Narrow exclusions to the shape of the value, and prove by mutation that "the same identifier is still detected" before adding one. Read dependency-audit advisories by "vulnerable range × the version actually installed × direct or dev dependency," not by package name, and give every exception a deadline plus the reason no remedy exists (MUST).
 
 ---
 
@@ -357,6 +384,7 @@ git worktree repair <moved-worktree-path>
 
 - **Law**: `.git/config` is the **repository's nervous system**. Pollution disrupts various tool integrations.
 - **Action**: Run `git config --show-origin --list`, `git worktree list --porcelain`, and comparison with local branch refs on material events and the Blueprint's risk-based cadence. Do not treat a supported extension as anomalous solely because it exists; identify its source and consumer.
+- **Post-Incident Triple Check**: After any incident that may have written shared state (`.git/config`, the object store, refs), mechanically recompute three things (MUST): ① the origin of config values (where `core.bare` and `core.hooksPath` come from, via `git config --show-origin --list`), ② the authors of recent commits (`git log --format=%an -n <N>`), and ③ what the remote-tracking refs point to (compared with `git ls-remote`). **Silent** damage (an identity overwrite that lets commits succeed and propagate, or a polluted remote-tracking ref that makes a gate report a false "behind") is more dangerous than damage that fails immediately (a polluted `core.bare`). Build the minimal reproduction of anything that can write out-of-process shared state in an isolated environment (MUST) — "re-run the same operation to find the cause" becomes a second incident. Prove a fix by measuring state right after the previously broken operation, not by green tests (MUST). Right after pushing from a worktree, confirm by measurement the author of your commits and where `origin/<base>` points (SHOULD).
 
 ### 5.1. `.gitignore` for AI Agent Artifacts
 
@@ -403,6 +431,12 @@ git worktree repair <moved-worktree-path>
     | Allow force pushes | ❌ OFF | Pairs with §2.7 |
     | Allow deletions | ❌ OFF | Prevent history loss |
 - **Required Outcome**: Machine-verify required checks, approval of the final revision, renewed review after approval-changing commits, force-push and deletion controls, and the owner, reason, expiry, and audit trail of any bypass. Derive approval counts from risk, regulation, and team size; high-assurance areas meet SLSA Source two-party-review requirements.
+- **Required-Check Integrity**:
+    - When a required status check runs conditionally, do not design it so the job is skipped when the condition fails (MUST NOT). On most CI platforms a skipped required check counts as "success," which disables the protection. Where you want to block the merge, either **do not report** the required check name (do not launch the aggregate job) or report an explicit failure (MUST).
+    - Keep one aggregate job and name only that job as the required check (SHOULD). Pin by contract test that the aggregate job (a) always runs and never becomes skipped on upstream failure, (b) does not list conditional jobs in `needs` (skipped is not success), and (c) aggregates upstream results and turns anything other than success red. Once a mechanism omits gates conditionally (lane splitting, change-scope detection), measure whether aggregate functions such as `success()` / `failure()` become false through a skipped chain and silently kill failure notifications or recovery steps (MUST).
+    - **Places bound by name** (required-check names, workflow reference names, webhook names) break silently when only the code side changes, and nothing shows in the diff or the artifacts. Before renaming, splitting, or deleting a CI job, query the required-check names in the protection settings (MUST); if the settings cannot be changed, align the code-side name with the existing one (strengthening the meaning is fine, weakening it is not). When parallelizing or splitting CI, enforce ordering invariants structurally through the job dependency graph and prove that the gate set is identical before and after (MUST) — declaration order guarantees nothing about execution order.
+    - A change proposal's CI tests "the virtual merge of head and base," but **a rerun reuses the recorded SHA** and does not reflect base progress. To re-verify a follow-up proposal after its dependency merges, **update the branch** (update-branch / rebase / close & reopen) instead of rerunning (MUST). Enable "Require branches to be up to date" so the tree that will actually be merged is tested (SHOULD).
+    - Status displays (CLI / API caches) can return a stale head. Before reporting "pushed, all green," directly confirm **the real branch** (`git ls-remote` / the branches API) and **that a CI run exists for that SHA** (MUST). "0 failures" and "0 unsuccessful" also hold when there are 0 checks — accept a zero-count result only together with evidence that it ran. A pipeline's exit code (`$?` after `git push … | tail -3`) is the last command's, so read `${PIPESTATUS[0]}` or measure the real state.
 
 ### 6.1. Ownership Resolution
 
@@ -476,6 +510,7 @@ git worktree repair <moved-worktree-path>
 - **Mandatory Boundaries**:
     - Retain traceable evidence of model or service, target revision, execution time, policy, and result. Include confidential code, prompt injection, and data retention in the threat model.
     - **AI comments are suggestions, not decisions.** A risk-based human or explicitly approved governance authority retains final accountability. Define fail-open or fail-closed behavior so an unavailable AI result does not block human review indefinitely.
+    - **Context Verification Before Disposition**: Do not accept a critical finding from a review or audit agent until you have opened the flagged file and confirmed **its actual usage context** (fixed-size container or dynamic, display-only or interactive, and so on) (MUST). Failure pattern: a lesson crystallized moments earlier is applied mechanically to every location that matches its wording, a correct design gets "fixed," and a pattern contrary to the lesson's intent is introduced. State both "when it applies" and "when it does not" for every lesson or rule (MUST), and list the locations judged false positive with reasons for future re-audits (SHOULD).
     - Prove review quality through the final revision, material risks, test evidence, and decisions on unresolved findings, not elapsed minutes or comment count.
 - **Use Cases (Assistive Scope)**:
     - Style / naming-convention auto-detection
@@ -585,6 +620,7 @@ git worktree repair <moved-worktree-path>
     git reset --hard HEAD@{5}       # rewind 5 operations
     ```
 - **Lesson**: with `git reflog`, almost every "oh no" is recoverable. Educate every engineer on its existence.
+- **CI-Fix Ancestry Check**: Before starting to repair a CI or scheduled-job failure, compare the revision the failed run verified (its checkout SHA) with the presumed fix commit using `git merge-base --is-ancestor <fix> <headSha>` or equivalent (MUST). The canonical rule is "CI-Fix Ancestry Check" in `engineering/000_engineering_standards.md`.
 
 ### 7.5. Sensitive History Cleansing
 
@@ -686,6 +722,7 @@ git worktree repair <moved-worktree-path>
     package-lock.json  merge=union
     ```
 - **Rationale**: Line-ending drift is the source of "diffs that only appear in CI". `.gitattributes` enforces uniformity at the source.
+- **Case-Only Distinction Ban**: Never create file or directory names that differ only by letter case (MUST NOT). Between a case-insensitive file system (the macOS / Windows default) and case-sensitive CI (Linux), renames go undetected, duplicate files appear, and imports fail on only one side. Fix a consistent lowercase convention (kebab-case or similar) in the project rules, and perform a case-only rename as a two-step `git mv` (via a temporary name) (SHOULD).
 
 ### 8.1. Git LFS Policy
 
@@ -822,6 +859,7 @@ git worktree repair <moved-worktree-path>
     - Do not infer risk only from semantic-version labels. Classify runtime, lockfile, build plugin, native binary, container base, transitive dependency, and maintainer or source changes
     - Limit auto-merge to low-risk updates with sufficient impact tests, provenance, license and reachability checks, rollback, and post-change monitoring
     - Triage actively exploited vulnerabilities immediately and choose mitigation, update, or rollback; green CI alone does not justify unconditional merge
+- **Audit Output Interpretation**: A dependency audit tool's "fix available" says nothing about breakage. Judge resolvability by both whether it is a major bump and whether the proposed version moves forward or backward (a downgrade), and decide from the residual count at the end of the dry run, not the "add" lines at the top (MUST). The canonical rule is "Audit Output Interpretation" in `engineering/000_engineering_standards.md`.
 - **Anti-Pattern Prohibitions**:
     - PR explosion → cap with `prConcurrentLimit`; adopt batched updates
     - All-auto-merge → major bumps will break; gate with review
@@ -860,8 +898,16 @@ git worktree repair <moved-worktree-path>
     - Provide a consistent installation path after clone or workspace bootstrap that fits the adopted runtime and package manager.
     - Treat local hooks as fast feedback, not final merge or release evidence. Re-run material checks in CI or a server-side control.
     - When bypass is allowed, require a reason, compensating verification, and audit evidence proportionate to risk.
+    - **Hook Failure Triage**: When a commit or push hook fails, do not read only the tail of its output with `| tail -n` (MUST NOT) — the cause appears near the top. Write the log to a file and read all of it (e.g. `git commit -F msg.txt > commit.log 2>&1`). Start the investigation by "running each hook step on its own," not from "what I changed this time" (MUST) — a failure can be a side effect of the previous failure. Before a commit whose hook may fail, set aside work evidence and uncommitted edits (SHOULD): tools that restore staged files (lint-staged and the like) can roll back ignored working documents too, so "it is gitignored, so it is safe" is wrong. Never bypass with `--no-verify` (MUST NOT).
+    - **Worktree Hook Presence**: When the hook framework's generated files are gitignored, a new worktree does not have them and Git passes every hook silently without warning. After `git worktree add`, regenerate the hooks and confirm the files exist before committing (MUST). Check the hook logs even for a commit that succeeded quickly. The reverse variant: an absolute `core.hooksPath` reads another working tree's hooks — both are told apart by comparing `git config --get core.hooksPath` with what exists on disk, and the fix is to relativize it in `--worktree` scope without polluting the shared config. Never point a shared setting at a specific checkout's absolute path (MUST NOT). A successful manual check is not a substitute for confirming the hook fired.
 - **Migration Note**: Before changing hook frameworks, compare OS, IDE and GUI-client compatibility, installation failure, measured latency, partial staging, and existing development environments. Define the observation period and rollback criteria in the Blueprint.
 - **Cross-References**: §2.5 lint-staged / §2.10 commitlint / §9.0 Multi-Layer Secret Scanning
+- **CI Token Permission Model & Artifact-Level Verification**:
+    - The effective permission of a CI token is the **logical AND** of the workflow declaration and the VCS-side (repository / organization) settings. A declaration can only narrow the ceiling; it cannot open a surface the settings closed. When investigating a permission error, do not conclude "not a permission problem" from the declaration alone; actually query the settings API (MUST). If it cannot be read, record "could not read" instead of filling the gap with a guess.
+    - A setting that lets "CI create and approve change proposals" bundles creation with approval and opens a surface that bypasses mandatory review, so do not enable it for automation convenience (SHOULD NOT). Placing a long-lived personal token adds credentials, so it is not the default choice either. The alternative is "artifacts to a branch, notification to an issue" — a compare link in the issue body lets a human open the proposal in one click without widening the permission surface.
+    - If failures are swallowed with `continue-on-error` or similar, separately verify **the artifact itself** (blob SHA etc.) to establish "was it really only the proposal creation that failed?" (MUST). Look at artifact identity, not step status. Take the artifact fingerprint **right after generation** and never re-read the working tree later (a tool may reset the working tree to the base, turning a successful run red through a false negative). An empty fingerprint is a failure.
+    - "The run is red" does not mean "nothing got done." Establish **which steps had succeeded** before hunting for the cause. Failure pattern: a weekly job stayed red for weeks while the artifact was generated correctly every time. Do not use a full-text search API for issue deduplication (emoji and multilingual titles are missed depending on tokenization) — list the issues and match exactly.
+- **CI Trigger Alignment**: Align a CI check's trigger with **the event that can break the invariant it enforces** (MUST). Watching a violation that originates in your own change (applying a migration, updating a generated artifact) with a weekly schedule is the same as accepting one period of exposure. A schedule is right only when the violation arises independently of your commits (a new CVE, an external manual change, data synchronization). However, a check that compares against production state produces constant false positives if run before the change is applied, so chain it after application completes and condition it on the predecessor's **success only** (a completion event also fires on failure or cancellation) (MUST). A trigger resolved by a name string (a referenced workflow name etc.) stops firing silently on a typo or rename, so pin by guard test that the referenced target exists and that the check keeps its trigger (MUST). For a check deliberately left on a schedule, record the reasoning in the evidence (MUST).
 
 ### 9.4. Shallow Clone & Sparse Checkout for CI
 
@@ -927,6 +973,7 @@ git worktree repair <moved-worktree-path>
 | **Tooling** | Depending on local checks without server-side or CI secret prevention | layered secret-control check | §9.0 |
 | **Review** | Replacing approval with an AI result without rationale, false-positive disposition, or final-revision review | finding disposition + human approval evidence | §6.4 |
 | **Tooling** | Hook definitions and installation paths exist only on personal machines | repository or bootstrap review | §9.3 |
+| **Merge** | Trying to block a required check by skipping a conditional job, so the skip counts as success | required-check existence check + aggregate-job contract test | §6.0 |
 
 ---
 

@@ -517,6 +517,7 @@ media/
 
 - Random ID-only (UUID, etc.) folder names are prohibited
 - File name duplication within the same folder is prohibited to prevent overwriting
+- **Filename Preservation**: A file name uploaded by a user is the user's data; sanitization is limited to the minimum required for safety (removing path separators and control characters, and reversible character-class conversion where needed) (MUST). Irreversible renaming by appending a UUID or timestamp is prohibited (MUST NOT). On a name collision, do not save under an implicit new name; return an error and let the user decide (MUST). "Rename to avoid duplicates" serves the system, and breaks the user's search and file management.
 
 ### 11.3. Admin Assets vs User Assets Separation
 
@@ -544,6 +545,7 @@ media/
 
 - **Law**: Directly writing storage **origin URLs** in `<img>` tag `src` attributes is prohibited
 - **Action**: Image delivery MUST go through a **CDN or reverse proxy**, applying edge-level caching, automatic format conversion (WebP/AVIF), and responsive resizing
+- **Image Host Header Precondition**: Before working on image search, image sitemaps, or `ImageObject`, fetch the image host's response headers (`x-robots-tag`, etc.) directly with a crawler UA and check them (MUST). The canonical rule is "Image Host Header Precondition" in `product/500_growth_marketing.md`.
 
 ### 12.2. The Storage URL Hardcoding Ban
 
@@ -607,6 +609,7 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 - **API Integration**: Call DAM API from CMS media selection UI to import assets
 - **CDN Unification**: Deliver DAM and CMS media through the same CDN (Cloudinary / imgix) with unified transformation parameters
 - **Metadata Sync**: Synchronize DAM tags and permission info to CMS media fields to prevent license violations
+- **Media Caption Metadata Preservation**: On every path that selects an image from the media library into content, save the display metadata (caption, alt, note) together with the URL, not the URL alone (MUST). Where the storage target must stay URL-array compatible, keep the array intact and hold the metadata normalized in an adjacent map. Key generation, resolution, and pruning of any map looked up by URL go through one normalization to the public URL and match on the same key the DTO's URL normalization produces (MUST): if one side keeps the raw path, the caption silently disappears at display time. When adding a new image path, implement saving, pruning on delete, and public DTO normalization at the same time (SHOULD). Failure pattern: several paths saved only the URL and the public display could not recover the caption.
 
 ### 14.3. Asset Lifecycle Management
 
@@ -633,6 +636,7 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 
 - **On-demand Revalidation**: Trigger instant revalidation of affected pages on content update via CMS Webhook
 - **Tag-based Revalidation**: Implement batch revalidation by content type using `revalidateTag()`
+- **Mutation-Path Invalidation Proof**: A change that adds or extends a cross-request cache (ISR, data cache) proves, by enumeration, that every mutation path that can change the cached read (create, update, delete, bulk operations, webhooks) fires the same invalidation tag (MUST). The canonical rule is "Invalidation Wiring Before Caching" in `engineering/300_web_frontend.md`.
 
 ---
 
@@ -737,6 +741,8 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 
 - **Law**: When placing interactive elements (`<input>`, `<select>`, `<button>`, etc.) within custom NodeViews, `stopEvent` function configuration is mandatory
 - **Action**: Control target events (`mousedown`, `keydown`, `input`, `dragstart`) to prevent propagation to the editor. Selectively block only interactive element events, not indiscriminate blocking of all events
+- **View Source (two-way)**: A WYSIWYG editor implements a source view that not only shows the raw HTML or source but can be edited in place with the change applied back (MUST). Complex embeds (iframe, script) and debugging exceed what visual editing alone can do. The source editing field uses a code editor with syntax highlighting.
+- **Dual-Renderer Content Bake**: When the same content is rendered by two systems, a static SSR renderer and a dynamic client renderer, never inject external metadata (alt, caption, etc.) into only one renderer function (MUST NOT). So that both systems consume the same input, bake the metadata into the content itself by a pure transformation on the public read render path, and keep the edit path's fetch raw so a re-save never persists derived values (MUST). Schema-driven parsers and editors drop undeclared attributes at parse time, so declare even render-only injected attributes in the client schema with defaults (MUST). The static renderer passes attributes through, so do not end verification at SSR alone. Failure pattern: caption and alt vanished after hydration and SSR output diverged from the client.
 
 ---
 
@@ -781,6 +787,7 @@ draft → pending → published → archived
 
 - **Self-Publish Ban**: Prohibit creators from directly transitioning their own content to `published` status
 - **Audit Trail**: Record all status transitions in audit logs (`who`, `when`, `from_status`, `to_status`, `reason`)
+- **Traceability UI**: Beyond persisting the audit log, a screen in the admin GUI that lets operators trace "when, who, and what changed" is mandatory (MUST). An audit log that can only be read by querying the DB directly is, operationally, the same as no audit log.
 
 ---
 
@@ -798,6 +805,7 @@ draft → pending → published → archived
 - **Query Filter**: `published_at <= NOW() AND (unpublished_at IS NULL OR unpublished_at > NOW())`
 - **Dual Defense**: Check time at both DB query and application logic layers to prevent bypass risks from CDN cache/ISR
 - **Cache Invalidation**: Auto-invalidate related page caches when scheduled time is reached
+- **Test Boundaries**: Scheduled-publishing tests always cover, as boundary values, (a) the date boundary (00:00) in the project time zone, (b) the UTC conversion round trip, and (c) immediate publication when a past datetime is set (MUST), and pin the whole chain schedule → time reached → publication applied → cache invalidated in E2E (SHOULD). Time zone, boundary values, and cache are the three points that produce the same failure in every CMS with scheduling.
 
 ---
 
@@ -847,6 +855,7 @@ draft → pending → published → archived
 ### 27.1. The Soft 404 Awareness Protocol
 
 - **Law**: Prevent "Soft 404" where deleted/unpublished content URLs return status code 200 with empty pages
+- **Data-Driven Route Smoke**: For routes generated from arrays or CMS content, do not hand-copy the smoke targets into the test script; read the same canonical source and derive the slugs and expected titles (MUST). The canonical rule is "Data-Driven Route Smoke" in `quality/000_qa_testing.md`.
 
 | Scenario | HTTP Status |
 |:---|:---|
@@ -946,6 +955,8 @@ switch (section.type) {
 | Event | `Event` |
 | Local Business | `LocalBusiness` |
 | Review | `Review` / `AggregateRating` |
+
+- **Caveat (Rich Result Eligibility)**: Before choosing a type from the table above, confirm that the required properties of types the search engine treats as rich-result eligible (`Product`, `SoftwareApplication`, etc.) can be filled truthfully (for example `Product` needs `image` and a purchase that completes on that page; `SoftwareApplication` needs `aggregateRating` or `review`) (MUST). Do not emit a type whose required properties cannot be met truthfully; keep the semantics with a non-eligible type instead (`Service` + `offers`, `WebPage`, etc.). Price and list structure remain, so the path AI search reads is not lost. Verify a type's eligibility against the search platform's primary documentation, and when in doubt measure the production HTML of peers in the same industry (SHOULD). Failure pattern: a type with unmeetable required properties kept being emitted, and Search Console accumulated zero valid and only invalid items.
 
 ### 31.2. Breadcrumb
 
@@ -1182,6 +1193,8 @@ switch (section.type) {
 | **Color contrast** | Guarantee minimum contrast ratio of 4.5:1 between text and background |
 | **Video captions** | Captions/transcripts mandatory for video content |
 
+- **Heading Rebase for Embedded Rich Text**: Heading levels that editors can choose freely cannot be protected by correction at save time, neither for existing data nor for future input. When embedding a body into the page outline (h1 = title, h2 = section, ...), leave the stored value untouched and rebase at render time, shifting every heading by the same amount so the shallowest heading in the body lands on the designated level, preserving relative hierarchy and clamping to 1–6 (MUST). The canonical rule is "Heading Rebase for Embedded Rich Text" in `engineering/300_web_frontend.md`.
+
 ### 39.2. European Accessibility Act (EAA) Compliance
 
 - **Rule 34.57**: Comply with the EAA (effective June 2025) by also ensuring the CMS admin UI itself meets WCAG 2.2 AA level accessibility
@@ -1204,6 +1217,7 @@ switch (section.type) {
 - **Rule 34.58**: Manage translations through CMS internal workflow or TMS (Translation Management System) integration
 - Use AI translation only as first drafts with mandatory human review
 - **Translation Memory**: Build a system to accumulate and reuse past translation assets
+- **Structure/Text Separation**: For AI translation of structured content (rich-text JSON, menus, link arrays), do not pass structure, IDs, URLs, enum values, numbers, times, or amounts to the model; extract only the natural-language text, send it under the contract "return a string array of the same length in the same order", and merge the result back into the skeleton (MUST). The canonical rule is "Structure/Text Separation" in `ai/000_ai_engineering.md`.
 - **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md` (Global Expansion), `core/200_language_protocol.md` (Language Protocol)
 
 ---
@@ -1288,6 +1302,7 @@ switch (section.type) {
   - Complete migration of content body (structured data)
   - Media asset migration and reference updates
   - 301 redirect setup (old URL → new URL)
+  - **Managed Redirect Store**: Redirects for migrated URLs that operators add, change, or stop during operation use a data store editable from the admin UI as the runtime SSOT, not static configuration (MUST). The canonical rule is "The Managed Redirect Protocol" in `product/500_growth_marketing.md`.
   - Metadata migration (SEO, OGP)
   - Revision history migration (when possible)
   - Internal link rewriting
@@ -1412,6 +1427,7 @@ switch (section.type) {
 
 - **Rule 34.76**: Auto-execute content existence verification (Smoke Test) on key pages after deployment
 - Include detection of empty pages (Soft 404)
+- **Feed Error-Quiet Check**: Verification of sitemaps, robots, llms.txt, and public feeds checks not only the HTTP status but also the server log at generation time (DB errors, empty-array fallbacks) (MUST). A 200 with an empty list is a failure. Data retrieval on public crawl paths states the publication condition (`status = published`, etc.) explicitly in application code and does not depend on the admin branch of a row-level policy (MUST). On the DB side, separate the public read policy from the admin read policy so the public path never evaluates the admin helper (SHOULD). Failure pattern: the sitemap returned 200 while the internal slug fetch fell back to an empty array on a permission error.
 
 ---
 
@@ -1944,6 +1960,7 @@ Content Published
   - **Rollback Plan**: Document rollback procedures in advance for migration failures
   - **Content Freeze**: Freeze content editing on source CMS during production migration execution
   - **SEO Monitoring**: Monitor Search Console index coverage daily for 30 days post-migration
+  - **Old-URL Population**: Build redirect rules for old URLs from the strings in the measured population of old URLs (the old sitemap, archives, access logs), never by reconstructing slugs from names (MUST). Old slugs may contain misspellings, duplicates, and mixed-width characters. After adding a rule, confirm the same URL exists in the population (if not, nobody links to it), and run a daily probe over the entire population so a miss shows red the next morning (SHOULD). Apply corrections through an idempotent migration (`ON CONFLICT ... DO NOTHING` plus a verification block confirming the rows landed), never by hand-run SQL against production (MUST). Failure pattern: rules reconstructed with correct spelling attached to non-existent URLs and missed the ones that existed. The canonical rule is "Measured Source Population" in `product/500_growth_marketing.md`.
 
 ---
 

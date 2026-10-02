@@ -426,6 +426,7 @@
 *   **The Usage Limit & Enforcement Protocol（Tier別制限実装）**:
     *   **Law**: サブスクリプションTierごとの制限は **UIとバックエンドの両方**で強制します。
     *   **Server-Side Enforcement (SSOT)**: 制限バリデーションは必ず Server Actions / RPC / DB Trigger 側で実行します。クライアントのみの制限は回避されます。
+    *   **Single-Path Write Closure**: プラン上限・登録数・座席数などの業務制約をRPC/Server Action内で判定する場合、同じ表への他の書込経路（直接INSERT/UPDATEのGRANT・RLSポリシー）を撤去するか、同等の制約で塞ぐ（MUST）。「サーバー側で検証している」だけでは、テーブル直書きで迂回できる。上限に達したユーザーのセッションで直接INSERTを試み、拒否されることをネガティブテストに含める（MUST）。実際にRPC側にしか上限判定が無く直書きで迂回できた事故に基づく。参照: `engineering/200_supabase_architecture.md` Rule 11.2。
     *   **Guard Centralization**: 制限チェックロジックは `src/lib/guards/subscription-guard.ts` 等に集約し、DRY違反のリスクを下げます。
     *   **ポジティブ・アップセルメッセージ**: 「Freeプランでは1件まで。Proにアップグレードすると無制限になります」など、制限超過をアップグレードの機会に変えます。
 *   **AI Credits Economy（AI-Native課金モデル）**:
@@ -595,6 +596,7 @@
     *   **DB First**: 全法的文書は `site_settings` または専用の `fixed_pages` テーブルに保存します。
     *   **Admin UI**: 非エンジニアが管理画面から即座に修正・公開できる仕組みを標準実装します。
     *   **リスク**: 法改正当日にデプロイ待ちが発生する状態は企業コンプライアンスの「失格」です。
+    *   **Migration Procedure（ハードコードからDBへ移す手順）**: 法的文言をハードコードからDB列へ移す場合、新列はNULL許容＋DEFAULTで安全にロールバック可能にし、コード側の `settings?.text ?? fallback` の fallback は移行前と同じ文言にする（MUST）。migrationとアプリデプロイの順序ラグで空文字や別言語が表示されることを防ぐ。変更は migration／取得仕様／型／バリデーションスキーマ／コンポーネントの全層を同一PRで更新し、型再生成待ちの間は明示的な型ブリッジで凌ぐ（SHOULD）。「後で動的化」コメント（例: `TODO.*site_settings`）を機械検出して残留を洗う。
 
 ### 7.3. グローバルコンプライアンス対応
 *   GDPR / CCPA / EU AI Act 対応の詳細は `security/100_data_governance.md` を参照してください。
@@ -1104,6 +1106,10 @@
 | 全体投稿頻度 | 5件 / 24時間 | 超過分をキューに保留 |
 | 新規アカウント制限 | 登録後72時間以内は2件まで | Progressive Trust（§14.5）と連動 |
 | ボット検出 | CAPTCHA/チャレンジ認証必須 | 検証失敗は投稿ブロック |
+*   **Anonymous UGC Opening Checklist（証跡／レート制限／集中度）**:
+    *   匿名投稿を許す機能を開放するときは、同じ変更単位で (a) 行為者不在でも捨てられない証跡（仮名化したIP・端末キー等）、(b) 本文投稿へのレート制限、(c) BOT検証のfail-closed（検証失敗は通さない）を置く（MUST）。監査ロガーが「認証ユーザー無し」を破棄する設計なら、匿名機能の証跡は構造的に全損する（実測: 匿名投稿の監査行が全期間0件）。fail-openは実質無防備で「対策済み」という誤った安心だけを残す。
+    *   荒らし対策として認証を唯一の防御にしてはならない（MUST NOT）。高価値UGCに認証を要求する判断はオーナー承認事項とし、既定はBOT対策＋レート制限＋集中度検知で作る（SHOULD）。
+    *   人間を集めた組織的投稿はBOT検証で止まらない。集中度（同一対象への短期件数・満点連続・単一ページのみ訪問者比）の検知を別に持つ（SHOULD）。
 
 ---
 

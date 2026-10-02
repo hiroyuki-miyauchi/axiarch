@@ -317,6 +317,8 @@ const user = await requireAdmin(); // Internally performs auth + authz + audit l
 ```
 
 -   **Role Enumeration Symmetry**: Multiple guard functions validating the same domain must retrieve role lists from a **common constant array**.
+-   **Namespace Separation**: Values that are compared against different things (e.g., a DB-layer role column and an app-layer role table) MUST be **separate constants** even when the spellings coincide. Checking two namespaces against one constant lets values from one leak into the other's allow set, producing a "configured but nothing happens" state that keeps running unobserved (it worked only because the spellings matched). Spellings that are shared on purpose SHOULD be shared by reference, not re-typed, so renaming one side breaks the other.
+    -   In designs with two layers of authority (a DB-layer role column and an app-layer role table, etc.), verify that every account creation and recovery path writes both layers at once and that no "true on one side only" mismatch exists (MUST). Reconcile the app-side allowed-value set with the DB CHECK constraint as sets (MUST): a check that looks only at the decision function passes "removed from the app but still in CHECK".
 -   **Unconditional Baseline Auth**: Handlers in action layers using privileged clients must **execute auth/authz checks on all code paths** regardless of data status.
 -   **ABAC recommended**: When simple RBAC is insufficient (multi-tenant, fine-grained access control), adopt Attribute-Based Access Control (ABAC).
 
@@ -325,6 +327,7 @@ const user = await requireAdmin(); // Internally performs auth + authz + audit l
 -   All Admin API/Actions must enforce RBAC check at the beginning.
 -   Financial, permission, and delete operations require Turnstile/OTP additional auth beyond RBAC.
 -   Record all Admin operations in audit logs. Include before/after diffs for destructive operations.
+-   **Guard Ordering**: Admin mutations MUST follow the fixed order (1) role guard (return immediately on failure) → (2) bot check → (3) mutation → (4) audit log. A bot check verifies "is this a human?", not "is this an admin?", and places that proceeded to the mutation on the bot check alone were actually found. Do not re-fetch a user afterwards just for the audit log; carry the same user obtained in (1) through to the end. Grep for sites that mutate after only a bot check and put the role guard in front of them.
 
 ### 4.7. Omnichannel Auth
 
@@ -335,6 +338,7 @@ const user = await requireAdmin(); // Internally performs auth + authz + audit l
 -   **Hashing Mandate**: API Keys must **never be stored in plaintext**. Hash with SHA-256 or equivalent.
 -   **Dual Auth Protocol**: Implement as OR condition of `X-API-KEY` and `Authorization: Bearer`.
 -   **Prefix Design**: Add prefixes (e.g., `sk_live_`, `pk_test_`) to API Keys for type/environment identification.
+-   **Shared Secret Comparison**: Shared-secret checks for cron, webhook, and internal API endpoints MUST use one constant-time comparison helper as the single implementation (SSOT), never re-implemented per route. The helper returns "mismatch (401)" and "not configured (500)" distinguishably, and the latter is always written to the error log. Keep one SSOT per runtime boundary, and block new code written with `!==` at review.
 
 ### 4.9. Password Policy
 
@@ -505,6 +509,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 -   Immediately invalidate server-side on logout. Client-side token deletion alone is insufficient.
 -   Immediately invalidate all sessions on account suspension/deletion.
 -   **Token Revocation List**: Maintain a list of invalidated tokens and check during validation.
+-   **Highest-Privilege-First Guard Audit**: When suspension, lock, or revocation checks are spread across several guards, confirm their presence starting from the most privileged guard (MUST). Defenses get written where the pain is, so they are implemented from the weak side first and the most privileged guard is the one most likely to be left without the check. When the IdP's ban does not revoke already-issued access tokens, re-evaluate the ban state in the guard on every call (no extra cost when the value is already in the user-fetch response).
 
 ### 6.6. Account Lockout & Brute Force Prevention
 
@@ -574,6 +579,8 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 | **Medium** | Address, nickname | RLS + least privilege access |
 | **Low** | Settings, UI preferences | Standard access controls |
 
+-   **Access Log Requirements (High/Critical)**: On any path where someone other than the data subject (staff, professionals, support) views or decrypts sensitive data (medical, financial, HR, etc.), require a stated reason for access and record who, when, what, and why (MUST). Allow decryption only when every condition holds — authenticated, row-level authorization passed, access log written — and alert when the number of decryptions per unit time crosses a threshold (e.g., 10 or more within an hour) (MUST). Exclude this access log from deletion and retain it longer than the data itself (or permanently) (SHOULD).
+
 ### 7.4. PII Masking
 
 -   **Law**: **Never include** PII in log output, error reports, or support screens.
@@ -581,6 +588,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
     1.  Embed PII filters in logging frameworks to auto-mask `email`, `phone`, `name`, etc.
     2.  Prohibit raw object log output like `console.log(user)`.
     3.  Configure PII filters in error tracking tools (Sentry, etc.).
+    4.  **Partial-Match Key Masking**: A partial-match mask on sensitive key names lets short words such as `ip` or `content` hit unrelated keys (`script`, lengths, hashes), protecting nothing while destroying evidence. When this happens, do not loosen the mask (MUST NOT). Fix the key name instead, and avoid words that contain a short sensitive term altogether (SHOULD). Run every key of any structure written to the audit log through the implementation's mask function as-is and verify that no key is masked unintentionally (MUST). Do not transcribe the rule into the test; call the real function.
 
 ```typescript
 // ❌ PROHIBITED: Log output containing PII
@@ -595,6 +603,14 @@ console.log('User login:', {
 ```
 
 When a security audit must identify a person, do not emit a raw `userId` to general application logs. Write it to a protected, purpose-limited audit sink with least privilege, tamper resistance, retention and deletion controls, and a documented legal basis. When correlation is sufficient, prefer a short-lived or rotatable pseudonymous reference separated by environment and purpose, and protect the re-identification data behind a separate boundary.
+
+-   **Keyed Pseudonymization Discipline**: When a value with a small search space (IP address, device fingerprint, phone number, postal code) is turned into a pseudo-identifier, use a keyed hash (HMAC or equivalent) (MUST). An unkeyed hash is reversible by brute force and cannot be treated as anonymization.
+    -   When the key is absent from the environment, the fallback MUST be a "process-lifetime random key" or "stop", never a fixed string in the repository (a public value). The only cost is losing correlation across instances, which is safer than becoming reversible. Detect and warn on key absence (SHOULD).
+    -   Derive the key in one place (a shared module) and never write HMAC directly in each path (MUST). A path added later tips the "default when no secret" toward the weak side (this actually happened: the original key was random, the later-added hash fell back to a fixed string). Separate keys per environment, and share the same derivation between the app layer and the edge layer so identical input yields identical output (SHOULD).
+    -   Pseudonymized values are usually retained longer than the raw values (e.g., raw IP for half a year / hash for three years), so a weak key outlives the raw data. Pin "cannot be reproduced from a public string" with a unit test (SHOULD).
+-   **Masking Implementation Contract**: Never pass a raw `error` object to the logger or error tracker; extract only `{name, message}` (MUST). Vendor SDKs may attach the whole request to the error, and key-name-based redaction never reaches PII nested deep inside. Beyond key names, run free-text PII patterns (email, phone, URL query and hash) over every string value in meta, the message, the stack, and breadcrumbs, and keep the pattern set in one SSOT with no separate implementation per sink (app logger / error tracker / edge) (MUST). Treat external services' customer, subscription, and payment identifiers as sensitive keys (MUST). For "replace every occurrence" patterns, do not hand-write global flags per pattern; route them through one conversion function and test with inputs containing multiple occurrences (MUST). When the error tracker's config is split per runtime, align scrubbing across all configs and apply it to every kind of before-send hook (MUST).
+-   **Verification Method**: Pin PII exclusion for logs and error tracking with tests that inspect the arguments after they pass through the real protection filter, not tests that mock the monitoring function and count calls (MUST). When the filter is designed to drop string meta, pass the cause classification as a finite enum value and confirm both that causes stay distinguishable and that no PII is present.
+-   **Public-Surface PII Guard**: Content saved from the admin console to a public surface (landing pages, articles, venue pages) SHOULD be scanned before saving for contact patterns such as phone numbers and email addresses, and not saved without explicit approval when one is detected. Operators have actually published a private individual's contact details by mistake. Exclude the business's official contact details via an allowlist.
 
 ### 7.5. Encryption Requirements
 
@@ -646,6 +662,7 @@ When a security audit must identify a person, do not emit a raw `userId` to gene
     1.  Manage table/column-level metadata (classification level, owner, retention period) with data catalog tools.
     2.  Auto-propagate classification labels during ETL/ELT pipeline data movement.
     3.  **Data Loss Prevention (DLP)**: Detect and block unauthorized copying, downloading, or external transmission of Restricted-classified data.
+    4.  **Row-Level Provenance**: Entities that receive data from several entry points (user forms, public API, admin console, bulk import, AI generation, batch jobs) SHOULD carry a `source` column (an enum) naming the ingress path, in addition to `created_at/updated_at/created_by/updated_by`. Keep `source` even on high-churn tables that omit the actor columns. The more entry points there are, the more impossible it becomes to tell "which path's data is broken"; this column is what scopes import-induced inconsistencies and justifies re-imports.
 
 ---
 
@@ -669,6 +686,7 @@ When a security audit must identify a person, do not emit a raw `userId` to gene
     2.  Clearly categorize consent (essential/functional/analytics/marketing).
     3.  Ensure basic service functionality is available even when consent is refused (no consent coercion).
     4.  Retain consent records as legal evidence for **at least 5 years**.
+    5.  **Notice–Implementation Correspondence**: Every sentence of the privacy policy, terms of service, and disclosure register MUST map one-to-one to the implementation that backs it (the columns stored, the destinations, the retention period). Both under-reporting (collecting without saying so) and over-reporting (saying "we record" what is never stored) are violations. Example: if the IP at posting time is used only briefly for flood detection and never written to the register, writing "posts are also recorded" is over-reporting. Revise the published text and the implementation in the same change unit and maintain the mapping table (sentence ↔ column / destination) (SHOULD). The better the implementation works, the quieter "collected but not disclosed" becomes, so the check SHOULD also run in reverse, from the implementation back to the published text. Operate this in tandem with `security/100_data_governance.md` §5.4 (SSoT for Legal Documents).
 
 ### 9.3. Right to be Forgotten
 
@@ -750,6 +768,8 @@ const BadConsentBanner = () => (
 -   `[ ]` Are question texts clear and free of complex negative phrasing?
 -   `[ ]` Is default consent set to "off" for non-essential cookies?
 -   `[ ]` Are repeated consent prompts limited? (Recommended max once per 30 days for the same user)
+-   `[ ]` Does the button wording match the legal basis? (Under a notice/disclosure-based regime — e.g., notice-style operation in Japan — the button is an acknowledgement such as "OK" or "Close", never "I agree". Under a consent-based regime, place "Reject all" and "Accept all" in the same class on the first layer, and never treat closing (×) or scrolling as consent.)
+-   `[ ]` Is contractual consent at account registration not being used as a substitute for cookie / advertising / push consent? (External transmission happens for every visitor before login. Under a notice-style banner, pressing "OK" must not turn on active subscriptions that involve a browser permission dialog.)
 
 -   **Cross-Reference**: §9.2 (Consent Management Platform), §7.1 (Privacy by Design Principle 2)
 
@@ -770,6 +790,9 @@ const BadConsentBanner = () => (
     -   **Law**: Clearly separate admin and general user API endpoints with role-based access control.
     -   **Anti-Pattern**: Distinguishing admin/general only by URL path (`/admin/users` vs `/users`) without backend authorization checks.
 
+-   **Trusted Header Strip**: Headers that a reverse proxy or middleware passes downstream as "trusted" (authenticated subject ID, tier, auth source, etc.) MUST have the client-supplied value removed unconditionally at the entry point on every path, and be re-set with the verified value only after successful authentication. On a code path the middleware did not set (e.g., a Bearer-only route that fell through), the spoofed value reached downstream untouched and became privilege escalation. Pin the header-propagation API contract (response header vs. request header replacement) with a test, and never treat a comment saying "the middleware sets this" as proof. Downstream handlers SHOULD treat the trusted header as layer 1 and re-verify against the DB ground truth as layer 2.
+-   **Page-Level Ownership Double Check**: Authenticated pages that display personal data MUST verify `entity.owner_id !== user.id` at the page level after fetching, and hide "does not exist" and "ownership mismatch" behind the same not-found response. Do not make row-level authorization a single point of failure. Also emit explicit noindex/nofollow to guard against accidental crawling by authenticated crawlers (internal tools, link-unfurling bots) (SHOULD).
+
 ### 10.2. Mass Assignment Defense (API #3)
 
 -   **Law**: Prohibit directly binding client input to models.
@@ -779,6 +802,7 @@ const BadConsentBanner = () => (
 ### 10.3. Input Validation
 
 -   **Validation at the Edge**: Treat all input as "untrusted data" and validate server-side. Client-side validation alone is insufficient.
+-   **Persistence Layer Enumeration**: When designing a defense against bad values (entry validation, DB constraints, daily detection), enumerate every place the value can persist (DB, cache, search index, client drafts / localStorage, queues) and run the same server-side decision (the same pure function) through every layer in both directions, on save and on restore (MUST). If even one layer is missed, the broken value is re-injected from there and users experience a "nothing I do will save" loop. See `design/000_design_ux.md` §14.5 (Auto-Save).
 -   **Zod / Valibot / ArkType required**: Mandate schema-based validation. Accepting input with `any` type is prohibited.
 
 ```typescript
@@ -797,15 +821,22 @@ export async function updateProfile(input: unknown) {
 }
 ```
 
+-   **Output Encoding for Server-Rendered Templates**: Dynamic values inserted into server-assembled HTML (email, notifications, PDF templates) MUST pass through an escape function without exception, even for URLs and plain text. `javascript:` and similar via `<a href="${url}">` are the vector. Values users can write freely (display name, bio) SHOULD not appear in the body of notifications sent to admins or operators; reference them by identifier and view the body in the admin console.
+-   **Boundary Schema Prohibitions**: Schemas at input boundaries (admin console, public forms, JSON columns) MUST NOT use anything equivalent to `any`. `any` is the state of believing input was validated when it was not. Accept free-form JSON as `unknown` and recursively reject `__proto__` / `constructor` / `prototype` keys; give `Record<string, X>` an explicit key-length cap and value type; and put `.max()` on every external identifier and token string (MUST). An uncapped string opens ReDoS, log flooding, and storage consumption at once. Treat downstream type errors caused by narrowing a schema as "hidden problems surfacing" and accept them. Review question: does every `z.string()` have `.min`/`.max`?
+-   **Allowlist Resolution Parity**: Build the allowed set for an allowlist check from every path of the caller's value-resolution chain (DB → environment-variable fallback, etc.) (MUST). The canonical rule is `security/430_authorization_and_access_control.md` §6.2 "Allowlist Resolution-Chain Parity".
+
 ### 10.4. SQL Injection Defense
 
 -   **Parameterized Query Only**: String concatenation for SQL construction is **absolutely prohibited**. Use ORM or parameterized queries only.
 -   **Safe ORM Usage**: Even with ORMs like Prisma or Drizzle, enforce parameterization when using raw SQL features like `$queryRaw`.
+-   **Filter-String Delimiter Sanitization**: In APIs that assemble a non-parameterized "filter string" (PostgREST `or=`, search DSLs, LDAP filters, etc.), replace or strip the syntactic delimiters (commas, parentheses, etc.) contained in user input immediately before issuing the query (MUST). Even through a query builder's `.or()` and similar, a delimiter that breaks the generated filter string becomes an unintended filter bypass (injection). "We use a query builder, so it is safe" does not hold for string-assembled filters.
 
 ### 10.5. SSRF Defense
 
 -   **Law**: When fetching external resources server-side, structurally prohibit access to internal networks (`127.0.0.1`, `10.x`, `172.16.x`, `169.254.169.254`).
 -   **Action**: URL whitelist + DNS rebinding countermeasures + firewall blocking metadata service access.
+-   **Structural Boundary Comparison**: Be suspicious whenever `startsWith` or prefix matching appears in code that decides "belongs to / owns / is the same" (MUST). The canonical rule is "Rule 67.7.9" in `security/430_authorization_and_access_control.md`.
+-   **Shared Outbound Fetch Guard**: Server-side code that fetches external URLs (Server Actions / Route Handlers / health checks / cron) MUST go through a shared URL guard (dangerous schemes, localhost, private/link-local/metadata ranges, `.local`/`.internal`, IPv6 / IPv4-mapped, decimal and hex IP notation) rather than a per-call regex. Do not follow redirects automatically; inspect `location` one hop at a time, run both the allowed-domain check and the SSRF guard at every hop, and apply the size cap to the response after manual following as well (MUST). Even in admin-only diagnostics (link checkers, OG fetchers), URLs that originate from public content are external input an attacker can plant (MUST). Attach a timeout (AbortController or equivalent) to every fetch, centralize timeout values in a per-purpose constant SSOT, and detect "`fetch(` with no nearby `signal`" by mechanical scan.
 
 ### 10.6. Rate Limiting / Throttling
 
@@ -821,6 +852,12 @@ export async function updateProfile(input: unknown) {
 | Webhook reception | 100/min/source |
 
 -   **Rate Limit Headers**: Include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` in responses.
+-   **Wiring Verification (No Declared-but-Unwired Defense)**: Defenses such as rate limiting, audit logging, and sanitization are judged by "actually called on the target path", not by "a constant, comment, or helper exists" (MUST). A rate-limit constant annotated "e.g., review posting" with no real wiring stays green through both review and tests. When pinning wiring with a source contract, count calls (with the opening parenthesis), not `import` occurrences, and set N in "count on target paths ≥ N" checks equal to the real number (a lower bound looser than reality stays green even when the count halves) (MUST). Pin behavior separately with unit tests. On anonymously writable paths, put an IP-keyed limit on the body (text submission) as well as on attachments, and ship "evidence that survives without an actor, rate limiting, fail-closed bot verification" in the same change unit that opens anonymous posting (MUST). When a defense is missing, the evidence it leaves as a side effect (the raw IP in the rate-limit key, etc.) is lost with it.
+-   **Fail-Closed Secret Check**: Endpoints protected by comparison against a secret stored in an environment variable (cron, webhooks, internal APIs) MUST use a condition that **rejects** when the secret is unset or empty. The `if (secret && token !== secret)` shape becomes an unauthenticated public endpoint in any environment where the variable is missing. Centralize in a shared verification function and prohibit hand-written conditions per route (SHOULD).
+-   **Key Design**: A rate-limit key MUST include the caller's identifier, and on authentication-required endpoints MUST prefer the authenticated subject in the form `prefix:(userId ?? ip)`. NAT, corporate Wi-Fi, CGNAT, and serverless egress fold many users into one IP, so an IP-only key shares and exhausts quota across legitimate users. Constant keys (shared by every request) are prohibited on any endpoint (MUST NOT): a constant key on the health check let a single IP burn the whole monitoring quota. When a stable identifier exists before login (a guest cookie, etc.), use it as the subject rather than a shared subject like `guest` (SHOULD). Do not bolt the IP onto a subject key and turn it into "subject + IP" granularity (one user's quota splits across connections).
+-   **AND Principle for Mutation Guards**: Guards on mutations are evaluated with AND (MUST): authentication/authorization (who) AND rate limiting (how often) AND audit logging (traceability; mandatory for sensitive data) AND bot check (is it human; public surfaces only). The inference "a strong front defense (OTP / MFA / CAPTCHA / audit log) exists, so no rate limit is needed" is prohibited (MUST NOT). OTP confirms identity and is powerless against rapid repeated mutations inside the verified session; only a rate limit stops mass operations from a compromised admin session. Put a per-admin rate limit on admin operations, and rate-limit the OTP issuance endpoint itself before the OTP branch (MUST). Treat mutations that call external metered APIs (payments, AI, SMS) as more critical than internal DB mutations.
+-   **Public Analytics & Observation Endpoints**: Analytics writes originating from public pages (views, searches, clicks) are handled with optional authentication (not logged in is the normal case as null, never an exception), an IP rate limit, and format validation of caller-supplied IDs; updates through a privileged client are restricted to rows in a public state, and on failure only the log write is dropped, never the page render (MUST). Intake endpoints that fan each element of an array input out to downstream events (CSP reports, etc.) MUST have a count cap and a streaming cap on actual bytes (`Content-Length` is only for early rejection), and must not drop the excess silently: leave the discarded count as a one-line summary. Never parse the request body before authorization (MUST NOT): a pure function with the right decision order is ineffective when the caller invokes it in the wrong order. A line that explicitly disables a library's safe default is reverted to the default unless a reason is recorded.
+-   **Daily Intake Cap**: A daily intake cap on a high-frequency endpoint SHOULD be decided by a one-row counter (date × accepted count × time reached), not a `count(*)` full scan per insert. After the cap is reached, drop without recording, deduplicate the warning per day, and keep the time reached in the counter.
 -   **Cross-Reference**: §23 (Bot Management)
 
 ### 10.7. CORS Design
@@ -828,6 +865,7 @@ export async function updateProfile(input: unknown) {
 -   `Access-Control-Allow-Origin: *` is **absolutely prohibited in production**.
 -   **Explicit Domain Specification**: Whitelist approach allowing only trusted origins.
 -   Leverage the restriction that `*` cannot be used with `Access-Control-Allow-Credentials: true`.
+-   **Exact-Match Origins Only**: Allowed origins MUST be exact matches; pattern matching via `endsWith` / `startsWith` is prohibited. A suffix match on a platform-shared domain (e.g., `*.vercel.app`, `*.pages.dev`) lets every other tenant's deployment reach your service through the browser. When preview or local origins are needed, design for the operator to add them explicitly to a secret as a comma-separated list. When the origin is not on the allowlist, emit neither `Access-Control-Allow-Origin` nor `Vary: Origin`. Add `Vary: Origin` only to responses whose ACAO truly varies by Origin (on a constant ACAO it lets an attacker expand the shared cache's key space without bound). Authenticated responses carry `Cache-Control: no-store, private`.
 
 ### 10.8. CSRF Defense
 
@@ -844,6 +882,9 @@ export async function updateProfile(input: unknown) {
 
 -   **Law**: Periodically detect and retire undocumented APIs (Shadow API) and deprecated-but-still-running APIs (Zombie API).
 -   **Action**: Detect unregistered endpoints via API gateway traffic analysis. Cross-reference with API inventory.
+-   **Non-Canonical Host & Second-Entrance Control**: "Not searchable" (`noindex` / canonical / sitemap) and "not reachable" (redirects, authentication, network boundaries) are different controls, and completing the former MUST NOT be used as grounds for the latter. noindex is an instruction to search engines; it changes nothing about who can reach the site.
+    -   Enumerate every host, deployment URL, preview environment, and legacy domain that points at the same production data store as an "entrance", and whenever one is added, measure what can be done from it (login, registration, writes, admin console) (MUST). Treat a non-canonical entrance as sitting outside the WAF, rate limiting, and monitoring attached to the canonical host.
+    -   Do not adopt the vendor's recommended closure as-is; test whether it fits the purpose (permanent redirect, path preservation, etc.) before adopting it (SHOULD). When the closure spans several layers (redirect, authentication, SSO, etc.), measure daily from the outside (HTTP responses) that each layer is alive, to catch the form where one layer silently drops and the state degrades to "closed but weakened" (SHOULD).
 
 ### 10.11. API Gateway
 
@@ -1038,9 +1079,12 @@ http {
 | `Cross-Origin-Opener-Policy` | `same-origin` | Window reference isolation |
 | `Cross-Origin-Resource-Policy` | `same-origin` | Resource isolation |
 
+-   **Permissions-Policy Syntax Note**: Manage `Permissions-Policy` per API in a table of "default value / conditions for change", and spell out the difference between `()` (deny for all origins) and `(self)` (allow own site only) (SHOULD). Writing `geolocation=()` disables the geolocation API for your own site too, and a blocked API may fail silently without throwing, so suspect the header first when something "just does not work". Any change that newly uses a browser API (geolocation, camera, microphone, etc.) MUST include the header update as a checklist item and confirm that no `Permissions policy violation` appears in the console.
+
 ### 12.2. CSP Nonce Protocol
 
 -   **Law**: Use **Nonce method** for CSP to ensure safe inline script execution. `'unsafe-inline'`, `'unsafe-eval'` usage is **completely prohibited**.
+-   **Stored Script Material Allowlist**: HTML or script material entered by admins (ad tags, embed widgets, etc.) MUST NOT be read from the DB and executed as-is as nonce-bearing inline script. Even on an admin-only write path, it becomes a stored-XSS surface when an admin account is compromised; "the nonce makes it safe" does not hold for DB-sourced scripts. Execute external `src` only from allowed hosts that are a subset of the CSP `script-src`, and inline only from an allowlist of fixed patterns (MUST). Apply the same decision at save time as validation and return the rejection reason to the admin in the same vocabulary as the renderer, but keep the final boundary on the render side so that rows written directly to the DB are stopped there too (MUST).
 
 ```typescript
 // ✅ CORRECT: Next.js CSP Nonce implementation
@@ -1135,12 +1179,15 @@ CREATE POLICY "Admins can view all"
 -   **DKIM**: Email signing for tamper detection. 2048-bit keys or higher.
 -   **DMARC**: Target `p=reject`. Phase from `p=none` → `p=quarantine` → `p=reject`.
 -   **BIMI**: Brand logo display for enhanced phishing defense (after DMARC reach).
+-   **Decommission Residue**: After a hosting migration, define the cleanup target by "what the old environment can still assert", not by "names reachable in a browser" (MUST). At minimum, inspect three families: signing keys (DKIM public keys), ownership proofs (ACME / DCV records), and delegation (NS). Removing the old host from SPF changes nothing while a DKIM public key remains: whoever holds the matching private key can still pass DMARC under your domain. A decision that passes on OR (DMARC = SPF pass or DKIM pass) is not tightened by tightening one side; inspect every term of the OR at once (MUST). Treat any DKIM selector or similar public key outside the set explicitly allowed as a legitimate sending path as a violation, and require a written reason to add to that set (SHOULD). DNS cannot enumerate a whole zone, so never read "could not resolve" as "absent"; a lookup failure turns the check red as a vanished scan target (MUST). Before deleting, record "why deleting this breaks nothing" and the restore value (MUST).
+-   **List-Unsubscribe Scope**: Do not attach `List-Unsubscribe` to individual replies or transactional email (MUST NOT). The canonical rule is "No List-Unsubscribe on Transactional Mail" in `operations/300_customer_experience.md`.
 
 ### 12.8. Webhook Security
 
 -   Signature verification required for incoming webhooks (HMAC-SHA256, etc.).
 -   Timestamp verification to prevent replay attacks.
 -   Apply rate limiting to webhook endpoints.
+-   **Receiver Order & Misconfiguration Signal**: Every incoming-webhook receiver MUST share the fixed order "(1) signature verification over the raw body → (2) idempotency record (UNIQUE INSERT of the event ID; duplicates return 2xx immediately to stop the sender's retries) → (3) explicit dispatch by `event.type`". When the signing secret is not configured, respond with 500 plus an error log, not 401 (MUST): 401 looks like "a bad request" and hides the misconfiguration forever. When several senders share one idempotency table, namespace event IDs with a sender prefix. Details in `engineering/100_api_integration.md` §17.4.
 
 ### 12.9. Certificate Transparency & CT Monitoring ★NEW
 
@@ -1262,10 +1309,13 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
     2.  **Extension Verification**: Restrict via whitelist (e.g., `.jpg`, `.png`, `.pdf`).
     3.  **Size Limits**: Set max size per type (e.g., images 10MB, documents 50MB).
     4.  **Filename Sanitization**: Never use user filenames directly. Rename with UUID. Strip `../`.
+    5.  **Container Formats & SVG**: Stage one checks the declared MIME type against the allowlist (UX fail-fast); stage two verifies magic bytes (MUST). The declared `file.type` is derived from the extension and unrelated to the signature; a rename alone forges it. Put container formats (ISOBMFF / EBML, etc.) on a brand allowlist, and reject a container whose contents cannot be identified from the leading bytes outright rather than "letting it through loosely because strict detection is impossible". Reject `<script>`, event attributes, `javascript:`, and `foreignObject` in SVG. Uploads forwarded to a paid external API require magic-byte verification as EDoS defense.
+    6.  **Validation SSOT**: Share one validation implementation across AI inference, user submissions, and attachments (MUST). Do not rely on a comment saying "magic bytes verified"; confirm the real path by grep (the comment and the implementation had drifted apart).
 
 ### 15.2. Metadata Removal
 
 -   **Law**: Strip EXIF metadata (GPS, camera info, etc.) from uploaded images before storage.
+-   **No Size-Based Early Return**: Metadata stripping covers every file; a "small files pass through" early return MUST NOT exist. Conversely, stripping that includes Orientation SHOULD NOT be wired into paths whose design intent is to keep the original (admin media library, etc.); restrict it to a backstop on re-encoding paths. Wiring it into an original-preserving path strips EXIF Orientation and regresses portrait photos into rotated display.
 
 ### 15.3. Executable File Blocking
 
@@ -1276,17 +1326,26 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 
 -   Recommend **Signed URL** pattern for direct storage upload of large files.
 -   **Action**: Max 5-minute expiry, `Content-Type` conditions, `Content-Length` conditions, server-side re-validation after upload.
+-   **Download-Side Path Re-Validation**: A path that issues read signed URLs for private storage MUST NOT trust the object path stored in the DB as input; immediately before issuing, re-verify "is it under the subject's (or owner's) prefix?" and "is it the expected bucket?" (MUST). Signed-URL issuance runs through a privileged path that bypasses row-level authorization, so the name "private bucket" plus RLS protects nothing here. Establish authentication on the issuing side, force the path under the owner prefix `${userId}/...`, and reject leading `/`, `..`, and `\`. Fix the bucket per feature and never let the caller choose it (SHOULD). Design the write-side path scheme (inside the subject prefix) and the read-side re-verification as a pair; never depend on one alone (MUST).
+-   **Private Reference Storage**: Place sensitive attachments (medical records, certificates, documents containing PII) in a dedicated private bucket; store a private reference of the form `bucket://path` in the DB rather than a permanent public URL, and issue the display signed URL on the spot without persisting it (MUST). Signed-URL issuance runs on a privileged path that bypasses row-level authorization (RLS, etc.), so establish authentication on the issuing side, force the path under the owner prefix (e.g. `${userId}/...`), and reject a leading `/`, `..`, and `\` (MUST). Run the same prefix-scope guard on every path that stores or publicly renders a client-supplied storage path (submit / link as well as upload) (MUST). When adding a new private-bucket constant, connect the bucket migration, owner path policy, signing helper, and verification script's reference parser in the same change; never leave a "constant only" or "helper only" unconnected state (MUST).
 
 ### 15.5. Storage Bucket Security
 
 -   **Bucket Separation**: Separate public and private assets into **different buckets**.
 -   **RLS Required**: Require RLS policies on all Supabase Storage buckets.
 -   **CORS Restriction**: Allow only app domain. `*` prohibited.
+-   **Search Index Control**: Treat removing the anti-indexing header (`X-Robots-Tag`) from a storage delivery path as a change that "widens the public scope", decided by an allowlist per area (bucket, prefix) (MUST). For areas not enumerated, re-apply `noindex` yourself instead of relying on the origin's headers, so that a newly added area stays out of search when nothing is done. Classify by "did the subject intend to publish this?", not "does a person appear in it?", and exclude any area whose paths contain user identifiers from public search on that basis alone (MUST). Verify from the outside over HTTP (header inspection on real URLs), not in code, asserting both that the header is gone in allowed areas and present in non-allowed areas (SHOULD). Checking one side alone misses over-correction.
+-   **Public-Flag Matrix Test**: "Row visibility (row-level authorization)" and "location visibility (bucket public flag, signed-URL expiry)" are different layers; tightening the former does not protect the latter. When sensitive data is involved, pin invariants on both: rather than individual negative checks, pin "the matrix of bucket name × public flag itself" by exact match, and add a positive control that prevents a zero-row false pass (MUST). Derive the expected values from a live query and confirm by measurement that an inverted mutation turns red before finalizing.
 
 ### 15.6. Content-Disposition Security
 
 -   Set `Content-Disposition: attachment` for user-uploaded file downloads.
 -   Allow `inline` only for images (`image/*`). Force `attachment` for HTML/SVG/PDF.
+-   **Private Attachment Lifecycle**: Attachments users send (inquiries, medical documents, etc.) go in a private bucket physically separated from public media, and the frontend MUST NOT be given a path that embeds the URL directly. Viewing is only via a short-lived signed URL (e.g., 5 minutes) through an authorized server; record the issuance event in the audit log and force `Content-Disposition: attachment`.
+    -   Before issuing the signed URL, confirm that the target path exactly matches "the path stored in the register for that submission ID" (MUST). Admin authentication alone must never sign an arbitrary path within the bucket (that is an IDOR granting admins cross-case access).
+    -   Deletion at expiry performs "delete the storage object → replace the path in the DB with a redacted value → record purged_at" atomically in one function (MUST). Deleting only the storage object leaves an orphan path that becomes a UI bug and audit noise.
+    -   Legal hold ON/OFF is an explicit admin action only, audit-logged, and never switched OFF by an automated job (MUST). The selection predicate for retention-based automatic purge must always exclude rows under hold. Spam-classified items may be deleted on a short cycle (e.g., 24h).
+    -   Periodically (e.g., quarterly) measure bucket size and the count of "over retention limit, not purged, no hold" items, and alert as a purge-job failure if any remain (SHOULD). Also detect attachments that have strayed into a public bucket. See `security/100_data_governance.md` §12.4.
 
 ### 15.7. Image Processing Security
 
@@ -1429,6 +1488,8 @@ function encryptAES256GCM(plaintext: string, password: string): { encrypted: str
     2.  **Input Sanitization**: Filter control characters and prompt manipulation patterns.
     3.  **Output Validation**: Validate LLM output with structured formats (JSON Schema, etc.). Reject unexpected output.
     4.  **Guardrail Implementation**: Deploy guardrails (topic restriction, harmful content detection) on both input and output.
+    5.  **Delimiter Spoofing Escape**: Structure the System / User separation with the SDK's native role separation (systemInstruction, etc.) (MUST). When a relay layer does not support it and a delimiter wrap is used, always escape delimiter literals in user input (e.g., `</user_input>`). Without this an attacker closes the delimiter and injects new instructions. Update the relay layer and the client side together.
+    6.  **Emergency Branch Mask Retention**: Emergency guardrails, exception branches, and early returns tend to skip "the normal path's safety processing". The PII-masked body MUST be referenced from the same variable / SSOT on the normal path, in emergency branches, and in test expectations, and be defined before any early return.
 
 ### 17.2. Sensitive Information Disclosure Defense (LLM02:2025)
 
@@ -1465,6 +1526,8 @@ function encryptAES256GCM(plaintext: string, password: string): { encrypted: str
 -   **Law**: Prevent cost explosion/DoS from excessive LLM requests.
 -   **Action**: Token usage rate limiting, per-user daily caps, cost alert configuration.
 -   **Cross-Reference**: `ai/000_ai_engineering.md` (Token cost management)
+-   **Finite-Set Snapping for Metered Inputs**: Wherever external input directly determines a metered billing unit (image transform parameters, LLM `max_tokens`, transcode settings, page counts, search `limit`, retry counts), snap the value to a finite set of allowed values built from the real callers, not a range check (MUST). A "1 to 10000 range check" leaves the cardinality at 10,000; each request is a normal 200, invisible to rate limiting and anomaly detection, and only the bill quietly swells. Apply the snapping at both the delivery entrance (edge) and the app, with the edge as the authority (MUST): app-side only is bypassed by hitting the URL directly. Write the test as "pass a disallowed value and get an allowed value back" (the existence of a range check is not enough) (MUST). Cap alerts and cut-offs are an availability risk, so shrink the cardinality first (SHOULD).
+-   **Per-Route Usage Metering**: Record usage metering fire-and-forget at the end of every AI route, and detect routes lacking the metering call by mechanical scan (`grep -L` or equivalent) in CI (MUST). One unmetered route makes that provider's cost impossible to see.
 
 ### 17.9. Model Access Control
 
@@ -1930,6 +1993,10 @@ const resolvers = {
     1.  **Hardcoding Absolutely Prohibited**: Physically prohibit embedding secrets in code, config files, `.env` files (under Git), or version control.
     2.  **Runtime Retrieval**: Retrieve secrets from secure external sources at runtime.
     3.  **Least Privilege**: Grant access to secrets only as minimally needed per user/service.
+    4.  **Missing-Secret Behavior**: Never write a `?? ''` / `?? null` / `?? '<default>'` fallback on a secret environment variable (MUST NOT). Throw a descriptive error at module load so the first invocation returns 500 and the operator notices immediately. A fallback that "looks like it works but does not" keeps a misconfigured deployment running for a long time, e.g., on webhooks the sender keeps retrying. Do not make a secret's default a public fixed string for local convenience (MUST NOT). If a fallback is unavoidable, use a process-lifetime random key plus a warn log, and derive keys with HMAC under a purpose label, never shared across purposes (see §7.4 Keyed Pseudonymization Discipline). Treat "timeout defaults to unlimited" and "secret defaults to a public string" as the same type: a default that silently removes a defense.
+    5.  **Header Transport Only**: Long-lived API keys and Bearer tokens MUST be sent in headers, never in the URL query string. URLs are recorded in every logging layer: web servers, CDNs, proxies, browser history, error-tracker breadcrumbs, SIEM. Never log an external API's error response wholesale (`JSON.stringify`); extract only `{status, message, code}` (MUST). Keep the grep hit count for `?key=` `?token=` `?secret=` at zero in CI.
+    6.  **Display / Save / Execute Separation**: Secret columns in a settings table MUST be handled by three separate functions: display (placeholder mask), save (ignore placeholder values and update only new ones), and execute (a server-only module reading the minimal columns directly). A placeholder mask added to make the admin response safe ended up with the notification sender using `********` as the API key. Never return raw secret values to the browser, even on admin-only screens. Secret rotation and leak audits must also scan task records, backup env files, and build artifacts including hidden files, and the record keeps only key name, storage location, and update time with the value explicitly redacted (MUST).
+    7.  **Digest Comparison for Finite Candidates**: When the secret store returns only a digest rather than the value, configuration values with a finite candidate set (region name, project ID, environment name) SHOULD be confirmed by comparing the candidates' sha256 against the digest, without ever seeing the value. Do not apply this to keys or tokens. Between "unverified because unreadable" and "verified because I read it", look first for the third option: verifying without handling the secret.
 
 ### 21.2. Centralized Management Tools
 
@@ -2009,6 +2076,13 @@ if (window.trustedTypes) {
 }
 ```
 
+-   **Trusted Types Operational Notes**: When the `trusted-types` directive is in use, fixed policy names that client libraries create internally (and compatibility keywords such as `allow-duplicates`) must be in the allowlist. Even with a correct `script-src`, a missing policy name or multiple instances re-creating the same-named policy throws only in production and only when a specific UI initializes. Generate allowed policy names from an SSOT constant instead of hard-coding them in middleware, and update the constant and the regression test together on library upgrades (SHOULD). On any CSP change, measure that the target page's response header contains the required policy names and that the console shows no `Policy "..." disallowed` / `already exists` (SHOULD).
+-   **Trusted Input Exception Design**: "Trusted input that is meant to execute scripts" entered from the admin console (measurement tags, ad tags, custom head) has its `<script>` silently deleted when run through the generic user-input sanitizer, and measurement and revenue stop quietly. Give trusted input a dedicated output path and design the bypass of the generic sanitizer to be "intentional, limited, and auditable" (SHOULD). In exchange, restrict editing rights for any field that can inject arbitrary script into the site-wide `<head>` to the top role, and warn on `<script>` injection at save time (MUST). See §12.2 Stored Script Material Allowlist.
+-   **Sanitizer Implementation Contract**: Never return raw HTML from a sanitizer's tag hook to add attributes (MUST NOT): it bypasses the library's own attribute-value filter and `<img src="javascript:...">` survives. Decide URL attribute safety (href / src / cite) with a dedicated policy that rejects `javascript:`, whitespace / entity obfuscation, `data:text/html`, and `data:image/svg+xml`, and add safe attributes (`rel` on `a[target=_blank]`, `iframe sandbox`, `img alt`) in a post-process after sanitizing.
+    -   Every place that renders a URL into `href` MUST pass a scheme allowlist (http / https, internal relative paths). HTML escaping does not prevent scheme XSS, and URL validators such as `z.string().url()` accept `javascript:` / `data:` as valid URLs, so they are not allowlists. Close both the input boundary and the render boundary (invalid values already stored in the DB cannot be neutralized by fixing the input side).
+    -   Hand-written JSX `target="_blank"` that bypasses the sanitizer MUST also carry `rel="noopener noreferrer"` without exception, and link components outside the linter's scope are scanned separately.
+    -   Admin input that is persisted and reflected on public pages MUST be validated separately per context: HTML / JS string / CSS / URL. Do not render a measurement ID unless it matches the allowed format; JSON-encode strings inside inline scripts and escape `<>&` and line separators; run CSS through a CSS-context sanitizer that drops `</style>` breakouts, `@import`, `expression()`, `behavior:`, and `javascript:` (an HTML sanitizer cannot substitute). Keep an external iframe's `allow` to the minimum needed for playback and do not copy the provider's recommended string (SHOULD).
+
 ### 22.2. Third-Party Script Management
 
 -   **Law**: Third-party scripts are a **primary supply chain attack vector**. Strictly control adoption and management.
@@ -2018,6 +2092,7 @@ if (window.trustedTypes) {
     3.  **SRI (Subresource Integrity)**: Apply `integrity` attribute to all external scripts/CSS (§12.5).
     4.  **Version Pinning**: Pin CDN script versions. Prohibit `latest` URL usage.
     5.  **Periodic Auditing**: Periodically audit third-party script behavior and detect suspicious external communications.
+    6.  **Allowed-Host Determination & Triage**: When allowing a third-party SDK's resources in CSP, never add a host guessed from the vendor name (MUST NOT). Take the host from the real `src` in the live DOM or the real URL the SDK returns, and after allowing it confirm that "the symptom is gone" (element renders, zero violation logs). Adding the allow entry is not grounds for calling the fix complete (a "we allowed it but it is still broken" state lasted for days). Triage pattern: (1) read the broken element's `src` from the live DOM → (2) fetch that URL alone and see whether it is alive → (3) compare against the matching directive in your own CSP header → (4) after the fix, measure on the same page that it renders and that violation logs are zero. Keep the allowed-host register with reasons and pin with a test that it matches the list of outbound hosts (SHOULD). Libraries that use Workers or `blob:` internally (image conversion, etc.) hang silently under a strict CSP, so declare `worker-src` and the like explicitly and include a console check in the procedure for the kinds of CSP violations that fail silently (SHOULD).
 -   **PCI DSS 4.0**: Requirement 6.4.3 mandates script inventory and SRI on payment pages.
 
 ### 22.3. Local Storage Security
@@ -2122,6 +2197,9 @@ self.addEventListener('fetch', (event) => {
 
 -   **Law**: Analyze **request patterns** rather than individual requests to detect abuse.
 -   **Detection Patterns**: High-speed access to the same account from different IPs, dictionary attack patterns, out-of-order API calls, mass account creation in short time.
+-   **Organized UGC Manipulation (Non-Bot Abuse)**: CAPTCHA / Turnstile only blocks automation; organized posting by real humans walks straight through. UGC MUST have concentration-based detection separate from automation detection (short-window count on the same target, consecutive top scores, share of posts from visitors who viewed only a single page). When a threshold is exceeded, do not auto-publish; hold the item and notify an admin. This matters most on services where a handful of posts can reorder rankings.
+    -   Hold intake controls as configuration of "surface (post type) × subject (member / anonymous) × countermeasure"; the only deterministic rejection is the honeypot, while suspicion signals (URLs, disposable email, freshly created accounts, target concentration, abuse score) go to hold (SHOULD). On surfaces with no hold queue (approval UI), only the kill switch rejects. Do not use the UA as the primary signal, and use IPs only in allowlists (SHOULD).
+    -   Detection shows only "is it organized?", never "is it illegal?". Legitimate posts in response to a call and instructed posts leave identical traces in logs, so detection wording and notifications MUST NOT assert "fraud". When the source material contains real users' IPs, keep only the metrics used for the decision and delete the source material. See `product/000_product_strategy.md` §14.7.
 
 ---
 
@@ -2137,6 +2215,10 @@ self.addEventListener('fetch', (event) => {
 | **Penetration Testing** | Twice yearly | External intrusion testing |
 | **Red Team Exercise** | Annually | Full scope |
 | **Bug Bounty** | Always | Discovery by external researchers |
+
+-   **Coverage-Claim Verification**: A completion claim of "Y applied to all X" MUST be verified one by one against a mechanical enumeration of exported mutation functions (naming prefixes such as `create|update|delete|add|remove|toggle|submit|approve|reject|reset|import|upload`), never against a manual listing from UI flows. From the attacker's view, the one missed mutation is worth as much as the 99 protected ones. When a function of the same name exists in several files, check every candidate's importers to find the real caller; a caller count of zero is an orphan to delete, and the fix goes into the real path (MUST): the guard was added to the orphan, leaving a gap in the production path across two rounds. After the fix, re-confirm that the real caller's import points at the fixed file. Keep cross-cutting files (payments, billing, external APIs, identity changes) in a dedicated slot of the enumeration, and state the denominator ("verified N mutations") in the completion commit (SHOULD).
+-   **Class Remediation (Not Instance Remediation)**: After fixing one instance of a vulnerable pattern, first put the defect's nature into words (e.g., "a container format's leading bytes cannot identify its contents", "a URL rendered into a raw href"), then count every entry point in the repository with that nature before fixing (MUST). Check the highest-exposure surfaces first (ads and navigation that appear on every page). Write the remediation tests from the definition of the nature, not from the place fixed (MUST). Elements sitting side by side in the same table, function, or constant group are invisible to diff review, so read them all (MUST): defects of the same type sit on "the neighboring line". Never add a gate to only one of parallel paths in the same domain (multiple checkouts, uploads, receivers); enumerate every path and apply the same contract, and measure the presence of guards on anonymous surfaces against sibling endpoints (MUST). Record "why this path does not need it" as an intentional asymmetry, and confirm "zero remaining" by a mechanical sweep before declaring completion (MUST).
+-   **Severity Determination for Authorization Findings**: Before judging a weak app-layer guard as an authorization bypass, reconcile the effective role of the data-access path (anonymous / authenticated / privileged) with the body of the target table's row-level authorization policy, then fix the severity (MUST). If row-level authorization backstops it, it is not exploitable (still narrow the app layer as defense in depth). Read on the assumption that client type differs per function even within one file (reads via session, updates via privileged), and re-measure premises on the spot because comments in code ("all rows NULL", etc.) go stale.
 
 ### 24.2. Security Education
 
@@ -2231,7 +2313,11 @@ self.addEventListener('fetch', (event) => {
 | `change_diff` | Before/after diff (for destructive operations) |
 
 -   **Tamper Prevention**: Store audit logs in append-only storage. Make deletion/modification physically impossible.
+-   **Anonymous Actor Handling**: An audit-log recording function MUST NOT discard an entry because "the authenticated subject cannot be obtained". Leave `actor_id` NULL and record the target, source address, device, and time. With a logger designed to drop entries lacking an authenticated user, the audit rows for anonymous posting were zero for the entire period from the moment it opened (measured). When creating or widening an anonymously (login-free) writable path, design "evidence that survives anonymity" in the same change, decide the scope of evidence by "can this path be written anonymously?", and keep a written reason for any path excluded (MUST / SHOULD). A path where the DB column is nullable and a single app line is the only thing stopping anonymity is treated as one that "loses its evidence the moment the gate is removed"; pin it with either a column constraint or the evidence (SHOULD). A state in which there is no primary record and after-the-fact tracing is possible only by time correlation across two independent systems is an "estimate", not a primary record; record having to rely on that method as a defect in itself (SHOULD).
 -   **Retention Period**: Retain for at least 1 year (extend per regulatory requirements).
+-   **Path Convergence & Count Reconciliation**: Audit records for events that can arrive through several paths (OAuth / email registration / admin creation / batch, etc.; registration, login, withdrawal) MUST NOT live on one application-layer path. Place them at the convergence point every path must pass through (a persistence-layer trigger, a single domain service, shared middleware, etc.) (MUST). When a branch intentionally discards a record, always pair it with an independent way to observe the discard; at minimum keep a daily reconciliation of "increment in target entities == number of audit rows" and alert on divergence (SHOULD). "The recording code exists and tests are green" is not evidence that recording happens (it was discovered as two registrations against zero audit rows). Never report "we record this" until confirmed against real production counts (MUST NOT). See `engineering/710_data_reconciliation.md`.
+-   **Append-Only Prerequisites**: Before installing a write-rejecting trigger, query the live catalog for the `ON DELETE` / `ON UPDATE` actions (`SET NULL` / `CASCADE`) of every FK that references the table as parent, and for maintenance jobs that run with owner privileges (SECURITY DEFINER, etc.) (MUST). Referential-integrity actions never appear in application code, and triggers fire regardless of the executing role, so the rejecting trigger permanently breaks user deletion and retention-policy DELETEs. Split append-only enforcement into "operations with a legitimate executor (retention-policy DELETE) → REVOKE only, no trigger" and "operations nobody legitimately performs (UPDATE / TRUNCATE) → REVOKE plus an always-enabled trigger", and do not adopt trigger exception flags (session-variable bypasses) because they become loopholes (MUST). When limiting the exception by shape (a WHEN clause allowing only specific columns to be nulled), pin the column set with a test. Table and column privileges still apply even to RLS-bypassing credentials, so query the executing principal's privilege conditions before designing a REVOKE-based defense. Place the check on the execution path (actually attempt the delete / update), not only on catalog state (trigger existence, privileges) (MUST): the catalog check passed the breakage all green.
+-   **Audit Write Semantics**: Audit logs for important mutations SHOULD be written fire-and-forget, recording failures without stopping the user's flow (except operations with immutable audit requirements such as step-up). Anonymous mutations are also audited: `actor_id` NULL plus the leading characters of a keyed hash (IP + UA) as a session placeholder so the same visitor can be correlated (never store the raw IP in details; see §7.4). Changes to user-visible identifiers (display name, email, username, avatar, bio) MUST all be audited, for erasure-request handling, impersonation detection, and legal traceability: rapid consecutive display-name changes are a reconnaissance pattern for impersonation and are completely invisible without an audit trail. Register action / resource in an SSOT enum so types and UI filters extend automatically.
 
 ### 25.2. Business Logic Security
 
@@ -2710,6 +2796,7 @@ val client = OkHttpClient.Builder()
     4.  **Full Operation Logging**: Force-log all operations during emergency access. Conduct mandatory audit sessions afterwards.
     5.  **Dual Control**: Require 2+ approvals (Dual Control) to activate emergency access.
     6.  **Periodic Testing**: Test that emergency access procedures actually function quarterly (Test without impact on production).
+    7.  **Self-Lockout Pre-Check**: Settings that also apply to the saver (access restrictions, roles) MUST be checked before saving with "will the saver still get through?", using the same function as the enforcement side. The canonical rule is `security/430_authorization_and_access_control.md` §6.2 "Self-Lockout Pre-Check".
 -   **Cross-Reference**: §3.4 (PAM — JIT Access), §6.8 (Physical Master Key), §25.1 (Audit Log Design)
 
 ---

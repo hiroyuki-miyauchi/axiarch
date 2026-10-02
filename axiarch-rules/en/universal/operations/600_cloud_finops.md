@@ -824,6 +824,8 @@
     | Below 50% | Waste | Consider cancellation or alternative |
     | Zero users | Zombie SaaS | **Cancel immediately** |
 
+-   **Send-Quota Modeling**: For sending services billed by monthly quota (email, SMS, push), model the consumption unit correctly (per recipient, inbound also counts as one, etc.) and keep the quota and overage price in the admin panel's finance settings (SHOULD) — overlooking that CC/BCC and inbound consume the quota skews the forecast by a factor of the recipient count. Visualize consumption, the month-end forecast, and expected overage cost, and alert daily on pressure (e.g. 80%), overage, and surges (SHOULD).
+
 ### §31. License Optimization (ITAM Integration)
 
 -   **Law**: Software license costs must be systematically managed through ITAM (IT Asset Management) integration.
@@ -899,6 +901,7 @@
     3.  **Triage**: Determine if legitimate or illegitimate increase
     4.  **Response**: Immediately stop resources/rollback for illegitimate
     5.  **Post-mortem**: Root cause identification and prevention
+    6.  **Usage meters as silent-failure detectors**: Billing meters and usage counters are the fastest detector of silent failures. "It works but the cost is not what we expected" is the earliest sign that a path differs from the design (a fallback returning correct output became the primary path, and nobody noticed until usage grew to dozens of times the quota). Reconcile against the budget daily, and leave a record that confirms a change "claiming an effect" in the next cycle's invoice or usage (SHOULD; see `operations/400_site_reliability.md` §33/§45-c)
 
 ---
 
@@ -1043,6 +1046,7 @@
     - Single vs multi-CDN based on traffic patterns
     - Regional restrictions from regulatory constraints (data sovereignty)
     - Edge Compute capability assessment
+-   **Billing-Unit-Aware Comparison**: Compare usage-billed services not by unit price but by the monthly amount after plugging your own design values into each billing unit (originals / unique transformations / requests / recipients) (MUST) — whether image transformation is billed per original or per variant changes the order of magnitude depending on the number of srcset widths. Estimate the base not by user count but by the number of public assets under the assumption that crawlers make a full pass (SHOULD). Treat "overage is not billed; limits apply instead" as an availability risk (transformation stops and every image breaks), not a cost item, and design for it as outage prevention (MUST). Do not conflate separately billed quotas such as storage and transformation (MUST).
 
 ### §41. IoT Cost Management
 

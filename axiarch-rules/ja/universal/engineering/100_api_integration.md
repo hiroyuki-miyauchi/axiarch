@@ -257,6 +257,7 @@ interface StoreResponse {
 | **Keyset-Based** | ✅ 推奨 | 高パフォーマンス要求 |
 
 - **Rule 35.13**: Cursor-Based Pagination を標準とする。Offset-Based は大規模データでパフォーマンス劣化するため管理画面に限定する
+- **Rule 35.13a: Post-Query Filter Ban**: limit／cursor 付きで取得した結果に対して、アプリケーション側で絞り込み（filter）を行ってはならない（MUST NOT）。ページの件数が欠け、total と表示が一致せず、cursor が壊れる。絞り込み条件（複数タグの AND/OR 等）は必ずクエリ（DB／API）側の述語として表現し（MUST）、クエリ側で表現できない条件はページング前の集合に対する view／RPC／検索索引で解決する（SHOULD）。
 
 ```json
 {
@@ -697,12 +698,15 @@ message Store {
 
 - 同一 `event_id` の Webhook が複数回到達しても副作用が1回のみ発生するよう設計する
 - Webhook固有IDを冪等性キーとして使用し、処理前にDB上で重複チェックを実施する
+- **Status-Aware Deduplication**: 重複排除は「イベント ID の行が存在するか」ではなく、処理状態（PROCESSING / PROCESSED / FAILED）を見て判定する（MUST）。PROCESSED → 2xx で ack、FAILED → PROCESSING に戻して再処理、PROCESSING → in-flight として ack（多重実行防止）。一意制約違反（重複 INSERT）を無条件に 2xx へ写像する実装は、失敗イベントを永久に取りこぼすため禁止（MUST NOT）。失敗パターン: 決済 Webhook で FAILED に終わったイベントが再送時に二度と処理されなかった。
 
 ### 17.4. Webhookエラーハンドリング
 
 - 処理失敗時は `5xx` を返し、送信元のリトライ機構に委ねる
 - `2xx` を返すと送信元は「成功」とみなしリトライしないため、処理が未完了のまま消失する
 - 署名不一致のリクエストは即座に `401 Unauthorized` を返しアラートログに記録する
+- **Receiver Template（署名 → 冪等性 → ディスパッチ）**: 全 receiver は次の順序を守る（MUST）: (1) raw body に対する署名検証（timing-safe、replay window）→ (2) 冪等性記録（event ID の UNIQUE INSERT、重複は 2xx で即返却し送信元の retry を止める）→ (3) `event.type` による明示ディスパッチ（未対応 type は記録のみ、例外は failed マーク + 5xx で送信元 retry に委ねる）。複数の送信元が同一冪等性テーブルを共有する場合、event ID は送信元 prefix で名前空間分離する（MUST）。新規 receiver は既存の canonical receiver からレイアウト・順序をコピーして始める（SHOULD）: 個別判断で書くと層が欠ける（失敗パターン: helper だけ存在して receiver 未実装、別 receiver が層を欠いていた）。
+- **Missing Secret = 500**: 署名 secret が未設定の場合は 401 ではなく 500 + エラーログで応答する（MUST）。401 は「不正リクエスト」に見えて misconfiguration を永久に隠す。ステータス契約: 2xx = 処理済み／重複（retry 不要）、4xx = 設定・署名不備（retry 無意味）、5xx = 一時障害（retry 要）。
 
 ### 17.5. Webhook送信設計（プロバイダ側）
 
@@ -710,6 +714,10 @@ message Store {
 - **イベント登録**: ユーザーが受信するイベントタイプを選択可能にする
 - **Webhook管理API**: 登録・更新・削除・テスト送信のAPIを提供する
 - **配信ログ**: 送信結果（成功/失敗、ステータスコード、レスポンスタイム）をログに記録し、ダッシュボードで可視化する
+- **送信側署名**: 自システムが外部へ発火する全 outbound Webhook に、タイムスタンプを含む HMAC 署名（`t=<ts>,v1=<hmac(ts.rawBody)>` 形式が広く互換）を付け、受信側が constant-time 比較と ±数分の鮮度検証をできるようにする（MUST）。無署名の Webhook を新規実装した場合は即時差し戻し、既存で無署名のまま稼働している箇所は受信側と協議のうえ秘密を交換してから署名を追加する（MUST）。
+- **HTTPS 強制**: 送信先 URL は本番で HTTPS を強制し、http の許容はループバック開発環境に限定する（MUST）。http を許すと共有秘密が中間者へ漏れる経路を作る。
+- **再試行分類**: 利用者の応答を遅らせないため送信は fire-and-forget とし、失敗は握りつぶさず記録する（SHOULD）。再試行は 5xx・ネットワークエラーのみ・有限回・指数バックオフ・試行ごとのタイムアウトとし、4xx は受信側の意図的拒否として再試行しない（MUST）。成功時は試行番号と応答コードを含む監査ログ（匿名主体可）を残し、全試行失敗は警報へ送る（SHOULD）。
+- **宛先側許可の事前確認**: 送信側と検証側（または宛先側）の両方に正しい値・許可が載って初めて成立する配線（内部 API secret、webhook 署名、集計レポートの送付先、許可 IP／オリジン）は、片側設定・キー形式移行でエラーなく沈黙する。片側の保存成功を完了と数えず（MUST NOT）、宛先側の要件を先に確認してから設定し、合成 E2E プローブで配線自体を定期実証する（MUST）。正本は `engineering/000_engineering_standards.md` の「Pair Verification」。
 
 ---
 
@@ -832,11 +840,16 @@ const delay = Math.min(
 - **Rule 35.36**: 全外部呼び出しにタイムアウトを設定する。タイムアウトなしの呼び出しは禁止する
 - 接続タイムアウト（推奨: 3秒）とリクエストタイムアウト（推奨: 10秒）を個別に設定する
 - サービスチェーンではダウンストリームのタイムアウトを考慮して上流のタイムアウトを設定する
+- **Finite Default Timeout**: 外部 I/O クライアントのファクトリ／ラッパーでタイムアウトを省略可能引数にする場合、既定値は有限でなければならない（MUST）。無制限は明示的な値（`null` 等）でのみ許可し、「渡し忘れ」と「意図した無制限」を型・値で区別する。「長時間ジョブは上位層が timeout を持つ」を省略の根拠にするなら、実際に上位層が持っていることを呼び出し箇所で確認する（MUST）: 応答後のバックグラウンド処理（after／waitUntil 相当）は上位のページ timeout に守られない。失敗パターン: 未指定の呼び出しが数百箇所あり、上流の stall 時にプラットフォームの最大実行時間まで居座った。「ページ上限より長い timeout 報告」は応答後タスクが真犯人である状況証拠として扱う。
+- **Outer Bound = Inner Bound + Cleanup Margin**: 外部呼出のタイムアウトと、その呼出を包む実行単位（関数・ジョブ・リクエスト）の上限を同値にしてはならない（MUST NOT）。実行単位の上限は「外部上限 + 後始末（予約解放・記録・応答整形）の余白」の関係式で定義し、定数として SSOT 化する（MUST）。テストは「値の一致」ではなく「関係式の成立（上限 > 外部上限 + 余白）」を固定し、派生値を使う側（lint／スクリプト）は秒数を直書きせず SSOT から導出する（MUST）。レビューでは「上限に達した**後**に何が走るか」を数え、走るものがあればその時間を上限の内側に確保する。同値設定は「上限を守るつもりの制約が後始末の時間を奪い、資源が漏れる」反直観的な失敗を生む。
+- **Server-Side Fetch Contract**: Server Action／Route Handler／health check／cron 経由の全 fetch に AbortController + timeout + finally の clearTimeout を付け、timeout 値は用途別定数の SSOT に集中管理する（MUST）。素の `fetch` は既定でタイムアウトせず、cron では永久に hang する。検出は「`fetch(` の近傍に `signal` が無い」を機械走査する。
 
 ### 21.5. Fallbackパターン
 
 - プライマリサービス障害時の代替動作を事前定義する
 - キャッシュデータの返却、デフォルト値、機能の縮退運転等
+- **Distinguishable Degradation**: レート制限・例外・上流不達などの縮退で `[]`／`0`／既定値を返す実装は、呼び出し側から「該当なし」「正常に判定した」と区別できず、利用者の次の行動を誤らせる（MUST NOT）。単なる情報欠落より悪質である。縮退の結末は型で持たせ（例: `'ok' | 'rate_limited' | 'error' | 'provider_unreachable'`）、呼出側の表示文言（「0 件」か「取得できませんでした」か）と、失敗時に次の操作を促す導線の停止まで追う（MUST）。既定値で応答するモジュール（分類・検出・要約）は、上流を呼べなかった一過性障害を「判定結果」として返し、その成功パスで計量・課金まで走らせてはならない（MUST NOT）。4xx（入力不正）を一過性障害と同じ分類に入れず（「時間を置いて再試行」は誤案内）、「条件が無い」だけの状態（未入力）を失敗扱いにしない。移行（認証方式・provider 切替）前後で「そのエラー経路を通る原因の集合」が変わっていないかを問う（MUST）。
+- **Fallback Must Signal Primary Death**: 正しい出力を返すフォールバック（代替 API・代替 provider・既定経路）は、画面正常・エラーログ空・型検査緑のまま恒久的な主経路になりうる。フォールバックを書くときは「これが使われていることをどう知るか」を同時に決め、最低でも「主経路が未設定／死んでいる」ことを起動時か定期ジョブで 1 回鳴らす signal を付ける（MUST）。正本は `operations/400_site_reliability.md` の「Fallback-Masked Primary Failure」。
 
 ---
 
@@ -868,6 +881,9 @@ async function processWithIdempotency(key: string, handler: () => Promise<Result
 - TTL: 24時間以上保持し、期限切れ後に自動削除
 - ストレージ: Redis（高速）またはDB（永続）
 - キー形式: `{client_id}:{operation}:{unique_id}`
+- **Resend With the Same Key**: 外部決済の開始は、試行 UUID と初回パラメータを保存し、通信結果不明時は同じ冪等キーで再送する（MUST）。プロバイダの冪等キー保持期間より手前（例: 24h に対し 23h）で不明結果の再送を停止し、新しい課金を重ねない（MUST）。保存済みセッションは再送前に取得して現在状態を確認し、価格・購入方式を変える場合は旧セッションの終了を確認してから比較更新で置き換える。
+- **Attempt Row Lifecycle**: 試行行は日次クリーンアップで消えない設計（利用者ごと 1 行、本人のアカウント削除時に FK で消える）とし、本文は正確な再送のみに用い、本人にも読取・改ざんを許さず、ログ・知識資産へ出さない（MUST）。
+- **Ownership Token, Not Time**: 退会など複数段階の外部処理は同じ行の所有トークンで囲み、失敗後は自分のトークンだけ解除する。プロセス停止で残ったトークンを時間経過だけで奪わず（MUST NOT）、日次照合が「結果不明 N 時間超」「占有 M 分超」を件数で検知して人が確認する（MUST）。占有解除の失敗は先行業務の成否を保持したまま別種のアラートにする。保持境界を越えた再送は二重課金、時間でロックを奪えば二重解約になる。数値はプロバイダ依存であり Blueprint で定める。
 
 ---
 
@@ -881,6 +897,8 @@ async function processWithIdempotency(key: string, handler: () => Promise<Result
 | **Sliding Window** | 正確な時間窓、均一分散 | 厳密な制限が必要な場合 |
 | **Fixed Window** | シンプル実装 | 低精度で十分な場合 |
 | **Leaky Bucket** | 一定レートで処理 | 均一な処理が必要な場合 |
+
+- **Counter over Count**: レート制限・日次上限などの受付上限を「対象期間の行数を数える」で判定してはならない（MUST NOT）。索引付きでも挿入ごとに O(n)、期間全体で O(n²) になり、上限が守るはずの資源を判定自体が食い潰す。上限判定は期間キーごとのカウンタ行を原子的に 1 行更新（upsert）して行い（MUST）、到達時刻を保存し、到達通知は期間あたり 1 件に抑える（SHOULD）。黙って捨てるのは正しいが、捨てている事実は知らせる。
 
 ### 23.2. 分散レート制限
 
@@ -1047,6 +1065,7 @@ Retry-After: 30
 
 - **Rule 35.48**: APIキー・トークンには必要最小限のスコープのみ付与する
 - 読み取り専用、書き込み専用、管理者等のスコープを細分化する
+- **Scope Sufficiency per Capability**: 同一プロバイダの機能でも必要な権限スコープは機能ごとに異なる。新しい機能（受信、読み取り、Webhook 取得等）を追加するときは、既存キーのスコープがその機能を許可するかを公式定義で確認し、不足なら機能専用の別キーを発行する（MUST）。既存キーの流用で「一部の機能だけ静かに失敗する」状態を作ってはならない（MUST NOT）。失敗パターン: 送信専用キーの流用で、送信は動くのに受信だけ落ちた。同名の環境変数でも実行基盤ごとに異なるスコープのキーを入れる場合は、台帳にスコープ差と発行元を明記する（SHOULD）。
 
 ---
 
@@ -1056,6 +1075,7 @@ Retry-After: 30
 
 - **Rule 35.49**: 全APIエンドポイントでリクエストボディのスキーマバリデーションを実施する（Zod, Joi等）
 - 未知fieldの扱いをcontractで定義する。権限変更や金銭操作等のcommandは拒否を既定にし、forward-compatibleなevent／read modelでは安全に無視または保持できるようにする
+- **Entry Order**: 外部から到達するエンドポイントの入口順序は「①パラメータ／パス／ID の形式検証（400 で即時拒否）→ ②レート制限 → ③永続層アクセス」とする（SHOULD）。形式不正な入力にレート制限枠・DB 接続・ログ容量を消費させず（不正な slug でも枠を消費すれば正当な利用者に影響する）、極長入力はパーサ層で資源を浪費させる前に長さ上限で落とす。検証後の値だけを下流に渡し、生の入力を service に渡さない（MUST）。本番のエラー応答は内部スキーマ詳細を漏らさない一般文言にする（SHOULD）。検出例: `params.(slug|id)` を `safeParse` 無しで使う route を列挙する。
 
 ### 29.2. Content-Type強制
 
@@ -1090,6 +1110,8 @@ Retry-After: 30
 | **Development** | `http://localhost:*` | `.env.local` |
 | **API外販（将来）** | 契約者ドメインのホワイトリスト | DB管理 + APIキーに紐付け |
 
+- **但し書き（Preview のパターン許可）**: 上表の「Preview 用ドメインパターン」は、プラットフォーム共有ドメイン（`*.vercel.app`、`*.pages.dev` 等）の suffix／prefix 一致（`endsWith`／`startsWith`）を許すものではない。共有ドメインの suffix 一致は他テナントの preview を許可することと同義である（失敗パターン: 他組織の preview や管理コンソールからブラウザ経由で自社の Function を呼べた）。許可 origin は完全一致のみとし（MUST）、preview／local が必要なら運用者が secret にカンマ区切りで明示追加する設計にする。allowlist 不一致時は ACAO も `Vary: Origin` も出さず、認証応答には `Cache-Control: no-store, private` を付ける。正本は `security/000_security_privacy.md` §10.7。
+
 ### 30.3. CORSセキュリティルール
 
 - `Access-Control-Allow-Credentials: true` は認証必要エンドポイントのみに限定し、`Allow-Origin: *` との組み合わせを**厳禁**とする
@@ -1104,6 +1126,9 @@ Retry-After: 30
 
 - **Rule 35.51**: データベースのRawオブジェクトを直接APIレスポンスとして返却することを「重罪」とする
 - レイヤー別DTOを定義し、各レイヤーで意図的なフィールドマッピングを行う
+- **Two-Key Lock（SELECT allowlist × DTO allowlist）**: DB 読み出しは「管理者しか見ない」経路も含め例外なく DTO マッパーを通し、SELECT 列 allowlist と DTO 出力 allowlist の両方を opt-in しなければ新列が外へ出ない構造を維持する（MUST）。正本は `engineering/300_web_frontend.md` の「Two-Key Lock」。
+- **Allowlist Pick, Never Denylist**: 公開境界の serializer は allowlist pick で新オブジェクトを構築する（MUST）。`{...rest}` + `delete` + `as DTO` の denylist 方式と、型アサーションによる narrowing は禁止（MUST NOT）: 列挙し忘れた新フィールドがデフォルト公開になる。
+- **Runtime Object Leaks**: サーバー → クライアント境界に渡すオブジェクトは、型が公開型でも実行時に存在する全列がシリアライズされる。機微列を持つ admin DTO は境界の前に公開射影へ変換し、`JSON.stringify(projection)` に機微値が現れないことをテストで固定する（MUST）。正本は `engineering/300_web_frontend.md` の「Two-Key Lock」。
 
 ### 31.2. DTO階層
 
@@ -1149,6 +1174,7 @@ it('should not expose password_hash in response', async () => {
 ### 33.1. Graceful Return Protocol
 
 - **Rule 35.52**: Server Action（`'use server'` 関数）でのエラーを `throw` によりクライアントに伝播させることを原則禁止する。全エラーを構造化レスポンスとして返却する
+- **Client-Side Sanitization Boundary**: Client 側 `catch` で得た未知例外の `message` を toast／alert／inline に直結せず、ユーザー向け文言だけを通し、内部語彙（token／secret／service_role／constraint／ベンダー名）を含む文言は操作別 fallback に落とす安全化境界を 1 箇所に置く（MUST）。サーバーが意図して返した `result.error` はその境界で安全化済みとして扱う。失敗パターン: 個別コンポーネントで「たぶん安全」と判断し、内部文言が画面・スクリーンショット・エラートラッカーの breadcrumb へ流れた。匿名到達面の完了画面は「送った／これから送る／送らない」までに留め、送信失敗・抑制リスト該当等の状態は運営側だけに出す（MUST）: 誠実な表示が到達性・存在のオラクルになる。正本は `engineering/300_web_frontend.md` の「Client Exception Safety Boundary」。
 
 ```typescript
 // ✅ 正: 構造化レスポンス
@@ -1188,6 +1214,8 @@ async function createStore(input: CreateStoreInput): Promise<ActionResponse<Stor
 ### 33.4. ロギング義務
 
 - **Rule 35.54**: エラーを戻り値として返す前に、必ずサーバーサイドでログ出力する。戻り値によるエラーハンドリングはログ出力を怠ると可観測性を失う
+- **Caller Must Inspect Result**: 結果オブジェクト型（`{ success: false }`／`null` 返却）の API を採用するなら、全呼出点が戻り値を検査することが契約の一部になる（MUST）。「例外が投げられなかった」と「副作用が完了した」は同義ではない。呼出点は throw／false／partial の各状態を明示的に分岐し、false は固定理由の失敗計数・PII 安全な警告・ジョブ `ok=false` のいずれかへ変換し、成功ログは `success === true` の後だけ出す（MUST）。ソース契約テストで「全呼出点が戻り値を検査する」ことを固定する（MUST）。失敗パターン: リポジトリ内の呼び出しのほぼ全てが戻り値を捨てていた。正本は `engineering/700_batch_backfill_operations.md` §2.8。
+- **Capture Coverage ≠ PII Scrub**: エラートラッカーの自動計装は「catch して構造化応答を返す」パターンを捕捉しないため、logger.error + capture を 1 helper に集約し `source` タグ（`api:*`／`cron:*`／`webhook:*`／`action:*`）を付ける（SHOULD）。正本は `operations/400_site_reliability.md` の「Capture Coverage ≠ PII Scrub」。
 
 ---
 
@@ -1222,6 +1250,7 @@ async function createStore(input: CreateStoreInput): Promise<ActionResponse<Stor
 
 - AIレスポンス等の意味的に類似したリクエストに対し、ベクトル類似度に基づくキャッシュを実装する
 - コスト削減とレイテンシ改善に有効
+- **Scope in the Key**: 類似度でヒットするキャッシュは問い合わせ文字列の一致を要求しないため、機能・テナント・用途のスコープ（名前空間）を明示的にキーへ含めない限り、境界を越えてヒットする（MUST 含める）。閾値・件数・モデルなどのパラメータが偶然一致する機能同士は相互汚染する（完全一致キャッシュの直感「問い合わせが違えば別エントリ」をそのまま持ち込んではならない）。読み・書き・類似探索の三方で同じスコープ次元を適用し、ルーティング表を作ったら「同じパラメータ組を持つ機能が他に無いか」を機械的に数える（SHOULD）。正本は `engineering/730_caching_discipline.md` §5.3。
 
 ---
 
@@ -1431,6 +1460,8 @@ logger.info('External API call', {
 | **Enterprise** | 大規模サービス | カスタムRate Limit、SLA付き |
 | **Native App (VIP)** | 自社アプリ | Enterprise相当（課金なし） |
 
+- **Tier 付与の根拠**: 上表の「Native App (VIP)」は、自社アプリが API Key を持たずに Bearer（ログインセッション）で本人確認を通過できることを意味し、ログイン済みという事実だけで Enterprise 相当の Tier を付与する根拠ではない。API Key と Bearer を OR で受け入れる共通エンドポイントでは、認証の成功（本人確認）と Tier の付与（契約上の権利）を分離し、有料 Tier 相当の権限は契約状態の SSOT（サブスクリプション・プラン属性）を確認したときのみ付与する（MUST）。失敗パターン: ログインだけで有料レーンが開き、無料ユーザーが全量データへ到達する課金迂回。
+
 ### 43.3. Data Monetization Privacy
 
 - **Rule 35.65**: API経由で提供するデータの匿名化インターフェースを実装し、プライバシーとデータ収益化を両立する
@@ -1481,6 +1512,7 @@ logger.info('External API call', {
 ### 46.1. サービス境界とデータ所有
 
 - **Rule 35.68**: deploy可能なserviceへの分割は、business capability、data／transaction invariant、変更頻度、latency、security／compliance境界、failure isolation、teamの認知負荷、運用費用から正当化する。modular monolith、service分割、既存systemの段階移行を比較し、microservice化自体を成熟度指標にしない。
+- **Rule 35.68a（分離可能性の凍結ゲート）**: 分割を「見送る」決定をした場合、「今は分けない」と「分けられなくする」は別の意思決定であり、分離オプションを静かに失わせる変更を機械的に凍結しなければならない（MUST）。例: 特権クライアントを import するファイル集合のラチェット（増加禁止・削減時は基準線更新を強制）、認証 cookie の親ドメイン設定禁止（host-only 維持）、境界を越える import のラチェット、認証導線の「公開レイアウト前提」を増やさない方針。これらは普通のレビューでは改善に見えるため、レビュー依存にしない。分割議論の多くで本当の争点は「公開ランタイムが特権鍵を持たないこと」であり、デプロイ分割ではなく権限設計（DB ロール・GRANT・RLS）で達成できる。分割の是非は性能・セキュリティ・コスト・運用の 4 観点で実測し、再検討トリガ（利用者数・決済・開発者数・CI p95 等）を決定記録に残す（SHOULD）。
 - 複数serviceから同じwritable dataへ接続する場合は、schema／table／recordのauthoritative owner、write権限、transaction境界、migration調整、contention、監査、退出経路を明示する。Database-per-Serviceは有力な分離手段だが、全workloadへ強制する唯一解ではない。
 
 ### 46.2. Decomposition Strategy
@@ -1538,6 +1570,7 @@ step数だけで方式を固定しない。ownership、可視性、変更頻度�
 
 - 単一の原子transactionで守れないcross-service business invariantに限り、Saga、reservation、escrow、workflow、manual reconciliation等を比較する。
 - Sagaを選ぶ場合は各stepのidempotency、timeout、再開可能なstate、補償の可否と限界、human escalationを定義する。補償をrollbackと同一視しない。
+- 退会・停止のように外部解約・アプリ DB・IdP の複数操作にまたがる処理は、単一トランザクションであるかのように説明・実装しない（MUST NOT）。各段階の補償は「自分が付けた印（deleted_at 等）と一致するときだけ比較更新で戻す」形にして別操作の印を上書きせず、補償対象には SDK の error 応答だけでなく例外・更新成功後の応答喪失も含める。補償自体の失敗は元の失敗を保持して固定分類で通知し、不可逆操作が確定した後の後処理（セッション失効・購読解除）の失敗は完了済みの主結果を失敗へ書き換えず「後処理の異常」として記録する。二系統の状態（IdP の ban とアプリの停止フラグ）を同期するときは、失敗時に反対値へ機械的に戻さず現在値を読み直して合わせ、現在値を確認できないときは安全側（停止側）へ保留して成功を返さない。詳細は `security/100_data_governance.md` §3.3 を正本とする。
 
 ### 48.2. Outbox Pattern詳細
 

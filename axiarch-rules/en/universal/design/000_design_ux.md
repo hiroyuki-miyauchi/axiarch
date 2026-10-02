@@ -120,6 +120,10 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         2. **Currency**: Display currency symbols and digit separators using `Intl.NumberFormat` in correct format for locale.
         3. **Consistency**: Maintain unified locale settings across the application and prevent mixing.
         4. **Form Field Order Locale Compliance**: Form fields for personal information (name, address, etc.) MUST follow locale-specific ordering conventions. Name ordering (e.g., "Last → First" in Japan vs "First → Last" in Western countries) and address ordering (e.g., "Prefecture → Street" in Japan vs "Street → State" in Western countries) differ by locale. Forcing an order contrary to the locale is prohibited.
+        5. **Timezone-Explicit Formatter SSOT**: User-facing date/times, day boundaries for daily aggregation, export file-name timestamps, and form initial values MUST pass only through a shared formatter that states the target time zone explicitly (e.g., `Intl.DateTimeFormat(locale, { timeZone })` created at module level).
+            -   **Prohibited patterns (MUST NOT)**: hand-written `getFullYear/getMonth/getDate/getHours` calls, date extraction via `toISOString().split('T')[0]`, `format(date, 'yyyy-MM-dd')` without a time zone, hardcoded weekday-name arrays, and inline date formatting inside components. All of them depend on the runtime's time zone.
+            -   **Failure pattern**: serverless runtimes resolve to UTC or local time depending on region, so the date "shifts by one day depending on the server region" (daily aggregation, login bonuses, CSV names, form initial values). Re-parsing dates at the cache serialization stage shifts them further.
+            -   **Verification**: grep the patterns above during review and gate on zero hits outside the formatter module and its golden tests (SHOULD).
 -   **Dark Mode & Theme Strategy**:
     -   **CSS Variable Separation**: Define all UI colors as CSS variables (`hsl(var(--...))` or `oklch(var(--...))` tokens) and maintain a design where light/dark/high-contrast mode switching is completed solely by overriding CSS variables.
     -   **No Inversion**: Dark mode is NOT simple color inversion. Design background contrast, elevation expression (use surface luminance difference instead of shadows on dark backgrounds), and saturation adjustment independently.
@@ -127,6 +131,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Semantic Token Mandate**: Prohibit usage of hardcoded color values (`#ffffff`, `bg-white`, etc.) and use semantic tokens (`bg-background`, `text-foreground`) instead.
     -   **Role-Based Naming**: Name colors by "role" not "appearance". Use `color-primary` instead of `blue-500`.
     -   **Loading State Unification**: Unify loading displays during data fetching as follows: Page level uses `loading.tsx` with Suspense Boundary + Skeleton, Component level uses `<Skeleton />` component, Action level uses button `disabled` + spinner icon. A blank white screen without any loading indicator is treated as a critical UX deficiency.
+    -   **Refresh Indicator Without Layout Shift**: On screens that already received server-rendered initial data (a snapshot), do NOT refetch unconditionally every time the screen opens (MUST NOT). Give the snapshot a freshness threshold based on its fetch time (e.g., 60 seconds; the value is set in the Blueprint) and refetch only when it is stale (SHOULD). While refetching, show progress in a form that does not move the layout, such as an absolutely positioned thin line or an overlay, never by inserting a bar or banner into the existing flow (MUST). Replace the data only when the result differs from what is on hand; do not re-render when identical (SHOULD). Failure pattern: a progress bar was inserted above the list on every open, so the whole list jumped up and down and flickered. Verification: confirm on a real device that no layout shift occurs before and after the refetch.
 
 ## 3. Component Implementation Guidelines
 
@@ -153,6 +158,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: Self-implementing carousels (sliders) tends to introduce bugs in touch interactions and accessibility (A11y). Usage of a validated library is mandatory.
     -   **Synced Sliders**: When implementing thumbnail-synced sliders (Main + Thumbs), use the library's native synchronization feature instead of custom State synchronization.
     -   **A11y**: Always enable `navigation` (arrows) and `pagination` (dots) and ensure keyboard accessibility.
+    -   **Object-Fit & Background Co-Review**: A change that switches an image's `object-fit` between `cover` and `contain` MUST also decide whether the background color on the same element and its parent still belongs there. A "safety fill" background from the `cover` era becomes a letterbox band the moment the image goes `contain`. In galleries with mixed aspect ratios using `contain`, the letterbox area MUST inherit the parent layout's background (no background class / transparent); do not add a background of its own without an explicit requirement (MUST NOT). When the letterbox can be eliminated altogether, prefer giving the container an aspect-ratio and filling it with `object-cover` (SHOULD). Failure pattern: a gray background left behind after the `contain` change was exposed as a letterbox for months and was mistaken for "the spec" in visual review. Verification: check computed styles (e.g., the slide's `backgroundColor` is transparent), not only screenshots (SHOULD).
 -   **The Native Input Prohibition**:
     -   **Law**: Usage of browser-native input forms (`<input type="date">`, `<input type="time">`, `<input type="color">`, etc.) in designed UIs is prohibited. Their appearance and behavior differ across browsers, destroying design consistency.
     -   **Action**: Use `Popover + Calendar` components for date selection, custom `Select` for time selection, and custom color pickers for color selection.
@@ -160,12 +166,17 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **The Editor Preview Protocol**:
     -   **Law**: In rich content editors (block editors, etc.), displaying only URL text or icons for embedded media (videos, maps, etc.) is prohibited.
     -   **Action**: Use editor extension features (NodeView, etc.) to display actual previews (iframes, etc.) within the editor. Achieve "True WYSIWYG" where the published layout can be accurately understood during editing.
+-   **The Editor-Hosted Modal Ban**:
+    -   **Law**: Inside the NodeView of an editor that watches for external DOM mutations and rebuilds its content (contenteditable-based editors), do NOT host components that rewrite attributes on other elements when they open, such as modals or live regions (MUST NOT). Move the modal's state and rendering outside the editor; the NodeView only issues a request with its position info. Components that render a live region SHOULD expose an option for the render container so it can be placed outside the editor (`document.body`).
+    -   **Failure pattern**: the `aria-hidden` applied when a modal opens reached siblings inside the editor content; the editor's DOM observer treated it as an external mutation, rebuilt the content, destroyed the NodeView, and the modal "existed for about 100ms and closed" or "vanished together with the button that was pressed". Suspect this mechanism when you see these symptoms, and link any earlier same-shaped incident that was worked around without a root cause.
+    -   **Verification**: a contract test sweeps the editor-extension directory as a set and pins the count of modal-component imports at zero (SHOULD).
 -   **The Headless UI Architecture (UI-Logic Separation Mandate)**:
     -   **Law**: UI components MUST focus exclusively on "data display" and "event emission", and MUST NOT contain business logic (data fetching, state computation, validation, etc.) internally.
     -   **Anti-Pattern**: Directly performing `fetch` inside components or managing state dependent on specific page DOM structures is a design violation that destroys reusability and portability.
     -   **Goal**: UI components must maintain a state where, when porting to another platform (React Native, etc.) in the future, only the "display layer" needs to be swapped without modifying logic.
 -   **The Modal Standard Architecture (Portal & Close UX)**:
     -   **Law**: All modals MUST be rendered at the DOM root using the `Portal` pattern. This prevents clipping caused by parent element's `overflow: hidden` or `z-index` constraints.
+    -   **Proviso (always-mounted UI that must exist in SSR)**: An always-mounted drawer or similar that must be present in the HTML at SSR time MAY be placed directly **outside** any ancestor with `transform` / `filter` / `perspective` instead of using a Portal. A transformed ancestor becomes the containing block for `position: fixed`, trapping the panel inside the ancestor's box. Pin the placement with a source test, and verify the SSR side by grepping the fetched HTML for the attributes and the absence of transforms (negative side included). See `engineering/300_web_frontend.md` §174 The Dialog Element Protocol for details.
     -   **Close Button**: Modal close buttons MUST be placed in the top-right corner with a unified visual design (e.g., circular background) consistent across the entire project. A modal with an unclear close mechanism is a UX deficiency.
 -   **The Mobile Media Upload Protocol**:
     -   **Law**: Standard capture formats of mobile devices (e.g., iOS HEIC/HEIF) often cannot be directly displayed in browsers. Components with file upload functionality should account for these formats.
@@ -174,26 +185,35 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 ### 3.2. Frontend Integration Protocol (Universal Principles)
 -   **Lifecycle Rule Compliance**: UI components MUST strictly follow framework-specific lifecycle conventions (proper side-effect management, safe state update timing, etc.). Refer to tech-stack-specific rules for framework details.
 -   **Hydration Safety (Server/Client Consistency)**: Initial state mismatches between SSR and client hydration cause UX failures (flickering, layout shift, non-interactivity). Maintain designs where SSR/CSR are consistent, with exceptions only for inevitably different elements (timestamps, random values, etc.).
+    -   **Dimension Class Parity**: When a server-side static renderer and a client-side component draw the same element, the classes/styles that decide dimensions, aspect ratio, and spacing MUST be generated from the same constants; never give only one side an inline style or a different breakpoint value (e.g., SSR fixed at `aspect-ratio:3/4` while CSR switches at `md:`). The dimensions change at hydration and produce CLS. See `engineering/300_web_frontend.md` §49 The Hydration Stability Protocol for details.
 -   **Conditional Rendering over Visibility**: High-cost UI trees (drawers, dialogs, mega menus, etc.) MUST use **conditional rendering** (excluded from DOM when display flag is `false`) rather than `display:none` concealment, to release memory and rendering resources.
+    -   **Proviso (open/close UI with animated transitions)**: UI whose open/close has a transition animation (drawers, accordions, expanding panels, etc.) is an exception to this rule and is driven by always-mounting plus a transition toggle. Removing it from the DOM via the display flag leaves nothing to interpolate, so a transition is structurally impossible, and mounting/unmounting on every open (e.g., about 95 nodes) becomes the dominant cost. When fully closed, hide it with `visibility:hidden` + `inert` (or `pointer-events-none` / `tabIndex=-1`) to stop painting and exclude it from hit-testing and the a11y tree. See the Transition Visibility Protocol in §3.4.
 -   **Ghost Dimension Prevention**: When size-dependent initialization (carousels, maps, charts, etc.) occurs inside initially hidden elements, explicitly trigger `resize` or force remount when the element becomes visible to prevent "Ghost Dimension" (broken layout).
+-   **Pre-Init Dimension Parity**: For widgets initialized by JS (sliders, tabs, maps, etc.), the pre-initialization SSR HTML MUST be given the same dimensions by CSS as the post-initialization state. Merely "hiding the second slide onward" lets the remaining slide stretch to the full frame and then shrink at initialization (CLS) (failure pattern: measured CLS reached the "poor" band, with the widget's initialized class listed among the shift sources). Derive the pre-init width with `calc()` from the same values passed to the widget (slides per view, gap), copying the library's own formula (SHOULD). Verification: load the production HTML into an iframe via `srcdoc` with `sandbox="allow-same-origin"` (no `allow-scripts`) and compare that script-free initial layout with the hydrated live DOM at the same viewport width (SHOULD). It isolates structural defects regardless of device load.
 -   **Interactive Element Nesting Prohibition**: Nesting interactive elements (e.g., `<a>` inside `<a>`, `<button>` inside `<a>`) is an HTML specification violation. To make an entire clickable card a link, use an absolutely-positioned overlay link technique.
 -   **Cross-Reference**: For framework-specific implementation details (React Hooks ordering, Hydration Mismatch handling, suppressHydrationWarning, Server Component boundary design, etc.), refer to `engineering/300_web_frontend.md`.
 
 ### 3.3. Layout Architecture
 -   **The Single Container Protocol**:
     -   If Layout provides a container, re-defining padding/container in Page is strictly prohibited (Double Padding).
+    -   **Padding Ownership**: For shared components placed on several surfaces, the outer spacing MUST state "who owns it" through a prop such as `variant` (owns it / parent owns it / minimal). Left to defaults, it becomes doubled or absent depending on where the component is placed. Failure pattern: list surfaces had an outer frame with `max-w-* mx-auto px-*`, so the same padding was applied twice, yet each file looked correct on its own and reading the CSS did not reveal it. If the same component is used in several places, measure every one of them (MUST), and have the check cover both "the caller passes the right variant" and "the parent actually has padding" (SHOULD). If the latter disappears, the "parent owns it" variant sticks to the screen edge.
 -   **Baseline Harmony (Filter Alignment Protocol)**:
     -   **Law**: When aligning `Input` and `Button` with labels, using `items-center` is prohibited.
     -   **Action**: MUST use **`items-end`** to align baseline considering label height. `items-center` blurs boundaries and looks amateur.
 -   **The Natural Scrolling Protocol**:
     -   **Law**: Unplanned nesting of `h-screen` + `overflow-y-auto` causing double scrollbars is UX defeat.
     -   **Action**: Ideally only **one** scroll container (body) on screen. If partial scroll needed, consider `dvh`.
+    -   **Reserved-Height Scope**: For where `min-height` / fixed `height` may be placed (only media whose dimensions are unknown before load, tap targets, and placeholders; never on text containers or outer frames), see Reserved-Height Scope under §17.2 CLS.
 -   **The Any-Screen Typography Protocol**:
     -   **Law**: Fixed `text-3xl` destroys mobile UI.
     -   **Action**: Start from mobile base (`text-xl`) and scale via breakpoints (`sm:`, `lg:`). Maintain visual hierarchy.
 -   **The Fragmented UI Protocol**:
     -   **Law**: "Similar but different" is worst. Standardize components including their layout context.
     -   **Action**: Prohibit ad-hoc CSS. Follow single "Gold Standard".
+    -   **Single Render Path**: When the same display object (image slider, card, embed preview, etc.) is rendered through several paths such as the public page, the in-editor preview, and the admin preview, all of them MUST use one display component as the SSOT; per-path duplicate implementations are prohibited. Edit-mode overlays (delete buttons, etc.) are injected via render-prop / slot and never duplicate the display component's DOM (MUST).
+    -   **All-Paths Fix Completion**: The completion condition of a bug fix MUST include "all render paths of the same display object were enumerated and the fix was applied on every path". Failure pattern: a hot-fix corrected 1 of 5 paths, and the old background color remained on the other 4. A fix applied to only one path is incomplete.
+    -   **Unique Selector Prefix**: When a shared component uses a library that resolves DOM via selector strings (navigation buttons, etc.), a unique identifier prefix per instance is mandatory (MUST). With duplicates, only the first instance responds and the rest become unclickable.
+    -   **Gold Standard Fixation**: When several implementations deliver the same experience, the document MUST state "which one is the standard (Gold Standard)" and "which direction to align", pinned by a measured baseline (dimensions, ratios, measurement conditions) and a check. When the standard exists only as oral knowledge, every correction leaves a different residual difference and the same fix is repeated (failure pattern: the same correction was repeated 5 times). Before touching the standard side, confirm by measurement that it is really the one at fault; reverse-direction corrections are prohibited (MUST). Mark already-matching measured values as "do not touch" and send back any proposal that alters them (SHOULD). Record the technical reason a separate implementation became necessary, together with the measured isolation table, and prevent that constraint from leaking to other surfaces structurally (SHOULD).
 
     -   **The Action Placement Standard**:
         -   **Law**: Inconsistent placement of primary action buttons ("Add", "Save", etc.) across pages increases user eye movement cost.
@@ -203,6 +223,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         -   **Law**: Breadcrumbs are the "lifeline for knowing current location" and MUST be placed at the **very top of the page** without exception.
         -   **Mobile**: On mobile screens, breadcrumbs and action buttons MUST be separated into a **vertical stack**, with breadcrumbs on top. Placing them side-by-side where breadcrumbs are hidden or forced to horizontal scroll is prohibited.
         -   **Visibility**: Handle breadcrumb text overflow with `overflow-x-auto` while ensuring visibility within the first view as much as possible.
+        -   **Scroll-End Padding**: The end-side padding of a horizontally scrolling container is not part of the scrollable overflow area, so symmetric padding does not look symmetric. Give the scrolling content `width: max-content` and put the end padding on the content side (MUST). A trailing spacer or margin on the last item does not extend `scrollWidth`. Failure pattern: the CSS said 16px on both sides, but measurement showed 16px left / 0px right, and the last item sat flush against the screen edge when scrolled to the end. Whenever a horizontally scrolling area is implemented or changed, measure the spacing with the content scrolled to both ends (MUST). Do not leave container-side declarations that have no effect (end-side padding); reduce them to the start side so the next person does not re-investigate why they do nothing.
 
     -   **The Sub-Page Header Consistency**:
         -   **Law**: List pages and create/detail pages MUST share the same header structure (icon + title + description) to maintain visual consistency.
@@ -211,6 +232,14 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 ### 3.4. Motion & Gestures (The "Soul")
 -   **Physics-Based**: All animation uses spring physics. Elements should bounce, stretch, and squash.
 -   **Swipe First**: Implement universal swipe-back and swipe-to-action. No lag allowed.
+-   **Transition Visibility Protocol**:
+    -   **Law**: Any operation that changes screen state (open/close, move, appear/disappear, swapping a status display) MUST have a transition whose intermediate stage can be observed. An instant switch is not "fast"; it is "I cannot tell what happened", and it is treated as a defect. Users cannot follow the diff with their eyes and must re-establish the mapping between their action and the result every time.
+    -   **No DOM Toggling**: Do NOT implement open/close UI as "remove from the DOM when the display flag is false" (MUST NOT). There is nothing to interpolate, so a transition is structurally impossible. Use native disclosure elements (`<details>` etc.) or keep the element mounted and change its appearance via CSS / motion (see the proviso under Conditional Rendering in §3.2). Decorations of opening/appearing (arrow rotation, etc.) move with the same duration as the body (SHOULD).
+    -   **Reduced-Motion Separation**: Always stop under `prefers-reduced-motion`. An inline-style `transition` cannot be overridden by the class-side reduced-motion rule, so keep `transition-property` on the class side and put duration / easing / delay inline (MUST).
+-   **Delight Animation Budget**:
+    -   **Budget (MUST)**: maximum playback time (e.g., 2 seconds), sustained 60fps, an asset size cap (e.g., Lottie JSON 50KB or less), disabled under `prefers-reduced-motion`, and a cap on how often the same animation shows (e.g., 3 times per session). The numbers are set in the Blueprint.
+    -   **Prohibited (MUST NOT)**: auto-playing audio, full-screen takeover outside a modal, forced waits beyond a set duration (e.g., 3 seconds), and overly positive effects in negative moments (error, delete, cancellation). Failure pattern: confetti on delete completion felt "out of place", and repeated showings caused "fatigue".
+    -   **Implementation**: CSS Animation is the first choice; use an animation library only for complex cases. Animate only `transform` / `opacity`, and follow the theme's tones in dark mode (SHOULD).
 
 ### 3.5. Multi-Sensory Design
 -   **Haptics**: Assign delicate "Tap", "Click" haptics to success/error/select events.
@@ -247,6 +276,9 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         -   No element overlap?
         -   Text not too small/too large and overflowing?
         -   Both touch (Touch) and mouse (Hover) interactions comfortable?
+        -   **Caller-Side Cross-Check for Shared Components**: Sharing a component does not move display control; responsive visibility (`hidden lg:block`), stickiness (`lg:sticky`), and spacing remain on the caller side. After sharing a component, grep the display-control classes of every call site and line them up for comparison (MUST). The criterion is not "no differences" but "every difference has an explainable reason" (legitimate differences exist, such as clearance for a surface-specific fixed footer). Failure pattern: assuming "shared, therefore aligned", the team was corrected twice in separate rounds (visibility, then stickiness). Do not over-pin breakpoint prefixes in the check (a check that fails the moment `sticky` is corrected to `lg:sticky` pulls the fix back); include the prefix in the expected value (SHOULD).
+        -   **Visibility and Overflow Measurement Formulas**: Measure "is it visible" by element height as well as `display`. Take `getComputedStyle(parent).display` and `getBoundingClientRect().height` as a pair (MUST; `display:block` with height 0 is not visible). Before shipping to mobile, count `documentElement.scrollWidth > clientWidth` and per-element `right > innerWidth` to measure horizontal scroll and overflow (MUST).
+        -   **Per-Element SP/PC Values and Screenshot Evidence**: For new UI components, design mobile and desktop values separately for font size, spacing, border radius, grid columns, initial item count, badge dimensions, layout pattern, and slider settings (MUST). Define both values even when using fixed px. Include screenshot verification for both SP and PC in the completion condition (MUST); "tested on PC only" and "applying the tiny SP size to PC as well" are prohibited.
 
 ## 6. Accessibility & Inclusivity
 -   **WCAG 2.2 AA Standard**:
@@ -267,6 +299,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Content Images**: Provide an `alt` attribute that accurately conveys the image content (e.g., `alt="Product exterior photo"`).
     -   **Decorative Images**: Set `alt=""` for purely decorative images so screen readers ignore them.
     -   **Omission Prohibited**: Omitting the `alt` attribute (which results in `undefined`) is strictly prohibited. Always specify either an empty string (`""`) or descriptive text.
+    -   **Three-Tier Priority and Generic Placeholder Ban**: CMS-driven image components MUST hold `alt` as a field independent of title / caption. Title is "a semantic description of the link target" and alt is "alternative text for the image content"; collapsing them into a single fallback degrades WCAG 1.1.1 and 2.4.4 at once and removes the opt-out path for decorative images (`alt=""`). The render priority is three tiers, "explicit alt → title (legacy fallback) → empty string", and generic placeholders such as "image" or "main image" MUST NOT be used (they only tell a screen-reader user "there is an image here" and convey no content). Ship the alt input field in the editing UI in the same commit that adds alt to the schema (MUST).
 -   **Focus Ring Protocol (Accessibility Sight)**:
     -   **Law**: UI where focus state (Tab key navigation, etc.) is not visually recognizable is a "maze in the dark" for keyboard users—accessibility failure.
     -   **Action**: When removing browser default focus ring (`outline-none`), MUST redefine **high-contrast focus ring** (e.g., `ring-2 ring-primary ring-offset-2`). "Invisible Focus" is treated as a bug.
@@ -282,9 +315,12 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **A11y Zero Tolerance CI (Build Gate)**:
     -   **Mandate**: Integrate `axe-core` or `pa11y-ci` into the CI pipeline. If even one `critical` or `serious` violation is detected, **force the build to fail**.
     -   **Exemption**: Only for unfixable external factors within UI library internals—addition to the exception list (Ignore Config) is permitted after documenting the reason.
+    -   **Severity SLA**: Apply a severity classification and response deadline to A11y defects found by manual testing as well (SHOULD): Critical (no access to a function: a button unreachable by keyboard, an important image without alt → e.g., within 24 hours) / Major (significantly hard to use → e.g., within 1 week) / Minor (small improvement → next sprint). Deadlines are set in the Blueprint. This prevents defects that passed the CI gate from stagnating under "fix it someday".
 -   **Non-Color Indication Protocol**:
     -   **Law**: Error displays and critical information MUST NOT rely on **color alone**. Users with color vision diversity will miss the information.
     -   **Action**: Always **combine** icons (⚠️, ✅, ❌) and text ("Required", "Error", "Success") with color to achieve a **triple-channel communication** standard.
+    -   **Link Identification**: If color is used to identify links in body text, always pair it with a non-color cue such as an underline (MUST). Even when the brand color is auto-corrected against the background, what is guaranteed is "color vs. background", not the **difference** between the link color and the body text color. Failure pattern: measured at 2.17:1, below the 3:1 that WCAG 1.4.1 requires when color is the only cue. Because operator settings move both colors, this difference cannot be corrected upstream and must not be relied on. Containers with the same role (body-rendering classes) share one style contract selector-wise (`.a a, .b a { … }`) (MUST), and in areas where production HTML mixes in hardcoded classes, put the defaults in `@layer components` rather than fighting with specificity (SHOULD).
+    -   **Measure Rendered Color**: Measure contrast from the "actually rendered color", not from "constants in the source" (MUST). Drawing 1px on a canvas and reading it with `getImageData` yields sRGB regardless of the color notation (`lab()` etc.). Confirm that a focus ring exists by actually pressing Tab on a keyboard (MUST); programmatic `.focus()` does not trigger `:focus-visible`, so the ring appears to be missing.
 -   **Font Size & Zoom Protocol**:
     -   **Minimum Body Text Size**: The minimum font size for body text is **16px**. Smaller font sizes impair readability and should be limited to supplementary text, captions, etc.
     -   **rem Mandate**: Specify `font-size` in `rem` units to respect user browser settings. `px` fixed values are only permitted at the `:root` level.
@@ -328,6 +364,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Law**: Avoid "div hell" — excessive use of `div` / `span`. Use appropriate HTML elements.
     -   **Elements**:
         -   `<button>`: Clickable actions (`<div onClick>` is prohibited)
+            -   **The Four-Piece Set When Unavoidable**: When `onClick` must go on a non-interactive tag for reasons such as `<button>` not being able to contain block elements, all four pieces MUST be present: `role="button"`, `tabIndex={0}`, `onKeyDown` (Enter / Space), and a `focus-visible` ring. If `onClick` is conditional, do not attach role etc. while not interactive. Because it looks functional to sighted users, visual checks miss it for a long time (across multiple releases). Run lint (`click-events-have-key-events` / `no-static-element-interactions`) as error and, in audits, grep and enumerate non-interactive tags carrying `onClick` (SHOULD).
         -   `<a>`: Navigation (page transitions, external links)
         -   `<nav>`, `<main>`, `<header>`, `<footer>`, `<aside>`: Page structure landmarks
         -   `<article>`, `<section>`: Semantic content divisions
@@ -393,10 +430,12 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **AI Failure Handling**:
     -   Design graceful recovery paths for AI errors. Provide correction, regeneration, and comparison UI patterns.
     -   **Human-in-the-Loop**: In Copilot experiences, always treat AI output as "suggestions". Maintain design where users hold final judgment authority.
+    -   **Disclaimer Tone & Thumbs-Down Reason Capture**: AI answers touching specialized domains (medical, legal, financial, etc.) MUST end with a visually distinct, pinned disclaimer banner. Use an icon that signals information or an expert rather than a warning sign, and keep the tone from stoking anxiety (SHOULD). Place 👍/👎 on every AI response, and when 👎 is pressed, additionally ask for a quick reason ("factually wrong", "inappropriate", etc.) and wire the result directly into quality observability (MUST). A 👎 without a reason cannot drive improvement and never becomes the entry point of the accuracy loop.
 -   **The Quota Framing Protocol**:
     -   **Law**: When displaying usage limits (Quota) for AI generation, API calls, etc., wording that makes users feel "stingy restrictions" is prohibited.
     -   **NG**: "You have reached your limit" / "Usage limit exceeded"
     -   **OK**: "You've used all your AI generation power this month. Upgrade your plan to unlock more?"
+    -   **High-Cost Action Friction**: UI that automatically triggers expensive processing (generative AI, external APIs, heavy search) in response to input MUST debounce at the UI level for a set interval after input completes (e.g., 800ms). Actions whose single execution is costly MUST NOT fire on one click; use a two-step structure where the "final execute" button fires after options are chosen. This structurally prevents cost waste from mis-clicks. When a rate limit is reached, show a limit message in the brand tone with an indication of when it resets, as in the OK example above (SHOULD).
 
 -   **MCP (Model Context Protocol) UX Integration Protocol**:
     -   **Background**: MCP (Model Context Protocol), released by Anthropic in 2024 and now an open standard, provides a standardized interface connecting AI agents with external tools and data sources. When applications connect to external MCP servers, appropriate UI governance becomes essential.
@@ -415,6 +454,8 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Disabled State**: When prerequisites are not met (e.g., initial registration incomplete), related tabs should NOT be hidden but instead displayed as **disabled (Disabled / reduced Opacity)**, maintaining awareness of the feature's existence (ensuring discoverability).
     -   **Active State**: Highlight the tab corresponding to the current context. When on a sub-resource (new creation screen, etc.) with no directly corresponding tab, either maintain the parent category tab or leave all tabs unselected.
 -   **Feature Discovery**: Progressive disclosure. Zero Data is an onboarding opportunity.
+    -   **Empty State Taxonomy**: Classify empty states into three patterns, "first use (nothing created yet)", "no search results (0 items for the criteria)", and "error / outage (fetch failed)", and standardize the components of each (illustration + message + CTA / guidance to change criteria / retry) (MUST). When the classification is vague, some empty states look like "a bug" and others like "still loading", raising cognitive load. When an admin table has 0 rows, keep the header row visible and center the empty message and the create button in the body (MUST); never hide the whole table and lose the structural cue.
+    -   **Empty ≠ Error Distinction**: The data-fetching layer that returns lists, counts, or status MUST return a value that distinguishes "0 items" from "fetch failed" (e.g., `status: 'ok' | 'error'`), and MUST NOT express failure as an empty array or 0. On failure the UI does not show empty-state copy ("You have no ..."); it shows an error with a retry means (MUST). Failure pattern: a failed notification fetch was displayed as "No unread notifications", so users never noticed the outage. Design the empty state and the failure state as separate components.
 -   **General Consumer Perspective**: No technical jargon ("Database", "API"). Use intuitive words ("Save", "Connect").
 -   **Micro-Interaction Standards**:
     -   **Cursor Affordance**: Clickable elements (including Cards and custom inputs) must apply `cursor-pointer` on hover to clarify affordance.
@@ -430,6 +471,8 @@ For *every* design task, the following "Scouting Loop" is mandatory:
         -   **Law (Positive Framing)**: Prefer **affirmative framing** over negation. Tell users "how to achieve" instead of "cannot do".
         -   **Law (Action-Oriented Button Labels)**: Button labels should prefer **verb forms** that clearly state the intended action (e.g., "Save Changes", "Submit Form", "Confirm Details") over bare nouns (e.g., "Save", "Submit"). This encourages user action and contributes to higher conversion rates.
         -   **Law (Debug Artifact Display Ban)**: Runtime debug values (`null`, `undefined`, `NaN`), stack traces, and raw database error messages being displayed in the UI is **strictly prohibited**. These give users the impression that the system is "broken" and constitute a critical UX deficiency. Always catch them with Error Boundaries or fallback UI and display user-comprehensible messages instead.
+        -   **Law (Internal Rule Number Ban)**: Internal rule numbers ("Rule X.Y", "Blueprint §n", etc.) MUST NOT appear in user-facing copy or error messages. They mean nothing to users and give the impression that something is "broken". Detection: grep string literals for `Rule [0-9]+\.[0-9]+`.
+        -   **Law (Default Copy Replacement Respects Edits)**: When changing the default value of copy that is editable in the admin UI, keep the set of old defaults as aliases and treat only rows whose current value matches an old default as "unedited" to be swapped to the new default (MUST). The canonical rule is "Rule 700.3.2a" in `engineering/700_batch_backfill_operations.md`.
 -   **The Explicit Explanation Protocol (Zero Jargon / Tooltip Mandate)**:
     -   **Law**: What's "common knowledge" to developers (API, Webhook, MRR) is "mystery symbols" to users. Lack of explanation means failure as a tool.
     -   **Action**: 
@@ -446,9 +489,16 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **Magic Word**: For irreversible actions like permanent deletion, verify with **Magic Word Input** (e.g., type "delete") instead of a simple "OK" button.
 -   **Dirty Check**:
     -   Warn users ("Changes will be lost") when attempting to leave with unsaved changes.
+    -   **SPA Navigation and the Auto-Save Exception**: Warn not only on `beforeunload` (tab close, browser back) but also before client-side routing transitions (MUST). SPA transitions do not fire `beforeunload`, so confirm in the router's navigation hook. For forms with auto-save enabled (§14.5), the data is already preserved, so do not show the leave-confirmation dialog and avoid double friction (SHOULD).
 -   **Loading Lock Protocol (Double-Submit Prevention)**:
     -   **Law**: Leaving buttons clickable during form submission or async processing causes double-registration and Race Conditions, and is strictly prohibited.
     -   **Action**: During processing (`isLoading`), disable buttons with the `disabled` attribute and visually indicate with greyout or spinner. For actions with significant side effects, additionally use `pointer-events-none` to physically block clicks.
+-   **Non-Blocking Transition Protocol**:
+    -   **Law**: A change that turns blocking UI (a loading modal, etc.) into non-blocking UI (a persistent panel, background progress) MUST be reviewed as a **change in the concurrency design**, not as a display change. Enumerate "what operations has this modal been blocking until now" and trace what happens when each of them runs. Failure pattern: the moment the modal was removed, previously unreachable paths opened all at once, and re-submission, stacking order, and leaving the page broke simultaneously.
+    -   **Single Queue**: Merge processing of the same kind (uploads, etc.) into one queue and one running session (MUST). Creating a new run per call makes several runs fight over the same display. Add further items to the existing session and carry over its start time.
+    -   **Count the Entrances**: Count the entrances that reach the same handler (dialog, drag&drop, the empty-state link, etc.) (MUST). Do not assume there is only one.
+    -   **Toast Above Modal**: Notifications for processing that keeps running outside a modal go in a layer above the modal (above Modal in the §14.3 hierarchy) (MUST). A modal must never hide notifications of background processing. If the modal library sets `pointer-events: none` on body, set `pointer-events: auto` explicitly on the notification panel.
+    -   **Exit Guard**: Having moved progress aside, always close the paths where leaving (reload, navigation) silently ends the processing (SHOULD).
 -   **Responsive Action Button Protocol**:
     -   **Mobile**: Important action buttons (register, save, purchase, etc.) should be `w-full` (full screen width) for easy tapping.
     -   **Desktop**: Use `w-auto` with sufficient minimum width and **center alignment**. Making buttons `w-full` on PC causing visual stretching is prohibited.
@@ -462,6 +512,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Anticipatory Assistance**: Anticipate needs before users struggle. (e.g., Offer "Convert format?" button when locale-specific input normalization is available).
     -   **Input Normalization (Tolerant Input Principle)**: When users enter data in an imprecise format (full-width numbers, full-width spaces, etc.), do NOT reject with validation errors. Instead, **silently auto-convert (Normalize)** on `onChange` or `onBlur`. Use `String.normalize('NFKC')` etc. to minimize user input burden.
     -   **Locale-Specific Input Assistance**: For locale-specific data entry (address, name, etc.), implement **locale-tailored input assistance features** (e.g., postal code to address auto-complete, phonetic reading auto-generation, phone number formatting, etc.) to reduce user input burden. Always allow manual correction after auto-completion to preserve user control.
+    -   **Confirmation Screen Protocol**: Classify whether a confirmation screen is required per operation type (MUST): mandatory for payments, purchases, and subscription contract changes; recommended for personal-data registration changes, posts, and contact-form submissions; unnecessary for lightweight operations such as favorites or search (immediate effect is expected). In regions where market convention makes a confirmation screen the minimum expectation (e.g., Japan), widen the mandatory scope. Confirmation screen UI requirements (MUST): re-display the entered content in a readable table layout, place "Edit" and "Submit" on different rows rather than side by side (mis-tap prevention), allow "Submit" to be pressed only once (disable to prevent double submission), and for payments show the final tax-inclusive amount large at the very top.
 -   **Pacing and Negative Space**: White space is for thinking time, not just empty space. Balance information density with cognitive breathing room for the target audience.
 -   **Reassuring Feedback**: Give reassuring feedback (visual or haptic) to every meaningful action so users can tell their operation was received.
 -   **The Graceful Error Recovery Protocol**:
@@ -498,8 +549,10 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Action**:
     1.  **SP (Drawer Safety)**: Add `data-vaul-no-drag` to scrollable areas in Drawers to prevent accidental close.
     2.  **PC (Viewport Safety)**: Set `max-height` for floating elements like Popovers to prevent overflow outside screen.
+        -   **Collision Pair & Observed Values**: Collision avoidance for floating elements only moves the "edge of the judgment"; unless the content width follows the available width, the position does not change. Add the `collisionPadding` equivalent and "content width follows available-width" as a pair (MUST). Before concluding "it is not working", read the observable values the feature exposes (CSS variables, data attributes, measurement APIs) (MUST). Failure pattern: the right-edge margin did not change after adding padding and "not working" was almost concluded, but measuring the exposed CSS variable showed the padding was subtracted correctly; only the content width was not following. Class-merge utilities (tailwind-merge etc.) are last-wins and erase defaults, so when a shared component's default must be preserved, compose the caller's fixed value as `min(<fixed>, <default variable>)` (SHOULD), and pin paired settings that "quietly revert when one side is removed" with both a comment and a check (SHOULD).
     3.  **Responsive Split**: Use `Drawer` for Mobile, `Popover` for PC standard.
     4.  **iOS Input Zoom Defense**: On iOS Safari, when input field `font-size` is **below 16px**, the browser auto-zooms on focus, damaging UX. The `font-size` of `input`, `textarea`, `select` in mobile views MUST be enforced at **16px (`text-base`)** or above.
+        -   **CSS SSOT Enforcement & Zoom Preservation**: Enforce the 16px in the CSS-side SSOT (tokens + an `input, textarea, select` selector), not in per-form classNames (MUST). Raw form elements and caller-side `text-sm` / `text-xs` overrides are common, so per-form fixes leak. Exclude checkbox, radio, range, and button types so their appearance is not changed unnecessarily. Never kill pinch zoom with viewport `maximum-scale=1` / `user-scalable=no` (MUST NOT); handle it through the input font size while keeping a11y intact.
 
 ### 14.2. The Mobile Click/Tap Fix
 -   **Law**: Mobile Popovers may fail to capture tap events due to focus conflicts.
@@ -528,6 +581,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Hook Strategy**: Use a standardized `useAutoSave` hook to implement draft saving with debounce (2 seconds or more).
 -   **Passive Restoration**: When a draft exists at page load, do NOT auto-apply it. Display a "Draft found" notification and give the user the choice to restore.
 -   **Hygiene**: On successful form submission, call `clearDraft()` to clean up local storage.
+-   **Draft Validation Parity**: When designing defenses against invalid values (entry validation, DB constraints, daily detection), enumerate every place the value can persist (DB, cache, search index, client drafts / localStorage, queues) (MUST). Run the same judgment as the server side (the same pure function) through every enumerated persistence layer, in both directions, on save and on restore (MUST). Failure pattern: even after the server-side check was tightened, a broken value was restored from the local draft and re-submitted, producing a "nothing I do lets me save" loop for real users. Drafts can become a contamination source outside the ring of defense. Verification: pin with a test that the same validator is called on the draft save and restore paths.
 -   **Roadmap**: Transitioning to server-side draft saving in the future is recommended to enable cross-device continuity (resume in progress).
 -   **The Public Form Persistence Protocol**:
     -   **Context**: When end-user facing forms (contact, registration, etc.) lose all input due to browser closure during entry, it constitutes a UX loss.
@@ -556,9 +610,11 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     5.  **Date & Currency**: Locale-compliant formatting (see §2.1 Locale Format Mandate)
     6.  **Admin Panel**: Administrators are also speakers of the target locale's language. Untranslated labels in admin panels are bugs without exception
     7.  **Automated Emails & Notifications**: From subject line to signature, all text must be natural in the target language
+    8.  **Components Wrapping Third-Party Libraries**: Default labels, tooltips, aria text, and empty states of editors, carousels, date pickers, etc. easily leak in the library's default language (usually English). When creating or updating a wrapper component, confirm that every visible string originating from the library has been replaced with the target locale (MUST). Use the library's locale option where available; otherwise provide a label-override path in the component (SHOULD). This residue source is not caught by ordinary literal scans
 -   **Exception**: Proper nouns (Google, LINE, Instagram, etc.) and technical terms where translation would be unnatural (URL, ID, API, etc.) are permitted.
 -   **Internal Value Display Guard**: Directly displaying DB values, internal constants, or enum string values in the UI is prohibited. Always convert to the target language via mapping dictionaries or label properties.
 -   **Scan Protocol**: Include verification that string literals in UI files (`.tsx`, etc.) are localized as a PR review checklist item. When possible, build CI script-based automated detection.
+-   **Longest-Language Overflow Check**: A multilingual UI MUST have one check that renders in the supported language with the longest words and coarsest wrapping units (often English or German) and mechanically measures that no text element exceeds the right edge of its nearest block ancestor / the viewport. Green in a language that wraps per character (Japanese, Chinese) is not evidence. Wrapping bans such as `nowrap` take effect through inheritance, so a source scan does not find them; measure the rendered result (MUST). Failure pattern: frames that fit in the default language overflowed in 4 places in English, and grep could not find it because `nowrap` was not written on the `span` itself. List intended horizontal scroll, `sr-only`, and ellipsis as explicit exclusions (SHOULD).
 
 ### 15.2. The Error Message UX Standard
 -   **Law**: Error messages MUST meet the following quality standards.
@@ -567,6 +623,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Empathy First**: Error messages should "help" users, not "blame" them. Prefer affirmative framing over negation.
 -   **Positive Framing**: Instead of "Cannot do X", say "Please do Y and try again" to show how to achieve the goal.
 -   **Graceful Recovery**: Error screens and error modals MUST include a concise explanation of the cause plus **at least one recovery action button** (reload, return home, contact support, etc.). A dead-end error screen is a critical UX deficiency.
+-   **Guard Message Pass-Through Ratchet**: The internal-term blocklist for user-facing errors (SQL, stack traces, table names, etc.) MUST NOT be loosened. Defense messages that must reach the user (the reason for a constraint violation, a hint about the target) get through the blocklist because the sending side chooses its words (MUST). Failure pattern: the reason text of a correctly blocked incident contained one internal term, so the whole message was masked and became "The operation failed", erasing from the user even the fact that the defense had worked. Verification: extract the defense messages (DB constraints, trigger raises, guard rejection reasons) from their definitions, pass them through the real masking function, and pin with a test that they "arrive unmasked" (SHOULD).
 
 ### 15.3. The IME/Input Method Handling Protocol
 -   **Context**: In CJK language regions (Japanese, Chinese, Korean, etc.), input via IME (Input Method Editor) is standard, and `onChange` event firing timing differs from direct input.
@@ -627,6 +684,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   `motion.easing.spring: cubic-bezier(0.175, 0.885, 0.32, 1.275)`
 -   **Properties**: `motion.property.enter`, `motion.property.exit`, `motion.property.hover`, `motion.property.expand`
 -   **Cross-Platform Consistency**: Guarantee identical motion experience across Web / iOS / Android / Flutter through tokens.
+-   **Delivery Layer Principle**: duration / easing come from SSOT tokens; literal values MUST NOT be written. Literals assign a different speed per surface and break the sense of "one product". When creating or revising UI that delivers the same experience (open/close, appear, etc.), first inventory the implementation families of that kind and tabulate, per family, even "whether it animates at all" (SHOULD). Failure pattern: there were 5 families of "press and the content appears" UI, split not only in implementation but in whether they moved. The unit of sharing is not limited to "a shared component". Component-level sharing does not reach server-rendered raw HTML (sanitized body content, CMS output), so put the values in a layer that reaches every path (the CSS SSOT, design tokens) (MUST). Never redefine under the same name a definition the library already provides (keyframes, etc.) (MUST NOT); to change the speed, point at the token (CSS variable) the library reads. Do not confine the grep for an existing definition to your own repository; definitions brought in via `@import` are visible in the browser's CSSOM (SHOULD).
 
 ### 16.2. prefers-reduced-motion Compliance
 -   **Law**: Accommodating users with vestibular disorders or high motion sensitivity is a **legal obligation** (EAA/WCAG 2.2 2.3.3).
@@ -644,6 +702,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Skeleton > Spinner**: Use Skeleton for loading to preview content shapes rather than spinners.
 -   **Optimistic UI**: Update UI before server response for lightweight actions.
 -   **Instant Feedback**: Guarantee visual feedback within 100ms of button press.
+-   **Text Alongside Spinners and a Minimum Display Time**: Do not show a spinner alone; pair it with text that states the status ("Loading..." etc.) (SHOULD). Give completion feedback (toasts, etc.) a minimum display time (reference value 3 seconds; set in the Blueprint) so it is not missed by vanishing instantly (SHOULD). To older or low-literacy users a bare spinner looks "stuck" and a brief toast is never perceived. Keep the hierarchy of main features shallow (reference value 2 levels) and fix the position of the "back" means on every screen (SHOULD).
 
 ### 17.2. Core Web Vitals (CWV) Awareness
 -   **LCP** (Largest Contentful Paint): Display the largest first-view element within **2.5 seconds**.
@@ -668,6 +727,8 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     -   **React 19 Compiler / PPR Support**: Leverage React 19 Compiler's Auto-Memoization and Next.js 15+ Partial Prerendering (PPR) to optimize hydration priority for interactive elements. Designs that return static shells instantly and stream dynamic content directly improve INP.
 -   **CLS** (Cumulative Layout Shift): Maintain layout shift below **0.1**.
     -   **Design Action**: Specify explicit `width`/`height` on images, videos, and ad slots. Use `font-display: optional` or `swap` for fonts.
+    -   **Reserved-Height Scope**: Minimum or reserved height (`min-height` / fixed `height`) may be placed only on media whose dimensions are unknown before load (images, video, maps, embeds, ad slots), on minimum tap-target sizes, and on skeletons / pre-init placeholders that are replaced after load (MUST). Containers whose content is text (body copy, rich-text render areas, outer frames of tabs and lists, non-empty panels) MUST NOT carry reserved height. Height is determined by content. Failure pattern: a `min-height` placed on the body container "to prevent CLS" created over 100px of blank space under short content, and because the SSR side lacked the same value, it grew at hydration and caused a layout shift too (the CLS countermeasure was the CLS source).
+    -   **Editor Concerns Stay in the Editor**: Editing-surface conveniences (a minimum clickable height for an empty editor, drop zones) MUST NOT be carried into the public read-only renderer. A public-only renderer needs no click area. Emit the same classes on SSR and the client (SHOULD). Fixed-height scroll frames use `max-height` and scroll only on overflow (SHOULD). Verification: an automated test checks that no reserved height has crept into the public renderer (SHOULD).
 -   **TTFB** (Time to First Byte): Target server response time within **800ms**. Prioritize CDN edge caching and SSG.
 -   **Design Impact**: Plan image/font lazy loading, appropriate sizing, and `font-display: swap` from the design stage.
 
@@ -716,6 +777,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Time on Task**: Task completion time.
 -   **Error Rate**: Error occurrence rate.
 -   **CSAT (Customer Satisfaction Score)**: Customer satisfaction.
+-   **Emotional UX KPIs**: Define metrics that quantify the emotional side of UX and track them monthly (SHOULD): the share of operations felt as pleasant (micro-survey), the share answering "trustworthy", an anxiety index at error and payment moments (abandonment rate + support contact rate), satisfaction on the completion screen, and first impression via a 5-second test. Targets (e.g., anxiety index 10% or below) are set in the Blueprint, and KPIs that miss target run an improvement loop of design sprint → A/B test → adoption decision (SHOULD).
 
 ### 19.3. Design Review Process
 -   **Heuristic Evaluation**: Regular expert reviews based on Nielsen's 10 Usability Heuristics.
@@ -1134,6 +1196,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
       setQualityMode('low');
     }
     ```
+-   **Save-Data and Minimum Guarantees per Network Tier**: Respect the browser's data-saving signals (the `Save-Data` request header, `navigator.connection.saveData`) by lowering image quality, dropping high-resolution variants, omitting custom fonts, disabling prefetch, and disabling animation (SHOULD). Branching on the header server-side takes effect from the first paint. Define in the Blueprint the "minimum guaranteed experience" per network-quality tier (e.g., text content and navigation work in every tier) and state explicitly the default tier for environments where the detection API is unavailable (usually the enhancement tier) (SHOULD).
 
 ### 29.3. Privacy Design for Personalization
 -   **Data Minimization Obligation**: Data required for personalization must be the minimum necessary. Excessive collection for the purpose of building a full user profile is prohibited.
@@ -1430,11 +1493,18 @@ For *every* design task, the following "Scouting Loop" is mandatory:
     | Design Token compliance | CI auto | Token Drift Checker (§24.3) |
     | Dark mode display verification | Implementer + Reviewer | Storybook / DevTools |
     | Mobile (375px) display verification | Implementer | DevTools / Physical device |
+    | Existing signature UI not degraded (Signature Interaction Preservation) | Implementer + Reviewer | Confirm on PC/SP devices that existing items, animations, and the expression system remain |
 
 -   **Pixel-Perfect Definition**: Requiring 100% pixel-perfect match is unrealistic. Apply the following tolerance standards:
     -   **Tolerated**: Font rendering differences (across OS/browser): ±1px
     -   **Tolerated**: Color differences due to anti-aliasing: ≤5% luminance difference
     -   **Not Tolerated**: Spacing differences, explicit color changes, element position shifts (≥2px)
+-   **Signature Interaction Preservation**:
+    -   **Law**: When adding functionality to a brand-specific interaction that already works in production (a unique animation, a two-tier display, a radial menu, etc.), the existing structure, motion, and expression system MUST NOT be deleted, simplified, or replaced. Additions are made by "adding to" the existing item array, shared component, or SSOT. When fixing defects such as overlap or unclickable elements, remove only the cause and keep the look, animation, and feel equivalent to production (MUST). A fix that removes one side in the name of "overlap prevention" is a degradation; if deletion or replacement is necessary, obtain owner approval in advance (MUST).
+    -   **Failure pattern**: regressions that flatten signature UI in the name of a bug fix occur frequently in changes made by AI agents or new members. In UI where a blurred backdrop, overlay, explanation panel, and action buttons coexist, verify the z-index layering on the real screen (MUST).
+    -   **Verification**: On real PC/SP screens confirm that "existing items remain", "added items follow the same expression system", and "no animation has disappeared" (MUST).
+-   **UX Deployment Gate**:
+    -   Formalize the pre-deploy UX review as a table that assigns a "check item" and a "pass criterion" to each of Nielsen's 10 heuristics (e.g., visibility of system status → every async operation shows a loading state) (MUST). Make the UX gate (is it usable?) mandatory separately from functional testing (does it work?). Define a composite score with points across several axes (first-run experience, error experience, micro-interactions, copy quality, accessibility) and block deployment below the pass threshold (e.g., 70 or above passes, below 60 blocks) (SHOULD). Points and thresholds are tuned per product in the Blueprint.
 
 ### 33.4. Storybook-Driven Development (SDD)
 
@@ -1536,6 +1606,7 @@ For *every* design task, the following "Scouting Loop" is mandatory:
 -   **Content Moderation Result UX**:
     -   When content is removed or hidden, notify the poster of the "reason for removal" and "means to appeal" (EU DSA Art.17 compliant).
     -   The appeal flow MUST be designed with equal ease as the reporting flow (§7 Symmetry Principle compliant).
+-   **UGC Image Review Pipeline and File Specifications**: User-submitted images MUST have a review matrix that defines "automatic detection → action" per detection target (inappropriate content: auto-hide → human review / clearly illegal: immediate block + admin notification / suspicious: flag → manual check). Write down the automatic-detection threshold (e.g., "LIKELY" or above) and the hand-off to human review. Define file-specification limits (size cap, allowed formats, minimum resolution, images per post, e.g., 5) together with the reasons: storage cost, excluding tiny images, and spam prevention (MUST). Strip EXIF (GPS, capture time) automatically on upload (MUST). Thresholds and caps are set in the Blueprint.
 
 ### 35.2. Trust Signal Design
 

@@ -400,6 +400,9 @@
     }
     ```
 
+-   **Classification Tag SSOT**: Classification tags used for error tracking and SLO aggregation (e.g. `source`: `api:*` / `cron:*` / `webhook:*` / `action:*`) are operational keys for classification, notification, and incident investigation, not log strings. Define them as constants starting from high-risk paths (auth, payments, permissions, webhooks, cron, AI) and keep them next to the route identifiers in the same definition (SHOULD). Hand-written per screen or per file, the same path gets aggregated under different names and dashboard fan-out becomes impossible.
+-   **Control-Flow Exceptions Are Not Errors**: When a framework expresses redirects, 404s, or dynamic-rendering switches as exceptions, the instrumentation layer MUST NOT classify them as `error`. Fake errors flood monitoring and slip through the "errors are always recorded" sampling exemption, inflating trace volume. Match by exact equality (or an explicit delimiter suffix) only, always rethrow the exception, and **skip** the measurement rather than recording success or failure (recording it as success injects millisecond-scale fake samples that skew latency statistics toward the fast side). Any detection capability lost by the exclusion (e.g. a page that was meant to be static falling back to dynamic) is restored by a separate check (SHOULD).
+
 ### §14. Log Pipeline Reliability
 
 -   **Law**: Log loss means "operating blind." Guarantee the reliability of the log pipeline itself.
@@ -409,6 +412,7 @@
     3.  **Dead Letter Queue**: Route parse-error logs to DLQ instead of discarding
     4.  **Log Rotation**: Size/time-based rotation to prevent disk exhaustion
     5.  **Encrypted Transport**: TLS encryption mandatory for log transport
+    6.  **Truncation Observability for Detection Queries**: An unordered `LIMIT` in an anomaly-detection or aggregation query yields an arbitrary sample once the cap is exceeded. In cases such as failed-login counting, where "over the cap" means "an attack is happening right now", this undercounts and the alert never fires (MUST NOT). Detection queries over sets that can exceed the cap MUST page newest-first in a stable order (timestamp descending + unique tiebreaker) and record a `truncated` flag in both the result and the liveness record when the scan limit is hit. Raw HTTP calls made by detectors MUST also carry a timeout
 
 ---
 
@@ -419,6 +423,7 @@
 -   **Law**: Tag complex distributed transactions with `correlation_id` for end-to-end log traceability.
 -   **Trace Context Propagation**: Propagate `traceparent` headers compliant with W3C Trace Context across all services.
 -   **Outcome**: Maintain capability to identify "which request failed at which service at which step" within 60 seconds of failure.
+-   **Mutation Coverage**: Having tracing "enabled" is not enough; coverage must be defined. Every business mutation (write DML) and external side effect (payments, email, AI, webhook dispatch) MUST run through a shared wrapper that propagates trace context. Asynchronous work that continues after the response (fire-and-forget) MUST NOT run without the trace ID propagated into its logs — unpropagated async work creates "failures whose cause is never known". Failure pattern: instrumentation existed, but the critical writes alone sat outside the wrapper. Audits SHOULD mechanically enumerate "writes / external calls not going through the wrapper" and keep that count at zero.
 
 ### §16. Service Map & Dependency Visualization
 
@@ -435,6 +440,9 @@
     -   **Liveness**: Is the process alive? (restart decision)
     -   **Readiness**: Can it accept traffic? (routing decision)
     -   **Startup**: Has initialization completed? (prevent premature kills)
+-   **Silent-Failure Coverage Inventory**: Adding monitoring "wherever someone happened to notice" lets new cron jobs, new send paths, and new external dependencies quietly slip out of the net, and the gap becomes the next silent failure. At design time, every new feature MUST decide which of the 4 types protects it: ① outcome proof ② fire-and-forget rescue ③ synthetic probes ④ periodic reconciliation / dead-man's switch / SLO evaluation.
+-   **Dead-Man's Switch for Scheduled Jobs**: "It did not run" never appears in any application log (a cron job that vanished from configuration failed every day and nobody noticed). Cover every scheduled job with a **single ledger** of "job_name × expected interval" plus a **one-line execution record** at the end of each execution point (route / Function / DB scheduler); the evaluator flags silence longer than twice the expected interval as missed (MUST). Structure it so that a new job is unmonitored unless both the ledger entry and the record are added (so the omission itself is caught by the evaluator). The meaning of the liveness signal follows §22 Liveness Purity.
+-   **Completeness Acceptance**: Monitoring work is not complete until the codebase has been mechanically enumerated (every cron, every Function, every external dependency) and each element is explained as either "covered" or "out of scope (with reason)" (MUST). Over-monitoring is noise, so a decision not to monitor is also recorded with its reason.
 
 ---
 
@@ -466,6 +474,8 @@
 -   **Law**: Deploy **Sentry** or equivalent for monitoring frontend script errors (Uncaught Exceptions) and hydration errors.
 -   **Scope**: Enabled only in production (`NODE_ENV=production`).
 -   **RUM (Real User Monitoring)**: Collect CWV (LCP/INP/CLS) from real users and compare with synthetic monitoring.
+-   **Capture Coverage ≠ PII Scrub**: An error tracker's auto-instrumentation does not capture the "catch and return a structured response" pattern typical of API routes. Consolidate `logger.error` + capture into one helper and attach the `source` tag (§13) and a segment tag (SHOULD). Audit PII-scrub completeness and capture reach as separate axes. Authenticated or special-layout segments get a segment-local Error Boundary that offers reset and a way back to the segment top, with details withheld in production. When migrating hundreds of catch sites, do it in staged rollouts ordered by catch count descending and clustered by domain rather than in one commit, and mechanically confirm "zero remaining pre-migration patterns".
+-   **Main-Thread Stall Reports**: The browser's native `confirm()` / `alert()` block the JS thread, so a long-task / freeze detector cannot distinguish them from a real stall. If stall detection is operated, unify on in-app dialogs and stop re-introduction with a source contract (SHOULD). Bundle triage context with each report (visibility, focus, suspected sleep, median timer delay as a CPU-starvation signal, task breakdown), exclude hidden-tab time from the judgement, and do not report from automated browsers (SHOULD). Do not loosen the threshold.
 
 ### §20. Web Vitals SLO
 
@@ -491,6 +501,9 @@
     2.  Include trace IDs in audit logs for bidirectional traceability
     3.  Define log retention periods with automatic deletion of expired logs
     4.  Implement RBAC for log access control
+-   **Outbound Alert Payload Boundary**: For alerts that travel through an external notification provider (email, chat), the details and body may contain **only aggregates, counts, ratios, categories, and key names** (MUST). Never actual values (names, email addresses, message bodies, signed URLs, storage paths, raw IPs). If an identifier is needed, reduce it to a `has_*_id` boolean or an untraceable category (SHOULD). Even if the audit log is masked, the alert write path has no mask of its own, so the boundary exists only at the call site — when adding an alert, do not assume "it is the same as the audit log" (MUST). Settings-change alerts carry "N → M (a added, b removed)" rather than old → new actual values, which stay in the audit log only (SHOULD). Inventories MUST scan **nested values, not just top-level key names** (recursive JSON path + IP/email regexes), and apply the same check to bodies on a schedule — a key-name-only inventory once missed a raw IP.
+-   **Mask-Key Hygiene**: Substring masking on sensitive key names (`content`, `ip`, ...) hits unrelated keys (`script`, hashes, lengths), protecting nothing while destroying evidence. When this happens, do not loosen the mask (MUST NOT). The canonical rule is "Partial-Match Key Masking" in `security/000_security_privacy.md`.
+-   **Exception Body Hygiene**: Exceptions involving AI providers, image analysis, user input, or RAG context MUST NOT send `error.message` as-is to the logger or error tracker; a provider's error body can contain prompt fragments or input content. The canonical rule is "Exception Body Hygiene" in `ai/000_ai_engineering.md`.
 -   **Cross-Reference**: `security/000_security_privacy.md` (PII Protection)
 
 ---
@@ -501,6 +514,10 @@
 
 -   **Law**: Design alerts with **SLO-based** (error budget burn rate) alerting as primary, threshold-based as supplementary.
 -   **Principle**: Prioritize symptom-based alerting. Limit cause-based alerting to dashboard visualization.
+-   **Liveness Purity**: The liveness signal of a scheduled job or health check (`ok` / heartbeat) expresses only "the job ran and wrote its result" (MUST). Individual check-item failures and data-quality degradation of the "stays until a human fixes it" kind MUST NOT be folded into liveness — doing so saturates liveness at permanently false, reports a job that runs correctly every day as "silent", and makes a real stop indistinguishable (the same accident happened twice within a short period). Visibility of anomalies belongs to alerts, notes, and the response JSON.
+    -   A failure of a check item (evaluator) itself is raised as a separate, dedicated alert that names the item (MUST). Liveness is dropped only when even that dedicated alert cannot be written.
+    -   "No exception was thrown" is not "the check ran". If every row is unparseable no exception fires and the mismatch count is zero. The check's success condition is **the number of rows actually judged (a coverage floor)**, and "could not evaluate" and "nothing to evaluate (evaluated, zero rows)" MUST NOT produce the same outcome.
+    -   Processing that creates **irreversible gaps** (e.g. an aggregation whose raw data expires under retention) MUST have a dedicated result-driven alert (dedup + auto-resolve on recovery) rather than being mixed into liveness.
 
 ### §23. Quantitative Alert Threshold Standards
 
@@ -517,6 +534,10 @@
     | **Certificate Expiry** | ≦ 30 days | ≦ 7 days | Verify auto-renewal |
     | **AI API Daily Cost** | 80% of budget | 100% of budget | Strengthen rate limits |
 
+-   **Per-Unit Rate Alerts**: Failure-rate and missing-rate alerts MUST be evaluated per smallest failing unit (placement slot, endpoint, tenant, job type, ...) in addition to the overall aggregate. An aggregate threshold dilutes a 100% failure of one unit across the others and may never fire (one slot was 80% broken and the aggregate alert stayed silent). Per-unit evaluation SHOULD have a denominator floor (minimum count) so that small fluctuations do not fire, and MUST be evaluated independently of the aggregate count gate.
+-   **Cumulative Metrics Need Deltas**: An alert that thresholds a monotonically increasing measure (monthly cumulative, counter) MUST also report the delta from the previous reading (rate of change). Crossing the threshold only says "it was exceeded at some point in the past", not "it is broken now". Branch the body on the delta (stopped → "close by reset"; still growing → candidate causes and triage order; no comparison available → "cannot judge"), and do not assert a cause (MUST NOT).
+-   **Baselines from Primary Sources**: Baseline values for health checks that verify external-service configuration (MX hosts, IP ranges, endpoint names) MUST come from primary sources (the values actually configured, official documentation), not guesses derived from the provider's name. A guessed baseline produces the false positive "a correctly configured production turns critical every day" and erodes trust in the check.
+
 ### §24. Alert Fatigue Prevention
 
 -   **Countermeasures**:
@@ -525,6 +546,16 @@
     3.  **Flapping Detection**: Auto-suppress alerts that toggle frequently
     4.  **Signal-to-Noise Ratio**: Quarterly alert audit. Remove alerts that never required action
     5.  **Alert 3 Requirements**: All alerts MUST be ① immediately actionable ② require human judgment ③ time-sensitive
+-   **Alert Lifecycle Contract (dedup ↔ auto-resolve)**:
+    -   If you add deduplication (no new row for the same condition while one is open), add the automatic close path for when the condition clears **at the same time** (MUST). With only one of the two, "open" becomes a latch meaning "fired once in the past" rather than "abnormal now". When adding an alert, decide together (1) the condition under which it auto-closes and (2) who does what to close it (MUST). Gaps a machine can fix get their remediation placed in the same job as the detection.
+    -   Apply auto-resolve only to conditions that describe the current state, never to records of events ("deleted N orphans") (MUST). Security / cost / moderation alerts are closed by human judgement; pin the "machines do not touch these" invariant with a test.
+    -   Three constraints on auto-resolve (MUST): ① touch nothing outside the owned dedup prefix, and never nest prefixes (at most one owning prefix matches any key; pass the evaluation start time so rows raised in the same run fall outside the boundary) ② close only the group whose evaluation succeeded ("could not read" is not "became healthy") ③ the violation list is the full set from this run.
+    -   Write the auto-resolve predicate as "remaining unresolved count", not "failures this run" (MUST). Runs that **did not try** (backoff, cutoff, deadline exceeded) make the former zero while the latter does not shrink. Always log the number cut off, and pin "does not close on a run that did not try" with a mutation test.
+    -   **Deferral Is Not Recovery**: On days when the denominator of a rate alert is below the minimum sample size, skip the judgement and keep already-open alerts **open** (MUST). A skipped judgement MUST NOT auto-resolve as "no violation" — otherwise a traffic dip the day after a floor breach counts as recovery. A failure of the evaluation itself (RPC not applied, broken permissions, query error) MUST fail the job's success flag and flow into observability so it is distinguishable from "no violation". Detect not only zero counts but also a sharp drop against the day before yesterday (SHOULD).
+    -   **Dedup Key Discipline**: Cut the calendar day of a daily dedup key in the time zone operators use for decisions (MUST) — cutting in UTC absorbs early-morning local events into the previous day's key, which is then swallowed as "already notified". The aggregation key (separates the day's events) and the persistence key (is the same failure continuing?) are different things: persistence judgements of the form "escalate after N occurrences / M hours" are not measured on a single row's running count but on the **history** of the series with the date stripped (family key), windowed into a total and a duration (MUST) — a dated key lives at most 24 hours and can never reach a longer persistence condition. Resolved rows are not notified but do count as persistence evidence. When designing thresholds in a system with auto-resolve, always check for paths that delete rows before the threshold is evaluated (MUST). Run health evaluation jobs **after** the nightly auto-remediation jobs (SHOULD).
+    -   **Persistence-Based Escalation**: Warnings are not notified on occurrence, but "not notifying" alone leaves them orphaned (nobody knew backups had been failing for days). Escalate by persistence (e.g. at least N occurrences and at least M hours), not severity, and send exactly one message per series in a daily sweep (SHOULD). Set the thresholds by replaying production data to estimate "how many messages would have been sent", keep the notified flag per row, and treat recurrence after resolution as a new row that earns one new message.
+    -   **False Positives Are Also Failure**: A monitor that never stops firing is as broken as a silent one (the more items, the sooner "too many to look at"). When touching a detector, extract and classify its actual output on real data (by host, status, kind) and never claim correctness from aggregate numbers alone (MUST). Count "not even HTTP" failures (fetch itself failed, invalid URL, timeout) in a separate bucket, and question whether the list is correct before improving its presentation (paging, caps). The negation of a state machine ("not published") is not monolithic: separate "not yet raised" from "deliberately taken down". Write every check by first stating the population condition "which rows does this rule apply to", and pair a negative test ("out-of-scope does not fire") with a positive one ("in-scope fires") (MUST).
+    -   **Fire-Source Ledger**: Every new fire source opens the same hole again. Mechanically reconcile every file that raises dedup keys against the auto-resolve calls, and fail when the explicit list drifts from the repository's reality (MUST). Budget from the start that "adding a notification always includes a ledger update".
 
 ### §25. Escalation Channel Matrix
 
@@ -534,6 +565,8 @@
 | **P1 (High)** | Instant notification + PagerDuty | **1 hour** | Major feature outage |
 | **P2 (Medium)** | Warning channel | **4 hours** | Non-critical feature issues |
 | **P3 (Low)** | Email + Issue Tracker | **Next business day** | Minor bugs |
+
+-   **Alert Channel Independence**: When the admin-alert delivery path consumes **the same resource** it monitors (email send quota, API quota), the exhaustion warning never arrives (the quota-exceeded email itself cannot be sent). Design an early warning based on consumption pace ("at the current pace, N% of the quota is reached by month end") as the only grace period (MUST), and add an independent path (an alert list in the DB, another channel) where possible. Count quota consumption as "recipients + inbound" (CC / BCC / inbound each count as one), and confirm in advance what happens at the cap (hard stop vs. overage billing) (see `operations/650_capacity_planning.md`).
 
 ### §25-b. Actionable Alert Template
 
@@ -558,6 +591,10 @@
     Dashboard: [Grafana link]
     Trace: [Jaeger link]
     ```
+
+-   **Structured Details Requirement**: Every number shown in an alert body is also stored with the same value in structured details (MUST; if only an estimate can be shown, keep the displayed value under a separate key). An alert that represents an event under ongoing auto-remediation MUST carry a quantity that shows the change since last time (remaining count, processed count) — an ever-growing `occurrence` looks the same whether the issue is neglected or a nightly remediation is recording recurrence, and the count alone cannot tell them apart. Do not read the occurrence count of an alert without such a quantity as "days neglected"; when you see "open for N days", compare before/after on the remaining count or real data before judging it neglected (MUST).
+-   **Multi-Net Alerting Discipline (one metric, several alerts)**: When several alerts sit on the same metric (aggregate vs. per-dimension, short vs. long window), write the metric's definition in one vocabulary and have every alert, threshold comment, and runbook quote it (MUST) — fixing only one of them against measurement leaves the others steering responders toward the old cause. Each alert MUST state in its body "which shape of anomaly this net catches" (aggregate = uniform degradation, per-dimension = skew in one dimension), and the body MUST show the triage order (check for skew first → if none, uniform causes) rather than asserting a cause. Pin the meaning of a metric name that suggests a cause (e.g. `blocked`) in the definition. Threshold comments SHOULD say "what this net does not catch" with measured values, and the aggregate threshold MUST NOT be lowered to catch skew.
+-   **Receptacle ≠ Detection**: A violation-report endpoint, a log sink, or a cleanup function "created / defined" detects or executes nothing by itself. It exists only once who looks (or calls), where, and when has been wired up **in the same PR** (MUST). Emit the count in the execution response so that zero and never-ran are distinguishable. When creating alerts from anonymous input (e.g. browser CSP reports), do not create a row per reporter; aggregate into a single dedup key, cap the number of reporters listed in details, and state in the body "anonymous report — reproduce before acting" (MUST). Narrow the condition (own site, enforce mode, exclude self) so noise does not cause alert fatigue.
 
 ---
 
@@ -681,6 +718,7 @@
 
 -   **Law**: Post-large-change issues should use **incremental per-feature-group rollback** to identify minimum reproduction units, not wholesale rollback.
 -   **Server Log Sovereignty**: Use server logs as primary information source. Categorize using HTTP status and error stacks.
+-   **Side-Effect Search**: When investigating an unexpected rewrite of state, grepping for the value as a string is not enough. Enumerate every command / API call that writes the value as a side effect (MUST; e.g. `git init` always writes `core.bare` although the string never appears in source; likewise ORM auto-DDL and SDK auto-configuration). The conclusion "eliminate the candidates and what remains is an external cause" only holds if the candidate set has been proven exhaustive (see `core/000_core_mindset.md`).
 
 ---
 
@@ -696,6 +734,8 @@
     2.  Production artifact build with pinned toolchains and locked dependencies
     3.  Unit, integration, contract, security, migration, and release tests appropriate to change impact
     4.  Approval appropriate to risk and separation of duties
+-   **Deployed-Reality Verification**: For execution bodies updated outside CI/CD (edge Workers, Functions, scheduler configuration, DNS/CDN settings), merge ≠ live. A change is closed by **measuring the production response** (MUST) — a merged fix once stayed off production for weeks while most of the bill was in its scope. Put the deploy step into CI and extend external probes to verify the change itself (e.g. output format). Monitoring that looks at "configuration" and "code" separately cannot detect a mismatch between them, so keep a drift check that explicitly verifies the combination of the deployed code version and configuration (presence of secrets) in production (MUST).
+-   **Time-Boxed Manual Deploy Exception**: Manual deploys are an emergency tool and are not banned. What is protected is "deployed by hand and forgotten": force a time-boxed exception declaration (expired → red; declaration still present after resolution → red) (MUST). In overwrite-everything deploy workflows, stop the deploy beforehand whenever something would be lost by the overwrite (MUST). A change that "claims an effect" SHOULD leave a record confirming the effect in the next cycle's invoice or usage (see `operations/600_cloud_finops.md` §34).
 
 ### §34. Branch Hygiene & Preview Environment Management
 
@@ -855,6 +895,10 @@
     3.  Specific tenants, regions, devices, or dependency paths are affected
     4.  Health checks remain green while user-perceived quality is degraded
 -   **Required Response**: Combine multi-perspective monitoring, synthetic checks, anomaly detection, and user-experience SLIs to detect partial degradation before it becomes a major incident.
+-   **Fallback-Masked Primary Failure**: A fallback that returns correct output (alternate API, alternate provider, default path) can become the **permanent primary path** while screens look fine, error logs are empty, and type checks are green (the primary's death was observed once without adding monitoring, and fallback usage grew to dozens of times the quota before anyone noticed). When writing a fallback, decide at the same time "how will we know this is in use", and at minimum attach a signal that fires once at startup or from a scheduled job when the primary is unconfigured or dead (MUST).
+    -   Confirm that the designed primary path is actually used by **counting production output** (MUST). Reading the code does not tell you (the branch is written correctly). When measuring, do not confuse the delivered payload with the rendered entity.
+    -   Measure "path health (is the probe green?)" and "actual usage (is the app using this path?)" separately (MUST). If the path is healthy but the app uses another, everything stays green.
+    -   Any instance that deviates from the primary path is a violation, even one (especially where quotas or authorization boundaries are involved) (MUST). "A few is fine" hides growth. During a migration that cannot reach zero, keep a baseline and treat only increases as violations. A design that offloads to an external service MUST write down the preconditions of the destination (allowed sources, host behind the proxy, etc.) as its success conditions.
 
 ---
 
@@ -878,6 +922,7 @@
 ### §47. Graceful Degradation
 
 -   **Law**: During outages, maintain core functionality in **limited functionality mode** instead of complete shutdown.
+-   **Degradation Must Be Distinguishable**: A degraded path (rate limit, exception, upstream unreachable) that returns `[]` / `0` / a default is indistinguishable to the caller from "no matches" or "judged normally", and misleads the user's next action (MUST NOT). The canonical rule is "Distinguishable Degradation" in `engineering/100_api_integration.md`.
 -   **Feature Flag Integration**: Control each feature with Feature Flags for partial disabling **without redeployment**.
 
     ```typescript
@@ -960,6 +1005,12 @@
     3.  **Reproducible**: Reconstruct identical environments from the same code
     4.  **State Management**: Shared and production state uses a durable backend with access control, encryption, locking, backup, and audit. Limit local state to disposable sandboxes
     5.  **Drift Detection**: Periodically detect divergence between infrastructure reality and code
+-   **Out-of-Repository Configuration Probing**: Inventory the settings that decide production behavior yet appear in no file of the repository (DNS SPF/DKIM/DMARC/CAA, CDN WAF, hosting redirects and protection, storage bucket public flags, auth redirect allowlists) and keep a scheduled check that measures them from the outside (MUST). Turning every code gate green guarantees nothing about them (DMARC left at `p=none` with no reporting, and not a single test verifying the public flag of a private bucket, are real examples).
+    -   Treat only changes in the weakening direction as violations (MUST). Blocking the tightening direction rolls back remediation. Compare policies with strength levels by their ordering.
+    -   Distinguish "could not resolve (outage)" from "absent (not configured)" (MUST). Confusing them either reports a DNS outage as "not configured" or turns a fetch failure green.
+    -   Remediations that break when applied in the wrong order (tightening DMARC first quarantines legitimate mail, etc.) MUST NOT be forced by the gate. The check pins the current state; the remediation order is written as a declaration.
+    -   "Row visibility (row-level authorization)" and "location visibility (bucket public settings, signed-URL expiry)" are different layers. For sensitive data, pin invariants on both: fix "the bucket name × public flag matrix itself" by exact match, and add a positive-side control that prevents a zero-row false pass (MUST). The canonical rule is "Public-Flag Matrix Test" in `security/000_security_privacy.md`.
+-   **Declared vs Served**: Public-surface health (crawler permissions, machine-readable entry points, structured data, inbound traffic) is measured separately on the "declared side (configuration emitted by code)" and the "served side (the result of fetching the production URL)" (MUST). Fixing only one side causes drift of the "robots says Allow but the proxy returns 403" kind, which zeroes inbound traffic. Use green only for "measured and good"; show items that could not be measured as `unmeasured` in a separate bucket, never green (MUST). Do not grow a separate inspection ledger (crawler list, referrer hosts); read the same constants the implementation reads (SHOULD; see `product/500_growth_marketing.md`).
 
 ### §54. GitOps & Declarative Infrastructure Management
 
@@ -996,6 +1047,8 @@
 
 1.  **Cold Start Mitigation**: Select provisioned concurrency, artifact reduction, lazy initialization, warm-up, or another control from SLOs and measurements. Do not require purposeless periodic calls
 2.  **Timeout Design**: Derive deadlines from caller budget, downstream deadlines, queue visibility, and platform limits. A fixed 1.5 multiplier is not universal
+    -   **Worst-Case Budget**: A batch running on a platform with an execution time limit sets its per-invocation item count so that "the sum of each item's **worst-case** duration (external call cap + DB operations) < the execution limit" holds structurally (MUST). The canonical rule is "Rule 700.3.6a" in `engineering/700_batch_backfill_operations.md`.
+    -   **No Equal Timeouts**: Do not set the external call's timeout equal to the limit of the execution unit (function, job, request) that wraps it (MUST NOT). The canonical rule is "Outer Bound = Inner Bound + Cleanup Margin" in `engineering/100_api_integration.md`.
 3.  **Idempotency**: Apply idempotency keys, deduplication, transactional outbox, or equivalents to retryable side effects. Do not force meaningless state tracking on read-only or pure functions
 4.  **Global Distribution**: Mind data source latency for Edge Functions
 5.  **Concurrency Control**: Set concurrency limits. Prevent backend DB connection exhaustion
@@ -1082,6 +1135,7 @@
 
 -   **Law**: Integrate SCA and artifact scanning into change acceptance, builds, and releases, and expose coverage for every detected ecosystem and distributed artifact. Do not block all Critical or High findings solely by CVSS; determine release risk from KEV, EPSS, reachability, exposure, data sensitivity, the deployed version, and compensating controls.
 -   **Response SLA**: Immediately contain actively exploited or externally exposed critical vulnerabilities. Define risk-tier deadlines for remediation, mitigation, VEX, or risk acceptance in the Blueprint, with applicable law and vendor deadlines as lower bounds. Critical within 24 hours and High within one week are onboarding references; track owner, deadline, exception, and recheck date in machine-readable form.
+-   **Advisory Reading**: Read a dependency-audit advisory as "vulnerable range × the version actually installed × direct or dev dependency", not by package name (MUST). Show production impact by auditing production dependencies only, and give every exception a deadline and a reason why no remediation exists. Because a PR that touched no dependency can turn red the moment a new advisory is published, triage a CI failure first as "diff-dependent or environmental"; fix environmental blockers on an independent branch with top priority and rerun blocked PRs via rebase (see `engineering/600_git_workflow.md`).
 -   **Cross-Reference**: `security/200_oss_compliance.md` §11, §16, and §54
 
 ### §68. Schema-Code Synchronization
@@ -1098,6 +1152,11 @@
 
 -   **Law**: Validate all critical environment variables at startup for existence and format. On missing: `process.exit(1)` immediately.
 -   **No Silent Fallbacks**: Silent fallbacks via default values for critical settings are prohibited.
+-   **Copy Follows Configuration**: User-facing copy ("you can reply to this email", "replies are recorded") switches from the **same pure function** that decides whether every setting and secret the feature needs is present, and MUST NOT say "you can" while unconfigured. "The UI promises more than the configuration delivers" happens beyond inquiries: notifications, billing, and integrations alike. The canonical rule is "Copy Follows Configuration" in `operations/300_customer_experience.md`.
+-   **Silent Feature Disablement Detection**: A structure where a missing setting silently disables a feature and the copy switches along with it (nothing abnormal appears on screen) MUST be surfaced as a warn by the daily health check. Behavior switches instantly once the setting is in place, but if the external side (DNS MX, etc.) is not ready, nothing happens on the sending side and replies are lost — so resolve and check consistency with the external side daily as well.
+-   **Test Fallback Containment**: Known CI/test values (test site keys, dummy secrets) are supplied only in the configuration resolution layer and MUST NOT be re-defaulted in UI components, actions, or API routes. The canonical rule is "Test Fallback Containment" in `engineering/000_engineering_standards.md`.
+-   **Determination-Time Table**: When you create a configuration switch (environment variable, flag), measure for each surface "when the value is determined" (request time / build time / startup time) and write it into the runbook as a table (MUST). Surfaces referencing the same variable determine it at different times (middleware at request time, static output at build time). If even one surface is build-time determined, the procedure MUST say **"change + rebuild"** rather than "change the variable" — "redeploy" cannot be distinguished from reusing the existing build and produces "disabled in theory, still enabled in practice". Attach a verification command against the served output to every switch procedure (MUST), and show the current effective state permanently in the admin panel (SHOULD; a fail-closed design has the flip side "lost configuration = total outage", so visibility is the only detection).
+-   **Settings Round-Trip Verification**: "Can be saved" and "takes effect" are different things. When adding a setting, verify the round trip "save in the admin panel → reload returns the same value → actual behavior changes" (MUST) — with validation, saving, and mapping all in place, a column missing from the fetch projection makes the value always fall to the default, "types pass and it looks like it works" (several toggles were permanently ON in a real case). Mechanically collect from source the columns saved and the columns read with `?? default`, and verify by **complement** that all of them are in the fetch projection (MUST; a by-name list check misses whatever was added later). `?? default` hides absence silently, so pair it with a check that detects absence (MUST). Reading settings via wide SELECT + single-row fetch is a single point of failure where one missing column silently drops the whole settings object to defaults; when "it does not take effect", look first at the server log error code (missing column vs. zero rows) (SHOULD).
 
 ### §70. Cache Reset Protocol
 
@@ -1162,6 +1221,10 @@
 
 -   **Law**: Human "promises" are inevitably broken. Rule effectiveness is guaranteed only by **codified physical constraints**.
 -   **Action**: Implement automated CI checks, Git Hooks, startup-time validation.
+-   **Enforcement Gates Live in Data and Code**: Do not guard the enforcement condition of an irreversible process (physical deletion, billing, sending) with migration comments, PR titles, or runbooks (MUST NOT) — a gate that depends on human memory yields an irreversible result the one time it is forgotten, and machines cannot confirm it is "being honored" (the same process reached merge candidacy twice and was stopped each time only because a human remembered). Put the gate in data (an enforcement flag defaulting to false) and code so that not a single item is processed unless it is true (MUST). Enforce and stop are each one operation and need no revert.
+    -   Decide the fail-safe direction by **operation reversibility**, not precedent (MUST): reversible operations (display ON/OFF) may default to enabled when the setting cannot be read, but irreversible ones always default to disabled. If multiple rows are possible, enforce "only when every row is true", and never let `LIMIT 1` skip a false row.
+    -   Always include the enforcement state in the execution result (MUST). Without it, "zero items" and "not enforced" cannot be told apart afterwards.
+    -   Verify both directions as a pair (MUST): "false → not processed" alone lets an implementation that pins the gate to false pass green. Only together with "true → actually processed" is the gate proven alive. Confirm defaults and NOT NULL on the DDL itself.
 
 ### §78. SRE as Code
 
@@ -1202,6 +1265,10 @@
     | **Dependencies** | Are external dependency SLOs confirmed? |
     | **Backup** | Is backup/restore procedure verified? |
     | **Capacity Planning** | Are required resources and scaling strategies defined? |
+
+-   **Readiness Ledger Format & Live Smoke**: Pre-go-live readiness for a feature tied to revenue or an external integration is managed in a ledger that lists, per item, "status (configured / not yet / owner decision needed)" alongside "the artifact and how it was verified (what was measured, how)" (MUST). The evidence is "measured", not "configured". The ledger SHOULD open with a one-sentence declaration of "the remaining decisive blocker (can it be narrowed to one?)" and separate items that need an owner decision.
+    -   When the provider has **configuration objects whose absence only surfaces at runtime** (e.g. a customer-portal default configuration, a webhook endpoint), the ledger MUST include them together with the error message shown when missing and the means of creation (scoped CLI permission or dashboard).
+    -   Switchovers such as DNS record the current values beforehand and are reversible within minutes; after the switch, prove end-to-end with **one real transaction from a real account** by reconciling three records: the app's state, the provider's event delivery log, and the receiver's processing log (MUST).
 
 ### §81. Reliability Review (Design Review)
 
@@ -2121,6 +2188,14 @@ The table is a reference model for responsibility placement. Conformance depends
           - name: Performance Budget
             run: npx bundlesize --config .bundlesizerc.json
     ```
+
+-   **Scheduled Workflow Failure Notification**: Scheduled runs in CI platforms (`schedule:` or equivalent) fail silently by default: the list turns red and nobody is told (five of six scheduled workflows notified no one on failure in a real case). Every workflow with a schedule MUST have a failure-notification job (issue creation / notification). "Added monitoring" and "would notice if monitoring broke" are different things; a dead monitor turns into evidence that the system is healthy.
+    -   Notify from a **separate job** with `needs: [main]` + `if: failure()`, not from an `if: failure()` step inside the main job (MUST). Folded into the same job, the step is skipped the moment the job dies by timeout or cancel, so it stays silent exactly when it matters. Written with `always()` alone it fires on skips too.
+    -   Stop omissions with a set ratchet (MUST): count every workflow with a schedule mechanically and fail if even one lacks the notification job. Centralize the notification logic in a composite action, and pin "it is a separate job" with a test that turns red when `needs` is removed.
+    -   A check that only runs manually (`workflow_dispatch`) is not monitoring (MUST NOT). Give it a schedule, or label it explicitly as "not monitoring". Before removing or folding a notification workflow, read the original design intent (what it was meant to be independent from) (MUST).
+-   **Multi-Runtime Gate Coverage**: If the project has two or more runtimes (Node + Deno, Web + Worker, app + DB functions), write down per runtime "which type-check, lint, and test gates see this code" (MUST). The richer the primary runtime's gates, the harder the secondary runtime's blind spot is to notice (type errors in a billing webhook and an authorization boundary reached production without hitting any gate in a real case). A test that inspects source as strings is not a type check.
+    -   Any check run by hand MUST be wired into CI. A manual run only guarantees "it was fixed at that moment", not that it stays fixed. Wire it into CI (at PR time), not into the deploy workflow (MUST) — stopping at deploy time means main is already broken.
+    -   When adding a gate job, add it to the `needs` of the aggregation job and the artifact-upload job too, and hold that invariant in a test (MUST). Confirm by measurement that the added gate exits 1 under a mutation (a deliberately injected type error) before finalizing (MUST).
 
 ### §174. Chaos as Code (CI-Integrated Chaos Testing)
 

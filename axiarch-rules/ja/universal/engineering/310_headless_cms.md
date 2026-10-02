@@ -517,6 +517,7 @@ media/
 
 - ランダムID（UUID等）のみのフォルダ名は禁止
 - 同一フォルダ内のファイル名重複は上書き防止のため禁止
+- **Filename Preservation**: 利用者がアップロードしたファイル名は利用者のデータであり、サニタイズは安全上必要な最小範囲（パス区切り・制御文字の除去、必要なら可逆な文字種変換）に限る（MUST）。UUID・タイムスタンプの不可逆な付与による改名は禁止（MUST NOT）。同名衝突は暗黙に改名して保存せず、エラーとして返して利用者に判断させる（MUST）。「重複回避のために名前を変える」はシステムの都合であり、利用者の検索性・ファイル管理を壊す。
 
 ### 11.3. 管理アセット vs ユーザーアセットの分離
 
@@ -544,6 +545,7 @@ media/
 
 - **Law**: ストレージの**オリジンURL**を`<img>`タグの`src`属性に直接記述することは禁止
 - **Action**: 画像配信は必ず**CDNまたはリバースプロキシ**を経由し、エッジレベルでのキャッシュ・自動フォーマット変換（WebP/AVIF）・レスポンシブリサイズを適用する
+- **Image Host Header Precondition**: 画像検索・画像サイトマップ・`ImageObject` を整える前に、画像配信ホストの応答ヘッダ（`x-robots-tag` 等）をクローラー UA で直接取得して確認する（MUST）。正本は `product/500_growth_marketing.md` の「Image Host Header Precondition」。
 
 ### 12.2. The Storage URL Hardcoding Ban
 
@@ -607,6 +609,7 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 - **API連携**: CMSのメディア選択UIからDAMのAPIを呼び出し、アセットをインポート
 - **CDN統一**: DAMとCMSのメディアを同一CDN（Cloudinary / imgix）経由で配信し、変換パラメータを統一する
 - **メタデータ同期**: DAMのタグ・権限情報をCMSメディアフィールドに同期し、利用権限違反を防止する
+- **Media Caption Metadata Preservation**: メディアライブラリからコンテンツへ画像を選択する全経路で、URL だけでなく表示に使うメタデータ（caption・alt・note）を同時に保存する（MUST）。保存先が URL 配列互換を要する場合は配列を壊さず、隣接するマップへ正規化して保持する。メタデータを URL で引くマップのキー生成・解決・剪定は公開 URL への正規化を一箇所で通し、DTO 側の URL 正規化と同じキーで照合する（MUST）: 片側が raw path のままだと表示時に静かに落ちる。新しい画像経路を追加するときは、保存・削除時の剪定・公開 DTO 正規化まで同時に実装する（SHOULD）。失敗パターン: 複数経路で URL だけを保存し、公開表示側で caption を復元できなかった。
 
 ### 14.3. アセットライフサイクル管理
 
@@ -633,6 +636,7 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 
 - **On-demand Revalidation**: CMS Webhookと連動し、コンテンツ更新時に該当ページを即時リバリデーションする
 - **Tag-based Revalidation**: `revalidateTag()` を使用しコンテンツタイプ単位での一括リバリデーションを実装する
+- **Mutation-Path Invalidation Proof**: クロスリクエストキャッシュ（ISR・データキャッシュ）を新設・拡張する差分は、その読み取り結果を変えうる全 mutation 経路（作成・更新・削除・一括操作・Webhook）が同一の無効化タグを発火することを列挙して証明する（MUST）。正本は `engineering/300_web_frontend.md` の「Invalidation Wiring Before Caching」。
 
 ---
 
@@ -737,6 +741,8 @@ const imageUrl = `https://storage.example.com/articles/2026/03/hero.webp`;
 
 - **Law**: カスタムNodeView内にインタラクティブ要素（`<input>`, `<select>`, `<button>`等）を配置する場合、`stopEvent`関数を必ず設定する
 - **Action**: ターゲットイベント（`mousedown`, `keydown`, `input`, `dragstart`）を制御し、エディタへの伝搬を防止する。全イベントの無差別ブロックではなく、インタラクティブ要素のイベントのみを選択的にブロックする
+- **View Source（双方向ソース表示）**: WYSIWYG エディタには、生の HTML／ソースを閲覧できるだけでなく、その場で編集して反映できる双方向のソース表示を実装する（MUST）。複雑な埋め込み（iframe／script）やデバッグはビジュアル編集だけでは限界がある。ソース編集欄はシンタックスハイライト付きコードエディタを用いる。
+- **Dual-Renderer Content Bake**: 同一コンテンツを SSR 用静的レンダラとクライアント用動的レンダラの二系統で描く場合、外部メタ（alt／caption 等）を片方の描画関数にだけ注入してはならない（MUST NOT）。両系が同じ入力を消費するよう、公開読取の描画経路でコンテンツ自体へ純変換で焼き込み（bake）、編集経路の fetch は raw のままにして再保存で派生値が永続化を汚さないようにする（MUST）。スキーマ駆動のパーサ／エディタは宣言されていない属性を parse 時に捨てるため、render 専用の注入属性でもクライアント側スキーマに既定値付きで宣言する（MUST）。静的レンダラは属性を素通しするため、SSR だけ見て検証を終えない。失敗パターン: hydration 後に caption／alt が消え、SSR とクライアントで出力が割れた。
 
 ---
 
@@ -781,6 +787,7 @@ draft → pending → published → archived
 
 - **Self-Publish Ban**: 自分が作成したコンテンツを自ら`published`ステータスへ直接遷移させることを禁止する
 - **Audit Trail**: すべてのステータス遷移を監査ログに記録する（`who`, `when`, `from_status`, `to_status`, `reason`）
+- **Traceability UI**: 監査ログは永続化するだけでなく、管理 GUI から「いつ・誰が・どう変えたか」を追跡できる画面を必須とする（MUST）。DB を直接クエリしないと分からない監査ログは、運用上は存在しないのと同じである。
 
 ---
 
@@ -798,6 +805,7 @@ draft → pending → published → archived
 - **Query Filter**: `published_at <= NOW() AND (unpublished_at IS NULL OR unpublished_at > NOW())`
 - **二重防御**: CDNキャッシュ/ISRによるバイパスリスクを防ぐため、DBクエリとアプリケーションロジックの両層で時刻チェックする
 - **キャッシュ無効化**: スケジュール時刻到達時に関連ページのキャッシュを自動無効化する
+- **Test Boundaries**: 予約公開のテストは、(a) プロジェクト時刻帯の日付境界（00:00）、(b) UTC 変換の往復、(c) 過去日時を設定した場合の即時公開、を境界値として必ず検証し（MUST）、(d) 予約 → 時刻到達 → 公開反映 → キャッシュ無効化の一連を E2E で固定する（SHOULD）。時刻帯・境界値・キャッシュの 3 点は予約公開を持つ全 CMS で同じ失敗を生む。
 
 ---
 
@@ -847,6 +855,7 @@ draft → pending → published → archived
 ### 27.1. The Soft 404 Awareness Protocol
 
 - **Law**: 削除済み/未公開コンテンツのURLに対してステータスコード200の空ページを返す「ソフト404」を防止する
+- **Data-Driven Route Smoke**: 配列や CMS コンテンツから生成されるルートのスモーク対象は検査スクリプトへ手書き複製せず、同じ正本を読んで slug と期待タイトルを導出する（MUST）。正本は `quality/000_qa_testing.md` の「Data-Driven Route Smoke」。
 
 | シナリオ | HTTPステータス |
 |:---|:---|
@@ -946,6 +955,8 @@ switch (section.type) {
 | イベント | `Event` |
 | ローカルビジネス | `LocalBusiness` |
 | レビュー | `Review` / `AggregateRating` |
+
+- **但し書き（Rich Result Eligibility）**: 上表の型を選ぶ前に、検索エンジンがリッチリザルト対象とする型（`Product`、`SoftwareApplication` 等）の必須項目（例: `Product` は `image` とそのページでの購入完結、`SoftwareApplication` は `aggregateRating` または `review`）を偽らずに埋められるかを確認する（MUST）。必須項目を偽らずに満たせない型は出さず、対象外の型（`Service` + `offers`、`WebPage` 等）で意味づけだけ残す。価格や一覧の構造は残るので AI 検索が読む経路は失われない。対象型の適格性は検索プラットフォームの一次資料で確認し、迷ったら同業の本番 HTML を実測する（SHOULD）。失敗パターン: 満たせない必須項目を持つ型を出し続け、Search Console で有効 0 件・無効のみが積み上がった。
 
 ### 31.2. パンくずリスト
 
@@ -1182,6 +1193,8 @@ switch (section.type) {
 | **カラーコントラスト** | テキストと背景の最低コントラスト比4.5:1を保証 |
 | **動画キャプション** | 動画コンテンツにはキャプション/トランスクリプトを必須 |
 
+- **Heading Rebase for Embedded Rich Text**: エディタで自由に選べる見出しレベルは、保存時の矯正では既存データも将来の入力も守れない。本文をページのアウトライン（h1 = 題名、h2 = 区画…）に埋め込むときは DB 上の値を書き換えず、描画側で「本文の最も浅い見出しが所定のレベルになるよう全見出しを同じ量だけずらす」再基準化を行い、相対階層を保って 1〜6 にクランプする（MUST）。正本は `engineering/300_web_frontend.md` の「Heading Rebase for Embedded Rich Text」。
+
 ### 39.2. European Accessibility Act (EAA) 対応
 
 - **Rule 34.57**: 2025年6月施行のEAAに対応し、CMS管理画面自体のアクセシビリティもWCAG 2.2 AAレベルで保証する
@@ -1204,6 +1217,7 @@ switch (section.type) {
 - **Rule 34.58**: 翻訳はCMS内ワークフローまたはTMS（Translation Management System）統合で管理する
 - AI翻訳は下訳としてのみ使用し、人間レビューを義務付ける
 - **Translation Memory**: 過去の翻訳資産を蓄積・再利用する仕組みを構築する
+- **Structure/Text Separation**: 構造化コンテンツ（リッチテキスト JSON・メニュー・リンク配列）の AI 翻訳は、構造・ID・URL・列挙値・数値・時刻・金額をモデルへ渡さず、自然言語テキストだけを抽出して「同数・同順の文字列配列を返す」契約で渡し、結果を骨格へ戻す（MUST）。正本は `ai/000_ai_engineering.md` の「Structure/Text Separation」。
 - **Cross-Reference**: `axiarch-rules/{lang}/universal/product/800_internationalization.md`（グローバル展開）、`core/200_language_protocol.md`（言語プロトコル）
 
 ---
@@ -1288,6 +1302,7 @@ switch (section.type) {
   - コンテンツ本文（構造化データ）の完全移行
   - メディアアセットの移行と参照先の更新
   - 301リダイレクトの設定（旧URL → 新URL）
+  - **Managed Redirect Store**: 運用で追加・修正・停止する移行 URL のリダイレクトは、静的設定ではなく管理画面から編集できるデータストアを実行時 SSOT にする（MUST）。正本は `product/500_growth_marketing.md` の「The Managed Redirect Protocol」。
   - メタデータ（SEO、OGP）の移行
   - リビジョン履歴の移行（可能な場合）
   - 内部リンクの書き換え
@@ -1412,6 +1427,7 @@ switch (section.type) {
 
 - **Rule 34.76**: デプロイ後に主要ページのコンテンツ存在確認（Smoke Test）を自動実行する
 - 空ページ（Soft 404）の検出を含める
+- **Feed Error-Quiet Check**: sitemap・robots・llms.txt・公開フィードの検証は HTTP ステータスだけでなく、生成時のサーバーログ（DB エラー・空配列フォールバック）まで確認する（MUST）。200 で空リストは失敗である。公開クロール経路のデータ取得は `status = published` 等の公開条件をアプリ側でも明示し、行レベルポリシーの管理者分岐に依存しない（MUST）。DB 側は public read policy と admin read policy を分離し、公開経路で admin helper の評価を発生させない（SHOULD）。失敗パターン: sitemap は 200 を返しつつ、内部の slug 取得が権限エラーで空配列へフォールバックしていた。
 
 ---
 
@@ -1944,6 +1960,7 @@ Content Published
   - **Rollback Plan**: 移行失敗時の切り戻し手順を事前に文書化する
   - **Content Freeze**: 本番移行実行中はソースCMSでのコンテンツ編集を凍結する
   - **SEO監視**: 移行後30日間、Search Consoleのインデックスカバレッジを日次監視する
+  - **Old-URL Population**: 旧 URL のリダイレクト規則は、実測した旧 URL の母集団（旧 sitemap・アーカイブ・アクセスログ）に載っている文字列から作り、名称から slug を再構成しない（MUST）。旧 slug には誤綴り・重複・全角混在があり得る。規則を追加したら母集団に同じ URL があることを確認し（無ければ誰もリンクしない URL）、母集団の全数を日次で照射するプローブを置いて取りこぼしが翌朝に赤で出るようにする（SHOULD）。是正は冪等な migration（`ON CONFLICT ... DO NOTHING` ＋ 入ったことを確かめる検証ブロック）で行い、本番へ手作業 SQL を打たない（MUST）。失敗パターン: 正綴りで再構成した規則が実在しない URL に付き、実在する URL を取りこぼした。正本は `product/500_growth_marketing.md` の「Measured Source Population」。
 
 ---
 

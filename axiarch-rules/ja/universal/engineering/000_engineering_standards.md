@@ -51,6 +51,7 @@
 ### 1.0. 命名規約と構造原則 (Naming & Structural Foundations)
 *   **The Consolidated Naming Convention**:
     *   **Files & Directories**: 公式style guide、formatter、framework generator、既存リポジトリ規約に従います。TypeScript / JavaScript Webでは `kebab-case` を既定とし、Pythonのmodule、Dart package、Java / Kotlin / C#の型ファイル、Terraform resource等へ一律適用しません。OS間の互換性のため、大文字小文字だけで区別する名前は全言語で禁止します。
+    *   **Case-Only Distinction Ban (補足)**: 上記の禁止は、大文字小文字を区別しないファイルシステム（macOS/Windows 既定）と区別する CI（Linux）の間で、リネームが検出されない・重複ファイルが生まれる・import が片側だけで失敗する事故を防ぐためです。大文字小文字のみの改名は `git mv` を 2 段階（別名経由）で行い、同一リポジトリの命名規約を 1 つに固定してください。
     *   **Symbols**: component、class、function、package等のsymbol名は言語ネイティブ規約を優先します。言語別の正本は `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` を参照します。
     *   **The Barrel File Ban**: TypeScript / JavaScriptでは、`index.ts` による無制限の再エクスポートを原則禁止します。言語公式のpackage/module入口は、循環参照、公開API、Tree Shakingまたはlink時影響を検証した場合に使用できます。
 *   **UI/Logic Consistency (完全統一)**:
@@ -66,6 +67,10 @@
 *   **The Interoperable Ecosystem Mandate**:
     *   **Law**: アプリ内に保持される重要なドメインデータを、システムの外でも通用する「標準化された資産」として扱ってください。独自仕様に閉じ込めることは、将来のサービス連携とユーザーへの価値提供を阻害する敗北行為です。
     *   **Portable Design**: 可能な限り業界標準のスキーマ、定数、国際規格に準拠し、データそれ自体が「信頼性の高い証明書」として他システムへのポータビリティを持つように設計してください。
+*   **Security Wrapper Name Collision Ban**: 安全版のラッパー（例: `safeJsonParse`）を導入したら、同名または紛らわしい名前の非安全版をコードベースに残してはなりません（MUST NOT）。開発者が「安全版を使っている」と誤認し、非安全版が呼ばれ続けるためです。非安全版は削除し、安全版の re-export で一本化してください。
+*   **Principle over Enumeration**: 「処理対象かどうか」の判定（フィルタ・分類・翻訳対象の抽出等）は、キー名や型名の列挙（許可リスト／拒否リスト）ではなく、対象の性質から導ける原理（例: 原文ロケールの文字を含まない文字列は散文ではない）を主判定にしなければなりません（MUST）。列挙は原理が拾えない例外を守る第 2 の網として残します（SHOULD）。
+    *   **Rationale**: 列挙だけに頼ると、定義域が広がった瞬間（新しいキー・新しい型）に黙って取りこぼします。実務では設定キーの列挙で判定していた翻訳対象が、後から追加された技術値キーを拾えず沈黙しました。
+    *   **Verification**: 列挙に無い新しい値を 1 件追加し、原理側の判定だけで正しく処理されることをテストで固定してください。
 
 ### 1.1. Omnichannel & Headless First Protocol
 *   **Web is just ONE Client**:
@@ -79,6 +84,10 @@
 *   **Mandate (The Vein Check)**: 機能実装の完了条件は、**「UI → Action → DB → Action → UI」** というデータのRound-Tripが疎通していることを確認するまでコミットしてはなりません。
 *   **Physical Verification**: 必ずDB（psql/Table Editor）で**物理的に値が書き込まれていること**を確認する義務を負います。
 *   **Deception Penalty**: 保存されない設定画面や、リロードすると消える入力フォームをPRに含めることは、修正完了まで全ての作業を凍結します。
+*   **Link-Target Reality**: UI が `href`・`fetch`・アクション参照で使う内部パス／API 定数と、実装ファイルの実在を機械的に突合する検査を監査項目に含めなければなりません（MUST）。定数ファイルへの登録は実装の証拠になりません。機能の存在を UI で表明する（ボタン・リンク・説明文）とき、その実装が無い状態で表示してはなりません（MUST NOT）。Anti-Haribote の適用範囲は「保存されない」だけでなく「リンク先が無い」「経路が無い」まで含みます。固定エラーだけを返すスタブ export が UI から呼ばれているものも同じ検査で検出してください（SHOULD）。
+*   **Post-Action-Only State Smell**: 「操作の直後だけ表示され、リロードすると消える」状態は、保存値を読込→表示の経路に配線していない兆候です。操作→表示と読込→表示は別経路であり、後者が無いまま「保存しました」と表示してはなりません（MUST NOT）。操作結果を state に置く部品は、同じ形の初期値をサーバから受け取る prop（`initialX`）を必ず持ち（MUST）、DB へ書く列は読み取りの select 指定と DTO へ同時に追加してください（MUST）。「書くだけ」の列は読まれません。
+*   **Real-Data Round-Trip**: 往復（表示→編集→保存→再表示）を持つ変換は、合成データではなく実データで往復させて不変を確かめなければなりません（MUST）。合成データでは「改行を含む項目」のような現実の形が出てきません。撤回した方式が実データで壊れた件数をテストに固定してください。
+*   **Verify Where It Is Read**: 是正の確認は、書いた場所（テーブル・設定）ではなく読まれる場所（表示・API 応答・派生テーブル・集約・キャッシュ）で行ってください（MUST）。表示を作る経路を先に辿り、派生・集約・スナップショットを持つ機能では本体を直したら派生も直します。最終出力で確認できないまま「直った」と報告してはなりません（MUST NOT）。確認できないなら、できないことを明示してください。設定値を変えて挙動を観察する前に、取得経路にキャッシュ・開発時バイパスが無いかを確認し、無効化手順は `engineering/730_caching_discipline.md` に従ってください。
 
 ### 1.3. Structure First Protocol（構造化ファースト）
 *   **Law**: 重要なビジネスデータ（資格、契約、健康状態、資産等）は、テキスト（非構造化データ）ではなく、可能な限りマスターデータ（M:N）やタグ形式で構造化して管理してください。
@@ -107,7 +116,10 @@
 *   **No "Later"**: 「後でリファクタリングする」は嘘です。今やるか、永遠にやらないかです。
 *   **Cyclomatic Complexity**: 複雑度が高いコードはバグの温床です。早期リターン（Early Return）を活用し、ネストを浅く保ちます。
 *   **Dead Code**: コメントアウトされたコード、使われていないインポート、デバッグ用の `console.log` は、コミット前に完全に削除します。
+*   **Prop Inventory on Consolidation**: 専用実装を共通実装へ統合するときは、専用側の prop／オプションを 1 つずつ「何のためにあったか」を確かめてから捨ててください（MUST）。性能配慮（先頭要素の先行読み込み等）は見た目に出ないため静かに落ちます。受け取るだけで使わない prop を残してはなりません（MUST NOT）。「宣言されて渡されている prop」は型検査・lint・未使用コード検出のどれも通り抜けるため、宣言と使用が対で存在することを検査で固定してください（SHOULD）。消えたのは機能であってコードではありません。
 *   **TODO管理**: `// TODO:` を残す場合は、必ずチケット番号または期限を併記します。放置されたTODOは技術的負債です。
+*   **Behavior-Preserving Consolidation**: 重複定義を SSOT へ集約する変更は、挙動を完全に保存しなければなりません（MUST）。手順は「未使用の SSOT 側定義を、呼び出し側で実際に効いているインライン値と完全一致に書き換える → 呼び出し側を SSOT 参照へ切り替える」の 2 段とし、厳密化・改善（正規表現の強化等）は別の変更で、その挙動を固定するテストと一緒に行ってください（MUST）。集約と挙動変更を 1 つの変更に混ぜると、テストの無い経路で回帰が起きたとき「集約のせい」か「厳密化のせい」かを切り分けられません。写しの差異の扱いは §13.9 Copies Are Deleted, Not Monitored を参照してください。
+*   **Share Only What Must Be Equal（要約）**: 入口が似ているフローの共通化は「方式」（検証のスキーマ化、認証・レート制限・bot 対策の扱い）までとし、スキーマ本体・保存先・表示経路・キャッシュ無効化対象は混ぜないでください（MUST）。詳細は `core/000_core_mindset.md` §1.3 の Share Only What Must Be Equal を参照してください。
 
 ### 1.7. Root Cause First Protocol（根本原因優先）
 *   **Prohibition**: エラー発生時、原因を特定せずに「とりあえず動く修正（Band-Aid Fix）」を適用することを禁止します。
@@ -116,6 +128,9 @@
     2.  **Diagnose（診断）**: ログ、スタックトレース、依存関係ツリー等を分析し、「なぜ起きたか」を言語化してください。
     3.  **Fix Root（根本修正）**: その場しのぎの緩和策ではなく、根本原因を解決してください。
 *   **Rationale**: バンドエイド修正は「時限爆弾」です。短期的には動作しますが、環境変更やライブラリ更新時に予測不能な障害を引き起こします。
+*   **Transient Claim Discipline**: 失敗を「一過性」と分類するには機序を述べなければなりません（MUST）。述べられないなら「未解明」です。成功は失敗より情報量が少なく、通ったことは原因の不在を証明しません。再試行は仮説の検証手段であって是正ではなく、再試行前に「これで通れば◯◯が原因ではない」という反証条件を宣言し、外形的な成功／失敗より先に提供されている診断情報（ビルドレポート・OOM 表示・stderr）を読んでください（MUST）。「対処したのに直らない」ときは、同じ層を強くする前に「本当にその層が返しているのか」を入口の一時ログ等で観測し（MUST）、原因候補が複数あるなら対照・原因側を外した probe・ローカル再現を同時に投入してください（SHOULD）。閾値を小さくしただけの「弱める」は「通さない」ではありません。
+*   **Two-Strike Spec Check**: 同じ症状に対する修正が 2 回連続で効かなかったら、3 回目の試行の前に仕様・実装の一次情報（WHATWG/W3C 仕様、ライブラリのソース）を直接確認してください（MUST）。要素固有の意味論（置換要素の寸法属性と `object-fit`、設定値の層ごとの意味）は推測では当たりません。
+*   **Guard Bypass Prohibition（要約）**: 防御（設定・hook・CI ゲート・lint）を無効化するフラグを付ける前に、その設定のコメントと導入経緯を読んで何の事故を防いでいるかを特定し、環境が要求を満たさないときは要求を緩めず満たす側を選んでください（MUST）。迂回した状態で行った検証は、その防御が守る事故に対して無効です。詳細は `core/000_core_mindset.md` §1.4 の Guard Bypass Prohibition を参照してください。
 
 ### 1.8. Config Change Impact Analysis（設定変更影響分析）
 *   **Context**: ビルド設定（`next.config.ts`等）、コンパイラ設定（`tsconfig.json`等）のプロジェクト全体設定ファイルの変更は、コードベース全体に予期しない影響を波及させます。
@@ -124,6 +139,11 @@
     2.  **Risk-Based Approval**: 変更ファイル数だけでriskを判定しません。security境界、互換性、共有toolchain、production blast radius、rollback難易度に応じて、owner review、独立承認または段階配信を要求してください。
     3.  **Cohesive Change**: 影響対象、設定、生成物、migration、検証、rollbackを追跡可能な変更単位として同期し、途中状態が利用者やrelease経路へ露出しないようにしてください。
 *   **Scan Examples**: `trailingSlash` 変更 → 全 `router.push` / `redirect` / `Link href` をスキャン。`paths` エイリアス変更 → 全 `import` 文をスキャン。
+*   **Determination-Time Check**: 環境変数・フラグ等の設定スイッチを作ったら、適用面ごとに「値がいつ確定するか」（リクエスト時／ビルド時／起動時）を実測し、運用手順書へ表として書いてください（MUST）。ビルド時に確定する面が 1 つでもあれば、手順は「変数の変更」ではなく「変更＋再ビルド」と明記します。「再デプロイ」は既存ビルドの再利用と区別できず、解除したつもりで解除できていない状態を生みます。詳細は `operations/400_site_reliability.md` の Dynamic Configuration 節を参照してください。
+*   **Enumeration Extension as Cohesive Change**: 種別を列挙する仕組み（`entity_type` 等）へ値を追加する変更は、アプリ定数・DB CHECK 制約・読み取りポリシーの分岐・設定レジストリ・保存時の同期フック・公開面の適用・管理 UI を同一の変更単位で揃えなければなりません（MUST）。片方だけ進むと HTTP 200・例外なし・ログなしで縮退します。特に行レベルの読み取りポリシー分岐の追加漏れは、書き込みが特権ロールで成功するため読み口だけが 0 件になり最も沈黙しやすい形です。列挙の正（CHECK 制約）に対して各層が全種別を被覆しているかを補集合（正にあって層に無い値）で検査するテストを置き、追加時に自動で赤くなるようラチェットしてください（MUST）。
+*   **Shared Component Replacement Scan**: 多数の呼び出し元を持つ共有部品（リンク・フォーム・フォーマッタ・URL 正規化等）を差し替える変更では、呼び出し元が渡している入力の「形の集合」（絶対／相対／クエリのみ／フラグメント／外部等）をリポジトリ走査で数え、その全形を入力表テストに固定してください（MUST）。設計時に想定した形だけの表は、想定外の形を 1 件も検査しません。実務では絶対パスだけを表に持つテストが相対 `?page=2` の書き換えを見逃し、ページ送り・並び替えが数週間壊れていました。判定は純関数へ切り出し、部品を実際に描画した結果も固定してください（SHOULD）。
+*   **Additional Scan Examples**: ドメイン／オリジン変更 → CORS、CSP、Cookie 属性、OGP、sitemap、robots、OAuth redirect URI、Webhook 登録先、メール送信ドメインを一括確認。環境変数の削除 → コード内の全参照、各実行基盤、台帳の 3 点を同時更新。`trailingSlash` 等の正規化変更 → アプリ内リンクに加え、プロキシの認証除外条件、robots／llms.txt／OpenAPI の公開パス、スケジューラ（cron）の設定パスを同じ正規 URL へ揃え、実 HTTP で到達を確認（`engineering/300_web_frontend.md` §108 参照）。
+*   **Direction-Aware Invariant Checks**: 不変条件の「安全な方向」が別の設定（並列度・ワーカーの有無・実行モード等）で反転する場合、検査はその設定を実ファイル・実値から導出し、読めなければ失敗させなければなりません（MUST）。定数で持つと、設定を変えた人が検査の存在を思い出さない限り静かにずれ、フレームワーク既定値への暗黙依存も既定の変更でずれます。上げすぎ・下げすぎの両方向に歯止めを置いてください（MUST）。片方向だけだと、前提が反転したとき同じ事故が逆向きに起きます（実務ではビルドのメモリ上限で 2 度、逆向きに落ちました）。値の根拠コメントも検査対象にし、前提が偽になったら失敗させます（SHOULD）。偽の説明は次の担当者の判断を能動的に誤らせ、検査は偽の前提を抱えたまま緑を返し続けます。機械で守れない判断値（余裕係数等）は限界として正直に記録してください（SHOULD）。
 
 ### 1.9. Version-Aware Contract and Codebase Consistency（導入版契約と既存実装の整合）
 *   **Law**: 既存コードは利用中のpatternを示す証拠であり、公式のversion別document、security advisory、support policyは契約とEOL判断の正本です。どちらかを無条件に優先せず、lockfile、runtime／compiler pin、導入packageの型・signature・生成物・testを照合してください。既存コードが動いていても、deprecated、未文書、脆弱、または偶然の挙動なら正当化にはなりません。
@@ -132,6 +152,7 @@
     2.  矛盾はversion mismatch、生成drift、deprecated API、未文書挙動として分類し、修正するか、ownerと期限を持つADRへ記録してください。
     3.  新しいpatternは互換性、migration、rollbackを検証し、必要な範囲だけ既存実装と文書を同じ変更で更新してください。
 *   **The Silent Async Bug Pattern**: Promise、Future、Task等の非同期結果は、`await`、呼出元へのreturn、集約、または§7.1の管理対象background taskとして必ず観測可能にしてください。fire-and-forgetと未処理失敗を禁止し、言語に適したstatic analysisを使用してください。
+*   **After-Response Hook Contract**: 応答返却後に関数が凍結されうる基盤（サーバレス等）で「待たない副作用」を起動する場合、失敗の可視化（ログ＋計数）と応答後の完走保証（基盤の after-response フックへの登録）は別々の問題であり、両方を満たす合成ヘルパーを唯一の入口にしてください（MUST）。フックへ渡す関数は副作用の promise を必ず `return` し（MUST）、型は `() => unknown` として `() => void` で「破棄が正しい」という誤った信号を出さないでください。フックの戻り値を await する基盤では `() => { void p }` は追跡されず、応答直後の凍結で副作用が消えます。フックがリクエストスコープ外（cron／バックグラウンド）で同期 throw する基盤では、即時実行フォールバックで包み、呼び出し元の戻り値と主動線を巻き込まないでください（MUST）。`void` 破棄形の退行ガードを置き、変異で赤化を実証してから緑を信用してください。
 
 ---
 
@@ -204,11 +225,14 @@
 ### 3.1. 機密情報管理 (Secrets Management)
 *   APIキーや秘密鍵はコードにコミットしません。`.env` ファイルとシークレットマネージャーを使用します。
 *   **The Single Source of Config**: コードの各所で直接 `process.env.NEXT_PUBLIC_...` を参照することは禁止です。必ず `src/lib/config` で一元管理し、存在チェック（Validation）を行ってください。
+*   **Credential Class in Names**: 環境変数名は資格情報の権限クラス（read-only／publishable／service／admin）を正確に表さなければなりません（MUST）。低権限を示す名前（`*_READ_KEY` 等）に高権限キーを入れてはならず、低権限名から高権限名へのフォールバック解決（またはその逆）を実装してはなりません（MUST NOT）。資格情報を受け取る境界関数で期待する権限クラスを実行時に検証し（例: 特権キーの接頭辞／claim を検出して低権限経路では拒否）、名前の誤用を物理的に止めてください（SHOULD）。詳細は `engineering/520_cloud_application_platforms.md` §7 を参照してください。
+*   **Public Resolver Isolation**: 公開値だけで足りる処理（CORS、CSP、redirect、OGP 等）は公開用の設定 resolver だけを読み、server secret を含む resolver を公開ランタイムの経路へ巻き込んではなりません（MUST NOT）。secret が必要な処理は対象のルート／アクション内で明示的に読んでください（MUST）。公開ページの経路が server 用 resolver を import すると、特権鍵などの秘密値の境界が通常の公開経路まで広がります。公開経路のモジュールが server 用 resolver を import していないことを静的検査で固定してください（SHOULD）。なお、アプリ側の列選択（射影）は権限境界ではありません（公開読み取りの権限設計は `engineering/200_supabase_architecture.md` Rule 3.5 参照）。
 
 ### 3.2. 環境変数テンプレート同期 (Environment Template Sync)
 *   **Law**: プロジェクトルートに `.env.example` を常設し、必要な全環境変数の**キーのみ**を記録する義務を負います。
 *   **Sync Mandate**: 新しい環境変数を追加した場合、**同一PRで** `.env.example` も更新しなければなりません。
 *   **Git Safety**: `.env.local` / `.env.production` 等の実値を含むファイルは `.gitignore` に含め、**厳正にコミットしてはなりません**。
+*   **Template Quality**: `.env.example` の各変数には、用途の 1 行説明、取得先（ダッシュボードの URL 等）、値のフォーマット例をコメントで併記してください（SHOULD）。キー名だけの列挙はオンボーディング障害を生みます。テンプレートからローカル設定を生成し、必須変数の未設定を列挙するセットアップコマンドを提供してください（SHOULD）。
 
 ### 3.3. 環境変数ドリフト防止 (Environment Variable Drift Prevention)
 *   **Law**: 環境変数の欠落や環境間の不整合（Drift）は、「ローカルでは動くがCI/本番で壊れる」最大の原因です。
@@ -216,6 +240,10 @@
     1.  **Startup Validation**: アプリケーション起動時に、必須環境変数の存在チェックを実行し、不足している場合は**起動を中断**してください。
     2.  **CI Parity Check**: CIパイプラインにおいて、`.env.example` に記載された全キーがCI環境に定義されていることを検証してください。
     3.  **Type-Safe Config**: 環境変数はZodやio-ts等で**型レベルでバリデーション**し、不正な値を起動時に検出してください。
+    4.  **Test Fallback Containment**: CI／テスト用の既知値（テスト用 site key、ダミー secret 等）は設定解決層だけで補完し、UI コンポーネント・アクション・API ルートで再フォールバックしてはなりません（MUST NOT）。本番で認証・Bot 検証・秘密系の設定が欠けたら、テスト値へ落ちずに UI は送信不可、サーバーは検証失敗として扱ってください（fail-closed）（MUST）。ローカルで便利なフォールバックが部品層へ漏れると、本番の env 未設定時にテストキーで動く抜け道になります。テスト値の定数には「CI 用途であり実運用のフォールバックではない」と明記し（SHOULD）、設定解決層以外にテスト値リテラルが無いことを grep で確認してください。
+*   **Runtime-of-Record Registry**: 各 secret は「それを実際に読む実行基盤」にだけ保存し、読まない基盤へ重複登録しないでください（MUST）。環境変数台帳には用途・取得先に加えて「対象実行基盤」を必ず記録します（MUST）。複数の実行基盤（アプリサーバとエッジ関数、CI とランタイム等）で同一値を共有する secret は全基盤へ同一値を設定し、片側だけの登録を禁止します（MUST NOT）。片側欠落は「片方の経路だけ落ちる」障害になります。環境変数の追加・変更時は、テンプレート／ローカル／各環境／各実行基盤／台帳／セットアップ手順の全項目を同一変更で確認してください（MUST）。
+*   **Pair Verification**: 送信側と検証側（または宛先側）の両方に正しい値・許可が載って初めて成立する配線（内部 API secret、webhook 署名、DMARC 集計先、許可 IP／オリジン）は、片側設定やキー形式移行でエラーなく沈黙します。片側の保存成功を完了と数えてはなりません（MUST NOT）。宛先側の許可が要る配線は宛先の要件を先に確認してから設定し（MUST）、合成 E2E プローブで配線自体を定期実証し（MUST）、最初の 1 件（初回レポート・初回 webhook・初回通知）が到達したことを人が確認するまで完了と呼ばないでください（MUST）。設定の成功は到達の証拠ではありません。
+*   **Generated Artifact Drift Gate**: 異なるランタイム（Node.js と Deno、Web とネイティブ、アプリと DB 関数等）の間で定数・スキーマを直接の相対 import で共有してはなりません（MUST NOT）。バンドラの解決範囲外で本番ビルドだけが失敗します。共有は SSOT からの自動生成で行い（MUST）、生成物に `@generated — DO NOT EDIT` ヘッダーを付け、CI で「生成→`git diff --exit-code`」のドリフト検出ゲートを置き、トリガーパスには SSOT ソース自体を含めてください。手動の「SYNC RULE」コメントは人的ミスを防げません。
 
 ### 3.4. PII & データスクラビング (PII & Data Scrubbing)
 *   **The Privacy Scrubbing Protocol (EXIF Wipe)**: ユーザー投稿画像（UGC）にはGPS座標等の個人情報が含まれる場合があります。クライアントサイドでの画像アップロード処理において、**EXIF情報の物理削除**を義務付けます。
@@ -240,8 +268,10 @@
     | Database credential | 最小権限、利用者分離、接続切替、active session処理 | workload identity、dynamic secret、二重credential |
     | External API key | owner、scope、利用箇所、vendor制約、切替と失効証跡 | short-lived token、dual-key rotation、期限付きstatic key |
     | Service account／OAuth client | non-human identity inventory、audience、権限、offboarding | federation、managed identity、certificate／secret rotation |
+*   **Purpose-Scoped Keys**: 外部サービスの API キーは用途（送信／受信／管理）ごとに分けてください（SHOULD）。片方が漏れても他方は無傷で、スコープ不足による部分故障（送信は動くが受信だけ落ちる）も切り分けやすくなります。キーのスコープは公式定義で確認してください。「送信のみ」のキーは読み取りエンドポイントで失敗し、原因が分かりにくい沈黙故障になります。
 *   **Zero-Downtime Rotation**: providerが並行credentialを支持する場合、new credential有効化、consumer切替、検証、old credential失効の段階手順を使用します。支持しない場合はmaintenance、queue、rollback、利用者通知をriskに応じて設計します。
 *   **Rotation Audit**: 発行、配布、利用、切替、失効、失敗、例外をcredential IDとownerへ結び付け、次回期限またはevent triggerをmachine-readable inventoryで監視します。
+*   **Two-Sided Activation Proof**: 呼出側と検証側に別々に配る委託 secret（内部 API secret 等）の認証連鎖は、両側の実環境で実呼出の成功応答を得るまで「未完了」として扱わなければなりません（MUST）。env 設定済みの目視確認は完了根拠になりません。プラットフォームが注入する鍵（service role key 等）との一致比較を機械認証に使ってはなりません（MUST NOT）。鍵形式移行・ローテーションで沈黙破綻します。機械認証は自前管理の専用トークンを両側に配り、timing-safe に比較してください。
 *   **Break-Glass Protocol**: 漏洩が疑われた場合は、影響を拡大しない最短手段で失効、scope縮小、consumer隔離、再発行を行い、証拠保全と復旧を両立します。incident recordと外部報告は適用法令、契約、組織incident SLAのtrigger／期限に従います。
 
 ### 3.7. OAuth / OIDC トークン管理プロトコル (OAuth/OIDC Token Handling)
@@ -328,22 +358,34 @@
 *   **Dependency Watch**: `npm audit`、`govulncheck`、`pip-audit`、.NET 10以降の`dotnet package list --vulnerable`または.NET 9以前の`dotnet list package --vulnerable`等、ecosystem標準または同等のSCAを依存変更時とrisk-based cadenceで実行します。対応順序と期限はCVSSだけでなく、KEV、EPSS、reachability、exposure、data感度、補償統制、vendor deadlineから決めます。悪用中または外部公開された重大脆弱性は直ちに封じ込め、修正・緩和・risk acceptanceの期限とownerをBlueprintへ記録します。
 *   **The Dependency Override Protocol**: 依存関係検証を無効化するoptionは禁止します。やむを得ないoverrideはpackage manager固有の正規機能を使い、理由、owner、期限、互換性testを記録します。
 *   **License Governance**: licenseのallow／review／denyは、配布形態、network service、link・derivative work、変更内容、顧客契約、公開義務、知財方針から決定します。AGPL等は一律のUniversal禁止ではなく、組織policyでdenyまたは法務reviewとした場合に自動blockします。詳細は`security/200_oss_compliance.md`を正本とします。
+*   **Pin Rationale Mandate**: ツールチェーンやビルダーの pin（`--webpack` 等）、依存の exact pin には理由を記録しなければなりません（MUST）。理由不明の pin はセキュリティパッチ適用時に外せない負債になります。プラグインが「特定ビルダー専用オプション」を持つ場合、それが pin の理由である可能性を最初に疑ってください。
 
 ### 4.2. Lockfile整合性 (Lockfile Integrity Protocol)
 *   **Law**: deploy可能なapplicationと実行rootは、採用ecosystemが提供するlockfile、checksum、resolved graph、version catalog、provider selection、vendor tree等の再現可能な解決正本をversion管理し、意図しない差分を禁止します。`package-lock.json`、`pnpm-lock.yaml`、`uv.lock`、`go.sum`、`Cargo.lock`、`packages.lock.json`、`composer.lock`、`Gemfile.lock`、`renv.lock`は性質の異なる例であり、すべてをlockfileとみなさない。公開libraryはecosystemのconsumer互換性慣行に従い、CIのtest／release解決と依存証跡を固定します。
 *   **CI Discipline**: 対応ecosystemでは`npm ci`、`pnpm install --frozen-lockfile`、`uv sync --locked`、`cargo build --locked`等のfrozen／locked commandを使用します。標準lockfileやlocked modeがない場合は、version、source、checksum、artifact digestを検証する同等gateで未承認の再解決を拒否します。
 *   **Recovery**: localとCIが乖離した場合はruntime、package manager、registry、platform、lockfile digestを先に比較します。lockfile再生成は明示理由、完全な依存差分review、test、SCAを伴う変更として扱い、標準復旧手順にしません。
 *   **Prohibition**: lockfileを正本とするapplication／実行rootで、依存関係変更後にlockfileをcommitせずPushすることを禁止します。
+*   **Tool Version Parity**: lockfile や解決グラフを生成・更新・検証するパッケージマネージャの版は、CI／リリースが使う版と同一系列に揃えなければなりません（MUST）。同じ lockfile 形式でも版差で optional／プラットフォーム別 transitive の刈り込み方が変わり、規律どおりの操作でも lock が壊れます。壊した側の版で実行した install／dry-run の成功は証拠にならず（壊れた測定器は自分の壊れを測れない）、「ローカルで検証した」は CI と同じ版で検証したときだけ認めます（MUST）。環境が要求版を満たさないときは要求を迂回せず、一時的に正しい版を呼び出して満たしてください（例: `npx -y <pm>@<CI版>`）。`engines` 相当の宣言と strict 適用（例: `.npmrc` の `engine-strict=true`）で古い版での install をその場でエラーにし、lock の健全性検査は依存インストールより前の preflight として CI 側の版で早期に走らせてください（SHOULD）。
+*   **Lock Preflight Polarity（補足）**: 上記の preflight は CI 上の 1 箇所に置き、既定を「実行する」として、省略は lock に触れていないことを機械的に証明できた変更に限ってください（fail-closed）（MUST）。依存を入れない dry-run では lifecycle script を起動しません（例: `--ignore-scripts`）（MUST）。依存の無い環境で script が失敗し、検査自体が誤爆するためです。詳細は `security/200_oss_compliance.md` §14.1 を参照してください。
+*   **Single Package Manager**: リポジトリ（または実行 root）ごとにパッケージマネージャと lockfile の SSOT を 1 つに固定し、別マネージャの lock／workspace ファイル（`pnpm-lock.yaml`、`yarn.lock` 等）を混在コミットしてはなりません（MUST NOT）。ビルド／デプロイ基盤は lockfile の存在でマネージャを自動判定するため、混在は意図しない frozen install への切替と Preview デプロイ失敗を招きます。混在は CI または pre-commit で検出してください（SHOULD）。
+*   **Hand-Edit Verification**: lockfile を手で編集または部分再生成したら、`node_modules` を消した状態からの frozen／locked install が exit 0 になることを確認するまで信用しないでください（MUST）。通常 install の成功も、その後の全ゲート緑も lockfile の健全性を示しません（自プラットフォームで不要な optional 依存の欠落は手元で露見しない）。再生成は依存ツリーを参照しない lock-only モード（例: `npm install --package-lock-only --ignore-scripts`）で行い、差分に「エントリごと消えている行」があれば異常とし、意図した package 以外が動いていないことを確かめます（SHOULD）。lockfile 更新は CI と同じランタイム／OS で生成してください。「ローカル全緑／CI 全ジョブ全滅」は共通の最初期ステップ（依存インストール）の失敗を示す強い手掛かりなので、個別ログより先に lockfile を疑い、main の lockfile を手元で frozen install に掛けて切り分けてください（SHOULD）。
 
 ### 4.3. Dead Export検出 (Dead Export Detection)
 *   **Law**: エクスポートされた関数・型・定数の使用箇所がゼロになった場合、即座に除去しなければなりません。
 *   **Action**: 監査時は `grep -r "functionName" src/` で全エクスポートの使用箇所を確認してください。使用箇所ゼロのエクスポートは即座に除去し、関連する型定義も連鎖クリーンアップしてください。
 *   **The Backup File Ban (No .bak)**: バックアップファイル（`.bak`, `.old`, `_copy`）はGit管理下においてはノイズであり即時削除してください。バックアップはGitの履歴です。
 *   **The Exhaustive Reference Scan (Grep First)**: ファイルを削除・リネームする際は、必ずプロジェクト全体を対象にファイル名で `grep` 検索を行い、全ての参照箇所を特定・排除してから実行してください。
+*   **Consumer-Count Liveness**: 設定値・環境変数・デザイントークン等が「生きている」かは、保存・出力側ではなく消費側の参照数で判定しなければなりません（MUST）。値が保存され出力されていても、読む側が無ければ何も変わりません。フレームワークが生成する間接参照（ユーティリティクラス等）も数え、どの変数を最終的に指しているかは本番成果物で確認してください（MUST）。消費者ゼロの設定に効果を語る説明文が付いていたら、それは仕様ではなく未配線の痕跡です。配線するか説明を実態に合わせるかのどちらかを行い、放置は選択肢に入れません（MUST）。
+*   **The Self-Referencing Route Scan**: コンポーネント／画面の設置先（URL）を移す変更は、ページ側の diff だけでは完結しません。当該コンポーネントとその依存内で旧 URL・ルート定数を grep し、「完了後に戻る」「ここで変更できます」系の自己参照導線を全て新設置先へ更新してください（MUST）。確認対象: OAuth／外部フローの redirect 先、キャッシュ再検証パス、リンク、パンくず、通知メール内リンク、ドキュメント。
+*   **Refactor Scan Completeness**: import 経路を一括変更するリファクタ（Barrel 撤去等）では、静的 import だけでなく動的 `import()`・型位置のインライン import・相対パス指定もスキャン対象に含め（MUST）、import 元の変更・削除で連鎖的に未使用化する型・変数を lint の機械可読出力で最後まで浄化してください（MUST）。
+*   **Duplicate Export Ban & Caller Verify**: 同名の export 関数が複数ファイルに存在する状態を放置してはなりません（MUST NOT）。修正が呼ばれない側（孤児）に当たり、監査を何度通過しても気づかれません（実務では誤修正が複数回の監査をすり抜けました）。修正対象を決める前に実際の caller を検証し、grep のヒットだけで「両方直す」と判断しないでください（MUST）。lint・型検査は孤児 export を警告しません。孤児は発見次第削除し、commit メッセージに caller 検証結果と本物の所在を残します（MUST）。本物の修正と孤児の削除は別コミットにし、revert で本物の修正だけを戻せるようにしてください（SHOULD）。監査では同名 export の重複（例: `export.*function <name>` の複数ヒット）を 0 件に保ちます（SHOULD）。
 
 ### 4.4. Ghost Feature Ban & Revival（ゴースト機能禁止と復活）
 *   **The Ghost Feature Ban**: ユーザー導線が存在しない機能（公開されていない管理画面コード等）は負債です。YAGNI原則に従い、物理削除してください。
 *   **The Ghost Feature Revival (Full-Stack Coherence)**: 管理画面で設定を変更しても、フロントエンドで何も変化しない機能（Ghost Feature）は、システムへの信頼を破壊するバグです。管理画面の設定項目を追加する際は、必ずフロントエンドでの反映ロジックを同時に実装し、結合テストを行ってください。
+*   **Safety Setting Coupling（Ghost Config 補足）**: 管理画面から保存できる設定値のうち、実行ロジックが一度も参照しないものは「設定されているという誤った安心」を生み、無い設定より危険です。特に制限値・許可フラグ・レート制限などの安全に関わる設定は、保存経路と参照経路の両方が結合していることをテストで証明してください（MUST）。参照する実装が無い設定項目は UI から除去するか、参照実装と同じ変更で追加します（MUST）。「あとで実装」の TODO 付き設定 UI を本番に出さないでください。
+*   **The Unwired Option Ban**: opt-in の prop／オプション／機能トグルを追加する変更は、「定義＋ロジック実装＋呼び出し側 1 件以上の配線」をセットで同一変更単位にしなければなりません（MUST）。配線を後回しにすると機能の存在自体が忘却され、呼び出し元未接続の prop は「50% 完成」のまま機会損失が続きます。供給源（集計データ・スキーマ）が無いなら prop 追加自体を延期し（MUST）、供給源設計→migration→DTO→prop の順で 1 つの変更単位に閉じてください。監査では呼び出し側を grep して、追加した opt-in が実際に配線されているかを検証します（SHOULD）。
+*   **Storage Fix Triple Check**: アップロード／書き込み経路の権限を通す是正はそれ単独では機能を完成させません。(1) 保存される値の形式、(2) その値を表示へ変換する経路、(3) その値を受理する書き込み経路の認可ガード（他者の資産パスの転載防止・自プレフィックス限定）を同一変更で実コード確認してください（MUST）。書き込みが拒否されていた間は潜在していた表示側・受理側の欠陥が、通した瞬間に顕在化します。同一の保存形式を持つ兄弟テーブル／経路を機械列挙（列名 grep 等）して正規化と認可を対称に適用し（MUST）、競合安全な採番を導入したら同じ列を書く旧経路も全て一本化してください（MUST）。片方だけ残ると上書きで孤児資産と削除漏れを生みます。
 
 ---
 
@@ -358,10 +400,12 @@
 *   **Explicit Imports**: `import` ステートメントは必ずファイルの最上部に記述してください。関数内や条件分岐内でのインポートは禁止です。
 *   **セマンティック構造**: ディレクトリ構造は機能単位（Feature-based）で整理し、AIが関連ファイルを見つけやすくします。
 *   **Schema Trust Protocol (No Ghost Columns)**: 設計書に予定されているが、DBマイグレーションがまだ適用されていないカラム名をクエリで使用することを禁止します。
+*   **Document-Schema Reality (対偶)**: 逆方向も同様です。仕様書・ルール文書・PII マトリクス等が表名・列名・RPC 名を引用する場合、それらが実スキーマに存在することを機械検査（例: `to_regclass` / information_schema 照合）で定常検証してください（MUST）。検査対象は「既に事故を起こした文書」に限定せず、スキーマ名を含む全文書に広げます。実装が仕様より先に正しく変わっていた場合は、仕様側を実測に基づいて改訂し、実測手段と日付を残してください（SHOULD）。詳細は `core/100_governance.md` §11.2 を参照してください。
 
 ### 5.2. AI Hygiene & Anti-Blindness（AI衛生管理）
 *   **The Anti-Blindness Protocol**: AIが生成したコードに含まれる省略記法（`// ...`）を、そのままファイルに保存することを禁止します。必ず完全なコードを展開させてください。
 *   **Human Verification Loop**: AI生成コードは「下書き」であり、必ず人間が検証・修正するフローを維持してください。AIの出力を無批判にコミットすることは禁止です。
+*   **AI Context Exclusion List**: AI コーディング支援ツール（Copilot、Cursor、エージェント等）を使うリポジトリは、コンテキスト送信からの除外リスト（`.copilotignore` / `.cursorignore` 等: `.env*`、秘密鍵、seed／本番スナップショット、migration、機密ルール、鍵ファイル）をリポジトリに配置してください（MUST）。テレメトリ／学習利用の設定を確認し不要な送信を無効化します（SHOULD）。除外リストは四半期ごと（Blueprint で周期を定める）に棚卸しし、新規追加されたセンシティブなパスが除外されていることを確認してください（SHOULD）。
 
 ### 5.3. AI Code Review Governance（AIコードレビュー統治）
 *   **Law**: AI（Copilot, Cursor, Cody等）が生成したコードは、人間が書いたコードと**同等以上の厳格さ**でレビューしなければなりません。「AIが生成した」は品質保証の免罪符にはなりません。
@@ -426,9 +470,15 @@
 ### 7.2. Versioned Contract Reality（導入版を正本にする）
 *   **Context**: 最新の公式ドキュメント、導入済みversion、生成された型、実行時挙動が一致しない場合があります。
 *   **Law**: 実装時はlockfile、runtime／compiler pin、導入済みpackageの型・signature・生成物・test結果を対象versionの事実として確認し、公式のversion対応文書、security advisory、support policyを契約とEOL判断の正本にします。どちらかを盲信せず、差異はversion不一致、非推奨API、生成drift、未文書化挙動として解消またはADRへ期限付きで記録します。
+*   **Serialization Reality Check**: 外部 SDK・API・DB クライアントへ渡す引数や設定キーは、型が通ることを正しさの証拠にしてはなりません（MUST NOT）。直列化・エンコード・未知キーの素通しで意味が変わります（例: 配列が別のリテラル形へ整形される、`value: unknown` の引数が型検査を通ったまま未知キーとして下流で 400 になる）。新しい引数の形や設定キーを本線に入れる前に、本番相当の環境で 1 回実呼び出しして成功と失敗の両方を観測してください（MUST）。実務では型が通る引数が直列化で意味を変え、定期ジョブが連夜落ちて停止に見えた事例と、未知キーが下流で拒否されて翻訳が全滅した事例があります。一度踏んだ「型は通るが意味が変わる形」は、ソース走査のラチェットで再発を禁止してください（SHOULD）。
+*   **Prerequisite Reality Check / Staged Enablement**: コンパイラ・トランスパイラ・ビルドプラグインの有効化は、(1) 隣接依存の更新のみ、(2) opt-in モードで低リスク標本 1〜2 件に適用して実行時健全性を確認、(3) 既定化と標本用の一時マーカー撤去、の 3 段の独立コミットで進めてください（SHOULD）。1 コミットで複数の意味論変化を起こすと bisect 不能になり、lint の緑は静的解析の通過であって実行時の健全性ではありません。既存の手動最適化は同じ段で消さず、挙動観測後に別段で撤去します（SHOULD）。移行計画の策定前に、導入済みツールの実際の既定挙動（有効なルール、プラグイン版）をインストール物から検査し、「前提条件は既に満たされていないか」を測ってください（MUST）。古い文献の前提で不要なフェーズを計画に含めてはなりません。
 
 ### 7.3. Fix Twice Principle（再発防止）
 *   **Law**: 欠陥修正では原因と同種の再発経路を確認し、riskと再発費用に見合うtest、型・schema、lint／static analysis、監視、runbook、design変更のいずれかで再発を検出または防止します。機械化が修正riskを上回る場合は、理由、残存risk、再確認条件を記録します。
+*   **Sibling Sweep**: 所見を是正するとき、同一アンチパターン（共通ヘルパー未適用・副作用の配置ミス・同型の書込み経路）の他の全出現箇所を機械的に列挙（grep 等）し、該当するものを同時に是正しなければなりません（MUST）。正本は `core/000_core_mindset.md` の「Sibling Sweep」。
+*   **Variant Enumeration**: 是正を書いたら、その是正が守る経路の変種（単数→複数、全損→部分損、この層→隣の層、引き金となる条件の別のバイト／別の表現）を列挙して各々に当ててください（MUST）。考慮漏れは守る対象と同じ軸のバリエーションに集中します。実務では摘出された不具合の 3 分の 2 が「自分の過去の是正の考慮漏れ」でした。既定値の注入剥がしなど多層に同じ処理が入りうる是正は、値の伝搬経路を末端まで遡り、実際に空／null が末端まで流れることを E2E で証明してください（SHOULD）。
+*   **Cumulative Diff Review**: 長い連続作業（多ラウンドの監査・是正）の最終盤で、累積差分の全量に対する独立多観点レビュー（行単位／削除挙動／横断トレース／簡素化／規約）を 1 回入れてください（MUST）。ラウンド内の自己レビューはそのラウンドの変更しか見ず、ラウンド間の相互作用と自分の修正の変種漏れは全量でしか出ません。中核 diff（DB・認可・計測・ゲート）は自分の是正にも比例的に敵対レビューを回します（§12.8 参照）。
+*   **Multi-Path Enumeration & Denominator Check**: 省略時に空値へフォールバックする引数（`x || fallback || []`）は、省略が例外にならず「静かに 0 件」になります。省略時に例外を投げられないなら、「この射影を使う経路は必ず解決関数を呼ぶ」「省略呼び出しは 0 件」をソース契約テストで固定し、変異で赤化することを確認してください（MUST）。同じ DTO・値を生成する経路が複数あるなら、全経路を列挙してから直します（MUST）。1 箇所だけ直すと残りが同じ形で生き続けます（実務では取得経路の大半が引数を省き、中核の属性表示が丸ごと欠けたまま全検査が緑でした）。是正効果を「件数が減った」で確認するときは、母数を別経路（DB 直接カウント等）で測ってください（MUST）。「フィルタが効いた」と「そもそも対象が 0 件」は結果の見た目が同じです。射影／マッパー起点の掃き方は `quality/000_qa_testing.md` の Drift Sweep Scope を参照してください。
 
 ---
 
@@ -437,6 +487,7 @@
 ### 8.0. 最新情報の確認義務 (Latest Info Protocol)
 *   **開発着手前**: コードを書く前に、必ず対象技術の公式ドキュメントや最新のリリースノートを確認します。古い情報に基づいた実装は手戻りの元です。
 *   **非推奨チェック**: 使用しようとしているAPIが Deprecated になっていないか確認します。
+*   **Verified Check Baselines（検査基準値の裏取り）**: 外部システムの値（パス形式・ヘッダ・ステータス・仕様上の必須項目）で分岐する検査は、自分で書いたフィクスチャで緑になっても未検証です。実データに当てて判定の向きを確かめるまで採用しないでください（MUST）。検査の基準値・台帳（必須プロパティ、閾値、仕様値）は一次情報で 1 件ずつ裏を取ってから書き、確認していない項目は空にします（MUST）。全件確認するか 1 件も確認しないかのどちらかにし、部分確認で「たぶん合っている」を根拠にしてはなりません。台帳には確認日と出典の性格を明記してください。外部の値の全集合を把握できないときは allowlist ではなく denylist 側へ倒し、取りこぼす条件をモジュール冒頭に明記してください（SHOULD）。正本は `quality/000_qa_testing.md` の「External-Value Branches」。
 
 ### 8.1. トレンドの把握 (Trend Awareness)
 *   シリコンバレーの最新トレンド（AIエージェント、Privacy Manifests等）を常にキャッチアップし、ルール自体も進化させ続けます。
@@ -470,6 +521,7 @@
 *   **Prohibitions**:
     *   実装コードと1:1対応する「コードコピーテスト」は禁止。テストは「振る舞いを検証」するものです。
     *   unsafe cast、型・compiler bypass、非同期errorの未処理を含むtest codeは、production codeと同等の品質基準で扱います。
+    *   **Verification Code Discipline（検証・確認コードの規律）**: 検証・確認のために書く一時コードやクエリにも同じ規律を課します（MUST）。エラーを必ず出力し、`null`／空を「事実」と読まない。列名・フィールド名は推測せず、まず実物（スキーマ照会）で実在を確認してから絞る。終了コードはパイプ越しに読まない（`| tail` / `| head` / 通知ラッパーの exit は最終コマンドの値であり、チェーンの停止点と後段未実行を隠す）。`> log; echo $?` の形で裸に見るか、実行と表示を分離する。「0 件」を結論にする前に対象ファイル・パスの実在を `ls`／`stat` で確かめる（複合コマンドの前段が失敗すると後段の 0 件は無意味）。条件式でパイプ右側に早期終了コマンド（`grep -q` / `head`）を置かない（`pipefail` 下で左側が SIGPIPE で落ち、一致しているのに false になる）。「緑に見えたのにスタックトレース断片がある」は必ず停止点を疑ってください。
 *   **Coverage Decision Contract**:
     *   statement／branch coverageだけで品質を判定せず、risk、重要invariant、mutation score、escaped defect、flakinessを組み合わせます。
     *   business logicのLine Coverage 80%とMutation Score 70%は導入時の参考値です。変更受入をblockする対象、閾値、除外、段階的引き上げはBlueprintで定義し、低riskの生成codeと高riskの決済logicへ同じ数値を強制しません。
@@ -569,6 +621,8 @@
 
 ### 10.1. CI/Deployment Safety Standards (CI・デプロイ安全基準)
 *   **The CI Timeout Protocol**: すべてのCI jobへ、通常実行時間、resource、外部依存、retryを基に明示timeoutを設定し、無期限実行を禁止します。10分は高速feedback jobの参考目標であり、build、device test、security scan等へ一律適用しません。
+*   **Timeout from Measured Distribution**: timeout の枠は感覚ではなく正常時の実測分布（直近 N run）から決めてください（MUST）。実務では直近 run が安定して約 7 分、枠 20 分（2.8 倍の余裕）でも当たり、cancelled が「たまに落ちる」として再実行で流されました。「ハングする」種類（外部からの取得）と「遅くなる」種類（静的検査）で方針を変え（SHOULD）、後者は枠を広げても失敗検知はほぼ鈍らず、前者は枠を広げず再試行で吸収します。重いステップへ個別 timeout を置き、ジョブ枠を食い潰す前にステップ名で落として遅延の在り処を特定してください（SHOULD）。
+*   **The CI Trigger Alignment Protocol**: CI 検査の発火条件は、その検査が課す不変条件がどのイベントで破られうるかに合わせてください（MUST）。自分の変更（migration 適用・生成物更新）が起点の違反を週次等の定期実行で見張るのは、露出期間を周期ぶん容認するのと同じです。定期実行が正しいのは、違反が自分の commit と無関係に発生する場合（新規 CVE、外部の手動変更、データ同期）だけです。ただし本番状態と比較する検査を適用前に走らせると常時偽陽性になるため、適用完了後に連鎖発火させ、前段の成功のみを条件にします（完了イベントは失敗・中止でも発火する）（MUST）。名前文字列で解決されるトリガー（参照先ワークフロー名等）はタイポや改名で無言に発火しなくなるため、参照先の実在と対象検査がトリガーを保持していることをガードテストで固定し、ガード自身も両記法（インライン／ブロック）を扱えることを変異で確認してください（MUST）。定期実行のまま据え置く検査は、その判断理由を証跡に明記します（MUST）。正本は `engineering/600_git_workflow.md` の「CI Trigger Alignment」。
 *   **The Red Button Checklist**: 本番変更は、適用されるLegal、Security、FinOps、Data、reliabilityのriskをmachine-readable gateまたは追跡可能な承認へ変換します。毎回の手動指差し確認を唯一の方式にしません。
 *   **Omnichannel Check**: 複数clientをproduct契約に含む場合、共有domain／API contractとclient固有UXを別々に検証します。Web以外を要件としないsystemへomnichannelを強制しません。
 *   **Deployment Safety Protocol**:
@@ -577,6 +631,8 @@
     *   **The Architectural Preservation Protocol**: 中核境界はownership、protected path、review policy、contract test等で保護します。`@preservation_level CRITICAL` headerは任意の実装例です。
 *   **セキュリティ**: 機密情報をcommitせず、CIでrepositoryと履歴をsecret scannerまたは同等統制により検証します。TruffleHogは実装例です。
 *   **Lockfile Recovery Discipline**: CIのみが失敗する場合、runtime、package manager、registry、platform、lockfile digestを先に比較します。lockfile再生成は完全な依存差分review、test、SCAを伴う意図的な依存変更として扱い、標準復旧手順にしません。
+*   **CI-Fix Ancestry Check**: CI／スケジュールジョブの失敗修復に着手する前に、失敗 run が検証した revision（checkout SHA）と、想定される修正コミットの包含関係（`git merge-base --is-ancestor <fix> <headSha>` 等）を照合しなければなりません（MUST）。「最後の失敗」は「現在も壊れている」を意味しません。修復系タスクの初手は、全 run のログを横断した失敗原因の全量確定と上記の包含照合とし（MUST）、既に取り込まれた修正を二重に作らないでください。実務では修正が失敗 run の 12 分後にマージ済みでした。修正済みなら再実行で検証し、再実行が失敗した時点で初めてコード修正に入ります（SHOULD）。
+*   **Generated Artifact Formatting Exclusion**: 「生成器が SSOT」のファイル（生成型・同期定数等）は、すべてフォーマッタ／自動整形の対象から除外しなければなりません（MUST）。CI が生成器の raw 出力と厳密比較する場合、整形してコミットすると当該 CI が恒久的に赤化します。復旧はフォーマッタではなく生成器の再実行で行います。一括整形コマンド（`prettier --write .` 等）は、編集禁止資産（ルールリポジトリ・ベンダーファイル）を除外してから実行してください（MUST）。ローカルの型検証前に、ビルドが再生成しない stale な生成ディレクトリ（開発サーバ専用の型キャッシュ等）を削除します（SHOULD）。CI は fresh のため無検出で、ローカルだけに幽霊エラーが出ます。
 *   **The Connection Verification Protocol**: database接続エラーでは、effective configuration、secret source、DNS、IPv4／IPv6、route、firewall、TLS、credential、pool saturation、provider statusを層別に確認します。`.env.local`はlocal開発での一例です。
 
 ### 10.2. The IPv6 Deployment Protocol
@@ -597,6 +653,10 @@
     1.  DBカラムが `DEFAULT NULL` の場合、Zodフィールドは `z.string().nullable()` を適用してください。
     2.  UI側で `undefined` として扱う必要がある場合は、`.nullable().transform(v => v ?? undefined)` で明示的に変換してください。
     3.  DBマイグレーションで `NOT NULL` 制約を変更した場合、Zodスキーマも**同時に更新**してください。
+*   **DB-Enforced Value Set Protocol**: DB が CHECK 制約・ポリシー内リテラル・enum で強制する値集合を、アプリ側ステータス定数の SSOT とし、定数値は DB 値と一致させてください（MUST）。UI ラベルは表示層で変換し、UI の語彙に引きずられて DB に存在しない値をバリデーションスキーマや選択肢に出してはなりません（MUST NOT）。
+    *   **Same-Change Rule**: 値集合を変える migration には、対応する定数・バリデーションスキーマ・DTO union・UI 選択肢の更新を同一変更に含めてください（MUST）。migration 単独のマージは「その値の INSERT が必ず失敗する」潜在バグの発生源で、型検査もモックテストも検出できません（実務では選択肢の 1 つを選ぶと保存が必ず失敗する状態が数か月潜伏しました）。手書きの union 重複を残さず、単一の定数から導出します。
+    *   **Bidirectional Set Verify**: コード側の集合と SQL 側（ポリシー本文の `IN (...)`、CHECK、enum）の集合差を機械検出する verify を pre-commit または CI で強制し、「コード側だけにある」「SQL 側だけにある」の双方向で出力してください（MUST）。手動実行の同期スクリプトは drift 防止になりません。種別追加時の全層被覆は §1.8 Enumeration Extension as Cohesive Change を参照してください。
+    *   **Auxiliary Evidence（補助証跡）**: `NOT VALID` なしの `ADD CONSTRAINT` が適用に成功した事実は「違反する既存行が無い」証跡として使えます（MAY）。既存行に現れ得ない値の判定・表示コードは dead code として削除してください（SHOULD）。
 
 ---
 
@@ -610,6 +670,7 @@
 ### 11.1. Docs as Code & Freshness（ドキュメント鮮度）
 *   **Docs as Code**: ドキュメントはコードと等価であり、Gitで管理し、PRレビューの対象とします。ドキュメント更新なきコード変更はマージ禁止です。
 *   **鮮度維持**: リンク切れチェックを自動化し、主要ルールは四半期ごとに見直します。
+*   **Comment–Behavior Parity**: 挙動を主張するコメント（丸める／再試行する／拒否する／全部見る／集合で固定する）は、対応するテストまたは検査が無ければ書いてはなりません（MUST）。是正の最後に、自分が書いた主張語を grep で拾い、対応する実装記号の有無を 1 件ずつ突合してください。コメントと実装の乖離は型検査・lint・既存テストのどれも検出せず、間違ったコメントは間違った実装より害が大きい（次の読者が「考慮済み」と信じて素通りする）ためです。検査の名前・冒頭コメントに「全部」「集合」「ラチェット」「完全一致」とあるなら、対象を列挙している判定式が実際にあるかを読んで確かめます（MUST）。名前は主張であって実装ではありません。件数・頻度・順序など前提を書いたコメントは、その前提が崩れたら赤化する検査を同時に置いてください（SHOULD）。
 
 ### 11.2. README Standard Protocol（README必須セクション基準）
 *   **Law**: プロジェクトのREADME.mdには以下のセクションを必ず含め、新規参画者が初日に開発環境を構築しPRを出せる状態を維持してください。
@@ -655,6 +716,7 @@
 
 ### 12.8. The Code Review Protocol（コードレビュー基準）
 *   **Law**: production変更には、riskに応じた人間reviewまたは同等の独立変更承認と、必須の自動gateを適用します。小さく単一目的でrevert可能な変更を既定とし、400変更行は分割判断の参考heuristicであって一律上限ではありません。generated code、migration、vendored artifactは別集計し、巨大変更には設計review、分割不能理由、段階releaseを要求します。
+*   **Fix-Diff Adversarial Review**: セキュリティ・データ完全性に関わる是正 diff は、実装完了後にその diff を攻撃対象とする独立レビュー（別ロール／別エージェント／読取専用）を 1 巡させなければなりません（MUST）。自分の再読を裏取りとみなしてはなりません（MUST NOT）。是正が「元の欠陥より悪い穴」を開けていないかを最優先で問います。特に RPC 化・権限モデル変更・ゲート追加は、閉じた穴の隣に「引数のクライアント信頼」「過剰な実行権付与」「別経路のゲート依存」を作りやすく、権限を締める是正は「誰が呼べるか（GRANT）」と「引数を誰が決めるか（信頼境界）」の両方を実 DB 権限照会で確定してください。部分失敗の可視化・マスキング・エスケープ等の横断是正は、対象の全兄弟を列挙してカバレッジを実測してから完了を宣言します（MUST）。「3 系だけ直して 10 系と言わない」。
 *   **レビュー観点チェックリスト**:
     | 観点 | チェック内容 |
     |:-----|:-----------|
@@ -684,6 +746,13 @@
     | **Commit-Msg** | `commit-msg` | Conventional Commits検証 | `commitlint` |
     | **Pre-Push** | `pre-push` | 保護ブランチへの直接Push物理ブロック | ブランチ名チェック |
 *   `--no-verify` でのフック迂回はゼロトレランスとし禁止です。
+*   **Check Self-Consistency（検査の自己矛盾禁止）**:
+    *   状態を測って禁止する検査（「main から N コミット遅れは禁止」等）を新設するとき、その状態を是正する操作の最中が例外として扱われるかを先に確かめてください（MUST）。禁止を満たす唯一の手段を禁止する検査は設計の失敗であり、出口が `--no-verify` しかない状態は検査の失敗ではなく設計の失敗です。
+    *   例外は無条件 skip にしてはなりません（MUST NOT）。是正操作であることを実測で限定します（例: マージ中で、かつ取り込み先が合意済み mainline の祖先であるときだけ pass）。迂回フラグを使いたくなったら、それは検査を直す合図です（MUST）。迂回回数はどこにも残らず、次の人が同じ壁に同じ穴を開けます。
+    *   検査を直したら、通るべき状態が通ることに加え、依然 fail すべき状態が fail すること（両方向の変異）を実行して確かめてください（MUST）。緑にしただけでは検査を壊したのと区別がつきません。
+    *   例外リスト・許容リスト・移行フラグ・暫定 allowlist など「平時に空であることが正常」な宣言を、テストが `LIST[0]` のように実在前提で参照してはなりません（MUST NOT）。正本は `quality/000_qa_testing.md` の「Exception-List Hygiene」。
+*   **Format-Dependent Checks（外部形式依存の検査）**: 外部ツール・ランタイムの出力形式（ログ文字列・トランスクリプト・構造化イベント）に依存する検査は、形式が変わる前提で書いてください（MUST）。判定は「既知文字列のどれか一致」ではなく複数形式を許容する集合で持ち、古い形式のパターンは消しません（広げるだけで狭めない）。検査が赤いとき、まず「対象が本当に壊れているか」を検査とは独立の手段（構造化データを直接解析する等）で確かめます（MUST）。動いているものを壊れていると報告する検査は迂回フラグへの動機を作り、ガバナンス全体を弱めます。平文 grep で JSON ログ等を数えると、パターン自体がログに載ったとき自分を数えます。判定に `> 0` しか使わない場合でも「数値を測定値として読んではならない」ことをコメントに明記してください（SHOULD）。
+*   **Hook Context Fidelity（起動文脈の忠実性）**: hook・CI・cron・スケジューラから起動されるゲートは、実際に起動される文脈（ランナーの起動方法、シェルオプション、環境変数）を再現して検証してください（MUST）。手で `bash <script>` して得た緑は、`sh -e` で起動される hook の緑ではありません。hook スクリプトは呼び出し方に依存せず fail-fast になるよう、先頭で `set -eu`（同等）を自分で宣言します（MUST）。ランナーが付ける `-e` に依存すると、`core.hooksPath` の違いや直接実行で前段の失敗が握りつぶされ、最後のコマンドの exit だけが返ります。出力が極端に短い失敗は「何も起きなかった」ではなく「早期に死んだ」と読み（SHOULD）、失敗行の特定は各行を個別に exit code 付きで実行します。外部プロセスを spawn するテストは環境変数まで含めて隔離してください（MUST）。`{...process.env}` の丸ごと継承は「cwd さえ変えれば隔離できている」という誤った前提であり、git なら `GIT_DIR` 系、他にも `npm_config_*` / `NODE_OPTIONS` / DB 接続系が同型です。回帰テストでは呼び出し元の状態（HEAD 等）が動いていないことを前後比較で固定し、汚染系バグは結果値ではなく副作用で捕まえます。worktree を作ったら hook のパス設定（`core.hooksPath`）を確認してください（SHOULD）。
 
 ### 12.11. The Branch Naming Convention（ブランチ命名規約）
 *   **Law**: ブランチ名は `type/summary` 形式で統一してください。
@@ -697,6 +766,7 @@
     1.  `git checkout main` → `git pull origin main` → マージ済みブランチの削除
     2.  新規タスク開始前にローカルの `main` が最新であることを確認してください。
     3.  古い `main` からブランチを切って開発を開始することを禁止します。
+    4.  記憶・メモリ・会話上の「マージ済み」「デプロイ済み」という認識は、現在の作業ツリーが最新であることを保証しません。直近にマージされた変更が触れたファイルを編集する前に、`git fetch` → behind 確認（`git status -sb`）→ クリーンなら `git merge --ff-only origin/main` で同期してから編集してください（MUST）。編集対象が直近変更と重なるときは、その変更の実差分（`git show <merge-sha>`）を確認し、その版の上に積みます（SHOULD）。stale なツリーでの編集はコンパイル・ビルドを通過するため事後検出できず、マージ済みの変更を黙って revert します。
 
 ---
 
@@ -713,16 +783,24 @@
     *   **No Blind Spread**: `...user` のようなスプレッド構文でのプロパティコピーは、将来追加される機密カラムを意図せず漏洩させるためDTO変換層では**完全禁止**です。
     *   **明示的なフィールド選択パターン**: `SELECT *` や `.select('*')` を禁止します。必要なカラムのみを明示的に列挙してください。
 *   **DTO同期義務**: BackendのDTOを変更した場合、FrontendのProps型も**同時に更新**してください。片方だけの更新は `undefined` 参照によるランタイムエラーの直接原因です。
+*   **Mapper Fan-Out Sync**: DTO インターフェースにフィールドを追加したら、同一コミットで全関連マッパー（例: `toXDTO`、`toAdminXDetailDTO`、`toBaseXDTO`）を更新しなければなりません（MUST）。DTO 定義の変更が全マッパーに伝播しないと、UI 上でサイレントなデータ欠落（値が常に `undefined`）が起きます。フィールド追加時はマッパー命名規約で grep し（例: `to.*DTO`）漏れを列挙してください（MUST）。マッパー入力を寛容型（Partial／unknown）にしている限り型システムは欠落を検出せず、レビューと grep が最後の砦です。
 *   **DTO Boundary Casting**: DB結果からDTOへの変換は、`as any` ではなく明示的なマッピング関数（`toDTO(dbResult): MyDTO`）で各フィールドを個別にマップしてください。
+*   **Serialized Attribute Pruning**: `data-*` 属性・JSON-LD・hydration payload へ JSON を埋め込む前に、表示対象の ID／URL に関連するメタデータだけへ prune してください（MUST）。表示で参照しないメタデータでも、HTML へシリアライズされた時点で公開データ境界に乗ります。削除済み要素の caption・note・権限名などの人間可読メタは、非表示でも公開情報として扱ってください。表示コンポーネントと SSR／静的レンダラが同じ正規化ヘルパーを使うことをテストし、削除済み要素のメタがシリアライズ結果に残らないことを否定期待値で回帰検出します（SHOULD）。
 *   **DTO Segregation**: 肥大化した単一の型定義ファイルを禁止します。機能ドメイン単位で分割してください（例: `types/store.ts`, `types/user.ts`）。
 *   **Mapper Input Robustness (Postel's Law)**: マッパー関数の入力は寛容に（ORM推論の不完全さを許容）、出力は厳格に（完全なDTO型を保証）してください。
+*   **Mapper Input Robustness（補強）**: 上記の「寛容」は `any` や `Record<string, unknown>` を意味しません。DB 行→DTO、DTO→外部公開の写し関数の入力型は、具体的な Row／DTO 型または名前付き narrow 型（`Pick<Row, …>` 等: select 由来の列だけ必須、非取得列は optional）で固定してください（MUST）。緩い入力型は「写し漏れ」ではなく存在しない列の捏造を許し、常に `null` を返すフィールドが外部契約として固まります。利用者は「データが無い」と区別できず、気づかれません。入力型を narrow に切り替えた瞬間に浮上する型エラー（存在しない列の SELECT、schema に無い DTO フィールド）は dead reference の証拠なので即削除し（MUST）、長期間残った `row: any` は隠れた drift の保管庫として監査で 0 件に保ってください（SHOULD）。
+*   **JSON Reference Normalization**: JSON／JSONB 列に保存された参照（`{url}`／`{path}`／素の文字列が混在し得るもの）は DTO 境界で表示用の単一 shape（例: `string[]`）へ正規化し、UI コンポーネントに内部 shape を知らせないでください（MUST）。JSON 列は静的保証が弱く、UI 側で扱うと同じ防御処理が詳細・一覧・管理プレビュー等へ拡散します。正規化ヘルパーは非文字列入力で例外化せず fallback／`null` を返す防御境界にし、shape を増やすときは代表 shape を DTO 回帰テストで固定してください（SHOULD）。
 *   **Explicit Mapping Mandate**: Service層での書き込みペイロード構築にスプレッド構文（`...input`）を**禁止**します。全フィールドを個別にマッピングしてください。
+*   **DTO ≠ Write Contract（補足）**: 読み出し／公開用 DTO（`Partial<DTO>` を含む）をそのまま DB の insert／update に渡してはなりません（MUST NOT）。存在しない列・関連配列・集計済みフィールド・PII 除外済みフィールドの意味が書き込みに混ざります。書き込み境界では生成型の Insert／Update 型で payload を組み立てる小さなマッパーを置き、関連配列（子エンティティ）は親行の更新から外して子テーブルのコマンドとして別処理してください（MUST）。レビューでは DTO 型を書き込み呼び出しへ渡している箇所（例: `Partial<.*DTO>` を payload に使う形）を grep し、0 件に保ちます（SHOULD）。
+*   **Read-DTO / Edit-DTO Segregation**: 公開表示用の allowlist DTO を編集画面の入力土台に使ってはなりません（MUST NOT）。表示は「絞る」、編集は「全部持ち回る」で要件が逆であり、共有すると表示に使わない項目が保存のたびに黙って消えます。実務では移植した本文 HTML が 1 回の保存で復元不能になりました。編集の入口は元の行から内部項目を復元し、保存スキーマにも宣言してください（MUST）。「保存が成功する」検査と「保存で値が失われない」検査は別物として両方持ち（MUST）、往復（読む→無変更で保存→読む）で値のある損失が 0 件であることを固定します。往復検査は (a) 配列要素のキー (b) 要素数 (c) 配列でないオブジェクト列 (d) 書き込み payload が値のある列を空で潰していないか、の 4 面で見てください（SHOULD）。
+*   **Read-Then-Save Round-Trip Contract**: 編集フォームが全項目を常時送信する設計では、読み出し DTO が供給していない項目（列名と DTO 名が違う派生フィールド、キャストで `undefined` のまま渡った項目）が初期値（空配列・空文字）で送られ、無関係な項目を保存するたびに消えます（型検査はキャストに隠れて検出できません）。更新 payload の契約は `undefined = 変更なし` と `空値 = 空にする` を区別し、フォームは DTO が供給しない項目を送ってはなりません（MUST NOT）。フォーム送信キー一覧と DTO 供給キー一覧を突合する検査を置き（MUST）、書き込みを有効化する前に読み出し側を先に整えてください（SHOULD）。往復検査の観点は上記 Read-DTO / Edit-DTO Segregation に従います。
 
 ### 13.2. The Client-Server Boundary Protocol（クライアント・サーバー境界）
 *   **Client DB Access Prohibition**: クライアントサイドから `supabase.from()` を直接呼び出すことは禁止します。データ取得・更新は必ず `Server Actions` または `Route Handler` を経由してください。
 *   **Secure Write Action Protocol (Turnstile Mandate)**: 公開フォームへの書き込みを行う Server Action は、必ず `turnstileToken` を引数として受け取り、サーバーサイドで検証してください。
 *   **Service Pattern Mandate**: `page.tsx` や `layout.tsx` 内でDBアクセス関数を直接呼び出すことを禁止します。必ず `lib/api/gateways/` (Read) または `lib/actions/` (Write) にロジックを抽出してください。
 *   **Async Boundary Protocol**: Client Component から非同期 Server Component を直接インポートして使用することは React の仕様違反です。必ず `children` Prop またはCompositionパターンを使用してください。
+*   **Not-an-Endpoint Principle**: フレームワークが export を自動で公開エンドポイントにする仕組み（サーバーアクション等）の下では、特権クライアントを使う内部処理（cron・バッチ）をそこへ置いてはなりません（MUST NOT）。ゲート無しの `'use server'` export は未認証で行レベル制御を跨いだ読み書きを許します。守るのではなく、公開されない module（`server-only` 等）へ移して「エンドポイントであることをやめる」のが正解です。「特権クライアントを直に使う export に認証ゲートが同居しているか」を静的検査で固定し、例外は理由付き台帳＋母数＋古い許可の残留まで検査してください（SHOULD）。外部入力の数値は上下限で丸めます。
 
 ### 13.3. The Service Layer Architecture（サービス層アーキテクチャ）
 *   **Service Layer Extraction Mandate**: Route Handler、Server Action等のエントリーポイントは「薄いインターフェース」に徹しなければなりません。ビジネスロジックをエントリーポイントに直書きすることを禁止します。
@@ -730,6 +808,7 @@
 *   **Service Aggregation Protocol**: 複数のGateway/Actionを統合して1画面分のデータを生成する「集約ロジック」は、必ずService層に `get...Data()` 形式で抽出してください。
 *   **Omnichannel Delivery Mandate**: UIコンポーネントにビジネスロジックやデータアクセスを直接記述することを禁止します。全てのロジックはService/Gateway層に抽出し、Web、モバイル、AIエージェントから再利用可能にしてください。
 *   **Error Translation**: Service層から発生した例外は、Controller層でHTTPステータスコードに変換してください。Service層がHTTPを知っていてはなりません。
+*   **Context Propagation Mandate**: DB クライアント・接続・トランザクション文脈を引数で受け取る関数は、内部のサブクエリやヘルパー呼び出しにも同じ文脈を渡し、内部で別の（特に高権限の）クライアントを生成してはなりません（MUST NOT）。`const client = supabase ?? createAdminClient()` のように 1 回だけ解決し、以降は同じ client を渡します。逸脱は環境変数への隠れ依存、単体テスト不能、権限境界の監査漏れを生みます。権限の異なるクライアントが本当に必要な場合は `readClient` / `adminClient` のように引数名で責務を分け、どの権限境界かを文書化してください（MUST）。「引数ありのとき高権限クライアント生成が呼ばれない」ことを、生成関数を throw モックにした回帰テストで固定します（SHOULD）。
 
 ### 13.4. The CQRS & Cache Strategy（CQRS & キャッシュ戦略）
 *   **CQRS Separation Mandate**: Read操作（参照）とWrite操作（更新）のロジックを同一の関数に混在させることを禁止します。`QueryGateway` と `CommandGateway` を明確に分離してください。
@@ -737,6 +816,7 @@
 *   **Hierarchical Cache Strategy**: データ特性を無視した一律のキャッシュ戦略を禁止します。以下のティアに分類してください:
     *   **STATIC** (変更なし): CDN/ISR。**WARM** (日次〜週次変更): TTL 5分〜1時間 + SWR。**HOT** (分単位変更): 短TTL + オンデマンドリバリデーション。**REALTIME** (即時反映): キャッシュ無効 + WebSocket/SSE。
 *   **Cache Invalidation Ceremony**: コアクエリロジックを変更した場合は、ビルドキャッシュの物理削除と開発サーバーの完全再起動を義務付けます。
+*   **Dev Cache Bypass（補足）**: 上記の儀式は最後の手段です。ローカル開発で「DB を直したのに画面が古い」が再発する構造では、ビルドキャッシュ削除のような運用手順を恒久解にしてはなりません（MUST NOT）。手順は守られず、層が複数あると手順自体が不完全になります（実務で 3 度再発）。開発環境では公開データ fetcher のキャッシュ経路そのものを条件分岐で迂回し（MUST）、TTL 短縮をバイパスと呼ばないでください。TTL を短くするのは「1 世代古い値を返す時間を短くする」だけで、境界に当たれば必ず古い値が出ます。キャッシュ層が複数ある（アプリ層キャッシュ／HTTP fetch のデータキャッシュ／CDN 等）場合、バイパス判定は 1 箇所の SSOT に置き各層がそれを参照します（MUST）。本番の TTL・タグ定義は dev の都合で変えず（MUST NOT）、本番相当のキャッシュ挙動を手元で再現する逃げ道（環境変数等）を残してください（SHOULD）。同じ語（`revalidate` 等）が層ごとに別の意味論を持ちうるため、設定値はライブラリ実装を読んで確定してから使います（MUST）。「対処したのに直らない」ときは同じ層をさらに強くする前に、関数入口の一時ログで「実行されているのに古い値が返る＝上流ではない」を切り分けてください（SHOULD）。
 *   **Cache Hit Rate**: キャッシュヒット率を計測し、90%未満のエンドポイントは最適化対象としてください。
 
 ### 13.5. The Mutation Integrity Protocol（ミューテーション整合性）
@@ -747,6 +827,8 @@
 *   **Post-Mutation Verification Fetch**: 重要度の高い更新の直後に同一IDで再取得（SELECT）を実行し、データが永続化されたことをログで検証してください。これにより「DB書き込み失敗」と「キャッシュの問題」を100%切り分けられます。
 *   **Step-by-Step Logging**: 各サブステップの実行結果をログに出力し（例: `Logger.info('[Step 2/5] Updating tags...')`）、障害発生時の原因特定を迅速化してください。
 *   **RLS Awareness**: Row Level Securityを使用するデータベースでは、権限不足はエラーではなく「0行に影響」として返されることを常に念頭に置いてください。
+*   **Derivation Timing Guard**: 導出・判定・走査を設計する際は「いつ」「誰として」「何回」評価されるかを明示しなければなりません（MUST）。取り違えると、正しく書いたつもりの処理が逆に働きます。外部入力（URL・外部 API 等）から導出する値は「入力が変わっていなければ保存済みを使う」を抽出処理より前に置いてください（MUST）。保存のたびに再導出すると、人手で修正された正しい保存値を毎回上書きして壊し、無駄な外部アクセスも生みます。どちらが正しいかは同じ導出器の出力との一致（自己一致）ではなく独立した情報で決めてください。独立情報照合は `engineering/710_data_reconciliation.md`、全件走査の既定行数上限は `engineering/200_supabase_architecture.md` を参照してください。
+*   **Row-Count-Blind Procedures**: 影響行数を返さない RPC／手続き（`RETURNS void` 等）を呼んだ後は、対象行を読み直して自分の操作として確定してから成功応答・監査行を書いてください（MUST）。存在しない／解除済みの対象でも応答が同じになるため、偽の成功と偽の監査行を作ります。実務では設定更新は影響行を確認していたのに、解除経路だけが規律から外れていました。監査 details には何を変更したか（マスク済み識別子・段階・回数）を残します。
 
 ### 13.6. The Type Safety & Integrity Protocol（型安全性と誠実性）
 この節はTypeScript固有の追加基準です。全言語共通の型・境界契約は `axiarch-rules/{lang}/universal/engineering/320_programming_language_governance.md` を正本とします。
@@ -756,17 +838,27 @@
 *   **Linter Suppression Prohibition**: `eslint-disable` / `@ts-ignore` 等の使用は原則禁止です。やむを得ず使用する場合は、理由を明記したコメントとIssue番号を必ず併記してください。
 *   **Generic Type Inference Safety**: `Record<string, any>` 等のanyインデックスシグネチャを禁止します。`Record<string, unknown>` または制約付きジェネリクスを使用してください。
 *   **Verification Gate**: 型チェック（`tsc --noEmit`）およびLinterが**警告ゼロ**で通過しないコードのコミットを禁止します。
+*   **External Identifier Branding**: 外部システム（決済・CRM・広告・配送等）の識別子は、自システムの識別子と表現型（string／uuid）が同じでも別の型として扱ってください（MUST）。`string` 同士の取り違えは型検査を素通りします。Branded type／newtype／value object 等で混同をコンパイル時に拒否し（SHOULD）、外部識別子へ解決できないレコードは送信せず理由付きで台帳に skip として残してください（MUST）。誤った識別子の送信は「送れない」より「別の相手へ計上する」という取り返しのつかない事故になります。実務では uuid と外部の `cus_` 形式を取り違え、従量請求が丸ごと立ちませんでした。回帰テストは「正しい形式である」だけでなく「自システムの識別子ではない」ことを否定側で明示します（SHOULD）。
+*   **Double-Cast Minimization**: 型の強制変換は最も弱い手段から試します。単純アサーション（`as T`）で通る場面での二重キャスト（`as unknown as T`）は禁止です（MUST NOT）。二重キャストはコンパイラが単純アサーションを拒否する型非互換の境界（ORM 推論限界、JSON 列、RPC 戻り値、フォーム再帰型）に限り、残存する二重キャストは監査時に「どの境界カテゴリの正当化か」で分類して件数を記録し、分類できないものは型定義の改善で解消してください（SHOULD）。「とりあえず二重キャスト」は思考停止の兆候です（実務では 60 ファイル超に増殖）。
+*   **Cast Audit Protocol**: 型階層を壊すキャスト（二重キャスト・非 null アサーション・`as any`）の監査は、発生しうる全層（マッパー入力、アクション／ルートの payload、ゲートウェイ・キャッシュ層のジェネリック、クライアントファクトリの戻り値、UI ライブラリの深い型再帰の回避）を対象に全ソースを grep し、層別に分類してください（MUST）。一部の層に偏った監査は「撲滅完了」と総括した直後に残存を生みます。各ヒットは「撲滅可能」「理由付きで残置」「撤去を試みて revert」の 3 分類で記録し、revert したものはコード内コメントに試行内容・失敗した型エラー・待っている上流条件を書いてください（MUST）。次の監査が同じ試行を繰り返さないためです。「撲滅完了」と宣言できるのは、全層の grep が 0 件または全件分類済みのときに限ります（MUST）。
 
 ### 13.7. The Error Handling Contract（エラーハンドリング契約）
 *   **Structured Error Return**: サーバーアクションは、業務ロジック上の失敗に対して `throw new Error()` を使用することを**原則禁止**します。代わりに `{ success: false, error: '...' }` 形式の構造化されたレスポンスを返してください。
 *   **Graceful Failure Contract**: エラー発生時はトースト通知やインラインエラーメッセージとして表示し、ユーザーに適切なフィードバックを提供してください。
 *   **Server-Client Symmetry**: サーバーサイドのガード強化を行う際は、必ずフロントエンド側の「エラー受け取り口」を同時に整備してください。
+*   **Classification Change = Control-Flow Change**: typed error／エラー分類関数を新設・拡張したら、その分類関数の全参照箇所を洗い出し、各分岐で新しい型が来たときの期待挙動を明示的に決めなければなりません（MUST）。分類関数が分岐条件を兼ねている限り、分類の変更は制御フローの変更であり「文言を増やしただけ」は成立しません。差分にもテストにも現れない経路変更が起きます。「伝播すべき異常」の判定は個別モジュールに書かず単一の述語へ SSOT 化してください（MUST）。
+*   **Degrade vs Propagate by Caller Role**: 分岐の意味論は呼び出し側の役割で決めます（MUST）。補助機能（文脈付与・推薦等）は縮退が正、事実を返す機能（検出・分類・要約）は伝播が正です。基盤を呼べていないのに「判断結果」として値を返すのは外部から見て偽の事実であり、成功パスの計量・課金まで走ります。
+*   **Input-First Persistence**: `Promise.all` 等の並列待機を try の外に置くと、1 つの throw が後続の副作用（保存・記録）を全部飛ばします。ユーザー入力の永続化より前に外部呼び出しを並列で待つ構造を作ってはなりません（MUST NOT）。失敗時に入力ごと消えます。実務では文言修正のつもりの分類変更がユーザー入力の消失に至りました。
 *   **Structured Error Logging**: エラーオブジェクトの文字列テンプレートへの直接埋め込み（`[object Object]` を出力）を禁止します。`message`, `code`, `details` 等のプロパティを明示的に分解してログに記録してください。
+*   **No Live Values in Log Messages**: ログのメッセージ文字列にフォーム入力・AI 応答本文・ストレージキー・識別子などの実値をテンプレート埋め込みしてはなりません（MUST NOT）。自動マスクは構造化フィールドに対して働くため、本文に混ぜた値はマスク処理の SSOT を迂回します。動的値は構造化 meta として渡してください（MUST）。
 *   **Centralized Logging Protocol**: 本番環境での `console.log` を禁止します。必ず `src/lib/logger.ts` を使用してください。
 *   **Read-Write Privilege Symmetry**: データの書き込みに特権クライアントを使用している場合、「編集のための読み込み」にも同等の可視性を保証してください。
+*   **Composed Helper Pairing**: 複数の関心事（例: 完走保証＋エラー可視化）を束ねる共通ヘルパーは、構成要素に「PII 安全／非安全」「厳格／緩和」等の別があるなら対で提供してください（MUST）。片方しか無いと、もう片方が要る呼び出し側は合成を諦めて手書きへ逃げ、束ねていた別の関心事（完走保証等）を静かに失います。同じ手書き回避パターン（素の `.catch()` 等）が多数あるなら、呼び出し側の規律ではなく SSOT の品揃え不足を疑ってください（SHOULD）。実務では数十箇所の手書きが「全員の不注意」ではなく「選べる正解が無かった」ことの表れでした。既存の合成ヘルパーへ一括で寄せる前に、その内部が使う捕捉・ログの強度（PII を送るか）を読み（MUST）、対を用意したら片方を他方へ差し替える変異でテストが赤くなることを実証してください（SHOULD）。§1.9 After-Response Hook Contract も参照してください。
+*   **Step-Tagged Failures under PII Scrubbing**: PII 境界で本文を破棄するロガー・プロキシ・分類器が直列に並ぶと、各層が正しくても手掛かりが 1 枚ずつ剥がれて真因が不可視になります（実務では 5 つの正しい設計が真因を 1 日以上隠しました）。複数工程を束ねる処理は、失敗時に工程名（step）を PII を含まないメタとして必ず残してください（MUST）。Error の name だけを直列化するロガーでは、どの工程かが消えます。失敗の catch は揮発するアプリログだけでなく、分類済みメタ（工程・status・種別）を保持期間の長い監視基盤へ即時送信します（SHOULD）。真因の確定は、境界の両側の記録の同時刻一致で行います。
 
 ### 13.8. The Dead Code & Workspace Cleanup（デッドコードとワークスペース清掃）
 *   **Dead Code Prohibition**: 現在使用されていないコード（未使用の変数、インポート、関数、型定義）は即時削除を義務付けます。コメントアウトも含めて一切残しません。Git履歴から復元できます。
+*   **Orphan Business Logic & Local-Only Scripts**: 呼び出し元ゼロの業務ロジック export は「将来使うかも」で残さず削除し、再実装時は Git 履歴を参照してください（SHOULD）。export されている限り誰かが import しうるため攻撃面に乗り続け、別の改修でセキュリティ修正コストを払い続けることになります。bypass credential（service role 等）を使うローカル script は明示的な env opt-in、CI／デプロイ環境での実行拒否、冒頭 docblock「LOCAL-ONLY」を必須とし（MUST）、source を書き換える script は既定 dry-run で `--apply` を要求してください（MUST）。
 *   **YAGNI厳格化**: 「将来使うかもしれない」コードは「ノイズ」です。現在のユーザーストーリーに含まれない「先回り実装」は技術的負債です。
 *   **Clean Workspace Mandate**: タスク完了時、一時ファイル、ビルドキャッシュ、空ディレクトリ、`console.log` は全て除去してからコミットしてください。
 *   **Unstable Timer Protocol**: `setTimeout` や `setInterval` をロジック制御に使用することを禁止します。イベント駆動アーキテクチャまたはジョブキューを使用してください。
@@ -774,17 +866,32 @@
 ### 13.9. The API Product & Configuration（API設計と構成管理）
 > **§13.15 Idempotency Key Protocol** も参照してください。
 *   **API Product Mindset**: 全てのデータ出力は「商品（Product）」です。APIは必ず **Tier 1 (Public/Free)** と **Tier 2 (Enterprise/Paid)** に分離できる設計にしてください。全Enterprise APIに `recordApiUsage` を計装してください。
+*   **Metering Non-Blocking Rule**: 有料 API の利用量記録は 100% 計測されなければなりません（MUST）が、記録経路はメインレスポンスをブロックしない非同期経路とし、記録失敗で API 自体を失敗させてはなりません（MUST NOT）。ログ欠損はリコンシリエーションで補えますが UX 毀損は取り戻せません。これは課金ログの話であり、上限到達を止めるクォータ判定（アトミック計数）とは責務が違うため分けて設計します。
 *   **API Latency Budget**: 全てのPublic/Enterprise APIのTTIは **200ms以内** に抑えてください。超過する処理は非同期Queueに逃がし、`202 Accepted` を返却してください。
+*   **Full-Fetch Triple Check（要約）**: `.limit()` 撤去などで全件取得・全件エクスポートへ切り替える変更は、正しさ・順序安定性（最終 ORDER に一意列）・応答サイズ上限の 3 点を同時に検証し、大きな結果はストレージ退避＋署名 URL で返してください（MUST）。詳細は `engineering/700_batch_backfill_operations.md` Rule 700.3.6b を参照してください。
 *   **VIP Lane Strategy**: 自社ネイティブアプリからは「Bearer Token認証」と「API Key認証」のOR条件を実装し、ログインユーザーに特権Tierを付与してください。
+*   **VIP Lane Supplement（認証 ≠ 権利）**: 上記の OR 条件は「API Key 無しでの本人確認」を可能にするためのものです。API Tier（有料／全量データの権利）は認証状態ではなく契約 SSOT（サブスクリプション／プラン定義）から導出しなければならず（MUST）、ログイン済みだけで特権 Tier を付与してはなりません（MUST NOT）。認証（誰か）と権利（何が使えるか）は別軸であり、ログインだけで有料レーンを開けると無料ユーザーが Enterprise データへ到達します（実監査で是正済みの欠陥）。
 *   **Tenant-Aware Naming**: 顧客ごとのリソースには `site_` / `account_` を接頭辞として使用し、全テナント共通の基盤設定にのみ `system_` を使用してください。
 *   **Legal Hardcoding Ban**: 利用規約等の法的テキストをソースコードに直書きすることは禁止です。管理画面から非エンジニアが即座に修正可能な状態にしてください。
+*   **Operator-Editable Values Ban on Hardcoding**: 上記は法務文に限りません。運用者が変更する前提の値（掲載コンテンツ・推薦・広告・予約高さ等の表示パラメータ）は、初回実装からコード外（DB／設定画面）に置いてください（MUST）。「後で管理画面を作る」を理由にコードへ直書きしてはなりません（MUST NOT）。後で作られることはなく、変更のたびにエンジニアのリソースを消費します。
 *   **Static Master Protocol**: アプリ全体で使用される定数値は `constants/` に一元定義し、コンポーネント内でのハードコードを禁止します。`as const` でイミュータブルに定義し、`typeof` で型を自動導出してください。
+*   **Cross-Layer Key Unification**: 管理側の登録値と表示側の分岐（switch）と取得側の判定で共有される識別キー（enum／section key 等）は、単一の定数・enum から全層が import してください（MUST）。各層で文字列を独立定義すると、不一致は例外にならず「何も表示されない」形で沈黙します（実務では管理画面が `new_reviews` で登録し表示側が `reviews` でのみ照合）。分岐は網羅性をコンパイル時に検証し（`never` 型による exhaustive check 等）、新しいキーを追加した時に更新が必要な全箇所（型・分岐・取得判定・既定ラベル・管理側の選択肢）を定義ファイルのコメントまたはチェックリストに列挙してください（SHOULD）。
+*   **SSOT Header Mandate**: SSOT として導入・拡張する定数・型・関数には、定義直前に「①何の SSOT か（責任領域）②参照先（誰が import するか）③更新ルール（変更時に何を同期・検証するか）」を必ず書いてください（MUST）。1 ファイル複数 SSOT なら各定義ごとに書き、自動生成ファイルは対象外です。新規 SSOT を作る前に既存 SSOT の scope 境界を読み、scope が違うなら同じ export に詰め込まず別 export・別型として並置します（MUST）。単位が同じでもコストの桁、法規制の影響度、チューニング判断者が違えば別 SSOT です。
+*   **Copies Are Deleted, Not Monitored**: 「must match」「正本は X、両者を同時更新すること」というコメントを見つけたら、その時点で両者のフィールド集合・値を実際に数えてください（MUST）。約束を書いている箇所は既に破れている確率が高く、同時更新は人間の記憶に依存した契約でドリフトの検出は常に事後になります。同じ値を複数ファイルへ手で書かず実体値を import で共有し（MUST）、写しを消せない事情が本当にあるなら値ベースでフィールド集合の一致を検査するテストを置きます（MUST）。「保護ファイル／CRITICAL だから触れない」は複製の理由にならず、オーナー承認を取って純関数を 1 本 export する方が安全です（SHOULD）。差異を見つけたら現在の実動作を優先して統一し、挙動変更を混ぜないでください（SHOULD）。
+*   **Non-Importable Output Reconciliation**: SSOT の値がコードから import できない媒体（SQL migration、DB 行、YAML、生成ファイル、静的解析のためリテラルを要求する設定値）へ出ていく箇所を棚卸しし、それぞれに「出力先を読み取り、SSOT の値を含む／一致することを検査するテスト」を置いてください（MUST）。書き写しを書き写しのまま終わらせません。出力先はタイムスタンプ等の可変名で名指しせず suffix 一致等で 1 本に特定し、0 本・2 本以上なら検査を失敗させます（MUST）。名指しは改名で黙って素通りします。静的解析制約でリテラルを残す場合は近接コメントで対応 SSOT を示し、コメント↔リテラル値を突合する verify を CI に置きます（SHOULD）。別ランタイム向けに生成するミラー定数は生成物を同一コミットに含め、「再生成 → `git status --short` が空」を確認してください（MUST）。
+*   **Threshold & Boundary Literals**: 表示・判定・アラートで共有される閾値は、消費側（ダッシュボード、アラートエンジン）を作る前に SSOT 化してください（MUST）。UI とアラートで判定基準が違う事故の温床になります。閾値 SSOT は単位を名前または注記に埋め込み（`*_MS`、「比率 0-1」）（SHOULD）、比較演算子直後の数値リテラル（`> 0.15`、`<= 500`）を grep の検出対象にします（SHOULD）。明示引数の呼び出しだけでなく、関数の default parameter・省略時 fallback・HTTP ステータスの厳密比較・時間単位換算（`60_000`）・sitemap／redirect 除外やヘッダー判定などの周辺境界も同じ SSOT を参照してください（MUST）。本体だけ SSOT 化して周辺で drift するのが監査の典型的な取りこぼしです。
+*   **Cross-Layer Constraint Parity（要約）**: 同一入力を client／server／公開 API の複数層で検証する場合、文字数上限・数値範囲などの制約値とエラーメッセージは単一の定数から参照し、統一時の既定は最も厳しい値にしてください（MUST）。層ごとに独立して進化すると、最も緩い層が実効制約になります。詳細は `engineering/300_web_frontend.md` の The Cross-Layer Constraint Parity を参照してください。
+*   **Display Metadata Colocation**: enum／値集合の表示メタデータ（ラベル・説明・バッジ様式・表示順）は値の定義と同じ場所に置き、画面側にはレイアウトだけを残してください（SHOULD）。DB 値を定数化していても表示メタを画面ごとに別管理すると、同じ状態の呼び名や色が画面ごとにずれます。例外（テスト期待値、外部仕様の固定名、文脈依存ラベル）は残存理由を記録します。
+*   **Responsibility-Separated Identifiers（要約）**: 値が偶然同じでも責務が違う識別子（DB テーブル名／ストレージ bucket 名／schema 名）は別の定数・別の型にし、境界ヘルパーの引数を責務別の型にしてください（MUST）。詳細は `core/000_core_mindset.md` §1.31 の Responsibility-Separated Identifiers を参照してください。
 *   **Projection-Schema Parity**: データ取得時の射影仕様はDBスキーマと100%一致しなければなりません。UIやDTOに定義されているがDBに存在しない「幽霊フィールド」を禁止します。
+*   **Projection-Consumer Parity**: 逆方向も守ります。複数画面へ給餌する共有射影（基底 SELECT／DTO spec）から列を外すときは、全給餌先の参照列を機械的に突合してから行ってください（MUST）。DTO が optional かつ `?? null` 吸収・表示条件が `value && …` の場合、列欠落は例外ゼロで一斉サイレント消失します（実務ではキャッチコピーが全面消失）。表示必須列は spec に明記し、`value && <p>{value}</p>` 型の optional 表示列には「全件で null は異常」の non-null 率監視を置いてください（SHOULD）。射影形状の変更後は旧形状キャッシュが TTL まで残る前提で検証します（`engineering/730_caching_discipline.md` 参照）。
+*   **Projection-Mapper Two-Key Lock**: 文字列で表現される射影（SELECT 列リスト、GraphQL selection、API の fields パラメータ）と、その結果を読むマッパー（`row.x` の参照集合）は、型システムが結び付けない 2 つの独立した層です。両者の集合一致を人間レビューと機械照合の二重で検証してください（MUST）。不一致の症状は例外ではなく「undefined → null → UI で『データなし』」という静かな欠落で、lint・型検査・単体テストが全て緑のまま本番のユーザー報告で初めて発覚します（実務では数か月潜伏し、複数タブの表示が同時に欠けました）。列追加時は「射影＋マッパー＋型定義（生成型または拡張型）」の 3 点同時更新を PR チェックリストに置いてください（MUST）。機械照合はマッパーの `row\.\w+` 参照を列挙して射影の列リストと差分を取る形で行い、射影側には整合済みフィールド一覧を docstring で残してレビュアーが差を視認できるようにします（SHOULD）。drift 発見時の掃き方と QA 側の検査は `quality/000_qa_testing.md` の Projection-Mapper Two-Key Lock／Drift Sweep Scope を参照してください。
 
 ### 13.10. The Authentication & Access Control（認証とアクセス制御）
 *   **Audit Bypass Anti-Pattern**: クライアントサイドから直接データベースの書き込みを行うことは、監査ログをバイパスするためガバナンス違反です。全てのデータ更新は必ず Server Actions を経由し、`recordAuditLog` を呼び出してください。
 *   **Authentication Guard Enumeration Consistency**: RBACにおいて、許可ロールのリストを複数のガード関数で個別管理することを**禁止**します。全てのガードは共通の定数配列（`ALLOWED_ADMIN_ROLES`）を参照してください。
 *   **Dead Zone Detection**: 「画面には入れるが操作だけが失敗する」不透明なデッドロックを防ぐため、ページレベルのガードとアクションレベルのガードが同一のロール集合を参照していることを定期的に監査してください。
+*   **Guard Data-Spec Parity**: 権限判定に用いるデータは、事前フィルタ層（Edge Middleware、グローバルセッション初期化、ルートガード）と最終判定層（Server Action／API の認可チェック）で同一の取得仕様（同じカラム集合・同じリレーション結合）を用いてください（MUST）。片方だけリレーションを含まない汎用取得（`*` 相当）を使うと、リレーション側で権限を持つ正規の管理者が前段で弾かれます（実インシデント）。権限判定用の取得仕様は名前付きで一元定義し全ガードがそれを参照します（SHOULD）。許可ロール定数の一元化だけでは不十分で、判定に必要な結合まで一致させる必要があります。検証: 「ロールを直接持つユーザー」「関連テーブル経由で権限を持つユーザー」の双方で、事前フィルタ層と最終判定層の結果が一致することをテストしてください（MUST）。
 
 ### 13.11. The Build & Deploy Verification（ビルドとデプロイ検証）
 *   **Production Build Verification**: 開発サーバーが動作していることは、コードの正しさの証明には**なりません**。タスク完了前に以下の **Triple Crown** を必ず通過させてください:
@@ -797,12 +904,17 @@
     2.  **Structured Data**: 構造化データ（JSON-LD, OpenGraph等）が最新か
     3.  **UX**: エラーメッセージがユーザーの言語で適切に提供されているか
     4.  **Type Safety**: `any` や不透明なキャストが新たに導入されていないか
+*   **Generated Artifact Integrity**: 生成される成果物（seed、生成定数、生成 SQL、生成型、生成ドキュメント等）への修正は、成果物ファイルへの手編集で完了扱いにしてはなりません（MUST NOT）。生成器または生成計画の SSOT へ反映し、フル再生成とフル適用（db reset 等）を実走して差分が再現されることを確認して初めて修正とみなします（MUST）。手編集は次回の再生成で無言で消え、成果物の diff には「生成器の欠落」が現れないため、対象箇所だけの部分検証で完了扱いにしてはなりません（MUST NOT）。生成物であることを示す標識（ヘッダコメント、パス規約、`.gitattributes linguist-generated` 等）を付け、レビューで手編集を検出できるようにしてください（SHOULD）。
+*   **Placeholder Discipline**: 検証ゲートは、必須成果物がプレースホルダー／スタブのままなら既定で失敗させてください（MUST）。一時的に許容する場合は明示的な例外フラグ（例: `ALLOW_<X>_PLACEHOLDER=1`）を要求し、フラグ無しの黙認を禁止します（MUST NOT）。長期間プレースホルダーで運用された成果物を初めて実体化する変更は、その成果物を消費する全ての検証・同期ツールとの併用を実走で確かめます（MUST）。初回実体化は潜在ギャップの顕在化点です。本番の高権限 secret を AI や自動化が無断で取得してはならず（MUST NOT）、必要な場合はオーナーの明示許可またはローカル env ファイルによる明示注入を前提にします。
 
 ### 13.12. The Migration & Schema Safety（マイグレーションとスキーマ安全性）
 *   **Migration Static Analysis Guard**: マイグレーションファイルのPush/Merge時に、CIパイプラインで**静的解析**を実行し、危険なSQLパターンを物理的に拒否してください。
 *   **Forbidden Patterns**: `UPDATE` without `WHERE`、`INSERT` without `ON CONFLICT`、`UNIQUE` constraint without cleanup。
 *   **Pre-push Hook**: ローカルでのPush前にスクリプトを実行し、危険なSQLを即座にフィードバックしてください。`--no-verify` でのフック回避は禁止です。
 *   **CI Pipeline**: `migration:check` ジョブを常時稼働させ、ヒューマンエラーの最終防衛線としてください。
+*   **Untracked Coverage & Checked-List Verification**: ローカルの自己検証で走る migration／危険 SQL ガードは、staged・未追跡（`git ls-files --others --exclude-standard`）・CI 差分の 3 経路を重複排除して同じ検査関数に流してください（MUST）。stage 前の新規ファイルを見ないガードは、作業中の自己検証で「問題なし」を返します。ガードの成功報告では、追加したファイルが実際に検査対象として列挙されたかを確認し、「検査対象 0 件」の緑を成功と数えてはなりません（MUST NOT）。見逃しを目視で補って済ませず、ガード自体を直して検出力を上げてください（MUST）。
+*   **Bypass Side-Effect Parity**: 本番データの変更は、手作業経路（コンソール・SQL Editor）が運用上の制約で止まったら、既に前例がある正規経路（migration・修復ジョブ）へ切り替えてください（MUST）。critical を何日も open のままにして手作業の再開を待ってはなりません（実務では 9 日間）。アプリの保存経路を迂回してデータを変えるときは、その経路が持つ副作用（版数の刻印・通知・監査ログ）を同じ形で再現し、冪等キー（同じ `source_id` 等）で後続のアプリ保存と重複しないようにします（MUST）。本文に正本が 2 つある設計（構造化データが NULL のときだけ生 HTML が正本、等）では、触る前にどちらが正本かを実測してください（SHOULD）。
+*   **Data Provenance**: 本番へ適用する migration・設定・シードに埋め込むデータを、ローカル／ステージングから生成してはなりません（MUST NOT）。ローカル seed はマスク値・接続情報・既定資格情報など本番と一致しない列を持ち、生成物はローカルでは正常に動くため環境差を検出できません。やむを得ず埋め込む場合は、実行 SQL／成果物にローカル固有の値が現れていないかを機械で検査し、検査の対象値は seed の実物から読み取ります（MUST）。データ移行を書く前に「そのデータは本当に埋め込む必要があるか」を問い、アプリ側に遅延生成の経路があるならそちらを選んでください（SHOULD）。
 
 ### 13.13. The Feature Flag Lifecycle Protocol（フィーチャーフラグ運用規律）
 *   **Context**: Feature Flagは安全なリリースを可能にしますが、管理されないフラグはコードの複雑性を増大させ、技術的負債となります。
@@ -963,6 +1075,7 @@
           "payload": { ... }
         }
         ```
+    *   **Event-Ready Audit Log**: 監査ログ／変更履歴は、テーブル名と行 ID に加えて集約種別・集約 ID・イベント名（`{集約}.{過去形動詞}`、例: `order.completed`）・イベント schema 版・before/after 差分を持たせ、将来 CDC／イベントストアへ昇格できる粒度にしてください（SHOULD）。ログは追記専用とし、イベント ID を一意キーにして重複処理を防いでください（MUST）。Event Sourcing の導入自体は要求せず、書き込み量・状態遷移の複雑さ・過去時点の再現要件など計測可能な指標で判断します（SHOULD）。後からイベント化しようとして粒度が足りないのが成長期の典型的な失敗です。
 
 ### 14.5. Multi-Tenancy Architecture Protocol（マルチテナンシー基本原則）
 *   **Context**: SaaSプロダクトにおいて、複数の顧客（テナント）を単一システムで安全に運用するマルチテナンシーは、設計の初期段階から織り込まなければなりません。後付けのマルチテナント化は最大級の技術的負債です。
@@ -985,6 +1098,9 @@
     *   **Provider Must Verify**: APIを提供する側（Provider）は、全コンシューマーコントラクトに対するProviderテストをCIで実行し、**コントラクト違反のデプロイリスクを低減**してください。
     *   **Schema-First for Internal APIs**: 内部API（BFF / マイクロサービス間）はOpenAPI 3.1スキーマから型を自動生成し、実装とスキーマの乖離を継続的に検出してください。
 *   **Contract Versioning**: コントラクトに破壊的変更を加える場合、「Expand-Contract Pattern」（まず新フィールドを追加、全Consumerが移行後に旧フィールドを削除）を必ず採用してください。
+*   **Intra-App Sender/Receiver Key Reconciliation**: サービス境界だけでなく、アプリ内のフォーム → アクション → スキーマの間でも、受信側の型／スキーマが必須とするキー集合と、送信側が実際に組み立てるキー集合を機械で突合してください（MUST）。受信スキーマの必須キーを送信側が一度も送っていなければその経路は 100% 失敗しますが、テストは自分で payload を組み立てるため緑のままです。必須判定はバリデータの内部構造を読まず「実際に `undefined` を通すか」で行い、差集合が空でなければ赤にします。
+    *   **No Bulk Argument Cast**: 呼び出し引数を `as <受信側の引数型>` で一括キャストしてはなりません（MUST NOT）。送信側が余分に送るキーは静かに捨てられ、成功表示のまま保存されません（実務では編集→保存で成功トーストが出るのに DB へ一切反映されない状態が続きました）。引数は受信側の型で注釈（`const args: Params = {…}`）して不一致をコンパイラに露出させ、局所キャストは型が必要な 1 フィールドに限ってください。
+    *   **Defaults & Sibling Fields**: 既定値でよい項目は既定値を持たせ、必須にするなら送信側に実在することを検査で固定します（SHOULD）。あるフィールドの写し漏れを直したら、同じフォーム×同じキャスト構造を通る兄弟フィールドを同じ変更で点検してください（MUST）。QA 側の要約は `quality/000_qa_testing.md` の Sender/Receiver Key Reconciliation を参照してください。
 
 ---
 
@@ -1180,6 +1296,7 @@
     *   MySQL: `ALTER TABLE ... ADD INDEX` はデフォルトでオンライン実行。ただし大テーブルは `pt-online-schema-change` を使用してください。
     *   **モニタリング義務**: インデックス作成中は `pg_stat_progress_create_index`（PostgreSQL）でブロッキング状態を監視してください。
 *   **インデックス削除**: 未使用インデックスはクエリパフォーマンスを低下させます。`pg_stat_user_indexes` で `idx_scan = 0` のインデックスを四半期ごとに審査し、削除候補をバックログに積んでください。
+*   **Observation Prerequisites（観測前提条件）**: 未使用インデックス（`idx_scan = 0` 等）の助言に基づく削除は、本番相当のデータ量とトラフィックで十分な観測期間（季節性・バッチ周期を含む）を経た統計に限って判断してください（MUST）。開発初期・少量データ・本番トラフィック未到達の環境の統計を根拠に削除してはなりません（MUST NOT）。アドバイザは「今」しか見ておらず、FK／検索用インデックスを落とす事故を招きます。削除候補は作成理由（想定クエリ・FK・将来の検索要件）と突き合わせ、理由が有効なら統計に関わらず保持し、削除は online で行い再作成手順をロールバックとして用意してください（SHOULD）。
 
 ### 17.3. スキーマバージョニングとドリフト防止
 *   **Law**: マイグレーションは「不変の歴史（Immutable History）」です。一度適用したマイグレーションファイルを修正・削除することは**絶対禁止**です。修正が必要な場合は必ず新規マイグレーションファイルを作成してください。
@@ -1205,6 +1322,7 @@
     1.  **Phase 1（Expand）**: DBマイグレーションを先にデプロイ（新カラム追加）
     2.  **Phase 2（Migrate）**: 旧/新両対応のアプリ全サービスをローリングデプロイ
     3.  **Phase 3（Contract）**: 全サービスが移行完了後にのみ旧カラム削除マイグレーションを実施
+*   **Order Dependence of Privilege Contraction（権限縮小の順序依存）**: DB とアプリのデプロイが並行して走る環境では、権限を狭める変更（REVOKE／行レベル制御の強化）も「新しい権限＋古いアプリコード」の窓を必ず生むものとして評価し、その窓で正当な書き込みが失敗しないかを問ってください（MUST）。失敗するなら、REVOKE ではなくサーバ側で値を既定へ強制上書きする方式（トリガ／サーバ既定値）を選びます（SHOULD）。書き込みは成功し続け、攻撃者が指定した値だけが捨てられ、デプロイ順に依存しません。倒す先は安全側（要モデレーション、最小ティア）にし、過剰付与へ倒す既定値を選んではなりません（MUST）。利用者の正当な経路が存在しない操作は順序問題が無いので素直に REVOKE してよく、REVOKE と上書きは経路ごとに使い分けます。「マージ前にアプリを先にデプロイする」という運用約束だけで守る是正は、それ自体を新しい危険として扱ってください。
 *   **後方互換APIの維持義務**: スキーマ変更に伴うAPIレスポンスの変更は**Expand-Contract Pattern**（§14.6参照）で管理し、Consumer側に同時デプロイを強制してはなりません。
 
 ---
@@ -1269,6 +1387,7 @@
     | ダイアログ | `<dialog>` または `role="dialog"` + `aria-modal` | 可視性だけで制御する `div` モーダル |
     | ナビゲーション | `<nav aria-label="...">`  | `<div class="nav">` |
     | ページ見出し構造 | `h1`→`h2`→`h3` の階層遵守 | スタイルのために `h1` を複数使用 |
+*   **Harm of Omitting `type`（`type` 省略の実害）**: すべての `<button>` に `type="button" | "submit" | "reset"` を明示してください（MUST）。form 外でも例外はありません。将来 `<form>` に包まれた瞬間、既定の `submit` が暴発します。フォーム内に描かれるリッチエディタのツールバー・アコーディオン等、ラッパー UI コンポーネント（`<Button>`）経由の要素も対象です。実害は「ツールバーを押すたびにフォームが submit され、保存と副作用バッチが走る」であり、UI 上は正常に見えます。既定の lint は `type` 省略を検出しないため、契約テストでディレクトリ配下の `<button` / `<Button` に `type=` 必須を固定し（SHOULD）、属性内の `=>` でタグが閉じたと誤認しない走査にしてください。検出は submit イベントの捕捉（submitter の特定）と、保存ボタン未押下で `updated_at` が動くかで行います。
 
 ### 18.4. キーボード & フォーカス管理プロトコル
 *   **Law**: マウス操作で可能な全操作は、キーボードのみでも完結できなければなりません。これはWCAG 2.1.1（Keyboard）の法的要件です。
@@ -1430,6 +1549,7 @@
     | Header | 大規模・複数クライアント | `Accept: application/vnd.api.v2+json` |
     | GraphQL メジャーバージョン | 全テナント（非推奨ディレクティブ使用） | `@deprecated(reason: "v2を使用してください")` |
     *   **廃止通知ルール**: APIは一度公開したら少なくとも1年間は旧バージョンを維持すること。Deprecationはヘッダー（`Deprecation`, `Sunset`）で事前通知する。
+*   **Published Schema Constraint Parity**: 外部に公開するスキーマ（JSON Schema／OpenAPI／ツール定義等）は、内部バリデーションと同じ制約（`pattern` と `maxLength` の両方等）を独立に表明してください（MUST）。正本は `engineering/740_data_contracts.md` の「Rule 740.8.5」。
 
 ### 19.2. Data Quality Engineering Protocol（データ品質エンジニアリング）
 *   **Context**: AI/LLMの推論精度を決めるのは「モデルの能力」ではなく「データの品質」です。"Garbage in, Garbage out" の原則は2026年においても不変です。データパイプラインの品質基準をエンジニアリング層で定義します。
@@ -1492,6 +1612,7 @@
     *   実行者を非難するのではなく、**障害を引き起こしたシステム・プロセスの設計上の脆弱性を特定・修正** することに焦点を当ててください。
     *   「気をつければ防げた」形式のトライアルは禁止。「同じ状況で誰でも同じミスを犯せるようなEnvironmentは何が問題か」の視点に切り替えてください。
 *   **アクションアイテム追跡義務**: PIRのアクションアイテムは必ずイシュートラッカー（GitHub Issues / Jira）で管理し、次回スプリントに組み込み、実行状況を確実にフォローしてください。放置されたアクションアイテムは「解決されないリスク」です。
+*   **Rule Crystallization Link**: 再発防止策は技術（型・テスト・監視）／プロセス（手順・レビュー）／人的要因（文書化・自動化の欠如として表現）の 3 軸で列挙し、単一軸に偏らないでください（SHOULD）。PIR の教訓から汎用化できるルールを抽出してルールファイルへ追記し、教訓ログにはインシデント識別子と追記先ルールの位置を相互参照で残してください（SHOULD）。技術対策だけのアクションは同じ手順の穴から再発し、教訓とルールが辿れないと次の改訂で根拠が失われます。
 
 ### 19.5. Secrets Governance & CVE SLA Protocol（シークレットガバナンス）
 *   **Context**: シークレットのリポジトリコミットは後辺性に再現するため「削除しただけで安全」は絶対的に誤りです。シークレット検出の自動化とCVE対応のSLA化は現代のセキュリティレイヤーの必須要件です。
@@ -1515,6 +1636,7 @@
     | **High（7.0–8.9）** | **発見後72時間以内** | 回避策の実施必須 |
     | **Medium（4.0–6.9）** | **次回スプリント内** | バックログに登録 |
     | **Low（0.1–3.9）** | **四半期内** | テックレーダーレビュー時 |
+*   **Audit Output Interpretation**: 依存監査ツール（`npm audit`、`pip-audit` 等）の「修正可能」表示や自動修正提案（`npm audit fix`、bot PR）は制約解であり、本番影響と破壊性を語りません。実行前にメジャー昇格か、提案版が前進か後退（ダウングレード）かの両方を見て解消可否を判定し（MUST）、メジャーダウングレード提案は危険信号としてそのまま適用してはなりません（MUST NOT）。実務ではフレームワークを 7 世代前へ下げる提案が出ました。dry-run は先頭の「追加」行ではなく末尾の残存件数で判断します。「最新版へ上げれば直る」は成り立たないことがあり、経路上の全要求元の最新版が宣言する range をレジストリで実照会し、「上流が直していない」を証明してから「直せない」と結論してください（MUST）。direct 依存は修正済み版へ明示 bump し、transitive 依存は `overrides`／`resolutions` で最小範囲の床を設定して外科的に直し（SHOULD）、強制の前に対象パッケージのモジュール形状（export が callable かオブジェクトか等）を `require()` で実測します（MUST）。残存分は本番依存のみ（dev 除外）で再監査して到達性で分類し報告し（MUST）、修正後は依存ツリーで全チェーンに安全版が入ったこととスキャナが 0 件になったことの両方を確認します（MUST）。セキュリティ目的の強制は、どの advisory を防ぐ枠かが読めるよう、下限を脆弱域の外へ宣言的に書いてください（SHOULD）。
 *   **自動スキャン**:
     *   `npm audit --audit-level=high` を CI で必須実行（§4.1参照）。
     *   GitHub Dependabot / Renovate Bot で脆弱性の自動プルリクエストを有効化し、レビュー前置設定を該当スロットに自動化する。

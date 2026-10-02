@@ -109,6 +109,7 @@
 | **Version** | The version of the contract itself and its change history |
 
 -   **Litmus test**: "Can a team consuming this data for the first time implement a safe consumer without asking the producer a single question?" — If not, the contract is incomplete.
+-   **Rule 740.2.1a (External Party Ledger Shape)**: A ledger that identifies external parties (referrers, crawlers, payment providers, social networks) holds the aggregation key, the display name, and the set of match conditions (hostnames, user agents, etc.) as a tuple (MUST). With only an array of raw hostnames, the counterpart's domain migration or rename splits the history and the post-migration traffic goes uncounted. Persist the raw matched value (the host) and resolve it to the key in the application-side ledger (SHOULD) — so updating the ledger needs no schema change. Failure pattern: the ledger could not follow the same party's domain migration, and its traffic split into a separate party.
 
 ### §2.2. Contracts as Code, Managed in Git
 
@@ -191,6 +192,7 @@
 
 -   **Rule 740.4.5 (Deadline-Bound Deprecation)**: Deprecation of the old version is announced **with an explicit retirement date** (MUST). Deadline-less deprecation ("please migrate someday") is prohibited (MUST NOT).
 -   **Alignment**: The Deprecation / Sunset header discipline for synchronous APIs is canonicalized by `engineering/100` §6.3. For data assets, the same idea is expressed as contract fields (deprecation date + retirement date).
+-   **Rule 740.4.5a (A deprecated stub never silently returns the "safe" value)**: Never leave the old signature of a defensive function (lockout, rate limiting, validation) as a stub that returns "always allowed" (MUST NOT). Leave fail-open for availability to the caller's decision, and make the deprecated stub **fail explicitly and land on the warning path** (MUST) — a disablement that returns a normal response is observable by no one. In an API that resolves overloads by argument name, a call that drops an argument does not error but resolves to the old version, so on deprecation delete the old signature or make it fail (MUST). When changing a contract (signature, return value), decide first where the guarantee the existing tests protected will move (MUST). Failure pattern: a call that dropped an argument resolved to the old stub, and the brute-force protection kept returning "not locked," silently disabled.
 
 ### §4.4. Consumer Ledger
 
@@ -208,6 +210,8 @@
 -   **Rule 740.5.1 (Ignore Unknown Fields)**: Consumers are implemented as Tolerant Readers that **ignore unknown fields** and extract only the fields they need (MUST). Strict parsing that raises an error on the presence of an unknown field turns the producer's non-breaking evolution (field addition) into a breaking one.
 -   **Rule 740.5.2 (Safe Handling of Unknown Enum Values)**: Code consuming enums implements an **explicit fallback for unknown values** (treat as `unknown`, or skip + count) (MUST). Crashing on an unknown enum value makes enum widening (§4.2) impossible.
 -   **Prior art**: The Tolerant Reader pattern (Martin Fowler).
+-   **Rule 740.5.2a (Absent-key semantics and enum mapping tables)**: Keep an enum mapping table as a constant that covers the whole domain, in a form where out-of-range values are recognizable as "no mapping" rather than returning `undefined` (MUST) — an implementation that indexes an array breaks silently the moment the domain widens, while type checks, lint, and build all pass. In machine-readable output (JSON-LD, APIs, feeds) "omitting the key" can carry meaning, so before omitting, confirm whether the spec interprets omission as a default or a wildcard (MUST) — `JSON.stringify` silently drops keys whose value is `undefined`. Failure pattern: the key that became `undefined` for the seventh element vanished from the output, and the receiver's spec read it as "applies to all," inverting the meaning. When collapsing an array to one item, confirm on real data that collapsing is justified (MUST) — `[0]` is "whatever came first," not "the representative."
+-   **Rule 740.5.2b (Single source for visible labels)**: Fix the source of a user-visible label (a caption, etc.) to a single field, and prohibit implicit fallbacks (`a ?? b ?? c`) to other fields (note / annotation / title / alt) (MUST NOT) — they produce "different text appears where it should be empty." Cut the fallback at the normalization (data-shaping) stage, not right before rendering (MUST): fixing only the renderer leaves the value filled in at normalization. If a search / SEO fallback is needed, keep it explicitly as a separate path from the visible label, and suppress the display in a shared component through an explicit prop (SHOULD).
 
 ### §5.2. Contract Tests
 
@@ -232,6 +236,7 @@
 -   **Rule 740.6.2 (Measurement Obligation)**: An SLA functions as a contract only when measured. Freshness and completeness are **continuously measured as metrics**, and divergence from the contracted values is made visible (MUST). Methods for cross-checking old/new and upstream/downstream (reconciliation) are canonicalized by `engineering/710`; metrics infrastructure and quality scores in general by `ai/100`.
 -   **Rule 740.6.3 (SLA-Violation Notification)**: SLA violations are **detected by the producer itself and notified to consumers** (MUST). A state where consumers notice "the data isn't arriving" first means the contract's responsibility placement is inverted. Alert design is delegated to `operations/400`.
 -   **Rule 740.6.4 (Executing Quality Rules)**: The quality rules stated in the contract (uniqueness, null rate, value ranges) are implemented as **validations executed on the pipeline**, not as documents (MUST). A rule that is not executed is a rule that does not exist.
+-   **Rule 740.6.5 (A constant SSOT for value domains, with invariant tests)**: For a string column with no DB-side enum / CHECK, keep the allowed values in **a single constant SSOT (a literal type)** in the application layer, referenced by both producers and consumers (MUST). Scattered string literals are prohibited (MUST NOT) — a typo does not surface until runtime. Pin the SSOT's invariants (uniqueness, naming convention, required entries) with unit tests (SHOULD), and generate the seeding of standard entries from the SSOT so values can be added without a DB schema change (MAY).
 
 ---
 
@@ -255,6 +260,7 @@
     -   Processing of valid items is not dragged down by violating items
 -   **Rule 740.8.3 (Consumer Tolerant Reader Tests)**: Consumers maintain tests verifying correct behavior on **input containing unknown fields** and **input containing unknown enum values** (MUST).
 -   **Rule 740.8.4 (Quality-Rule Execution Tests)**: Verify by test that the contract's quality rules (§6.4) are actually executed on the pipeline and that violations are detected (SHOULD).
+-   **Rule 740.8.5 (Independent constraint declaration in published schemas, universal contract tests)**: A schema published externally (JSON Schema / OpenAPI / tool definitions) declares the same constraints as the internal validation independently (both `pattern` and `maxLength`, etc.) (MUST) — a published schema is a contract read by the counterpart's implementation, not yours, so a constraint enforced only internally does not exist for an external implementation that reads only the schema or for a validator that ignores `pattern`. Keep the numeric basis in shared constants referenced by both the internal validator and the published schema (MUST). Write contract tests as universal conditions such as "every string property has an upper bound" rather than per-field values, so added fields are automatically covered (SHOULD). Failure pattern: a string bounded internally reached the counterpart unbounded in the published schema.
 
 ---
 

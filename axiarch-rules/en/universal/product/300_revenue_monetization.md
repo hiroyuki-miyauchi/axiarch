@@ -142,6 +142,8 @@
 - **FinOps (Cost Management)**:
   - **Budget Alerts**: Must set Budget Alerts for AWS/GCP/Firebase to prevent
     cloud bankruptcy.
+  - **Send-Quota Consumption Model**:
+    For send-type services billed by a monthly quota (email, SMS, push), model the consumption unit correctly (per recipient; inbound also counts as one message) and keep the quota and overage unit price in financial settings (SHOULD). The canonical rule is "Send-Quota Modeling" in `operations/600_cloud_finops.md`.
   - **Cost Allocation**: Clarify costs per feature/team using tagging.
   - **Cost Visualization Dashboard**: Visualize "estimated cost ($)", "tokens
     consumed per feature" daily in admin panel for fact-based cost management.
@@ -231,6 +233,7 @@
     - **WARM (300s)**: Search results, list views.
     - **HOT (60s)**: Detail pages, reviews.
     - **REALTIME (0s)**: Payments, authentication — No caching.
+    - **Estimate vs. Measurement**: Effect figures such as "zero DB load" above are estimates under stated assumptions, not guarantees. When a rule or design document states a reduction rate, mark whether it is an estimate (with its assumptions) or a measurement, and never present an estimate as a guaranteed value (MUST).
   - **The Shift-Left FinOps Protocol**:
     - **Context**: The 2026 FinOps best practice has evolved from
       post-deployment reactive cost optimization to **Pre-Deployment Costing** —
@@ -725,10 +728,15 @@
     tokenization via Stripe.js/Checkout.
   - **Idempotency & State Consistency**: Reduce double-payment risk via
     `Idempotency-Key` and support state consistency via Webhooks.
+    - **Idempotent Retry Boundary (supplement)**: Save the attempt ID and initial parameters when starting a payment, and when the communication result is unknown, **resend with the same idempotency key** (MUST). Stop resending unknown results before the provider's idempotency-key retention window (e.g., 23 hours against a 24-hour window) so that no new charge is stacked (MUST). Design the attempt row so that daily cleanup never deletes it, deny even the owner read/tamper access, and keep it out of logs and knowledge assets (MUST). Wrap multi-step external processing such as account deletion in an ownership token on the same row, never seize a token left by a dead process on elapsed time alone, and let the daily reconciliation detect "unknown result for over N hours" and "held for over M minutes" by count for human review (MUST). Resending past the retention boundary double-charges; seizing the lock on time alone double-cancels. See `engineering/100_api_integration.md` §22.3 Idempotency Key Management for details.
   - **Anti-Fraud**: Utilize Stripe Radar to automatically block fraudulent usage
     (Credit Master Attacks).
   - **Auditability**: Completely record logs of operations like amount changes
     or permission grants.
+  - **Existing Implementation Discovery**:
+    Before starting any new implementation touching payments, billing, or entitlements, scan the existing code; never destroy a billing implementation you discover, but diagnose it first and plan integration or a safe migration (MUST). Billing is where existing implementations are hardest to see, and breaking them leaves damage as refunds and accounting corrections.
+  - **Legacy Protection**:
+    Isolate and protect existing free users, legacy features, and existing data from new features (MUST). Loss of existing data is not tolerated.
 - **The Payment Fail-Safe Protocol (Payment Failure Recovery)**:
   - **Law**: Do not immediately cancel users on payment failure; provide **Grace
     Period (3-7 days)**.
@@ -739,6 +747,8 @@
        minimize involuntary churn.
     3. **Stripe Smart Retries**: Enable Stripe Billing auto-retry to maximize
        collection rate.
+    4. **Portal Entry for All Lifecycle States**:
+       The entry API to the self-service portal that handles invoice history, receipt download, payment-method changes, and reactivation MUST admit subscribers in every lifecycle state, including `trialing / past_due / unpaid / canceled / incomplete / paused`, not only `active`. The portal controls which operations each state may perform. When several history rows exist, adopt the most recently updated row (SHOULD). Narrowing the entry to `active` closes the receipt and reactivation paths for exactly the churned and payment-failed users who need them most, directly damaging LTV. Include in E2E that the portal path opens for canceled and payment-failing test users.
 - **The Smart Retention Protocol (Voluntary Churn Mitigation)**:
   - **Context**: Even when users choose to cancel, appropriate flows can reduce
     churn (attrition).
@@ -760,6 +770,7 @@
       and code references it dynamically ("data-driven").
     - **Reason**: Hardcoding plan IDs means app resubmission/redeployment every
       time plans are recreated on Stripe, hurting business agility.
+    - **Dual-Location Rule**: The **runtime decision source for tier/entitlement flags is the plan definition in your own DB** (MUST). At the same time, when an implementation JIT-creates or restores plan rows from the provider's product metadata, the provider side MUST carry the same flag, or the entitlement disappears on restore (MUST). Include the triad "DB definition", "provider-side metadata", and "the SSOT constant the decision function reads" in the plan creation/revision checklist, and centralize the decision function in one place that both the grant path and the request path (middleware) reference (SHOULD). Setting only one side leaves buyers of a higher plan stranded on free entitlements.
   - **The API Product Mindset (Rule 26.3)**:
     - **Law (Data Monetization)**: All data output is a "Product". Abandon
       internal API laxity; design APIs strictly separable into **Tier 1
@@ -780,8 +791,11 @@
     - **Zero Exception**: Failure to record metered logs MUST NOT result in a
       500 error returned to users. Prioritize UX continuity over log
       completeness.
+    - **Verification**:
+      APIs that claim usage-based billing or metering MUST verify by test that the target endpoint **actually calls the metering function** and how it behaves when recording fails (the response is not dropped; the gap flows to observability). Never rely on inference from a structural name such as "it goes through the Gateway, so it is metered" (MUST NOT). For calls that incur per-use cost such as LLMs, record usage at the end of every route and detect routes lacking the recording call mechanically in CI (e.g., `grep -L`) (MUST). Audits have found routes that were "supposed to be metered" but never wired.
   - **Native Access Privilege**: Grant Tier 2 (Enterprise) equivalent access to
     users accessing from the official Native App regardless of Stripe status.
+  - **Supplement (Bearer ≠ Entitlement)**: The exception above does not permit granting a higher tier on the basis of "logged in". Authentication (Bearer) proves identity only; tier, entitlements, rate-limit relaxation, and full data access are derived from the billing SSOT (contract state, plan metadata), and Tier 2 equivalent access MUST NOT be granted regardless of contract state (MUST NOT). After successful Bearer verification, middleware checks the active contract and plan attributes to decide the tier, and assigns the free tier when no contract exists. Not embedding secret keys in the native app (identity verification) and protecting the paid data boundary with the billing SSOT (authorization) are separate responsibilities. The VIP Lane Strategy in `engineering/000_engineering_standards.md` follows the same correction.
 - **Admin FinOps**:
   - Implement a dashboard where finance staff can check "Daily Sales", "Instant
     Refunds", and "Force Plan Overrides".
@@ -803,6 +817,14 @@
       3. **Tier Auto-Sync**: Implement a mechanism for automatic
          promotion/demotion of API access permissions (Tier 1 ⇄ Tier 2) in
          conjunction with plan changes.
+      4. **Registered Event Set Parity**:
+         The set of Webhook events registered on the provider side MUST match one-to-one the set of event types the receiving handler actually processes. Both events registered but not handled and events handled but not registered are prohibited. State in the design document "which events are the source of truth for entitlement grants" (MUST); a checkout-completed event marks "intent to pay", not contract formation, so it alone MUST NOT grant entitlements. A PR that changes the event set updates the handler branches, the provider-side registration, and the readiness ledger together (SHOULD). Reducing the registered set or switching to a different event is the classic way entitlement grants break silently.
+      5. **Invoice-Level Failure Handling**:
+         In addition to subscription-state events, always process the invoice-level payment failure event (`invoice.payment_failed` equivalent) individually and immediately send an admin notification containing invoice ID, amount, customer, and payment page URL (MUST). State events alone cannot identify "which invoice" failed, delaying recovery actions.
+      6. **Observation Layer Isolation**:
+         Side effects of the observation layer such as notifications and audit logs are fire-and-forget (failures are only logged); a failure in the observation layer MUST NOT return 5xx and trigger the provider's retry storm (MUST NOT). Detect customer attribute changes (e.g., email) via a diff (`previous_attributes` equivalent), keep them as observation logs first, and automate synchronization only after a confirmation flow. When a payment method is attached, record attributes such as expiry in a structured log on the spot (SHOULD); fetching them later by listing becomes impossible due to API rate limits and cost.
+      7. **Three-Way Sync Proof**:
+         To rebut claims such as "I canceled but was still charged", keep a structure that can prove that (1) the provider's Webhook payload, (2) your own state change, and (3) the audit log of the user's action are mutually linked and untampered (SHOULD). Record cancellation not as immediate deletion but as "cancellation accepted at period end" (`cancel_at_period_end` equivalent), and transition the state via the provider's Webhook at expiry.
   - **The Subscription Lifecycle State Machine Protocol**:
     - **Context**: The Webhook-Driven State Machine in §3 defines eventual
       consistency at the conceptual level, but lacks an **explicit state machine
@@ -846,6 +868,15 @@
       subscription states via simple string overwrites without permitted
       transition matrix validation — is a breeding ground for unauthorized
       reactivation and entitlement leakage.
+    - **Pre-Transaction Contract Check (supplement)**:
+      Account deletion proceeds to cancellation only after identity and permission checks and after **fetching every contract from the external provider and confirming contract IDs and states** (MUST). Pause (`paused`) is resumable and therefore included in cancellation targets; exclude only known terminal states. On missing data, unknown states, or a truncated listing, abort the deletion and record an anomaly with a fixed reason (MUST). New payment entry points likewise do not continue when reading existing contracts fails (MUST). The DB/environment-variable fallback for pricing is an availability decision and is treated independently from the decision "does an existing contract exist". Grant no paid entitlement to `paused`, and keep it in scope for duplicate-contract prevention and billing management (MUST). State explicitly as the verification scope that local integration tests guarantee only the DB's owner scope, missing data, and failure behavior, not transmission to the production provider or notification delivery (SHOULD). Contracts surviving account deletion and duplicate contracts are prevented by "do not proceed if you cannot read".
+- **The Payer Identity Propagation Protocol**:
+  - **Law**: **Every** path that starts a payment (standard plan, higher plan, admin-issued, API-issued) MUST place the internal user/organization ID in the provider-side metadata at the **contract (subscription) level**. Never depend on customer-level metadata alone.
+  - **Action**:
+    1. **Fallback Chain**: Implement user resolution on the Webhook side as an explicit fallback chain in the order "contract metadata → existing mapping in your DB → customer metadata", and never discard events where every stage is empty; quarantine them as "orphan contracts" and alert (MUST).
+    2. **Reused Customer Check**: An implementation that looks up and reuses an existing customer by email may hit a customer created by another path (e.g., auto-generated by hosted checkout) without metadata, so verify the presence of metadata on reuse or compensate with contract metadata (MUST).
+    3. **Route Addition Review**: When a payment path is added, make "is the metadata passed?" a review item and guard it with a contract test (SHOULD).
+  - **Anti-Pattern**: An orphan contract whose owner cannot be reconstructed later breaks refunds, audits, and entitlement grants alike. It is a structural defect that recurs as paths multiply.
 - **The Payment Data Attribution Protocol**:
   - **Law**: Record traffic source information (`utm_source`, `utm_medium`,
     `campaign_id`, etc.) in the payment provider's **Metadata** or your own DB
@@ -972,6 +1003,9 @@
     | 21 | **Scalability** | PSD3/Open Banking readiness design                                                                    | §3 PSD3 Readiness             |
     | 22 | **Consistency** | Revenue recognition (ASC 606/IFRS 15) automation                                                      | §8 Revenue Recognition        |
     | 23 | **Consistency** | Entitlement management billing decoupling design                                                      | §9 Entitlement                |
+    | 24 | **Consistency** | Webhook endpoint boot + signature verification proven by an invalid-signature POST (clean 4xx = booted; 5xx = required config missing, every event fails while the sender keeps retrying) | §3 Webhook State Machine      |
+    | 25 | **Operations**  | Production cutover made reversible by recording current values; after cutover, one real transaction with a real account reconciles "app state", "provider delivery log", and "receiver processing log" | §3 Webhook State Machine      |
+    | 26 | **Operations**  | Provider-side configuration objects whose absence surfaces only at runtime (customer portal default configuration, Webhook endpoints) listed in the readiness ledger as "present + how verified" | §3 Payment Fail-Safe          |
 
 - **The Chargeback & Dispute Management Protocol**:
   - **Risk**: If chargeback rates exceed Visa's threshold (0.65%) or
@@ -1067,6 +1101,7 @@
     1. **Payment Method Abstraction**: Design the `PaymentProvider` interface to
        support not only card payments but also bank transfers, digital wallets,
        and A2A payments.
+       - **Pending-State First**: The payment domain model MUST hold a first-class pending state ("payment request established, funds not yet confirmed") instead of assuming instant card authorization only. Include the transitions for entitlement grant, expiry, cancellation, and funds confirmation while pending in the transition matrix of the state machine above; confirm funds through asynchronous notification (Webhook or polling), and never treat the user's screen transition as confirmation (MUST). Keep the interface generic so that regional delayed-settlement methods (e.g., convenience-store payment, bank transfer, QR) can be added later without branching on whether a pending state exists (SHOULD). Retrofitting a pending state forces rework across entitlement grants, accounting, and dunning.
     2. **SCA Compliance**: Verify Strong Customer Authentication (SCA)
        compliance across all payment flows and enable 3D Secure 2.0 by default.
     3. **Regulatory Monitoring**: Monitor payment-related regulatory changes
@@ -1193,6 +1228,8 @@
     3. **Revenue Reconciliation Gate**: After outage resolution, mandate a
        reconciliation process between provider records and the internal database
        for all billing data during the affected period.
+    4. **Purchase Gate Kill Switch**:
+       Place a single purchase gate, switchable without redeploy (driven by DB or a settings store), ahead of every path that starts a paid purchase, and centralize its read in one SSOT reader function (MUST). Include halting purchases through this gate in the runbook as the first move of Sev1 response (SHOULD). Between loading production keys and the public cutover, keep the gate OFF as standard procedure so that unexpected live payments via pre-launch URLs are blocked (SHOULD). Payments that "already went through" leave damage as refunds and accounting work, so prepare the means to stop them first.
 
 - **The Tax Automation & Global Tax Engine Protocol**:
   - **Context**: §3's Stripe Tax recommendation covers basic tax compliance, but
@@ -1310,9 +1347,11 @@
   - **Immutable Ledger**: Direct updates to point balances (`UPDATE`) are
     strictly prohibited. All changes must be recorded as `INSERT` (Credit/Debit)
     into `point_transactions`, calculating balances via aggregation.
+  - **Counter-Ledger Parity (supplement)**: When several paths return a balance (counter column, aggregate view, balance function), define the ledger as the single truth and the counter as its cache, and verify by continuous reconciliation that every read path converges to the same value (MUST). Make reconciliation repair an idempotent job that restores under-counts only for accounts backed by ledger rows; never zero out a balance that has no ledger backing (MUST NOT). Keep ledger amounts signed (grant +, consume −) and unify the sign convention across the insert path, balance function, views, and counter updates (MUST). Compute absolute totals as `SUM(ABS(x))`; `ABS(SUM(x))` is prohibited because mixed signs cancel out (MUST NOT). See `engineering/710_data_reconciliation.md` §6 Double-Counting Prevention for details.
 - **Security & Fraud Prevention**:
   - **Idempotency**: Client-generated UUIDs (`Idempotency-Key`) are mandatory
     for point grants/consumption to prevent double counting.
+    - **Source-Entity Idempotency Key**: Grant and reward APIs MUST include, in addition to the client-generated UUID, the ID of the entity that originates the grant (review ID, order ID, etc.) in the idempotency key. Standardize on the `{reason}:{source_entity_id}` form; a coarse key at the parent-entity level (store, user) is prohibited because it either suppresses legitimate multiple grants or allows double grants (MUST NOT). A client UUID can change between retries, whereas a source-entity key is decided by the server and structurally closes double grants.
   - **Security-Tiered Allocation**: Vary allocation amounts based on user
     authentication strength to encourage MFA.
     - **Tier 1 (Email)**: 1 pt (Minimal / Anti-spam)
@@ -1339,6 +1378,8 @@
 - Expiration of points and prepaid value:
   - Determine applicable rules from issuance model, paid/free status, transfer/refund rights, outstanding balances and target jurisdictions. Do not impose a universal 180-day regulatory-avoidance recipe or equate calendar months with days.
   - Align expiry, notices, processing and refunds with customer terms; record current local primary sources and the applicability decision in Blueprint. A regional reference for Japan is the [FSA prepaid-value guidance](https://www.fsa.go.jp/policy/prepaid/).
+  - **Legal-Effect Date Display Precondition**: When a UI or notification shows a definite date with legal or contractual effect (expiry, deadline, automatic cancellation, automatic deletion), the precondition for showing it is that the scheduled job that actually executes the effect (cron / DB scheduler / batch) exists and is running (MUST). If the job is not implemented or not running, do not show a definite date (MUST NOT); keep to indefinite wording such as "applied after advance notice upon introduction". Release expiry processing together with advance notice (e.g., 30 days / 7 days before) (MUST). A misrepresentation that showed a definite expiry date from a display-only constant recurs in the same shape for every legal date, such as renewal dates and scheduled deletion dates. Reconcile each expiry/deadline display string against the existence of its executing job definition (SHOULD).
+  - **Pending Legal Decision Freeze**: When a gap between a rule and the implementation involves a legal or accounting judgment, neither unilaterally align the rule to the implementation nor the implementation to the rule (MUST NOT). The canonical rule is "Freezing Drift That Involves Legal Judgment" in `core/100_governance.md`.
 
 ## 5. Ad Management Strategy
 
@@ -1355,6 +1396,7 @@
     - **Action**: Store uploaded images in a dedicated bucket (e.g.,
       `ads-assets`) and deliver via CDN. Mixing with general user-uploaded
       images in the same bucket is prohibited.
+    - **Stored Script Material Allowlist**: Never read admin-submitted HTML/script material (ad tags, embedded widgets) from the DB and execute it as-is (MUST NOT). The canonical rule is "Stored Script Material Allowlist" in `security/000_security_privacy.md`.
 - **Placement Strategy**:
   - **Unified System**: Manage ad locations via `location` IDs (e.g.,
     `sidebar_top`). The frontend specifies the location, and the system delivers
@@ -1373,6 +1415,16 @@
       3. **Above-the-Fold Exception**: First-view ads MUST use
          `loading="eager"` + `priority={true}` for preloading to minimize blank
          time.
+      4. **Reservation-Content Pairing**: Decide the reserved height (`min-height`) of lazily loaded third-party content from the **measured production size per creative type**, and also constrain the creative's variable-size behavior (full-width responsive, etc.) so it fits within the reservation (MUST). One-sided handling, reservation only or constraint only, does not eliminate CLS. Use admin data (width/height in the DB) and caller-supplied values only as a floor, and confirm they match production measurements before relying on them (MUST). After changing a reservation value or a creative-side setting, re-measure CLS per page type and keep the within-budget result as evidence (MUST).
+      5. **Height-Stable Fallback**: On unfilled, blocked, or error outcomes, render a substitute card of the same height so the height never moves regardless of the delivery result (MUST).
+      6. **Visibility-Gated Request**: Intersection detection (IntersectionObserver) sees geometry only. Panels that are `inert`, `visibility`-hidden, mid-transform, or positioned off-screen still "intersect", so intersection MUST NOT substitute for "visible to the user" (MUST). Slots placed on surfaces whose open/closed state the UI holds (drawers, menus, tabs, modals) are mounted and requested only once that state becomes "open" (MUST). A slot fetched on a closed surface produces "unseen impressions", which is both an ad-policy violation and measurement pollution. Separately from tests of the pure function that decides loading conditions, add tests that check the wiring (mount conditions) that calls it, and measure in production (MUST). For third-party scripts in general, see `engineering/300_web_frontend.md` §283.
+- **The Ad Measurement Integrity Protocol**:
+  - **Law**: On surfaces mixing third-party-delivered content (ads, embeds, widgets), decide the source of truth for measurement per content type (MUST). For types where the third party measures clicks/impressions itself and does not deliver them to the parent frame, the third party is the source of truth, and in-house measurement is limited to in-house-served creatives (image, HTML).
+  - **Action**:
+    1. **No Population Mixing**: Never mix populations that differ in measurability or billing party into one metric such as "impressions" (MUST). Mixing renders derived metrics such as CTR meaningless.
+    2. **Container ≠ Impression**: Never count the container's intersection or mount as an "impression" (MUST); it counts unfilled slots as one impression each. Keep delivery outcomes (filled / unfilled / blocked, etc.) as a separate "one per slot" aggregate and surface the fill rate on the admin dashboard and in a daily alert (SHOULD).
+    3. **Beacon Batching**: Do not generate a server call per impression for measurement events that carry no meaning. Send measurement events in batches or via beacon, and before sending, confirm "can this number inform a decision?" (SHOULD).
+  - **Anti-Pattern**: Counting container intersections as impressions and hitting the server per impression, paying for a meaningless number. "Container intersection = impression" and "one metric over mixed populations" recur in the same shape for video plays, embed measurement, and notification delivery.
 - **The Ad Schema Standard**:
   - **Law**: Ad management tables MUST include at minimum the following columns,
     enabling delivery control and performance measurement.
@@ -1402,8 +1454,11 @@
        Route Handler etc. to avoid server load from high-volume crawler access.
     2. **Sellers.json**: Publish your own and partner information via
        `/sellers.json`.
+       - **Supplement (Minimal Form & CDN Verification)**: sellers.json is the mechanism by which an ad system publishes "the sellers that sell through it"; the publisher's own file stays in the minimal form consistent with ads.txt (only real identifiers of your own) (SHOULD). Fabricated seller IDs and URLs in identifier fields are prohibited (MUST NOT). Set `s-maxage` on public files that crawlers fetch frequently, and verify from response headers (e.g., `x-*-cache`) that `max-age` alone passes straight through the CDN (MUST).
     3. **Validation**: Periodically monitor that your status on ad platforms
        (Google AdSense / GAM, etc.) is "Authorized".
+    4. **Third-Party Metrics Sovereignty**: For slots delivered by a third-party network in an iframe, the third party's dashboard is the source of truth for impressions and clicks, and in-house measurement is limited to in-house-submitted creatives (image, HTML) (MUST). Clicks inside the iframe never reach the parent document, so in-house CTR is meaningless (see §5 Ad Measurement Integrity). The admin dashboard labels third-party slots "measured externally" and does not mix them with in-house figures (SHOULD). Classify the creative type (third-party tag / script / HTML / image) in one classification function and do not scatter the rendering, measurement, and reserved-height branches across rendering components (SHOULD).
+    5. **Fill-Rate Primary Metric**: Revenue slots dependent on a third party keep a primary metric that aggregates delivery outcomes (filled / unfilled / blocked / substitute shown) by slot × device × day, and detect daily a drop below the floor versus the previous day, a spike in the blocked rate, and a collapse in counts (SHOULD). Limit in-house aggregation to "view side by side" and "ring when it drops", sent via a beacon carrying no identifiers, cookies, paths, or IPs (SHOULD). State the receiver's limits (spoofing from outside a browser cannot be stopped), use the values only as aggregate metrics, and keep alerts at warn level on the premise that a human confirms (MUST). This is how you learn first that "the third party went down".
 - **The Ad Labeling Protocol (Automatic Ad Disclosure / Anti-Stealth
   Marketing)**:
   - **Law**: Ad slots, PR articles, and sponsored content MUST have labels such
@@ -1466,6 +1521,7 @@
     complexity.
   - **Circuit Breaker**: Implement a safety mechanism to auto-stop AI features
     upon sudden cost spikes (e.g., exceeding budget in 1 hour).
+  - **Measured Token Recording**: Calls that incur per-use cost such as LLMs MUST obtain the actual input and output token counts from the response metadata and record them in the usage history. The canonical rule is "Measured Tokens Mandate" in `ai/000_ai_engineering.md`.
 - **The AI-Native Monetization Protocol**:
   - **Context**: Revenue from AI products cannot be captured by traditional
     seat-based models. When AI replaces human work, it provides value that does
@@ -1678,6 +1734,14 @@
   4. **Preview Environment**: Automatically perform end-to-end testing in
      Staging/Preview environments to ensure payment flows complete successfully
      with the proposed pricing changes.
+  5. **Allowlist SSOT Chain**:
+     The server-side allowlist that validates the SKU/price ID of a purchase request MUST be derived from the same SSOT chain the UI uses for display (e.g., DB definition ∪ environment configuration). Never let a fail-closed check depend on a single nullable source alone (MUST); when the source can become empty, detect and alert on emptiness as an anomaly so legitimate purchases do not fail silently en masse. Place a regression test on the allowlist derivation asserting "every legitimate SKU passes" (SHOULD). Checking against the DB alone has caused a regression where every legitimate purchase failed while the price ID column was NULL.
+  6. **Four-Way Price Parity**:
+     The price a customer sees MUST always match across four places: (1) UI display, (2) the amount the provider actually charges, (3) the plan definition in your DB, and (4) the legal disclosure page. Include the four-way parity in the drift detection above and auto-reconcile the amounts on the legal disclosure page too (SHOULD). The canonical rule, including the price-revision procedure and retention of old prices, is "Four-Way Price Parity" in `product/400_pricing_strategy.md`.
+  7. **Displayed Price Source**:
+     The source of any price shown on a screen or document MUST be the same column or constant that the billing process actually resolves. Referencing a different-domain constant that "happens to be the same amount" to align the display is prohibited because a revision on one side silently reopens the gap (MUST NOT). See `product/400_pricing_strategy.md` §14.3 for details.
+  8. **Revenue CTA Fallback**:
+     Placing `href="#"` or a no-op as the final fallback of a revenue path (price card, purchase button, sign-up CTA) is prohibited (MUST NOT). Even when an environment variable is unset or the feature is not ready, route to a meaningful next step such as registration or contact (MUST). State the rendering priority (coming-soon badge → purchase button → fallback) in a comment at the data definition (SHOULD), and verify `href="#"` under public pages is zero on every release (SHOULD). "Clicking does nothing" raises no error and slips past QA easily.
 
 ### 7.2. The Coupon Integrity Protocol
 
@@ -2012,8 +2076,11 @@
        `invoice.paid`, etc.). Manual DB updates are prohibited.
     3. **Feature Flag Integration**: Link the entitlement system with feature
        flags to enable per-plan feature ON/OFF changes without code deployment.
+       - **Visual Badge ≠ Feature Gate**: Keep a visual indicator such as a "coming soon" badge and the flag that gates purchase or features in separate fields (MUST); never gate on string matching of the badge (MUST NOT). Default to a structure where a feature launch completes by flipping one feature flag, deriving UI display, CTA activation, and structured data (`Offer.availability` PreOrder/InStock) from the same flag (SHOULD). Detect gating on visual values (e.g., `badge === 'coming soon'`) by grep. Giving one flag two responsibilities turns a "remove the badge" request into an unintended feature release.
     4. **Runtime Enforcement**: Execute feature access checks on the server
        side; frontend UI display control is supplementary only.
+    5. **Effective Entitlement for Verification**:
+       Implement the path by which admins verify paid features as in-app effective entitlement resolution, without rewriting the contract SSOT (provider contract, contract table, the user's tier column) (MUST). Manual contract updates for verification are prohibited (MUST NOT); when a real contract change is needed, treat it separately as an audited Override. Resolve the effective tier not only at the call site but also inside quota/guard functions that take a user ID, so that special handling is not missed when new call sites are added (MUST). Delegate role decisions to a shared role group and do not write role names directly into feature modules (SHOULD).
   - **Anti-Pattern**: Hardcoding entitlements in code like `if (plan === 'pro')`
     is prohibited. This requires code deployment for every plan addition/change,
     severely damaging business agility.
@@ -2681,6 +2748,8 @@
 | 75 | **Entitlement Cache Stale**          | Entitlement cache relying only on TTL without Webhook-driven immediate invalidation                                            | Entitlement Cache Strategy (§9)                                         |
 | 76 | **Cloud Unit Economics Blindness**   | Not tracking per-user infrastructure costs, causing margin erosion at scale                                                    | Cloud Unit Economics (§1)                                               |
 | 77 | **Expansion-Masked Churn**           | High NRR masking low GRR (foundation erosion)                                                                                  | GRR Improvement (§11)                                                   |
+| 78 | **Dead CTA**                         | Final fallback of a revenue path is `href="#"` / no-op, causing abandonment with no error raised                              | Revenue CTA Fallback (§7.1)                                             |
+| 79 | **Login-Equals-Entitlement**         | Granting higher-tier-equivalent access on "logged in" alone, bypassing the billing SSOT                                        | Bearer ≠ Entitlement supplement (§3)                                    |
 
 ### 12.3. Future Outlook
 

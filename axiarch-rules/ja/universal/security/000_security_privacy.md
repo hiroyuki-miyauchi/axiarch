@@ -317,6 +317,8 @@ const user = await requireAdmin(); // 内部で認証+認可+監査ログを一�
 ```
 
 -   **Role Enumeration Symmetry**: 同一ドメインを検証する複数のガード関数は**共通の定数配列**からロール一覧を取得する。
+-   **Namespace Separation**: 比べている対象が違う値（例: DB 層のロール列とアプリ層のロール表）は、綴りが同じでも**別の定数**にする（MUST）。1 つの定数で 2 つの名前空間を照合すると片方の値がもう片方の許可集合へ流れ込み、「設定したのに何も起きない」状態が観測されないまま動き続ける（綴りが一致していたので動いていた）。意図的に共有する綴りは直書きせず参照で共有し、片方だけ改名したら壊れるようにする（SHOULD）。
+    -   二層（DB 層のロール列とアプリ層のロール表など）に権限を持つ設計では、アカウント作成・復旧の全経路が両層を同時に書くことと、「片方だけ真」の食い違いが無いことを検査する（MUST）。アプリ側の許容値集合と DB の CHECK 制約は集合として突き合わせる（MUST）: 判定関数だけを見る検査は「アプリから消したが CHECK に残る」を素通しする。
 -   **Unconditional Baseline Auth**: 特権クライアントを使用するアクション層のハンドラは、データのステータスに関わらず**全コードパスで認証・認可チェックを実行**。
 -   **ABAC推奨**: 単純なRBACでは不十分な場合（マルチテナント、細粒度アクセス制御）、属性ベースアクセス制御（ABAC）を導入。
 
@@ -325,6 +327,7 @@ const user = await requireAdmin(); // 内部で認証+認可+監査ログを一�
 -   全Admin API/Actionは冒頭でRBACチェックを強制。
 -   金銭・権限・削除操作はRBACに加え Turnstile/OTP 追加認証必須。
 -   全Admin操作を監査ログに記録。破壊的操作は変更前後の差分を含める。
+-   **Guard Ordering**: 管理者の変更操作は (1) ロールガード（失敗は即 return）→ (2) ボット検査 → (3) 変更 → (4) 監査ログ の順序を固定する（MUST）。ボット検査は「人間か」の検証であって「管理者か」の検証ではなく、ボット検査だけで変更へ進む箇所が実際に残っていた。監査ログ用のユーザーを後付けで取り直さず、(1) で得た同一ユーザーを最後まで持ち回る。ボット検査のみで変更へ進む箇所は grep で洗い出し、ロールガードを前置する。
 
 ### 4.7. Omnichannel Auth
 
@@ -335,6 +338,7 @@ const user = await requireAdmin(); // 内部で認証+認可+監査ログを一�
 -   **Hashing Mandate**: API Key は**厳正に平文保存しない**。SHA-256等でハッシュ化して保存。
 -   **Dual Auth Protocol**: `X-API-KEY` と `Authorization: Bearer` の OR条件で実装。
 -   **Prefix Design**: API Keyにプレフィックス（例: `sk_live_`, `pk_test_`）を付与し、種別・環境を識別可能にする。
+-   **Shared Secret Comparison**: cron / webhook / 内部 API の共有シークレット照合は constant-time 比較の共有ヘルパを唯一の実装（SSOT）とし、各ルートで再実装しない（MUST）。ヘルパは「不一致（401）」と「未設定（500）」を判別可能に返し、後者は必ずエラーログに残す。ランタイムが異なる境界ごとに 1 つずつ SSOT を置き、`!==` で書かれた新規コードはレビューで止める。
 
 ### 4.9. Password Policy
 
@@ -505,6 +509,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 -   ログアウト時はサーバーサイドで即時無効化。クライアント側のトークン削除のみでは不十分。
 -   アカウント停止・削除時は全セッションを即時無効化する。
 -   **Token Revocation List**: 無効化されたトークンのリストを管理し、検証時に照合。
+-   **Highest-Privilege-First Guard Audit**: 停止・ロック・失効の判定が複数のガードに分散している場合、権限の高いガードから順に判定の有無を確認する（MUST）。防御は困っている箇所から書かれるため弱い側から実装され、最も権限の高いガードにだけ判定が無いまま残りやすい。IdP の ban が発行済みアクセストークンを失効させない場合は、ガード側で ban 状態を都度判定する（ユーザー取得の応答に含まれる値なら追加コストは無い）。
 
 ### 6.6. Account Lockout & Brute Force Prevention
 
@@ -574,6 +579,8 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
 | **Medium** | 住所、ニックネーム | RLS + 最小権限アクセス |
 | **Low** | 設定値、UI設定 | 通常のアクセス制御 |
 
+-   **Access Log Requirements (High/Critical)**: 機微データ（医療・金融・人事等）を本人以外（運営・専門職・サポート）が閲覧・復号する経路では、閲覧理由の入力を必須とし「誰が・いつ・何を・なぜ」を記録する（MUST）。復号は「認証済み・行レベル認可通過・閲覧ログ書込済み」の全条件を満たす場合のみ許可し、単位時間あたりの復号件数に閾値アラート（例: 1 時間に 10 件以上）を置く（MUST）。この閲覧ログは削除対象外とし、データ本体より長期（または永久）に保持する（SHOULD）。
+
 ### 7.4. PII マスキング
 
 -   **Law**: ログ出力・エラーレポート・サポート画面にPIIを**厳正に含めない**。
@@ -581,6 +588,7 @@ function verifyMtlsBinding(token: JWTPayload, clientCertDer: Buffer): boolean {
     1.  ログフレームワークにPIIフィルターを組み込み、`email`, `phone`, `name` 等を自動マスキング。
     2.  `console.log(user)` のような生オブジェクトのログ出力を禁止。
     3.  Sentry等のエラートラッキングでもPIIフィルターを設定。
+    4.  **Partial-Match Key Masking**: 機微キー名への部分一致マスクは `ip` / `content` のような短い語が無関係なキー（`script`、長さ、ハッシュ）に当たり、何も守らずに証跡だけを失う。事象が出てもマスク側を緩めてはならない（MUST NOT）。直すのはキー名の側で、短い機微語を含む語は語ごと避ける（SHOULD）。監査ログに載せる構造体は全キーを実装のマスク関数にそのまま通し、「意図せず伏せられるキーが無い」ことを検査する（MUST）。判定規則をテストに書き写さず、実装の関数を呼ぶ。
 
 ```typescript
 // ❌ PROHIBITED: PIIを含むログ出力
@@ -595,6 +603,14 @@ console.log('User login:', {
 ```
 
 本人識別が必要なsecurity auditは、一般application logへ生の`userId`を出さず、目的限定、最小権限、改ざん耐性、保持・削除、法的根拠を備えた保護audit sinkへ記録する。相関が必要な場合も、環境・目的ごとに分離した短期またはrotation可能なpseudonymous referenceを優先し、逆引き情報を別境界で保護する。
+
+-   **Keyed Pseudonymization Discipline**: IP アドレス・端末構成・電話番号・郵便番号など探索空間が小さい値を擬似識別子にするときは、鍵付きハッシュ（HMAC 等）を用いる（MUST）。鍵なしハッシュは総当たりで生値へ戻るため「匿名化」として扱えない。
+    -   鍵が環境に無いときのフォールバックは、リポジトリ内の固定文字列（公知の値）ではなく「プロセス限りの乱数鍵」または「停止」にする（MUST）。代償はインスタンスを跨いだ突合ができないことだけで、逆引き可能にするより安全側である。鍵不在は検知して警告する（SHOULD）。
+    -   鍵の導出は 1 箇所（共通モジュール）に集め、各経路で直接 HMAC を書かない（MUST）。後から足した経路が「秘密が無いときの既定」を弱い側へ倒す（先に作った鍵は乱数、後付けのハッシュは固定文字列、という形で実際に起きた）。鍵は環境ごとに分け、アプリ層とエッジ層で同じ導出を共有して同一入力が同一値になるようにする（SHOULD）。
+    -   仮名化値は生値より長く保持されることが多く（例: 生 IP 半年 / ハッシュ 3 年）、鍵の弱さは生値より長く影響する。「公知の文字列から再現できないこと」を単体テストで固定する（SHOULD）。
+-   **Masking Implementation Contract**: 生の `error` オブジェクトをロガー／エラートラッカーへ渡さず `{name, message}` のみ抽出する（MUST）。ベンダー SDK はリクエスト全体を error に添付することがあり、キー名ベースの redact は深い場所の PII に届かない。マスクはキー名に加え、meta の全文字列値・message・stack・breadcrumb にも自由文 PII パターン（メール／電話／URL の query・hash）を通し、パターン集合は 1 SSOT にして各 sink（アプリロガー／エラートラッカー／エッジ）で別実装を持たない（MUST）。外部サービスの customer / subscription / payment 識別子は機微キー扱いとする（MUST）。「全出現を置換する」パターンは個別にグローバルフラグを書かず変換関数を通し、複数出現の入力でテストする（MUST）。エラートラッカーの設定がランタイムごとに分かれる場合は scrub を全設定で揃え、送信前フックの全種類に適用する（MUST）。
+-   **Verification Method**: ログ・エラートラッキングの PII 除外は、監視関数を mock して「呼ばれたか」を見るテストではなく、実際の保護フィルタを通した後の引数を検査するテストで固定する（MUST）。フィルタが文字列 meta を落とす設計なら、原因分類は有限の列挙値として渡し、原因の区別と PII 不在を同時に確認する。
+-   **Public-Surface PII Guard**: 管理画面から公開面（LP・記事・店舗ページ）へ保存するコンテンツは、保存前に電話番号・メールアドレス等の連絡先パターンをスキャンし、検出時は明示的な承認なしに保存しない（SHOULD）。運用者が誤って個人の連絡先を公開面に書く事故が実際に起きている。事業者の公式連絡先は許可リストで除外する。
 
 ### 7.5. 暗号化要件
 
@@ -646,6 +662,7 @@ console.log('User login:', {
     1.  データカタログツールでテーブル/カラム単位のメタデータ（分類レベル、オーナー、保存期間）を管理。
     2.  ETL/ELTパイプラインでのデータ移動時に分類ラベルを自動伝搬。
     3.  **Data Loss Prevention (DLP)**: Restricted分類データの不正なコピー・ダウンロード・外部送信を検出・ブロック。
+    4.  **Row-Level Provenance**: 複数の入口（利用者フォーム、公開 API、管理画面、一括インポート、AI 生成、バッチ）からデータが流入するエンティティには、`created_at/updated_at/created_by/updated_by` に加えて流入経路を示す `source` 列（列挙）を持たせる（SHOULD）。高頻度更新テーブルで操作者列を省略する場合でも `source` は残す。入口が増えるほど「どの経路のデータが壊れているか」の切り分けが不可能になり、この列がインポート起因の不整合の範囲特定と再取込の根拠になる。
 
 ---
 
@@ -669,6 +686,7 @@ console.log('User login:', {
     2.  同意カテゴリ（必須/機能/分析/マーケティング）を明確に分類。
     3.  同意拒否時もサービスの基本機能は利用可能にする（同意強制の禁止）。
     4.  同意記録は法的証拠として**最低5年間**保持。
+    5.  **Notice–Implementation Correspondence**: プライバシーポリシー・利用規約・開示台帳の各文は、それを裏付ける実装（保存する列・送信先・保持期間）と 1 対 1 で対応させる（MUST）。過少申告（集めているのに書かない）も過大申告（保存していないのに「記録する」と書く）も違反である。例: 投稿時の IP を連続投稿判定に短時間使うだけで台帳に残さないなら、「投稿も記録する」と書くのは過大申告になる。公表文の改訂と実装の変更は同じ変更単位で行い、対応表（文 ↔ 列／送信先）を維持する（SHOULD）。実装が正しく動くほど「集めているのに公表していない」は静かになるため、検査は実装側から公表文へ逆引きする方向も持つ（SHOULD）。`security/100_data_governance.md` §5.4（法的文書の SSoT）と対で運用する。
 
 ### 9.3. 忘れられる権利（Right to be Forgotten）
 
@@ -750,6 +768,8 @@ const BadConsentBanner = () => (
 -   `[ ]` 複合否定を含む紛らわしい質問文がないか
 -   `[ ]` デフォルト同意が「必須Cookie以外はオフ」になっているか
 -   `[ ]` 繰り返しの同意催促が制限されているか（同一ユーザーへの表示は30日に1回まで推奨）
+-   `[ ]` ボタン文言が法的根拠と一致しているか（通知・公表を根拠とするレジーム（例: 日本の通知型運用）では受領の合図「OK」「閉じる」にし「同意する」と書かない。同意を根拠とするレジームでは「すべて拒否」と「すべて同意」を同一クラスで第 1 層に置き、閉じる（×）やスクロールを同意扱いにしない）
+-   `[ ]` アカウント登録時の契約同意で Cookie／広告／プッシュの同意を代替していないか（外部送信は未ログインの全訪問者に起きる。通知型で「OK」を押してもブラウザ許可ダイアログを伴う能動的な購読は ON にしない）
 
 -   **Cross-Reference**: §9.2（同意管理プラットフォーム）, §7.1（プライバシー・バイ・デザイン原則2）
 
@@ -770,6 +790,9 @@ const BadConsentBanner = () => (
     -   **Law**: 管理者APIエンドポイントと一般ユーザーAPIエンドポイントを明確に分離し、ロールベースのアクセス制御を適用。
     -   **Anti-Pattern**: URLパスのみで管理者/一般を区別（`/admin/users` vs `/users`）し、バックエンドで認可チェックを省略すること。
 
+-   **Trusted Header Strip**: リバースプロキシ／ミドルウェアが下流へ「信頼済み」として渡すヘッダ（認証主体 ID・tier・auth source 等）は、入口で全パスにおいてクライアント供給値を無条件に削除し、認証成功時のみ検証済み値を再設定する（MUST）。ミドルウェアが設定しないコードパス（Bearer 等の一部経路の fall through）で偽装値がそのまま下流へ届き、権限昇格になった。ヘッダ伝搬 API の契約（レスポンスヘッダかリクエストヘッダ置換か）はテストで固定し、「ミドルウェアが設定する」というコメントを事実の証明にしない。下流は信頼ヘッダを層 1 とし、DB の ground truth で再検証する層 2 を持つ（SHOULD）。
+-   **Page-Level Ownership Double Check**: 個人データを表示する認証済みページは、取得後に `entity.owner_id !== user.id` をページ単位でも検証し、存在しない場合と所有不一致を同じ not-found で隠す（MUST）。行レベル認可を単一障害点にしない。あわせて明示的な noindex/nofollow を出し、認証済みクローラ（社内ツール・リンク展開ボット）の誤クロールに備える（SHOULD）。
+
 ### 10.2. Mass Assignment防御（API #3）
 
 -   **Law**: クライアントからの入力をモデルに直接バインドすることを禁止。
@@ -779,6 +802,7 @@ const BadConsentBanner = () => (
 ### 10.3. 入力検証 (Input Validation)
 
 -   **Validation at the Edge**: 全ての入力は「信頼できないデータ」として扱い、サーバーサイドで検証する。クライアントサイド検証のみでは不十分。
+-   **Persistence Layer Enumeration**: 不正な値への防御（入口検査・DB 制約・日次検知）を設計するとき、その値が持続しうる場所（DB・キャッシュ・検索インデックス・クライアントの下書き／localStorage・キュー）をすべて列挙し、全層にサーバー側と同一の判定（同じ純関数）を保存時と復元時の両方向で通す（MUST）。1 層でも抜けると壊れた値がそこから再注入され、利用者には「何をしても保存できない」ループとして現れる。`design/000_design_ux.md` §14.5（Auto-Save）参照。
 -   **Zod / Valibot / ArkType必須**: スキーマベースの検証を義務付ける。`any`型での入力受け入れは禁止。
 
 ```typescript
@@ -797,15 +821,22 @@ export async function updateProfile(input: unknown) {
 }
 ```
 
+-   **Output Encoding for Server-Rendered Templates**: サーバー側で組み立てる HTML（メール・通知・PDF 用テンプレート）へ挿入する動的値は、URL やプレーンテキストでも例外なくエスケープ関数を通す（MUST）。`<a href="${url}">` からの `javascript:` 等がベクターになる。利用者が自由に書ける値（表示名・自己紹介）は管理者・運営者宛の通知本文に載せず、識別子で参照して本文は管理画面で見る（SHOULD）。
+-   **Boundary Schema Prohibitions**: 入力境界（管理画面・公開フォーム・JSON 列）のスキーマで `any` 相当を使わない（MUST NOT）。`any` は「検証を通した」と思っているのに通っていない状態と同義である。自由 JSON は `unknown` で受けて `__proto__` / `constructor` / `prototype` キーを再帰的に拒否し、`Record<string, X>` はキー長の上限と値型を明示し、全ての外部識別子・トークン文字列に `.max()` を付ける（MUST）。上限なし文字列は ReDoS・ログ氾濫・容量消費の面を同時に生む。スキーマを狭めて下流が型エラーになるのは「隠れていた問題の顕在化」として受容する。レビュー観点: 全 `z.string()` に `.min`/`.max` があるか。
+-   **Allowlist Resolution Parity**: 許可リスト検証は、呼び出し元の値解決の連鎖（DB → 環境変数フォールバック等）の全経路から許可集合を構成する（MUST）。正本は `security/430_authorization_and_access_control.md` §6.2「Allowlist Resolution-Chain Parity」。
+
 ### 10.4. SQLインジェクション防御
 
 -   **Parameterized Query Only**: 文字列連結によるSQL構築は**絶対禁止**。ORMまたはパラメータ化クエリのみ使用。
 -   **ORMの安全な使用**: Prisma, Drizzle等のORMを使用する場合でも、`$queryRaw` 等の生SQL機能使用時はパラメータ化を強制。
+-   **Filter-String Delimiter Sanitization**: パラメータ化されない「フィルタ文字列」を組み立てる API（PostgREST の `or=`、検索 DSL、LDAP フィルタ等）では、利用者入力に含まれる構文上の区切り文字（カンマ・括弧等）を発行直前で置換・除去する（MUST）。クエリビルダの `.or()` 等を使っていても、生成されるフィルタ文字列が区切り文字で破壊されると意図しないフィルタ回避（Injection）になる。「クエリビルダを使っているから安全」は文字列組み立て系のフィルタに対しては成立しない。
 
 ### 10.5. SSRF防御
 
 -   **Law**: サーバーサイドで外部リソースをフェッチする場合、内部ネットワーク（`127.0.0.1`, `10.x`, `172.16.x`, `169.254.169.254`）へのアクセスを構造的に禁止する。
 -   **Action**: URLホワイトリスト + DNSリバインディング対策 + メタデータサービスへのアクセスをファイアウォールで遮断。
+-   **Structural Boundary Comparison**: 「所属・所有・同一」を判定するコードで `startsWith` / 前方一致を見たら疑う（MUST）。正本は `security/430_authorization_and_access_control.md` の「Rule 67.7.9」。
+-   **Shared Outbound Fetch Guard**: サーバー側（Server Action / Route Handler / health check / cron）から外部 URL へ fetch する処理は、処理ごとの個別正規表現ではなく共有 URL ガード（危険スキーム、localhost、private/link-local/metadata、`.local`/`.internal`、IPv6 / IPv4-mapped、10 進・16 進 IP 表記）を通す（MUST）。redirect は自動追跡せず一段ずつ location を検査し、各 hop で許可ドメインと SSRF ガードの両方を通し、追跡後のレスポンスにもサイズ上限を適用する（MUST）。管理者専用の診断機能（リンクチェッカー・OG 取得）でも、公開コンテンツ由来の URL は攻撃者が仕込める外部入力として扱う（MUST）。全 fetch に timeout（AbortController 等）を付け、timeout 値は用途別定数の SSOT に集約し、「`fetch(` の近傍に `signal` が無い」を機械走査で検出する。
 
 ### 10.6. Rate Limiting / Throttling
 
@@ -821,6 +852,12 @@ export async function updateProfile(input: unknown) {
 | Webhook受信 | 100回/分/ソース |
 
 -   **Rate Limit Headers**: レスポンスに `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After` を含める。
+-   **Wiring Verification (No Declared-but-Unwired Defense)**: レート制限・監査ログ・サニタイズ等の防御は「定数・コメント・ヘルパーが存在する」ことではなく「対象経路で実際に呼ばれている」ことで判定する（MUST）。「例: レビュー投稿」とコメントされた制限定数に実配線が無い、という形はレビューでもテストでも緑のまま通る。配線の有無をソース契約で固定するときは `import` の出現ではなく呼び出し（開き括弧付き）で数え、「対象経路の件数 ≥ N」型の検査の N は実態と同値に置く（実態より緩い下限は半減しても緑のまま）（MUST）。挙動は単体テストで別に固定する。匿名で書ける経路には添付だけでなく本文（テキスト送信）にも IP 鍵の制限を置き、匿名投稿の開放と同じ変更単位で「行為者不在でも残る証跡・レート制限・fail-closed のボット検証」を揃える（MUST）。防御が欠けると、その防御が副次的に残す証跡（レート制限キーの生 IP 等）まで同時に失われる。
+-   **Fail-Closed Secret Check**: 環境変数に格納した秘密との照合で守るエンドポイント（cron・webhook・内部 API）は、秘密が未設定・空のときに**拒否**する条件式にする（MUST）。`if (secret && token !== secret)` 形は未設定環境で無認証公開になる。共通の検証関数に集約し、各ルートでの条件式の手書きを禁止する（SHOULD）。
+-   **Key Design**: レート制限のキーには必ず呼び出し元の識別子を含め、認証必須エンドポイントでは `prefix:(userId ?? ip)` の形で認証主体を優先する（MUST）。NAT・企業 Wi-Fi・CGNAT・serverless egress は単一 IP に多数の利用者をまとめるため、IP 単独キーは正規利用者間で quota を共有・枯渇させる。定数キー（全リクエスト共有）はいかなるエンドポイントでも禁止（MUST NOT）: ヘルスチェックの定数キーが単一 IP の爆撃で監視の quota を全消費できた。未ログインでも安定した識別子（ゲスト Cookie 等）があれば `guest` のような全員共通 subject を使わず、その識別子を subject にする（SHOULD）。主体キーに IP を後付けして「主体 + IP」単位へ変質させない（同一利用者の複数回線で quota が分裂する）。
+-   **AND Principle for Mutation Guards**: 変更操作のガードは AND で評価する（MUST）: 認証／認可（誰か） AND レート制限（頻度） AND 監査ログ（追跡、機微データは必須） AND ボット検査（人間か、公開面のみ）。「強い前段防御（OTP / MFA / CAPTCHA / 監査ログ）があるからレート制限不要」という推論を禁止する（MUST NOT）。OTP は本人確認であり、検証後のセッション内での高速な連続変更には無力で、侵害された管理者セッションの大量操作を止められるのはレート制限だけである。管理者操作にも管理者ごとのレート制限を置き、OTP 発行エンドポイント自体も OTP 分岐の前でレート制限する（MUST）。外部の従量課金 API（決済・AI・SMS）を呼ぶ変更は内部 DB 変更以上に critical として扱う。
+-   **Public Analytics & Observation Endpoints**: 公開ページ由来の分析書き込み（閲覧・検索・クリック）は任意認証（未ログインは null で正常系とし例外化しない）、IP レート制限、呼び出し元供給 ID の形式検証で扱い、特権クライアントで更新する場合は公開状態の行に限定し、失敗時はログ書き込みだけを捨ててページ表示を止めない（MUST）。配列入力を要素ごとに下流イベントへ増幅する受け口（CSP report 等）は件数上限と実バイト数のストリーム上限（`Content-Length` は早期拒否のみ）を持ち、超過分は黙って捨てず破棄件数を 1 行の要約として残す（MUST）。認可より前にリクエスト本文を解析しない（MUST NOT）: 純関数の判定順序が正しくても呼ぶ側の順序が逆なら効かない。ライブラリの安全側既定を明示的に外している行は、理由が残っていなければ既定へ戻す。
+-   **Daily Intake Cap**: 高頻度受け口の日次受付上限は、挿入ごとの `count(*)` 全走査ではなく「日付 × 受付数 × 到達時刻」の 1 行カウンタで判定する（SHOULD）。上限到達後は記録せず捨て、警告は日単位で dedup し、到達時刻をカウンタに残す。
 -   **Cross-Reference**: §23 (ボット管理)
 
 ### 10.7. CORS設計
@@ -828,6 +865,7 @@ export async function updateProfile(input: unknown) {
 -   `Access-Control-Allow-Origin: *` は**本番環境で絶対禁止**。
 -   **許可ドメインの明示的指定**: ホワイトリスト方式で信頼するオリジンのみ許可。
 -   `Access-Control-Allow-Credentials: true` 使用時は `*` が使えないことを利用し、厳格に制限。
+-   **Exact-Match Origins Only**: 許可オリジンは完全一致のみとし、`endsWith` / `startsWith` によるパターン一致を禁止する（MUST）。プラットフォーム共有ドメイン（例: `*.vercel.app`、`*.pages.dev`）の接尾辞一致は、他テナントのデプロイ全てをブラウザ経由で自サービスへ到達可能にする。preview / local が必要なら運用者が secret にカンマ区切りで明示追加する設計にする。許可リスト不一致時は `Access-Control-Allow-Origin` も `Vary: Origin` も出さない。`Vary: Origin` は ACAO が本当に Origin で変わる応答にだけ付ける（定数 ACAO に付けると共有キャッシュの鍵空間を攻撃者が無限に広げられる）。認証応答には `Cache-Control: no-store, private` を付ける。
 
 ### 10.8. CSRF防御
 
@@ -844,6 +882,9 @@ export async function updateProfile(input: unknown) {
 
 -   **Law**: 未文書化のAPI（Shadow API）、非推奨だがまだ稼働しているAPI（Zombie API）を定期的に検出・廃止する。
 -   **Action**: APIゲートウェイのトラフィック分析で未登録エンドポイントを検出。APIインベントリと照合。
+-   **Non-Canonical Host & Second-Entrance Control**: 「検索に出さない」（`noindex` / canonical / sitemap）と「到達させない」（転送・認証・ネットワーク境界）は別の統制であり、前者を済ませたことを後者の根拠にしてはならない（MUST NOT）。noindex は検索エンジンへの指示であって、誰が到達できるかは変えない。
+    -   同じ本番データストアを指すホスト・デプロイ URL・プレビュー環境・旧ドメインを「入口」として列挙し、入口が増えるたびに「そこから何ができるか」（ログイン・登録・書込・管理画面）を実測する（MUST）。非正規入口は正規ホストに紐づく WAF・レート制限・監視の外側にあるとみなす。
+    -   ベンダー推奨の閉じ方をそのまま採らず、用途（恒久転送・パス保持等）に合うかを実測して採用する（SHOULD）。閉じ方が複数層（転送・認証・SSO 等）に分かれる場合、各層が生きていることを外形（HTTP 応答）で日次計測し、片方が静かに外れて「閉じてはいるが劣化」に落ちる形を検出する（SHOULD）。
 
 ### 10.11. API Gateway
 
@@ -1038,9 +1079,12 @@ http {
 | `Cross-Origin-Opener-Policy` | `same-origin` | ウィンドウ参照の分離 |
 | `Cross-Origin-Resource-Policy` | `same-origin` | リソースの分離 |
 
+-   **Permissions-Policy Syntax Note**: `Permissions-Policy` は API ごとに「既定値・変更条件」を表で管理し、`()`（全オリジンで禁止）と `(self)`（自サイトのみ許可）の意味の違いを明記する（SHOULD）。`geolocation=()` と書くと自サイトの位置情報 API まで無効化され、ブロックされた API は例外を投げず沈黙することがあるため、「動かない」原因としてヘッダを最初に疑う。新規にブラウザ API（位置情報・カメラ・マイク等）を使う変更はヘッダの更新をチェック項目に含め、コンソールに `Permissions policy violation` が出ないことを確認する（MUST）。
+
 ### 12.2. CSP Nonce Protocol
 
 -   **Law**: CSPは**Nonce方式**を使用し、インラインスクリプトの安全な実行を保証する。`'unsafe-inline'`, `'unsafe-eval'` の使用を**完全禁止**。
+-   **Stored Script Material Allowlist**: 管理者が入稿した HTML／スクリプト素材（広告タグ・埋め込みウィジェット等）を DB から読み出してそのまま nonce 付きインラインとして実行してはならない（MUST NOT）。管理者専用の書込経路であっても、管理アカウント侵害時には格納型 XSS 面になり、「nonce があるから安全」は DB 由来スクリプトには成立しない。外部 `src` は CSP `script-src` の部分集合である許可ホスト、インラインは固定パターンの許可リストでのみ実行する（MUST）。同じ判定を保存時のバリデーションにも適用して拒否理由を描画側と同じ語彙で管理者へ返すが、最終境界は描画側に残し、DB を直接書いた行もそこで止める（MUST）。
 
 ```typescript
 // ✅ CORRECT: Next.js CSP Nonce実装例
@@ -1135,12 +1179,15 @@ CREATE POLICY "Admins can view all"
 -   **DKIM**: メール署名で改ざん検出。2048bit鍵以上。
 -   **DMARC**: `p=reject` を最終目標。段階的に `p=none` → `p=quarantine` → `p=reject` に移行。
 -   **BIMI**: ブランドロゴ表示によるフィッシング対策強化（DMARC reach後）。
+-   **Decommission Residue**: ホスティング移行後の残骸掃除は「ブラウザで到達する名前」ではなく「旧環境が主張できる権限」で対象を定義する（MUST）。最低限、署名鍵（DKIM 公開鍵）、所有権証明（ACME／DCV レコード）、委任（NS）の 3 系統を見る。SPF から旧ホストを外しても DKIM 公開鍵が残っている限り、対応する秘密鍵を持つ者は自社ドメイン名義で DMARC を通せる。OR で通る判定（DMARC = SPF pass or DKIM pass）は片側だけ締めても締めたことにならず、OR の全項を同時に見る（MUST）。DKIM セレクタ等は正規の送信経路として許可した集合以外に公開鍵があれば違反とし、許可集合に足すには理由を書く（SHOULD）。DNS はゾーン全体を列挙できないため、引けなかった名前を「無い」と読まず、取得失敗は走査対象の消滅として赤にする（MUST）。消す前に「消しても壊れない根拠」と復元値を記録する（MUST）。
+-   **List-Unsubscribe Scope**: 個別返信・取引メールに `List-Unsubscribe` を付けない（MUST NOT）。正本は `operations/300_customer_experience.md` の「No List-Unsubscribe on Transactional Mail」。
 
 ### 12.8. Webhook Security
 
 -   受信Webhookは署名検証必須（HMAC-SHA256等）。
 -   タイムスタンプ検証でリプレイ攻撃を防止。
 -   Webhookエンドポイントにもレート制限を適用。
+-   **Receiver Order & Misconfiguration Signal**: 受信 Webhook は「(1) raw body に対する署名検証 → (2) 冪等性記録（event ID の UNIQUE INSERT、重複は 2xx で即返却し送信元の retry を止める） → (3) `event.type` による明示ディスパッチ」の固定順序を全 receiver で共有する（MUST）。署名 secret が未設定の場合は 401 ではなく 500 + エラーログで応答する（MUST）: 401 は「不正リクエスト」に見えて設定不備を永久に隠す。複数の送信元が同一の冪等性テーブルを共有する場合、event ID は送信元 prefix で名前空間分離する。詳細は `engineering/100_api_integration.md` §17.4。
 
 ### 12.9. Certificate Transparency & CT監視 ★NEW
 
@@ -1262,10 +1309,13 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
     2.  **拡張子検証**: ホワイトリスト（例: `.jpg`, `.png`, `.pdf`）で制限。
     3.  **サイズ制限**: タイプごとの最大サイズ設定（例: 画像10MB、文書50MB）。
     4.  **ファイル名サニタイズ**: ユーザーファイル名を直接使用しない。UUIDでリネーム。`../` を除去。
+    5.  **Container Formats & SVG**: 1 段目に申告 MIME の許可リスト照合（UX の fail-fast）、2 段目にマジックバイト検証を置く（MUST）。申告 `file.type` は拡張子由来で署名とは無関係であり、リネームだけで偽れる。コンテナ形式（ISOBMFF / EBML 等）は brand 許可リストにし、先頭バイトで中身を判別できない形式は「厳密に判定できないから緩く通す」ではなくコンテナごと拒否する。SVG は `<script>`・イベント属性・`javascript:`・`foreignObject` を拒否する。有料の外部 API へ転送するアップロードはマジックバイト検証を EDoS 防御として必須にする。
+    6.  **Validation SSOT**: 検証ロジックは AI 推論／利用者投稿／添付で 1 つの実装を共有する（MUST）。「マジックバイト検証済み」というコメントを根拠にせず、実経路を grep で確認する（コメントと実装がずれていた）。
 
 ### 15.2. メタデータ除去
 
 -   **Law**: アップロード画像からEXIFメタデータ（GPS、カメラ情報等）を保存前に除去する。
+-   **No Size-Based Early Return**: メタデータ剥離は全ファイルが処理対象であり、「小ファイルは pass-through」の早期 return を置いてはならない（MUST NOT）。一方で Orientation を含む剥離は原本保存が設計意図の経路（管理メディアライブラリ等）には配線せず、再エンコード経路の backstop に限定する（SHOULD）。原本保存経路に配線すると EXIF Orientation が剥がれ、縦向き写真が回転表示される退行になる。
 
 ### 15.3. 実行可能ファイルのブロック
 
@@ -1276,17 +1326,26 @@ curl "https://api.certspotter.com/v1/issuances?domain=example.com&include_subdom
 
 -   大容量ファイルには**Signed URL**パターンでの直接ストレージアップロードを推奨。
 -   **Action**: 最長5分の有効期限、`Content-Type` 条件、`Content-Length` 条件、アップロード後のサーバーサイド再検証。
+-   **Download-Side Path Re-Validation**: 非公開ストレージの読み取り署名 URL を発行する経路は、DB に保存されたオブジェクトパスを入力として信用せず、発行直前に「本人（または所有者）prefix 配下か」「想定バケットか」を再検証する（MUST）。署名 URL の発行は特権経路で行レベル認可を迂回するため、"private bucket" という名前と RLS だけでは守られない。発行側で認証を確立し、path を `${userId}/...` の所有者 prefix に強制し、`/` 始まり・`..`・`\` を拒否する。バケットは機能ごとに固定し、呼び出し側から指定させない（SHOULD）。書き込み側のパス設計（本人 prefix の内側）と読み取り側の再検証は対で設計し、片方だけに依存しない（MUST）。
+-   **Private Reference Storage**: 機微添付（医療・証明書・PII を含む書類）は非公開の専用バケットに置き、DB には永続公開 URL ではなく `bucket://path` 形式の private 参照を保存し、表示用の署名 URL はその場で発行して保存しない（MUST）。署名 URL の発行は行単位の認可（RLS 等）を迂回する特権経路で行われるため、発行側で認証を確立し、path を所有者 prefix（例: `${userId}/...`）配下へ強制して先頭 `/`・`..`・`\` を拒否する（MUST）。クライアント供給の Storage path を DB 保存／公開描画する全経路（upload だけでなく submit / link 等）で同じ prefix scope ガードを通す（MUST）。新しい非公開バケット定数を追加したら、同一変更でバケット migration・所有者 path policy・署名ヘルパ・検証スクリプトの参照 parser を接続し、定数だけ／ヘルパだけの未接続状態を残さない（MUST）。
 
 ### 15.5. Storage Bucket Security
 
 -   **バケット分離**: 公開アセットと非公開アセットを**別バケット**に分離。
 -   **RLS必須**: Supabase Storageの全バケットにRLSポリシーを要求。
 -   **CORS制限**: アプリドメインのみ許可。`*` 禁止。
+-   **Search Index Control**: ストレージ配信経路で検索避けヘッダ（`X-Robots-Tag`）を外す変更は「公開範囲を広げる」変更として扱い、領域（バケット・prefix）単位の許可リストで決める（MUST）。列挙されていない領域には原本のヘッダに依存せず自分で `noindex` を付け直し、新しい領域が増えたとき何もしなければ検索に出ないことを既定にする。分類は「個人が写るか」ではなく「本人の意図で公開したか」で行い、パスに利用者識別子を含む領域はそれだけで公開検索の対象外にする（MUST）。検査はコードではなく外形 HTTP（実 URL へのヘッダ確認）で行い、許可領域で消えていることと非許可領域で付いていることの両方を assert する（SHOULD）。片方だけでは過剰是正を見逃す。
+-   **Public-Flag Matrix Test**: 「行の見え方（行レベル認可）」と「置き場の見え方（バケット公開フラグ・署名 URL 期限）」は別層であり、前者を厳格にしても後者は守られない。機微データを扱うなら両方に不変条件を張り、個別の否定側検査ではなく「バケット名 × 公開フラグの行列そのもの」を厳密一致で固定し、0 件成功の偽合格を防ぐ肯定側の対照も置く（MUST）。期待値は実照会から起こし、反転変異で赤化することを実測してから確定する。
 
 ### 15.6. Content-Disposition Security
 
 -   ユーザーアップロードファイルのダウンロード時は `Content-Disposition: attachment` を設定。
 -   `inline` は画像（`image/*`）のみ許可。HTML/SVG/PDFは `attachment` を強制。
+-   **Private Attachment Lifecycle**: 利用者が送る添付（問い合わせ・医療書類等）は公開メディアと物理分離した非公開バケットに置き、フロントが URL を直接埋め込む経路を提供しない（MUST）。閲覧は認可済みサーバ経由の短命署名 URL（例: 5 分）のみとし、発行イベントを監査ログに残し、`Content-Disposition: attachment` を強制する。
+    -   署名 URL の発行前に、対象 path が「その申請 ID に紐づく台帳へ保存された path」と完全一致することを確認する（MUST）。管理者認証だけでバケット内の任意 path を署名してはならない（管理者に横断閲覧を許す IDOR になる）。
+    -   期限到達時の削除は「Storage object 削除 → DB 上の path を伏せ値へ置換 → purged_at 記録」を 1 つの関数で原子的に行う（MUST）。Storage だけ消すと孤立 path が UI バグと監査ノイズになる。
+    -   リーガルホールドの ON/OFF は管理者の明示操作のみ・監査ログ必須とし、自動ジョブで OFF にしない（MUST）。保持期限による自動消去の対象選択はホールド中の行を必ず除外する述語を持つ。spam 判定は短期（例: 24h）で削除してよい。
+    -   定期的（例: 四半期）にバケット容量と「保持上限超・未 purge・hold 無し」の件数を計測し、残っていれば purge ジョブ失敗として警報する（SHOULD）。公開バケットに添付が紛れていないかも検出する。`security/100_data_governance.md` §12.4 参照。
 
 ### 15.7. 画像処理セキュリティ
 
@@ -1429,6 +1488,8 @@ function encryptAES256GCM(plaintext: string, password: string): { encrypted: str
     2.  **入力サニタイズ**: 制御文字、プロンプト操作パターンをフィルタリング。
     3.  **出力検証**: LLM出力を構造化フォーマット（JSON Schema等）で検証。期待外出力を拒否。
     4.  **Guardrail実装**: 入力・出力の両方にガードレール（トピック制限、有害コンテンツ検出）を設置。
+    5.  **Delimiter Spoofing Escape**: System / User の分離は SDK のネイティブ role 分離（systemInstruction 等）で構造化する（MUST）。中継層が未対応で delimiter wrap を使う場合は、利用者入力中の delimiter リテラル（例: `</user_input>`）を必ず escape する。これが無いと攻撃者が delimiter を閉じて新しい指示を注入できる。中継層とクライアント側の両方を同期更新する。
+    6.  **Emergency Branch Mask Retention**: 緊急ガードレール・例外分岐・早期 return は「通常経路の安全処理」を飛ばしやすい。PII マスク済み本文は通常経路・緊急分岐・テスト期待値で同一の変数／SSOT を参照し、早期 return の前に定義する（MUST）。
 
 ### 17.2. 機密情報漏洩防御 (LLM02:2025)
 
@@ -1465,6 +1526,8 @@ function encryptAES256GCM(plaintext: string, password: string): { encrypted: str
 -   **Law**: 過剰なLLMリクエストによるコスト爆発・DoSを防止する。
 -   **Action**: トークン使用量のレート制限、ユーザーごとの日次上限、コストアラート設定。
 -   **Cross-Reference**: `ai/000_ai_engineering.md` (トークンコスト管理)
+-   **Finite-Set Snapping for Metered Inputs**: 外部入力がそのまま従量課金の単位（画像変換パラメータ、LLM `max_tokens`、トランスコード指定、ページ数、検索 `limit`、再送回数）を決める箇所は、値域チェックではなく実際の呼び出し元から作った許可値の有限集合へスナップする（MUST）。「1〜10000 の範囲チェック」は基数を 10,000 のまま残し、リクエストは 1 回ずつ正常系（200）でレート制限にも異常検知にも映らず、課金だけが静かに膨らむ。丸めは配信の入口（エッジ）とアプリの両方に置き、エッジを正とする（MUST）: アプリ側だけだと URL 直叩きで素通しになる。テストは「許可外の値を渡して許可値が返る」で書く（範囲チェックの存在では不十分）（MUST）。上限アラート／遮断は可用性リスクなので、基数を絞ることを先にする（SHOULD）。
+-   **Per-Route Usage Metering**: 全 AI ルートの終端で usage 計量を fire-and-forget で記録し、計量呼び出しを持たないルートを機械走査（`grep -L` 相当）で CI 検出する（MUST）。1 ルートの計量漏れは、そのプロバイダのコストを可視化不能にする。
 
 ### 17.9. モデルアクセス制御
 
@@ -1931,6 +1994,10 @@ const resolvers = {
     1.  **ハードコーディング絶対禁止**: コード、設定ファイル、`.env`ファイル（Git管理下）、バージョン管理にシークレットを物理的に埋め込むことを禁止。
     2.  **ランタイム取得**: シークレットは実行時にセキュアな外部ソースから取得。
     3.  **最小権限**: シークレットへのアクセスはユーザー/サービスごとに必要最小限のみ付与。
+    4.  **Missing-Secret Behavior**: secret 系の環境変数に `?? ''` / `?? null` / `?? '<default>'` のフォールバックを書かない（MUST NOT）。module load 時に説明的なエラーで throw し、最初の呼び出しで 500 を返して運用者が即気付ける状態にする。「動くように見えて動かない」フォールバックは、送信元が retry する Webhook などで設定不備のデプロイを長時間稼働させる。ローカル便宜のために秘密の既定値を公知の固定文字列にしない（MUST NOT）。倒すならプロセス限りの乱数鍵 + warn ログにし、鍵は用途ラベルで HMAC 導出して他用途と共有しない（§7.4 Keyed Pseudonymization Discipline 参照）。「timeout 既定の無制限」「secret 既定の公知文字列」は同じ「既定値が防御を静かに外す」型として扱う。
+    5.  **Header Transport Only**: 長命の API Key / Bearer は必ずヘッダで送信し、URL の query string に乗せない（MUST）。URL は Web サーバ・CDN・プロキシ・ブラウザ履歴・エラートラッカーの breadcrumb・SIEM などあらゆるログ層に記録される。外部 API のエラーレスポンスを丸ごと（`JSON.stringify`）ログせず `{status, message, code}` のみ抽出する（MUST）。`?key=` `?token=` `?secret=` の grep ヒット 0 を CI で維持する。
+    6.  **Display / Save / Execute Separation**: 設定テーブルの secret 列は「表示（placeholder マスク）」「保存（placeholder 値は無視し新値だけ更新）」「実行（server-only module で必要最小列を直接取得）」の 3 責務を別関数に分ける（MUST）。管理画面返却を安全化する placeholder マスクを入れたら、通知送信側まで `********` を API キーとして使う構造になっていた。管理者だけが見る画面でもブラウザへ secret 生値を返さない。secret 更新／漏えい監査ではタスク証跡・退避 env・ビルド生成物も隠しファイル込みで走査し、証跡にはキー名・保存先・更新時刻だけを残して値は明示的に伏せ字にする（MUST）。
+    7.  **Digest Comparison for Finite Candidates**: secret store が値ではなくダイジェストしか返さない場合、候補が有限な設定値（リージョン名・プロジェクト ID・環境名）は候補の sha256 と突き合わせて値を見ずに同一性を確定する（SHOULD）。鍵やトークンには適用しない。「読めないから未確認」と「読んだから確認済み」の間に、秘密を扱わずに検証する第三の選択肢を先に探す。
 
 ### 21.2. 一元管理ツール
 
@@ -2010,6 +2077,13 @@ if (window.trustedTypes) {
 }
 ```
 
+-   **Trusted Types Operational Notes**: `trusted-types` ディレクティブを使う場合、クライアントライブラリが内部で作る固定 policy 名（および `allow-duplicates` 等の互換キーワード）を許可リストに含める必要がある。`script-src` が正しくても policy 名が無い、または複数インスタンスが同名 policy を再作成すると、特定 UI の初期化時だけ本番で例外が発生する。許可 policy 名はミドルウェアへ直書きせず SSOT 定数から生成し、ライブラリ更新時は定数と再発防止テストを同時に更新する（SHOULD）。CSP 変更時は対象ページの応答ヘッダに必要 policy 名が含まれること、コンソールに `Policy "..." disallowed` / `already exists` が出ないことを実測する（SHOULD）。
+-   **Trusted Input Exception Design**: 管理画面から入る「スクリプト実行を前提とする信頼済み入力」（計測タグ・広告タグ・カスタム head）は、ユーザー入力用の汎用サニタイザを一律に通すと `<script>` がサイレントに削除され、計測・収益が静かに停止する。信頼済み入力には専用の出力経路を設け、汎用サニタイザのバイパスを「意図的・限定的・監査可能」に設計する（SHOULD）。その代償として、サイト全体の `<head>` に任意スクリプトを注入できる項目の編集権限は最上位ロールに限定し、保存時に `<script>` の注入を警告する（MUST）。§12.2 Stored Script Material Allowlist 参照。
+-   **Sanitizer Implementation Contract**: サニタイザの tag hook から raw HTML を返して属性を補完しない（MUST NOT）: ライブラリ本来の属性値フィルタを迂回し `<img src="javascript:...">` が残る。URL 属性（href / src / cite）の安全判定は `javascript:`・空白／entity 難読化・`data:text/html`・`data:image/svg+xml` を拒否する専用ポリシーで行い、安全属性の補完（`a[target=_blank]` の `rel`、`iframe sandbox`、`img alt`）はサニタイズ後の post-process で行う。
+    -   URL を `href` に描画する箇所は全てスキーム許可リスト（http / https・内部相対パス）を通す（MUST）。HTML エスケープはスキーム XSS を防がず、`z.string().url()` 等の URL バリデータは `javascript:` / `data:` を有効な URL として受理するので許可リストではない。入力境界と描画境界の両方で塞ぐ（DB 格納済みの不正値は入力側の修正では無害化できない）。
+    -   サニタイザを通らない JSX 直書きの `target="_blank"` も例外なく `rel="noopener noreferrer"` を付け、lint の対象外になるリンクコンポーネントは独自に走査する（MUST）。
+    -   公開ページへ保存反映される管理者入力は HTML / JS 文字列 / CSS / URL の文脈ごとに別の検証を行う（MUST）。計測 ID は許可形式に一致しなければ描画しない、インラインスクリプト内の文字列は JSON 化と `<>&` / 行区切り文字の escape、CSS は `</style>` 脱出・`@import`・`expression()`・`behavior:`・`javascript:` を落とす CSS 文脈サニタイザ（HTML サニタイザでは代替不可）を通す。外部 iframe の `allow` は再生に必要な最小権限のみとし、提供者推奨文字列をコピーしない（SHOULD）。
+
 ### 22.2. サードパーティスクリプト管理
 
 -   **Law**: サードパーティスクリプトは**主要なサプライチェーン攻撃ベクトル**。導入・管理を厳格に制御する。
@@ -2019,6 +2093,7 @@ if (window.trustedTypes) {
     3.  **SRI (Subresource Integrity)**: 全外部スクリプト/CSSに `integrity` 属性を付与（§12.5）。
     4.  **バージョン固定**: CDNスクリプトのバージョンを固定。`latest` URLの使用禁止。
     5.  **定期監査**: サードパーティスクリプトの動作を定期的に監査し、不審な外部通信を検出。
+    6.  **Allowed-Host Determination & Triage**: 第三者 SDK のリソースを CSP で許可するとき、ベンダー名から推測したホストを足してはならない（MUST NOT）。実 DOM の `src`／SDK が返す実 URL からホストを取り、許可後は「症状が消えたか」（要素の描画成功・違反ログ 0）で確認する。許可を足したことを修正完了の根拠にしない（「許可を足したのに直っていない」状態が数日続いた）。切り分けの型: (1) 壊れている要素の `src` を実 DOM で読む → (2) その URL を単体で取得して生死を見る → (3) 自サイトの CSP ヘッダの該当ディレクティブと突き合わせる → (4) 修正後に同じページで描画成功と違反ログ 0 を実測する。許可ホストの台帳は理由付きで持ち、外部送信ホストの一覧と一致することをテストで固定する（SHOULD）。Worker・`blob:` を内部で使うライブラリ（画像変換等）は厳格 CSP 下で静かにハングするため、`worker-src` 等を明示し、沈黙する種類の CSP 違反を想定してコンソール実測を手順に含める（SHOULD）。
 -   **PCI DSS 4.0**: 要件6.4.3は決済ページでのスクリプトインベントリとSRIを義務付け。
 
 ### 22.3. Local Storageセキュリティ
@@ -2123,6 +2198,9 @@ self.addEventListener('fetch', (event) => {
 
 -   **Law**: 個別リクエストではなく**リクエストパターン**を分析してアビューズを検出する。
 -   **検出パターン**: 異なるIPからの同一アカウントへの高速アクセス、辞書攻撃パターン、順序外のAPIコール、短時間の大量アカウント作成。
+-   **Organized UGC Manipulation (Non-Bot Abuse)**: CAPTCHA / Turnstile は自動化を弾くだけで、「実在の人間を集めた組織的投稿」は素通りする。UGC には自動化検知とは別に、集中度で見る検知（同一対象への短期件数、満点連続件数、単一ページのみ閲覧の訪問者からの投稿比率）を置く（MUST）。閾値超過は自動公開せず保留に落として管理者へ通知する。少数の投稿で順位が入れ替わる規模のサービスでは特に効く。
+    -   受付制御は「面（投稿種別）× 主体（会員／匿名）× 対策」を設定で持ち、確定的な拒否は honeypot のみ、疑い（URL・使い捨てメール・作成直後アカウント・対象集中・不正スコア）は保留にする（SHOULD）。保留の受け皿（承認 UI）が無い面ではキルスイッチだけ拒否にする。UA を主判定にせず、IP は許可リストにだけ使う（SHOULD）。
+    -   検知は「組織的か」までしか示さず「違法か」は示さない。呼びかけに応じた正当な投稿と指示された投稿はログ上の痕跡が同じであるため、検知文言・通知で「不正」と断定してはならない（MUST NOT）。原資料が実在利用者の IP を含む場合は、判断に使った指標だけを残して原資料は削除する。`product/000_product_strategy.md` §14.7 参照。
 
 ---
 
@@ -2138,6 +2216,10 @@ self.addEventListener('fetch', (event) => {
 | **ペネトレーションテスト** | 年2回 | 外部侵入テスト |
 | **レッドチーム演習** | 年1回 | フルスコープ |
 | **バグバウンティ** | 常時 | 外部研究者による発見 |
+
+-   **Coverage-Claim Verification**: 「全 X に Y を適用した」という完了主張は、UI 導線からの人手列挙ではなく、export された変更関数の機械的列挙（命名 prefix `create|update|delete|add|remove|toggle|submit|approve|reject|reset|import|upload` 等）を母数にして 1 件ずつ検証する（MUST）。攻撃者から見れば、漏れた 1 件は守られた 99 件と同じ価値を提供する。同名関数が複数ファイルにある場合は各候補の import 元を全数確認して実 caller を特定し、caller 0 件は orphan として削除候補、修正は実経路側に入れる（MUST）: orphan 側にだけガードを足し、本番経路に 2 回分の gap が残った。修正後に「実 caller の import 文が修正済みファイルを指すか」を再確認する。決済・課金・外部 API・identity 変更系の横断ファイルは列挙の専用枠に置き、完了 commit には「verified N mutations」の母数を明記する（SHOULD）。
+-   **Class Remediation (Not Instance Remediation)**: 脆弱パターンを 1 箇所是正したら、欠陥の性質（例: 「コンテナ形式の先頭バイトでは中身を判別できない」「URL を生 href に描画」）を先に言語化し、その性質を持つ入口を全リポジトリで数え上げてから直す（MUST）。露出の大きい面（全ページに出る広告・ナビ）を優先確認する。是正のテストは直した箇所ではなく性質の定義から書く（MUST）。同じ表・関数・定数群に並ぶ要素は差分レビューでは見えないので全件読む（MUST）: 同型の欠陥は「隣の行」に並んでいる。同一ドメインの並行経路（複数の checkout・upload・receiver）に片方だけゲートを足さず、全経路を列挙して同一契約を適用し、匿名到達面のガード有無は兄弟エンドポイントと並べて測る（MUST）。「なぜこの経路には不要か」は意図的非対称として記録し、是正後に「残存ゼロ」を sweep で機械確認してから完了とする（MUST）。
+-   **Severity Determination for Authorization Findings**: アプリ層ガードの弱点を認可バイパスと判定する前に、取得経路の実効ロール（匿名／認証済み／特権）と対象テーブルの行レベル認可ポリシー本文を突合してから severity を確定する（MUST）。行レベル認可が backstop していれば exploitable ではない（ただし多層防御としてアプリ層も狭める）。同一ファイル内でも関数ごとにクライアント種別（読み取りはセッション、更新は特権）が違う前提で読み、コード中のコメント（「全行 NULL」等）は陳腐化するので前提はその場で測り直す。
 
 ### 24.2. セキュリティ教育
 
@@ -2232,7 +2314,11 @@ self.addEventListener('fetch', (event) => {
 | `change_diff` | 変更前後の差分（破壊的操作時） |
 
 -   **改ざん防止**: 監査ログは書き込み専用（Append-Only）ストレージに保存。削除・変更を物理的に不可能にする。
+-   **Anonymous Actor Handling**: 監査ログ記録関数は「認証主体が取れない」ことを理由にエントリを破棄してはならない（MUST NOT）。`actor_id` を NULL のまま、対象・接続元・端末・時刻を記録する。ロガーが認証ユーザー無しを破棄する設計だと、匿名投稿の監査行は開放と同時に全期間 0 件になる（実測）。匿名（ログイン不要）で書き込める経路を新設・拡張するときは、同じ変更で「匿名でも残る証跡」を設計し、証跡の対象範囲は「その経路を匿名で書けるか」で決め、対象外とした経路は理由を書いて残す（MUST / SHOULD）。DB 列が NULL 許容でアプリの 1 行だけが匿名を止めている経路は「ゲートを外した瞬間に証跡が無くなる」経路として扱い、列の制約か証跡のどちらかで固定する（SHOULD）。一次記録が無く、独立 2 系統の時刻相関でしか事後追跡できない状態は「推定」であって一次記録ではなく、その手法に頼らざるを得ないこと自体を欠陥として記録する（SHOULD）。
 -   **保存期間**: 最低1年間保持（規制要件に応じて延長）。
+-   **Path Convergence & Count Reconciliation**: 複数の経路（OAuth／メール登録／管理者作成／バッチ等）から到達しうる出来事（登録・ログイン・退会）の監査記録は、アプリケーション層の 1 経路に置いてはならない（MUST NOT）。すべての経路が必ず通過する収束点（永続化層のトリガ、単一のドメインサービス、共通ミドルウェア等）に置く（MUST）。記録を意図的に捨てる分岐を置く場合、捨てた事実が独立して観測できる対を必ず設け、少なくとも「対象エンティティの増分件数 == 監査行の件数」の日次突合を持ち、乖離をアラートにする（SHOULD）。「記録するコードが存在し、テストが緑」は記録されている証拠にならない（登録 2 件に対し監査行 0 件という形で発見された）。本番の実件数で確認するまで「記録している」と申告してはならない（MUST NOT）。`engineering/710_data_reconciliation.md` 参照。
+-   **Append-Only Prerequisites**: 書き込み禁止トリガを張る前に、その表を親とする FK の `ON DELETE` / `ON UPDATE` アクション（`SET NULL` / `CASCADE`）と、所有者権限で走る保守ジョブ（SECURITY DEFINER 等）を実照会する（MUST）。参照整合性アクションはアプリのコードに現れず、トリガは実行ロールに関係なく発火するため、拒否トリガが利用者削除や保持ポリシーの DELETE を恒久的に失敗させる。append-only 化は「正当な実行者がいる操作（保持ポリシーの DELETE）→ REVOKE のみ、トリガ無し」「誰も正当に実行しない操作（UPDATE / TRUNCATE）→ REVOKE + 常時有効トリガ」に分け、トリガの例外フラグ（セッション変数バイパス）は抜け穴になるので採らない（MUST）。例外を形で限定する場合（特定列のみ NULL 化を許す WHEN 句）は列集合の一致をテストで固定する。RLS バイパス相当の特権でもテーブル／列権限は効くため、REVOKE による防御を設計する前に実行主体の権限条件を実照会する。検査はカタログ状態（トリガの存在・権限）だけでなく実行系（実際に削除／更新を試みる）で置く（MUST）: カタログ検査は破壊を全緑で素通しした。
+-   **Audit Write Semantics**: 重要な変更操作の監査ログは fire-and-forget で書き、失敗は記録するが利用者のフローを止めない（SHOULD。step-up 等の不変監査要件がある操作は除く）。匿名の変更操作も監査対象とし、`actor_id` NULL + 鍵付きハッシュ（IP + UA）の先頭数文字をセッション placeholder にして同一訪問者を相関可能にする（生 IP は details に保存しない。§7.4 参照）。利用者に見える識別子（表示名・メール・ユーザー名・アバター・自己紹介）の変更は、削除権対応・なりすまし検知・法務トレーサビリティのため全件監査対象とする（MUST）: 短時間の表示名連続変更はなりすまし準備の偵察パターンで、監査が無いと完全に不可視になる。action / resource は SSOT の enum に登録し、型と UI フィルタを自動拡張する。
 
 ### 25.2. ビジネスロジックセキュリティ
 
@@ -2711,6 +2797,7 @@ val client = OkHttpClient.Builder()
     4.  **全操作記録**: 緊急アクセス中の全操作を強制ログ記録。事後に必ず監査セッションを実施。
     5.  **2名承認制**: 緊急アクセスの有効化には2名以上の承認（Dual Control）を必要とする。
     6.  **定期テスト**: 四半期に1回、緊急アクセス手順が実際に機能するかテストを実施（Test without impact on production）。
+    7.  **Self-Lockout Pre-Check**: 自分自身にも適用されるアクセス制限・ロール設定は、保存前に「適用後も保存者が通れるか」を判定側と同一の関数で検証する（MUST）。正本は `security/430_authorization_and_access_control.md` §6.2「Self-Lockout Pre-Check」。
 -   **Cross-Reference**: §3.4 (PAM — JIT Access), §6.8 (Physical Master Key), §25.1 (監査ログ設計)
 
 ---

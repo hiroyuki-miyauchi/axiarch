@@ -185,6 +185,13 @@ Legal maps, future schedules and statistics here are reference candidates, not a
     -   **Verify completion** of propagation: confirm the target data no longer remains in derived stores, not just that the deletion job logged success. Meta's DELF (deletion correctness verification framework) is a precedent.
     -   When immediate deletion is technically difficult (e.g., backups), provide a mechanism to re-apply deletion upon restore (such as retaining deletion tombstones).
 -   **Rule 3.3.6**: Maintain a **derived-store catalog** per deletable data type (an inventory of which stores and pipelines the data is replicated or derived into), and require catalog updates whenever a new derivation target is added (SHOULD).
+-   **Rule 3.3.7 (Serialization & Compensation for Multi-System Deletion)**: Deletions that span external billing, the app DB, and the identity provider (IdP) — account withdrawal, suspension — MUST NOT be described or implemented as if they were a single transaction. Order them "billing cancellation (fail-closed: abort the whole flow on failure) → idempotent soft delete → hard delete at the identity provider," placing the heaviest irreversible side effect last (MUST).
+    -   Make the compensation for each stage explicit, and shape it as "revert by compare-and-update only when the mark you set yourself (`deleted_at` etc.) still matches," so it never overwrites another operation's mark. Compensation covers not only SDK error responses but exceptions and lost responses; when compensation itself fails, keep the original failure, notify under a fixed classification, and do not overwrite the primary result (MUST).
+    -   A failure in post-processing after the irreversible step has committed (session revocation, subscription cancellation) MUST be recorded as a "post-processing anomaly," never rewriting the completed primary result as a failure. When syncing two state systems (IdP ban and app suspension flag), do not mechanically flip to the opposite value on failure; re-read the current value and align to it, and when it cannot be confirmed, hold on the safe (suspended) side and do not return success (SHOULD). Do not embed user IDs in notification bodies.
+    -   Failure patterns: fail-open billing cancellation produces "deleted users still being charged"; compensation that overwrites the primary result leaves "a lingering soft delete the user cannot retry." Cross-Reference: `engineering/100_api_integration.md` §48.1 (Saga).
+-   **Rule 3.3.8 (Re-check Purge & Disclosure Ledger on Column Addition)**: Any change that adds a column to a table that may hold PII MUST, in the same change, re-verify (1) that the retention purge/anonymization routine drops the new column, and (2) that the disclosure ledger's "include/exclude reason" is still true for the new column. When the check depends on "the reason sentence" rather than "the set of columns," both checks stay green while the added column slips through.
+    -   Give the purge test a negative control ("one row goes red under the old implementation"), and make the disclosure-ledger classification depend on the column set so that adding a column goes red automatically (SHOULD). Extend the derived-store catalog (Rule 3.3.6) from a per-table to a per-column view (prevents the accident where user-authored text stays excluded as "written by operations").
+-   **Rule 3.3.9 (Legal Hold Exclusion from Automated Purge)**: Selection of rows for retention-driven automated deletion or anonymization MUST carry a **predicate that excludes rows under legal hold** (e.g., `legal_hold IS NOT TRUE`). A hold means "retain until released" and has no expiry. Release is an explicit administrator action recorded in the audit log, and automated jobs MUST NOT switch it OFF. UI copy states the effect directly: "no automated deletion while ON." Failure pattern: a purge that ignored the hold column deleted litigation evidence on expiry. Procedure: §12.4.1.
 -   **Cross-Reference**: `security/000_security_privacy.md` §4.5 (Right to be Forgotten)
 
 ### 3.4. Cross-Border Transfer Framework
@@ -230,6 +237,8 @@ Link each access, deletion or other data-subject request to an intake ID, identi
 Even when automated, an authenticated session alone does not authorize disclosure of all data. Match verification to the request, review scope and third-party redaction, and deliver through authorized channels. Distinguish sending from receipt.
 
 Do not convert statutory calendar months to fixed 30-day durations. Unsupported jurisdictions and unassessed requests must not silently default to 30 days: retain an unassessed status and alert the owner. Separate numeric deadlines from qualitative timing obligations and internal targets. Verify the applicable primary source when applying the rule.
+
+-   **Disclosure Scope Boundary (Sent-Mail Records)**: When a subject's disclosure includes email sending records, include the From, CC, and Reply-To that appeared in headers the subject received, but not BCC, which is a third party's address the subject never saw (SHOULD). A sending ledger with one row per recipient and a recipient role (to/cc/bcc) makes this split mechanical (`operations/300_customer_experience.md` §16.2).
 
 #### 3.6.1. DSAR API Design Pattern
 
@@ -351,9 +360,12 @@ export function consentMiddleware(req: NextRequest): NextResponse {
 -   **Initial State**: Analytics and advertising cookies **disabled** on first visit. Enabled only after explicit consent.
 -   **Banner UI**: Provide 3 options: "Accept All", "Customize", "Reject".
 -   **Persistence**: Store consent state in DB or LocalStorage. Do not re-display banner on return visits.
+    -   **Supplement (Storage Lifetime)**: A user choice whose loss changes legal state or UX — consent state above all — MUST NOT live only in script-writable storage (LocalStorage / `document.cookie`). Major browsers evict script-written storage after a short period (e.g., 7 days). Keep a copy in an httpOnly cookie issued via the server's response header; when reading, reconcile both, take the one with the newer update time, and write back the side that was lost (SHOULD). Treat "I consented but the banner came back" reports as a sign of storage eviction.
 -   **Consent Withdrawal**: Ensure accessible pathway (e.g., footer link) for users to withdraw consent at any time.
 -   **Server-Side Recording**: Record consent state server-side and maintain audit trail.
 -   **Mandate**: Default is "Reject All". Only enable categories actively consented to by the user.
+-   **Regional Regime**: The default consent state for device data (analytics, ads, notifications) may be set by the law of the visitor's region. Rather than one global default, **confine the region→regime (opt-in / notice) mapping to a single function** and declare it there (SHOULD). When the region cannot be determined, fall to the strict side (opt-in) in production (MUST); local/preview may use the lenient side. Resolve location on the server (edge), normalize it onto an internal header, and unconditionally strip any client-supplied header of the same name (MUST; spoofing must not bypass the strict side). An explicitly saved refusal is honored regardless of regime (MUST). A market decision that departs from this Mandate (reject-all default) MUST be declared as an explicit exception in the Blueprint, with its basis (primary sources) and review triggers (law change, platform policy change, anomalous opt-out rate). Legal interpretation itself is out of scope for this file; confirm against primary sources at the time of application.
+-   **Hydration Discipline under a Default-ON Regime**: Once a setting that can be "enabled by default" exists, the effective state before the saved value (LocalStorage / cookie) has been read is nothing but the default. Side effects that depend on the saved value (measurement beacons, cookie issuance, tag firing) MUST wait for **the saved value to finish loading**; do not bet on effect ordering. Inline initialization reads the saved value synchronously and prefers it over the default (SHOULD). Failure pattern: even a user who had saved a refusal fired a first beacon as "consented," and the server issued a cookie. Pin the verification with a test that "a user with a saved refusal triggers no side effect on first access" (SHOULD).
 
 ### 4.7. GDPR Digital Omnibus Reform (2025.11 Proposal)
 
@@ -409,6 +421,7 @@ export function consentMiddleware(req: NextRequest): NextResponse {
 -   **Tag Manager Rules**: When using GTM etc., implement consent-status-based tag firing control integrated with CMP.
 -   **Vendor Contracts**: Specify data collection scope, purpose, and retention period in DPA (§13) when onboarding third-party SDKs.
 -   **Audit**: Audit actually-loaded scripts quarterly to detect unauthorized script injection.
+-   **External Transmission Registry & Same-PR Rule**: Every external service that sends information from the user's device to a third-party server (analytics, ads, error monitoring, bot protection, payments, CDN) MUST be managed in a **registry** holding service name, operator, data sent, purpose, the recipient's privacy policy URL, adoption date, and CSP-reflected status. A new adoption MUST complete "registry entry → user-facing disclosure page update → CSP addition" in a **single PR**. Splitting them structurally produces disclosure-obligation gaps. In the quarterly audit above, diff the CSP configuration against the registry to detect unregistered destinations (SHOULD).
 
 ### 4.8. Universal Opt-Out Mechanism (GPC) Implementation
 
@@ -452,6 +465,8 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **Rule 5.1.1**: Record in the database "when and which version of terms the user consented to" and retain as legal evidence.
 -   **Rule 5.1.2**: Upon terms revision, force-display consent screen on next login.
 -   **Required Consent Record Fields**: User ID, consent type, consent timestamp, IP address, User-Agent, terms version
+-   **Rule 5.1.3 (Consent Ledger Write Boundary)**: Consolidate consent-fact writes at the service boundary (e.g., a restricted server-side RPC) and enforce DB time, permitted types, and idempotency under concurrency inside the transaction (MUST). Do not store client-supplied version, agreed_at, IP, or User-Agent as-is in the legal ledger (MUST NOT). If the consent row cannot be created, do not create the primary record (inquiry etc.) either. Even for anonymous submissions where no user FK can be set, stamp the consent fact (version, time) into the submission record itself (MUST). Keep the consent ledger as a long-retention primary record separate from short-retention audit logs, and on account deletion anonymize it instead of cascade-deleting (MUST). Failure pattern: audit logs on short retention (e.g., 90 days) expired, and the consent evidence vanished with them.
+-   **Rule 5.1.4 (Versioning & Re-consent Side Effects)**: Keep a version per legal document (terms, privacy policy, statutory disclosure page, etc.) and bump it on every wording change (MUST). Detect "text revised but version unchanged" by a daily reconciliation of the text's revision time against the version's update time (SHOULD). Automate the side effects of a version bump (re-consent prompt, notification, audit log old→new), and use blocking re-consent only for revisions that require explicit consent. Never treat "no answer" as consent (MUST NOT). Documents that are display-only obligations are not re-consent targets.
 
 ### 5.2. Legal Archive
 -   **Rule 5.2.1**: Never delete past terms. Keep them permanently accessible as permalinks.
@@ -465,6 +480,8 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **Action**: Legal documents must use a **Headless CMS** or **database** as the single source of truth.
 -   **No Code Deployment for Terms**: A design requiring app redeployment for legal text changes is a design defect.
 -   **Cross-Reference**: `security/000_security_privacy.md` §3.3 (Legal Content Consistency Protocol)
+-   **Disclosure–Implementation Parity (Collected = Disclosed)**: A change that newly collects personal-related information (IP, device configuration, behavioral logs, etc.) MUST align four things in the same change: (1) an entry in the collected-data list, (2) an independent entry under purposes of use (not read into an existing purpose), (3) an explicit retention period (cap + preservation conditions, equal to the implementation constant), and (4) a mechanism that continuously detects drift between the disclosure and the implementation. Collecting without disclosing is a deficiency no matter how correctly retention and safeguards are implemented. This defect gets quieter the better the implementation works (collection, purge, and detection all green), so it trips none of the existing gates. Because the disclosure lives in a CMS or DB, it sits outside code review's field of view: pair every change that touches personal data with a check that mechanically reconciles the external promise against the implementation, and pin the equality of the retention constant, the DB-side purge function, and the disclosure text with a test (SHOULD). See the §16.5 application list and `security/000_security_privacy.md` §9.2.
+-   **Implementation-Before-Statement Principle**: Behavior stated in terms, guidelines, privacy policies, help pages, etc. ("will be withdrawn," "deleted immediately") MUST be **implemented first and pinned by a check** before it is written; the wording MUST NOT come first. Write only what the implementation guarantees, and state the real propagation timing (e.g., "removed progressively by periodic sync") instead of "immediately." Before writing, count that a path by which the subject can actually reach that behavior (UI, API) exists; never write "the user can do this" when only an administrator can (MUST). Failure pattern: writing the wording first recreates "wording not backed by implementation" in a new place (the published-document form of Anti-Haribote).
 
 ### 5.5. Consent Legal Validity Standards
 
@@ -473,6 +490,8 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 | **Clickwrap** | ✅ Strong | Terms acceptance, payment consent |
 | **Sign-in-wrap** | ⚠️ Moderate | Low-risk terms updates |
 | **Browsewrap** | ❌ Weak | Do not use |
+
+-   **Consent Record Integrity**: Store **a hash (e.g., SHA-256) of the terms text as of the consent moment** in each consent record, and allow INSERT only (no UPDATE/DELETE) on consent rows (MUST). Periodically (e.g., monthly), recompute the hash of every consent row from the archived terms text (§5.2) and compare; a single mismatch raises a critical alert as possible tampering (SHOULD). The evidentiary strength of consent rests on proving "consented to this text at that time," so a consent row with no binding to the text is weak evidence.
 
 ### 5.6. Dispute Resolution & Arbitration Clauses
 
@@ -831,6 +850,7 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **Opt-Out Switch**: Place "Data Participation" ON/OFF switch in user settings.
 -   **DB Flag**: `data_commercialization_opt_out: boolean DEFAULT false`.
 -   **Anonymization Mandate**: Apply **k-anonymization** or **differential privacy** to externally provided data.
+-   **Threshold SSOT & View-Side Guard**: Keep the minimum cohort size (k) for published aggregates in a constant SSOT that every aggregate definition references (MUST); hardcoded thresholds are prohibited. External provision (API, data licensing) returns only **view definitions that have already passed** the triple guard — k threshold, no excluded columns, consent filter (Opt-Out applied) — and never relies on filtering at the API layer (MUST). This structurally severs the path where an API bug leaks raw data. Do not relax the guard based on the buyer's trustworthiness (MUST NOT): make the data structurally impossible to emit rather than contractually forbidden.
 
 ### 11.9. AI Governance Committee
 -   Establish an **AI Governance Committee** upon reaching a certain business scale:
@@ -888,6 +908,8 @@ export function gpcMiddleware(req: NextRequest): NextResponse {
 -   **Closed Service Entities**: Change status to `closed`/`archived` and exclude from search. Retain related UGC permanently.
 -   **Deleted User Content**: Set `owner_id: null`. Retain content with public interest.
 -   **Dormant Data**: Auto-notify administrators of archival suggestions for non-public content unchanged for 2+ years.
+-   **Back-Reference Discipline for Derived Assets**: Metadata of derived assets (RAG corpora, statistics) MUST NOT hold reference keys to users, sessions, or individuals; leave no re-identification path after purge. By contrast, **references to public content rows** (source table, source row ID) are needed for lifecycle sync (propagating deletion/unpublishing) and are retained (SHOULD); do not confuse them with the ban on personal references. When the author deletes the source post, keep the asset but drop the reference to the source row and round the timestamp to the month (MUST), so the asset remains explainable as "reference information detached from the author and the original post."
+-   **Knowledge Asset State Management**: Knowledge that has been turned into an asset in non-identifying form expresses source events (author deletion, unpublishing, new version, falling outside the statistical window) as a state (e.g., `source_deleted` / `quarantined` / `superseded` / `aged_out`) plus an observation time rather than as deletion; only legally required deletions go to a tombstone ledger. The state vocabulary, freshness annotations, and double-filtering details are in `ai/000_ai_engineering.md` §19.4.
 
 ### 12.3. Automated Cleanup
 -   **Mandate**: Auto-execute periodic cleanup jobs via `pg_cron` / Cloud Scheduler etc.
@@ -902,6 +924,9 @@ SELECT cron.schedule(
 ```
 
 -   **Anonymization Obligation**: When deletion is legally difficult, perform **irreversible anonymization**. Hashing alone is insufficient.
+-   **Two-Layer Design for Derived Assets**: User input containing personal data (AI conversation logs, inquiries, search logs, etc.) MUST be handled in **two layers**. Layer 1 (raw logs) exists only within the retention period and is subject to subject deletion and purge; layer 2 (derived assets) permanently stores only statistics that **carry no** user ID, session ID, or body column, plus generalized text that a human has stripped of personal character and promoted. Promotion requires a human in the loop.
+    -   Run the aggregation of derived statistics **inside the same job as the retention purge, before the purge**, so that missing days are prevented structurally (MUST). Make aggregation idempotent via upsert on a unique (date, category) key. Failure pattern: aggregation and purge ran as separate jobs, and the statistics for days where purge ran first were lost forever.
+    -   Assign classification (topic tagging) at submit time with a pure function (dictionary, rules) that does not call AI, paying no extra inference cost for asset creation (SHOULD). Derived-asset tables are not exposed to users: reads are limited to the administrator role, and writes go only through service/cron paths (MUST).
 
 ### 12.4. Jurisdiction-Specific Data Retention Period Template
 
@@ -925,6 +950,8 @@ Do not apply generic three- or seven-year defaults to real data. Avoid unsupport
     4.  Notify relevant parties of preservation obligations (send periodic reminders)
     5.  Hold release only by written approval from legal team
 -   **Anti-Pattern**: Deleting data during a litigation hold constitutes **Spoliation**, resulting in sanctions and adverse inference.
+-   **Three-Layer Retention Design (Cap, Case Preservation, Aggregate Offload)**: "Keep it" for disclosure requests and litigation versus "delete it" under the duty to erase is not a binary choice, and "we don't auto-delete" is not a legal answer. Design three layers (MUST): (1) a retention cap for raw values, (2) per-case preservation (rows under legal hold or with an unresolved report are exempt from both purge and deletion; Rule 3.3.9), and (3) offloading to aggregates with person-identifying columns removed. Because a mismatch between the disclosed period and the implementation is a violation, pin the equality of the retention constant and the purge function with a test (SHOULD).
+    -   Surface stale preservation flags and neglected cases (effectively exceeding retention) through daily detection (SHOULD). When trend analysis longer than the retention period is needed, do not extend raw data; fold it into daily aggregates with personal columns dropped (SHOULD). Folded aggregates cannot be restored to distinct values, so label them as "cumulative" in the display and never present them as reversible.
 
 ---
 
@@ -1086,10 +1113,13 @@ Missing, expired or ambiguous inputs remain unassessed and alert the owner; do n
 ### 15.1. Automated Toxicity Detection
 -   **Filter First**: UGC must pass AI auto-moderation before publication.
 -   **SLA**: Zero-tolerance framework preventing even momentary display of illegal content.
+-   **UGC Image Review Matrix & File Specification**: For uploaded images, define a review matrix per detection target — "detection → automatic action (auto-hide → human review / immediate block + admin notification / flag → manual check)" — and document the thresholds and the hand-off to human review (MUST). Set size cap, allowed formats, minimum resolution, and images per post, each with its rationale (storage cost, excluding tiny images, spam prevention), and strip EXIF (location, capture time) on upload (MUST). Reporting and appeal UI: `design/000_design_ux.md` §35.1.
+-   **Coordinated Posting (Non-Bot Abuse)**: CAPTCHA only blocks automation; coordinated posting by real humans passes straight through. Beyond toxicity detection, place detection on a separate axis (concentration on the same target, score distribution, traffic source), and on threshold breach hold the content instead of auto-publishing and notify administrators. Detection shows only "was it coordinated," never "was it illegal," so notification wording MUST NOT assert "fraud." Details: `security/000_security_privacy.md` §23.4.
 
 ### 15.2. Copyright Infringement Response (DMCA/Rights)
 -   **Takedown Process**: Fact-check copyright infringement reports within **24 hours**. Takedown when infringement is clear.
 -   **Counter-Notice**: Provide counter-notice process.
+-   **Disclosure-Ready Logging for UGC**: Keep **logs of publishing acts** (posts, comments: IP, time, account) in a form that can answer the jurisdiction's sender-identification disclosure regime (e.g., Japan's Provider Liability Limitation Act, EU DSA, US DMCA subpoena) — plaintext IP, retention at or above the jurisdiction's requirement — while minimizing **view-only** access logs by hashing the IP: a two-tier retention policy (SHOULD). On accepting a disclosure request, immediately suspend automated deletion of all logs related to the target (legal hold; Rule 3.3.9) and retain until the response is complete (MUST). Manage the stages from acceptance to disclosure (acceptance, identity verification, infringement assessment, hearing the sender, disclosure decision, execution) with deadlines, and record every case in a long-retention ledger. Retention years are set in the Blueprint.
 
 ### 15.3. Transparency Reports
 -   **Law**: Per DSA compliance, periodically publish statistics on content moderation activities.
@@ -1110,6 +1140,7 @@ Missing, expired or ambiguous inputs remain unassessed and alert the owner; do n
 -   **Mandate**: Maintain GDPR Art.30 compliant Records of Processing Activities.
 -   **Record Items**: Processing purpose, data categories, recipients, cross-border transfers, retention periods, security measures.
 -   **Update Frequency**: Immediate update when new processing activities are added + **annual** full review.
+-   **Whole-Schema Denominator Principle**: Inventories for cross-cutting ledgers — ROPA, retention periods, PII classification, asset-creation paths — MUST use **every table in the schema as the denominator**. Inventorying a subset by FK column-name pattern or similar always misses something (failure pattern: behavioral logs and operator-authored content groups fell out of the ledger as "not user-input tables"). Every ledger row MUST carry either a "path (which use, how transformed)" or an "exclusion reason," and CI MUST check exact equality between the ledger and the schema so that a new table goes red merely by being absent from the ledger. Write exclusion reasons as types (SHOULD): tied directly to a person / yields no knowledge / already counted through another path (double counting) / a plan rather than a fact / an operational counter.
 
 ### 16.3. Data Classification Framework
 
@@ -1139,6 +1170,8 @@ COMMENT ON COLUMN profiles.phone IS '@pii:phone';
 COMMENT ON COLUMN profiles.full_name IS '@pii:name';
 ```
 
+-   **Exclusion Registry Check**: Keep a **registry** of columns that must never ride any asset-creation or aggregation path (individual names, identification numbers, owner IDs, email, IP, UA, address, phone, payment data, plaintext of encrypted columns), and turn CI red when any of those column names appears in an aggregate definition (view, materialized view) or adapter output (MUST). Using an excluded column as an **aggregation key** (COUNT DISTINCT etc.) is allowed; only **emitting its value** is prohibited. PII tags (above) protect the source table's columns, but without a mechanical check on derived definitions they resurface on the aggregate side.
+
 -   **Automated PII Redaction in Logs**:
 
 ```typescript
@@ -1151,6 +1184,8 @@ function redactPII(data: Record<string, unknown>): Record<string, unknown> {
   );
 }
 ```
+
+-   **Supplement (Limits of Key-Name Masking)**: Key-name-based redaction like the above cannot catch generic keys such as `{ error: error.message }` or emails, phone numbers, and URL query strings embedded in free text (message, stack, breadcrumbs). Do not pass the raw `error` object to the logger; extract only `{ name, message }` and run PII patterns over free text as well (MUST). Treat customer identifiers of external services (a payment provider's customer ID etc.) as sensitive keys. The implementation contract is `security/000_security_privacy.md` §7.4.
 
 -   **Privacy-Preserving Computation**:
 
@@ -1168,6 +1203,7 @@ function redactPII(data: Record<string, unknown>): Record<string, unknown> {
     -   Block table creation without `retention_days` during migrations
     -   Auto-reconcile RLS policies with ROPA records
     -   Detect pre-consent tracking script loading in E2E tests
+    -   Reconcile the disclosure's (privacy policy's) collected-data list and retention periods against implementation constants and purge functions (§5.4 "Collected = Disclosed")
 
 #### 16.5.1. CI/CD Privacy Check Pipeline Example
 
@@ -1219,6 +1255,7 @@ jobs:
 -   **Mandate**: Create and maintain data flow diagrams for all processing activities including:
     -   Data collection points, storage locations, sharing destinations, retention periods, deletion triggers
 -   **Update Frequency**: Update on new feature releases + **semi-annual** full inventory.
+-   **Derived-from-Real-Schema Obligation**: Build the ledger of PII columns, retention periods, and deletion methods by mechanically extracting from the real DB (`information_schema`, constraints, function definitions) and the purge implementation, not from names assumed at design time (MUST). A ledger that points at non-existent targets is a "false SSOT" that makes every periodic reconciliation a guaranteed miss (failure pattern: not one of the tables listed in the ledger existed, and reconciliation was always green). Record the ledger's retention column as "the implemented value," and log any gap from the legally desired value in a separate column (open items) as an owner decision (SHOULD); writing the desired value hides the drift from the implementation. Reconcile in both directions — "ledger → DB" and "DB → ledger" (detecting PII columns absent from the ledger) (SHOULD).
 
 ### 16.7. Data Ethics Framework
 -   **Core Principles**: Transparency, fairness, purpose limitation, accountability, human-centricity

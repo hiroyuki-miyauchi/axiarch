@@ -269,6 +269,8 @@
     4.  **Respond**: Rollback / Hotfix / Kill Switch / Temporary block
     5.  **Resolve**: Status page update, recovery notification, begin monitoring
     6.  **Review**: Conduct Post-Mortem within 48 hours → Govern feedback
+-   **First-Response Checklist (e.g. the first 30 minutes)**: The first response to a security incident SHOULD be held as a checklist with an owner and a completion column so that the right actions are taken even without thinking: ① confirm the detection is real → ② open communications and convene → ③ provisionally identify the impact scope → ④ cut off the access path → ⑤ preserve evidence (snapshot, log export; §37) → ⑥ start a minute-by-minute timeline. The time window is defined in the Blueprint.
+-   **No Public Statements During First Response**: Within the first-response window (e.g. 30 minutes), information MUST NOT be published on social media or public channels. Statements before the facts are established risk retraction and misinformation (follow the public communication procedure in §9).
 
 ### §7. Cyber Incident-Specific Response
 
@@ -541,6 +543,7 @@
 #### §9.2. Incident Notification Templates
 
 -   **Law**: Incident notifications MUST be issued based on **pre-prepared templates**. Hastily written free-form text increases the risk of information omission and inappropriate expressions.
+-   **Tone Standard by Phase**: During an outage, calm and explanatory (excessive self-deprecation such as "we deeply apologize for the enormous inconvenience" is prohibited); for a data breach, sincere and specific (vague deferrals such as "details are under investigation" left standing are prohibited); for recovery reports, factual and grateful (celebratory tone or emoji such as "Fully restored! 🎉" is prohibited) (MUST). Crisis-copy failures fall into "said too much", "said too little", and "too giddy". Before publishing, pass technical-lead review and, where needed, legal review (see `product/600_brand_strategy.md`).
 
 -   **Initial Report Template**:
     ```
@@ -1563,6 +1566,8 @@
     - Consider international legal jurisdiction (MLAT, CLOUD Act, etc.)
     - Understand data provision requirements across different jurisdictions
     - Establish liaison procedures with international law enforcement
+
+-   **Immediate Evidence Capture (4 points right after detection)**: (1) take a logical snapshot of the affected data store and record its SHA-256; (2) export application / edge / monitoring logs to external storage and secure a minimum retention (e.g. 1 year); (3) keep every operation record in NTP-synchronized UTC (prevents confusion from time-zone conversion); (4) restrict access to evidence data to the technical lead and legal, and log that access separately (MUST).
 
 -   **Cross-Reference**: §6 (Evidence Preservation), §7 (Cyber Incidents), `security/100_data_governance.md`
 

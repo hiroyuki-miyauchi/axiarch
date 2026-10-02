@@ -257,6 +257,7 @@ interface StoreResponse {
 | **Keyset-Based** | ✅ Recommended | High performance requirements |
 
 - **Rule 35.13**: Cursor-Based Pagination is the standard. Offset-Based is limited to admin panels due to performance degradation with large datasets
+- **Rule 35.13a: Post-Query Filter Ban**: Never filter in application code a result set that was fetched with a limit or cursor (MUST NOT). Pages come up short, totals disagree with what is displayed, and cursors break. Express every filter condition (AND/OR across multiple tags, etc.) as a predicate on the query (DB or API) side (MUST); conditions the query cannot express are resolved with a view, RPC, or search index over the pre-pagination set (SHOULD).
 
 ```json
 {
@@ -697,12 +698,15 @@ message Store {
 
 - Design so that the same `event_id` webhook arriving multiple times produces side effects only once
 - Use webhook unique ID as idempotency key and perform duplicate check in DB before processing
+- **Status-Aware Deduplication**: Deduplicate by processing state (PROCESSING / PROCESSED / FAILED), not by "does a row for this event ID exist" (MUST). PROCESSED → ack with 2xx; FAILED → reset to PROCESSING and reprocess; PROCESSING → ack as in-flight (prevents concurrent execution). An implementation that unconditionally maps a unique-constraint violation (duplicate INSERT) to 2xx drops failed events forever and is prohibited (MUST NOT). Failure pattern: a payment webhook event that ended as FAILED was never processed again on redelivery.
 
 ### 17.4. Webhook Error Handling
 
 - Return `5xx` on processing failure, delegating to the sender's retry mechanism
 - Returning `2xx` causes the sender to consider it "successful" and not retry, losing incomplete processing
 - Immediately return `401 Unauthorized` for signature-mismatched requests and record in alert logs
+- **Receiver Template (signature → idempotency → dispatch)**: Every receiver keeps this order (MUST): (1) signature verification on the raw body (timing-safe, replay window) → (2) idempotency record (UNIQUE INSERT of the event ID; a duplicate returns 2xx immediately to stop the sender's retries) → (3) explicit dispatch on `event.type` (unsupported types are only recorded; an exception marks the event failed and returns 5xx to delegate the retry to the sender). When several senders share one idempotency table, namespace event IDs with a sender prefix (MUST). Start a new receiver by copying the layout and order of the existing canonical receiver (SHOULD): written case by case, a layer goes missing (failure pattern: only the helper existed with no receiver, and another receiver lacked a layer).
+- **Missing Secret = 500**: When the signing secret is not configured, respond with 500 plus an error log, not 401 (MUST). A 401 looks like "a bad request" and hides the misconfiguration forever. Status contract: 2xx = processed or duplicate (no retry), 4xx = configuration or signature defect (retry is pointless), 5xx = transient failure (retry required).
 
 ### 17.5. Webhook Delivery Design (Provider Side)
 
@@ -710,6 +714,10 @@ message Store {
 - **Event Registration**: Allow users to select event types to receive
 - **Webhook Management API**: Provide APIs for registration, update, deletion, and test delivery
 - **Delivery Logs**: Log delivery results (success/failure, status code, response time) and visualize in dashboard
+- **Sender-Side Signing**: Sign every outbound webhook your system fires with a timestamped HMAC (the `t=<ts>,v1=<hmac(ts.rawBody)>` form is widely compatible) so the receiver can do a constant-time comparison and a freshness check of a few minutes (MUST). Send back any newly implemented unsigned webhook immediately; for an existing unsigned webhook already in operation, agree with the receiver, rotate the secret, then add the signature (MUST).
+- **HTTPS Enforcement**: Enforce HTTPS for destination URLs in production and allow http only for loopback development environments (MUST). Allowing http creates a path for the shared secret to leak to an intermediary.
+- **Retry Classification**: Send fire-and-forget so the user's response is not delayed, but record failures instead of swallowing them (SHOULD). Retry only on 5xx and network errors, a finite number of times, with exponential backoff and a per-attempt timeout; treat 4xx as the receiver's deliberate rejection and never retry (MUST). On success, keep an audit log with attempt number and response code (anonymous subject allowed), and route exhaustion of all attempts to an alert (SHOULD).
+- **Confirm Destination-Side Permission First**: Wiring that only works once both the sending side and the verifying (or destination) side hold the correct value or permission (internal API secrets, webhook signatures, aggregate-report destinations, allowed IPs or origins) goes silent without error after a one-sided setting or a key-format migration. Never count a one-sided save as completion (MUST NOT); confirm the destination's requirements first, then configure, and prove the wiring itself periodically with a synthetic E2E probe (MUST). The canonical rule is "Pair Verification" in `engineering/000_engineering_standards.md`.
 
 ---
 
@@ -832,11 +840,16 @@ const delay = Math.min(
 - **Rule 35.36**: Set timeouts for all external calls. Calls without timeouts are prohibited
 - Set connection timeout (recommended: 3s) and request timeout (recommended: 10s) separately
 - In service chains, set upstream timeouts considering downstream timeouts
+- **Finite Default Timeout**: When a factory or wrapper for an external I/O client takes the timeout as an optional argument, the default must be finite (MUST). Allow "unlimited" only through an explicit value (`null` or similar) so that "forgot to pass it" and "deliberately unlimited" are distinguishable by type and value. If "long-running jobs have a timeout at a higher layer" is the reason for omitting it, confirm at the call site that the higher layer really has one (MUST): post-response background work (after or waitUntil equivalents) is not protected by the page timeout above it. Failure pattern: hundreds of calls passed no timeout and sat until the platform's maximum execution time whenever upstream stalled. Treat "a timeout report longer than the page limit" as circumstantial evidence that a post-response task is the culprit.
+- **Outer Bound = Inner Bound + Cleanup Margin**: Never set the timeout of an external call equal to the limit of the execution unit (function, job, request) that wraps it (MUST NOT). Define the execution unit's limit by the relation "external limit + margin for cleanup (releasing reservations, recording, shaping the response)" and make it an SSOT constant (MUST). Tests pin the relation ("limit > external limit + margin"), not the equality of values, and consumers of derived values (lint, scripts) derive them from the SSOT instead of hard-coding seconds (MUST). In review, count what runs **after** the limit is reached and, if anything does, reserve its time inside the limit. Equal settings produce the counter-intuitive failure in which a constraint meant to enforce the limit steals the cleanup time and leaks resources.
+- **Server-Side Fetch Contract**: Every fetch made through a Server Action, Route Handler, health check, or cron carries an AbortController, a timeout, and a clearTimeout in finally, with timeout values centralized in a per-purpose SSOT of constants (MUST). A bare `fetch` never times out by default and hangs a cron forever. Detect violations by machine-scanning for `fetch(` with no `signal` nearby.
 
 ### 21.5. Fallback Pattern
 
 - Pre-define alternative behavior for primary service failures
 - Return cached data, default values, degraded functionality, etc.
+- **Distinguishable Degradation**: A degraded path (rate limit, exception, upstream unreachable) that returns `[]`, `0`, or a default is indistinguishable, from the caller's side, from "no results" or "judged normally", and misleads the user's next action (MUST NOT). It is worse than a mere gap in information. Carry the degradation outcome in the type (for example `'ok' | 'rate_limited' | 'error' | 'provider_unreachable'`) and follow it through to the caller's wording ("0 results" versus "could not be retrieved") and to disabling the call-to-action on failure (MUST). A module that answers with defaults (classification, detection, summarization) must never return a transient failure to reach upstream as a "verdict" and then run metering and billing on that success path (MUST NOT). Do not classify 4xx (invalid input) together with transient failures ("try again later" is wrong guidance), and do not treat "no condition given" (empty input) as a failure. Across a migration (auth method, provider switch), ask whether the set of causes that lead into that error path has changed (MUST).
+- **Fallback Must Signal Primary Death**: A fallback that returns correct output (an alternative API, an alternative provider, a default path) can become the permanent primary path while the screen looks fine, the error log is empty, and type checks are green. When writing a fallback, decide at the same time "how will we know it is being used", and at minimum add a signal that fires once at startup or in a periodic job when the primary path is unconfigured or dead (MUST). The canonical rule is "Fallback-Masked Primary Failure" in `operations/400_site_reliability.md`.
 
 ---
 
@@ -868,6 +881,9 @@ async function processWithIdempotency(key: string, handler: () => Promise<Result
 - TTL: Retain for 24+ hours, auto-delete after expiration
 - Storage: Redis (fast) or DB (persistent)
 - Key format: `{client_id}:{operation}:{unique_id}`
+- **Resend With the Same Key**: When starting an external payment, store the attempt UUID and the initial parameters, and when the outcome is unknown, resend with the same idempotency key (MUST). Stop resending unknown outcomes before the provider's idempotency-key retention boundary (for example 23h against 24h) so that no new charge is stacked (MUST). Fetch the stored session and check its current state before resending; when changing price or purchase mode, confirm the old session has ended, then replace it with a compare-and-update.
+- **Attempt Row Lifecycle**: Design attempt rows so daily cleanup never deletes them (one row per user, removed via FK when the user's account is deleted), use their body only for exact resends, deny read and modification even to the user, and keep them out of logs and knowledge assets (MUST).
+- **Ownership Token, Not Time**: Wrap multi-step external processing such as account closure in an ownership token on the same row, and after a failure release only your own token. Never seize a token left by a stopped process merely because time has passed (MUST NOT); a daily reconciliation detects "unknown outcome older than N hours" and "held longer than M minutes" by count and a person checks (MUST). A failure to release the hold becomes a separate kind of alert that preserves the result of the preceding work. Resending past the retention boundary double-charges; seizing a lock by time double-cancels. The numbers are provider-dependent and belong in the Blueprint.
 
 ---
 
@@ -881,6 +897,8 @@ async function processWithIdempotency(key: string, handler: () => Promise<Result
 | **Sliding Window** | Precise time window, uniform distribution | When strict limiting is needed |
 | **Fixed Window** | Simple implementation | When low precision suffices |
 | **Leaky Bucket** | Constant rate processing | When uniform processing is needed |
+
+- **Counter over Count**: Never decide an intake limit (rate limit, daily cap) by "counting the rows in the period" (MUST NOT). Even with an index that is O(n) per insert and O(n²) over the period, so the check itself consumes the resource the limit is meant to protect. Decide the limit by atomically updating one counter row per period key (upsert) (MUST), store the time the limit was reached, and throttle the notification to one per period (SHOULD). Dropping silently is correct; not reporting that you are dropping is not.
 
 ### 23.2. Distributed Rate Limiting
 
@@ -1047,6 +1065,7 @@ The following values are starting-point examples, not fixed requirements. Decide
 
 - **Rule 35.48**: Grant only minimum required scopes to API keys and tokens
 - Granularize scopes into read-only, write-only, admin, etc.
+- **Scope Sufficiency per Capability**: Even within one provider, the required permission scope differs per capability. When adding a new capability (receiving, reading, fetching webhooks, etc.), confirm from the official definition that the existing key's scope permits it, and if not, issue a separate key dedicated to that capability (MUST). Never create a state where "only some capabilities fail silently" by reusing an existing key (MUST NOT). Failure pattern: reusing a send-only key kept sending working while only receiving failed. When the same environment variable name holds keys of different scope per runtime, record the scope difference and issuer in the ledger (SHOULD).
 
 ---
 
@@ -1056,6 +1075,7 @@ The following values are starting-point examples, not fixed requirements. Decide
 
 - **Rule 35.49**: Perform request body schema validation on all API endpoints (Zod, Joi, etc.)
 - Define unknown-field behavior in the contract. Default to rejection for commands such as privilege or financial changes, while forward-compatible events or read models may safely ignore or retain unknown fields
+- **Entry Order**: For externally reachable endpoints, the entry sequence is "(1) format validation of parameters, path, and IDs (immediate 400) → (2) rate limiting → (3) persistence access" (SHOULD). Do not let malformed input consume rate-limit buckets, DB connections, or log capacity (a malformed slug that still consumes a bucket slot hurts legitimate users), and reject overlong input with a length cap before the parser layer wastes resources on it. Pass only validated values downstream and never hand raw input to a service (MUST). Production error responses use generic wording that leaks no internal schema detail (SHOULD). Detection example: list routes that use `params.(slug|id)` without `safeParse`.
 
 ### 29.2. Content-Type Enforcement
 
@@ -1090,6 +1110,8 @@ The following values are starting-point examples, not fixed requirements. Decide
 | **Development** | `http://localhost:*` | `.env.local` |
 | **API Resale (Future)** | Contracted domain whitelist | DB managed + linked to API key |
 
+- **Caveat (preview domain patterns)**: "Preview domain patterns" in the table above does not permit suffix or prefix matching (`endsWith` / `startsWith`) on platform-shared domains (`*.vercel.app`, `*.pages.dev`, etc.). A suffix match on a shared domain is the same as allowing other tenants' previews (failure pattern: other organizations' previews and admin consoles could call our Functions through the browser). Allowed origins are exact matches only (MUST); when preview or local origins are needed, the operator adds them explicitly as a comma-separated secret. When the allowlist does not match, emit neither ACAO nor `Vary: Origin`, and send `Cache-Control: no-store, private` on authenticated responses. The canonical text is `security/000_security_privacy.md` §10.7.
+
 ### 30.3. CORS Security Rules
 
 - `Access-Control-Allow-Credentials: true` is limited to auth-required endpoints only, combined with `Allow-Origin: *` is **strictly prohibited**
@@ -1104,6 +1126,9 @@ The following values are starting-point examples, not fixed requirements. Decide
 
 - **Rule 35.51**: Returning database Raw objects directly as API responses is a "serious offense"
 - Define layer-specific DTOs and perform intentional field mapping at each layer
+- **Two-Key Lock (SELECT allowlist × DTO allowlist)**: Every DB read, including "admin-only" paths, goes through a DTO mapper without exception, and the structure stays such that a new column cannot leave unless both the SELECT column allowlist and the DTO output allowlist opt in (MUST). The canonical rule is "Two-Key Lock" in `engineering/300_web_frontend.md`.
+- **Allowlist Pick, Never Denylist**: Serializers at public boundaries build a new object by allowlist pick (MUST). The denylist style `{...rest}` + `delete` + `as DTO` and narrowing by type assertion are prohibited (MUST NOT): a new field you forgot to enumerate is public by default.
+- **Runtime Object Leaks**: An object passed across the server → client boundary serializes every column present at runtime even when its type is a public type. Convert admin DTOs that carry sensitive columns into a public projection before the boundary, and pin with a test that no sensitive value appears in `JSON.stringify(projection)` (MUST). The canonical rule is "Two-Key Lock" in `engineering/300_web_frontend.md`.
 
 ### 31.2. DTO Hierarchy
 
@@ -1149,6 +1174,7 @@ it('should not expose password_hash in response', async () => {
 ### 33.1. Graceful Return Protocol
 
 - **Rule 35.52**: Propagating errors via `throw` in Server Actions (`'use server'` functions) to clients is prohibited in principle. Return all errors as structured responses
+- **Client-Side Sanitization Boundary**: Never wire the `message` of an unknown exception caught on the client straight into a toast, alert, or inline text; put one sanitization boundary in a single place that passes only user-facing wording and maps anything containing internal vocabulary (token, secret, service_role, constraint, vendor names) to a per-operation fallback (MUST). A `result.error` the server returned deliberately is treated as already sanitized at that boundary. Failure pattern: individual components decided "probably safe" and internal wording flowed to the screen, screenshots, and error-tracker breadcrumbs. Completion screens on anonymous surfaces say no more than "sent / will send / not sending", and states such as delivery failure or suppression-list hits are shown only to operators (MUST): an honest display becomes a reachability and existence oracle. The canonical rule is "Client Exception Safety Boundary" in `engineering/300_web_frontend.md`.
 
 ```typescript
 // ✅ Correct: Structured response
@@ -1188,6 +1214,8 @@ async function createStore(input: CreateStoreInput): Promise<ActionResponse<Stor
 ### 33.4. Logging Obligation
 
 - **Rule 35.54**: Always log on the server side before returning an error as a return value. Error handling via return values loses observability if logging is neglected
+- **Caller Must Inspect Result**: If you adopt result-object APIs (`{ success: false }` or `null` returns), every call site inspecting the return value becomes part of the contract (MUST). "No exception was thrown" is not "the side effect completed". Call sites branch explicitly on throw, false, and partial; convert false into a fixed-reason failure count, a PII-safe warning, or a job `ok=false`, and emit the success log only after `success === true` (MUST). Pin "every call site inspects the return value" with a source-contract test (MUST). Failure pattern: nearly every call in the repository discarded the return value. The canonical text is `engineering/700_batch_backfill_operations.md` §2.8.
+- **Capture Coverage ≠ PII Scrub**: Automatic instrumentation of error trackers does not capture the "catch and return a structured response" pattern, so consolidate logger.error plus capture in one helper and tag it with a `source` (`api:*`, `cron:*`, `webhook:*`, `action:*`) (SHOULD). The canonical rule is "Capture Coverage ≠ PII Scrub" in `operations/400_site_reliability.md`.
 
 ---
 
@@ -1222,6 +1250,7 @@ async function createStore(input: CreateStoreInput): Promise<ActionResponse<Stor
 
 - Implement vector similarity-based caching for semantically similar requests such as AI responses
 - Effective for cost reduction and latency improvement
+- **Scope in the Key**: A cache that hits on similarity does not require the query string to match, so unless the scope (namespace) of feature, tenant, and purpose is explicitly part of the key, it hits across boundaries (MUST include). Features whose parameters (threshold, count, model) happen to coincide contaminate each other (never import the exact-match intuition "a different query is a different entry"). Apply the same scope dimension on all three sides — read, write, and similarity search — and once a routing table exists, count mechanically whether any other feature has the same parameter set (SHOULD). The canonical text is `engineering/730_caching_discipline.md` §5.3.
 
 ---
 
@@ -1431,6 +1460,8 @@ logger.info('External API call', {
 | **Enterprise** | Large-scale services | Custom rate limits, with SLA |
 | **Native App (VIP)** | Own apps | Enterprise equivalent (no charge) |
 
+- **Basis for Tier Assignment**: "Native App (VIP)" in the table above means that first-party apps pass identity verification with a Bearer session instead of an API key; it is not a basis for granting an Enterprise-equivalent tier merely because the user is logged in. On a shared endpoint that accepts API Key OR Bearer, separate authentication success (identity) from tier assignment (contractual entitlement), and grant paid-tier privileges only after checking the contract-state SSOT (subscription and plan attributes) (MUST). Failure pattern: a billing bypass in which logging in alone opened the paid lane and free users reached the full data set.
+
 ### 43.3. Data Monetization Privacy
 
 - **Rule 35.65**: Implement anonymization interfaces for data provided via API, balancing privacy and data monetization
@@ -1481,6 +1512,7 @@ logger.info('External API call', {
 ### 46.1. Service Boundaries and Data Ownership
 
 - **Rule 35.68**: Justify decomposition into deployable services from business capabilities, data and transaction invariants, change frequency, latency, security and compliance boundaries, failure isolation, team cognitive load, and operating cost. Compare a modular monolith, service decomposition, and incremental migration of existing systems; microservice adoption itself is not a maturity metric.
+- **Rule 35.68a (Separability Freeze Gate)**: When the decision is to "defer" a split, "not splitting now" and "making a split impossible" are separate decisions, and changes that quietly erode the option to separate must be frozen mechanically (MUST). Examples: a ratchet on the set of files that import the privileged client (no growth; shrinking forces a baseline update), a ban on parent-domain auth cookies (keep them host-only), a ratchet on imports that cross the boundary, and a policy of not adding auth flows that assume the public layout. Each of these looks like an improvement in ordinary review, so do not rely on review. In most split debates the real issue is "the public runtime must not hold privileged keys", which is achieved by privilege design (DB roles, GRANT, RLS) rather than by deployment separation. Decide the split on measurements across four lenses — performance, security, cost, operations — and record re-evaluation triggers (user count, payments, developer count, CI p95, etc.) in the decision record (SHOULD).
 - When multiple services access the same writable data, declare the authoritative owner of schemas, tables, or records, write permissions, transaction boundaries, migration coordination, contention, audit, and exit routes. Database per service is a strong isolation option, not the only solution mandated for every workload.
 
 ### 46.2. Decomposition Strategy
@@ -1538,6 +1570,7 @@ Do not select a method from step count alone. Record ownership, visibility, chan
 
 - Only for cross-service business invariants that cannot be protected by one atomic transaction, compare sagas, reservations, escrow, workflows, and manual reconciliation.
 - When selecting a saga, define step idempotency, timeouts, resumable state, the feasibility and limits of compensation, and human escalation. Compensation is not the same as rollback.
+- Processing that spans several operations across an external cancellation, the application DB, and the IdP — account closure, suspension — must never be described or implemented as if it were one transaction (MUST NOT). Compensation at each step reverts "only when the mark I set (deleted_at, etc.) still matches, via compare-and-update" so another operation's mark is never overwritten, and it covers not only the SDK's error response but also exceptions and lost responses after a successful update. A failure of the compensation itself preserves the original failure and is reported under a fixed category; a failure in post-processing after an irreversible step has been committed (session revocation, subscription cancellation) never rewrites the completed main result as failed and is recorded as a "post-processing anomaly". When synchronizing two state systems (IdP ban and the application's suspension flag), do not mechanically revert to the opposite value on failure; re-read the current value and align to it, and when the current value cannot be read, hold on the safe (suspended) side and do not return success. The canonical text is `security/100_data_governance.md` §3.3.
 
 ### 48.2. Outbox Pattern Details
 

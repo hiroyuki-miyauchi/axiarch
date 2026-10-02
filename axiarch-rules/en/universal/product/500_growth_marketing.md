@@ -110,6 +110,7 @@
     *   **Definition**: GEO is a strategy to provide information in formats easy for AI to learn and cite, aiming to be selected as "trusted citation source (Primary Source)" during answer generation.
 *   **Structured Data**:
     *   **JSON-LD**: Implement `Schema.org` (JSON-LD) on all public pages to aim for Rich Snippet display (reviews, prices, FAQ) in Google search results.
+    *   **Note (FAQ rich results are time-bound information)**: The "FAQ" rich snippet above has been discontinued by major search engines; the purpose of `FAQPage` is answer extraction by AI search, not rich display in search results. Because "aim for rich snippets" misleads, describe `FAQPage` as semantic markup for AI (SHOULD). Confirm the current eligibility of a target type in the search platform's primary documentation.
     *   **The Essential Schemas Protocol (Required Schema Catalog)**:
         *   **Law**: When implementing JSON-LD, actively adopt the following schema types according to page type.
         *   **Schemas**:
@@ -117,12 +118,24 @@
             |:-------|:--------|:-------------------|
             | `Article` / `BlogPosting` | Article pages | `author`, `publisher`, `datePublished`, `dateModified` |
             | `BreadcrumbList` | All pages (common) | Page hierarchy structure |
+            | `ItemList` | Listing pages (area, category, tag, ranking, search results) | `itemListElement` (`position` and `url` per item) |
             | `FAQPage` | Q&A format content | Question and answer pairs |
             | `Product` | Product/plan pages | `Offer` (price), availability |
             | `Organization` | Top page | Logo, social links (`sameAs`) |
             | `LocalBusiness` | Store/location pages | `openingHoursSpecification`, `geo`, `address` |
             | `AggregateRating` | Review aggregation | Average rating, review count |
+        *   **Caveat (conditions for the `Product` row)**: `Product` in the table above applies only when the purchase completes on that page and the required properties such as the product image (`image`) can be satisfied truthfully. When they cannot, as on SaaS pricing/plan pages, do not emit `Product`; keep only semantic markup with a type outside rich-result eligibility such as `Service` + `offers` (MUST). Never emit a type whose required properties cannot be satisfied truthfully. Confirm the eligibility and required properties of the target type in the search platform's primary documentation.
+        *   **Listing Page Mandate**: 1:N entity listing pages (area, category, tag, ranking, search results) MUST emit `ItemList` in addition to `BreadcrumbList` so the listing contents are machine-extractable. Breadcrumbs alone do not let LLMs or search engines structure "how many items this page holds". Detect the absence of JSON-LD output in listing-route page files by grep. Where semantic precision is needed, subtypes such as `OfferCatalog` MAY be adopted after rich-result validation. Structuring detail pages while leaving listings out is the typical gap.
         *   **Type Safety**: Use libraries like `schema-dts` to build JSON-LD in a type-safe manner. Building via string concatenation or raw objects is prohibited.
+        *   **Enum Value SSOT**: Never write structured-data enum values (`https://schema.org/{EnumName}` form, case-sensitive) as string literals; centralize them in an `as const` constant SSOT and reference it (MUST). Even with a typed library, enum URLs are strings, so a typo passes and the search side silently drops it as "an unknown value". Add a new schema in the order "check the official spec page → add the enum to the constants → zero warnings in the rich result test → zero errors in Search Console coverage" (MUST).
+    *   **The Rich Result Eligibility Protocol**:
+        *   **Law**: For types that search engines treat as rich-result eligible (e.g., `Product`, `SoftwareApplication`, `SocialMediaPosting`), confirm before choosing the type whether the required properties (e.g., `image` and on-page purchase for `Product`, `aggregateRating` or `review` for `SoftwareApplication`, `datePublished` for `SocialMediaPosting`) can be filled truthfully (MUST). If they cannot, do not emit the type; keep only semantic markup with a non-eligible type (`Service` + `offers`, `WebPage`, etc.). "Emit it anyway even though it does not qualify" has no value; all that remains is a "declaration that fails the requirements" (measured example: 0 valid, 25 invalid, 0 rich results). When in doubt, measure the production HTML of peers in your industry (SHOULD).
+        *   **Action**:
+            1.  **Type Ledger**: Centralize the classification of emittable types (rich-result eligible / not eligible / prohibited) and the required properties per type in one ledger (constant), and treat any emitted type not in the ledger as a violation (complement = violation) (MUST). Blocking dangerous types by name misses the next type that gets added.
+            2.  **Mechanical Source Collection**: Collect the sources to inspect mechanically by occurrences of `'@type'` etc., not from a hand-written list, and keep only exclusions, each with a reason (MUST). Treat an excluded path that does not exist as a violation too. Require required properties only on top-level entities, not on types nested under `about`/`location` etc. (MUST).
+            3.  **Served Probe**: Source inspection sees only "the types as written". Because the served JSON-LD varies with DB content, locale, and section composition, fetch production URLs daily, judge types, required properties, duplicates, and parse failures with the same pure function, and file failures as Issues (MUST).
+            4.  **Spelling & Property Discipline**: Spell `url`/`@id` inside JSON-LD exactly as the canonical, down to the trailing slash (MUST); otherwise they are counted twice as separate URLs. The title property differs by type (`headline` for `Article`, `name` for `Event`), so never attach the same property to several types from one branch (MUST). Never emit the same listing (`ItemList`) twice on one page; take the union and emit one (MUST).
+            5.  **Hierarchy & Co-location**: Hierarchical listing pages (area, category, organizational hierarchy) declare the parent-child relation not only via the listing's `ItemList` but via the page's own entity type (e.g., `AdministrativeArea` + `containedInPlace`) (SHOULD). Several JSON-LD `<script>` blocks MAY co-exist independently on one page without forcing them into a single `mainEntity`. Omit optional properties for which no data exists rather than fabricating them (MUST). Emit `Organization` and `WebSite` with `SearchAction` on the top page (SHOULD).
     *   **The JSON-LD Performance Protocol (JSON-LD Generation Performance Mandate)**:
         *   **Context**: JSON-LD is not just about being present. AI Crawlers prioritize response speed, and pages with slow JSON-LD generation risk shallower crawl depth and exclusion from citation candidates.
         *   **Law**: Cache strategies MUST be applied to JSON-LD generation processing, and the following performance targets MUST be achieved.
@@ -134,6 +147,7 @@
             1.  **Cache-First Response**: Apply WARM cache (TTL ~5 minutes) to JSON-LD output to accelerate responses to AI Crawlers.
             2.  **Strict Field Selectionification**: Optimize data fetching during JSON-LD generation to retrieve only the minimum required fields. Fetching all columns is prohibited.
             3.  **Freshness Signal**: Include `dateModified` / `updated_at` in JSON-LD to communicate "content freshness" to AI (linked with E-E-A-T Freshness Signal).
+                *   **Fallback Chain & Four-Channel Sync**: Unify the fallback chain `dateModified = entity.updated_at || entity.created_at` across all JSON-LD types and prohibit writing `created_at` directly (MUST NOT). `created_at` is an immutable value fixed at creation and keeps broadcasting "always stale content" as a freshness signal. Promote `updated_at` to a required field of the public DTO, and synchronize the four channels, JSON-LD `dateModified`, sitemap `lastmod`, the `article:modified_time` meta, and the `Last-Modified` header, to the same value (SHOULD). Verify zero lines in structured-data generation code where `dateModified` references `created_at` directly.
     *   **The Direct Answer Protocol (Answer First)**:
         *   **Context**: AI search engines (SGE, Perplexity) extract "direct answers" to user questions.
         *   **Action**: Force content to be written as "conclusion first (answer first)", "procedures in numbered lists", "comparisons in tables". Definition syntax like "X is Y" is also effective.
@@ -174,10 +188,17 @@
         *   **Law**: Upon publication or update of articles and important pages, notify supported search engines (Bing, Yandex, etc.) immediately via **IndexNow API**.
         *   **Action**: Configure IndexNow API key server-side and build a mechanism that automatically fires notifications via event hooks on content publish/update.
     *   **URL Persistence**: When renewing, strictly set 301 redirects from old URLs (e.g., WordPress `/archives/123`) to inherit SEO value (Link Juice).
+    *   **The Managed Redirect Protocol**:
+        *   **Law**: For migration URLs that must be added, corrected, or stopped during operation (old detail URLs, etc.), make a data store editable from the admin panel the runtime SSOT rather than static configuration (MUST). A few fixed paths may remain in static configuration, but never define the same source in both. Static configuration alone cannot add, fix, or stop an old URL discovered during operation immediately.
+        *   **Safety Conditions (MUST)**: (a) Targets are relative URLs or absolute URLs on the same origin only (open-redirect prevention; reject `javascript:`/`data:`/`mailto:` etc.). (b) Reject before saving any rule whose source equals its target or that forms a direct mutual reference (loop prevention). (c) Do not run the lookup for admin panels, APIs, framework internals, static assets, or auth callbacks (constantize excluded prefixes and extensions). (d) On lookup failure, do not redirect; continue existing processing. (e) Do not use a high-privilege key for runtime lookups; read only publishable columns. (f) Record rule creation, update, and deletion in the audit log; delete via soft delete and allow stopping by validity period. Default status is 301; make 302/307/308 selectable only when needed and explain the difference in the UI (SHOULD).
+        *   **Measured Source Population**: Build old-URL rules from strings that appear in the measured population of old URLs (old sitemap, archives, access logs), and never reconstruct slugs from names (MUST). Old slugs may contain misspellings, duplicates, and mixed full-width characters. After adding a rule, confirm the same URL exists in the population (MUST); if not, nobody links to it. Place a probe that sweeps the entire population daily so misses show red the next morning (SHOULD). Apply corrections via idempotent migrations and never run hand-written SQL against production (MUST).
+        *   **URL Key Normalization**: Exact-match lookups keyed by URL path (redirects, canonical, cache keys) MUST pass through RFC 3986 normalization, such as lowercasing percent-encoding hex, before lookup. The canonical rule is "URL Key Normalization" in `engineering/300_web_frontend.md`.
     *   **The Pre-Launch Indexing Protocol (Sealed SEO)**:
         *   **Law**: `robots: noindex` setting MUST **NEVER be removed** until migration to official domain and explicit "Launch approval" from stakeholders.
         *   **Risk**: Indexing in incomplete state damages domain reputation, causes duplicate content, degrades brand image.
         *   **Action**: In dev/staging environments, force noindex via `next.config.js` or `middleware`, and build flow to only remove after production AND explicit approval.
+        *   **Supplement (noindex does not reach AI crawlers)**: `noindex` (`X-Robots-Tag` / `meta robots`) is a search-engine standard; the official opt-out for AI crawlers is only `Disallow` in `robots.txt`. Suppress pre-launch exposure with separate means for "search indexing" and "AI training" (MUST): keep search engines (`*`) on `Allow` plus `noindex`, and give AI crawlers `Disallow: /` (never apply the same setting to both: MUST NOT). The canonical rule is "Rule 33.112a" in `engineering/300_web_frontend.md`.
+        *   **Supplement (never combine Disallow with noindex)**: Never `Disallow` in `robots.txt` a URL you want `noindex` to take effect on (login, registration, internally linked authenticated pages, etc.) (MUST). The canonical rule is "Disallow vs noindex" in `engineering/300_web_frontend.md`.
     *   **The Hreflang Protocol (Internationalized URL Strategy)**:
         *   **Context**: Prepare SEO-safe URL design for future multi-language expansion.
         *   **Law**: Adopt a **subdirectory strategy** with unique URLs per language (e.g., `/en/products/newyork`). Language switching via query parameters (`?lang=en`) or cookies is prohibited for SEO reasons.
@@ -189,12 +210,16 @@
             1.  **Allowed Content**: List public content such as published articles, public pages, FAQs
             2.  **Denied Content**: Explicitly exclude admin panels, user personal information pages, draft content
             3.  **Dynamic Updates**: Build a mechanism to automatically regenerate `llms.txt` in sync with content publish/unpublish events
+            4.  **Per-UA Sections**: After the site-wide section, place a section per major AI crawler UA, each self-contained with four items: "allowed paths", "recommended structured-data interpretation path (JSON-LD types)", "restated restricted paths", and "crawl etiquette and attribution guidance" (SHOULD). With global rules alone, a crawler cannot determine uniquely which paths it may ingest and conservatively falls back to low fidelity (text scraping).
+            5.  **Additive Only**: Per-UA sections MUST NOT relax site-wide restrictions. Relax on the `robots.txt` side only; `llms.txt` merely reflects it.
+            6.  **Last Updated**: Maintain the `Last Updated:` line (MUST). AI crawlers judge staleness by the update date.
         *   **Full Dump**: Optionally provide a `/llms-full.txt` that outputs full text content of key pages in plain text, enabling LLMs to acquire deep context.
 *   **Core Web Vitals**:
     *   Since it directly affects SEO ranking, always keep **LCP, INP, CLS** scores green (Good).
 *   **The SEO Integrity Protocol (Canonical & Internal Link)**:
     *   **Law**: Mandate returning `canonical` URL using `generateMetadata` on all public pages.
     *   **Action**: Dynamically generate breadcrumb hierarchy structure as JSON-LD on page transitions to accurately convey site structure to crawlers.
+    *   **Canonical Construction**: Build canonical URLs from the route-definition SSOT helper (`ROUTE_PATHS.X(slug)` equivalent), not from hardcoded template literals (MUST). For catch-all routes reachable by several paths with the same content, at minimum set the received URL as its own canonical (MUST) and add depth validation that returns 404 for unexpected depths (SHOULD). Declare `robots` explicitly, `index:false, follow:false` on 404 and `index:true, follow:true` on valid public pages, instead of relying on default inference (MUST). There have been cases that satisfied the "write a canonical" rule yet were effectively in violation through hardcoding and catch-all gaps. Detect by grep lines containing `canonical:` without an SSOT helper reference, and dynamic routes without `canonical`.
 *   **The Consent Mode v2 Protocol (Compliance Tracking)**:
     *   **Context**: Compliance with EEA regulations and domestic laws (Revised Applicable Regional Telecommunications Law, etc.).
     *   **Law**: Implement Google Consent Mode v2 and dynamically control tag firing according to user consent state (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`).
@@ -226,7 +251,14 @@
         | **Answer-First Structure** | Format headings (H2/H3) as questions, place conclusions immediately after | Makes it easy for AI search engines to extract as answers |
         | **AI Crawler Permission** | Allow AI crawlers (GPTBot, Google-Extended, etc.) in `robots.txt` | Ensure AI indexing |
         | **Self-Contained Content** | Information on the page is answerable without external links | Information density that AI can cite independently |
+        | **Body and internal links readable in the initial HTML** | AI crawlers execute no JavaScript and do not revisit, so never move public body text or internal links to client-side lazy loading. Before removing links from a shared block, place them via SSR where the context fits, then remove (never in reverse order). Decide whether removal is allowed by canonical and sitemap | A link moved to lazy loading is as good as gone to AI. Body extraction drops nav and ads by link density, so links placed where the context fits do not dilute the body |
     *   **Action**: Use as an AI search readiness perspective check during PR reviews. Combine with the SEO Launch Checklist to ensure quality from both traditional SEO and AI search (GEO) perspectives.
+*   **The Declared-vs-Served Measurement Protocol**:
+    *   **Law**: Measure the health of the public surface (crawler permissions, llms.txt, permission boundaries, machine-readable entry points, JSON-LD, inbound traffic) separately on the "declared side" (settings emitted by pure functions in code) and the "served side" (results of fetching production URLs) (MUST). Fixing only one side causes drift of the "robots says Allow but the proxy returns 403" type, which zeroes AI search traffic.
+    *   **Action**:
+        1.  **Green Means Measured**: Use green only for "the measured result is good" (MUST). Items that could not be measured (citation rate that needs a paid external API, reach counts unobtainable by design because bot UAs are discarded, etc.) go in a separate `unmeasured` bucket, and the screen says "not measured".
+        2.  **Shared Constants**: Do not add inspection ledgers (crawler lists, referrer hosts, type classifications); read the same constants the implementation reads (SHOULD).
+    *   **Anti-Pattern**: A health screen that counts unmeasured items as green, or looks only at declarations and never at what is served. For continuous reconciliation of infrastructure declarations against actual state, see `operations/400_site_reliability.md`.
 *   **The Author Profile Protocol (Author Profile Foundation)**:
     *   **Context**: In Google's E-E-A-T evaluation, especially in YMYL (Your Money Your Life) categories, author credibility directly impacts search rankings. This defines structural standards for author profile pages in addition to the `Author Visibility Protocol`.
     *   **Law**: Content articles (columns, blogs, etc.) MUST include an **author profile** containing the following elements.
@@ -280,6 +312,7 @@
         | **Image Search** | Specific `alt` attributes on all images + high-resolution WebP/AVIF + image sitemap | `ImageObject` |
         | **Video Search** | Chapter (`Clip`) markup + thumbnails + transcripts on videos | `VideoObject` + `Clip` |
         | **Visual Search** | Product images comply with Google Merchant Center guidelines (white background, multiple angles) | `Product` + `Offer` |
+    *   **Image Host Header Precondition**: Before polishing image search, the image sitemap, or `ImageObject`, fetch the image delivery host's response headers (`x-robots-tag`, etc.) directly with a crawler UA and check them (MUST). If the origin returns `noindex` (`none`), every upstream measure is void, and inspecting the page HTML alone never reveals it. The question is not same-domain but "can you control the response headers"; when serving directly from managed storage or a third-party CDN you cannot control, insert a front on your own domain (a subdomain is fine) and strip the header (SHOULD). `<image:loc>` in the image sitemap may point to another domain. If the image host is separated, register that host in Search Console too (SHOULD).
 
 ### 2.3. Passage Ranking Protocol
 
@@ -350,6 +383,7 @@
         *   Display a **welcome message** (toast, etc.) on first login to encourage the first action.
     *   **Measurement**: Track the following funnel via analytics and monitor weekly.
         *   Visit → Registration Start Rate → Registration Completion Rate → First Action Rate → 7-Day Retention Rate
+    *   **Aha Moment Validation**: Do not decide the "value experience (Aha Moment)" by declaration; validate it by the retention gap between users who reached it and those who did not (e.g., 2x or more at D30) (MUST). The canonical rule is "Aha Moment Validation" in `operations/300_customer_experience.md`.
 
 ## 4. Retention Strategy
 *   **Habit Formation**:
@@ -369,6 +403,7 @@
 
     *   **Opt-out Respect**: Mandate UI/API enabling immediate delivery cessation. Implement one-click opt-out.
     *   **Time Window**: Limit notification delivery to **8:00 AM - 9:00 PM** based on user timezone. Sending during late night or early morning hours is prohibited.
+    *   **Sensitive Life-Event Suppression**: When a registered person, family member, pet, asset, etc. can undergo a life event requiring care (loss, bereavement, major change of condition), hold a self-reported status and, at the moment of the report, immediately stop every promotion, reminder, recommendation, seasonal notification, and name insertion tied to that entity (MUST). Continue only legally required notices, preserve the data rather than deleting it, place a grace period (e.g., 6 months) before any re-engagement, and transition the status only by self-report, never by automatic inference (MUST). An inappropriate notification at that moment is an incident that destroys trust irreversibly. See `operations/300_customer_experience.md` §10.2 for details.
 *   **The Retention KPI Dashboard Standard**:
     *   **Context**: To quantitatively track retention strategy, define key retention metrics and continuously monitor them. Drive retention improvement based on "data" rather than "intuition".
     *   **Key Metrics**:
@@ -610,6 +645,7 @@
         1.  **Server-Side Generation**: Use Edge Functions or server-side OGP image generation libraries to dynamically generate OGP images at request time.
         2.  **CDN Cache**: Apply CDN caching (e.g., `s-maxage=86400`) to prevent regeneration on repeated requests to the same page, reducing generation costs.
         3.  **Fallback**: If dynamic generation fails, fall back to a site-wide default OGP image to avoid empty OGP.
+        4.  **No Fabricated Metadata**: When implementing a requirement of the "declare the metadata" type (image dimensions, MIME type, modification date, etc.), first confirm that you actually hold the value (MUST). If you do not, the way to satisfy the requirement is adding a data path, not assigning a default. No value is more correct than a wrong value (MUST). Consumers can fetch the real asset and measure it, but a mismatch between declaration and asset cannot be repaired. Provide an input that callers can pass only when they know the real value, and emit nothing by default. If the same file already has the convention "emit only when the value exists", that convention is the source of truth (SHOULD). An "always emit a default" implementation is 100% wrong wherever the value is absent (measured example: every declared dimension of public images mismatched).
 
 ### 9.2. Social Commerce Protocol
 

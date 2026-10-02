@@ -1121,6 +1121,8 @@ Build-Your-Own Plan Design Patterns:
 
 ### 6.2. Price Change Notification Protocol
 
+- **Four-Way Price Parity (invariant underlying Rule 13.061)**: The price a customer sees MUST always match across four places: (1) UI display, (2) the amount the payment provider actually charges, (3) the plan definition in your DB, and (4) the legal disclosure page (e.g., the Japanese Specified Commercial Transactions Act notice, terms of service). Align tax-inclusive/exclusive handling across all four as well. Revise prices by creating a new price object on the provider side, switching the DB plan definition to it, and updating the UI and legal disclosure in the same release; never rewrite the amount of an existing price object (MUST). Keep old prices rather than deleting them, as "deactivated + outside the allowlist", for history, refunds, and audits (MUST). Because a legal disclosure amount that diverges from the actual charge is a legal violation, include the four-way parity in drift detection (`product/300_revenue_monetization.md` §7.1) (SHOULD).
+
 - **Rule 13.061**: Price revisions require the following lead times
 
 | Audience | Minimum Notice | Notification Method |
@@ -2258,6 +2260,8 @@ Dimension 4 — Ambient AI (Always-On Environments)
   - All pricing information uses **pricing DB (payment provider: Stripe, etc.)** as SSOT
   - Frontend display, APIs, and internal documents all source from SSOT
   - Hardcoded price values are prohibited (→ aligned with 300 SSOT principle)
+  - **Displayed Price Source (the true SSOT of displayed prices)**: When a price, fee, or limit is shown on a screen or document, its source MUST be the same column or constant that the billing/charging process actually resolves. Referencing a different-domain constant that "happens to be the same amount" (e.g., a data resale catalog) to align the display is prohibited (MUST NOT); a revision on one side silently reopens the gap.
+  - When the source is null/unset, the fallback is a non-degrading display (same value as the former literal), and monitor that the fallback has not become permanent (SHOULD). When correcting, trace "which function resolves this screen's amount at billing time" through the call path and wire that source into the display side too. Violations of the displayed-price SSOT arise not only from "hardcoding" but from "borrowing another SSOT"; an audit has produced a wrong correction proposal from this.
 
 ### 14.4. Pricing Audit Trail
 

@@ -92,6 +92,9 @@
 
 - Rule 520.17: local、preview、test、staging、productionは必要なrisk境界に応じて分離する。環境名や個数ではなく、credential、data、domain、quota、billing、access、blast radiusの分離成果を検証する。
 - Rule 520.18: preview環境をpublicな無認証環境にしない。production data、secret、OAuth callback、webhook、email送信、検索index、analyticsをpreviewへ無差別複製しない。
+  - **Measurement Exclusion Axes**: 外部計測（タグ・ビーコン）の除外は、パス（運営面・個人領域）／環境（本番以外のデプロイ・CI）／主体（自動化・iframe・運営者端末）の 3 軸で閉じる（MUST）。1 軸だけ閉じても残り 2 軸から入る。User-Agent は自動化ツールが実機 UA を名乗るため主判定にしない。計測タグのマウントは client の門 1 箇所に集約し、現在のパスで毎遷移評価する（初回リクエストだけの判定は SPA 遷移で破れる）。
+  - **Non-Secret Destination Identifiers**: 外部宛先を決める識別子（測定 ID・コンテナ ID・Webhook 先・プロジェクト ID）は秘密値でなくても seed・非本番環境へ配らない（MUST NOT）。判定基準は「漏れると困るか」ではなく「その値を持った環境が本番のふりをして外部へ書き込めるか」。本番判定はデプロイ単位の値だけで決め、リクエスト単位の値を混ぜない（静的化に焼き付く）。
+  - **Attempt-Recording Verification**: 除外の検証は遮断だけでなく「送ろうとした試行」を記録して 0 件を assert し、公開面では送られる肯定側テストと対にする（MUST）。遮断だけでは「送ろうとした事実」が消え、退行が緑のまま通る（失敗パターン: CI が本番計測へ長期間送信し続け、人間より多い偽トラフィックになっていた）。混入は上振れとして現れるため、下振れだけでなく上振れ検知も置く（SHOULD）。正本は `ai/100_data_analytics.md` §6.2。
 - Rule 520.19: configuration、schema、runtime、build、routing、firewall、feature flagを同じrevisionとpromotion recordへ結び付ける。環境ごとの差は型付きconfigurationとpolicyで宣言する。
 - Rule 520.20: production昇格は、検証済みartifactまたはversionを再buildせずpromoteできる場合は同一物を使う。再buildが必要なplatformではsource、dependency、builder、configuration差分をprovenanceで検証する。
 
@@ -106,8 +109,13 @@
 
 - Rule 520.25: human、CI、runtime、provider integration、supportを別identityとし、可能な経路ではOIDC／workload identityと短命credentialを優先する。
 - Rule 520.26: public client key、publishable key、secret key、service role、admin credentialの性質を台帳化し、browserへ送信可能な識別子と権限credentialを名称だけで判断しない。
+  - **Credential-Class Naming Fidelity**: 環境変数名は資格情報の権限クラス（read-only／publishable／service／admin）を正確に表す（MUST）。低権限を示す名前に高権限キーを入れず（MUST NOT）、低権限名から高権限名へ、またはその逆のフォールバック解決を実装しない（MUST NOT）。同じフォールバック集合に異なる権限クラスを混ぜない。
+  - **Privileged Variable Group**: 書き込み・特権処理は特権専用の変数グループだけを読み、読み取り検証用の公開キーを混ぜない（MUST）。失敗パターン: 「読み取り用」の名前で特権キーが流れ、SSOT 監査で初めて検出される。
+  - **Runtime Class Assertion**: 資格情報を受け取る境界関数で期待する権限クラスを実行時に検証し（例: 特権キーのプレフィックス／claim を検出して低権限経路では拒否）、名前の誤用を物理的に止める（SHOULD）。
 - Rule 520.27: secretはenvironmentとserviceに最小scopeで注入し、source、preview comment、build log、artifact、client bundle、telemetryへ残さない。閲覧、更新、失効を監査する。
 - Rule 520.28: configuration schemaは未知値、欠落、環境違いをbuildまたはstartupでfail closedし、secret rotation、provider key migration、certificate更新をdual-read／dual-key等で無停止検証する。
+  - **Baked-Config Redeploy**: 環境変数などデプロイ時にビルド成果物へ焼き込まれる設定は、値を変えただけでは本番に反映されない。変更後は検証済みリビジョンの再デプロイを必須手順とし、新デプロイが READY で変更後の値で動作することを証跡に残す（MUST）。失敗パターン: 「設定は変えたのに効いていない」。
+  - **Remote-Revision-Only Deploy**: 本番デプロイは常にリモートの正本リビジョン（既定ブランチ等）から行い、作業端末のローカル状態を直接本番へ送るツール／コマンドを使わない（MUST NOT）。ローカルが正本より遅れていれば回帰デプロイになる。
 
 ## §8. data、state、migration、backup
 
@@ -141,6 +149,7 @@
 
 - Rule 520.45: request、compute、duration、memory、storage、operation、egress、build、log、trace、seat、domain、support、add-onをcost driverとしてservice／environment／ownerへ配賦する。
 - Rule 520.46: budget alert、spend cap、automatic pause、quotaは同一ではない。対象外usage、反映遅延、fail-open／fail-closed、503等の顧客影響を確認し、単一のcost controlへ依存しない。
+  - **Alert Channel Independence**: 管理者アラートの通知経路が監視対象のリソース（メール送信枠・API クォータ）と同じ資源を消費する場合、枯渇時の警告自体が届かない。到達ペース（現在のペースで期末に枠の N% に達する、例: 80%）に基づく早期 warn を唯一の猶予として設計し、可能なら別経路（DB 上のアラート一覧・別チャネル）を併設する（MUST）。正本は `operations/400_site_reliability.md` の「Alert Channel Independence」。
 - Rule 520.47: loop、retry storm、cache miss、log explosion、abuse、preview leak、branch放置、unbounded fan-outをcost incidentとして検出し、rate、concurrency、instance、queue、retentionへ安全上限を置く。
 - Rule 520.48: capacityはproviderの「自動scale」を根拠に無制限と見なさず、quota、connection、hot key、regional capacity、support lead time、cost ceilingを負荷試験とforecastで検証する。
 
@@ -211,6 +220,8 @@ managed runtimeはsource revisionやapplication artifactを変更せず更新さ
 
 - Rule 520.65: platformへの言語対応を、packageが存在することだけで認定しない。言語・platform・serviceごとに、公式、community、生成client、protocol直接利用、runtime同梱SDKを区別し、support主体、maturity、対応API、version互換範囲、release／security update、EOL、license、認証方式をmachine-readable inventoryへ記録する。
 - Rule 520.66: SDK間のfeature parityを仮定しない。Auth、data query／transaction、Realtime／streaming、Storage、Functions／events、local emulator、schema／type generation、retry／pagination、telemetryについて、必要capabilityとpositive／negative contract testを言語ごとに定義する。client SDKの公開credential・Rules／RLS境界と、server／admin SDKのworkload identity・IAM境界を同一視しない。
+  - **Provider Rollout Precondition**: マネージドプロバイダの機能（MFA 方式、ストレージ変換、リージョン固有 API 等）に依存する実装は、着手前にそのプロジェクト／プラン／リージョンで機能が有効化されているかをコンソールまたは管理 API で確認する（MUST）。SDK が公開している＝プロジェクトで使える、ではない。
+  - **Disabled-Feature Degradation**: 機能が無効な環境でもアプリが落ちないよう、`Disabled` 系エラーを捕捉して機能を非表示にするか Feature Flag で切り替える（MUST）。「実装したのに動かない」を長時間デバッグする前に、プロバイダ側のロールアウト状態を疑う。
 - Rule 520.67: schemaまたはAPIからclientを生成する場合は、schema digest、generator、template、runtime、生成artifactをpinし、手修正を禁止する。platform API、SDK、生成client、consumerのversion skewをcompatibility testで検証し、deprecated APIまたはSDK major versionの移行をowner、期限、rollbackとともに管理する。
 - Rule 520.68: community SDKまたは未提供言語をproductionで使う場合は、maintainer continuity、security advisory経路、release遅延、機能欠落、platform support範囲をrisk acceptanceへ記録し、直接REST／gRPC等の公開protocol、内部adapter、別の公式SDK利用service等から実現可能なfallbackを持つ。共通wrapperは認証、retry、error、pagination等の差を隠して第二の非公式platform APIを作らず、必要最小限の安定境界とcontract testに限定する。
 
@@ -233,6 +244,7 @@ managed runtimeはsource revisionやapplication artifactを変更せず更新さ
 - Rule 520.77: install、update、reconfiguration、plan変更、permission拡張、publisher移管、環境接続をprivileged supply-chain／control-plane changeとして扱う。providerが対応する場合は承認済みでreview可能なmanifest、IaC、APIまたは同等sourceを使い、対応しない場合はbefore／afterを保存する。least privilege、identity分離、環境／tenant分離、install actor、effective permission diff、configuration／secret target diff、price／terms impact、positive／negative authorization、risk-basedな独立承認とstaged validationを必須とする。新しいscope、resource、data destination、terms、price、version channelを自動承認せず、consoleまたはprovider側のdriftを承認済み状態との差分として検出する。
 - Rule 520.78: integrationのhealth、audit、dependency、quota、unit cost、budget、retry／queue、provider status、deprecation、support signalをownerとdegraded-mode runbookへ結ぶ。disabled integration、退職またはdeprovision済みinstaller、orphan identity、credential／webhook expiry、permission／version drift、upstream lifecycle eventを検出し、credentialをrotateし、riskに応じてkill switchまたは安全なbypassを演習する。integration、secret、environment variable、binding、drain、managed resourceが利用不能または削除された場合のdeploy／runtime挙動を検証する。
 - Rule 520.79: decommissionではprovider-owned resourceと、customer data、generated artifact、shared database／bucket、identity、secret、environment variable、webhook、drain、callback、DNS、branch、retained copy、billingを区別するimpact graphを作る。export、retention、deletion、privacy obligationを定義し、新規writeを止め、必要時はrollbackまたはparallel runを保持し、access revoke、uninstall、残存resource cleanup、orphan scan、billing停止、dependent healthを確認してcleanup evidenceを保持する。uninstallまたはdisconnectedという表示だけを、data、access、cost、dependentが除去された証明にしない。
+  - **Decommission Residue by Claimable Authority**: ホスティング移行後の残骸掃除は「ブラウザで到達する名前」ではなく「旧環境が主張できる権限」で対象を定義する（MUST）。最低限、署名鍵（DKIM 公開鍵）、所有権証明（ACME／DCV レコード）、委任（NS）の 3 系統を見る。OR で通る判定（例: DMARC = SPF pass or DKIM pass）は片側だけ締めても締めたことにならず、DNS は引けなかった名前を「無い」と読まない。消す前に「消しても壊れない根拠」と復元値を記録する。失敗パターン: ブラウザで見て回る掃除で消した件数より、残った署名鍵の方が危険だった。正本は `security/000_security_privacy.md` §12.7。
 
 ## §21. multi-service application composition／aggregate release
 

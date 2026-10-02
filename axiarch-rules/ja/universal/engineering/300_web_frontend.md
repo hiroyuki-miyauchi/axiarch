@@ -137,10 +137,14 @@
 ### §5. バージョン管理・依存関係
 
 - **Rule 33.5**: `package.json` の依存関係はCaret Range（`"react": "^19.1.0"`）を使用し、パッチ/マイナーアップデートを自動取得する。ただし**lockfileのコミットを必須**とする
+    - **Compiler-Adjacent Exact Pin（Rule 33.5 の例外）**: コンパイラ隣接依存（compiler / transpiler / bundler plugin / AST 変換・コード生成器、およびそれらと型契約を共有する `@types/*` 相当）は Caret ではなく exact pin とする（MUST）。minor 更新で出力コードや型契約が変わりうるため SemVer caret に委ねない。`@types/*` への major-only 指定（`^19` 等）は任意の minor を許容する最高リスクであり禁止（MUST NOT）
+    - 非隣接の一般ライブラリは Caret 維持でよい（MAY）。全依存の exact 化は自動更新 PR を阻害する過剰締め付けであり、対象は「隣接」判定で絞る。exact pin した依存の更新は別コミットで行い bisect 可能性を保つ（SHOULD）。`package.json` の指定が SSOT で lockfile は補助
 - **Renovate/Dependabot**: 依存関係の自動更新PRを有効化し、21日間の安定期間後にマージする
 - **The Freshness Obligation**: 外部サービスSDK（AI、Auth、Payment等）は進化が速い。新規実装では常に最新版を使用し、問題発生時は「まずアップデート」を第一解決策とする
 - **Cross-Reference**: `security/200_oss_compliance.md`
 - **Next.js 16 破壊的変更対応**: Next.js 16へのアップグレード時は Node.js 20.9+ および TypeScript 5+ が必須。AMPサポートは廃止済み。`middleware.ts` は `proxy.ts` に移行（詳細は Part LI 参照）
+- **Major Upgrade Rendering Compatibility**: フレームワークのメジャー更新時は、レンダリング内部 API（Portal・同期 flush・NodeView 相当）に依存するライブラリ（リッチテキスト、DnD、仮想スクロール等）の対応版を先に確認する（MUST）。型・ビルド・テストは通るため、実ブラウザ検証を更新の完了条件に含める
+    - **診断ヒューリスティック**: 「データも配信もスキーマも正しいのに画面へ出ない」が揃ったら、描画ライブラリとフレームワークのメジャー版非互換を最優先で疑う（MUST）。データ層を層ごとに潰す前に「内部状態（ライブラリのモデル）には存在するが DOM に無い」かを 1 回で確認し、描画の最終段に絞る。症状の分布（特定の描画機構を使うノードだけ出ない等）を非互換の指紋として使う（SHOULD）。失敗パターン: 6 層を無罪確認してから真因に到達した例がある
 
 ### §301. Tailwind CSS 4 Deep Dive
 
@@ -174,6 +178,11 @@
 - **The Server-Only Import Protocol（Bundle Protection）**:
     - **Rule 33.7**: サーバー専用ファイル（`lib/api/*`, `lib/actions/*`等）には `import 'server-only'` を必須で含める
     - **効果**: Client Componentsから誤ってインポートされた場合にビルドエラーとなり、機密ロジックやAPIキーのクライアントバンドル混入を物理的に防止
+- **The Transitive Env Boundary Protocol**: Client Component から参照されるモジュールは、直接・間接を問わず private env の SSOT モジュールを import してはならない（MUST NOT）。`use client` が直接 `env` を読まなくても、logger / utils / 画像 loader のような共通モジュール経由で到達しうる。クライアントで必要な公開変数は公開 env 専用の SSOT へ分離し、server/client 両方から参照される共通モジュールは秘密値ではなく公開可能な実行環境情報（`NODE_ENV` 等）だけに依存させる（MUST）
+    - **検証**: クライアント境界ファイルからの private env import が 0 件であることを検索で確認し、lint と本番ビルドの両方で境界の破綻がないことを確認する（SHOULD）
+- **Sink Boundary Pattern**: 横断的に import される同期 API（ロガー等）がサーバー専用依存を抱える場合、呼び出し側の全面書き換えや `server-only` マーカーによるビルド失敗化は解にならない。環境依存の実装（書き出し先 = sink）だけを境界モジュールへ切り出し、`package.json` の `imports` 条件（browser / default 等）で実装を差し替える（SHOULD）。両実装は同一インターフェースを保ち、形状ドリフトをテストで固定する（MUST）
+    - **検証**: 「クリーンビルド後の公開チャンクに当該依存が 0 件」（否定側）と「サーバー側には存在する」（肯定側）の対で実証する（MUST）。試して効かなかった条件は「再試行しない」と明記して記録し、次の担当者の時間を守る（SHOULD）
+- **Server-Only Applicability & Detection（Rule 33.7 補強）**: secret env 参照・RLS バイパス資格情報のクライアント・バックエンド SDK 初期化・管理者専用テーブル書き込みを含むモジュールは、既存の client import 経路が無くても将来の退行防御として `server-only` 境界を宣言する（MUST）。検出は「`server-only` 宣言が無く secret 系シンボルを含むファイル」の grep。テストランタイムでは alias で no-op 化する
 
 ### §7. ディレクトリオントロジー
 
@@ -213,6 +222,10 @@ export const env = createEnv({
 });
 ```
 
+- **Rule 33.10a: The Static Access Bridge**: バンドラがビルド時に値を置換する公開環境変数（`NEXT_PUBLIC_*`、`VITE_*` 等）は、置換対象となる静的参照形（`process.env.NAME` / `import.meta.env.NAME`）で取得しなければならない（MUST）。キー名を定数オブジェクト経由で動的参照（`process.env[KEYS.NAME]`）するとバンドラが置換できず本番の client bundle で `undefined` になり、起動時バリデーションが全画面エラーに落ちる（MUST NOT）。ローカル開発サーバーでは再現しない
+    - キー名の SSOT 化（定数集約）は許容するが、値取得の境界だけは静的参照を残す「静的アクセスブリッジ」を設け、公開 env の追加・削除時はキー定数・schema・ブリッジ・回帰テストを同時に更新する（MUST）。検証: 公開 env モジュールに `process.env[` が残っていないこと、本番ビルド後のブラウザ実行で起動エラーに落ちないこと
+- **Rule 33.10b: No Weak Secret Fallback**: secret 系 env に `?? ''` / `?? null` / `?? '<default>'` の fallback を書いてはならない（MUST NOT）。正本は `security/000_security_privacy.md` の「Missing-Secret Behavior」。
+
 ### §9. Site Settings Architecture
 
 - **Runtime Injection**: テーマカラー等の設定はDBからランタイム（RootLayout）で取得し、CSS変数として注入する。ビルド時ではなくランタイムで設定することで、再ビルド不要のデザイン変更を実現
@@ -227,6 +240,7 @@ export const env = createEnv({
 - **Rule 33.12**: Next.js 15のPartial Prerendering（PPR）を活用し、静的シェルと動的コンテンツの最適な組み合わせを実現する
 - **Static Shell**: ページのレイアウト・ナビゲーション・静的コンテンツは即座に配信される静的シェルとしてプリレンダリング
 - **Dynamic Streaming**: ユーザー固有コンテンツ（認証状態、パーソナライズ等）は `<Suspense>` 境界内で動的にストリーミング
+    - **但し書き（公開面の本文）**: AI 検索から見える必要のある公開面の H1・本文・結果一覧・JSON-LD は `<Suspense>` の子に置かない（§114 参照）。JS を実行しないクローラーには遅延境界の子は骨組みしか見えない
 - **Action**: `experimental.ppr: true` を `next.config.ts` で有効化し、ページ単位で `export const experimental_ppr = true` を宣言
 - **Next.js 16 Cache Components**: PPRの安定版として `'use cache'` ディレクティブがGA化。動的コンポーネント内でもキャッシュ境界を宣言可能
 
@@ -235,6 +249,8 @@ export const env = createEnv({
 - **Rule 33.295**: Next.js 15+ の `after()` API を活用し、レスポンス送信後の非ブロッキング処理を実装する
 - **Use Cases**: ログ記録、アナリティクスイベント送信、キャッシュ無効化等のレスポンスに影響しないサイドエフェクト
 - **Advantage**: `waitUntil` と異なり `after()` はServer Actions・Route Handlers・Middleware・`generateMetadata` 内で使用可能
+- **Side-Effect Boundary**: 通知・メール・外部連携の副作用は応答後実行またはキューへ逃がし、DB 書き込み・決済など業務ロジックは同期 `await` して失敗を応答で伝える。副作用の失敗を「操作の失敗」としてユーザーに誤認させない（MUST）
+- **After-Response Hook Contract**: 「失敗の可視化（ログ + 計数）」と「応答後の完走保証（基盤のフックへ登録）」は別問題であり、片方では不十分。両方を満たす合成ヘルパーを唯一の入口にする（MUST）。正本は `engineering/000_engineering_standards.md` の「After-Response Hook Contract」。
 - **Error Isolation**: `after()` 内のエラーはメインレスポンスに影響しない。ただし `try-catch` で隔離し、エラーログを確保すること
 
 ```typescript
@@ -262,6 +278,8 @@ export async function POST(request: Request) {
 - **Rule 33.13**: デフォルトはServer Component。`'use client'` は**インタラクティビティが必要な最小単位**にのみ付与する
 - **Leaf Component Strategy**: `'use client'` はコンポーネントツリーの**末端（リーフ）**に配置。ページやレイアウトレベルでの `'use client'` は禁止
 - **Props Serialization**: Server → Client の Props はシリアライズ可能な値のみ。関数・クラスインスタンスの受け渡しは不可
+- **Plain JSON at the Boundary**: エディタ・ライブラリが生成する null-prototype オブジェクト（`Object.create(null)` 由来）・クラスインスタンス・Map/Set を Server Action・RPC・`postMessage`・Worker 等のフレームワーク境界へ渡す層は、境界の直前で純 JSON 化（`JSON.parse(JSON.stringify(x))` 相当）を通す（MUST）。シリアライザはこれらを「プレーンでない」と判定して送信バイト上で無言で置換・欠落させ、型検査・schema 検証（`unknown`）・単体テストのどれにも現れない。`structuredClone` はプロトタイプを保持するため代替にならない（MUST NOT）
+    - 純 JSON 化の配線（データ生成元の出口で通っていること）を単体テストで固定する（MUST）。切り分け: 「無編集の保存は成功／編集すると全滅」型の事象は直列化境界を疑い、`fetch` をフックして送信バイトを直接見る（SHOULD）。置換記号（`"$T"` 等）が見えればこの機序
 
 ### §13. The Async-UI Boundary Protocol
 
@@ -271,12 +289,16 @@ export async function POST(request: Request) {
 ### §14. The Component-DTO Interface Protocol
 
 - **Rule 33.15**: UIコンポーネントのProps定義にデータベースの生の型（`Row`）を使用することは禁止。**DTO Interface**に依存し、実装詳細を隠蔽する
+- **Two-Key Lock（Rule 33.15 補強）**: 「管理者しか見ない」経路も含め例外なく DTO マッパーを通す（MUST）。SELECT 列 allowlist と DTO 出力 allowlist の両方を opt-in しなければ新列が外へ出ない構造を維持し、schema drift で追加された PII 列が自動的に漏れる経路を断つ。公開境界の serializer は allowlist pick で新オブジェクトを構築し、`{...rest}` + `delete` + `as DTO` の denylist 方式は列挙し忘れた新フィールドが既定で公開されるため禁止（MUST NOT）
+    - Server → Client 境界に渡すオブジェクトは、型が公開型でも実行時に存在する全列が RSC ペイロードへシリアライズされブラウザへ届く（client 側が使わなくても漏れる）。機微列を持つ admin DTO は境界の前に公開射影へ変換し、`JSON.stringify(projection)` に機微値が現れないことをテストで固定する（MUST）。PII 列は client 行きの SELECT spec から物理的に除外し server-only spec と分ける。RLS で本人だけ読める ≠ client HTML に出してよい
 
 ### §15. Production Build 検証プロトコル
 
 - **Rule 33.16**: **`npm run build` が Exit 0 で通過するまで、そのコードは「存在しない」**
 - **SSG Awareness**: `cookies()` 等のdynamic APIを SSG ページでインポートすると本番ビルドでエラーとなる。動的依存を分離せよ
+    - **共通レイヤの波及**: ルート layout や i18n のリクエスト設定で `headers()` / `cookies()` を無条件に呼ぶと、個々のページの `force-dynamic` を全て外しても静的プリレンダは 1 本も復活しない。個別最適化の前に全体を一律に制約している要因を先に確認し、「動的レンダリング宣言 N 件」と「動的レンダリング面 N 件」を混同しない（MUST）。実測はビルド成果物（`.next/server/app` の `.html` 件数と `prerender-manifest.json`）で行い、コードの宣言数を根拠にしない
 - **Tiered Database Client Protocol**: SSG/ISR互換のDBクライアントは、dynamic API依存と非依存で**物理的に別ファイル**に分離する
+- **Build Green ≠ Behavior Correct**: CSS・レイアウト・レスポンシブ分岐の変更はコンパイル成功では正当性を示せない。配信 CSS の実見・算出スタイルの実効値・幅条件の一致をブラウザで実測してから完了とする（MUST）。ビルドが生成物として型制約を作る構成（ルート／アクションファイルの export 制約等）ではビルドを一度通すまで検査自体が存在しないため、完了前に本番ビルドを挟んだ後の型検査を通す（MUST）。開発サーバーでのみ再現する失敗は (a) ランタイム直接呼び出しで到達性確認 (b) 本番ビルドで再現確認 (c) 再現しなければ dev-only として記録、の 3 段で切り分ける。正本は `quality/000_qa_testing.md` の「Build Green ≠ Behavior Correct」。
 
 ---
 
@@ -286,10 +308,15 @@ export async function POST(request: Request) {
 
 - **Rule 33.17**: 認証チェックやジオロケーションリダイレクトは**Edge Middleware**で実行し、レイテンシを最小化する
 - **Rule 33.18**: `middleware.ts` は軽量に保ち、静的資産を処理対象から除外する。Middleware内での重いDBクエリや外部API呼び出しは禁止
+- **Rule 33.18a（Framework-Recognized Filename Mandate）**: フレームワークが規約で認識する中核ファイル（ミドルウェア／プロキシ／エラー境界／設定）は、そのバージョンの公式規約どおりの名前・エクスポート名で配置する（MUST）。独自名（`guards.ts` 等）で置くとフレームワークに認識されず、CSP・CORS・レート制限等の全体防御が一度も実行されない「静かな防御喪失」に陥る。ビルドもテストも通るため「機能していると思い込む」。規約名はバージョンで変わる（例: `middleware.ts` → `proxy.ts`、§311 参照）ため、アップグレード時は旧名が「認識されない独自名」に転落していないか確認する。全体防御は「ファイルが存在する」ではなく実配信でレスポンスヘッダー／429 等が出ていることで確認する（SHOULD）
+- **Rule 33.18b（ASCII-Only Header Values）**: ミドルウェア／サーバーで設定する HTTP ヘッダー値（CSP の長い文字列のコメント部を含む）は ASCII セーフな文字のみで記述する（MUST）。非 ASCII（全角文字等）は HTTP のバイト列制約に反し、実行時 500 となりビルドでは検出されない
+- **Rule 33.18c（Trusted Header Strip）**: ミドルウェアが下流へ「信頼済み」として渡すヘッダー（認証主体 ID・tier・auth source 等）は、入口で全パスにおいてクライアント供給値を無条件に削除し、認証成功時のみ検証済み値を再設定する（MUST）。ミドルウェアが set しないコードパス（bearer / API key の一部経路の fall through）でクライアントの偽装値がそのまま下流に届き、権限昇格になる。ヘッダー伝搬 API の契約（response header への set は下流の `request.headers.get` に届かない）を確認し、意図と実装の乖離をテストで固定する（MUST）。「middleware が x-user-id を set する」というコメントは事実の証明にならない。下流ハンドラは信頼ヘッダーを層 1 とし、DB で再検証する層 2 を持つ（SHOULD）。検出: ミドルウェアが set するヘッダー名と下流が読むヘッダー名を cross check する。正本は `security/000_security_privacy.md` の「Trusted Header Strip」。
+- **Rule 33.18d（Rewrite-Before-Authorization Ordering）**: リクエストパスに対する分岐（認可・除外・rewrite）は、rewrite・正規化・prefix 除去のどれが先に効くかを明示してから書く（MUST）。rewrite 方式 i18n で認可判定を rewrite 前のパスで行うと `'/en/owner/x'.startsWith('/owner')` が false になりロケール接頭辞側だけ穴が空く。i18n / SEO rewrite の対象はページリクエストに限定し、API・フレームワーク内部・静的 asset・metadata は prefix 有無に関わらず除外し、認可境界を通らない経路で API パスを後から生成しない（MUST）。パス境界判定は `path === root || path.startsWith(root + '/')` の境界一致で行い、素の `startsWith(root)` は `/owner-guide` のような別ルートを巻き込むため禁止（MUST NOT）。契約テストには prefix 付きパスと類似名の別ルートを必ず含める
 
 ### §17. The Non-Blocking Edge Processing Protocol
 
 - **Rule 33.19**: Edge MiddlewareおよびAPI Routesにおいて、メインレスポンスに無関係なブロッキングDB書き込みを `await` で待機させることは禁止
+- **Signed Internal Context**: 内部 rewrite がミドルウェアを再入させる構成では、実ランタイムで実行回数と 2 回目に届くヘッダーを観測する（MUST）。1 回目が付与したヘッダーの存在だけを「内部リクエスト」の証拠にすると外部クライアントが偽造できる。内部コンテキストはサーバー secret で HMAC 署名し、検証成功・path 一致・locale 一致の全条件で復元、それ以外は fail closed（MUST）。表示言語は認証・認可・課金判定に流用しない（MUST NOT）。回帰試験は正規署名・偽造・リプレイ・直接アクセスを含む
 - **waitUntil**: サイドエフェクトは `event.waitUntil()` でバックグラウンド化
 - **Error Isolation**: バックグラウンド処理のエラーは try-catch で隔離
 
@@ -305,6 +332,7 @@ export async function POST(request: Request) {
 
 - **Rule 33.21**: **shadcn/ui** を標準UIコンポーネントライブラリとして採用し、カスタマイズ性とアクセシビリティを両立する
 - **Design Token**: Tailwind Config の `extend` でプロジェクト固有のカラー・フォント・シャドウをトークンとして定義する。HEX値直書きは禁止
+    - **正当な例外と検出手順**: hex を保持してよいのは第三者ブランドガイドで色が固定されたもの（外部サービスのロゴ SVG 等）、チャートのデータ系列色、CSS 変数が解決されないメール HTML の inline style に限り（MAY）、理由をコードコメントで明示する。監査は「hex パターンの全件検索 → 既知の正当な置き場（トークン定義・テーマ管理画面・サニタイズ許可リスト等）を除外 → 残りを全件レビュー」で行い、検出ゼロまたは例外注記済みを完了条件にする（MUST）。「全部禁止」のままでは第三者ロゴやメールが違反扱いになり監査が形骸化する
 - **Class Sorting**: `prettier-plugin-tailwindcss` の使用を必須とする
 
 ### §20. Interactive Components Standard
@@ -344,10 +372,14 @@ export async function POST(request: Request) {
 - **Rule 33.27**: Tailwind Utility クラスを原則使用する
 - **Component Extraction**: 共通パターンはReactコンポーネントとしてカプセル化し、`@apply` の使用を可能な限り回避する
 - **CSS Modules**: 複雑なアニメーションやTailwindで表現困難なスタイルにのみ許可
+- **Shared ClassName Extraction**: 同一コンポーネント群で 3 箇所以上に完全一致する長いユーティリティクラス文字列が現れたら、共有定数モジュールへ抽出する（MUST）。命名は「対象 + 役割 + 種別接尾辞」（例: `EMBED_CODE_TEXTAREA_CLASSNAME`）、配置はドメインフォルダ直下の private モジュール（先頭アンダースコア等）とし、監査時は 3+ 重複をスクリプトで全件検出する（SHOULD）
+- **The Utility Class Definition Check**: プロジェクト固有のユーティリティクラス・接頭辞付きクラスを使うときは定義を実際に開く（MUST）。クラス名は「意図の表明」であって「実装」ではなく、使用箇所の多さは定義がある証拠にならない（使う側は既存例を真似るだけなので、定義が無いまま使用箇所だけが増える方が自然）。`@apply` / `@utility` を経由せずクラス名だけ書いてもビルドもリントもエラーを出さない無音性を前提に、CSS 側に宣言があることを検査で固定する（SHOULD）。失敗パターン: 「対策済み」として使い回されたクラスに定義が無く、スクロールバーが出たままだった
 
 ### §26. The CSS Specificity Protocol
 
 - **Rule 33.28**: `!important` によるスタイル上書きは**完全禁止**。根本原因を解決するか、React状態管理で制御する
+- **Presence Gate**: `!important` の可否は「理由」を聞く前に「存在するか」で判定する。1 件でも検出されたら原則 `NEEDS_FIX` とし安易な上書きとして扱う（MUST）。反映されないスタイルはセレクタ設計・コンポーネント責務・DOM 階層・トークン・variant・状態属性・条件付きレンダリングで解決し、`!important` を足して通す修正は禁止
+    - **例外と検証**: 例外は外部埋め込み・印刷・サードパーティ iframe 等、設計上回避不能な場合のみ。範囲を対象クラスに閉じ、代替不能理由・削除予定条件・検証コマンドをコメントか証跡に残し、人間レビューを必須とする（MUST）。UI/CSS 変更を含むタスクでは対象拡張子を横断した検索（例: `rg -n "!important" src --glob "*.tsx" --glob "*.css"`）で検出ゼロを完了条件に含める（MUST）。「禁止」だけでは例外議論で押し切られる
 
 ### §27. The CSS Class Merge Utility Protocol
 
@@ -368,6 +400,7 @@ export async function POST(request: Request) {
 ### §29. The Stacking Context Safety Protocol
 
 - **Rule 33.31**: 通常コンテンツ内要素に明示的 `z-index` を適用することは原則禁止。`isolation: isolate` でスコープを隔離する
+- **The Sticky Travel Protocol**: `position: sticky` が追従しないときは「親の高さ」と「子の高さ合計」を実測する（MUST）。差がそのまま追従距離であり、親が中身の分しか高さを持たないと最後の子は既に下端にいて可動域がゼロになる。grid / flex の item が自分の書いた要素とは限らない（stretch して高さを持つのはラップ要素で、中の `aside` は `height:auto` だった例）。追従距離は本文の長さに依存するため長短両方のページで確認し（SHOULD）、追従中に覆われていないかを枠内の複数点で `elementFromPoint` で確認する。`z-index` 無しは DOM 順のまま後続の `z-10` に負ける
 
 ### §30. The CSS Containment Protocol
 
@@ -400,6 +433,10 @@ export async function POST(request: Request) {
 - **Third-Party Isolation**: サードパーティCSSを専用レイヤーに隔離し、プロジェクトスタイルとの競合を防止する
 - **Tailwind CSS 4 統合**: Tailwind v4 は内部的に `@layer base`, `@layer components`, `@layer utilities` を使用。カスタムレイヤーとの統合を理解する
 - **Unlayered Styles**: レイヤーに属さないスタイルはすべてのレイヤーより優先される。意図しない上書きを防止するため、全スタイルをレイヤーに配置することを推奨
+- **Container Element Pattern（レイヤへ入れられない場合）**: unlayered なサードパーティ CSS は同じ詳細度なら `@layer utilities` の utility に無条件で勝つ。utility で上書きしたいなら相手をレイヤへ入れ、それができない（各コンポーネントが直接 import している等）なら utility は `display` 等の規則を持たない素の器要素に付ける（MUST）
+- **Computed-Value Verification（CSS を書いた ≠ 動いている）**: CSS の遷移・utility クラス・レイヤ指定を追加した変更は「ソースに書いた」「HTML にクラスが出ている」では完了にならない（MUST NOT）。実 DOM の `getComputedStyle()` と `getBoundingClientRect()`、遷移なら時系列の中間値サンプリングをもって完了とする（MUST）。前提機能（`interpolate-size` のような有効化キーワード）が欠けると CSS は無言で止まり、エラーも警告も出ない。失敗パターン: 本番 DOM の computed が `pan-y` のままで「是正済み」に見えていた変更が、4 日後に同じ穴へ再度落ちた。是正の判定を是正前と同じ観測手段（クラスの有無）で行ってはならない。正本は `quality/000_qa_testing.md` の「CSS 効力の実測」。
+- **Derived Custom Properties over Instance CSS**: 同じ部品の複数インスタンスに共通する欠陥を、インスタンス名指しの CSS で直してはならない（MUST NOT）。インスタンスが増えるたびに書き足す設計は書き忘れを検出できない（例: 10 本中 4 本に是正漏れ）。各インスタンスが部品へ渡す設定値と同じ値からカスタムプロパティを出し、グローバル CSS は汎用ルール 1 組だけを持つ（MUST）。網羅は部品を使う全ファイルを走査し、インスタンス数と宣言数の一致を補集合で固定する検査で担保する
+- **Margin Collapse Across Fragments**: 本文を複数の片に分割して並べる構造（本文とウィジェットの交互配置）では、片のコンテナが `overflow: hidden` で BFC になると片をまたぐ margin が相殺されず足し算になる。横のはみ出しだけを切りたい場合は `overflow-x: clip` を使い BFC を作らない（SHOULD）。見出しの margin-top はブロックの margin-bottom より必ず広く設計して「前の要素が何であれ見出し自身の margin-top だけ」になるようにし、SSR と hydrate 後で外枠の余白を同値にする（MUST）
 
 ```css
 /* ✅ CSS Layers による優先順位制御 */
@@ -461,6 +498,8 @@ export async function POST(request: Request) {
 ### §36. The Route Conflict Ban
 
 - **Rule 33.38**: ページリファクタリング時、移動元ディレクトリは物理的に削除すること
+- **The Self-Referencing Route Scan**: 画面の設置先（URL）を移す変更はページ側の diff だけでは完結しない。当該コンポーネントとその依存内で旧 URL・ルート定数を grep し、「完了後に戻る」「ここで変更できます」系の自己参照導線（OAuth 等の redirect 先・キャッシュ再検証パス・リンク・パンくず・通知メール内リンク・ドキュメント）を全て新設置先へ更新する（MUST）。正本は `engineering/000_engineering_standards.md` の「The Self-Referencing Route Scan」。
+- **Route Constant ↔ Reality Triangulation**: ルート定数を追加・利用するときは、対応する実ページ／redirect の存在と認証・所有者チェックを同時に確認する（MUST）。定数上は SSOT に見えても実体が無ければ導線は壊れる。404 調査は「リンク呼び出し・定数・実体」の 3 点を同時照合する
 
 ---
 
@@ -485,6 +524,8 @@ export async function POST(request: Request) {
 ### §40. The Subscription Timer Sanitization Protocol
 
 - **Rule 33.42**: サブスクリプションコールバック内の `setTimeout` / `setInterval` はタイマーIDを `useRef` で管理。ローカル変数でのタイマー管理は禁止
+- **Timer Dependency Rate Rule**: 周期タイマー（interval / debounce / timeout）を持つ副作用の依存は「実行中か」を表す boolean だけにし、進捗そのものを依存にしない（MUST）。依存を書くとき「これは周期より速く変わりうるか」を問う。速く変わる依存 + cleanup を持つ副作用は、発火前に毎回 cleanup → 再作成され一度も tick しない。回線とマシンが速い環境ほど確実に再現し、遅い環境では偶然 tick が間に合って正しく見える
+    - 「推定できないときは数字を出さない」設計は、裏返すと「出ないこと」が異常のサインにならず、もっともらしい待機表示で止まる故障は正常系と見分けがつかない。実測値が動いているかを別途確認し（SHOULD）、テストでは「周期より速い更新」を意図的に注入する（SHOULD）
 
 ### §41. The Explicit Initial State Typing Mandate
 
@@ -495,6 +536,12 @@ export async function POST(request: Request) {
 ### §42. The Compiler Readiness Protocol
 
 - **Rule 33.44**: React Compiler互換のコーディングパターンを推奨する。`useMemo` / `useCallback` の過度な手動使用を避け、コンポーネントは純粋関数として実装する
+- **Structural Compliance Checklist**: コンパイラ／並行レンダリングの警告は lint noise ではなく、将来のフレームワーク更新でビルド不能化する構造的実装臭として扱い、ビルド時の compiler 警告を 0 に維持する（MUST）
+    - render 中に ref を書き換えない（MUST NOT）。ref 更新はイベントハンドラまたは effect へ移す
+    - hydration／クライアント判定は `useSyncExternalStore` ベースの共通 hook へ集約し、`mounted` state を各所で乱立させない（SHOULD）
+    - props → state の同期 effect は必要性を再評価し、残す場合も初回 paint 中の同期更新を避けユーザー操作由来の更新と区別する（SHOULD）
+    - フォームライブラリの値監視は render ごとに購読を再生成する直呼び（`watch()`）ではなく購読 hook（`useWatch()`）を使う（SHOULD）
+- **The Effect Order & Remount Protocol**: effect は子コンポーネント → 親コンポーネントの順で実行される。親の `useEffect` で、子のコールバック（`onReady` / `onInstance` 等）が設定した state を `null` に戻すパターンは禁止する（MUST）— 子の設定が親に上書きされる。サードパーティウィジェット（スライダー・エディタ・地図等）の設定変更で再初期化が必要な場合は、`key` に全設定属性を含めてコンポーネント全体を再マウントさせる（SHOULD、§52 参照）。一部の属性しか含めないと設定変更が伝播しない。破棄済みインスタンスへの参照は `instance && !instance.destroyed` のようにガードする
 
 ---
 
@@ -512,6 +559,7 @@ export async function POST(request: Request) {
 - **Low-Risk Operations**: いいねボタン、コメント追加等の可逆的操作に限定して使用する。決済等の高リスク操作にはサーバー確認を待つ
 - **Automatic Rollback**: サーバー操作失敗時はUIが自動的に元の状態にロールバックされる
 - **Pure Update Function**: 楽観的状態を計算する関数は純粋関数でなければならない
+- **Optimistic Update Integrity**: 更新 API の戻り値でローカル状態を上書きする際、戻り値は一覧取得時の DTO と同じ形とは限らない（JOIN・集計由来の項目が欠ける）。欠落しうる項目は既存値を引き継ぐか、更新 API を一覧と同じ射影で返す設計にし、無条件上書きは禁止（MUST NOT）。作成・削除・移動後は直接対象だけでなく派生データ（件数・集計・親エンティティのサマリ）も再取得または再計算する（MUST）。片方だけの更新は「保存したのに数字が変わらない」不具合として利用者に届く
 
 ### §45. useFormStatus & useActionState
 
@@ -538,6 +586,7 @@ export async function POST(request: Request) {
 - **Rule 33.50**: React 19の `preload()`, `preinit()`, `prefetchDNS()`, `preconnect()` APIを活用し、リソースの先読みをプログラマティックに制御する
 - **Font Preloading**: `preinit()` でクリティカルフォントを先行初期化
 - **Third-Party DNS**: 外部サービスへの `prefetchDNS()` でDNS解決時間を最小化
+- **Deployment Criteria**: 全ページで必ず接続する第三者オリジンと LCP 要素の配信元には、ルートレイアウトの `<head>` で `dns-prefetch` と `preconnect`（CORS 資源は `crossorigin`）を併記する（SHOULD）。前者は非対応環境の fallback、後者は完全ハンドシェイク。同時 preconnect 数にはブラウザ上限（例: 6）があり超過分は無視されるため、遅延読込される広告／解析オリジンには付けず（MUST NOT）、一部ページのみのオリジンは該当ページで宣言する
 
 ### §48b. useEffectEvent Hook
 
@@ -661,6 +710,12 @@ const getProduct = cache(async (id: string) => {
 - **Rule 33.51**: SSRとクライアントレンダリングの出力不一致（Hydration Mismatch）の発生リスクを最小化する
 - **Root Cause**: SSR中に `Date.now()`, `Math.random()`, ブラウザ固有グローバル (`window.innerWidth` 等) を使用すると不一致が発生する
 - **Suppress**: `suppressHydrationWarning` は**日時表示にのみ**許可。それ以外での使用は禁止
+- **Allowed vs Prohibited Suppression（補足）**: 抑制属性を許可するのは「自コードで一致させられない差異」— ブラウザ拡張による `<html>` / `<body>` / 共通ナビへの属性注入、サーバー・クライアントの時刻差、乱数・一意 ID — に限る（MAY）。自コードのバグ・データフェッチの不一致・状態管理の問題を隠す目的での使用は禁止（MUST NOT）。付与時はコメントで外部要因を明記し、全ページ共通で拡張機能の標的になりやすいナビゲーション要素には予防的に付与してよいが、ページ内コンテンツのリンクには不要（SHOULD）
+- **Dimension Class Parity**: サーバー側の静的レンダラとクライアント側コンポーネントが同じ要素を描く場合、寸法・アスペクト比・余白を決めるクラス／スタイルは同一のトークン／クラス定義を共有し、片方だけ inline style や別ブレークポイント値にしてはならない（MUST）。SSR が単一値（`style="aspect-ratio:3/4"`）、CSR がレスポンシブ値（`aspect-[3/4] md:aspect-[3/2]`）という非対称は hydration で寸法が変わり CLS を生む。両者を同一の定数から生成するか、自動テストで一致を検査する（SHOULD）
+- **Hybrid Swap Layout Parity**: サーバー描画 HTML をクライアントで対話的レンダラへ差し替える構成では、両フェーズの wrapper が同じレイアウト規則（class 体系・余白・タイポグラフィ）を持つことを要件にする（MUST）。読み取り専用なら差し替え自体を無くし、対話機能が必要なら差し替えを維持して規則を統一する。「差し替えを全廃する」は対話機能を失う過剰修正であり、誤用の修正を先に検討する（SHOULD）
+- **Conditional Render Ban**: 読み込み中と完了後で同じコンポーネントを異なる props で条件分岐描画（`isLoading ? <X /> : <X extra />`）してはならない（MUST NOT）。描画は統一し未取得データは既定値（空配列等）で渡す。スケルトンが必要なら wrapper（グリッド等）を共通化し子だけを差し替え、完成後と同じ DOM 構造・寸法・アスペクト比で作る（SHOULD）
+- **Dual-Renderer Content Bake**: 同一コンテンツを SSR 用静的レンダラとクライアント用動的レンダラの二系統で描く場合、外部メタ（alt / caption 等）を片方の描画関数にだけ注入してはならない（MUST NOT）。正本は `engineering/310_headless_cms.md` の「Dual-Renderer Content Bake」。
+- **The Pre-Init Appearance Protocol**: 「既定で効かせて、active / initialized クラスで戻す」CSS 設計は、JS 初期化前（SSR 直後〜数百 ms）に「戻される前」の見た目を必ず持つ。演出 CSS は初期化済みを表すクラス（`.initialized .slide` 等）にだけ掛け、初期化の瞬間に active も同時に付く構造にする（MUST）。初期状態の見た目は JS を無効にして撮る（MUST）— 1 枚で分かる。隣が見えないレイアウトでの縮小など効果が無い装飾は黒地や区切りだけを生むため、レイアウト条件を実測して不要な演出を撤去する（SHOULD）
 
 ### §50. The SSR Stream Resilience Protocol
 
@@ -718,6 +773,11 @@ type ActionResult<T> =
 ### §60. Multi-Step Form Protocol
 
 - **Rule 33.62**: マルチステップフォームではステップ毎に個別のZodスキーマを定義し、ステップ遷移時にバリデーションを実行する。最終送信時に全ステップデータを統合バリデーション
+- **Step Form Thresholds**: 入力項目数でフォーム形式を選ぶ（SHOULD。閾値は例であり Blueprint で定める）: 例として 1〜5 項目は単一ページ、6〜10 項目は 2 ステップ、11 項目以上は 3 ステップ以上 + プログレスバー。3 ステップ以上ではステップ名を表示し、完了済みステップはチェック表示かつクリックで戻れるようにする（MUST）。ステップ間のデータはセッションストレージ等で保持し、リロード・戻る操作で入力が消えないようにする（MUST）
+- **The Cross-Layer Constraint Parity**: 同一入力に対する複数層（client／server／公開 API）のバリデーションスキーマは、文字数上限・数値範囲などの制約値を単一の定数から参照し、エラーメッセージもその定数から生成する（MUST）。層ごとの独立進化は「client OK → server reject」の UX 事故と「API 直叩きで最も緩い層が実効制約になる」防御崩壊を生む。統一時の既定値は最も厳しい値にし（SHOULD）、必須／任意の差が正当な場合は理由をスキーマコメントに明記する。制約を厳しくする変更では既存行が新上限を超えないか確認し、UI の `maxLength` も同期する（MUST）。検出: 同一エンティティのスキーマ定義が複数ある file を列挙する
+- **Controlled Select Allow-Set Guard**: 列挙値を選ぶ controlled な Select 系コンポーネントは、ライブラリ内部の native `<select>` 併設や再マウント（配列フィールドの `update()` による key 再生成等）で `onChange('')` を発火しうる。`onValueChange` は許可集合に含まれる値だけを form state へ書き、表示側も許可集合外は既定値へ倒す（MUST）。判定は JSX の中ではなく純関数へ出してテストする
+    - スキーマ側は `''` だけを「未設定」として既定値へ倒し、それ以外の不正値は従来どおり拒否する二重化を行う（SHOULD）— 下書きや旧 state の `''` で保存不能にならないため。保存前検証のエラー文言は項目名まで出し、表示名辞書とスキーマの全キーはテストで突合する。アプリの二重ガードが守れない別経路（API 直叩き・移行スクリプト・手作業 SQL）の書き込みは日次の整合性検査で許可集合外（`''` / null / 旧値）を warn として拾い、検査自体の失敗は critical で可視化する（`engineering/710_data_reconciliation.md` 参照）
+- **Contact Identity Validation**: 連絡先（メール・電話）の形式検査は、ブラウザ組込みの `type="email"`（`a@b` を通す）/ `type="tel"`（無検査）に頼らず、サーバー側の純関数（構文・予約ドメイン・捨てアド・長さ上限）を正本とし、クライアントは同じ関数を遅延ロードして blur で先に表示する（MUST）。正本は `operations/300_customer_experience.md` の「Contact Identity Validation」。
 
 ---
 
@@ -738,6 +798,7 @@ type ActionResult<T> =
 ### §63. The Dynamic Form Engine Protocol
 
 - **Rule 33.65**: 動的フォーム生成（管理画面等）はスキーマ駆動でフィールドをレンダリングする
+- **Rule 33.65a（Structure by Container, not Delimiter）**: 区切り記号（改行・カンマ・行頭マーカー等）で構造を表す入力方式は、「内容にその記号が絶対現れない」と言い切れるときにしか使ってはならない（MUST NOT）。自由入力テキストではまず保証できず、項目内改行と項目区切りが同じ `\n` になれば入力欄を 1 文字触るだけで項目が増殖し、「1 行 = 1 項目」というラベルのせいで編集者は気づけない。構造は入れ物で表す（MUST）: 1 つの箱 = 1 つの項目にすれば区切りという概念自体が不要になる。エスケープ規則を足す案は「素人でも更新できる」目的から遠ざかる — 規約で守るものは破られる、形で守れるなら形で守る。往復（表示 → 編集 → 保存）を持つ変換は実データで往復させて不変を確かめる（MUST）。合成データでは「改行を含む項目」のような現実の形が出てこない
 
 ### §64. The useFieldArray Initialization Guard
 
@@ -779,6 +840,7 @@ type ActionResult<T> =
 ### §71. The External Link Protocol
 
 - **Rule 33.73**: 外部サイトリンクには必ず `target="_blank"` と `rel="noopener noreferrer"` を付与する
+- **No Exception for Hand-Written JSX & Scheme Allowlist**: sanitizer を通らない JSX 直書きの `target="_blank"` も例外なく `rel="noopener noreferrer"` を付ける（MUST）。`next/link` は eslint `jsx-no-target-blank` の対象外なので独自走査で補う。URL を `href` に描画する箇所は全てスキーム許可リスト（http / https / 内部相対パス）を通す（MUST）— HTML エスケープはスキーム XSS（`javascript:`）を防がず、`z.string().url()` 等の URL バリデータは `javascript:` / `data:text/html` を有効な URL として受理するため許可リストではない。入力境界と描画境界の両方で塞ぐ（DB 格納済みの不正値は入力側修正では無害化できない）。詳細は `security/000_security_privacy.md` §22.1
 
 ---
 
@@ -791,10 +853,13 @@ type ActionResult<T> =
 ### §73. The Frictionless Security UI Protocol
 
 - **Rule 33.75**: セキュリティ対策がユーザー体験を阻害してはならない。Turnstileはinvisibleモードで使用し、ユーザーフローを維持する
+- **Rule 33.75b（No Bot Challenge on Admin-Only Mutations）**: 認証済み管理者だけが叩く状態変更に、公開フォーム向けの bot チャレンジ（CAPTCHA / Turnstile）を付けない（SHOULD NOT）。統制は管理者ガード・レート制限・監査ログ・許可集合検証で行う。トークンが得られない配置（非表示の器）になると保存ボタンが恒久 disabled になり、「兄弟の更新は成功しステータス更新だけ成功記録ゼロ」という静かな機能不全になる。「本番の監査ログで当該操作だけ成功記録がゼロ」は機能不全の発見手段として使う
+- **Rule 33.75c（Hidden-Ancestor Static Check）**: bot チャレンジを描画するコンポーネントが `display:none` / `hidden` 属性 / 素の `hidden` クラスの祖先を持たないことを、描画確認に加えて AST で検査する（SHOULD。ブレークポイント付き `md:hidden` は許す）。陽性／陰性のテストを固定する。invisible reCAPTCHA でも同じ
 
 ### §74. The Conditional Security Bypass Ban
 
 - **Rule 33.76**: `isAdmin` や `isDev` フラグに基づき認証チェックをスキップするコードは禁止。ベースラインの認証・認可チェックは全パスで例外なく実行される
+- **Fail-Closed Secret Comparison**: 環境変数・設定値に格納した秘密との照合で守るエンドポイント（cron、webhook、内部 API）は、秘密が未設定・空のときに拒否する条件式（`if (!secret || token !== secret)`）にする（MUST）。`if (secret && token !== secret)` の形は未設定環境で無認証公開になる。共通の検証関数に集約し、各ルートでの条件式の手書きを禁止する（SHOULD）。レート制限のキーには必ず呼び出し元の識別子（IP・ユーザー ID・API キー）を含める（MUST）— 固定文字列キーは 1 利用者が全体の上限を消費し全利用者を巻き込む（`security/000_security_privacy.md` §10.6 参照）
 
 ### §75. The Deep Type Recursion Break Protocol
 
@@ -808,6 +873,9 @@ type ActionResult<T> =
 
 - **Rule 33.79**: フィルタリング、ソート、ページネーションのUI状態はURL SearchParamsで管理する。`nuqs` ライブラリを推奨
 - **Benefit**: ブックマーク共有、ブラウザ履歴、SSR互換性
+- **List Search Contract**: 一覧の絞り込み・並び替え・ページ送りの状態は URL に持ち、JS 無しでも動く GET フォームとリンクで操作できるようにする（MUST）。URL パラメータは許可集合へ丸める（MUST）: 面外の種別・未知のソート・不正なページ番号は既定値へ落としエラーにしない。絞り込み結果 0 件は 200 で返し（404 にしない）、「条件ありの 0 件（見つからない）」と「条件なしの 0 件（準備中）」でコピーを分け「条件をクリア」を出す（MUST）
+    - canonical は条件なしの基底 URL に固定し、絞り込みリンクは `rel="nofollow"` にして条件の順列を個別 URL として索引させない（SHOULD）。外部集計（人気順等）に依存する並び替えは選ばれたときだけ呼び、失敗時は既定の並び（新着順）へ退避し、全順序のため最終キーに id を含める（MUST）。ページ送りが条件を引き継ぐことを契約テストで固定する（SHOULD）
+- **Receiver-Owned Query Contract**: 画面遷移の URL query は「リンク元」ではなく「受信画面の契約」である。受信画面側の builder 関数と key 定数で組み立て、リンク元ごとに手書きしない（SHOULD）
 
 ### §78. The Hard Session Refresh Protocol
 
@@ -887,6 +955,8 @@ type ActionResult<T> =
     1. Server-Sent Events (SSE)
     2. WebSocket
     3. Polling（最終手段、interval ≥ 30秒）
+- **Adoption Criterion**: WebSocket／Realtime 購読の採用は、データの更新周期と「気づくまでの許容遅延」を比較し、即時性の価値が常時接続のコスト（接続数・fan-out・再接続嵐・課金）に見合う場合に限る（SHOULD）。更新がバッチ／cron 周期（例: 数分単位）なら、サーバー描画の写し + 鮮度条件付き再取得を既定にする。採用条件（例: 個人宛イベントが入り数秒で気づく必要が出た時点）を先に文書化し、条件到達で切り替える
+- **Conditional Refresh Without Layout Shift**: サーバー描画で受け取った写しがある場合、開くたびに無条件で再取得しない（MUST NOT）。正本は `design/000_design_ux.md` の「Refresh Indicator Without Layout Shift」。
 
 ---
 
@@ -910,10 +980,14 @@ type ActionResult<T> =
     - **JS (Gzipped)**: Initial ≤ 150KB, Route Chunk ≤ 50KB
     - **CSS (Gzipped)**: ≤ 30KB
     - **Measurement**: `@next/bundle-analyzer` で定期監査
+- **Rule 33.94a（Artifact-Based Toolchain Decision）**: ビルダー／バンドラ／コンパイラの切替はビルド時間・メモリだけで判定してはならない（MUST NOT）。「配信される成果物の総量」と「落ちるはずのコード（デバッグログ・開発専用分岐）が実際に落ちているか」を成果物で実測する。プラグインが特定ビルダー専用オプションを持つなら、それが pin の理由である可能性を最初に疑う
+    - 比較計測は同一コミット・各 2 回以上取る（MUST）— 1 回ではばらつきと区別できない。集合比較（ルート数・チャンク数）には肯定側の対照を置く（MUST）: 「N 件抽出できている」を先に確認してから 0 差分を結論する。抽出が両側 0 件なら「0 対 0 で一致」という偽合格になる。遅延読み込み等の効果はマニフェストを解析して「初期チャンク集合から消えたこと」で測る（SHOULD）。ツールチェーンの pin（`--webpack` 等）は理由を記録する（MUST）— 理由不明の pin はセキュリティパッチ適用時に外せない負債になる
 
 ### §93. The Dynamic Library Decoupling Protocol
 
 - **Rule 33.95**: 30KB（Gzip）超過のライブラリのメインバンドル同梱は禁止。`next/dynamic` でlazy load
+- **Lazy Boundary Placement**: 「利用者操作で初めて可視になる」UI（ダイアログ・ドロワー・エディタ）の重い中身は遅延読込する（MUST）。ただし遅延境界を各呼び出し側に置くと、呼び出し側が 1 つでも eager なら分離効果が消え、トリガーを内包する設計では読み込み中トリガーが消える。境界はコンポーネント内部に置き、トリガーは静的に描画、重い子は初回オープンまでマウントしない（SHOULD）— 1 修正で全呼び出し側が受益する。初回オープン後はマウントを維持し再オープンを即時化してよい（MAY）。判定基準: 「必ず描画される」ものは対象外、「操作起点で初めて可視」は全て候補
+- **Server-Side Heavy Import**: サーバー側でも、重い解析ライブラリ（HTML パーサ・画像処理・圧縮）を関数トップレベルで静的 import すると、それを使わないリクエストのコールドスタートまで負担する。関数内の動的 `await import()` にし、バンドル分析で基準値を持つ（SHOULD）
 
 ### §94. The LCP & Lazy Loading Performance Protocol
 
@@ -921,6 +995,14 @@ type ActionResult<T> =
     - ヒーロー画像: `priority` 属性を適用。Lazy Load しない
     - Below-the-Fold 画像: `loading="lazy"` 必須
     - `<Suspense>` + Server Component: ストリーミングで重いコンテンツを段階的表示
+- **Hidden-but-Rendered Ban**: CSS の非表示（`display:none` 等）はサーバー描画・hydration・DOM 生成・画像要素数を省略しない。同じデータの一覧を画面幅別に二重描画して片方を隠す構成を避け、単一 DOM をレスポンシブ CSS（モバイルは `overflow-x: auto` + scroll snap、デスクトップは grid）で切り替える（SHOULD）。画面幅で意味やデータが本当に異なる場合のみ別ツリーを許可し、非アクティブ側は遅延読込またはサーバー側分岐にする
+- **Hidden Subtree Lazy Images**: 初期表示領域に入る要素を初期化前の一時的な CSS で隠す場合、その配下の `loading="lazy"` 画像は交差判定が走らず取得が始まらない。初期表示分の画像は非遅延（eager）にする（MUST）。ブラウザキャッシュがあると再現しないため初回訪問相当で計測する。画像の読み込み挙動はそれを囲む CSS とセットで判定し、テストは `loading` 属性の式ではなく描画結果の属性を検査する（MUST）
+- **Slides-in-View SSOT**: 「同時に表示される枚数」はレイアウト CSS と画像読み込み属性の両方が依存する値であり、定数化して SSOT にし、CSS 側の値との一致をテストで機械検査する（MUST）。片方だけ変えると沈黙故障になる
+- **Preload vs Eager Separation**: レスポンシブに表示枚数が変わる場合、preload（LCP 候補 1 枚のみ）と eager（最大同時表示枚数ぶん）を分離し、2 枚目以降は低優先度で「発見は早く、優先度は低く」する（SHOULD）。preload リンクはメディアクエリを持てず SSR 時点で確定するため、全枚に付けると狭い画面で帯域を浪費する。共有表示コンポーネントの `priority` / preload は無条件にせず opt-in にし、真に above-the-fold の用途だけが有効化する。preload の実在は SSR HTML の `<link as="image">` 数で監査できる
+- **Carousel Adjacency Exception**: カルーセルの隣接スライド画像は Below-the-Fold 規定を機械適用して `lazy` のままにしない。現在位置の前後 1 枚と先頭だけを eager にする純関数で制御する（MUST）— 送られた瞬間に読込が始まって届くまで黒地が見える一方、全部 eager は初回に全取得して LCP を悪化させる。隣接要素を見せる演出（減光・縮小）は隣が実際に見えるレイアウト条件（メディアクエリ）にだけ掛け、1 枚表示の面に掛けない（MUST）— opacity と brightness は黒地との合成で二重に暗くなる。ライブラリの遷移速度と CSS transition の duration を揃え、検証は遷移中フレームの平均輝度・暗い画素率を実測して前後比較する（SHOULD）
+- **LCP Entry Evidence**: LCP を理由に UI 挙動（自動再生停止・遅延）を変える提案は、LCP entry の実測（PerformanceObserver `largest-contentful-paint`）を根拠として添える（MUST）。LCP は「既存候補より大きい」描画でしか候補を更新しないため、等サイズの器に描かれる後続スライドは LCP 候補を更新せず、「切替が LCP を後ろ倒しにする」は仮説であって事実ではない。自動再生を止める最適化で利用者に「動いていない」と知覚させず、`prefers-reduced-motion` の利用者のみ停止し一時停止手段（hover / touch）は残す（MUST）
+- **The Lazy Fetch Sentinel Protocol**: 遅延取得の目印（sentinel）は常に見えている要素へ置く（MUST）。閉じた `<details>` や `display:none` 配下は交差せず、「開いた瞬間だけ空」という一番見えにくい形になる。スクロール枠の中の目印は `root` にその枠を渡す（MUST）— 省略は viewport を意味し、枠の底まで送っても一生発火しない。交差だけに頼らず hover / focus / 開閉も受け皿にし、取得済み集合で二重取得を弾く。先読みは枠そのものの接近（root=viewport）と枠の底（root=枠）の 2 段にする（SHOULD）
+    - 「発火しない」の切り分けは `getBoundingClientRect()` / `scrollHeight` / `clientHeight` の実測と、同条件の observer をページ内で張り直して `isIntersecting` を直接見ることで行う（SHOULD）。継ぎ目のなさは人のスクロール速度（例: 約 800px/s）を模して「枠へ到達した時点で続きが入っているか」で測る。3 つの「交差しない置き方」はすべて型検査・lint・build を通る
 
 ### §95. The Performance Regression Response
 
@@ -1003,6 +1085,7 @@ async function processLargeDataset(items: Item[]) {
     - レスポンシブサイズ（`sizes` 属性）
     - CLS防止（`width`/`height` 必須、または `fill` + wrapper sizing）
     - CDN配信（Cloudflare Image Transformations 等）
+- **object-fit Co-Review**: 画像の `object-fit` を `cover` ↔ `contain` で切り替える変更では、同じ要素と親要素の背景色指定も同時に要否判定する（MUST）。正本は `design/000_design_ux.md` の「Object-Fit & Background Co-Review」。
 
 ### §100. The Image Size Budget
 
@@ -1047,30 +1130,48 @@ async function processLargeDataset(items: Item[]) {
 - **Rule 33.107**: 全公開ページで `generateMetadata` を実装し、動的なtitle/descriptionを生成する
 - **Title Template**: `layout.tsx` で `title: { template: '%s | サービス名', default: 'サービス名' }` を設定
 - **Fallback**: DB取得失敗時のフォールバックメタデータを必ず定義する
+- **Single Metadata Helper**: 全ての公開詳細ルートのメタデータ生成は、OG・Twitter card・robots・canonical を一括で出す 1 つのヘルパーを経由する（MUST）。個別ページで `{ title, description }` だけを返す実装は SNS プレビュー欠落・canonical 欠落・将来の仕様変更の取りこぼしを生む。ヘルパー未経由のルートは、動的ルートを走査して `generateMetadata` を持ちながらヘルパーを参照しないファイルを列挙するスクリプトで機械検出する（SHOULD）
 
 ### §107. The Structured Data Protocol (JSON-LD)
 
 - **Rule 33.108**: 型安全なJSON-LDスキーマを実装する。`schema-dml` 等の型付きライブラリを使用し、手書きJSONは禁止
 - **Required Types**: `Organization`, `WebSite`, `BreadcrumbList`, `FAQPage`, `Product` 等のビジネス関連スキーマ
+    - **但し書き（Rich Result Eligibility）**: 必須項目を偽らずに満たせない型は出さない。リッチリザルト対象型（`Product`、`SoftwareApplication`、`SocialMediaPosting` 等）は必須項目（例: `Product` は `image` と購入完結、`SoftwareApplication` は `aggregateRating` または `review`）を型を選ぶ前に確認し、埋められないなら対象外の型（`Service` + `offers`、`WebPage` 等）で意味づけだけ残す（MUST）。対象型の適格性は検索プラットフォームの一次資料で確認する。失敗パターン: 満たせない型を出し続け「有効 0 件・無効 25 件」のまま、ルール自身がその実装を指示していた。迷ったら同業の本番 HTML を実測する（SHOULD）
+- **Rule 33.108a（Eligibility First / Measured-vs-Fixed Check）**: 外部プラットフォームの表示機能への対応可否は、自分の構造化データの厚さではなくプラットフォームが対象としているページ種別・型で決まる。着手前に公式ドキュメントで対象タイプと制限を確認する（MUST）— 対象外の面に実装を増やしても成果は出ない。ただし評価軸が複数ある場合（検索リッチリザルトと AI 検索／GEO）、片方で無効でももう片方で読まれる構造化データを撤去してはならない（MUST NOT）。監視画面の「未対応」表示を根拠に工数を割く前に、その表示が測定値か固定値（ハードコード）かを確認する（MUST）
+- **Type Ledger & Complement Violation**: 出してよい型の分類（リッチリザルト対象／対象外／禁止）と型ごとの必須項目は 1 つの台帳（定数）に集約し、台帳に無い型が出力されたら違反にする（MUST）— 危険な型を名指しで弾く方式は次に増えた型を取りこぼす。正本は `product/500_growth_marketing.md` の「Type Ledger」「Mechanical Source Collection」。
+    - ソース検査は「書かれている型」しか見られない。配信される JSON-LD は DB 内容・ロケール・セクション構成で変わるため、本番 URL を日次で取得し、型・必須項目・重複・パース不能を同じ純関数で判定して失敗を起票する（MUST）
+- **Enum Value Constants**: schema.org の enum 値 URL（`https://schema.org/{EnumName}`、大文字小文字厳密）は文字列リテラルで書かず `as const` の定数 SSOT に集約する（MUST）。型付きライブラリでも enum URL は string のため typo が通り、クローラー側で「知らない値」と判定されるだけで開発側に feedback が無い。新規スキーマ追加は「公式仕様確認 → enum を定数へ追加 → リッチリザルトテストで警告 0 → Search Console で error 0」の順で通す。検出: `schema.org` を含む URL のうち非正規パターンを grep
+- **Hierarchical Entities & Multiple Scripts**: 階層を持つ一覧ページ（地域・カテゴリ・組織階層）は `ItemList` だけでなくページ自身のエンティティ型（例: `AdministrativeArea` + `containedInPlace`）で親子関係を宣言する（SHOULD）。正本は `product/500_growth_marketing.md` の「Hierarchy & Co-location」。
 
 ### §108. The Canonical URL Protocol
 
 - **Rule 33.109**: 全公開ページで `alternates: { canonical: url }` を定義し、重複コンテンツによるSEOペナルティを防止する
 - **Trailing Slash**: プロジェクト全体でトレーリングスラッシュの使用を統一する（`next.config.ts` の `trailingSlash`）
+    - **Normalization Consistency Across Declarations**: 公開 API や AI 向けエンドポイントのパスは、robots・llms.txt・OpenAPI・プロキシの認証除外条件・ルート実装の全てが同じ正規 URL（末尾スラッシュ含む）を参照する（MUST）。末尾スラッシュ正規化が有効な環境で除外条件が「なし」だけを見ていると公開 API が `401` になる。除外条件はあり／なし両方を扱う。クローラー向け許可パス（llms.txt・robots）は実在する公開ルート・sitemap・ルート定数と照合し、存在しないパスを案内しない（MUST）。公開エンドポイントは build 成功だけでなく実 HTTP で `200` と期待する `Content-Type` を確認する（MUST）
+- **URL Key Normalization**: URL パスをキーにした完全一致照合（リダイレクト・canonical・キャッシュキー）は、パーセントエンコードの 16 進を小文字に揃える等の RFC 3986 §6.2.2.1 正規化を通してから引く（MUST）。ブラウザや Wayback Machine は同じ URL を大文字エンコードで送り、完全一致から外れて 404 になる。同一 URI の別綴りに対して行を足して直すのは禁止（次の綴りでまた漏れる）。代表例の検証が緑でも全数の緑を意味しない — 母集団を作って全数を照射し日次で回す（SHOULD）
+- **URL Stability（Cool URIs）**: 一覧面を分割・新設しても、既に索引・被リンクされた詳細 URL は変えない（MUST）。分割はナビゲーション（パンくず中段）とサイトマップ・計測の page type に反映する。同型の一覧面は本体 1 つ + 表示設定（見出し・ヒーロー・翻訳名前空間）で分岐し、ページファイルを複製しない（MUST NOT）。新しい一覧 URL は sitemap・HTML サイトマップ・自社計測の page type に同時に載せる（MUST）
+- **Canonical via Route SSOT**: canonical URL はテンプレートリテラルのハードコードではなく、ルート定義の SSOT ヘルパー（`ROUTE_PATHS.X(slug)` 相当）から構築する（MUST）— ルート形式変更時の取り残しを防ぐ。正本は `product/500_growth_marketing.md` の「Canonical Construction」。
 
 ### §109. The Dynamic OGP Protocol
 
 - **Rule 33.110**: `@vercel/og` または `ImageResponse` でOGP画像を動的生成し、SNSシェアのCTRを向上させる
 - **Dimensions**: 1200×630px（Facebook/LinkedIn標準）を基準とする
+- **No Fabricated Metadata**: 「メタデータを明示する」型の要件（画像寸法・MIME type・更新日等）を実装するときは、その値を実際に持っているかを先に確かめる（MUST）。正本は `product/500_growth_marketing.md` の「No Fabricated Metadata」。
+- **OG Image Dimensions & Robots Directives**: メタデータ生成の共通関数は OG 画像に `width / height / type` を既定で付与する（MUST）— SNS クローラーが画像を取得せずに比率を確定でき切り抜き・ぼけを防ぐ。index 対象ページの `robots` には `max-snippet:-1, max-image-preview:large, max-video-preview:-1` を既定で付与し、`noIndex` 時は `index:false, follow:false, nocache:true` 相当のみを出す（SHOULD）。検出: `openGraph:` / `robots:` の生成箇所で寸法・max-* の不在を grep
 
 ### §110. The Robots & Sitemap Protocol
 
 - **Rule 33.111**: `app/robots.ts` と `app/sitemap.ts` を実装し、クローラーのアクセス制御とページの発見可能性を保証する
 - **Dynamic Sitemap**: DBからページリストを取得し、動的サイトマップを生成
+- **Disallow vs noindex**: `noindex` を効かせたい URL（ログイン・登録・内部リンクされる認証ページ等）を robots で `Disallow` してはならない（MUST）。クローラーが `noindex` を読めず「ブロック済みだがインデックス済み」に育つ。noindex を効かせたい URL はクロールさせる。小規模サイトでのクロール予算節約は、Disallow と noindex の同居という矛盾の害が利益を上回る（SHOULD）。設定ファイルへ追記する前に、そのファイル自身のコメントに書かれた禁止理由を読む（MUST）— 自分のファイルの根拠に反する追記はレビューより先に本人が止められる
+- **Freshness Signal Sync**: JSON-LD `dateModified` は `updated_at || created_at` のフォールバック連鎖で出し、`created_at` 直書きは「常に古い」を発信し続けるため禁止（MUST NOT）。正本は `product/500_growth_marketing.md` の「Fallback Chain & Four-Channel Sync」。
 
 ### §111. The Ghost Content Protocol (Time-Gated SEO)
 
 - **Rule 33.112**: 公開前コンテンツには `noindex` を設定し、クローラーによる時期尚早なインデックスを防止する
+- **Rule 33.112a（AI 学習抑止は別手段）**: 公開前サイトの抑止は「検索インデックス」と「AI 学習」を別の手段で行う（MUST）。`noindex`（`X-Robots-Tag` / `meta robots`）は検索エンジン向けの標準であり、AI クローラーの公式オプトアウト手段は robots.txt の `Disallow` だけ。「noindex にしてあるから学習もされない」は成立しない。検索インデックスは後から削除依頼できるが学習データに入ったものは実質取り消せず損害が非対称
+    - UA 別に扱いを分け、両者を同じ設定にしない（MUST NOT）: 検索エンジン（`*`）は `Allow` のまま + `noindex`、AI クローラーは `Disallow: /`。`*` を `Disallow` にするとクローラーが `noindex` を読めなくなり既存インデックスがかえって消えない（§110 参照）。公開後の GEO 方針（AI クローラー明示 Allow）は同じスイッチに連動させ解除時に自動復帰させる（SHOULD）。一般形: ある標準が「クローラー全般に効く」と暗黙に仮定すると、その標準を採用していない新種のクローラーが盲点になる — 「誰が何を尊重するか」はベンダーの一次ドキュメントで確認する（MUST）
+- **Authenticated Personal Pages**: 個人データを表示する認証済みページは明示的に noindex / nofollow / nocache を出し layout 単位で継承させる（SHOULD）— 認証済みクローラー（社内 BI ツール・リンク unfurler）が URL を crawl した場合、フレームワークの既定メタデータは `index: true` を暗示する。取得後に `entity.owner_id !== user.id` を page-level で検証し、存在しない場合と所有不一致を同じ not-found で隠す（MUST）。RLS は単一障害点にしない
 
 ### §112. The Microcopy Identity Protocol
 
@@ -1085,10 +1186,13 @@ async function processLargeDataset(items: Item[]) {
 - **Rule 33.114**: セマンティックHTML要素（`<header>`, `<nav>`, `<main>`, `<article>`, `<aside>`, `<footer>`）を使用し、ページ構造を明示する
 - **Heading Hierarchy**: `<h1>` → `<h2>` → `<h3>` の階層をスキップせず、論理的な見出し構造を維持する
 - **Single H1 Rule**: 1ページにつき `<h1>` は**一つだけ**
+- **Heading Rebase for Embedded Rich Text**: エディタで自由に選べる見出しレベルは、保存時の矯正では既存データも将来の入力も守れない。ページのアウトライン（h1=題名、h2=区画、h3=節…）に本文を埋め込むときは、描画側で「本文の最も浅い見出しが所定のレベルになるよう全見出しを同じ量だけずらす」再基準化を行い、相対階層を保ち 1〜6 にクランプする（MUST）。DB 上の値は書き換えない。再基準化は描画前の JSON に対して一度だけ行い、SSR とクライアントが同じ JSON を描くようにする（MUST）— 片側だけ HTML を書き換えると hydrate で元に戻り、クローラーは描画後の DOM を見る。意味（タグ）だけを直し見た目は元のレベルに保つ（持ち上げた段数をラッパーのクラスに持たせ CSS で戻す）（SHOULD）。検査は純関数の真理表と、描画結果に対する「階層飛び 0 件」のテストで固定する
 
 ### §114. The SSR First Protocol
 
 - **Rule 33.115**: クリティカルコンテンツはServer Side Renderingで初回HTMLに含める。クライアントサイドでのみレンダリングされるコンテンツはクローラーに遅延認識される
+- **AI Crawlers Do Not Execute JavaScript**: AI 検索のクローラーは JavaScript を実行せず初期 HTML だけを読み、再訪もしない。公開面の本文・内部リンクをクライアント側の遅延読み込みへ移すことは AI から見て「消える」のと同じである（MUST 前提）。共通ブロック（サイドバー等）からリンクを削るときは、先に文脈の合う場所（例: 親ページに子ページのリンク）へ SSR で置き、その後で削る。逆順は禁止（MUST）— 消えている期間に読まれた分は戻らない。削ってよいかは canonical と sitemap で判定する（MUST）: canonical が別 URL へ正規化され sitemap からも外れたファセットは元から index 対象外で、全ページに積むのはクロール予算の浪費。AI の本文抽出はリンク密度を特徴量にナビ・広告を落とすため、リンクは文脈が合う場所へ置き共通ブロックへ積まない（SHOULD）
+- **No Streaming Boundary Around Public Body**: ストリーミング SSR の遅延境界（React Suspense 等）の子は、初期 HTML では非表示のプレースホルダとして末尾に流され JS で差し替えられるため、JS を実行しないクローラーには骨組みしか見えない。AI 検索から見える必要のある公開面では、H1・本文・結果一覧・JSON-LD を遅延境界の子に置いてはならない（MUST）。TTFB より本文到達を優先する。この方針は詳細ページの個別判断ではなく公開面全体の方針として扱い、ガード（テスト・lint）は対象ページを名指しせず公開ルートの集合に対して持つ（SHOULD）— 詳細で直したのに一覧 3 本に残っていた失敗が、個別判断で終わらせる危うさを示す
 
 ### §115. The IndexNow Protocol
 
@@ -1149,6 +1253,8 @@ async function processLargeDataset(items: Item[]) {
 
 - **Rule 33.121**: 主要フローのスクリーンリーダー（VoiceOver/TalkBack）での検証を実機で実施すること
 - **Icon Labels**: テキストを含まないアイコンのみのボタンには `aria-label` 属性でその機能を明示する
+- **Label + Hidden Icon Pair**: `<button>` / `<a>` の子がアイコンのみ（text node なし）のとき `aria-label` を動作を表す動詞句で必須とし（MUST）、同時にアイコン側へ `aria-hidden="true"` を付けて二重読み上げを防ぐ（MUST）。`outline-none` で潰されている場合は `focus-visible` のリングを併設する（MUST）。アイコン上の動的バッジは装飾なら `aria-hidden`、意味があるなら親の `aria-label` に含める
+    - **Lint は取り切れない**: `jsx-a11y/control-has-associated-label` は子要素のテキスト解析が浅く `<button><Icon/></button>` を通す。監査では `aria-label` / `title` 無しの button を抽出しタグと式を strip した内側テキストが空のものを列挙するソース走査ヒューリスティックを実行し、偽陽性込みの候補を目視で確認する（SHOULD）。同一ルールの退行が複数箇所で繰り返された記録があり、能動的な走査が要る
 
 ### §121. WAI-ARIA Protocol
 
@@ -1191,10 +1297,12 @@ async function processLargeDataset(items: Item[]) {
 ### §128. Web Push Notifications
 
 - **Rule 33.129**: Web Push通知はユーザーの明示的なオプトイン（CTA）後にのみ許可を要求する。ページロード直後のパーミッション要求は禁止
+- **Invalid Destination Hygiene**: Push 配信先の識別子（デバイストークン・endpoint 等）は、配信サービスから無効応答（`410 Gone` / `NotRegistered` 相当）を受けた時点で即座に削除する（MUST）— 無効宛先への送信継続は送信元の品質低下・ブロックを招く。起動時に最新識別子を取得して差し替え、長期未使用の識別子は定期削除し、無効率を監視して閾値（例: 10%）超過でアラートする（SHOULD）
 
 ### §129. The Install Prompt Protocol
 
 - **Rule 33.130**: カスタムインストールプロンプトでPWAインストール率を向上させる。`beforeinstallprompt` イベントをキャプチャし、適切なタイミングで表示する
+- **Display Conditions**: カスタムインストールプロンプトは、関心（訪問回数閾値、例: 3 回以上）・滞在（セッション時間閾値、例: 60 秒以上）・拒否履歴（直近 N 日、例: 30 日に閉じていない）の全条件を満たした場合のみ表示する（MUST）— 初回訪問での即時表示は不信感を招く。非モーダルのバナーで利点を説明してからネイティブプロンプトを出し、表示回数／インストール完了の比率を計測する（SHOULD）。閾値は Blueprint で定める
 
 ---
 
@@ -1213,11 +1321,14 @@ async function processLargeDataset(items: Item[]) {
 ### §132. Locale Management
 
 - **Rule 33.133**: ロケール検出の優先順位: URLパス > Cookie > Accept-Language ヘッダー
+- **Locale-Prefixed Path Matching**: サブディレクトリ方式の i18n では、現在パスとルート定数の比較（ナビの現在地判定・特定ページでの部品の出し分け・メンテナンス除外・パンくず等）は、必ずロケール接頭辞を剥がす共通関数を通してから行う（MUST）。既定ロケールが接頭辞なしの場合、剥がし忘れは既定ロケールでは正しく動き、非既定ロケールだけで機能が同時多発的に壊れる（5 箇所が同時に壊れていた例）。レビューで検出できないため、パス取得 API の利用箇所を走査し、正規化を通さない照合をファイル名付きで報告する自動テストを置く（SHOULD）
+- **Locale Verification by Body Text**: 静的レンダリング区間ではリクエスト依存の locale 解決は構造的に不可能で、レイアウトとページで動的性が異なると「半分だけ翻訳された HTML」が生まれる。locale 依存表示の検証は `<html lang>` やメタではなく本文の実文言で判定し（MUST）— lang はレイアウト由来で先に直るため最も誤解を生む指標 — 必ず対象 working tree のサーバーで行う（MUST）。恒久解は locale をルート構造・キャッシュキーへ昇格させること
 
 ### §133. Translation Workflow
 
 - **Rule 33.134**: i18n辞書ファイル（JSON/TS）はnamespace分割し、ページ単位でlazy loadする
 - **Missing Key Handling**: 翻訳キーが欠落している場合、フォールバック言語のテキストまたはキー自体を表示する。空文字列やundefinedをレンダリングすることは禁止
+- **Operator-Entered Values Are Single-Locale**: 管理画面や CMS から運営者が入力する設定値（ラベル・注記等）は、ロケール次元を持たない限り既定ロケール専用の値である。`運営値 || 辞書` のフォールバック順は値が存在する限り辞書を一度も使わず、非既定ロケールで既定言語が漏れ出す。非既定ロケールでは辞書を優先し運営値は既定ロケールでのみ採用するか、ロケール別カラムを持たせる（MUST）。サーバー処理が返す固定文言も同様に扱い、文言ではなくエラーコードを返す設計を優先する（SHOULD、`core/200_language_protocol.md` 参照）
 
 ---
 
@@ -1227,6 +1338,8 @@ async function processLargeDataset(items: Item[]) {
 
 - **Rule 33.135**: `error.tsx`（App Routerのエラーバウンダリ）を全ルートセグメントに配置し、未処理例外がユーザーに白画面を表示することを防止する
 - **Recovery**: エラーUIには「再試行」ボタンを含め、ユーザーが回復アクションを取れるようにする
+- **Client Exception Safety Boundary**: Client 側 `catch` で得た未知例外の `message` を toast / alert / inline に直結せず、ユーザー向け文言だけを通し、内部語彙（token / secret / service_role / constraint / ベンダー名）を含む文言は操作別 fallback に落とす安全化境界を 1 箇所に置く（MUST）。個別コンポーネントで「たぶん安全」と判断すると内部文言が画面・スクリーンショット・エラートラッカーの breadcrumb へ流れる。サーバーが意図して返した `result.error` はその境界で安全化済みとして扱う
+- **Capture Coverage ≠ PII Scrub**: エラートラッカーの自動計装は「catch して構造化応答を返す」パターンを捕捉しないため、logger.error + capture を 1 helper に集約し `source` タグ（`api:*` / `cron:*` / `webhook:*` / `action:*` / `segment:*`）を付ける（SHOULD）。正本は `operations/400_site_reliability.md` の「Capture Coverage ≠ PII Scrub」。
 
 ### §135. Global Error Handling
 
@@ -1235,6 +1348,8 @@ async function processLargeDataset(items: Item[]) {
 ### §136. Not Found Handling
 
 - **Rule 33.137**: `not-found.tsx` をカスタマイズし、404時に有用なナビゲーション（ホーム、検索等）を提供する
+- **The Streaming Soft-404 Protocol**: ストリーミング SSR では、ローディング／Suspense 境界の内側で `notFound()` を投げても、シェルが 200 で先行 flush された後はステータスを変えられない（soft-404）。ルート直下の `loading.tsx` が境界を作る構成では page body・`generateMetadata` どちらで投げても捕捉される。真の 404 が必要なルートは、軽い存在チェックをブロッキング（境界の外）で行い重い本体だけを境界内に置く設計にする（MUST）
+    - 即効の是正として全動的ルートの欠落時に noindex を保証しインデックス汚染を閉塞する（MUST）— ステータスは 200 のままでも実害は止まる。検証はコードの静的読解ではなく本番ビルドの実測で行い、HTTP ステータスと robots meta の両方を確認する（MUST）。「`notFound()` があるから 404」と読解で断定してはならない（MUST NOT）— 静的読解で誤判定した記録がある。メタデータ側に欠落分岐を追加する際は、本体側の「代替解決 → リダイレクト」経路（レガシー ID 等）を先に殺さないよう、同じ ID 解決を欠落分岐の先頭で確認する（MUST）
 
 ### §137. Offline & Network Resilience
 
@@ -1242,14 +1357,17 @@ async function processLargeDataset(items: Item[]) {
     - 自動リトライ（指数バックオフ、最大3回）
     - オフライン検知（`navigator.onLine` / `online`/`offline` イベント）
     - 楽観的更新 + ロールバック
+- **Empty ≠ Error**: 一覧・件数・状態を取得するデータ取得層は「0 件」と「取得失敗」を区別できる戻り値（`status: 'ok' | 'error'` 等）を返し、失敗を空配列や 0 で表現しない（MUST NOT）。UI は失敗時に空状態文言（「〜はありません」）を出さず、エラー表示と再試行手段を出す（MUST）。空状態と失敗状態は別のコンポーネントとして設計する（`design/000_design_ux.md` 参照）
 
 ### §138. Console Warning Protocol
 
 - **Rule 33.139**: `console.error` や `console.warn` は開発の失敗の証拠。全ての `console.error` は修正するか、正当な `Logger` に置き換える
+- **Same-Message Flood Is a Root-Cause Signal**: 同一文言の console 警告が大量に出ている状態をノイズとして放置しない（MUST NOT）。件数が多いほど根因（例: 描画ライブラリとフレームワークのメジャー版非互換、§5 参照）である可能性が高い
 
 ### §139. Graceful Degradation Protocol
 
 - **Rule 33.140**: 外部サービス（Analytics、Chat、Ad等）の読み込み失敗がアプリの主要機能を阻害してはならない。`try-catch` で隔離し、フォールバックを表示する
+- **Terminal Placeholder Mandate**: 外部依存の N 段フォールバック（一次取得 → 代替埋め込み → …）には、全段失敗時の明示的な終端表示（stage N+1）を必ず用意する（MUST）。終端を考慮しないと空白 box・無限スピナー・無音の失敗で UX が崩壊する。判定は各段の入力が全て空 / null のとき終端へ落とす。終端表示は支援技術にも失敗を伝え（`role="img"` + 説明ラベル等）（MUST）、テストは各段の出力分岐を全て SSR / 描画レベルで検証する（SHOULD）
 
 ---
 
@@ -1259,6 +1377,9 @@ async function processLargeDataset(items: Item[]) {
 
 - **Rule 33.141**: `'use server'` ディレクティブはファイルの先頭に配置し、ファイル全体をServer Actionファイルとして定義する。インライン `'use server'` は禁止
 - **Auth Guard**: 全Server Actionsの先頭で認証チェックを実行する。認証なしのServer Actionは原則禁止
+- **Every Export Is an Endpoint**: `'use server'` を宣言したファイルの export は全て匿名から呼べる公開エンドポイントと見なす（MUST）。「サーバー内部でしか呼んでいない」は根拠にならない（呼び出し側の事情は防御にならない）。cron・内部集計・特権書き込みを Server Action に同居させず（MUST NOT）、`server-only` の通常モジュールへ移してエンドポイントであること自体をやめる — ゲートを足すのは次善で攻撃面を消すのが最善。残す場合はその関数自身の中でゲートを通す（同一ファイルの別 export が守られていても無関係）。外から来る数値（窓・件数・遡り日数）は上下限へ丸める（MUST）
+    - **機械検出**: 「特権クライアントを直接使う export に、ゲートらしい呼び出しが同居しているか」を lint に組み込み、匿名から叩ける仕様の例外は理由付きの台帳に置き、母数と古い許可の残留も検査する（SHOULD）。実測で数百 export 中 1 件の異物が未認証の特権書き込みだった
+- **DB-Hidden Columns Stay Hidden in DTOs**: 特権クライアント（RLS／列 GRANT をバイパスする資格情報）で読んだ値を公開 DTO へ変換する経路は DB 側の露出制限を迂回する。DB で匿名から隠した列は DTO 側でも落とし、DB 側の期待集合を読み込んで DTO 出力に残らないことを assert する「挙動での突合」テストを置く（MUST）。逆向き（DTO に追加したが DB 台帳に無い）は CI が赤くなるがこちら向きは何も赤くならないため、突合を両方向にする（SHOULD）。サーバー専用の値は公開 DTO から読まず server-only の読み口を分けて必要列だけ select する（`engineering/200_supabase_architecture.md` Rule 2.9 参照）
 
 ### §141. Return Type Safety
 
@@ -1267,6 +1388,8 @@ async function processLargeDataset(items: Item[]) {
 ### §142. Rate Limiting
 
 - **Rule 33.143**: 公開Server Actions（Contact Form送信等）にはレート制限を実装する
+- **Entry Order**: 外部から到達するエンドポイントの入口順序は「①パラメータ／パス／ID の形式検証（400 で即時拒否）→ ②レート制限 → ③永続層アクセス」とする（SHOULD）。正本は `engineering/100_api_integration.md` の「Entry Order」。
+- **Public Analytics Actions**: 公開ページ由来の analytics 書き込み（閲覧／検索／クリックログ）は任意認証（未ログインは null で正常系とし例外化しない）・IP レート制限・呼び出し元供給 ID の形式検証で扱い、特権クライアントでの更新は公開状態の行に限定し、失敗時はログ書き込みだけスキップしてページ表示を止めない（MUST）。正本は `security/000_security_privacy.md` の「Public Analytics & Observation Endpoints」。
 
 ### §143. File Upload via Server Actions
 
@@ -1275,6 +1398,7 @@ async function processLargeDataset(items: Item[]) {
 ### §144. Mutation Side Effects
 
 - **Rule 33.145**: Server Action内でのデータ変更（CUD操作）後は `revalidateTag()` で関連キャッシュを明示的に無効化する
+- **Invalidation Wiring Before Caching**: クロスリクエストキャッシュを新設・拡張する差分は、その読み取り結果を変えうる全 mutation 経路（作成・更新・削除・一括操作）が同一の無効化タグを発火することを列挙して証明する（MUST）。証明できなければ TTL 任せの staleness 回帰でありキャッシュ追加を保留する。「パス単位の無効化（`revalidatePath`）」と「データキャッシュ単位の無効化（`revalidateTag`）」は別機構で、前者が後者を消すと仮定してはならない（MUST NOT）。同一データに複数モジュールが異なるタグ体系を持つならタグ標準化が先（`engineering/730_caching_discipline.md` 参照）
 
 ### §145. The API Key Isolation Protocol
 
@@ -1284,6 +1408,7 @@ async function processLargeDataset(items: Item[]) {
 ### §146. The Input Sanitization Protocol
 
 - **Rule 33.147**: Server Actionsに渡されるユーザー入力は `zod` でバリデーション後、必要に応じてサニタイズ処理を実行する。生のユーザー入力を直接DBクエリやHTML出力に使用することは禁止
+- **Filter Syntax Delimiter Neutralization**: クエリビルダーや REST フィルタ言語（PostgREST の `.or()` 等）に文字列としてユーザー入力を埋め込む場合、そのフィルタ言語の構文区切り文字（カンマ・括弧・ドット等）をクエリ発行の直前で置換・削除する（MUST。例: `query.replace(/[,()]/g, ' ')`）。プレースホルダ化されないフィルタ文字列は SQL 同様に Injection 面であり、「クエリビルダーなら安全」は誤解。無害化はバリデーション層とは別にクエリを組み立てる関数の内側で行い、迂回経路を残さない（SHOULD）
 
 ---
 
@@ -1377,6 +1502,7 @@ async function processLargeDataset(items: Item[]) {
 
 - **Rule 33.162**: Lighthouse CIをPRパイプラインに統合し、パフォーマンス・SEO・A11yスコアの劣化を自動検出する
 - **Threshold**: Performance ≥ 90, Accessibility ≥ 90, SEO ≥ 90
+- **Mobile-First Measurement**: 性能ゲートの計測条件は、利用者分布のうち最も制約の強い環境（低速回線 + CPU スロットリングのモバイルシミュレーション）を既定とする（MUST）。デスクトップ条件のみでの合格は無効とし、モバイル条件の閾値を Blueprint で定める。計測条件（デバイス・回線・スロットリング倍率）は CI 設定に明記しレポートに併記する（SHOULD）— 条件を固定しない性能ゲートは「PC では速い」で通ってしまう。条件の異なるスコアを比較しない
 
 ### §162. Storybook
 
@@ -1399,6 +1525,8 @@ async function processLargeDataset(items: Item[]) {
 ### §165. ISR (Incremental Static Regeneration)
 
 - **Rule 33.166**: 静的コンテンツ（ブログ、商品ページ等）にはISRを適用。`revalidate` 値はコンテンツ更新頻度に基づき設定（デフォルト: 3600秒）
+- **Revalidated Static as Default**: 公開一覧・索引ページは、毎リクエスト生成（コスト・TTFB・クローラー負荷）と完全静的（新着が永遠に出ない）の両極端を避け、更新頻度に応じた再検証付き静的化を既定とし、書き込み側の on-demand 無効化と組み合わせる（SHOULD）。ページ全体の静的化候補は (a) パスパラメータのみ (b) 認証状態を読まない (c) 公開読み取り専用 (d) 更新頻度が再検証間隔より長い、の 4 条件を満たすものに限る（MUST）— クエリ文字列等のリクエスト単位入力を持つページは本質的に動的で、キャッシュキーに含めると爆発する
+    - 認証依存・ユーザー固有ページは静的化から完全除外し意図を明示宣言する（MUST）— ユーザー間キャッシュ漏えいは重大なセキュリティ事故。動的入力を持つページの代替は (1) 入力をパス化 (2) 静的シェル + 動的断片 (3) データ取得関数単位のキャッシュ、から選ぶ（SHOULD）。監査は「再検証未設定ページ」を機械列挙し、動的入力の有無で事前フィルタしてから候補化する
 
 ### §166. Edge Config
 
@@ -1408,6 +1536,8 @@ async function processLargeDataset(items: Item[]) {
 
 - **Rule 33.168**: 静的資産（画像、フォント、CSS/JS）は**CDN**からの配信を必須とする
 - **Cache-Control**: `public, max-age=31536000, immutable`（ハッシュ付きアセット）
+- **Delivery-Layer-First Diagnosis**: 静的資産の体感遅延・再取得の調査は、コンポーネントやローダーの最適化より先に配信層を実測する（MUST）: 変換（リサイズ／フォーマット）が実際に効いているか、`Cache-Control` の実ヘッダー、CDN のヒット／ミス状態を curl で確認する。アップロード経路によって cache-control 未指定（`no-cache` 配信）になる資産が混在しうる。開発環境では画像変換が無効なことが多く、srcset / preload の実効性と LCP は本番相当の配信構成で判断し開発環境の遅延を根拠にしない（MUST NOT）
+    - 設定値を入れれば切り替わる配信経路（環境変数で有効化する CDN／プロキシ）は、値が入っていない限り一度も通しで検証されていない — 本番に値を入れた瞬間に全画像が落ちる状態だった例がある。本番へ値を入れる前に対象経路を実 URL で end-to-end に検証する（MUST）。診断ではエラーコードの差（「形式不正」まで進む = 変換自体は稼働／「拒否」= 手前で弾かれている）を「変換が有効か」と「その source が許されるか」の切り分けに使う（SHOULD）
 
 ### §168. Production Monitoring
 
@@ -1451,6 +1581,8 @@ async function processLargeDataset(items: Item[]) {
 ### §174. The Dialog Element Protocol
 
 - **Rule 33.175**: モーダルダイアログには `<dialog>` 要素の `showModal()` を使用する。カスタムモーダル実装よりセマンティック・アクセシブル・安全
+- **The Always-Mounted Drawer Protocol**: 常時マウントで開閉する UI に「マウント = アクティブ」前提のモーダルプリミティブ（スクロールロックがマウントに無条件連動するもの等）を使ってはならない（MUST NOT）。ライブラリの配布物（dist）を実読して前提を確かめる。手組みするなら a11y（`role="dialog"` / `aria-modal` / Escape / Tab トラップ / フォーカス返却）を等価に提供する。閉状態の閉じ込めは `inert` 属性を第一候補にする（SHOULD）— 1 属性でフォーカス・支援技術・ポインタを一括除外でき SSR にも乗る
+    - Portal を外して SSR HTML に実在させる場合、`transform` / `filter` / `perspective` を持つ祖先の外に描画する（MUST）— 変換祖先は `position: fixed` の containing block になりパネルが祖先の箱に拘束される。配置は source テストで固定する。宣言的 UI フレームワークが wheel / touchmove を受動（passive）で登録する場合、JSX ハンドラ内の `preventDefault` は無効なので、スクロール抑止は開いている間だけ native の非受動リスナーを装着する（MUST）。合成イベントを dispatch して `defaultPrevented` を読む機能テストで確認する。検証は対で行う: SSR 側は curl で属性・transform の実在 grep（否定側も）、挙動側は開閉両方向の中間フレーム捕捉（MUST）。`design/000_design_ux.md` の Portal 必須規定に対する例外（SSR 実在が必要な常時マウント UI）
 
 ### §175. The Scroll-Driven Animations Protocol
 
@@ -1548,6 +1680,7 @@ navigation.addEventListener('navigate', (event) => {
 ### §185. Session Replay
 
 - **Rule 33.186**: エラー再現のためにセッションリプレイ（Sentry Session Replay等）を導入する。ただし PII（個人識別情報）はマスキング必須
+- **Rule 33.186b（Sensitive-Screen Stop Gate）**: 機微画面で第三者 SDK（セッション記録・分析・広告）を止める門を書くときは、「止める／再開する」が (a) 送信の有無 (b) 記録モード (c) 標本率 (d) 永続化（sticky session）の 4 面でどう変わるかを、公開ドキュメントではなく配布物（実装）を読んで確認する（MUST）— マスキングしても URL・滞在・操作は残り、`stop()` / `start()` が標本率を無視する SDK がある。確認した前提は SDK の配布物を読む単体テストで固定し、SDK 更新で前提が変わったら赤くなるようにする（SHOULD）。止める順序はフレームワークの effect 実行順（insertion → layout → passive）まで確かめ、公開 API に「送らずに止める」が無ければ送信直前の envelope フィルタを最終層として持つ
 
 ---
 
@@ -1577,6 +1710,7 @@ navigation.addEventListener('navigate', (event) => {
 ### §190. The AI Rate Limiting UI Protocol
 
 - **Rule 33.191**: AIサービスのレート制限到達時は、ユーザーに分かりやすいメッセージ（「しばらくお待ちください」）と待機時間の目安を表示する
+- **Cost Friction Design**: 入力に連動して自動的に高コスト処理（生成 AI・外部 API・重い検索）が走る UI は、入力完了から一定時間（例: 800ms）のデバウンスを UI レベルで必須とする（MUST）。1 回の実行コストが高いアクションはワンクリックで発火させず、オプション選択後の「最終実行」ボタンで発火させる二段構成にする（MUST）— 誤クリックによるコスト浪費を構造的に防ぐ。制限到達時の文言はブランドトーンに合わせ再開時期の目安を添える（`design/000_design_ux.md` The Quota Framing Protocol 参照）
 
 ### §191. The AI Accessibility Protocol
 
@@ -1653,6 +1787,7 @@ navigation.addEventListener('navigate', (event) => {
 
 - **Rule 33.204**: Content Security Policy は `'strict-dynamic'` + nonce ベースのポリシーを推奨する
 - **Report-Only**: 導入初期は `Content-Security-Policy-Report-Only` でレポート収集し、ブロッキングはしない
+- **Origin Addition = Allowlist Update**: 外部オリジン（画像ホスト・埋め込み iframe・API 接続先・サードパーティスクリプト）を参照するコードを追加する変更は、対応する許可リスト（画像最適化の許可ホスト `remotePatterns`、CSP の各ディレクティブ、CORS、`preconnect` 対象）を同じ変更で更新する（MUST）。設定漏れは開発環境で気づかず本番でのみクラッシュ（500）／ブロックとして顕在化する。動的 URL（アフィリエイト・ユーザーアバター・UGC 埋め込み）を扱う機能では想定ドメインを実装初期にプリセットし、未知ドメインは安全にフォールバック（プレースホルダー画像・リンク化）させる（SHOULD）。外部サービスを追加した PR では、実際に読み込まれる外部リソースと CSP／許可リストの照合を受入条件にする（SHOULD。§99 参照）
 
 ### §203b. The CSP Level 3 Protocol
 
@@ -1745,6 +1880,7 @@ navigation.addEventListener('navigate', (event) => {
 
 ### §219. The Double Scrollbar Ban
 - **Rule 33.220**: ネストされたスクロールコンテナの二重スクロールバーは厳禁
+- **overflow-x Implies overflow-y auto**: `overflow-x` / `overflow-y` の片方だけを `visible` 以外にすると、もう片方は `auto` に計算される（CSS Overflow 3）。横スクロールだけを意図する箱は `overflow-y` を明示（`hidden` または `clip`）する（MUST）— 縦のはみ出しが 0 でもタッチ端末はラバーバンドの受け皿にし、本文スクロール中に止まる離脱要因になる。`overscroll-behavior: contain` は親への伝播を止めるだけで箱自身のバウンスには効かない
 
 ### §220. The Fragment Misuse Ban
 - **Rule 33.221**: `key` 属性が必要なリストレンダリングで `<>...</>` ショートハンドを使用し、キー警告を放置することは禁止
@@ -1757,6 +1893,9 @@ navigation.addEventListener('navigate', (event) => {
 
 ### §223. The Image Without Dimensions Ban
 - **Rule 33.224**: `<img>` / `<Image>` に `width` と `height`（または `fill` + wrapper sizing）なしで使用することは禁止。CLS直接原因
+- **Reserved Height Is Media-Only（対になる原則）**: 予約高さ（`min-height` / 固定 `height`）を許すのは、読み込み前に寸法が確定しない媒体（画像・動画・地図・埋め込み・広告枠）、タップ領域の最小寸法、読み込み後に置換される skeleton / 初期化前占位に限る（MUST）。テキストが中身となる器（本文・リッチテキストの描画領域・タブや一覧の外枠）に予約高さを置いてはならない（MUST NOT）— 短い本文の下に空白が出るだけでなく、SSR 段に同じ値が無ければ hydration で伸びて CLS 対策のつもりの `min-height` が CLS の発生源になる。編集面の都合（空エディタでもクリックできる最低高さ）を公開面の読み取り専用レンダラへ持ち込まない。固定高さのスクロール枠は `max-height` にし、公開レンダラに予約高さが混入していないことを自動テストで検査する（SHOULD）
+- **Media Frame Ratio from Real Dimensions**: `object-fit: cover` で描くメディア枠に、画像の比率と無関係な固定高さを与えない（MUST NOT）— 上下が切れる。枠のアスペクト比は実データの画像寸法の分布から導き SSOT 定数として持つ。スライド・カードの幅を絶対値で固定しない（MUST NOT）— 中間幅（サイドバー付き 2 列等）でカラム幅が固定値より狭くなりはみ出す。枠 = カラムに合わせる。`contain` にすると比率の合わない画像で帯が出るため方針（cover を維持し少数の例外画像は切れる）を明記し、是正は各画面幅で「見えている割合」を実測して前後比較する（SHOULD）
+- **Third-Party Content: Reservation and Constraint as a Pair**: 遅延読込される第三者コンテンツ（広告等）の領域予約は、コンテンツ種別ごとの実測サイズから決め、かつコンテンツ側の可変サイズ動作（全幅レスポンシブ等）を予約に収まるよう制限する（MUST）— 予約だけ・制限だけの片側対応では CLS は解消しない（狭い枠で予約の 2 倍超のサイズが返り CLS 0.4 超になった例）。管理データ（DB 上の幅・高さ）を予約値の根拠にする前に本番の実測と一致することを確認し（MUST）、予約値やコンテンツ側設定を変更したら本番で対象ページ種別ごとに CLS を再測して予算内であることを証跡にする（MUST）。予約定数には更新ルール（いつ・何を測って変えるか）を併記する（`product/300_revenue_monetization.md` §5 参照）
 
 ### §224. The useEffect for Derived State Ban
 - **Rule 33.225**: 他のstateから計算可能な値を `useEffect` + `setState` で同期する「ミラーリングパターン」は禁止
@@ -1787,6 +1926,7 @@ navigation.addEventListener('navigate', (event) => {
 
 ### §233. The Magic Number/String Ban
 - **Rule 33.234**: コード内のマジックナンバー・マジックストリングは禁止。定数や`enum`を定義
+- **Peripheral Literal Drift**: 本体を定数参照にしても周辺で drift する。関数の default parameter（`getList(limit = 20)`）・省略時 fallback・HTTP ステータスの厳密比較・時間単位換算（`60_000`）・sitemap／redirect 除外・ヘッダー判定などの周辺境界も同じ SSOT を参照する（MUST）。表示・判定・アラートで共有される閾値は消費側（ダッシュボード・アラート）を作る前に SSOT 化し（MUST）、単位を名前または注記に埋め込む（`*_MS`、「比率 0-1」）（SHOULD）。検出: 比較演算子直後の数値リテラル（`> 0.15`、`<= 500`）を grep 対象にする
 
 ### §234. The Lazy Redirect Ban
 - **Rule 33.235**: 条件分岐のない冗長リダイレクトは禁止。ルーティング構造で解決
@@ -1887,6 +2027,7 @@ navigation.addEventListener('navigate', (event) => {
     - パスワードマネージャー互換（`autocomplete` 属性の適切な設定）
     - ソーシャルログインボタンの一貫したデザイン
     - エラーメッセージでメールアドレスの存在を暴露しない（「メールまたはパスワードが正しくありません」）
+- **In-App Browser Tier**: ブラウザサポートマトリクスは汎用ブラウザだけでなく、対象市場でシェアの高いアプリ内ブラウザ（メッセンジャー・ポータル・SNS の WebView）をアナリティクスに基づき Tier に組み込み、Tier 1 なら全機能テストの対象にする（MUST）。正本は `quality/000_qa_testing.md` の「In-App Browsers」。
 
 ### §255. Passkey Support
 
@@ -1904,6 +2045,7 @@ navigation.addEventListener('navigate', (event) => {
 ### §258. Protected Route Protocol
 
 - **Rule 33.259**: 認証が必要なルートは `middleware.ts` でEdge Middlewareレベルでガードする。ページコンポーネント内での認証チェックのみに依存しない
+- **No Privilege-Acquiring Page Under Its Own Guard**: 集中 guard（layout 等）の配下に、その権限を獲得する画面（招待受諾・オンボーディング・権限申請・契約同意）を置かない（MUST NOT）— 循環依存で機能が構造的に死ぬ。設計時に「このページの利用者は guard を通過できる状態か」を問い、分離は URL を変えない機構（route group 等）で行う。guard 外区画を作ったら配下の全ページを列挙して「guard 配下 or 完全一致 allowlist の guard 外」を強制する構造ゲートを置き、走査 0 件での偽合格を防ぐ下限 assert を併設する（MUST）— guard 外区画へ新しいページを足すと無言で認可が外れる。ソース走査はコメント除外で行う（`security/430_authorization_and_access_control.md` 参照）
 
 ---
 
@@ -1921,10 +2063,17 @@ navigation.addEventListener('navigate', (event) => {
     - **Framer Motion**: Reactコンポーネントのマウント/アンマウントアニメーション、ジェスチャー
     - **GSAP**: 複雑なタイムライン・スクロール連動アニメーション
 - **Bundle Impact**: アニメーションライブラリのバンドルサイズを常に意識。CSS純正で可能な場合はCSS優先
+- **The Disclosure UI Mount Protocol**: 展開 UI（オーバーレイ／パネル／項目）は常時マウントし、開閉は初期値固定 + アニメーショントグルで駆動する（MUST）。閉完了時は `visibility:hidden` + `inert`（または `pointer-events-none` / `tabIndex=-1`）で非描画化・hit-test / a11y ツリー除外する。重さの支配的コストは開くたびのマウント → 破棄（約 95 ノード）と blur の多重であり、マイクロ最適化（memo / GPU ヒント）では構造的な重さは解消しない。`design/000_design_ux.md` の「条件付きレンダリング優先」に対する但し書き（アニメーション遷移を持つ開閉 UI は常時マウント + 遷移トグル）
+    - `backdrop-filter` は視覚差が実際に出る面に限定する（MUST）— 不透明度の高い色付き背景上の blur は効果ゼロでコストだけ発生する。モバイルでは全画面 blur を避け濃い調光で代替する（SHOULD）
+    - body を `position: fixed` にするスクロールロックは全文書リフローを起こし、閉じた瞬間の同期解除は閉アニメの最初のフレームを食い潰す。解除は閉アニメの体感完了まで遅延し、遅延中の再オープンは予約キャンセルでロック継続、アンマウント時は即時解除（SHOULD）
+    - ページ内スクロール演出はネイティブ `scrollTo({behavior:'smooth'})` を主経路にする（MUST）。rAF 駆動の自前イージングはメインスレッド実行のため遅延画像ロードやスクロールハンドラと競合してカクつく。JS 駆動は watchdog 後のフォールバック専用
+    - 常時マウント化したリンクは不要な prefetch を明示的に止める（`visibility:hidden` でも IntersectionObserver は交差する）（SHOULD）。常時マウント後は `querySelector` が隠れた項目を拾い、プログラム `.click()` は `visibility:hidden` でも発火するため、検証は `aria-expanded` 等の状態属性で対象を特定する
 
 ### §261. The Micro-Interaction Protocol
 
 - **Rule 33.262**: ボタンクリック、フォーム送信、状態変更等の主要UIイベントにマイクロインタラクション（0.1〜0.3秒の短いフィードバック）を実装する
+- **Paint-Gated Choreography**: 展開直後の重い初回描画（リフロー・blur 初回描画）と重なるアニメーションは、経過時間ベースの遅延・spring では最初に描画できたフレームで既に終盤 = ポップインになる。発火は「初回フレームの描画コミット後」（double rAF）でゲートする（MUST）— 壁時計遅延は停滞を吸収できない。開閉は段階振付にする（SHOULD）: 開 = ゲート起点でオーバーレイ／パネルのフェード → 完了後に項目の展開、閉 = 項目収納 → 概ね収納後にフェードアウト → 完了後にロック解除。タイミング定数は SSOT に置き、段階間の順序不変条件（例: `OPEN_FADE ≤ ITEMS_BASE_DELAY`）をコメントで固定する（MUST）
+    - モーションの質感が確立済みの UI では駆動エンジン（spring 等）を差し替えず「マウント方式だけ」を変える（SHOULD）— CSS bezier 近似は体感差で棄却されうる。非表示タブでは rAF が進まないため、検証はスクリーンショット取得でフレームを駆動し、中間状態（回転 + 中間座標）の捕捉をもって全区間再生の証拠とする（SHOULD）
 
 ### §262. The Loading Animation Protocol
 
@@ -2037,6 +2186,7 @@ navigation.addEventListener('navigate', (event) => {
 ### §283. The Third-Party Script Isolation Protocol
 
 - **Rule 33.284**: サードパーティスクリプト（Analytics、Chat、Ad等）はメインスレッドをブロックしてはならない。`next/script` の `lazyOnload` 戦略で遅延ロードする
+- **Rule 33.284a（Visibility-Gated Mount）**: IntersectionObserver 等の交差判定は幾何のみを見る。`inert`・`visibility`・transform 途中・オフスクリーン配置のパネルも「交差」するため、交差判定を「ユーザーに見えている」の代替にしてはならない（MUST）— 交差判定は「近づいたか」の判定であって「見えるか」の判定ではない。開閉状態を UI が持つ面（ドロワー・タブ・アコーディオン・モーダル）に置く遅延ロード対象（広告・重い埋め込み・計測）は、その状態が「開いた」になってから初めてマウントする（MUST）。常時マウント + 非表示は第三者スクリプトの読込・課金・計測を隠れて発生させる（開かれていないメニューの広告枠が filled になっていた例）。「読み込み条件を判定する純関数」が正しくても「その関数を呼ぶ配線」が誤っていれば本番で誤動作するため、純関数のテストとは別に配線（マウント条件）を検査するテストを置き本番で実測する（MUST）
 
 ### §284. The Partytown Protocol
 
@@ -2301,6 +2451,7 @@ const { data, error } = await client.GET('/api/products/{id}', {
 - **Rule 33.319**: フロントエンドで受信する外部データ（API・WebSocket・localStorage等）は、消費前に必ず Zod でバリデーションする
 - **Trust Boundary**: フロントエンドの Trust Boundary は「自コンポーネントの props」まで。外部データはすべて untrusted として扱う
 - **Error Recovery**: バリデーション失敗時はデフォルト値またはエラー状態にフォールバックする。クラッシュさせてはならない
+- **Absent-Key Semantics**: 列挙値の対応表は定義域を全部持つ定数として置き、範囲外は `undefined` を返すのではなく「対応が無い」と判断できる形にする（MUST）— 配列添字で引く実装は定義域が広がった瞬間に静かに壊れ、型検査・lint・build は通る。正本は `engineering/740_data_contracts.md` の「Rule 740.5.2a」。
 
 ```typescript
 // ✅ 外部データのバリデーションゲート
@@ -2369,6 +2520,8 @@ function ProductList({ response }: { response: ApiResponse }) {
 }
 ```
 
+- **Classification Mapping Totality Test**: 保存値の種別（type）を面ごとの大分類（family）へ振り分ける場合、対応表を SSOT に置き、「全 type がちょうど 1 つの family に属する」全域性・一意性をテストで固定する（MUST）— type を増やして分類漏れが起きると一覧から静かに消える。コンポーネントや DB クエリで種別リテラルを直書きした分岐（`type === 'x' || …`）を書かず、振り分け関数と許可集合定数を経由する（MUST NOT）。`satisfies never` の網羅検出を実行時の対応表にも延長する実務手段
+
 ### §329. The Data Invariant Protocol
 
 - **Rule 33.323**: ビジネスクリティカルなデータの不変条件（Invariant）をフロントエンドでも検証する
@@ -2380,6 +2533,8 @@ function ProductList({ response }: { response: ApiResponse }) {
 - **Rule 33.324**: DBレコードの未設定フィールドを `null` でコンポーネントに渡す代わりに、**Null Object パターン**でデフォルト値を持つオブジェクトに変換する
 - **Benefit**: コンポーネント層での null チェック分岐を排除し、コードの可読性とテスタビリティを向上
 - **DTO Layer**: API → DTO 変換時にNull Objectを生成する
+- **The Single-Source Visible Label Protocol**: 利用者に見えるラベル（キャプション帯等）の値の出所は単一フィールドに固定し、別フィールド（note / annotation / title / alt）への暗黙フォールバック（`a ?? b ?? c`）を禁止する（MUST NOT）— 「空のはずの場所に別の文字が出る」乖離を生む。正本は `engineering/740_data_contracts.md` の「Rule 740.5.2b」。
+- **The `a || b` Single-Fallback Display Trap**: フォールバック演算子は「どちらか片方があればよい」要件にのみ正しい。「両方見せたい」要件に流用すると、優先側が存在する限り劣後側が構造的に永久に不可視になり、データが揃っているほど症状が固定化する。表示系で `a || b` を使う場合、「b は a があるとき表示されなくてよいか」をレビュー観点として明示し（MUST）、併記要件は要素を分けて各々 `value && …` で描画する（MUST）
 
 ---
 

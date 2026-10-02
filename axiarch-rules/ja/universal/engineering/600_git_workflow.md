@@ -58,6 +58,8 @@
 
 - **原則**: 統合差分を小さく保ち、未統合期間と競合riskを測定する。trunk-based development、release branch、stacked diff等の方式は、製品のrelease model、規制、複数version保守、hardware／mobile審査、offline開発の制約からBlueprintで選ぶ。
 - **短期統合**: 短命branchと頻繁な統合は通常の既定だが、日次や固定寿命をUniversal要件にしない。長期branchが必要ならowner、同期方法、security fixのbackport、終了条件を持つ。
+- **Post-Merge Integration Gate（統合後ゲート）**: 各change proposalのCIは「自分のbranch＋その時点のbase」しか検証していない。複数の変更が同時期にマージされた／stacked／squash mergeされた場合、統合後の基幹branchで静的検査だけでなくbuildと全testを再実行する（MUST）。「両方緑だった」を統合の根拠にせず、緑の対象が何だったかを毎回言えるようにする。失敗パターン: 2本のPRが個別に緑のまま同時期にマージされ、同居状態のゲートが一度も走らないまま本番で壊れる。
+    - より良いのは「マージされる木」をマージ前に検査する仕組み（merge queue相当）であり、設計の前提にするVCS／CI機能は文書ではなく実際のUI／APIで利用可否を確かめてから設計する（MUST）。手順の詳細は §2.6 Integrated-State Verification / Conflict Resolution Contract。
 
 ### 1.1. ブランチ命名規約
 
@@ -75,6 +77,7 @@
 
 - **Law**: branchのage、base divergence、未解決競合、security patch遅延を可視化し、Blueprintのrisk budgetを超えたbranchへownerと解消計画を要求する。
 - **Action**: 大きな変更は互換性shim、branch by abstraction、feature flag、stacked diff、段階migration等から適切な手段を選び、未完成機能を安全に統合または隔離する。固定2日やfeature flagだけを唯一解にしない。
+- **Resume Check（再開時の前提照合）**: 未コミットの下書き・長期stash・放置された変更提案を時間を置いて再開するときは、差分の可読性ではなく**前提の生存**を確認する（MUST）。ファイルの中身は書いた時点で凍っているが、依存する概念（プロバイダ名・契約・定数・SSOT）はbase側で動いている。依存する概念で `git log <base> --grep` と実コードを引き、変化があれば書き直す。既にSSOTがある領域は下書きの文言をSSOTと1対1で突き合わせる（MUST）— SSOTのコメントには過去の誤りが書かれていることが多く、下書きに同じ誤りがあればそれが答えである。公表文書（規約・開示）ではこの再照合を必須とする（MUST）。
 
 ---
 
@@ -104,6 +107,7 @@
 ### 2.1. Atomic Commits
 
 - **Law**: 1つのコミットには「1つの論理的変更」のみを含めます。
+- **Explicit Staging（明示的なstage）**: 監査・大規模リファクタ・整形ツール実行後のコミットでは `git add -A` / `git add .` を使わず、意図したファイルを明示的にstageする（MUST）。commit前に `git status` と `git diff --stat HEAD` で、read-only領域（Universalルール・エージェント設定・生成物・`node_modules/`）が含まれていないことを確認し（MUST）、push前に `git log --stat -1` で変更ファイル数と内容を見直す（SHOULD）。失敗パターン: 監査commitがformatterの副作用で保護領域の変更を巻き込み、意図しないUniversal改変としてpushされる。誤ってコミットした場合は `git reset --soft HEAD~1` → 対象を `git restore --staged` → 意図したファイルのみ再commitで復旧し、原因（formatter・lint-staged設定）も同時に直す（SHOULD）。
 
 ### 2.2. Pull Request Template Protocol
 
@@ -155,6 +159,7 @@
 
 - **Law**: formatterと軽量lintはlocalまたはCIで決定論的に再現し、CIをauthoritative gateとする。local hookで自動修正する場合はstaged範囲を逸脱せず、部分stageを壊さず、変更内容を利用者が確認できるようにする。hook自体は全projectの必須実装ではない。
 - **クロスリファレンス**: 具体的なフレームワーク選定は §9.3 Hooks Distribution / §2.10 commitlint（commit-msg フック）
+- **Generated Artifact Formatter Parity（生成物と整形フックの一致）**: CIで「生成スクリプト実行 → `git diff --exit-code`」により生成物の鮮度を検証する場合、生成スクリプトは整形フック適用後のコミット済み生成物と**同一のバイト列**を出力しなければならない（MUST）。正本は `quality/000_qa_testing.md` の「Generated Artifact Formatter Parity」。
 
 ### 2.6. Merge Strategy Mandate（マージ戦略義務）
 
@@ -163,6 +168,14 @@
 - **Policy**: merge方式をrepository単位で明示し、同じ保護refへ無秩序に混在させない。hosting serviceの設定、server hook、merge bot等で強制する。
 - **Local Rebase Discipline（ローカル Rebase 規律）**:
     - 自分だけが所有するbranchではrebaseを使用できる。共有branchの履歴を書き換える場合は全collaboratorの明示合意と復旧点を必要とし、通常はmergeまたは新branchを選ぶ。
+- **Integrated-State Verification（統合状態での検証）**:
+    - 複数branchに分割した変更は、**出荷する形（全branchをマージした状態）で少なくとも1回、全ゲートを通す**ことを完了条件とする（MUST）。branch分割はレビュー単位であって検証単位ではない。マージ後にしか成立しない到達鎖、branchを跨いで初めて働くゲート、他branchの正当なコードを阻むガードは、branch単体では原理的に検出できない。
+    - stacked（依存）branchはbaseの後続commitを取り込んで維持する（MUST）。baseへ後からcommitしたら依存branchへ伝播させる。
+    - 独立branchが同じファイルへ入れるガードの広さに注意する。トークン単位の禁止は他branchの正当なコードを阻み、最終的に緩められる（SHOULD）。
+- **Conflict Resolution Contract（競合解決の契約）**:
+    - 競合解決の正しさは「両方の意図が生きているか」で判定する（MUST）。解決後に満たすべき条件を先に書き出してから解決し、「新しい方を採る」「片方に寄せる」を解決とみなしてはならない（MUST NOT）。正しさは取り込み元の権威ではなく、両側の要素（定数名・関数名の出現数）が残っていることの実測と自己testで確かめる。
+    - 競合解決・統合の前に、branch間の祖先関係を `git merge-base --is-ancestor` 等で**機械的に実測**する（MUST）。名前の見た目や記憶した設計図を根拠にしない。初回統合では「解決済みの版」はまだ存在しないので、他所から持ってくることを第一手にしない。
+    - 多branchのマージは、順序・競合ファイル・解決方針・解決後の検証条件・マージ後に通すゲートを**手順書として成果物に残す**（SHOULD）。同じファイルを複数branchが育てている場合はその組と正しい解決を列挙する。複数branchを一括統合する操作（octopus merge相当）は競合時に解決済みの前半ごと巻き戻るため使わない（SHOULD NOT）。
 
 ### 2.7. Force-Push Protocol（フォースプッシュ・プロトコル）
 
@@ -276,6 +289,7 @@
     2. マージ済みの作業ブランチを `git branch -d <branch>` で削除
     3. リモートブランチも同様にクリーンアップ（`git push origin --delete <branch>` または GitHub の auto-delete on merge 機能を有効化）
 - **継続性**: `git branch --merged` の確認を **エンジニアの呼吸** として日常化せよ。
+- **Squash-Merge Aftercare（squash merge後の後始末）**: squash mergeとマージ後自動削除を採用する環境では、localにbranchとupstream設定が残っていることはremote branchの存在を意味しない。既存の変更提案へ後続変更をpushする前に、**その状態（open／merged）とheadを実照会**する（MUST）。`git push` の出力を読み、`* [new branch]` は更新ではなく削除済みbranchの復活であると認識する（MUST）— 孤児branchと「baseに入らない是正」を生む。squash merge済みの変更提案への後続修正は元branchを再利用せず、**baseから作り直してcherry-pick**する（MUST）。元branchは共通祖先がマージ前のままで、マージ済み差分が二重に現れる。squash mergeでは元commitのSHAはbaseの祖先にならないため、反映判定はSHAではなく**内容**で行う。
 
 ### 3.1. Stale Remote Tracking References
 
@@ -328,6 +342,8 @@ git worktree repair <moved-worktree-path>
 ./axiarch-scripts/check-git-config-clean.sh --quiet # CI 用サイレントモード（汚染なら exit 1）
 ```
 
+- **Runtime-Scoped Health Checks（実行環境に依存する検査の適用判定）**: 特定runtime（エージェント種別・CI・OS）でしか生成されない証跡を検査するhealth checkは、**先に適用対象判定**を行い、対象外ではquietモードで出力なしにpassする（MUST）。「設定ファイルの存在」（不変条件、欠落は失敗）と「実際の実行履歴」（runtime依存、生成されない環境は対象外）を分離する。修正後はquiet実行でexit 0かつ出力なしを確認する。失敗パターン: 偽陽性が続いて検査全体への信頼が落ち、本物の警告も無視される。
+
 ### 4.3. 複数tool・AI Agent並行使用時の追加注意
 
 - **Context**: IDE、AI agent、automation、開発者が同じrepository metadata、branch、index、worktreeを並行変更すると、support差、lock、base誤認、未取得変更の上書きが起こり得る。
@@ -336,6 +352,12 @@ git worktree repair <moved-worktree-path>
     2. 同じbranch／indexへ書く操作はlock、queue、handoff等で直列化する
     3. task開始・handoff・終了時にstatus、worktree一覧、remote parity、未公開変更を確認する
     4. 自動修復前にdry-runを確認し、active worktree、branch ref、未保存変更を削除しない
+    5. 1セッションで独立branchを複数作り、未pushのまま「全ゲート緑」と報告しない（MUST NOT）。push前に使い捨てbranchで推奨順に通しマージし、統合後にtest・型検査を再実行する（MUST）。自動マージの成功はテキストが混ざったことしか示さない。衝突が判明したらマージ順を決め、後続を先行の上へrebaseして事前解消する（SHOULD）。上げられない事情があるならbranch名と理由をtask記録に残す（MUST）— 誰も知らないbranchは「無い」のと同じである
+    6. branch固有の差分はthree-dot（`base...branch`）で見る（MUST）。two-dotはbaseの古さを差分に混ぜ、存在しない退行を見せる
+    7. Gitはhook実行時に `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` 等を子プロセス環境へ注入する。子プロセスで `git` を起動するtest fixture・scriptは **`GIT_*` を除去した環境**で回す（MUST）。`cwd` を一時ディレクトリにしても `GIT_DIR` があれば無視され、共有 `.git/config` の `core.bare` 書き換え・identity（`user.*`）の偽名上書き・object storeへのfixture commit混入・remote-tracking refの誤指しが起き、commitは成功するため沈黙伝播する。同型箇所は横断grepで全て潰し、サニタイザをSSOT化する。「手元では通るのにhook経由だと落ちる」ときは、まず `env | grep ^GIT` を疑う（SHOULD）
+    8. 同じ作業ツリーで複数のセッション（人・AI）が動きうる場合、未コミット変更は「安全な保留」ではなく**他者の `git add -A` に巻き込まれる状態**として扱う。長く放置せず、stashか別worktreeへ退避する（SHOULD）。commit前は `git status` に加え**直前commitの中身（`git log -1 --stat`）**を確認し、自分の意図しないファイルが混入していないかを見る（MUST）。「commitしていないから安全」は単独セッション前提の思い込みである
+    9. 共有 `.git/config` は並行セッション稼働中に書き換えない。明らかな異常値でも `--worktree` スコープかper-invocationの `GIT_DIR` / `GIT_WORK_TREE` で回避し、共有configの是正はownerへ報告する。Gitが壊れている間に `git stash` を試さない（結果を確認できず、変更消失の疑いだけが残る）— 作業ツリーの状態確認はGit以外の手段（`ls`、ソース整合性script）でも取れるようにしておく
+    10. AI agentが短時間に多数ファイルを書き換えるtaskでは、端末のセキュリティソフトがランサムウェアと誤検知し、shell・gitを含む開発コマンド全体を停止させうる。大量変更の前に利用者へ通知するか、変更を小さな単位に分割する（SHOULD）。「突然 `/bin/bash` や `rm` が実行できない」症状ではセキュリティソフトのブロックを最初に疑う
 
 ### 4.4. Failure Pattern Documentation（失敗パターン）
 
@@ -348,6 +370,11 @@ git worktree repair <moved-worktree-path>
     | worktreeをfile操作で移動 | 登録pathと実pathが不一致 | `git worktree repair` |
     | local branch削除後にconfig sectionが残る | local refなしで`branch.<name>` keyが存在 | 対象sectionだけをreview後に削除 |
     | toolが正式Git extensionを未support | 再現可能なunsupported-extension error | tool／Git更新、隔離、serial execution、期限付き例外 |
+    | worktreeからhookが別checkoutの定義で実行される（`core.hooksPath` が絶対パス） | 自分の差分と無関係なscript／command不在でhookが失敗する | `git config --get core.hooksPath` で実効パスを確認し、対象worktreeのhook起動設定を `--worktree` スコープで相対化・復元する。`--no-verify` へ逃げない |
+    | `git worktree add` 直後のworktreeにhook実体（gitignore対象の生成物）が無い | Gitは警告せずhookを全部素通しにし、commit出力が `[branch sha] message` だけで終わる | commit前にhookを再生成して実体の存在を確認する。素通しでcommitした場合はpre-commit相当の検査を手動で流し記録する |
+    | hookから起動されたtest fixtureが `GIT_DIR` を継承して `git init` する | 共有 `.git/config` に `core.bare = true`、authorの偽名化、`origin/<base>` の誤指しが沈黙発生 | fixtureで `GIT_*` をunsetする（§4.3 項目7）。事後は§5.0 Post-Incident Triple Checkで検算し、再現は隔離環境で組む |
+
+- **CI Failure Triage Order（CI失敗のトリアージ順序）**: CIが赤くなったら、まず「差分依存か環境要因（新規advisory公開・外部サービス・lockfile drift・別branchの誤検知）か」を切り分ける（MUST）。複数の変更提案が同時に赤なら、変更の無いもの（docsのみ等）のログを先に読む — そこに出る失敗はその提案と無関係な「repository全体に効く検査」である。集約ゲートは独立した失敗ではないので、集約ゲートのログから先に読むと分解が1手で済む。環境要因のブロッカーは独立branchで最優先是正し、被ブロック側はmergeではなくrebaseで最新化してCIを新環境で再走させる（MUST）。失敗パターン: 1本のbranchの誤検知が、全履歴・全branchを走査する検査を通じて他の全提案を同時に赤にする。検査を足すときは**走査範囲**を書き残し（MUST）、「全履歴・全branch」を見る検査は1人の誤検知が全員を止める共有資源として扱う。除外は値の形に絞り、変異で「同じ識別子でも検出される」ことを実証してから入れる。依存監査のadvisoryは「パッケージ名」ではなく「脆弱範囲 × 実際に入っている版 × 直接／開発依存か」で読み、例外は期限つきで解消手段が無い根拠を書く（MUST）。
 
 ---
 
@@ -357,6 +384,7 @@ git worktree repair <moved-worktree-path>
 
 - **Law**: `.git/config` は **リポジトリの神経系統**。汚染は様々なツール連携を断絶する。
 - **Action**: `git config --show-origin --list`、`git worktree list --porcelain`、local branch refとの照合を、変更eventとBlueprintのrisk-based cadenceで実行する。正式extensionの存在だけを異常とせず、設定sourceと利用者を確認する。
+- **Post-Incident Triple Check（事故後の三点検算）**: 共有状態（`.git/config`・object store・ref）を書きうる事故の後は、①configの出所（`git config --show-origin --list` で `core.bare`・`core.hooksPath` の由来）、②直近commitのauthor（`git log --format=%an -n <N>`）、③remote-tracking refの指す先（`git ls-remote` との一致）の3点を機械的に検算する（MUST）。被害は即死するもの（`core.bare` 汚染）より**沈黙するもの**（identity上書きでcommitが成功して伝播、remote-tracking ref汚染でゲートが虚偽のbehindを報告）が危険である。プロセス外の共有状態を書きうる再現は隔離環境で最小再現を組む（MUST）— 「原因究明のために同じ操作を再実行」が二次障害になる。修正の有効性はtestの緑ではなく、壊れていた操作の直後に状態を計測して実証する（MUST）。worktreeからpushした直後は、自分のcommitのauthorと `origin/<base>` の指す先を実測で確認する（SHOULD）。
 
 ### 5.1. `.gitignore` for AI Agent Artifacts
 
@@ -403,6 +431,12 @@ git worktree repair <moved-worktree-path>
     | Allow force pushes | ❌ OFF | §2.7 と連携 |
     | Allow deletions | ❌ OFF | 履歴消失防止 |
 - **必須成果**: required check、最終revisionに対する承認、承認後変更時の再review、force push／削除の制御、bypassのowner・理由・期限・監査証跡を機械確認できること。承認人数はrisk、規制、team規模で定め、高保証領域ではSLSA Sourceの二者review要件を満たす。
+- **Required-Check Integrity（必須チェックの実効性）**:
+    - 必須status checkを条件付きで実行する場合、条件不成立時にjobをskipする設計を採用してはならない（MUST NOT）。多くのCIではskipされた必須チェックは「成功」として扱われ、保護が無効化される。合流を止めたい条件では必須チェック名を**報告しない**（集約jobを起動しない）か明示的に失敗を報告する（MUST）。
+    - 集約jobを1つ置き、保護の必須チェックはそれだけを指定する（SHOULD）。集約jobは (a) 常に実行され上流失敗でskippedにならない、(b) 条件付きjobを `needs` に含めない（skippedはsuccessではない）、(c) 上流結果を集計してsuccess以外を赤へ変換する、を契約testで固定する。ゲートを条件付きで省略する仕組み（lane分割・変更範囲判定）を入れたら、`success()` / `failure()` のような集約関数がskipped連鎖で偽になり、失敗通知・復旧処理が黙って死んでいないかを実測する（MUST）。
+    - **名前で結合している箇所**（必須チェック名・workflow参照名・webhook名等）はコード側だけ変えると沈黙で壊れ、差分にも成果物にも現れない。CI jobを改名・分割・削除する前に保護設定の必須チェック名を実照会し（MUST）、保護設定を変えられないならコード側の名前を既存名に合わせる（意味の強化はよいが弱化はしない）。CIを並列化・分割するときは実行順の不変条件をjobの依存グラフで構造的に強制し、ゲート集合のbefore／after完全一致を証明する（MUST）— 記述順は実行順を何も保証しない。
+    - 変更提案のCIは「headとbaseの仮想マージ結果」を検査するが、**再実行（rerun）は記録済みのSHAを再利用**しbaseの進行を反映しない。依存する提案のマージ後に後続提案を検証し直すには、再実行ではなく**branchの更新**（update-branch／rebase／close & reopen）を行う（MUST）。「Require branches to be up to date」を有効にし、マージされる木そのものを検査する（SHOULD）。
+    - 状態表示（CLI／APIのキャッシュ）は古いheadを返しうる。「push済み・全緑」を報告する前に、**branchの実体**（`git ls-remote` ／ branches API）と**そのSHAに対するCI実行の実在**を直接確認する（MUST）。「失敗0件」「未成功0件」は「チェックが0件」でも成立する — 件数ゼロの検査結果は実行された証拠と一緒にしか採用しない。パイプの終了コード（`git push … | tail -3` の `$?`）は最後のコマンドの値になるため、`${PIPESTATUS[0]}` を取るか実体を測る。
 
 ### 6.1. Ownership Resolution（所有者解決）
 
@@ -476,6 +510,7 @@ git worktree repair <moved-worktree-path>
 - **Mandatory Boundaries（必須の境界）**:
     - AI出力にはmodel／service、対象revision、実行時刻、policy、resultを追跡できる証跡を残し、機密code、prompt injection、data retentionをthreat modelへ含める。
     - **AIコメントは示唆であり決定ではない**。riskに基づく人間または明示的に承認されたgovernance主体が最終責任を持つ。AI結果が未完了でも無期限に人間reviewを停止しないfail-open／fail-closed方針を定める。
+    - **Context Verification Before Disposition（判定前の文脈確認）**: レビュー／監査agentの重大指摘は、指摘対象ファイルを開いて**実際の用途文脈**（固定寸法コンテナか動的か、表示専用か対話か等）を確認するまで採用しない（MUST）。失敗パターン: 直前に結晶化された教訓の字面に一致する全箇所へ機械適用され、正しい設計が「修正」されて教訓の意図に逆行するパターンが導入される。教訓・ルールには「適用する条件」と「適用しない条件」を併記し（MUST）、偽陽性と判定した箇所は将来の再監査のために理由付きで列挙する（SHOULD）。
     - review品質は経過分数やコメント数で証明せず、最終revision、重要risk、test evidence、未解決指摘への判断を記録する。
 - **Use Cases（補助範囲）**:
     - スタイル / 命名規約の自動検出
@@ -585,6 +620,7 @@ git worktree repair <moved-worktree-path>
     git reset --hard HEAD@{5}       # 5 操作前に戻る
     ```
 - **教訓**: `git reflog` が見えれば、ほぼ全ての「やらかし」は復元可能。reflog の存在を全エンジニアに教育せよ。
+- **CI-Fix Ancestry Check（CI修復前の包含照合）**: CI／スケジュールjobの失敗修復に着手する前に、失敗runが検証したrevision（checkout SHA）と想定修正commitの包含関係を `git merge-base --is-ancestor <fix> <headSha>` 等で照合する（MUST）。正本は `engineering/000_engineering_standards.md` の「CI-Fix Ancestry Check」。
 
 ### 7.5. Sensitive History Cleansing（機密履歴の除去）
 
@@ -686,6 +722,7 @@ git worktree repair <moved-worktree-path>
     package-lock.json  merge=union
     ```
 - **理由**: 改行コードの揺れは **CI でのみ発生する謎の diff** の温床。`.gitattributes` で物理的に統一する。
+- **Case-Only Distinction Ban（大文字小文字のみの区別禁止）**: ファイル・ディレクトリ名は、大文字小文字の差だけで区別される名前を作らない（MUST NOT）。case-insensitiveなファイルシステム（macOS／Windows既定）とcase-sensitiveなCI（Linux）の間で、リネームが検出されない・重複ファイルが生まれる・importが片方でだけ失敗する事故を招く。一貫した小文字規約（kebab-case等）をproject規約で固定し、大文字小文字のみの変更は `git mv` を2段階（一時名経由）で行う（SHOULD）。
 
 ### 8.1. Git LFS Policy（Git LFS 採用基準）
 
@@ -822,6 +859,7 @@ git worktree repair <moved-worktree-path>
     - semantic versionのpatch／minor／majorだけでriskを決めない。runtime、lockfile、build plugin、native binary、container base、transitive dependency、maintainer／source変更を分類する
     - auto-mergeは影響範囲test、provenance、license、reachability、rollback、変更後monitoringが十分なlow-risk updateに限定する
     - 悪用中脆弱性は即時triageし、緩和、update、rollbackを選ぶ。CI greenだけで無条件mergeしない
+- **Audit Output Interpretation（監査出力の読み方）**: 依存監査ツールの「修正可能」表示は破壊性を語らない。メジャー昇格か、提案版が前進か後退（ダウングレード）かの両方を見て解消可否を判定し、dry-runの先頭に並ぶ「追加」行ではなく末尾の残存件数で判断する（MUST）。正本は `engineering/000_engineering_standards.md` の「Audit Output Interpretation」。
 - **アンチパターン禁止**:
     - PR 数の爆発 → `prConcurrentLimit` で上限設定、batched updates 採用
     - 全自動マージ → major bump で破綻、レビューゲートを設けよ
@@ -860,8 +898,16 @@ git worktree repair <moved-worktree-path>
     - clone／workspace bootstrap後に、採用したruntimeとpackage managerへ適した一貫した導入経路を提供すること。
     - local hookは高速なfeedbackであり、merge／releaseの最終根拠にしない。重要検査はCIまたはserver-side controlで再実行すること。
     - bypassを許可する場合は、理由、補償検査、監査証跡をriskに応じて要求すること。
+    - **Hook Failure Triage（フック失敗の切り分け）**: commit／pushフックが失敗したら、出力を `| tail -n` で末尾だけ読まない（MUST NOT）— 失敗の原因は先頭側に出る。ログをファイルへ落として全文を読む（例: `git commit -F msg.txt > commit.log 2>&1`）。原因調査は「今回の変更内容」ではなく「フックの各ステップを単独実行」から入る（MUST）— 失敗は前回失敗の副作用であることがある。フックが落ちうるcommitの前に作業証跡と未コミットの編集を退避する（SHOULD）: staged fileを復元するtool（lint-staged等）はignore対象の作業文書まで巻き戻すことがあり、「`.gitignore` 対象だから安全」は誤りである。`--no-verify` で迂回しない（MUST NOT）。
+    - **Worktree Hook Presence（worktree作成後のhook実体確認）**: hook frameworkの生成物がgitignore対象なら、新規worktreeにはそれが存在せず、Gitは警告なしに全hookを素通しにする。`git worktree add` 後はhookを再生成し、実体の存在を確認してからcommitする（MUST）。短時間で成功したcommitも発火ログを確認する。逆向きの変種として `core.hooksPath` が絶対パスだと別作業ツリーのhookを読む — どちらも `git config --get core.hooksPath` と実体の有無を突き合わせれば判別でき、是正は `--worktree` スコープで相対化し共有configを汚さない。共有設定を特定checkoutの絶対パスへ向けない（MUST NOT）。手動検査の成功をhook発火確認の代わりにしない。
 - **Migration Note**: hook frameworkを変更する前に、OS／IDE／GUI clientの互換性、導入失敗、実測latency、部分stage、既存開発環境を比較し、観測期間とrollback条件をBlueprintへ定義する。
 - **クロスリファレンス**: §2.5 lint-staged / §2.10 commitlint / §9.0 Multi-Layer Secret Scanning
+- **CI Token Permission Model & Artifact-Level Verification（CIトークンの実効権限と成果物検証）**:
+    - CIトークンの実効権限は、workflow宣言とVCS側（repository／組織）設定の**論理積**で決まる。宣言は上限を絞ることしかできず、設定で閉じられた面を開くことはできない。権限エラーの調査では宣言だけで「権限問題ではない」と判断せず、設定側APIを実際に引く（MUST）。読めない場合は「読めなかった」と記録し、推測で埋めない。
+    - 「CIが変更提案を作成・承認できる」設定は作成と承認を束ねて開放し、レビュー必須の保護を迂回できる面が開くため、自動化の利便のために有効化しない（SHOULD NOT）。長寿命の個人tokenを置く案も資格情報を増やすので既定では選ばない。代替は「成果物はbranchへ、通知はissueへ」— 比較リンクをissue本文へ入れれば人間が1クリックで提案を開け、権限面を広げずに済む。
+    - `continue-on-error` 等で失敗を握り潰すなら、**成果物そのもの**（blob SHA等）を別途照合して「本当に提案作成だけの失敗か」を確定する（MUST）。stepの成否ではなく成果物の同一性を見る。成果物の指紋は**生成直後**に取り、後段で作業ツリーを読み直さない（toolが作業ツリーをbaseへ戻すことがあり、偽陰性で成功した実行を赤化する）。指紋が空なら失敗にする。
+    - 「runが赤い」＝「何も出来ていない」ではない。**どのstepまでは成功していたか**を先に確定してから原因を探す。失敗パターン: 週次jobが数週連続で赤のまま、成果物は毎回正しく生成されていた。issueの重複判定に全文検索APIを使わない（絵文字・多言語titleでトークン化次第で取りこぼす）— 一覧を引いて完全一致させる。
+- **CI Trigger Alignment（検査の発火条件）**: CI検査の発火条件は、その検査が課す不変条件が**どのイベントで破られうるか**に合わせる（MUST）。自分の変更（migration適用・生成物更新）が起点の違反を週次等の定期実行で見張るのは、露出期間を周期ぶん容認するのと同じである。定期実行が正しいのは違反が自分のcommitと無関係に発生する場合（新規CVE・外部の手動変更・データ同期）だけ。ただし本番状態と比較する検査を適用前に走らせると常時偽陽性になるため、適用完了後に連鎖発火させ、前段の**成功のみ**を条件にする（完了イベントは失敗・中止でも発火する）（MUST）。名前文字列で解決されるtrigger（参照先workflow名等）はtypoや改名で無言に発火しなくなるため、参照先の実在と対象検査がtriggerを保持することをガードtestで固定する（MUST）。定期実行のまま据え置く検査は、その判断理由を証跡に明記する（MUST）。
 
 ### 9.4. Shallow Clone & Sparse Checkout for CI（CI 最適化のための部分 clone）
 
@@ -927,6 +973,7 @@ git worktree repair <moved-worktree-path>
 | **Tooling** | local検査だけに依存し、server-sideまたはCIのsecret preventionがない | layered secret-control check | §9.0 |
 | **Review** | AIの結果を根拠、誤検知判断、final revision確認なしに承認へ置換する | finding disposition + human approval evidence | §6.4 |
 | **Tooling** | hook定義と導入経路が個人環境にしか存在しない | repository／bootstrap review | §9.3 |
+| **Merge** | 必須checkを条件付きjobのskipで止めようとし、skipを成功扱いにする | required-check報告の実在確認 + 集約job契約test | §6.0 |
 
 ---
 
